@@ -1,6 +1,9 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.shared.Exercise;
+
+import java.util.List;
 
 /**
  * The async counterpart of <code>GreetingService</code>.
@@ -11,4 +14,5 @@ public interface LangTestDatabaseAsync {
 			throws IllegalArgumentException;*/
 
 	void test(AsyncCallback<Void> asyncCallback);
+  void getExercises(AsyncCallback<List<Exercise>> async);
 }
