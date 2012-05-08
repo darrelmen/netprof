@@ -2,8 +2,9 @@ package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,41 +17,39 @@ import java.util.Map;
 public class Exercise implements IsSerializable  {
   private String content;
   private String id;
-  private Map<String,QAPair> langToQuestion = new HashMap<String, QAPair>();
+  private Map<String,List<QAPair>> langToQuestion = new HashMap<String, List<QAPair>>();
   public static class QAPair implements IsSerializable {
     private String question;
     private String answer;
-    public QAPair() {}
+    public QAPair() {}   // required for serialization
     public QAPair(String q, String a) { question = q; answer = a;}
- /*   private QAPair(JSONObject o) {
-      question = (String) o.get("question");
-      answer   = (String) o.get("answerKey");
-    }*/
-    public String toString() { return "'"+question + "' : '" + answer +"'"; }
+    public String toString() { return "'"+ getQuestion() + "' : '" + getAnswer() +"'"; }
+
+    public String getQuestion() {
+      return question;
+    }
+
+    public String getAnswer() {
+      return answer;
+    }
   }
 
-  public Exercise() {}
+  public Exercise() {}     // required for serialization
   public Exercise(String id, String content) { this.id = id; this.content = content; }
- /* public Exercise(JSONObject obj) {
-    content = (String) obj.get("content");
-    id = (String) obj.get("exid");
-    Collection<JSONObject> qa = JSONArray.toCollection((JSONArray) obj.get("qa"), JSONObject.class);
-    for (JSONObject o : qa) {
-      Set<String> keys = o.keySet();
-      for (String k : keys) {
-        JSONObject qaForLang = (JSONObject)o.get(k);
-
-        addQuestion(k,(String) qaForLang.get("question"),(String) qaForLang.get("answerKey"));
-   //     langToQuestion.put(k, new QAPair((String) qaForLang.get("question"),(String) o.get("answerKey")));
-      }
-    }
-  }*/
   public void addQuestion(String lang, String question, String answer) {
-    langToQuestion.put(lang, new QAPair(question, answer));
+    List<QAPair> qaPairs = langToQuestion.get(lang);
+    if (qaPairs == null) {
+      langToQuestion.put(lang, qaPairs = new ArrayList<QAPair>());
+    }
+    qaPairs.add(new QAPair(question, answer));
   }
 
   public String getID() { return id; }
-
+  public String getContent() { return content; }
+  public List<QAPair> getQuestions() {
+    List<QAPair> pairs = langToQuestion.get("en");
+    return pairs;
+  }
   public String toString() {
     return "Exercise " + id + " : " + content + "\n\tquestions " + langToQuestion;
   }

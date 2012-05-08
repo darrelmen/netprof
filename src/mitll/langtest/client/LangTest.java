@@ -25,10 +25,11 @@ import java.util.List;
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
-public class LangTest implements EntryPoint {
+public class LangTest implements EntryPoint, UserFeedback {
   public static final int WIDTH = 850, HEIGHT = 600;
   DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
   VerticalPanel exerciseList = new VerticalPanel();
+  ExercisePanel current = null;
 
   /**
 	 * The message displayed to the user when the server cannot be reached or
@@ -44,32 +45,45 @@ public class LangTest implements EntryPoint {
 	private final GreetingServiceAsync greetingService = GWT
 			.create(GreetingService.class);
 
-    private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
+  private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
+  private Label status;
 
   public void onModuleLoad() {
     RootPanel.get().add(widgets);
     widgets.setSize(WIDTH + "px", HEIGHT + "px");
 
-    final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText("Remote Procedure Call");
+    setupErrorDialog();
+/*    final DialogBox dialogBox = new DialogBox();
+    dialogBox.setText("Information");
     dialogBox.setAnimationEnabled(true);
     final Button closeButton = new Button("Close");
     // We can set the id of a widget by accessing its Element
     closeButton.getElement().setId("closeButton");
 
+    //final Label textToServerLabel = new Label();
+   // final HTML serverResponseLabel = new HTML();
+    VerticalPanel dialogVPanel = new VerticalPanel();
+    dialogVPanel.addStyleName("dialogVPanel");
+  //  dialogVPanel.add(new HTML("<b>Sending name to the server:</b>"));
+    //dialogVPanel.add(textToServerLabel);
+  //  dialogVPanel.add(new HTML("<br><b>Server replies:</b>"));
+   // dialogVPanel.add(serverResponseLabel);
+    dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
+    dialogVPanel.add(closeButton);
+    dialogBox.setWidget(dialogVPanel);
+
+    closeButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        dialogBox.hide();
+      }
+    });*/
     widgets.addWest(exerciseList,200);
     exerciseList.add(new HTML("<h1></h1>"));
     exerciseList.add(new HTML("<h2>Items</h2>"));
-    widgets.addNorth(new HTML("<h1>Welcome to DLI Language Testing</h1>"),80);
+    widgets.addNorth(new HTML("<h1>Welcome to DLI Language Testing</h1>"), 80);
     service.getExercises(new AsyncCallback<List<Exercise>>() {
       public void onFailure(Throwable caught) {
-        dialogBox
-          .setText("Remote Procedure Call - Failure");
-      //  serverResponseLabel
-       //   .addStyleName("serverResponseLabelError");
-        //serverResponseLabel.setHTML(SERVER_ERROR);
-        dialogBox.center();
-        closeButton.setFocus(true);
+        showErrorMessage("Server error - couldn't get exercises.");
       }
 
       public void onSuccess(List<Exercise> result) {
@@ -81,10 +95,60 @@ public class LangTest implements EntryPoint {
           if (first) {
             w.setStyleDependentName("highlighted", true);
             first = false;
+            loadExercise(e);
           }
         }
       }
     });
+    status = new Label();
+    widgets.addSouth(status, 100);
+  }
+
+  private DialogBox dialogBox;
+  private Button closeButton;
+  private void setupErrorDialog() {
+    dialogBox = new DialogBox();
+    dialogBox.setText("Information");
+    dialogBox.setAnimationEnabled(true);
+    this.closeButton = new Button("Close");
+    // We can set the id of a widget by accessing its Element
+    closeButton.getElement().setId("closeButton");
+
+    //final Label textToServerLabel = new Label();
+    // final HTML serverResponseLabel = new HTML();
+    VerticalPanel dialogVPanel = new VerticalPanel();
+    dialogVPanel.addStyleName("dialogVPanel");
+    //  dialogVPanel.add(new HTML("<b>Sending name to the server:</b>"));
+    //dialogVPanel.add(textToServerLabel);
+    //  dialogVPanel.add(new HTML("<br><b>Server replies:</b>"));
+    // dialogVPanel.add(serverResponseLabel);
+    dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
+    dialogVPanel.add(closeButton);
+    dialogBox.setWidget(dialogVPanel);
+
+    closeButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        dialogBox.hide();
+      }
+    });
+  }
+
+  public void showErrorMessage(String msg) {
+    dialogBox.setText(msg);
+    //  serverResponseLabel
+    //   .addStyleName("serverResponseLabelError");
+    //serverResponseLabel.setHTML(SERVER_ERROR);
+    dialogBox.center();
+    closeButton.setFocus(true);
+  }
+
+  public void showStatus(String msg) { status.setText(msg); }
+
+  private void loadExercise(Exercise e) {
+    if (current != null) {
+      widgets.remove(current);
+    }
+    widgets.add(new ExercisePanel(e, service, this));
   }
     /**
      * This is the entry point method.
@@ -100,9 +164,9 @@ public class LangTest implements EntryPoint {
 
 		// Add the nameField and sendButton to the RootPanel
 		// Use RootPanel.get() to get the entire body element
-		RootPanel.get("nameFieldContainer").add(nameField);
+/*		RootPanel.get("nameFieldContainer").add(nameField);
 		RootPanel.get("sendButtonContainer").add(sendButton);
-		RootPanel.get("errorLabelContainer").add(errorLabel);
+		RootPanel.get("errorLabelContainer").add(errorLabel);*/
 
 		// Focus the cursor on the name field when the app loads
 		nameField.setFocus(true);

@@ -173,6 +173,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return exercises;
   }
 
+  public void addAnswer(String id, int questionID, String answer) {
+    System.out.println("Got " +id + " and " + questionID + " and " + answer);
+  }
+
   private Exercise getExercise(JSONObject obj) {
     Exercise exercise = new Exercise((String) obj.get("exid"), (String) obj.get("content"));
    // content = (String) obj.get("content");
