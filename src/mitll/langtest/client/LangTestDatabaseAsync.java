@@ -15,4 +15,6 @@ public interface LangTestDatabaseAsync {
 
 	void test(AsyncCallback<Void> asyncCallback);
   void getExercises(AsyncCallback<List<Exercise>> async);
+
+  void addAnswer(String id, int questionID, String answer, AsyncCallback<Void> async);
 }
