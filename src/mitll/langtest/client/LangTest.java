@@ -1,5 +1,8 @@
 package mitll.langtest.client;
 
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.FieldVerifier;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -17,11 +20,17 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import java.util.List;
+
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class LangTest implements EntryPoint {
-	/**
+  public static final int WIDTH = 850, HEIGHT = 600;
+  DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
+  VerticalPanel exerciseList = new VerticalPanel();
+
+  /**
 	 * The message displayed to the user when the server cannot be reached or
 	 * returns an error.
 	 */
@@ -37,10 +46,50 @@ public class LangTest implements EntryPoint {
 
     private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
 
-	/**
-	 * This is the entry point method.
-	 */
-	public void onModuleLoad() {
+  public void onModuleLoad() {
+    RootPanel.get().add(widgets);
+    widgets.setSize(WIDTH + "px", HEIGHT + "px");
+
+    final DialogBox dialogBox = new DialogBox();
+    dialogBox.setText("Remote Procedure Call");
+    dialogBox.setAnimationEnabled(true);
+    final Button closeButton = new Button("Close");
+    // We can set the id of a widget by accessing its Element
+    closeButton.getElement().setId("closeButton");
+
+    widgets.addWest(exerciseList,200);
+    exerciseList.add(new HTML("<h1></h1>"));
+    exerciseList.add(new HTML("<h2>Items</h2>"));
+    widgets.addNorth(new HTML("<h1>Welcome to DLI Language Testing</h1>"),80);
+    service.getExercises(new AsyncCallback<List<Exercise>>() {
+      public void onFailure(Throwable caught) {
+        dialogBox
+          .setText("Remote Procedure Call - Failure");
+      //  serverResponseLabel
+       //   .addStyleName("serverResponseLabelError");
+        //serverResponseLabel.setHTML(SERVER_ERROR);
+        dialogBox.center();
+        closeButton.setFocus(true);
+      }
+
+      public void onSuccess(List<Exercise> result) {
+        boolean first = true;
+        for (Exercise e : result) {
+          HTML w = new HTML("<b>" + e.getID() + "</b>");
+          w.setStylePrimaryName("exercise");
+          exerciseList.add(w);
+          if (first) {
+            w.setStyleDependentName("highlighted", true);
+            first = false;
+          }
+        }
+      }
+    });
+  }
+    /**
+     * This is the entry point method.
+     */
+	public void onModuleLoad2() {
 		final Button sendButton = new Button("Send");
 		final TextBox nameField = new TextBox();
 		nameField.setText("GWT User");

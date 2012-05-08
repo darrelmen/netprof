@@ -32,3 +32,12 @@ h1 {
 #closeButton {
   margin: 15px 6px 6px;
 }
+
+.exercise {
+  font-size: 12pt;
+}
+
+.exercise-highlighted {
+  background-color: lightgrey;
+  border: none;
+}
