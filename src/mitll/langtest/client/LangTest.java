@@ -45,8 +45,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
 	/**
 	 * Create a remote service proxy to talk to the server-side Greeting service.
 	 */
+/*
 	private final GreetingServiceAsync greetingService = GWT
 			.create(GreetingService.class);
+*/
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private Label status;
@@ -56,30 +58,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     widgets.setSize(WIDTH + "px", HEIGHT + "px");
 
     setupErrorDialog();
-/*    final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText("Information");
-    dialogBox.setAnimationEnabled(true);
-    final Button closeButton = new Button("Close");
-    // We can set the id of a widget by accessing its Element
-    closeButton.getElement().setId("closeButton");
-
-    //final Label textToServerLabel = new Label();
-   // final HTML serverResponseLabel = new HTML();
-    VerticalPanel dialogVPanel = new VerticalPanel();
-    dialogVPanel.addStyleName("dialogVPanel");
-  //  dialogVPanel.add(new HTML("<b>Sending name to the server:</b>"));
-    //dialogVPanel.add(textToServerLabel);
-  //  dialogVPanel.add(new HTML("<br><b>Server replies:</b>"));
-   // dialogVPanel.add(serverResponseLabel);
-    dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
-    dialogVPanel.add(closeButton);
-    dialogBox.setWidget(dialogVPanel);
-
-    closeButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-      }
-    });*/
     widgets.addWest(exerciseList,200);
     exerciseList.add(new HTML("<h1></h1>"));
     exerciseList.add(new HTML("<h2>Items</h2>"));
@@ -291,7 +269,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
 						closeButton.setFocus(true);						
 					}
 				});
-				greetingService.greetServer(textToServer,
+		/*		greetingService.greetServer(textToServer,
 						new AsyncCallback<String>() {
 							public void onFailure(Throwable caught) {
 								// Show the RPC error message to the user
@@ -312,7 +290,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
 								dialogBox.center();
 								closeButton.setFocus(true);
 							}
-						});
+						});*/
 			}
 		}
 
