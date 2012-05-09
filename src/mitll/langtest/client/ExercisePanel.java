@@ -4,6 +4,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
@@ -63,6 +64,7 @@ public class ExercisePanel extends VerticalPanel {
     buttonRow.add(submit);
 
     final Button next = new Button("Next");
+    DOM.setElementAttribute(next.getElement(), "id", "nextButton");
     submit.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         int i = 1;
@@ -91,6 +93,6 @@ public class ExercisePanel extends VerticalPanel {
       }
     });
     buttonRow.add(next);
-    next.addStyleName("paddedHorizontalPanel");
+ //   next.addStyleName("paddedHorizontalPanel");
   }
 }
