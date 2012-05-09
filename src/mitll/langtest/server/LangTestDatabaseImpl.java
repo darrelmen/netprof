@@ -32,22 +32,23 @@ import java.util.Set;
  */
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase {
+  // mysql config info
 /*  private String url = "jdbc:mysql://localhost:3306/",
     dbOptions = "?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull",
     driver = "com.mysql.jdbc.Driver";*/
 
+  // h2 config info
   private String url = "jdbc:h2:new",
     dbOptions = "",//"?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull",
     driver = "org.h2.Driver";
 
-  public LangTestDatabaseImpl() {
-    try {
-//      checkDB();
-    } catch (Exception e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-  }
+  public LangTestDatabaseImpl() {}
 
+  /**
+   * Not necessary if we use the h2 DBStarter service -- see web.xml reference
+   * @return
+   * @throws Exception
+   */
   private Connection dbLogin() throws Exception {
     try {
       Class.forName(driver).newInstance();
@@ -75,44 +76,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-/*  public void checkDB() throws Exception {
-    System.out.println("checkDB called");
-    Connection connection = this.dbLogin();
-    PreparedStatement statement = connection.prepareStatement("SELECT * FROM exercises");
-
-    ResultSet rs = statement.executeQuery();
-           while(rs.next()) {
-             Clob clob = rs.getClob(4);
-
-             //Reader characterStream = clob.getCharacterStream();
-             InputStreamReader utf8 = new InputStreamReader(clob.getAsciiStream(), "UTF8");
-             BufferedReader br = new BufferedReader(utf8);
-             int c= 0;
-             char cbuf[] = new char[1024];
-             StringBuilder b = new StringBuilder();
-             while((c = br.read(cbuf)) != -1) {
-                                                   b.append(cbuf,0,c);
-             };
-             //characterStream.read();
-             //
-             if (b.toString().startsWith("{")) {
-            	// System.err.println("got " + b);
-            	 net.sf.json.JSONObject obj = net.sf.json.JSONObject.fromObject(b.toString());
-               Exercise e = new Exercise(obj);
-
-             //  Object content = obj.get("content");
-               System.err.println("got " + rs.getString(1) +"/" + rs.getString(2) + "/"+ rs.getString(3) + " : " +obj);
-               System.out.println("exercise " + e);
-             }
-            // clob.getSubString(1, clob.length.toInt).replaceAll("\\s+", " ");
-           }
-
-    connection.commit();
-    connection.close();
-    System.out.println("checkDB returning ");
-    //return exercise_id;
-  }*/
-
   public void test() {
     try {
   //    checkDB();
@@ -126,14 +89,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Connection connection = null;
 
     try {
-      connection = this.dbLogin();
+     // connection = this.dbLogin();
+      connection = (Connection)getServletContext().getAttribute("connection");
       PreparedStatement statement = connection.prepareStatement("SELECT * FROM exercises");
 
       ResultSet rs = statement.executeQuery();
       while(rs.next()) {
         Clob clob = rs.getClob(4);
 
-        //Reader characterStream = clob.getCharacterStream();
         InputStreamReader utf8 = new InputStreamReader(clob.getAsciiStream(), "UTF8");
         BufferedReader br = new BufferedReader(utf8);
         int c= 0;
@@ -142,34 +105,26 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         while((c = br.read(cbuf)) != -1) {
           b.append(cbuf,0,c);
         }
-        //characterStream.read();
-        //
+
         if (b.toString().startsWith("{")) {
-          // System.err.println("got " + b);
           net.sf.json.JSONObject obj = net.sf.json.JSONObject.fromObject(b.toString());
           Exercise e = getExercise(obj);
           exercises.add(e);
-          //  Object content = obj.get("content");
-         // System.err.println("got " + rs.getString(1) +"/" + rs.getString(2) + "/"+ rs.getString(3) + " : " +obj);
-         // System.out.println("exercise " + e);
         }
-        // clob.getSubString(1, clob.length.toInt).replaceAll("\\s+", " ");
       }
-
-      connection.commit();
-    //  connection.close();
+       rs.close();
+       statement.close();
     } catch (Exception e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      e.printStackTrace();
     } finally {
       if (connection != null) {
-        try {
-          connection.close();
+     /*   try {
+          //connection.close();
         } catch (SQLException e) {
           e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
+        }*/
       }
     }
-    System.out.println("checkDB returning ");
     return exercises;
   }
 
@@ -179,15 +134,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private Exercise getExercise(JSONObject obj) {
     Exercise exercise = new Exercise((String) obj.get("exid"), (String) obj.get("content"));
-   // content = (String) obj.get("content");
-    //id = (String) obj.get("exid");
     Collection<JSONObject> qa = JSONArray.toCollection((JSONArray) obj.get("qa"), JSONObject.class);
     for (JSONObject o : qa) {
       Set<String> keys = o.keySet();
       for (String k : keys) {
         JSONObject qaForLang = (JSONObject)o.get(k);
         exercise.addQuestion(k, (String) qaForLang.get("question"), (String) qaForLang.get("answerKey"));
-        //     langToQuestion.put(k, new QAPair((String) qaForLang.get("question"),(String) o.get("answerKey")));
       }
     }
     return exercise;
