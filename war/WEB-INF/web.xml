@@ -40,9 +40,9 @@
   <context-param>
     <param-name>db.url</param-name>
 
-    <param-value>jdbc:h2:new</param-value>
+    <param-value>jdbc:h2:new;IFEXISTS=TRUE</param-value>
 
-    <!--  <param-value>jdbc:h2:file://services/apache-tomcat-7.0.2/webapps/langTest/new</param-value>  -->
+    <!--  <param-value>jdbc:h2:file://services/apache-tomcat-7.0.2/webapps/langTest/new;IFEXISTS=TRUE</param-value>  -->
       </context-param>
       <context-param>
         <param-name>db.user</param-name>
