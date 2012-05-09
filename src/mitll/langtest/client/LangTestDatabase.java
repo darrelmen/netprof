@@ -15,8 +15,7 @@ import java.util.List;
  */
 @RemoteServiceRelativePath("langtestdatabase")
 public interface LangTestDatabase extends RemoteService {
-	void test();
   List<Exercise> getExercises();
-  void addAnswer(String id, int questionID, String answer);
+  void addAnswer(Exercise exercise, int questionID, String answer);
  // void addRecordedAnswer(String id, int questionID, String answer);
 }

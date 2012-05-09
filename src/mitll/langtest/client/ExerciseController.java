@@ -11,4 +11,8 @@ import mitll.langtest.shared.Exercise;
  */
 public interface ExerciseController {
   boolean loadNextExercise(Exercise current);
+
+  boolean loadPreviousExercise(Exercise current);
+
+  boolean onFirst(Exercise current);
 }

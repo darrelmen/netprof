@@ -44,6 +44,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public LangTestDatabaseImpl() {}
 
+  private void dropResults() {
+    try {
+      Connection connection = getConnection();
+      PreparedStatement statement = connection.prepareStatement("DROP TABLE if exists results");
+      if (!statement.execute()) {
+        System.err.println("couldn't create table?");
+      }
+      statement.close();
+
+    } catch (Exception e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.  }
+    }
+  }
+
   /**
    * Not necessary if we use the h2 DBStarter service -- see web.xml reference
    * @return
@@ -76,25 +90,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  public void test() {
-    try {
-  //    checkDB();
-    } catch (Exception e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-  }
-
+  /**
+   * Hit the database for the exercises
+   * @return
+   */
   public List<Exercise> getExercises() {
     List<Exercise> exercises = new ArrayList<Exercise>();
     Connection connection = null;
 
     try {
      // connection = this.dbLogin();
-      connection = (Connection)getServletContext().getAttribute("connection");
+      connection = getConnection();
       PreparedStatement statement = connection.prepareStatement("SELECT * FROM exercises");
 
       ResultSet rs = statement.executeQuery();
       while(rs.next()) {
+        String plan = rs.getString(1);
+        String exid = rs.getString(2);
+        String exType = rs.getString(3);
         Clob clob = rs.getClob(4);
 
         InputStreamReader utf8 = new InputStreamReader(clob.getAsciiStream(), "UTF8");
@@ -107,8 +120,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
 
         if (b.toString().startsWith("{")) {
+         // System.out.println("b " +b.toString());
           net.sf.json.JSONObject obj = net.sf.json.JSONObject.fromObject(b.toString());
-          Exercise e = getExercise(obj);
+          Exercise e = getExercise(plan,obj);
           exercises.add(e);
         }
       }
@@ -128,12 +142,81 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return exercises;
   }
 
-  public void addAnswer(String id, int questionID, String answer) {
-    System.out.println("Got " +id + " and " + questionID + " and " + answer);
+  private Connection getConnection() throws Exception {
+    try {
+      return (Connection)getServletContext().getAttribute("connection");
+    } catch (Exception e) {  // for standalone testing
+      return this.dbLogin();
+    }
+
   }
 
-  private Exercise getExercise(JSONObject obj) {
-    Exercise exercise = new Exercise((String) obj.get("exid"), (String) obj.get("content"));
+  /**
+   * Creates the result table if it's not there.
+   * @param e
+   * @param questionID
+   * @param answer
+   */
+  public void addAnswer(Exercise e, int questionID, String answer) {
+    //System.out.println("Got " +id + " and " + questionID + " and " + answer);
+
+    if (false) {
+      dropResults();
+    }
+
+    Connection connection = (Connection)getServletContext().getAttribute("connection");
+    try {
+      createResultTable(connection);
+      addAnswerToTable(e.getPlan(), e.getID(), questionID, answer, connection);
+
+      if (true) { // true to see what is in the table
+        try {
+          showResults();
+        } catch (Exception e1) {
+          e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+      }
+    } catch (SQLException ee) {
+      ee.printStackTrace();
+    }
+  }
+
+  private void showResults() throws Exception {
+    PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM results");
+    ResultSet rs = statement.executeQuery();
+    while (rs.next()) {
+      System.out.println(rs.getString(1) + "," + rs.getString(2) + "," + rs.getInt(3) + "," + rs.getString(4) + "," + rs.getTimestamp(5));
+    }
+    rs.close();
+    statement.close();
+  }
+
+  private void createResultTable(Connection connection) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
+      "results (plan VARCHAR, id VARCHAR, qid INT, answer VARCHAR, timestamp TIMESTAMP AS CURRENT_TIMESTAMP)");
+    statement.execute();
+    statement.close();
+  }
+
+  private void addAnswerToTable(String plan, String id, int questionID, String answer, Connection connection) throws SQLException {
+    PreparedStatement statement;
+    statement = connection.prepareStatement("INSERT INTO results(plan,id,qid,answer) VALUES(?,?, ?, ?)");
+    int i = 1;
+    statement.setString(i++,plan);
+    statement.setString(i++,id);
+    statement.setInt(i++, questionID);
+    statement.setString(i++, answer);
+    statement.executeUpdate();
+    statement.close();
+  }
+
+  /**
+   * Parse the json that represents the exercise.  Created during ingest process (see ingest.scala).
+   * @param obj
+   * @return
+   */
+  private Exercise getExercise(String plan, JSONObject obj) {
+    Exercise exercise = new Exercise(plan,(String) obj.get("exid"), (String) obj.get("content"));
     Collection<JSONObject> qa = JSONArray.toCollection((JSONArray) obj.get("qa"), JSONObject.class);
     for (JSONObject o : qa) {
       Set<String> keys = o.keySet();
@@ -147,6 +230,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public static void main(String[] arg) {
     LangTestDatabaseImpl langTestDatabase = new LangTestDatabaseImpl();
-    for (Exercise e : langTestDatabase.getExercises()) System.err.println("e " + e);
+    //for (Exercise e : langTestDatabase.getExercises()) System.err.println("e " + e);
+    try {
+      langTestDatabase.showResults();
+    } catch (Exception e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
   }
 }

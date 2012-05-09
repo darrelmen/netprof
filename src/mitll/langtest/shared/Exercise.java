@@ -15,6 +15,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class Exercise implements IsSerializable  {
+  private String plan;
   private String content;
   private String id;
   private Map<String,List<QAPair>> langToQuestion = new HashMap<String, List<QAPair>>();
@@ -35,7 +36,13 @@ public class Exercise implements IsSerializable  {
   }
 
   public Exercise() {}     // required for serialization
-  public Exercise(String id, String content) { this.id = id; this.content = content; }
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
+   * @param id
+   * @param content
+   */
+  public Exercise(String plan, String id, String content) { this.plan = plan; this.id = id; this.content = content; }
   public void addQuestion(String lang, String question, String answer) {
     List<QAPair> qaPairs = langToQuestion.get(lang);
     if (qaPairs == null) {
@@ -44,6 +51,7 @@ public class Exercise implements IsSerializable  {
     qaPairs.add(new QAPair(question, answer));
   }
 
+  public String getPlan() { return plan; }
   public String getID() { return id; }
   public String getContent() { return content; }
   public List<QAPair> getQuestions() {
@@ -51,6 +59,6 @@ public class Exercise implements IsSerializable  {
     return pairs;
   }
   public String toString() {
-    return "Exercise " + id + " : " + content + "\n\tquestions " + langToQuestion;
+    return "Exercise " + plan+"/"+ id + " : " + content + "\n\tquestions " + langToQuestion;
   }
 }

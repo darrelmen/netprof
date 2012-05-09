@@ -31,27 +31,34 @@ public class ExercisePanel extends VerticalPanel {
   private List<TextBox> answers = new ArrayList<TextBox>();
   private Set<TextBox> completed = new HashSet<TextBox>();
   private Exercise exercise = null;
-
+  private boolean enableNextOnlyWhenAllCompleted = true;
   public ExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                        final ExerciseController controller) {
     this.exercise = e;
     add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
     add(new HTML(e.getContent()));
     int i = 1;
-    final Button submit = new Button("Submit");
-    submit.setEnabled(false);
+    final Button next = new Button("Next");
+    if (enableNextOnlyWhenAllCompleted) { // initially not enabled
+      next.setEnabled(false);
+    }
     for (Exercise.QAPair pair : e.getQuestions()) {
       add(new HTML("<h4>Question #" + (i++) + " : " + pair.getQuestion() + "</h3>"));
       final TextBox answer = new TextBox();
       answer.setWidth(ANSWER_BOX_WIDTH);
-      //answer.addStyleName("input");
       answers.add(answer);
-      answer.addKeyUpHandler(new KeyUpHandler() {
-        public void onKeyUp(KeyUpEvent event) {
-          if (answer.getText().length() > 0) { completed.add(answer); } else { completed.remove(answer); }
-          submit.setEnabled((completed.size() == answers.size()));
-        }
-      });
+      if (enableNextOnlyWhenAllCompleted) {  // make sure user entered in answers for everything
+        answer.addKeyUpHandler(new KeyUpHandler() {
+          public void onKeyUp(KeyUpEvent event) {
+            if (answer.getText().length() > 0) {
+              completed.add(answer);
+            } else {
+              completed.remove(answer);
+            }
+            next.setEnabled((completed.size() == answers.size()));
+          }
+        });
+      }
       add(answer);
     }
     SimplePanel spacer = new SimplePanel();
@@ -59,40 +66,36 @@ public class ExercisePanel extends VerticalPanel {
     add(spacer);
 
     HorizontalPanel buttonRow = new HorizontalPanel();
-    //buttonRow.addStyleName("paddedHorizontalPanel");
     add(buttonRow);
-    buttonRow.add(submit);
 
-    final Button next = new Button("Next");
+    Button prev = new Button("Previous");
+    prev.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        controller.loadPreviousExercise(e);
+      }
+    });
+    prev.setEnabled(!controller.onFirst(e));
+    buttonRow.add(prev);
+
+    buttonRow.add(next);
+  //  next.addStyleName("paddedHorizontalPanel");
     DOM.setElementAttribute(next.getElement(), "id", "nextButton");
-    submit.addClickHandler(new ClickHandler() {
+    next.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         int i = 1;
         for (TextBox tb : answers) {
-          service.addAnswer(exercise.getID(), i++, tb.getText(), new AsyncCallback<Void>() {
+          service.addAnswer(exercise, i++, tb.getText(), new AsyncCallback<Void>() {
             public void onFailure(Throwable caught) {
               userFeedback.showErrorMessage("Couldn't post answers for exercise.");
             }
 
             public void onSuccess(Void result) {
-              userFeedback.showStatus("Answers entered.");
-              next.setEnabled(true);
-              submit.setEnabled(false);
+              controller.loadNextExercise(e);
             }
           }
           );
         }
       }
     });
-    next.setEnabled(false);
-    next.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        if (controller.loadNextExercise(e)) { // we're on the last one
-
-        }
-      }
-    });
-    buttonRow.add(next);
- //   next.addStyleName("paddedHorizontalPanel");
   }
 }
