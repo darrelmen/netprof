@@ -69,18 +69,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
 
       public void onSuccess(List<Exercise> result) {
         currentExercises = result; // remember current exercises
-        boolean first = true;
+       // boolean first = true;
+        Exercise first = result.get(0);
         for (Exercise e : result) {
           HTML w = new HTML("<b>" + e.getID() + "</b>");
           w.setStylePrimaryName("exercise");
           exerciseList.add(w);
           progressMarkers.add(w);
-          if (first) {
-            w.setStyleDependentName("highlighted", true);
-            first = false;
-            loadExercise(e);
-          }
+         
         }
+        loadExercise(first);
+
       }
     });
     status = new Label();
@@ -139,11 +138,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
       html = progressMarkers.get(i - 1);
       html.setStyleDependentName("highlighted", false);
     }
+    if (i < currentExercises.size()-1) {
+      html = progressMarkers.get(i + 1);
+      html.setStyleDependentName("highlighted", false);
+    }
     html = progressMarkers.get(i);
     html.setStyleDependentName("highlighted", true);
   }
 
   public boolean loadNextExercise(Exercise current) {
+    showStatus("");
     int i = currentExercises.indexOf(current);
     boolean onLast = i == currentExercises.size() - 1;
     if (onLast) {
@@ -154,6 +158,21 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     }
     return onLast;
   }
+
+  public boolean loadPreviousExercise(Exercise current) {
+    showStatus("");
+    int i = currentExercises.indexOf(current);
+    boolean onFirst = i == 0;
+    if (onFirst) {
+     // showErrorMessage("Test Complete! Thank you!");
+    }
+    else {
+      loadExercise(currentExercises.get(i-1));
+    }
+    return onFirst;
+  }
+
+  public boolean onFirst(Exercise current) { return currentExercises.indexOf(current) == 0; }
 
     /**
      * This is the entry point method.
@@ -239,7 +258,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
 				sendButton.setEnabled(false);
 				textToServerLabel.setText(textToServer);
 				serverResponseLabel.setText("");
-				service.test(new AsyncCallback<Void>() {
+	/*			service.test(new AsyncCallback<Void>() {
 					public void onFailure(Throwable caught) {
 						// Show the RPC error message to the user
 						dialogBox
@@ -251,14 +270,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
 						closeButton.setFocus(true);
 					}
 
-				/*	public void onSuccess(String result) {
+					public void onSuccess(String result) {
 						dialogBox.setText("Remote Procedure Call 2");
 						serverResponseLabel
 								.removeStyleName("serverResponseLabelError");
 						serverResponseLabel.setHTML(result);
 						dialogBox.center();
 						closeButton.setFocus(true);
-					}*/
+					}
 
 					public void onSuccess(Void result) {
 						dialogBox.setText("Remote Procedure Call 2");
@@ -268,7 +287,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
 						dialogBox.center();
 						closeButton.setFocus(true);						
 					}
-				});
+				});*/
 		/*		greetingService.greetServer(textToServer,
 						new AsyncCallback<String>() {
 							public void onFailure(Throwable caught) {
