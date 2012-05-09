@@ -1,0 +1,14 @@
+package mitll.langtest.client;
+
+import mitll.langtest.shared.Exercise;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: GO22670
+ * Date: 5/9/12
+ * Time: 11:56 AM
+ * To change this template use File | Settings | File Templates.
+ */
+public interface ExerciseController {
+  boolean loadNextExercise(Exercise current);
+}

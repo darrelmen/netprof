@@ -20,16 +20,19 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
-public class LangTest implements EntryPoint, UserFeedback {
+public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
   public static final int WIDTH = 850, HEIGHT = 600;
-  DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
-  VerticalPanel exerciseList = new VerticalPanel();
-  ExercisePanel current = null;
+  private DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
+  private VerticalPanel exerciseList = new VerticalPanel();
+  private ExercisePanel current = null;
+  private List<Exercise> currentExercises = null;
+  private List<HTML> progressMarkers = new ArrayList<HTML>();
 
   /**
 	 * The message displayed to the user when the server cannot be reached or
@@ -87,11 +90,13 @@ public class LangTest implements EntryPoint, UserFeedback {
       }
 
       public void onSuccess(List<Exercise> result) {
+        currentExercises = result; // remember current exercises
         boolean first = true;
         for (Exercise e : result) {
           HTML w = new HTML("<b>" + e.getID() + "</b>");
           w.setStylePrimaryName("exercise");
           exerciseList.add(w);
+          progressMarkers.add(w);
           if (first) {
             w.setStyleDependentName("highlighted", true);
             first = false;
@@ -148,8 +153,30 @@ public class LangTest implements EntryPoint, UserFeedback {
     if (current != null) {
       widgets.remove(current);
     }
-    widgets.add(new ExercisePanel(e, service, this));
+    widgets.add(current = new ExercisePanel(e, service, this, this));
+    int i = currentExercises.indexOf(e);
+
+    HTML html;
+    if (i > 0) {
+      html = progressMarkers.get(i - 1);
+      html.setStyleDependentName("highlighted", false);
+    }
+    html = progressMarkers.get(i);
+    html.setStyleDependentName("highlighted", true);
   }
+
+  public boolean loadNextExercise(Exercise current) {
+    int i = currentExercises.indexOf(current);
+    boolean onLast = i == currentExercises.size() - 1;
+    if (onLast) {
+      showErrorMessage("Test Complete! Thank you!");
+    }
+    else {
+      loadExercise(currentExercises.get(i+1));
+    }
+    return onLast;
+  }
+
     /**
      * This is the entry point method.
      */
