@@ -32,6 +32,16 @@
     <url-pattern>/langtest/langtestdatabase</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>uploadServlet</servlet-name>
+    <servlet-class>mitll.langtest.server.UploadServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>uploadServlet</servlet-name>
+    <url-pattern>/pretest/upload</url-pattern>
+  </servlet-mapping>
+
   <listener>
     <listener-class>org.h2.server.web.DbStarter</listener-class>
   </listener>

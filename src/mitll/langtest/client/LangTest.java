@@ -1,7 +1,14 @@
 package mitll.langtest.client;
 
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.FieldVerifier;
 import com.google.gwt.core.client.EntryPoint;
@@ -27,12 +34,17 @@ import java.util.List;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
-  public static final int WIDTH = 850, HEIGHT = 600;
-  private DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
+  public static final int WIDTH = 1440, HEIGHT = 1080;
+  private static final int HEADER_HEIGHT = 80;
+  private static final int FOOTER_HEIGHT = 40;
+  public static final int EXERCISE_LIST_WIDTH = 200;
   private VerticalPanel exerciseList = new VerticalPanel();
+  private Panel currentExerciseVPanel = new SimplePanel();
   private ExercisePanel current = null;
   private List<Exercise> currentExercises = null;
   private List<HTML> progressMarkers = new ArrayList<HTML>();
+  private int currentExercise = 0;
+  private Label status;
 
   /**
 	 * The message displayed to the user when the server cannot be reached or
@@ -42,26 +54,30 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
 			+ "attempting to contact the server. Please check your network "
 			+ "connection and try again.";
 
-	/**
-	 * Create a remote service proxy to talk to the server-side Greeting service.
-	 */
-/*
-	private final GreetingServiceAsync greetingService = GWT
-			.create(GreetingService.class);
-*/
-
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
-  private Label status;
 
   public void onModuleLoad() {
+    DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
     RootPanel.get().add(widgets);
+
     widgets.setSize(WIDTH + "px", HEIGHT + "px");
+    widgets.addNorth(new HTML("<h1>Welcome to DLI Language Testing</h1>"), HEADER_HEIGHT);
+    widgets.addSouth(status = new Label(), FOOTER_HEIGHT);
+    widgets.addWest(exerciseList, EXERCISE_LIST_WIDTH);
+    widgets.add(currentExerciseVPanel);
 
     setupErrorDialog();
-    widgets.addWest(exerciseList,200);
-    exerciseList.add(new HTML("<h1></h1>"));
+
+    currentExerciseVPanel.addStyleName("currentExercisePanel");
+    final VerticalPanel items = new VerticalPanel();
+    ScrollPanel itemScroller = new ScrollPanel(items);
+  //  itemScroller.setHeight((HEIGHT - HEADER_HEIGHT - FOOTER_HEIGHT) + "px");
+    itemScroller.setSize(EXERCISE_LIST_WIDTH +"px",(HEIGHT - HEADER_HEIGHT - FOOTER_HEIGHT - 60) + "px"); // 54
+   // itemScroller.addStyleName("rightMargin");
+   // exerciseList.add(new HTML("<h1></h1>"));
     exerciseList.add(new HTML("<h2>Items</h2>"));
-    widgets.addNorth(new HTML("<h1>Welcome to DLI Language Testing</h1>"), 80);
+    exerciseList.add(itemScroller);
+
     service.getExercises(new AsyncCallback<List<Exercise>>() {
       public void onFailure(Throwable caught) {
         showErrorMessage("Server error - couldn't get exercises.");
@@ -69,21 +85,36 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
 
       public void onSuccess(List<Exercise> result) {
         currentExercises = result; // remember current exercises
-       // boolean first = true;
         Exercise first = result.get(0);
-        for (Exercise e : result) {
-          HTML w = new HTML("<b>" + e.getID() + "</b>");
-          w.setStylePrimaryName("exercise");
-          exerciseList.add(w);
-          progressMarkers.add(w);
-         
+        for (final Exercise e : result) {
+          addExerciseToList(e, items);
         }
         loadExercise(first);
-
       }
     });
-    status = new Label();
-    widgets.addSouth(status, 100);
+  }
+
+  private void addExerciseToList(final Exercise e, VerticalPanel items) {
+    final HTML w = new HTML("<b>" + e.getID() + "</b>");
+    w.setStylePrimaryName("exercise");
+    items.add(w);
+    progressMarkers.add(w);
+
+    w.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        loadExercise(e);
+      }
+    });
+    w.addMouseOverHandler(new MouseOverHandler() {
+      public void onMouseOver(MouseOverEvent event) {
+        w.addStyleName("clickable");
+      }
+    });
+    w.addMouseOutHandler(new MouseOutHandler() {
+      public void onMouseOut(MouseOutEvent event) {
+        w.removeStyleName("clickable");
+      }
+    });
   }
 
   private DialogBox dialogBox;
@@ -128,22 +159,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
 
   private void loadExercise(Exercise e) {
     if (current != null) {
-      widgets.remove(current);
+      currentExerciseVPanel.remove(current);
     }
-    widgets.add(current = new ExercisePanel(e, service, this, this));
+    currentExerciseVPanel.add(current = new ExercisePanel(e, service, this, this));
     int i = currentExercises.indexOf(e);
 
-    HTML html;
-    if (i > 0) {
-      html = progressMarkers.get(i - 1);
-      html.setStyleDependentName("highlighted", false);
-    }
-    if (i < currentExercises.size()-1) {
-      html = progressMarkers.get(i + 1);
-      html.setStyleDependentName("highlighted", false);
-    }
+    HTML html = progressMarkers.get(currentExercise);
+    html.setStyleDependentName("highlighted", false);
     html = progressMarkers.get(i);
     html.setStyleDependentName("highlighted", true);
+    currentExercise = i;
   }
 
   public boolean loadNextExercise(Exercise current) {
@@ -163,9 +188,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     showStatus("");
     int i = currentExercises.indexOf(current);
     boolean onFirst = i == 0;
-    if (onFirst) {
-     // showErrorMessage("Test Complete! Thank you!");
-    }
+    if (onFirst) {}
     else {
       loadExercise(currentExercises.get(i-1));
     }
@@ -173,6 +196,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
   }
 
   public boolean onFirst(Exercise current) { return currentExercises.indexOf(current) == 0; }
+
+
 
     /**
      * This is the entry point method.

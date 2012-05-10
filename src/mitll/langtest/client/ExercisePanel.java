@@ -1,5 +1,6 @@
 package mitll.langtest.client;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -7,7 +8,9 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -31,12 +34,19 @@ public class ExercisePanel extends VerticalPanel {
   private List<TextBox> answers = new ArrayList<TextBox>();
   private Set<TextBox> completed = new HashSet<TextBox>();
   private Exercise exercise = null;
-  private boolean enableNextOnlyWhenAllCompleted = true;
+  private boolean enableNextOnlyWhenAllCompleted = false;
   public ExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                        final ExerciseController controller) {
     this.exercise = e;
     add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
-    add(new HTML(e.getContent()));
+
+    // attempt to left justify
+    HorizontalPanel hp = new HorizontalPanel();
+    hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+    hp.add(new HTML(e.getContent()));
+    hp.setWidth((LangTest.WIDTH-LangTest.EXERCISE_LIST_WIDTH-100) + "px");
+    add(hp);
+
     int i = 1;
     final Button next = new Button("Next");
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
@@ -78,7 +88,6 @@ public class ExercisePanel extends VerticalPanel {
     buttonRow.add(prev);
 
     buttonRow.add(next);
-  //  next.addStyleName("paddedHorizontalPanel");
     DOM.setElementAttribute(next.getElement(), "id", "nextButton");
     next.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
