@@ -32,13 +32,14 @@ import java.util.Set;
  */
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase {
+  private static final String ENCODING = "UTF8";
   // mysql config info
 /*  private String url = "jdbc:mysql://localhost:3306/",
     dbOptions = "?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull",
     driver = "com.mysql.jdbc.Driver";*/
 
   // h2 config info
-  private String url = "jdbc:h2:new",
+  private String url = "jdbc:h2:new;IFEXISTS=TRUE",
     dbOptions = "",//"?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull",
     driver = "org.h2.Driver";
 
@@ -110,7 +111,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         String exType = rs.getString(3);
         Clob clob = rs.getClob(4);
 
-        InputStreamReader utf8 = new InputStreamReader(clob.getAsciiStream(), "UTF8");
+        InputStreamReader utf8 = new InputStreamReader(clob.getAsciiStream(), ENCODING);
         BufferedReader br = new BufferedReader(utf8);
         int c= 0;
         char cbuf[] = new char[1024];
@@ -119,8 +120,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           b.append(cbuf,0,c);
         }
 
+      //  System.out.println("b " +b.toString());
+
         if (b.toString().startsWith("{")) {
-         // System.out.println("b " +b.toString());
           net.sf.json.JSONObject obj = net.sf.json.JSONObject.fromObject(b.toString());
           Exercise e = getExercise(plan,obj);
           exercises.add(e);
@@ -173,7 +175,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         try {
           showResults();
         } catch (Exception e1) {
-          e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+          e1.printStackTrace();
         }
       }
     } catch (SQLException ee) {
@@ -182,7 +184,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private void showResults() throws Exception {
-    PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM results");
+    PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM results order by timestamp");
     ResultSet rs = statement.executeQuery();
     while (rs.next()) {
       System.out.println(rs.getString(1) + "," + rs.getString(2) + "," + rs.getInt(3) + "," + rs.getString(4) + "," + rs.getTimestamp(5));
@@ -230,9 +232,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public static void main(String[] arg) {
     LangTestDatabaseImpl langTestDatabase = new LangTestDatabaseImpl();
-    //for (Exercise e : langTestDatabase.getExercises()) System.err.println("e " + e);
+    for (Exercise e : langTestDatabase.getExercises()) System.err.println("e " + e);
     try {
-      langTestDatabase.showResults();
+    //  langTestDatabase.showResults();
     } catch (Exception e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
