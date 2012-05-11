@@ -1,6 +1,6 @@
 package mitll.langtest.client;
 
-import com.google.gwt.dom.client.Style;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -8,13 +8,13 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.shared.Exercise;
 
 import java.util.ArrayList;
@@ -35,6 +35,14 @@ public class ExercisePanel extends VerticalPanel {
   private Set<TextBox> completed = new HashSet<TextBox>();
   private Exercise exercise = null;
   private boolean enableNextOnlyWhenAllCompleted = false;
+
+  /**
+   * @see LangTest#loadExercise(mitll.langtest.shared.Exercise)
+   * @param e
+   * @param service
+   * @param userFeedback
+   * @param controller
+   */
   public ExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                        final ExerciseController controller) {
     this.exercise = e;
@@ -54,22 +62,9 @@ public class ExercisePanel extends VerticalPanel {
     }
     for (Exercise.QAPair pair : e.getQuestions()) {
       add(new HTML("<h4>Question #" + (i++) + " : " + pair.getQuestion() + "</h3>"));
-      final TextBox answer = new TextBox();
-      answer.setWidth(ANSWER_BOX_WIDTH);
-      answers.add(answer);
-      if (enableNextOnlyWhenAllCompleted) {  // make sure user entered in answers for everything
-        answer.addKeyUpHandler(new KeyUpHandler() {
-          public void onKeyUp(KeyUpEvent event) {
-            if (answer.getText().length() > 0) {
-              completed.add(answer);
-            } else {
-              completed.remove(answer);
-            }
-            next.setEnabled((completed.size() == answers.size()));
-          }
-        });
-      }
-      add(answer);
+      Widget answerWidget = getAnswerWidget(next, i);
+      add(answerWidget);
+      initWidget(answerWidget,i);
     }
     SimplePanel spacer = new SimplePanel();
     spacer.setSize("500px", "20px");
@@ -106,5 +101,29 @@ public class ExercisePanel extends VerticalPanel {
         }
       }
     });
+  }
+
+  protected Widget getAnswerWidget(final Button next, int index) {
+    GWT.log("getAnswerWidget for #" +index);
+    final TextBox answer = new TextBox();
+    answer.setWidth(ANSWER_BOX_WIDTH);
+    answers.add(answer);
+    if (enableNextOnlyWhenAllCompleted) {  // make sure user entered in answers for everything
+      answer.addKeyUpHandler(new KeyUpHandler() {
+        public void onKeyUp(KeyUpEvent event) {
+          if (answer.getText().length() > 0) {
+            completed.add(answer);
+          } else {
+            completed.remove(answer);
+          }
+          next.setEnabled((completed.size() == answers.size()));
+        }
+      });
+    }
+    return answer;
+  }
+
+  protected void initWidget(Widget w, int index) {
+
   }
 }

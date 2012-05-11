@@ -20,4 +20,20 @@
   <source path='client'/>
   <source path='shared'/>
 
+  <public path='public'/>
+
+  <!-- TODO: Add this when it is an object -->
+  <!-- This script is so that Sound Manager 2 can be accessed through JSNI -->
+  <!-- <script src="soundmanager2.js"/>  -->
+
+  <!-- These 3 scripts are necessary so that Flash Recording can work -->
+  <!-- ADD THIS IF IT BREAKS WITH THE NEWER ONE -->
+  <!--   <script src="js/jquery-1.4.2.js"/>   -->
+  <script src="js/jquery-1.4.2.js"/>
+  <script src="js/swfobject.js"/>
+  <script src="js/recorder.js"/>
+<!--
+  <script src="js/embedRecorder.js"/>
+-->
+
 </module>
