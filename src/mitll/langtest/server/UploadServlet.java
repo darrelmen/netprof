@@ -35,6 +35,11 @@ public class UploadServlet extends HttpServlet implements Servlet{
 
 	@SuppressWarnings("unchecked")
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+
+    System.err.println("got doPost!");
+
+
+
 		String tomcatWriteDirectory = getServletContext().getInitParameter("tomcatWriteDirectoryFullPath");
 		String pretestFilesRelativePath = getServletContext().getInitParameter("pretestFilesRelativePath");  // likely = pretest_files
 		String testsRelativePath = "tests";

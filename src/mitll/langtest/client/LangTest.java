@@ -7,8 +7,10 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.client.recorder.FlashRecordPanel;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.FieldVerifier;
 import com.google.gwt.core.client.EntryPoint;
@@ -46,6 +48,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
   private int currentExercise = 0;
   private Label status;
 
+  // TODO REMOVE
+  private FlashRecordPanel flashRecordPanel;
+  // TODO REMOVE
+  public static PopupPanel recordPopup;
+
   /**
 	 * The message displayed to the user when the server cannot be reached or
 	 * returns an error.
@@ -71,12 +78,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     currentExerciseVPanel.addStyleName("currentExercisePanel");
     final VerticalPanel items = new VerticalPanel();
     ScrollPanel itemScroller = new ScrollPanel(items);
-  //  itemScroller.setHeight((HEIGHT - HEADER_HEIGHT - FOOTER_HEIGHT) + "px");
     itemScroller.setSize(EXERCISE_LIST_WIDTH +"px",(HEIGHT - HEADER_HEIGHT - FOOTER_HEIGHT - 60) + "px"); // 54
-   // itemScroller.addStyleName("rightMargin");
-   // exerciseList.add(new HTML("<h1></h1>"));
     exerciseList.add(new HTML("<h2>Items</h2>"));
     exerciseList.add(itemScroller);
+
+    // TODO : move this somewhere else!!!!
+    flashRecordPanel = new FlashRecordPanel("flashcontent");
+
+    recordPopup = new PopupPanel();
+    recordPopup.setStyleName("RecordPopup");
+    recordPopup.setWidget(flashRecordPanel);
+//    recordPopup.setPopupPosition(-100, -100);
+    recordPopup.show();					//show it temporarily so that it's on the page
+
+    flashRecordPanel.initializeJS(GWT.getModuleBaseURL(), "flashcontent");
 
     service.getExercises(new AsyncCallback<List<Exercise>>() {
       public void onFailure(Throwable caught) {
@@ -158,10 +173,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
   public void showStatus(String msg) { status.setText(msg); }
 
   private void loadExercise(Exercise e) {
+    System.err.println("loading exercise " + e.getID());
     if (current != null) {
       currentExerciseVPanel.remove(current);
     }
-    currentExerciseVPanel.add(current = new ExercisePanel(e, service, this, this));
+    boolean recordResponses = true;
+    if (recordResponses) {
+      System.err.println("loading record exercise panel");
+
+      currentExerciseVPanel.add(current = new RecordExercisePanel(e, service, this, this));
+    } else {
+      currentExerciseVPanel.add(current = new ExercisePanel(e, service, this, this));
+
+    }
     int i = currentExercises.indexOf(e);
 
     HTML html = progressMarkers.get(currentExercise);
