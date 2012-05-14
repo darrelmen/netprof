@@ -1,11 +1,13 @@
 package mitll.langtest.client;
 
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.InlineHTML;
-import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.recorder.FlashRecordPanel;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -16,29 +18,11 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class RecordExercisePanel extends ExercisePanel {
- // public static PopupPanel recordPopup;
-
- // FlashRecordPanel flashRecordPanel;
+  ExerciseController controller;
   public RecordExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                              final ExerciseController controller) {
     super(e,service,userFeedback,controller);
-//    flashRecordPanel = new FlashRecordPanel();
-
-/*
-    recordPopup = new PopupPanel();
-    recordPopup.setStyleName("RecordPopup");
-    recordPopup.setWidget(flashRecordPanel);
-    recordPopup.setPopupPosition(-100, -100);
-    recordPopup.show();					//show it temporarily so that it's on the page
-*/
-
- //   flashRecordPanel.initializeJS(GWT.getModuleBaseURL());
-/*
-    try {
-      FlashRecordPanel.setRecordingInfo("test");
-    } catch (Exception e) {
-      GWT.log("FlashRecordPanel.init : Got " + e.getMessage());
-    }*/
+    this.controller = controller;
   }
 
   /**
@@ -47,30 +31,55 @@ public class RecordExercisePanel extends ExercisePanel {
    * @param index
    * @return
    */
-  protected Widget getAnswerWidget2(Button next, int index) {
-    FlashRecordPanel r = new FlashRecordPanel("flashcontent");//_" + index);
-/*    InlineHTML inline = new InlineHTML();
+  protected Widget getAnswerWidget(Button next, final int index) {
     String id = "flashcontent_" + index;
-    inline.getElement().setId(id);*/
+    //System.out.println("getAnswerWidget widget " + /*w + */" at " + index + " with '" + id +"'");
 
-    return r;
-    //return super.getAnswerWidget(next);    //To change body of overridden methods use File | Settings | File Templates.
+   // FlashRecordPanel widget = new FlashRecordPanel(id);
+    SimplePanel sp = new SimplePanel();
+
+    Image image = new Image("images/record.png");
+    image.setAltText("Record");
+    final ImageAnchor record_button = new ImageAnchor();
+    record_button.setResource(image);
+
+   // record_button.getElement().setId("record_button");
+    record_button.setTitle("Record");
+    record_button.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        System.out.println("showing " + "question_"+index);
+        controller.showRecorder(exercise,"question_"+index,record_button);
+      }
+    });
+    sp.add(record_button);
+
+    return sp;
   }
 
+  private static class ImageAnchor extends Anchor {
+    public ImageAnchor() {}
+    public void setResource(Image img) {
+      DOM.insertBefore(getElement(), img.getElement(), DOM.getFirstChild(getElement()));
+    }
+  }
+
+  /**
+   * TODO : on the server, notice which audio posts have arrived, and take the latest ones...
+   *
+   * @param service
+   * @param userFeedback
+   * @param controller
+   * @param completedExercise
+   */
+  @Override
+  protected void postAnswers(LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller, Exercise completedExercise) {
+    controller.loadNextExercise(completedExercise);
+  }
 
   protected void initWidget(Widget w, int index) {
-    String id = "flashcontent";//_" + index;
-    System.out.println("init widget " + /*w + */" at " + index + " with " + id);
-    //FlashRecordPanel r = (FlashRecordPanel) w;
-
-/*
-    recordPopup = new PopupPanel();
-    recordPopup.setStyleName("RecordPopup");
-    recordPopup.setWidget(r);
-    recordPopup.setPopupPosition(-100, -100);
-    recordPopup.show();					//show it temporarily so that it's on the page
-*/
-
-   // r.initializeJS(GWT.getModuleBaseURL(), id);
+    String id = "flashcontent_" + index;
+    System.out.println("init widget " + /*w + */" at " + index + " with '" + id +"'");
+  //  FlashRecordPanel r = (FlashRecordPanel) w;
+ //   r.initializeJS(GWT.getModuleBaseURL(), id);
   }
 }

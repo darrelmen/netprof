@@ -31,9 +31,9 @@ import java.util.Set;
  */
 public class ExercisePanel extends VerticalPanel {
   private static final String ANSWER_BOX_WIDTH = "400px";
-  private List<TextBox> answers = new ArrayList<TextBox>();
+  private List<Widget> answers = new ArrayList<Widget>();
   private Set<TextBox> completed = new HashSet<TextBox>();
-  private Exercise exercise = null;
+  protected Exercise exercise = null;
   private boolean enableNextOnlyWhenAllCompleted = false;
 
   /**
@@ -61,10 +61,10 @@ public class ExercisePanel extends VerticalPanel {
       next.setEnabled(false);
     }
     for (Exercise.QAPair pair : e.getQuestions()) {
+      Widget answerWidget = getAnswerWidget(next, i-1);
       add(new HTML("<h4>Question #" + (i++) + " : " + pair.getQuestion() + "</h3>"));
-      Widget answerWidget = getAnswerWidget(next, i);
       add(answerWidget);
-      initWidget(answerWidget,i);
+      answers.add(answerWidget);
     }
     SimplePanel spacer = new SimplePanel();
     spacer.setSize("500px", "20px");
@@ -84,30 +84,55 @@ public class ExercisePanel extends VerticalPanel {
 
     buttonRow.add(next);
     DOM.setElementAttribute(next.getElement(), "id", "nextButton");
+
+    // send answers to server
     next.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        int i = 1;
-        for (TextBox tb : answers) {
-          service.addAnswer(exercise, i++, tb.getText(), new AsyncCallback<Void>() {
-            public void onFailure(Throwable caught) {
-              userFeedback.showErrorMessage("Couldn't post answers for exercise.");
-            }
-
-            public void onSuccess(Void result) {
-              controller.loadNextExercise(e);
-            }
-          }
-          );
-        }
+        postAnswers(service, userFeedback, controller, e);
       }
     });
+  }
+
+  /**
+   * @see LangTest#loadExercise(mitll.langtest.shared.Exercise)
+   */
+  public void finishAnswerConfig() {
+    int i = 0;
+    for (Widget w : answers) {
+      initWidget(w, i++);
+    }
+  }
+
+  /**
+   * Record answers at the server.  For our purposes, add a row to the result table and possibly post
+   * some audio and remember where it is.
+   *
+   * @param service
+   * @param userFeedback
+   * @param controller
+   * @param completedExercise
+   */
+  protected void postAnswers(LangTestDatabaseAsync service, final UserFeedback userFeedback,
+                             final ExerciseController controller, final Exercise completedExercise) {
+    int i = 1;
+    for (Widget tb : answers) {
+      service.addAnswer(exercise, i++, ((TextBox)tb).getText(), new AsyncCallback<Void>() {
+        public void onFailure(Throwable caught) {
+          userFeedback.showErrorMessage("Couldn't post answers for exercise.");
+        }
+
+        public void onSuccess(Void result) {
+          controller.loadNextExercise(completedExercise);
+        }
+      }
+      );
+    }
   }
 
   protected Widget getAnswerWidget(final Button next, int index) {
     GWT.log("getAnswerWidget for #" +index);
     final TextBox answer = new TextBox();
     answer.setWidth(ANSWER_BOX_WIDTH);
-    answers.add(answer);
     if (enableNextOnlyWhenAllCompleted) {  // make sure user entered in answers for everything
       answer.addKeyUpHandler(new KeyUpHandler() {
         public void onKeyUp(KeyUpEvent event) {

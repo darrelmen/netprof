@@ -5,11 +5,13 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.recorder.FlashRecordPanel;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.FieldVerifier;
@@ -48,10 +50,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
   private int currentExercise = 0;
   private Label status;
 
-  // TODO REMOVE
   private FlashRecordPanel flashRecordPanel;
-  // TODO REMOVE
-  public static PopupPanel recordPopup;
+  private PopupPanel recordPopup;
+  private boolean flashRecordPanelInited;
 
   /**
 	 * The message displayed to the user when the server cannot be reached or
@@ -85,13 +86,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     // TODO : move this somewhere else!!!!
     flashRecordPanel = new FlashRecordPanel("flashcontent");
 
-    recordPopup = new PopupPanel();
+    recordPopup = new PopupPanel(true);
     recordPopup.setStyleName("RecordPopup");
     recordPopup.setWidget(flashRecordPanel);
 //    recordPopup.setPopupPosition(-100, -100);
-    recordPopup.show();					//show it temporarily so that it's on the page
+    //recordPopup.show();					//show it temporarily so that it's on the page
 
-    flashRecordPanel.initializeJS(GWT.getModuleBaseURL(), "flashcontent");
+    //flashRecordPanel.initializeJS(GWT.getModuleBaseURL(), "flashcontent");
 
     service.getExercises(new AsyncCallback<List<Exercise>>() {
       public void onFailure(Throwable caught) {
@@ -177,14 +178,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     if (current != null) {
       currentExerciseVPanel.remove(current);
     }
-    boolean recordResponses = true;
-    if (recordResponses) {
-      System.err.println("loading record exercise panel");
-
+    if (e.getType() == Exercise.EXERCISE_TYPE.RECORD) {
       currentExerciseVPanel.add(current = new RecordExercisePanel(e, service, this, this));
     } else {
+      // TODO handle fl type
       currentExerciseVPanel.add(current = new ExercisePanel(e, service, this, this));
-
     }
     int i = currentExercises.indexOf(e);
 
@@ -193,6 +191,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     html = progressMarkers.get(i);
     html.setStyleDependentName("highlighted", true);
     currentExercise = i;
+
+    current.finishAnswerConfig();    // TODO : remove?
   }
 
   public boolean loadNextExercise(Exercise current) {
@@ -221,9 +221,39 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
 
   public boolean onFirst(Exercise current) { return currentExercises.indexOf(current) == 0; }
 
+  public void showRecorder(Exercise exercise, String question, Widget sender) {
+    // Create the new popup.
+    // Position the popup 1/3rd of the way down and across the screen, and
+    // show the popup. Since the position calculation is based on the
+    // offsetWidth and offsetHeight of the popup, you have to use the
+    // setPopupPositionAndShow(callback) method. The alternative would
+    // be to call show(), calculate the left and top positions, and
+    // call setPopupPosition(left, top). This would have the ugly side
+    // effect of the popup jumping from its original position to its
+    // new position.
+  /*  recordPopup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+      public void setPosition(int offsetWidth, int offsetHeight) {
+
+        int left = (Window.getClientWidth() - offsetWidth) / 3;
+        int top = (Window.getClientHeight() - offsetHeight) / 3;
+        recordPopup.setPopupPosition(left, top);
+      }
+    });
+*/
+    int left = sender.getAbsoluteLeft();
+    int top = sender.getAbsoluteTop()-10;
+    recordPopup.setPopupPosition(left, top);
+    recordPopup.show();
+
+    if (!flashRecordPanelInited) {
+      System.out.println("doing initializeJS");
+      flashRecordPanel.initializeJS(GWT.getModuleBaseURL(), "flashcontent");
+      flashRecordPanelInited = true;
+    }
+   }
 
 
-    /**
+  /**
      * This is the entry point method.
      */
 	public void onModuleLoad2() {

@@ -35,10 +35,7 @@ public class UploadServlet extends HttpServlet implements Servlet{
 
 	@SuppressWarnings("unchecked")
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
-
-    System.err.println("got doPost!");
-
-
+    //System.err.println("got doPost!");
 
 		String tomcatWriteDirectory = getServletContext().getInitParameter("tomcatWriteDirectoryFullPath");
 		String pretestFilesRelativePath = getServletContext().getInitParameter("pretestFilesRelativePath");  // likely = pretest_files
@@ -57,7 +54,7 @@ public class UploadServlet extends HttpServlet implements Servlet{
 			while(it.hasNext()){
 				FileItem item = it.next();
 				String fieldName = item.getFieldName();
-
+       // System.err.println("Got " + fieldName + "=" + item.getString());
 				if(fieldName.equals("currentPlanName")){	
 					currentPlanName = item.getString();
 				}
@@ -67,6 +64,7 @@ public class UploadServlet extends HttpServlet implements Servlet{
 				else{
 					String exercise_name = item.getName();
 				//	String base = exercise_name + maxTestId;
+          System.err.println("Got " + currentPlanName + " and " + currentTestName);
 
           String planAndTestPath = currentPlanName + File.separator + testsRelativePath + File.separator + currentTestName;
           String currentTestDir = tomcatWriteDirectory + File.separator + pretestFilesRelativePath + File.separator + planAndTestPath;
