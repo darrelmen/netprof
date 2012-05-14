@@ -37,6 +37,9 @@ public class UploadForm extends FormPanel{
 		mainPanel.add(format);
 		mainPanel.add(currentPlanName);
 		mainPanel.add(currentTestName);
+
+    currentPlanName.setValue("testPlan");
+    currentTestName.setValue("testExercise");
 	}
 	
 	public static void setCurrentData(String planName, String testName){

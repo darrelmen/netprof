@@ -80,6 +80,7 @@ function microphone_recorder_events()
   case "saved":
     var name = arguments[1];
     var data = $.parseJSON(arguments[2]);
+    gotSaveComplete();
     if(data.saved) {
       $('#upload_status').css({'color': '#0F0'}).text(name + " was saved");
     } else {
@@ -108,6 +109,7 @@ Recorder = {
   recorderOriginalHeight: 0,
   uploadFormId: null,
   uploadFieldName: null,
+  permitCalled: 0,
 
   connect: function(name, attempts) {
     if(navigator.appName.indexOf("Microsoft") != -1) {
@@ -125,7 +127,7 @@ Recorder = {
       Recorder.recorderOriginalWidth = Recorder.recorder.width;
       Recorder.recorderOriginalHeight = Recorder.recorder.height;
       if(Recorder.uploadFormId && $) {
-        var frm = $(Recorder.uploadFormId); 
+        var frm = $(Recorder.uploadFormId);
         Recorder.recorder.init(frm.attr('action').toString(), Recorder.uploadFieldName, frm.serializeArray());
       }
       return;
@@ -160,13 +162,18 @@ Recorder = {
   },
 
   updateForm: function() {
-    var frm = $(Recorder.uploadFormId); 
+    var frm = $(Recorder.uploadFormId);
     Recorder.recorder.update(frm.serializeArray());
   },
 
   showPermissionWindow: function() {
-    Recorder.resize(240, 160);
+    if (permitCalled == 0) {
+      $('#upload_status').css({'color': '#000'}).text(" permit called: ");
+
+      Recorder.resize(240, 160);
     // need to wait until app is resized before displaying permissions screen
-    setTimeout(function(){Recorder.recorder.permit();}, 1);
+      setTimeout(function(){Recorder.recorder.permit();}, 1);
+      permitCalled = 1;
+    }
   }
 }

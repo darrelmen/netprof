@@ -1,5 +1,6 @@
 package mitll.langtest.client;
 
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -15,4 +16,6 @@ public interface ExerciseController {
   boolean loadPreviousExercise(Exercise current);
 
   boolean onFirst(Exercise current);
+
+  void showRecorder(Exercise exercise, String question, Widget sender);
 }

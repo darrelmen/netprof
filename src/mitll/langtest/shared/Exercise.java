@@ -15,9 +15,12 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class Exercise implements IsSerializable  {
+  public enum EXERCISE_TYPE { RECORD, ENG_TEXT, FL_TEXT }
+
   private String plan;
   private String content;
   private String id;
+  private EXERCISE_TYPE type = EXERCISE_TYPE.RECORD;    // TODO : set
   private Map<String,List<QAPair>> langToQuestion = new HashMap<String, List<QAPair>>();
   public static class QAPair implements IsSerializable {
     private String question;
@@ -54,6 +57,8 @@ public class Exercise implements IsSerializable  {
   public String getPlan() { return plan; }
   public String getID() { return id; }
   public String getContent() { return content; }
+  public EXERCISE_TYPE getType() { return type; }
+
   public List<QAPair> getQuestions() {
     List<QAPair> pairs = langToQuestion.get("en");
     return pairs;
