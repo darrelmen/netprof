@@ -5,13 +5,9 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.recorder.FlashRecordPanel;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.FieldVerifier;
@@ -23,15 +19,10 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -83,7 +74,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     exerciseList.add(new HTML("<h2>Items</h2>"));
     exerciseList.add(itemScroller);
 
-    // TODO : move this somewhere else!!!!
+    //
     flashRecordPanel = new FlashRecordPanel("flashcontent");
 
     recordPopup = new PopupPanel(true);
@@ -108,6 +99,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
         loadExercise(first);
       }
     });
+
+    getUser();
   }
 
   private void addExerciseToList(final Exercise e, VerticalPanel items) {
@@ -221,7 +214,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
 
   public boolean onFirst(Exercise current) { return currentExercises.indexOf(current) == 0; }
 
-  public void showRecorder(Exercise exercise, String question, Widget sender) {
+  /**
+   * @see RecordExercisePanel#getAnswerWidget(com.google.gwt.user.client.ui.Button, int)
+   * @param exercise
+   * @param question
+   * @param sender
+   */
+  public void showRecorder(Exercise exercise, int question, Widget sender) {
     // Create the new popup.
     // Position the popup 1/3rd of the way down and across the screen, and
     // show the popup. Since the position calculation is based on the
@@ -241,7 +240,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     });
 */
     int left = sender.getAbsoluteLeft();
-    int top = sender.getAbsoluteTop()-10;
+    int top = sender.getAbsoluteTop()-12;
     recordPopup.setPopupPosition(left, top);
     recordPopup.show();
 
@@ -250,8 +249,180 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
       flashRecordPanel.initializeJS(GWT.getModuleBaseURL(), "flashcontent");
       flashRecordPanelInited = true;
     }
+    flashRecordPanel.setUpload(exercise,question);
    }
 
+  public void storeUser(int sessionID) {
+    //String sessionID = "";//BrowserInfo.getBrowserInfo();/*(Get sessionID from server's response to your login request.)*/;
+    final long DURATION = 1000 * 60 * 60 * 1 ; //duration remembering login. 2 weeks in this example.
+    Date expires = new Date(System.currentTimeMillis() + DURATION);
+    Cookies.setCookie("sid", ""+sessionID, expires, null, "/", false);
+  }
+
+  public void getUser() {
+    String sessionID = Cookies.getCookie("sid");
+    System.out.println("got " +sessionID);
+    if ( sessionID != null ) {
+      //checkWithServerIfSessionIdIsStillLegal();
+    }
+    else displayLoginBox();
+  }
+
+  private void displayLoginBox() {
+
+    final TextBox nameField = new TextBox();
+    nameField.setText("GWT User");
+   // final Label errorLabel = new Label();
+   // final Button sendButton = new Button("Send");
+   // final TextBox nameField = new TextBox();
+    nameField.setText("GWT User");
+   // final Label errorLabel = new Label();
+
+    // We can add style names to widgets
+   // sendButton.addStyleName("sendButton");
+    // We can add style names to widgets
+   // sendButton.addStyleName("sendButton");
+
+    // Add the nameField and sendButton to the RootPanel
+    // Use RootPanel.get() to get the entire body element
+/*		RootPanel.get("nameFieldContainer").add(nameField);
+		RootPanel.get("sendButtonContainer").add(sendButton);
+		RootPanel.get("errorLabelContainer").add(errorLabel);*/
+
+    // Focus the cursor on the name field when the app loads
+    nameField.setFocus(true);
+    nameField.selectAll();
+
+    // Create the popup dialog box
+    final DialogBox dialogBox = new DialogBox();
+    dialogBox.setText("Login Questions");
+    dialogBox.setAnimationEnabled(true);
+
+    // Enable glass background.
+    dialogBox.setGlassEnabled(true);
+
+    final Button closeButton = new Button("Close");
+    // We can set the id of a widget by accessing its Element
+    closeButton.getElement().setId("closeButton");
+    final TextBox textToServerLabel = new TextBox();
+    //final Choice
+    //  serverResponseLabel = new HTML();
+
+    // Add a drop box with the list types
+    final ListBox dropBox = new ListBox(false);
+    for (String s : Arrays.asList("Male","Female")) {
+      dropBox.addItem(s);
+    }
+    dropBox.ensureDebugId("cwListBox-dropBox");
+    VerticalPanel dropBoxPanel = new VerticalPanel();
+    dropBoxPanel.setSpacing(4);
+  //  dropBoxPanel.add(new HTML(constants.cwListBoxSelectCategory()));
+    dropBoxPanel.add(dropBox);
+
+
+    VerticalPanel dialogVPanel = new VerticalPanel();
+    dialogVPanel.addStyleName("dialogVPanel");
+    dialogVPanel.add(new HTML("<b>Please enter your age:</b>"));
+    dialogVPanel.add(textToServerLabel);
+    dialogVPanel.add(new HTML("<br><b>Please select gender:</b>"));
+    dialogVPanel.add(dropBoxPanel);
+    dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
+    dialogVPanel.add(closeButton);
+    dialogBox.setWidget(dialogVPanel);
+
+
+    // Add a handler to close the DialogBox
+    
+
+    // Create a handler for the sendButton and nameField
+    class MyHandler implements ClickHandler, KeyUpHandler {
+      /**
+       * Fired when the user clicks on the sendButton.
+       */
+      public void onClick(ClickEvent event) {
+          dialogBox.hide();
+
+        sendNameToServer();
+      }
+
+      /**
+       * Fired when the user types in the nameField.
+       */
+      public void onKeyUp(KeyUpEvent event) {
+        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+          sendNameToServer();
+        }
+      }
+
+      /**
+       * Send the name from the nameField to the server and wait for a response.
+       */
+      private void sendNameToServer() {
+        // First, we validate the input.
+        //String textToServer = nameField.getText();
+        System.out.println("got " + textToServerLabel.getText());
+
+        // Then, we send the input to the server.
+      //  sendButton.setEnabled(false);
+        //textToServerLabel.setText(textToServer);
+        //serverResponseLabel.setText("");
+        		service.addUser(Integer.parseInt(textToServerLabel.getText()),
+              dropBox.getValue(dropBox.getSelectedIndex())
+        ,
+              new AsyncCallback<Integer>() {
+              public void onFailure(Throwable caught) {
+                // Show the RPC error message to the user
+                dialogBox
+                    .setText("Remote Procedure Call - Failure");
+                /*serverResponseLabel
+                    .addStyleName("serverResponseLabelError");
+                serverResponseLabel.setHTML(SERVER_ERROR);*/
+                dialogBox.center();
+                closeButton.setFocus(true);
+              }
+
+                public void onSuccess(Integer result) {
+                  storeUser(result);
+                }
+
+
+            });
+        /*		greetingService.greetServer(textToServer,
+                new AsyncCallback<String>() {
+                  public void onFailure(Throwable caught) {
+                    // Show the RPC error message to the user
+                    dialogBox
+                        .setText("Remote Procedure Call - Failure");
+                    serverResponseLabel
+                        .addStyleName("serverResponseLabelError");
+                    serverResponseLabel.setHTML(SERVER_ERROR);
+                    dialogBox.center();
+                    closeButton.setFocus(true);
+                  }
+
+                  public void onSuccess(String result) {
+                    dialogBox.setText("Remote Procedure Call");
+                    serverResponseLabel
+                        .removeStyleName("serverResponseLabelError");
+                    serverResponseLabel.setHTML(result);
+                    dialogBox.center();
+                    closeButton.setFocus(true);
+                  }
+                });*/
+      }
+    }
+
+    // Add a handler to send the name to the server
+    MyHandler handler = new MyHandler();
+  //  sendButton.addClickHandler(handler);
+    closeButton.addClickHandler(handler);
+
+    int left = (Window.getClientWidth() - 0) / 3;
+    int top = (Window.getClientHeight() - 0) / 3;
+    dialogBox.setPopupPosition(left, top);
+
+    dialogBox.show();
+  }
 
   /**
      * This is the entry point method.

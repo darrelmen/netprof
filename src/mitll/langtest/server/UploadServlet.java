@@ -3,6 +3,8 @@
  */
 package mitll.langtest.server;
 
+import mitll.langtest.client.recorder.UploadForm;
+import mitll.langtest.server.database.DatabaseImpl;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -29,18 +31,19 @@ import java.util.Map;
  *
  */
 public class UploadServlet extends HttpServlet implements Servlet{
-/*	private static final String url = "jdbc:mysql://localhost:3306/", dbOptions = "?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull",
-		driver = "com.mysql.jdbc.Driver";*/
 	private static final long serialVersionUID = -611668719240096732L;
+  DatabaseImpl db = new DatabaseImpl(this);
 
 	@SuppressWarnings("unchecked")
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
     //System.err.println("got doPost!");
 
 		String tomcatWriteDirectory = getServletContext().getInitParameter("tomcatWriteDirectoryFullPath");
-		String pretestFilesRelativePath = getServletContext().getInitParameter("pretestFilesRelativePath");  // likely = pretest_files
-		String testsRelativePath = "tests";
-		
+	//	String pretestFilesRelativePath = getServletContext().getInitParameter("pretestFilesRelativePath");  // likely = pretest_files
+	//	String testsRelativePath = "tests";
+
+    if (tomcatWriteDirectory == null) tomcatWriteDirectory = "answers";
+
 		response.setContentType("application/json");
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
@@ -49,29 +52,33 @@ public class UploadServlet extends HttpServlet implements Servlet{
 			List<FileItem> items = upload.parseRequest(request);
 			Iterator<FileItem> it = items.iterator();
 			
-			String currentPlanName = null, currentTestName = null;
+			String plan = null, exercise = null, question=null;
 
 			while(it.hasNext()){
 				FileItem item = it.next();
 				String fieldName = item.getFieldName();
        // System.err.println("Got " + fieldName + "=" + item.getString());
-				if(fieldName.equals("currentPlanName")){	
-					currentPlanName = item.getString();
+				if(fieldName.equals(UploadForm.PLAN)){
+					plan = item.getString();
 				}
-				else if(fieldName.equals("currentTestName")){	
-					currentTestName = item.getString();
-				}
+        else if(fieldName.equals(UploadForm.EXERCISE)){
+          exercise = item.getString();
+        }
+        else if(fieldName.equals(UploadForm.QUESTION)){
+          question = item.getString();
+        }
 				else{
-					String exercise_name = item.getName();
+		//			String exercise_name = item.getName();
 				//	String base = exercise_name + maxTestId;
-          System.err.println("Got " + currentPlanName + " and " + currentTestName);
+          System.err.println("Got " + plan + " and " + exercise);
 
-          String planAndTestPath = currentPlanName + File.separator + testsRelativePath + File.separator + currentTestName;
-          String currentTestDir = tomcatWriteDirectory + File.separator + pretestFilesRelativePath + File.separator + planAndTestPath;
+          String planAndTestPath = plan + File.separator + exercise + File.separator + question;
+          String currentTestDir = tomcatWriteDirectory + File.separator  + planAndTestPath;
           File audioFilePath = new File(currentTestDir);
           audioFilePath.mkdirs();
 
-          writeAudioFile(item, "", audioFilePath);
+          File file = writeAudioFile(item, "user", audioFilePath);
+          db.addAnswer(plan,exercise,Integer.parseInt(question),"",file.getPath());
 				}
 			}
 		}
@@ -80,8 +87,10 @@ public class UploadServlet extends HttpServlet implements Servlet{
 		}
 	}
 
-  private void writeAudioFile(FileItem item, String base, File audioFilePath) throws Exception {
+  private File writeAudioFile(FileItem item, String base, File audioFilePath) throws Exception {
     System.out.println("got " + item);
-    //item.write(new File(audioFilePath.getPath() + File.separator + base + ".wav"));
+    File file = new File(audioFilePath.getPath() + File.separator + base + ".wav");
+    item.write(file);
+    return file;
   }
 }

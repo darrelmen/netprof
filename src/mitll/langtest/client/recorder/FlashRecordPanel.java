@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.shared.Exercise;
 
 /**
  * @author gregbramble
@@ -19,9 +20,10 @@ import com.google.gwt.user.client.ui.SimplePanel;
 public class FlashRecordPanel extends FlowPanel {
   boolean showStatus = true;
   boolean showUploadStatus = true;
+  private final UploadForm upload;
 
   /**
-   * @see mitll.langtest.client.RecordExercisePanel#getAnswerWidget(com.google.gwt.user.client.ui.Button, int)
+   * see mitll.langtest.client.RecordExercisePanel#getAnswerWidget(com.google.gwt.user.client.ui.Button, int)
    */
 	public FlashRecordPanel(String id){
     InlineHTML save_button = new InlineHTML();
@@ -78,8 +80,11 @@ public class FlashRecordPanel extends FlowPanel {
 		add(uploadStatusPanel);
     uploadStatusPanel.setVisible(showUploadStatus);
 
-    add(new UploadForm());
+    upload = new UploadForm();
+    add(upload);
   }
+
+  public void setUpload(Exercise e, int qid) { upload.setSlots(e,qid); }
 
   private static class ImageAnchor extends Anchor {
     public ImageAnchor() {}

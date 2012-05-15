@@ -48,7 +48,7 @@ public class RecordExercisePanel extends ExercisePanel {
     record_button.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         System.out.println("showing " + "question_"+index);
-        controller.showRecorder(exercise,"question_"+index,record_button);
+        controller.showRecorder(exercise,index,record_button);
       }
     });
     sp.add(record_button);
@@ -77,8 +77,8 @@ public class RecordExercisePanel extends ExercisePanel {
   }
 
   protected void initWidget(Widget w, int index) {
-    String id = "flashcontent_" + index;
-    System.out.println("init widget " + /*w + */" at " + index + " with '" + id +"'");
+   // String id = "flashcontent_" + index;
+   // System.out.println("init widget " + /*w + */" at " + index + " with '" + id +"'");
   //  FlashRecordPanel r = (FlashRecordPanel) w;
  //   r.initializeJS(GWT.getModuleBaseURL(), id);
   }
