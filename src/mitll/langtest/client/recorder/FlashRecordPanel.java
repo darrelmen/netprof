@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -21,6 +22,7 @@ public class FlashRecordPanel extends FlowPanel {
   boolean showStatus = false;
   boolean showUploadStatus = false;
   private final UploadForm upload;
+  private static Widget saveFeedback;  // remember for later
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad
@@ -56,9 +58,8 @@ public class FlashRecordPanel extends FlowPanel {
     });
     add(record_button);
 
-    // save -- TODO change icon
-    // TODO listen for save event to be completed
     add(flashContent);
+
     //playback
 
     Image image2 = new Image("images/play.png");
@@ -85,7 +86,15 @@ public class FlashRecordPanel extends FlowPanel {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#showRecorder(mitll.langtest.shared.Exercise, int, com.google.gwt.user.client.ui.Widget)
+   * Remember widget so we can show it later when the save completes.
+   * @param w
+   */
+  public static void setSaveCompleteFeedbackWidget(Widget w) {
+    saveFeedback = w;
+  }
+
+  /**
+   * @see mitll.langtest.client.ExerciseController#showRecorder(mitll.langtest.shared.Exercise, int, com.google.gwt.user.client.ui.Widget, com.google.gwt.user.client.ui.Widget)
    * @param e
    * @param qid
    * @param userID
@@ -140,7 +149,8 @@ public class FlashRecordPanel extends FlowPanel {
 	}-*//*;*/
 
   public static void saveComplete() {
-    System.out.println("Save is complete!");
+//    System.out.println("Save is complete!");
+    saveFeedback.setVisible(true);
   }
 
   public static void swfCallback() {

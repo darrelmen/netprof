@@ -1,10 +1,11 @@
 package mitll.langtest.client;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -18,7 +19,8 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class RecordExercisePanel extends ExercisePanel {
-  ExerciseController controller;
+  private ExerciseController controller;
+
   public RecordExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                              final ExerciseController controller) {
     super(e,service,userFeedback,controller);
@@ -26,40 +28,58 @@ public class RecordExercisePanel extends ExercisePanel {
   }
 
   /**
+   * Has a check mark to indicate when the saved audio has been successfully posted to the server.
+   *
+   * It's made visible by a call in {@link mitll.langtest.client.recorder.FlashRecordPanel#saveComplete}
+   *
+   * @see mitll.langtest.client.recorder.FlashRecordPanel#setSaveCompleteFeedbackWidget(com.google.gwt.user.client.ui.Widget) ()
+   * @see mitll.langtest.client.recorder.FlashRecordPanel#saveComplete()
    * @see ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, UserFeedback, ExerciseController)
    * @param next
    * @param index
    * @return
    */
   protected Widget getAnswerWidget(Button next, final int index) {
-    String id = "flashcontent_" + index;
-    //System.out.println("getAnswerWidget widget " + /*w + */" at " + index + " with '" + id +"'");
-
-   // FlashRecordPanel widget = new FlashRecordPanel(id);
-    SimplePanel sp = new SimplePanel();
-
+    HorizontalPanel sp = new HorizontalPanel();
     Image image = new Image("images/record.png");
     image.setAltText("Record");
-    final ImageAnchor record_button = new ImageAnchor();
+
+    Image check = new Image("images/checkmark.png");
+    check.getElement().setId("checkmark_" +index);
+    check.setAltText("Audio Saved");
+
+    final ImageAnchor record_button = new ImageAnchor(index, check);
     record_button.setResource(image);
 
-   // record_button.getElement().setId("record_button");
     record_button.setTitle("Record");
-    record_button.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        System.out.println("showing " + "question_"+index);
-        controller.showRecorder(exercise,index,record_button);
-      }
-    });
     sp.add(record_button);
+    SimplePanel spacer = new SimplePanel();
+    spacer.setHeight("24px");
+    spacer.setWidth("100px") ;
+
+    sp.add(check);
+    check.setVisible(false);
 
     return sp;
   }
 
-  private static class ImageAnchor extends Anchor {
-    public ImageAnchor() {}
+  /**
+   * Remembers check image widget so we can show it when save is complete.
+   */
+  private class ImageAnchor extends Anchor implements MouseOverHandler {
+    final int index;
+    Widget check;
+    public ImageAnchor(int index, Widget check) {
+      this.index = index;
+      this.check = check;
+      addDomHandler(this, MouseOverEvent.getType());
+    }
     public void setResource(Image img) {
       DOM.insertBefore(getElement(), img.getElement(), DOM.getFirstChild(getElement()));
+    }
+
+    public void onMouseOver(MouseOverEvent event) {
+      controller.showRecorder(exercise,index, this, check);
     }
   }
 
@@ -74,12 +94,5 @@ public class RecordExercisePanel extends ExercisePanel {
   @Override
   protected void postAnswers(LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller, Exercise completedExercise) {
     controller.loadNextExercise(completedExercise);
-  }
-
-  protected void initWidget(Widget w, int index) {
-   // String id = "flashcontent_" + index;
-   // System.out.println("init widget " + /*w + */" at " + index + " with '" + id +"'");
-  //  FlashRecordPanel r = (FlashRecordPanel) w;
- //   r.initializeJS(GWT.getModuleBaseURL(), id);
   }
 }

@@ -85,16 +85,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     exerciseList.add(new HTML("<h2>Items</h2>"));
     exerciseList.add(itemScroller);
 
-    //
     flashRecordPanel = new FlashRecordPanel("flashcontent");
 
     recordPopup = new PopupPanel(true);
     recordPopup.setStyleName("RecordPopup");
     recordPopup.setWidget(flashRecordPanel);
-//    recordPopup.setPopupPosition(-100, -100);
-    //recordPopup.show();					//show it temporarily so that it's on the page
-
-    //flashRecordPanel.initializeJS(GWT.getModuleBaseURL(), "flashcontent");
 
     service.getExercises(new AsyncCallback<List<Exercise>>() {
       public void onFailure(Throwable caught) {
@@ -200,8 +195,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     html = progressMarkers.get(i);
     html.setStyleDependentName("highlighted", true);
     currentExercise = i;
-
-    current.finishAnswerConfig();    // TODO : remove?
   }
 
   public boolean loadNextExercise(Exercise current) {
@@ -235,8 +228,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
    * @param exercise
    * @param question
    * @param sender
+   * @param saveFeedbackWidget
    */
-  public void showRecorder(Exercise exercise, int question, Widget sender) {
+  public void showRecorder(Exercise exercise, int question, Widget sender, Widget saveFeedbackWidget) {
     // Create the new popup.
     // Position the popup 1/3rd of the way down and across the screen, and
     // show the popup. Since the position calculation is based on the
@@ -246,15 +240,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     // call setPopupPosition(left, top). This would have the ugly side
     // effect of the popup jumping from its original position to its
     // new position.
-  /*  recordPopup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-      public void setPosition(int offsetWidth, int offsetHeight) {
-
-        int left = (Window.getClientWidth() - offsetWidth) / 3;
-        int top = (Window.getClientHeight() - offsetHeight) / 3;
-        recordPopup.setPopupPosition(left, top);
-      }
-    });
-*/
 
     int userID = user.getUser();
     if (userID == -1) {
@@ -264,6 +249,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     else {
       flashRecordPanel.setUpload(exercise, question, userID);
     }
+    // remember feedback widget so we can indicate when save is complete
+    FlashRecordPanel.setSaveCompleteFeedbackWidget(saveFeedbackWidget);
 
     int left = sender.getAbsoluteLeft();
     int top = sender.getAbsoluteTop()-12;
@@ -278,7 +265,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
    }
 
   public void gotUser(int userID, Exercise exercise, int question) {
-    flashRecordPanel.setUpload(exercise,question, userID);
+    flashRecordPanel.setUpload(exercise, question, userID);
   }
 
   /**
