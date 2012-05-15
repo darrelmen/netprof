@@ -88,6 +88,7 @@ public class ExercisePanel extends VerticalPanel {
     // send answers to server
     next.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
+        controller.login();
         postAnswers(service, userFeedback, controller, e);
       }
     });

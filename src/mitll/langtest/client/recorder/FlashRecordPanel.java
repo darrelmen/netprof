@@ -18,12 +18,12 @@ import mitll.langtest.shared.Exercise;
  *
  */
 public class FlashRecordPanel extends FlowPanel {
-  boolean showStatus = true;
-  boolean showUploadStatus = true;
+  boolean showStatus = false;
+  boolean showUploadStatus = false;
   private final UploadForm upload;
 
   /**
-   * see mitll.langtest.client.RecordExercisePanel#getAnswerWidget(com.google.gwt.user.client.ui.Button, int)
+   * @see mitll.langtest.client.LangTest#onModuleLoad
    */
 	public FlashRecordPanel(String id){
     InlineHTML save_button = new InlineHTML();
@@ -84,6 +84,11 @@ public class FlashRecordPanel extends FlowPanel {
     add(upload);
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#showRecorder(mitll.langtest.shared.Exercise, int, com.google.gwt.user.client.ui.Widget)
+   * @param e
+   * @param qid
+   */
   public void setUpload(Exercise e, int qid) { upload.setSlots(e,qid); }
 
   private static class ImageAnchor extends Anchor {
