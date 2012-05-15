@@ -5,9 +5,6 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.user.client.Cookies;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.recorder.FlashRecordPanel;
 import mitll.langtest.shared.Exercise;
@@ -22,8 +19,6 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -260,6 +255,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
       }
     });
 */
+
+    int userID = user.getUser();
+    if (userID == -1) {
+      user.setLangTest(this, exercise, question);   // callback when available
+      user.login();
+    }
+    else {
+      flashRecordPanel.setUpload(exercise, question, userID);
+    }
+
     int left = sender.getAbsoluteLeft();
     int top = sender.getAbsoluteTop()-12;
     recordPopup.setPopupPosition(left, top);
@@ -270,8 +275,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
       flashRecordPanel.initializeJS(GWT.getModuleBaseURL(), "flashcontent");
       flashRecordPanelInited = true;
     }
-    flashRecordPanel.setUpload(exercise,question);
    }
+
+  public void gotUser(int userID, Exercise exercise, int question) {
+    flashRecordPanel.setUpload(exercise,question, userID);
+  }
 
   /**
      * This is the entry point method.
