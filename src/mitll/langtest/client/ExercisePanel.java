@@ -107,14 +107,20 @@ public class ExercisePanel extends VerticalPanel {
   protected void postAnswers(LangTestDatabaseAsync service, final UserFeedback userFeedback,
                              final ExerciseController controller, final Exercise completedExercise) {
     int i = 1;
-    for (Widget tb : answers) {
-      service.addAnswer(exercise, i++, ((TextBox)tb).getText(), "", new AsyncCallback<Void>() {
+    int user = controller.getUser();
+    final Set<Widget> incomplete = new HashSet<Widget>();
+    incomplete.addAll(incomplete);
+    for (final Widget tb : answers) {
+      service.addAnswer(user, exercise, i++, ((TextBox)tb).getText(), "", new AsyncCallback<Void>() {
         public void onFailure(Throwable caught) {
           userFeedback.showErrorMessage("Couldn't post answers for exercise.");
         }
 
         public void onSuccess(Void result) {
-          controller.loadNextExercise(completedExercise);
+          incomplete.remove(tb);
+          if (incomplete.isEmpty()) {
+            controller.loadNextExercise(completedExercise);
+          }
         }
       }
       );

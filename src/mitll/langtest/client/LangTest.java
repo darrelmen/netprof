@@ -88,7 +88,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     flashRecordPanel = new FlashRecordPanel("flashcontent");
 
     recordPopup = new PopupPanel(true);
-    recordPopup.setStyleName("RecordPopup");
+    if (false) recordPopup.setStyleName("RecordPopup");
     recordPopup.setWidget(flashRecordPanel);
 
     service.getExercises(new AsyncCallback<List<Exercise>>() {
@@ -109,6 +109,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
   }
 
   public void login() { user.login(); }
+  public int getUser() { return user.getUser(); }
 
   private void addExerciseToList(final Exercise e, VerticalPanel items) {
     final HTML w = new HTML("<b>" + e.getID() + "</b>");
@@ -178,7 +179,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
   public void showStatus(String msg) { status.setText(msg); }
 
   private void loadExercise(Exercise e) {
-    System.err.println("loading exercise " + e.getID());
+    System.err.println("loading exercise " + e.getID() + " " +e.getType());
     if (current != null) {
       currentExerciseVPanel.remove(current);
     }
@@ -247,7 +248,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
       user.login();
     }
     else {
-      flashRecordPanel.setUpload(exercise, question, userID);
+      flashRecordPanel.setUpload(userID, exercise, question);
     }
     // remember feedback widget so we can indicate when save is complete
     FlashRecordPanel.setSaveCompleteFeedbackWidget(saveFeedbackWidget);
@@ -264,8 +265,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     }
    }
 
-  public void gotUser(int userID, Exercise exercise, int question) {
-    flashRecordPanel.setUpload(exercise, question, userID);
+  public void gotUser(long userID, Exercise exercise, int question) {
+    flashRecordPanel.setUpload(userID, exercise, question);
   }
 
   /**

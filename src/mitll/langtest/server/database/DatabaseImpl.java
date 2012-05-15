@@ -37,10 +37,8 @@ public class DatabaseImpl {
     driver = "org.h2.Driver";
 
   private HttpServlet servlet;
-  private String plan;
 
   public DatabaseImpl(HttpServlet s) { this.servlet = s; }
-
 
   /**
    * Hit the database for the exercises
@@ -156,7 +154,7 @@ public class DatabaseImpl {
     }
   }
 
-  public int addUser(int age, String gender) {
+  public long addUser(int age, String gender, int experience) {
     try {
       Connection connection = getConnection();
       PreparedStatement statement;
@@ -166,28 +164,24 @@ public class DatabaseImpl {
         statement.close();
       }
 
-      statement = connection.prepareStatement( "CREATE TABLE if not exists users (id INT AUTO_INCREMENT, " +
-        "age INT, gender INT, experience INT, password VARCHAR)");
+      statement = connection.prepareStatement( "CREATE TABLE if not exists users (id IDENTITY, " +
+        "age INT, gender INT, experience INT, password VARCHAR, CONSTRAINT pkusers PRIMARY KEY (id))");
       statement.execute();
       statement.close();
 
-       System.out.println("adding " +age + " and " + gender);
-      statement = connection.prepareStatement("INSERT INTO users(age,gender) VALUES(?,?)");
+      System.out.println("adding " +age + " and " + gender + " and " + experience);
+      statement = connection.prepareStatement("INSERT INTO users(age,gender,experience) VALUES(?,?,?);");
       int i = 1;
-      //statement.setString(i++,plan);
-     // statement.setString(i++,id);
       statement.setInt(i++, age);
       statement.setInt(i++, gender.equalsIgnoreCase("male") ? 0 : 1);
-     // statement.setString(i++, audioFile);
+      statement.setInt(i++, experience);
       statement.executeUpdate();
-      ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
-      //statement.close();
 
-      int id = 0;
-     //  statement = getConnection().prepareStatement("SELECT max(id) FROM users order by timestamp");
-       // ResultSet rs = statement.executeQuery();
+      ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
+
+      long id = 0;
         while (rs.next()) {
-          id = rs.getInt(1);
+          id = rs.getLong(1);
           System.out.println("addUser got user #" +id);
           //  System.out.println(rs.getString(1) + "," + rs.getString(2) + "," + rs.getInt(3) + "," + rs.getString(4) + "," + rs.getTimestamp(5));
         }
@@ -203,17 +197,16 @@ public class DatabaseImpl {
   /**
    * Creates the result table if it's not there.
    *
-   * TODO : add user
    * @see mitll.langtest.client.ExercisePanel#postAnswers(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.UserFeedback, mitll.langtest.client.ExerciseController, mitll.langtest.shared.Exercise)
+   * @param userID
    * @param e
    * @param questionID
    * @param answer
    * @param audioFile
    */
-  public void addAnswer(Exercise e, int questionID, String answer, String audioFile) {
+  public void addAnswer(int userID, Exercise e, int questionID, String answer, String audioFile) {
     String ip = "";//servlet.getThreadLocalRequest().getRemoteAddr();
-    System.out.println("Got " +e + " and " + questionID + " and " + answer + " at " +ip);
-
+  //  System.out.println("Got " +e + " and " + questionID + " and " + answer + " at " +ip);
 
     if (DROP_CREATED_TABLES) {
       dropResults();
@@ -221,15 +214,15 @@ public class DatabaseImpl {
 
     String plan = e.getPlan();
     String id = e.getID();
-    addAnswer(plan, id, questionID, answer, audioFile);
+    addAnswer(userID, plan, id, questionID, answer, audioFile);
   }
 
-  public void addAnswer(String plan, String id, int questionID, String answer, String audioFile) {
+  public void addAnswer(int userID, String plan, String id, int questionID, String answer, String audioFile) {
     try {
       Connection connection = getConnection();
       createResultTable(connection);
 
-      addAnswerToTable(plan, id, questionID, answer, audioFile, connection);
+      addAnswerToTable(userID, plan, id, questionID, answer, audioFile, connection);
 
       if (true) { // true to see what is in the table
         try {
@@ -257,32 +250,32 @@ public class DatabaseImpl {
     }
   }
 
-
-
   public void addUser() {
     String sql = "CREATE TABLE if not exists users (id INT AUTO_INCREMENT, " +
       "age INT, gender INT, experience INT, password VARCHAR, CONSTRAINT pkusers PRIMARY KEY (id))";
   }
 
   /**
-   * TODO : add user
    * @see #addAnswer
+   * @param userid
    * @param plan
    * @param id
    * @param questionID
    * @param answer
-   * @param connection
+   * @param connection    
    * @throws SQLException
    */
-  private void addAnswerToTable(String plan, String id, int questionID, String answer, String audioFile, Connection connection) throws SQLException {
+  private void addAnswerToTable(int userid, String plan, String id, int questionID, String answer, String audioFile,
+                                Connection connection) throws SQLException {
     if (DROP_CREATED_TABLES) {
       dropResults();
     }
-	  createResultTable(connection);
+	createResultTable(connection);
 
     PreparedStatement statement;
-    statement = connection.prepareStatement("INSERT INTO results(plan,id,qid,answer,audioFile) VALUES(?,?, ?, ?,?)");
+    statement = connection.prepareStatement("INSERT INTO results(userid,plan,id,qid,answer,audioFile) VALUES(?,?,?,?,?,?)");
     int i = 1;
+    statement.setInt(i++, userid);
     statement.setString(i++,plan);
     statement.setString(i++,id);
     statement.setInt(i++, questionID);
@@ -317,8 +310,8 @@ public class DatabaseImpl {
 
   public static void main(String[] arg) {
     DatabaseImpl langTestDatabase = new DatabaseImpl(null);
-    int id = langTestDatabase.addUser(23,"male");
+    long id = langTestDatabase.addUser(23,"male", 0);
     System.out.println("id =" +id);
-    for (Exercise e : langTestDatabase.getExercises()) System.err.println("e " + e);
+   // for (Exercise e : langTestDatabase.getExercises()) System.err.println("e " + e);
  }
 }

@@ -21,6 +21,13 @@ import mitll.langtest.shared.Exercise;
 public class RecordExercisePanel extends ExercisePanel {
   private ExerciseController controller;
 
+  /**
+   * @see LangTest#loadExercise(mitll.langtest.shared.Exercise)
+   * @param e
+   * @param service
+   * @param userFeedback
+   * @param controller
+   */
   public RecordExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                              final ExerciseController controller) {
     super(e,service,userFeedback,controller);

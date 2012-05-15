@@ -20,4 +20,6 @@ public interface ExerciseController {
   void showRecorder(Exercise exercise, int question, Widget sender, Widget saveFeedbackWidget);
 
   void login();
+
+  int getUser();
 }
