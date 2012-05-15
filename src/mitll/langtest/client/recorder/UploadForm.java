@@ -17,9 +17,10 @@ public class UploadForm extends FormPanel{
   public static final String PLAN = "plan";
   public static final String EXERCISE = "exercise";
   public static final String QUESTION = "question";
+  public static final String USER = "user";
   private VerticalPanel mainPanel = new VerticalPanel();
 	private Hidden authenticity_token = new Hidden(), upload_file = new Hidden(), format = new Hidden();
-	private static Hidden plan, exercise, question;
+	private static Hidden plan, exercise, question, user;
 	
 	public UploadForm(){
 		getElement().setId("uploadForm");			//this is so that the Recorder knows to use this form to upload
@@ -36,6 +37,7 @@ public class UploadForm extends FormPanel{
 		plan = new Hidden(PLAN);
     exercise = new Hidden(EXERCISE);
     question = new Hidden(QUESTION);
+    user = new Hidden(USER);
 
     mainPanel.add(authenticity_token);
 		mainPanel.add(upload_file);
@@ -45,16 +47,19 @@ public class UploadForm extends FormPanel{
 		mainPanel.add(plan);
     mainPanel.add(exercise);
     mainPanel.add(question);
+    mainPanel.add(user);
   }
 
   /**
    * @see FlashRecordPanel#setUpload
    * @param e
    * @param id
+   * @param userID
    */
-  public void setSlots(Exercise e, int id) {
+  public void setSlots(Exercise e, int id, int userID) {
     plan.setValue(e.getPlan());
     exercise.setValue(e.getID());
     question.setValue(""+id);
+    user.setValue(""+userID);
   }
 }

@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import mitll.langtest.shared.Exercise;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -26,7 +27,10 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public class User {
-  LangTestDatabaseAsync service;
+  private LangTestDatabaseAsync service;
+  private LangTest langTest;
+  private Exercise exercise;
+  private int question;
   public User(LangTestDatabaseAsync service) { this.service = service; }
 
   // user tracking
@@ -35,7 +39,13 @@ public class User {
     final long DURATION = 1000 * 60 * 60 * 20 ; //duration remembering login. 2 weeks in this example.
     Date expires = new Date(System.currentTimeMillis() + DURATION);
     Cookies.setCookie("sid", "" + sessionID, expires, null, "/", false);
+    if (langTest != null) {
+      System.out.println("user logged in as " + sessionID);
+      langTest.gotUser(sessionID, exercise, question);
+    }
   }
+
+  public void setLangTest(LangTest lt,Exercise exercise, int q) { langTest = lt; this.exercise = exercise; this.question = q; }
 
   public void login() {
     String sessionID = Cookies.getCookie("sid");
@@ -44,6 +54,19 @@ public class User {
       //checkWithServerIfSessionIdIsStillLegal();
     }
     else displayLoginBox();
+  }
+
+  public boolean isUserValid() {
+    return Cookies.getCookie("sid") != null;
+  }
+
+  public int getUser() {
+    String sid = Cookies.getCookie("sid");
+    if (sid == null) {
+      System.err.println("sid not set!");
+      return -1;
+    }
+    return Integer.parseInt(sid);
   }
 
   public void clearUser() {

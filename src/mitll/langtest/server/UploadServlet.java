@@ -41,6 +41,8 @@ public class UploadServlet extends HttpServlet implements Servlet{
 		String tomcatWriteDirectory = getServletContext().getInitParameter("tomcatWriteDirectoryFullPath");
 	//	String pretestFilesRelativePath = getServletContext().getInitParameter("pretestFilesRelativePath");  // likely = pretest_files
 	//	String testsRelativePath = "tests";
+   //String ip = request.getSession();
+    System.out.println("got " + request.getSession());
 
     if (tomcatWriteDirectory == null) tomcatWriteDirectory = "answers";
 
@@ -52,7 +54,7 @@ public class UploadServlet extends HttpServlet implements Servlet{
 			List<FileItem> items = upload.parseRequest(request);
 			Iterator<FileItem> it = items.iterator();
 			
-			String plan = null, exercise = null, question=null;
+			String plan = null, exercise = null, question=null, user=null;
 
 			while(it.hasNext()){
 				FileItem item = it.next();
@@ -67,17 +69,20 @@ public class UploadServlet extends HttpServlet implements Servlet{
         else if(fieldName.equals(UploadForm.QUESTION)){
           question = item.getString();
         }
+        else if(fieldName.equals(UploadForm.USER)){
+          user = item.getString();
+        }
 				else{
 		//			String exercise_name = item.getName();
 				//	String base = exercise_name + maxTestId;
           System.err.println("Got " + plan + " and " + exercise);
 
-          String planAndTestPath = plan + File.separator + exercise + File.separator + question;
+          String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-"+user;
           String currentTestDir = tomcatWriteDirectory + File.separator  + planAndTestPath;
           File audioFilePath = new File(currentTestDir);
           audioFilePath.mkdirs();
 
-          File file = writeAudioFile(item, "user", audioFilePath);
+          File file = writeAudioFile(item, "answer", audioFilePath);
           db.addAnswer(plan,exercise,Integer.parseInt(question),"",file.getPath());
 				}
 			}

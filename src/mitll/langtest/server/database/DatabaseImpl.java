@@ -24,6 +24,7 @@ import java.util.Set;
  */
 public class DatabaseImpl {
   private static final String ENCODING = "UTF8";
+  private static final boolean DROP_CREATED_TABLES = false;
 
   // mysql config info
 /*  private String url = "jdbc:mysql://localhost:3306/",
@@ -159,7 +160,7 @@ public class DatabaseImpl {
     try {
       Connection connection = getConnection();
       PreparedStatement statement;
-      if (true) {
+      if (DROP_CREATED_TABLES) {
         statement = connection.prepareStatement("drop TABLE users");
         statement.execute();
         statement.close();
@@ -214,7 +215,7 @@ public class DatabaseImpl {
     System.out.println("Got " +e + " and " + questionID + " and " + answer + " at " +ip);
 
 
-    if (false) {
+    if (DROP_CREATED_TABLES) {
       dropResults();
     }
 
@@ -274,7 +275,7 @@ public class DatabaseImpl {
    * @throws SQLException
    */
   private void addAnswerToTable(String plan, String id, int questionID, String answer, String audioFile, Connection connection) throws SQLException {
-    if (false) {
+    if (DROP_CREATED_TABLES) {
       dropResults();
     }
 	  createResultTable(connection);
@@ -313,7 +314,6 @@ public class DatabaseImpl {
     statement.execute();
     statement.close();
   }
-
 
   public static void main(String[] arg) {
     DatabaseImpl langTestDatabase = new DatabaseImpl(null);
