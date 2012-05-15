@@ -10,5 +10,7 @@ import java.util.List;
  */
 public interface LangTestDatabaseAsync {
   void getExercises(AsyncCallback<List<Exercise>> async);
-  void addAnswer(Exercise exercise, int questionID, String answer, AsyncCallback<Void> async);
+  void addAnswer(Exercise exercise, int questionID, String answer, String audioFile, AsyncCallback<Void> async);
+
+  void addUser(int age, String gender, AsyncCallback<Integer> async);
 }

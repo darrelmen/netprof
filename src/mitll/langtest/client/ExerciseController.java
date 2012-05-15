@@ -17,5 +17,5 @@ public interface ExerciseController {
 
   boolean onFirst(Exercise current);
 
-  void showRecorder(Exercise exercise, String question, Widget sender);
+  void showRecorder(Exercise exercise, int question, Widget sender);
 }

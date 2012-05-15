@@ -116,7 +116,7 @@ public class ExercisePanel extends VerticalPanel {
                              final ExerciseController controller, final Exercise completedExercise) {
     int i = 1;
     for (Widget tb : answers) {
-      service.addAnswer(exercise, i++, ((TextBox)tb).getText(), new AsyncCallback<Void>() {
+      service.addAnswer(exercise, i++, ((TextBox)tb).getText(), "", new AsyncCallback<Void>() {
         public void onFailure(Throwable caught) {
           userFeedback.showErrorMessage("Couldn't post answers for exercise.");
         }
