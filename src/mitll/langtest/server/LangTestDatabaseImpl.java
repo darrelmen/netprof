@@ -28,13 +28,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getExercises();  //To change body of implemented methods use File | Settings | File Templates.
   }
 
-  public void addAnswer(Exercise exercise, int questionID, String answer, String audioFile) {
-    db.addAnswer(exercise,questionID,answer,audioFile);
+  public void addAnswer(int userID, Exercise exercise, int questionID, String answer, String audioFile) {
+    db.addAnswer(userID, exercise,questionID,answer,audioFile);
   }
 
-  public int addUser(int age, String gender) {
-    return db.addUser(age,gender);
+  public long addUser(int age, String gender, int experience) {
+    return db.addUser(age,gender,experience);
   }
-
-
 }

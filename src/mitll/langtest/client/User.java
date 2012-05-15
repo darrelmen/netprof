@@ -27,6 +27,7 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public class User {
+  private static final int EXPIRATION_MINUTES = 20;
   private LangTestDatabaseAsync service;
   private LangTest langTest;
   private Exercise exercise;
@@ -34,9 +35,8 @@ public class User {
   public User(LangTestDatabaseAsync service) { this.service = service; }
 
   // user tracking
-  public void storeUser(int sessionID) {
-    //String sessionID = "";//BrowserInfo.getBrowserInfo();/*(Get sessionID from server's response to your login request.)*/;
-    final long DURATION = 1000 * 60 * 60 * 20 ; //duration remembering login. 2 weeks in this example.
+  public void storeUser(long sessionID) {
+    final long DURATION = 1000 * 60 * 60 * EXPIRATION_MINUTES; //duration remembering login. 2 weeks in this example.
     Date expires = new Date(System.currentTimeMillis() + DURATION);
     Cookies.setCookie("sid", "" + sessionID, expires, null, "/", false);
     if (langTest != null) {
@@ -110,8 +110,6 @@ public class User {
     // We can set the id of a widget by accessing its Element
     closeButton.getElement().setId("closeButton");
     final TextBox textToServerLabel = new TextBox();
-    //final Choice
-    //  serverResponseLabel = new HTML();
 
     // Add a drop box with the list types
     final ListBox dropBox = new ListBox(false);
@@ -124,20 +122,30 @@ public class User {
     //  dropBoxPanel.add(new HTML(constants.cwListBoxSelectCategory()));
     dropBoxPanel.add(dropBox);
 
+    // add experience drop box
+    final ListBox dropBox2 = new ListBox(false);
+    for (int i = 0; i < 21; i += 3) {
+      dropBox2.addItem(i + " to " + (i+3) + " months");
+    }
+    dropBox2.addItem("More than 22 months");
+    dropBox2.addItem("Native Speaker");
+    dropBox2.ensureDebugId("cwListBox-dropBox");
+    VerticalPanel dropBoxPanel2 = new VerticalPanel();
+    dropBoxPanel2.setSpacing(4);
+    //  dropBoxPanel.add(new HTML(constants.cwListBoxSelectCategory()));
+    dropBoxPanel2.add(dropBox2);
 
     VerticalPanel dialogVPanel = new VerticalPanel();
     dialogVPanel.addStyleName("dialogVPanel");
-    dialogVPanel.add(new HTML("<b>Please enter your age:</b>"));
+    dialogVPanel.add(new HTML("<b>Please enter your age</b>"));
     dialogVPanel.add(textToServerLabel);
-    dialogVPanel.add(new HTML("<br><b>Please select gender:</b>"));
+    dialogVPanel.add(new HTML("<br><b>Please select gender</b>"));
     dialogVPanel.add(dropBoxPanel);
+    dialogVPanel.add(new HTML("<br><b>Please select months of experience</b>"));
+    dialogVPanel.add(dropBoxPanel2);
     dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
     dialogVPanel.add(closeButton);
     dialogBox.setWidget(dialogVPanel);
-
-
-    // Add a handler to close the DialogBox
-
 
     // Create a handler for the sendButton and nameField
     class MyHandler implements ClickHandler, KeyUpHandler {
@@ -146,7 +154,6 @@ public class User {
        */
       public void onClick(ClickEvent event) {
         dialogBox.hide();
-
         sendNameToServer();
       }
 
@@ -163,67 +170,37 @@ public class User {
        * Send the name from the nameField to the server and wait for a response.
        */
       private void sendNameToServer() {
-        // First, we validate the input.
-        //String textToServer = nameField.getText();
-        System.out.println("got " + textToServerLabel.getText());
-
-        // Then, we send the input to the server.
-        //  sendButton.setEnabled(false);
-        //textToServerLabel.setText(textToServer);
-        //serverResponseLabel.setText("");
+        int monthsOfExperience = dropBox2.getSelectedIndex()*3;
+        if (monthsOfExperience == 21) {
+          monthsOfExperience++;
+        }
+        else if (monthsOfExperience == 24) {
+          monthsOfExperience = 20*24;
+        }
         service.addUser(Integer.parseInt(textToServerLabel.getText()),
-          dropBox.getValue(dropBox.getSelectedIndex())
-          ,
-          new AsyncCallback<Integer>() {
+          dropBox.getValue(dropBox.getSelectedIndex()),
+          monthsOfExperience, new AsyncCallback<Long>() {
             public void onFailure(Throwable caught) {
               // Show the RPC error message to the user
               dialogBox.setText("Remote Procedure Call - Failure");
-              /*serverResponseLabel
-                  .addStyleName("serverResponseLabelError");
-              serverResponseLabel.setHTML(SERVER_ERROR);*/
               dialogBox.center();
               closeButton.setFocus(true);
             }
 
-            public void onSuccess(Integer result) {
+            public void onSuccess(Long result) {
               System.out.println("server result is " +result);
               storeUser(result);
             }
-
-
           });
-        /*		greetingService.greetServer(textToServer,
-                new AsyncCallback<String>() {
-                  public void onFailure(Throwable caught) {
-                    // Show the RPC error message to the user
-                    dialogBox
-                        .setText("Remote Procedure Call - Failure");
-                    serverResponseLabel
-                        .addStyleName("serverResponseLabelError");
-                    serverResponseLabel.setHTML(SERVER_ERROR);
-                    dialogBox.center();
-                    closeButton.setFocus(true);
-                  }
-
-                  public void onSuccess(String result) {
-                    dialogBox.setText("Remote Procedure Call");
-                    serverResponseLabel
-                        .removeStyleName("serverResponseLabelError");
-                    serverResponseLabel.setHTML(result);
-                    dialogBox.center();
-                    closeButton.setFocus(true);
-                  }
-                });*/
       }
     }
 
     // Add a handler to send the name to the server
     MyHandler handler = new MyHandler();
-    //  sendButton.addClickHandler(handler);
     closeButton.addClickHandler(handler);
 
     int left = (Window.getClientWidth() - 0) / 3;
-    int top = (Window.getClientHeight() - 0) / 3;
+    int top  = (Window.getClientHeight() - 0) / 3;
     dialogBox.setPopupPosition(left, top);
 
     dialogBox.show();

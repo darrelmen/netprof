@@ -52,14 +52,14 @@ public class UploadForm extends FormPanel{
 
   /**
    * @see FlashRecordPanel#setUpload
+   * @param userID
    * @param e
    * @param id
-   * @param userID
    */
-  public void setSlots(Exercise e, int id, int userID) {
+  public void setSlots(long userID, Exercise e, int id) {
+    user.setValue(""+userID);
     plan.setValue(e.getPlan());
     exercise.setValue(e.getID());
     question.setValue(""+id);
-    user.setValue(""+userID);
   }
 }

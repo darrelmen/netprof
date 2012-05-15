@@ -95,11 +95,11 @@ public class FlashRecordPanel extends FlowPanel {
 
   /**
    * @see mitll.langtest.client.ExerciseController#showRecorder(mitll.langtest.shared.Exercise, int, com.google.gwt.user.client.ui.Widget, com.google.gwt.user.client.ui.Widget)
+   * @param userID
    * @param e
    * @param qid
-   * @param userID
    */
-  public void setUpload(Exercise e, int qid, int userID) { upload.setSlots(e,qid, userID); }
+  public void setUpload(long userID, Exercise e, int qid) { upload.setSlots(userID, e,qid); }
 
   private static class ImageAnchor extends Anchor {
     public ImageAnchor() {}
