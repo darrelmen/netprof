@@ -62,7 +62,8 @@ public class ExercisePanel extends VerticalPanel {
     }
     for (Exercise.QAPair pair : e.getQuestions()) {
       Widget answerWidget = getAnswerWidget(next, i-1);
-      add(new HTML("<h4>Question #" + (i++) + " : " + pair.getQuestion() + "</h3>"));
+      String questionHeader = "Question #" + (i++) + " : " + pair.getQuestion();
+      add(new HTML("<h4>" + questionHeader + "</h4>"));
       add(answerWidget);
       answers.add(answerWidget);
     }
@@ -92,16 +93,6 @@ public class ExercisePanel extends VerticalPanel {
         postAnswers(service, userFeedback, controller, e);
       }
     });
-  }
-
-  /**
-   * @see LangTest#loadExercise(mitll.langtest.shared.Exercise)
-   */
-  public void finishAnswerConfig() {
-    int i = 0;
-    for (Widget w : answers) {
-      initWidget(w, i++);
-    }
   }
 
   /**
@@ -147,9 +138,5 @@ public class ExercisePanel extends VerticalPanel {
       });
     }
     return answer;
-  }
-
-  protected void initWidget(Widget w, int index) {
-
   }
 }
