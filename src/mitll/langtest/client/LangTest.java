@@ -58,9 +58,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     RootPanel.get().add(widgets);
 
     widgets.setSize(WIDTH + "px", HEIGHT + "px");
-    //HorizontalPanel hp = new HorizontalPanel();
     HTML title = new HTML("<h1>DLI Language Testing</h1>");
-    //hp.add(title);
     Anchor logout = new Anchor("Logout");
     logout.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
@@ -148,14 +146,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     // We can set the id of a widget by accessing its Element
     closeButton.getElement().setId("closeButton");
 
-    //final Label textToServerLabel = new Label();
-    // final HTML serverResponseLabel = new HTML();
     VerticalPanel dialogVPanel = new VerticalPanel();
     dialogVPanel.addStyleName("dialogVPanel");
-    //  dialogVPanel.add(new HTML("<b>Sending name to the server:</b>"));
-    //dialogVPanel.add(textToServerLabel);
-    //  dialogVPanel.add(new HTML("<br><b>Server replies:</b>"));
-    // dialogVPanel.add(serverResponseLabel);
     dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
     dialogVPanel.add(closeButton);
     dialogBox.setWidget(dialogVPanel);
@@ -169,9 +161,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
 
   public void showErrorMessage(String msg) {
     dialogBox.setText(msg);
-    //  serverResponseLabel
-    //   .addStyleName("serverResponseLabelError");
-    //serverResponseLabel.setHTML(SERVER_ERROR);
     dialogBox.center();
     closeButton.setFocus(true);
   }
@@ -186,7 +175,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     if (e.getType() == Exercise.EXERCISE_TYPE.RECORD) {
       currentExerciseVPanel.add(current = new RecordExercisePanel(e, service, this, this));
     } else {
-      // TODO handle fl type
       currentExerciseVPanel.add(current = new ExercisePanel(e, service, this, this));
     }
     int i = currentExercises.indexOf(e);

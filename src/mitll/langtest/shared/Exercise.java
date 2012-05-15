@@ -15,12 +15,13 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class Exercise implements IsSerializable  {
-  public enum EXERCISE_TYPE { RECORD, ENG_TEXT, FL_TEXT }
+  public enum EXERCISE_TYPE { RECORD, TEXT_RESPONSE }
 
   private String plan;
   private String content;
   private String id;
-  private EXERCISE_TYPE type = EXERCISE_TYPE.RECORD;    // TODO : set
+  private EXERCISE_TYPE type = EXERCISE_TYPE.RECORD;
+  private boolean promptInEnglish = true;
   private Map<String,List<QAPair>> langToQuestion = new HashMap<String, List<QAPair>>();
   public static class QAPair implements IsSerializable {
     private String question;
@@ -41,11 +42,17 @@ public class Exercise implements IsSerializable  {
   public Exercise() {}     // required for serialization
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
+   * @see mitll.langtest.server.database.DatabaseImpl#getExercise(String, net.sf.json.JSONObject)
    * @param id
    * @param content
+   * @param promptInEnglish
+   * @param recordAudio
    */
-  public Exercise(String plan, String id, String content) { this.plan = plan; this.id = id; this.content = content; }
+  public Exercise(String plan, String id, String content, boolean promptInEnglish, boolean recordAudio) {
+    this.plan = plan; this.id = id; this.content = content;
+    this.type = recordAudio ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE;
+    this.promptInEnglish = promptInEnglish;
+  }
   public void addQuestion(String lang, String question, String answer) {
     List<QAPair> qaPairs = langToQuestion.get(lang);
     if (qaPairs == null) {
@@ -59,10 +66,14 @@ public class Exercise implements IsSerializable  {
   public String getContent() { return content; }
   public EXERCISE_TYPE getType() { return type; }
 
+  /**
+   * @see mitll.langtest.client.ExercisePanel#ExercisePanel(Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.UserFeedback, mitll.langtest.client.ExerciseController)
+   * @return
+   */
   public List<QAPair> getQuestions() {
-    List<QAPair> pairs = langToQuestion.get("en");
-    return pairs;
+    return langToQuestion.get(promptInEnglish ? "en" : "fl");
   }
+
   public String toString() {
     return "Exercise " + plan+"/"+ id + " : " + content + "\n\tquestions " + langToQuestion;
   }
