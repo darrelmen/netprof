@@ -102,7 +102,10 @@ public class DatabaseImpl {
    * @return
    */
   private Exercise getExercise(String plan, JSONObject obj) {
-    Exercise exercise = new Exercise(plan,(String) obj.get("exid"), (String) obj.get("content"));
+    boolean promptInEnglish = false;
+    boolean recordAudio = false;
+    Exercise exercise = new Exercise(plan,(String) obj.get("exid"), (String) obj.get("content"),
+      promptInEnglish, recordAudio);
     Collection<JSONObject> qa = JSONArray.toCollection((JSONArray) obj.get("qa"), JSONObject.class);
     for (JSONObject o : qa) {
       Set<String> keys = o.keySet();
