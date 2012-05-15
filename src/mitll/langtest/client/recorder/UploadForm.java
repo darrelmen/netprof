@@ -40,10 +40,18 @@ public class UploadForm extends FormPanel{
     mainPanel.add(authenticity_token);
 		mainPanel.add(upload_file);
 		mainPanel.add(format);
-		mainPanel.add(plan);
-		mainPanel.add(exercise);
-	}
 
+    // TODO : context info -- should add user too
+		mainPanel.add(plan);
+    mainPanel.add(exercise);
+    mainPanel.add(question);
+  }
+
+  /**
+   * @see FlashRecordPanel#setUpload
+   * @param e
+   * @param id
+   */
   public void setSlots(Exercise e, int id) {
     plan.setValue(e.getPlan());
     exercise.setValue(e.getID());

@@ -158,8 +158,15 @@ public class DatabaseImpl {
   public int addUser(int age, String gender) {
     try {
       Connection connection = getConnection();
-      PreparedStatement statement = connection.prepareStatement( "CREATE TABLE if not exists users (id INT AUTO_INCREMENT, " +
-        "age INT, gender INT, experience INT, password VARCHAR, CONSTRAINT pkusers PRIMARY KEY (id))");
+      PreparedStatement statement;
+      if (true) {
+        statement = connection.prepareStatement("drop TABLE users");
+        statement.execute();
+        statement.close();
+      }
+
+      statement = connection.prepareStatement( "CREATE TABLE if not exists users (id INT AUTO_INCREMENT, " +
+        "age INT, gender INT, experience INT, password VARCHAR)");
       statement.execute();
       statement.close();
 
@@ -179,8 +186,8 @@ public class DatabaseImpl {
      //  statement = getConnection().prepareStatement("SELECT max(id) FROM users order by timestamp");
        // ResultSet rs = statement.executeQuery();
         while (rs.next()) {
-          id = rs.getInt(1);                System.out.println("addUser got " +id);
-
+          id = rs.getInt(1);
+          System.out.println("addUser got user #" +id);
           //  System.out.println(rs.getString(1) + "," + rs.getString(2) + "," + rs.getInt(3) + "," + rs.getString(4) + "," + rs.getTimestamp(5));
         }
         rs.close();
@@ -267,6 +274,11 @@ public class DatabaseImpl {
    * @throws SQLException
    */
   private void addAnswerToTable(String plan, String id, int questionID, String answer, String audioFile, Connection connection) throws SQLException {
+    if (false) {
+      dropResults();
+    }
+	  createResultTable(connection);
+
     PreparedStatement statement;
     statement = connection.prepareStatement("INSERT INTO results(plan,id,qid,answer,audioFile) VALUES(?,?, ?, ?,?)");
     int i = 1;
@@ -283,7 +295,13 @@ public class DatabaseImpl {
     PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM results order by timestamp");
     ResultSet rs = statement.executeQuery();
     while (rs.next()) {
-      System.out.println(rs.getString(1) + "," + rs.getString(2) + "," + rs.getInt(3) + "," + rs.getString(4) + "," + rs.getTimestamp(5));
+      int i = 1;
+      System.out.println(rs.getInt(i++) +","+rs.getString(i++) + "," +
+        rs.getString(i++) + "," +
+        rs.getInt(i++) + "," +
+        rs.getString(i++) + "," +
+        rs.getString(i++) + "," +
+        rs.getTimestamp(i++));
     }
     rs.close();
     statement.close();
@@ -291,7 +309,7 @@ public class DatabaseImpl {
 
   private void createResultTable(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
-      "results (userid INT, plan VARCHAR, id VARCHAR, qid INT, answer VARCHAR, answerAudioFile VARCHAR, timestamp TIMESTAMP AS CURRENT_TIMESTAMP)");
+      "results (userid INT, plan VARCHAR, id VARCHAR, qid INT, answer VARCHAR, audioFile VARCHAR, timestamp TIMESTAMP AS CURRENT_TIMESTAMP)");
     statement.execute();
     statement.close();
   }
@@ -302,12 +320,5 @@ public class DatabaseImpl {
     int id = langTestDatabase.addUser(23,"male");
     System.out.println("id =" +id);
     for (Exercise e : langTestDatabase.getExercises()) System.err.println("e " + e);
-    try {
-      //  langTestDatabase.showResults();
-    } catch (Exception e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-  }
-
-
+ }
 }

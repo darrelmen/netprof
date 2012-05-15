@@ -18,4 +18,6 @@ public interface ExerciseController {
   boolean onFirst(Exercise current);
 
   void showRecorder(Exercise exercise, int question, Widget sender);
+
+  void login();
 }
