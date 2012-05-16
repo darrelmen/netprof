@@ -66,6 +66,14 @@ public class Exercise implements IsSerializable  {
   public String getContent() { return content; }
   public EXERCISE_TYPE getType() { return type; }
 
+  public void setPromptInEnglish(boolean b) {
+    this.promptInEnglish = b;
+  }
+
+  public void setRecordAnswer(boolean spoken) {
+    type = spoken ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE;
+  }
+
   /**
    * @see mitll.langtest.client.ExercisePanel#ExercisePanel(Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.UserFeedback, mitll.langtest.client.ExerciseController)
    * @return
@@ -75,6 +83,7 @@ public class Exercise implements IsSerializable  {
   }
 
   public String toString() {
-    return "Exercise " + plan+"/"+ id + " : " + content + "\n\tquestions " + langToQuestion;
+    return "Exercise " + plan+"/"+ id + "/" + (promptInEnglish?"english":"foreign")+"/" + getType()+
+      " : content bytes = " + content.length() + " num questions " + langToQuestion.size();
   }
 }

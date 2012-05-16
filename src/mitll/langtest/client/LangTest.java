@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
-public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
+public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   public static final int WIDTH = 1440, HEIGHT = 1080;
   private static final int HEADER_HEIGHT = 80;
   private static final int FOOTER_HEIGHT = 40;
@@ -32,6 +32,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
   private VerticalPanel exerciseList = new VerticalPanel();
   private Panel currentExerciseVPanel = new SimplePanel();
   private ExercisePanel current = null;
+  private VerticalPanel items;
   private List<Exercise> currentExercises = null;
   private List<HTML> progressMarkers = new ArrayList<HTML>();
   private int currentExercise = 0;
@@ -40,6 +41,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
   private FlashRecordPanel flashRecordPanel;
   private PopupPanel recordPopup;
   private boolean flashRecordPanelInited;
+  private long lastUser = -1;
 
   /**
 	 * The message displayed to the user when the server cannot be reached or
@@ -52,7 +54,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
 
   public void onModuleLoad() {
-    user = new User(service);
+    user = new User(this,service);
 
     DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
     RootPanel.get().add(widgets);
@@ -63,9 +65,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     logout.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         user.clearUser();
-        //showErrorMessage("User logged out.");
         loadFirstExercise();
-        login();
       }
     });
     widgets.addNorth(title, HEADER_HEIGHT);
@@ -77,7 +77,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     setupErrorDialog();
 
     currentExerciseVPanel.addStyleName("currentExercisePanel");
-    final VerticalPanel items = new VerticalPanel();
+    this.items = new VerticalPanel();
     ScrollPanel itemScroller = new ScrollPanel(items);
     itemScroller.setSize(EXERCISE_LIST_WIDTH +"px",(HEIGHT - HEADER_HEIGHT - FOOTER_HEIGHT - 60) + "px"); // 54
     exerciseList.add(new HTML("<h2>Items</h2>"));
@@ -86,10 +86,25 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
     flashRecordPanel = new FlashRecordPanel("flashcontent");
 
     recordPopup = new PopupPanel(true);
-    if (false) recordPopup.setStyleName("RecordPopup");
+    recordPopup.setStyleName("RecordPopup");
     recordPopup.setWidget(flashRecordPanel);
 
-    service.getExercises(new AsyncCallback<List<Exercise>>() {
+    login();
+  }
+
+  public void gotUser(long userID) {
+    System.out.println("gotUser " + userID + " vs " + lastUser);
+
+    if (userID != lastUser) {
+      items.clear();
+      getExercises(userID);
+      lastUser = userID;
+    }
+  }
+
+  private void getExercises(long userID) {
+    System.out.println("loading exercises for " + userID);
+    service.getExercises(userID, new AsyncCallback<List<Exercise>>() {
       public void onFailure(Throwable caught) {
         showErrorMessage("Server error - couldn't get exercises.");
       }
@@ -102,11 +117,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
         loadFirstExercise();
       }
     });
-
-    user.login();
   }
 
-  public void login() { user.login(); }
+  private void login()  { user.login(); }
   public int getUser() { return user.getUser(); }
 
   private void addExerciseToList(final Exercise e, VerticalPanel items) {
@@ -168,6 +181,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
   public void showStatus(String msg) { status.setText(msg); }
 
   private void loadExercise(Exercise e) {
+    login();
+
     System.err.println("loading exercise " + e.getID() + " " +e.getType());
     if (current != null) {
       currentExerciseVPanel.remove(current);
@@ -232,8 +247,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
 
     int userID = user.getUser();
     if (userID == -1) {
-      user.setLangTest(this, exercise, question);   // callback when available
-      user.login();
+      System.err.println("huh? no user? ");
+     // user.setLangTest(this, exercise, question);   // callback when available
+     // user.login();
     }
     else {
       flashRecordPanel.setUpload(userID, exercise, question);
@@ -252,10 +268,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController {
       flashRecordPanelInited = true;
     }
    }
-
-  public void gotUser(long userID, Exercise exercise, int question) {
-    flashRecordPanel.setUpload(userID, exercise, question);
-  }
 
   /**
      * This is the entry point method.

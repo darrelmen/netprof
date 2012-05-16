@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import mitll.langtest.shared.Exercise;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -29,10 +28,12 @@ import java.util.Date;
 public class User {
   private static final int EXPIRATION_MINUTES = 20;
   private LangTestDatabaseAsync service;
-  private LangTest langTest;
-  private Exercise exercise;
-  private int question;
-  public User(LangTestDatabaseAsync service) { this.service = service; }
+  private UserNotification langTest;
+
+  public User(UserNotification lt, LangTestDatabaseAsync service) {
+    this.langTest = lt;
+    this.service = service;
+  }
 
   // user tracking
   public void storeUser(long sessionID) {
@@ -41,24 +42,24 @@ public class User {
     Cookies.setCookie("sid", "" + sessionID, expires, null, "/", false);
     if (langTest != null) {
       System.out.println("user logged in as " + sessionID);
-      langTest.gotUser(sessionID, exercise, question);
+      langTest.gotUser(sessionID);
     }
   }
-
-  public void setLangTest(LangTest lt,Exercise exercise, int q) { langTest = lt; this.exercise = exercise; this.question = q; }
 
   public void login() {
     String sessionID = Cookies.getCookie("sid");
     if ( sessionID != null ) {
       System.out.println("login got " +sessionID);
+      langTest.gotUser(Long.parseLong(sessionID));//, exercise, question);
+
       //checkWithServerIfSessionIdIsStillLegal();
     }
     else displayLoginBox();
   }
 
-  public boolean isUserValid() {
+/*  public boolean isUserValid() {
     return Cookies.getCookie("sid") != null;
-  }
+  }*/
 
   public int getUser() {
     String sid = Cookies.getCookie("sid");
@@ -77,22 +78,7 @@ public class User {
 
     final TextBox nameField = new TextBox();
     nameField.setText("GWT User");
-    // final Label errorLabel = new Label();
-    // final Button sendButton = new Button("Send");
-    // final TextBox nameField = new TextBox();
     nameField.setText("GWT User");
-    // final Label errorLabel = new Label();
-
-    // We can add style names to widgets
-    // sendButton.addStyleName("sendButton");
-    // We can add style names to widgets
-    // sendButton.addStyleName("sendButton");
-
-    // Add the nameField and sendButton to the RootPanel
-    // Use RootPanel.get() to get the entire body element
-/*		RootPanel.get("nameFieldContainer").add(nameField);
-		RootPanel.get("sendButtonContainer").add(sendButton);
-		RootPanel.get("errorLabelContainer").add(errorLabel);*/
 
     // Focus the cursor on the name field when the app loads
     nameField.setFocus(true);

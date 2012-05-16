@@ -19,13 +19,17 @@ import java.util.List;
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase {
   private DatabaseImpl db;
 
-
   public LangTestDatabaseImpl() {
     db = new DatabaseImpl(this);
   }
 
-  public List<Exercise> getExercises() {
-    return db.getExercises();  //To change body of implemented methods use File | Settings | File Templates.
+  /**
+   * @see mitll.langtest.client.LangTest#onModuleLoad
+   * @return
+   * @param userID
+   */
+  public List<Exercise> getExercises(long userID) {
+    return db.getExercises(userID);
   }
 
   public void addAnswer(int userID, Exercise exercise, int questionID, String answer, String audioFile) {
@@ -33,6 +37,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public long addUser(int age, String gender, int experience) {
+    String ip = getThreadLocalRequest().getRemoteAddr();
+    System.out.println("Got  at " +ip);
     return db.addUser(age,gender,experience);
   }
 }
