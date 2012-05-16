@@ -136,8 +136,7 @@ public class ExercisePanel extends VerticalPanel {
           if (answer.getText().length() > 0) {
             recordCompleted(answer);
           } else {
-            completed.remove(answer);
-            enableNext();
+            recordIncomplete(answer);
           }
         }
       });
@@ -145,12 +144,17 @@ public class ExercisePanel extends VerticalPanel {
     return answer;
   }
 
-  private void enableNext() {
-    next.setEnabled((completed.size() == answers.size()));
+  protected void recordIncomplete(Widget answer) {
+    completed.remove(answer);
+    enableNext();
   }
 
   protected void recordCompleted(Widget answer) {
     completed.add(answer);
     enableNext();
+  }
+
+  private void enableNext() {
+    next.setEnabled((completed.size() == answers.size()));
   }
 }

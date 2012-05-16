@@ -29,7 +29,8 @@ public class DatabaseImpl {
   private static final String ENCODING = "UTF8";
   private static final boolean DROP_USER = false;
   private static final boolean DROP_RESULT = false;
-  private static final String H2_DB_NAME = "vlr-parle";//"new";
+  private static final boolean TESTING = true;
+  private static final String H2_DB_NAME = TESTING ? "vlr-parle" : "/services/apache-tomcat-7.0.27/webapps/langTest/vlr-parle";
   private Map<Long, List<Schedule>> userToSchedule;
 
   // mysql config info
@@ -161,12 +162,7 @@ public class DatabaseImpl {
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         String plan = rs.getString(1);
-      //  String exid = rs.getString(2);
-     //   String exType = rs.getString(3);
-        Clob clob = rs.getClob(4);
-
-        String s = getStringFromClob(clob);
-        //  System.out.println("b " +b.toString());
+        String s = getStringFromClob(rs.getClob(4));
 
         if (s.startsWith("{")) {
           net.sf.json.JSONObject obj = net.sf.json.JSONObject.fromObject(s);
@@ -251,7 +247,9 @@ public class DatabaseImpl {
         ""*/);
       connection.setAutoCommit(false);
       boolean closed = connection.isClosed();
-      System.out.println("closed " + closed);
+      if (closed) {
+        System.err.println("connection is closed to : " + url);
+      }
       return connection;
     } catch (Exception ex) {
       ex.printStackTrace();
@@ -263,6 +261,8 @@ public class DatabaseImpl {
     try {
       return (Connection) servlet.getServletContext().getAttribute("connection");
     } catch (Exception e) {  // for standalone testing
+      System.err.println("The context DBStarter is not working?");
+     // e.printStackTrace();
       return this.dbLogin();
     }
   }
@@ -337,7 +337,7 @@ public class DatabaseImpl {
   public boolean isAnswerValid(int userID, Exercise e, int questionID) {
     boolean val = false;
     try {
-      PreparedStatement statement = getConnection().prepareStatement("SELECT valid FROM results WHERE userid = ? AND plan = ? AND id = ? AND qid = ?");
+      PreparedStatement statement = getConnection().prepareStatement("SELECT valid, timestamp FROM results WHERE userid = ? AND plan = ? AND id = ? AND qid = ? order by timestamp desc");
 
       statement.setInt(1,userID);
       statement.setString(2, e.getPlan());
@@ -345,9 +345,10 @@ public class DatabaseImpl {
       statement.setInt(4, questionID);
 
       ResultSet rs = statement.executeQuery();
-      int c = 0;
       while (rs.next()) {
         val = rs.getBoolean(1);
+       // Timestamp timestamp = rs.getTimestamp(2);
+       // System.out.println(timestamp + " : " + val);
         break;
       }
       rs.close();
@@ -356,6 +357,18 @@ public class DatabaseImpl {
       e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
     return val;
+  }
+
+  public void destroy() {
+    try {
+      Connection connection = dbLogin();
+      if (!connection.isClosed()) {
+        connection.close();
+      }
+  //    DriverManager.deregisterDriver((Driver)Class.forName(driver).newInstance());
+    } catch (Exception e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
   }
 
   /**
@@ -454,7 +467,7 @@ public class DatabaseImpl {
           rs.getTimestamp(i++));
       }
     }
-    System.out.println("now " + c + " answers");
+ //   System.out.println("now " + c + " answers");
     rs.close();
     statement.close();
   }

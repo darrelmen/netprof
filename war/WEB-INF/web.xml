@@ -34,14 +34,21 @@
     <listener-class>org.h2.server.web.DbStarter</listener-class>
   </listener>
 
+  <context-param>
+    <param-name>tomcatWriteDirectoryFullPath</param-name>
+    <param-value>//services/apache-tomcat-7.0.27/webapps/langTest/answers</param-value>
+  </context-param>
+
   <!-- note for the jdbc url, we seem to need an absolute file path on the webserver -->
   <context-param>
     <param-name>db.url</param-name>
 
-    <param-value>jdbc:h2:vlr-parle;IFEXISTS=TRUE</param-value>
+    <!--
+       <param-value>jdbc:h2:vlr-parle;IFEXISTS=TRUE</param-value>
+    -->
 
-    <!--  <param-value>jdbc:h2:file://services/apache-tomcat-7.0.2/webapps/langTest/new;IFEXISTS=TRUE</param-value>  -->
-      </context-param>
+    <param-value>jdbc:h2:file://services/apache-tomcat-7.0.27/webapps/langTest/vlr-parle;IFEXISTS=TRUE</param-value>
+  </context-param>
       <context-param>
         <param-name>db.user</param-name>
         <param-value></param-value>
