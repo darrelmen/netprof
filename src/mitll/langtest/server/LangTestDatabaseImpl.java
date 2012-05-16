@@ -38,7 +38,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public long addUser(int age, String gender, int experience) {
     String ip = getThreadLocalRequest().getRemoteAddr();
-    System.out.println("Got  at " +ip);
-    return db.addUser(age,gender,experience);
+    return db.addUser(age,gender,experience, ip);
   }
 }

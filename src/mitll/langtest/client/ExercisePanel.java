@@ -32,10 +32,10 @@ import java.util.Set;
 public class ExercisePanel extends VerticalPanel {
   private static final String ANSWER_BOX_WIDTH = "400px";
   private List<Widget> answers = new ArrayList<Widget>();
-  private Set<TextBox> completed = new HashSet<TextBox>();
+  private Set<Widget> completed = new HashSet<Widget>();
   protected Exercise exercise = null;
   private boolean enableNextOnlyWhenAllCompleted = true;
-
+  private Button next;
   /**
    * @see LangTest#loadExercise(mitll.langtest.shared.Exercise)
    * @param e
@@ -56,12 +56,12 @@ public class ExercisePanel extends VerticalPanel {
     add(hp);
 
     int i = 1;
-    final Button next = new Button("Next");
+    this.next = new Button("Next");
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
       next.setEnabled(false);
     }
     for (Exercise.QAPair pair : e.getQuestions()) {
-      Widget answerWidget = getAnswerWidget(next, i-1);
+      Widget answerWidget = getAnswerWidget(i-1);
       String questionHeader = "Question #" + (i++) + " : " + pair.getQuestion();
       add(new HTML("<h4>" + questionHeader + "</h4>"));
       add(answerWidget);
@@ -89,7 +89,6 @@ public class ExercisePanel extends VerticalPanel {
     // send answers to server
     next.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-      //  controller.login();
         postAnswers(service, userFeedback, controller, e);
       }
     });
@@ -127,7 +126,7 @@ public class ExercisePanel extends VerticalPanel {
     }
   }
 
-  protected Widget getAnswerWidget(final Button next, int index) {
+  protected Widget getAnswerWidget(int index) {
     GWT.log("getAnswerWidget for #" +index);
     final TextBox answer = new TextBox();
     answer.setWidth(ANSWER_BOX_WIDTH);
@@ -135,14 +134,23 @@ public class ExercisePanel extends VerticalPanel {
       answer.addKeyUpHandler(new KeyUpHandler() {
         public void onKeyUp(KeyUpEvent event) {
           if (answer.getText().length() > 0) {
-            completed.add(answer);
+            recordCompleted(answer);
           } else {
             completed.remove(answer);
+            enableNext();
           }
-          next.setEnabled((completed.size() == answers.size()));
         }
       });
     }
     return answer;
+  }
+
+  private void enableNext() {
+    next.setEnabled((completed.size() == answers.size()));
+  }
+
+  protected void recordCompleted(Widget answer) {
+    completed.add(answer);
+    enableNext();
   }
 }

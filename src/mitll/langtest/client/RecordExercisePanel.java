@@ -5,11 +5,11 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.recorder.SaveNotification;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -36,53 +36,62 @@ public class RecordExercisePanel extends ExercisePanel {
   }
 
   /**
-   * Has a check mark to indicate when the saved audio has been successfully posted to the server.
+   * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
    * It's made visible by a call in {@link mitll.langtest.client.recorder.FlashRecordPanel#saveComplete}
    *
-   * @see mitll.langtest.client.recorder.FlashRecordPanel#setSaveCompleteFeedbackWidget(com.google.gwt.user.client.ui.Widget) ()
+   * @see mitll.langtest.client.recorder.FlashRecordPanel#setSaveCompleteFeedbackWidget
    * @see mitll.langtest.client.recorder.FlashRecordPanel#saveComplete()
    * @see ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, UserFeedback, ExerciseController)
-   * @param next
    * @param index
    * @return
    */
-  protected Widget getAnswerWidget(Button next, final int index) {
-    HorizontalPanel sp = new HorizontalPanel();
-    Image image = new Image("images/record.png");
-    image.setAltText("Record");
+  @Override
+  protected Widget getAnswerWidget(final int index) {
+    return new AnswerPanel(index);
+  }
 
-    Image check = new Image("images/checkmark.png");
-    check.getElement().setId("checkmark_" +index);
-    check.setAltText("Audio Saved");
+  private class AnswerPanel extends HorizontalPanel implements SaveNotification {
+    private Image check;
+    public AnswerPanel( final int index) {
+      Image image = new Image("images/record.png");
+      image.setAltText("Record");
 
-    final ImageAnchor record_button = new ImageAnchor(index, check);
-    record_button.setResource(image);
+      this.check = new Image("images/checkmark.png");
+      check.getElement().setId("checkmark_" +index);
+      check.setAltText("Audio Saved");
 
-    record_button.setTitle("Record");
-    sp.add(record_button);
+      final ImageAnchor record_button = new ImageAnchor(index, this);
+      record_button.setResource(image);
 
-    SimplePanel spacer = new SimplePanel();
-    spacer.setHeight("24px");
-    spacer.setWidth("100px") ;
+      record_button.setTitle("Record");
+      add(record_button);
 
-    sp.add(spacer);
+      SimplePanel spacer = new SimplePanel();
+      spacer.setHeight("24px");
+      spacer.setWidth("100px") ;
 
-    sp.add(check);
-    check.setVisible(false);
+      add(spacer);
 
-    return sp;
+      add(check);
+      check.setVisible(false);
+    }
+
+    public void gotSave() {
+      check.setVisible(true);
+      recordCompleted(this);
+    }
   }
 
   /**
-   * Remembers check image widget so we can show it when save is complete.
+   * Remembers answerPanel image widget so we can show it when save is complete.
    */
   private class ImageAnchor extends Anchor implements MouseOverHandler {
-    final int index;
-    Widget check;
-    public ImageAnchor(int index, Widget check) {
+    private final int index;
+    private SaveNotification answerPanel;
+    public ImageAnchor(int index, SaveNotification answerPanel) {
       this.index = index;
-      this.check = check;
+      this.answerPanel = answerPanel;
       addDomHandler(this, MouseOverEvent.getType());
     }
     public void setResource(Image img) {
@@ -90,7 +99,7 @@ public class RecordExercisePanel extends ExercisePanel {
     }
 
     public void onMouseOver(MouseOverEvent event) {
-      controller.showRecorder(exercise,index, this, check);
+      controller.showRecorder(exercise,index, this, answerPanel);
     }
   }
 
