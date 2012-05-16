@@ -35,7 +35,12 @@ public class UploadServlet extends HttpServlet implements Servlet{
 	//	String pretestFilesRelativePath = getServletContext().getInitParameter("pretestFilesRelativePath");  // likely = pretest_files
     if (tomcatWriteDirectory == null) tomcatWriteDirectory = "answers";
 
-		response.setContentType("application/json");
+    File test = new File(tomcatWriteDirectory);
+    if (!test.exists()) test.mkdirs();
+    if (!test.exists()) {
+      tomcatWriteDirectory = "answers";
+    }
+    response.setContentType("application/json");
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
 
@@ -86,7 +91,7 @@ public class UploadServlet extends HttpServlet implements Servlet{
   private boolean isValid(File file) {
     try {
       boolean b = audioCheck.checkWavFile(file);
-      System.out.println("check = " + b);
+   //   System.out.println("check = " + b);
       return b;
     } catch (Exception e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.

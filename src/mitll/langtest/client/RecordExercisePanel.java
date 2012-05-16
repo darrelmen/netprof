@@ -22,6 +22,7 @@ import mitll.langtest.shared.Exercise;
  */
 public class RecordExercisePanel extends ExercisePanel {
   private static final String IMAGES_CHECKMARK = "images/checkmark.png";
+  private static final String IMAGES_REDX_PNG = "images/redx.png";
   private ExerciseController controller;
   private LangTestDatabaseAsync service;
 
@@ -83,10 +84,12 @@ public class RecordExercisePanel extends ExercisePanel {
       check.setVisible(false);
     }
 
+    /**
+     * @see mitll.langtest.client.recorder.FlashRecordPanel#saveComplete()
+     */
     public void gotSave() {
-      check.setVisible(true);
       final AnswerPanel outer = this;
-    //  System.err.println(controller.getUser() + " " + exercise.getPlan() + ", " + exercise.getID() + ", " + index);
+      //System.err.println(controller.getUser() + " " + exercise.getPlan() + ", " + exercise.getID() + ", " + index);
       service.isAnswerValid(controller.getUser(),exercise,index,new AsyncCallback<Boolean>() {
         public void onFailure(Throwable caught) {
           System.err.println("huh? could ask answer validity?");
@@ -94,15 +97,18 @@ public class RecordExercisePanel extends ExercisePanel {
 
         public void onSuccess(Boolean result) {
          // System.err.println(controller.getUser() + " " + exercise.getPlan() + ", " + exercise.getID() + ", " + index + " valid " + result);
-          if (!result) {
-            check.setUrl("images/redx.png");
-            check.setAltText("Audio Invalid");
-          }
-          else {
+          check.setVisible(false);
+          if (result) {
             check.setUrl(IMAGES_CHECKMARK);
             check.setAltText("Audio Saved");
             recordCompleted(outer);
           }
+          else {
+            check.setUrl(IMAGES_REDX_PNG);
+            check.setAltText("Audio Invalid");
+            recordIncomplete(outer);
+          }
+          check.setVisible(true);
         }
       });
     }
