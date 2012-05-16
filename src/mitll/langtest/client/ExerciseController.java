@@ -1,6 +1,7 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.recorder.SaveNotification;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -17,7 +18,7 @@ public interface ExerciseController {
 
   boolean onFirst(Exercise current);
 
-  void showRecorder(Exercise exercise, int question, Widget sender, Widget saveFeedbackWidget);
+  void showRecorder(Exercise exercise, int question, Widget sender, SaveNotification saveFeedbackWidget);
 
   int getUser();
 }

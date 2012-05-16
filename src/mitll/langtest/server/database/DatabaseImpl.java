@@ -46,6 +46,15 @@ public class DatabaseImpl {
   public DatabaseImpl(HttpServlet s) {
     this.servlet = s;
     this.userToSchedule = getSchedule();
+
+    if (true) {
+      try {
+        //dropUserTable();
+        createUserTable();
+      } catch (Exception e) {
+        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      }
+    }
   }
 
   private static class Schedule {
@@ -248,27 +257,18 @@ public class DatabaseImpl {
     }
   }
 
-  public long addUser(int age, String gender, int experience) {
+  public long addUser(int age, String gender, int experience, String ipAddr) {
     try {
       Connection connection = getConnection();
       PreparedStatement statement;
-      if (true) {
-        statement = connection.prepareStatement("drop TABLE users");
-        statement.execute();
-        statement.close();
-      }
 
-      statement = connection.prepareStatement("CREATE TABLE if not exists users (id IDENTITY, " +
-        "age INT, gender INT, experience INT, password VARCHAR, CONSTRAINT pkusers PRIMARY KEY (id))");
-      statement.execute();
-      statement.close();
-
-      System.out.println("adding " + age + " and " + gender + " and " + experience);
-      statement = connection.prepareStatement("INSERT INTO users(age,gender,experience) VALUES(?,?,?);");
+      //System.out.println("adding " + age + " and " + gender + " and " + experience);
+      statement = connection.prepareStatement("INSERT INTO users(age,gender,experience,ipaddr) VALUES(?,?,?,?);");
       int i = 1;
       statement.setInt(i++, age);
       statement.setInt(i++, gender.equalsIgnoreCase("male") ? 0 : 1);
       statement.setInt(i++, experience);
+      statement.setString(i++, ipAddr);
       statement.executeUpdate();
 
       ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
@@ -286,6 +286,25 @@ public class DatabaseImpl {
       ee.printStackTrace();
     }
     return 0;
+  }
+
+  private void createUserTable() throws Exception {
+    Connection connection = getConnection();
+
+    PreparedStatement statement;
+
+    statement = connection.prepareStatement("CREATE TABLE if not exists users (id IDENTITY, " +
+      "age INT, gender INT, experience INT, ipaddr VARCHAR, password VARCHAR, timestamp TIMESTAMP AS CURRENT_TIMESTAMP, CONSTRAINT pkusers PRIMARY KEY (id))");
+    statement.execute();
+    statement.close();
+  }
+
+  private void dropUserTable() throws Exception {
+    Connection connection = getConnection();
+    PreparedStatement statement;
+    statement = connection.prepareStatement("drop TABLE users");
+    statement.execute();
+    statement.close();
   }
 
   /**

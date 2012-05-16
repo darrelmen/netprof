@@ -7,6 +7,7 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.recorder.FlashRecordPanel;
+import mitll.langtest.client.recorder.SaveNotification;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.FieldVerifier;
 import com.google.gwt.core.client.EntryPoint;
@@ -48,7 +49,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 	 * returns an error.
 	 */
 /*	private static final String SERVER_ERROR = "An error occurred while "
-			+ "attempting to contact the server. Please check your network "
+			+ "attempting to contact the server. Please answerPanel your network "
 			+ "connection and try again.";*/
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
@@ -228,13 +229,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean onFirst(Exercise current) { return currentExercises.indexOf(current) == 0; }
 
   /**
-   * @see RecordExercisePanel#getAnswerWidget(com.google.gwt.user.client.ui.Button, int)
+   * @see RecordExercisePanel.ImageAnchor#onMouseOver(com.google.gwt.event.dom.client.MouseOverEvent)
    * @param exercise
    * @param question
    * @param sender
    * @param saveFeedbackWidget
    */
-  public void showRecorder(Exercise exercise, int question, Widget sender, Widget saveFeedbackWidget) {
+  public void showRecorder(Exercise exercise, int question, Widget sender, SaveNotification saveFeedbackWidget) {
     // Create the new popup.
     // Position the popup 1/3rd of the way down and across the screen, and
     // show the popup. Since the position calculation is based on the
