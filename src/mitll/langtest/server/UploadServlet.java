@@ -26,15 +26,13 @@ import java.util.List;
  */
 public class UploadServlet extends HttpServlet implements Servlet{
 	private static final long serialVersionUID = -611668719240096732L;
-  DatabaseImpl db = new DatabaseImpl(this);
+  private DatabaseImpl db = new DatabaseImpl(this);
+  private AudioCheck audioCheck = new AudioCheck();
 
-	@SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked")
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
 		String tomcatWriteDirectory = getServletContext().getInitParameter("tomcatWriteDirectoryFullPath");
 	//	String pretestFilesRelativePath = getServletContext().getInitParameter("pretestFilesRelativePath");  // likely = pretest_files
-	//	String testsRelativePath = "tests";
-//    System.out.println("got " + request.getSession());
-
     if (tomcatWriteDirectory == null) tomcatWriteDirectory = "answers";
 
 		response.setContentType("application/json");
@@ -50,7 +48,6 @@ public class UploadServlet extends HttpServlet implements Servlet{
 			while(it.hasNext()){
 				FileItem item = it.next();
 				String fieldName = item.getFieldName();
-       // System.err.println("Got " + fieldName + "=" + item.getString());
 				if(fieldName.equals(UploadForm.PLAN)){
 					plan = item.getString();
 				}
@@ -64,15 +61,13 @@ public class UploadServlet extends HttpServlet implements Servlet{
           user = item.getString();
         }
 				else{
-//          System.err.println("Got " + plan + " and " + exercise);
-
           String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-"+user;
           String currentTestDir = tomcatWriteDirectory + File.separator  + planAndTestPath;
           File audioFilePath = new File(currentTestDir);
           audioFilePath.mkdirs();
 
           File file = writeAudioFile(item, "answer", audioFilePath);
-          db.addAnswer(0, plan,exercise,Integer.parseInt(question),"",file.getPath());
+          db.addAnswer(Integer.parseInt(user), plan,exercise,Integer.parseInt(question),"",file.getPath(), isValid(file));
 				}
 			}
 		}
@@ -82,9 +77,20 @@ public class UploadServlet extends HttpServlet implements Servlet{
 	}
 
   private File writeAudioFile(FileItem item, String base, File audioFilePath) throws Exception {
-  //  System.out.println("got " + item);
     File file = new File(audioFilePath.getPath() + File.separator + base + ".wav");
     item.write(file);
+    //isValid(file);
     return file;
+  }
+
+  private boolean isValid(File file) {
+    try {
+      boolean b = audioCheck.checkWavFile(file);
+      System.out.println("check = " + b);
+      return b;
+    } catch (Exception e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+    return false;
   }
 }

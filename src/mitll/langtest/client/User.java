@@ -26,7 +26,7 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public class User {
-  private static final int EXPIRATION_MINUTES = 20;
+  private static final int EXPIRATION_MINUTES = 30;
   private LangTestDatabaseAsync service;
   private UserNotification langTest;
 

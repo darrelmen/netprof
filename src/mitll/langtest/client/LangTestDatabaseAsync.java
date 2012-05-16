@@ -12,4 +12,5 @@ public interface LangTestDatabaseAsync {
   void getExercises(long userID, AsyncCallback<List<Exercise>> async);
   void addAnswer(int usedID, Exercise exercise, int questionID, String answer, String audioFile, AsyncCallback<Void> async);
   void addUser(int age, String gender, int experience, AsyncCallback<Long> async);
+  void isAnswerValid(int userID, Exercise exercise, int questionID, AsyncCallback<Boolean> async);
 }

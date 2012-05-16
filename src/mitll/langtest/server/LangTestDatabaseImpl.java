@@ -40,4 +40,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String ip = getThreadLocalRequest().getRemoteAddr();
     return db.addUser(age,gender,experience, ip);
   }
+
+  public boolean isAnswerValid(int userID, Exercise exercise, int questionID) {
+    return db.isAnswerValid(userID, exercise,questionID);
+  }
+
 }

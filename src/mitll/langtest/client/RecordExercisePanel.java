@@ -3,6 +3,7 @@ package mitll.langtest.client;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -20,7 +21,9 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class RecordExercisePanel extends ExercisePanel {
+  private static final String IMAGES_CHECKMARK = "images/checkmark.png";
   private ExerciseController controller;
+  private LangTestDatabaseAsync service;
 
   /**
    * @see LangTest#loadExercise(mitll.langtest.shared.Exercise)
@@ -33,6 +36,7 @@ public class RecordExercisePanel extends ExercisePanel {
                              final ExerciseController controller) {
     super(e,service,userFeedback,controller);
     this.controller = controller;
+    this.service = service;
   }
 
   /**
@@ -53,11 +57,13 @@ public class RecordExercisePanel extends ExercisePanel {
 
   private class AnswerPanel extends HorizontalPanel implements SaveNotification {
     private Image check;
+    private int index;
     public AnswerPanel( final int index) {
+      this.index = index;
       Image image = new Image("images/record.png");
       image.setAltText("Record");
 
-      this.check = new Image("images/checkmark.png");
+      this.check = new Image(IMAGES_CHECKMARK);
       check.getElement().setId("checkmark_" +index);
       check.setAltText("Audio Saved");
 
@@ -79,7 +85,26 @@ public class RecordExercisePanel extends ExercisePanel {
 
     public void gotSave() {
       check.setVisible(true);
-      recordCompleted(this);
+      final AnswerPanel outer = this;
+    //  System.err.println(controller.getUser() + " " + exercise.getPlan() + ", " + exercise.getID() + ", " + index);
+      service.isAnswerValid(controller.getUser(),exercise,index,new AsyncCallback<Boolean>() {
+        public void onFailure(Throwable caught) {
+          System.err.println("huh? could ask answer validity?");
+        }
+
+        public void onSuccess(Boolean result) {
+         // System.err.println(controller.getUser() + " " + exercise.getPlan() + ", " + exercise.getID() + ", " + index + " valid " + result);
+          if (!result) {
+            check.setUrl("images/redx.png");
+            check.setAltText("Audio Invalid");
+          }
+          else {
+            check.setUrl(IMAGES_CHECKMARK);
+            check.setAltText("Audio Saved");
+            recordCompleted(outer);
+          }
+        }
+      });
     }
   }
 
