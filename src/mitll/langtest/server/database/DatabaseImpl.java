@@ -27,7 +27,8 @@ import java.util.Set;
  */
 public class DatabaseImpl {
   private static final String ENCODING = "UTF8";
-  private static final boolean DROP_CREATED_TABLES = false;
+  private static final boolean DROP_USER = false;
+  private static final boolean DROP_RESULT = false;
   private static final String H2_DB_NAME = "vlr-parle";//"new";
   private Map<Long, List<Schedule>> userToSchedule;
 
@@ -47,12 +48,21 @@ public class DatabaseImpl {
     this.servlet = s;
     this.userToSchedule = getSchedule();
 
-    if (true) {
+    if (DROP_USER) {
       try {
-        //dropUserTable();
+        dropUserTable();
         createUserTable();
       } catch (Exception e) {
-        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        e.printStackTrace();
+      }
+    }
+    if (DROP_RESULT) {
+      System.out.println("dropping results table");
+      dropResults();
+      try {
+        createResultTable(getConnection());
+      } catch (Exception e) {
+        e.printStackTrace();
       }
     }
   }
@@ -276,7 +286,7 @@ public class DatabaseImpl {
       long id = 0;
       while (rs.next()) {
         id = rs.getLong(1);
-        System.out.println("addUser got user #" + id);
+        System.out.println("DatabaseImpl : addUser got user #" + id);
         //  System.out.println(rs.getString(1) + "," + rs.getString(2) + "," + rs.getInt(3) + "," + rs.getString(4) + "," + rs.getTimestamp(5));
       }
       rs.close();
@@ -300,6 +310,7 @@ public class DatabaseImpl {
   }
 
   private void dropUserTable() throws Exception {
+    System.err.println("dropUserTable -------------------- ");
     Connection connection = getConnection();
     PreparedStatement statement;
     statement = connection.prepareStatement("drop TABLE users");
@@ -318,24 +329,50 @@ public class DatabaseImpl {
    * @see mitll.langtest.client.ExercisePanel#postAnswers(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.UserFeedback, mitll.langtest.client.ExerciseController, mitll.langtest.shared.Exercise)
    */
   public void addAnswer(int userID, Exercise e, int questionID, String answer, String audioFile) {
-    String ip = "";//servlet.getThreadLocalRequest().getRemoteAddr();
-    //  System.out.println("Got " +e + " and " + questionID + " and " + answer + " at " +ip);
-
-    if (DROP_CREATED_TABLES) {
-      dropResults();
-    }
-
     String plan = e.getPlan();
     String id = e.getID();
-    addAnswer(userID, plan, id, questionID, answer, audioFile);
+    addAnswer(userID, plan, id, questionID, answer, audioFile, true);
   }
 
-  public void addAnswer(int userID, String plan, String id, int questionID, String answer, String audioFile) {
+  public boolean isAnswerValid(int userID, Exercise e, int questionID) {
+    boolean val = false;
+    try {
+      PreparedStatement statement = getConnection().prepareStatement("SELECT valid FROM results WHERE userid = ? AND plan = ? AND id = ? AND qid = ?");
+
+      statement.setInt(1,userID);
+      statement.setString(2, e.getPlan());
+      statement.setString(3, e.getID());
+      statement.setInt(4, questionID);
+
+      ResultSet rs = statement.executeQuery();
+      int c = 0;
+      while (rs.next()) {
+        val = rs.getBoolean(1);
+        break;
+      }
+      rs.close();
+      statement.close();
+    } catch (Exception e1) {
+      e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+    return val;
+  }
+
+  /**
+   * @see mitll.langtest.server.UploadServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @param userID
+   * @param plan
+   * @param id
+   * @param questionID
+   * @param answer
+   * @param audioFile
+   * @param valid
+   */
+  public void addAnswer(int userID, String plan, String id, int questionID, String answer, String audioFile, boolean valid) {
     try {
       Connection connection = getConnection();
-      createResultTable(connection);
 
-      addAnswerToTable(userID, plan, id, questionID, answer, audioFile, connection);
+      addAnswerToTable(userID, plan, id, questionID, answer, audioFile, connection, valid);
 
       if (true) { // true to see what is in the table
         try {
@@ -363,30 +400,32 @@ public class DatabaseImpl {
     }
   }
 
-  public void addUser() {
+/*  public void addUser() {
     String sql = "CREATE TABLE if not exists users (id INT AUTO_INCREMENT, " +
       "age INT, gender INT, experience INT, password VARCHAR, CONSTRAINT pkusers PRIMARY KEY (id))";
-  }
+  }*/
 
   /**
+   *
    * @param userid
    * @param plan
    * @param id
    * @param questionID
    * @param answer
    * @param connection
+   * @param valid
    * @throws SQLException
    * @see #addAnswer
    */
   private void addAnswerToTable(int userid, String plan, String id, int questionID, String answer, String audioFile,
-                                Connection connection) throws SQLException {
-    if (DROP_CREATED_TABLES) {
+                                Connection connection, boolean valid) throws SQLException {
+    if (DROP_RESULT) {
       dropResults();
     }
     createResultTable(connection);
 
     PreparedStatement statement;
-    statement = connection.prepareStatement("INSERT INTO results(userid,plan,id,qid,answer,audioFile) VALUES(?,?,?,?,?,?)");
+    statement = connection.prepareStatement("INSERT INTO results(userid,plan,id,qid,answer,audioFile,valid) VALUES(?,?,?,?,?,?,?)");
     int i = 1;
     statement.setInt(i++, userid);
     statement.setString(i++, plan);
@@ -394,6 +433,7 @@ public class DatabaseImpl {
     statement.setInt(i++, questionID);
     statement.setString(i++, answer);
     statement.setString(i++, audioFile);
+    statement.setBoolean(i++, valid);
     statement.executeUpdate();
     statement.close();
   }
@@ -401,22 +441,27 @@ public class DatabaseImpl {
   private void showResults() throws Exception {
     PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM results order by timestamp");
     ResultSet rs = statement.executeQuery();
+    int c = 0;
     while (rs.next()) {
+      c++;
       int i = 1;
-      System.out.println(rs.getInt(i++) + "," + rs.getString(i++) + "," +
-        rs.getString(i++) + "," +
-        rs.getInt(i++) + "," +
-        rs.getString(i++) + "," +
-        rs.getString(i++) + "," +
-        rs.getTimestamp(i++));
+      if (false) {
+        System.out.println(rs.getInt(i++) + "," + rs.getString(i++) + "," +
+          rs.getString(i++) + "," +
+          rs.getInt(i++) + "," +
+          rs.getString(i++) + "," +
+          rs.getString(i++) + "," +
+          rs.getTimestamp(i++));
+      }
     }
+    System.out.println("now " + c + " answers");
     rs.close();
     statement.close();
   }
 
   private void createResultTable(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
-      "results (userid INT, plan VARCHAR, id VARCHAR, qid INT, answer VARCHAR, audioFile VARCHAR, timestamp TIMESTAMP AS CURRENT_TIMESTAMP)");
+      "results (userid INT, plan VARCHAR, id VARCHAR, qid INT, answer VARCHAR, audioFile VARCHAR, valid BOOLEAN, timestamp TIMESTAMP AS CURRENT_TIMESTAMP)");
     statement.execute();
     statement.close();
   }

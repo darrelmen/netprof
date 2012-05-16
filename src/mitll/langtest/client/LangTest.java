@@ -195,11 +195,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     int i = currentExercises.indexOf(e);
 
+    markCurrentExercise(i);
+    currentExercise = i;
+  }
+
+  private void markCurrentExercise(int i) {
     HTML html = progressMarkers.get(currentExercise);
     html.setStyleDependentName("highlighted", false);
     html = progressMarkers.get(i);
     html.setStyleDependentName("highlighted", true);
-    currentExercise = i;
   }
 
   public boolean loadNextExercise(Exercise current) {
