@@ -5,22 +5,10 @@
          version="2.5"
          xmlns="http://java.sun.com/xml/ns/javaee">
 
-  <!-- Servlets -->
-<!--  <servlet>
-    <servlet-name>greetServlet</servlet-name>
-    <servlet-class>mitll.langtest.server.GreetingServiceImpl</servlet-class>
-  </servlet>
-  
-  <servlet-mapping>
-    <servlet-name>greetServlet</servlet-name>
-    <url-pattern>/langtest/greet</url-pattern>
-  </servlet-mapping>-->
-  
   <!-- Default page to serve -->
   <welcome-file-list>
     <welcome-file>LangTest.html</welcome-file>
   </welcome-file-list>
-
 
   <servlet>
     <servlet-name>databaseServlet</servlet-name>
@@ -50,7 +38,7 @@
   <context-param>
     <param-name>db.url</param-name>
 
-    <param-value>jdbc:h2:new;IFEXISTS=TRUE</param-value>
+    <param-value>jdbc:h2:vlr-parle;IFEXISTS=TRUE</param-value>
 
     <!--  <param-value>jdbc:h2:file://services/apache-tomcat-7.0.2/webapps/langTest/new;IFEXISTS=TRUE</param-value>  -->
       </context-param>

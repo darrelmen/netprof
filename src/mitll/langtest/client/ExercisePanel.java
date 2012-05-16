@@ -34,7 +34,7 @@ public class ExercisePanel extends VerticalPanel {
   private List<Widget> answers = new ArrayList<Widget>();
   private Set<TextBox> completed = new HashSet<TextBox>();
   protected Exercise exercise = null;
-  private boolean enableNextOnlyWhenAllCompleted = false;
+  private boolean enableNextOnlyWhenAllCompleted = true;
 
   /**
    * @see LangTest#loadExercise(mitll.langtest.shared.Exercise)
@@ -89,7 +89,7 @@ public class ExercisePanel extends VerticalPanel {
     // send answers to server
     next.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        controller.login();
+      //  controller.login();
         postAnswers(service, userFeedback, controller, e);
       }
     });
@@ -109,7 +109,7 @@ public class ExercisePanel extends VerticalPanel {
     int i = 1;
     int user = controller.getUser();
     final Set<Widget> incomplete = new HashSet<Widget>();
-    incomplete.addAll(incomplete);
+    incomplete.addAll(answers);
     for (final Widget tb : answers) {
       service.addAnswer(user, exercise, i++, ((TextBox)tb).getText(), "", new AsyncCallback<Void>() {
         public void onFailure(Throwable caught) {

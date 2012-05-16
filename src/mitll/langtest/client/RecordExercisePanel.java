@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -60,9 +61,12 @@ public class RecordExercisePanel extends ExercisePanel {
 
     record_button.setTitle("Record");
     sp.add(record_button);
+
     SimplePanel spacer = new SimplePanel();
     spacer.setHeight("24px");
     spacer.setWidth("100px") ;
+
+    sp.add(spacer);
 
     sp.add(check);
     check.setVisible(false);
