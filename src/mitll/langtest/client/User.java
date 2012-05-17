@@ -29,6 +29,7 @@ public class User {
   private static final int EXPIRATION_MINUTES = 30;
   private LangTestDatabaseAsync service;
   private UserNotification langTest;
+  //Logger logger = Logger.getLogger("User");
 
   public User(UserNotification lt, LangTestDatabaseAsync service) {
     this.langTest = lt;
@@ -39,43 +40,44 @@ public class User {
   public void storeUser(long sessionID) {
     final long DURATION = 1000 * 60 * 60 * EXPIRATION_MINUTES; //duration remembering login. 2 weeks in this example.
     Date expires = new Date(System.currentTimeMillis() + DURATION);
-    Cookies.setCookie("sid", "" + sessionID, expires, null, "/", false);
+    Cookies.setCookie("sid", "" + sessionID, expires);
     if (langTest != null) {
-      System.out.println("user logged in as " + sessionID);
       langTest.gotUser(sessionID);
     }
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#login()
+   */
   public void login() {
-    String sessionID = Cookies.getCookie("sid");
-    if ( sessionID != null ) {
-      System.out.println("login got " +sessionID);
-      langTest.gotUser(Long.parseLong(sessionID));//, exercise, question);
-
-      //checkWithServerIfSessionIdIsStillLegal();
+    int user = getUser();
+    if ( user != -1) {
+     // alert("login Cookie now " + Cookies.getCookie("sid"));
+//      alert("user:login sessionID not null = " + sessionID + " and there are " + Cookies.getCookieNames().size() + " cookies!");
+      langTest.gotUser(user);
     }
-    else displayLoginBox();
+    else {
+   //   alert("login Cookie now " + Cookies.getCookie("sid"));
+      displayLoginBox();
+    }
   }
-
-/*  public boolean isUserValid() {
-    return Cookies.getCookie("sid") != null;
-  }*/
 
   public int getUser() {
     String sid = Cookies.getCookie("sid");
-    if (sid == null) {
-      System.err.println("sid not set!");
+    if (sid == null || sid.equals("-1")) {
+     // System.err.println("sid not set!");
       return -1;
     }
     return Integer.parseInt(sid);
   }
 
   public void clearUser() {
-    Cookies.removeCookie("sid");
+    Cookies.setCookie("sid","-1");
+    //alert("clearUser Cookie now " + Cookies.getCookie("sid"));
+    //Cookies.removeCookie("sid");    // this doesn't always seem to work???
   }
 
   private void displayLoginBox() {
-
     final TextBox nameField = new TextBox();
     nameField.setText("GWT User");
     nameField.setText("GWT User");
