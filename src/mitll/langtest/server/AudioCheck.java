@@ -2,20 +2,21 @@ package mitll.langtest.server;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
 /**
- * Created with IntelliJ IDEA.
+ * Checks for two things -- is the audio long enough ({@link #MinRecordLength} and is
+ * it just a recording of silence by looking at average power and variance :
+ * ({@link #PowerThreshold} and ({@link #VarianceThreshold}.
+ *
  * User: GO22670
  * Date: 5/16/12
  * Time: 2:35 PM
  * To change this template use File | Settings | File Templates.
  */
 public class AudioCheck {
-  private static final int MinRecordLength = 2*10000; // 10000 = 0.7 second
+  private static final int MinRecordLength = 5*10000; // 10000 = 0.7 second
   private static final int WinSize = 10;
   private static final float PowerThreshold = -55.0f;
   private static final float VarianceThreshold = 20.0f;
