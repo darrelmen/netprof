@@ -27,6 +27,8 @@ import java.util.Date;
  */
 public class User {
   private static final int EXPIRATION_MINUTES = 30;
+  private static final int MIN_AGE = 6;
+  private static final int MAX_AGE = 90;
   private LangTestDatabaseAsync service;
   private UserNotification langTest;
   //Logger logger = Logger.getLogger("User");
@@ -95,42 +97,59 @@ public class User {
     dialogBox.setGlassEnabled(true);
 
     final Button closeButton = new Button("Close");
+    closeButton.setEnabled(false);
+
     // We can set the id of a widget by accessing its Element
     closeButton.getElement().setId("closeButton");
-    final TextBox textToServerLabel = new TextBox();
+    final TextBox ageEntryBox = new TextBox();
+    ageEntryBox.addKeyUpHandler(new KeyUpHandler() {
+      public void onKeyUp(KeyUpEvent event) {
+        String text = ageEntryBox.getText();
+        if (text.length() == 0) {
+          closeButton.setEnabled(false);
+          return;
+        }
+        try {
+          int age = Integer.parseInt(text);
+          closeButton.setEnabled (age > MIN_AGE && age < MAX_AGE);
+        } catch (NumberFormatException e) {
+          closeButton.setEnabled(false);
+        }
+      }
+    });
 
     // Add a drop box with the list types
-    final ListBox dropBox = new ListBox(false);
+    final ListBox genderBox = new ListBox(false);
     for (String s : Arrays.asList("Male", "Female")) {
-      dropBox.addItem(s);
+      genderBox.addItem(s);
     }
-    dropBox.ensureDebugId("cwListBox-dropBox");
-    VerticalPanel dropBoxPanel = new VerticalPanel();
-    dropBoxPanel.setSpacing(4);
+    genderBox.ensureDebugId("cwListBox-dropBox");
+    VerticalPanel genderPanel = new VerticalPanel();
+    genderPanel.setSpacing(4);
     //  dropBoxPanel.add(new HTML(constants.cwListBoxSelectCategory()));
-    dropBoxPanel.add(dropBox);
+    genderPanel.add(genderBox);
 
     // add experience drop box
-    final ListBox dropBox2 = new ListBox(false);
+    final ListBox experienceBox = new ListBox(false);
     for (int i = 0; i < 21; i += 3) {
-      dropBox2.addItem(i + " to " + (i+3) + " months");
+      experienceBox.addItem(i + " to " + (i + 3) + " months");
     }
-    dropBox2.addItem("More than 22 months");
-    dropBox2.addItem("Native Speaker");
-    dropBox2.ensureDebugId("cwListBox-dropBox");
-    VerticalPanel dropBoxPanel2 = new VerticalPanel();
-    dropBoxPanel2.setSpacing(4);
+    experienceBox.addItem("More than 22 months");
+    experienceBox.addItem("Native Speaker");
+    experienceBox.ensureDebugId("cwListBox-dropBox");
+    VerticalPanel experiencePanel = new VerticalPanel();
+    experiencePanel.setSpacing(4);
     //  dropBoxPanel.add(new HTML(constants.cwListBoxSelectCategory()));
-    dropBoxPanel2.add(dropBox2);
+    experiencePanel.add(experienceBox);
 
     VerticalPanel dialogVPanel = new VerticalPanel();
     dialogVPanel.addStyleName("dialogVPanel");
     dialogVPanel.add(new HTML("<b>Please enter your age</b>"));
-    dialogVPanel.add(textToServerLabel);
+    dialogVPanel.add(ageEntryBox);
     dialogVPanel.add(new HTML("<br><b>Please select gender</b>"));
-    dialogVPanel.add(dropBoxPanel);
+    dialogVPanel.add(genderPanel);
     dialogVPanel.add(new HTML("<br><b>Please select months of experience</b>"));
-    dialogVPanel.add(dropBoxPanel2);
+    dialogVPanel.add(experiencePanel);
     dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
     dialogVPanel.add(closeButton);
     dialogBox.setWidget(dialogVPanel);
@@ -158,28 +177,28 @@ public class User {
        * Send the name from the nameField to the server and wait for a response.
        */
       private void sendNameToServer() {
-        int monthsOfExperience = dropBox2.getSelectedIndex()*3;
+        int monthsOfExperience = experienceBox.getSelectedIndex()*3;
         if (monthsOfExperience == 21) {
           monthsOfExperience++;
         }
         else if (monthsOfExperience == 24) {
           monthsOfExperience = 20*24;
         }
-        service.addUser(Integer.parseInt(textToServerLabel.getText()),
-          dropBox.getValue(dropBox.getSelectedIndex()),
+        service.addUser(Integer.parseInt(ageEntryBox.getText()),
+          genderBox.getValue(genderBox.getSelectedIndex()),
           monthsOfExperience, new AsyncCallback<Long>() {
-            public void onFailure(Throwable caught) {
-              // Show the RPC error message to the user
-              dialogBox.setText("Remote Procedure Call - Failure");
-              dialogBox.center();
-              closeButton.setFocus(true);
-            }
+          public void onFailure(Throwable caught) {
+            // Show the RPC error message to the user
+            dialogBox.setText("Remote Procedure Call - Failure");
+            dialogBox.center();
+            closeButton.setFocus(true);
+          }
 
-            public void onSuccess(Long result) {
-              System.out.println("server result is " +result);
-              storeUser(result);
-            }
-          });
+          public void onSuccess(Long result) {
+            System.out.println("server result is " + result);
+            storeUser(result);
+          }
+        });
       }
     }
 
