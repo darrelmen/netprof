@@ -42,19 +42,20 @@
   <!-- note for the jdbc url, we seem to need an absolute file path on the webserver -->
   <context-param>
     <param-name>db.url</param-name>
-
     <!--
        <param-value>jdbc:h2:vlr-parle;IFEXISTS=TRUE</param-value>
-    -->
+          -->
 
     <param-value>jdbc:h2:file://services/apache-tomcat-7.0.27/webapps/langTest/vlr-parle;IFEXISTS=TRUE</param-value>
+
   </context-param>
-      <context-param>
-        <param-name>db.user</param-name>
-        <param-value></param-value>
-      </context-param>
-      <context-param>
-        <param-name>db.password</param-name>
-        <param-value></param-value>
-      </context-param>
+
+  <context-param>
+    <param-name>db.user</param-name>
+    <param-value></param-value>
+  </context-param>
+  <context-param>
+    <param-name>db.password</param-name>
+    <param-value></param-value>
+  </context-param>
 </web-app>

@@ -4,6 +4,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.User;
 
 import java.util.List;
 
@@ -19,7 +20,8 @@ import java.util.List;
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase {
   private DatabaseImpl db;
 
-  public LangTestDatabaseImpl() {
+  @Override
+  public void init() {
     db = new DatabaseImpl(this);
   }
 
@@ -44,6 +46,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public boolean isAnswerValid(int userID, Exercise exercise, int questionID) {
     return db.isAnswerValid(userID, exercise, questionID);
   }
+
+  public List<User> getUsers() { return db.getUsers(); }
 
   @Override
   public void destroy() {

@@ -49,7 +49,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private List<HTML> progressMarkers = new ArrayList<HTML>();
   private int currentExercise = 0;
   private Label status;
-  private User user;
+  private UserManager user;
   private FlashRecordPanel flashRecordPanel;
   private PopupPanel recordPopup;
   private boolean flashRecordPanelInited;
@@ -66,7 +66,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
 
   public void onModuleLoad() {
-    user = new User(this,service);
+    user = new UserManager(this,service);
 
     DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
     RootPanel.get().add(widgets);
@@ -98,33 +98,46 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     login();
   }
 
+  /**
+   * Has both a logout and a users link
+   * @return
+   */
   private Widget getLogout() {
     Anchor logout = new Anchor("Logout");
     DockLayoutPanel hp2 = new DockLayoutPanel(Style.Unit.PX);
-    hp2.addSouth(logout, 24);
+    VerticalPanel vp = new VerticalPanel();
+    vp.add(logout);
+    hp2.addSouth(vp, 48);
     logout.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        try {
-          user.clearUser();
-          login();
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+        user.clearUser();
+        removeCurrentExercise();
+        items.clear();
+
+        login();
+      }
+    });
+
+    Anchor users = new Anchor("Users");
+    vp.add(users);
+
+    users.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        user.showUsers();
       }
     });
     return hp2;
   }
 
   /**
-   * @see User#login
-   * @see User#storeUser(long)
+   * @see UserManager#login
+   * @see UserManager#storeUser(long)
    * @param userID
    */
   public void gotUser(long userID) {
     System.out.println("gotUser " + userID + " vs " + lastUser);
 
     if (userID != lastUser) {
-      items.clear();
       getExercises(userID);
       lastUser = userID;
     }
@@ -215,10 +228,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void loadExercise(Exercise e) {
     login();
 
-    //System.err.println("loading exercise " + e.getID() + " " +e.getType());
-    if (current != null) {
-      currentExerciseVPanel.remove(current);
-    }
+    removeCurrentExercise();
     if (e.getType() == Exercise.EXERCISE_TYPE.RECORD) {
       currentExerciseVPanel.add(current = new RecordExercisePanel(e, service, this, this));
     } else {
@@ -228,6 +238,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     markCurrentExercise(i);
     currentExercise = i;
+  }
+
+  private void removeCurrentExercise() {
+    if (current != null) {
+      currentExerciseVPanel.remove(current);
+      current = null;
+    }
   }
 
   private void markCurrentExercise(int i) {
@@ -313,6 +330,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void showPopupAt(int left, int top) {
     recordPopup.setPopupPosition(left, top);
     recordPopup.show();
+    flashRecordPanel.reset();
 
     if (!flashRecordPanelInited) {  // TODO is this correct???
       System.out.println("doing initializeJS");
