@@ -14,12 +14,16 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.shared.Exercise;
 
 /**
- * @author
+ * Roughly mimics the Cykod example at <a href='https://github.com/cykod/FlashWavRecorder/blob/master/html/index.html'>Cykod example html</a><p></p>
+ *
+ * Communicates with saveFeedback interface when a save(upload) completes {@link mitll.langtest.client.RecordExercisePanel.AnswerPanel}
+ *
+ * @author Gordon Vidaver
  *
  */
 public class FlashRecordPanel extends FlowPanel {
-  boolean showStatus = false;
-  boolean showUploadStatus = false;
+  private boolean showStatus = false;
+  private boolean showUploadStatus = false;
   private final UploadForm upload;
   private static SaveNotification saveFeedback;  // remember for later
 
