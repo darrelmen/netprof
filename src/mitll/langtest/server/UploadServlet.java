@@ -26,8 +26,16 @@ import java.util.List;
  */
 public class UploadServlet extends HttpServlet implements Servlet{
 	private static final long serialVersionUID = -611668719240096732L;
-  private DatabaseImpl db = new DatabaseImpl(this);
+  private DatabaseImpl db;
   private AudioCheck audioCheck = new AudioCheck();
+
+  /**
+   * Don't do this earlier, since we need the servlet context to be set.
+   */
+  @Override
+  public void init() {
+    db = new DatabaseImpl(this);
+  }
 
   @SuppressWarnings("unchecked")
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
