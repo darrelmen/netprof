@@ -5,12 +5,18 @@ import mitll.langtest.shared.Exercise;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.*;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,18 +25,27 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created with IntelliJ IDEA.
+ * Note with H2 that :
+ *  * you can corrupt the database if you try to copy a file that's in use by another process.
+ *  * one process can lock the database and make it inaccessible to a second one, seemingly this can happen
+ *    more easily when H2 lives inside a servlet container (e.g. tomcat).
+ *  * it's not a good idea to close connections, especially in the context of a servlet inside a container, since
+ *    H2 will return "new" connections that have already been closed.
+ *  * it's not a good idea to reuse one connection...?
+ *
  * User: go22670
  * Date: 5/14/12
  * Time: 11:44 PM
  * To change this template use File | Settings | File Templates.
  */
 public class DatabaseImpl {
+  private static final boolean TESTING = false;
+
   private static final String ENCODING = "UTF8";
   private static final boolean DROP_USER = false;
   private static final boolean DROP_RESULT = false;
-  private static final boolean TESTING = true;
   private static final String H2_DB_NAME = TESTING ? "vlr-parle" : "/services/apache-tomcat-7.0.27/webapps/langTest/vlr-parle";
+  private static final boolean LOG_RESULTS = false;
   private Map<Long, List<Schedule>> userToSchedule;
 
   // mysql config info
@@ -39,7 +54,7 @@ public class DatabaseImpl {
     driver = "com.mysql.jdbc.Driver";*/
 
   // h2 config info
-  private String url = "jdbc:h2:" + H2_DB_NAME + ";IFEXISTS=TRUE",
+  private String url = "jdbc:h2:" + H2_DB_NAME + ";IFEXISTS=TRUE;QUERY_CACHE_SIZE=0;",
     dbOptions = "",//"?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull",
     driver = "org.h2.Driver";
 
@@ -172,6 +187,7 @@ public class DatabaseImpl {
       }
       rs.close();
       statement.close();
+      closeConnection(connection);
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
@@ -230,6 +246,12 @@ public class DatabaseImpl {
   private Connection dbLogin() throws Exception {
     try {
       Class.forName(driver).newInstance();
+      try {
+        url = servlet.getServletContext().getInitParameter("db.url"); // from web.xml
+      } catch (Exception e) {
+        System.err.println("no servlet context?");
+        //e.printStackTrace();
+      }
       System.out.println("connecting to " + url);
 
       GWT.log("connecting to " + url);
@@ -241,10 +263,7 @@ public class DatabaseImpl {
 
         GWT.log(s);
       }
-      Connection connection = DriverManager.getConnection(url
-        + /*getInitParameter(PRETEST_DATABASE) +*/ dbOptions/*,
-        "",
-        ""*/);
+      Connection connection = DriverManager.getConnection(url + dbOptions);
       connection.setAutoCommit(false);
       boolean closed = connection.isClosed();
       if (closed) {
@@ -257,14 +276,24 @@ public class DatabaseImpl {
     }
   }
 
+  // should we have one connection???
+  // Connection c = null;
+
   private Connection getConnection() throws Exception {
+  //  if (c != null) return c;
+	  Connection c;
     try {
-      return (Connection) servlet.getServletContext().getAttribute("connection");
+      ServletContext servletContext = servlet.getServletContext();
+      c = (Connection) servletContext.getAttribute("connection");
     } catch (Exception e) {  // for standalone testing
-      System.err.println("The context DBStarter is not working?");
-     // e.printStackTrace();
-      return this.dbLogin();
+      System.err.println("The context DBStarter is not working : " + e.getMessage());
+      e.printStackTrace();
+      c = this.dbLogin();
     }
+    if (c.isClosed())  {
+      System.err.println("getConnection : conn " + c + " is closed!");
+    }
+    return c;
   }
 
   public long addUser(int age, String gender, int experience, String ipAddr) {
@@ -291,6 +320,8 @@ public class DatabaseImpl {
       }
       rs.close();
       statement.close();
+      closeConnection(connection);
+
       return id;
     } catch (Exception ee) {
       ee.printStackTrace();
@@ -307,6 +338,8 @@ public class DatabaseImpl {
       "age INT, gender INT, experience INT, ipaddr VARCHAR, password VARCHAR, timestamp TIMESTAMP AS CURRENT_TIMESTAMP, CONSTRAINT pkusers PRIMARY KEY (id))");
     statement.execute();
     statement.close();
+    closeConnection(connection);
+
   }
 
   private void dropUserTable() throws Exception {
@@ -316,6 +349,7 @@ public class DatabaseImpl {
     statement = connection.prepareStatement("drop TABLE users");
     statement.execute();
     statement.close();
+    closeConnection(connection);
   }
 
   /**
@@ -337,7 +371,8 @@ public class DatabaseImpl {
   public boolean isAnswerValid(int userID, Exercise e, int questionID) {
     boolean val = false;
     try {
-      PreparedStatement statement = getConnection().prepareStatement("SELECT valid, timestamp FROM results WHERE userid = ? AND plan = ? AND id = ? AND qid = ? order by timestamp desc");
+      Connection connection = getConnection();
+      PreparedStatement statement = connection.prepareStatement("SELECT valid, timestamp FROM results WHERE userid = ? AND plan = ? AND id = ? AND qid = ? order by timestamp desc");
 
       statement.setInt(1,userID);
       statement.setString(2, e.getPlan());
@@ -353,6 +388,7 @@ public class DatabaseImpl {
       }
       rs.close();
       statement.close();
+      closeConnection(connection);
     } catch (Exception e1) {
       e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
@@ -361,10 +397,10 @@ public class DatabaseImpl {
 
   public void destroy() {
     try {
-      Connection connection = dbLogin();
-      if (!connection.isClosed()) {
+  /*   Connection connection = getConnection();
+     if (!connection.isClosed()) {
         connection.close();
-      }
+     }*/
   //    DriverManager.deregisterDriver((Driver)Class.forName(driver).newInstance());
     } catch (Exception e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -384,19 +420,26 @@ public class DatabaseImpl {
   public void addAnswer(int userID, String plan, String id, int questionID, String answer, String audioFile, boolean valid) {
     try {
       Connection connection = getConnection();
-
       addAnswerToTable(userID, plan, id, questionID, answer, audioFile, connection, valid);
+      closeConnection(connection);
 
-      if (true) { // true to see what is in the table
+      if (LOG_RESULTS) { // true to see what is in the table
         try {
           showResults();
         } catch (Exception e1) {
           e1.printStackTrace();
         }
       }
+
     } catch (Exception ee) {
       ee.printStackTrace();
     }
+  }
+
+  private void closeConnection(Connection connection) throws SQLException {
+  //  System.err.println("Closing " + connection);
+    //connection.close();
+   // System.err.println("Closing " + connection + " " + connection.isClosed());
   }
 
   private void dropResults() {
@@ -407,16 +450,12 @@ public class DatabaseImpl {
         System.err.println("couldn't create table?");
       }
       statement.close();
+      closeConnection(connection);
 
     } catch (Exception e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.  }
     }
   }
-
-/*  public void addUser() {
-    String sql = "CREATE TABLE if not exists users (id INT AUTO_INCREMENT, " +
-      "age INT, gender INT, experience INT, password VARCHAR, CONSTRAINT pkusers PRIMARY KEY (id))";
-  }*/
 
   /**
    *
@@ -432,11 +471,6 @@ public class DatabaseImpl {
    */
   private void addAnswerToTable(int userid, String plan, String id, int questionID, String answer, String audioFile,
                                 Connection connection, boolean valid) throws SQLException {
-    if (DROP_RESULT) {
-      dropResults();
-    }
-    createResultTable(connection);
-
     PreparedStatement statement;
     statement = connection.prepareStatement("INSERT INTO results(userid,plan,id,qid,answer,audioFile,valid) VALUES(?,?,?,?,?,?,?)");
     int i = 1;
@@ -452,7 +486,8 @@ public class DatabaseImpl {
   }
 
   private void showResults() throws Exception {
-    PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM results order by timestamp");
+    Connection connection = getConnection();
+    PreparedStatement statement = connection.prepareStatement("SELECT * FROM results order by timestamp");
     ResultSet rs = statement.executeQuery();
     int c = 0;
     while (rs.next()) {
@@ -470,6 +505,7 @@ public class DatabaseImpl {
  //   System.out.println("now " + c + " answers");
     rs.close();
     statement.close();
+    closeConnection(connection);
   }
 
   private void createResultTable(Connection connection) throws SQLException {
