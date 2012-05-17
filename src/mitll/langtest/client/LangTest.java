@@ -113,6 +113,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         user.clearUser();
         removeCurrentExercise();
         items.clear();
+        progressMarkers.clear();
 
         login();
       }
