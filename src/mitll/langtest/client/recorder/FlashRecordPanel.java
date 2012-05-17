@@ -26,12 +26,12 @@ public class FlashRecordPanel extends FlowPanel {
   private boolean showUploadStatus = false;
   private final UploadForm upload;
   private static SaveNotification saveFeedback;  // remember for later
-
+  private InlineHTML save_button;
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad
    */
 	public FlashRecordPanel(String id){
-    InlineHTML save_button = new InlineHTML();
+    save_button = new InlineHTML();
     save_button.getElement().setId("save_button");//"flashcontent");
     add(save_button);
 
@@ -78,6 +78,7 @@ public class FlashRecordPanel extends FlowPanel {
       }
     });
     add(play_button);
+    play_button.setVisible(false);
 
     SimplePanel uploadStatusPanel = new SimplePanel();
 		uploadStatusPanel.getElement().setId("upload_status");
@@ -86,6 +87,13 @@ public class FlashRecordPanel extends FlowPanel {
 
     upload = new UploadForm();
     add(upload);
+  }
+
+  /**
+   * Doesn't seem to work
+   */
+  public void reset() {
+    save_button.setVisible(false);
   }
 
   /**

@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import com.google.gwt.core.client.GWT;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.User;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -17,6 +18,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -296,13 +298,25 @@ public class DatabaseImpl {
     return c;
   }
 
+  /**
+   * Somehow on subsequent runs, the ids skip by 30 or so?
+   *
+   * Uses return generated keys to get the user id
+   *
+   * @param age
+   * @param gender
+   * @param experience
+   * @param ipAddr
+   * @return
+   */
   public long addUser(int age, String gender, int experience, String ipAddr) {
     try {
       Connection connection = getConnection();
       PreparedStatement statement;
 
       //System.out.println("adding " + age + " and " + gender + " and " + experience);
-      statement = connection.prepareStatement("INSERT INTO users(age,gender,experience,ipaddr) VALUES(?,?,?,?);");
+      statement = connection.prepareStatement("INSERT INTO users(age,gender,experience,ipaddr) VALUES(?,?,?,?);",
+        Statement.RETURN_GENERATED_KEYS);
       int i = 1;
       statement.setInt(i++, age);
       statement.setInt(i++, gender.equalsIgnoreCase("male") ? 0 : 1);
@@ -351,6 +365,43 @@ public class DatabaseImpl {
     statement.close();
     closeConnection(connection);
   }
+
+  /**
+   * Pulls the list of users out of the database.
+   * @return
+   */
+  public List<User> getUsers() {
+    try {
+      Connection connection = getConnection();
+      PreparedStatement statement;
+
+      statement = connection.prepareStatement("SELECT * from users;");
+      int i = 1;
+
+      ResultSet rs = statement.executeQuery();
+      List<User> users = new ArrayList<User>();
+      while (rs.next()) {
+    	  i = 1;
+        users.add(new User(rs.getLong(i++), //id
+        		rs.getInt(i++), // age
+          rs.getInt(i++), //gender
+          rs.getInt(i++), // exp
+          rs.getString(i++), // ip
+          rs.getString(i++), // password
+          rs.getTimestamp(i++).getTime()
+        ));
+      }
+      rs.close();
+      statement.close();
+      closeConnection(connection);
+
+      return users;
+    } catch (Exception ee) {
+      ee.printStackTrace();
+    }
+    return new ArrayList<User>();
+  }
+
 
   /**
    * Creates the result table if it's not there.
