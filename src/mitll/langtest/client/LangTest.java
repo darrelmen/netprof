@@ -1,23 +1,31 @@
 package mitll.langtest.client;
 
+import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.recorder.FlashRecordPanel;
 import mitll.langtest.client.recorder.SaveNotification;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.FieldVerifier;
-import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +34,13 @@ import java.util.List;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
+  // TODO : consider putting these in the .css file?
   public static final int WIDTH = 1440, HEIGHT = 1080;
   private static final int HEADER_HEIGHT = 80;
   private static final int FOOTER_HEIGHT = 40;
-  public static final int EXERCISE_LIST_WIDTH = 200;
+  public  static final int EXERCISE_LIST_WIDTH = 200;
+  private static final int EAST_WIDTH = 40;
+
   private VerticalPanel exerciseList = new VerticalPanel();
   private Panel currentExerciseVPanel = new SimplePanel();
   private ExercisePanel current = null;
@@ -61,18 +72,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     RootPanel.get().add(widgets);
 
     widgets.setSize(WIDTH + "px", HEIGHT + "px");
+
+    // header/title line
+    DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
     HTML title = new HTML("<h1>DLI Language Testing</h1>");
-    Anchor logout = new Anchor("Logout");
-    logout.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        user.clearUser();
-        loadFirstExercise();
-      }
-    });
-    widgets.addNorth(title, HEADER_HEIGHT);
+    hp.addEast(getLogout(),EAST_WIDTH);
+    hp.add(title);
+
+    widgets.addNorth(hp, HEADER_HEIGHT);
     widgets.addSouth(status = new Label(), FOOTER_HEIGHT);
     widgets.addWest(exerciseList, EXERCISE_LIST_WIDTH);
-    widgets.addEast(logout, 40);
     widgets.add(currentExerciseVPanel);
 
     setupErrorDialog();
@@ -84,15 +93,33 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     exerciseList.add(new HTML("<h2>Items</h2>"));
     exerciseList.add(itemScroller);
 
-    flashRecordPanel = new FlashRecordPanel("flashcontent");
-
-    recordPopup = new PopupPanel(true);
-    recordPopup.setStyleName("RecordPopup");
-    recordPopup.setWidget(flashRecordPanel);
+    setupRecordPopup();
 
     login();
   }
 
+  private Widget getLogout() {
+    Anchor logout = new Anchor("Logout");
+    DockLayoutPanel hp2 = new DockLayoutPanel(Style.Unit.PX);
+    hp2.addSouth(logout, 24);
+    logout.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        try {
+          user.clearUser();
+          login();
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    });
+    return hp2;
+  }
+
+  /**
+   * @see User#login
+   * @see User#storeUser(long)
+   * @param userID
+   */
   public void gotUser(long userID) {
     System.out.println("gotUser " + userID + " vs " + lastUser);
 
@@ -103,8 +130,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
+  /**
+   * Get exercises for this user.
+   * @param userID
+   */
   private void getExercises(long userID) {
-    System.out.println("loading exercises for " + userID);
+    //System.out.println("loading exercises for " + userID);
     service.getExercises(userID, new AsyncCallback<List<Exercise>>() {
       public void onFailure(Throwable caught) {
         showErrorMessage("Server error - couldn't get exercises.");
@@ -184,7 +215,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void loadExercise(Exercise e) {
     login();
 
-    System.err.println("loading exercise " + e.getID() + " " +e.getType());
+    //System.err.println("loading exercise " + e.getID() + " " +e.getType());
     if (current != null) {
       currentExerciseVPanel.remove(current);
     }
@@ -232,6 +263,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public boolean onFirst(Exercise current) { return currentExercises.indexOf(current) == 0; }
 
+  // popup recording -- TODO : refactor into its own class
+  private void setupRecordPopup() {
+    flashRecordPanel = new FlashRecordPanel("flashcontent");
+
+    recordPopup = new PopupPanel(true);
+    recordPopup.setStyleName("RecordPopup");
+    recordPopup.setWidget(flashRecordPanel);
+
+    showPopupAt(-100,-100);
+    recordPopup.hide();
+  }
+
   /**
    * @see RecordExercisePanel.ImageAnchor#onMouseOver(com.google.gwt.event.dom.client.MouseOverEvent)
    * @param exercise
@@ -264,6 +307,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     int left = sender.getAbsoluteLeft();
     int top = sender.getAbsoluteTop()-12;
+    showPopupAt(left, top);
+   }
+
+  private void showPopupAt(int left, int top) {
     recordPopup.setPopupPosition(left, top);
     recordPopup.show();
 
@@ -272,150 +319,5 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       flashRecordPanel.initializeJS(GWT.getModuleBaseURL(), "flashcontent");
       flashRecordPanelInited = true;
     }
-   }
-
-  /**
-     * This is the entry point method.
-     */
-	public void onModuleLoad2() {
-		final Button sendButton = new Button("Send");
-		final TextBox nameField = new TextBox();
-		nameField.setText("GWT User");
-		final Label errorLabel = new Label();
-
-		// We can add style names to widgets
-		sendButton.addStyleName("sendButton");
-
-		// Add the nameField and sendButton to the RootPanel
-		// Use RootPanel.get() to get the entire body element
-/*		RootPanel.get("nameFieldContainer").add(nameField);
-		RootPanel.get("sendButtonContainer").add(sendButton);
-		RootPanel.get("errorLabelContainer").add(errorLabel);*/
-
-		// Focus the cursor on the name field when the app loads
-		nameField.setFocus(true);
-		nameField.selectAll();
-
-		// Create the popup dialog box
-		final DialogBox dialogBox = new DialogBox();
-		dialogBox.setText("Remote Procedure Call");
-		dialogBox.setAnimationEnabled(true);
-		final Button closeButton = new Button("Close");
-		// We can set the id of a widget by accessing its Element
-		closeButton.getElement().setId("closeButton");
-		final Label textToServerLabel = new Label();
-		final HTML serverResponseLabel = new HTML();
-		VerticalPanel dialogVPanel = new VerticalPanel();
-		dialogVPanel.addStyleName("dialogVPanel");
-		dialogVPanel.add(new HTML("<b>Sending name to the server:</b>"));
-		dialogVPanel.add(textToServerLabel);
-		dialogVPanel.add(new HTML("<br><b>Server replies:</b>"));
-		dialogVPanel.add(serverResponseLabel);
-		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
-		dialogVPanel.add(closeButton);
-		dialogBox.setWidget(dialogVPanel);
-
-		// Add a handler to close the DialogBox
-		closeButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				dialogBox.hide();
-				sendButton.setEnabled(true);
-				sendButton.setFocus(true);
-			}
-		});
-
-		// Create a handler for the sendButton and nameField
-		class MyHandler implements ClickHandler, KeyUpHandler {
-			/**
-			 * Fired when the user clicks on the sendButton.
-			 */
-			public void onClick(ClickEvent event) {
-				sendNameToServer();
-			}
-
-			/**
-			 * Fired when the user types in the nameField.
-			 */
-			public void onKeyUp(KeyUpEvent event) {
-				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-					sendNameToServer();
-				}
-			}
-
-			/**
-			 * Send the name from the nameField to the server and wait for a response.
-			 */
-			private void sendNameToServer() {
-				// First, we validate the input.
-				errorLabel.setText("");
-				String textToServer = nameField.getText();
-				if (!FieldVerifier.isValidName(textToServer)) {
-					errorLabel.setText("Please enter at least four characters");
-					return;
-				}
-
-				// Then, we send the input to the server.
-				sendButton.setEnabled(false);
-				textToServerLabel.setText(textToServer);
-				serverResponseLabel.setText("");
-	/*			service.test(new AsyncCallback<Void>() {
-					public void onFailure(Throwable caught) {
-						// Show the RPC error message to the user
-						dialogBox
-								.setText("Remote Procedure Call - Failure");
-						serverResponseLabel
-								.addStyleName("serverResponseLabelError");
-						serverResponseLabel.setHTML(SERVER_ERROR);
-						dialogBox.center();
-						closeButton.setFocus(true);
-					}
-
-					public void onSuccess(String result) {
-						dialogBox.setText("Remote Procedure Call 2");
-						serverResponseLabel
-								.removeStyleName("serverResponseLabelError");
-						serverResponseLabel.setHTML(result);
-						dialogBox.center();
-						closeButton.setFocus(true);
-					}
-
-					public void onSuccess(Void result) {
-						dialogBox.setText("Remote Procedure Call 2");
-						serverResponseLabel
-								.removeStyleName("serverResponseLabelError");
-						serverResponseLabel.setHTML("got here!");
-						dialogBox.center();
-						closeButton.setFocus(true);						
-					}
-				});*/
-		/*		greetingService.greetServer(textToServer,
-						new AsyncCallback<String>() {
-							public void onFailure(Throwable caught) {
-								// Show the RPC error message to the user
-								dialogBox
-										.setText("Remote Procedure Call - Failure");
-								serverResponseLabel
-										.addStyleName("serverResponseLabelError");
-								serverResponseLabel.setHTML(SERVER_ERROR);
-								dialogBox.center();
-								closeButton.setFocus(true);
-							}
-
-							public void onSuccess(String result) {
-								dialogBox.setText("Remote Procedure Call");
-								serverResponseLabel
-										.removeStyleName("serverResponseLabelError");
-								serverResponseLabel.setHTML(result);
-								dialogBox.center();
-								closeButton.setFocus(true);
-							}
-						});*/
-			}
-		}
-
-		// Add a handler to send the name to the server
-		MyHandler handler = new MyHandler();
-		sendButton.addClickHandler(handler);
-		nameField.addKeyUpHandler(handler);
-	}
+  }
 }
