@@ -39,7 +39,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int HEADER_HEIGHT = 80;
   private static final int FOOTER_HEIGHT = 40;
   public  static final int EXERCISE_LIST_WIDTH = 200;
-  private static final int EAST_WIDTH = 40;
+  private static final int EAST_WIDTH = 45;
 
   private VerticalPanel exerciseList = new VerticalPanel();
   private Panel currentExerciseVPanel = new SimplePanel();
@@ -50,6 +50,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private int currentExercise = 0;
   private Label status;
   private UserManager user;
+  private ResultManager resultManager;
   private FlashRecordPanel flashRecordPanel;
   private PopupPanel recordPopup;
   private boolean flashRecordPanelInited;
@@ -67,6 +68,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public void onModuleLoad() {
     user = new UserManager(this,service);
+    resultManager = new ResultManager(service);
 
     DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
     RootPanel.get().add(widgets);
@@ -107,7 +109,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     DockLayoutPanel hp2 = new DockLayoutPanel(Style.Unit.PX);
     VerticalPanel vp = new VerticalPanel();
     vp.add(logout);
-    hp2.addSouth(vp, 48);
+    hp2.addSouth(vp, 55);
     logout.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         user.clearUser();
@@ -127,6 +129,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         user.showUsers();
       }
     });
+
+    Anchor showResults = new Anchor("Results");
+    vp.add(showResults);
+
+    showResults.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        resultManager.showResults();
+      }
+    });
     return hp2;
   }
 
@@ -136,7 +147,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
-    System.out.println("gotUser " + userID + " vs " + lastUser);
+   // System.out.println("gotUser " + userID + " vs " + lastUser);
 
     if (userID != lastUser) {
       getExercises(userID);

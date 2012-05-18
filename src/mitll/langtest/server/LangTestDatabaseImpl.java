@@ -4,6 +4,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
 import java.util.List;
@@ -48,6 +49,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public List<User> getUsers() { return db.getUsers(); }
+  public List<Result> getResults() { return db.getResults(); }
 
   @Override
   public void destroy() {
