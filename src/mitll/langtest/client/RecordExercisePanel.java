@@ -5,7 +5,6 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -48,11 +47,12 @@ public class RecordExercisePanel extends ExercisePanel {
    * @see mitll.langtest.client.recorder.FlashRecordPanel#setSaveCompleteFeedbackWidget
    * @see mitll.langtest.client.recorder.FlashRecordPanel#saveComplete()
    * @see ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, UserFeedback, ExerciseController)
+   * @param exercise
    * @param index
    * @return
    */
   @Override
-  protected Widget getAnswerWidget(final int index) {
+  protected Widget getAnswerWidget(Exercise exercise, final int index) {
     return new AnswerPanel(index);
   }
 

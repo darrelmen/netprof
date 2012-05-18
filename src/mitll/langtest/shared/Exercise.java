@@ -21,7 +21,7 @@ public class Exercise implements IsSerializable  {
   private String content;
   private String id;
   private EXERCISE_TYPE type = EXERCISE_TYPE.RECORD;
-  private boolean promptInEnglish = true;
+  public boolean promptInEnglish = true;
   private Map<String,List<QAPair>> langToQuestion = new HashMap<String, List<QAPair>>();
   public static class QAPair implements IsSerializable {
     private String question;
@@ -42,7 +42,7 @@ public class Exercise implements IsSerializable  {
   public Exercise() {}     // required for serialization
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getExercise(String, net.sf.json.JSONObject)
+   * @see mitll.langtest.server.database.DatabaseImpl#getExercise
    * @param id
    * @param content
    * @param promptInEnglish
