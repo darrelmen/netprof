@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Note with H2 that :
@@ -75,7 +77,7 @@ public class DatabaseImpl {
       }
     }
     if (DROP_RESULT) {
-      System.out.println("dropping results table");
+      System.out.println("------------ dropping results table");
       dropResults();
       try {
         createResultTable(getConnection());
@@ -113,6 +115,7 @@ public class DatabaseImpl {
    */
   private Map<Long, List<Schedule>> getSchedule() {
     Connection connection;
+    SortedSet<String> ids = new TreeSet<String>();
 
     List<Schedule> schedules = new ArrayList<Schedule>();
     try {
@@ -130,6 +133,7 @@ public class DatabaseImpl {
     }
     Map<Long, List<Schedule>> userToSchedule = new HashMap<Long, List<Schedule>>();
     for (Schedule s : schedules) {
+      ids.add(s.exid);
       List<Schedule> forUser = userToSchedule.get(s.userid);
       if (forUser == null) {
         userToSchedule.put(s.userid, forUser = new ArrayList<Schedule>());
@@ -171,7 +175,7 @@ public class DatabaseImpl {
   public List<Exercise> getRawExercises() {
     List<Exercise> exercises = new ArrayList<Exercise>();
     Connection connection = null;
-
+    SortedSet<String> ids = new TreeSet<String>();
     try {
       connection = getConnection();
       PreparedStatement statement = connection.prepareStatement("SELECT * FROM exercises");
@@ -179,11 +183,21 @@ public class DatabaseImpl {
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         String plan = rs.getString(1);
+        String exid = rs.getString(2);
         String s = getStringFromClob(rs.getClob(4));
 
         if (s.startsWith("{")) {
           net.sf.json.JSONObject obj = net.sf.json.JSONObject.fromObject(s);
-          Exercise e = getExercise(plan, obj);
+          Exercise e = getExercise(plan, exid, obj);
+          if (e == null) {
+            System.err.println("couldn't find exercise for plan '" +plan+ "'");
+            continue;
+          }
+          if (e.getID() == null) {
+            System.err.println("no valid exid for " +e);
+            continue;
+          }
+          ids.add(e.getID());
           exercises.add(e);
         }
       }
@@ -223,12 +237,19 @@ public class DatabaseImpl {
    * @param obj
    * @return
    */
-  private Exercise getExercise(String plan, JSONObject obj) {
+  private Exercise getExercise(String plan, String exid, JSONObject obj) {
     boolean promptInEnglish = false;
     boolean recordAudio = false;
-    Exercise exercise = new Exercise(plan, (String) obj.get("exid"), (String) obj.get("content"),
-      promptInEnglish, recordAudio);
-    Collection<JSONObject> qa = JSONArray.toCollection((JSONArray) obj.get("qa"), JSONObject.class);
+    String content = (String) obj.get("content");
+    if (content == null) {
+      System.err.println("no content key in " + obj.keySet());
+    }
+    Exercise exercise = new Exercise(plan, exid, content, promptInEnglish, recordAudio);
+    Object qa1 = obj.get("qa");
+    if (qa1 == null) {
+      System.err.println("no qa key in " + obj.keySet());
+    }
+    Collection<JSONObject> qa = JSONArray.toCollection((JSONArray) qa1, JSONObject.class);
     for (JSONObject o : qa) {
       Set<String> keys = o.keySet();
       for (String k : keys) {
@@ -285,8 +306,12 @@ public class DatabaseImpl {
   //  if (c != null) return c;
 	  Connection c;
     try {
-      ServletContext servletContext = servlet.getServletContext();
-      c = (Connection) servletContext.getAttribute("connection");
+      if (servlet == null) {
+        c = this.dbLogin();
+      } else {
+        ServletContext servletContext = servlet.getServletContext();
+        c = (Connection) servletContext.getAttribute("connection");
+      }
     } catch (Exception e) {  // for standalone testing
       System.err.println("The context DBStarter is not working : " + e.getMessage());
       e.printStackTrace();
@@ -357,7 +382,7 @@ public class DatabaseImpl {
   }
 
   private void dropUserTable() throws Exception {
-    System.err.println("dropUserTable -------------------- ");
+    System.err.println("----------- dropUserTable -------------------- ");
     Connection connection = getConnection();
     PreparedStatement statement;
     statement = connection.prepareStatement("drop TABLE users");
