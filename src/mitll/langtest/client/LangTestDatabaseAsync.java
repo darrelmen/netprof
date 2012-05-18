@@ -2,6 +2,7 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
 import java.util.List;
@@ -15,4 +16,5 @@ public interface LangTestDatabaseAsync {
   void addUser(int age, String gender, int experience, AsyncCallback<Long> async);
   void isAnswerValid(int userID, Exercise exercise, int questionID, AsyncCallback<Boolean> async);
   void getUsers(AsyncCallback<List<User>> async);
+  void getResults(AsyncCallback<List<Result>> async);
 }

@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import com.google.gwt.core.client.GWT;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -427,6 +428,43 @@ public class DatabaseImpl {
     return new ArrayList<User>();
   }
 
+
+  /**
+   * Pulls the list of results out of the database.
+   * @return
+   */
+  public List<Result> getResults() {
+    try {
+      Connection connection = getConnection();
+      PreparedStatement statement;
+
+      statement = connection.prepareStatement("SELECT * from results;");
+      int i = 1;
+
+      ResultSet rs = statement.executeQuery();
+      List<Result> results = new ArrayList<Result>();
+      while (rs.next()) {
+        i = 1;
+        results.add(new Result(rs.getLong(i++), //id
+          rs.getString(i++), // plan
+          rs.getString(i++), // id
+          rs.getInt(i++), // qid
+          rs.getString(i++), // answer
+          rs.getString(i++), // audioFile
+          rs.getBoolean(i++), // valid
+          rs.getTimestamp(i++).getTime()
+        ));
+      }
+      rs.close();
+      statement.close();
+      closeConnection(connection);
+
+      return results;
+    } catch (Exception ee) {
+      ee.printStackTrace();
+    }
+    return new ArrayList<Result>();
+  }
 
   /**
    * Creates the result table if it's not there.
