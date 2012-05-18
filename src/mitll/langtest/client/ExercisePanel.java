@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -61,7 +62,7 @@ public class ExercisePanel extends VerticalPanel {
       next.setEnabled(false);
     }
     for (Exercise.QAPair pair : e.getQuestions()) {
-      Widget answerWidget = getAnswerWidget(i-1);
+      Widget answerWidget = getAnswerWidget(e, i-1);
       String questionHeader = "Question #" + (i++) + " : " + pair.getQuestion();
       add(new HTML("<h4>" + questionHeader + "</h4>"));
       add(answerWidget);
@@ -126,10 +127,13 @@ public class ExercisePanel extends VerticalPanel {
     }
   }
 
-  protected Widget getAnswerWidget(int index) {
+  protected Widget getAnswerWidget(Exercise exercise, int index) {
     GWT.log("getAnswerWidget for #" +index);
     final TextBox answer = new TextBox();
     answer.setWidth(ANSWER_BOX_WIDTH);
+    if (!exercise.promptInEnglish) {
+      answer.setDirection(HasDirection.Direction.RTL);
+    }
     if (enableNextOnlyWhenAllCompleted) {  // make sure user entered in answers for everything
       answer.addKeyUpHandler(new KeyUpHandler() {
         public void onKeyUp(KeyUpEvent event) {
