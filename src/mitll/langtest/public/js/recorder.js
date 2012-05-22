@@ -112,6 +112,9 @@ Recorder = {
   permitCalled: 0,
 
   connect: function(name, attempts) {
+   // if (Recorder.recorder == null) {
+    $('#upload_status').css({'color': '#0F0'}).text("connect called: ");
+
     if(navigator.appName.indexOf("Microsoft") != -1) {
       Recorder.recorder = window[name];
     } else {
@@ -134,6 +137,7 @@ Recorder = {
     }
 
     setTimeout(function() {Recorder.connect(name, attempts+1);}, 100);
+  //  }
   },
 
   playBack: function(name) {
@@ -167,13 +171,16 @@ Recorder = {
   },
 
   showPermissionWindow: function() {
-   // if (permitCalled == 0) {
-      $('#upload_status').css({'color': '#000'}).text(" permit called: ");
+  //  if (Recorder.permitCalled == 0) {
+      $('#upload_status').css({'color': '#0F0'}).text(" permit called: ");
 
       Recorder.resize(240, 160);
     // need to wait until app is resized before displaying permissions screen
       setTimeout(function(){Recorder.recorder.permit();}, 1);
-      permitCalled = 1;
-    //}
+      Recorder.permitCalled = 1;
+    /*  }
+    else {
+      $('#upload_status').css({'color': '#0F0'}).text(" permit not called: ");
+    }*/
   }
 }

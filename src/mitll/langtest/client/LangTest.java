@@ -305,7 +305,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see RecordExercisePanel.ImageAnchor#onMouseOver(com.google.gwt.event.dom.client.MouseOverEvent)
+   * @see RecordExercisePanel.AnswerPanel#onMouseOver
    * @param exercise
    * @param question
    * @param sender

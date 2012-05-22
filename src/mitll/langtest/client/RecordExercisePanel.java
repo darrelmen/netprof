@@ -56,9 +56,10 @@ public class RecordExercisePanel extends ExercisePanel {
     return new AnswerPanel(index);
   }
 
-  private class AnswerPanel extends HorizontalPanel implements SaveNotification {
+  private class AnswerPanel extends HorizontalPanel implements SaveNotification, MouseOverHandler {
     private Image check;
     private int index;
+    private ImageAnchor record_button;
     public AnswerPanel( final int index) {
       this.index = index;
       Image image = new Image("images/record.png");
@@ -68,7 +69,7 @@ public class RecordExercisePanel extends ExercisePanel {
       check.getElement().setId("checkmark_" +index);
       check.setAltText("Audio Saved");
 
-      final ImageAnchor record_button = new ImageAnchor(index, this);
+      record_button = new ImageAnchor();
       record_button.setResource(image);
 
       record_button.setTitle("Record");
@@ -82,6 +83,7 @@ public class RecordExercisePanel extends ExercisePanel {
 
       add(check);
       check.setVisible(false);
+      addDomHandler(this, MouseOverEvent.getType());
     }
 
     /**
@@ -112,25 +114,18 @@ public class RecordExercisePanel extends ExercisePanel {
         }
       });
     }
+    public void onMouseOver(MouseOverEvent event) {
+      controller.showRecorder(exercise, index, record_button, this);
+    }
   }
 
   /**
    * Remembers answerPanel image widget so we can show it when save is complete.
    */
-  private class ImageAnchor extends Anchor implements MouseOverHandler {
-    private final int index;
-    private SaveNotification answerPanel;
-    public ImageAnchor(int index, SaveNotification answerPanel) {
-      this.index = index;
-      this.answerPanel = answerPanel;
-      addDomHandler(this, MouseOverEvent.getType());
-    }
+  private class ImageAnchor extends Anchor {
+    public ImageAnchor() {}
     public void setResource(Image img) {
       DOM.insertBefore(getElement(), img.getElement(), DOM.getFirstChild(getElement()));
-    }
-
-    public void onMouseOver(MouseOverEvent event) {
-      controller.showRecorder(exercise,index, this, answerPanel);
     }
   }
 
