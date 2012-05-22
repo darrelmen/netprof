@@ -15,7 +15,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class Exercise implements IsSerializable  {
-  public enum EXERCISE_TYPE { RECORD, TEXT_RESPONSE }
+  public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE }
 
   private String plan;
   private String content;
