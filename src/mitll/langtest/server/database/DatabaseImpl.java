@@ -318,6 +318,7 @@ public class DatabaseImpl {
       e.printStackTrace();
       c = this.dbLogin();
     }
+    c.setAutoCommit(true);
     if (c.isClosed())  {
       System.err.println("getConnection : conn " + c + " is closed!");
     }
