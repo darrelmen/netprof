@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -51,6 +52,8 @@ public class DatabaseImpl {
   private static final boolean DROP_RESULT = false;
   private static final String H2_DB_NAME = TESTING ? "vlr-parle" : "/services/apache-tomcat-7.0.27/webapps/langTest/vlr-parle";
   private static final boolean LOG_RESULTS = false;
+  private static final String TIME = "time";
+  private static final String EXID = "exid";
   private Map<Long, List<Schedule>> userToSchedule;
 
   // mysql config info
@@ -67,6 +70,17 @@ public class DatabaseImpl {
 
   public DatabaseImpl(HttpServlet s) {
     this.servlet = s;
+    try {
+      boolean open = getConnection() != null;
+      if (!open) {
+        System.err.println("couldn't open connection to database");
+        return;
+      }
+    } catch (Exception e) {
+      System.err.println("couldn't open connection to database, got " +e.getMessage());
+      e.printStackTrace();
+      return;
+    }
     this.userToSchedule = getSchedule();
 
     if (DROP_USER) {
@@ -318,6 +332,9 @@ public class DatabaseImpl {
       e.printStackTrace();
       c = this.dbLogin();
     }
+    if (c == null) {
+      return c;
+    }
     c.setAutoCommit(true);
     if (c.isClosed())  {
       System.err.println("getConnection : conn " + c + " is closed!");
@@ -356,7 +373,7 @@ public class DatabaseImpl {
       long id = 0;
       while (rs.next()) {
         id = rs.getLong(1);
-        System.out.println("DatabaseImpl : addUser got user #" + id);
+        //System.out.println("DatabaseImpl : addUser got user #" + id);
         //  System.out.println(rs.getString(1) + "," + rs.getString(2) + "," + rs.getInt(3) + "," + rs.getString(4) + "," + rs.getTimestamp(5));
       }
       rs.close();
@@ -446,14 +463,22 @@ public class DatabaseImpl {
       List<Result> results = new ArrayList<Result>();
       while (rs.next()) {
         i = 1;
-        results.add(new Result(rs.getLong(i++), //id
-          rs.getString(i++), // plan
-          rs.getString(i++), // id
-          rs.getInt(i++), // qid
-          rs.getString(i++), // answer
-          rs.getString(i++), // audioFile
-          rs.getBoolean(i++), // valid
-          rs.getTimestamp(i++).getTime()
+        rs.getInt(i++);
+        long userID = rs.getLong(i++);
+        String plan = rs.getString(i++);
+        String exid = rs.getString(i++);
+        int qid = rs.getInt(i++);
+        Timestamp timestamp = rs.getTimestamp(i++);
+        String answer = rs.getString(i++);
+        boolean valid = rs.getBoolean(i++);
+        results.add(new Result(userID, //id
+          plan, // plan
+          exid, // id
+          qid, // qid
+          answer, // answer
+          //rs.getString(i++), // audioFile
+          valid, // valid
+          timestamp.getTime()
         ));
       }
       rs.close();
@@ -487,7 +512,13 @@ public class DatabaseImpl {
     boolean val = false;
     try {
       Connection connection = getConnection();
-      PreparedStatement statement = connection.prepareStatement("SELECT valid, timestamp FROM results WHERE userid = ? AND plan = ? AND id = ? AND qid = ? order by timestamp desc");
+      PreparedStatement statement = connection.prepareStatement(
+        "SELECT valid, " + TIME +
+        " FROM results " +
+        "WHERE userid = ? AND plan = ? AND " +
+          EXID +
+          " = ? AND qid = ? " +
+        "order by " +TIME+ " desc");
 
       statement.setInt(1,userID);
       statement.setString(2, e.getPlan());
@@ -505,7 +536,7 @@ public class DatabaseImpl {
       statement.close();
       closeConnection(connection);
     } catch (Exception e1) {
-      e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      e1.printStackTrace();
     }
     return val;
   }
@@ -518,7 +549,7 @@ public class DatabaseImpl {
      }*/
   //    DriverManager.deregisterDriver((Driver)Class.forName(driver).newInstance());
     } catch (Exception e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      e.printStackTrace();
     }
   }
 
@@ -587,14 +618,21 @@ public class DatabaseImpl {
   private void addAnswerToTable(int userid, String plan, String id, int questionID, String answer, String audioFile,
                                 Connection connection, boolean valid) throws SQLException {
     PreparedStatement statement;
-    statement = connection.prepareStatement("INSERT INTO results(userid,plan,id,qid,answer,audioFile,valid) VALUES(?,?,?,?,?,?,?)");
+    //statement = connection.prepareStatement("INSERT INTO results(userid,plan,id,qid,answer,audioFile,valid) VALUES(?,?,?,?,?,?,?)");
+    statement = connection.prepareStatement("INSERT INTO results(userid,plan," +
+      EXID +
+      ",qid,answer,valid) VALUES(?,?,?,?,?,?)");
     int i = 1;
     statement.setInt(i++, userid);
     statement.setString(i++, plan);
     statement.setString(i++, id);
     statement.setInt(i++, questionID);
-    statement.setString(i++, answer);
-    statement.setString(i++, audioFile);
+   // System.err.println("got " + userid + ", " + plan +", "+ id +", " + questionID + ", " +answer + ", " +audioFile +", " + valid);
+
+   // System.err.println("got " + answer + " and " + audioFile);
+    boolean isAudioAnswer = answer == null || answer.length() == 0;
+    statement.setString(i++, isAudioAnswer ? audioFile : answer);
+    //statement.setString(i++, audioFile);
     statement.setBoolean(i++, valid);
     statement.executeUpdate();
     statement.close();
@@ -602,7 +640,7 @@ public class DatabaseImpl {
 
   private void showResults() throws Exception {
     Connection connection = getConnection();
-    PreparedStatement statement = connection.prepareStatement("SELECT * FROM results order by timestamp");
+    PreparedStatement statement = connection.prepareStatement("SELECT * FROM results order by " + TIME);
     ResultSet rs = statement.executeQuery();
     int c = 0;
     while (rs.next()) {
@@ -625,7 +663,11 @@ public class DatabaseImpl {
 
   private void createResultTable(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
-      "results (userid INT, plan VARCHAR, id VARCHAR, qid INT, answer VARCHAR, audioFile VARCHAR, valid BOOLEAN, timestamp TIMESTAMP AS CURRENT_TIMESTAMP)");
+      "results (userid INT, plan VARCHAR, " +
+      EXID +
+      " VARCHAR, qid INT, answer CLOB, " +
+      //"audioFile VARCHAR, " +
+      "valid BOOLEAN, " +TIME + " TIMESTAMP AS CURRENT_TIMESTAMP)");
     statement.execute();
     statement.close();
   }

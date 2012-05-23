@@ -97,7 +97,7 @@ public class UserManager {
     // Enable glass background.
     dialogBox.setGlassEnabled(true);
 
-    final Button closeButton = new Button("Close");
+    final Button closeButton = new Button("Login");
     closeButton.setEnabled(false);
 
     // We can set the id of a widget by accessing its Element
@@ -132,11 +132,19 @@ public class UserManager {
 
     // add experience drop box
     final ListBox experienceBox = new ListBox(false);
-    for (int i = 0; i < 21; i += 3) {
-      experienceBox.addItem(i + " to " + (i + 3) + " months");
+    List<String> choices = Arrays.asList(
+      "0-3 months (Semester 1)",
+      "4-6 months (Semester 1)",
+      "7-9 months (Semester 2)",
+      "10-12 months (Semester 2)",
+      "13-16 months (Semester 3)",
+      "Native speaker");
+    final int lastChoice = choices.size()-1;
+    for (String c : choices) {
+      experienceBox.addItem(c);
     }
-    experienceBox.addItem("More than 22 months");
-    experienceBox.addItem("Native Speaker");
+/*    experienceBox.addItem("More than 22 months");
+    experienceBox.addItem("Native Speaker");*/
     experienceBox.ensureDebugId("cwListBox-dropBox");
     VerticalPanel experiencePanel = new VerticalPanel();
     experiencePanel.setSpacing(4);
@@ -179,12 +187,15 @@ public class UserManager {
        */
       private void sendNameToServer() {
         int monthsOfExperience = experienceBox.getSelectedIndex()*3;
-        if (monthsOfExperience == 21) {
+        if (experienceBox.getSelectedIndex() == lastChoice) {
+          monthsOfExperience = 20*12;
+        }
+       /* if (monthsOfExperience == 21) {
           monthsOfExperience++;
         }
         else if (monthsOfExperience == 24) {
           monthsOfExperience = 20*12;
-        }
+        }*/
         service.addUser(Integer.parseInt(ageEntryBox.getText()),
           genderBox.getValue(genderBox.getSelectedIndex()),
           monthsOfExperience, new AsyncCallback<Long>() {
@@ -232,8 +243,8 @@ public class UserManager {
     dialogVPanel.setWidth("1200px");
     dialogBox.setWidth("1200px");
 
-    int left = (Window.getClientWidth() - 0) / 5;
-    int top  = (Window.getClientHeight() - 0) / 5;
+    int left = (Window.getClientWidth() - 0) / 10;
+    int top  = (Window.getClientHeight() - 0) / 10;
     dialogBox.setPopupPosition(left, top);
 
     service.getUsers(new AsyncCallback<List<User>>() {
