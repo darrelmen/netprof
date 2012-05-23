@@ -120,7 +120,7 @@ public class ResultManager {
     ipaddr.setSortable(true);
     table.addColumn(ipaddr,"Answer");
 
-    final SafeHtmlCell progressCell = new SafeHtmlCell();
+/*    final SafeHtmlCell progressCell = new SafeHtmlCell();
     Column<Result,SafeHtml> audioFile = new Column<Result,SafeHtml>(progressCell) {
       @Override
       public SafeHtml getValue(Result answer) {
@@ -132,7 +132,7 @@ public class ResultManager {
       }
     };
     audioFile.setSortable(true);
-    table.addColumn(audioFile,"AudioFile");
+    table.addColumn(audioFile,"AudioFile");*/
 
     TextColumn<Result> valid = new TextColumn<Result>() {
       @Override

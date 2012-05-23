@@ -40,6 +40,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int FOOTER_HEIGHT = 40;
   public  static final int EXERCISE_LIST_WIDTH = 200;
   private static final int EAST_WIDTH = 45;
+  private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
 
   private VerticalPanel exerciseList = new VerticalPanel();
   private Panel currentExerciseVPanel = new SimplePanel();
@@ -77,7 +78,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // header/title line
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
-    HTML title = new HTML("<h1>DLI Language Testing</h1>");
+    HTML title = new HTML("<h1>" + DLI_LANGUAGE_TESTING + "</h1>");
     hp.addEast(getLogout(),EAST_WIDTH);
     hp.add(title);
 

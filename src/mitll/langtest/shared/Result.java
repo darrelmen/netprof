@@ -16,18 +16,18 @@ public class Result implements IsSerializable {
   public String id;
   public int qid;
   public String answer;
-  public String audioFile;
+ // public String audioFile;
   public boolean valid;
   public long timestamp;
 
   public Result() {}
-  public Result(long userid, String plan, String id, int qid, String answer, String audioFile, boolean  valid, long timestamp) {
+  public Result(long userid, String plan, String id, int qid, String answer, /*String audioFile,*/ boolean  valid, long timestamp) {
     this.userid = userid;
     this.plan  = plan;
     this.id = id;
     this.qid = qid;
     this.answer = answer;
-    this.audioFile = audioFile;
+//    this.audioFile = audioFile;
     this.valid = valid;
     this.timestamp = timestamp;
   }
