@@ -65,7 +65,13 @@ public class ExercisePanel extends VerticalPanel {
       Widget answerWidget = getAnswerWidget(e, i-1);
       String questionHeader = "Question #" + (i++) + " : " + pair.getQuestion();
       add(new HTML("<h4>" + questionHeader + "</h4>"));
-      add(answerWidget);
+      VerticalPanel vp = new VerticalPanel();
+      vp.add(new HTML(getQuestionPrompt(e)));
+      SimplePanel spacer = new SimplePanel();
+      spacer.setSize("500px", "20px");
+      vp.add(spacer);
+      vp.add(answerWidget);
+      add(vp);
       answers.add(answerWidget);
     }
     SimplePanel spacer = new SimplePanel();
@@ -93,6 +99,10 @@ public class ExercisePanel extends VerticalPanel {
         postAnswers(service, userFeedback, controller, e);
       }
     });
+  }
+
+  protected String getQuestionPrompt(Exercise e) {
+    return "&nbsp;&nbsp;&nbsp;Type your answer in " +(e.promptInEnglish ? "english" : " the foreign language") +" :";
   }
 
   /**
@@ -128,7 +138,7 @@ public class ExercisePanel extends VerticalPanel {
   }
 
   protected Widget getAnswerWidget(Exercise exercise, int index) {
-    GWT.log("getAnswerWidget for #" +index);
+  //  GWT.log("getAnswerWidget for #" +index);
     final TextBox answer = new TextBox();
     answer.setWidth(ANSWER_BOX_WIDTH);
     if (!exercise.promptInEnglish) {

@@ -54,8 +54,8 @@ public class ResultManager {
     dialogVPanel.setWidth("1200px");
     dialogBox.setWidth("1200px");
 
-    int left = (Window.getClientWidth() - 0) / 5;
-    int top  = (Window.getClientHeight() - 0) / 5;
+    int left = (Window.getClientWidth() - 0) / 10;
+    int top  = (Window.getClientHeight() - 0) / 10;
     dialogBox.setPopupPosition(left, top);
 
     service.getResults(new AsyncCallback<List<Result>>() {

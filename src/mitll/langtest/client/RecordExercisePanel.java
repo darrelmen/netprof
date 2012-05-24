@@ -56,6 +56,11 @@ public class RecordExercisePanel extends ExercisePanel {
     return new AnswerPanel(index);
   }
 
+  @Override
+  protected String getQuestionPrompt(Exercise e) {
+    return "&nbsp;&nbsp;&nbsp;Speak and record your answer in " +(e.promptInEnglish ? "english" : " the foreign language") +" :";
+  }
+
   private class AnswerPanel extends HorizontalPanel implements SaveNotification, MouseOverHandler {
     private Image check;
     private int index;

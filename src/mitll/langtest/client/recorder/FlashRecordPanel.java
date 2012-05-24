@@ -3,6 +3,7 @@
  */
 package mitll.langtest.client.recorder;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
@@ -27,6 +28,7 @@ public class FlashRecordPanel extends FlowPanel {
   private final UploadForm upload;
   private static SaveNotification saveFeedback;  // remember for later
   private InlineHTML save_button;
+  private ImageAnchor play_button;
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad
    */
@@ -67,7 +69,7 @@ public class FlashRecordPanel extends FlowPanel {
 
     Image image2 = new Image("images/play.png");
     image2.setAltText("Play");
-    ImageAnchor play_button = new ImageAnchor();
+    play_button = new ImageAnchor();
     play_button.setResource(image2);
 
     play_button.getElement().setId("play_button");
@@ -93,7 +95,9 @@ public class FlashRecordPanel extends FlowPanel {
    * Doesn't seem to work
    */
   public void reset() {
+    GWT.log("reset widget state --- ");
     save_button.setVisible(false);
+    play_button.setVisible(false);
   }
 
   /**
