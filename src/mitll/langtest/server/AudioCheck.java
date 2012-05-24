@@ -41,7 +41,7 @@ public class AudioCheck {
       assert(ais.getFormat().getChannels() == 1);
 
       if (ais.getFrameLength() < MinRecordLength) {
-        System.err.println("INFO: audio recording (Length: " + ais.getFrameLength() + ") ");
+        System.err.println("INFO: audio recording too short (Length: " + ais.getFrameLength() + ") < min (" +MinRecordLength+ ") ");
         return false;
       }
       int fsize = ais.getFormat().getFrameSize();
@@ -70,7 +70,7 @@ public class AudioCheck {
       float mean = pm / n;
       float var = p2 / n - mean * mean;
       final boolean validAudio = mean > PowerThreshold || Math.sqrt(var) > VarianceThreshold;
-      System.err.println("INFO: audio recording (Length: " + ais.getFrameLength() + ") " +
+      System.out.println("INFO: audio recording (Length: " + ais.getFrameLength() + ") " +
         "mean power = " + mean + " (dB), std = " + Math.sqrt(var) + " valid = " + validAudio);
       return validAudio;
     } catch (Exception e) {
@@ -79,7 +79,7 @@ public class AudioCheck {
       try {
         if (ais != null) ais.close();
       } catch (IOException e) {
-        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        e.printStackTrace();
       }
     }
 

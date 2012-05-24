@@ -454,15 +454,12 @@ public class DatabaseImpl {
   public List<Result> getResults() {
     try {
       Connection connection = getConnection();
-      PreparedStatement statement;
-
-      statement = connection.prepareStatement("SELECT * from results;");
-      int i = 1;
+      PreparedStatement statement = connection.prepareStatement("SELECT * from results;");
 
       ResultSet rs = statement.executeQuery();
       List<Result> results = new ArrayList<Result>();
       while (rs.next()) {
-        i = 1;
+        int i = 1;
         rs.getInt(i++);
         long userID = rs.getLong(i++);
         String plan = rs.getString(i++);
@@ -627,11 +624,12 @@ public class DatabaseImpl {
     statement.setString(i++, plan);
     statement.setString(i++, id);
     statement.setInt(i++, questionID);
-   // System.err.println("got " + userid + ", " + plan +", "+ id +", " + questionID + ", " +answer + ", " +audioFile +", " + valid);
+    //System.err.println("got " + userid + ", " + plan +", "+ id +", " + questionID + ", " +answer + ", " +audioFile +", " + valid);
 
-   // System.err.println("got " + answer + " and " + audioFile);
     boolean isAudioAnswer = answer == null || answer.length() == 0;
-    statement.setString(i++, isAudioAnswer ? audioFile : answer);
+    String x = isAudioAnswer ? audioFile : answer;
+    //  System.err.println("got " + answer + " and " + audioFile + " -> " + x);
+    statement.setString(i++, x);
     //statement.setString(i++, audioFile);
     statement.setBoolean(i++, valid);
     statement.executeUpdate();
@@ -663,11 +661,14 @@ public class DatabaseImpl {
 
   private void createResultTable(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
-      "results (userid INT, plan VARCHAR, " +
-      EXID +
-      " VARCHAR, qid INT, answer CLOB, " +
+      "results (id IDENTITY, userid INT, plan VARCHAR, " +
+      EXID +" VARCHAR, " +
+      "qid INT," +
+      TIME + " TIMESTAMP AS CURRENT_TIMESTAMP," +
+      "answer CLOB," +
       //"audioFile VARCHAR, " +
-      "valid BOOLEAN, " +TIME + " TIMESTAMP AS CURRENT_TIMESTAMP)");
+      "valid BOOLEAN" +
+      ")");
     statement.execute();
     statement.close();
   }

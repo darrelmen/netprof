@@ -35,6 +35,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getExercises(userID);
   }
 
+  /**
+   * @see mitll.langtest.client.ExercisePanel#postAnswers
+   * @param userID
+   * @param exercise
+   * @param questionID
+   * @param answer
+   * @param audioFile
+   */
   public void addAnswer(int userID, Exercise exercise, int questionID, String answer, String audioFile) {
     db.addAnswer(userID, exercise,questionID,answer,audioFile);
   }

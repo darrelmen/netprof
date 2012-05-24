@@ -80,7 +80,17 @@ public class UploadServlet extends HttpServlet implements Servlet{
           audioFilePath.mkdirs();
 
           File file = writeAudioFile(item, "answer", audioFilePath);
-          db.addAnswer(Integer.parseInt(user), plan,exercise,Integer.parseInt(question),"",file.getPath(), isValid(file));
+          if (!file.exists()) {
+            System.err.println("huh? can't find " + file.getAbsolutePath());
+          }
+          boolean valid = isValid(file);
+      /*    if (!valid) {
+            System.err.println("audio file " + file.getAbsolutePath() + " is *not* valid");
+          }
+          else {
+            System.out.println("audio file " + file.getAbsolutePath() + " is valid");
+          }*/
+          db.addAnswer(Integer.parseInt(user), plan,exercise,Integer.parseInt(question),"",file.getPath(), valid);
 				}
 			}
 		}
@@ -98,11 +108,9 @@ public class UploadServlet extends HttpServlet implements Servlet{
 
   private boolean isValid(File file) {
     try {
-      boolean b = audioCheck.checkWavFile(file);
-   //   System.out.println("check = " + b);
-      return b;
+      return audioCheck.checkWavFile(file);
     } catch (Exception e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      e.printStackTrace();
     }
     return false;
   }

@@ -342,8 +342,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void showPopupAt(int left, int top) {
     recordPopup.setPopupPosition(left, top);
-    recordPopup.show();
     flashRecordPanel.reset();
+    recordPopup.show();
 
     if (!flashRecordPanelInited) {  // TODO is this correct???
       System.out.println("doing initializeJS");
