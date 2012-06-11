@@ -39,18 +39,17 @@
     <!-- <param-value>answers</param-value>
           -->
 
-        <param-value>/services/tomcat/webapps/langTest/answers</param-value>
+        <param-value>/services/tomcat/webapps/netPron2/answers</param-value>
 
   </context-param>
 
   <!-- note for the jdbc url, we seem to need an absolute file path on the webserver -->
   <context-param>
     <param-name>db.url</param-name>
-    <!--      <param-value>jdbc:h2:vlr-parle;IFEXISTS=TRUE</param-value>
-          -->
-
-   <param-value>jdbc:h2:file://services/tomcat/webapps/langTest/vlr-parle;IFEXISTS=TRUE</param-value>
-
+    <!--
+         <param-value>jdbc:h2:vlr-parle;IFEXISTS=TRUE</param-value>
+      -->
+   <param-value>jdbc:h2:file://services/tomcat/webapps/netPron2/vlr-parle;IFEXISTS=TRUE</param-value>
          </context-param>
   
   <context-param>
