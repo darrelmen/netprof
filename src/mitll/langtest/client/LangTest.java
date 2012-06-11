@@ -2,6 +2,8 @@ package mitll.langtest.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.impl.SchedulerImpl;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -9,6 +11,9 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -68,6 +73,39 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
 
   public void onModuleLoad() {
+    // set uncaught exception handler
+    GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
+      public void onUncaughtException(Throwable throwable) {
+        String text = "Uncaught exception: ";
+        while (throwable != null) {
+          StackTraceElement[] stackTraceElements = throwable.getStackTrace();
+          text += throwable.toString() + "\n";
+          for (StackTraceElement stackTraceElement : stackTraceElements) {
+            text += "    at " + stackTraceElement + "\n";
+          }
+          throwable = throwable.getCause();
+          if (throwable != null) {
+            text += "Caused by: ";
+          }
+        }
+        DialogBox dialogBox = new DialogBox(true, false);
+        DOM.setStyleAttribute(dialogBox.getElement(), "backgroundColor", "#ABCDEF");
+        System.err.print(text);
+        text = text.replaceAll(" ", "&nbsp;");
+        dialogBox.setHTML("<pre>" + text + "</pre>");
+        dialogBox.center();
+      }
+    });
+
+    // use a deferred command so that the handler catches onModuleLoad2() exceptions
+    Scheduler.get().scheduleDeferred(new Command() {
+      public void execute() {
+        onModuleLoad2();
+      }
+    });
+  }
+
+  public void onModuleLoad2() {
     user = new UserManager(this,service);
     resultManager = new ResultManager(service);
 

@@ -426,13 +426,20 @@ public class DatabaseImpl {
       List<User> users = new ArrayList<User>();
       while (rs.next()) {
     	  i = 1;
+        Timestamp timestamp;
+        if (rs.getMetaData().getColumnCount() == 7) { // if we have a timestamp column --
+          timestamp = rs.getTimestamp(i++);
+        }
+        else { // Wade's db schema doesn't have a timestamp column, currently
+          timestamp = new Timestamp(System.currentTimeMillis());
+        }
         users.add(new User(rs.getLong(i++), //id
-        		rs.getInt(i++), // age
+          rs.getInt(i++), // age
           rs.getInt(i++), //gender
           rs.getInt(i++), // exp
           rs.getString(i++), // ip
           rs.getString(i++), // password
-          rs.getTimestamp(i++).getTime()
+          timestamp.getTime()
         ));
       }
       rs.close();
