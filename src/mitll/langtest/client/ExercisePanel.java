@@ -1,12 +1,12 @@
 package mitll.langtest.client;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
@@ -24,7 +24,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created with IntelliJ IDEA.
+ * Note that for text input answers, the user is prevented from cut-copy-paste.
+ *
  * User: GO22670
  * Date: 5/8/12
  * Time: 1:39 PM
@@ -139,7 +140,7 @@ public class ExercisePanel extends VerticalPanel {
 
   protected Widget getAnswerWidget(Exercise exercise, int index) {
   //  GWT.log("getAnswerWidget for #" +index);
-    final TextBox answer = new TextBox();
+    final TextBox answer = new NoPasteTextBox();
     answer.setWidth(ANSWER_BOX_WIDTH);
     if (!exercise.promptInEnglish) {
       answer.setDirection(HasDirection.Direction.RTL);
@@ -170,5 +171,25 @@ public class ExercisePanel extends VerticalPanel {
 
   private void enableNext() {
     next.setEnabled((completed.size() == answers.size()));
+  }
+
+  /**
+   * Stops the user from cut-copy-paste into the text box.
+   * <p></p>
+   * Prevents googling for answers.
+   */
+  private static class NoPasteTextBox extends TextBox {
+    public NoPasteTextBox() {
+      sinkEvents(Event.ONPASTE);
+    }
+    public void onBrowserEvent(Event event) {
+    //  GWT.log("Text box got " + event);
+      super.onBrowserEvent(event);
+
+      if (event.getTypeInt() == Event.ONPASTE) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+    }
   }
 }
