@@ -184,6 +184,8 @@ public class DatabaseImpl {
     /**
     * Hit the database for the exercises
     *
+    * Mainly what is important is the json exercise content (column 5).
+    *
     * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
     * @return
     */
@@ -193,16 +195,19 @@ public class DatabaseImpl {
     SortedSet<String> ids = new TreeSet<String>();
     try {
       connection = getConnection();
-      PreparedStatement statement = connection.prepareStatement("SELECT * FROM exercises");
-
+      String sql = "SELECT * FROM exercises";
+      PreparedStatement statement = connection.prepareStatement(sql);
+     // System.out.println("doing " + sql + " on " + connection);
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         String plan = rs.getString(1);
         String exid = rs.getString(2);
-        String s = getStringFromClob(rs.getClob(4));
+        String type = rs.getString(3);
+        boolean onlyfa = rs.getBoolean(4);
+        String content = getStringFromClob(rs.getClob(5));
 
-        if (s.startsWith("{")) {
-          net.sf.json.JSONObject obj = net.sf.json.JSONObject.fromObject(s);
+        if (content.startsWith("{")) {
+          net.sf.json.JSONObject obj = net.sf.json.JSONObject.fromObject(content);
           Exercise e = getExercise(plan, exid, obj);
           if (e == null) {
             System.err.println("couldn't find exercise for plan '" +plan+ "'");
@@ -215,11 +220,16 @@ public class DatabaseImpl {
           ids.add(e.getID());
           exercises.add(e);
         }
+        else {
+          System.err.println("expecting a { (marking json data), so skipping " + content);
+        }
       }
       rs.close();
       statement.close();
       closeConnection(connection);
     } catch (Exception e) {
+      System.err.println("got " + e);
+
       e.printStackTrace();
     } finally {
       if (connection != null) {
@@ -229,6 +239,12 @@ public class DatabaseImpl {
           e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }*/
       }
+    }
+    if (exercises.isEmpty()) {
+      System.err.println("no exercises found in database?");
+    }
+    else {
+      System.out.println("found " + exercises.size() + " exercises.");
     }
     return exercises;
   }
