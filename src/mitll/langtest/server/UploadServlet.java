@@ -90,7 +90,7 @@ public class UploadServlet extends HttpServlet implements Servlet{
           else {
             System.out.println("audio file " + file.getAbsolutePath() + " is valid");
           }*/
-          db.addAnswer(Integer.parseInt(user), plan,exercise,Integer.parseInt(question),"",file.getPath(), valid);
+          db.answerDAO.addAnswer(Integer.parseInt(user), plan,exercise,Integer.parseInt(question),"",file.getPath(), valid, db);
 				}
 			}
 		}
