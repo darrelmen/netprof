@@ -53,7 +53,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public boolean isAnswerValid(int userID, Exercise exercise, int questionID) {
-    return db.isAnswerValid(userID, exercise, questionID);
+    return db.isAnswerValid(userID, exercise, questionID, db);
   }
 
   public List<User> getUsers() { return db.getUsers(); }
