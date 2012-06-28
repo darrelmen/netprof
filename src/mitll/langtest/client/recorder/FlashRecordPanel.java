@@ -27,18 +27,19 @@ public class FlashRecordPanel extends FlowPanel {
   private boolean showUploadStatus = false;
   private final UploadForm upload;
   private static SaveNotification saveFeedback;  // remember for later
-  private InlineHTML save_button;
+  //private InlineHTML save_button;
   private ImageAnchor play_button;
   /**
-   * @see mitll.langtest.client.LangTest#onModuleLoad
+   * @see mitll.langtest.client.LangTest#onModuleLoad2
    */
 	public FlashRecordPanel(String id){
-    save_button = new InlineHTML();
+/*    save_button = new InlineHTML();
     save_button.getElement().setId("save_button");//"flashcontent");
-    add(save_button);
+    add(save_button);*/
 
     SimplePanel flashContent = new SimplePanel();
 		flashContent.getElement().setId(id);//"flashcontent");
+    flashContent.setSize(240+"px",160+"px");
 
     InlineHTML inner = new InlineHTML();
     inner.setHTML("<p>ERROR: Your browser must have JavaScript enabled and the Adobe Flash Player installed.</p>");
@@ -95,8 +96,8 @@ public class FlashRecordPanel extends FlowPanel {
    * Doesn't seem to work
    */
   public void reset() {
-    GWT.log("reset widget state --- ");
-    save_button.setVisible(false);
+    //GWT.log("reset widget state --- ");
+    //save_button.setVisible(false);
     play_button.setVisible(false);
   }
 
@@ -130,6 +131,10 @@ public class FlashRecordPanel extends FlowPanel {
 
   public native void playbackOnClick() /*-{
     $wnd.Recorder.playBack('audio');
+  }-*/;
+
+  public native void showPermission() /*-{
+    $wnd.Recorder.showPermission();
   }-*/;
 
 	public native void initializeJS(String moduleBaseURL, String id) /*-{

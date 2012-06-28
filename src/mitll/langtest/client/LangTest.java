@@ -122,6 +122,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     widgets.addNorth(hp, HEADER_HEIGHT);
     widgets.addSouth(status = new Label(), FOOTER_HEIGHT);
+
+    status.getElement().setId("status");
     widgets.addWest(exerciseList, EXERCISE_LIST_WIDTH);
     widgets.add(currentExerciseVPanel);
 
@@ -340,7 +342,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     recordPopup.setWidget(flashRecordPanel);
 
     showPopupAt(-100,-100);
-    recordPopup.hide();
+    //recordPopup.hide();
   }
 
   /**

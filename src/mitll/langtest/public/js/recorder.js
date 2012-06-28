@@ -5,22 +5,24 @@ function microphone_recorder_events()
 
   switch(arguments[0]) {
   case "ready":
-    var width = parseInt(arguments[1]);
-    var height = parseInt(arguments[2]);
-    Recorder.uploadFormId = "#uploadForm";
-    Recorder.uploadFieldName = "upload_file[filename]";
+  //  var width = parseInt(arguments[1]);
+  //  var height = parseInt(arguments[2]);
+    //Recorder.uploadFormId = "#uploadForm";
+   // Recorder.uploadFieldName = "upload_file[filename]";
     Recorder.connect("recorderApp", 0);
-    Recorder.recorderOriginalWidth = width;
-    Recorder.recorderOriginalHeight = height;
-    $('#play_button').css({'margin-left': width + 8});
+   // Recorder.recorderOriginalWidth = width;
+   // Recorder.recorderOriginalHeight = height;
+   // $('#play_button').css({'margin-left': width + 8});
+/*
     $('#save_button').css({'width': width, 'height': height});
+*/
   break;
 
   case "no_microphone_found":
     break;
 
   case "microphone_user_request":
-    Recorder.showPermissionWindow();
+    //Recorder.showPermissionWindow();
     break;
 
   case "microphone_connected":
@@ -105,10 +107,10 @@ function microphone_recorder_events()
 
 Recorder = {
   recorder: null,
-  recorderOriginalWidth: 0,
-  recorderOriginalHeight: 0,
-  uploadFormId: null,
-  uploadFieldName: null,
+  //recorderOriginalWidth: 0,
+  //recorderOriginalHeight: 0,
+  uploadFormId: "#uploadForm",
+  uploadFieldName: "upload_file[filename]",
   permitCalled: 0,
 
   connect: function(name, attempts) {
@@ -154,7 +156,7 @@ Recorder = {
   },
 
   defaultSize: function(width, height) {
-    Recorder.resize(Recorder.recorderOriginalWidth, Recorder.recorderOriginalHeight);
+   // Recorder.resize(Recorder.recorderOriginalWidth, Recorder.recorderOriginalHeight);
   },
 
   show: function() {
@@ -170,14 +172,18 @@ Recorder = {
     Recorder.recorder.update(frm.serializeArray());
   },
 
+  showPermission: function() {
+    Recorder.recorder.permit();
+  },
+
   showPermissionWindow: function() {
   //  if (Recorder.permitCalled == 0) {
       $('#upload_status').css({'color': '#0F0'}).text(" permit called: ");
 
-      Recorder.resize(240, 160);
+    //  Recorder.resize(240, 160);
     // need to wait until app is resized before displaying permissions screen
       setTimeout(function(){Recorder.recorder.permit();}, 1);
-      Recorder.permitCalled = 1;
+    //  Recorder.permitCalled = 1;
     /*  }
     else {
       $('#upload_status').css({'color': '#0F0'}).text(" permit not called: ");
