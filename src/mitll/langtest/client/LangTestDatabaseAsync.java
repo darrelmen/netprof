@@ -17,4 +17,7 @@ public interface LangTestDatabaseAsync {
   void isAnswerValid(int userID, Exercise exercise, int questionID, AsyncCallback<Boolean> async);
   void getUsers(AsyncCallback<List<User>> async);
   void getResults(AsyncCallback<List<Result>> async);
+
+
+  void postArray(List<Integer> byteArray, AsyncCallback<Void> async);
 }

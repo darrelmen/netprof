@@ -7,6 +7,12 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 
@@ -58,6 +64,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public List<User> getUsers() { return db.getUsers(); }
   public List<Result> getResults() { return db.getResults(); }
+
+  public void postArray(List<Integer> byteArray) {
+    System.out.println("got " + byteArray.size());
+    for (Integer b : byteArray) {
+      System.out.println("got " + b);
+    }
+    File file = new File("test.wav");
+    try {
+      OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
+      for (Integer b : byteArray) {
+        outputStream.write(b);
+      }
+      System.out.println("wrote " + file.getAbsolutePath());
+      outputStream.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
 
   @Override
   public void destroy() {

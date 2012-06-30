@@ -2,6 +2,8 @@ package mitll.langtest.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsArrayInteger;
+import com.google.gwt.core.client.JsArrayNumber;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.impl.SchedulerImpl;
 import com.google.gwt.dom.client.Style;
@@ -139,7 +141,34 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setupRecordPopup();
 
     login();
+
+    sendArray();
   }
+
+  private void sendArray() {
+    JsArrayInteger array = getArray();
+    List<Integer> byteArrayToSend = new ArrayList<Integer>(array.length());
+
+    for (int i = 0; i < array.length(); i++) {
+      int i1 = array.get(i);
+      byteArrayToSend.add(i1);
+    }
+    service.postArray(byteArrayToSend,new AsyncCallback<Void>() {
+      public void onFailure(Throwable caught) {
+        //To change body of implemented methods use File | Settings | File Templates.
+      }
+
+      public void onSuccess(Void result) {
+        //To change body of implemented methods use File | Settings | File Templates.
+      }
+    });
+
+  }
+
+
+  public native JsArrayInteger getArray() /*-{
+    return $wnd.testarray;
+  }-*/;
 
   /**
    * Has both a logout and a users link
@@ -345,6 +374,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     //recordPopup.hide();
   }
 
+  private void setupRecordPopup2() {
+    flashRecordPanel = new FlashRecordPanel("flashcontent");
+
+    recordPopup = new PopupPanel(true);
+    recordPopup.setStyleName("RecordPopup");
+    recordPopup.setWidget(flashRecordPanel);
+
+    showPopupAt(-100,-100);
+    //recordPopup.hide();
+  }
+
   /**
    * @see RecordExercisePanel.AnswerPanel#onMouseOver
    * @param exercise
@@ -391,4 +431,5 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       flashRecordPanelInited = true;
     }
   }
+
 }

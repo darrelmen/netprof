@@ -1,6 +1,5 @@
 package mitll.langtest.client;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.Exercise;
@@ -24,4 +23,6 @@ public interface LangTestDatabase extends RemoteService {
   boolean isAnswerValid(int userID, Exercise exercise, int questionID);
   List<User> getUsers();
   List<Result> getResults();
+
+  void postArray(List<Integer> byteArray);
 }
