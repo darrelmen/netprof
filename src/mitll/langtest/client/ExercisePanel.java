@@ -159,12 +159,12 @@ public class ExercisePanel extends VerticalPanel {
     return answer;
   }
 
-  protected void recordIncomplete(Widget answer) {
+  public void recordIncomplete(Widget answer) {
     completed.remove(answer);
     enableNext();
   }
 
-  protected void recordCompleted(Widget answer) {
+  public void recordCompleted(Widget answer) {
     completed.add(answer);
     enableNext();
   }

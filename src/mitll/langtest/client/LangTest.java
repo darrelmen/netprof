@@ -3,9 +3,7 @@ package mitll.langtest.client;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArrayInteger;
-import com.google.gwt.core.client.JsArrayNumber;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.impl.SchedulerImpl;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -15,7 +13,6 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -30,7 +27,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.recorder.FlashRecordPanel;
+import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.SaveNotification;
 import mitll.langtest.shared.Exercise;
 
@@ -59,7 +56,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Label status;
   private UserManager user;
   private ResultManager resultManager;
-  private FlashRecordPanel flashRecordPanel;
+  private FlashRecordPanelHeadless flashRecordPanel;
   private PopupPanel recordPopup;
   private boolean flashRecordPanelInited;
   private long lastUser = -1;
@@ -138,11 +135,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     exerciseList.add(new HTML("<h2>Items</h2>"));
     exerciseList.add(itemScroller);
 
-    setupRecordPopup();
 
     login();
 
-    sendArray();
+    //sendArray();
   }
 
   private void sendArray() {
@@ -155,14 +151,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     service.postArray(byteArrayToSend,new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) {
-        //To change body of implemented methods use File | Settings | File Templates.
+          GWT.log("sendArray : got failure " + caught);
       }
 
       public void onSuccess(Void result) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        GWT.log("sendArray : got success " + result);
       }
     });
-
   }
 
 
@@ -217,7 +212,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
-   // System.out.println("gotUser " + userID + " vs " + lastUser);
+    System.out.println("gotUser " + userID + " vs " + lastUser);
+    setupRecordPopup();
 
     if (userID != lastUser) {
       getExercises(userID);
@@ -363,7 +359,28 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean onFirst(Exercise current) { return currentExercises.indexOf(current) == 0; }
 
   // popup recording -- TODO : refactor into its own class
+
+  /**
+   * @see #onModuleLoad2()
+   */
   private void setupRecordPopup() {
+    flashRecordPanel = new FlashRecordPanelHeadless();
+    GWT.log("making record popup");
+    recordPopup = new PopupPanel(true);
+    recordPopup.setStyleName("RecordPopup");
+    recordPopup.setWidget(flashRecordPanel);
+
+    showPopupAt(-100,-100);
+
+
+    int left =  RootPanel.get().getAbsoluteLeft()+100;
+    int top = RootPanel.get().getAbsoluteTop()+100;
+    showPopupAt(left, top);
+
+    //recordPopup.hide();
+  }
+
+/*  private void setupRecordPopup2() {
     flashRecordPanel = new FlashRecordPanel("flashcontent");
 
     recordPopup = new PopupPanel(true);
@@ -372,18 +389,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     showPopupAt(-100,-100);
     //recordPopup.hide();
-  }
-
-  private void setupRecordPopup2() {
-    flashRecordPanel = new FlashRecordPanel("flashcontent");
-
-    recordPopup = new PopupPanel(true);
-    recordPopup.setStyleName("RecordPopup");
-    recordPopup.setWidget(flashRecordPanel);
-
-    showPopupAt(-100,-100);
-    //recordPopup.hide();
-  }
+  }*/
 
   /**
    * @see RecordExercisePanel.AnswerPanel#onMouseOver
@@ -410,10 +416,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
      // user.login();
     }
     else {
-      flashRecordPanel.setUpload(userID, exercise, question);
+     // flashRecordPanel.setUpload(userID, exercise, question);
     }
     // remember feedback widget so we can indicate when save is complete
-    FlashRecordPanel.setSaveCompleteFeedbackWidget(saveFeedbackWidget);
+ //   FlashRecordPanel.setSaveCompleteFeedbackWidget(saveFeedbackWidget);
 
     int left = sender.getAbsoluteLeft();
     int top = sender.getAbsoluteTop()-12;
@@ -427,8 +433,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     if (!flashRecordPanelInited) {  // TODO is this correct???
       System.out.println("doing initializeJS");
+      GWT.log("doing initializeJS");
+
       flashRecordPanel.initializeJS(GWT.getModuleBaseURL(), "flashcontent");
       flashRecordPanelInited = true;
+
+      Scheduler.get().scheduleDeferred(new Command() {
+        public void execute() {
+          flashRecordPanel.showPermission();
+        }
+      });
     }
   }
 

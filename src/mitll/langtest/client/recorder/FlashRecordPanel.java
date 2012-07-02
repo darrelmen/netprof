@@ -4,15 +4,21 @@
 package mitll.langtest.client.recorder;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.shared.Exercise;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Roughly mimics the Cykod example at <a href='https://github.com/cykod/FlashWavRecorder/blob/master/html/index.html'>Cykod example html</a><p></p>
@@ -29,10 +35,13 @@ public class FlashRecordPanel extends FlowPanel {
   private static SaveNotification saveFeedback;  // remember for later
   //private InlineHTML save_button;
   private ImageAnchor play_button;
+  private LangTestDatabaseAsync service;
+
   /**
-   * @see mitll.langtest.client.LangTest#onModuleLoad2
+   * @see mitll.langtest.client.LangTest#setupRecordPopup()
    */
-	public FlashRecordPanel(String id){
+	public FlashRecordPanel(String id, LangTestDatabaseAsync service){
+    this.service = service;
 /*    save_button = new InlineHTML();
     save_button.getElement().setId("save_button");//"flashcontent");
     add(save_button);*/
@@ -137,6 +146,34 @@ public class FlashRecordPanel extends FlowPanel {
     $wnd.Recorder.showPermission();
   }-*/;
 
+  public native JsArrayInteger getWav() /*-{
+    $wnd.Recorder.getWav();
+  }-*/;
+
+  private void sendArray(JsArrayInteger array) {
+ //   JsArrayInteger array = getArray();
+    List<Integer> byteArrayToSend = new ArrayList<Integer>(array.length());
+
+    for (int i = 0; i < array.length(); i++) {
+      int i1 = array.get(i);
+      byteArrayToSend.add(i1);
+    }
+    service.postArray(byteArrayToSend,new AsyncCallback<Void>() {
+      public void onFailure(Throwable caught) {
+        GWT.log("sendArray : got failure " + caught);
+      }
+
+      public void onSuccess(Void result) {
+        GWT.log("sendArray : got success " + result);
+      }
+    });
+  }
+
+  /**
+   * @see mitll.langtest.client.LangTest#showPopupAt(int, int)
+   * @param moduleBaseURL
+   * @param id
+   */
 	public native void initializeJS(String moduleBaseURL, String id) /*-{
 		var appWidth = 24;
 		var appHeight = 24;
@@ -153,7 +190,7 @@ public class FlashRecordPanel extends FlowPanel {
       //swfCallback();  // TODO somehow this sometimes shows up as undefined...
     }
 		
-		$wnd.swfobject.embedSWF(moduleBaseURL + "recorder.swf", id, appWidth, appHeight, "10.1.0", "", flashvars, params, attributes, outputStatus);
+		$wnd.swfobject.embedSWF(moduleBaseURL + "test.swf", id, appWidth, appHeight, "10.1.0", "", flashvars, params, attributes, outputStatus);
 	//	$wnd.createGoodWave = $entry(@com.pretest.client.FlashRecordPanel::createGoodWave());
 	//	$wnd.showWaitStatus = $entry(@com.pretest.client.FlashRecordPanel::showWaitStatus());
 	//	$wnd.setPausePlayButtonEnabled = $entry(@com.pretest.client.FlashRecordPanel::setPausePlayButtonEnabled(Z));
