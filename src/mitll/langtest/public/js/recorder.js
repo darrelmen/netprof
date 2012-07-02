@@ -172,6 +172,14 @@ Recorder = {
     Recorder.recorder.update(frm.serializeArray());
   },
 
+  stop: function() {
+    Recorder.recorder.stop();
+  },
+
+  getWav: function() {
+    return Recorder.recorder.getWav();
+  },
+
   showPermission: function() {
     Recorder.recorder.permit();
   },

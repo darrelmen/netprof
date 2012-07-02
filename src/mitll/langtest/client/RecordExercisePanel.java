@@ -120,7 +120,7 @@ public class RecordExercisePanel extends ExercisePanel {
       });
     }
     public void onMouseOver(MouseOverEvent event) {
-      controller.showRecorder(exercise, index, record_button, this);
+      //controller.showRecorder(exercise, index, record_button, this);
     }
   }
 
