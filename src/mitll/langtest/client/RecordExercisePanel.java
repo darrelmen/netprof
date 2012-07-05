@@ -18,6 +18,7 @@ import mitll.langtest.shared.Exercise;
  * Date: 5/11/12
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
+ * @deprecated
  */
 public class RecordExercisePanel extends ExercisePanel {
   private static final String IMAGES_CHECKMARK = "images/checkmark.png";
@@ -48,11 +49,12 @@ public class RecordExercisePanel extends ExercisePanel {
    * @see mitll.langtest.client.recorder.FlashRecordPanel#saveComplete()
    * @see ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, UserFeedback, ExerciseController)
    * @param exercise
-   * @param index
-   * @return
+   * @param service
+   *@param controller
+   * @param index  @return
    */
   @Override
-  protected Widget getAnswerWidget(Exercise exercise, final int index) {
+  protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
     return new AnswerPanel(index);
   }
 

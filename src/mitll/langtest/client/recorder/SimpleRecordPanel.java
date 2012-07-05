@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.client.ExerciseController;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.shared.Exercise;
 
@@ -40,9 +41,9 @@ public class SimpleRecordPanel extends FlowPanel {
   private final Image stopImage;
 
   /**
-   * @see mitll.langtest.client.LangTest#setupRecordPopup()
+   * @see
    */
-	public SimpleRecordPanel(final FlashRecordPanelHeadless headless, LangTestDatabaseAsync service){
+	public SimpleRecordPanel(LangTestDatabaseAsync service){
     this.service = service;
 /*    save_button = new InlineHTML();
     save_button.getElement().setId("save_button");//"flashcontent");
@@ -73,14 +74,17 @@ public class SimpleRecordPanel extends FlowPanel {
     record_button.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         if (recording) {
+          recording = false;
           record_button.setResource(recordImage);
-          headless.stopRecording();
+       //   controller.stopRecording();
           play_button.setVisible(true); // TODO : replace with link to audio on server
 
-          sendArray(headless.getWav());
+         // sendArray(headless.getWav());
         } else {
           record_button.setResource(stopImage);
-          headless.recordOnClick();
+          recording = true;
+
+          //   controller.startRecording();
         }
       }
     });
@@ -99,7 +103,7 @@ public class SimpleRecordPanel extends FlowPanel {
     play_button.setTitle("Play");
     play_button.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        headless.playbackOnClick();
+    //    headless.playbackOnClick();
       }
     });
     add(play_button);
@@ -143,11 +147,11 @@ public class SimpleRecordPanel extends FlowPanel {
   private static class ImageAnchor extends Anchor {
     Image img = null;
     public ImageAnchor() {}
-    public void setResource(Image img) {
-      if (img != null) {
-        DOM.removeChild(getElement(),img.getElement());
+    public void setResource(Image img2) {
+      if (this.img != null) {
+        DOM.removeChild(getElement(),this.img.getElement());
       }
-      this.img = img;
+      this.img = img2;
       DOM.insertBefore(getElement(), img.getElement(), DOM.getFirstChild(getElement()));
     }
 

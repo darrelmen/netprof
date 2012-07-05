@@ -63,7 +63,8 @@ public class ExercisePanel extends VerticalPanel {
       next.setEnabled(false);
     }
     for (Exercise.QAPair pair : e.getQuestions()) {
-      Widget answerWidget = getAnswerWidget(e, i-1);
+
+      Widget answerWidget = getAnswerWidget(e, service, controller, i-1);
       String questionHeader = "Question #" + (i++) + " : " + pair.getQuestion();
       add(new HTML("<h4>" + questionHeader + "</h4>"));
       VerticalPanel vp = new VerticalPanel();
@@ -138,7 +139,7 @@ public class ExercisePanel extends VerticalPanel {
     }
   }
 
-  protected Widget getAnswerWidget(Exercise exercise, int index) {
+  protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, int index) {
   //  GWT.log("getAnswerWidget for #" +index);
     final TextBox answer = new NoPasteTextBox();
     answer.setWidth(ANSWER_BOX_WIDTH);

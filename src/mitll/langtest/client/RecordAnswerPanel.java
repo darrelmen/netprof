@@ -17,6 +17,7 @@ import mitll.langtest.shared.Exercise;
 * Date: 7/2/12
 * Time: 7:15 PM
 * To change this template use File | Settings | File Templates.
+ * @deprecated
 */
 class RecordAnswerPanel extends HorizontalPanel implements SaveNotification, MouseOverHandler {
   private static final String IMAGES_CHECKMARK = "images/checkmark.png";
@@ -75,6 +76,7 @@ class RecordAnswerPanel extends HorizontalPanel implements SaveNotification, Mou
 
   /**
    * @see mitll.langtest.client.recorder.FlashRecordPanel#saveComplete()
+   * @deprecated
    */
   public void gotSave() {
     final RecordAnswerPanel outer = this;
