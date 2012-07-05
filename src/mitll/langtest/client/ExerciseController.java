@@ -18,7 +18,18 @@ public interface ExerciseController {
 
   boolean onFirst(Exercise current);
 
+  /**
+   * @deprecated
+   * @param exercise
+   * @param question
+   * @param sender
+   * @param saveFeedbackWidget
+   */
   void showRecorder(Exercise exercise, int question, Widget sender, SaveNotification saveFeedbackWidget);
 
   int getUser();
+
+ // void startRecording();
+ // void stopRecording();
+
 }

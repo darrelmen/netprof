@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
+import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.recorder.SaveNotification;
 import mitll.langtest.shared.Exercise;
 
@@ -47,7 +48,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
 
   private VerticalPanel exerciseList = new VerticalPanel();
-  private Panel currentExerciseVPanel = new SimplePanel();
+  private Panel currentExerciseVPanel = new VerticalPanel();
   private ExercisePanel current = null;
   private VerticalPanel items;
   private List<Exercise> currentExercises = null;
@@ -57,7 +58,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private UserManager user;
   private ResultManager resultManager;
   private FlashRecordPanelHeadless flashRecordPanel;
-  private PopupPanel recordPopup;
+  //private PopupPanel recordPopup;
+
   private boolean flashRecordPanelInited;
   private long lastUser = -1;
 
@@ -117,18 +119,37 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
     HTML title = new HTML("<h1>" + DLI_LANGUAGE_TESTING + "</h1>");
     hp.addEast(getLogout(),EAST_WIDTH);
+  //  hp.setHeight("180px");
+    flashRecordPanel = new FlashRecordPanelHeadless();
+    FlashRecordPanelHeadless.setMicPermission(new MicPermission() {
+      public void gotPermission() {
+        System.out.println("got permission!");
+        flashRecordPanel.setSize("0px","0px");
+        flashRecordPanelInited = true;
+        getExercises(lastUser);
+
+      }
+
+      public void gotDenial() {
+          System.err.println("dude!!!!");
+      }
+    });
+  //  hp.addWest(flashRecordPanel, 250);
     hp.add(title);
+
+
 
     widgets.addNorth(hp, HEADER_HEIGHT);
     widgets.addSouth(status = new Label(), FOOTER_HEIGHT);
 
-    status.getElement().setId("status");
     widgets.addWest(exerciseList, EXERCISE_LIST_WIDTH);
+
     widgets.add(currentExerciseVPanel);
+    currentExerciseVPanel.add(flashRecordPanel);
+    currentExerciseVPanel.addStyleName("currentExercisePanel");
 
     setupErrorDialog();
 
-    currentExerciseVPanel.addStyleName("currentExercisePanel");
     this.items = new VerticalPanel();
     ScrollPanel itemScroller = new ScrollPanel(items);
     itemScroller.setSize(EXERCISE_LIST_WIDTH +"px",(HEIGHT - HEADER_HEIGHT - FOOTER_HEIGHT - 60) + "px"); // 54
@@ -203,9 +224,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         resultManager.showResults();
       }
     });
+
+    HTML html = new HTML();
+    html.getElement().setId("status");
+    SimplePanel sp = new SimplePanel();
+    sp.add(html);
+   // ScrollPanel sp = new ScrollPanel(html);
+    //sp.setHeight("300px");
+   // sp.setWidth("120px");
+    vp.add(sp);
     return hp2;
   }
 
+  private void login()  { user.login(); }
   /**
    * @see UserManager#login
    * @see UserManager#storeUser(long)
@@ -213,10 +244,29 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void gotUser(long userID) {
     System.out.println("gotUser " + userID + " vs " + lastUser);
-    setupRecordPopup();
+/*    Scheduler.get().scheduleDeferred(new Command() {
+      public void execute() {
+        setupRecordPopup();
+      }
+    });*/
+
+   // setupRecordPopup();
+
+    Scheduler.get().scheduleDeferred(new Command() {
+      public void execute() {
+        if (!didPopup) {
+          System.out.println("gotUser : doing initializeJS");
+          flashRecordPanel.initializeJS(GWT.getModuleBaseURL(), "flashcontent");
+          System.out.println("gotUser : did   initializeJS");
+          didPopup = true;
+        }
+      }
+    });
 
     if (userID != lastUser) {
-      getExercises(userID);
+      if (flashRecordPanelInited) {
+        getExercises(userID);
+      }
       lastUser = userID;
     }
   }
@@ -242,8 +292,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
   }
 
-  private void login()  { user.login(); }
   public int getUser() { return user.getUser(); }
+
+  public void startRecording() {
+  //  flashRecordPanel.recordOnClick();
+  }
+
+  public void stopRecording() {
+ //   flashRecordPanel.stopRecording();
+  }
 
   private void addExerciseToList(final Exercise e, VerticalPanel items) {
     final HTML w = new HTML("<b>" + e.getID() + "</b>");
@@ -308,7 +365,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     removeCurrentExercise();
     if (e.getType() == Exercise.EXERCISE_TYPE.RECORD) {
-      currentExerciseVPanel.add(current = new RecordExercisePanel(e, service, this, this));
+      currentExerciseVPanel.add(current = new SimpleRecordExercisePanel(e, service, this, this));
     } else {
       currentExerciseVPanel.add(current = new ExercisePanel(e, service, this, this));
     }
@@ -360,25 +417,33 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   // popup recording -- TODO : refactor into its own class
 
+  private boolean didPopup = false;
+
   /**
-   * @see #onModuleLoad2()
+   * @see #gotUser(long)
    */
-  private void setupRecordPopup() {
+/*  private void setupRecordPopup() {
+    if (didPopup) {
+      System.out.println("setupRecordPopup - " + didPopup);
+      return;
+    }
     flashRecordPanel = new FlashRecordPanelHeadless();
     GWT.log("making record popup");
     recordPopup = new PopupPanel(true);
-    recordPopup.setStyleName("RecordPopup");
+  //  recordPopup.setStyleName("RecordPopup");
     recordPopup.setWidget(flashRecordPanel);
+    recordPopup.setHeight("190px");
+    recordPopup.setWidth("250px");
 
-    showPopupAt(-100,-100);
+    // showPopupAt(-100,-100);
 
 
     int left =  RootPanel.get().getAbsoluteLeft()+100;
     int top = RootPanel.get().getAbsoluteTop()+100;
     showPopupAt(left, top);
-
+    didPopup = true;
     //recordPopup.hide();
-  }
+  }*/
 
 /*  private void setupRecordPopup2() {
     flashRecordPanel = new FlashRecordPanel("flashcontent");
@@ -423,27 +488,38 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     int left = sender.getAbsoluteLeft();
     int top = sender.getAbsoluteTop()-12;
-    showPopupAt(left, top);
+/*    showPopupAt(left, top);*/
    }
-
+/*
   private void showPopupAt(int left, int top) {
-    recordPopup.setPopupPosition(left, top);
-    flashRecordPanel.reset();
-    recordPopup.show();
+    //recordPopup.setPopupPosition(left, top);
+  //  flashRecordPanel.reset();
+  //  recordPopup.center();
 
-    if (!flashRecordPanelInited) {  // TODO is this correct???
-      System.out.println("doing initializeJS");
+    if (!flashRecordPanelInited) {
       GWT.log("doing initializeJS");
-
-      flashRecordPanel.initializeJS(GWT.getModuleBaseURL(), "flashcontent");
-      flashRecordPanelInited = true;
 
       Scheduler.get().scheduleDeferred(new Command() {
         public void execute() {
-          flashRecordPanel.showPermission();
+          System.out.println("showPopupAt : doing initializeJS");
+          flashRecordPanel.initializeJS(GWT.getModuleBaseURL(), "flashcontent");
+          System.out.println("showPopupAt : did   initializeJS");
         }
       });
+
+      flashRecordPanelInited = true;
+
+  *//*    Scheduler.get().scheduleDeferred(new Command() {
+        public void execute() {
+        //  GWT.log("calling connect");
+
+        //  flashRecordPanel.connect();
+          GWT.log("calling showPermission");
+
+         // flashRecordPanel.showPermission();
+        }
+      });*//*
     }
-  }
+  }*/
 
 }

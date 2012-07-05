@@ -1,6 +1,7 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.recorder.SimpleRecordPanel;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -13,8 +14,8 @@ import mitll.langtest.shared.Exercise;
 public class SimpleRecordExercisePanel extends ExercisePanel {
 //  private static final String IMAGES_CHECKMARK = "images/checkmark.png";
 //  private static final String IMAGES_REDX_PNG = "images/redx.png";
-  private ExerciseController controller;
-  private LangTestDatabaseAsync service;
+ // private ExerciseController controller;
+//  private LangTestDatabaseAsync service;
 
   /**
    * @see mitll.langtest.client.LangTest#loadExercise(mitll.langtest.shared.Exercise)
@@ -26,8 +27,8 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
   public SimpleRecordExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                                    final ExerciseController controller) {
     super(e,service,userFeedback,controller);
-    this.controller = controller;
-    this.service = service;
+  //  this.controller = controller;
+   // this.service = service;
 
 
 
@@ -37,18 +38,17 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
-   * It's made visible by a call in {@link mitll.langtest.client.recorder.FlashRecordPanel#saveComplete}
    *
-   * @see mitll.langtest.client.recorder.FlashRecordPanel#setSaveCompleteFeedbackWidget
-   * @see mitll.langtest.client.recorder.FlashRecordPanel#saveComplete()
    * @see mitll.langtest.client.ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.UserFeedback, mitll.langtest.client.ExerciseController)
    * @param exercise
-   * @param index
-   * @return
+   * @param service
+   * @param controller
+   * @param index  @return
    */
   @Override
-  protected Widget getAnswerWidget(Exercise exercise, final int index) {
-    return new RecordAnswerPanel(service, controller.getUser(), exercise, this, index);
+  protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
+    //protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
+      return new SimpleRecordPanel(service);
   }
 
   @Override
