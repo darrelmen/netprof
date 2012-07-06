@@ -22,7 +22,7 @@ import java.util.List;
 
 /**
  * @author gregbramble
- *
+ * @deprecated
  */
 public class UploadServlet extends HttpServlet implements Servlet{
 	private static final long serialVersionUID = -611668719240096732L;

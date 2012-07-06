@@ -11,7 +11,7 @@ import mitll.langtest.shared.Exercise;
 
 /**
  * @author gregbramble
- *
+ * @deprecated
  */
 public class UploadForm extends FormPanel{
   public static final String PLAN = "plan";

@@ -34,4 +34,5 @@ public interface ExerciseController {
   void stopRecording();
   String getBase64EncodedWavFile();
 
+  //void playBackAudio();
 }

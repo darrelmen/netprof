@@ -57,18 +57,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private UserManager user;
   private ResultManager resultManager;
   private FlashRecordPanelHeadless flashRecordPanel;
-  //private PopupPanel recordPopup;
+  private boolean didPopup = false;
 
   private boolean flashRecordPanelInited;
   private long lastUser = -1;
-
-  /**
-	 * The message displayed to the user when the server cannot be reached or
-	 * returns an error.
-	 */
-/*	private static final String SERVER_ERROR = "An error occurred while "
-			+ "attempting to contact the server. Please answerPanel your network "
-			+ "connection and try again.";*/
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
 
@@ -126,17 +118,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         flashRecordPanel.setSize("0px","0px");
         flashRecordPanelInited = true;
         getExercises(lastUser);
-
       }
 
       public void gotDenial() {
           System.err.println("dude!!!!");
       }
     });
-  //  hp.addWest(flashRecordPanel, 250);
     hp.add(title);
-
-
 
     widgets.addNorth(hp, HEADER_HEIGHT);
     widgets.addSouth(status = new Label(), FOOTER_HEIGHT);
@@ -155,35 +143,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     exerciseList.add(new HTML("<h2>Items</h2>"));
     exerciseList.add(itemScroller);
 
-
     login();
-
-    //sendArray();
   }
-
-/*  private void sendArray() {
-    JsArrayInteger array = getArray();
-    List<Integer> byteArrayToSend = new ArrayList<Integer>(array.length());
-
-    for (int i = 0; i < array.length(); i++) {
-      int i1 = array.get(i);
-      byteArrayToSend.add(i1);
-    }
-    service.postArray(byteArrayToSend,new AsyncCallback<Void>() {
-      public void onFailure(Throwable caught) {
-          GWT.log("sendArray : got failure " + caught);
-      }
-
-      public void onSuccess(Void result) {
-        GWT.log("sendArray : got success " + result);
-      }
-    });
-  }*/
-
-
-  public native JsArrayInteger getArray() /*-{
-    return $wnd.testarray;
-  }-*/;
 
   /**
    * Has both a logout and a users link
@@ -228,9 +189,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     html.getElement().setId("status");
     SimplePanel sp = new SimplePanel();
     sp.add(html);
-   // ScrollPanel sp = new ScrollPanel(html);
-    //sp.setHeight("300px");
-   // sp.setWidth("120px");
     vp.add(sp);
     return hp2;
   }
@@ -242,14 +200,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
-    System.out.println("gotUser " + userID + " vs " + lastUser);
-/*    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-        setupRecordPopup();
-      }
-    });*/
-
-   // setupRecordPopup();
+//    System.out.println("gotUser " + userID + " vs " + lastUser);
 
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
@@ -304,6 +255,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void stopRecording() {
     flashRecordPanel.stopRecording();
   }
+
+/*
+  public void playBackAudio() {
+    flashRecordPanel.playbackOnClick();
+  }
+*/
 
   private void addExerciseToList(final Exercise e, VerticalPanel items) {
     final HTML w = new HTML("<b>" + e.getID() + "</b>");
@@ -420,44 +377,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   // popup recording -- TODO : refactor into its own class
 
-  private boolean didPopup = false;
 
-  /**
-   * @see #gotUser(long)
-   */
-/*  private void setupRecordPopup() {
-    if (didPopup) {
-      System.out.println("setupRecordPopup - " + didPopup);
-      return;
-    }
-    flashRecordPanel = new FlashRecordPanelHeadless();
-    GWT.log("making record popup");
-    recordPopup = new PopupPanel(true);
-  //  recordPopup.setStyleName("RecordPopup");
-    recordPopup.setWidget(flashRecordPanel);
-    recordPopup.setHeight("190px");
-    recordPopup.setWidth("250px");
-
-    // showPopupAt(-100,-100);
-
-
-    int left =  RootPanel.get().getAbsoluteLeft()+100;
-    int top = RootPanel.get().getAbsoluteTop()+100;
-    showPopupAt(left, top);
-    didPopup = true;
-    //recordPopup.hide();
-  }*/
-
-/*  private void setupRecordPopup2() {
-    flashRecordPanel = new FlashRecordPanel("flashcontent");
-
-    recordPopup = new PopupPanel(true);
-    recordPopup.setStyleName("RecordPopup");
-    recordPopup.setWidget(flashRecordPanel);
-
-    showPopupAt(-100,-100);
-    //recordPopup.hide();
-  }*/
 
   /**
    * @see RecordExercisePanel.AnswerPanel#onMouseOver
@@ -480,49 +400,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     int userID = user.getUser();
     if (userID == -1) {
       System.err.println("huh? no user? ");
-     // user.setLangTest(this, exercise, question);   // callback when available
-     // user.login();
     }
     else {
-     // flashRecordPanel.setUpload(userID, exercise, question);
     }
-    // remember feedback widget so we can indicate when save is complete
- //   FlashRecordPanel.setSaveCompleteFeedbackWidget(saveFeedbackWidget);
-
-    int left = sender.getAbsoluteLeft();
-    int top = sender.getAbsoluteTop()-12;
-/*    showPopupAt(left, top);*/
    }
-/*
-  private void showPopupAt(int left, int top) {
-    //recordPopup.setPopupPosition(left, top);
-  //  flashRecordPanel.reset();
-  //  recordPopup.center();
-
-    if (!flashRecordPanelInited) {
-      GWT.log("doing initializeJS");
-
-      Scheduler.get().scheduleDeferred(new Command() {
-        public void execute() {
-          System.out.println("showPopupAt : doing initializeJS");
-          flashRecordPanel.initializeJS(GWT.getModuleBaseURL(), "flashcontent");
-          System.out.println("showPopupAt : did   initializeJS");
-        }
-      });
-
-      flashRecordPanelInited = true;
-
-  *//*    Scheduler.get().scheduleDeferred(new Command() {
-        public void execute() {
-        //  GWT.log("calling connect");
-
-        //  flashRecordPanel.connect();
-          GWT.log("calling showPermission");
-
-         // flashRecordPanel.showPermission();
-        }
-      });*//*
-    }
-  }*/
-
 }
