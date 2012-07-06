@@ -2,6 +2,7 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
@@ -24,7 +25,8 @@ public interface LangTestDatabase extends RemoteService {
   List<User> getUsers();
   List<Result> getResults();
 
-  void postArray(String base64EncodedByteArray);
-  boolean writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user);
+  //void postArray(String base64EncodedByteArray);
+  AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user);
 
+ // String getPathToAnswer(String plan, String exercise, String question, String user);
 }

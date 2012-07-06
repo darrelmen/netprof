@@ -1,6 +1,7 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
@@ -18,9 +19,8 @@ public interface LangTestDatabaseAsync {
   void getUsers(AsyncCallback<List<User>> async);
   void getResults(AsyncCallback<List<Result>> async);
 
+ // void getPathToAnswer(String plan, String exercise, String question, String user, AsyncCallback<String> async);
 
-  void postArray(String base64EncodedByteArray, AsyncCallback<Void> async);
-
-  void writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user, AsyncCallback<Boolean> async);
-
+  //void postArray(String base64EncodedByteArray);
+  void writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user, AsyncCallback<AudioAnswer> async);
 }

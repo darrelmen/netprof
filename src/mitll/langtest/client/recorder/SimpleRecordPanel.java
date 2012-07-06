@@ -8,6 +8,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
@@ -15,6 +16,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.ExerciseController;
 import mitll.langtest.client.ExerciseQuestionState;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -24,15 +26,14 @@ import mitll.langtest.shared.Exercise;
  *
  */
 public class SimpleRecordPanel extends HorizontalPanel {
-   private static final String IMAGES_CHECKMARK = "images/checkmark.png";
-   private static final String IMAGES_REDX_PNG = "images/redx.png";
+  private static final String IMAGES_CHECKMARK = "images/checkmark.png";
+  private static final String IMAGES_REDX_PNG = "images/redx.png";
 
-  private ImageAnchor play_button;
   boolean recording = false;
-  boolean playing = false;
   private final Image recordImage;
   private final Image stopImage;
   private Image check;
+  private SimplePanel playback = new SimplePanel();
 
   /**
    * @see mitll.langtest.client.SimpleRecordExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.ExerciseController, int)
@@ -53,24 +54,17 @@ public class SimpleRecordPanel extends HorizontalPanel {
 
     record_button.getElement().setId("record_button");
     record_button.setTitle("Record");
+    playback.setHeight("30px"); // for audio controls to show
     record_button.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         if (recording) {
           recording = false;
-          record_button.setResource(recordImage);
-          controller.stopRecording();
-          play_button.setVisible(true); // TODO : replace with link to audio on server
+          stopClicked(record_button, controller, service, exercise, index, questionState, outer);
 
-          service.writeAudioFile(controller.getBase64EncodedWavFile()
-            ,exercise.getPlan(),exercise.getID(),""+index,""+controller.getUser(),new AsyncCallback<Boolean>() {
-            public void onFailure(Throwable caught) {}
-            public void onSuccess(Boolean result) {
-              showAudioValidity(result, questionState, outer);
-            }
-          });
         } else {
-          record_button.setResource(stopImage);
           recording = true;
+          playback.setWidget(new HTML(""));
+          record_button.setResource(stopImage);
 
           controller.startRecording();
         }
@@ -84,8 +78,6 @@ public class SimpleRecordPanel extends HorizontalPanel {
     add(spacer);
     //playback
 
-    addPlayButton(controller);
-
     this.check = new Image(IMAGES_CHECKMARK);
     check.getElement().setId("checkmark_" +index);
     check.setAltText("Audio Saved");
@@ -98,8 +90,42 @@ public class SimpleRecordPanel extends HorizontalPanel {
 
     add(check);
     check.setVisible(false);
+
+    spacer = new SimplePanel();
+    spacer.setHeight("24px");
+    spacer.setWidth("10px");
+    add(spacer);
+
+    add(playback);
   }
 
+  private void stopClicked(ImageAnchor record_button, ExerciseController controller, LangTestDatabaseAsync service,
+                           Exercise exercise, int index, final ExerciseQuestionState questionState, final Panel outer) {
+    record_button.setResource(recordImage);
+    controller.stopRecording();
+
+    service.writeAudioFile(controller.getBase64EncodedWavFile()
+      ,exercise.getPlan(),exercise.getID(),""+index,""+controller.getUser(),new AsyncCallback<AudioAnswer>() {
+      public void onFailure(Throwable caught) {}
+
+      public void onSuccess(AudioAnswer result) {
+        showAudioValidity(result.valid, questionState, outer);
+        setAudioTag(result.path);
+      }
+    });
+  }
+
+  private void setAudioTag(String result) {
+    playback.setWidget(new HTML("<audio preload=\"none\" controls=\"controls\" tabindex=\"0\">\n" +
+      "<source type=\"audio/wav\" src=\"" +
+      result +
+      "\"></source>\n" +
+      // "<source type=\"audio/ogg\" src=\"media/ac-LC1-009/ac-LC1-009-C.ogg\"></source>\n" +
+      "Your browser does not support the audio tag.\n" +
+      "</audio>"));
+  }
+
+/*
   private void addPlayButton(final ExerciseController controller) {
     final Image image2 = new Image("images/play.png");
     image2.setAltText("play");
@@ -125,6 +151,7 @@ public class SimpleRecordPanel extends HorizontalPanel {
     add(play_button);
     play_button.setVisible(false);
   }
+*/
 
   private void showAudioValidity(Boolean result, ExerciseQuestionState questionState, Panel outer) {
     check.setVisible(false);

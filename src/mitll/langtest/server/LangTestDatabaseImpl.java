@@ -3,6 +3,7 @@ package mitll.langtest.server;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
@@ -71,19 +72,27 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Just for testing
-   * @deprecated
    * @param base64EncodedByteArray
    */
+/*
   public void postArray(String base64EncodedByteArray) {
     byte [] byteArray = getBytesFromBase64String(base64EncodedByteArray);
     File file = new File("test.wav");
     writeToFile(byteArray, file);
   }
+*/
 
+  /**
+   * Decode Base64 string
+   * @param base64EncodedByteArray
+   * @return
+   */
   private byte[] getBytesFromBase64String(String base64EncodedByteArray) {
     Base64 decoder = new Base64();
-    byte[] decoded;
+    byte[] decoded = null;
     //System.out.println("postArray : got " + base64EncodedByteArray.substring(0,Math.min(base64EncodedByteArray.length(), 20)) +"...");
+    //decoded = (byte[])decoder.decode(base64EncodedByteArray);
+
     try {
       decoded = (byte[])decoder.decode(base64EncodedByteArray);
     } catch (DecoderException e1) {   // just b/c eclipse seems to insist
@@ -92,21 +101,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return decoded;
   }
 
-  public boolean writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user) {
+  public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user) {
     ServletContext context = getServletContext();
     String realContextPath = context.getRealPath(getThreadLocalRequest().getContextPath());
 
     System.out.println("Deployed context is " + realContextPath);
 
-    String tomcatWriteDirectory = getTomcatDir();
+    String wavPath = getLocalPathToAnswer(plan, exercise, question, user);
+    File file = new File(realContextPath, wavPath);   // relative to deploy
 
-    String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-"+user;
-    String currentTestDir = tomcatWriteDirectory + File.separator  + planAndTestPath;
-    File audioFilePath = new File(currentTestDir);
-    boolean mkdirs = audioFilePath.mkdirs();
     byte [] byteArray = getBytesFromBase64String(base64EncodedString);
 
-    File file = writeAudioFile(byteArray, "answer", audioFilePath);
+    writeToFile(byteArray,file);
+
     if (!file.exists()) {
       System.err.println("huh? can't find " + file.getAbsolutePath());
     }
@@ -118,7 +125,23 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     System.out.println("audio file " + file.getAbsolutePath() + " is valid");
   }*/
     db.answerDAO.addAnswer(Integer.parseInt(user), plan,exercise,Integer.parseInt(question),"",file.getPath(), valid, db);
-    return valid;
+    return new AudioAnswer(wavPath.replaceAll("\\\\","/"), valid);
+  }
+
+/*  public String getPathToAnswer(String plan, String exercise, String question, String user) {
+    return getLocalPathToAnswer(plan,exercise,question,user).replaceAll("\\\\","/");
+  }*/
+
+  public String getLocalPathToAnswer(String plan, String exercise, String question, String user) {
+    String tomcatWriteDirectory = getTomcatDir();
+
+    String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-"+user;
+    String currentTestDir = tomcatWriteDirectory + File.separator  + planAndTestPath;
+    String wavPath = currentTestDir + File.separator + "answer_" + System.currentTimeMillis() + ".wav";
+    File audioFilePath = new File(currentTestDir);
+    boolean mkdirs = audioFilePath.mkdirs();
+
+    return wavPath;
   }
 
   private String getTomcatDir() {
@@ -133,11 +156,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return tomcatWriteDirectory;
   }
 
-  private File writeAudioFile(byte [] byteArray,String base, File audioFilePath) {
+/*  private File writeAudioFile(byte [] byteArray,String base, File audioFilePath) {
     File file = new File(audioFilePath.getPath() + File.separator + base + ".wav");
     writeToFile(byteArray,file);
     return file;
-  }
+  }*/
 
   private void writeToFile(byte [] byteArray, File file) {
     try {
@@ -163,5 +186,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public void destroy() {
     super.destroy();
     db.destroy();
+  }
+
+  public static void main(String [] arg) {
+    System.out.println("x\\y\\z".replaceAll("\\\\","/"));
   }
 }
