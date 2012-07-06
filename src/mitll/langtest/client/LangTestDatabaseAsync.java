@@ -20,4 +20,7 @@ public interface LangTestDatabaseAsync {
 
 
   void postArray(String base64EncodedByteArray, AsyncCallback<Void> async);
+
+  void writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user, AsyncCallback<Boolean> async);
+
 }
