@@ -297,7 +297,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     flashRecordPanel.recordOnClick();
   }
 
-  public String getWav() {
+  public String getBase64EncodedWavFile() {
     return flashRecordPanel.getWav();
   }
 

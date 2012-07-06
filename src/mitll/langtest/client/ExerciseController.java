@@ -32,6 +32,6 @@ public interface ExerciseController {
 
   void startRecording();
   void stopRecording();
-  String getWav();
+  String getBase64EncodedWavFile();
 
 }
