@@ -8,9 +8,7 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.List;
@@ -26,6 +24,7 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase {
   private DatabaseImpl db;
+  private AudioCheck audioCheck = new AudioCheck();
 
   @Override
   public void init() {
@@ -71,6 +70,63 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       System.out.println("got " + b);
     }
     File file = new File("test.wav");
+    writeToFile(byteArray, file);
+  }
+
+  public boolean writeAudioFile(List<Integer> byteArray, String plan, String exercise, String question, String user) {
+    String tomcatWriteDirectory = getTomcatDir();
+
+    String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-"+user;
+    String currentTestDir = tomcatWriteDirectory + File.separator  + planAndTestPath;
+    File audioFilePath = new File(currentTestDir);
+    audioFilePath.mkdirs();
+
+    File file = writeAudioFile(byteArray, "answer", audioFilePath);
+    if (!file.exists()) {
+      System.err.println("huh? can't find " + file.getAbsolutePath());
+    }
+    boolean valid = isValid(file);
+    /*    if (!valid) {
+    System.err.println("audio file " + file.getAbsolutePath() + " is *not* valid");
+  }
+  else {
+    System.out.println("audio file " + file.getAbsolutePath() + " is valid");
+  }*/
+    db.answerDAO.addAnswer(Integer.parseInt(user), plan,exercise,Integer.parseInt(question),"",file.getPath(), valid, db);
+    return valid;
+  }
+  //	}
+  //	}
+//		catch(Exception ex){
+//			ex.printStackTrace();
+//		}
+  //}
+
+
+
+  private String getTomcatDir() {
+    String tomcatWriteDirectory = getServletContext().getInitParameter("tomcatWriteDirectoryFullPath");
+    //	String pretestFilesRelativePath = getServletContext().getInitParameter("pretestFilesRelativePath");  // likely = pretest_files
+    if (tomcatWriteDirectory == null) tomcatWriteDirectory = "answers";
+
+    File test = new File(tomcatWriteDirectory);
+    if (!test.exists()) test.mkdirs();
+    if (!test.exists()) {
+      tomcatWriteDirectory = "answers";
+    }
+    return tomcatWriteDirectory;
+  }
+
+
+  private File writeAudioFile( List<Integer> byteArray,String base, File audioFilePath) {
+    File file = new File(audioFilePath.getPath() + File.separator + base + ".wav");
+    //  item.write(file);
+    writeToFile(byteArray,file);
+    //isValid(file);
+    return file;
+  }
+
+  private void writeToFile(List<Integer> byteArray, File file) {
     try {
       OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
       for (Integer b : byteArray) {
@@ -81,6 +137,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  private boolean isValid(File file) {
+    try {
+      return audioCheck.checkWavFile(file);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return false;
   }
 
   @Override

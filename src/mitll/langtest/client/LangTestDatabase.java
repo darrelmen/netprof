@@ -25,4 +25,6 @@ public interface LangTestDatabase extends RemoteService {
   List<Result> getResults();
 
   void postArray(List<Integer> byteArray);
+
+  boolean writeAudioFile(List<Integer> byteArray, String plan, String exercise, String question, String user);
 }

@@ -29,9 +29,13 @@ import java.util.List;
  *
  */
 public class SimpleRecordPanel extends FlowPanel {
+
+   private static final String IMAGES_CHECKMARK = "images/checkmark.png";
+  private static final String IMAGES_REDX_PNG = "images/redx.png";
+
   private boolean showStatus = false;
-  private boolean showUploadStatus = false;
-  private final UploadForm upload;
+ // private boolean showUploadStatus = false;
+//  private final UploadForm upload;
   private static SaveNotification saveFeedback;  // remember for later
   //private InlineHTML save_button;
   private ImageAnchor play_button;
@@ -39,11 +43,12 @@ public class SimpleRecordPanel extends FlowPanel {
   boolean recording = false;
   private final Image recordImage;
   private final Image stopImage;
+  private Image check;
 
   /**
    * @see
    */
-	public SimpleRecordPanel(LangTestDatabaseAsync service){
+	public SimpleRecordPanel(final LangTestDatabaseAsync service, final ExerciseController controller,final Exercise exercise,final int index){
     this.service = service;
 /*    save_button = new InlineHTML();
     save_button.getElement().setId("save_button");//"flashcontent");
@@ -77,8 +82,34 @@ public class SimpleRecordPanel extends FlowPanel {
           recording = false;
           record_button.setResource(recordImage);
        //   controller.stopRecording();
-          play_button.setVisible(true); // TODO : replace with link to audio on server
 
+
+          // TODO have controller return List<Integer>
+          JsArrayInteger wav = controller.getWav();
+          play_button.setVisible(true); // TODO : replace with link to audio on server
+          service.writeAudioFile(          getByteList(wav)
+            ,exercise.getPlan(),exercise.getID(),""+index,""+controller.getUser(),new AsyncCallback<Boolean>() {
+             public void onFailure(Throwable caught) {
+             }
+
+            public void onSuccess(Boolean result) {
+             // if (result) {}
+
+              check.setVisible(false);
+              if (result) {
+                check.setUrl(IMAGES_CHECKMARK);
+                check.setAltText("Audio Saved");
+             //   exercisePanel.recordCompleted(outer);    // TODO fill in
+              }
+              else {
+                check.setUrl(IMAGES_REDX_PNG);
+                check.setAltText("Audio Invalid");
+               // exercisePanel.recordIncomplete(outer);
+              }
+              check.setVisible(true);
+            }
+
+           });
          // sendArray(headless.getWav());
         } else {
           record_button.setResource(stopImage);
@@ -109,13 +140,37 @@ public class SimpleRecordPanel extends FlowPanel {
     add(play_button);
     play_button.setVisible(false);
 
-    SimplePanel uploadStatusPanel = new SimplePanel();
+ /*   SimplePanel uploadStatusPanel = new SimplePanel();
 		uploadStatusPanel.getElement().setId("upload_status");
 		add(uploadStatusPanel);
     uploadStatusPanel.setVisible(showUploadStatus);
 
     upload = new UploadForm();
-    add(upload);
+    add(upload);*/
+
+
+    this.check = new Image(IMAGES_CHECKMARK);
+    check.getElement().setId("checkmark_" +index);
+    check.setAltText("Audio Saved");
+
+    SimplePanel spacer = new SimplePanel();
+    spacer.setHeight("24px");
+    spacer.setWidth("100px") ;
+
+    add(spacer);
+
+    add(check);
+    check.setVisible(false);
+  }
+
+  private List<Integer> getByteList(JsArrayInteger wav) {
+    List<Integer> byteArrayToSend = new ArrayList<Integer>(wav.length());
+
+    for (int i = 0; i < wav.length(); i++) {
+      int i1 = wav.get(i);
+      byteArrayToSend.add(i1);
+    }
+    return byteArrayToSend;
   }
 
   /**
@@ -138,11 +193,11 @@ public class SimpleRecordPanel extends FlowPanel {
 
   /**
    * @see mitll.langtest.client.ExerciseController#showRecorder(mitll.langtest.shared.Exercise, int, com.google.gwt.user.client.ui.Widget, mitll.langtest.client.recorder.SaveNotification)
-   * @param userID
-   * @param e
-   * @param qid
+   * @paramx userID
+   * @paramx xe
+   * @paramx qid
    */
-  public void setUpload(long userID, Exercise e, int qid) { upload.setSlots(userID, e,qid); }
+  //public void setUpload(long userID, Exercise e, int qid) { upload.setSlots(userID, e,qid); }
 
   private static class ImageAnchor extends Anchor {
     Image img = null;
