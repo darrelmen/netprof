@@ -12,11 +12,6 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class SimpleRecordExercisePanel extends ExercisePanel {
-//  private static final String IMAGES_CHECKMARK = "images/checkmark.png";
-//  private static final String IMAGES_REDX_PNG = "images/redx.png";
- // private ExerciseController controller;
-//  private LangTestDatabaseAsync service;
-
   /**
    * @see mitll.langtest.client.LangTest#loadExercise(mitll.langtest.shared.Exercise)
    * @param e
@@ -27,12 +22,6 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
   public SimpleRecordExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                                    final ExerciseController controller) {
     super(e,service,userFeedback,controller);
-  //  this.controller = controller;
-   // this.service = service;
-
-
-
-
   }
 
   /**
@@ -47,24 +36,13 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    */
   @Override
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
-    //protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
-      return new SimpleRecordPanel(service, controller,exercise, index);
+      return new SimpleRecordPanel(service, controller,exercise, this, index);
   }
 
   @Override
   protected String getQuestionPrompt(Exercise e) {
     return "&nbsp;&nbsp;&nbsp;Speak and record your answer in " +(e.promptInEnglish ? "english" : " the foreign language") +" :";
   }
-
-  /**
-   * Remembers answerPanel image widget so we can show it when save is complete.
-   */
-/*  private class ImageAnchor extends Anchor {
-    public ImageAnchor() {}
-    public void setResource(Image img) {
-      DOM.insertBefore(getElement(), img.getElement(), DOM.getFirstChild(getElement()));
-    }
-  }*/
 
   /**
    * TODO : on the server, notice which audio posts have arrived, and take the latest ones...

@@ -10,6 +10,7 @@ import mitll.langtest.shared.User;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 
+import javax.servlet.ServletContext;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,6 +27,7 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase {
+  private static final String ANSWERS = "answers";
   private DatabaseImpl db;
   private AudioCheck audioCheck = new AudioCheck();
 
@@ -67,20 +69,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public List<User> getUsers() { return db.getUsers(); }
   public List<Result> getResults() { return db.getResults(); }
 
+  /**
+   * Just for testing
+   * @deprecated
+   * @param base64EncodedByteArray
+   */
   public void postArray(String base64EncodedByteArray) {
     byte [] byteArray = getBytesFromBase64String(base64EncodedByteArray);
-    /*System.out.println("got " + base64EncodedByteArray.size());
-    for (Integer b : base64EncodedByteArray) {
-      System.out.println("got " + b);
-    }*/
     File file = new File("test.wav");
     writeToFile(byteArray, file);
   }
 
   private byte[] getBytesFromBase64String(String base64EncodedByteArray) {
     Base64 decoder = new Base64();
-    byte[] decoded = null;
-    System.out.println("postArray : got " + base64EncodedByteArray.substring(0,Math.min(base64EncodedByteArray.length(), 20)) +"...");
+    byte[] decoded;
+    //System.out.println("postArray : got " + base64EncodedByteArray.substring(0,Math.min(base64EncodedByteArray.length(), 20)) +"...");
     try {
       decoded = (byte[])decoder.decode(base64EncodedByteArray);
     } catch (DecoderException e1) {   // just b/c eclipse seems to insist
@@ -90,12 +93,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public boolean writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user) {
+    ServletContext context = getServletContext();
+    String realContextPath = context.getRealPath(getThreadLocalRequest().getContextPath());
+
+    System.out.println("Deployed context is " + realContextPath);
+
     String tomcatWriteDirectory = getTomcatDir();
 
     String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-"+user;
     String currentTestDir = tomcatWriteDirectory + File.separator  + planAndTestPath;
     File audioFilePath = new File(currentTestDir);
-    audioFilePath.mkdirs();
+    boolean mkdirs = audioFilePath.mkdirs();
     byte [] byteArray = getBytesFromBase64String(base64EncodedString);
 
     File file = writeAudioFile(byteArray, "answer", audioFilePath);
@@ -112,34 +120,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.answerDAO.addAnswer(Integer.parseInt(user), plan,exercise,Integer.parseInt(question),"",file.getPath(), valid, db);
     return valid;
   }
-  //	}
-  //	}
-//		catch(Exception ex){
-//			ex.printStackTrace();
-//		}
-  //}
-
-
 
   private String getTomcatDir() {
     String tomcatWriteDirectory = getServletContext().getInitParameter("tomcatWriteDirectoryFullPath");
-    //	String pretestFilesRelativePath = getServletContext().getInitParameter("pretestFilesRelativePath");  // likely = pretest_files
-    if (tomcatWriteDirectory == null) tomcatWriteDirectory = "answers";
+    if (tomcatWriteDirectory == null) tomcatWriteDirectory = ANSWERS;
 
     File test = new File(tomcatWriteDirectory);
     if (!test.exists()) test.mkdirs();
     if (!test.exists()) {
-      tomcatWriteDirectory = "answers";
+      tomcatWriteDirectory = ANSWERS;
     }
     return tomcatWriteDirectory;
   }
 
-
   private File writeAudioFile(byte [] byteArray,String base, File audioFilePath) {
     File file = new File(audioFilePath.getPath() + File.separator + base + ".wav");
-    //  item.write(file);
     writeToFile(byteArray,file);
-    //isValid(file);
     return file;
   }
 
@@ -147,9 +143,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     try {
       OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
       outputStream.write(byteArray);
-   /*   for (Integer b : base64EncodedByteArray) {
-        outputStream.write(b);
-      }*/
       System.out.println("wrote " + file.getAbsolutePath());
       outputStream.close();
     } catch (Exception e) {

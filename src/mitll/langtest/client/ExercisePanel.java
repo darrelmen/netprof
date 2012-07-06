@@ -31,7 +31,7 @@ import java.util.Set;
  * Time: 1:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExercisePanel extends VerticalPanel {
+public class ExercisePanel extends VerticalPanel implements ExerciseQuestionState {
   private static final String ANSWER_BOX_WIDTH = "400px";
   private List<Widget> answers = new ArrayList<Widget>();
   private Set<Widget> completed = new HashSet<Widget>();
@@ -63,25 +63,35 @@ public class ExercisePanel extends VerticalPanel {
       next.setEnabled(false);
     }
     for (Exercise.QAPair pair : e.getQuestions()) {
-
-      Widget answerWidget = getAnswerWidget(e, service, controller, i-1);
+      // add question header
       String questionHeader = "Question #" + (i++) + " : " + pair.getQuestion();
       add(new HTML("<h4>" + questionHeader + "</h4>"));
+
+      // add question prompt
       VerticalPanel vp = new VerticalPanel();
       vp.add(new HTML(getQuestionPrompt(e)));
       SimplePanel spacer = new SimplePanel();
       spacer.setSize("500px", "20px");
       vp.add(spacer);
+
+      // add answer widget
+      Widget answerWidget = getAnswerWidget(e, service, controller, i-1);
       vp.add(answerWidget);
-      add(vp);
       answers.add(answerWidget);
+
+      add(vp);
     }
     SimplePanel spacer = new SimplePanel();
     spacer.setSize("500px", "20px");
     add(spacer);
 
-    HorizontalPanel buttonRow = new HorizontalPanel();
+    HorizontalPanel buttonRow = getNextAndPreviousButtons(e, service, userFeedback, controller);
     add(buttonRow);
+  }
+
+  private HorizontalPanel getNextAndPreviousButtons(final Exercise e, final LangTestDatabaseAsync service,
+                                                    final UserFeedback userFeedback, final ExerciseController controller) {
+    HorizontalPanel buttonRow = new HorizontalPanel();
 
     Button prev = new Button("Previous");
     prev.addClickHandler(new ClickHandler() {
@@ -101,6 +111,7 @@ public class ExercisePanel extends VerticalPanel {
         postAnswers(service, userFeedback, controller, e);
       }
     });
+    return buttonRow;
   }
 
   protected String getQuestionPrompt(Exercise e) {
