@@ -48,7 +48,7 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
   @Override
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
     //protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
-      return new SimpleRecordPanel(service);
+      return new SimpleRecordPanel(service, controller,exercise, index);
   }
 
   @Override
@@ -57,17 +57,6 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
   }
 
   /**
-   * Remembers answerPanel image widget so we can show it when save is complete.
-   */
-/*  private class ImageAnchor extends Anchor {
-    public ImageAnchor() {}
-    public void setResource(Image img) {
-      DOM.insertBefore(getElement(), img.getElement(), DOM.getFirstChild(getElement()));
-    }
-  }*/
-
-  /**
-   * TODO : on the server, notice which audio posts have arrived, and take the latest ones...
    *
    * @param service
    * @param userFeedback
