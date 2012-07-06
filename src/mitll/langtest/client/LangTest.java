@@ -21,7 +21,6 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -162,7 +161,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     //sendArray();
   }
 
-  private void sendArray() {
+/*  private void sendArray() {
     JsArrayInteger array = getArray();
     List<Integer> byteArrayToSend = new ArrayList<Integer>(array.length());
 
@@ -179,7 +178,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         GWT.log("sendArray : got success " + result);
       }
     });
-  }
+  }*/
 
 
   public native JsArrayInteger getArray() /*-{
@@ -295,11 +294,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public int getUser() { return user.getUser(); }
 
   public void startRecording() {
-  //  flashRecordPanel.recordOnClick();
+    flashRecordPanel.recordOnClick();
+  }
+
+  public String getWav() {
+    return flashRecordPanel.getWav();
   }
 
   public void stopRecording() {
- //   flashRecordPanel.stopRecording();
+    flashRecordPanel.stopRecording();
   }
 
   private void addExerciseToList(final Exercise e, VerticalPanel items) {

@@ -24,5 +24,5 @@ public interface LangTestDatabase extends RemoteService {
   List<User> getUsers();
   List<Result> getResults();
 
-  void postArray(List<Integer> byteArray);
+  void postArray(String base64EncodedByteArray);
 }

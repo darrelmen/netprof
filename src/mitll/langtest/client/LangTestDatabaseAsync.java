@@ -19,5 +19,5 @@ public interface LangTestDatabaseAsync {
   void getResults(AsyncCallback<List<Result>> async);
 
 
-  void postArray(List<Integer> byteArray, AsyncCallback<Void> async);
+  void postArray(String base64EncodedByteArray, AsyncCallback<Void> async);
 }

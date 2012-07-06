@@ -7,10 +7,11 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Base64;
+
 import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.List;
@@ -65,17 +66,27 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public List<User> getUsers() { return db.getUsers(); }
   public List<Result> getResults() { return db.getResults(); }
 
-  public void postArray(List<Integer> byteArray) {
-    System.out.println("got " + byteArray.size());
-    for (Integer b : byteArray) {
+  public void postArray(String base64EncodedByteArray) {
+    Base64 decoder = new Base64();
+    byte[] decoded = null;
+    System.out.println("postArray : got " + base64EncodedByteArray.substring(0,Math.min(base64EncodedByteArray.length(), 20)) +"...");
+	try {
+		decoded = (byte[])decoder.decode(base64EncodedByteArray);
+	} catch (DecoderException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
+    /*System.out.println("got " + base64EncodedByteArray.size());
+    for (Integer b : base64EncodedByteArray) {
       System.out.println("got " + b);
-    }
+    }*/
     File file = new File("test.wav");
     try {
       OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
-      for (Integer b : byteArray) {
+      outputStream.write(decoded);
+   /*   for (Integer b : base64EncodedByteArray) {
         outputStream.write(b);
-      }
+      }*/
       System.out.println("wrote " + file.getAbsolutePath());
       outputStream.close();
     } catch (Exception e) {

@@ -43,7 +43,7 @@ public class SimpleRecordPanel extends FlowPanel {
   /**
    * @see
    */
-	public SimpleRecordPanel(LangTestDatabaseAsync service){
+	public SimpleRecordPanel(LangTestDatabaseAsync service, final ExerciseController controller){
     this.service = service;
 /*    save_button = new InlineHTML();
     save_button.getElement().setId("save_button");//"flashcontent");
@@ -76,15 +76,15 @@ public class SimpleRecordPanel extends FlowPanel {
         if (recording) {
           recording = false;
           record_button.setResource(recordImage);
-       //   controller.stopRecording();
+          controller.stopRecording();
           play_button.setVisible(true); // TODO : replace with link to audio on server
 
-         // sendArray(headless.getWav());
+          sendBase64EncodedArray(controller.getWav());
         } else {
           record_button.setResource(stopImage);
           recording = true;
 
-          //   controller.startRecording();
+          controller.startRecording();
         }
       }
     });
@@ -160,26 +160,21 @@ public class SimpleRecordPanel extends FlowPanel {
     }*/
   }
 
-  private void sendArray(JsArrayInteger array) {
-    if (array == null) {
+  private void sendBase64EncodedArray(String base64) {
+    if (base64 == null) {
       System.err.println("got null array!");
       return;
     }
-    GWT.log("Got array of size " + array.length());
+   // GWT.log("Got array of size " + array.length());
  //   JsArrayInteger array = getArray();
-    List<Integer> byteArrayToSend = new ArrayList<Integer>(array.length());
 
-    for (int i = 0; i < array.length(); i++) {
-      int i1 = array.get(i);
-      byteArrayToSend.add(i1);
-    }
-    service.postArray(byteArrayToSend,new AsyncCallback<Void>() {
+    service.postArray(base64,new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) {
-        GWT.log("sendArray : got failure " + caught);
+        GWT.log("sendBase64EncodedArray : got failure " + caught);
       }
 
       public void onSuccess(Void result) {
-        GWT.log("sendArray : got success " + result);
+        GWT.log("sendBase64EncodedArray : got success " + result);
       }
     });
   }

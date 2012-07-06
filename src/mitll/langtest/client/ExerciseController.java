@@ -1,5 +1,6 @@
 package mitll.langtest.client;
 
+import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.recorder.SaveNotification;
 import mitll.langtest.shared.Exercise;
@@ -29,7 +30,8 @@ public interface ExerciseController {
 
   int getUser();
 
- // void startRecording();
- // void stopRecording();
+  void startRecording();
+  void stopRecording();
+  String getWav();
 
 }

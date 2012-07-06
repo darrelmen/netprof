@@ -103,8 +103,12 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     $wnd.Recorder.showPermission();
   }-*//*;*/
 
-  public native JsArrayInteger getWav() /*-{
-    $wnd.Recorder.getWav();
+  /**
+   * Base64 encoded byte array from action script.
+   * @return
+   */
+  public native String getWav() /*-{
+    return $wnd.Recorder.getWav();
   }-*/;
 
 /*  public void initialize(String moduleBaseURL) {
