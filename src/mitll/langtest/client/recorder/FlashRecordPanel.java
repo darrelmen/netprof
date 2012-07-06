@@ -150,7 +150,7 @@ public class FlashRecordPanel extends FlowPanel {
     $wnd.Recorder.getWav();
   }-*/;
 
-  private void sendArray(JsArrayInteger array) {
+/*  private void sendArray(JsArrayInteger array) {
  //   JsArrayInteger array = getArray();
     List<Integer> byteArrayToSend = new ArrayList<Integer>(array.length());
 
@@ -167,7 +167,7 @@ public class FlashRecordPanel extends FlowPanel {
         GWT.log("sendArray : got success " + result);
       }
     });
-  }
+  }*/
 
   /**
    * @see mitll.langtest.client.LangTest#showPopupAt(int, int)

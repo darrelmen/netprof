@@ -180,11 +180,11 @@ Recorder = {
   },
 
   stop: function() {
-    Recorder.recorder.stop();
+    Recorder.recorder.record("", "");
   },
 
   getWav: function() {
-    return Recorder.recorder.getWav();
+    return Recorder.recorder.getwavbase64();
   },
 
   showPermission: function() {
