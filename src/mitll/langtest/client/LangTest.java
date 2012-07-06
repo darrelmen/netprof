@@ -2,25 +2,29 @@ package mitll.langtest.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.LoadEvent;
+import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -111,19 +115,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     HTML title = new HTML("<h1>" + DLI_LANGUAGE_TESTING + "</h1>");
     hp.addEast(getLogout(),EAST_WIDTH);
   //  hp.setHeight("180px");
-    flashRecordPanel = new FlashRecordPanelHeadless();
-    FlashRecordPanelHeadless.setMicPermission(new MicPermission() {
-      public void gotPermission() {
-        System.out.println("got permission!");
-        flashRecordPanel.setSize("0px","0px");
-        flashRecordPanelInited = true;
-        getExercises(lastUser);
-      }
-
-      public void gotDenial() {
-          System.err.println("dude!!!!");
-      }
-    });
+    makeFlashContainer();
     hp.add(title);
 
     widgets.addNorth(hp, HEADER_HEIGHT);
@@ -144,6 +136,63 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     exerciseList.add(itemScroller);
 
     login();
+  }
+
+  private void makeFlashContainer() {
+    flashRecordPanel = new FlashRecordPanelHeadless();
+    FlashRecordPanelHeadless.setMicPermission(new MicPermission() {
+      public void gotPermission() {
+        System.out.println("got permission!");
+        flashRecordPanel.setSize("0px","0px");
+        flashRecordPanelInited = true;
+        getExercises(lastUser);
+      }
+
+      public void gotDenial() {
+        System.err.println("dude!!!!");
+        showImagePopup();
+      }
+    });
+  }
+
+  private void showImagePopup() {
+    final PopupPanel popupImage = new PopupPanel();
+    popupImage.setAutoHideEnabled(true);
+    final Image image = new Image("images/really.png");
+    image.addLoadHandler(new LoadHandler() {
+      public void onLoad(LoadEvent event) {
+        // since the image has been loaded, the dimensions are known
+        popupImage.center();
+        // only now show the image
+        popupImage.setVisible(true);
+      }
+    });
+
+    popupImage.add(image);
+    // hide the image until it has been fetched
+    popupImage.setVisible(false);
+    // this causes the image to be loaded into the DOM
+    popupImage.center();
+
+
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        popupImage.hide();
+        //flashRecordPanel.showPermission();
+        didPopup = false;
+        currentExerciseVPanel.remove(flashRecordPanel);
+
+        flashRecordPanel.removeFlash("flashcontent");
+
+        makeFlashContainer();
+        currentExerciseVPanel.add(flashRecordPanel);
+        initFlash();
+      }
+    };
+
+    // Schedule the timer to run once in 5 seconds.
+    t.schedule(1000);
   }
 
   /**
@@ -202,16 +251,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void gotUser(long userID) {
 //    System.out.println("gotUser " + userID + " vs " + lastUser);
 
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-        if (!didPopup) {
-          System.out.println("gotUser : doing initializeJS");
-          flashRecordPanel.initializeJS(GWT.getModuleBaseURL(), "flashcontent");
-          System.out.println("gotUser : did   initializeJS");
-          didPopup = true;
-        }
-      }
-    });
+    initFlash();
 
     if (userID != lastUser) {
       if (flashRecordPanelInited) {
@@ -219,6 +259,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
       lastUser = userID;
     }
+  }
+
+  private void initFlash() {
+    Scheduler.get().scheduleDeferred(new Command() {
+      public void execute() {
+        if (!didPopup) {
+          System.out.println("gotUser : doing installFlash");
+          flashRecordPanel.installFlash(GWT.getModuleBaseURL(), "flashcontent");
+          System.out.println("gotUser : did   installFlash");
+          didPopup = true;
+        }
+      }
+    });
   }
 
   /**

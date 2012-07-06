@@ -47,9 +47,9 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     $wnd.Recorder.stop();
   }-*/;
 
-/*  public native void playbackOnClick() *//*-{
-    $wnd.Recorder.playBack('audio');
-  }-*//*;*/
+  public native void showPermission() /*-{
+    $wnd.Recorder.showPermission();
+  }-*/;
 
   /**
    * Base64 encoded byte array from action script.
@@ -59,7 +59,12 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     return $wnd.Recorder.getWav();
   }-*/;
 
-	public native void initializeJS(String moduleBaseURL, String id) /*-{
+  /**
+   * @see mitll.langtest.client.LangTest#initFlash()
+   * @param moduleBaseURL
+   * @param id
+   */
+	public native void installFlash(String moduleBaseURL, String id) /*-{
 		var appWidth = 240;
 		var appHeight = 160;
 		
@@ -80,6 +85,9 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 		$wnd.swfobject.embedSWF(moduleBaseURL + "test.swf", id, appWidth, appHeight, "10.1.0", "", flashvars, params, attributes, outputStatus);
   }-*/;
 
+  public native void removeFlash(String id) /*-{
+    $wnd.swfobject.removeSWF("recorderApp");
+  }-*/;
 
   public static void micConnected() {
     System.out.println("micConnected!");
@@ -89,11 +97,6 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     System.out.println("mic  NOT   Connected!");
     micPermission.gotDenial();
   }
-
-/*  public static void playbackStopped() {
-    System.out.println("mic  NOT   Connected!");
-    micPermission.gotDenial();
-  }*/
 
   public static void swfCallback() {
     System.out.println("embedSWF is complete!");

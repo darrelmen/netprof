@@ -19,8 +19,5 @@ public interface LangTestDatabaseAsync {
   void getUsers(AsyncCallback<List<User>> async);
   void getResults(AsyncCallback<List<Result>> async);
 
- // void getPathToAnswer(String plan, String exercise, String question, String user, AsyncCallback<String> async);
-
-  //void postArray(String base64EncodedByteArray);
   void writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user, AsyncCallback<AudioAnswer> async);
 }

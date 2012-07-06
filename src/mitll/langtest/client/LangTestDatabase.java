@@ -25,8 +25,5 @@ public interface LangTestDatabase extends RemoteService {
   List<User> getUsers();
   List<Result> getResults();
 
-  //void postArray(String base64EncodedByteArray);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user);
-
- // String getPathToAnswer(String plan, String exercise, String question, String user);
 }
