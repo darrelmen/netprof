@@ -21,6 +21,17 @@ public class Result implements IsSerializable {
   public long timestamp;
 
   public Result() {}
+
+  /**
+   * @see mitll.langtest.server.database.ResultDAO#getResults()
+   * @param userid
+   * @param plan
+   * @param id
+   * @param qid
+   * @param answer
+   * @param valid
+   * @param timestamp
+   */
   public Result(long userid, String plan, String id, int qid, String answer, /*String audioFile,*/ boolean  valid, long timestamp) {
     this.userid = userid;
     this.plan  = plan;

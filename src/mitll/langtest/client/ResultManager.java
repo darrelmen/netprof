@@ -1,5 +1,7 @@
 package mitll.langtest.client;
 
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -60,9 +62,7 @@ public class ResultManager {
     dialogBox.setPopupPosition(left, top);
 
     service.getResults(new AsyncCallback<List<Result>>() {
-      public void onFailure(Throwable caught) {
-      }
-
+      public void onFailure(Throwable caught) {}
       public void onSuccess(List<Result> result) {
         if (lastTable != null) {
           dialogVPanel.remove(lastTable);
@@ -121,20 +121,23 @@ public class ResultManager {
     ipaddr.setSortable(true);
     table.addColumn(ipaddr,"Answer");
 
-/*   final SafeHtmlCell progressCell = new SafeHtmlCell();
+    final AbstractCell<SafeHtml> progressCell = new AbstractCell<SafeHtml>("click") {
+      @Override
+      public void render(Context context, SafeHtml value, SafeHtmlBuilder sb) {
+        if (value != null) {
+          sb.append(value);
+        }
+      }
+    };
     Column<Result,SafeHtml> audioFile = new Column<Result,SafeHtml>(progressCell) {
       @Override
       public SafeHtml getValue(Result answer) {
-       // SafeHtmlBuilder sb = new SafeHtmlBuilder();
-       // sb.appendHtmlConstant(answer.answer);
-       // sb.appendHtmlConstant(getAudioTag(answer.answer));
-       // return sb.toSafeHtml();
         return getAudioTag(answer.answer);
       }
     };
     audioFile.setSortable(true);
 
-    table.addColumn(audioFile,"AudioFile");*/
+    table.addColumn(audioFile,"File");
 
     TextColumn<Result> valid = new TextColumn<Result>() {
       @Override
@@ -203,7 +206,7 @@ public class ResultManager {
 
     // Set the cellList as the display.
     pager.setDisplay(table);
-
+    pager.setPageSize(8);
     // Add the pager and list to the page.
     VerticalPanel vPanel = new VerticalPanel();
     vPanel.add(pager);

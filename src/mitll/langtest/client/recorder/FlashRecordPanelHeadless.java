@@ -24,6 +24,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   private String id = "flashcontent";
   private static MicPermission micPermission;
   private boolean didPopup = false;
+  private static boolean permissionReceived;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2
@@ -55,9 +56,9 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
       public void execute() {
         if (!didPopup) {
           show();
-          System.out.println("gotUser : doing installFlash");
-          installFlash();//GWT.getModuleBaseURL(), "flashcontent");
-          System.out.println("gotUser : did   installFlash");
+          System.out.println("initFlash : doing installFlash");
+          installFlash();
+          System.out.println("initFlash : did   installFlash");
           didPopup = true;
         }
       }
@@ -108,12 +109,9 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
     $wnd.micConnected = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::micConnected());
     $wnd.micNotConnected = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::micNotConnected());
-   // $wnd.playbackStopped = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::playbackStopped());
-   // $wnd.swfCallback = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::swfCallback());
 
     function outputStatus(e) {
       //alert("e.success = " + e.success +"\ne.id = "+ e.id +"\ne.ref = "+ e.ref);
-      //swfCallback();  // TODO somehow this sometimes shows up as undefined...
     }
 		
 		$wnd.swfobject.embedSWF(moduleBaseURL + "test.swf", id, appWidth, appHeight, "10.1.0", "", flashvars, params, attributes, outputStatus);
@@ -128,6 +126,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   public static void micConnected() {
     System.out.println("micConnected!");
+    permissionReceived = true;
     micPermission.gotPermission();
   }
 
@@ -136,10 +135,9 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   public static void micNotConnected() {
     System.out.println("mic  NOT   Connected!");
+    permissionReceived = false;
     micPermission.gotDenial();
   }
-/*
-  public static void swfCallback() {
-    System.out.println("embedSWF is complete!");
-  }*/
+
+  public boolean gotPermission() { return permissionReceived; }
 }

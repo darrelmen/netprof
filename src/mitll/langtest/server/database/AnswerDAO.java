@@ -49,11 +49,8 @@ public class AnswerDAO {
       statement.setInt(4, questionID);
 
       ResultSet rs = statement.executeQuery();
-      while (rs.next()) {
+      if (rs.next()) {
         val = rs.getBoolean(1);
-       // Timestamp timestamp = rs.getTimestamp(2);
-       // System.out.println(timestamp + " : " + val);
-        break;
       }
       rs.close();
       statement.close();
@@ -65,7 +62,7 @@ public class AnswerDAO {
   }
 
   /**
-   * @see mitll.langtest.server.UploadServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, String, String)
    * @param userID
    * @param plan
    * @param id
@@ -103,14 +100,14 @@ public class AnswerDAO {
    * @param questionID
    * @param answer
    * @param audioFile
-   *@param connection
-   * @param valid   @throws java.sql.SQLException
+   * @param connection
+   * @param valid
+   * @throws java.sql.SQLException
    * @see #addAnswer
    */
   private void addAnswerToTable(int userid, String plan, String id, int questionID, String answer, String audioFile,
                                 Connection connection, boolean valid) throws SQLException {
     PreparedStatement statement;
-    //statement = connection.prepareStatement("INSERT INTO results(userid,plan,id,qid,answer,audioFile,valid) VALUES(?,?,?,?,?,?,?)");
     statement = connection.prepareStatement("INSERT INTO results(userid,plan," +
       Database.EXID +
       ",qid,answer,valid) VALUES(?,?,?,?,?,?)");

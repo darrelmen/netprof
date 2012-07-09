@@ -68,19 +68,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public List<User> getUsers() { return db.getUsers(); }
-  public List<Result> getResults() { return db.getResults(); }
-
-  /**
-   * Just for testing
-   * @param base64EncodedByteArray
-   */
-/*
-  public void postArray(String base64EncodedByteArray) {
-    byte [] byteArray = getBytesFromBase64String(base64EncodedByteArray);
-    File file = new File("test.wav");
-    writeToFile(byteArray, file);
+  public List<Result> getResults() {
+    List<Result> results = db.getResults();
+    for (Result r : results) {
+      int answer = r.answer.indexOf(ANSWERS);
+      if (answer == -1) continue;
+      r.answer = r.answer.substring(answer);
+    }
+    return results;
   }
-*/
 
   /**
    * Decode Base64 string
@@ -91,7 +87,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Base64 decoder = new Base64();
     byte[] decoded = null;
     //System.out.println("postArray : got " + base64EncodedByteArray.substring(0,Math.min(base64EncodedByteArray.length(), 20)) +"...");
-    //decoded = (byte[])decoder.decode(base64EncodedByteArray);
+   // decoded = (byte[])decoder.decode(base64EncodedByteArray);
 
     try {
       decoded = (byte[])decoder.decode(base64EncodedByteArray);
@@ -137,7 +133,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return getLocalPathToAnswer(plan,exercise,question,user).replaceAll("\\\\","/");
   }*/
 
-  public String getLocalPathToAnswer(String plan, String exercise, String question, String user) {
+  private String getLocalPathToAnswer(String plan, String exercise, String question, String user) {
     String tomcatWriteDirectory = getTomcatDir();
 
     String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-"+user;
@@ -161,17 +157,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return tomcatWriteDirectory;
   }
 
-/*  private File writeAudioFile(byte [] byteArray,String base, File audioFilePath) {
-    File file = new File(audioFilePath.getPath() + File.separator + base + ".wav");
-    writeToFile(byteArray,file);
-    return file;
-  }*/
-
   private void writeToFile(byte [] byteArray, File file) {
     try {
       OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
       outputStream.write(byteArray);
-      System.out.println("wrote " + file.getAbsolutePath());
+//      System.out.println("wrote " + file.getAbsolutePath());
       outputStream.close();
     } catch (Exception e) {
       e.printStackTrace();
@@ -195,5 +185,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public static void main(String [] arg) {
     System.out.println("x\\y\\z".replaceAll("\\\\","/"));
+
+    LangTestDatabaseImpl langTestDatabase = new LangTestDatabaseImpl();
+    langTestDatabase.init();
+    langTestDatabase.getResults();
   }
 }

@@ -8,14 +8,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -34,9 +29,6 @@ import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.shared.Exercise;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
@@ -49,25 +41,21 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int EAST_WIDTH = 45;
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
 
-  private VerticalPanel exerciseList = new VerticalPanel();
   private Panel currentExerciseVPanel = new VerticalPanel();
-  private ExercisePanel current = null;
-  private VerticalPanel items;
-  private List<Exercise> currentExercises = null;
-  private List<HTML> progressMarkers = new ArrayList<HTML>();
-  private int currentExercise = 0;
+  private ExerciseList exerciseList;
   private Label status;
   private UserManager user;
   private final UserTable userTable = new UserTable();
   private ResultManager resultManager;
   private FlashRecordPanelHeadless flashRecordPanel;
-  //private boolean didPopup = false;
 
-  private boolean flashRecordPanelInited;
   private long lastUser = -1;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
 
+  /**
+   * Make an exception handler that displays the exception.
+   */
   public void onModuleLoad() {
     // set uncaught exception handler
     GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
@@ -125,7 +113,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     widgets.addNorth(hp, HEADER_HEIGHT);
     widgets.addSouth(status = new Label(), FOOTER_HEIGHT);
-
+    VerticalPanel exerciseList = new VerticalPanel();
     widgets.addWest(exerciseList, EXERCISE_LIST_WIDTH);
 
     // set up center panel, initially with flash record panel
@@ -137,8 +125,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setupErrorDialog();
 
     // set up left side exercise list
-    this.items = new VerticalPanel();
-    ScrollPanel itemScroller = new ScrollPanel(items);
+    ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
+    this.exerciseList = new ExerciseList(currentExerciseVPanel,service,this, factory);
+    ScrollPanel itemScroller = new ScrollPanel(this.exerciseList);
     itemScroller.setSize(EXERCISE_LIST_WIDTH +"px",(HEIGHT - HEADER_HEIGHT - FOOTER_HEIGHT - 60) + "px"); // 54
     exerciseList.add(new HTML("<h2>Items</h2>"));
     exerciseList.add(itemScroller);
@@ -153,13 +142,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void makeFlashContainer() {
     flashRecordPanel = new FlashRecordPanelHeadless();
-    System.out.println("made " + flashRecordPanel);
+
     FlashRecordPanelHeadless.setMicPermission(new MicPermission() {
       public void gotPermission() {
         System.out.println("got permission!");
         flashRecordPanel.hide();
-        flashRecordPanelInited = true;
-        getExercises(lastUser);
+        exerciseList.getExercises(lastUser);
       }
 
       public void gotDenial() {
@@ -213,7 +201,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * Has both a logout and a users link
+   * Has both a logout and a users link and a results link
    * @return
    */
   private Widget getLogout() {
@@ -225,10 +213,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     logout.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         user.clearUser();
-        removeCurrentExercise();
-        items.clear();
-        progressMarkers.clear();
-
+        exerciseList.removeCurrentExercise();
+        exerciseList.clear();
         login();
       }
     });
@@ -277,32 +263,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     flashRecordPanel.initFlash();
 
     if (userID != lastUser) {
-      if (flashRecordPanelInited) {
-        getExercises(userID);
+      if (flashRecordPanel.gotPermission()) {
+        exerciseList.getExercises(userID);
       }
       lastUser = userID;
     }
-  }
-
-  /**
-   * Get exercises for this user.
-   * @param userID
-   */
-  private void getExercises(long userID) {
-    //System.out.println("loading exercises for " + userID);
-    service.getExercises(userID, new AsyncCallback<List<Exercise>>() {
-      public void onFailure(Throwable caught) {
-        showErrorMessage("Server error - couldn't get exercises.");
-      }
-
-      public void onSuccess(List<Exercise> result) {
-        currentExercises = result; // remember current exercises
-        for (final Exercise e : result) {
-          addExerciseToList(e, items);
-        }
-        loadFirstExercise();
-      }
-    });
   }
 
   public int getUser() { return user.getUser(); }
@@ -327,33 +292,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public String getBase64EncodedWavFile() {
     return flashRecordPanel.getWav();
-  }
-
-  private void addExerciseToList(final Exercise e, VerticalPanel items) {
-    final HTML w = new HTML("<b>" + e.getID() + "</b>");
-    w.setStylePrimaryName("exercise");
-    items.add(w);
-    progressMarkers.add(w);
-
-    w.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        loadExercise(e);
-      }
-    });
-    w.addMouseOverHandler(new MouseOverHandler() {
-      public void onMouseOver(MouseOverEvent event) {
-        w.addStyleName("clickable");
-      }
-    });
-    w.addMouseOutHandler(new MouseOutHandler() {
-      public void onMouseOut(MouseOutEvent event) {
-        w.removeStyleName("clickable");
-      }
-    });
-  }
-
-  private void loadFirstExercise() {
-    loadExercise(currentExercises.get(0));
   }
 
   private DialogBox dialogBox;
@@ -387,58 +325,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public void showStatus(String msg) { status.setText(msg); }
 
-  private void loadExercise(Exercise e) {
-    login();
-
-    removeCurrentExercise();
-    if (e.getType() == Exercise.EXERCISE_TYPE.RECORD) {
-      currentExerciseVPanel.add(current = new SimpleRecordExercisePanel(e, service, this, this));
-    } else {
-      currentExerciseVPanel.add(current = new ExercisePanel(e, service, this, this));
-    }
-    int i = currentExercises.indexOf(e);
-
-    markCurrentExercise(i);
-    currentExercise = i;
-  }
-
-  private void removeCurrentExercise() {
-    if (current != null) {
-      currentExerciseVPanel.remove(current);
-      current = null;
-    }
-  }
-
-  private void markCurrentExercise(int i) {
-    HTML html = progressMarkers.get(currentExercise);
-    html.setStyleDependentName("highlighted", false);
-    html = progressMarkers.get(i);
-    html.setStyleDependentName("highlighted", true);
-  }
-
-  public boolean loadNextExercise(Exercise current) {
-    showStatus("");
-    int i = currentExercises.indexOf(current);
-    boolean onLast = i == currentExercises.size() - 1;
-    if (onLast) {
-      showErrorMessage("Test Complete! Thank you!");
-    }
-    else {
-      loadExercise(currentExercises.get(i+1));
-    }
-    return onLast;
-  }
-
-  public boolean loadPreviousExercise(Exercise current) {
-    showStatus("");
-    int i = currentExercises.indexOf(current);
-    boolean onFirst = i == 0;
-    if (onFirst) {}
-    else {
-      loadExercise(currentExercises.get(i-1));
-    }
-    return onFirst;
-  }
-
-  public boolean onFirst(Exercise current) { return currentExercises.indexOf(current) == 0; }
+  public boolean loadNextExercise(Exercise current) { return exerciseList.loadNextExercise(current);  }
+  public boolean loadPreviousExercise(Exercise current) { return exerciseList.loadPreviousExercise(current);  }
+  public boolean onFirst(Exercise current) { return exerciseList.onFirst(current); }
 }
