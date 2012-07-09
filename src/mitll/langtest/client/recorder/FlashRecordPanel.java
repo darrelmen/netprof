@@ -26,7 +26,7 @@ import java.util.List;
  * Communicates with saveFeedback interface when a save(upload) completes {@link mitll.langtest.client.RecordExercisePanel.AnswerPanel}
  *
  * @author Gordon Vidaver
- *
+ * @deprecated use FlashRecordPanelHeadless instead
  */
 public class FlashRecordPanel extends FlowPanel {
   private boolean showStatus = false;

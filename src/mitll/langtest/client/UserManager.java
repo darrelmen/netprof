@@ -5,10 +5,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.SimplePager;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -19,11 +15,9 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.shared.User;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -38,8 +32,8 @@ public class UserManager {
   private static final int EXPIRATION_MINUTES = 30;
   private static final int MIN_AGE = 6;
   private static final int MAX_AGE = 90;
-  private LangTestDatabaseAsync service;
-  private UserNotification langTest;
+  private final LangTestDatabaseAsync service;
+  private final UserNotification langTest;
   //Logger logger = Logger.getLogger("UserManager");
 
   public UserManager(UserNotification lt, LangTestDatabaseAsync service) {
@@ -48,7 +42,7 @@ public class UserManager {
   }
 
   // user tracking
-  public void storeUser(long sessionID) {
+  private void storeUser(long sessionID) {
     final long DURATION = 1000 * 60 * 60 * EXPIRATION_MINUTES; //duration remembering login. 2 weeks in this example.
     Date expires = new Date(System.currentTimeMillis() + DURATION);
     Cookies.setCookie("sid", "" + sessionID, expires);
@@ -223,149 +217,5 @@ public class UserManager {
     dialogBox.setPopupPosition(left, top);
 
     dialogBox.show();
-  }
-
-  private Widget lastTable = null;
-  private Button closeButton;
-  public void showUsers() {
-    // Create the popup dialog box
-    final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText("Registered Users");
-
-    // Enable glass background.
-    dialogBox.setGlassEnabled(true);
-
-    closeButton = new Button("Close");
-    closeButton.setEnabled(true);
-    closeButton.getElement().setId("closeButton");
-
-    final VerticalPanel dialogVPanel = new VerticalPanel();
-    dialogVPanel.setWidth("1200px");
-    dialogBox.setWidth("1200px");
-
-    int left = (Window.getClientWidth() - 0) / 10;
-    int top  = (Window.getClientHeight() - 0) / 10;
-    dialogBox.setPopupPosition(left, top);
-
-    service.getUsers(new AsyncCallback<List<User>>() {
-      public void onFailure(Throwable caught) {}
-      public void onSuccess(List<User> result) {
-        if (lastTable != null) {
-          dialogVPanel.remove(lastTable);
-          dialogVPanel.remove(closeButton);
-        }
-
-        Widget table = getTable(result);
-        dialogVPanel.add(table);
-        dialogVPanel.add(closeButton);
-
-        lastTable = table;
-        dialogBox.show();
-      }
-    });
-
-    dialogBox.setWidget(dialogVPanel);
-
-    // Add a handler to send the name to the server
-    closeButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-      }
-    });
-  }
-
-  private Widget getTable(List<User> result) {
-    CellTable<User> table = new CellTable<User>();
-    table.setWidth("1100px");
-    TextColumn<User> id = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) { return ""+contact.id; }};
-    id.setSortable(true);
-    table.addColumn(id,"ID");
-
-    TextColumn<User> age = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) { return ""+contact.age; }};
-    age.setSortable(true);
-    table.addColumn(age, "Age");
-
-    TextColumn<User> gender = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) { return contact.gender == 0 ? "male" : "female"; }};
-    gender.setSortable(true);
-    table.addColumn(gender,"Gender");
-
-    TextColumn<User> experience = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) { return ""+contact.experience + " months"; }};
-    experience.setSortable(true);
-    table.addColumn(experience,"Experience");
-
-    TextColumn<User> ipaddr = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) { return ""+contact.ipaddr; }};
-    ipaddr.setSortable(true);
-    table.addColumn(ipaddr,"IP Addr");
-
-    TextColumn<User> password = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) { return ""+contact.password; }};
-    password.setSortable(true);
-    table.addColumn(password,"Password");
-
-    TextColumn<User> date = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) { return ""+new Date(contact.timestamp); }};
-    date.setSortable(true);
-    table.addColumn(date,"Time");
-
-    // Create a data provider.
-    ListDataProvider<User> dataProvider = new ListDataProvider<User>();
-
-    // Connect the table to the data provider.
-    dataProvider.addDataDisplay(table);
-
-    // Add the data to the data provider, which automatically pushes it to the
-    // widget.
-    List<User> list = dataProvider.getList();
-    for (User contact : result) {
-      list.add(contact);
-    }
-    table.setRowCount(list.size());
-
-    // Add a ColumnSortEvent.ListHandler to connect sorting to the
-    // java.util.List.
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(
-      list);
-    columnSortHandler.setComparator(id,
-      new Comparator<User>() {
-        public int compare(User o1, User o2) {
-          if (o1 == o2) {
-            return 0;
-          }
-
-          // Compare the name columns.
-          if (o1 != null) {
-            return (o2 != null) ? (int)(o1.id - o2.id) : 0;
-          }
-          return -1;
-        }
-      });
-    table.addColumnSortHandler(columnSortHandler);
-
-    // We know that the data is sorted alphabetically by default.
-    table.getColumnSortList().push(id);
-
-    // Create a SimplePager.
-    SimplePager pager = new SimplePager();
-
-    // Set the cellList as the display.
-    pager.setDisplay(table);
-
-    // Add the pager and list to the page.
-    VerticalPanel vPanel = new VerticalPanel();
-    vPanel.add(pager);
-    vPanel.add(table);
-    return vPanel;
   }
 }
