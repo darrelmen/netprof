@@ -14,6 +14,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -112,7 +113,7 @@ public class ResultManager {
       @Override
       public String getValue(Result answer) { return ""+answer.qid; }};
     experience.setSortable(true);
-    table.addColumn(experience,"Question #");
+    table.addColumn(experience,"Q. #");
 
     TextColumn<Result> ipaddr = new TextColumn<Result>() {
       @Override
@@ -120,18 +121,19 @@ public class ResultManager {
     ipaddr.setSortable(true);
     table.addColumn(ipaddr,"Answer");
 
-/*    final SafeHtmlCell progressCell = new SafeHtmlCell();
+/*   final SafeHtmlCell progressCell = new SafeHtmlCell();
     Column<Result,SafeHtml> audioFile = new Column<Result,SafeHtml>(progressCell) {
       @Override
       public SafeHtml getValue(Result answer) {
-        SafeHtmlBuilder sb = new SafeHtmlBuilder();
-        sb.appendHtmlConstant(answer.audioFile);
-        sb.appendHtmlConstant("<audio control><source src='" +answer.audioFile+
-        "' type='audio/wav'/></audio>");
-        return sb.toSafeHtml();
+       // SafeHtmlBuilder sb = new SafeHtmlBuilder();
+       // sb.appendHtmlConstant(answer.answer);
+       // sb.appendHtmlConstant(getAudioTag(answer.answer));
+       // return sb.toSafeHtml();
+        return getAudioTag(answer.answer);
       }
     };
     audioFile.setSortable(true);
+
     table.addColumn(audioFile,"AudioFile");*/
 
     TextColumn<Result> valid = new TextColumn<Result>() {
@@ -207,5 +209,21 @@ public class ResultManager {
     vPanel.add(pager);
     vPanel.add(table);
     return vPanel;
+  }
+
+  private SafeHtml getAudioTag(String result) {
+
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    // sb.appendHtmlConstant(answer.answer);
+    // sb.appendHtmlConstant(getAudioTag(answer.answer));
+    // return sb.toSafeHtml();
+    sb.appendHtmlConstant("<audio preload=\"none\" controls=\"controls\" tabindex=\"0\">\n" +
+      "<source type=\"audio/wav\" src=\"" +
+      result +
+      "\"></source>\n" +
+      // "<source type=\"audio/ogg\" src=\"media/ac-LC1-009/ac-LC1-009-C.ogg\"></source>\n" +
+      "Your browser does not support the audio tag.\n" +
+      "</audio>");
+    return sb.toSafeHtml();
   }
 }

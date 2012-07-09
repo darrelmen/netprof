@@ -58,9 +58,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private int currentExercise = 0;
   private Label status;
   private UserManager user;
+  private final UserTable userTable = new UserTable();
   private ResultManager resultManager;
   private FlashRecordPanelHeadless flashRecordPanel;
-  private boolean didPopup = false;
+  //private boolean didPopup = false;
 
   private boolean flashRecordPanelInited;
   private long lastUser = -1;
@@ -156,14 +157,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     FlashRecordPanelHeadless.setMicPermission(new MicPermission() {
       public void gotPermission() {
         System.out.println("got permission!");
-
-        Scheduler.get().scheduleDeferred(new Command() {
-          public void execute() {
-            System.out.println("hiding " + flashRecordPanel);
-
-            flashRecordPanel.hide();
-          }});
-
+        flashRecordPanel.hide();
         flashRecordPanelInited = true;
         getExercises(lastUser);
       }
@@ -204,14 +198,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       @Override
       public void run() {
         popupImage.hide();
-        didPopup = false;
         currentExerciseVPanel.remove(flashRecordPanel);
 
-        flashRecordPanel.removeFlash("flashcontent");
+        flashRecordPanel.removeFlash();
 
         makeFlashContainer();
         currentExerciseVPanel.add(flashRecordPanel);
-        initFlash();
+        flashRecordPanel.initFlash();
       }
     };
 
@@ -245,7 +238,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     users.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        user.showUsers();
+        userTable.showUsers(service);
       }
     });
 
@@ -267,7 +260,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void login()  { user.login(); }
+
   /**
+   * Init Flash recorder once we login.
+   *
+   * Only get the exercises if the user has accepted mic access.
+   *
+   * @see #makeFlashContainer
    * @see UserManager#login
    * @see UserManager#storeUser(long)
    * @param userID
@@ -275,7 +274,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void gotUser(long userID) {
 //    System.out.println("gotUser " + userID + " vs " + lastUser);
 
-    initFlash();
+    flashRecordPanel.initFlash();
 
     if (userID != lastUser) {
       if (flashRecordPanelInited) {
@@ -283,20 +282,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
       lastUser = userID;
     }
-  }
-
-  private void initFlash() {
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-        if (!didPopup) {
-          flashRecordPanel.show();
-          System.out.println("gotUser : doing installFlash");
-          flashRecordPanel.installFlash(GWT.getModuleBaseURL(), "flashcontent");
-          System.out.println("gotUser : did   installFlash");
-          didPopup = true;
-        }
-      }
-    });
   }
 
   /**
@@ -322,16 +307,26 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public int getUser() { return user.getUser(); }
 
+  // recording methods...
+  /**
+   * Recording interface
+   */
   public void startRecording() {
     flashRecordPanel.recordOnClick();
   }
 
-  public String getBase64EncodedWavFile() {
-    return flashRecordPanel.getWav();
-  }
-
+  /**
+   * Recording interface
+   */
   public void stopRecording() {
     flashRecordPanel.stopRecording();
+  }
+
+  /**
+   * Recording interface
+   */
+  public String getBase64EncodedWavFile() {
+    return flashRecordPanel.getWav();
   }
 
   private void addExerciseToList(final Exercise e, VerticalPanel items) {

@@ -22,7 +22,6 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
 /**
- * Roughly mimics the Cykod example at <a href='https://github.com/cykod/FlashWavRecorder/blob/master/html/index.html'>Cykod example html</a><p></p>
  *
  * Has three parts -- record/stop button, audio validity feedback, and audio html 5 control to playback audio just posted to the server.
  *
