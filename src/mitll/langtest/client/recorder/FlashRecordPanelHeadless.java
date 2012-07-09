@@ -32,7 +32,18 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     inner.setHTML("<p>ERROR: Your browser must have JavaScript enabled and the Adobe Flash Player installed.</p>");
     flashContent.add(inner);
     add(flashContent);
+    hide();
+  }
+
+  public void show() {
+    System.out.println("showing record panel");
+
     setSize(250 + "px", 170 + "px");
+  }
+
+  public void hide() {
+    System.out.println("hiding record panel");
+    setSize("0px", "0px");
   }
 
   public static void setMicPermission(MicPermission micPermission) {
@@ -45,10 +56,6 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
   public native void stopRecording() /*-{
     $wnd.Recorder.stop();
-  }-*/;
-
-  public native void showPermission() /*-{
-    $wnd.Recorder.showPermission();
   }-*/;
 
   /**

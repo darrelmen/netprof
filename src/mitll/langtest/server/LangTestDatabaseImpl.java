@@ -105,10 +105,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     ServletContext context = getServletContext();
     String realContextPath = context.getRealPath(getThreadLocalRequest().getContextPath());
 
+    realContextPath = realContextPath.replace("netPron2/netPron2","netPron2"); // hack for mtex!!!
     System.out.println("Deployed context is " + realContextPath);
-
     String wavPath = getLocalPathToAnswer(plan, exercise, question, user);
     File file = new File(realContextPath, wavPath);   // relative to deploy
+
+    File parentFile = file.getParentFile();
+   // System.out.println("making dir " + parentFile.getAbsolutePath());
+
+    parentFile.mkdirs();
 
     byte [] byteArray = getBytesFromBase64String(base64EncodedString);
 

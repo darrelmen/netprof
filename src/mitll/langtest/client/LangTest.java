@@ -32,7 +32,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
-import mitll.langtest.client.recorder.SaveNotification;
 import mitll.langtest.shared.Exercise;
 
 import java.util.ArrayList;
@@ -101,6 +100,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
   }
 
+  /**
+   * Use DockLayout to put a header at the top, exercise list on the left, and eventually
+   * the current exercise in the center.  There is also a status on line on the bottom.
+   *
+   * Initially the flash record player is put in the center of the DockLayout
+   */
   public void onModuleLoad2() {
     user = new UserManager(this,service);
     resultManager = new ResultManager(service);
@@ -115,7 +120,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     HTML title = new HTML("<h1>" + DLI_LANGUAGE_TESTING + "</h1>");
     hp.addEast(getLogout(),EAST_WIDTH);
   //  hp.setHeight("180px");
-    makeFlashContainer();
     hp.add(title);
 
     widgets.addNorth(hp, HEADER_HEIGHT);
@@ -123,12 +127,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     widgets.addWest(exerciseList, EXERCISE_LIST_WIDTH);
 
+    // set up center panel, initially with flash record panel
     widgets.add(currentExerciseVPanel);
+    makeFlashContainer();
     currentExerciseVPanel.add(flashRecordPanel);
     currentExerciseVPanel.addStyleName("currentExercisePanel");
 
     setupErrorDialog();
 
+    // set up left side exercise list
     this.items = new VerticalPanel();
     ScrollPanel itemScroller = new ScrollPanel(items);
     itemScroller.setSize(EXERCISE_LIST_WIDTH +"px",(HEIGHT - HEADER_HEIGHT - FOOTER_HEIGHT - 60) + "px"); // 54
@@ -138,24 +145,43 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     login();
   }
 
+  /**
+   * Hookup feedback for events from Flash generated from the user's response to the Mic Access dialog
+   *
+   * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#micConnected()
+   */
   private void makeFlashContainer() {
     flashRecordPanel = new FlashRecordPanelHeadless();
+    System.out.println("made " + flashRecordPanel);
     FlashRecordPanelHeadless.setMicPermission(new MicPermission() {
       public void gotPermission() {
         System.out.println("got permission!");
-        flashRecordPanel.setSize("0px","0px");
+
+        Scheduler.get().scheduleDeferred(new Command() {
+          public void execute() {
+            System.out.println("hiding " + flashRecordPanel);
+
+            flashRecordPanel.hide();
+          }});
+
         flashRecordPanelInited = true;
         getExercises(lastUser);
       }
 
       public void gotDenial() {
         System.err.println("dude!!!!");
-        showImagePopup();
+        showPopupOnDenial();
       }
     });
   }
 
-  private void showImagePopup() {
+  /**
+   * Show a popup telling how unhappy we are with the user's choice not to allow mic recording.
+   *
+   * Remove the flash player that was there, put in a new one, again, and ask the user again for permission.
+   *
+   */
+  private void showPopupOnDenial() {
     final PopupPanel popupImage = new PopupPanel();
     popupImage.setAutoHideEnabled(true);
     final Image image = new Image("images/really.png");
@@ -174,12 +200,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // this causes the image to be loaded into the DOM
     popupImage.center();
 
-
     Timer t = new Timer() {
       @Override
       public void run() {
         popupImage.hide();
-        //flashRecordPanel.showPermission();
         didPopup = false;
         currentExerciseVPanel.remove(flashRecordPanel);
 
@@ -191,7 +215,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     };
 
-    // Schedule the timer to run once in 5 seconds.
+    // Schedule the timer to run once in 1 seconds.
     t.schedule(1000);
   }
 
@@ -265,6 +289,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         if (!didPopup) {
+          flashRecordPanel.show();
           System.out.println("gotUser : doing installFlash");
           flashRecordPanel.installFlash(GWT.getModuleBaseURL(), "flashcontent");
           System.out.println("gotUser : did   installFlash");
@@ -308,12 +333,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void stopRecording() {
     flashRecordPanel.stopRecording();
   }
-
-/*
-  public void playBackAudio() {
-    flashRecordPanel.playbackOnClick();
-  }
-*/
 
   private void addExerciseToList(final Exercise e, VerticalPanel items) {
     final HTML w = new HTML("<b>" + e.getID() + "</b>");
@@ -427,34 +446,4 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public boolean onFirst(Exercise current) { return currentExercises.indexOf(current) == 0; }
-
-  // popup recording -- TODO : refactor into its own class
-
-
-
-  /**
-   * @see RecordExercisePanel.AnswerPanel#onMouseOver
-   * @param exercise
-   * @param question
-   * @param sender
-   * @param saveFeedbackWidget
-   */
-  public void showRecorder(Exercise exercise, int question, Widget sender, SaveNotification saveFeedbackWidget) {
-    // Create the new popup.
-    // Position the popup 1/3rd of the way down and across the screen, and
-    // show the popup. Since the position calculation is based on the
-    // offsetWidth and offsetHeight of the popup, you have to use the
-    // setPopupPositionAndShow(callback) method. The alternative would
-    // be to call show(), calculate the left and top positions, and
-    // call setPopupPosition(left, top). This would have the ugly side
-    // effect of the popup jumping from its original position to its
-    // new position.
-
-    int userID = user.getUser();
-    if (userID == -1) {
-      System.err.println("huh? no user? ");
-    }
-    else {
-    }
-   }
 }
