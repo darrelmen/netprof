@@ -6,12 +6,14 @@ package mitll.langtest.client.recorder;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.ExerciseController;
 import mitll.langtest.client.ExerciseQuestionState;
@@ -21,6 +23,10 @@ import mitll.langtest.shared.Exercise;
 
 /**
  * Roughly mimics the Cykod example at <a href='https://github.com/cykod/FlashWavRecorder/blob/master/html/index.html'>Cykod example html</a><p></p>
+ *
+ * Has three parts -- record/stop button, audio validity feedback, and audio html 5 control to playback audio just posted to the server.
+ *
+ * On click on the stop button, posts audio to the server.
  *
  * @author Gordon Vidaver
  *
@@ -36,13 +42,15 @@ public class SimpleRecordPanel extends HorizontalPanel {
   private SimplePanel playback = new SimplePanel();
 
   /**
+   * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
+   *
    * @see mitll.langtest.client.SimpleRecordExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.ExerciseController, int)
    */
 	public SimpleRecordPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
                            final Exercise exercise, final ExerciseQuestionState questionState, final int index){
-    // record
     final Panel outer = this;
 
+    // make record button
     // make images
     recordImage = new Image("images/record.png");
     recordImage.setAltText("Record");
@@ -54,30 +62,35 @@ public class SimpleRecordPanel extends HorizontalPanel {
 
     record_button.getElement().setId("record_button");
     record_button.setTitle("Record");
+
     playback.setHeight("30px"); // for audio controls to show
     record_button.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         if (recording) {
           recording = false;
-          stopClicked(record_button, controller, service, exercise, index, questionState, outer);
 
+          stopClicked(record_button, controller, service, exercise, index, questionState, outer);
         } else {
           recording = true;
           playback.setWidget(new HTML(""));
           record_button.setResource(stopImage);
+          record_button.setTitle("Stop");
 
           controller.startRecording();
         }
       }
     });
-    add(record_button);
+    SimplePanel recordButtonContainer = new SimplePanel();
+    recordButtonContainer.setWidth("75px");
+    recordButtonContainer.add(record_button);
+    add(recordButtonContainer);
 
     SimplePanel spacer = new SimplePanel();
     spacer.setHeight("24px");
     spacer.setWidth("10px");
     add(spacer);
-    //playback
 
+    // make audio feedback widget
     this.check = new Image(IMAGES_CHECKMARK);
     check.getElement().setId("checkmark_" +index);
     check.setAltText("Audio Saved");
@@ -96,12 +109,34 @@ public class SimpleRecordPanel extends HorizontalPanel {
     spacer.setWidth("10px");
     add(spacer);
 
+    // add playback html
     add(playback);
   }
 
+  /**
+   * Send the audio to the server.<br></br>
+   *
+   * Audio is a wav file, as a string, encoded base 64  <br></br>
+   *
+   * Report audio validity and show the audio widget that allows playback.     <br></br>
+   *
+   * Once audio is posted to the server, two pieces of information come back in the AudioAnswer: the audio validity<br></br>
+   *  (false if it's too short, etc.) and a URL to the stored audio on the server. <br></br>
+   *   This is used to make the audio playback widget.
+   *
+   * @param record_button
+   * @param controller
+   * @param service
+   * @param exercise
+   * @param index
+   * @param questionState
+   * @param outer
+   */
   private void stopClicked(ImageAnchor record_button, ExerciseController controller, LangTestDatabaseAsync service,
                            Exercise exercise, int index, final ExerciseQuestionState questionState, final Panel outer) {
     record_button.setResource(recordImage);
+    record_button.setTitle("Recording");
+
     controller.stopRecording();
 
     service.writeAudioFile(controller.getBase64EncodedWavFile()
@@ -125,34 +160,6 @@ public class SimpleRecordPanel extends HorizontalPanel {
       "</audio>"));
   }
 
-/*
-  private void addPlayButton(final ExerciseController controller) {
-    final Image image2 = new Image("images/play.png");
-    image2.setAltText("play");
-    play_button = new ImageAnchor();
-    play_button.setResource(image2);
-
-    play_button.getElement().setId("play_button");
-    play_button.setTitle("Play");
-    play_button.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        if (playing) {
-          image2.setUrl("images/play.png");
-          image2.setAltText("Play recorded audio.");
-        }
-        else {
-          image2.setUrl("images/squareStop.png");
-          image2.setAltText("Click to stop playback.");
-        }
-        playing = !playing;
-      //  controller.playBackAudio();
-      }
-    });
-    add(play_button);
-    play_button.setVisible(false);
-  }
-*/
-
   private void showAudioValidity(Boolean result, ExerciseQuestionState questionState, Panel outer) {
     check.setVisible(false);
     if (result) {
@@ -164,6 +171,20 @@ public class SimpleRecordPanel extends HorizontalPanel {
       check.setUrl(IMAGES_REDX_PNG);
       check.setAltText("Audio Invalid");
       questionState.recordIncomplete(outer);
+
+      final PopupPanel popupImage = new PopupPanel(true);
+      popupImage.add(new HTML("Audio too short, or too quiet.<br/>Please re-record."));
+      popupImage.showRelativeTo(this);
+
+      Timer t = new Timer() {
+        @Override
+        public void run() {
+          popupImage.hide();
+        }
+      };
+
+      // Schedule the timer to run once in 1 seconds.
+      t.schedule(2500);
     }
     check.setVisible(true);
   }
