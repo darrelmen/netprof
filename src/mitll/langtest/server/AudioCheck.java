@@ -16,7 +16,7 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioCheck {
-  private static final int MinRecordLength = 5*10000; // 10000 = 0.7 second
+  private static final int MinRecordLength = 1*10000; // 10000 = 0.7 second
   private static final int WinSize = 10;
   private static final float PowerThreshold = -55.0f;
   private static final float VarianceThreshold = 20.0f;

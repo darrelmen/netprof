@@ -175,7 +175,7 @@ public class SimpleRecordPanel extends HorizontalPanel {
       popupImage.add(new HTML("Audio too short, or too quiet.<br/>Please re-record."));
       popupImage.showRelativeTo(this);
 
-      Timer t = new Timer() {
+ /*     Timer t = new Timer() {
         @Override
         public void run() {
           popupImage.hide();
@@ -183,7 +183,7 @@ public class SimpleRecordPanel extends HorizontalPanel {
       };
 
       // Schedule the timer to run once in 1 seconds.
-      t.schedule(2500);
+      t.schedule(30000);*/
     }
     check.setVisible(true);
   }

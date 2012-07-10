@@ -7,6 +7,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
@@ -54,7 +55,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     HorizontalPanel hp = new HorizontalPanel();
     hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(new HTML(e.getContent()));
-    hp.setWidth((LangTest.WIDTH-LangTest.EXERCISE_LIST_WIDTH-100) + "px");
+    hp.setWidth((Window.getClientWidth()-LangTest.EXERCISE_LIST_WIDTH-100) + "px");
     add(hp);
 
     int i = 1;
