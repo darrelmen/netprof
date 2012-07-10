@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -34,7 +35,6 @@ import mitll.langtest.shared.Exercise;
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   // TODO : consider putting these in the .css file?
-  public static final int WIDTH = 1440, HEIGHT = 1080;
   private static final int HEADER_HEIGHT = 80;
   private static final int FOOTER_HEIGHT = 40;
   public  static final int EXERCISE_LIST_WIDTH = 200;
@@ -102,7 +102,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
     RootPanel.get().add(widgets);
 
-    widgets.setSize(WIDTH + "px", HEIGHT + "px");
+    widgets.setSize((Window.getClientWidth()-EAST_WIDTH) + "px", (Window.getClientHeight()-FOOTER_HEIGHT) + "px");
 
     // header/title line
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
@@ -128,7 +128,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
     this.exerciseList = new ExerciseList(currentExerciseVPanel,service,this, factory);
     ScrollPanel itemScroller = new ScrollPanel(this.exerciseList);
-    itemScroller.setSize(EXERCISE_LIST_WIDTH +"px",(HEIGHT - HEADER_HEIGHT - FOOTER_HEIGHT - 60) + "px"); // 54
+    itemScroller.setSize(EXERCISE_LIST_WIDTH +"px",(Window.getClientHeight() - (2*HEADER_HEIGHT) - FOOTER_HEIGHT - 60) + "px"); // 54
     exerciseList.add(new HTML("<h2>Items</h2>"));
     exerciseList.add(itemScroller);
 
