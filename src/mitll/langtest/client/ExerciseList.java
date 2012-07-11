@@ -90,7 +90,7 @@ public class ExerciseList extends VerticalPanel {
   }
 
   private void loadExercise(Exercise e) {
-    //login();
+    feedback.login();
 
     removeCurrentExercise();
 

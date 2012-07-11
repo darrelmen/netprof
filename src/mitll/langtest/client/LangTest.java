@@ -245,7 +245,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return hp2;
   }
 
-  private void login()  { user.login(); }
+  public void login()  { user.login(); }
 
   /**
    * Init Flash recorder once we login.
