@@ -27,14 +27,16 @@ import mitll.langtest.shared.Exercise;
  *
  * On click on the stop button, posts audio to the server.
  *
- * @author Gordon Vidaver
+ * Automatically stops recording after 20 seconds.
  *
+ * @author Gordon Vidaver
  */
 public class SimpleRecordPanel extends HorizontalPanel {
   private static final String IMAGES_CHECKMARK = "images/checkmark.png";
   private static final String IMAGES_REDX_PNG = "images/redx.png";
+  private static final int DELAY_MILLIS = 20000;
 
-  boolean recording = false;
+  private boolean recording = false;
   private final Image recordImage;
   private final Image stopImage;
   private Image check;
@@ -67,7 +69,7 @@ public class SimpleRecordPanel extends HorizontalPanel {
       public void onClick(ClickEvent event) {
         if (recording) {
           recording = false;
-
+          cancelTimer();
           stopClicked(record_button, controller, service, exercise, index, questionState, outer);
         } else {
           recording = true;
@@ -76,6 +78,7 @@ public class SimpleRecordPanel extends HorizontalPanel {
           record_button.setTitle("Stop");
 
           controller.startRecording();
+          addRecordingMaxLengthTimeout(record_button, controller, service, exercise, index, questionState, outer);
         }
       }
     });
@@ -112,6 +115,48 @@ public class SimpleRecordPanel extends HorizontalPanel {
     add(playback);
   }
 
+  private Timer recordTimer;
+
+  /**
+   * Add a timer to automatically stop recording after 20 seconds.
+   *
+   *
+   * @param record_button
+   * @param controller
+   * @param service
+   * @param exercise
+   * @param index
+   * @param questionState
+   * @param outer
+   */
+  private void addRecordingMaxLengthTimeout(final ImageAnchor record_button,
+                                           final ExerciseController controller,
+                                           final LangTestDatabaseAsync service,
+                                           final Exercise exercise,
+                                           final int index,final ExerciseQuestionState questionState,
+                                            final Panel outer ) {
+    cancelTimer();
+    recordTimer = new Timer() {
+      @Override
+      public void run() {
+        if (recording) {
+          recording = false;
+
+          stopClicked(record_button, controller, service, exercise, index, questionState, outer);
+        }
+      }
+    };
+
+    // Schedule the timer to run once in 20 seconds.
+    recordTimer.schedule(DELAY_MILLIS);
+  }
+
+  private void cancelTimer() {
+    if (recordTimer != null) {
+      recordTimer.cancel();
+    }
+  }
+
   /**
    * Send the audio to the server.<br></br>
    *
@@ -123,6 +168,7 @@ public class SimpleRecordPanel extends HorizontalPanel {
    *  (false if it's too short, etc.) and a URL to the stored audio on the server. <br></br>
    *   This is used to make the audio playback widget.
    *
+   * @see #SimpleRecordPanel
    * @param record_button
    * @param controller
    * @param service
@@ -134,7 +180,7 @@ public class SimpleRecordPanel extends HorizontalPanel {
   private void stopClicked(ImageAnchor record_button, ExerciseController controller, LangTestDatabaseAsync service,
                            Exercise exercise, int index, final ExerciseQuestionState questionState, final Panel outer) {
     record_button.setResource(recordImage);
-    record_button.setTitle("Recording");
+    record_button.setTitle("Record");
 
     controller.stopRecording();
 
@@ -174,16 +220,6 @@ public class SimpleRecordPanel extends HorizontalPanel {
       final PopupPanel popupImage = new PopupPanel(true);
       popupImage.add(new HTML("Audio too short, or too quiet.<br/>Please re-record."));
       popupImage.showRelativeTo(this);
-
- /*     Timer t = new Timer() {
-        @Override
-        public void run() {
-          popupImage.hide();
-        }
-      };
-
-      // Schedule the timer to run once in 1 seconds.
-      t.schedule(30000);*/
     }
     check.setVisible(true);
   }

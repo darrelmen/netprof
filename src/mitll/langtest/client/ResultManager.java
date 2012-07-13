@@ -35,6 +35,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class ResultManager {
+  private static final int PAGE_SIZE = 8;
   private LangTestDatabaseAsync service;
 
   public ResultManager(LangTestDatabaseAsync s) {this.service = s;}
@@ -57,8 +58,8 @@ public class ResultManager {
     dialogVPanel.setWidth("1200px");
     dialogBox.setWidth("1200px");
 
-    int left = (Window.getClientWidth() - 0) / 10;
-    int top  = (Window.getClientHeight() - 0) / 10;
+    int left = (Window.getClientWidth()) / 10;
+    int top  = (Window.getClientHeight()) / 10;
     dialogBox.setPopupPosition(left, top);
 
     service.getResults(new AsyncCallback<List<Result>>() {
@@ -206,7 +207,7 @@ public class ResultManager {
 
     // Set the cellList as the display.
     pager.setDisplay(table);
-    pager.setPageSize(8);
+    pager.setPageSize(PAGE_SIZE);
     // Add the pager and list to the page.
     VerticalPanel vPanel = new VerticalPanel();
     vPanel.add(pager);
@@ -215,11 +216,7 @@ public class ResultManager {
   }
 
   private SafeHtml getAudioTag(String result) {
-
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    // sb.appendHtmlConstant(answer.answer);
-    // sb.appendHtmlConstant(getAudioTag(answer.answer));
-    // return sb.toSafeHtml();
     sb.appendHtmlConstant("<audio preload=\"none\" controls=\"controls\" tabindex=\"0\">\n" +
       "<source type=\"audio/wav\" src=\"" +
       result +
