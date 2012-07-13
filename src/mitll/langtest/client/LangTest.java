@@ -270,6 +270,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
+  /**
+   * @see ExercisePanel#postAnswers
+   * @see mitll.langtest.client.recorder.SimpleRecordPanel#stopClicked
+   * @return
+   */
   public int getUser() { return user.getUser(); }
 
   // recording methods...

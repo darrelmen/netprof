@@ -12,6 +12,7 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -59,7 +60,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public long addUser(int age, String gender, int experience) {
-    String ip = getThreadLocalRequest().getRemoteAddr();
+    HttpServletRequest request = getThreadLocalRequest();
+    String header = request.getHeader("X-FORWARDED-FOR");
+    String ip = request.getRemoteHost()+"/"+ request.getRemoteAddr()+(header != null ? "/"+ header : "");
     return db.addUser(age,gender,experience, ip);
   }
 

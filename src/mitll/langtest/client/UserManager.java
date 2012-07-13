@@ -12,29 +12,32 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.shared.User;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
+ * Handles storing cookies for users, etc.
+ *
+ * Prompts user for login info.
+ *
+ * NOTE : will keep prompting them if the browser doesn't let you store cookies.
+ *
  * User: GO22670
  * Date: 5/15/12
  * Time: 11:32 AM
  * To change this template use File | Settings | File Templates.
  */
 public class UserManager {
-  private static final int EXPIRATION_MINUTES = 30;
+  private static final int EXPIRATION_HOURS = 240;
   private static final int MIN_AGE = 6;
   private static final int MAX_AGE = 90;
   private final LangTestDatabaseAsync service;
   private final UserNotification langTest;
-  //Logger logger = Logger.getLogger("UserManager");
 
   public UserManager(UserNotification lt, LangTestDatabaseAsync service) {
     this.langTest = lt;
@@ -42,13 +45,16 @@ public class UserManager {
   }
 
   // user tracking
+
+  /**
+   * @see #displayLoginBox()
+   * @param sessionID
+   */
   private void storeUser(long sessionID) {
-    final long DURATION = 1000 * 60 * 60 * EXPIRATION_MINUTES; //duration remembering login. 2 weeks in this example.
+    final long DURATION = 1000 * 60 * 60 * EXPIRATION_HOURS; //duration remembering login
     Date expires = new Date(System.currentTimeMillis() + DURATION);
     Cookies.setCookie("sid", "" + sessionID, expires);
-    if (langTest != null) {
-      langTest.gotUser(sessionID);
-    }
+    langTest.gotUser(sessionID);
   }
 
   /**
@@ -67,6 +73,10 @@ public class UserManager {
     }
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#getUser
+   * @return
+   */
   public int getUser() {
     String sid = Cookies.getCookie("sid");
     if (sid == null || sid.equals("-1")) {
@@ -76,6 +86,9 @@ public class UserManager {
     return Integer.parseInt(sid);
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#getLogout()
+   */
   public void clearUser() {
     Cookies.setCookie("sid","-1");
     //alert("clearUser Cookie now " + Cookies.getCookie("sid"));
@@ -121,7 +134,6 @@ public class UserManager {
     genderBox.ensureDebugId("cwListBox-dropBox");
     VerticalPanel genderPanel = new VerticalPanel();
     genderPanel.setSpacing(4);
-    //  dropBoxPanel.add(new HTML(constants.cwListBoxSelectCategory()));
     genderPanel.add(genderBox);
 
     // add experience drop box
@@ -137,12 +149,9 @@ public class UserManager {
     for (String c : choices) {
       experienceBox.addItem(c);
     }
-/*    experienceBox.addItem("More than 22 months");
-    experienceBox.addItem("Native Speaker");*/
     experienceBox.ensureDebugId("cwListBox-dropBox");
     VerticalPanel experiencePanel = new VerticalPanel();
     experiencePanel.setSpacing(4);
-    //  dropBoxPanel.add(new HTML(constants.cwListBoxSelectCategory()));
     experiencePanel.add(experienceBox);
 
     VerticalPanel dialogVPanel = new VerticalPanel();
@@ -184,12 +193,6 @@ public class UserManager {
         if (experienceBox.getSelectedIndex() == lastChoice) {
           monthsOfExperience = 20*12;
         }
-       /* if (monthsOfExperience == 21) {
-          monthsOfExperience++;
-        }
-        else if (monthsOfExperience == 24) {
-          monthsOfExperience = 20*12;
-        }*/
         service.addUser(Integer.parseInt(ageEntryBox.getText()),
           genderBox.getValue(genderBox.getSelectedIndex()),
           monthsOfExperience, new AsyncCallback<Long>() {
@@ -212,8 +215,8 @@ public class UserManager {
     MyHandler handler = new MyHandler();
     closeButton.addClickHandler(handler);
 
-    int left = (Window.getClientWidth() - 0) / 3;
-    int top  = (Window.getClientHeight() - 0) / 3;
+    int left = Window.getClientWidth() / 3;
+    int top  = Window.getClientHeight() / 3;
     dialogBox.setPopupPosition(left, top);
 
     dialogBox.show();

@@ -26,7 +26,7 @@ public class UserDAO {
    * @param gender
    * @param experience
    * @param ipAddr
-   * @return
+   * @return newly inserted user id, or 0 if something goes horribly wrong
    */
   public long addUser(int age, String gender, int experience, String ipAddr) {
     try {

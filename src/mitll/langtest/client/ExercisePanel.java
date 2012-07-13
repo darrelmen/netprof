@@ -40,7 +40,8 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
   private boolean enableNextOnlyWhenAllCompleted = true;
   private Button next;
   /**
-   * @see LangTest#loadExercise(mitll.langtest.shared.Exercise)
+   * @see ExercisePanelFactory#getExericsePanel
+   * @see ExerciseList#loadExercise
    * @param e
    * @param service
    * @param userFeedback
@@ -123,6 +124,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
    * Record answers at the server.  For our purposes, add a row to the result table and possibly post
    * some audio and remember where it is.
    *
+   * @see ExercisePanel#getNextAndPreviousButtons(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, UserFeedback, ExerciseController)
    * @param service
    * @param userFeedback
    * @param controller
