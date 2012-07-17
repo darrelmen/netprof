@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -21,7 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Handles storing cookies for users, etc.
+ * Handles storing cookies for users, etc. IF user ids are stored as cookies.
  *
  * Prompts user for login info.
  *
@@ -36,8 +35,11 @@ public class UserManager {
   private static final int EXPIRATION_HOURS = 240;
   private static final int MIN_AGE = 6;
   private static final int MAX_AGE = 90;
+  private static final int NO_USER_SET = -1;
   private final LangTestDatabaseAsync service;
   private final UserNotification langTest;
+  private boolean useCookie = false;
+  private long userID = NO_USER_SET;
 
   public UserManager(UserNotification lt, LangTestDatabaseAsync service) {
     this.langTest = lt;
@@ -47,13 +49,17 @@ public class UserManager {
   // user tracking
 
   /**
+   * @param sessionID from database
    * @see #displayLoginBox()
-   * @param sessionID
    */
   private void storeUser(long sessionID) {
     final long DURATION = 1000 * 60 * 60 * EXPIRATION_HOURS; //duration remembering login
     Date expires = new Date(System.currentTimeMillis() + DURATION);
-    Cookies.setCookie("sid", "" + sessionID, expires);
+    if (useCookie) {
+      Cookies.setCookie("sid", "" + sessionID, expires);
+    } else {
+      userID = sessionID;
+    }
     langTest.gotUser(sessionID);
   }
 
@@ -62,37 +68,38 @@ public class UserManager {
    */
   public void login() {
     int user = getUser();
-    if ( user != -1) {
-     // alert("login Cookie now " + Cookies.getCookie("sid"));
-//      alert("user:login sessionID not null = " + sessionID + " and there are " + Cookies.getCookieNames().size() + " cookies!");
+    if (user != NO_USER_SET) {
       langTest.gotUser(user);
-    }
-    else {
-   //   alert("login Cookie now " + Cookies.getCookie("sid"));
+    } else {
       displayLoginBox();
     }
   }
 
   /**
+   * @return id of user
    * @see mitll.langtest.client.LangTest#getUser
-   * @return
    */
   public int getUser() {
-    String sid = Cookies.getCookie("sid");
-    if (sid == null || sid.equals("-1")) {
-     // System.err.println("sid not set!");
-      return -1;
+    if (useCookie) {
+      String sid = Cookies.getCookie("sid");
+      if (sid == null || sid.equals("" + NO_USER_SET)) {
+        return NO_USER_SET;
+      }
+      return Integer.parseInt(sid);
+    } else {
+      return (int) userID;
     }
-    return Integer.parseInt(sid);
   }
 
   /**
    * @see mitll.langtest.client.LangTest#getLogout()
    */
   public void clearUser() {
-    Cookies.setCookie("sid","-1");
-    //alert("clearUser Cookie now " + Cookies.getCookie("sid"));
-    //Cookies.removeCookie("sid");    // this doesn't always seem to work???
+    if (useCookie) {
+      Cookies.setCookie("sid", "" + NO_USER_SET);
+    } else {
+      userID = NO_USER_SET;
+    }
   }
 
   private void displayLoginBox() {
