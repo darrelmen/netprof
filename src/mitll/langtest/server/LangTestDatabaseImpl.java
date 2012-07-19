@@ -17,6 +17,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 
@@ -61,8 +63,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public long addUser(int age, String gender, int experience) {
     HttpServletRequest request = getThreadLocalRequest();
-    String header = request.getHeader("X-FORWARDED-FOR");
-    String ip = request.getRemoteHost()+"/"+ request.getRemoteAddr()+(header != null ? "/"+ header : "");
+   // String header = request.getHeader("X-FORWARDED-FOR");
+    String header = request.getHeader("User-Agent");
+    SimpleDateFormat sdf = new SimpleDateFormat();
+    String format = sdf.format(new Date());
+    String ip = request.getRemoteHost()+/*"/"+ request.getRemoteAddr()+*/(header != null ? "/"+ header : "") + " at " + format;
     return db.addUser(age,gender,experience, ip);
   }
 

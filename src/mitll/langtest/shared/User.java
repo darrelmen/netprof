@@ -29,4 +29,13 @@ public class User implements IsSerializable {
     this.password = password;
     this.timestamp = timestamp;
   }
+
+  public String getTimestamp() {
+	  if (ipaddr == null) return "";
+    if (ipaddr.contains("at ")) {
+      int i = ipaddr.lastIndexOf("at ")+"at ".length();
+      return ipaddr.substring(i);
+    }
+    else return "";
+  }
 }

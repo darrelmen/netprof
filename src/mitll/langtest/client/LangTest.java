@@ -117,7 +117,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     widgets.addWest(exerciseList, EXERCISE_LIST_WIDTH);
 
     // set up center panel, initially with flash record panel
-    widgets.add(currentExerciseVPanel);
+    ScrollPanel sp = new ScrollPanel();
+    sp.add(currentExerciseVPanel);
+    widgets.add(sp);
     makeFlashContainer();
     currentExerciseVPanel.add(flashRecordPanel);
     currentExerciseVPanel.addStyleName("currentExercisePanel");

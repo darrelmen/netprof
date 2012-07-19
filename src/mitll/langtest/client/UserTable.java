@@ -126,19 +126,19 @@ public class UserTable {
     ipaddr.setSortable(true);
     table.addColumn(ipaddr, "IP Addr");
 
-    TextColumn<User> password = new TextColumn<User>() {
+/*    TextColumn<User> password = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
         return "" + contact.password;
       }
     };
     password.setSortable(true);
-    table.addColumn(password, "Password");
+    table.addColumn(password, "Password");*/
 
     TextColumn<User> date = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        return "" + new Date(contact.timestamp);
+        return "" + contact.getTimestamp();
       }
     };
     date.setSortable(true);
