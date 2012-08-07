@@ -151,6 +151,7 @@ public class UserManager {
       "7-9 months (Semester 2)",
       "10-12 months (Semester 2)",
       "13-16 months (Semester 3)",
+      "16+ months",
       "Native speaker");
     final int lastChoice = choices.size()-1;
     for (String c : choices) {
