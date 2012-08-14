@@ -33,6 +33,7 @@ public class ExerciseList extends VerticalPanel {
   private LangTestDatabaseAsync service;
   private UserFeedback feedback;
   private ExercisePanelFactory factory;
+  private boolean doGrading = false;
 
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback, ExercisePanelFactory factory) {
     this.currentExerciseVPanel = currentExerciseVPanel;
@@ -41,11 +42,33 @@ public class ExerciseList extends VerticalPanel {
     this.factory = factory;
   }
 
-  /**
-   * Get exercises for this user.
-   * @param userID
-   */
+  public void getGradedExercises(GradingExercisePanelFactory factory) {
+    doGrading = true;
+    this.factory = factory;
+
+    service.getExercises(new AsyncCallback<List<Exercise>>() {
+      public void onFailure(Throwable caught) {
+        feedback.showErrorMessage("Server error - couldn't get exercises.");
+      }
+
+      public void onSuccess(List<Exercise> result) {
+        currentExercises = result; // remember current exercises
+        for (final Exercise e : result) {
+          addExerciseToList(e);
+        }
+        loadFirstExercise();
+      }
+    });
+  }
+
+    /**
+    * Get exercises for this user.
+    * @see LangTest#gotUser(long)
+    * @see mitll.langtest.client.LangTest#makeFlashContainer()
+    * @param userID
+    */
   public void getExercises(long userID) {
+    doGrading = false;
     //System.out.println("loading exercises for " + userID);
     service.getExercises(userID, new AsyncCallback<List<Exercise>>() {
       public void onFailure(Throwable caught) {
@@ -90,7 +113,9 @@ public class ExerciseList extends VerticalPanel {
   }
 
   private void loadExercise(Exercise e) {
-    feedback.login();
+    if (!doGrading) {
+      feedback.login();
+    }
 
     removeCurrentExercise();
 

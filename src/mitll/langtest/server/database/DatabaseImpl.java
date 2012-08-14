@@ -55,6 +55,7 @@ public class DatabaseImpl implements Database {
   public final UserDAO userDAO = new UserDAO(this);
   private final ResultDAO resultDAO = new ResultDAO(this);
   public final AnswerDAO answerDAO = new AnswerDAO(this);
+  public final GradeDAO gradeDAO = new GradeDAO(this);
 
   public DatabaseImpl(HttpServlet s) {
     this.servlet = s;
@@ -89,18 +90,28 @@ public class DatabaseImpl implements Database {
         e.printStackTrace();
       }
     }
+
+    try {
+      gradeDAO.createGradesTable(getConnection());
+    } catch (Exception e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+
   }
 
+  public List<Exercise> getExercises() {
+     return exerciseDAO.getRawExercises();
+  }
 
   public List<Exercise> getExercises(long userID) {
     List<Schedule> forUser = userToSchedule.get(userID);
     if (forUser == null) {
       System.err.println("no schedule for user " +userID);
-      return exerciseDAO.getRawExercises();
+      return getExercises();
     }
     List<Exercise> exercises = new ArrayList<Exercise>();
 
-    List<Exercise> rawExercises = exerciseDAO.getRawExercises();
+    List<Exercise> rawExercises = getExercises();
     Map<String,Exercise> idToExercise = new HashMap<String, Exercise>();
     for (Exercise e : rawExercises) { idToExercise.put(e.getID(),e); }
     for (Schedule s : forUser) {
@@ -202,10 +213,20 @@ public class DatabaseImpl implements Database {
 
   /**
    * Pulls the list of results out of the database.
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults()
    * @return
    */
   public List<Result> getResults() {
     return resultDAO.getResults();
+  }
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultsForExercise(String)
+   * @param exid
+   * @return
+   */
+  public List<Result> getResultsForExercise(String exid) {
+    return resultDAO.getResultsForExercise(exid);
   }
 
   /**
@@ -220,6 +241,10 @@ public class DatabaseImpl implements Database {
    */
   public void addAnswer(int userID, Exercise e, int questionID, String answer, String audioFile) {
     answerDAO.addAnswer(userID, e, questionID, answer, audioFile);
+  }
+
+  public void addGrade(int resultID, int grade, boolean correct) {
+    gradeDAO.addGrade(resultID, grade, correct);
   }
 
   public boolean isAnswerValid(int userID, Exercise exercise, int questionID, Database database) {

@@ -49,6 +49,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getExercises(userID);
   }
 
+  public List<Exercise> getExercises() {
+    return db.getExercises();
+  }
+
+  /**
+   * @see mitll.langtest.client.GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.ExerciseController, int)
+   * @param exid
+   * @return
+   */
+  public List<Result> getResultsForExercise(String exid) {
+    return db.getResultsForExercise(exid);
+  }
+
   /**
    * @see mitll.langtest.client.ExercisePanel#postAnswers
    * @param userID
@@ -59,6 +72,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public void addAnswer(int userID, Exercise exercise, int questionID, String answer, String audioFile) {
     db.addAnswer(userID, exercise,questionID,answer,audioFile);
+  }
+
+  public void addGrade(int resultID, int grade, boolean correct) {
+    db.addGrade(resultID, grade, correct);
   }
 
   public long addUser(int age, String gender, int experience) {
@@ -76,6 +93,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public List<User> getUsers() { return db.getUsers(); }
+
+  /**
+   * @see mitll.langtest.client.ResultManager#showResults()
+   * @return
+   */
   public List<Result> getResults() {
     List<Result> results = db.getResults();
     for (Result r : results) {

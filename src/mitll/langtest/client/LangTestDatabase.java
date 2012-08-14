@@ -1,5 +1,6 @@
 package mitll.langtest.client;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.AudioAnswer;
@@ -19,11 +20,15 @@ import java.util.List;
 @RemoteServiceRelativePath("langtestdatabase")
 public interface LangTestDatabase extends RemoteService {
   List<Exercise> getExercises(long userID);
+  List<Exercise> getExercises();
+  List<Result> getResultsForExercise(String exid);
   void addAnswer(int userID, Exercise exercise, int questionID, String answer, String audioFile);
+  void addGrade(int resultID, int grade, boolean correct);
   long addUser(int age, String gender, int experience);
   boolean isAnswerValid(int userID, Exercise exercise, int questionID);
   List<User> getUsers();
   List<Result> getResults();
 
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user);
+
 }

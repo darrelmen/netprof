@@ -38,7 +38,7 @@ public class ExerciseDAO {
   public List<Exercise> getRawExercises() {
     List<Exercise> exercises = new ArrayList<Exercise>();
     Connection connection = null;
-    SortedSet<String> ids = new TreeSet<String>();
+  //  SortedSet<String> ids = new TreeSet<String>();
     try {
       connection = database.getConnection();
       String sql = "SELECT * FROM exercises";
@@ -63,7 +63,7 @@ public class ExerciseDAO {
             System.err.println("no valid exid for " + e);
             continue;
           }
-          ids.add(e.getID());
+      //    ids.add(e.getID());
           exercises.add(e);
         } else {
           System.err.println("expecting a { (marking json data), so skipping " + content);

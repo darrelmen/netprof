@@ -1,7 +1,10 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.shared.Exercise;
+
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.

@@ -5,15 +5,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.*;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -102,6 +98,65 @@ public class UserManager {
     }
   }
 
+  public void displayChoiceBox() {
+    final DialogBox dialogBox = new DialogBox();
+    // Enable glass background.
+    dialogBox.setGlassEnabled(true);
+    VerticalPanel dialogVPanel = new VerticalPanel();
+    dialogVPanel.addStyleName("dialogVPanel");
+    dialogVPanel.addStyleName("center");
+    dialogVPanel.add(new HTML("<b>Please choose to </b><br>"));
+    //dialogVPanel.add(new HTML(""));
+
+    SimplePanel spacer = new SimplePanel();
+    spacer.setSize("20px", "20px");
+    dialogVPanel.add(spacer);
+
+    Anchor w = new Anchor("Take a test");
+    w.addStyleName("paddedHorizontalPanel");
+    w.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        dialogBox.hide();
+        displayLoginBox();
+      }
+    });
+    dialogVPanel.add(w);
+    HTML w2 = new HTML("<br><i>&nbsp;&nbsp;&nbsp;Or</i><br>");
+    w2.addStyleName("paddedHorizontalPanel");
+
+    spacer = new SimplePanel();
+    spacer.addStyleName("paddedHorizontalPanel");
+    spacer.setSize("20px", "20px");
+    spacer.add(w2);
+    dialogVPanel.add(spacer);
+
+
+   // dialogVPanel.add(w2);
+
+    spacer = new SimplePanel();
+    spacer.setSize("20px", "20px");
+    dialogVPanel.add(spacer);
+    spacer = new SimplePanel();
+    spacer.setSize("20px", "20px");
+    dialogVPanel.add(spacer);
+
+
+    Anchor w1 = new Anchor("Grade a test");
+    dialogVPanel.add(w1);
+    w1.addStyleName("paddedHorizontalPanel");
+
+    w1.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        dialogBox.hide();
+        System.err.println("OK, grade tests...");
+        langTest.setGrading(true);
+      }
+    });
+
+    dialogBox.setWidget(dialogVPanel);
+    show(dialogBox);
+  }
+
   private void displayLoginBox() {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
@@ -111,27 +166,8 @@ public class UserManager {
     // Enable glass background.
     dialogBox.setGlassEnabled(true);
 
-    final Button closeButton = new Button("Login");
-    closeButton.setEnabled(false);
-
-    // We can set the id of a widget by accessing its Element
-    closeButton.getElement().setId("closeButton");
     final TextBox ageEntryBox = new TextBox();
-    ageEntryBox.addKeyUpHandler(new KeyUpHandler() {
-      public void onKeyUp(KeyUpEvent event) {
-        String text = ageEntryBox.getText();
-        if (text.length() == 0) {
-          closeButton.setEnabled(false);
-          return;
-        }
-        try {
-          int age = Integer.parseInt(text);
-          closeButton.setEnabled (age > MIN_AGE && age < MAX_AGE);
-        } catch (NumberFormatException e) {
-          closeButton.setEnabled(false);
-        }
-      }
-    });
+    final Button closeButton = makeCloseButton(ageEntryBox);
 
     // Add a drop box with the list types
     final ListBox genderBox = new ListBox(false);
@@ -223,10 +259,38 @@ public class UserManager {
     MyHandler handler = new MyHandler();
     closeButton.addClickHandler(handler);
 
+    show(dialogBox);
+  }
+
+  private void show(DialogBox dialogBox) {
     int left = Window.getClientWidth() / 3;
     int top  = Window.getClientHeight() / 3;
     dialogBox.setPopupPosition(left, top);
 
     dialogBox.show();
+  }
+
+  private Button makeCloseButton(final TextBox ageEntryBox) {
+    final Button closeButton = new Button("Login");
+    closeButton.setEnabled(false);
+
+    // We can set the id of a widget by accessing its Element
+    closeButton.getElement().setId("closeButton");
+    ageEntryBox.addKeyUpHandler(new KeyUpHandler() {
+      public void onKeyUp(KeyUpEvent event) {
+        String text = ageEntryBox.getText();
+        if (text.length() == 0) {
+          closeButton.setEnabled(false);
+          return;
+        }
+        try {
+          int age = Integer.parseInt(text);
+          closeButton.setEnabled (age > MIN_AGE && age < MAX_AGE);
+        } catch (NumberFormatException e) {
+          closeButton.setEnabled(false);
+        }
+      }
+    });
+    return closeButton;
   }
 }
