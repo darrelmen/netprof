@@ -1,8 +1,6 @@
 package mitll.langtest.client;
 
-import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.cell.client.*;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -23,6 +21,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +41,11 @@ public class ResultManager {
 
   private Widget lastTable = null;
   private Button closeButton;
+/*
+  public ResultManager(boolean gradingView) {
+
+  }*/
+
   public void showResults() {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
@@ -70,7 +74,7 @@ public class ResultManager {
           dialogVPanel.remove(closeButton);
         }
 
-        Widget table = getTable(result);
+        Widget table = getTable(result, false, true);
         dialogVPanel.add(table);
         dialogVPanel.add(closeButton);
 
@@ -89,38 +93,53 @@ public class ResultManager {
     });
   }
 
-  private Widget getTable(List<Result> result) {
+  public Widget getTable(List<Result> result, final boolean gradingView, boolean showQuestionColumn) {
     CellTable<Result> table = new CellTable<Result>();
     table.setWidth("1200px");
-    TextColumn<Result> id = new TextColumn<Result>() {
-      @Override
-      public String getValue(Result answer) { return ""+answer.userid; }};
-    id.setSortable(true);
-    table.addColumn(id,"User ID");
+    TextColumn<Result> id = null;
+    if (!gradingView) {
+      id = new TextColumn<Result>() {
+        @Override
+        public String getValue(Result answer) {
+          return "" + answer.userid;
+        }
+      };
+      id.setSortable(true);
+      table.addColumn(id, "User ID");
 
-    TextColumn<Result> age = new TextColumn<Result>() {
-      @Override
-      public String getValue(Result answer) { return ""+answer.plan; }};
-    age.setSortable(true);
-    table.addColumn(age, "Plan");
+      TextColumn<Result> age = new TextColumn<Result>() {
+        @Override
+        public String getValue(Result answer) {
+          return "" + answer.plan;
+        }
+      };
+      age.setSortable(true);
+      table.addColumn(age, "Plan");
 
-    TextColumn<Result> gender = new TextColumn<Result>() {
-      @Override
-      public String getValue(Result answer) { return answer.id; }};
-    gender.setSortable(true);
-    table.addColumn(gender,"Exercise");
-
+      TextColumn<Result> gender = new TextColumn<Result>() {
+        @Override
+        public String getValue(Result answer) {
+          return answer.id;
+        }
+      };
+      gender.setSortable(true);
+      table.addColumn(gender, "Exercise");
+    }
+    if (showQuestionColumn) {
     TextColumn<Result> experience = new TextColumn<Result>() {
       @Override
       public String getValue(Result answer) { return ""+answer.qid; }};
     experience.setSortable(true);
     table.addColumn(experience,"Q. #");
-
-    TextColumn<Result> ipaddr = new TextColumn<Result>() {
+    }
+/*    TextColumn<Result> answerText = new TextColumn<Result>() {
       @Override
-      public String getValue(Result answer) { return ""+answer.answer; }};
-    ipaddr.setSortable(true);
-    table.addColumn(ipaddr,"Answer");
+      public String getValue(Result answer) {
+        String answer1 = answer.answer;
+        return gradingView ? (answer1.endsWith(".wav") ? "" : answer1) : answer1; }};
+
+    answerText.setSortable(true);
+    table.addColumn(answerText,"Answer");*/
 
     final AbstractCell<SafeHtml> progressCell = new AbstractCell<SafeHtml>("click") {
       @Override
@@ -133,25 +152,97 @@ public class ResultManager {
     Column<Result,SafeHtml> audioFile = new Column<Result,SafeHtml>(progressCell) {
       @Override
       public SafeHtml getValue(Result answer) {
-        return getAudioTag(answer.answer);
+        if (answer.answer.endsWith(".wav")) {
+        SafeHtml audioTag = getAudioTag(answer.answer);
+        return audioTag;
+        }
+        else {
+          SafeHtmlBuilder sb = new SafeHtmlBuilder();
+          sb.appendHtmlConstant(answer.answer);
+          return sb.toSafeHtml();
+        }
       }
     };
     audioFile.setSortable(true);
 
-    table.addColumn(audioFile,"File");
+    table.addColumn(audioFile, "Answer");
 
-    TextColumn<Result> valid = new TextColumn<Result>() {
-      @Override
-      public String getValue(Result answer) { return ""+answer.valid; }};
-    valid.setSortable(true);
-    table.addColumn(valid,"Is Valid Recording?");
+    if (!gradingView) {
+      TextColumn<Result> valid = new TextColumn<Result>() {
+        @Override
+        public String getValue(Result answer) {
+          return "" + answer.valid;
+        }
+      };
+      valid.setSortable(true);
 
-    TextColumn<Result> date = new TextColumn<Result>() {
-      @Override
-      public String getValue(Result answer) { return ""+new Date(answer.timestamp); }};
-    date.setSortable(true);
-    table.addColumn(date,"Time");
+      table.addColumn(valid, "Is Valid Recording?");
 
+      TextColumn<Result> date = new TextColumn<Result>() {
+        @Override
+        public String getValue(Result answer) {
+          return "" + new Date(answer.timestamp);
+        }
+      };
+      date.setSortable(true);
+      table.addColumn(date, "Time");
+    }
+    else {
+  /*    final CheckboxCell correctCheckbox   = new CheckboxCell(true, true);
+      //correctCheckbox.get
+      final CheckboxCell incorrectCheckbox = new CheckboxCell(true, true);
+      Column<Result,Boolean> correct = new Column<Result, Boolean>(correctCheckbox) {
+       @Override
+            public Boolean getValue(Result object) {
+              return false;
+            }
+          };
+      FieldUpdater<Result, Boolean> correctUpdater = new FieldUpdater<Result, Boolean>() {
+        public void update(int index, Result object, Boolean value) {
+          System.out.println("Got value " + index + " " + object + " " + value);
+          //  incorrectCheckbox.setValue(getContext(),!value);
+        }
+      };
+      correct.setFieldUpdater(correctUpdater);
+      table.addColumn(correct,"Correct?");
+
+      Column<Result,Boolean> incorrect = new Column<Result, Boolean>(incorrectCheckbox) {
+        @Override
+        public Boolean getValue(Result object) {
+          return false;
+        }
+      };
+      FieldUpdater<Result, Boolean> incorrectUpdater = new FieldUpdater<Result, Boolean>() {
+        public void update(int index, Result object, Boolean value) {
+          System.out.println("Got value " + index + " " + object + " " + value);
+        }
+      };
+      incorrect.setFieldUpdater(incorrectUpdater);
+      table.addColumn(correct,"Incorrect?");*/
+
+      SelectionCell selectionCell = new SelectionCell(Arrays.asList("Ungraded", "Correct", "Incorrect"));
+      Column<Result, String> col = new Column<Result, String>(selectionCell) {
+        @Override
+        public String getValue(Result object) {
+          return "Ungraded";
+        }
+      };
+      col.setFieldUpdater(new FieldUpdater<Result, String>() {
+        public void update(int index, Result object, String value) {
+          System.out.println("Got value " + index + " " + object + " " + value);
+          service.addGrade(object.uniqueID,0,value.equals("Correct"),new AsyncCallback<Void>() {
+            public void onFailure(Throwable caught) {
+              //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public void onSuccess(Void result) {   // TODO show check box?
+              //To change body of implemented methods use File | Settings | File Templates.
+            }
+          });
+        }
+      });
+      table.addColumn(col, "Correct?");
+    }
     // Create a data provider.
     ListDataProvider<Result> dataProvider = new ListDataProvider<Result>();
 

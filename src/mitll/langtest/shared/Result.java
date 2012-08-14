@@ -11,6 +11,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class Result implements IsSerializable {
   //userid INT, plan VARCHAR, id VARCHAR, qid INT, answer VARCHAR, audioFile VARCHAR, valid BOOLEAN, timestamp
+  public int uniqueID;
   public long userid;
   public String plan;
   public String id;
@@ -32,7 +33,9 @@ public class Result implements IsSerializable {
    * @param valid
    * @param timestamp
    */
-  public Result(long userid, String plan, String id, int qid, String answer, /*String audioFile,*/ boolean  valid, long timestamp) {
+  public Result(int uniqueID
+                ,long userid, String plan, String id, int qid, String answer, /*String audioFile,*/ boolean  valid, long timestamp) {
+   this.uniqueID = uniqueID;
     this.userid = userid;
     this.plan  = plan;
     this.id = id;

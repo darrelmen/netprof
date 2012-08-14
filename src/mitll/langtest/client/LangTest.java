@@ -50,8 +50,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private FlashRecordPanelHeadless flashRecordPanel;
 
   private long lastUser = -1;
-
+  private boolean grading = false;
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
+  private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
 
   /**
    * Make an exception handler that displays the exception.
@@ -127,7 +128,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setupErrorDialog();
 
     // set up left side exercise list
-    ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
     this.exerciseList = new ExerciseList(currentExerciseVPanel,service,this, factory);
     ScrollPanel itemScroller = new ScrollPanel(this.exerciseList);
     itemScroller.setSize(EXERCISE_LIST_WIDTH +"px",(Window.getClientHeight() - (2*HEADER_HEIGHT) - FOOTER_HEIGHT - 60) + "px"); // 54
@@ -157,6 +157,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         showPopupOnDenial();
       }
     });
+  }
+
+  public void setGrading(boolean g) {
+    this.grading = g;
+
+    if (grading) {
+      exerciseList.getGradedExercises(new GradingExercisePanelFactory(service, this, this));
+      lastUser = -1; // no user
+    }
   }
 
   /**
@@ -247,7 +256,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return hp2;
   }
 
-  public void login()  { user.login(); }
+  public void login()  {
+    user.displayChoiceBox();
+  //  user.login();
+  }
 
   /**
    * Init Flash recorder once we login.

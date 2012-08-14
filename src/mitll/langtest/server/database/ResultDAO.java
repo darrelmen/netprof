@@ -19,7 +19,7 @@ public class ResultDAO {
 
   /**
    * Pulls the list of results out of the database.
-   *
+   * @see mitll.langtest.server.database.DatabaseImpl#getResults()
    * @return
    */
   public List<Result> getResults() {
@@ -27,33 +27,61 @@ public class ResultDAO {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement("SELECT * from results;");
 
-      ResultSet rs = statement.executeQuery();
-      List<Result> results = new ArrayList<Result>();
-      while (rs.next()) {
-        int i = 1;
-        rs.getInt(i++);
-        long userID = rs.getLong(i++);
-        String plan = rs.getString(i++);
-        String exid = rs.getString(i++);
-        int qid = rs.getInt(i++);
-        Timestamp timestamp = rs.getTimestamp(i++);
-        String answer = rs.getString(i++);
-        boolean valid = rs.getBoolean(i++);
-        results.add(new Result(userID, //id
-          plan, // plan
-          exid, // id
-          qid, // qid
-          answer, // answer
-          //rs.getString(i++), // audioFile
-          valid, // valid
-          timestamp.getTime()
-        ));
-      }
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
+      return getResultsForQuery(connection, statement);
+    } catch (Exception ee) {
+      ee.printStackTrace();
+    }
+    return new ArrayList<Result>();
+  }
 
-      return results;
+  private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+    ResultSet rs = statement.executeQuery();
+    List<Result> results = new ArrayList<Result>();
+    while (rs.next()) {
+      int i = 1;
+      int uniqueID = rs.getInt(i++);
+      long userID = rs.getLong(i++);
+      String plan = rs.getString(i++);
+      String exid = rs.getString(i++);
+      int qid = rs.getInt(i++);
+      Timestamp timestamp = rs.getTimestamp(i++);
+      String answer = rs.getString(i++);
+      boolean valid = rs.getBoolean(i++);
+      results.add(new Result(userID, //id
+        plan, // plan
+        exid, // id
+        qid, // qid
+        answer, // answer
+        //rs.getString(i++), // audioFile
+        valid, // valid
+        timestamp.getTime()
+      ));
+    }
+    rs.close();
+    statement.close();
+    database.closeConnection(connection);
+
+    return results;
+  }
+
+  /**
+   * TODO join against grades -- don't return graded exercises
+   *
+   * @see DatabaseImpl#getResultsForExercise(String)
+   * @param exerciseID
+   * @return
+   */
+  public List<Result> getResultsForExercise(String exerciseID) {
+    try {
+      Connection connection = database.getConnection();
+      String sql = "SELECT * from results where EXID='" + exerciseID + "'";
+      System.err.println("executing " + sql);
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      List<Result> resultsForQuery = getResultsForQuery(connection, statement);
+      System.err.println("got back " + resultsForQuery.size());
+
+      return resultsForQuery;
     } catch (Exception ee) {
       ee.printStackTrace();
     }
@@ -75,6 +103,11 @@ public class ResultDAO {
     }
   }
 
+  /**
+   * @deprecated
+   * @param database
+   * @throws Exception
+   */
   private void showResults(Database database) throws Exception {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement("SELECT * FROM results order by " + Database.TIME);
@@ -111,4 +144,6 @@ public class ResultDAO {
     statement.execute();
     statement.close();
   }
+
+
 }

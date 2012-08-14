@@ -9,4 +9,5 @@ package mitll.langtest.client;
  */
 public interface UserNotification {
   void gotUser(long userID);
+  void setGrading(boolean g);
 }

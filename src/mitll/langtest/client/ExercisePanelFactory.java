@@ -10,10 +10,16 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class ExercisePanelFactory {
-  private LangTestDatabaseAsync service;
-  private UserFeedback userFeedback;
-  private ExerciseController controller;
+  protected LangTestDatabaseAsync service;
+  protected UserFeedback userFeedback;
+  protected ExerciseController controller;
 
+  /**
+   * @see mitll.langtest.client.LangTest#onModuleLoad2()
+   * @param service
+   * @param userFeedback
+   * @param controller
+   */
   public ExercisePanelFactory( final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                                final ExerciseController controller) {
     this.service =service;

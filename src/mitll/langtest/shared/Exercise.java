@@ -66,6 +66,10 @@ public class Exercise implements IsSerializable  {
   public String getContent() { return content; }
   public EXERCISE_TYPE getType() { return type; }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getExercises(long)
+   * @param b
+   */
   public void setPromptInEnglish(boolean b) {
     this.promptInEnglish = b;
   }
@@ -80,6 +84,12 @@ public class Exercise implements IsSerializable  {
    */
   public List<QAPair> getQuestions() {
     return langToQuestion.get(promptInEnglish ? "en" : "fl");
+  }
+
+  public int getNumQuestions() {
+    List<QAPair> en = langToQuestion.get("en");
+    if (en == null) return 0; // should never happen
+    return en.size();
   }
 
   public String toString() {

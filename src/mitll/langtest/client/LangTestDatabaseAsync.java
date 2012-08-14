@@ -13,6 +13,7 @@ import java.util.List;
  */
 public interface LangTestDatabaseAsync {
   void getExercises(long userID, AsyncCallback<List<Exercise>> async);
+  void getExercises( AsyncCallback<List<Exercise>> async);
   void addAnswer(int usedID, Exercise exercise, int questionID, String answer, String audioFile, AsyncCallback<Void> async);
   void addUser(int age, String gender, int experience, AsyncCallback<Long> async);
   void isAnswerValid(int userID, Exercise exercise, int questionID, AsyncCallback<Boolean> async);
@@ -20,4 +21,8 @@ public interface LangTestDatabaseAsync {
   void getResults(AsyncCallback<List<Result>> async);
 
   void writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user, AsyncCallback<AudioAnswer> async);
+
+  void addGrade(int resultID, int grade, boolean correct, AsyncCallback<Void> async);
+
+  void getResultsForExercise(String exid, AsyncCallback<List<Result>> async);
 }
