@@ -30,6 +30,7 @@ import java.util.*;
  */
 public class ResultManager {
   private static final int PAGE_SIZE = 8;
+  private int pageSize = PAGE_SIZE;
   private LangTestDatabaseAsync service;
   private UserFeedback feedback;
   private GradingExercisePanel panel;
@@ -48,6 +49,8 @@ public class ResultManager {
   public void setFeedback(GradingExercisePanel panel) {
     this.panel = panel;
   }
+
+  public void setPageSize(int s) { this.pageSize = s; }
 
   private Widget lastTable = null;
   private Button closeButton;
@@ -223,7 +226,7 @@ public class ResultManager {
               feedback.showStatus("Now "+result + " graded answers.");
               remainingResults.remove(object.uniqueID);
               if (remainingResults.isEmpty()) {
-                panel.enableNextButton(true);
+               // panel.recordCompleted(panel);
               }
               else {
                 System.out.println("now " + remainingResults.size() + " results remain.");
@@ -289,7 +292,7 @@ public class ResultManager {
 
     // Set the cellList as the display.
     pager.setDisplay(table);
-    pager.setPageSize(PAGE_SIZE);
+    pager.setPageSize(pageSize);
     // Add the pager and list to the page.
     VerticalPanel vPanel = new VerticalPanel();
     vPanel.add(pager);

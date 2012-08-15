@@ -8,6 +8,7 @@ import mitll.langtest.client.recorder.SimpleRecordPanel;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class GradingExercisePanel extends ExercisePanel {
                               final ExerciseController controller) {
     super(e,service,userFeedback,controller);
     this.userFeedback = userFeedback;
+    enableNextButton(true);
   }
 
   /**
@@ -41,7 +43,8 @@ public class GradingExercisePanel extends ExercisePanel {
    * @param exercise
    * @param service
    * @param controller
-   * @param index  @return
+   * @param index
+   * @return
    */
   @Override
   protected Widget getAnswerWidget(Exercise exercise, final LangTestDatabaseAsync service, ExerciseController controller, final int index) {
@@ -58,9 +61,18 @@ public class GradingExercisePanel extends ExercisePanel {
       public void onSuccess(List<Result> result) {
         ResultManager rm = new ResultManager(service, userFeedback);
         rm.setFeedback(outer);
-        vp.add(rm.getTable(result, true,(n > 1)));
+        boolean moreThanOneQuestion = n > 1;
+        if (moreThanOneQuestion) {
+          List<Result> filtered = new ArrayList<Result>();
+          for (Result r : result) if (r.qid == index) filtered.add(r);
+          result = filtered;
+          rm.setPageSize(4);
+        }
+
+        vp.add(rm.getTable(result, true, moreThanOneQuestion));
         //System.err.println("found " +result.size() + " results");
-        if (result.isEmpty()) enableNextButton(true);
+
+       // if (result.isEmpty()) recordCompleted(outer);
       }
     });
     return vp;

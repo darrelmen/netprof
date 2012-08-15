@@ -135,7 +135,7 @@ public class GradeDAO {
       statement.close();
       database.closeConnection(connection);
 
-      System.out.println("found " + results.size() + " graded results for " + exerciseID);
+    //  System.out.println("found " + results.size() + " graded results for " + exerciseID);
       return results;
     } catch (Exception ee) {
       ee.printStackTrace();
