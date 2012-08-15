@@ -74,8 +74,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.addAnswer(userID, exercise,questionID,answer,audioFile);
   }
 
-  public void addGrade(int resultID, int grade, boolean correct) {
-    db.addGrade(resultID, grade, correct);
+  public int addGrade(int resultID, int grade, boolean correct) {
+    return db.addGrade(resultID, grade, correct);
   }
 
   public long addUser(int age, String gender, int experience) {

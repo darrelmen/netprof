@@ -243,8 +243,15 @@ public class DatabaseImpl implements Database {
     answerDAO.addAnswer(userID, e, questionID, answer, audioFile);
   }
 
-  public void addGrade(int resultID, int grade, boolean correct) {
-    gradeDAO.addGrade(resultID, grade, correct);
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addGrade(int, int, boolean)
+   * @param resultID
+   * @param grade
+   * @param correct
+   * @return
+   */
+  public int addGrade(int resultID, int grade, boolean correct) {
+    return gradeDAO.addGrade(resultID, grade, correct);
   }
 
   public boolean isAnswerValid(int userID, Exercise exercise, int questionID, Database database) {

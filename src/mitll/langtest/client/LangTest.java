@@ -98,7 +98,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void onModuleLoad2() {
     user = new UserManager(this,service);
-    resultManager = new ResultManager(service);
+    resultManager = new ResultManager(service, this);
 
     DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
     RootPanel.get().add(widgets);
