@@ -22,7 +22,7 @@ public interface LangTestDatabase extends RemoteService {
   List<Exercise> getExercises();
   List<Result> getResultsForExercise(String exid);
   void addAnswer(int userID, Exercise exercise, int questionID, String answer, String audioFile);
-  int addGrade(int resultID, int grade, boolean correct);
+  int addGrade(int resultID, String exerciseID, int grade, boolean correct);
   long addUser(int age, String gender, int experience);
   boolean isAnswerValid(int userID, Exercise exercise, int questionID);
   List<User> getUsers();

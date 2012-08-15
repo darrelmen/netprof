@@ -92,6 +92,7 @@ public class DatabaseImpl implements Database {
     }
 
     try {
+      gradeDAO.dropGrades();
       gradeDAO.createGradesTable(getConnection());
     } catch (Exception e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -246,12 +247,12 @@ public class DatabaseImpl implements Database {
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#addGrade(int, int, boolean)
    * @param resultID
-   * @param grade
-   * @param correct
-   * @return
+   * @param exerciseID
+   *@param grade
+   * @param correct   @return
    */
-  public int addGrade(int resultID, int grade, boolean correct) {
-    return gradeDAO.addGrade(resultID, grade, correct);
+  public int addGrade(int resultID, String exerciseID, int grade, boolean correct) {
+    return gradeDAO.addGrade(resultID, exerciseID, grade, correct);
   }
 
   public boolean isAnswerValid(int userID, Exercise exercise, int questionID, Database database) {

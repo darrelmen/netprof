@@ -119,7 +119,7 @@ public class ExerciseList extends VerticalPanel {
 
     removeCurrentExercise();
 
-    currentExerciseVPanel.add(current = factory.getExericsePanel(e));
+    currentExerciseVPanel.add(current = factory.getExercisePanel(e));
     int i = currentExercises.indexOf(e);
 
     markCurrentExercise(i);

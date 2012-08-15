@@ -130,16 +130,12 @@ public class UserManager {
     spacer.add(w2);
     dialogVPanel.add(spacer);
 
-
-   // dialogVPanel.add(w2);
-
     spacer = new SimplePanel();
     spacer.setSize("20px", "20px");
     dialogVPanel.add(spacer);
     spacer = new SimplePanel();
     spacer.setSize("20px", "20px");
     dialogVPanel.add(spacer);
-
 
     Anchor w1 = new Anchor("Grade a test");
     dialogVPanel.add(w1);
@@ -148,7 +144,6 @@ public class UserManager {
     w1.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         dialogBox.hide();
-        System.err.println("OK, grade tests...");
         langTest.setGrading(true);
       }
     });
