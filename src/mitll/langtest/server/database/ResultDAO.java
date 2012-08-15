@@ -99,7 +99,7 @@ public class ResultDAO {
           iter.remove();
         }
       }
-      System.err.println("after removing graded items count = " + resultsForQuery.size());
+      //System.err.println("after removing graded items count = " + resultsForQuery.size());
 
       return resultsForQuery;
     } catch (Exception ee) {
