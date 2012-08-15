@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 
 import java.sql.Connection;
@@ -69,6 +70,10 @@ public class ResultDAO {
     return results;
   }
 
+  public boolean areAnyResultsLeftToGradeFor(Exercise e) {
+    return !getResultsForExercise(e.getID()).isEmpty();
+  }
+
   /**
    * Joins against grades -- don't return graded exercises
    *
@@ -94,7 +99,7 @@ public class ResultDAO {
           iter.remove();
         }
       }
-      //System.err.println("after removing graded items count = " + resultsForQuery.size());
+      System.err.println("after removing graded items count = " + resultsForQuery.size());
 
       return resultsForQuery;
     } catch (Exception ee) {

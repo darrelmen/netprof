@@ -109,9 +109,39 @@ public class ExerciseList extends VerticalPanel {
   }
 
   private void loadFirstExercise() {
-    loadExercise(currentExercises.get(0));
+    Exercise toLoad = currentExercises.get(0);
+
+    if (doGrading) {
+      getNextUngraded();
+    }
+    else {
+      loadExercise(toLoad);
+    }
   }
 
+  private void getNextUngraded() {
+    service.getNextUngradedExercise(new AsyncCallback<Exercise>() {
+      public void onFailure(Throwable caught) {}
+      public void onSuccess(Exercise result) {
+        if (result != null) {
+          System.out.println("next ungraded is " + result.getID());
+          for (Exercise e : currentExercises) {
+            if (e.getID().equals(result.getID())) {
+              loadExercise(e);
+            }
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * @see #addExerciseToList(mitll.langtest.shared.Exercise)
+   * @see #loadFirstExercise()
+   * @see #loadNextExercise(mitll.langtest.shared.Exercise)
+   * @see #loadPreviousExercise(mitll.langtest.shared.Exercise)
+   * @param e
+   */
   private void loadExercise(Exercise e) {
     if (!doGrading) {
       feedback.login();
@@ -121,7 +151,10 @@ public class ExerciseList extends VerticalPanel {
 
     currentExerciseVPanel.add(current = factory.getExercisePanel(e));
     int i = currentExercises.indexOf(e);
-
+    if (i == -1) {
+      System.err.println("can't find " + e + " in list of " + currentExercises.size() + " exercises.");
+      return;
+    }
     markCurrentExercise(i);
     currentExercise = i;
   }
@@ -154,7 +187,12 @@ public class ExerciseList extends VerticalPanel {
       feedback.showErrorMessage("Test Complete! Thank you!");
     }
     else {
-      loadExercise(currentExercises.get(i+1));
+      if (doGrading) {
+        getNextUngraded();
+      }
+      else {
+        loadExercise(currentExercises.get(i+1));
+      }
     }
     return onLast;
   }

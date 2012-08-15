@@ -53,6 +53,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getExercises();
   }
 
+  public Exercise getNextUngradedExercise() {
+    return db.getNextUngradedExercise();
+  }
+
   /**
    * @see mitll.langtest.client.GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.ExerciseController, int)
    * @param exid

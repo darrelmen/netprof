@@ -11,10 +11,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Note with H2 that :
@@ -92,7 +89,7 @@ public class DatabaseImpl implements Database {
     }
 
     try {
-      gradeDAO.dropGrades();
+     // gradeDAO.dropGrades();
       gradeDAO.createGradesTable(getConnection());
     } catch (Exception e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -100,8 +97,25 @@ public class DatabaseImpl implements Database {
 
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises()
+   * @return
+   */
   public List<Exercise> getExercises() {
      return exerciseDAO.getRawExercises();
+  }
+
+  public Exercise getNextUngradedExercise() {
+    List<Exercise> rawExercises = getExercises();
+    System.out.println("checking " +rawExercises.size() + " exercises.");
+    for (Exercise e : rawExercises) {
+      if (resultDAO.areAnyResultsLeftToGradeFor(e)) {
+        System.out.println("Exercise " +e + " needs grading.");
+
+        return e;
+      }
+    }
+    return null;
   }
 
   public List<Exercise> getExercises(long userID) {
