@@ -51,6 +51,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private long lastUser = -1;
   private boolean grading = false;
+  private boolean askedMode = false;
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
 
@@ -163,9 +164,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     this.grading = g;
 
     if (grading) {
-      exerciseList.getGradedExercises(new GradingExercisePanelFactory(service, this, this));
-      lastUser = -1; // no user
+      exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), user, grading);
     }
+    else {
+      exerciseList.setFactory(new ExercisePanelFactory(service, this, this), user, grading);
+    }
+    lastUser = -1; // no user
+
+    askedMode = true;
   }
 
   /**
@@ -224,6 +230,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     logout.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         user.clearUser();
+        askedMode = false;
         exerciseList.removeCurrentExercise();
         exerciseList.clear();
         login();
@@ -256,9 +263,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return hp2;
   }
 
-  public void login()  {
-    user.displayChoiceBox();
-  //  user.login();
+  public void login() {
+    if (askedMode && !grading) user.login();
+    else
+      user.displayChoiceBox();
+    //  user.login();
   }
 
   /**

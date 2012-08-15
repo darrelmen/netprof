@@ -28,4 +28,10 @@ public interface LangTestDatabaseAsync {
 
 
   void getNextUngradedExercise(AsyncCallback<Exercise> async);
+
+  void checkoutExerciseID(String user,String id, AsyncCallback<Void> async);
+
+  void addGrader(String login, AsyncCallback<Void> async);
+
+  void graderExists(String login, AsyncCallback<Boolean> async);
 }

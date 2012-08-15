@@ -53,6 +53,7 @@ public class DatabaseImpl implements Database {
   private final ResultDAO resultDAO = new ResultDAO(this);
   public final AnswerDAO answerDAO = new AnswerDAO(this);
   public final GradeDAO gradeDAO = new GradeDAO(this);
+  public final GraderDAO graderDAO = new GraderDAO(this);
 
   public DatabaseImpl(HttpServlet s) {
     this.servlet = s;
@@ -91,6 +92,7 @@ public class DatabaseImpl implements Database {
     try {
      // gradeDAO.dropGrades();
       gradeDAO.createGradesTable(getConnection());
+      graderDAO.createGraderTable(getConnection());
     } catch (Exception e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
@@ -105,11 +107,16 @@ public class DatabaseImpl implements Database {
      return exerciseDAO.getRawExercises();
   }
 
-  public Exercise getNextUngradedExercise() {
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise()
+   * @return
+   */
+  public Exercise getNextUngradedExercise(Collection<String> activeExercises) {
     List<Exercise> rawExercises = getExercises();
-    System.out.println("checking " +rawExercises.size() + " exercises.");
+    //System.out.println("checking " +rawExercises.size() + " exercises.");
     for (Exercise e : rawExercises) {
-      if (resultDAO.areAnyResultsLeftToGradeFor(e)) {
+      if (!activeExercises.contains(e.getID()) && // no one is working on it
+          resultDAO.areAnyResultsLeftToGradeFor(e)) {
         System.out.println("Exercise " +e + " needs grading.");
 
         return e;
@@ -259,7 +266,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addGrade(int, int, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addGrade
    * @param resultID
    * @param exerciseID
    *@param grade
@@ -268,6 +275,9 @@ public class DatabaseImpl implements Database {
   public int addGrade(int resultID, String exerciseID, int grade, boolean correct) {
     return gradeDAO.addGrade(resultID, exerciseID, grade, correct);
   }
+
+  public void addGrader(String login) { graderDAO.addGrader(login); }
+  public boolean graderExists(String login) { return graderDAO.graderExists(login); }
 
   public boolean isAnswerValid(int userID, Exercise exercise, int questionID, Database database) {
     return answerDAO.isAnswerValid(userID, exercise, questionID, database);
