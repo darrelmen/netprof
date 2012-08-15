@@ -8,13 +8,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class ResultDAO {
   private final Database database;
-
+  private GradeDAO gradeDAO;
   public ResultDAO(Database database) {
     this.database = database;
+
+    gradeDAO = new GradeDAO(database);
+
   }
 
   /**
@@ -65,21 +70,31 @@ public class ResultDAO {
   }
 
   /**
-   * TODO join against grades -- don't return graded exercises
+   * Joins against grades -- don't return graded exercises
    *
    * @see DatabaseImpl#getResultsForExercise(String)
    * @param exerciseID
-   * @return
+   * @return results that haven't been graded yet
    */
   public List<Result> getResultsForExercise(String exerciseID) {
     try {
       Connection connection = database.getConnection();
       String sql = "SELECT * from results where EXID='" + exerciseID + "'";
-      System.err.println("executing " + sql);
+     // System.err.println("executing " + sql);
       PreparedStatement statement = connection.prepareStatement(sql);
 
       List<Result> resultsForQuery = getResultsForQuery(connection, statement);
-      System.err.println("got back " + resultsForQuery.size());
+    //  System.err.println("got back " + resultsForQuery.size());
+
+      Set<Integer> resultIDsForExercise = gradeDAO.getResultIDsForExercise(exerciseID);
+      for (Iterator<Result> iter = resultsForQuery.iterator(); iter.hasNext();) {
+        Result next = iter.next();
+        if (resultIDsForExercise.contains(next.uniqueID)) {
+        // System.out.println("removing graded item for result " + next.uniqueID);
+          iter.remove();
+        }
+      }
+      //System.err.println("after removing graded items count = " + resultsForQuery.size());
 
       return resultsForQuery;
     } catch (Exception ee) {

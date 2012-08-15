@@ -27,7 +27,7 @@ public class ExercisePanelFactory {
     this.controller = controller;
   }
 
-  public ExercisePanel getExericsePanel(Exercise e) {
+  public ExercisePanel getExercisePanel(Exercise e) {
     if (e.getType() == Exercise.EXERCISE_TYPE.RECORD) {
       return new SimpleRecordExercisePanel(e, service, userFeedback, controller);
     } else {

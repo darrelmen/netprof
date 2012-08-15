@@ -14,12 +14,10 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.User;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -198,7 +196,7 @@ public class ResultManager {
       col.setFieldUpdater(new FieldUpdater<Result, String>() {
         public void update(int index, Result object, String value) {
           int grade = Integer.parseInt(value);
-          service.addGrade(object.uniqueID,grade,true,new AsyncCallback<Integer>() {
+          service.addGrade(object.uniqueID, object.id, grade,true,new AsyncCallback<Integer>() {
             public void onFailure(Throwable caught) {}
 
             public void onSuccess(Integer result) {   // TODO show check box?

@@ -21,7 +21,7 @@ public class GradingExercisePanelFactory extends ExercisePanelFactory {
     super(service, userFeedback, controller);
   }
 
-  public ExercisePanel getExericsePanel(Exercise e) {
+  public ExercisePanel getExercisePanel(Exercise e) {
      return new GradingExercisePanel(e, service, userFeedback, controller);
   }
 }

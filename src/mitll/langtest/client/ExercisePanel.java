@@ -40,7 +40,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
   private boolean enableNextOnlyWhenAllCompleted = true;
   private Button next;
   /**
-   * @see ExercisePanelFactory#getExericsePanel
+   * @see ExercisePanelFactory#getExercisePanel
    * @see ExerciseList#loadExercise
    * @param e
    * @param service
