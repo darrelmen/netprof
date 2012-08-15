@@ -137,7 +137,7 @@ public class UserManager {
     spacer.setSize("20px", "20px");
     dialogVPanel.add(spacer);
 
-    Anchor w1 = new Anchor("Grade a test");
+    Anchor w1 = new Anchor("Grade tests");
     dialogVPanel.add(w1);
     w1.addStyleName("paddedHorizontalPanel");
 

@@ -12,6 +12,7 @@ public class GradeDAO {
   }
 
   /**
+   * If a grade already exists, update the value.
    * @see DatabaseImpl#addGrade(int, String, int, boolean)
    * @param resultID
    * @param exerciseID
@@ -23,12 +24,22 @@ public class GradeDAO {
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement;
-      statement = connection.prepareStatement("INSERT INTO grades(resultID,exerciseID,grade,correct) VALUES(?,?,?,?)");
-      int i = 1;
-      statement.setInt(i++, resultID);
-      statement.setString(i++, exerciseID);
-      statement.setInt(i++, grade);
-      statement.setBoolean(i++, correct);
+
+      String sql = "INSERT INTO grades(resultID,exerciseID,grade,correct) VALUES(?,?,?,?)";
+      boolean exists = gradeExists(resultID);
+      if (exists) {
+        sql = "UPDATE grades SET grade='" +grade+
+            "' WHERE resultID='" + resultID+
+            "'";
+      }
+      statement = connection.prepareStatement(sql);
+      if (!exists) {
+        int i = 1;
+        statement.setInt(i++, resultID);
+        statement.setString(i++, exerciseID);
+        statement.setInt(i++, grade);
+        statement.setBoolean(i++, correct);
+      }
       statement.executeUpdate();
       statement.close();
 
@@ -37,6 +48,27 @@ public class GradeDAO {
       e.printStackTrace();
     }
     return getCount();
+  }
+
+  public boolean gradeExists(int resultID) {
+    boolean val = false;
+    try {
+      Connection connection = database.getConnection();
+      PreparedStatement statement;
+      statement = connection.prepareStatement("SELECT COUNT(*) from grades where resultID='" +
+          resultID +
+          "'");
+      ResultSet rs = statement.executeQuery();
+      if (rs.next()) {
+        val = rs.getInt(1) > 0;
+      }
+      rs.close();
+      statement.close();
+      database.closeConnection(connection);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return val;
   }
 
   /**
@@ -82,6 +114,11 @@ public class GradeDAO {
     return new ArrayList<Result>();
   }*/
 
+  /**
+   * @see ResultDAO#getResultsForExercise(String)
+   * @param exerciseID
+   * @return
+   */
   public Set<Integer> getResultIDsForExercise(String exerciseID) {
     try {
       Connection connection = database.getConnection();

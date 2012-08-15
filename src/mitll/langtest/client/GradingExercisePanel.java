@@ -47,6 +47,7 @@ public class GradingExercisePanel extends ExercisePanel {
   protected Widget getAnswerWidget(Exercise exercise, final LangTestDatabaseAsync service, ExerciseController controller, final int index) {
     final SimplePanel vp = new SimplePanel();
     final int n = exercise.getNumQuestions();
+    final GradingExercisePanel outer = this;
     service.getResultsForExercise(exercise.getID(), new AsyncCallback<List<Result>>() {
       public void onFailure(Throwable caught) {}
 
@@ -56,8 +57,10 @@ public class GradingExercisePanel extends ExercisePanel {
        */
       public void onSuccess(List<Result> result) {
         ResultManager rm = new ResultManager(service, userFeedback);
+        rm.setFeedback(outer);
         vp.add(rm.getTable(result, true,(n > 1)));
-//        System.err.println("adding " +result.size() + " results");
+        //System.err.println("found " +result.size() + " results");
+        if (result.isEmpty()) enableNextButton(true);
       }
     });
     return vp;
@@ -65,7 +68,7 @@ public class GradingExercisePanel extends ExercisePanel {
 
   @Override
   protected String getQuestionPrompt(Exercise e) {
-    return "";//&nbsp;&nbsp;&nbsp;Speak and record your answer in " +(e.promptInEnglish ? "English" : " the foreign language") +" :";
+    return "";
   }
 
   /**

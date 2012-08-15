@@ -19,10 +19,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.shared.Result;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -35,10 +32,21 @@ public class ResultManager {
   private static final int PAGE_SIZE = 8;
   private LangTestDatabaseAsync service;
   private UserFeedback feedback;
+  private GradingExercisePanel panel;
+  private Set<Integer> remainingResults = new HashSet<Integer>();
 
+  /**
+   * @see GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, ExerciseController, int)
+   * @param s
+   * @param feedback
+   */
   public ResultManager(LangTestDatabaseAsync s, UserFeedback feedback) {
     this.service = s;
     this.feedback = feedback;
+  }
+
+  public void setFeedback(GradingExercisePanel panel) {
+    this.panel = panel;
   }
 
   private Widget lastTable = null;
@@ -92,6 +100,12 @@ public class ResultManager {
   }
 
   public Widget getTable(List<Result> result, final boolean gradingView, boolean showQuestionColumn) {
+    remainingResults.clear();
+
+    for (Result r: result) {
+      remainingResults.add(r.uniqueID);
+    }
+
     CellTable<Result> table = new CellTable<Result>();
     table.setWidth("1200px");
     TextColumn<Result> id = null;
@@ -194,14 +208,26 @@ public class ResultManager {
         }
       };
       col.setFieldUpdater(new FieldUpdater<Result, String>() {
-        public void update(int index, Result object, String value) {
-          int grade = Integer.parseInt(value);
+        public void update(int index, final Result object, String value) {
+          int grade = -1;
+          try {
+            grade = Integer.parseInt(value);
+          } catch (NumberFormatException e) {
+            //e.printStackTrace();
+          }
           service.addGrade(object.uniqueID, object.id, grade,true,new AsyncCallback<Integer>() {
             public void onFailure(Throwable caught) {}
 
             public void onSuccess(Integer result) {   // TODO show check box?
               System.out.println("now " + result + " grades ");
               feedback.showStatus("Now "+result + " graded answers.");
+              remainingResults.remove(object.uniqueID);
+              if (remainingResults.isEmpty()) {
+                panel.enableNextButton(true);
+              }
+              else {
+                System.out.println("now " + remainingResults.size() + " results remain.");
+              }
             }
           });
         }

@@ -185,7 +185,11 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
   }
 
   private void enableNext() {
-    next.setEnabled((completed.size() == answers.size()));
+    enableNextButton((completed.size() == answers.size()));
+  }
+
+  public void enableNextButton(boolean val) {
+    next.setEnabled(val);
   }
 
   /**
