@@ -47,7 +47,7 @@ public class ResultDAO {
       Timestamp timestamp = rs.getTimestamp(i++);
       String answer = rs.getString(i++);
       boolean valid = rs.getBoolean(i++);
-      results.add(new Result(userID, //id
+      results.add(new Result(uniqueID,userID, //id
         plan, // plan
         exid, // id
         qid, // qid

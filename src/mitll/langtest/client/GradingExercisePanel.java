@@ -19,6 +19,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class GradingExercisePanel extends ExercisePanel {
+  private UserFeedback userFeedback;
   /**
    * @seex LangTest#loadExercise
    * @param e
@@ -29,6 +30,7 @@ public class GradingExercisePanel extends ExercisePanel {
   public GradingExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                               final ExerciseController controller) {
     super(e,service,userFeedback,controller);
+    this.userFeedback = userFeedback;
   }
 
   /**
@@ -46,50 +48,19 @@ public class GradingExercisePanel extends ExercisePanel {
     final SimplePanel vp = new SimplePanel();
     final int n = exercise.getNumQuestions();
     service.getResultsForExercise(exercise.getID(), new AsyncCallback<List<Result>>() {
-      public void onFailure(Throwable caught) {
-
-      }
+      public void onFailure(Throwable caught) {}
 
       /**
        * TODO : consider sorting by answer type (audio vs text)
        * @param result
        */
       public void onSuccess(List<Result> result) {
-        ResultManager rm = new ResultManager(service);
-
+        ResultManager rm = new ResultManager(service, userFeedback);
         vp.add(rm.getTable(result, true,(n > 1)));
-        System.err.println("adding " +result.size() + " results");
-        /*for (Result r : result) {
-          HorizontalPanel hp = new HorizontalPanel();
-          if (n > 1) {
-            hp.add(new HTML("Question #"+r.qid));
-          }
-          hp.add(new HTML("Answer :"));
-          if (*//*r.answer.startsWith("answers") && *//*r.answer.endsWith(".wav"))  {
-             hp.add(new HTML(getAudioTag(r.answer)));
-          }
-          else {
-            hp.add(new HTML(r.answer));
-          }
-          vp.add(hp);
-          //hp.add(new HTML("Question #"+r.qid));
-
-        }*/
+//        System.err.println("adding " +result.size() + " results");
       }
     });
     return vp;
-  }
-
-  private SafeHtml getAudioTag(String result) {
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<audio preload=\"none\" controls=\"controls\" tabindex=\"0\">\n" +
-        "<source type=\"audio/wav\" src=\"" +
-        result +
-        "\"></source>\n" +
-        // "<source type=\"audio/ogg\" src=\"media/ac-LC1-009/ac-LC1-009-C.ogg\"></source>\n" +
-        "Your browser does not support the audio tag.\n" +
-        "</audio>");
-    return sb.toSafeHtml();
   }
 
   @Override

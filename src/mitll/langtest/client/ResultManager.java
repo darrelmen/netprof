@@ -36,15 +36,15 @@ import java.util.List;
 public class ResultManager {
   private static final int PAGE_SIZE = 8;
   private LangTestDatabaseAsync service;
+  private UserFeedback feedback;
 
-  public ResultManager(LangTestDatabaseAsync s) {this.service = s;}
+  public ResultManager(LangTestDatabaseAsync s, UserFeedback feedback) {
+    this.service = s;
+    this.feedback = feedback;
+  }
 
   private Widget lastTable = null;
   private Button closeButton;
-/*
-  public ResultManager(boolean gradingView) {
-
-  }*/
 
   public void showResults() {
     // Create the popup dialog box
@@ -188,39 +188,7 @@ public class ResultManager {
       table.addColumn(date, "Time");
     }
     else {
-  /*    final CheckboxCell correctCheckbox   = new CheckboxCell(true, true);
-      //correctCheckbox.get
-      final CheckboxCell incorrectCheckbox = new CheckboxCell(true, true);
-      Column<Result,Boolean> correct = new Column<Result, Boolean>(correctCheckbox) {
-       @Override
-            public Boolean getValue(Result object) {
-              return false;
-            }
-          };
-      FieldUpdater<Result, Boolean> correctUpdater = new FieldUpdater<Result, Boolean>() {
-        public void update(int index, Result object, Boolean value) {
-          System.out.println("Got value " + index + " " + object + " " + value);
-          //  incorrectCheckbox.setValue(getContext(),!value);
-        }
-      };
-      correct.setFieldUpdater(correctUpdater);
-      table.addColumn(correct,"Correct?");
-
-      Column<Result,Boolean> incorrect = new Column<Result, Boolean>(incorrectCheckbox) {
-        @Override
-        public Boolean getValue(Result object) {
-          return false;
-        }
-      };
-      FieldUpdater<Result, Boolean> incorrectUpdater = new FieldUpdater<Result, Boolean>() {
-        public void update(int index, Result object, Boolean value) {
-          System.out.println("Got value " + index + " " + object + " " + value);
-        }
-      };
-      incorrect.setFieldUpdater(incorrectUpdater);
-      table.addColumn(correct,"Incorrect?");*/
-
-      SelectionCell selectionCell = new SelectionCell(Arrays.asList("Ungraded", "Correct", "Incorrect"));
+      SelectionCell selectionCell = new SelectionCell(Arrays.asList("Ungraded", "1", "2", "3", "4", "5"));
       Column<Result, String> col = new Column<Result, String>(selectionCell) {
         @Override
         public String getValue(Result object) {
@@ -229,19 +197,18 @@ public class ResultManager {
       };
       col.setFieldUpdater(new FieldUpdater<Result, String>() {
         public void update(int index, Result object, String value) {
-          System.out.println("Got value " + index + " " + object + " " + value);
-          service.addGrade(object.uniqueID,0,value.equals("Correct"),new AsyncCallback<Void>() {
-            public void onFailure(Throwable caught) {
-              //To change body of implemented methods use File | Settings | File Templates.
-            }
+          int grade = Integer.parseInt(value);
+          service.addGrade(object.uniqueID,grade,true,new AsyncCallback<Integer>() {
+            public void onFailure(Throwable caught) {}
 
-            public void onSuccess(Void result) {   // TODO show check box?
-              //To change body of implemented methods use File | Settings | File Templates.
+            public void onSuccess(Integer result) {   // TODO show check box?
+              System.out.println("now " + result + " grades ");
+              feedback.showStatus("Now "+result + " graded answers.");
             }
           });
         }
       });
-      table.addColumn(col, "Correct?");
+      table.addColumn(col, "Grade");
     }
     // Create a data provider.
     ListDataProvider<Result> dataProvider = new ListDataProvider<Result>();

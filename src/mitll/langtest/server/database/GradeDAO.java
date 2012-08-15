@@ -24,7 +24,7 @@ public class GradeDAO {
 
   }
 
-  public void addGrade(int resultID, int grade, boolean correct) {
+  public int addGrade(int resultID, int grade, boolean correct) {
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement;
@@ -40,6 +40,7 @@ public class GradeDAO {
     } catch (Exception e) {
       e.printStackTrace();
     }
+    return getCount();
   }
 
   /**
@@ -126,6 +127,22 @@ public class GradeDAO {
     rs.close();
     statement.close();
     database.closeConnection(connection);
+  }
+
+  public int getCount() {
+    try {
+      Connection connection = database.getConnection();
+      PreparedStatement statement;
+      statement = connection.prepareStatement("SELECT COUNT(*) from grades");
+      ResultSet rs = statement.executeQuery();
+      if (rs.next()) return rs.getInt(1);
+      statement.close();
+
+      database.closeConnection(connection);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return 0;
   }
 
   void createGradesTable(Connection connection) throws SQLException {
