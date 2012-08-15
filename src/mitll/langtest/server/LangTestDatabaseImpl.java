@@ -18,8 +18,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -41,9 +40,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#onModuleLoad
-   * @return
    * @param userID
+   * @return
+   * @see mitll.langtest.client.LangTest#onModuleLoad
    */
   public List<Exercise> getExercises(long userID) {
     return db.getExercises(userID);
@@ -54,53 +53,85 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public Exercise getNextUngradedExercise() {
-    return db.getNextUngradedExercise();
+    synchronized (this) {
+      Exercise nextUngradedExercise = db.getNextUngradedExercise(userToExerciseID.values());
+      //activeExercises.add(nextUngradedExercise.getID());
+      System.out.println("Active set now " + userToExerciseID);
+      return nextUngradedExercise;
+    }
+  }
+
+  //Set<String> activeExercises = new HashSet<String>();
+  Map<String, String> userToExerciseID = new HashMap<String, String>();
+/*  public void returnExerciseID(String id) {
+    synchronized (this) {
+      System.out.println("returnExerciseID Active set now " + activeExercises);
+
+      activeExercises.remove(id);
+    }
+  }*/
+
+  public void checkoutExerciseID(String user, String id) {
+    synchronized (this) {
+      userToExerciseID.put(user, id);
+      System.out.println("checkoutExerciseID Active set now " + userToExerciseID);
+    }
   }
 
   /**
-   * @see mitll.langtest.client.GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.ExerciseController, int)
    * @param exid
    * @return
+   * @see mitll.langtest.client.GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.ExerciseController, int)
    */
   public List<Result> getResultsForExercise(String exid) {
     return db.getResultsForExercise(exid);
   }
 
   /**
-   * @see mitll.langtest.client.ExercisePanel#postAnswers
    * @param userID
    * @param exercise
    * @param questionID
    * @param answer
    * @param audioFile
+   * @see mitll.langtest.client.ExercisePanel#postAnswers
    */
   public void addAnswer(int userID, Exercise exercise, int questionID, String answer, String audioFile) {
-    db.addAnswer(userID, exercise,questionID,answer,audioFile);
+    db.addAnswer(userID, exercise, questionID, answer, audioFile);
   }
 
   public int addGrade(int resultID, String exerciseID, int grade, boolean correct) {
     return db.addGrade(resultID, exerciseID, grade, correct);
   }
 
+  public void addGrader(String login) {
+    db.addGrader(login);
+  }
+
+  public boolean graderExists(String login) {
+    return db.graderExists(login);
+  }
+
   public long addUser(int age, String gender, int experience) {
     HttpServletRequest request = getThreadLocalRequest();
-   // String header = request.getHeader("X-FORWARDED-FOR");
+    // String header = request.getHeader("X-FORWARDED-FOR");
     String header = request.getHeader("User-Agent");
     SimpleDateFormat sdf = new SimpleDateFormat();
     String format = sdf.format(new Date());
-    String ip = request.getRemoteHost()+/*"/"+ request.getRemoteAddr()+*/(header != null ? "/"+ header : "") + " at " + format;
-    return db.addUser(age,gender,experience, ip);
+    String ip = request.getRemoteHost() +/*"/"+ request.getRemoteAddr()+*/(header != null ? "/" + header : "") + " at " + format;
+    return db.addUser(age, gender, experience, ip);
   }
 
   public boolean isAnswerValid(int userID, Exercise exercise, int questionID) {
     return db.isAnswerValid(userID, exercise, questionID, db);
   }
 
-  public List<User> getUsers() { return db.getUsers(); }
+  public List<User> getUsers() {
+    return db.getUsers();
+  }
 
   /**
-   * @see mitll.langtest.client.ResultManager#showResults()
    * @return
+   * @see mitll.langtest.client.ResultManager#showResults()
    */
   public List<Result> getResults() {
     List<Result> results = db.getResults();
@@ -114,6 +145,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Decode Base64 string
+   *
    * @param base64EncodedByteArray
    * @return
    */
@@ -121,10 +153,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Base64 decoder = new Base64();
     byte[] decoded = null;
     //System.out.println("postArray : got " + base64EncodedByteArray.substring(0,Math.min(base64EncodedByteArray.length(), 20)) +"...");
-   // decoded = (byte[])decoder.decode(base64EncodedByteArray);
+    // decoded = (byte[])decoder.decode(base64EncodedByteArray);
 
     try {
-      decoded = (byte[])decoder.decode(base64EncodedByteArray);
+      decoded = (byte[]) decoder.decode(base64EncodedByteArray);
     } catch (DecoderException e1) {   // just b/c eclipse seems to insist
       e1.printStackTrace();
     }
@@ -135,19 +167,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     ServletContext context = getServletContext();
     String realContextPath = context.getRealPath(getThreadLocalRequest().getContextPath());
 
-    realContextPath = realContextPath.replace("netPron2/netPron2","netPron2"); // hack for mtex!!!
+    realContextPath = realContextPath.replace("netPron2/netPron2", "netPron2"); // hack for mtex!!!
     //System.out.println("Deployed context is " + realContextPath);
     String wavPath = getLocalPathToAnswer(plan, exercise, question, user);
     File file = new File(realContextPath, wavPath);   // relative to deploy
 
     File parentFile = file.getParentFile();
-   // System.out.println("making dir " + parentFile.getAbsolutePath());
+    // System.out.println("making dir " + parentFile.getAbsolutePath());
 
     parentFile.mkdirs();
 
-    byte [] byteArray = getBytesFromBase64String(base64EncodedString);
+    byte[] byteArray = getBytesFromBase64String(base64EncodedString);
 
-    writeToFile(byteArray,file);
+    writeToFile(byteArray, file);
 
     if (!file.exists()) {
       System.err.println("huh? can't find " + file.getAbsolutePath());
@@ -159,8 +191,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   else {
     System.out.println("audio file " + file.getAbsolutePath() + " is valid");
   }*/
-    db.answerDAO.addAnswer(Integer.parseInt(user), plan,exercise,Integer.parseInt(question),"",file.getPath(), valid, db);
-    return new AudioAnswer(wavPath.replaceAll("\\\\","/"), valid);
+    db.answerDAO.addAnswer(Integer.parseInt(user), plan, exercise, Integer.parseInt(question), "", file.getPath(), valid, db);
+    return new AudioAnswer(wavPath.replaceAll("\\\\", "/"), valid);
   }
 
 /*  public String getPathToAnswer(String plan, String exercise, String question, String user) {
@@ -170,8 +202,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String getLocalPathToAnswer(String plan, String exercise, String question, String user) {
     String tomcatWriteDirectory = getTomcatDir();
 
-    String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-"+user;
-    String currentTestDir = tomcatWriteDirectory + File.separator  + planAndTestPath;
+    String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-" + user;
+    String currentTestDir = tomcatWriteDirectory + File.separator + planAndTestPath;
     String wavPath = currentTestDir + File.separator + "answer_" + System.currentTimeMillis() + ".wav";
     File audioFilePath = new File(currentTestDir);
     boolean mkdirs = audioFilePath.mkdirs();
@@ -191,7 +223,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return tomcatWriteDirectory;
   }
 
-  private void writeToFile(byte [] byteArray, File file) {
+  private void writeToFile(byte[] byteArray, File file) {
     try {
       OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
       outputStream.write(byteArray);
@@ -217,8 +249,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.destroy();
   }
 
-  public static void main(String [] arg) {
-    System.out.println("x\\y\\z".replaceAll("\\\\","/"));
+  public static void main(String[] arg) {
+    System.out.println("x\\y\\z".replaceAll("\\\\", "/"));
 
     LangTestDatabaseImpl langTestDatabase = new LangTestDatabaseImpl();
     langTestDatabase.init();

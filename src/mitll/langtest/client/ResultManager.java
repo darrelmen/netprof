@@ -222,14 +222,14 @@ public class ResultManager {
             public void onFailure(Throwable caught) {}
 
             public void onSuccess(Integer result) {   // TODO show check box?
-              System.out.println("now " + result + " grades ");
+              //System.out.println("now " + result + " grades ");
               feedback.showStatus("Now "+result + " graded answers.");
               remainingResults.remove(object.uniqueID);
               if (remainingResults.isEmpty()) {
                // panel.recordCompleted(panel);
               }
               else {
-                System.out.println("now " + remainingResults.size() + " results remain.");
+               // System.out.println("now " + remainingResults.size() + " results remain.");
               }
             }
           });
