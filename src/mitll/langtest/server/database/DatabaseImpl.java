@@ -247,10 +247,8 @@ public class DatabaseImpl implements Database {
    */
   public ResultsAndGrades getResultsForExercise(String exid) {
     GradeDAO.GradesAndIDs gradesAndIDs = gradeDAO.getResultIDsForExercise(exid);
-  //  Set<Integer> resultIDsForExercise = resultIDsForExercise1;
     List<Result> resultsForExercise = resultDAO.getAllResultsForExercise(exid);
     return new ResultsAndGrades(resultsForExercise, gradesAndIDs.grades);
-   // return resultsForExercise;
   }
 
   /**

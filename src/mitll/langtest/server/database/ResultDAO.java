@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 
@@ -50,21 +51,29 @@ public class ResultDAO {
       Timestamp timestamp = rs.getTimestamp(i++);
       String answer = rs.getString(i++);
       boolean valid = rs.getBoolean(i++);
-      results.add(new Result(uniqueID,userID, //id
-        plan, // plan
-        exid, // id
-        qid, // qid
-        answer, // answer
-        //rs.getString(i++), // audioFile
-        valid, // valid
-        timestamp.getTime()
-      ));
+      Result e = new Result(uniqueID, userID, //id
+          plan, // plan
+          exid, // id
+          qid, // qid
+          answer, // answer
+          //rs.getString(i++), // audioFile
+          valid, // valid
+          timestamp.getTime()
+      );
+      trimPathForWebPage(e);
+      results.add(e);
     }
     rs.close();
     statement.close();
     database.closeConnection(connection);
 
     return results;
+  }
+
+  private void trimPathForWebPage(Result r) {
+    int answer = r.answer.indexOf(LangTestDatabaseImpl.ANSWERS);
+    if (answer == -1) return;
+    r.answer = r.answer.substring(answer);
   }
 
   public boolean areAnyResultsLeftToGradeFor(Exercise e) {

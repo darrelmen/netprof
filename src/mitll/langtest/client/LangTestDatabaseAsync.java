@@ -33,6 +33,4 @@ public interface LangTestDatabaseAsync {
   void graderExists(String login, AsyncCallback<Boolean> async);
 
   void getResultsForExercise(String exid, AsyncCallback<ResultsAndGrades> async);
-
-
 }
