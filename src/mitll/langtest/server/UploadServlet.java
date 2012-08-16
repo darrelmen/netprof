@@ -5,10 +5,10 @@ package mitll.langtest.server;
 
 import mitll.langtest.client.recorder.UploadForm;
 import mitll.langtest.server.database.DatabaseImpl;
-import org.apache.commons.fileupload.FileItem;
+/*import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;*/
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -48,7 +48,7 @@ public class UploadServlet extends HttpServlet implements Servlet{
     if (!test.exists()) {
       tomcatWriteDirectory = "answers";
     }
-    response.setContentType("application/json");
+   /* response.setContentType("application/json");
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
 
@@ -84,27 +84,27 @@ public class UploadServlet extends HttpServlet implements Servlet{
             System.err.println("huh? can't find " + file.getAbsolutePath());
           }
           boolean valid = isValid(file);
-      /*    if (!valid) {
+          if (!valid) {
             System.err.println("audio file " + file.getAbsolutePath() + " is *not* valid");
           }
           else {
             System.out.println("audio file " + file.getAbsolutePath() + " is valid");
-          }*/
+          }
           db.answerDAO.addAnswer(Integer.parseInt(user), plan,exercise,Integer.parseInt(question),"",file.getPath(), valid, db);
 				}
-			}
+			}*/
 		}
-		catch(Exception ex){
-			ex.printStackTrace();
-		}
-	}
+		//catch(Exception ex){
+	//		ex.printStackTrace();
+		//}
+	//}
 
-  private File writeAudioFile(FileItem item, String base, File audioFilePath) throws Exception {
+/*  private File writeAudioFile(FileItem item, String base, File audioFilePath) throws Exception {
     File file = new File(audioFilePath.getPath() + File.separator + base + ".wav");
     item.write(file);
     //isValid(file);
     return file;
-  }
+  }*/
 
   private boolean isValid(File file) {
     try {

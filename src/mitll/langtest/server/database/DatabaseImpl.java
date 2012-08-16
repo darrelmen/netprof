@@ -108,7 +108,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise()
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
    * @return
    */
   public Exercise getNextUngradedExercise(Collection<String> activeExercises) {

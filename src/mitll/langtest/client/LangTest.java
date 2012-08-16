@@ -44,7 +44,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Panel currentExerciseVPanel = new VerticalPanel();
   private ExerciseList exerciseList;
   private Label status;
-  private UserManager user;
+  private UserManager userManager;
   private final UserTable userTable = new UserTable();
   private ResultManager resultManager;
   private FlashRecordPanelHeadless flashRecordPanel;
@@ -98,7 +98,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Initially the flash record player is put in the center of the DockLayout
    */
   public void onModuleLoad2() {
-    user = new UserManager(this,service);
+    userManager = new UserManager(this,service);
     resultManager = new ResultManager(service, this);
 
     DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
@@ -160,16 +160,22 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
   }
 
+  /**
+   * @see mitll.langtest.client.UserManager#displayChoiceBox()
+   * @see UserManager#displayGraderLogin()
+   * @param g
+   */
   public void setGrading(boolean g) {
+    System.out.println("setGrading " + g);
     this.grading = g;
 
     if (grading) {
-      exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), user, grading);
+      exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, grading);
+      lastUser = -1; // no user
     }
     else {
-      exerciseList.setFactory(new ExercisePanelFactory(service, this, this), user, grading);
+      exerciseList.setFactory(new ExercisePanelFactory(service, this, this), userManager, grading);
     }
-    lastUser = -1; // no user
 
     askedMode = true;
   }
@@ -229,7 +235,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     hp2.addSouth(vp, 55);
     logout.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        user.clearUser();
+        userManager.clearUser();
         askedMode = false;
         exerciseList.removeCurrentExercise();
         exerciseList.clear();
@@ -264,10 +270,22 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public void login() {
-    if (askedMode && !grading) user.login();
+    System.out.println("asked " + askedMode);
+    System.out.println("grading " + grading);
+    if (askedMode) {
+      if (grading) {
+        if (userManager.getGrader() == null || userManager.getGrader().length() == 0) {
+          //user.getGrader();
+          System.out.println("grading " + grading + " but no grader registered?");
+
+        }
+      }
+      else {
+        userManager.login();
+      }
+    }
     else
-      user.displayChoiceBox();
-    //  user.login();
+      userManager.displayChoiceBox();
   }
 
   /**
@@ -282,7 +300,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void gotUser(long userID) {
 //    System.out.println("gotUser " + userID + " vs " + lastUser);
-
+    askedMode = true;
+    grading = false;
+    setGrading(grading);
     flashRecordPanel.initFlash();
 
     if (userID != lastUser) {
@@ -298,7 +318,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.recorder.SimpleRecordPanel#stopClicked
    * @return
    */
-  public int getUser() { return user.getUser(); }
+  public int getUser() { return userManager.getUser(); }
 
   // recording methods...
   /**

@@ -52,9 +52,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getExercises();
   }
 
-  public Exercise getNextUngradedExercise() {
+  public Exercise getNextUngradedExercise(String user) {
     synchronized (this) {
-      Exercise nextUngradedExercise = db.getNextUngradedExercise(userToExerciseID.values());
+      String currentExerciseForUser = userToExerciseID.get(user);
+      Collection<String> currentActiveExercises = new HashSet<String>(userToExerciseID.values());
+      currentActiveExercises.remove(currentExerciseForUser); // it's OK to include the one the user is working on now...
+      Exercise nextUngradedExercise = db.getNextUngradedExercise(currentActiveExercises);
       //activeExercises.add(nextUngradedExercise.getID());
       System.out.println("Active set now " + userToExerciseID);
       return nextUngradedExercise;

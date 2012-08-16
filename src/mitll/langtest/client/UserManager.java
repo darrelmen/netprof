@@ -64,6 +64,7 @@ public class UserManager {
    */
   public void login() {
     int user = getUser();
+    System.out.println("login called : " +user);
     if (user != NO_USER_SET) {
       langTest.gotUser(user);
     } else {
@@ -107,6 +108,9 @@ public class UserManager {
     }
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#login()
+   */
   public void displayChoiceBox() {
 
     final DialogBox dialogBox = new DialogBox();
@@ -127,7 +131,7 @@ public class UserManager {
     w.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         dialogBox.hide();
-        langTest.setGrading(false);
+        //langTest.setGrading(false);
 
         displayLoginBox();
       }
@@ -261,8 +265,13 @@ public class UserManager {
     Cookies.setCookie("grader", "" + user, expires);
   }
 
+  /**
+   * @see #displayChoiceBox()
+   * @see #login()
+   */
   private void displayLoginBox() {
-    langTest.setGrading(false);
+      System.out.println("display login box START ----------- ");
+    //langTest.setGrading(false);
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Login Questions");
@@ -321,6 +330,8 @@ public class UserManager {
        * Fired when the user clicks on the sendButton.
        */
       public void onClick(ClickEvent event) {
+        System.out.println("display login close button clicked ----------- ");
+
         dialogBox.hide();
         sendNameToServer();
       }
@@ -365,6 +376,9 @@ public class UserManager {
     closeButton.addClickHandler(handler);
 
     show(dialogBox);
+
+    System.out.println("display login box END ----------- ");
+
   }
 
   private void show(DialogBox dialogBox) {

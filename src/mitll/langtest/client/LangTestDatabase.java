@@ -32,7 +32,7 @@ public interface LangTestDatabase extends RemoteService {
 
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user);
 
-  Exercise getNextUngradedExercise();
+  Exercise getNextUngradedExercise(String user);
 
   void checkoutExerciseID(String user,String id);
 }
