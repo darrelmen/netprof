@@ -1,8 +1,9 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.shared.Grade;
+
 import java.sql.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class GradeDAO {
   private final Database database;
@@ -119,28 +120,42 @@ public class GradeDAO {
    * @param exerciseID
    * @return
    */
-  public Set<Integer> getResultIDsForExercise(String exerciseID) {
+  public GradesAndIDs getResultIDsForExercise(String exerciseID) {
     try {
       Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement("SELECT resultID from grades where exerciseID='" +exerciseID+
-          "'");
+      String sql = "SELECT resultID, grade from grades where exerciseID='" + exerciseID + "'";
+      PreparedStatement statement = connection.prepareStatement(sql);
 
       ResultSet rs = statement.executeQuery();
-      Set<Integer> results = new HashSet<Integer>();
+      Set<Grade> grades = new HashSet<Grade>();
+      Set<Integer> ids = new HashSet<Integer>();
       while (rs.next()) {
         int resultID = rs.getInt(1);
-        results.add(resultID);
+        int grade = rs.getInt(2);
+        grades.add(new Grade(resultID, grade));
+        ids.add(resultID);
       }
       rs.close();
       statement.close();
       database.closeConnection(connection);
 
     //  System.out.println("found " + results.size() + " graded results for " + exerciseID);
-      return results;
+      return new GradesAndIDs(grades,ids);
     } catch (Exception ee) {
       ee.printStackTrace();
     }
-    return new HashSet<Integer>();
+    return new GradesAndIDs(new ArrayList<Grade>(),new ArrayList<Integer>());
+    //return new HashSet<Grade>();
+  }
+
+  public static class GradesAndIDs {
+    Collection<Grade> grades;
+    Collection<Integer> ids;
+
+    public GradesAndIDs(Collection<Grade> grades, Collection<Integer> ids) {
+      this.grades = grades;
+      this.ids = ids;
+    }
   }
 
   void dropGrades() {
@@ -156,34 +171,6 @@ public class GradeDAO {
     } catch (Exception e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.  }
     }
-  }
-
-  /**
-   * TODO make this work...
-   * @param database
-   * @throws Exception
-   */
-  private void showGrades(Database database) throws Exception {
-    Connection connection = database.getConnection();
-    PreparedStatement statement = connection.prepareStatement("SELECT * FROM grades order by " + Database.TIME);
-    ResultSet rs = statement.executeQuery();
-    int c = 0;
-    while (rs.next()) {
-      c++;
-      int i = 1;
-      if (false) {
-        System.out.println(rs.getInt(i++) + "," + rs.getString(i++) + "," +
-          rs.getString(i++) + "," +
-          rs.getInt(i++) + "," +
-          rs.getString(i++) + "," +
-          rs.getString(i++) + "," +
-          rs.getTimestamp(i++));
-      }
-    }
- //   System.out.println("now " + c + " answers");
-    rs.close();
-    statement.close();
-    database.closeConnection(connection);
   }
 
   public int getCount() {

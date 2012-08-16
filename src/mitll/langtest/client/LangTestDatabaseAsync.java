@@ -1,10 +1,7 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
 
 import java.util.List;
 
@@ -22,7 +19,7 @@ public interface LangTestDatabaseAsync {
 
   void writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user, AsyncCallback<AudioAnswer> async);
 
-  void getResultsForExercise(String exid, AsyncCallback<List<Result>> async);
+//  void getResultsForExercise(String exid, AsyncCallback<List<Result>> async);
 
   void addGrade(int resultID, String exerciseID, int grade, boolean correct, AsyncCallback<Integer> async);
 
@@ -34,4 +31,8 @@ public interface LangTestDatabaseAsync {
   void addGrader(String login, AsyncCallback<Void> async);
 
   void graderExists(String login, AsyncCallback<Boolean> async);
+
+  void getResultsForExercise(String exid, AsyncCallback<ResultsAndGrades> async);
+
+
 }

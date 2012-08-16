@@ -54,7 +54,7 @@ public class ExerciseList extends VerticalPanel {
     this.doGrading = doGrading;
     this.factory = factory;
     this.user = user;
-     System.out.println("Factory is " +factory);
+    // System.out.println("Factory is " +factory);
     if (doGrading) {
       loadGradingExercises();
     }

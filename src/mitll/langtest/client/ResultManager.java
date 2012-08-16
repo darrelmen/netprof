@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
+import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 
 import java.util.*;
@@ -83,7 +84,7 @@ public class ResultManager {
           dialogVPanel.remove(closeButton);
         }
 
-        Widget table = getTable(result, false, true);
+        Widget table = getTable(result, false, true, new ArrayList<Grade>());
         dialogVPanel.add(table);
         dialogVPanel.add(closeButton);
 
@@ -102,15 +103,24 @@ public class ResultManager {
     });
   }
 
-  public Widget getTable(List<Result> result, final boolean gradingView, boolean showQuestionColumn) {
+  /**
+   * @see GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, ExerciseController, int)
+   * @param result
+   * @param gradingView
+   * @param showQuestionColumn
+   * @param grades
+   * @return
+   */
+  public Widget getTable(Collection<Result> result, final boolean gradingView, boolean showQuestionColumn,
+                         Collection<Grade> grades) {
     remainingResults.clear();
 
-    for (Result r: result) {
+/*    for (Result r: result) {
       remainingResults.add(r.uniqueID);
-    }
+    }*/
 
     CellTable<Result> table = new CellTable<Result>();
-    table.setWidth("1200px");
+    table.setWidth(gradingView ? "1000px" : "1200px");
     TextColumn<Result> id = null;
     if (!gradingView) {
       id = new TextColumn<Result>() {
@@ -141,20 +151,15 @@ public class ResultManager {
       table.addColumn(gender, "Exercise");
     }
     if (showQuestionColumn) {
-    TextColumn<Result> experience = new TextColumn<Result>() {
-      @Override
-      public String getValue(Result answer) { return ""+answer.qid; }};
-    experience.setSortable(true);
-    table.addColumn(experience,"Q. #");
+      TextColumn<Result> experience = new TextColumn<Result>() {
+        @Override
+        public String getValue(Result answer) {
+          return "" + answer.qid;
+        }
+      };
+      experience.setSortable(true);
+      table.addColumn(experience, "Q. #");
     }
-/*    TextColumn<Result> answerText = new TextColumn<Result>() {
-      @Override
-      public String getValue(Result answer) {
-        String answer1 = answer.answer;
-        return gradingView ? (answer1.endsWith(".wav") ? "" : answer1) : answer1; }};
-
-    answerText.setSortable(true);
-    table.addColumn(answerText,"Answer");*/
 
     final AbstractCell<SafeHtml> progressCell = new AbstractCell<SafeHtml>("click") {
       @Override
@@ -168,8 +173,8 @@ public class ResultManager {
       @Override
       public SafeHtml getValue(Result answer) {
         if (answer.answer.endsWith(".wav")) {
-        SafeHtml audioTag = getAudioTag(answer.answer);
-        return audioTag;
+          SafeHtml audioTag = getAudioTag(answer.answer);
+          return audioTag;
         }
         else {
           SafeHtmlBuilder sb = new SafeHtmlBuilder();
@@ -183,16 +188,6 @@ public class ResultManager {
     table.addColumn(audioFile, "Answer");
 
     if (!gradingView) {
-      TextColumn<Result> valid = new TextColumn<Result>() {
-        @Override
-        public String getValue(Result answer) {
-          return "" + answer.valid;
-        }
-      };
-      valid.setSortable(true);
-
-      table.addColumn(valid, "Is Valid Recording?");
-
       TextColumn<Result> date = new TextColumn<Result>() {
         @Override
         public String getValue(Result answer) {
@@ -203,36 +198,36 @@ public class ResultManager {
       table.addColumn(date, "Time");
     }
     else {
-      SelectionCell selectionCell = new SelectionCell(Arrays.asList("Ungraded", "1", "2", "3", "4", "5"));
+      final Map<Integer,Integer> resultToGrade = new HashMap<Integer, Integer>();
+      for (Grade g : grades) resultToGrade.put(g.resultID,g.grade);
+
+      System.out.println("made r->g : " + resultToGrade);
+
+      SelectionCell selectionCell = new SelectionCell(Arrays.asList("Ungraded", "1", "2", "3", "4", "5", "Skip"));
       Column<Result, String> col = new Column<Result, String>(selectionCell) {
         @Override
         public String getValue(Result object) {
-          return "Ungraded";
+          Integer grade = resultToGrade.get(object.uniqueID);
+          String s = grade == null ? "Ungraded" : grade == -1 ? "Ungraded" : grade == -2 ? "Skip" : "" + grade;
+          System.out.println("current grade for : " + object + " is " + s);
+
+          return s;
         }
       };
       col.setFieldUpdater(new FieldUpdater<Result, String>() {
         public void update(int index, final Result object, String value) {
           int grade = -1;
-          try {
-            grade = Integer.parseInt(value);
-          } catch (NumberFormatException e) {
-            //e.printStackTrace();
-          }
-          service.addGrade(object.uniqueID, object.id, grade,true,new AsyncCallback<Integer>() {
-            public void onFailure(Throwable caught) {}
-
-            public void onSuccess(Integer result) {   // TODO show check box?
-              //System.out.println("now " + result + " grades ");
-              feedback.showStatus("Now "+result + " graded answers.");
-              remainingResults.remove(object.uniqueID);
-              if (remainingResults.isEmpty()) {
-               // panel.recordCompleted(panel);
-              }
-              else {
-               // System.out.println("now " + remainingResults.size() + " results remain.");
-              }
+          if (value.equals("Ungraded")) grade = -1;
+          else if (value.equals("Skip")) grade = -2;
+          else {
+            try {
+              grade = Integer.parseInt(value);
+            } catch (NumberFormatException e) {
             }
-          });
+          }
+          System.out.println("adding grade " + grade + " for : " + object);
+
+          addGrade(object, grade);
         }
       });
       table.addColumn(col, "Grade");
@@ -253,6 +248,43 @@ public class ResultManager {
 
     // Add a ColumnSortEvent.ListHandler to connect sorting to the
     // java.util.List.
+    addSorter(table, id, list);
+
+    // We know that the data is sorted alphabetically by default.
+   // table.getColumnSortList().push(id);
+
+    // Create a SimplePager.
+    VerticalPanel vPanel = getPager(table);
+    return vPanel;
+  }
+
+  private VerticalPanel getPager(CellTable<Result> table) {
+    SimplePager pager = new SimplePager();
+
+    // Set the cellList as the display.
+    pager.setDisplay(table);
+    pager.setPageSize(pageSize);
+    // Add the pager and list to the page.
+    VerticalPanel vPanel = new VerticalPanel();
+    vPanel.add(pager);
+    vPanel.add(table);
+    return vPanel;
+  }
+
+  private void addGrade(final Result object, int grade) {
+    service.addGrade(object.uniqueID, object.id, grade,true,new AsyncCallback<Integer>() {
+      public void onFailure(Throwable caught) {}
+      public void onSuccess(Integer result) {   // TODO show check box?
+        feedback.showStatus("Now "+result + " graded answers.");
+        remainingResults.remove(object.uniqueID);
+        if (remainingResults.isEmpty()) {
+         // panel.recordCompleted(panel);
+        }
+      }
+    });
+  }
+
+  private void addSorter(CellTable<Result> table, TextColumn<Result> id, List<Result> list) {
     ColumnSortEvent.ListHandler<Result> columnSortHandler = new ColumnSortEvent.ListHandler<Result>(list);
     columnSortHandler.setComparator(id,
       new Comparator<Result>() {
@@ -283,21 +315,6 @@ public class ResultManager {
         }
       });
     table.addColumnSortHandler(columnSortHandler);
-
-    // We know that the data is sorted alphabetically by default.
-   // table.getColumnSortList().push(id);
-
-    // Create a SimplePager.
-    SimplePager pager = new SimplePager();
-
-    // Set the cellList as the display.
-    pager.setDisplay(table);
-    pager.setPageSize(pageSize);
-    // Add the pager and list to the page.
-    VerticalPanel vPanel = new VerticalPanel();
-    vPanel.add(pager);
-    vPanel.add(table);
-    return vPanel;
   }
 
   private SafeHtml getAudioTag(String result) {
