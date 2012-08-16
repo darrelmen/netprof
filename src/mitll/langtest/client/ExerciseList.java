@@ -150,30 +150,11 @@ public class ExerciseList extends VerticalPanel {
   }
 
   private void checkoutExercise(Exercise result) {
-   // currentActiveExercise = result.getID();
-    System.out.println(user.getGrader() +"  : checking out exercise # " + result.getID());
-
-    service.checkoutExerciseID(user.getGrader(), result.getID(), new AsyncCallback<Void>() {
-      public void onFailure(Throwable caught) {
-      }
-
-      public void onSuccess(Void result) {
-      }
+     service.checkoutExerciseID(user.getGrader(), result.getID(), new AsyncCallback<Void>() {
+      public void onFailure(Throwable caught) {}
+      public void onSuccess(Void result) {}
     });
   }
-
-/*
-  private void releaseExercise() {
-    if (currentActiveExercise != null) {
-      System.out.println("releasing exercise # " + currentActiveExercise);
-
-      service.returnExerciseID(currentActiveExercise, new AsyncCallback<Void>() {
-        public void onFailure(Throwable caught) {}
-        public void onSuccess(Void result) {}
-      });
-    }
-  }
-*/
 
   /**
    * @see #addExerciseToList(mitll.langtest.shared.Exercise)

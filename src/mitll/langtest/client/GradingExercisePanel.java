@@ -57,6 +57,7 @@ public class GradingExercisePanel extends ExercisePanel {
         rm.setFeedback(outer);
         boolean moreThanOneQuestion = n > 1;
         Collection<Result> results = resultsAndGrades.results;
+        rm.setPageSize(8);
         if (moreThanOneQuestion) {
           List<Result> filtered = new ArrayList<Result>();
           for (Result r : results) if (r.qid == index) filtered.add(r);
@@ -65,8 +66,6 @@ public class GradingExercisePanel extends ExercisePanel {
         }
 
         vp.add(rm.getTable(results, true, false, resultsAndGrades.grades));
-        //System.err.println("found " +result.size() + " results");
-
        // if (result.isEmpty()) recordCompleted(outer);
       }
     });

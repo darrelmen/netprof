@@ -1,5 +1,8 @@
 package mitll.langtest.server;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -16,6 +19,9 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -27,9 +33,15 @@ import java.util.*;
  */
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase {
-  private static final String ANSWERS = "answers";
+  public static final String ANSWERS = "answers";
+  public static final int TIMEOUT = 30;
   private DatabaseImpl db;
   private AudioCheck audioCheck = new AudioCheck();
+
+  private Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
+      .concurrencyLevel(4)
+      .maximumSize(10000)
+      .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();
 
   @Override
   public void init() {
@@ -49,32 +61,33 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getExercises();
   }
 
+  /**
+   * Remember who is grading which exercise.  Time out reservation after 30 minutes.
+   * @param user
+   * @return
+   */
   public Exercise getNextUngradedExercise(String user) {
     synchronized (this) {
-      String currentExerciseForUser = userToExerciseID.get(user);
-      Collection<String> currentActiveExercises = new HashSet<String>(userToExerciseID.values());
-      currentActiveExercises.remove(currentExerciseForUser); // it's OK to include the one the user is working on now...
-      Exercise nextUngradedExercise = db.getNextUngradedExercise(currentActiveExercises);
-      //activeExercises.add(nextUngradedExercise.getID());
-      System.out.println("Active set now " + userToExerciseID);
-      return nextUngradedExercise;
+      ConcurrentMap<String,String> stringStringConcurrentMap = userToExerciseID.asMap();
+      Collection<String> values = stringStringConcurrentMap.values();
+      String currentExerciseForUser = userToExerciseID.getIfPresent(user);
+      System.out.println("for " + user + " current " + currentExerciseForUser);
+
+      Collection<String> currentActiveExercises = new HashSet<String>(values);
+
+      if (currentExerciseForUser != null) {
+        currentActiveExercises.remove(currentExerciseForUser); // it's OK to include the one the user is working on now...
+      }
+      System.out.println("current set minus " + user + " is " + currentActiveExercises);
+
+      return db.getNextUngradedExercise(currentActiveExercises);
     }
   }
-
-  //Set<String> activeExercises = new HashSet<String>();
-  Map<String, String> userToExerciseID = new HashMap<String, String>();
-/*  public void returnExerciseID(String id) {
-    synchronized (this) {
-      System.out.println("returnExerciseID Active set now " + activeExercises);
-
-      activeExercises.remove(id);
-    }
-  }*/
 
   public void checkoutExerciseID(String user, String id) {
     synchronized (this) {
       userToExerciseID.put(user, id);
-      System.out.println("checkoutExerciseID Active set now " + userToExerciseID);
+      System.out.println("after adding " + user + "->" + id + " active exercise map now " + userToExerciseID.asMap());
     }
   }
 
@@ -134,13 +147,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.ResultManager#showResults()
    */
   public List<Result> getResults() {
-    List<Result> results = db.getResults();
-    for (Result r : results) {
-      int answer = r.answer.indexOf(ANSWERS);
-      if (answer == -1) continue;
-      r.answer = r.answer.substring(answer);
-    }
-    return results;
+    return db.getResults();
   }
 
   /**
@@ -250,10 +257,27 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public static void main(String[] arg) {
-    System.out.println("x\\y\\z".replaceAll("\\\\", "/"));
+    //System.out.println("x\\y\\z".replaceAll("\\\\", "/"));
 
     LangTestDatabaseImpl langTestDatabase = new LangTestDatabaseImpl();
-    langTestDatabase.init();
-    langTestDatabase.getResults();
+    //langTestDatabase.init();
+
+      String fred = langTestDatabase.userToExerciseID.getIfPresent("fred");
+      System.out.println("Val " + fred);
+     langTestDatabase.userToExerciseID.put("fred","Barney");
+    fred = langTestDatabase.userToExerciseID.getIfPresent("fred");
+    System.out.println("Val " + fred);
+    try {
+      Object o = new Object();
+      synchronized (o) {
+        o.wait(6000);
+      }
+    } catch (InterruptedException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+    fred = langTestDatabase.userToExerciseID.getIfPresent("fred");
+    System.out.println("Val " + fred);
   }
+
+
 }

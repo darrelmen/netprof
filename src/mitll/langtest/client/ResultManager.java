@@ -30,7 +30,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class ResultManager {
-  private static final int PAGE_SIZE = 8;
+  private static final int PAGE_SIZE = 12;
   private int pageSize = PAGE_SIZE;
   private LangTestDatabaseAsync service;
   private UserFeedback feedback;
@@ -201,7 +201,7 @@ public class ResultManager {
       final Map<Integer,Integer> resultToGrade = new HashMap<Integer, Integer>();
       for (Grade g : grades) resultToGrade.put(g.resultID,g.grade);
 
-      System.out.println("made r->g : " + resultToGrade);
+     // System.out.println("made r->g : " + resultToGrade);
 
       SelectionCell selectionCell = new SelectionCell(Arrays.asList("Ungraded", "1", "2", "3", "4", "5", "Skip"));
       Column<Result, String> col = new Column<Result, String>(selectionCell) {
@@ -209,7 +209,7 @@ public class ResultManager {
         public String getValue(Result object) {
           Integer grade = resultToGrade.get(object.uniqueID);
           String s = grade == null ? "Ungraded" : grade == -1 ? "Ungraded" : grade == -2 ? "Skip" : "" + grade;
-          System.out.println("current grade for : " + object + " is " + s);
+         // System.out.println("current grade for : " + object + " is " + s);
 
           return s;
         }
@@ -223,10 +223,11 @@ public class ResultManager {
             try {
               grade = Integer.parseInt(value);
             } catch (NumberFormatException e) {
+              System.err.println("setFieldUpdater : couldn't parse " + value +"??");
             }
           }
-          System.out.println("adding grade " + grade + " for : " + object);
-
+         // System.out.println("adding grade " + grade + " for : " + object);
+          resultToGrade.put(object.uniqueID,grade);
           addGrade(object, grade);
         }
       });
@@ -254,8 +255,7 @@ public class ResultManager {
    // table.getColumnSortList().push(id);
 
     // Create a SimplePager.
-    VerticalPanel vPanel = getPager(table);
-    return vPanel;
+    return getPager(table);
   }
 
   private VerticalPanel getPager(CellTable<Result> table) {
