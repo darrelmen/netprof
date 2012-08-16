@@ -35,7 +35,7 @@ public class ExerciseList extends VerticalPanel {
   private ExercisePanelFactory factory;
   private boolean doGrading = false;
   //private String currentActiveExercise;
-   UserManager user;
+  UserManager user;
 
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback, ExercisePanelFactory factory) {
     this.currentExerciseVPanel = currentExerciseVPanel;
@@ -44,29 +44,39 @@ public class ExerciseList extends VerticalPanel {
     this.factory = factory;
   }
 
+  /**
+   * @see LangTest#setGrading
+   * @param factory
+   * @param user
+   * @param doGrading
+   */
   public void setFactory(ExercisePanelFactory factory, UserManager user, boolean doGrading) {
     this.doGrading = doGrading;
     this.factory = factory;
     this.user = user;
-
+     System.out.println("Factory is " +factory);
     if (doGrading) {
-      service.getExercises(new AsyncCallback<List<Exercise>>() {
-        public void onFailure(Throwable caught) {
-          feedback.showErrorMessage("Server error - couldn't get exercises.");
-        }
-
-        public void onSuccess(List<Exercise> result) {
-          currentExercises = result; // remember current exercises
-          for (final Exercise e : result) {
-            addExerciseToList(e);
-          }
-          loadFirstExercise();
-        }
-      });
+      loadGradingExercises();
     }
   }
 
-    /**
+  private void loadGradingExercises() {
+    service.getExercises(new AsyncCallback<List<Exercise>>() {
+      public void onFailure(Throwable caught) {
+        feedback.showErrorMessage("Server error - couldn't get exercises.");
+      }
+
+      public void onSuccess(List<Exercise> result) {
+        currentExercises = result; // remember current exercises
+        for (final Exercise e : result) {
+          addExerciseToList(e);
+        }
+        loadFirstExercise();
+      }
+    });
+  }
+
+  /**
     * Get exercises for this user.
     * @see LangTest#gotUser(long)
     * @see mitll.langtest.client.LangTest#makeFlashContainer()
@@ -125,7 +135,7 @@ public class ExerciseList extends VerticalPanel {
   }
 
   private void getNextUngraded() {
-    service.getNextUngradedExercise(new AsyncCallback<Exercise>() {
+    service.getNextUngradedExercise(user.getGrader(), new AsyncCallback<Exercise>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Exercise result) {
         if (result != null) {

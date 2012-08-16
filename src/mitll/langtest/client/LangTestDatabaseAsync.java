@@ -27,7 +27,7 @@ public interface LangTestDatabaseAsync {
   void addGrade(int resultID, String exerciseID, int grade, boolean correct, AsyncCallback<Integer> async);
 
 
-  void getNextUngradedExercise(AsyncCallback<Exercise> async);
+  void getNextUngradedExercise(String user, AsyncCallback<Exercise> async);
 
   void checkoutExerciseID(String user,String id, AsyncCallback<Void> async);
 
