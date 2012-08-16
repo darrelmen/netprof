@@ -8,10 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ResultDAO {
   private final Database database;
@@ -81,27 +78,36 @@ public class ResultDAO {
    * @param exerciseID
    * @return results that haven't been graded yet
    */
-  public List<Result> getResultsForExercise(String exerciseID) {
+  private List<Result> getResultsForExercise(String exerciseID) {
+    return getResultsForExercise(exerciseID, gradeDAO.getResultIDsForExercise(exerciseID).ids);
+  }
+
+  public List<Result> getResultsForExercise(String exerciseID, Collection<Integer> gradedResults) {
     try {
-      Connection connection = database.getConnection();
-      String sql = "SELECT * from results where EXID='" + exerciseID + "'";
-     // System.err.println("executing " + sql);
-      PreparedStatement statement = connection.prepareStatement(sql);
+      List<Result> resultsForQuery = getAllResultsForExercise(exerciseID);
 
-      List<Result> resultsForQuery = getResultsForQuery(connection, statement);
-    //  System.err.println("got back " + resultsForQuery.size());
-
-      Set<Integer> resultIDsForExercise = gradeDAO.getResultIDsForExercise(exerciseID);
       for (Iterator<Result> iter = resultsForQuery.iterator(); iter.hasNext();) {
         Result next = iter.next();
-        if (resultIDsForExercise.contains(next.uniqueID)) {
-        // System.out.println("removing graded item for result " + next.uniqueID);
+        if (gradedResults.contains(next.uniqueID)) {
+          // System.out.println("removing graded item for result " + next.uniqueID);
           iter.remove();
         }
       }
       //System.err.println("after removing graded items count = " + resultsForQuery.size());
 
       return resultsForQuery;
+    } catch (Exception ee) {
+      ee.printStackTrace();
+    }
+    return new ArrayList<Result>();
+  }
+
+  public List<Result> getAllResultsForExercise(String exerciseID) {
+    try {
+      Connection connection = database.getConnection();
+      String sql = "SELECT * from results where EXID='" + exerciseID + "'";
+      PreparedStatement statement = connection.prepareStatement(sql);
+      return getResultsForQuery(connection, statement);
     } catch (Exception ee) {
       ee.printStackTrace();
     }

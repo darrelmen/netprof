@@ -1,15 +1,13 @@
 package mitll.langtest.client;
 
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.recorder.SimpleRecordPanel;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.ResultsAndGrades;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -51,25 +49,22 @@ public class GradingExercisePanel extends ExercisePanel {
     final SimplePanel vp = new SimplePanel();
     final int n = exercise.getNumQuestions();
     final GradingExercisePanel outer = this;
-    service.getResultsForExercise(exercise.getID(), new AsyncCallback<List<Result>>() {
+    service.getResultsForExercise(exercise.getID(), new AsyncCallback<ResultsAndGrades>() {
       public void onFailure(Throwable caught) {}
 
-      /**
-       * TODO : consider sorting by answer type (audio vs text)
-       * @param result
-       */
-      public void onSuccess(List<Result> result) {
+      public void onSuccess(ResultsAndGrades resultsAndGrades) {
         ResultManager rm = new ResultManager(service, userFeedback);
         rm.setFeedback(outer);
         boolean moreThanOneQuestion = n > 1;
+        Collection<Result> results = resultsAndGrades.results;
         if (moreThanOneQuestion) {
           List<Result> filtered = new ArrayList<Result>();
-          for (Result r : result) if (r.qid == index) filtered.add(r);
-          result = filtered;
+          for (Result r : results) if (r.qid == index) filtered.add(r);
+          results = filtered;
           rm.setPageSize(4);
         }
 
-        vp.add(rm.getTable(result, true, moreThanOneQuestion));
+        vp.add(rm.getTable(results, true, false, resultsAndGrades.grades));
         //System.err.println("found " +result.size() + " results");
 
        // if (result.isEmpty()) recordCompleted(outer);

@@ -2,10 +2,7 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
 
 import java.util.List;
 
@@ -20,7 +17,7 @@ import java.util.List;
 public interface LangTestDatabase extends RemoteService {
   List<Exercise> getExercises(long userID);
   List<Exercise> getExercises();
-  List<Result> getResultsForExercise(String exid);
+  ResultsAndGrades getResultsForExercise(String exid);
   void addAnswer(int userID, Exercise exercise, int questionID, String answer, String audioFile);
   int addGrade(int resultID, String exerciseID, int grade, boolean correct);
   void addGrader(String login);

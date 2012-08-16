@@ -1,9 +1,7 @@
 package mitll.langtest.server.database;
 
 import com.google.gwt.core.client.GWT;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -247,8 +245,12 @@ public class DatabaseImpl implements Database {
    * @param exid
    * @return
    */
-  public List<Result> getResultsForExercise(String exid) {
-    return resultDAO.getResultsForExercise(exid);
+  public ResultsAndGrades getResultsForExercise(String exid) {
+    GradeDAO.GradesAndIDs gradesAndIDs = gradeDAO.getResultIDsForExercise(exid);
+  //  Set<Integer> resultIDsForExercise = resultIDsForExercise1;
+    List<Result> resultsForExercise = resultDAO.getAllResultsForExercise(exid);
+    return new ResultsAndGrades(resultsForExercise, gradesAndIDs.grades);
+   // return resultsForExercise;
   }
 
   /**

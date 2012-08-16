@@ -45,4 +45,9 @@ public class Result implements IsSerializable {
     this.valid = valid;
     this.timestamp = timestamp;
   }
+
+  @Override
+  public String toString() {
+    return "Result #"+uniqueID + " by user " + userid + " id " + id;
+  }
 }

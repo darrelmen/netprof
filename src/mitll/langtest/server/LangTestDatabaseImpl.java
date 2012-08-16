@@ -3,10 +3,7 @@ package mitll.langtest.server;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
@@ -22,7 +19,7 @@ import java.util.*;
 
 
 /**
- * Created with IntelliJ IDEA.
+ * Supports all the database interactions.
  * User: GO22670
  * Date: 5/7/12
  * Time: 5:49 PM
@@ -86,7 +83,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see mitll.langtest.client.GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.ExerciseController, int)
    */
-  public List<Result> getResultsForExercise(String exid) {
+  public ResultsAndGrades getResultsForExercise(String exid) {
     return db.getResultsForExercise(exid);
   }
 
