@@ -166,7 +166,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param g
    */
   public void setGrading(boolean g) {
-    System.out.println("setGrading " + g);
+  //  System.out.println("setGrading " + g);
     this.grading = g;
 
     if (grading) {
@@ -270,8 +270,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public void login() {
-    System.out.println("asked " + askedMode);
-    System.out.println("grading " + grading);
+    //System.out.println("asked " + askedMode);
+    //System.out.println("grading " + grading);
     if (askedMode) {
       if (grading) {
         if (userManager.getGrader() == null || userManager.getGrader().length() == 0) {

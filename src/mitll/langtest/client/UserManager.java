@@ -75,7 +75,7 @@ public class UserManager {
   public void logout() {
     Cookies.setCookie("grader","");
 
-    System.out.println("grader now " + getGrader());
+    System.out.println("logout : grader now " + getGrader());
   }
 
   /**
