@@ -185,7 +185,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     writeToFile(byteArray, file);
 
     if (!file.exists()) {
-      System.err.println("huh? can't find " + file.getAbsolutePath());
+      System.err.println("writeAudioFile : huh? can't find " + file.getAbsolutePath());
     }
     boolean valid = isValid(file);
     /*    if (!valid) {
