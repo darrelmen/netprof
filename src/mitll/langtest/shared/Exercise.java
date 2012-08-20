@@ -27,9 +27,19 @@ public class Exercise implements IsSerializable  {
     private String question;
     private String answer;
     public QAPair() {}   // required for serialization
+
+    /**
+     * @see Exercise#addQuestion(String, String, String)
+     * @param q
+     * @param a
+     */
     public QAPair(String q, String a) { question = q; answer = a;}
     public String toString() { return "'"+ getQuestion() + "' : '" + getAnswer() +"'"; }
 
+    /**
+     * @see mitll.langtest.client.ExercisePanel#addQuestions
+     * @return
+     */
     public String getQuestion() {
       return question;
     }
@@ -42,7 +52,7 @@ public class Exercise implements IsSerializable  {
   public Exercise() {}     // required for serialization
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getExercise
+   * @see mitll.langtest.server.database.ExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
    * @param id
    * @param content
    * @param promptInEnglish
@@ -53,6 +63,13 @@ public class Exercise implements IsSerializable  {
     this.type = recordAudio ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE;
     this.promptInEnglish = promptInEnglish;
   }
+
+  /**
+   * @see mitll.langtest.server.database.ExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
+   * @param lang
+   * @param question
+   * @param answer
+   */
   public void addQuestion(String lang, String question, String answer) {
     List<QAPair> qaPairs = langToQuestion.get(lang);
     if (qaPairs == null) {
@@ -79,12 +96,15 @@ public class Exercise implements IsSerializable  {
   }
 
   /**
-   * @see mitll.langtest.client.ExercisePanel#ExercisePanel(Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.UserFeedback, mitll.langtest.client.ExerciseController)
+   * @see mitll.langtest.client.ExercisePanel#addQuestions(Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.ExerciseController, int)
    * @return
    */
   public List<QAPair> getQuestions() {
     return langToQuestion.get(promptInEnglish ? "en" : "fl");
   }
+
+  public List<QAPair> getEnglishQuestions() { return langToQuestion.get("en"); }
+  //public List<QAPair> getForeignLanguageQuestions() { return langToQuestion.get("fl"); }
 
   public int getNumQuestions() {
     List<QAPair> en = langToQuestion.get("en");

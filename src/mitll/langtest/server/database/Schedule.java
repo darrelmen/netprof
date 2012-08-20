@@ -18,6 +18,10 @@ class Schedule {
   public boolean flQ;
   public boolean spoken;
 
+  /**
+   * @see mitll.langtest.server.database.ScheduleDAO#getSchedule()
+   * @param rs
+   */
   public Schedule(ResultSet rs) {
     int i = 1;
     try {
