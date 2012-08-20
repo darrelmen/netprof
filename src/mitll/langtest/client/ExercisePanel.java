@@ -9,14 +9,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.shared.Exercise;
 
 import java.util.ArrayList;
@@ -25,7 +18,10 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Note that for text input answers, the user is prevented from cut-copy-paste.
+ * Note that for text input answers, the user is prevented from cut-copy-paste.<br></br>
+ *
+ * Subclassed to provide for audio recording and playback {@link SimpleRecordExercisePanel} and
+ * grading of answers {@link GradingExercisePanel}
  *
  * User: GO22670
  * Date: 5/8/12
@@ -39,6 +35,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
   protected Exercise exercise = null;
   private boolean enableNextOnlyWhenAllCompleted = true;
   private Button next;
+
   /**
    * @see ExercisePanelFactory#getExercisePanel
    * @see ExerciseList#loadExercise
@@ -60,21 +57,42 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     add(hp);
 
     int i = 1;
-    this.next = new Button("Next");
-    if (enableNextOnlyWhenAllCompleted) { // initially not enabled
-      next.setEnabled(false);
-    }
+
+    addQuestions(e, service, controller, i);
+
+    SimplePanel spacer = new SimplePanel();
+    spacer.setSize("500px", "20px");
+    add(spacer);
+
+    Panel buttonRow = getNextAndPreviousButtons(e, service, userFeedback, controller);
+    add(buttonRow);
+  }
+
+  /**
+   * For every question,
+   * <ul>
+   *  <li>show the text of the question,  </li>
+   *  <li>the prompt to the test taker (e.g "Speak your response in English")  </li>
+   *  <li>an answer widget (either a simple text box, an flash audio record and playback widget, or a list of the answers, when grading </li>
+   * </ul>     <br></br>
+   * Remember the answer widgets so we can notice which have been answered, and then know when to enable the next button.
+   * @param e
+   * @param service
+   * @param controller used in subclasses for audio control
+   * @param i
+   */
+  private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int i) {
+    List<Exercise.QAPair> englishQuestions = e.getEnglishQuestions();
+    //System.out.println("eng q " + englishQuestions);
     for (Exercise.QAPair pair : e.getQuestions()) {
       // add question header
-      String questionHeader = "Question #" + (i++) + " : " + pair.getQuestion();
-      add(new HTML("<h4>" + questionHeader + "</h4>"));
+      Exercise.QAPair engQAPair = englishQuestions.get(i - 1);
 
+      getQuestionHeader(i, engQAPair, pair);
+      i++;
       // add question prompt
       VerticalPanel vp = new VerticalPanel();
-      vp.add(new HTML(getQuestionPrompt(e)));
-      SimplePanel spacer = new SimplePanel();
-      spacer.setSize("500px", "20px");
-      vp.add(spacer);
+      addQuestionPrompt(vp, e);
 
       // add answer widget
       Widget answerWidget = getAnswerWidget(e, service, controller, i-1);
@@ -83,16 +101,30 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
 
       add(vp);
     }
-    SimplePanel spacer = new SimplePanel();
-    spacer.setSize("500px", "20px");
-    add(spacer);
-
-    HorizontalPanel buttonRow = getNextAndPreviousButtons(e, service, userFeedback, controller);
-    add(buttonRow);
   }
 
-  private HorizontalPanel getNextAndPreviousButtons(final Exercise e, final LangTestDatabaseAsync service,
-                                                    final UserFeedback userFeedback, final ExerciseController controller) {
+  protected void getQuestionHeader(int i,  Exercise.QAPair  engQAPair, Exercise.QAPair pair) {
+    String questionHeader = "Question #" + i + " : " + pair.getQuestion();
+    add(new HTML("<h4>" + questionHeader + "</h4>"));
+  }
+
+  private void addQuestionPrompt(Panel vp, Exercise e) {
+    vp.add(new HTML(getQuestionPrompt(e)));
+    SimplePanel spacer = new SimplePanel();
+    spacer.setSize("500px", getQuestionPromptSpacer() + "px");
+    vp.add(spacer);
+  }
+
+  protected String getQuestionPrompt(Exercise e) {
+    return "&nbsp;&nbsp;&nbsp;Type your answer in " +(e.promptInEnglish ? "english" : " the foreign language") +" :";
+  }
+
+  protected int getQuestionPromptSpacer() {
+    return 20;
+  }
+
+  private Panel getNextAndPreviousButtons(final Exercise e, final LangTestDatabaseAsync service,
+                                          final UserFeedback userFeedback, final ExerciseController controller) {
     HorizontalPanel buttonRow = new HorizontalPanel();
 
     Button prev = new Button("Previous");
@@ -104,6 +136,10 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     prev.setEnabled(!controller.onFirst(e));
     buttonRow.add(prev);
 
+    this.next = new Button("Next");
+    if (enableNextOnlyWhenAllCompleted) { // initially not enabled
+      next.setEnabled(false);
+    }
     buttonRow.add(next);
     DOM.setElementAttribute(next.getElement(), "id", "nextButton");
 
@@ -116,13 +152,11 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     return buttonRow;
   }
 
-  protected String getQuestionPrompt(Exercise e) {
-    return "&nbsp;&nbsp;&nbsp;Type your answer in " +(e.promptInEnglish ? "english" : " the foreign language") +" :";
-  }
-
   /**
    * Record answers at the server.  For our purposes, add a row to the result table and possibly post
    * some audio and remember where it is.
+   * <br></br>
+   * Loads next exercise after the post.
    *
    * @see ExercisePanel#getNextAndPreviousButtons(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, UserFeedback, ExerciseController)
    * @param service
@@ -153,6 +187,17 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     }
   }
 
+  /**
+   * Remember to have the text default to RTL direction if the prompt is in the foreign (Arabic) language.
+   * <br></br>
+   * Keeps track of which text fields have been typed in, so we can enable/disable the next button.
+   *
+   * @param exercise here used to determine the prompt language (English/FL)
+   * @param service used in subclasses
+   * @param controller  used in subclasses
+   * @param index of the question (0 for first, 1 for second, etc.) (used in subclasses)
+   * @return widget that handles the answer
+   */
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, int index) {
   //  GWT.log("getAnswerWidget for #" +index);
     final TextBox answer = new NoPasteTextBox();

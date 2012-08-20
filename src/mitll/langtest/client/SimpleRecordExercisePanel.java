@@ -5,7 +5,7 @@ import mitll.langtest.client.recorder.SimpleRecordPanel;
 import mitll.langtest.shared.Exercise;
 
 /**
- * Created with IntelliJ IDEA.
+ * Mainly delegates recording to the {@link SimpleRecordPanel}.
  * User: GO22670
  * Date: 5/11/12
  * Time: 11:51 AM
@@ -13,7 +13,7 @@ import mitll.langtest.shared.Exercise;
  */
 public class SimpleRecordExercisePanel extends ExercisePanel {
   /**
-   * @see mitll.langtest.client.LangTest#loadExercise(mitll.langtest.shared.Exercise)
+   * @see ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    * @param e
    * @param service
    * @param userFeedback
@@ -32,7 +32,8 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    * @param exercise
    * @param service
    * @param controller
-   * @param index  @return
+   * @param index
+   * @return
    */
   @Override
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
@@ -45,7 +46,9 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
   }
 
   /**
-   * TODO : on the server, notice which audio posts have arrived, and take the latest ones...
+   * on the server, notice which audio posts have arrived, and take the latest ones...
+   * <br></br>
+   * Move on to next exercise...
    *
    * @param service
    * @param userFeedback

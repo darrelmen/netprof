@@ -18,6 +18,8 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class GradingExercisePanel extends ExercisePanel {
+  public static final int ONE_QUESTION_PAGE_SIZE = 8;
+  public static final int TWO_QUESTION_PAGE_SIZE = 4;
   private UserFeedback userFeedback;
   /**
    * @seex LangTest#loadExercise
@@ -33,6 +35,24 @@ public class GradingExercisePanel extends ExercisePanel {
     enableNextButton(true);
   }
 
+  @Override
+  protected void getQuestionHeader(int i,  Exercise.QAPair  engQAPair, Exercise.QAPair pair) {
+    String english = engQAPair.getQuestion();
+    String questionHeader = "Question #" + i + " : " + pair.getQuestion();
+    add(new HTML("<h4>" + questionHeader + " / " + english + "</h4>"));
+
+    /*  String width = "";
+for (int j = 0; j < "Question #".length(); j++) width += "&nbsp;";
+add(new HTML("<h4>" + questionHeader + " <br/> " + width+english +"</h4>"));
+String width = "";
+for (int j = 0; j < "Question #".length(); j++) width += "&nbsp;";
+add(new HTML("<h4>" + width + *//*" / " + *//*english + "</h4>"));*/
+  }
+
+  protected int getQuestionPromptSpacer() {
+    return 0;
+  }
+
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
@@ -41,7 +61,7 @@ public class GradingExercisePanel extends ExercisePanel {
    * @param exercise
    * @param service
    * @param controller
-   * @param index
+   * @param index of the question (0 for first, 1 for second, etc.)
    * @return
    */
   @Override
@@ -57,12 +77,12 @@ public class GradingExercisePanel extends ExercisePanel {
         rm.setFeedback(outer);
         boolean moreThanOneQuestion = n > 1;
         Collection<Result> results = resultsAndGrades.results;
-        rm.setPageSize(8);
+        rm.setPageSize(ONE_QUESTION_PAGE_SIZE);
         if (moreThanOneQuestion) {
           List<Result> filtered = new ArrayList<Result>();
           for (Result r : results) if (r.qid == index) filtered.add(r);
           results = filtered;
-          rm.setPageSize(4);
+          rm.setPageSize(TWO_QUESTION_PAGE_SIZE);
         }
 
         vp.add(rm.getTable(results, true, false, resultsAndGrades.grades));
