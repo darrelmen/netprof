@@ -135,7 +135,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     exerciseList.add(new HTML("<h2>Items</h2>"));
     exerciseList.add(itemScroller);
 
-    login();
+    modeSelect();
+  }
+
+  private void modeSelect() {
+    String value = Window.Location.getParameter("grading");
+    System.out.println("param grading " + value);
+    if (value != null && !value.equals("false")) {
+      System.out.println("jump to choice box " + value);
+
+      userManager.graderLogin();
+    }
+    else {
+      login();
+    }
   }
 
   /**
@@ -239,7 +252,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         askedMode = false;
         exerciseList.removeCurrentExercise();
         exerciseList.clear();
-        login();
+        modeSelect();
       }
     });
 
@@ -269,6 +282,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return hp2;
   }
 
+  /**
+   * @see #getLogout()
+   * @see #onModuleLoad2()
+   */
   public void login() {
     //System.out.println("asked " + askedMode);
     //System.out.println("grading " + grading);
