@@ -32,6 +32,7 @@ public class UserManager {
   private static final int MIN_AGE = 6;
   private static final int MAX_AGE = 90;
   private static final int NO_USER_SET = -1;
+  public static final String GRADING = "grading";
   private final LangTestDatabaseAsync service;
   private final UserNotification langTest;
   private boolean useCookie = false;
@@ -160,19 +161,23 @@ public class UserManager {
     w1.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         dialogBox.hide();
-        String sid = Cookies.getCookie("grader");
-        if (sid == null || sid.length() == 0) {
-          displayGraderLogin();
-        }
-        else {
-          System.out.println("grader cookie " + getGrader());
-          langTest.setGrading(true);
-        }
+        graderLogin();
       }
     });
 
     dialogBox.setWidget(dialogVPanel);
     show(dialogBox);
+  }
+
+  public void graderLogin() {
+    String sid = Cookies.getCookie("grader");
+    if (sid == null || sid.length() == 0) {
+      displayGraderLogin();
+    }
+    else {
+      System.out.println("grader cookie " + getGrader());
+      langTest.setGrading(true);
+    }
   }
 
   private void displayGraderLogin() {
@@ -184,68 +189,75 @@ public class UserManager {
     dialogBox.setGlassEnabled(true);
 
     final TextBox user = new TextBox();
+    final TextBox password = new PasswordTextBox();
 
     final Button closeButton = new Button("Login");
+    final Button reg = new Button("Register");
+
+
     closeButton.setEnabled(false);
 
     // We can set the id of a widget by accessing its Element
     closeButton.getElement().setId("closeButton");
-    user.addKeyUpHandler(new KeyUpHandler() {
-      public void onKeyUp(KeyUpEvent event) {
-        String text = user.getText();
-        if (text.length() == 0) {
-          closeButton.setEnabled(false);
-          return;
-        }
 
-        service.graderExists(text, new AsyncCallback<Boolean>() {
-          public void onFailure(Throwable caught) {}
-          public void onSuccess(Boolean result) {
-            closeButton.setEnabled(result);
-          }
-        });
-      }
-    });
+
+    KeyUpHandler keyHandler = new MyKeyUpHandler(user, closeButton, reg, password);
+    user.addKeyUpHandler(keyHandler);
+    password.addKeyUpHandler(keyHandler);
+
 
 
     VerticalPanel dialogVPanel = new VerticalPanel();
     dialogVPanel.addStyleName("dialogVPanel");
-    dialogVPanel.add(new HTML("<b>Please enter userid</b>"));
+    dialogVPanel.add(new HTML("<b>User ID</b>"));
     dialogVPanel.add(user);
-    dialogVPanel.add(new HTML("<b>Or click here to</b>"));
+    dialogVPanel.add(new HTML("<b>Password</b>"));
+    dialogVPanel.add(password);
+    dialogVPanel.add(new HTML("<i>(New users : choose an id and click register.)</i>"));
 
-    Anchor w1 = new Anchor("Register");
-    dialogVPanel.add(w1);
-    w1.addClickHandler(new ClickHandler() {
+    reg.setEnabled(false);
+    reg.getElement().setId("registerButton");
+
+    reg.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        if (user.getText().length() > 0) {
+        if (user.getText().length() > 0 && password.getText().length() > 0) {
           service.graderExists(user.getText(), new AsyncCallback<Boolean>() {
-            public void onFailure(Throwable caught) {
-            }
+            public void onFailure(Throwable caught) {}
 
             public void onSuccess(Boolean result) {
-              if (!result) service.addGrader(user.getText(), new AsyncCallback<Void>() {
-                public void onFailure(Throwable caught) {
-                }
-
-                public void onSuccess(Void result) {
-                  setGraderCookie(user.getText());
-                  closeButton.setEnabled(true);
-                  closeButton.click();
-                }
-              });
-              else {
+              if (result) {
                 closeButton.setEnabled(false);
+              } else {
+                service.addGrader(user.getText(), new AsyncCallback<Void>() {
+                  public void onFailure(Throwable caught) {
+                  }
+
+                  public void onSuccess(Void result) {
+                    setGraderCookie(user.getText());
+                    boolean passwordMatch = checkPassword(password);
+                    closeButton.setEnabled(passwordMatch);
+                    closeButton.click();
+                  }
+                });
               }
             }
           });
         }
       }
     });
-    w1.addStyleName("paddedHorizontalPanel");
+    //w1.addStyleName("paddedHorizontalPanel");
 
     dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
-    dialogVPanel.add(closeButton);
+    HorizontalPanel hp = new HorizontalPanel();
+    hp.add(reg);
+
+    SimplePanel spacer = new SimplePanel();
+    spacer.setSize("20px", "20px");
+
+    hp.add(spacer);
+    hp.add(closeButton);
+
+    dialogVPanel.add(hp);
     dialogBox.setWidget(dialogVPanel);
 
     closeButton.addClickHandler(new ClickHandler() {
@@ -256,6 +268,10 @@ public class UserManager {
       }
     });
     show(dialogBox);
+  }
+
+  private boolean checkPassword(TextBox password) {
+    return password.getText().trim().equalsIgnoreCase(GRADING);
   }
 
   private void setGraderCookie(String user) {
@@ -411,5 +427,48 @@ public class UserManager {
       }
     });
     return closeButton;
+  }
+
+  private class MyKeyUpHandler implements KeyUpHandler {
+    private final TextBox user;
+    private final Button closeButton, regButton;
+    private final TextBox password;
+    //private final boolean onExists;
+
+    public MyKeyUpHandler(TextBox user, Button closeButton, Button regButton, TextBox password) {
+      this.user = user;
+      this.closeButton = closeButton;
+      this.password = password;
+      this.regButton = regButton;
+    }
+
+    public void onKeyUp(KeyUpEvent event) {
+      String text = user.getText();
+      if (text.length() == 0) {
+        closeButton.setEnabled(false);
+        return;
+      }
+
+      service.graderExists(text, new AsyncCallback<Boolean>() {
+        public void onFailure(Throwable caught) {}
+        public void onSuccess(Boolean result) {
+          System.out.println("user '" + user.getText() + "' exists " + result);
+          boolean passwordMatch = checkPassword(password);
+
+          if (passwordMatch) {
+           // boolean existAndValidPassword = result;
+
+            //if (existAndValidPassword && onExists) {
+            closeButton.setEnabled(result);
+            regButton.setEnabled(!result);
+          }
+          else {
+            closeButton.setEnabled(false);
+            regButton.setEnabled(false);
+          }
+         // }
+        }
+      });
+    }
   }
 }

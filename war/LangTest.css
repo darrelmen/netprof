@@ -37,6 +37,10 @@ h1 {
   margin: 15px 6px 6px;
 }
 
+#registerButton {
+    margin: 15px 6px 6px;
+}
+
 .exercise {
   font-size: 12pt;
 }
