@@ -174,7 +174,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see mitll.langtest.client.UserManager#displayChoiceBox()
    * @see UserManager#displayGraderLogin()
    * @param g
    */
@@ -283,13 +282,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see #getLogout()
-   * @see #onModuleLoad2()
+   * @see ExerciseList#loadExercise(mitll.langtest.shared.Exercise)
+   * @see #modeSelect()
    */
   public void login() {
+    userManager.login();
+
     //System.out.println("asked " + askedMode);
     //System.out.println("grading " + grading);
-    if (askedMode) {
+/*    if (askedMode) {
       if (grading) {
         if (userManager.getGrader() == null || userManager.getGrader().length() == 0) {
           //user.getGrader();
@@ -302,7 +303,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     }
     else
-      userManager.displayChoiceBox();
+      userManager.displayChoiceBox();*/
   }
 
   /**

@@ -2,7 +2,6 @@ package mitll.langtest.server;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -17,7 +16,6 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 
@@ -34,6 +32,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public static final int TIMEOUT = 30;
   private DatabaseImpl db;
   private AudioCheck audioCheck = new AudioCheck();
+
+  private static final String LAME_PATH_WINDOWS = "C:\\Users\\go22670\\lame\\lame.exe";
+  private static final String LAME_PATH_LINUX = "/usr/local/bin/lame";
 
   private Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
       .concurrencyLevel(4)
@@ -234,6 +235,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return new File(realContextPath, wavPath);
   }
 
+  /**
+   * Checks if file exists already...
+   * @param pathToWav
+   */
   private void ensureWriteMP3(String pathToWav) {
     File absolutePathToWav = getAbsolutePathToWav(pathToWav);
     String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
@@ -242,14 +247,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * Checks if file exists already...
+   * Use lame to write an mp3 file.
    * @param pathToWav
    */
   private void writeMP3(String pathToWav) {
     String mp3File = pathToWav.replace(".wav",".mp3");
-    String lamePath = "C:\\Users\\go22670\\lame\\lame.exe";    // Windows
+    String lamePath = LAME_PATH_WINDOWS;    // Windows
     if (!new File(lamePath).exists()) {
-      lamePath = "/usr/local/bin/lame";
+      lamePath = LAME_PATH_LINUX;
+    }
+    if (!new File(lamePath).exists()) {
+      System.err.println("no lame installed at " + lamePath + " or " +LAME_PATH_WINDOWS);
     }
 
 /*    System.out.println("using " +lamePath +" audio :'" +pathToWav +
@@ -282,23 +290,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     shellProc.redirectErrorStream(true);
     Process process2 = shellProc.start();
-    try {
-    //  System.out.println(new Date() + " : proc " + shellProc.command() + " wait for...");
-      process2.waitFor();
-    //  System.out.println(new Date() + " : proc " + shellProc.command() + " done waiting for...");
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-    InputStream is2 = process2.getInputStream();
+
+    // read the output
+    InputStream stdout = process2.getInputStream();
+    readFromStream(stdout, false);
+    InputStream errorStream = process2.getErrorStream();
+    readFromStream(errorStream, true);
+
+    process2.destroy();
+    //System.out.println(new Date() + " : proc " + shellProc.command() + " finished");
+  }
+
+  private void readFromStream(InputStream is2, boolean showOutput) throws IOException {
     InputStreamReader isr2 = new InputStreamReader(is2);
     BufferedReader br2 = new BufferedReader(isr2);
     String line2;
     while ((line2 = br2.readLine()) != null) {
-      System.out.println(line2);
+      if (showOutput) System.err.println(line2);
     }
     br2.close();
-    process2.destroy();
-    System.out.println(new Date() + " : proc " + shellProc.command() + " finished");
   }
 
 /*  public String getPathToAnswer(String plan, String exercise, String question, String user) {

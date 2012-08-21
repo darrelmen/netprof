@@ -5,7 +5,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -32,10 +31,18 @@ public class UserManager {
   private static final int MIN_AGE = 6;
   private static final int MAX_AGE = 90;
   private static final int NO_USER_SET = -1;
-  public static final String GRADING = "grading";
+  private static final String GRADING = "grading";
+  private static final List<String> EXPERIENCE_CHOICES = Arrays.asList(
+      "0-3 months (Semester 1)",
+      "4-6 months (Semester 1)",
+      "7-9 months (Semester 2)",
+      "10-12 months (Semester 2)",
+      "13-16 months (Semester 3)",
+      "16+ months",
+      "Native speaker");
   private final LangTestDatabaseAsync service;
   private final UserNotification langTest;
-  private boolean useCookie = false;
+  private final boolean useCookie = false;
   private long userID = NO_USER_SET;
 
   public UserManager(UserNotification lt, LangTestDatabaseAsync service) {
@@ -73,7 +80,7 @@ public class UserManager {
     }
   }
 
-  public void logout() {
+  void logout() {
     Cookies.setCookie("grader","");
 
     System.out.println("logout : grader now " + getGrader());
@@ -110,9 +117,10 @@ public class UserManager {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#login()
+   * We don't use this anymore
+   * @deprecated
    */
-  public void displayChoiceBox() {
+  private void displayChoiceBox() {
 
     final DialogBox dialogBox = new DialogBox();
     // Enable glass background.
@@ -282,12 +290,9 @@ public class UserManager {
   }
 
   /**
-   * @see #displayChoiceBox()
    * @see #login()
    */
   private void displayLoginBox() {
-      System.out.println("display login box START ----------- ");
-    //langTest.setGrading(false);
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Login Questions");
@@ -311,14 +316,7 @@ public class UserManager {
 
     // add experience drop box
     final ListBox experienceBox = new ListBox(false);
-    List<String> choices = Arrays.asList(
-      "0-3 months (Semester 1)",
-      "4-6 months (Semester 1)",
-      "7-9 months (Semester 2)",
-      "10-12 months (Semester 2)",
-      "13-16 months (Semester 3)",
-      "16+ months",
-      "Native speaker");
+    List<String> choices = EXPERIENCE_CHOICES;
     final int lastChoice = choices.size()-1;
     for (String c : choices) {
       experienceBox.addItem(c);
@@ -346,8 +344,6 @@ public class UserManager {
        * Fired when the user clicks on the sendButton.
        */
       public void onClick(ClickEvent event) {
-        System.out.println("display login close button clicked ----------- ");
-
         dialogBox.hide();
         sendNameToServer();
       }
@@ -355,7 +351,7 @@ public class UserManager {
       /**
        * Fired when the user types in the nameField.
        */
-      public void onKeyUp(KeyUpEvent event) {
+      public void onKeyUp(KeyUpEvent event) {     // never called...
         if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
           sendNameToServer();
         }
@@ -390,11 +386,9 @@ public class UserManager {
     // Add a handler to send the name to the server
     MyHandler handler = new MyHandler();
     closeButton.addClickHandler(handler);
+    closeButton.addKeyUpHandler(handler);
 
     show(dialogBox);
-
-    System.out.println("display login box END ----------- ");
-
   }
 
   private void show(DialogBox dialogBox) {
