@@ -320,10 +320,9 @@ public class ResultManager {
   private SafeHtml getAudioTag(String result) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<audio preload=\"none\" controls=\"controls\" tabindex=\"0\">\n" +
-      "<source type=\"audio/wav\" src=\"" +
-      result +
-      "\"></source>\n" +
-      // "<source type=\"audio/ogg\" src=\"media/ac-LC1-009/ac-LC1-009-C.ogg\"></source>\n" +
+        "<source type=\"audio/wav\" src=\"" + result + "\"></source>\n" +
+        "<source type=\"audio/mp3\" src=\"" + result.replace(".wav",".mp3") + "\"></source>\n" +
+        // "<source type=\"audio/ogg\" src=\"media/ac-LC1-009/ac-LC1-009-C.ogg\"></source>\n" +
       "Your browser does not support the audio tag.\n" +
       "</audio>");
     return sb.toSafeHtml();

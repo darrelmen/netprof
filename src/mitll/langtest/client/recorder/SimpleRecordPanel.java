@@ -195,12 +195,17 @@ public class SimpleRecordPanel extends HorizontalPanel {
     });
   }
 
+  /**
+   * @see #stopClicked(mitll.langtest.client.recorder.SimpleRecordPanel.ImageAnchor, mitll.langtest.client.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.shared.Exercise, int, mitll.langtest.client.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
+   * @param result
+   */
   private void setAudioTag(String result) {
     playback.setWidget(new HTML("<audio preload=\"none\" controls=\"controls\" tabindex=\"0\">\n" +
       "<source type=\"audio/wav\" src=\"" +
       result +
       "\"></source>\n" +
-      // "<source type=\"audio/ogg\" src=\"media/ac-LC1-009/ac-LC1-009-C.ogg\"></source>\n" +
+      "<source type=\"audio/mp3\" src=\"" + result.replace(".wav",".mp3") + "\"></source>\n" +
+        // "<source type=\"audio/ogg\" src=\"media/ac-LC1-009/ac-LC1-009-C.ogg\"></source>\n" +
       "Your browser does not support the audio tag.\n" +
       "</audio>"));
   }

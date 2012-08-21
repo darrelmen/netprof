@@ -13,10 +13,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
@@ -97,7 +94,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.ExerciseController, int)
    */
   public ResultsAndGrades getResultsForExercise(String exid) {
-    return db.getResultsForExercise(exid);
+    ResultsAndGrades resultsForExercise = db.getResultsForExercise(exid);
+    ensureMP3(resultsForExercise.results);
+    return resultsForExercise;
+  }
+
+  private void ensureMP3(Collection<Result> results) {
+    for (Result r : results) {
+      if (r.answer.endsWith(".wav")) {
+        File mp3 = new File(r.answer.replace(".wav", ".mp3"));
+        if (!mp3.exists()) {
+          writeMP3(r.answer);
+        }
+      }
+    }
   }
 
   /**
@@ -147,7 +157,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.ResultManager#showResults()
    */
   public List<Result> getResults() {
-    return db.getResults();
+    List<Result> results = db.getResults();
+    ensureMP3(results);
+    return results;
   }
 
   /**
@@ -162,7 +174,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     //System.out.println("postArray : got " + base64EncodedByteArray.substring(0,Math.min(base64EncodedByteArray.length(), 20)) +"...");
     // decoded = (byte[])decoder.decode(base64EncodedByteArray);
 
-    try {
+   try {
       decoded = (byte[]) decoder.decode(base64EncodedByteArray);
     } catch (DecoderException e1) {   // just b/c eclipse seems to insist
       e1.printStackTrace();
@@ -174,7 +186,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     ServletContext context = getServletContext();
     String realContextPath = context.getRealPath(getThreadLocalRequest().getContextPath());
 
-    realContextPath = realContextPath.replace("netPron2/netPron2", "netPron2"); // hack for mtex!!!
+    String appName = getServletContext().getInitParameter("appName");
+    if (appName == null) appName = "netPron2";
+    realContextPath = realContextPath.replace(appName +"/" + appName, appName);
     //System.out.println("Deployed context is " + realContextPath);
     String wavPath = getLocalPathToAnswer(plan, exercise, question, user);
     File file = new File(realContextPath, wavPath);   // relative to deploy
@@ -192,6 +206,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       System.err.println("writeAudioFile : huh? can't find " + file.getAbsolutePath());
     }
     boolean valid = isValid(file);
+    writeMP3(file.getAbsolutePath());
     /*    if (!valid) {
     System.err.println("audio file " + file.getAbsolutePath() + " is *not* valid");
   }
@@ -199,7 +214,64 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     System.out.println("audio file " + file.getAbsolutePath() + " is valid");
   }*/
     db.answerDAO.addAnswer(Integer.parseInt(user), plan, exercise, Integer.parseInt(question), "", file.getPath(), valid, db);
-    return new AudioAnswer(wavPath.replaceAll("\\\\", "/"), valid);
+    String wavPathWithForwardSlashSeparators = wavPath.replaceAll("\\\\", "/");
+    return new AudioAnswer(wavPathWithForwardSlashSeparators, valid);
+  }
+
+  public void writeMP3(String pathToWav) {
+    String mp3File = pathToWav.replace(".wav",".mp3");
+
+    String lamePath = "C:\\Users\\go22670\\lame\\lame.exe";    // Windows
+    if (!new File(lamePath).exists()) {
+      lamePath = "/usr/local/bin/lame";
+    }
+
+    System.out.println("using " +lamePath +" audio :'" +pathToWav +
+        "' mp3 '" +mp3File+
+        "'");
+    writeMP3(lamePath, pathToWav, mp3File);
+  }
+
+  private void writeMP3(String lamePath, String pathToAudioFile, String mp3File) {
+    ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File);
+    try {
+      System.out.println("writeMP3 running lame" + lameProc.command());
+      runProcess(lameProc);
+      System.out.println("writeMP3 exited  lame" + lameProc);
+    } catch (IOException e) {
+      System.err.println("Couldn't run " + lameProc);
+      e.printStackTrace();
+    }
+
+    File testMP3 = new File(mp3File);
+    if (!testMP3.exists()) {
+      System.err.println("didn't write MP3 : " + testMP3.getAbsolutePath());
+    } else {
+      System.out.println("Wrote to " + testMP3);
+    }
+  }
+
+  private void runProcess(ProcessBuilder shellProc) throws IOException {
+    System.out.println(new Date() + " : proc " + shellProc.command() + " started...");
+
+    shellProc.redirectErrorStream(true);
+    Process process2 = shellProc.start();
+    try {
+      System.out.println(new Date() + " : proc " + shellProc.command() + " wait for...");
+      process2.waitFor();
+      System.out.println(new Date() + " : proc " + shellProc.command() + " done waiting for...");
+
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    InputStream is2 = process2.getInputStream();
+    InputStreamReader isr2 = new InputStreamReader(is2);
+    BufferedReader br2 = new BufferedReader(isr2);
+    String line2;
+    while ((line2 = br2.readLine()) != null) {
+      System.out.println(line2);
+    }
+    System.out.println(new Date() + " : proc " + shellProc.command() + " finished");
   }
 
 /*  public String getPathToAnswer(String plan, String exercise, String question, String user) {
@@ -262,6 +334,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     LangTestDatabaseImpl langTestDatabase = new LangTestDatabaseImpl();
     //langTestDatabase.init();
 
+    langTestDatabase.writeMP3("C:\\Users\\go22670\\DLITest\\LangTest\\war\\answers\\test\\ac-LC1-001\\1\\subject-460\\answer_1345134729569.wav");
+    //langTestDatabase.writeMP3("C:\Users\go22670\DLITest\LangTest\war\answers\test\ac-LC1-001\1\subject-460\answer_1345134729569.wav");
+
+    if (true) return;
       String fred = langTestDatabase.userToExerciseID.getIfPresent("fred");
       System.out.println("Val " + fred);
      langTestDatabase.userToExerciseID.put("fred","Barney");
