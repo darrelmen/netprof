@@ -317,6 +317,11 @@ public class ResultManager {
     table.addColumnSortHandler(columnSortHandler);
   }
 
+  /**
+   * @see #getTable(java.util.Collection, boolean, boolean, java.util.Collection)
+   * @param result
+   * @return
+   */
   private SafeHtml getAudioTag(String result) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<audio preload=\"none\" controls=\"controls\" tabindex=\"0\">\n" +

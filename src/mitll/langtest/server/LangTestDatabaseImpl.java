@@ -99,13 +99,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return resultsForExercise;
   }
 
+  /**
+   * Make sure we have mp3 files in results.
+   * @param results
+   */
   private void ensureMP3(Collection<Result> results) {
     for (Result r : results) {
       if (r.answer.endsWith(".wav")) {
-        File mp3 = new File(r.answer.replace(".wav", ".mp3"));
-        if (!mp3.exists()) {
-          writeMP3(r.answer);
-        }
+        ensureWriteMP3(r.answer);
       }
     }
   }
@@ -158,7 +159,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public List<Result> getResults() {
     List<Result> results = db.getResults();
-    ensureMP3(results);
+   // ensureMP3(results);
     return results;
   }
 
@@ -182,16 +183,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return decoded;
   }
 
+  /**
+   * Writes an mp3 equivalent as well.
+   *
+   * @param base64EncodedString
+   * @param plan
+   * @param exercise
+   * @param question
+   * @param user
+   * @return
+   */
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user) {
-    ServletContext context = getServletContext();
-    String realContextPath = context.getRealPath(getThreadLocalRequest().getContextPath());
-
-    String appName = getServletContext().getInitParameter("appName");
-    if (appName == null) appName = "netPron2";
-    realContextPath = realContextPath.replace(appName +"/" + appName, appName);
-    //System.out.println("Deployed context is " + realContextPath);
     String wavPath = getLocalPathToAnswer(plan, exercise, question, user);
-    File file = new File(realContextPath, wavPath);   // relative to deploy
+
+    File file = getAbsolutePathToWav(wavPath);
 
     File parentFile = file.getParentFile();
     // System.out.println("making dir " + parentFile.getAbsolutePath());
@@ -206,6 +211,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       System.err.println("writeAudioFile : huh? can't find " + file.getAbsolutePath());
     }
     boolean valid = isValid(file);
+
     writeMP3(file.getAbsolutePath());
     /*    if (!valid) {
     System.err.println("audio file " + file.getAbsolutePath() + " is *not* valid");
@@ -218,26 +224,46 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return new AudioAnswer(wavPathWithForwardSlashSeparators, valid);
   }
 
-  public void writeMP3(String pathToWav) {
-    String mp3File = pathToWav.replace(".wav",".mp3");
+  private File getAbsolutePathToWav(String wavPath) {
+    ServletContext context = getServletContext();
+    String realContextPath = context.getRealPath(getThreadLocalRequest().getContextPath());
 
+    String appName = getServletContext().getInitParameter("appName");
+    if (appName == null) appName = "netPron2";
+    realContextPath = realContextPath.replace(appName +"/" + appName, appName);
+    return new File(realContextPath, wavPath);
+  }
+
+  private void ensureWriteMP3(String pathToWav) {
+    File absolutePathToWav = getAbsolutePathToWav(pathToWav);
+    String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
+    if (new File(mp3File).exists()) return;
+    writeMP3(absolutePathToWav.getAbsolutePath());
+  }
+
+  /**
+   * Checks if file exists already...
+   * @param pathToWav
+   */
+  private void writeMP3(String pathToWav) {
+    String mp3File = pathToWav.replace(".wav",".mp3");
     String lamePath = "C:\\Users\\go22670\\lame\\lame.exe";    // Windows
     if (!new File(lamePath).exists()) {
       lamePath = "/usr/local/bin/lame";
     }
 
-    System.out.println("using " +lamePath +" audio :'" +pathToWav +
+/*    System.out.println("using " +lamePath +" audio :'" +pathToWav +
         "' mp3 '" +mp3File+
-        "'");
+        "'");*/
     writeMP3(lamePath, pathToWav, mp3File);
   }
 
   private void writeMP3(String lamePath, String pathToAudioFile, String mp3File) {
     ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File);
     try {
-      System.out.println("writeMP3 running lame" + lameProc.command());
+  //    System.out.println("writeMP3 running lame" + lameProc.command());
       runProcess(lameProc);
-      System.out.println("writeMP3 exited  lame" + lameProc);
+ //     System.out.println("writeMP3 exited  lame" + lameProc);
     } catch (IOException e) {
       System.err.println("Couldn't run " + lameProc);
       e.printStackTrace();
@@ -247,20 +273,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (!testMP3.exists()) {
       System.err.println("didn't write MP3 : " + testMP3.getAbsolutePath());
     } else {
-      System.out.println("Wrote to " + testMP3);
+   //   System.out.println("Wrote to " + testMP3);
     }
   }
 
   private void runProcess(ProcessBuilder shellProc) throws IOException {
-    System.out.println(new Date() + " : proc " + shellProc.command() + " started...");
+    //System.out.println(new Date() + " : proc " + shellProc.command() + " started...");
 
     shellProc.redirectErrorStream(true);
     Process process2 = shellProc.start();
     try {
-      System.out.println(new Date() + " : proc " + shellProc.command() + " wait for...");
+    //  System.out.println(new Date() + " : proc " + shellProc.command() + " wait for...");
       process2.waitFor();
-      System.out.println(new Date() + " : proc " + shellProc.command() + " done waiting for...");
-
+    //  System.out.println(new Date() + " : proc " + shellProc.command() + " done waiting for...");
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
@@ -271,6 +296,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     while ((line2 = br2.readLine()) != null) {
       System.out.println(line2);
     }
+    br2.close();
+    process2.destroy();
     System.out.println(new Date() + " : proc " + shellProc.command() + " finished");
   }
 
