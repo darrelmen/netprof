@@ -179,11 +179,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     //System.out.println("postArray : got " + base64EncodedByteArray.substring(0,Math.min(base64EncodedByteArray.length(), 20)) +"...");
     // decoded = (byte[])decoder.decode(base64EncodedByteArray);
 
- /*  try {
+   try {
       decoded = (byte[]) decoder.decode(base64EncodedByteArray);
-    } catch (DecoderException e1) {   // just b/c eclipse seems to insist
+    } catch (Exception e1) {   // just b/c eclipse seems to insist
       e1.printStackTrace();
-    }*/
+    }
     return decoded;
   }
 
@@ -216,8 +216,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     boolean valid = isValid(file);
 
-    new AudioConversion().writeMP3(file.getAbsolutePath());
-    new AudioConversion().writeOGG(file.getAbsolutePath());
+    AudioConversion audioConversion = new AudioConversion();
+    audioConversion.writeMP3(file.getAbsolutePath());
+    if (USE_OGG) audioConversion.writeOGG(file.getAbsolutePath());
     /*    if (!valid) {
     System.err.println("audio file " + file.getAbsolutePath() + " is *not* valid");
   }
@@ -253,10 +254,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       audioConversion.writeMP3(absolutePathToWav.getAbsolutePath());
     }
 
-    String oggFile = absolutePathToWav.getAbsolutePath().replace(".wav",".ogg");
-    File ogg = new File(oggFile);
-    if (!ogg.exists()) {
-      audioConversion.writeOGG(absolutePathToWav.getAbsolutePath());
+    if (USE_OGG) {
+      String oggFile = absolutePathToWav.getAbsolutePath().replace(".wav", ".ogg");
+      File ogg = new File(oggFile);
+      if (!ogg.exists()) {
+        audioConversion.writeOGG(absolutePathToWav.getAbsolutePath());
+      }
     }
    // System.out.println("mp3 " + mp3.getAbsolutePath() + " exists " + mp3.exists());
   }

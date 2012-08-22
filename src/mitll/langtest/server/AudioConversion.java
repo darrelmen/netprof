@@ -18,6 +18,11 @@ public class AudioConversion {
   private static final String FFMPEG_PATH_WINDOWS = "C:\\Users\\go22670\\ffmpeg\\bin\\ffmpeg.exe";
   private static final String FFMPEG_PATH_LINUX = "/usr/local/bin/ffmpeg";
 
+  /**
+   * @see LangTestDatabaseImpl#ensureWriteMP3(String)
+   * @see LangTestDatabaseImpl#writeAudioFile(String, String, String, String, String)
+   * @param pathToWav
+   */
   public void writeOGG(String pathToWav) {
     String mp3File = pathToWav.replace(".wav",".ogg");
     String exePath = FFMPEG_PATH_WINDOWS;    // Windows
@@ -75,7 +80,7 @@ public class AudioConversion {
   private void writeOGG(String path, String pathToAudioFile, String mp3File) {
     ProcessBuilder lameProc = new ProcessBuilder(path, "-i", pathToAudioFile, mp3File);
     try {
-          System.out.println("writeOGG running ffmpeg" + lameProc.command());
+      System.out.println("writeOGG running ffmpeg" + lameProc.command());
       runProcess(lameProc);
       //     System.out.println("writeMP3 exited  lame" + lameProc);
     } catch (IOException e) {
@@ -99,7 +104,7 @@ public class AudioConversion {
 
     // read the output
     InputStream stdout = process2.getInputStream();
-    readFromStream(stdout, true);
+    readFromStream(stdout, false);
     InputStream errorStream = process2.getErrorStream();
     readFromStream(errorStream, true);
 

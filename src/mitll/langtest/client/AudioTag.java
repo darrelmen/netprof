@@ -11,7 +11,8 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioTag {
-  private static final boolean USE_OGG =true;
+  private static final boolean USE_OGG = LangTestDatabase.USE_OGG;
+
   /**
    * @see ResultManager#getTable(java.util.Collection, boolean, boolean, java.util.Collection)
    * @param result
