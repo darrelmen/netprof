@@ -76,6 +76,11 @@ public class ResultDAO {
     r.answer = r.answer.substring(answer);
   }
 
+  /**
+   * @see DatabaseImpl#getNextUngradedExercise(java.util.Collection)
+   * @param e
+   * @return
+   */
   public boolean areAnyResultsLeftToGradeFor(Exercise e) {
     return !getResultsForExercise(e.getID()).isEmpty();
   }
@@ -88,10 +93,11 @@ public class ResultDAO {
    * @return results that haven't been graded yet
    */
   private List<Result> getResultsForExercise(String exerciseID) {
-    return getResultsForExercise(exerciseID, gradeDAO.getResultIDsForExercise(exerciseID).ids);
+    GradeDAO.GradesAndIDs resultIDsForExercise = gradeDAO.getResultIDsForExercise(exerciseID);
+    return getResultsForExercise(exerciseID, resultIDsForExercise.ids);
   }
 
-  public List<Result> getResultsForExercise(String exerciseID, Collection<Integer> gradedResults) {
+  private List<Result> getResultsForExercise(String exerciseID, Collection<Integer> gradedResults) {
     try {
       List<Result> resultsForQuery = getAllResultsForExercise(exerciseID);
 

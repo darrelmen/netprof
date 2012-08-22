@@ -3,6 +3,8 @@ package mitll.langtest.shared;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
 * Created with IntelliJ IDEA.
@@ -14,9 +16,17 @@ import java.util.Collection;
 public class ResultsAndGrades implements IsSerializable {
   public Collection<Result> results;
   public Collection<Grade> grades;
+  public Map<Boolean,Map<Boolean,List<Result>>> spokenToLangToResult;
   public ResultsAndGrades() {}
-  public ResultsAndGrades(Collection<Result> results, Collection<Grade> grades) {
+
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getResultsForExercise(String)
+   * @param results
+   * @param grades
+   */
+  public ResultsAndGrades(Collection<Result> results, Collection<Grade> grades, Map<Boolean,Map<Boolean,List<Result>>> spokenToLangToResult) {
     this.results = results;
     this.grades  = grades;
+    this.spokenToLangToResult = spokenToLangToResult;
   }
 }

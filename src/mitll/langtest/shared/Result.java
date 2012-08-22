@@ -20,6 +20,8 @@ public class Result implements IsSerializable {
  // public String audioFile;
   public boolean valid;
   public long timestamp;
+  public boolean flq;
+  public boolean spoken;
 
   public Result() {}
 
@@ -45,6 +47,9 @@ public class Result implements IsSerializable {
     this.valid = valid;
     this.timestamp = timestamp;
   }
+
+  public void setFLQ(boolean flq)  { this.flq = flq; }
+  public void setSpoken(boolean v) { this.spoken = v; }
 
   @Override
   public String toString() {

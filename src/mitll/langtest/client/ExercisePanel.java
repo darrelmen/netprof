@@ -109,14 +109,22 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
   }
 
   private void addQuestionPrompt(Panel vp, Exercise e) {
-    vp.add(new HTML(getQuestionPrompt(e)));
+    vp.add(new HTML(getQuestionPrompt(e.promptInEnglish)));
     SimplePanel spacer = new SimplePanel();
     spacer.setSize("500px", getQuestionPromptSpacer() + "px");
     vp.add(spacer);
   }
 
-  protected String getQuestionPrompt(Exercise e) {
-    return "&nbsp;&nbsp;&nbsp;Type your answer in " +(e.promptInEnglish ? "english" : " the foreign language") +" :";
+  protected String getQuestionPrompt(boolean promptInEnglish) {
+    return getWrittenPrompt(promptInEnglish);
+  }
+
+  protected String getWrittenPrompt(boolean promptInEnglish) {
+    return "&nbsp;&nbsp;&nbsp;Type your answer in " +(promptInEnglish ? "english" : " the foreign language") +" :";
+  }
+
+  protected String getSpokenPrompt(boolean promptInEnglish) {
+    return "&nbsp;&nbsp;&nbsp;Speak and record your answer in " +(promptInEnglish ? "English" : " the foreign language") +" :";
   }
 
   protected int getQuestionPromptSpacer() {
