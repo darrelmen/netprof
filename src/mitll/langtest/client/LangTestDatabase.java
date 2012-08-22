@@ -15,6 +15,8 @@ import java.util.List;
  */
 @RemoteServiceRelativePath("langtestdatabase")
 public interface LangTestDatabase extends RemoteService {
+  boolean USE_OGG = false;
+
   List<Exercise> getExercises(long userID);
   List<Exercise> getExercises();
   ResultsAndGrades getResultsForExercise(String exid);
