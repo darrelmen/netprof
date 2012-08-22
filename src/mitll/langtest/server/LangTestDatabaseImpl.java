@@ -6,15 +6,19 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.*;
-
-import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
@@ -32,9 +36,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public static final int TIMEOUT = 30;
   private DatabaseImpl db;
   private AudioCheck audioCheck = new AudioCheck();
-
-  private static final String LAME_PATH_WINDOWS = "C:\\Users\\go22670\\lame\\lame.exe";
-  private static final String LAME_PATH_LINUX = "/usr/local/bin/lame";
 
   private Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
       .concurrencyLevel(4)
@@ -178,11 +179,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     //System.out.println("postArray : got " + base64EncodedByteArray.substring(0,Math.min(base64EncodedByteArray.length(), 20)) +"...");
     // decoded = (byte[])decoder.decode(base64EncodedByteArray);
 
-   try {
+ /*  try {
       decoded = (byte[]) decoder.decode(base64EncodedByteArray);
     } catch (DecoderException e1) {   // just b/c eclipse seems to insist
       e1.printStackTrace();
-    }
+    }*/
     return decoded;
   }
 
@@ -215,7 +216,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     boolean valid = isValid(file);
 
-    writeMP3(file.getAbsolutePath());
+    new AudioConversion().writeMP3(file.getAbsolutePath());
     /*    if (!valid) {
     System.err.println("audio file " + file.getAbsolutePath() + " is *not* valid");
   }
@@ -249,77 +250,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       return;
     }
    // System.out.println("mp3 " + mp3.getAbsolutePath() + " exists " + mp3.exists());
-    writeMP3(absolutePathToWav.getAbsolutePath());
+    new AudioConversion().writeMP3(absolutePathToWav.getAbsolutePath());
   }
-
-  /**
-   * Use lame to write an mp3 file.
-   * @param pathToWav
-   */
-  private void writeMP3(String pathToWav) {
-    String mp3File = pathToWav.replace(".wav",".mp3");
-    String lamePath = LAME_PATH_WINDOWS;    // Windows
-    if (!new File(lamePath).exists()) {
-      lamePath = LAME_PATH_LINUX;
-    }
-    if (!new File(lamePath).exists()) {
-      System.err.println("no lame installed at " + lamePath + " or " +LAME_PATH_WINDOWS);
-    }
-
-/*    System.out.println("using " +lamePath +" audio :'" +pathToWav +
-        "' mp3 '" +mp3File+
-        "'");*/
-    writeMP3(lamePath, pathToWav, mp3File);
-  }
-
-  private void writeMP3(String lamePath, String pathToAudioFile, String mp3File) {
-    ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File);
-    try {
-  //    System.out.println("writeMP3 running lame" + lameProc.command());
-      runProcess(lameProc);
- //     System.out.println("writeMP3 exited  lame" + lameProc);
-    } catch (IOException e) {
-      System.err.println("Couldn't run " + lameProc);
-      e.printStackTrace();
-    }
-
-    File testMP3 = new File(mp3File);
-    if (!testMP3.exists()) {
-      System.err.println("didn't write MP3 : " + testMP3.getAbsolutePath());
-    } else {
-   //   System.out.println("Wrote to " + testMP3);
-    }
-  }
-
-  private void runProcess(ProcessBuilder shellProc) throws IOException {
-    //System.out.println(new Date() + " : proc " + shellProc.command() + " started...");
-
-    shellProc.redirectErrorStream(true);
-    Process process2 = shellProc.start();
-
-    // read the output
-    InputStream stdout = process2.getInputStream();
-    readFromStream(stdout, false);
-    InputStream errorStream = process2.getErrorStream();
-    readFromStream(errorStream, true);
-
-    process2.destroy();
-    //System.out.println(new Date() + " : proc " + shellProc.command() + " finished");
-  }
-
-  private void readFromStream(InputStream is2, boolean showOutput) throws IOException {
-    InputStreamReader isr2 = new InputStreamReader(is2);
-    BufferedReader br2 = new BufferedReader(isr2);
-    String line2;
-    while ((line2 = br2.readLine()) != null) {
-      if (showOutput) System.err.println(line2);
-    }
-    br2.close();
-  }
-
-/*  public String getPathToAnswer(String plan, String exercise, String question, String user) {
-    return getLocalPathToAnswer(plan,exercise,question,user).replaceAll("\\\\","/");
-  }*/
 
   private String getLocalPathToAnswer(String plan, String exercise, String question, String user) {
     String tomcatWriteDirectory = getTomcatDir();
@@ -375,15 +307,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     //System.out.println("x\\y\\z".replaceAll("\\\\", "/"));
 
     LangTestDatabaseImpl langTestDatabase = new LangTestDatabaseImpl();
-    //langTestDatabase.init();
+    langTestDatabase.init();
 
-    langTestDatabase.writeMP3("C:\\Users\\go22670\\DLITest\\LangTest\\war\\answers\\test\\ac-LC1-001\\1\\subject-460\\answer_1345134729569.wav");
-    //langTestDatabase.writeMP3("C:\Users\go22670\DLITest\LangTest\war\answers\test\ac-LC1-001\1\subject-460\answer_1345134729569.wav");
-
-    if (true) return;
-      String fred = langTestDatabase.userToExerciseID.getIfPresent("fred");
-      System.out.println("Val " + fred);
-     langTestDatabase.userToExerciseID.put("fred","Barney");
+    String fred = langTestDatabase.userToExerciseID.getIfPresent("fred");
+    System.out.println("Val " + fred);
+    langTestDatabase.userToExerciseID.put("fred","Barney");
     fred = langTestDatabase.userToExerciseID.getIfPresent("fred");
     System.out.println("Val " + fred);
     try {
