@@ -41,8 +41,8 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
   }
 
   @Override
-  protected String getQuestionPrompt(Exercise e) {
-    return "&nbsp;&nbsp;&nbsp;Speak and record your answer in " +(e.promptInEnglish ? "English" : " the foreign language") +" :";
+  protected String getQuestionPrompt(boolean promptInEnglish) {
+    return getSpokenPrompt(promptInEnglish);
   }
 
   /**

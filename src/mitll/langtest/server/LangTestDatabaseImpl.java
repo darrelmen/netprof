@@ -61,6 +61,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Remember who is grading which exercise.  Time out reservation after 30 minutes.
+   *
+   * @see mitll.langtest.client.ExerciseList#getNextUngraded()
    * @param user
    * @return
    */
@@ -242,7 +244,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private void ensureWriteMP3(String pathToWav) {
     File absolutePathToWav = getAbsolutePathToWav(pathToWav);
     String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
-    if (new File(mp3File).exists()) return;
+    File mp3 = new File(mp3File);
+    if (mp3.exists()) {
+      return;
+    }
+   // System.out.println("mp3 " + mp3.getAbsolutePath() + " exists " + mp3.exists());
     writeMP3(absolutePathToWav.getAbsolutePath());
   }
 

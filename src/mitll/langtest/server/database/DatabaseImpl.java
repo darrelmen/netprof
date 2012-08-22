@@ -52,6 +52,7 @@ public class DatabaseImpl implements Database {
   public final AnswerDAO answerDAO = new AnswerDAO(this);
   public final GradeDAO gradeDAO = new GradeDAO(this);
   public final GraderDAO graderDAO = new GraderDAO(this);
+  private final ScheduleDAO scheduleDAO = new ScheduleDAO(this);
 
   public DatabaseImpl(HttpServlet s) {
     this.servlet = s;
@@ -248,7 +249,25 @@ public class DatabaseImpl implements Database {
   public ResultsAndGrades getResultsForExercise(String exid) {
     GradeDAO.GradesAndIDs gradesAndIDs = gradeDAO.getResultIDsForExercise(exid);
     List<Result> resultsForExercise = resultDAO.getAllResultsForExercise(exid);
-    return new ResultsAndGrades(resultsForExercise, gradesAndIDs.grades);
+    Set<Long> users = new HashSet<Long>();
+
+    for (Result r : resultsForExercise) {
+      users.add(r.userid);
+    }
+    Map<Long, List<Schedule>> scheduleForUserAndExercise = scheduleDAO.getScheduleForUserAndExercise(users, exid);
+    Map<Boolean,Map<Boolean,List<Result>>> spokenToLangToResult = new HashMap<Boolean, Map<Boolean, List<Result>>>();
+    for (Result r : resultsForExercise) {
+      List<Schedule> schedules = scheduleForUserAndExercise.get(r.userid);
+      Schedule schedule = schedules.get(0);
+      r.setFLQ(schedule.flQ);
+      r.setSpoken(schedule.spoken);
+      Map<Boolean, List<Result>> langToResult = spokenToLangToResult.get(schedule.spoken);
+      if (langToResult == null) spokenToLangToResult.put(schedule.spoken, langToResult = new HashMap<Boolean, List<Result>>());
+      List<Result> resultsForLang = langToResult.get(schedule.flQ);
+      if (resultsForLang == null) langToResult.put(schedule.flQ, resultsForLang = new ArrayList<Result>());
+      resultsForLang.add(r);
+    }
+    return new ResultsAndGrades(resultsForExercise, gradesAndIDs.grades, spokenToLangToResult);
   }
 
   /**
