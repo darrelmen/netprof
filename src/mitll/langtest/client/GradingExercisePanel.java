@@ -1,7 +1,10 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
@@ -17,9 +20,13 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class GradingExercisePanel extends ExercisePanel {
-  public static final int ONE_QUESTION_PAGE_SIZE = 3;
-  public static final int TWO_QUESTION_PAGE_SIZE = ONE_QUESTION_PAGE_SIZE;
+  private static final int ONE_QUESTION_PAGE_SIZE = 3;
+  private static final int TWO_QUESTION_PAGE_SIZE = ONE_QUESTION_PAGE_SIZE;
+
+  private static final int BIG_ONE_QUESTION_PAGE_SIZE = 8;
+  private static final int BIG_TWO_QUESTION_PAGE_SIZE = BIG_ONE_QUESTION_PAGE_SIZE/2;
   private UserFeedback userFeedback;
+
   /**
    * @seex LangTest#loadExercise
    * @param e
@@ -39,13 +46,6 @@ public class GradingExercisePanel extends ExercisePanel {
     String english = engQAPair.getQuestion();
     String questionHeader = "Question #" + i + " : " + pair.getQuestion();
     add(new HTML("<h4>" + questionHeader + " / " + english + "</h4>"));
-
-    /*  String width = "";
-for (int j = 0; j < "Question #".length(); j++) width += "&nbsp;";
-add(new HTML("<h4>" + questionHeader + " <br/> " + width+english +"</h4>"));
-String width = "";
-for (int j = 0; j < "Question #".length(); j++) width += "&nbsp;";
-add(new HTML("<h4>" + width + *//*" / " + *//*english + "</h4>"));*/
   }
 
   protected int getQuestionPromptSpacer() {
@@ -53,9 +53,10 @@ add(new HTML("<h4>" + width + *//*" / " + *//*english + "</h4>"));*/
   }
 
   /**
-   * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
-   *
-   *
+   * Partitions results into 3 (or fewer) separate tables for each of the
+   * possible spoken/written & english/f.l. combinations.
+   * <br></br>
+   * Uses a result manager table (simple pager).  {@link ResultManager#getTable(java.util.Collection, boolean, boolean, java.util.Collection)}
    * @see ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, UserFeedback, ExerciseController)
    * @param exercise
    * @param service
@@ -65,7 +66,6 @@ add(new HTML("<h4>" + width + *//*" / " + *//*english + "</h4>"));*/
    */
   @Override
   protected Widget getAnswerWidget(Exercise exercise, final LangTestDatabaseAsync service, ExerciseController controller, final int index) {
-    // final SimplePanel vp = new SimplePanel();
     final VerticalPanel vp = new VerticalPanel();
     final int n = exercise.getNumQuestions();
     final GradingExercisePanel outer = this;
@@ -75,18 +75,23 @@ add(new HTML("<h4>" + width + *//*" / " + *//*english + "</h4>"));*/
       public void onSuccess(ResultsAndGrades resultsAndGrades) {
         List<Boolean> spoken = Arrays.asList(true, false);
         List<Boolean> foreignOrEnglish = Arrays.asList(true, false);
+        int count = countDistinctTypes(resultsAndGrades);
         for (boolean s : spoken) {
           Map<Boolean, List<Result>> langToResult = resultsAndGrades.spokenToLangToResult.get(s);
-          for (boolean l : foreignOrEnglish) {
-
-            List<Result> results = langToResult.get(l);
-            if (results != null) {
-              String prompt = s ? outer.getSpokenPrompt(!l) : outer.getWrittenPrompt(!l);
-              vp.add(new HTML(prompt));
-              SimplePanel spacer = new SimplePanel();
-              spacer.setSize("500px", "5px");
-              vp.add(spacer);
-              vp.add(showResults(results, resultsAndGrades.grades, service, outer, n > 1, index));
+          if (langToResult != null) { // there might not be any written types
+            for (boolean l : foreignOrEnglish) {
+              List<Result> results = langToResult.get(l);
+              if (results != null) {
+                String prompt = s ? outer.getSpokenPrompt(!l) : outer.getWrittenPrompt(!l);
+                vp.add(new HTML(prompt));
+                SimplePanel spacer = new SimplePanel();
+                spacer.setSize("500px", "5px");
+                vp.add(spacer);
+                int oneQuestionPageSize = count == 1 ? BIG_ONE_QUESTION_PAGE_SIZE : ONE_QUESTION_PAGE_SIZE;
+                int twoQuestionPageSize = count == 1 ? BIG_TWO_QUESTION_PAGE_SIZE : TWO_QUESTION_PAGE_SIZE;
+                vp.add(showResults(results, resultsAndGrades.grades, service, outer, n > 1, index,
+                    oneQuestionPageSize, twoQuestionPageSize));
+              }
             }
           }
         }
@@ -96,17 +101,35 @@ add(new HTML("<h4>" + width + *//*" / " + *//*english + "</h4>"));*/
     return vp;
   }
 
+  private int countDistinctTypes(ResultsAndGrades resultsAndGrades) {
+    List<Boolean> spoken = Arrays.asList(true, false);
+    List<Boolean> foreignOrEnglish = Arrays.asList(true, false);
+    int count = 0;
+    for (boolean s : spoken) {
+      Map<Boolean, List<Result>> langToResult = resultsAndGrades.spokenToLangToResult.get(s);
+      if (langToResult != null) { // there might not be any written types
+        for (boolean l : foreignOrEnglish) {
+          List<Result> results = langToResult.get(l);
+          if (results != null) {
+             count++;
+          }
+        }
+      }
+    }
+    return count;
+  }
+
   private Widget showResults(Collection<Result> results, Collection<Grade> grades,
-                             LangTestDatabaseAsync service, GradingExercisePanel outer,boolean moreThanOneQuestion, int index) {
+                             LangTestDatabaseAsync service, GradingExercisePanel outer,
+                             boolean moreThanOneQuestion, int index, int pageSize, int twoQPageSize) {
     ResultManager rm = new ResultManager(service, userFeedback);
     rm.setFeedback(outer);
-    //Collection<Result> results = resultsAndGrades.results;
-    rm.setPageSize(ONE_QUESTION_PAGE_SIZE);
+    rm.setPageSize(pageSize);
     if (moreThanOneQuestion) {
       List<Result> filtered = new ArrayList<Result>();
       for (Result r : results) if (r.qid == index) filtered.add(r);
       results = filtered;
-      rm.setPageSize(TWO_QUESTION_PAGE_SIZE);
+      rm.setPageSize(twoQPageSize);
     }
 
     return rm.getTable(results, true, false, grades);
@@ -118,7 +141,7 @@ add(new HTML("<h4>" + width + *//*" / " + *//*english + "</h4>"));*/
   }
 
   /**
-   * TODO : on the server, notice which audio posts have arrived, and take the latest ones...
+   * Consider : on the server, notice which audio posts have arrived, and take the latest ones...
    *
    * @param service
    * @param userFeedback
