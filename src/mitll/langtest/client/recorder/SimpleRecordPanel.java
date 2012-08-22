@@ -5,6 +5,7 @@ package mitll.langtest.client.recorder;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -15,6 +16,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.ExerciseController;
 import mitll.langtest.client.ExerciseQuestionState;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -41,6 +43,7 @@ public class SimpleRecordPanel extends HorizontalPanel {
   private final Image stopImage;
   private Image check;
   private SimplePanel playback = new SimplePanel();
+  private final AudioTag audioTag = new AudioTag();
 
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
@@ -200,14 +203,7 @@ public class SimpleRecordPanel extends HorizontalPanel {
    * @param result
    */
   private void setAudioTag(String result) {
-    playback.setWidget(new HTML("<audio preload=\"none\" controls=\"controls\" tabindex=\"0\">\n" +
-      "<source type=\"audio/wav\" src=\"" +
-      result +
-      "\"></source>\n" +
-      "<source type=\"audio/mp3\" src=\"" + result.replace(".wav",".mp3") + "\"></source>\n" +
-        // "<source type=\"audio/ogg\" src=\"media/ac-LC1-009/ac-LC1-009-C.ogg\"></source>\n" +
-      "Your browser does not support the audio tag.\n" +
-      "</audio>"));
+    playback.setWidget(new HTML(audioTag.getAudioTag(result)));
   }
 
   private void showAudioValidity(Boolean result, ExerciseQuestionState questionState, Panel outer) {

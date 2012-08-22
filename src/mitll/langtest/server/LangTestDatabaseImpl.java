@@ -217,6 +217,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     boolean valid = isValid(file);
 
     new AudioConversion().writeMP3(file.getAbsolutePath());
+    new AudioConversion().writeOGG(file.getAbsolutePath());
     /*    if (!valid) {
     System.err.println("audio file " + file.getAbsolutePath() + " is *not* valid");
   }
@@ -243,14 +244,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param pathToWav
    */
   private void ensureWriteMP3(String pathToWav) {
+    AudioConversion audioConversion = new AudioConversion();
     File absolutePathToWav = getAbsolutePathToWav(pathToWav);
+
     String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
     File mp3 = new File(mp3File);
-    if (mp3.exists()) {
-      return;
+    if (!mp3.exists()) {
+      audioConversion.writeMP3(absolutePathToWav.getAbsolutePath());
+    }
+
+    String oggFile = absolutePathToWav.getAbsolutePath().replace(".wav",".ogg");
+    File ogg = new File(oggFile);
+    if (!ogg.exists()) {
+      audioConversion.writeOGG(absolutePathToWav.getAbsolutePath());
     }
    // System.out.println("mp3 " + mp3.getAbsolutePath() + " exists " + mp3.exists());
-    new AudioConversion().writeMP3(absolutePathToWav.getAbsolutePath());
   }
 
   private String getLocalPathToAnswer(String plan, String exercise, String question, String user) {

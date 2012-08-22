@@ -36,6 +36,7 @@ public class ResultManager {
   private UserFeedback feedback;
   private GradingExercisePanel panel;
   private Set<Integer> remainingResults = new HashSet<Integer>();
+  private final AudioTag audioTag = new AudioTag();
 
   /**
    * @see GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, ExerciseController, int)
@@ -173,8 +174,7 @@ public class ResultManager {
       @Override
       public SafeHtml getValue(Result answer) {
         if (answer.answer.endsWith(".wav")) {
-          SafeHtml audioTag = getAudioTag(answer.answer);
-          return audioTag;
+          return audioTag.getAudioTag(answer.answer);
         }
         else {
           SafeHtmlBuilder sb = new SafeHtmlBuilder();
@@ -315,21 +315,5 @@ public class ResultManager {
         }
       });
     table.addColumnSortHandler(columnSortHandler);
-  }
-
-  /**
-   * @see #getTable(java.util.Collection, boolean, boolean, java.util.Collection)
-   * @param result
-   * @return
-   */
-  private SafeHtml getAudioTag(String result) {
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<audio preload=\"none\" controls=\"controls\" tabindex=\"0\">\n" +
-        "<source type=\"audio/wav\" src=\"" + result + "\"></source>\n" +
-        "<source type=\"audio/mp3\" src=\"" + result.replace(".wav",".mp3") + "\"></source>\n" +
-        // "<source type=\"audio/ogg\" src=\"media/ac-LC1-009/ac-LC1-009-C.ogg\"></source>\n" +
-      "Your browser does not support the audio tag.\n" +
-      "</audio>");
-    return sb.toSafeHtml();
   }
 }
