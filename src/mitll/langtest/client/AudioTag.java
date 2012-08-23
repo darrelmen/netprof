@@ -4,7 +4,8 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 /**
- * Created with IntelliJ IDEA.
+ * Only use an mp3 audio reference -- seems to be the common denominator among browsers.
+ *
  * User: go22670
  * Date: 8/22/12
  * Time: 3:26 PM
@@ -12,6 +13,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
  */
 public class AudioTag {
   private static final boolean USE_OGG = LangTestDatabase.USE_OGG;
+  private static final boolean USE_WAV = false;
 
   /**
    * @see ResultManager#getTable(java.util.Collection, boolean, boolean, java.util.Collection)
@@ -20,11 +22,12 @@ public class AudioTag {
    */
   public SafeHtml getAudioTag(String result) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<audio preload=\"none\" controls=\"controls\" tabindex=\"0\">\n" +
-        "<source type=\"audio/" +
+    String firstSource = USE_WAV ? "<source type=\"audio/" +
         (USE_OGG ? "ogg" : "wav") +
-        "\" src=\"" + (USE_OGG ? result.replace(".wav",".ogg") : result) + "\"></source>\n" +
-        "<source type=\"audio/mp3\" src=\"" + result.replace(".wav",".mp3") + "\"></source>\n" +
+        "\" src=\"" + (USE_OGG ? result.replace(".wav", ".ogg") : result) + "\"></source>\n" : "";
+    sb.appendHtmlConstant("<audio preload=\"none\" controls=\"controls\" tabindex=\"0\">\n" +
+        firstSource +
+        "<source type=\"audio/mp3\" src=\"" + result.replace(".wav", ".mp3") + "\"></source>\n" +
         // "<source type=\"audio/ogg\" src=\"media/ac-LC1-009/ac-LC1-009-C.ogg\"></source>\n" +
         "Your browser does not support the audio tag.\n" +
         "</audio>");
