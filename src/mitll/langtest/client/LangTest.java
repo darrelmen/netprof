@@ -146,6 +146,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     modeSelect();
   }
 
+  /**
+   * Check the URL parameters for special modes.
+   */
   private void modeSelect() {
     String isGrading = Window.Location.getParameter("grading");
    // System.out.println("param grading " + isGrading);
@@ -154,8 +157,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // System.out.println("param grading " + isGrading);
     englishOnlyMode = isEnglish != null && !isEnglish.equals("false");
 
-    if (isGrading != null && !isGrading.equals("false")) {
-      System.out.println("jump to choice box " + isGrading);
+    if (englishOnlyMode || (isGrading != null && !isGrading.equals("false"))) {
+      //System.out.println("jump to choice box " + isGrading);
 
       userManager.graderLogin();
     }
@@ -334,6 +337,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public int getUser() { return userManager.getUser(); }
   public String getGrader() { return userManager.getGrader(); }
+  public boolean getEnglishOnly() { return englishOnlyMode; }
 
   // recording methods...
   /**

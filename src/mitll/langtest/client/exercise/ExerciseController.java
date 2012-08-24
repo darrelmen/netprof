@@ -20,10 +20,11 @@ public interface ExerciseController {
   boolean onFirst(Exercise current);
 
   int getUser();
+  String getGrader();
 
   void startRecording();
   void stopRecording();
   String getBase64EncodedWavFile();
 
-  String getGrader();
+  boolean getEnglishOnly();
 }

@@ -47,10 +47,21 @@ public class GradingExercisePanel extends ExercisePanel {
   }
 
   @Override
-  protected void getQuestionHeader(int i,  Exercise.QAPair  engQAPair, Exercise.QAPair pair) {
+  protected void getQuestionHeader(int i, int total, Exercise.QAPair engQAPair, Exercise.QAPair pair) {
     String english = engQAPair.getQuestion();
-    String questionHeader = "Question #" + i + " : " + pair.getQuestion();
-    add(new HTML("<h4>" + questionHeader + " / " + english + "</h4>"));
+    String prefix = "Question" +
+        (total > 1 ? " #" + i : "") +
+        " : ";
+    String questionHeader = prefix + pair.getQuestion();
+
+    if (controller.getEnglishOnly())  {
+      String answer = engQAPair.getAnswer();
+      add(new HTML("<br></br><b>" + prefix + "</b>" +english));
+      add(new HTML("<b>Answer : &nbsp;&nbsp;</b>"+answer + "<br></br>"));
+    }
+    else {
+      add(new HTML("<h4>" + questionHeader + " / " + english + "</h4>"));
+    }
   }
 
   protected int getQuestionPromptSpacer() {
@@ -75,6 +86,7 @@ public class GradingExercisePanel extends ExercisePanel {
     final VerticalPanel vp = new VerticalPanel();
     final int n = exercise.getNumQuestions();
     final GradingExercisePanel outer = this;
+    final boolean englishOnly = controller.getEnglishOnly();
     service.getResultsForExercise(exercise.getID(), new AsyncCallback<ResultsAndGrades>() {
       public void onFailure(Throwable caught) {}
 
@@ -82,13 +94,15 @@ public class GradingExercisePanel extends ExercisePanel {
         List<Boolean> spoken = Arrays.asList(true, false);
         List<Boolean> foreignOrEnglish = Arrays.asList(true, false);
         int count = countDistinctTypes(resultsAndGrades);
-        for (boolean s : spoken) {
-          Map<Boolean, List<Result>> langToResult = resultsAndGrades.spokenToLangToResult.get(s);
+        for (boolean isSpoken : spoken) {
+          Map<Boolean, List<Result>> langToResult = resultsAndGrades.spokenToLangToResult.get(isSpoken);
           if (langToResult != null) { // there might not be any written types
-            for (boolean l : foreignOrEnglish) {
-              List<Result> results = langToResult.get(l);
+            for (boolean isForeign : foreignOrEnglish) {
+              if (englishOnly && isForeign) continue; // skip non-english
+              List<Result> results = langToResult.get(isForeign);
               if (results != null) {
-                String prompt = s ? outer.getSpokenPrompt(!l) : outer.getWrittenPrompt(!l);
+                boolean isEnglish = !isForeign;
+                String prompt = isSpoken ? outer.getSpokenPrompt(isEnglish) : outer.getWrittenPrompt(isEnglish);
                 vp.add(new HTML(prompt));
                 SimplePanel spacer = new SimplePanel();
                 spacer.setSize("500px", "5px");
@@ -125,6 +139,19 @@ public class GradingExercisePanel extends ExercisePanel {
     return count;
   }
 
+  /**
+   * @see #getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @param results
+   * @param grades
+   * @param service
+   * @param outer
+   * @param moreThanOneQuestion
+   * @param index
+   * @param pageSize
+   * @param twoQPageSize
+   * @param grader
+   * @return
+   */
   private Widget showResults(Collection<Result> results, Collection<Grade> grades,
                              LangTestDatabaseAsync service, GradingExercisePanel outer,
                              boolean moreThanOneQuestion, int index, int pageSize, int twoQPageSize, String grader) {
@@ -142,9 +169,7 @@ public class GradingExercisePanel extends ExercisePanel {
   }
 
   @Override
-  protected String getQuestionPrompt(boolean promptInEnglish) {
-    return "";
-  }
+  protected String getQuestionPrompt(boolean promptInEnglish) { return ""; }
 
   /**
    * Consider : on the server, notice which audio posts have arrived, and take the latest ones...

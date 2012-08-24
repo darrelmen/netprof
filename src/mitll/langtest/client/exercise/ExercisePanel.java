@@ -36,6 +36,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
   private List<Widget> answers = new ArrayList<Widget>();
   private Set<Widget> completed = new HashSet<Widget>();
   protected Exercise exercise = null;
+  protected ExerciseController controller;
   private boolean enableNextOnlyWhenAllCompleted = true;
   private Button next;
 
@@ -50,6 +51,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
   public ExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                        final ExerciseController controller) {
     this.exercise = e;
+    this.controller = controller;
     add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
 
     // attempt to left justify
@@ -86,12 +88,13 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
    */
   private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int i) {
     List<Exercise.QAPair> englishQuestions = e.getEnglishQuestions();
+    int n = englishQuestions.size();
     //System.out.println("eng q " + englishQuestions);
     for (Exercise.QAPair pair : e.getQuestions()) {
       // add question header
       Exercise.QAPair engQAPair = englishQuestions.get(i - 1);
 
-      getQuestionHeader(i, engQAPair, pair);
+      getQuestionHeader(i, n, engQAPair, pair);
       i++;
       // add question prompt
       VerticalPanel vp = new VerticalPanel();
@@ -106,8 +109,10 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     }
   }
 
-  protected void getQuestionHeader(int i,  Exercise.QAPair  engQAPair, Exercise.QAPair pair) {
-    String questionHeader = "Question #" + i + " : " + pair.getQuestion();
+  protected void getQuestionHeader(int i, int total, Exercise.QAPair engQAPair, Exercise.QAPair pair) {
+    String questionHeader = "Question" +
+        (total > 1 ? " #" + i : "")+
+        " : " + pair.getQuestion();
     add(new HTML("<h4>" + questionHeader + "</h4>"));
   }
 
