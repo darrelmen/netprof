@@ -205,7 +205,7 @@ public class ResultManager {
       table.addColumn(date, "Time");
     } else {
       for (int i = 0; i < numGrades; i++) {
-        Column<Result, String> col = getGradingColumn(grades, grader, i);
+        Column<Result, String> col = getGradingColumn(grades, grader, i, i == numGrades-1);
         String columnHeader = numGrades > 1 ? "Grade #" + (i + 1) : "Grade";
         table.addColumn(col,  columnHeader);
       }
@@ -236,16 +236,17 @@ public class ResultManager {
   }
 
   /**
-   * TODO : add second column, on demand
+   * Adds second column, on demand
    * @see #getTable
    * @param grades
    * @param grader
+   * @param editable
    * @return
    */
-  private Column<Result, String> getGradingColumn(Collection<Grade> grades, final String grader, final int gradingColumnIndex) {
+  private Column<Result, String> getGradingColumn(Collection<Grade> grades, final String grader, final int gradingColumnIndex, boolean editable) {
     final Map<Integer, Integer> resultToGrade = getResultToGrade(grades, gradingColumnIndex);
 
-    SelectionCell selectionCell = new SelectionCell(Arrays.asList(UNGRADED, "1", "2", "3", "4", "5", SKIP));
+    AbstractCell selectionCell = editable ? new SelectionCell(Arrays.asList(UNGRADED, "1", "2", "3", "4", "5", SKIP)) : new TextCell();
     Column<Result, String> col = new Column<Result, String>(selectionCell) {
       @Override
       public String getValue(Result object) {
