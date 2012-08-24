@@ -38,7 +38,7 @@ public class ResultManager {
   private int pageSize = PAGE_SIZE;
   private LangTestDatabaseAsync service;
   private UserFeedback feedback;
-  private GradingExercisePanel panel;
+  //private GradingExercisePanel panel;
   private Set<Integer> remainingResults = new HashSet<Integer>();
   private final AudioTag audioTag = new AudioTag();
 
@@ -53,7 +53,7 @@ public class ResultManager {
   }
 
   public void setFeedback(GradingExercisePanel panel) {
-    this.panel = panel;
+    //this.panel = panel;
   }
 
   public void setPageSize(int s) { this.pageSize = s; }
@@ -89,7 +89,7 @@ public class ResultManager {
           dialogVPanel.remove(closeButton);
         }
 
-        Widget table = getTable(result, false, true, new ArrayList<Grade>(), "");
+        Widget table = getTable(result, false, true, new ArrayList<Grade>(), "", 1);
         dialogVPanel.add(table);
         dialogVPanel.add(closeButton);
 
@@ -116,10 +116,11 @@ public class ResultManager {
    * @param showQuestionColumn
    * @param grades
    * @param grader
+   * @param numGrades
    * @return
    */
   public Widget getTable(Collection<Result> result, final boolean gradingView, boolean showQuestionColumn,
-                         Collection<Grade> grades, final String grader) {
+                         Collection<Grade> grades, final String grader, int numGrades) {
     remainingResults.clear();
 
 /*    for (Result r: result) {
@@ -202,10 +203,12 @@ public class ResultManager {
       };
       date.setSortable(true);
       table.addColumn(date, "Time");
-    }
-    else {
-      Column<Result, String> col = getGradingColumn(grades, grader);
-      table.addColumn(col, "Grade");
+    } else {
+      for (int i = 0; i < numGrades; i++) {
+        Column<Result, String> col = getGradingColumn(grades, grader, i);
+        String columnHeader = numGrades > 1 ? "Grade #" + (i + 1) : "Grade";
+        table.addColumn(col,  columnHeader);
+      }
     }
     // Create a data provider.
     ListDataProvider<Result> dataProvider = new ListDataProvider<Result>();
@@ -234,33 +237,20 @@ public class ResultManager {
 
   /**
    * TODO : add second column, on demand
-   * @see #getTable(java.util.Collection, boolean, boolean, java.util.Collection, String)
+   * @see #getTable
    * @param grades
    * @param grader
    * @return
    */
-  private Column<Result, String> getGradingColumn(Collection<Grade> grades, final String grader) {
-    //System.out.println("getGradingColumn Grader '" + grader +"'");
-    final Map<Integer,List<Integer>> resultToGrade = new HashMap<Integer, List<Integer>>();
-    for (Grade g : grades) {
-      List<Integer> gradesForResult = resultToGrade.get(g.resultID);
-      if (gradesForResult == null) {
-        resultToGrade.put(g.resultID, gradesForResult = new ArrayList<Integer>());
-      }
-      gradesForResult.add(g.grade);
-    }
-
-    // System.out.println("made r->g : " + resultToGrade);
+  private Column<Result, String> getGradingColumn(Collection<Grade> grades, final String grader, final int gradingColumnIndex) {
+    final Map<Integer, Integer> resultToGrade = getResultToGrade(grades, gradingColumnIndex);
 
     SelectionCell selectionCell = new SelectionCell(Arrays.asList(UNGRADED, "1", "2", "3", "4", "5", SKIP));
     Column<Result, String> col = new Column<Result, String>(selectionCell) {
       @Override
       public String getValue(Result object) {
-        Collection<Integer> gradesForResult = resultToGrade.get(object.uniqueID);
-        if (gradesForResult == null) return UNGRADED;
-        Integer grade = gradesForResult.iterator().next();
+        Integer grade = resultToGrade.get(object.uniqueID);
         String s = grade == null ? UNGRADED : grade == -1 ? UNGRADED : grade == -2 ? SKIP : "" + grade;
-       // System.out.println("current grade for : " + object + " is " + s);
         return s;
       }
     };
@@ -276,20 +266,44 @@ public class ResultManager {
             System.err.println("setFieldUpdater : couldn't parse " + value +"??");
           }
         }
-       // System.out.println("adding grade " + grade + " for : " + result);
-        List<Integer> grades = resultToGrade.get(result.uniqueID);
-        if (grades == null) {
-          resultToGrade.put(result.uniqueID, grades = new ArrayList<Integer>());
-          grades.add(grade);
-        }
-        else {
-          grades.set(0,grade);
-        }
+        resultToGrade.put(result.uniqueID, grade);
 
         addGrade(result, grade, grader);
       }
     });
     return col;
+  }
+
+  private Map<Integer, Integer> getResultToGrade(Collection<Grade> grades, int gradingColumnIndex) {
+    final Map<Integer,List<Grade>> resultToGrade = new HashMap<Integer, List<Grade>>();
+
+    final Map<Integer,Integer> resultToGradeForColumn = new HashMap<Integer, Integer>();
+
+    for (Grade g : grades) {
+      List<Grade> gradesForResult = resultToGrade.get(g.resultID);
+      if (gradesForResult == null) {
+        resultToGrade.put(g.resultID, gradesForResult = new ArrayList<Grade>());
+      }
+      gradesForResult.add(g);
+    }
+    for (Map.Entry<Integer, List<Grade>> idToGrades : resultToGrade.entrySet()) {
+      Integer resultID = idToGrades.getKey();
+      List<Grade> gradesForResult = idToGrades.getValue();
+      if (gradesForResult.size() > 1) {
+        //System.out.println(resultID + "->" + gradesForResult);
+      }
+      Collections.sort(gradesForResult, new Comparator<Grade>() {
+        public int compare(Grade o1, Grade o2) {
+          return o1.id < o2.id ? -1 : o1.id > o2.id ? +1 : 0;
+        }
+      });
+      if (gradingColumnIndex < gradesForResult.size()) {
+        Grade choice = gradesForResult.get(gradingColumnIndex);
+        resultToGradeForColumn.put(resultID, choice.grade);
+        //System.out.println("\t"+resultID + "->" + choice + " at " + gradingColumnIndex);
+      }
+    }
+    return resultToGradeForColumn;
   }
 
   private VerticalPanel getPager(CellTable<Result> table) {
@@ -306,7 +320,7 @@ public class ResultManager {
   }
 
   /**
-   * @see #getGradingColumn(java.util.Collection, String)
+   * @see #getGradingColumn
    * @param object
    * @param grade
    * @param grader

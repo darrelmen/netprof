@@ -34,6 +34,8 @@ public class GradeDAO {
             "' WHERE resultID='" + resultID+
             "' AND grader='" +grader +
             "'";
+
+       // System.out.println("UPDATE " + grade + " grade for " + resultID + " and " +grader);
       }
       statement = connection.prepareStatement(sql);
       if (!exists) {
@@ -67,7 +69,11 @@ public class GradeDAO {
           "'");
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
-        val = rs.getInt(1) > 0;
+        int anInt = rs.getInt(1);
+        if (anInt > 1) {
+         System.err.println("Found " + anInt + " grades for " + resultID + " and " +grader);
+        }
+        val = anInt > 0;
       }
       rs.close();
       statement.close();
@@ -86,17 +92,19 @@ public class GradeDAO {
   public GradesAndIDs getResultIDsForExercise(String exerciseID) {
     try {
       Connection connection = database.getConnection();
-      String sql = "SELECT resultID, grade, grader from grades where exerciseID='" + exerciseID + "'";
+      String sql = "SELECT id, resultID, grade, grader from grades where exerciseID='" + exerciseID + "'";
       PreparedStatement statement = connection.prepareStatement(sql);
 
       ResultSet rs = statement.executeQuery();
       Set<Grade> grades = new HashSet<Grade>();
       Set<Integer> ids = new HashSet<Integer>();
       while (rs.next()) {
-        int resultID = rs.getInt(1);
-        int grade = rs.getInt(2);
-        String grader = rs.getString(3);
-        grades.add(new Grade(resultID, grade, grader));
+        int i = 1;
+        int id = rs.getInt(i++);
+        int resultID = rs.getInt(i++);
+        int grade = rs.getInt(i++);
+        String grader = rs.getString(i++);
+        grades.add(new Grade(id, resultID, grade, grader));
         ids.add(resultID);
       }
       rs.close();
@@ -109,7 +117,6 @@ public class GradeDAO {
       ee.printStackTrace();
     }
     return new GradesAndIDs(new ArrayList<Grade>(),new ArrayList<Integer>());
-    //return new HashSet<Grade>();
   }
 
   public static class GradesAndIDs {
