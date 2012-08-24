@@ -33,6 +33,8 @@ import java.util.*;
  */
 public class ResultManager {
   private static final int PAGE_SIZE = 12;
+  public static final String UNGRADED = "Ungraded";
+  public static final String SKIP = "Skip";
   private int pageSize = PAGE_SIZE;
   private LangTestDatabaseAsync service;
   private UserFeedback feedback;
@@ -87,7 +89,7 @@ public class ResultManager {
           dialogVPanel.remove(closeButton);
         }
 
-        Widget table = getTable(result, false, true, new ArrayList<Grade>());
+        Widget table = getTable(result, false, true, new ArrayList<Grade>(), "");
         dialogVPanel.add(table);
         dialogVPanel.add(closeButton);
 
@@ -107,15 +109,17 @@ public class ResultManager {
   }
 
   /**
+   * @see mitll.langtest.client.ResultManager#showResults
    * @see GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @param result
    * @param gradingView
    * @param showQuestionColumn
    * @param grades
+   * @param grader
    * @return
    */
   public Widget getTable(Collection<Result> result, final boolean gradingView, boolean showQuestionColumn,
-                         Collection<Grade> grades) {
+                         Collection<Grade> grades, final String grader) {
     remainingResults.clear();
 
 /*    for (Result r: result) {
@@ -200,39 +204,7 @@ public class ResultManager {
       table.addColumn(date, "Time");
     }
     else {
-      final Map<Integer,Integer> resultToGrade = new HashMap<Integer, Integer>();
-      for (Grade g : grades) resultToGrade.put(g.resultID,g.grade);
-
-     // System.out.println("made r->g : " + resultToGrade);
-
-      SelectionCell selectionCell = new SelectionCell(Arrays.asList("Ungraded", "1", "2", "3", "4", "5", "Skip"));
-      Column<Result, String> col = new Column<Result, String>(selectionCell) {
-        @Override
-        public String getValue(Result object) {
-          Integer grade = resultToGrade.get(object.uniqueID);
-          String s = grade == null ? "Ungraded" : grade == -1 ? "Ungraded" : grade == -2 ? "Skip" : "" + grade;
-         // System.out.println("current grade for : " + object + " is " + s);
-
-          return s;
-        }
-      };
-      col.setFieldUpdater(new FieldUpdater<Result, String>() {
-        public void update(int index, final Result object, String value) {
-          int grade = -1;
-          if (value.equals("Ungraded")) grade = -1;
-          else if (value.equals("Skip")) grade = -2;
-          else {
-            try {
-              grade = Integer.parseInt(value);
-            } catch (NumberFormatException e) {
-              System.err.println("setFieldUpdater : couldn't parse " + value +"??");
-            }
-          }
-         // System.out.println("adding grade " + grade + " for : " + object);
-          resultToGrade.put(object.uniqueID,grade);
-          addGrade(object, grade);
-        }
-      });
+      Column<Result, String> col = getGradingColumn(grades, grader);
       table.addColumn(col, "Grade");
     }
     // Create a data provider.
@@ -260,6 +232,66 @@ public class ResultManager {
     return getPager(table);
   }
 
+  /**
+   * TODO : add second column, on demand
+   * @see #getTable(java.util.Collection, boolean, boolean, java.util.Collection, String)
+   * @param grades
+   * @param grader
+   * @return
+   */
+  private Column<Result, String> getGradingColumn(Collection<Grade> grades, final String grader) {
+    //System.out.println("getGradingColumn Grader '" + grader +"'");
+    final Map<Integer,List<Integer>> resultToGrade = new HashMap<Integer, List<Integer>>();
+    for (Grade g : grades) {
+      List<Integer> gradesForResult = resultToGrade.get(g.resultID);
+      if (gradesForResult == null) {
+        resultToGrade.put(g.resultID, gradesForResult = new ArrayList<Integer>());
+      }
+      gradesForResult.add(g.grade);
+    }
+
+    // System.out.println("made r->g : " + resultToGrade);
+
+    SelectionCell selectionCell = new SelectionCell(Arrays.asList(UNGRADED, "1", "2", "3", "4", "5", SKIP));
+    Column<Result, String> col = new Column<Result, String>(selectionCell) {
+      @Override
+      public String getValue(Result object) {
+        Collection<Integer> gradesForResult = resultToGrade.get(object.uniqueID);
+        if (gradesForResult == null) return UNGRADED;
+        Integer grade = gradesForResult.iterator().next();
+        String s = grade == null ? UNGRADED : grade == -1 ? UNGRADED : grade == -2 ? SKIP : "" + grade;
+       // System.out.println("current grade for : " + object + " is " + s);
+        return s;
+      }
+    };
+    col.setFieldUpdater(new FieldUpdater<Result, String>() {
+      public void update(int index, final Result result, String value) {
+        int grade = -1;
+        if (value.equals(UNGRADED)) grade = -1;
+        else if (value.equals(SKIP)) grade = -2;
+        else {
+          try {
+            grade = Integer.parseInt(value);
+          } catch (NumberFormatException e) {
+            System.err.println("setFieldUpdater : couldn't parse " + value +"??");
+          }
+        }
+       // System.out.println("adding grade " + grade + " for : " + result);
+        List<Integer> grades = resultToGrade.get(result.uniqueID);
+        if (grades == null) {
+          resultToGrade.put(result.uniqueID, grades = new ArrayList<Integer>());
+          grades.add(grade);
+        }
+        else {
+          grades.set(0,grade);
+        }
+
+        addGrade(result, grade, grader);
+      }
+    });
+    return col;
+  }
+
   private VerticalPanel getPager(CellTable<Result> table) {
     SimplePager pager = new SimplePager();
 
@@ -273,8 +305,14 @@ public class ResultManager {
     return vPanel;
   }
 
-  private void addGrade(final Result object, int grade) {
-    service.addGrade(object.uniqueID, object.id, grade,true,new AsyncCallback<Integer>() {
+  /**
+   * @see #getGradingColumn(java.util.Collection, String)
+   * @param object
+   * @param grade
+   * @param grader
+   */
+  private void addGrade(final Result object, int grade, String grader) {
+    service.addGrade(object.uniqueID, object.id, grade,true, grader, new AsyncCallback<Integer>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Integer result) {   // TODO show check box?
         feedback.showStatus("Now "+result + " graded answers.");

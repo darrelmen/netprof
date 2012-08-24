@@ -14,23 +14,25 @@ public class GradeDAO {
 
   /**
    * If a grade already exists, update the value.
-   * @see DatabaseImpl#addGrade(int, String, int, boolean)
+   * @see DatabaseImpl#addGrade(int, String, int, boolean, String)
    * @param resultID
    * @param exerciseID
    * @param grade
    * @param correct
+   * @param grader
    * @return
    */
-  public int addGrade(int resultID, String exerciseID, int grade, boolean correct) {
+  public int addGrade(int resultID, String exerciseID, int grade, boolean correct, String grader) {
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement;
 
-      String sql = "INSERT INTO grades(resultID,exerciseID,grade,correct) VALUES(?,?,?,?)";
-      boolean exists = gradeExists(resultID);
+      String sql = "INSERT INTO grades(resultID,exerciseID,grade,correct,grader) VALUES(?,?,?,?,?)";
+      boolean exists = gradeExists(resultID, grader);
       if (exists) {
         sql = "UPDATE grades SET grade='" +grade+
             "' WHERE resultID='" + resultID+
+            "' AND grader='" +grader +
             "'";
       }
       statement = connection.prepareStatement(sql);
@@ -40,6 +42,7 @@ public class GradeDAO {
         statement.setString(i++, exerciseID);
         statement.setInt(i++, grade);
         statement.setBoolean(i++, correct);
+        statement.setString(i++, grader);
       }
       statement.executeUpdate();
       statement.close();
@@ -51,13 +54,16 @@ public class GradeDAO {
     return getCount();
   }
 
-  public boolean gradeExists(int resultID) {
+  private boolean gradeExists(int resultID, String grader) {
     boolean val = false;
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement;
-      statement = connection.prepareStatement("SELECT COUNT(*) from grades where resultID='" +
+      statement = connection.prepareStatement("SELECT COUNT(*) from grades " +
+          "where resultID='" +
           resultID +
+          "' AND grader='" +
+          grader +
           "'");
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
@@ -73,49 +79,6 @@ public class GradeDAO {
   }
 
   /**
-   * Pulls the list of results out of the database.
-   *
-   * @return
-   */
-/*  public List<Grade> getGrades() {
-    try {
-      Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement("SELECT * from grades;");
-
-      ResultSet rs = statement.executeQuery();
-      List<Grade> results = new ArrayList<Grade>();
-      while (rs.next()) {
-        int i = 1;
-        rs.getInt(i++);
-        long userID = rs.getLong(i++);
-        String plan = rs.getString(i++);
-        String exid = rs.getString(i++);
-        int qid = rs.getInt(i++);
-        Timestamp timestamp = rs.getTimestamp(i++);
-        String answer = rs.getString(i++);
-        boolean valid = rs.getBoolean(i++);
-        results.add(new Grade(userID, //id
-          plan, // plan
-          exid, // id
-          qid, // qid
-          answer, // answer
-          //rs.getString(i++), // audioFile
-          valid, // valid
-          timestamp.getTime()
-        ));
-      }
-      rs.close();
-      statement.close();
-      database.closeConnection(connection);
-
-      return results;
-    } catch (Exception ee) {
-      ee.printStackTrace();
-    }
-    return new ArrayList<Result>();
-  }*/
-
-  /**
    * @see ResultDAO#getResultsForExercise(String)
    * @param exerciseID
    * @return
@@ -123,7 +86,7 @@ public class GradeDAO {
   public GradesAndIDs getResultIDsForExercise(String exerciseID) {
     try {
       Connection connection = database.getConnection();
-      String sql = "SELECT resultID, grade from grades where exerciseID='" + exerciseID + "'";
+      String sql = "SELECT resultID, grade, grader from grades where exerciseID='" + exerciseID + "'";
       PreparedStatement statement = connection.prepareStatement(sql);
 
       ResultSet rs = statement.executeQuery();
@@ -132,7 +95,8 @@ public class GradeDAO {
       while (rs.next()) {
         int resultID = rs.getInt(1);
         int grade = rs.getInt(2);
-        grades.add(new Grade(resultID, grade));
+        String grader = rs.getString(3);
+        grades.add(new Grade(resultID, grade, grader));
         ids.add(resultID);
       }
       rs.close();
@@ -158,7 +122,7 @@ public class GradeDAO {
     }
   }
 
-  void dropGrades() {
+/*  void dropGrades() {
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement("DROP TABLE if exists grades");
@@ -171,7 +135,7 @@ public class GradeDAO {
     } catch (Exception e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.  }
     }
-  }
+  }*/
 
   public int getCount() {
     try {
@@ -196,7 +160,29 @@ public class GradeDAO {
    */
   void createGradesTable(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
-      "grades (id IDENTITY, exerciseID VARCHAR, resultID INT, grade INT, correct BOOLEAN)");
+      "grades (id IDENTITY, exerciseID VARCHAR, resultID INT, grade INT, correct BOOLEAN, grader VARCHAR)");
+    statement.execute();
+    statement.close();
+
+    int numColumns = getNumColumns(connection);
+    if (numColumns != 6) {
+      addColumnToTable(connection);
+    }
+  }
+
+  private int getNumColumns(Connection connection) throws SQLException {
+    Statement stmt = connection.createStatement();
+    ResultSet rs = stmt.executeQuery("SELECT * FROM grades");
+
+    // Get result set meta data
+    ResultSetMetaData rsmd = rs.getMetaData();
+    int numColumns = rsmd.getColumnCount();
+    stmt.close();
+    return numColumns;
+  }
+
+  private void addColumnToTable(Connection connection) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE grades ADD grader VARCHAR");
     statement.execute();
     statement.close();
   }
