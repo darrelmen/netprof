@@ -1,10 +1,15 @@
-package mitll.langtest.client;
+package mitll.langtest.client.grading;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.ResultManager;
+import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanel;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
@@ -56,7 +61,7 @@ public class GradingExercisePanel extends ExercisePanel {
    * Partitions results into 3 (or fewer) separate tables for each of the
    * possible spoken/written & english/f.l. combinations.
    * <br></br>
-   * Uses a result manager table (simple pager).  {@link ResultManager#getTable(java.util.Collection, boolean, boolean, java.util.Collection)}
+   * Uses a result manager table (simple pager).  {@link mitll.langtest.client.ResultManager#getTable(java.util.Collection, boolean, boolean, java.util.Collection)}
    * @see ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, UserFeedback, ExerciseController)
    * @param exercise
    * @param service

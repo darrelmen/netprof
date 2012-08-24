@@ -1,5 +1,10 @@
-package mitll.langtest.client;
+package mitll.langtest.client.grading;
 
+import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanel;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -11,7 +16,7 @@ import mitll.langtest.shared.Exercise;
  */
 public class GradingExercisePanelFactory extends ExercisePanelFactory {
   /**
-   * @see LangTest#onModuleLoad2()
+   * @see mitll.langtest.client.LangTest#onModuleLoad2()
    * @param service
    * @param userFeedback
    * @param controller

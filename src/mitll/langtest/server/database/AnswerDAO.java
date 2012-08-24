@@ -23,7 +23,7 @@ public class AnswerDAO {
    * @param questionID
    * @param answer
    * @param audioFile
-   * @see mitll.langtest.client.ExercisePanel#postAnswers(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.UserFeedback, mitll.langtest.client.ExerciseController, mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
    */
   public void addAnswer(int userID, Exercise e, int questionID, String answer, String audioFile) {
     String plan = e.getPlan();

@@ -1,7 +1,10 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanel;
 import mitll.langtest.client.recorder.SimpleRecordPanel;
+import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -13,7 +16,7 @@ import mitll.langtest.shared.Exercise;
  */
 public class SimpleRecordExercisePanel extends ExercisePanel {
   /**
-   * @see ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    * @param e
    * @param service
    * @param userFeedback
@@ -28,7 +31,7 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
    *
-   * @see mitll.langtest.client.ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.UserFeedback, mitll.langtest.client.ExerciseController)
+   * @see mitll.langtest.client.exercise.ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController)
    * @param exercise
    * @param service
    * @param controller

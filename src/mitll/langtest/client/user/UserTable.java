@@ -1,4 +1,4 @@
-package mitll.langtest.client;
+package mitll.langtest.client.user;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
+import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.shared.User;
 
 import java.util.Comparator;

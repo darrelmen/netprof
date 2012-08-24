@@ -1,4 +1,4 @@
-package mitll.langtest.client;
+package mitll.langtest.client.user;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -9,6 +9,7 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.LangTestDatabaseAsync;
 
 import java.util.Arrays;
 import java.util.Date;

@@ -17,6 +17,8 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
+import mitll.langtest.client.grading.GradingExercisePanel;
+import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 
@@ -39,7 +41,7 @@ public class ResultManager {
   private final AudioTag audioTag = new AudioTag();
 
   /**
-   * @see GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, ExerciseController, int)
+   * @see GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @param s
    * @param feedback
    */
@@ -105,7 +107,7 @@ public class ResultManager {
   }
 
   /**
-   * @see GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, ExerciseController, int)
+   * @see GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @param result
    * @param gradingView
    * @param showQuestionColumn

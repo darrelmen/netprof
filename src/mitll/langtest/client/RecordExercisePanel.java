@@ -9,7 +9,10 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanel;
 import mitll.langtest.client.recorder.SaveNotification;
+import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
 /**
