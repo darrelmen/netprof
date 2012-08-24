@@ -93,7 +93,12 @@ public class GradingExercisePanel extends ExercisePanel {
       public void onSuccess(ResultsAndGrades resultsAndGrades) {
         List<Boolean> spoken = Arrays.asList(true, false);
         List<Boolean> foreignOrEnglish = Arrays.asList(true, false);
+
         int count = countDistinctTypes(resultsAndGrades);
+        boolean bigPage = count == 1 || englishOnly;
+        int oneQuestionPageSize = bigPage ? BIG_ONE_QUESTION_PAGE_SIZE : ONE_QUESTION_PAGE_SIZE;
+        int twoQuestionPageSize = bigPage ? BIG_TWO_QUESTION_PAGE_SIZE : TWO_QUESTION_PAGE_SIZE;
+
         for (boolean isSpoken : spoken) {
           Map<Boolean, List<Result>> langToResult = resultsAndGrades.spokenToLangToResult.get(isSpoken);
           if (langToResult != null) { // there might not be any written types
@@ -107,8 +112,7 @@ public class GradingExercisePanel extends ExercisePanel {
                 SimplePanel spacer = new SimplePanel();
                 spacer.setSize("500px", "5px");
                 vp.add(spacer);
-                int oneQuestionPageSize = count == 1 ? BIG_ONE_QUESTION_PAGE_SIZE : ONE_QUESTION_PAGE_SIZE;
-                int twoQuestionPageSize = count == 1 ? BIG_TWO_QUESTION_PAGE_SIZE : TWO_QUESTION_PAGE_SIZE;
+
                 vp.add(showResults(results, resultsAndGrades.grades, service, outer, n > 1, index,
                     oneQuestionPageSize, twoQuestionPageSize, controller.getGrader()));
               }
@@ -165,7 +169,7 @@ public class GradingExercisePanel extends ExercisePanel {
       rm.setPageSize(twoQPageSize);
     }
 
-    return rm.getTable(results, true, false, grades, grader);
+    return rm.getTable(results, true, false, grades, grader, controller.getEnglishOnly() ? 2 : 1);
   }
 
   @Override
