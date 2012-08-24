@@ -21,7 +21,7 @@ public interface LangTestDatabase extends RemoteService {
   List<Exercise> getExercises();
   ResultsAndGrades getResultsForExercise(String exid);
   void addAnswer(int userID, Exercise exercise, int questionID, String answer, String audioFile);
-  int addGrade(int resultID, String exerciseID, int grade, boolean correct);
+  int addGrade(int resultID, String exerciseID, int grade, boolean correct, String grader);
   void addGrader(String login);
   boolean graderExists(String login);
   long addUser(int age, String gender, int experience);

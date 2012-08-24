@@ -179,7 +179,7 @@ public class UserManager {
   }
 
   public void graderLogin() {
-    String sid = Cookies.getCookie("grader");
+    String sid = getGrader();
     if (sid == null || sid.length() == 0) {
       displayGraderLogin();
     }

@@ -16,7 +16,7 @@ public class AudioTag {
   private static final boolean USE_WAV = false;
 
   /**
-   * @see ResultManager#getTable(java.util.Collection, boolean, boolean, java.util.Collection)
+   * @see ResultManager#getTable(java.util.Collection
    * @param result
    * @return
    */

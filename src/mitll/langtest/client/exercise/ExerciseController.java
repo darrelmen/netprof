@@ -24,4 +24,6 @@ public interface ExerciseController {
   void startRecording();
   void stopRecording();
   String getBase64EncodedWavFile();
+
+  String getGrader();
 }

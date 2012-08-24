@@ -288,11 +288,13 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#addGrade
    * @param resultID
    * @param exerciseID
-   *@param grade
-   * @param correct   @return
-   */
-  public int addGrade(int resultID, String exerciseID, int grade, boolean correct) {
-    return gradeDAO.addGrade(resultID, exerciseID, grade, correct);
+   * @param grade
+   * @param correct
+   * @param grader
+   * @return
+   * */
+  public int addGrade(int resultID, String exerciseID, int grade, boolean correct, String grader) {
+    return gradeDAO.addGrade(resultID, exerciseID, grade, correct, grader);
   }
 
   public void addGrader(String login) { graderDAO.addGrader(login); }

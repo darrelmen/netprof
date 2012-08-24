@@ -59,7 +59,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private long lastUser = -1;
   private boolean grading = false;
-  private boolean askedMode = false;
+  private boolean englishOnlyMode = false;
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
 
@@ -147,10 +147,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void modeSelect() {
-    String value = Window.Location.getParameter("grading");
-    System.out.println("param grading " + value);
-    if (value != null && !value.equals("false")) {
-      System.out.println("jump to choice box " + value);
+    String isGrading = Window.Location.getParameter("grading");
+   // System.out.println("param grading " + isGrading);
+
+    String isEnglish = Window.Location.getParameter("english");
+    // System.out.println("param grading " + isGrading);
+    englishOnlyMode = isEnglish != null && !isEnglish.equals("false");
+
+    if (isGrading != null && !isGrading.equals("false")) {
+      System.out.println("jump to choice box " + isGrading);
 
       userManager.graderLogin();
     }
@@ -197,7 +202,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       exerciseList.setFactory(new ExercisePanelFactory(service, this, this), userManager, grading);
     }
 
-    askedMode = true;
+    //askedMode = true;
   }
 
   /**
@@ -256,7 +261,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     logout.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         userManager.clearUser();
-        askedMode = false;
+        //askedMode = false;
         exerciseList.removeCurrentExercise();
         exerciseList.clear();
         modeSelect();
@@ -295,23 +300,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void login() {
     userManager.login();
-
-    //System.out.println("asked " + askedMode);
-    //System.out.println("grading " + grading);
-/*    if (askedMode) {
-      if (grading) {
-        if (userManager.getGrader() == null || userManager.getGrader().length() == 0) {
-          //user.getGrader();
-          System.out.println("grading " + grading + " but no grader registered?");
-
-        }
-      }
-      else {
-        userManager.login();
-      }
-    }
-    else
-      userManager.displayChoiceBox();*/
   }
 
   /**
@@ -326,7 +314,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void gotUser(long userID) {
 //    System.out.println("gotUser " + userID + " vs " + lastUser);
-    askedMode = true;
+    //askedMode = true;
     grading = false;
     setGrading(grading);
     flashRecordPanel.initFlash();
@@ -345,6 +333,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   public int getUser() { return userManager.getUser(); }
+  public String getGrader() { return userManager.getGrader(); }
 
   // recording methods...
   /**

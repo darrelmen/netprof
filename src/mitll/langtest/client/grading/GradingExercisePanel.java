@@ -61,7 +61,7 @@ public class GradingExercisePanel extends ExercisePanel {
    * Partitions results into 3 (or fewer) separate tables for each of the
    * possible spoken/written & english/f.l. combinations.
    * <br></br>
-   * Uses a result manager table (simple pager).  {@link mitll.langtest.client.ResultManager#getTable(java.util.Collection, boolean, boolean, java.util.Collection)}
+   * Uses a result manager table (simple pager).  {@link mitll.langtest.client.ResultManager#getTable}
    * @see ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, UserFeedback, ExerciseController)
    * @param exercise
    * @param service
@@ -70,7 +70,8 @@ public class GradingExercisePanel extends ExercisePanel {
    * @return
    */
   @Override
-  protected Widget getAnswerWidget(Exercise exercise, final LangTestDatabaseAsync service, ExerciseController controller, final int index) {
+  protected Widget getAnswerWidget(Exercise exercise, final LangTestDatabaseAsync service,
+                                   final ExerciseController controller, final int index) {
     final VerticalPanel vp = new VerticalPanel();
     final int n = exercise.getNumQuestions();
     final GradingExercisePanel outer = this;
@@ -95,7 +96,7 @@ public class GradingExercisePanel extends ExercisePanel {
                 int oneQuestionPageSize = count == 1 ? BIG_ONE_QUESTION_PAGE_SIZE : ONE_QUESTION_PAGE_SIZE;
                 int twoQuestionPageSize = count == 1 ? BIG_TWO_QUESTION_PAGE_SIZE : TWO_QUESTION_PAGE_SIZE;
                 vp.add(showResults(results, resultsAndGrades.grades, service, outer, n > 1, index,
-                    oneQuestionPageSize, twoQuestionPageSize));
+                    oneQuestionPageSize, twoQuestionPageSize, controller.getGrader()));
               }
             }
           }
@@ -126,7 +127,7 @@ public class GradingExercisePanel extends ExercisePanel {
 
   private Widget showResults(Collection<Result> results, Collection<Grade> grades,
                              LangTestDatabaseAsync service, GradingExercisePanel outer,
-                             boolean moreThanOneQuestion, int index, int pageSize, int twoQPageSize) {
+                             boolean moreThanOneQuestion, int index, int pageSize, int twoQPageSize, String grader) {
     ResultManager rm = new ResultManager(service, userFeedback);
     rm.setFeedback(outer);
     rm.setPageSize(pageSize);
@@ -137,7 +138,7 @@ public class GradingExercisePanel extends ExercisePanel {
       rm.setPageSize(twoQPageSize);
     }
 
-    return rm.getTable(results, true, false, grades);
+    return rm.getTable(results, true, false, grades, grader);
   }
 
   @Override
