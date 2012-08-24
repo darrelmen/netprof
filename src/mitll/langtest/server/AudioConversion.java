@@ -1,6 +1,7 @@
 package mitll.langtest.server;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Does mp3 conversion using a shell call to lame.
@@ -62,7 +63,7 @@ public class AudioConversion {
     ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File);
     try {
       //    System.out.println("writeMP3 running lame" + lameProc.command());
-      runProcess(lameProc);
+      new ProcessRunner().runProcess(lameProc);
       //     System.out.println("writeMP3 exited  lame" + lameProc);
     } catch (IOException e) {
       System.err.println("Couldn't run " + lameProc);
@@ -81,7 +82,7 @@ public class AudioConversion {
     ProcessBuilder lameProc = new ProcessBuilder(path, "-i", pathToAudioFile, mp3File);
     try {
       System.out.println("writeOGG running ffmpeg" + lameProc.command());
-      runProcess(lameProc);
+      new ProcessRunner().runProcess(lameProc);
       //     System.out.println("writeMP3 exited  lame" + lameProc);
     } catch (IOException e) {
       System.err.println("Couldn't run " + lameProc);
@@ -94,32 +95,6 @@ public class AudioConversion {
     } else {
       //   System.out.println("Wrote to " + testMP3);
     }
-  }
-
-  private void runProcess(ProcessBuilder shellProc) throws IOException {
-    //System.out.println(new Date() + " : proc " + shellProc.command() + " started...");
-
-    shellProc.redirectErrorStream(true);
-    Process process2 = shellProc.start();
-
-    // read the output
-    InputStream stdout = process2.getInputStream();
-    readFromStream(stdout, false);
-    InputStream errorStream = process2.getErrorStream();
-    readFromStream(errorStream, true);
-
-    process2.destroy();
-    //System.out.println(new Date() + " : proc " + shellProc.command() + " finished");
-  }
-
-  private void readFromStream(InputStream is2, boolean showOutput) throws IOException {
-    InputStreamReader isr2 = new InputStreamReader(is2);
-    BufferedReader br2 = new BufferedReader(isr2);
-    String line2;
-    while ((line2 = br2.readLine()) != null) {
-      if (showOutput) System.err.println(line2);
-    }
-    br2.close();
   }
 
   public static void main(String[] arg) {
