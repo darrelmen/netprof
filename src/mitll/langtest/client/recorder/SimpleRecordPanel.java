@@ -5,7 +5,6 @@ package mitll.langtest.client.recorder;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -17,8 +16,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.AudioTag;
-import mitll.langtest.client.ExerciseController;
-import mitll.langtest.client.ExerciseQuestionState;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
@@ -48,7 +47,7 @@ public class SimpleRecordPanel extends HorizontalPanel {
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
    *
-   * @see mitll.langtest.client.SimpleRecordExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.ExerciseController, int)
+   * @see mitll.langtest.client.SimpleRecordExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
 	public SimpleRecordPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
                            final Exercise exercise, final ExerciseQuestionState questionState, final int index){
@@ -199,7 +198,7 @@ public class SimpleRecordPanel extends HorizontalPanel {
   }
 
   /**
-   * @see #stopClicked(mitll.langtest.client.recorder.SimpleRecordPanel.ImageAnchor, mitll.langtest.client.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.shared.Exercise, int, mitll.langtest.client.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
+   * @see #stopClicked(mitll.langtest.client.recorder.SimpleRecordPanel.ImageAnchor, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.shared.Exercise, int, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
    * @param result
    */
   private void setAudioTag(String result) {

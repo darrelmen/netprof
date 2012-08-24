@@ -1,4 +1,4 @@
-package mitll.langtest.client;
+package mitll.langtest.client.exercise;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -10,6 +10,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
 
 import java.util.ArrayList;
@@ -45,7 +48,7 @@ public class ExerciseList extends VerticalPanel {
   }
 
   /**
-   * @see LangTest#setGrading
+   * @see mitll.langtest.client.LangTest#setGrading
    * @param factory
    * @param user
    * @param doGrading
@@ -78,7 +81,7 @@ public class ExerciseList extends VerticalPanel {
 
   /**
     * Get exercises for this user.
-    * @see LangTest#gotUser(long)
+    * @see mitll.langtest.client.LangTest#gotUser(long)
     * @see mitll.langtest.client.LangTest#makeFlashContainer()
     * @param userID
     */

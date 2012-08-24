@@ -1,4 +1,4 @@
-package mitll.langtest.client;
+package mitll.langtest.client.exercise;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -10,6 +10,9 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.LangTest;
+import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
 import java.util.ArrayList;
@@ -20,8 +23,8 @@ import java.util.Set;
 /**
  * Note that for text input answers, the user is prevented from cut-copy-paste.<br></br>
  *
- * Subclassed to provide for audio recording and playback {@link SimpleRecordExercisePanel} and
- * grading of answers {@link GradingExercisePanel}
+ * Subclassed to provide for audio recording and playback {@link mitll.langtest.client.SimpleRecordExercisePanel} and
+ * grading of answers {@link mitll.langtest.client.grading.GradingExercisePanel}
  *
  * User: GO22670
  * Date: 5/8/12
@@ -53,7 +56,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     HorizontalPanel hp = new HorizontalPanel();
     hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(new HTML(e.getContent()));
-    hp.setWidth((Window.getClientWidth()-LangTest.EXERCISE_LIST_WIDTH-100) + "px");
+    hp.setWidth((Window.getClientWidth()- LangTest.EXERCISE_LIST_WIDTH-100) + "px");
     add(hp);
 
     int i = 1;

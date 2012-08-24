@@ -63,7 +63,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Remember who is grading which exercise.  Time out reservation after 30 minutes.
    *
-   * @see mitll.langtest.client.ExerciseList#getNextUngraded()
+   * @see mitll.langtest.client.exercise.ExerciseList#getNextUngraded()
    * @param user
    * @return
    */
@@ -95,7 +95,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @param exid
    * @return
-   * @see mitll.langtest.client.GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.ExerciseController, int)
+   * @see mitll.langtest.client.grading.GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
   public ResultsAndGrades getResultsForExercise(String exid) {
     ResultsAndGrades resultsForExercise = db.getResultsForExercise(exid);
@@ -121,7 +121,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param questionID
    * @param answer
    * @param audioFile
-   * @see mitll.langtest.client.ExercisePanel#postAnswers
+   * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers
    */
   public void addAnswer(int userID, Exercise exercise, int questionID, String answer, String audioFile) {
     db.addAnswer(userID, exercise, questionID, answer, audioFile);

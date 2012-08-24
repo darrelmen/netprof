@@ -26,8 +26,16 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExerciseList;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
+import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.client.user.UserManager;
+import mitll.langtest.client.user.UserNotification;
+import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -332,7 +340,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see ExercisePanel#postAnswers
+   * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers
    * @see mitll.langtest.client.recorder.SimpleRecordPanel#stopClicked
    * @return
    */

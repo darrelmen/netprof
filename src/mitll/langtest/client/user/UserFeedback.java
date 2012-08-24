@@ -1,4 +1,4 @@
-package mitll.langtest.client;
+package mitll.langtest.client.user;
 
 /**
  * Created with IntelliJ IDEA.

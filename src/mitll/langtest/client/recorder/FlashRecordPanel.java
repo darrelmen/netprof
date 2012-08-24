@@ -3,12 +3,10 @@
  */
 package mitll.langtest.client.recorder;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -16,9 +14,6 @@ import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.shared.Exercise;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Roughly mimics the Cykod example at <a href='https://github.com/cykod/FlashWavRecorder/blob/master/html/index.html'>Cykod example html</a><p></p>
@@ -112,7 +107,7 @@ public class FlashRecordPanel extends FlowPanel {
 
   /**
    * Remember widget so we can show it later when the save completes.
-   * @see mitll.langtest.client.ExerciseController#showRecorder(mitll.langtest.shared.Exercise, int, com.google.gwt.user.client.ui.Widget, SaveNotification)
+   * @see mitll.langtest.client.exercise.ExerciseController#showRecorder(mitll.langtest.shared.Exercise, int, com.google.gwt.user.client.ui.Widget, SaveNotification)
    * @param w
    */
   public static void setSaveCompleteFeedbackWidget(SaveNotification w) {
@@ -120,7 +115,7 @@ public class FlashRecordPanel extends FlowPanel {
   }
 
   /**
-   * @see mitll.langtest.client.ExerciseController#showRecorder(mitll.langtest.shared.Exercise, int, com.google.gwt.user.client.ui.Widget, SaveNotification)
+   * @see mitll.langtest.client.exercise.ExerciseController#showRecorder(mitll.langtest.shared.Exercise, int, com.google.gwt.user.client.ui.Widget, SaveNotification)
    * @param userID
    * @param e
    * @param qid

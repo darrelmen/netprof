@@ -37,7 +37,7 @@ public class Exercise implements IsSerializable  {
     public String toString() { return "'"+ getQuestion() + "' : '" + getAnswer() +"'"; }
 
     /**
-     * @see mitll.langtest.client.ExercisePanel#addQuestions
+     * @see mitll.langtest.client.exercise.ExercisePanel#addQuestions
      * @return
      */
     public String getQuestion() {
@@ -96,7 +96,7 @@ public class Exercise implements IsSerializable  {
   }
 
   /**
-   * @see mitll.langtest.client.ExercisePanel#addQuestions(Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.ExerciseController, int)
+   * @see mitll.langtest.client.exercise.ExercisePanel#addQuestions(Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @return
    */
   public List<QAPair> getQuestions() {

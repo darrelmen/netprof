@@ -1,4 +1,4 @@
-package mitll.langtest.client;
+package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.ui.Widget;
 
