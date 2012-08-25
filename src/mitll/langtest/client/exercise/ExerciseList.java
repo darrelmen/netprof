@@ -37,8 +37,9 @@ public class ExerciseList extends VerticalPanel {
   private UserFeedback feedback;
   private ExercisePanelFactory factory;
   private boolean doGrading = false;
+  private int expectedGrades = 1;
   //private String currentActiveExercise;
-  UserManager user;
+  private UserManager user;
 
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback, ExercisePanelFactory factory) {
     this.currentExerciseVPanel = currentExerciseVPanel;
@@ -52,11 +53,13 @@ public class ExerciseList extends VerticalPanel {
    * @param factory
    * @param user
    * @param doGrading
+   * @param expectedGrades
    */
-  public void setFactory(ExercisePanelFactory factory, UserManager user, boolean doGrading) {
+  public void setFactory(ExercisePanelFactory factory, UserManager user, boolean doGrading, int expectedGrades) {
     this.doGrading = doGrading;
     this.factory = factory;
     this.user = user;
+    this.expectedGrades = expectedGrades;
     // System.out.println("Factory is " +factory);
     if (doGrading) {
       loadGradingExercises();
@@ -138,7 +141,7 @@ public class ExerciseList extends VerticalPanel {
   }
 
   private void getNextUngraded() {
-    service.getNextUngradedExercise(user.getGrader(), new AsyncCallback<Exercise>() {
+    service.getNextUngradedExercise(user.getGrader(), expectedGrades, new AsyncCallback<Exercise>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Exercise result) {
         if (result != null) {

@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.grading.GradingExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 
@@ -244,7 +245,8 @@ public class ResultManager {
    * @return
    */
   private Column<Result, String> getGradingColumn(Collection<Grade> grades, final String grader, final int gradingColumnIndex, boolean editable) {
-    final Map<Integer, Integer> resultToGrade = getResultToGrade(grades, gradingColumnIndex);
+    final Map<Integer, Long> resultToGradeID = new HashMap<Integer, Long>();
+    final Map<Integer, Integer> resultToGrade = getResultToGrade(grades,resultToGradeID, gradingColumnIndex);
 
     AbstractCell selectionCell = editable ? new SelectionCell(Arrays.asList(UNGRADED, "1", "2", "3", "4", "5", SKIP)) : new TextCell();
     Column<Result, String> col = new Column<Result, String>(selectionCell) {
@@ -268,14 +270,15 @@ public class ResultManager {
           }
         }
         resultToGrade.put(result.uniqueID, grade);
-
-        addGrade(result, grade, grader);
+        Long gradeID = resultToGradeID.get(result.uniqueID);
+        System.out.println("getGradingColumn Found " + gradeID + " for " + result);
+        addGrade(result, grade, grader, gradeID == null ? -1 : gradeID, resultToGradeID);
       }
     });
     return col;
   }
 
-  private Map<Integer, Integer> getResultToGrade(Collection<Grade> grades, int gradingColumnIndex) {
+  private Map<Integer, Integer> getResultToGrade(Collection<Grade> grades,Map<Integer, Long> resultToGradeID, int gradingColumnIndex) {
     final Map<Integer,List<Grade>> resultToGrade = new HashMap<Integer, List<Grade>>();
 
     final Map<Integer,Integer> resultToGradeForColumn = new HashMap<Integer, Integer>();
@@ -301,6 +304,7 @@ public class ResultManager {
       if (gradingColumnIndex < gradesForResult.size()) {
         Grade choice = gradesForResult.get(gradingColumnIndex);
         resultToGradeForColumn.put(resultID, choice.grade);
+        resultToGradeID.put(resultID,(long)choice.id);
         //System.out.println("\t"+resultID + "->" + choice + " at " + gradingColumnIndex);
       }
     }
@@ -320,22 +324,29 @@ public class ResultManager {
     return vPanel;
   }
 
+
   /**
    * @see #getGradingColumn
-   * @param object
+   * @param answerToGrade
    * @param grade
    * @param grader
+   * @param gradeID
    */
-  private void addGrade(final Result object, int grade, String grader) {
-    service.addGrade(object.uniqueID, object.id, grade,true, grader, new AsyncCallback<Integer>() {
+  private void addGrade(final Result answerToGrade, int grade, String grader, long gradeID, final Map<Integer, Long> resultToGradeID) {
+    service.addGrade(answerToGrade.uniqueID, answerToGrade.id, grade, gradeID, true, grader, new AsyncCallback<CountAndGradeID>() {
       public void onFailure(Throwable caught) {}
-      public void onSuccess(Integer result) {   // TODO show check box?
-        feedback.showStatus("Now "+result + " graded answers.");
-        remainingResults.remove(object.uniqueID);
+
+      public void onSuccess(CountAndGradeID result) {
+        feedback.showStatus("Now "+result.count + " graded answers.");
+        resultToGradeID.put(answerToGrade.uniqueID, result.gradeID);
+      }
+
+ /*
+        remainingResults.remove(answerToGrade.uniqueID);
         if (remainingResults.isEmpty()) {
          // panel.recordCompleted(panel);
         }
-      }
+      */
     });
   }
 

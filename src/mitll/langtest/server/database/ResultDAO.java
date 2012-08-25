@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 
 import java.sql.Connection;
@@ -14,10 +15,12 @@ import java.util.*;
 public class ResultDAO {
   private final Database database;
   private GradeDAO gradeDAO;
+  private ScheduleDAO scheduleDAO ;
   public ResultDAO(Database database) {
     this.database = database;
 
     gradeDAO = new GradeDAO(database);
+    scheduleDAO = new ScheduleDAO(database);
 
   }
 
@@ -77,12 +80,16 @@ public class ResultDAO {
   }
 
   /**
-   * @see DatabaseImpl#getNextUngradedExercise(java.util.Collection)
+   * @see DatabaseImpl#getNextUngradedExercise
    * @param e
    * @return
    */
-  public boolean areAnyResultsLeftToGradeFor(Exercise e) {
-    return !getResultsForExercise(e.getID()).isEmpty();
+/*  public boolean areAnyResultsLeftToGradeFor(Exercise e) {
+    return !getResultsForExercise(e.getID(),1).isEmpty();
+  }*/
+
+  public boolean areAnyResultsLeftToGradeFor(Exercise e, int expected) {
+    return !getResultsForExercise(e.getID(),expected).isEmpty();
   }
 
   /**
@@ -92,23 +99,55 @@ public class ResultDAO {
    * @param exerciseID
    * @return results that haven't been graded yet
    */
-  private List<Result> getResultsForExercise(String exerciseID) {
+  private List<Result> getResultsForExercise(String exerciseID, int expected) {
     GradeDAO.GradesAndIDs resultIDsForExercise = gradeDAO.getResultIDsForExercise(exerciseID);
-    return getResultsForExercise(exerciseID, resultIDsForExercise.ids);
+    return getResultsForExercise(exerciseID, resultIDsForExercise.grades, expected);
   }
 
-  private List<Result> getResultsForExercise(String exerciseID, Collection<Integer> gradedResults) {
+  /**
+   * TODO : Add proper filtering
+   * @param exerciseID
+   * @param gradedResults
+   * @param expected
+   * @return
+   */
+  private List<Result> getResultsForExercise(String exerciseID, Collection<Grade> gradedResults, int expected) {
     try {
       List<Result> resultsForQuery = getAllResultsForExercise(exerciseID);
+      enrichResults(resultsForQuery,exerciseID);
+      //System.out.println("expected " + expected + " before " + resultsForQuery.size());
+
+      if (expected > 1) { // hack!
+        for (Iterator<Result> iter = resultsForQuery.iterator(); iter.hasNext(); ) {
+          Result next = iter.next();
+          if (next.flq) {
+            iter.remove();
+          }
+        }
+      }
+
+      Map<Integer,Integer> idToCount = new HashMap<Integer, Integer>();
+      for (Grade g : gradedResults) {
+        Integer countForResult = idToCount.get(g.resultID);
+        if (countForResult == null) idToCount.put(g.resultID,1);
+        else {
+          idToCount.put(g.resultID,countForResult+1);
+        }
+      }
+      //System.out.println("expected " + expected + " before " + resultsForQuery.size() + " map "+ idToCount);
 
       for (Iterator<Result> iter = resultsForQuery.iterator(); iter.hasNext();) {
         Result next = iter.next();
-        if (gradedResults.contains(next.uniqueID)) {
-          // System.out.println("removing graded item for result " + next.uniqueID);
+        Integer count = idToCount.get(next.uniqueID);
+        if (count != null && count >= expected) {
+        //  System.out.println("removing graded item for result " + next);
           iter.remove();
         }
+        else {
+          //System.out.println("NOT removing graded item for result " + next + " count = " + count);
+        }
       }
-      //System.err.println("after removing graded items count = " + resultsForQuery.size());
+      //System.out.println("after removing graded items count = " + resultsForQuery.size());
 
       return resultsForQuery;
     } catch (Exception ee) {
@@ -127,6 +166,34 @@ public class ResultDAO {
       ee.printStackTrace();
     }
     return new ArrayList<Result>();
+  }
+
+  public Set<Long> getUsers(List<Result> resultsForExercise) {
+    Set<Long> users = new HashSet<Long>();
+
+    for (Result r : resultsForExercise) {
+      users.add(r.userid);
+    }
+    return users;
+  }
+
+  /**
+   * Currently the results aren't marked with the spoken/written, foreign/english flags -- have to recover
+   * them from the schedule.
+   *
+   * @param resultsForExercise
+   * @param exid
+   */
+  public void enrichResults(List<Result> resultsForExercise, String exid) {
+    Set<Long> users = getUsers(resultsForExercise);
+
+    Map<Long, List<Schedule>> scheduleForUserAndExercise = scheduleDAO.getScheduleForUserAndExercise(users, exid);
+    for (Result r : resultsForExercise) {
+      List<Schedule> schedules = scheduleForUserAndExercise.get(r.userid);
+      Schedule schedule = schedules.get(0);
+      r.setFLQ(schedule.flQ);
+      r.setSpoken(schedule.spoken);
+    }
   }
 
   void dropResults(Database database) {
@@ -149,7 +216,7 @@ public class ResultDAO {
    * @param database
    * @throws Exception
    */
-  private void showResults(Database database) throws Exception {
+/*  private void showResults(Database database) throws Exception {
     Connection connection = database.getConnection();
     PreparedStatement statement = connection.prepareStatement("SELECT * FROM results order by " + Database.TIME);
     ResultSet rs = statement.executeQuery();
@@ -170,7 +237,7 @@ public class ResultDAO {
     rs.close();
     statement.close();
     database.closeConnection(connection);
-  }
+  }*/
 
   void createResultTable(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
