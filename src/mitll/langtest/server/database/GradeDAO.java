@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Grade;
 
 import java.sql.*;
@@ -14,30 +15,37 @@ public class GradeDAO {
 
   /**
    * If a grade already exists, update the value.
-   * @see DatabaseImpl#addGrade(int, String, int, boolean, String)
+   * @see DatabaseImpl#addGrade(int, String, int, long, boolean, String)
    * @param resultID
    * @param exerciseID
    * @param grade
+   * @param gradeID
    * @param correct
    * @param grader
    * @return
    */
-  public int addGrade(int resultID, String exerciseID, int grade, boolean correct, String grader) {
+  public CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader) {
+    long id = 0;
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement;
+      //System.out.println("addGrade " + grade + " grade for " + resultID + " and " +grader + " ex id " + exerciseID+ " and " +gradeID);
 
       String sql = "INSERT INTO grades(resultID,exerciseID,grade,correct,grader) VALUES(?,?,?,?,?)";
-      boolean exists = gradeExists(resultID, grader);
+      //boolean exists = gradeExists(resultID, grader, gradeID);
+      boolean exists = gradeID != -1;
       if (exists) {
-        sql = "UPDATE grades SET grade='" +grade+
-            "' WHERE resultID='" + resultID+
-            "' AND grader='" +grader +
-            "'";
-
-       // System.out.println("UPDATE " + grade + " grade for " + resultID + " and " +grader);
+        sql = "UPDATE grades " +
+            "SET grade='" +grade+ "' " +
+            "WHERE resultID='" + resultID+ "' " +
+            "AND grader='" +grader + "'" +
+            (gradeID != -1 ? " AND id=" +gradeID : "");
+        //System.out.println("UPDATE " + grade + " grade for " + resultID + " and " +grader+ " and " +gradeID);
+        statement = connection.prepareStatement(sql);
       }
-      statement = connection.prepareStatement(sql);
+      else {
+        statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+      }
       if (!exists) {
         int i = 1;
         statement.setInt(i++, resultID);
@@ -46,32 +54,44 @@ public class GradeDAO {
         statement.setBoolean(i++, correct);
         statement.setString(i++, grader);
       }
-      statement.executeUpdate();
-      statement.close();
+      int i = statement.executeUpdate();
 
+      if (exists) {
+       // System.out.println("UPDATE " + i);
+      }
+      else {
+        ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
+        while (rs.next()) {
+          id = rs.getLong(1);
+        }
+      }
+
+      statement.close();
       database.closeConnection(connection);
     } catch (Exception e) {
       e.printStackTrace();
     }
-    return getCount();
+    return new CountAndGradeID(getCount(),id);
   }
 
-  private boolean gradeExists(int resultID, String grader) {
+/*  private boolean gradeExists(int resultID, String grader, long gradeID) {
     boolean val = false;
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement;
       statement = connection.prepareStatement("SELECT COUNT(*) from grades " +
-          "where resultID='" +
-          resultID +
-          "' AND grader='" +
-          grader +
-          "'");
+          "where resultID='" +resultID + "' " +
+          "AND grader='" + grader + "'" +
+          (gradeID != -1 ? " AND id=" +gradeID : "")
+      );
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
         int anInt = rs.getInt(1);
         if (anInt > 1) {
          System.err.println("Found " + anInt + " grades for " + resultID + " and " +grader);
+        }
+        else {
+          System.out.println("gradeExists : Found " + anInt + " grades for " + resultID + " and " +grader +" and " +gradeID);
         }
         val = anInt > 0;
       }
@@ -82,10 +102,10 @@ public class GradeDAO {
       e.printStackTrace();
     }
     return val;
-  }
+  }*/
 
   /**
-   * @see ResultDAO#getResultsForExercise(String)
+   * @see ResultDAO#getResultsForExercise
    * @param exerciseID
    * @return
    */
@@ -119,30 +139,15 @@ public class GradeDAO {
     return new GradesAndIDs(new ArrayList<Grade>(),new ArrayList<Integer>());
   }
 
+  /**
+   * TODO : remove
+   */
   public static class GradesAndIDs {
     Collection<Grade> grades;
-    Collection<Integer> ids;
-
     public GradesAndIDs(Collection<Grade> grades, Collection<Integer> ids) {
       this.grades = grades;
-      this.ids = ids;
     }
   }
-
-/*  void dropGrades() {
-    try {
-      Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement("DROP TABLE if exists grades");
-      if (!statement.execute()) {
-        System.err.println("couldn't create table?");
-      }
-      statement.close();
-      database.closeConnection(connection);
-
-    } catch (Exception e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.  }
-    }
-  }*/
 
   public int getCount() {
     try {

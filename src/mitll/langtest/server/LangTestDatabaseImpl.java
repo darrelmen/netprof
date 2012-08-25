@@ -65,23 +65,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @see mitll.langtest.client.exercise.ExerciseList#getNextUngraded()
    * @param user
+   * @param expectedGrades
    * @return
    */
-  public Exercise getNextUngradedExercise(String user) {
+  public Exercise getNextUngradedExercise(String user, int expectedGrades) {
+    System.out.println("Expected grades " + expectedGrades);
     synchronized (this) {
       ConcurrentMap<String,String> stringStringConcurrentMap = userToExerciseID.asMap();
       Collection<String> values = stringStringConcurrentMap.values();
       String currentExerciseForUser = userToExerciseID.getIfPresent(user);
-      System.out.println("for " + user + " current " + currentExerciseForUser);
+      //System.out.println("for " + user + " current " + currentExerciseForUser);
 
       Collection<String> currentActiveExercises = new HashSet<String>(values);
 
       if (currentExerciseForUser != null) {
         currentActiveExercises.remove(currentExerciseForUser); // it's OK to include the one the user is working on now...
       }
-      System.out.println("current set minus " + user + " is " + currentActiveExercises);
+      //System.out.println("current set minus " + user + " is " + currentActiveExercises);
 
-      return db.getNextUngradedExercise(currentActiveExercises);
+      return db.getNextUngradedExercise(currentActiveExercises, expectedGrades);
     }
   }
 
@@ -127,8 +129,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.addAnswer(userID, exercise, questionID, answer, audioFile);
   }
 
-  public int addGrade(int resultID, String exerciseID, int grade, boolean correct, String grader) {
-    return db.addGrade(resultID, exerciseID, grade, correct, grader);
+  /**
+   * @see mitll.langtest.client.ResultManager#addGrade
+   * @param resultID
+   * @param exerciseID
+   * @param grade
+   * @param gradeID
+   * @param correct
+   * @param grader
+   * @return
+   */
+  public CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader) {
+    return db.addGrade(resultID, exerciseID, grade, gradeID, correct, grader);
   }
 
   public void addGrader(String login) {

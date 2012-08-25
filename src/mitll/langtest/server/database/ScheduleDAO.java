@@ -18,14 +18,19 @@ public class ScheduleDAO {
    */
   Map<Long, List<Schedule>> getSchedule() {
     Set<Long> objects = Collections.emptySet();
-    return getScheduleForUserAndExercise(true, objects, "");
+    return getScheduleForUserAndExercise(true, false, objects, "");
   }
 
   public Map<Long, List<Schedule>> getScheduleForUserAndExercise(Set<Long> users, String exid) {
-    return getScheduleForUserAndExercise(false, users, exid);
+    return getScheduleForUserAndExercise(false, false, users, exid);
   }
 
-  private Map<Long, List<Schedule>> getScheduleForUserAndExercise(boolean getAll, Set<Long> users, String exid) {
+  public Map<Long, List<Schedule>> getScheduleForUserAndExercise(String exid) {
+    Set<Long> users = Collections.emptySet();
+    return getScheduleForUserAndExercise(false, true, users, exid);
+  }
+
+  private Map<Long, List<Schedule>> getScheduleForUserAndExercise(boolean getAll, boolean ignoreUsers, Set<Long> users, String exid) {
     Connection connection;
     // SortedSet<String> ids = new TreeSet<String>();
 
@@ -38,8 +43,9 @@ public class ScheduleDAO {
         for (Long l : users) b.append(l).append(",");
 
         String inClause = users.isEmpty() ? "" : b.toString().substring(0, b.length() - 1);
-        sql += " where USERID in (" + inClause +
-            ") and EXID='" + exid + "'";
+        sql += " where " +
+            (ignoreUsers ? "" : "USERID in (" + inClause +") and ")+
+            "EXID='" + exid + "'";
       }
       PreparedStatement statement = connection.prepareStatement(sql);
 

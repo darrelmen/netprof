@@ -198,11 +198,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     this.grading = g;
 
     if (grading) {
-      exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, grading);
+      exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, grading, englishOnlyMode ? 2 : 1);
       lastUser = -1; // no user
     }
     else {
-      exerciseList.setFactory(new ExercisePanelFactory(service, this, this), userManager, grading);
+      exerciseList.setFactory(new ExercisePanelFactory(service, this, this), userManager, grading, 1);
     }
 
     //askedMode = true;

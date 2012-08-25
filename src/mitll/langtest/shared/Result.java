@@ -53,6 +53,6 @@ public class Result implements IsSerializable {
 
   @Override
   public String toString() {
-    return "Result #"+uniqueID + " by user " + userid + " id " + id;
+    return "Result #"+uniqueID + " by user " + userid + " id " + id + " flq " + flq + " spoken " + spoken;
   }
 }

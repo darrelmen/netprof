@@ -110,12 +110,12 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
    * @return
    */
-  public Exercise getNextUngradedExercise(Collection<String> activeExercises) {
+  public Exercise getNextUngradedExercise(Collection<String> activeExercises, int expectedCount) {
     List<Exercise> rawExercises = getExercises();
     //System.out.println("checking " +rawExercises.size() + " exercises.");
     for (Exercise e : rawExercises) {
       if (!activeExercises.contains(e.getID()) && // no one is working on it
-          resultDAO.areAnyResultsLeftToGradeFor(e)) {
+          resultDAO.areAnyResultsLeftToGradeFor(e, expectedCount)) {
         System.out.println("Exercise " +e + " needs grading.");
 
         return e;
@@ -249,11 +249,8 @@ public class DatabaseImpl implements Database {
   public ResultsAndGrades getResultsForExercise(String exid) {
     GradeDAO.GradesAndIDs gradesAndIDs = gradeDAO.getResultIDsForExercise(exid);
     List<Result> resultsForExercise = resultDAO.getAllResultsForExercise(exid);
-    Set<Long> users = new HashSet<Long>();
+    Set<Long> users =  resultDAO.getUsers(resultsForExercise);
 
-    for (Result r : resultsForExercise) {
-      users.add(r.userid);
-    }
     Map<Long, List<Schedule>> scheduleForUserAndExercise = scheduleDAO.getScheduleForUserAndExercise(users, exid);
     Map<Boolean,Map<Boolean,List<Result>>> spokenToLangToResult = new HashMap<Boolean, Map<Boolean, List<Result>>>();
     for (Result r : resultsForExercise) {
@@ -269,6 +266,18 @@ public class DatabaseImpl implements Database {
     }
     return new ResultsAndGrades(resultsForExercise, gradesAndIDs.grades, spokenToLangToResult);
   }
+
+
+
+/*  public void enrichResults(Collection<Result> results,String exid) { {
+    Map<Long, List<Schedule>> scheduleForUserAndExercise = scheduleDAO.getScheduleForUserAndExercise(exid);
+    for (Result r : results) {
+      List<Schedule> schedules = scheduleForUserAndExercise.get(r.userid);
+      Schedule schedule = schedules.get(0);
+      r.setFLQ(schedule.flQ);
+      r.setSpoken(schedule.spoken);
+    }
+  }*/
 
   /**
    * Creates the result table if it's not there.
@@ -289,12 +298,13 @@ public class DatabaseImpl implements Database {
    * @param resultID
    * @param exerciseID
    * @param grade
-   * @param correct
+   * @param gradeID
+   *@param correct
    * @param grader
    * @return
    * */
-  public int addGrade(int resultID, String exerciseID, int grade, boolean correct, String grader) {
-    return gradeDAO.addGrade(resultID, exerciseID, grade, correct, grader);
+  public CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader) {
+    return gradeDAO.addGrade(resultID, exerciseID, grade, gradeID, correct, grader);
   }
 
   public void addGrader(String login) { graderDAO.addGrader(login); }
