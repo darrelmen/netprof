@@ -1,6 +1,6 @@
 package mitll.langtest.client;
 
-import com.google.gwt.cell.client.*;
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -19,11 +19,16 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.grading.GradingExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,17 +39,17 @@ import java.util.*;
  */
 public class ResultManager {
   private static final int PAGE_SIZE = 12;
-  public static final String UNGRADED = "Ungraded";
-  public static final String SKIP = "Skip";
+  protected static final String UNGRADED = "Ungraded";
+  protected static final String SKIP = "Skip";
   private int pageSize = PAGE_SIZE;
-  private LangTestDatabaseAsync service;
-  private UserFeedback feedback;
-  //private GradingExercisePanel panel;
+  protected LangTestDatabaseAsync service;
+  protected UserFeedback feedback;
+
   private Set<Integer> remainingResults = new HashSet<Integer>();
   private final AudioTag audioTag = new AudioTag();
 
   /**
-   * @see GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see mitll.langtest.client.LangTest#onModuleLoad2
    * @param s
    * @param feedback
    */
@@ -131,34 +136,7 @@ public class ResultManager {
     CellTable<Result> table = new CellTable<Result>();
     table.setWidth(gradingView ? "1000px" : "1200px");
     TextColumn<Result> id = null;
-    if (!gradingView) {
-      id = new TextColumn<Result>() {
-        @Override
-        public String getValue(Result answer) {
-          return "" + answer.userid;
-        }
-      };
-      id.setSortable(true);
-      table.addColumn(id, "User ID");
-
-      TextColumn<Result> age = new TextColumn<Result>() {
-        @Override
-        public String getValue(Result answer) {
-          return "" + answer.plan;
-        }
-      };
-      age.setSortable(true);
-      table.addColumn(age, "Plan");
-
-      TextColumn<Result> gender = new TextColumn<Result>() {
-        @Override
-        public String getValue(Result answer) {
-          return answer.id;
-        }
-      };
-      gender.setSortable(true);
-      table.addColumn(gender, "Exercise");
-    }
+    id = addUserPlanExercise(table, id);
     if (showQuestionColumn) {
       TextColumn<Result> experience = new TextColumn<Result>() {
         @Override
@@ -195,22 +173,7 @@ public class ResultManager {
 
     table.addColumn(audioFile, "Answer");
 
-    if (!gradingView) {
-      TextColumn<Result> date = new TextColumn<Result>() {
-        @Override
-        public String getValue(Result answer) {
-          return "" + new Date(answer.timestamp);
-        }
-      };
-      date.setSortable(true);
-      table.addColumn(date, "Time");
-    } else {
-      for (int i = 0; i < numGrades; i++) {
-        Column<Result, String> col = getGradingColumn(grades, grader, i, i == numGrades-1);
-        String columnHeader = numGrades > 1 ? "Grade #" + (i + 1) : "Grade";
-        table.addColumn(col,  columnHeader);
-      }
-    }
+    addResultColumn(grades, grader, numGrades, table);
     // Create a data provider.
     ListDataProvider<Result> dataProvider = new ListDataProvider<Result>();
 
@@ -236,79 +199,45 @@ public class ResultManager {
     return getPager(table);
   }
 
-  /**
-   * Adds second column, on demand
-   * @see #getTable
-   * @param grades
-   * @param grader
-   * @param editable
-   * @return
-   */
-  private Column<Result, String> getGradingColumn(Collection<Grade> grades, final String grader, final int gradingColumnIndex, boolean editable) {
-    final Map<Integer, Long> resultToGradeID = new HashMap<Integer, Long>();
-    final Map<Integer, Integer> resultToGrade = getResultToGrade(grades,resultToGradeID, gradingColumnIndex);
-
-    AbstractCell selectionCell = editable ? new SelectionCell(Arrays.asList(UNGRADED, "1", "2", "3", "4", "5", SKIP)) : new TextCell();
-    Column<Result, String> col = new Column<Result, String>(selectionCell) {
-      @Override
-      public String getValue(Result object) {
-        Integer grade = resultToGrade.get(object.uniqueID);
-        String s = grade == null ? UNGRADED : grade == -1 ? UNGRADED : grade == -2 ? SKIP : "" + grade;
-        return s;
-      }
-    };
-    col.setFieldUpdater(new FieldUpdater<Result, String>() {
-      public void update(int index, final Result result, String value) {
-        int grade = -1;
-        if (value.equals(UNGRADED)) grade = -1;
-        else if (value.equals(SKIP)) grade = -2;
-        else {
-          try {
-            grade = Integer.parseInt(value);
-          } catch (NumberFormatException e) {
-            System.err.println("setFieldUpdater : couldn't parse " + value +"??");
-          }
+  protected TextColumn<Result> addUserPlanExercise(CellTable<Result> table, TextColumn<Result> id) {
+      id = new TextColumn<Result>() {
+        @Override
+        public String getValue(Result answer) {
+          return "" + answer.userid;
         }
-        resultToGrade.put(result.uniqueID, grade);
-        Long gradeID = resultToGradeID.get(result.uniqueID);
-        System.out.println("getGradingColumn Found " + gradeID + " for " + result);
-        addGrade(result, grade, grader, gradeID == null ? -1 : gradeID, resultToGradeID);
-      }
-    });
-    return col;
+      };
+      id.setSortable(true);
+      table.addColumn(id, "User ID");
+
+      TextColumn<Result> age = new TextColumn<Result>() {
+        @Override
+        public String getValue(Result answer) {
+          return "" + answer.plan;
+        }
+      };
+      age.setSortable(true);
+      table.addColumn(age, "Plan");
+
+      TextColumn<Result> gender = new TextColumn<Result>() {
+        @Override
+        public String getValue(Result answer) {
+          return answer.id;
+        }
+      };
+      gender.setSortable(true);
+      table.addColumn(gender, "Exercise");
+    return id;
   }
 
-  private Map<Integer, Integer> getResultToGrade(Collection<Grade> grades,Map<Integer, Long> resultToGradeID, int gradingColumnIndex) {
-    final Map<Integer,List<Grade>> resultToGrade = new HashMap<Integer, List<Grade>>();
-
-    final Map<Integer,Integer> resultToGradeForColumn = new HashMap<Integer, Integer>();
-
-    for (Grade g : grades) {
-      List<Grade> gradesForResult = resultToGrade.get(g.resultID);
-      if (gradesForResult == null) {
-        resultToGrade.put(g.resultID, gradesForResult = new ArrayList<Grade>());
-      }
-      gradesForResult.add(g);
-    }
-    for (Map.Entry<Integer, List<Grade>> idToGrades : resultToGrade.entrySet()) {
-      Integer resultID = idToGrades.getKey();
-      List<Grade> gradesForResult = idToGrades.getValue();
-      if (gradesForResult.size() > 1) {
-        //System.out.println(resultID + "->" + gradesForResult);
-      }
-      Collections.sort(gradesForResult, new Comparator<Grade>() {
-        public int compare(Grade o1, Grade o2) {
-          return o1.id < o2.id ? -1 : o1.id > o2.id ? +1 : 0;
+  protected void addResultColumn(Collection<Grade> grades, String grader, int numGrades, CellTable<Result> table) {
+      TextColumn<Result> date = new TextColumn<Result>() {
+        @Override
+        public String getValue(Result answer) {
+          return "" + new Date(answer.timestamp);
         }
-      });
-      if (gradingColumnIndex < gradesForResult.size()) {
-        Grade choice = gradesForResult.get(gradingColumnIndex);
-        resultToGradeForColumn.put(resultID, choice.grade);
-        resultToGradeID.put(resultID,(long)choice.id);
-        //System.out.println("\t"+resultID + "->" + choice + " at " + gradingColumnIndex);
-      }
-    }
-    return resultToGradeForColumn;
+      };
+      date.setSortable(true);
+      table.addColumn(date, "Time");
   }
 
   private VerticalPanel getPager(CellTable<Result> table) {
@@ -322,32 +251,6 @@ public class ResultManager {
     vPanel.add(pager);
     vPanel.add(table);
     return vPanel;
-  }
-
-
-  /**
-   * @see #getGradingColumn
-   * @param answerToGrade
-   * @param grade
-   * @param grader
-   * @param gradeID
-   */
-  private void addGrade(final Result answerToGrade, int grade, String grader, long gradeID, final Map<Integer, Long> resultToGradeID) {
-    service.addGrade(answerToGrade.uniqueID, answerToGrade.id, grade, gradeID, true, grader, new AsyncCallback<CountAndGradeID>() {
-      public void onFailure(Throwable caught) {}
-
-      public void onSuccess(CountAndGradeID result) {
-        feedback.showStatus("Now "+result.count + " graded answers.");
-        resultToGradeID.put(answerToGrade.uniqueID, result.gradeID);
-      }
-
- /*
-        remainingResults.remove(answerToGrade.uniqueID);
-        if (remainingResults.isEmpty()) {
-         // panel.recordCompleted(panel);
-        }
-      */
-    });
   }
 
   private void addSorter(CellTable<Result> table, TextColumn<Result> id, List<Result> list) {

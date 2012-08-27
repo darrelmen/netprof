@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,20 +14,22 @@ import java.io.InputStreamReader;
  * To change this template use File | Settings | File Templates.
  */
 public class ProcessRunner {
+  private static final boolean SHOW_OUTPUT = false;
+
   public void runProcess(ProcessBuilder shellProc) throws IOException {
-    //System.out.println(new Date() + " : proc " + shellProc.command() + " started...");
+   // System.out.println(new Date() + " : proc " + shellProc.command() + " started...");
 
     shellProc.redirectErrorStream(true);
     Process process2 = shellProc.start();
 
     // read the output
     InputStream stdout = process2.getInputStream();
-    readFromStream(stdout, false);
+    readFromStream(stdout, SHOW_OUTPUT);
     InputStream errorStream = process2.getErrorStream();
     readFromStream(errorStream, true);
 
     process2.destroy();
-    //System.out.println(new Date() + " : proc " + shellProc.command() + " finished");
+  //  System.out.println(new Date() + " : proc " + shellProc.command() + " finished");
   }
 
   private void readFromStream(InputStream is2, boolean showOutput) throws IOException {

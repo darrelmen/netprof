@@ -72,9 +72,9 @@ public class AudioConversion {
 
     File testMP3 = new File(mp3File);
     if (!testMP3.exists()) {
-      //System.err.println("didn't write MP3 : " + testMP3.getAbsolutePath());
+      System.err.println("didn't write MP3 : " + testMP3.getAbsolutePath());
     } else {
-      //   System.out.println("Wrote to " + testMP3);
+  //    System.out.println("Wrote to " + testMP3 + " length " + testMP3.getTotalSpace());
     }
   }
 
