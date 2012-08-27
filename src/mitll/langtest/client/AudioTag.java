@@ -13,10 +13,10 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
  */
 public class AudioTag {
   private static final boolean USE_OGG = LangTestDatabase.USE_OGG;
-  private static final boolean USE_WAV = false;
+  private static final boolean USE_WAV = true;
 
   /**
-   * @see ResultManager#getTable(java.util.Collection
+   * @see ResultManager#getTable
    * @param result
    * @return
    */

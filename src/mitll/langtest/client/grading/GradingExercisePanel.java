@@ -18,7 +18,8 @@ import mitll.langtest.shared.ResultsAndGrades;
 import java.util.*;
 
 /**
- * Created with IntelliJ IDEA.
+ * Allows a grader to grade answers entered in the default mode.
+ *
  * User: GO22670
  * Date: 5/11/12
  * Time: 11:51 AM
@@ -33,7 +34,7 @@ public class GradingExercisePanel extends ExercisePanel {
   private UserFeedback userFeedback;
 
   /**
-   * @seex LangTest#loadExercise
+   * @see GradingExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    * @param e
    * @param service
    * @param userFeedback
@@ -46,6 +47,14 @@ public class GradingExercisePanel extends ExercisePanel {
     enableNextButton(true);
   }
 
+  /**
+   * If controller is english only, then show the answer too.
+   *
+   * @param i
+   * @param total
+   * @param engQAPair
+   * @param pair
+   */
   @Override
   protected void getQuestionHeader(int i, int total, Exercise.QAPair engQAPair, Exercise.QAPair pair) {
     String english = engQAPair.getQuestion();
@@ -72,7 +81,8 @@ public class GradingExercisePanel extends ExercisePanel {
    * Partitions results into 3 (or fewer) separate tables for each of the
    * possible spoken/written & english/f.l. combinations.
    * <br></br>
-   * Uses a result manager table (simple pager).  {@link mitll.langtest.client.ResultManager#getTable}
+   * Uses a result manager table (simple pager).  {@link mitll.langtest.client.ResultManager#getTable}<br></br>
+   * If the controller says this is an English only grading mode, then only show english answers.
    * @see ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, UserFeedback, ExerciseController)
    * @param exercise
    * @param service
@@ -96,9 +106,6 @@ public class GradingExercisePanel extends ExercisePanel {
 
         int count = countDistinctTypes(resultsAndGrades);
         boolean bigPage = count == 1 || englishOnly;
-        int oneQuestionPageSize = bigPage ? BIG_ONE_QUESTION_PAGE_SIZE : ONE_QUESTION_PAGE_SIZE;
-        int twoQuestionPageSize = bigPage ? BIG_TWO_QUESTION_PAGE_SIZE : TWO_QUESTION_PAGE_SIZE;
-
         for (boolean isSpoken : spoken) {
           Map<Boolean, List<Result>> langToResult = resultsAndGrades.spokenToLangToResult.get(isSpoken);
           if (langToResult != null) { // there might not be any written types
@@ -106,15 +113,8 @@ public class GradingExercisePanel extends ExercisePanel {
               if (englishOnly && isForeign) continue; // skip non-english
               List<Result> results = langToResult.get(isForeign);
               if (results != null) {
-                boolean isEnglish = !isForeign;
-                String prompt = isSpoken ? outer.getSpokenPrompt(isEnglish) : outer.getWrittenPrompt(isEnglish);
-                vp.add(new HTML(prompt));
-                SimplePanel spacer = new SimplePanel();
-                spacer.setSize("500px", "5px");
-                vp.add(spacer);
-
-                vp.add(showResults(results, resultsAndGrades.grades, service, outer, n > 1, index,
-                    oneQuestionPageSize, twoQuestionPageSize, controller.getGrader()));
+                String prompt = getPrompt(isSpoken, isForeign, outer);
+                vp.add(addAnswerGroup(resultsAndGrades.grades, results, bigPage, prompt, outer, service, n, index));
               }
             }
           }
@@ -125,6 +125,34 @@ public class GradingExercisePanel extends ExercisePanel {
     return vp;
   }
 
+  private String getPrompt(boolean isSpoken, boolean isForeign, GradingExercisePanel outer) {
+    boolean isEnglish = !isForeign;
+    return isSpoken ? outer.getSpokenPrompt(isEnglish) : outer.getWrittenPrompt(isEnglish);
+  }
+
+  private Widget addAnswerGroup(Collection<Grade> grades,
+                                List<Result> results, boolean bigPage, String prompt,
+                                GradingExercisePanel outer, LangTestDatabaseAsync service, int n, int index) {
+    VerticalPanel vp = new VerticalPanel();
+
+    int oneQuestionPageSize = bigPage ? BIG_ONE_QUESTION_PAGE_SIZE : ONE_QUESTION_PAGE_SIZE;
+    int twoQuestionPageSize = bigPage ? BIG_TWO_QUESTION_PAGE_SIZE : TWO_QUESTION_PAGE_SIZE;
+    vp.add(new HTML(prompt));
+    SimplePanel spacer = new SimplePanel();
+    spacer.setSize("500px", "5px");
+    vp.add(spacer);
+
+    vp.add(showResults(results, grades, service, outer, n > 1, index,
+        oneQuestionPageSize, twoQuestionPageSize, controller.getGrader()));
+    return vp;
+  }
+
+  /**
+   * How many distinct types there are - combinations of spoken/written & flq/english q.
+   *
+   * @param resultsAndGrades
+   * @return 1-3
+   */
   private int countDistinctTypes(ResultsAndGrades resultsAndGrades) {
     List<Boolean> spoken = Arrays.asList(true, false);
     List<Boolean> foreignOrEnglish = Arrays.asList(true, false);
@@ -159,7 +187,7 @@ public class GradingExercisePanel extends ExercisePanel {
   private Widget showResults(Collection<Result> results, Collection<Grade> grades,
                              LangTestDatabaseAsync service, GradingExercisePanel outer,
                              boolean moreThanOneQuestion, int index, int pageSize, int twoQPageSize, String grader) {
-    ResultManager rm = new ResultManager(service, userFeedback);
+    ResultManager rm = new GradingResultManager(service, userFeedback);
     rm.setFeedback(outer);
     rm.setPageSize(pageSize);
     if (moreThanOneQuestion) {
@@ -169,7 +197,8 @@ public class GradingExercisePanel extends ExercisePanel {
       rm.setPageSize(twoQPageSize);
     }
 
-    return rm.getTable(results, true, false, grades, grader, controller.getEnglishOnly() ? 2 : 1);
+    int numGrades = controller.getEnglishOnly() ? 2 : 1;
+    return rm.getTable(results, true, false, grades, grader, numGrades);
   }
 
   @Override
