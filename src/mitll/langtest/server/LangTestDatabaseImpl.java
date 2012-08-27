@@ -34,8 +34,8 @@ import java.util.concurrent.TimeUnit;
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase {
   public static final String ANSWERS = "answers";
   public static final int TIMEOUT = 30;
+  public static final String DEFAULT_APP_NAME = "netPron2";
   private DatabaseImpl db;
-  private AudioCheck audioCheck = new AudioCheck();
 
   private Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
       .concurrencyLevel(4)
@@ -175,28 +175,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public List<Result> getResults() {
     List<Result> results = db.getResults();
-   // ensureMP3(results);
     return results;
-  }
-
-  /**
-   * Decode Base64 string
-   *
-   * @param base64EncodedByteArray
-   * @return
-   */
-  private byte[] getBytesFromBase64String(String base64EncodedByteArray) {
-    Base64 decoder = new Base64();
-    byte[] decoded = null;
-    //System.out.println("postArray : got " + base64EncodedByteArray.substring(0,Math.min(base64EncodedByteArray.length(), 20)) +"...");
-    // decoded = (byte[])decoder.decode(base64EncodedByteArray);
-
-   try {
-      decoded = (byte[]) decoder.decode(base64EncodedByteArray);
-    } catch (Exception e1) {   // just b/c eclipse seems to insist
-      e1.printStackTrace();
-    }
-    return decoded;
   }
 
   /**
@@ -214,23 +193,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     File file = getAbsolutePathToWav(wavPath);
 
-    File parentFile = file.getParentFile();
-    // System.out.println("making dir " + parentFile.getAbsolutePath());
-
-    parentFile.mkdirs();
-
-    byte[] byteArray = getBytesFromBase64String(base64EncodedString);
-
-    writeToFile(byteArray, file);
-
-    if (!file.exists()) {
-      System.err.println("writeAudioFile : huh? can't find " + file.getAbsolutePath());
-    }
-    boolean valid = isValid(file);
-
-    AudioConversion audioConversion = new AudioConversion();
-    audioConversion.writeMP3(file.getAbsolutePath());
-    if (USE_OGG) audioConversion.writeOGG(file.getAbsolutePath());
+    boolean valid = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
     /*    if (!valid) {
     System.err.println("audio file " + file.getAbsolutePath() + " is *not* valid");
   }
@@ -247,7 +210,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String realContextPath = context.getRealPath(getThreadLocalRequest().getContextPath());
 
     String appName = getServletContext().getInitParameter("appName");
-    if (appName == null) appName = "netPron2";
+    if (appName == null) appName = DEFAULT_APP_NAME;
     realContextPath = realContextPath.replace(appName +"/" + appName, appName);
     return new File(realContextPath, wavPath);
   }
@@ -266,14 +229,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       audioConversion.writeMP3(absolutePathToWav.getAbsolutePath());
     }
 
-    if (USE_OGG) {
-      String oggFile = absolutePathToWav.getAbsolutePath().replace(".wav", ".ogg");
-      File ogg = new File(oggFile);
-      if (!ogg.exists()) {
-        audioConversion.writeOGG(absolutePathToWav.getAbsolutePath());
-      }
+    if (WRITE_ALTERNATE_COMPRESSED_AUDIO) {
+       audioConversion.writeCompressed(absolutePathToWav.getAbsolutePath());
     }
-   // System.out.println("mp3 " + mp3.getAbsolutePath() + " exists " + mp3.exists());
   }
 
   private String getLocalPathToAnswer(String plan, String exercise, String question, String user) {
@@ -298,26 +256,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       tomcatWriteDirectory = ANSWERS;
     }
     return tomcatWriteDirectory;
-  }
-
-  private void writeToFile(byte[] byteArray, File file) {
-    try {
-      OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
-      outputStream.write(byteArray);
-//      System.out.println("wrote " + file.getAbsolutePath());
-      outputStream.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  private boolean isValid(File file) {
-    try {
-      return audioCheck.checkWavFile(file);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return false;
   }
 
   @Override

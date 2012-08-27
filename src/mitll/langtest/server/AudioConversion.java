@@ -1,11 +1,17 @@
 package mitll.langtest.server;
 
+import mitll.langtest.client.LangTestDatabase;
+import org.apache.commons.codec.binary.Base64;
+
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Does mp3 conversion using a shell call to lame.
- * Partial attempt at ogg vorbis conversion.
+ *  Uses ffmpeg to convert to webm format.
  *
  * User: go22670
  * Date: 8/22/12
@@ -18,13 +24,76 @@ public class AudioConversion {
 
   private static final String FFMPEG_PATH_WINDOWS = "C:\\Users\\go22670\\ffmpeg\\bin\\ffmpeg.exe";
   private static final String FFMPEG_PATH_LINUX = "/usr/local/bin/ffmpeg";
+  private AudioCheck audioCheck = new AudioCheck();
+
+  public boolean convertBase64ToAudioFiles(String base64EncodedString, File file) {
+    File parentFile = file.getParentFile();
+    // System.out.println("making dir " + parentFile.getAbsolutePath());
+
+    parentFile.mkdirs();
+
+    byte[] byteArray = getBytesFromBase64String(base64EncodedString);
+
+    writeToFile(byteArray, file);
+
+    if (!file.exists()) {
+      System.err.println("writeAudioFile : huh? can't find " + file.getAbsolutePath());
+    }
+    boolean valid = isValid(file);
+
+    AudioConversion audioConversion = new AudioConversion();
+    audioConversion.writeMP3(file.getAbsolutePath());
+    if (LangTestDatabase.WRITE_ALTERNATE_COMPRESSED_AUDIO) {
+      audioConversion.writeCompressed(file.getAbsolutePath());
+    }
+    return valid;
+  }
+
+  /**
+   * Decode Base64 string
+   *
+   * @param base64EncodedByteArray
+   * @return
+   */
+  private byte[] getBytesFromBase64String(String base64EncodedByteArray) {
+    Base64 decoder = new Base64();
+    byte[] decoded = null;
+    //System.out.println("postArray : got " + base64EncodedByteArray.substring(0,Math.min(base64EncodedByteArray.length(), 20)) +"...");
+    // decoded = (byte[])decoder.decode(base64EncodedByteArray);
+
+    try {
+      decoded = (byte[]) decoder.decode(base64EncodedByteArray);
+    } catch (Exception e1) {   // just b/c eclipse seems to insist
+      e1.printStackTrace();
+    }
+    return decoded;
+  }
+
+  private void writeToFile(byte[] byteArray, File file) {
+    try {
+      OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
+      outputStream.write(byteArray);
+      outputStream.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private boolean isValid(File file) {
+    try {
+      return audioCheck.checkWavFile(file);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
 
   /**
    * @see LangTestDatabaseImpl#ensureWriteMP3(String)
    * @see LangTestDatabaseImpl#writeAudioFile(String, String, String, String, String)
    * @param pathToWav
    */
-  public void writeOGG(String pathToWav) {
+  private void writeOGG(String pathToWav) {
     String mp3File = pathToWav.replace(".wav",".ogg");
     String exePath = FFMPEG_PATH_WINDOWS;    // Windows
     if (!new File(exePath).exists()) {
@@ -37,8 +106,36 @@ public class AudioConversion {
 /*    System.out.println("using " +exePath +" audio :'" +pathToWav +
         "' mp3 '" +mp3File+
         "'");*/
-    writeOGG(exePath, pathToWav, mp3File);
+    writeWithFFMPEG(exePath, pathToWav, mp3File);
   }
+
+  /**
+   * @see LangTestDatabaseImpl#ensureWriteMP3(String)
+   * @see LangTestDatabaseImpl#writeAudioFile(String, String, String, String, String)
+   * @param path
+   */
+  public boolean writeCompressed(String path) {
+    String outputFile = path.replace(".wav", ".webm");
+    File ogg = new File(outputFile);
+    return ogg.exists() || writeWEBMM(path);
+  }
+
+  private boolean writeWEBMM(String pathToWav) {
+    String mp3File = pathToWav.replace(".wav",".webm");
+    String exePath = FFMPEG_PATH_WINDOWS;    // Windows
+    if (!new File(exePath).exists()) {
+      exePath = FFMPEG_PATH_LINUX;
+    }
+    if (!new File(exePath).exists()) {
+      System.err.println("no lame installed at " + exePath + " or " +FFMPEG_PATH_WINDOWS);
+    }
+
+/*    System.out.println("using " +exePath +" audio :'" +pathToWav +
+        "' mp3 '" +mp3File+
+        "'");*/
+    return writeWithFFMPEG(exePath, pathToWav, mp3File);
+  }
+
   /**
    * Use lame to write an mp3 file.
    * @param pathToWav
@@ -78,10 +175,10 @@ public class AudioConversion {
     }
   }
 
-  private void writeOGG(String path, String pathToAudioFile, String mp3File) {
+  private boolean writeWithFFMPEG(String path, String pathToAudioFile, String mp3File) {
     ProcessBuilder lameProc = new ProcessBuilder(path, "-i", pathToAudioFile, mp3File);
     try {
-      System.out.println("writeOGG running ffmpeg" + lameProc.command());
+    //  System.out.println("writeWithFFMPEG running ffmpeg" + lameProc.command());
       new ProcessRunner().runProcess(lameProc);
       //     System.out.println("writeMP3 exited  lame" + lameProc);
     } catch (IOException e) {
@@ -91,9 +188,11 @@ public class AudioConversion {
 
     File testMP3 = new File(mp3File);
     if (!testMP3.exists()) {
-      System.err.println("didn't write OGG : " + testMP3.getAbsolutePath());
+      System.err.println("didn't write output file : " + testMP3.getAbsolutePath());
+      return false;
     } else {
       //   System.out.println("Wrote to " + testMP3);
+      return true;
     }
   }
 
