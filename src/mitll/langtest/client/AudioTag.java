@@ -4,7 +4,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 /**
- * Only use an mp3 audio reference -- seems to be the common denominator among browsers.
+ * Use an mp3 audio reference and either WAV or WEBM.
  *
  * User: go22670
  * Date: 8/22/12
@@ -12,8 +12,9 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioTag {
-  private static final boolean USE_OGG = LangTestDatabase.USE_OGG;
-  private static final boolean USE_WAV = true;
+  private static final boolean INCLUDE_ALTERNATE_COMPRESSED = LangTestDatabase.WRITE_ALTERNATE_COMPRESSED_AUDIO;
+  private static final String ALTERNATE_TYPE = "webm";
+  private static final boolean INCLUDE_ALTERNATE_AUDIO = true;
 
   /**
    * @see ResultManager#getTable
@@ -22,9 +23,10 @@ public class AudioTag {
    */
   public SafeHtml getAudioTag(String result) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    String firstSource = USE_WAV ? "<source type=\"audio/" +
-        (USE_OGG ? "ogg" : "wav") +
-        "\" src=\"" + (USE_OGG ? result.replace(".wav", ".ogg") : result) + "\"></source>\n" : "";
+    String firstSource = INCLUDE_ALTERNATE_AUDIO ?
+        "<source type=\"audio/" + (INCLUDE_ALTERNATE_COMPRESSED ? ALTERNATE_TYPE : "wav") + "\" " +
+           "src=\"" + (INCLUDE_ALTERNATE_COMPRESSED ? result.replace(".wav", "." +ALTERNATE_TYPE) : result) + "\">" +
+        "</source>\n" : "";
     sb.appendHtmlConstant("<audio preload=\"none\" controls=\"controls\" tabindex=\"0\">\n" +
         firstSource +
         "<source type=\"audio/mp3\" src=\"" + result.replace(".wav", ".mp3") + "\"></source>\n" +

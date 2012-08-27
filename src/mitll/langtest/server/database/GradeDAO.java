@@ -6,8 +6,12 @@ import mitll.langtest.shared.Grade;
 import java.sql.*;
 import java.util.*;
 
+/**
+ * Stored and retrieves grades from the database.
+ */
 public class GradeDAO {
   private final Database database;
+  private boolean debug = false;
 
   public GradeDAO(Database database) {
     this.database = database;
@@ -20,7 +24,7 @@ public class GradeDAO {
    * @param exerciseID
    * @param grade
    * @param gradeID
-   * @param correct
+   * @param correct ignored for now
    * @param grader
    * @return
    */
@@ -32,15 +36,13 @@ public class GradeDAO {
       //System.out.println("addGrade " + grade + " grade for " + resultID + " and " +grader + " ex id " + exerciseID+ " and " +gradeID);
 
       String sql = "INSERT INTO grades(resultID,exerciseID,grade,correct,grader) VALUES(?,?,?,?,?)";
-      //boolean exists = gradeExists(resultID, grader, gradeID);
       boolean exists = gradeID != -1;
       if (exists) {
         sql = "UPDATE grades " +
             "SET grade='" +grade+ "' " +
             "WHERE resultID='" + resultID+ "' " +
-            "AND grader='" +grader + "'" +
             (gradeID != -1 ? " AND id=" +gradeID : "");
-        //System.out.println("UPDATE " + grade + " grade for " + resultID + " and " +grader+ " and " +gradeID);
+        if (debug) System.out.println("UPDATE " + grade + " grade for " + resultID + " and " +grader+ " and " +gradeID);
         statement = connection.prepareStatement(sql);
       }
       else {
@@ -57,7 +59,10 @@ public class GradeDAO {
       int i = statement.executeUpdate();
 
       if (exists) {
-       // System.out.println("UPDATE " + i);
+        if (debug) System.out.println("UPDATE " + i);
+        if (i == 0) {
+          System.err.println("huh? didn't update the grade for "+ resultID + " and " +grader+ " and " +gradeID);
+        }
       }
       else {
         ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
