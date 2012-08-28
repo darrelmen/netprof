@@ -15,7 +15,7 @@ import java.util.List;
  */
 @RemoteServiceRelativePath("langtestdatabase")
 public interface LangTestDatabase extends RemoteService {
-  boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = true;
+  boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
   List<Exercise> getExercises(long userID);
   List<Exercise> getExercises();

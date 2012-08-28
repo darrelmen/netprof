@@ -38,6 +38,9 @@ import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.Exercise;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
@@ -46,7 +49,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int HEADER_HEIGHT = 80;
   private static final int FOOTER_HEIGHT = 40;
   public  static final int EXERCISE_LIST_WIDTH = 200;
-  private static final int EAST_WIDTH = 45;
+  private static final int EAST_WIDTH = 65;
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
 
   private Panel currentExerciseVPanel = new VerticalPanel();
@@ -62,6 +65,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private boolean englishOnlyMode = false;
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
+  private String browser = "Unknown";
+  private int ver = 0;
+  private String version = "";
+
+  private Map<String,Integer> browserToVersion = new HashMap<String,Integer>();
 
   /**
    * Make an exception handler that displays the exception.
@@ -106,6 +114,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Initially the flash record player is put in the center of the DockLayout
    */
   public void onModuleLoad2() {
+    populateBrowserVersions();
+
     userManager = new UserManager(this,service);
     resultManager = new ResultManager(service, this);
 
@@ -117,6 +127,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // header/title line
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
     HTML title = new HTML("<h1>" + DLI_LANGUAGE_TESTING + "</h1>");
+    getBrowserAndVersion();
     hp.addEast(getLogout(),EAST_WIDTH);
   //  hp.setHeight("180px");
     hp.add(title);
@@ -140,7 +151,64 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     makeExerciseList(exerciseListPanel);
 
     modeSelect();
+
+    checkForCompatibleBrowser();
+    //Window.alert("Browser " + agent);
   }
+
+  private void checkForCompatibleBrowser() {
+    Integer min = browserToVersion.get(browser);
+    if (browser.equals("IE")) {
+      //Window.alert("Your browser is " + browser + ".<br></br>We recommend using either Firefox, Safari, or Chrome.");
+    }
+    if (min == null) {
+      Window.alert("Your browser is " + browser + " version " + version + ". We strongly recommend any of " + browserToVersion.keySet());
+    }
+    else if (ver < min) {
+      Window.alert("Your browser is " + browser + " version " + version +". We strongly recommend upgrading to version " + min);
+    }
+    else {
+      System.err.println("browser " + browser + " ver " + ver + " version " + version + " vs " + min);
+    }
+  }
+
+  private void populateBrowserVersions() {
+    browserToVersion.put("firefox",14);
+    browserToVersion.put("chrome",21);
+    browserToVersion.put("IE",9);
+    browserToVersion.put("safari",5);
+  }
+
+  private void getBrowserAndVersion() {
+    String agent = getUserAgent();
+    if (agent.contains("firefox")) {
+      version = agent.substring(agent.indexOf("firefox") + "firefox".length() + 1).split("\\s+")[0];
+      browser = "firefox";
+    } else if (agent.contains("chrome")) {
+      version = agent.substring(agent.indexOf("chrome") + "chrome".length() + 1).split("\\s+")[0];
+      browser = "chrome";
+    } else if (agent.contains("msie")) {
+      version = agent.substring(agent.indexOf("msie") + "msie".length() + 1).split(";")[0];
+      browser = "IE";
+    } else if (agent.contains("safari")) {
+      version = agent.substring(agent.indexOf("safari") + "safari".length() + 1).split("\\s+")[0];
+      if (version.length() > 1) {
+        version = version.substring(0,1);
+      }
+      browser = "safari";
+    }
+    String major = version.split("\\.")[0];
+    try {
+      ver = Integer.parseInt(major);
+    } catch (NumberFormatException e) {
+      System.err.println("couldn't parse " + agent + " and " + major);
+      e.printStackTrace();
+    }
+  }
+
+  public static native String getUserAgent() /*-{
+    return navigator.userAgent.toLowerCase();
+  }-*/;
 
   private void makeExerciseList(VerticalPanel exerciseListPanel) {
     this.exerciseList = new ExerciseList(currentExerciseVPanel,service,this, factory);
@@ -264,7 +332,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     DockLayoutPanel hp2 = new DockLayoutPanel(Style.Unit.PX);
     VerticalPanel vp = new VerticalPanel();
     vp.add(logout);
-    hp2.addSouth(vp, 55);
+    hp2.addSouth(vp, 75);
     logout.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         userManager.clearUser();
@@ -293,11 +361,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     });
 
-    HTML html = new HTML();
-    html.getElement().setId("status");
-    SimplePanel sp = new SimplePanel();
-    sp.add(html);
-    vp.add(sp);
+   // HTML html = new HTML(browser + " " +ver);
+    //html.getElement().setId("status");
+   // SimplePanel sp = new SimplePanel();
+   // sp.add(html);
+
+    Anchor status = new Anchor(browser + " " +ver);
+
+    vp.add(status);
     return hp2;
   }
 

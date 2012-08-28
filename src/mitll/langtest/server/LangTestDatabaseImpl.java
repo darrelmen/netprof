@@ -69,7 +69,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public Exercise getNextUngradedExercise(String user, int expectedGrades) {
-    System.out.println("Expected grades " + expectedGrades);
     synchronized (this) {
       ConcurrentMap<String,String> stringStringConcurrentMap = userToExerciseID.asMap();
       Collection<String> values = stringStringConcurrentMap.values();

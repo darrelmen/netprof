@@ -48,6 +48,8 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class GradingResultManager extends ResultManager {
+  private static final List<String> GRADING_OPTIONS = Arrays.asList(UNGRADED, "1", "2", "3", "4", "5", SKIP);
+
   /**
    * @see mitll.langtest.client.grading.GradingExercisePanel#showResults(java.util.Collection, java.util.Collection, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.grading.GradingExercisePanel, boolean, int, int, int, String)
    * @param s
@@ -77,8 +79,9 @@ public class GradingResultManager extends ResultManager {
    */
   @Override
   protected void addResultColumn(Collection<Grade> grades, String grader, int numGrades, CellTable<Result> table) {
+    Map<Integer,Integer> resultToGradeFirstColumn = new HashMap<Integer, Integer>();
     for (int i = 0; i < numGrades; i++) {
-      Column<Result, String> col = getGradingColumn(grades, grader, i, i == numGrades - 1);
+      Column<Result, String> col = getGradingColumn(grades, resultToGradeFirstColumn, grader, i, i == numGrades - 1);
       String columnHeader = numGrades > 1 ? "Grade #" + (i + 1) : "Grade";
       table.addColumn(col, columnHeader);
     }
@@ -89,17 +92,23 @@ public class GradingResultManager extends ResultManager {
    *
    * Hides the grade value from the user for grade #1.
    *
+   * Rejects adding a second grade if first isn't done yet.
+   *
    * @see #getTable
    * @param grades
    * @param grader who is grading
    * @param editable only the last column is editable
    * @return
    */
-  private Column<Result, String> getGradingColumn(Collection<Grade> grades, final String grader, final int gradingColumnIndex, final boolean editable) {
+  private Column<Result, String> getGradingColumn(Collection<Grade> grades,
+                                                  final Map<Integer,Integer> resultToGradeFirstColumn,
+                                                  final String grader, final int gradingColumnIndex,
+                                                  final boolean editable) {
     final Map<Integer, Long> resultToGradeID = new HashMap<Integer, Long>();
     final Map<Integer, Integer> resultToGrade = getResultToGrade(grades,resultToGradeID, gradingColumnIndex);
+    if (gradingColumnIndex == 0) resultToGradeFirstColumn.putAll(resultToGrade);
 
-    AbstractCell selectionCell = editable ? new SelectionCell(Arrays.asList(UNGRADED, "1", "2", "3", "4", "5", SKIP)) : new TextCell();
+    AbstractCell selectionCell = editable ? new SelectionCell(GRADING_OPTIONS) : new TextCell();
     Column<Result, String> col = new Column<Result, String>(selectionCell) {
       @Override
       public String getValue(Result object) {
@@ -109,6 +118,13 @@ public class GradingResultManager extends ResultManager {
     };
     col.setFieldUpdater(new FieldUpdater<Result, String>() {
       public void update(int index, final Result result, String value) {
+        if (gradingColumnIndex > 0) {
+          Integer grade = resultToGradeFirstColumn.get(result.uniqueID);
+          if (grade == null) {
+            Window.alert("Please wait until first grade is set.");
+            return;
+          }
+        }
         int grade = -1;
         if (value.equals(UNGRADED)) grade = -1;
         else if (value.equals(SKIP)) grade = -2;
