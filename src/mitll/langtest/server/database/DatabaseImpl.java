@@ -116,7 +116,7 @@ public class DatabaseImpl implements Database {
     for (Exercise e : rawExercises) {
       if (!activeExercises.contains(e.getID()) && // no one is working on it
           resultDAO.areAnyResultsLeftToGradeFor(e, expectedCount)) {
-        System.out.println("Exercise " +e + " needs grading.");
+        //System.out.println("Exercise " +e + " needs grading.");
 
         return e;
       }

@@ -11,7 +11,7 @@ import java.util.*;
  */
 public class GradeDAO {
   private final Database database;
-  private boolean debug = false;
+  private boolean debug = true;
 
   public GradeDAO(Database database) {
     this.database = database;
@@ -46,6 +46,8 @@ public class GradeDAO {
         statement = connection.prepareStatement(sql);
       }
       else {
+        if (debug) System.out.println("INSERT " + grade + " grade for " + resultID + " and " +grader+ " and " +gradeID);
+
         statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
       }
       if (!exists) {

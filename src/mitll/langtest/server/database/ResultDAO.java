@@ -108,7 +108,7 @@ public class ResultDAO {
    * TODO : Add proper filtering
    * @param exerciseID
    * @param gradedResults
-   * @param expected
+   * @param expected if > 1 remove flq results (hack!)
    * @return
    */
   private List<Result> getResultsForExercise(String exerciseID, Collection<Grade> gradedResults, int expected) {

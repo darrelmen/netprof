@@ -169,7 +169,7 @@ public class AudioConversion {
 
     File testMP3 = new File(mp3File);
     if (!testMP3.exists()) {
-      System.err.println("didn't write MP3 : " + testMP3.getAbsolutePath());
+    //  System.err.println("didn't write MP3 : " + testMP3.getAbsolutePath());
     } else {
   //    System.out.println("Wrote to " + testMP3 + " length " + testMP3.getTotalSpace());
     }
@@ -178,9 +178,9 @@ public class AudioConversion {
   private boolean writeWithFFMPEG(String path, String pathToAudioFile, String mp3File) {
     ProcessBuilder lameProc = new ProcessBuilder(path, "-i", pathToAudioFile, mp3File);
     try {
-    //  System.out.println("writeWithFFMPEG running ffmpeg" + lameProc.command());
+      //System.out.println("writeWithFFMPEG running ffmpeg" + lameProc.command());
       new ProcessRunner().runProcess(lameProc);
-      //     System.out.println("writeMP3 exited  lame" + lameProc);
+      //System.out.println("writeWithFFMPEG exited  ffmpeg" + lameProc);
     } catch (IOException e) {
       System.err.println("Couldn't run " + lameProc);
       e.printStackTrace();
@@ -198,7 +198,7 @@ public class AudioConversion {
 
   public static void main(String[] arg) {
     //new AudioConversion().writeMP3("C:\\Users\\go22670\\DLITest\\LangTest\\war\\answers\\test\\ac-LC1-001\\1\\subject-460\\answer_1345134729569.wav");
-    new AudioConversion().writeOGG("C:\\Users\\go22670\\DLITest\\LangTest\\war\\answers\\test\\ac-LC1-001\\1\\subject-460\\answer_1345134729569.wav");
+    new AudioConversion().writeCompressed("C:\\Users\\go22670\\DLITest\\LangTest\\war\\answers\\test\\ac-LC1-001\\1\\subject-460\\answer_1345134729569.wav");
 
   }
 }
