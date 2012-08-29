@@ -125,16 +125,7 @@ public class GradingResultManager extends ResultManager {
             return;
           }
         }
-        int grade = -1;
-        if (value.equals(UNGRADED)) grade = -1;
-        else if (value.equals(SKIP)) grade = -2;
-        else {
-          try {
-            grade = Integer.parseInt(value);
-          } catch (NumberFormatException e) {
-            System.err.println("setFieldUpdater : couldn't parse " + value +"??");
-          }
-        }
+        int grade = getValueToGrade(value);
         resultToGrade.put(result.uniqueID, grade);
         Long gradeID = resultToGradeID.get(result.uniqueID);
         System.out.println("getGradingColumn Found " + gradeID + " for " + result);
@@ -142,6 +133,20 @@ public class GradingResultManager extends ResultManager {
       }
     });
     return col;
+  }
+
+  private int getValueToGrade(String value) {
+    int grade = -1;
+    if (value.equals(UNGRADED)) grade = -1;
+    else if (value.equals(SKIP)) grade = -2;
+    else {
+      try {
+        grade = Integer.parseInt(value);
+      } catch (NumberFormatException e) {
+        System.err.println("setFieldUpdater : couldn't parse " + value +"??");
+      }
+    }
+    return grade;
   }
 
   private Map<Integer, Integer> getResultToGrade(Collection<Grade> grades,Map<Integer, Long> resultToGradeID, int gradingColumnIndex) {

@@ -36,8 +36,7 @@ public class Grade implements IsSerializable {
 
   @Override
   public boolean equals(Object obj) {
-    return (obj instanceof Grade) &&
-        id == ((Grade) obj).id;
+    return (obj instanceof Grade) && id == ((Grade) obj).id;
   }
 
   @Override

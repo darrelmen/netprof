@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.goodwave.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
@@ -63,6 +64,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private long lastUser = -1;
   private boolean grading = false;
   private boolean englishOnlyMode = false;
+  private boolean goodwaveMode = false;
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
   private String browser = "Unknown";
@@ -226,8 +228,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    // System.out.println("param grading " + isGrading);
 
     String isEnglish = Window.Location.getParameter("english");
+    String goodwave = Window.Location.getParameter("goodwave");
     // System.out.println("param grading " + isGrading);
     englishOnlyMode = isEnglish != null && !isEnglish.equals("false");
+    goodwaveMode = goodwave != null && !goodwave.equals("false");
 
     if (englishOnlyMode || (isGrading != null && !isGrading.equals("false"))) {
       //System.out.println("jump to choice box " + isGrading);
@@ -269,7 +273,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   //  System.out.println("setGrading " + g);
     this.grading = g;
 
-    if (grading) {
+    if (goodwaveMode) {
+      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this), userManager, grading, 1);
+    }
+    else if (grading) {
       exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, grading, englishOnlyMode ? 2 : 1);
       lastUser = -1; // no user
     }
