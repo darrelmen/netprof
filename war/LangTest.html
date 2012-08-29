@@ -12,6 +12,9 @@
     <!-- Consider inlining CSS to reduce the number of requested files -->
     <!--                                                               -->
     <link type="text/css" rel="stylesheet" href="LangTest.css">
+<!--
+    <link type="text/css" rel="stylesheet" href="GoodWave.css">
+-->
 
     <!--                                           -->
     <!-- Any title is fine                         -->
@@ -24,6 +27,21 @@
     <!-- be added before this line.                -->
     <!--                                           -->
     <script type="text/javascript" language="javascript" src="langtest/langtest.nocache.js"></script>
+
+    <!-- These 2 scripts are so that Sound Manager 2 can be accessed through JSNI -->
+    <script type="text/javascript" src="soundmanager2.js"></script>
+
+    <script type="text/javascript">
+      soundManager.url = 'swf/';
+      soundManager.flashVersion = 9; // optional: shiny features (default = 8)
+      soundManager.useFlashBlock = false; // optionally, enable when you're ready to dive in
+      soundManager.allowPolling = true;
+      soundManager.useFastPolling = true;
+      soundManager.useHighPerformance = true;
+      soundManager.debugMode = false;
+      // enable HTML5 audio support, if you're feeling adventurous. iPad/iPhone will always get this.
+      // soundManager.useHTML5Audio = true;
+    </script>
   </head>
 
   <!--                                           -->

@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
@@ -32,14 +33,9 @@ import mitll.langtest.shared.Exercise;
  *
  * @author Gordon Vidaver
  */
-public class SimpleRecordPanel extends HorizontalPanel {
+public class SimpleRecordPanel extends RecordButtonPanel {
   private static final String IMAGES_CHECKMARK = "images/checkmark.png";
   private static final String IMAGES_REDX_PNG = "images/redx.png";
-  private static final int DELAY_MILLIS = 20000;
-
-  private boolean recording = false;
-  private final Image recordImage;
-  private final Image stopImage;
   private Image check;
   private SimplePanel playback = new SimplePanel();
   private final AudioTag audioTag = new AudioTag();
@@ -51,150 +47,58 @@ public class SimpleRecordPanel extends HorizontalPanel {
    */
 	public SimpleRecordPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
                            final Exercise exercise, final ExerciseQuestionState questionState, final int index){
-    final Panel outer = this;
-
-    // make record button
-    // make images
-    recordImage = new Image("images/record.png");
-    recordImage.setAltText("Record");
-    stopImage = new Image("images/stop.png");
-    stopImage.setAltText("Stop");
-
-    final ImageAnchor record_button = new ImageAnchor();
-    record_button.setResource(recordImage);
-
-    record_button.getElement().setId("record_button");
-    record_button.setTitle("Record");
+    super(service, controller, exercise, questionState, index);
 
     playback.setHeight("30px"); // for audio controls to show
-    record_button.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        if (recording) {
-          recording = false;
-          cancelTimer();
-          stopClicked(record_button, controller, service, exercise, index, questionState, outer);
-        } else {
-          recording = true;
-          playback.setWidget(new HTML(""));
-          record_button.setResource(stopImage);
-          record_button.setTitle("Stop");
-
-          controller.startRecording();
-          addRecordingMaxLengthTimeout(record_button, controller, service, exercise, index, questionState, outer);
-        }
-      }
-    });
-    SimplePanel recordButtonContainer = new SimplePanel();
-    recordButtonContainer.setWidth("75px");
-    recordButtonContainer.add(record_button);
-    add(recordButtonContainer);
-
-    SimplePanel spacer = new SimplePanel();
-    spacer.setHeight("24px");
-    spacer.setWidth("10px");
-    add(spacer);
 
     // make audio feedback widget
-    this.check = new Image(IMAGES_CHECKMARK);
-    check.getElement().setId("checkmark_" +index);
-    check.setAltText("Audio Saved");
-
-    spacer = new SimplePanel();
-    spacer.setHeight("24px");
-    spacer.setWidth("100px") ;
-
-    add(spacer);
-
-    add(check);
-    check.setVisible(false);
-
-    spacer = new SimplePanel();
-    spacer.setHeight("24px");
-    spacer.setWidth("10px");
-    add(spacer);
+    addValidityFeedback(index);
 
     // add playback html
+    addPlayback();
+  }
+
+  private void addPlayback() {
+    // add spacer
+    addSpacer();
+
     add(playback);
   }
 
-  private Timer recordTimer;
+  protected void addValidityFeedback(int index) {
+    SimplePanel spacer = new SimplePanel();
 
-  /**
-   * Add a timer to automatically stop recording after 20 seconds.
-   *
-   *
-   * @param record_button
-   * @param controller
-   * @param service
-   * @param exercise
-   * @param index
-   * @param questionState
-   * @param outer
-   */
-  private void addRecordingMaxLengthTimeout(final ImageAnchor record_button,
-                                           final ExerciseController controller,
-                                           final LangTestDatabaseAsync service,
-                                           final Exercise exercise,
-                                           final int index,final ExerciseQuestionState questionState,
-                                            final Panel outer ) {
-    cancelTimer();
-    recordTimer = new Timer() {
-      @Override
-      public void run() {
-        if (recording) {
-          recording = false;
+    // add spacer
+    spacer.setHeight("24px");
+    spacer.setWidth("110px") ;
 
-          stopClicked(record_button, controller, service, exercise, index, questionState, outer);
-        }
-      }
-    };
+    add(spacer);
+   // SimplePanel spacer;
+    this.check = new Image(IMAGES_CHECKMARK);
+    check.getElement().setId("checkmark_" +index);
+    check.setAltText("Audio Saved");
+    check.setVisible(false);
 
-    // Schedule the timer to run once in 20 seconds.
-    recordTimer.schedule(DELAY_MILLIS);
+    add(check);
   }
 
-  private void cancelTimer() {
-    if (recordTimer != null) {
-      recordTimer.cancel();
-    }
+  private void addSpacer() {
+    SimplePanel spacer;
+    spacer = new SimplePanel();
+    spacer.setHeight("24px");
+    spacer.setWidth("10px");
+    add(spacer);
   }
 
-  /**
-   * Send the audio to the server.<br></br>
-   *
-   * Audio is a wav file, as a string, encoded base 64  <br></br>
-   *
-   * Report audio validity and show the audio widget that allows playback.     <br></br>
-   *
-   * Once audio is posted to the server, two pieces of information come back in the AudioAnswer: the audio validity<br></br>
-   *  (false if it's too short, etc.) and a URL to the stored audio on the server. <br></br>
-   *   This is used to make the audio playback widget.
-   *
-   * @see #SimpleRecordPanel
-   * @param record_button
-   * @param controller
-   * @param service
-   * @param exercise
-   * @param index
-   * @param questionState
-   * @param outer
-   */
-  private void stopClicked(ImageAnchor record_button, ExerciseController controller, LangTestDatabaseAsync service,
-                           Exercise exercise, int index, final ExerciseQuestionState questionState, final Panel outer) {
-    record_button.setResource(recordImage);
-    record_button.setTitle("Record");
+  @Override
+  protected void nowRecording() {
+    playback.setWidget(new HTML(""));
+  }
 
-    controller.stopRecording();
-
-    service.writeAudioFile(controller.getBase64EncodedWavFile()
-      ,exercise.getPlan(),exercise.getID(),""+index,""+controller.getUser(),new AsyncCallback<AudioAnswer>() {
-      public void onFailure(Throwable caught) {}
-
-      public void onSuccess(AudioAnswer result) {
-        showAudioValidity(result.valid, questionState, outer);
-        setAudioTag(result.path);
-      }
-    });
+  @Override
+  protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {
+    showAudioValidity(result.valid, questionState, outer);
+    setAudioTag(result.path);
   }
 
   /**
@@ -222,17 +126,5 @@ public class SimpleRecordPanel extends HorizontalPanel {
       popupImage.showRelativeTo(this);
     }
     check.setVisible(true);
-  }
-
-  private static class ImageAnchor extends Anchor {
-    Image img = null;
-    public ImageAnchor() {}
-    public void setResource(Image img2) {
-      if (this.img != null) {
-        DOM.removeChild(getElement(),this.img.getElement());
-      }
-      this.img = img2;
-      DOM.insertBefore(getElement(), img.getElement(), DOM.getFirstChild(getElement()));
-    }
   }
 }

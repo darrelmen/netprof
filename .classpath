@@ -12,5 +12,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/json-lib-2.4-jdk15.jar" sourcepath="C:/Users/go22670/langTestIngest/json/json-lib-2.4-jdk15-sources.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-codec-1.6.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guava-13.0.jar"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/GoodWave"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
