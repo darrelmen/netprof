@@ -321,6 +321,10 @@ public class DatabaseImpl implements Database {
     return gradeDAO.addGradeEasy(exerciseID, toAdd);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#changeGrade(mitll.langtest.shared.Grade)
+   * @param toChange
+   */
   public void changeGrade(Grade toChange) {
     gradeDAO.changeGrade(toChange);
   }

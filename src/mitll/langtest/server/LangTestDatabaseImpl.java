@@ -141,6 +141,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.addGrade(exerciseID, toAdd);
   }
 
+  /**
+   * @see mitll.langtest.client.grading.GradingResultManager#changeGrade(mitll.langtest.shared.Grade)
+   * @param toChange
+   */
   public void changeGrade(Grade toChange) {
     db.changeGrade(toChange);
   }
