@@ -106,13 +106,18 @@ public class DatabaseImpl implements Database {
      return exerciseDAO.getRawExercises();
   }
 
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
-   * @return
-   */
   public Exercise getNextUngradedExercise(Collection<String> activeExercises, int expectedCount) {
+    if (expectedCount == 1) return getNextUngradedExerciseQuick(activeExercises,expectedCount);
+    else return getNextUngradedExerciseSlow(activeExercises,expectedCount);
+  }
+
+    /**
+    * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
+    * @return
+    */
+  public Exercise getNextUngradedExerciseSlow(Collection<String> activeExercises, int expectedCount) {
     List<Exercise> rawExercises = getExercises();
-    //System.out.println("checking " +rawExercises.size() + " exercises.");
+    System.out.println("getNextUngradedExercise : checking " +rawExercises.size() + " exercises.");
     for (Exercise e : rawExercises) {
       if (!activeExercises.contains(e.getID()) && // no one is working on it
           resultDAO.areAnyResultsLeftToGradeFor(e, expectedCount)) {
@@ -124,7 +129,65 @@ public class DatabaseImpl implements Database {
     return null;
   }
 
+  public Exercise getNextUngradedExerciseQuick(Collection<String> activeExercises, int expectedCount) {
+    List<Exercise> rawExercises = getExercises();
+    Collection<Result> resultExcludingExercises = resultDAO.getResultExcludingExercises(activeExercises);
+    System.out.println("getNextUngradedExercise found  " + resultExcludingExercises.size() + " results, expected " +expectedCount);
+
+    GradeDAO.GradesAndIDs allGradesExcluding = gradeDAO.getAllGradesExcluding(activeExercises);
+               Map<Integer,Integer> idToCount = new HashMap<Integer, Integer>();
+    for (Grade g : allGradesExcluding.grades) {
+      //Integer countOfGrades = idToCount.get(g.resultID);
+      if (!idToCount.containsKey(g.resultID)) idToCount.put(g.resultID,1);
+      else idToCount.put(g.resultID,2);
+    }
+    System.out.println("getNextUngradedExercise found  " + allGradesExcluding.resultIDs.size() + " graded results");
+
+    // remove results that have grades...
+    Iterator<Result> iterator = resultExcludingExercises.iterator();
+    while (iterator.hasNext()) {
+      Result result = iterator.next();
+
+      //if (allGradesExcluding.resultIDs.contains(result.uniqueID)) {
+        Integer numGrades = idToCount.get(result.uniqueID);
+        if (numGrades != null && expectedCount <= numGrades) {  // need 2 grades for english
+          //if (result.flq)  // TODO : need to enrich Results with flq flag
+          iterator.remove();
+        }
+/*        else if (result.id.equals("ac-L0P-001")) System.out.println("num " +numGrades+
+            " result " + result);*/
+      //}
+    }
+
+    System.out.println("getNextUngradedExercise after removing  " + resultExcludingExercises.size() + " results");
+
+    // whatever remains, find first exercise
+
+    SortedSet<String> exids = new TreeSet<String>();
+    for (Result r : resultExcludingExercises) exids.add(r.id);
+    if (exids.isEmpty()) return null;
+    else {
+      System.out.println("getNextUngradedExercise candidates are   " + exids);
+
+      String first = exids.first();
+      for (Exercise e : rawExercises) {
+        if (e.getID().equals(first)) {
+          System.out.println("getNextUngradedExercise  " + e);
+
+          return e;
+        }
+      }
+      if (!rawExercises.isEmpty()) {
+        System.err.println("getNextUngradedExercise2 expecting an exercise to match " + first);
+      }
+    }
+
+    return null;
+  }
+
   public List<Exercise> getExercises(long userID) {
+    System.out.println("getExercises : for user  " +userID);
+
     List<Schedule> forUser = userToSchedule.get(userID);
     if (forUser == null) {
       System.err.println("no schedule for user " +userID);
@@ -299,12 +362,32 @@ public class DatabaseImpl implements Database {
    * @param exerciseID
    * @param grade
    * @param gradeID
-   *@param correct
+   * @param correct
    * @param grader
+   * @param gradeType
    * @return
    * */
-  public CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader) {
-    return gradeDAO.addGrade(resultID, exerciseID, grade, gradeID, correct, grader);
+/*  public CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader, String gradeType) {
+    return gradeDAO.addGrade(resultID, exerciseID, grade, gradeID, correct, grader, gradeType);
+  }*/
+
+  /**
+   *
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addGrade
+   * @param exerciseID
+   * @param toAdd
+   * @return
+   */
+  public CountAndGradeID addGrade(String exerciseID, Grade toAdd) {
+    return gradeDAO.addGradeEasy(exerciseID, toAdd);
+  }
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#changeGrade(mitll.langtest.shared.Grade)
+   * @param toChange
+   */
+  public void changeGrade(Grade toChange) {
+    gradeDAO.changeGrade(toChange);
   }
 
   public void addGrader(String login) { graderDAO.addGrader(login); }

@@ -8,6 +8,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultsAndGrades;
 import mitll.langtest.shared.User;
@@ -57,6 +58,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getExercises(userID);
   }
 
+  /**
+   * @see mitll.langtest.client.exercise.ExerciseList#loadGradingExercises()
+   * @return
+   */
   public List<Exercise> getExercises() {
     return db.getExercises();
   }
@@ -130,18 +135,26 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.ResultManager#addGrade
-   * @param resultID
+   * @see mitll.langtest.client.grading.GradingResultManager#addGrade
    * @param exerciseID
-   * @param grade
-   * @param gradeID
-   * @param correct
-   * @param grader
    * @return
    */
-  public CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader) {
-    return db.addGrade(resultID, exerciseID, grade, gradeID, correct, grader);
+/*  public CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader, String gradeType) {
+    return db.addGrade(resultID, exerciseID, grade, gradeID, correct, grader, gradeType);
+  }*/
+
+  public CountAndGradeID addGrade(String exerciseID, Grade toAdd) {
+    return db.addGrade(exerciseID, toAdd);
   }
+
+  /**
+   * @see mitll.langtest.client.grading.GradingResultManager#changeGrade(mitll.langtest.shared.Grade)
+   * @param toChange
+   */
+  public void changeGrade(Grade toChange) {
+    db.changeGrade(toChange);
+  }
+
 
   public void addGrader(String login) {
     db.addGrader(login);

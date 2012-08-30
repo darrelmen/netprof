@@ -38,7 +38,6 @@ public class ExerciseList extends VerticalPanel {
   private ExercisePanelFactory factory;
   private boolean doGrading = false;
   private int expectedGrades = 1;
-  //private String currentActiveExercise;
   private UserManager user;
 
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback, ExercisePanelFactory factory) {
@@ -60,26 +59,13 @@ public class ExerciseList extends VerticalPanel {
     this.factory = factory;
     this.user = user;
     this.expectedGrades = expectedGrades;
-    // System.out.println("Factory is " +factory);
     if (doGrading) {
       loadGradingExercises();
     }
   }
 
   private void loadGradingExercises() {
-    service.getExercises(new AsyncCallback<List<Exercise>>() {
-      public void onFailure(Throwable caught) {
-        feedback.showErrorMessage("Server error - couldn't get exercises.");
-      }
-
-      public void onSuccess(List<Exercise> result) {
-        currentExercises = result; // remember current exercises
-        for (final Exercise e : result) {
-          addExerciseToList(e);
-        }
-        loadFirstExercise();
-      }
-    });
+    service.getExercises(new SetExercisesCallback());
   }
 
   /**
@@ -90,20 +76,21 @@ public class ExerciseList extends VerticalPanel {
     */
   public void getExercises(long userID) {
     doGrading = false;
-    //System.out.println("loading exercises for " + userID);
-    service.getExercises(userID, new AsyncCallback<List<Exercise>>() {
-      public void onFailure(Throwable caught) {
-        feedback.showErrorMessage("Server error - couldn't get exercises.");
-      }
+    service.getExercises(userID, new SetExercisesCallback());
+  }
 
-      public void onSuccess(List<Exercise> result) {
-        currentExercises = result; // remember current exercises
-        for (final Exercise e : result) {
-          addExerciseToList(e);
-        }
-        loadFirstExercise();
+  private class SetExercisesCallback implements AsyncCallback<List<Exercise>> {
+    public void onFailure(Throwable caught) {
+      feedback.showErrorMessage("Server error - couldn't get exercises.");
+    }
+
+    public void onSuccess(List<Exercise> result) {
+      currentExercises = result; // remember current exercises
+      for (final Exercise e : result) {
+        addExerciseToList(e);
       }
-    });
+      loadFirstExercise();
+    }
   }
 
   private void addExerciseToList(final Exercise e) {
@@ -174,7 +161,6 @@ public class ExerciseList extends VerticalPanel {
       feedback.login();
     }
 
-   // releaseExercise();
     if (doGrading) {
       checkoutExercise(e);
     }
@@ -212,7 +198,6 @@ public class ExerciseList extends VerticalPanel {
   }
 
   public boolean loadNextExercise(Exercise current) {
-    //showStatus("");
     int i = currentExercises.indexOf(current);
     boolean onLast = i == currentExercises.size() - 1;
     if (onLast) {
@@ -230,7 +215,6 @@ public class ExerciseList extends VerticalPanel {
   }
 
   public boolean loadPreviousExercise(Exercise current) {
-   // showStatus("");
     int i = currentExercises.indexOf(current);
     boolean onFirst = i == 0;
     if (onFirst) {}

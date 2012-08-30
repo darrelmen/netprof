@@ -17,18 +17,28 @@ import java.util.List;
 public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
+  // exerciseDAO
   List<Exercise> getExercises(long userID);
   List<Exercise> getExercises();
   ResultsAndGrades getResultsForExercise(String exid);
-  void addAnswer(int userID, Exercise exercise, int questionID, String answer, String audioFile);
-  CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader);
+
+  // gradeDAO
+ // CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader, String gradeType);
+  CountAndGradeID addGrade(String exerciseID, Grade grade);
+  void changeGrade(Grade toChange);
+
+  // grader DAO
   void addGrader(String login);
   boolean graderExists(String login);
+
+  // user DAO
   long addUser(int age, String gender, int experience);
-  boolean isAnswerValid(int userID, Exercise exercise, int questionID);
   List<User> getUsers();
   List<Result> getResults();
 
+  // answer DAO
+  void addAnswer(int userID, Exercise exercise, int questionID, String answer, String audioFile);
+  boolean isAnswerValid(int userID, Exercise exercise, int questionID);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user);
 
   Exercise getNextUngradedExercise(String user, int expectedGrades);
