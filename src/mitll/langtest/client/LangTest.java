@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -67,11 +66,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private boolean goodwaveMode = false;
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
-  private String browser = "Unknown";
-  private int ver = 0;
-  private String version = "";
 
-  private Map<String,Integer> browserToVersion = new HashMap<String,Integer>();
+  private final BrowserCheck browserCheck = new BrowserCheck();
 
   /**
    * Make an exception handler that displays the exception.
@@ -116,8 +112,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Initially the flash record player is put in the center of the DockLayout
    */
   public void onModuleLoad2() {
-    populateBrowserVersions();
-
     userManager = new UserManager(this,service);
     resultManager = new ResultManager(service, this);
 
@@ -129,7 +123,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // header/title line
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
     HTML title = new HTML("<h1>" + DLI_LANGUAGE_TESTING + "</h1>");
-    getBrowserAndVersion();
+    browserCheck.getBrowserAndVersion();
     hp.addEast(getLogout(),EAST_WIDTH);
   //  hp.setHeight("180px");
     hp.add(title);
@@ -154,63 +148,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     modeSelect();
 
-    checkForCompatibleBrowser();
-    //Window.alert("Browser " + agent);
+    browserCheck.checkForCompatibleBrowser();
   }
-
-  private void checkForCompatibleBrowser() {
-    Integer min = browserToVersion.get(browser);
-    if (browser.equals("IE")) {
-      //Window.alert("Your browser is " + browser + ".<br></br>We recommend using either Firefox, Safari, or Chrome.");
-    }
-    if (min == null) {
-      Window.alert("Your browser is " + browser + " version " + version + ". We strongly recommend any of " + browserToVersion.keySet());
-    }
-    else if (ver < min) {
-      Window.alert("Your browser is " + browser + " version " + version +". We strongly recommend upgrading to version " + min);
-    }
-    else {
-      System.err.println("browser " + browser + " ver " + ver + " version " + version + " vs " + min);
-    }
-  }
-
-  private void populateBrowserVersions() {
-    browserToVersion.put("firefox",14);
-    browserToVersion.put("chrome",21);
-    browserToVersion.put("IE",9);
-    browserToVersion.put("safari",5);
-  }
-
-  private void getBrowserAndVersion() {
-    String agent = getUserAgent();
-    if (agent.contains("firefox")) {
-      version = agent.substring(agent.indexOf("firefox") + "firefox".length() + 1).split("\\s+")[0];
-      browser = "firefox";
-    } else if (agent.contains("chrome")) {
-      version = agent.substring(agent.indexOf("chrome") + "chrome".length() + 1).split("\\s+")[0];
-      browser = "chrome";
-    } else if (agent.contains("msie")) {
-      version = agent.substring(agent.indexOf("msie") + "msie".length() + 1).split(";")[0];
-      browser = "IE";
-    } else if (agent.contains("safari")) {
-      version = agent.substring(agent.indexOf("safari") + "safari".length() + 1).split("\\s+")[0];
-      if (version.length() > 1) {
-        version = version.substring(0,1);
-      }
-      browser = "safari";
-    }
-    String major = version.split("\\.")[0];
-    try {
-      ver = Integer.parseInt(major);
-    } catch (NumberFormatException e) {
-      System.err.println("couldn't parse " + agent + " and " + major);
-      e.printStackTrace();
-    }
-  }
-
-  public static native String getUserAgent() /*-{
-    return navigator.userAgent.toLowerCase();
-  }-*/;
 
   private void makeExerciseList(VerticalPanel exerciseListPanel) {
     this.exerciseList = new ExerciseList(currentExerciseVPanel,service,this, factory);
@@ -225,8 +164,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void modeSelect() {
     String isGrading = Window.Location.getParameter("grading");
-   // System.out.println("param grading " + isGrading);
-
     String isEnglish = Window.Location.getParameter("english");
     String goodwave = Window.Location.getParameter("goodwave");
     // System.out.println("param grading " + isGrading);
@@ -235,7 +172,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     if (englishOnlyMode || (isGrading != null && !isGrading.equals("false"))) {
       //System.out.println("jump to choice box " + isGrading);
-
       userManager.graderLogin();
     }
     else {
@@ -283,8 +219,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     else {
       exerciseList.setFactory(new ExercisePanelFactory(service, this, this), userManager, grading, 1);
     }
-
-    //askedMode = true;
   }
 
   /**
@@ -335,48 +269,52 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   private Widget getLogout() {
-    Anchor logout = new Anchor("Logout");
     DockLayoutPanel hp2 = new DockLayoutPanel(Style.Unit.PX);
     VerticalPanel vp = new VerticalPanel();
-    vp.add(logout);
     hp2.addSouth(vp, 75);
+
+    // add logout link
+    Anchor logout = new Anchor("Logout");
+    vp.add(logout);
     logout.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        userManager.clearUser();
-        //askedMode = false;
-        exerciseList.removeCurrentExercise();
-        exerciseList.clear();
-        modeSelect();
+        resetState();
       }
     });
 
     Anchor users = new Anchor("Users");
-    vp.add(users);
-
     users.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         userTable.showUsers(service);
       }
     });
+    vp.add(users);
 
     Anchor showResults = new Anchor("Results");
-    vp.add(showResults);
-
     showResults.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         resultManager.showResults();
       }
     });
+    vp.add(showResults);
 
-   // HTML html = new HTML(browser + " " +ver);
+    // HTML html = new HTML(browser + " " +ver);
     //html.getElement().setId("status");
    // SimplePanel sp = new SimplePanel();
    // sp.add(html);
 
-    Anchor status = new Anchor(browser + " " +ver);
-
+    // no click handler for this for now
+    Anchor status = new Anchor(browserCheck.browser + " " +browserCheck.ver);
     vp.add(status);
+
     return hp2;
+  }
+
+  private void resetState() {
+    userManager.clearUser();
+    exerciseList.removeCurrentExercise();
+    exerciseList.clear();
+    modeSelect();
   }
 
   /**

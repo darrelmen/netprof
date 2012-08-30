@@ -41,6 +41,13 @@ public class ResultDAO {
     return new ArrayList<Result>();
   }
 
+  /**
+   * Get a list of Results for this Query.
+   * @param connection
+   * @param statement
+   * @return
+   * @throws SQLException
+   */
   private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<Result> results = new ArrayList<Result>();
@@ -168,6 +175,26 @@ public class ResultDAO {
     return new ArrayList<Result>();
   }
 
+  public Collection<Result> getResultExcludingExercises(Collection<String> toExclude) {
+    // select results.* from results where results.exid not in ('ac-R0P-006','ac-LOP-001','ac-L0P-013')
+    try {
+      Connection connection = database.getConnection();
+
+      StringBuilder b = new StringBuilder();
+      for (String id : toExclude) b.append("'").append(id).append("'").append(",");
+      String list = b.toString();
+      list = list.substring(0,Math.max(0,list.length()-1));
+      String sql = "SELECT * from results where EXID not in (" + list + ")";
+
+      PreparedStatement statement = connection.prepareStatement(sql);
+      return getResultsForQuery(connection, statement);
+    } catch (Exception ee) {
+      ee.printStackTrace();
+    }
+    return new ArrayList<Result>();
+
+  }
+
   public Set<Long> getUsers(List<Result> resultsForExercise) {
     Set<Long> users = new HashSet<Long>();
 
@@ -213,7 +240,7 @@ public class ResultDAO {
 
   /**
    * @deprecated
-   * @param database
+   * @paramx database
    * @throws Exception
    */
 /*  private void showResults(Database database) throws Exception {
