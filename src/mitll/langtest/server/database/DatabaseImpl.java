@@ -112,7 +112,7 @@ public class DatabaseImpl implements Database {
    */
   public Exercise getNextUngradedExercise(Collection<String> activeExercises, int expectedCount) {
     List<Exercise> rawExercises = getExercises();
-    //System.out.println("checking " +rawExercises.size() + " exercises.");
+    System.out.println("getNextUngradedExercise : checking " +rawExercises.size() + " exercises.");
     for (Exercise e : rawExercises) {
       if (!activeExercises.contains(e.getID()) && // no one is working on it
           resultDAO.areAnyResultsLeftToGradeFor(e, expectedCount)) {
@@ -125,6 +125,8 @@ public class DatabaseImpl implements Database {
   }
 
   public List<Exercise> getExercises(long userID) {
+    System.out.println("getExercises : for user  " +userID);
+
     List<Schedule> forUser = userToSchedule.get(userID);
     if (forUser == null) {
       System.err.println("no schedule for user " +userID);
@@ -299,12 +301,28 @@ public class DatabaseImpl implements Database {
    * @param exerciseID
    * @param grade
    * @param gradeID
-   *@param correct
+   * @param correct
    * @param grader
+   * @param gradeType
    * @return
    * */
-  public CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader) {
-    return gradeDAO.addGrade(resultID, exerciseID, grade, gradeID, correct, grader);
+/*  public CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader, String gradeType) {
+    return gradeDAO.addGrade(resultID, exerciseID, grade, gradeID, correct, grader, gradeType);
+  }*/
+
+  /**
+   *
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addGrade
+   * @param exerciseID
+   * @param toAdd
+   * @return
+   */
+  public CountAndGradeID addGrade(String exerciseID, Grade toAdd) {
+    return gradeDAO.addGradeEasy(exerciseID, toAdd);
+  }
+
+  public void changeGrade(Grade toChange) {
+    gradeDAO.changeGrade(toChange);
   }
 
   public void addGrader(String login) { graderDAO.addGrader(login); }

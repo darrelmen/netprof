@@ -29,7 +29,11 @@ public interface LangTestDatabaseAsync {
 
   void getResultsForExercise(String exid, AsyncCallback<ResultsAndGrades> async);
 
-  void addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader, AsyncCallback<CountAndGradeID> async);
+  //void addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader, String gradeType, AsyncCallback<CountAndGradeID> async);
+  //void addGradeEasy( String exerciseID,Grade toAdd, AsyncCallback<CountAndGradeID> async);
 
 
+  void addGrade(String exerciseID, Grade grade, AsyncCallback<CountAndGradeID> async);
+
+  void changeGrade(Grade toChange, AsyncCallback<Void> async);
 }
