@@ -106,11 +106,16 @@ public class DatabaseImpl implements Database {
      return exerciseDAO.getRawExercises();
   }
 
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
-   * @return
-   */
   public Exercise getNextUngradedExercise(Collection<String> activeExercises, int expectedCount) {
+    if (expectedCount == 1) return getNextUngradedExerciseQuick(activeExercises,expectedCount);
+    else return getNextUngradedExerciseSlow(activeExercises,expectedCount);
+  }
+
+    /**
+    * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
+    * @return
+    */
+  public Exercise getNextUngradedExerciseSlow(Collection<String> activeExercises, int expectedCount) {
     List<Exercise> rawExercises = getExercises();
     System.out.println("getNextUngradedExercise : checking " +rawExercises.size() + " exercises.");
     for (Exercise e : rawExercises) {
@@ -121,6 +126,62 @@ public class DatabaseImpl implements Database {
         return e;
       }
     }
+    return null;
+  }
+
+  public Exercise getNextUngradedExerciseQuick(Collection<String> activeExercises, int expectedCount) {
+    List<Exercise> rawExercises = getExercises();
+    Collection<Result> resultExcludingExercises = resultDAO.getResultExcludingExercises(activeExercises);
+    System.out.println("getNextUngradedExercise found  " + resultExcludingExercises.size() + " results, expected " +expectedCount);
+
+    GradeDAO.GradesAndIDs allGradesExcluding = gradeDAO.getAllGradesExcluding(activeExercises);
+               Map<Integer,Integer> idToCount = new HashMap<Integer, Integer>();
+    for (Grade g : allGradesExcluding.grades) {
+      //Integer countOfGrades = idToCount.get(g.resultID);
+      if (!idToCount.containsKey(g.resultID)) idToCount.put(g.resultID,1);
+      else idToCount.put(g.resultID,2);
+    }
+    System.out.println("getNextUngradedExercise found  " + allGradesExcluding.resultIDs.size() + " graded results");
+
+    // remove results that have grades...
+    Iterator<Result> iterator = resultExcludingExercises.iterator();
+    while (iterator.hasNext()) {
+      Result result = iterator.next();
+
+      //if (allGradesExcluding.resultIDs.contains(result.uniqueID)) {
+        Integer numGrades = idToCount.get(result.uniqueID);
+        if (numGrades != null && expectedCount <= numGrades) {  // need 2 grades for english
+          //if (result.flq)  // TODO : need to enrich Results with flq flag
+          iterator.remove();
+        }
+/*        else if (result.id.equals("ac-L0P-001")) System.out.println("num " +numGrades+
+            " result " + result);*/
+      //}
+    }
+
+    System.out.println("getNextUngradedExercise after removing  " + resultExcludingExercises.size() + " results");
+
+    // whatever remains, find first exercise
+
+    SortedSet<String> exids = new TreeSet<String>();
+    for (Result r : resultExcludingExercises) exids.add(r.id);
+    if (exids.isEmpty()) return null;
+    else {
+      System.out.println("getNextUngradedExercise candidates are   " + exids);
+
+      String first = exids.first();
+      for (Exercise e : rawExercises) {
+        if (e.getID().equals(first)) {
+          System.out.println("getNextUngradedExercise  " + e);
+
+          return e;
+        }
+      }
+      if (!rawExercises.isEmpty()) {
+        System.err.println("getNextUngradedExercise2 expecting an exercise to match " + first);
+      }
+    }
+
     return null;
   }
 

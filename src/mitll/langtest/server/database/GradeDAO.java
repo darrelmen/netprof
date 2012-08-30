@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.Result;
 
 import java.sql.*;
 import java.util.*;
@@ -139,9 +140,25 @@ public class GradeDAO {
    * @return
    */
   public GradesAndIDs getResultIDsForExercise(String exerciseID) {
+    String sql = "SELECT id, resultID, grade, grader, gradeType from grades where exerciseID='" + exerciseID + "'";
+
+    return getGradesForSQL(sql);
+  }
+
+  public GradesAndIDs getAllGradesExcluding(Collection<String> toExclude) {
+    StringBuilder b = new StringBuilder();
+    for (String id : toExclude) b.append("'").append(id).append("'").append(",");
+    String list = b.toString();
+    list = list.substring(0,Math.max(0,list.length()-1));
+
+    String sql = "SELECT id, resultID, grade, grader, gradeType from grades where exerciseID not in (" + list + ")";
+
+    return getGradesForSQL(sql);
+  }
+
+  private GradesAndIDs getGradesForSQL(String sql) {
     try {
       Connection connection = database.getConnection();
-      String sql = "SELECT id, resultID, grade, grader, gradeType from grades where exerciseID='" + exerciseID + "'";
       PreparedStatement statement = connection.prepareStatement(sql);
 
       ResultSet rs = statement.executeQuery();
@@ -172,13 +189,16 @@ public class GradeDAO {
     return new GradesAndIDs(new ArrayList<Grade>(),new ArrayList<Integer>());
   }
 
+
   /**
-   * TODO : remove
+   *
    */
   public static class GradesAndIDs {
     Collection<Grade> grades;
+    Collection<Integer> resultIDs;
     public GradesAndIDs(Collection<Grade> grades, Collection<Integer> ids) {
       this.grades = grades;
+      this.resultIDs = ids;
     }
   }
 
