@@ -131,7 +131,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     widgets.addNorth(hp, HEADER_HEIGHT);
     widgets.addSouth(status = new Label(), FOOTER_HEIGHT);
     VerticalPanel exerciseListPanel = new VerticalPanel();
-    widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH);
+    widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH/* +10*/);
+   // exerciseListPanel.addStyleName("exerciseList");
 
     // set up center panel, initially with flash record panel
     ScrollPanel sp = new ScrollPanel();
@@ -154,7 +155,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void makeExerciseList(VerticalPanel exerciseListPanel) {
     this.exerciseList = new ExerciseList(currentExerciseVPanel,service,this, factory);
     ScrollPanel itemScroller = new ScrollPanel(this.exerciseList);
-    itemScroller.setSize(EXERCISE_LIST_WIDTH +"px",(Window.getClientHeight() - (2*HEADER_HEIGHT) - FOOTER_HEIGHT - 60) + "px"); // 54
+
+    itemScroller.setSize((EXERCISE_LIST_WIDTH) +"px",(Window.getClientHeight() - (2*HEADER_HEIGHT) - FOOTER_HEIGHT - 60) + "px"); // 54
     exerciseListPanel.add(new HTML("<h2>Items</h2>"));
     exerciseListPanel.add(itemScroller);
   }
