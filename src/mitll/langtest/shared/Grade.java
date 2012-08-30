@@ -10,23 +10,28 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * To change this template use File | Settings | File Templates.
  */
 public class Grade implements IsSerializable {
+  private static final int UNASSIGNED = -1;
   public int id;
   public int resultID;
   public int grade;
   public String grader;
-  //public boolean correct;
+  public String gradeType;
+
   public Grade() {}
 
-  /**
-   * @see mitll.langtest.server.database.GradeDAO#getResultIDsForExercise(String)
-   *
-   */
-  public Grade(int id, int resultID, int grade,/*, boolean correct*/String grader) {
+  public Grade(int resultID, int grade, String grader, String gradeType) {
+    this(UNASSIGNED,resultID,grade,grader,gradeType);
+  }
+    /**
+    * @see mitll.langtest.server.database.GradeDAO#getResultIDsForExercise(String)
+    *
+    */
+  public Grade(int id, int resultID, int grade,String grader, String gradeType) {
     this.id = id;
     this.resultID = resultID;
     this.grade  = grade;
     this.grader  = grader;
-    //this.correct = correct;
+    this.gradeType = gradeType;
   }
 
   @Override
@@ -42,6 +47,6 @@ public class Grade implements IsSerializable {
 
   @Override
   public String toString() {
-    return "ID = " + id +" : result " + resultID + " = " + grade + " by " + grader;
+    return "ID = " + id +" : result " + resultID + " = " + grade + " by " + grader + " type " +gradeType ;
   }
 }

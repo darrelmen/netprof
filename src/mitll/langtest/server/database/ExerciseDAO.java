@@ -88,7 +88,7 @@ public class ExerciseDAO {
     if (exercises.isEmpty()) {
       System.err.println("no exercises found in database?");
     } else {
-      System.out.println("found " + exercises.size() + " exercises.");
+      System.out.println("getRawExercises : found " + exercises.size() + " exercises.");
     }
     return exercises;
   }
