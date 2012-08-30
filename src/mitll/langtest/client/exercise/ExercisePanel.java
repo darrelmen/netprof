@@ -57,7 +57,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
     hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-    hp.add(new HTML(e.getContent()));
+    hp.add(getQuestionContent(e));
     hp.setWidth((Window.getClientWidth()- LangTest.EXERCISE_LIST_WIDTH-100) + "px");
     add(hp);
 
@@ -71,6 +71,10 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
 
     Panel buttonRow = getNextAndPreviousButtons(e, service, userFeedback, controller);
     add(buttonRow);
+  }
+
+  protected Widget getQuestionContent(Exercise e) {
+    return new HTML(e.getContent());
   }
 
   /**

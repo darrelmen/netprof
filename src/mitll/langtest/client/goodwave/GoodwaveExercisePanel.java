@@ -28,6 +28,22 @@ public class GoodwaveExercisePanel extends ExercisePanel {
     super(e,service,userFeedback,controller);
   }
 
+  @Override
+  protected Widget getQuestionContent(Exercise e) {
+    String content = e.getContent();
+    if (content.contains("audio")) {
+     // System.err.println("content " + content);
+
+      int i = content.indexOf("source src=");
+      String s = content.substring(i + "source src=".length()+1).split("\\\"")[0];
+      System.err.println("audio path '" + s + "'");
+    }
+
+
+    // TODO make a good wave panel that plays audio, displays the wave form...
+    return super.getQuestionContent(e);    //To change body of overridden methods use File | Settings | File Templates.
+  }
+
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
