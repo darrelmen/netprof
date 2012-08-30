@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,19 +87,20 @@ public class GradingResultManager extends ResultManager {
   private Column<Result, String> getGradingColumn(Collection<Grade> grades,
                                                   final String grader, final int gradingColumnIndex,
                                                   final boolean editable) {
-    final Map<Integer, Grade> resultToGrade = getResultToGrade(grades,/*resultToGradeID, */gradingColumnIndex);
+    final Map<Integer, Grade> resultToGrade = getResultToGrade(grades, gradingColumnIndex);
 
     AbstractCell selectionCell = editable ? new SelectionCell(GRADING_OPTIONS) : new TextCell();
     Column<Result, String> col = new Column<Result, String>(selectionCell) {
       @Override
-      public String getValue(Result object) {
-        Grade choice = resultToGrade.get(object.uniqueID);
+      public String getValue(Result result) {
+        Grade choice = resultToGrade.get(result.uniqueID);
         if (choice == null) {
+         // System.out.println("getGradingColumn getValue no grade for " + result);
           return UNGRADED;
         }
         else {
           Integer grade = choice.grade;
-          return (editable ? (grade == -1 ? UNGRADED : (grade == -2 ? SKIP : "" + grade)) : "--");
+          return (editable ? getStringForGrade(grade) : "--");
         }
       }
     };
@@ -109,17 +111,21 @@ public class GradingResultManager extends ResultManager {
         if (choice == null) {
           String gradeType = gradingColumnIndex == 0 ? "any" : "english-only";
           choice = new Grade(result.uniqueID,grade,grader,gradeType);
-//          System.out.println("getGradingColumn making new grade " + choice + " for " + result);
+          System.out.println("getGradingColumn making new grade " + choice + " for " + result);
           addGrade(result.id, choice, result.uniqueID, resultToGrade);
         }
         else {
-//          System.out.println("getGradingColumn updating existing grade " + choice + " for " + result);
+          System.out.println("getGradingColumn updating existing grade " + choice + " for " + result);
           choice.grade = grade;
           changeGrade(choice);
         }
       }
     });
     return col;
+  }
+
+  private String getStringForGrade(Integer grade) {
+    return (grade == -1 ? UNGRADED : (grade == -2 ? SKIP : "" + grade));
   }
 
   /**
@@ -156,17 +162,34 @@ public class GradingResultManager extends ResultManager {
     for (Map.Entry<Integer, List<Grade>> idToGrades : resultToGrade.entrySet()) {
       Integer resultID = idToGrades.getKey();
       List<Grade> gradesForResult = idToGrades.getValue();
-/*      if (gradesForResult.size() > 1) {
-        System.out.println(resultID + "->" + gradesForResult);
-      }*/
       Collections.sort(gradesForResult, new Comparator<Grade>() {
         public int compare(Grade o1, Grade o2) {
           return o1.id < o2.id ? -1 : o1.id > o2.id ? +1 : 0;
         }
       });
-      if (gradingColumnIndex < gradesForResult.size()) {
-        Grade choice = gradesForResult.get(gradingColumnIndex);
-        resultToGradeForColumn.put(resultID, choice);
+      if (gradesForResult.size() == 2) {
+        if (gradingColumnIndex < gradesForResult.size()) {
+          Grade choice = gradesForResult.get(gradingColumnIndex);
+          if (choice == null) {
+            System.err.println("no grade at index " + gradingColumnIndex + "?");
+          } else {
+            resultToGradeForColumn.put(resultID, choice);
+          }
+        }
+      } else if (!gradesForResult.isEmpty()) {
+        Grade choice = gradesForResult.get(0);
+        if (choice == null) {
+          System.err.println("no grade at index " + 0 + "?");
+        } else {
+          if (gradingColumnIndex == 1) {
+            if (choice.gradeType.equals("english-only")) {
+              resultToGradeForColumn.put(resultID, choice);
+            }
+          }
+          else {
+            resultToGradeForColumn.put(resultID, choice);
+          }
+        }
       }
     }
     return resultToGradeForColumn;
@@ -195,7 +218,7 @@ public class GradingResultManager extends ResultManager {
         gradesForResult.add(g);
       }
       else {
-       // System.out.println("Skipping " + g);
+        //System.out.println("\tCol " + gradingColumnIndex + " Skipping " + g);
       }
     }
     return resultToGrade;
@@ -209,15 +232,15 @@ public class GradingResultManager extends ResultManager {
    * @param resultToGrade
    */
   private void addGrade(String exerciseID, final Grade toAdd,final int resultID ,final Map<Integer, Grade> resultToGrade) {
-  //  System.out.println("addGrade grade " + toAdd + " at " + new Date());
+    System.out.println("addGrade grade " + toAdd + " at " + new Date() + " result->grade has " + resultToGrade.size());
 
     service.addGrade(exerciseID, toAdd, new AsyncCallback<CountAndGradeID>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(CountAndGradeID result) {
         feedback.showStatus("Now " + result.count + " graded answers.");
         toAdd.id = (int) result.gradeID;
-//        System.out.println("grade added " + toAdd + " at " + new Date());
         resultToGrade.put(resultID, toAdd);
+        System.out.println("grade added at " + new Date() + " adding " + resultID + " -> " + toAdd + " now " + resultToGrade.size());
       }
 
       /*
@@ -237,7 +260,9 @@ public class GradingResultManager extends ResultManager {
     service.changeGrade(toChange,new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Void result) {
-//        System.out.println("changeGrade " + toChange);
+        feedback.showStatus("Grade changed to " + getStringForGrade(toChange.grade));
+
+       // System.out.println("changeGrade " + toChange);
       }
     }
     );

@@ -11,18 +11,20 @@ import java.util.*;
  */
 public class GradeDAO {
   private final Database database;
-  private boolean debug = true;
+  private boolean debug = false;
 
   public GradeDAO(Database database) {
     this.database = database;
   }
 
+  /**
+   * @see DatabaseImpl#changeGrade(mitll.langtest.shared.Grade)
+   * @param toChange
+   */
   public void changeGrade(Grade toChange) {
-    long id = 0;
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement;
-      //System.out.println("addGrade " + grade + " grade for " + resultID + " and " +grader + " ex id " + exerciseID+ " and " +gradeID);
 
       String sql = "UPDATE grades " +
           "SET grade='" + toChange.grade + "' " +
