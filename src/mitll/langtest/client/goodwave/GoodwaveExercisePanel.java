@@ -1,6 +1,7 @@
 package mitll.langtest.client.goodwave;
 
 import com.goodwave.client.PlayAudioPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -30,22 +31,34 @@ public class GoodwaveExercisePanel extends ExercisePanel {
     super(e,service,userFeedback,controller);
   }
 
+  /**
+   * Replace the html 5 audio tag with our fancy waveform widget.
+   * @param e
+   * @return
+   */
   @Override
   protected Widget getQuestionContent(Exercise e) {
     String content = e.getContent();
     String path = null;
     if (content.contains("audio")) {
-     // System.err.println("content " + content);
+   //   System.err.println("content " + content);
 
       int i = content.indexOf("source src=");
       String s = content.substring(i + "source src=".length()+1).split("\\\"")[0];
       System.err.println("audio path '" + s + "'");
       path = s;
+
+      int start = content.indexOf("<audio");
+      int end = content.indexOf("audio>");
+      content = content.substring(0,start) + content.substring(end + "audio>".length());
+
+    //  System.err.println("after " + content);
+
     }
 
     VerticalPanel vp = new VerticalPanel();
     // TODO make a good wave panel that plays audio, displays the wave form...
-    Widget questionContent = super.getQuestionContent(e);
+    Widget questionContent = new HTML(content);//super.getQuestionContent(e);
     vp.add(questionContent);
    if (path != null) vp.add(new PlayAudioPanel(controller.getSoundManager(),path));
     return vp;    //To change body of overridden methods use File | Settings | File Templates.
