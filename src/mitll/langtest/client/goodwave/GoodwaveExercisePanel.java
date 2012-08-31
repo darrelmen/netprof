@@ -1,5 +1,7 @@
 package mitll.langtest.client.goodwave;
 
+import com.goodwave.client.PlayAudioPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -31,17 +33,22 @@ public class GoodwaveExercisePanel extends ExercisePanel {
   @Override
   protected Widget getQuestionContent(Exercise e) {
     String content = e.getContent();
+    String path = null;
     if (content.contains("audio")) {
      // System.err.println("content " + content);
 
       int i = content.indexOf("source src=");
       String s = content.substring(i + "source src=".length()+1).split("\\\"")[0];
       System.err.println("audio path '" + s + "'");
+      path = s;
     }
 
-
+    VerticalPanel vp = new VerticalPanel();
     // TODO make a good wave panel that plays audio, displays the wave form...
-    return super.getQuestionContent(e);    //To change body of overridden methods use File | Settings | File Templates.
+    Widget questionContent = super.getQuestionContent(e);
+    vp.add(questionContent);
+   if (path != null) vp.add(new PlayAudioPanel(controller.getSoundManager(),path));
+    return vp;    //To change body of overridden methods use File | Settings | File Templates.
   }
 
   /**

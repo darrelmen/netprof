@@ -1,5 +1,7 @@
 package mitll.langtest.client.exercise;
 
+import com.goodwave.client.sound.SoundManager;
+import com.goodwave.client.sound.SoundManagerAPI;
 import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.recorder.SaveNotification;
@@ -27,4 +29,6 @@ public interface ExerciseController {
   String getBase64EncodedWavFile();
 
   boolean getEnglishOnly();
+
+  SoundManagerAPI getSoundManager();
 }
