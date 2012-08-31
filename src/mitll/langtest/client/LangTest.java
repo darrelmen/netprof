@@ -1,5 +1,7 @@
 package mitll.langtest.client;
 
+import com.goodwave.client.sound.SoundManagerAPI;
+import com.goodwave.client.sound.SoundManagerStatic;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -68,6 +70,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
 
   private final BrowserCheck browserCheck = new BrowserCheck();
+  private SoundManagerStatic soundManager;
 
   /**
    * Make an exception handler that displays the exception.
@@ -150,6 +153,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     modeSelect();
 
     browserCheck.checkForCompatibleBrowser();
+
+    soundManager = new SoundManagerStatic();
+      soundManager.exportStaticMethods();
+    soundManager.initialize();
   }
 
   private void makeExerciseList(VerticalPanel exerciseListPanel) {
@@ -381,6 +388,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public String getBase64EncodedWavFile() {
     return flashRecordPanel.getWav();
+  }
+
+  public SoundManagerAPI getSoundManager() {
+    return soundManager;
+
+
   }
 
   private DialogBox dialogBox;
