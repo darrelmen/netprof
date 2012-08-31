@@ -1,15 +1,17 @@
 package mitll.langtest.client.goodwave;
 
+import com.goodwave.client.HidePanelsControlPanel;
 import com.goodwave.client.PlayAudioPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.goodwave.client.songimage.SongImageManagerPanel;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanel;
 import mitll.langtest.client.recorder.SimpleRecordPanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
+
+import java.util.Arrays;
 
 /**
  * Mainly delegates recording to the {@link mitll.langtest.client.recorder.SimpleRecordPanel}.
@@ -60,7 +62,25 @@ public class GoodwaveExercisePanel extends ExercisePanel {
     // TODO make a good wave panel that plays audio, displays the wave form...
     Widget questionContent = new HTML(content);//super.getQuestionContent(e);
     vp.add(questionContent);
-   if (path != null) vp.add(new PlayAudioPanel(controller.getSoundManager(),path));
+   if (path != null) {
+     PlayAudioPanel playAudio = new PlayAudioPanel(controller.getSoundManager(), path);
+     HorizontalPanel hp = new HorizontalPanel();
+
+     hp.setWidth("100%");
+     hp.setSpacing(5);
+
+     hp.add(playAudio);
+
+     SongImageManagerPanel parent = new SongImageManagerPanel(null);
+     HidePanelsControlPanel controlPanel = new HidePanelsControlPanel(parent);   // TODO
+     controlPanel.init(Arrays.asList(SongImageManagerPanel.GoodWaveImageType.WAVEFORM,SongImageManagerPanel.GoodWaveImageType.SPECTROGRAM));
+     hp.add(controlPanel);
+     hp.setCellHorizontalAlignment(controlPanel, HasHorizontalAlignment.ALIGN_RIGHT);
+
+     vp.add(parent);
+
+     vp.add(hp);
+   }
     return vp;    //To change body of overridden methods use File | Settings | File Templates.
   }
 
