@@ -2,6 +2,7 @@ package mitll.langtest.client.goodwave;
 
 import com.goodwave.client.HidePanelsControlPanel;
 import com.goodwave.client.PlayAudioPanel;
+import com.goodwave.client.songimage.SongImageController;
 import com.goodwave.client.songimage.SongImageManagerPanel;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -63,7 +64,7 @@ public class GoodwaveExercisePanel extends ExercisePanel {
     Widget questionContent = new HTML(content);//super.getQuestionContent(e);
     vp.add(questionContent);
    if (path != null) {
-     PlayAudioPanel playAudio = new PlayAudioPanel(controller.getSoundManager(), path);
+     final PlayAudioPanel playAudio = new PlayAudioPanel(controller.getSoundManager(), path);
      HorizontalPanel hp = new HorizontalPanel();
 
      hp.setWidth("100%");
@@ -71,7 +72,23 @@ public class GoodwaveExercisePanel extends ExercisePanel {
 
      hp.add(playAudio);
 
-     SongImageManagerPanel parent = new SongImageManagerPanel(null);
+     SongImageManagerPanel parent = new SongImageManagerPanel(new SongImageController() {
+       public void startSong() {
+         playAudio.play();
+       }
+
+       public int getOffsetWidth() {
+         return getOffsetWidth();
+       }
+
+       public void addToImageLoadPanel(Widget widget) {
+         //To change body of implemented methods use File | Settings | File Templates.
+       }
+
+       public void removeFromImageLoadPanel(Widget widget) {
+         //To change body of implemented methods use File | Settings | File Templates.
+       }
+     });
      HidePanelsControlPanel controlPanel = new HidePanelsControlPanel(parent);   // TODO
      controlPanel.init(Arrays.asList(SongImageManagerPanel.GoodWaveImageType.WAVEFORM,SongImageManagerPanel.GoodWaveImageType.SPECTROGRAM));
      hp.add(controlPanel);
