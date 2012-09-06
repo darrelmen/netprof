@@ -1,5 +1,6 @@
 package mitll.langtest.client;
 
+import audio.image.ImageType;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.*;
 
@@ -36,4 +37,6 @@ public interface LangTestDatabaseAsync {
   void addGrade(String exerciseID, Grade grade, AsyncCallback<CountAndGradeID> async);
 
   void changeGrade(Grade toChange, AsyncCallback<Void> async);
+
+  void getImageForAudioFile(String audioFile, String imageType, int width, int height, AsyncCallback<String> async);
 }

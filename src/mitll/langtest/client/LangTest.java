@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.goodwave.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
@@ -39,9 +40,6 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.Exercise;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -148,19 +146,40 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setupErrorDialog();
 
     // set up left side exercise list
-    makeExerciseList(exerciseListPanel);
+    boolean isGrading = checkParams();
+    makeExerciseList(exerciseListPanel, isGrading);
 
     modeSelect();
 
     browserCheck.checkForCompatibleBrowser();
 
     soundManager = new SoundManagerStatic();
-      soundManager.exportStaticMethods();
+    soundManager.exportStaticMethods();
     soundManager.initialize();
   }
 
-  private void makeExerciseList(VerticalPanel exerciseListPanel) {
-    this.exerciseList = new ExerciseList(currentExerciseVPanel,service,this, factory);
+  /**
+   *
+   * @param exerciseListPanel to add scroller to
+   * @param isGrading true if grading, false if not
+   */
+  private void makeExerciseList(Panel exerciseListPanel, boolean isGrading) {
+    this.exerciseList = isGrading ?
+        new GradedExerciseList(currentExerciseVPanel,service,this,factory) :
+        englishOnlyMode ? new ExerciseList(currentExerciseVPanel,service,this,factory) {
+          @Override
+          protected void checkBeforeLoad(Exercise e) {
+            System.out.println("ignoring check before load for " + e);
+           // gotUser(-1);    //To change body of overridden methods use File | Settings | File Templates.
+          }
+
+          @Override
+          public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {
+            super.setFactory(factory, user, expectedGrades);
+            getExercisesInOrder();
+          }
+        }: new ExerciseList(currentExerciseVPanel,service, this, factory);
+
     ScrollPanel itemScroller = new ScrollPanel(this.exerciseList);
 
     itemScroller.setSize((EXERCISE_LIST_WIDTH) +"px",(Window.getClientHeight() - (2*HEADER_HEIGHT) - FOOTER_HEIGHT - 60) + "px"); // 54
@@ -172,14 +191,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Check the URL parameters for special modes.
    */
   private void modeSelect() {
-    String isGrading = Window.Location.getParameter("grading");
-    String isEnglish = Window.Location.getParameter("english");
-    String goodwave = Window.Location.getParameter("goodwave");
-    // System.out.println("param grading " + isGrading);
-    englishOnlyMode = isEnglish != null && !isEnglish.equals("false");
-    goodwaveMode = goodwave != null && !goodwave.equals("false");
-
-    if (englishOnlyMode || (isGrading != null && !isGrading.equals("false"))) {
+    boolean isGrading = checkParams();
+    if (goodwaveMode) {
+      gotUser(-1);
+    }
+    else if (englishOnlyMode || isGrading) {
       //System.out.println("jump to choice box " + isGrading);
       userManager.graderLogin();
     }
@@ -188,9 +204,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
+  private boolean checkParams() {
+    String isGrading = Window.Location.getParameter("grading");
+    String isEnglish = Window.Location.getParameter("english");
+    String goodwave = Window.Location.getParameter("goodwave");
+    // System.out.println("param grading " + isGrading);
+    englishOnlyMode = isEnglish != null && !isEnglish.equals("false");
+    goodwaveMode = goodwave != null && !goodwave.equals("false");
+    return (isGrading != null && !isGrading.equals("false"));
+  }
+
   /**
    * Hookup feedback for events from Flash generated from the user's response to the Mic Access dialog
    *
+   * @see #onModuleLoad2()
    * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#micConnected()
    */
   private void makeFlashContainer() {
@@ -219,14 +246,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     this.grading = g;
 
     if (goodwaveMode) {
-      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this), userManager, grading, 1);
+      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this), userManager, 1);
     }
     else if (grading) {
-      exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, grading, englishOnlyMode ? 2 : 1);
+      exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, englishOnlyMode ? 2 : 1);
       lastUser = -1; // no user
     }
     else {
-      exerciseList.setFactory(new ExercisePanelFactory(service, this, this), userManager, grading, 1);
+      exerciseList.setFactory(new ExercisePanelFactory(service, this, this), userManager, 1);
     }
   }
 
@@ -331,6 +358,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #modeSelect()
    */
   public void login() {
+    System.out.println("LangTest.login");
     userManager.login();
   }
 
@@ -345,8 +373,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
-//    System.out.println("gotUser " + userID + " vs " + lastUser);
-    //askedMode = true;
+    System.out.println("gotUser " + userID + " vs " + lastUser);
+
     grading = false;
     setGrading(grading);
     flashRecordPanel.initFlash();

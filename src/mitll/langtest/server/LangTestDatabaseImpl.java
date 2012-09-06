@@ -1,5 +1,7 @@
 package mitll.langtest.server;
 
+import audio.image.ImageType;
+import audio.imagewriter.ImageWriter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -37,6 +39,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public static final String ANSWERS = "answers";
   public static final int TIMEOUT = 30;
   public static final String DEFAULT_APP_NAME = "netPron2";
+  public static final String IMAGE_WRITER_IMAGES = "imageWriterImages";
   private DatabaseImpl db;
 
   private Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
@@ -59,7 +62,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.exercise.ExerciseList#loadGradingExercises()
+   * @see mitll.langtest.client.exercise.ExerciseList#getExercisesInOrder()
    * @return
    */
   public List<Exercise> getExercises() {
@@ -69,7 +72,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Remember who is grading which exercise.  Time out reservation after 30 minutes.
    *
-   * @see mitll.langtest.client.exercise.ExerciseList#getNextUngraded()
+   * @seex mitll.langtest.client.exercise.ExerciseList#getNextUngraded
    * @param user
    * @param expectedGrades
    * @return
@@ -97,6 +100,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       userToExerciseID.put(user, id);
       System.out.println("after adding " + user + "->" + id + " active exercise map now " + userToExerciseID.asMap());
     }
+  }
+
+  public String getImageForAudioFile(String audioFile, String imageType, int width, int height) {
+    ImageWriter imageWriter = new ImageWriter();
+    if (!audioFile.endsWith(".wav")) audioFile = audioFile.substring(0,audioFile.length()-".mp3".length())+".wav";
+    ImageType imageType1 =
+        imageType.equalsIgnoreCase(ImageType.WAVEFORM.toString()) ? ImageType.WAVEFORM :
+            imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM :
+                imageType.equalsIgnoreCase(ImageType.WORD_TRANSCRIPT.toString()) ? ImageType.WORD_TRANSCRIPT :
+                    imageType.equalsIgnoreCase(ImageType.PHONE_TRANSCRIPT.toString()) ? ImageType.PHONE_TRANSCRIPT :
+                        imageType.equalsIgnoreCase(ImageType.SPEECH_TRANSCRIPT.toString()) ? ImageType.SPEECH_TRANSCRIPT : null;
+
+    return imageWriter.writeImageSimple(audioFile,getImageOutDir(),width,height, imageType1);
   }
 
   /**
@@ -269,6 +285,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       tomcatWriteDirectory = ANSWERS;
     }
     return tomcatWriteDirectory;
+  }
+
+  private String getImageOutDir() {
+    String imageOutdir = getServletContext().getInitParameter("imageOutdir");
+    if (imageOutdir == null) imageOutdir = IMAGE_WRITER_IMAGES;
+
+    File test = new File(imageOutdir);
+    if (!test.exists()) test.mkdirs();
+    if (!test.exists()) {
+      imageOutdir = IMAGE_WRITER_IMAGES;
+    }
+    return imageOutdir;
   }
 
   @Override
