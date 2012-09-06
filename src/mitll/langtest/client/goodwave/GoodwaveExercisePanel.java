@@ -1,8 +1,11 @@
 package mitll.langtest.client.goodwave;
 
 import com.goodwave.client.PlayAudioPanel;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HTML;
@@ -10,6 +13,8 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ProvidesResize;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -25,8 +30,13 @@ import mitll.langtest.shared.Exercise;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GoodwaveExercisePanel extends ExercisePanel {
-  //LangTestDatabaseAsync service;
+public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResize {
+  public static final int MIN_WIDTH = 256;
+  public static final int HEIGHT = 128;
+  public static final int RIGHT_MARGIN = 400;
+  private String audioPath;
+  private Image waveform,spectrogram;
+  private int lastWidth = 0;
   /**
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    * @param e
@@ -36,8 +46,23 @@ public class GoodwaveExercisePanel extends ExercisePanel {
    */
   public GoodwaveExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                                final ExerciseController controller) {
-    super(e,service,userFeedback,controller);
-    //this.service = service;
+    super(e, service, userFeedback, controller);
+    Window.addResizeHandler(new ResizeHandler() {
+      public void onResize(ResizeEvent event) {
+        int diff = Math.abs(event.getWidth() - lastWidth);
+        //System.out.println("got resize " + getOffsetWidth() + " event " + event.getWidth() + " diff " + diff);
+        if (lastWidth == 0 || ((float)diff /(float)lastWidth) > 0.2) {
+          System.out.println("new width " +  event.getWidth() + " vs old " + lastWidth);
+
+          lastWidth = event.getWidth();
+          getImages();
+        }
+      }
+    });
+  }
+
+  public void onResize() {
+    System.out.println("got resize " + getOffsetWidth());
   }
 
   /**
@@ -62,7 +87,6 @@ public class GoodwaveExercisePanel extends ExercisePanel {
       content = content.substring(0,start) + content.substring(end + "audio>".length());
 
     //  System.err.println("after " + content);
-
     }
 
     VerticalPanel vp = new VerticalPanel();
@@ -77,48 +101,39 @@ public class GoodwaveExercisePanel extends ExercisePanel {
      hp.setSpacing(5);
 
      hp.add(playAudio);
+     lastWidth = Window.getClientWidth();
 
-/*     SongImageManagerPanel parent = new SongImageManagerPanel(new SongImageController() {
-       public void startSong() {
-         playAudio.play();
-       }
-
-       public int getOffsetWidth() {
-         return getOffsetWidth();
-       }
-
-       public void addToImageLoadPanel(Widget widget) {
-         //To change body of implemented methods use File | Settings | File Templates.
-       }
-
-       public void removeFromImageLoadPanel(Widget widget) {
-         //To change body of implemented methods use File | Settings | File Templates.
-       }
-     });
-     HidePanelsControlPanel controlPanel = new HidePanelsControlPanel(parent);   // TODO
-     controlPanel.init(Arrays.asList(SongImageManagerPanel.GoodWaveImageType.WAVEFORM,SongImageManagerPanel.GoodWaveImageType.SPECTROGRAM));
-     hp.add(controlPanel);*/
      HorizontalPanel controlPanel = new HorizontalPanel();
-     addCheckbox(controlPanel,"Waveform");
-     addCheckbox(controlPanel,"Spectrogram");
+     waveform = new Image();
+     addCheckbox(controlPanel,"Waveform",waveform);
+     spectrogram = new Image();
+     addCheckbox(controlPanel,"Spectrogram",spectrogram);
      hp.setCellHorizontalAlignment(controlPanel, HasHorizontalAlignment.ALIGN_RIGHT);
-
-     //vp.add(parent);
+     hp.add(controlPanel);
 
      vp.add(hp);
-     final Image waveform = new Image();
      vp.add(waveform);
-     Image spectrogram = new Image();
      vp.add(spectrogram);
-     getImageURLForAudio(path, "Waveform", waveform);
-     getImageURLForAudio(path, "Spectrogram", spectrogram);
+     getImages(path, waveform, spectrogram);
+     this.audioPath = path;
    }
-    return vp;    //To change body of overridden methods use File | Settings | File Templates.
+    return vp;
   }
 
-  private void getImageURLForAudio(String path, String type, final Image waveform) {
+  private void getImages() {
+    getImages(audioPath,waveform,spectrogram);
+  }
 
-    service.getImageForAudioFile(path, type,1024,128,new AsyncCallback<String>() {
+  private void getImages(String path, Image waveform, Image spectrogram) {
+    int width = Window.getClientWidth()- RIGHT_MARGIN;
+    getImageURLForAudio(path, "Waveform", width, waveform);
+    getImageURLForAudio(path, "Spectrogram", width, spectrogram);
+  }
+
+  private void getImageURLForAudio(String path, String type,int width, final Image waveform) {
+    int toUse = Math.max(MIN_WIDTH, width);
+    int height = HEIGHT;
+    service.getImageForAudioFile(path, type, toUse, height,new AsyncCallback<String>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(String result) {
         waveform.setUrl(result);
@@ -126,16 +141,15 @@ public class GoodwaveExercisePanel extends ExercisePanel {
     });
   }
 
-  private void addCheckbox(HorizontalPanel controlPanel,String label) {
+  private void addCheckbox(HorizontalPanel controlPanel,String label, final Widget widget) {
     CheckBox w = new CheckBox();
     w.setValue(true);
     w.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
       public void onValueChange(ValueChangeEvent<Boolean> event) {
-
+         widget.setVisible(event.getValue());
       }
     });
     controlPanel.add(w);
- //   String label = "Waveform";
     controlPanel.add(new Label(label));
   }
 
