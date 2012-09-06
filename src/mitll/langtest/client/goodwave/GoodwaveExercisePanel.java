@@ -1,6 +1,7 @@
 package mitll.langtest.client.goodwave;
 
 import com.goodwave.client.PlayAudioPanel;
+import com.goodwave.client.sound.AudioControl;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -13,8 +14,11 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -37,6 +41,9 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
   private String audioPath;
   private Image waveform,spectrogram;
   private int lastWidth = 0;
+  PopupPanel imageOverlay;// = new PopupPanel(false);
+  private double songDuration;
+
   /**
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    * @param e
@@ -96,7 +103,27 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
    if (path != null) {
      final PlayAudioPanel playAudio = new PlayAudioPanel(controller.getSoundManager(), path);
      HorizontalPanel hp = new HorizontalPanel();
+     final Panel outer = this;
+     imageOverlay = new PopupPanel(false);
+     playAudio.addListener(new AudioControl() {
+       public void reinitialize() {
+         imageOverlay.hide();
+       }
 
+       public void songFirstLoaded(double durationEstimate) {
+         //To change body of implemented methods use File | Settings | File Templates.
+       }
+
+       public void songLoaded(double duration) {
+         songDuration = duration;
+         imageOverlay.show();
+         imageOverlay.setSize("3px",outer.getOffsetHeight()+"px");
+       }
+
+       public void update(double position) {
+         imageOverlay.setPopupPosition((int)(((double)outer.getOffsetHeight())*(position/songDuration)), getAbsoluteTop());
+       }
+     });
      hp.setWidth("100%");
      hp.setSpacing(5);
 
@@ -111,6 +138,9 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
      hp.setCellHorizontalAlignment(controlPanel, HasHorizontalAlignment.ALIGN_RIGHT);
      hp.add(controlPanel);
 
+     imageOverlay.setStyleName("ImageOverlay");
+     imageOverlay.add(new SimplePanel());
+
      vp.add(hp);
      vp.add(waveform);
      vp.add(spectrogram);
@@ -118,6 +148,16 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
      this.audioPath = path;
    }
     return vp;
+  }
+
+  public void setImageOverlayVisible(boolean visible){
+    //getOffsetWidth()
+    if(visible){
+      imageOverlay.show();
+    }
+    else{
+      imageOverlay.hide();
+    }
   }
 
   private void getImages() {
