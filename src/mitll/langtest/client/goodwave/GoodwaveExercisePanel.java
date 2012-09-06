@@ -1,18 +1,22 @@
 package mitll.langtest.client.goodwave;
 
-import com.goodwave.client.HidePanelsControlPanel;
 import com.goodwave.client.PlayAudioPanel;
-import com.goodwave.client.songimage.SongImageController;
-import com.goodwave.client.songimage.SongImageManagerPanel;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanel;
-import mitll.langtest.client.recorder.SimpleRecordPanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
-
-import java.util.Arrays;
 
 /**
  * Mainly delegates recording to the {@link mitll.langtest.client.recorder.SimpleRecordPanel}.
@@ -22,6 +26,7 @@ import java.util.Arrays;
  * To change this template use File | Settings | File Templates.
  */
 public class GoodwaveExercisePanel extends ExercisePanel {
+  //LangTestDatabaseAsync service;
   /**
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    * @param e
@@ -32,6 +37,7 @@ public class GoodwaveExercisePanel extends ExercisePanel {
   public GoodwaveExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                                final ExerciseController controller) {
     super(e,service,userFeedback,controller);
+    //this.service = service;
   }
 
   /**
@@ -72,7 +78,7 @@ public class GoodwaveExercisePanel extends ExercisePanel {
 
      hp.add(playAudio);
 
-     SongImageManagerPanel parent = new SongImageManagerPanel(new SongImageController() {
+/*     SongImageManagerPanel parent = new SongImageManagerPanel(new SongImageController() {
        public void startSong() {
          playAudio.play();
        }
@@ -91,14 +97,46 @@ public class GoodwaveExercisePanel extends ExercisePanel {
      });
      HidePanelsControlPanel controlPanel = new HidePanelsControlPanel(parent);   // TODO
      controlPanel.init(Arrays.asList(SongImageManagerPanel.GoodWaveImageType.WAVEFORM,SongImageManagerPanel.GoodWaveImageType.SPECTROGRAM));
-     hp.add(controlPanel);
+     hp.add(controlPanel);*/
+     HorizontalPanel controlPanel = new HorizontalPanel();
+     addCheckbox(controlPanel,"Waveform");
+     addCheckbox(controlPanel,"Spectrogram");
      hp.setCellHorizontalAlignment(controlPanel, HasHorizontalAlignment.ALIGN_RIGHT);
 
-     vp.add(parent);
+     //vp.add(parent);
 
      vp.add(hp);
+     final Image waveform = new Image();
+     vp.add(waveform);
+     Image spectrogram = new Image();
+     vp.add(spectrogram);
+     getImageURLForAudio(path, "Waveform", waveform);
+     getImageURLForAudio(path, "Spectrogram", spectrogram);
    }
     return vp;    //To change body of overridden methods use File | Settings | File Templates.
+  }
+
+  private void getImageURLForAudio(String path, String type, final Image waveform) {
+
+    service.getImageForAudioFile(path, type,1024,128,new AsyncCallback<String>() {
+      public void onFailure(Throwable caught) {}
+      public void onSuccess(String result) {
+        waveform.setUrl(result);
+      }
+    });
+  }
+
+  private void addCheckbox(HorizontalPanel controlPanel,String label) {
+    CheckBox w = new CheckBox();
+    w.setValue(true);
+    w.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+      public void onValueChange(ValueChangeEvent<Boolean> event) {
+
+      }
+    });
+    controlPanel.add(w);
+ //   String label = "Waveform";
+    controlPanel.add(new Label(label));
   }
 
   /**

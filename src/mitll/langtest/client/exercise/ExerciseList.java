@@ -27,18 +27,18 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class ExerciseList extends VerticalPanel {
-  private List<Exercise> currentExercises = null;
+  protected List<Exercise> currentExercises = null;
   private int currentExercise = 0;
   private List<HTML> progressMarkers = new ArrayList<HTML>();
   private Panel current = null;
 
   private Panel currentExerciseVPanel;
-  private LangTestDatabaseAsync service;
+  protected LangTestDatabaseAsync service;
   private UserFeedback feedback;
   private ExercisePanelFactory factory;
-  private boolean doGrading = false;
-  private int expectedGrades = 1;
-  private UserManager user;
+  //private boolean doGrading = false;
+  protected int expectedGrades = 1;
+  protected UserManager user;
 
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback, ExercisePanelFactory factory) {
     this.currentExerciseVPanel = currentExerciseVPanel;
@@ -51,22 +51,22 @@ public class ExerciseList extends VerticalPanel {
    * @see mitll.langtest.client.LangTest#setGrading
    * @param factory
    * @param user
-   * @param doGrading
+   * @paramx doGrading
    * @param expectedGrades
    */
-  public void setFactory(ExercisePanelFactory factory, UserManager user, boolean doGrading, int expectedGrades) {
-    this.doGrading = doGrading;
+  public void setFactory(ExercisePanelFactory factory, UserManager user, /*boolean doGrading, */int expectedGrades) {
+  //  this.doGrading = doGrading;
     this.factory = factory;
     this.user = user;
     this.expectedGrades = expectedGrades;
-    if (doGrading) {
+/*    if (doGrading) {
       loadGradingExercises();
-    }
+    }*/
   }
 
-  private void loadGradingExercises() {
+/*  private void loadGradingExercises() {
     service.getExercises(new SetExercisesCallback());
-  }
+  }*/
 
   /**
     * Get exercises for this user.
@@ -75,11 +75,15 @@ public class ExerciseList extends VerticalPanel {
     * @param userID
     */
   public void getExercises(long userID) {
-    doGrading = false;
+ //   doGrading = false;
     service.getExercises(userID, new SetExercisesCallback());
   }
 
-  private class SetExercisesCallback implements AsyncCallback<List<Exercise>> {
+  public void getExercisesInOrder() {
+    service.getExercises(new SetExercisesCallback());
+  }
+
+  protected class SetExercisesCallback implements AsyncCallback<List<Exercise>> {
     public void onFailure(Throwable caught) {
       feedback.showErrorMessage("Server error - couldn't get exercises.");
     }
@@ -116,37 +120,9 @@ public class ExerciseList extends VerticalPanel {
     });
   }
 
-  private void loadFirstExercise() {
+  protected void loadFirstExercise() {
     Exercise toLoad = currentExercises.get(0);
-
-    if (doGrading) {
-      getNextUngraded();
-    }
-    else {
-      loadExercise(toLoad);
-    }
-  }
-
-  private void getNextUngraded() {
-    service.getNextUngradedExercise(user.getGrader(), expectedGrades, new AsyncCallback<Exercise>() {
-      public void onFailure(Throwable caught) {}
-      public void onSuccess(Exercise result) {
-        if (result != null) {
-          for (Exercise e : currentExercises) {
-            if (e.getID().equals(result.getID())) {
-              loadExercise(e);
-            }
-          }
-        }
-      }
-    });
-  }
-
-  private void checkoutExercise(Exercise result) {
-     service.checkoutExerciseID(user.getGrader(), result.getID(), new AsyncCallback<Void>() {
-      public void onFailure(Throwable caught) {}
-      public void onSuccess(Void result) {}
-    });
+    loadExercise(toLoad);
   }
 
   /**
@@ -156,14 +132,8 @@ public class ExerciseList extends VerticalPanel {
    * @see #loadPreviousExercise(mitll.langtest.shared.Exercise)
    * @param e
    */
-  private void loadExercise(Exercise e) {
-    if (!doGrading) {
-      feedback.login();
-    }
-
-    if (doGrading) {
-      checkoutExercise(e);
-    }
+  protected void loadExercise(Exercise e) {
+    checkBeforeLoad(e);
 
     removeCurrentExercise();
 
@@ -175,6 +145,15 @@ public class ExerciseList extends VerticalPanel {
     }
     markCurrentExercise(i);
     currentExercise = i;
+  }
+
+  protected void checkBeforeLoad(Exercise e) {
+    feedback.login();
+  }
+
+  protected void getNextExercise(Exercise current) {
+    int i = currentExercises.indexOf(current);
+    loadExercise(currentExercises.get(i+1));
   }
 
   public void removeCurrentExercise() {
@@ -204,12 +183,7 @@ public class ExerciseList extends VerticalPanel {
       feedback.showErrorMessage("Test Complete! Thank you!");
     }
     else {
-      if (doGrading) {
-        getNextUngraded();
-      }
-      else {
-        loadExercise(currentExercises.get(i+1));
-      }
+      getNextExercise(current);
     }
     return onLast;
   }

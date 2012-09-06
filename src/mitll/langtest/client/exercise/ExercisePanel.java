@@ -39,6 +39,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
   protected ExerciseController controller;
   private boolean enableNextOnlyWhenAllCompleted = true;
   private Button next;
+  protected LangTestDatabaseAsync service;
 
   /**
    * @see ExercisePanelFactory#getExercisePanel
@@ -52,6 +53,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
                        final ExerciseController controller) {
     this.exercise = e;
     this.controller = controller;
+    this.service = service;
     add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
 
     // attempt to left justify

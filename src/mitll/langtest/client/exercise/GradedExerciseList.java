@@ -1,0 +1,71 @@
+package mitll.langtest.client.exercise;
+
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.Exercise;
+
+/**
+ * Handles left side of NetPron2 -- which exercise is the current one, highlighting, etc.
+ *
+ * User: GO22670
+ * Date: 7/9/12
+ * Time: 5:59 PM
+ * To change this template use File | Settings | File Templates.
+ */
+public class GradedExerciseList extends ExerciseList {
+  public GradedExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback, ExercisePanelFactory factory) {
+    super(currentExerciseVPanel, service, feedback, factory);
+  }
+
+  /**
+   * @see mitll.langtest.client.LangTest#setGrading
+   * @param factory
+   * @param user
+   * @param expectedGrades
+   */
+  @Override
+  public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {
+    super.setFactory(factory,user,expectedGrades);
+    getExercisesInOrder();
+  }
+
+  @Override
+  protected void loadFirstExercise() {
+    getNextUngraded();
+  }
+
+  @Override
+  protected void checkBeforeLoad(Exercise e) {
+    checkoutExercise(e);
+  }
+
+  @Override
+  protected void getNextExercise(Exercise current) {
+    getNextUngraded();
+  }
+
+  private void getNextUngraded() {
+    service.getNextUngradedExercise(user.getGrader(), expectedGrades, new AsyncCallback<Exercise>() {
+      public void onFailure(Throwable caught) {}
+      public void onSuccess(Exercise result) {
+        if (result != null) {
+          for (Exercise e : currentExercises) {
+            if (e.getID().equals(result.getID())) {
+              loadExercise(e);
+            }
+          }
+        }
+      }
+    });
+  }
+
+  private void checkoutExercise(Exercise result) {
+     service.checkoutExerciseID(user.getGrader(), result.getID(), new AsyncCallback<Void>() {
+       public void onFailure(Throwable caught) {}
+       public void onSuccess(Void result) {}
+     });
+  }
+}

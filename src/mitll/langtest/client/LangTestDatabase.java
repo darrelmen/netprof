@@ -44,4 +44,6 @@ public interface LangTestDatabase extends RemoteService {
   Exercise getNextUngradedExercise(String user, int expectedGrades);
 
   void checkoutExerciseID(String user,String id);
+
+  String getImageForAudioFile(String audioFile, String imageType, int width, int height);
 }
