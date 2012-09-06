@@ -102,9 +102,31 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  /**
+   * Get an image of desired dimensions for the audio file
+   * @param audioFile
+   * @param imageType
+   * @param width
+   * @param height
+   * @return path to an image file
+   */
   public String getImageForAudioFile(String audioFile, String imageType, int width, int height) {
     ImageWriter imageWriter = new ImageWriter();
-    if (!audioFile.endsWith(".wav")) audioFile = audioFile.substring(0,audioFile.length()-".mp3".length())+".wav";
+    //System.out.println("getImageForAudioFile : for " + audioFile);
+
+    if (audioFile.endsWith(".mp3")) {
+      String wavFile = audioFile.substring(0,audioFile.length()-".mp3".length())+".wav";
+      //System.out.println("getImageForAudioFile : wav " + wavFile);
+
+      File test = getAbsolutePathToWav(wavFile);
+      if (test.exists()) {
+        // System.out.println("found " + test);
+        audioFile = test.getAbsolutePath();
+      }
+      else {
+        audioFile = getWavForMP3(audioFile);
+      }
+    }
     ImageType imageType1 =
         imageType.equalsIgnoreCase(ImageType.WAVEFORM.toString()) ? ImageType.WAVEFORM :
             imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM :
@@ -113,6 +135,33 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                         imageType.equalsIgnoreCase(ImageType.SPEECH_TRANSCRIPT.toString()) ? ImageType.SPEECH_TRANSCRIPT : null;
 
     return imageWriter.writeImageSimple(audioFile,getImageOutDir(),width,height, imageType1);
+  }
+
+  /**
+   * Ultimately does lame --decode from.mp3 to.wav
+   * @param audioFile to convert
+   * @return
+   */
+  private String getWavForMP3(String audioFile) {
+    assert(audioFile.endsWith(".mp3"));
+    AudioConversion audioConversion = new AudioConversion();
+    String absolutePath = getAbsolutePathToWav(audioFile).getAbsolutePath();
+
+    if (!new File(absolutePath).exists())
+      System.err.println("expecting file at " + absolutePath);
+    else {
+      File file = audioConversion.convertMP3ToWav(absolutePath);
+      if (file.exists()) {
+       // String orig = audioFile;
+        audioFile = file.getAbsolutePath();
+        //System.out.println("getImageForAudioFile : from " + orig + " wrote to " + file + " or " + audioFile);
+      }
+      else {
+        System.err.println("getImageForAudioFile : can't find " +  file.getAbsolutePath());
+      }
+    }
+    assert(audioFile.endsWith(".wav"));
+    return audioFile;
   }
 
   /**

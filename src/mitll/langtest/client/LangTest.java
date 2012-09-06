@@ -164,24 +164,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param isGrading true if grading, false if not
    */
   private void makeExerciseList(Panel exerciseListPanel, boolean isGrading) {
+    System.out.println("makeExerciseList : english only " + englishOnlyMode + " goodwave " + goodwaveMode);
     this.exerciseList = isGrading ?
         new GradedExerciseList(currentExerciseVPanel,service,this,factory) :
-        englishOnlyMode ? new ExerciseList(currentExerciseVPanel,service,this,factory) {
+        goodwaveMode ? new ExerciseList(currentExerciseVPanel,service,this,factory) {
           @Override
-          protected void checkBeforeLoad(Exercise e) {
-            System.out.println("ignoring check before load for " + e);
-           // gotUser(-1);    //To change body of overridden methods use File | Settings | File Templates.
-          }
-
-          @Override
-          public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {
-            super.setFactory(factory, user, expectedGrades);
-            getExercisesInOrder();
-          }
+          protected void checkBeforeLoad(Exercise e) {} // don't try to login
         }: new ExerciseList(currentExerciseVPanel,service, this, factory);
 
     ScrollPanel itemScroller = new ScrollPanel(this.exerciseList);
-
     itemScroller.setSize((EXERCISE_LIST_WIDTH) +"px",(Window.getClientHeight() - (2*HEADER_HEIGHT) - FOOTER_HEIGHT - 60) + "px"); // 54
     exerciseListPanel.add(new HTML("<h2>Items</h2>"));
     exerciseListPanel.add(itemScroller);
@@ -192,6 +183,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void modeSelect() {
     boolean isGrading = checkParams();
+    System.out.println("modeSelect english " +englishOnlyMode + " grading " +isGrading );
     if (goodwaveMode) {
       gotUser(-1);
     }
@@ -211,7 +203,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // System.out.println("param grading " + isGrading);
     englishOnlyMode = isEnglish != null && !isEnglish.equals("false");
     goodwaveMode = goodwave != null && !goodwave.equals("false");
-    return (isGrading != null && !isGrading.equals("false"));
+    boolean grading = (isGrading != null && !isGrading.equals("false")) || englishOnlyMode;
+    return grading;
   }
 
   /**

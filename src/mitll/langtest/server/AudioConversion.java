@@ -156,7 +156,47 @@ public class AudioConversion {
     writeMP3(lamePath, pathToWav, mp3File);
   }
 
-  private void writeMP3(String lamePath, String pathToAudioFile, String mp3File) {
+  public File convertMP3ToWav(String pathToWav) {
+    assert(pathToWav.endsWith(".mp3"));
+    String mp3File = pathToWav.replace(".mp3",".wav");
+    String lamePath = LAME_PATH_WINDOWS;    // Windows
+    if (!new File(lamePath).exists()) {
+      lamePath = LAME_PATH_LINUX;
+    }
+    if (!new File(lamePath).exists()) {
+      System.err.println("no lame installed at " + lamePath + " or " +LAME_PATH_WINDOWS);
+    }
+
+
+    File file = writeWavFromMP3(lamePath, pathToWav, mp3File);
+/*    System.out.println("convertMP3ToWav using " +lamePath +" audio :'" +pathToWav +
+        "' out '" +mp3File+
+        "' = '" +file.getName()+
+        "'");*/
+    return file;
+  }
+
+  private File writeWavFromMP3(String lamePath, String pathToAudioFile, String mp3File) {
+    ProcessBuilder lameProc = new ProcessBuilder(lamePath, "--decode", pathToAudioFile, mp3File);
+    try {
+      //    System.out.println("writeMP3 running lame" + lameProc.command());
+      new ProcessRunner().runProcess(lameProc);
+      //     System.out.println("writeMP3 exited  lame" + lameProc);
+    } catch (IOException e) {
+      System.err.println("Couldn't run " + lameProc);
+      e.printStackTrace();
+    }
+
+    File testMP3 = new File(mp3File);
+    if (!testMP3.exists()) {
+      //  System.err.println("didn't write MP3 : " + testMP3.getAbsolutePath());
+    } else {
+      //    System.out.println("Wrote to " + testMP3 + " length " + testMP3.getTotalSpace());
+    }
+    return testMP3;
+  }
+
+  private File writeMP3(String lamePath, String pathToAudioFile, String mp3File) {
     ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File);
     try {
       //    System.out.println("writeMP3 running lame" + lameProc.command());
@@ -173,6 +213,7 @@ public class AudioConversion {
     } else {
   //    System.out.println("Wrote to " + testMP3 + " length " + testMP3.getTotalSpace());
     }
+    return testMP3;
   }
 
   private boolean writeWithFFMPEG(String path, String pathToAudioFile, String mp3File) {
