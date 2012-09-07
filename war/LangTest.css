@@ -68,6 +68,10 @@ h1 {
     background-color: red;
 }
 
+.Button{
+    font-family: Arial Unicode MS, Arial, sans-serif;
+}
+
 .clickable {
   cursor                      :   hand;
   cursor                      :   pointer;
