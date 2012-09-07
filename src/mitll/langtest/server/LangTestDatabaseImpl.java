@@ -39,7 +39,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public static final String ANSWERS = "answers";
   public static final int TIMEOUT = 30;
   public static final String DEFAULT_APP_NAME = "netPron2";
-  public static final String IMAGE_WRITER_IMAGES = "imageWriterImages";
+  public static final String IMAGE_WRITER_IMAGES = "audioimages";
   private DatabaseImpl db;
 
   private Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()

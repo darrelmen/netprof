@@ -6,6 +6,7 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -18,6 +19,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.ResizeLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -41,8 +43,10 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
   private String audioPath;
   private Image waveform,spectrogram;
   private int lastWidth = 0;
-  PopupPanel imageOverlay;// = new PopupPanel(false);
+  PopupPanel imageOverlay;
   private double songDuration;
+  Panel imageContainer;
+  AudioPositionPopup audioPositionPopup;
 
   /**
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
@@ -82,8 +86,6 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
     String content = e.getContent();
     String path = null;
     if (content.contains("audio")) {
-   //   System.err.println("content " + content);
-
       int i = content.indexOf("source src=");
       String s = content.substring(i + "source src=".length()+1).split("\\\"")[0];
       System.err.println("audio path '" + s + "'");
@@ -97,71 +99,59 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
     }
 
     VerticalPanel vp = new VerticalPanel();
-    // TODO make a good wave panel that plays audio, displays the wave form...
-    Widget questionContent = new HTML(content);//super.getQuestionContent(e);
+    Widget questionContent = new HTML(content);
     vp.add(questionContent);
-   if (path != null) {
-     final PlayAudioPanel playAudio = new PlayAudioPanel(controller.getSoundManager(), path);
-     HorizontalPanel hp = new HorizontalPanel();
-     final Panel outer = this;
-     imageOverlay = new PopupPanel(false);
-     playAudio.addListener(new AudioControl() {
-       public void reinitialize() {
-         imageOverlay.hide();
-       }
+    if (path != null) {
+    //  ResizeLayoutPanel resizeLayoutPanel = new ResizeLayoutPanel();
+    //  imageContainer = new ResizeVP();
+     // resizeLayoutPanel.add(imageContainer);
+      imageContainer = new VerticalPanel();
+      final PlayAudioPanel playAudio = new PlayAudioPanel(controller.getSoundManager(), path);
+      HorizontalPanel hp = new HorizontalPanel();
+      //final Panel outer = this;
+      imageOverlay = new PopupPanel(false);
+      imageOverlay.setStyleName("ImageOverlay");
+      SimplePanel w = new SimplePanel();
+      imageOverlay.add(w);
+      w.setStyleName("ImageOverlay");
 
-       public void songFirstLoaded(double durationEstimate) {
-         //To change body of implemented methods use File | Settings | File Templates.
-       }
+      audioPositionPopup = new AudioPositionPopup();
+      playAudio.addListener(audioPositionPopup);
+      hp.setWidth("100%");
+      hp.setSpacing(5);
 
-       public void songLoaded(double duration) {
-         songDuration = duration;
-         imageOverlay.show();
-         imageOverlay.setSize("3px",outer.getOffsetHeight()+"px");
-       }
+      hp.add(playAudio);
+      lastWidth = Window.getClientWidth();
 
-       public void update(double position) {
-         imageOverlay.setPopupPosition((int)(((double)outer.getOffsetHeight())*(position/songDuration)), getAbsoluteTop());
-       }
-     });
-     hp.setWidth("100%");
-     hp.setSpacing(5);
+      HorizontalPanel controlPanel = new HorizontalPanel();
+      waveform = new Image();
+      addCheckbox(controlPanel, "Waveform", waveform);
+      spectrogram = new Image();
+      addCheckbox(controlPanel, "Spectrogram", spectrogram);
+      hp.setCellHorizontalAlignment(controlPanel, HasHorizontalAlignment.ALIGN_RIGHT);
+      hp.add(controlPanel);
 
-     hp.add(playAudio);
-     lastWidth = Window.getClientWidth();
 
-     HorizontalPanel controlPanel = new HorizontalPanel();
-     waveform = new Image();
-     addCheckbox(controlPanel,"Waveform",waveform);
-     spectrogram = new Image();
-     addCheckbox(controlPanel,"Spectrogram",spectrogram);
-     hp.setCellHorizontalAlignment(controlPanel, HasHorizontalAlignment.ALIGN_RIGHT);
-     hp.add(controlPanel);
 
-     imageOverlay.setStyleName("ImageOverlay");
-     imageOverlay.add(new SimplePanel());
+      vp.add(hp);
 
-     vp.add(hp);
-     vp.add(waveform);
-     vp.add(spectrogram);
-     getImages(path, waveform, spectrogram);
-     this.audioPath = path;
-   }
+      imageContainer.add(waveform);
+      imageContainer.add(spectrogram);
+      vp.add(imageContainer);
+      getImages(path, waveform, spectrogram);
+      this.audioPath = path;
+    }
     return vp;
   }
 
-  public void setImageOverlayVisible(boolean visible){
-    //getOffsetWidth()
-    if(visible){
-      imageOverlay.show();
-    }
-    else{
-      imageOverlay.hide();
+  private static class ResizeVP extends VerticalPanel implements RequiresResize {
+    public void onResize() {
+      System.out.println("Got resize width " + getOffsetWidth() + " height " + getOffsetHeight());
     }
   }
 
   private void getImages() {
-    getImages(audioPath,waveform,spectrogram);
+    getImages(audioPath, waveform, spectrogram);
   }
 
   private void getImages(String path, Image waveform, Image spectrogram) {
@@ -177,6 +167,7 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
       public void onFailure(Throwable caught) {}
       public void onSuccess(String result) {
         waveform.setUrl(result);
+        audioPositionPopup.reinitialize();
       }
     });
   }
@@ -233,5 +224,57 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
   @Override
   protected void postAnswers(LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller, Exercise completedExercise) {
     controller.loadNextExercise(completedExercise);
+  }
+
+  private class AudioPositionPopup implements AudioControl {
+    double last = 0;
+    public void reinitialize() {
+     // System.out.println("reinit");
+      imageOverlay.hide();
+      int left = imageContainer.getAbsoluteLeft();
+      int top  = imageContainer.getAbsoluteTop();
+      imageOverlay.setPopupPosition(left, top);
+    }
+
+    public void songFirstLoaded(double durationEstimate) {
+    //  System.out.println("songFirstLoaded");
+    }
+
+    public void songLoaded(final double duration) {
+          songDuration = duration;
+          int offsetHeight = imageContainer.getOffsetHeight();
+          int left = imageContainer.getAbsoluteLeft();
+          int top = imageContainer.getAbsoluteTop();
+         // System.out.println("songLoaded " + duration + " height " + offsetHeight + " x 0 y " + top);
+          imageOverlay.setSize("2px", offsetHeight + "px");
+          imageOverlay.setPopupPosition(left, top);
+ /*         System.out.println("songLoaded " + imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() +
+              " x "+imageOverlay.getPopupLeft() + " y " + imageOverlay.getPopupTop() + " dim " +
+          imageOverlay.getOffsetWidth() + " x " + imageOverlay.getOffsetHeight());*/
+  }
+
+    public void update(double position) {
+      if (!imageOverlay.isShowing()) imageOverlay.show();
+      last = position;
+      showAt(position);
+    }
+
+    public void show() {
+      if (imageOverlay.isShowing()) {
+        //System.out.println("showing at " + last);
+        showAt(last);
+      }
+    }
+
+    private void showAt(double position) {
+      int offsetHeight = imageContainer.getOffsetHeight();
+      imageOverlay.setSize("2px", offsetHeight + "px");
+
+      int left = imageContainer.getAbsoluteLeft() + (int) (((double) imageContainer.getOffsetWidth()) * (position / songDuration));
+      int top = imageContainer.getAbsoluteTop();
+      //System.out.println("update " + position + " left " + left + " top " + top);
+      imageOverlay.setPopupPosition(left, top);
+      //System.out.println("update showing " + imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() + " x "+imageOverlay.getPopupLeft() + " y " + imageOverlay.getPopupTop());
+    }
   }
 }
