@@ -63,6 +63,11 @@ h1 {
   margin-left: 10px;
 }
 
+.ImageOverlay{
+    border: none;
+    background-color: red;
+}
+
 .clickable {
   cursor                      :   hand;
   cursor                      :   pointer;

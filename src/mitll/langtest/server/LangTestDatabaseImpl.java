@@ -118,7 +118,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       String wavFile = audioFile.substring(0,audioFile.length()-".mp3".length())+".wav";
       //System.out.println("getImageForAudioFile : wav " + wavFile);
 
-      File test = getAbsolutePathToWav(wavFile);
+      File test = getAbsoluteFile(wavFile);
       if (test.exists()) {
         // System.out.println("found " + test);
         audioFile = test.getAbsolutePath();
@@ -134,7 +134,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                     imageType.equalsIgnoreCase(ImageType.PHONE_TRANSCRIPT.toString()) ? ImageType.PHONE_TRANSCRIPT :
                         imageType.equalsIgnoreCase(ImageType.SPEECH_TRANSCRIPT.toString()) ? ImageType.SPEECH_TRANSCRIPT : null;
 
-    return imageWriter.writeImageSimple(audioFile,getImageOutDir(),width,height, imageType1);
+    String imageOutDir = getImageOutDir();
+    String absolutePathToImage = imageWriter.writeImageSimple(audioFile, getAbsoluteFile(imageOutDir).getAbsolutePath(), width, height, imageType1);
+    String installPath = getInstallPath();
+    assert (absolutePathToImage.startsWith(installPath));
+
+    String relativeImagePath = ensureForwardSlashes(absolutePathToImage.substring(installPath.length()));
+    //System.out.println("rel path is " + relativeImagePath);
+    return relativeImagePath;
   }
 
   /**
@@ -145,7 +152,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String getWavForMP3(String audioFile) {
     assert(audioFile.endsWith(".mp3"));
     AudioConversion audioConversion = new AudioConversion();
-    String absolutePath = getAbsolutePathToWav(audioFile).getAbsolutePath();
+    String absolutePath = getAbsoluteFile(audioFile).getAbsolutePath();
 
     if (!new File(absolutePath).exists())
       System.err.println("expecting file at " + absolutePath);
@@ -259,17 +266,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Writes an mp3 equivalent as well.
    *
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopClicked(mitll.langtest.client.recorder.RecordButtonPanel.ImageAnchor, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.shared.Exercise, int, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
    * @param base64EncodedString
    * @param plan
    * @param exercise
    * @param question
    * @param user
-   * @return
+   * @return relative path with forward slashes
    */
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user) {
     String wavPath = getLocalPathToAnswer(plan, exercise, question, user);
 
-    File file = getAbsolutePathToWav(wavPath);
+    File file = getAbsoluteFile(wavPath);
 
     boolean valid = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
     /*    if (!valid) {
@@ -279,18 +287,30 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     System.out.println("audio file " + file.getAbsolutePath() + " is valid");
   }*/
     db.answerDAO.addAnswer(Integer.parseInt(user), plan, exercise, Integer.parseInt(question), "", file.getPath(), valid, db);
-    String wavPathWithForwardSlashSeparators = wavPath.replaceAll("\\\\", "/");
+    String wavPathWithForwardSlashSeparators = ensureForwardSlashes(wavPath);
     return new AudioAnswer(wavPathWithForwardSlashSeparators, valid);
   }
 
-  private File getAbsolutePathToWav(String wavPath) {
+  private String ensureForwardSlashes(String wavPath) {
+    return wavPath.replaceAll("\\\\", "/");
+  }
+
+  private File getAbsoluteFile(String filePath) {
+    String realContextPath = getInstallPath();
+    File file = new File(realContextPath, filePath);
+    assert(file.exists());
+    return file;
+  }
+
+  private String getInstallPath() {
     ServletContext context = getServletContext();
     String realContextPath = context.getRealPath(getThreadLocalRequest().getContextPath());
 
     String appName = getServletContext().getInitParameter("appName");
     if (appName == null) appName = DEFAULT_APP_NAME;
-    realContextPath = realContextPath.replace(appName +"/" + appName, appName);
-    return new File(realContextPath, wavPath);
+    String dupPath = appName + File.separator + appName;
+    realContextPath = realContextPath.replace(dupPath, appName);// hack to deal with path duplication issue
+    return realContextPath;
   }
 
   /**
@@ -299,7 +319,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private void ensureWriteMP3(String pathToWav) {
     AudioConversion audioConversion = new AudioConversion();
-    File absolutePathToWav = getAbsolutePathToWav(pathToWav);
+    File absolutePathToWav = getAbsoluteFile(pathToWav);
 
     String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
     File mp3 = new File(mp3File);
@@ -312,6 +332,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  /**
+   *
+   * @param plan
+   * @param exercise
+   * @param question
+   * @param user
+   * @return a path relative to the install dir
+   */
   private String getLocalPathToAnswer(String plan, String exercise, String question, String user) {
     String tomcatWriteDirectory = getTomcatDir();
 
