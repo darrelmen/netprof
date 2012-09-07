@@ -46,7 +46,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private Panel imageContainer;
   private AudioPositionPopup audioPositionPopup;
   protected LangTestDatabaseAsync service;
-  private SoundManagerAPI soundManager;
+  protected SoundManagerAPI soundManager;
+  private PlayAudioPanel playAudio;
   boolean debug = false;
 
   /**
@@ -88,39 +89,57 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private void addWidgets(String path) {
     //  ResizeLayoutPanel resizeLayoutPanel = new ResizeLayoutPanel();
     //  imageContainer = new ResizeVP();
-     // resizeLayoutPanel.add(imageContainer);
-      imageContainer = new VerticalPanel();
-      final PlayAudioPanel playAudio = new PlayAudioPanel(soundManager, path);
-      HorizontalPanel hp = new HorizontalPanel();
-      //final Panel outer = this;
-      imageOverlay = new PopupPanel(false);
-      imageOverlay.setStyleName("ImageOverlay");
-      SimplePanel w = new SimplePanel();
-      imageOverlay.add(w);
-      w.setStyleName("ImageOverlay");
+    // resizeLayoutPanel.add(imageContainer);
+    imageContainer = new VerticalPanel();
+    HorizontalPanel hp = new HorizontalPanel();
+    hp.setWidth("100%");
+    hp.setSpacing(5);
 
-      audioPositionPopup = new AudioPositionPopup();
-      playAudio.addListener(audioPositionPopup);
-      hp.setWidth("100%");
-      hp.setSpacing(5);
 
-      hp.add(playAudio);
-      lastWidth = Window.getClientWidth();
+    playAudio = addButtonsToButtonRow(hp, path);
+    lastWidth = Window.getClientWidth();
 
-      HorizontalPanel controlPanel = new HorizontalPanel();
-      waveform = new Image();
-      addCheckbox(controlPanel, "Waveform", waveform);
-      spectrogram = new Image();
-      addCheckbox(controlPanel, "Spectrogram", spectrogram);
-      hp.setCellHorizontalAlignment(controlPanel, HasHorizontalAlignment.ALIGN_RIGHT);
-      hp.add(controlPanel);
-      add(hp);
+    HorizontalPanel controlPanel = new HorizontalPanel();
+    waveform = new Image();
+    addCheckbox(controlPanel, "Waveform", waveform);
+    spectrogram = new Image();
+    addCheckbox(controlPanel, "Spectrogram", spectrogram);
+    hp.setCellHorizontalAlignment(controlPanel, HasHorizontalAlignment.ALIGN_RIGHT);
+    hp.add(controlPanel);
+    add(hp);
 
-      imageContainer.add(waveform);
-      imageContainer.add(spectrogram);
-      add(imageContainer);
-      getImages(path, waveform, spectrogram);
-      this.audioPath = path;
+    imageContainer.add(waveform);
+    imageContainer.add(spectrogram);
+    add(imageContainer);
+
+    if (path != null) { // TODO awkward... better way?
+      getImagesForPath(path);
+    }
+  }
+
+  public void getImagesForPath(String path) {
+    getImages(path, waveform, spectrogram);
+    this.audioPath = path;
+    playAudio.startSong(path);
+  }
+
+  protected PlayAudioPanel addButtonsToButtonRow(HorizontalPanel hp, String path) {
+    final PlayAudioPanel playAudio = makePlayAudioPanel();
+    imageOverlay = new PopupPanel(false);
+    imageOverlay.setStyleName("ImageOverlay");
+    SimplePanel w = new SimplePanel();
+    imageOverlay.add(w);
+    w.setStyleName("ImageOverlay");
+
+    audioPositionPopup = new AudioPositionPopup();
+    playAudio.addListener(audioPositionPopup);
+
+    hp.add(playAudio);
+    return playAudio;
+  }
+
+  protected PlayAudioPanel makePlayAudioPanel() {
+    return new PlayAudioPanel(soundManager);
   }
 
   private static class ResizeVP extends VerticalPanel implements RequiresResize {

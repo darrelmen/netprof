@@ -1,13 +1,25 @@
 package mitll.langtest.client.goodwave;
 
+import com.goodwave.client.PlayAudioPanel;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanel;
+import mitll.langtest.client.exercise.ExerciseQuestionState;
+import mitll.langtest.client.recorder.RecordButton;
+import mitll.langtest.client.recorder.RecordButtonPanel;
+import mitll.langtest.client.recorder.SimpleRecordPanel;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -37,6 +49,7 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
 
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
+   *
    * @param e
    * @return
    */
@@ -46,15 +59,15 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
     String path = null;
     if (content.contains("audio")) {
       int i = content.indexOf("source src=");
-      String s = content.substring(i + "source src=".length()+1).split("\\\"")[0];
+      String s = content.substring(i + "source src=".length() + 1).split("\\\"")[0];
       System.err.println("audio path '" + s + "'");
       path = s;
 
       int start = content.indexOf("<audio");
       int end = content.indexOf("audio>");
-      content = content.substring(0,start) + content.substring(end + "audio>".length());
+      content = content.substring(0, start) + content.substring(end + "audio>".length());
 
-    //  System.err.println("after " + content);
+      //  System.err.println("after " + content);
     }
 
     VerticalPanel vp = new VerticalPanel();
@@ -70,23 +83,17 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
-   *
-   * @see mitll.langtest.client.exercise.ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController)
    * @param exercise
    * @param service
    * @param controller
    * @param index
    * @return
+   * @see mitll.langtest.client.exercise.ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController)
    */
   @Override
-  protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
-
-    GoodwaveRecordPanel widgets = new GoodwaveRecordPanel(service, controller, exercise, this, index);
-    GoodWaveCaptionPanel testCaptionPanel = new GoodWaveCaptionPanel("User Recorder", widgets);
-    testCaptionPanel.add(widgets);
-
-    testCaptionPanel.setHeight("600px");
-    return testCaptionPanel;
+  protected Widget getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service, final ExerciseController controller, final int index) {
+    final ExerciseQuestionState questionState = this;
+    return new RecordAudioPanel(service, controller, exercise, questionState, index);
   }
 
   @Override
@@ -107,5 +114,69 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
   @Override
   protected void postAnswers(LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller, Exercise completedExercise) {
     controller.loadNextExercise(completedExercise);
+  }
+
+  private static class RecordAudioPanel extends AudioPanel {
+    private final ExerciseController controller;
+    private final Exercise exercise;
+    private final ExerciseQuestionState questionState;
+    private final int index;
+
+    public RecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, ExerciseQuestionState questionState, int index) {
+      super(null, service, controller.getSoundManager());
+      this.controller = controller;
+      this.exercise = exercise;
+      this.questionState = questionState;
+      this.index = index;
+    }
+
+    @Override
+    protected PlayAudioPanel makePlayAudioPanel() {
+      final Button record = new Button("\u25ba record");
+      final Widget outer = this;
+      RecordButton rb = new RecordButton(record) {
+        @Override
+        protected void stopRecording() {
+          controller.stopRecording();
+
+          service.writeAudioFile(controller.getBase64EncodedWavFile()
+              , exercise.getPlan(), exercise.getID(), "" + index, "" + controller.getUser(), new AsyncCallback<AudioAnswer>() {
+            public void onFailure(Throwable caught) {
+            }
+
+            public void onSuccess(AudioAnswer result) {
+              String path1 = result.path;
+              if (path1.endsWith(".wav")) path1 = path1.replace(".wav", ".mp3");
+              getImagesForPath(path1);
+              questionState.recordCompleted(outer);
+            }
+          });
+        }
+
+        @Override
+        protected void startRecording() {
+          controller.startRecording();
+        }
+
+        @Override
+        protected void showRecording() {
+          record.setText("stop");
+        }
+
+        @Override
+        protected void showStopped() {
+          record.setText("\u25ba record");
+        }
+      };
+
+      return new PlayAudioPanel(soundManager) {
+        @Override
+        protected void addButtons() {
+          add(record);
+          super.addButtons();
+        }
+      };
+
+    }
   }
 }

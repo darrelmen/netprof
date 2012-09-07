@@ -3,23 +3,15 @@
  */
 package mitll.langtest.client.recorder;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.AudioTag;
+import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
@@ -91,10 +83,17 @@ public class SimpleRecordPanel extends RecordButtonPanel {
   }
 
   @Override
-  protected void nowRecording() {
+  protected void startRecording() {
+    super.startRecording();
     playback.setWidget(new HTML(""));
   }
 
+  /**
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
+   * @param result
+   * @param questionState
+   * @param outer
+   */
   @Override
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {
     showAudioValidity(result.valid, questionState, outer);
@@ -102,7 +101,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
   }
 
   /**
-   * @see #stopClicked(mitll.langtest.client.recorder.SimpleRecordPanel.ImageAnchor, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.shared.Exercise, int, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
+   * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
    * @param result
    */
   private void setAudioTag(String result) {
