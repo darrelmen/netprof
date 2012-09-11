@@ -3,6 +3,7 @@ package mitll.langtest.client;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.*;
+import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.List;
 
@@ -46,4 +47,6 @@ public interface LangTestDatabase extends RemoteService {
   void checkoutExerciseID(String user,String id);
 
   String getImageForAudioFile(String audioFile, String imageType, int width, int height);
+
+  PretestScore getScoreForAudioFile(String audioFile, int width, int height);
 }

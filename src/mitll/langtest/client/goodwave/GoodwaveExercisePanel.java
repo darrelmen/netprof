@@ -1,13 +1,9 @@
 package mitll.langtest.client.goodwave;
 
 import com.goodwave.client.PlayAudioPanel;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -16,8 +12,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanel;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.client.recorder.RecordButtonPanel;
-import mitll.langtest.client.recorder.SimpleRecordPanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
@@ -30,6 +24,8 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResize {
+  private String refAudio;
+
   /**
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    * @param e
@@ -66,7 +62,7 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
       int start = content.indexOf("<audio");
       int end = content.indexOf("audio>");
       content = content.substring(0, start) + content.substring(end + "audio>".length());
-
+      this.refAudio = path;
       //  System.err.println("after " + content);
     }
 
@@ -93,7 +89,7 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
   @Override
   protected Widget getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service, final ExerciseController controller, final int index) {
     final ExerciseQuestionState questionState = this;
-    return new RecordAudioPanel(service, controller, exercise, questionState, index);
+    return new RecordAudioPanel(service, controller, exercise, questionState, index, refAudio);
   }
 
   @Override
@@ -121,19 +117,22 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
     private final Exercise exercise;
     private final ExerciseQuestionState questionState;
     private final int index;
+    private final String refAudio;
 
-    public RecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, ExerciseQuestionState questionState, int index) {
+    public RecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, ExerciseQuestionState questionState, int index, String refAudio) {
       super(null, service, controller.getSoundManager());
       this.controller = controller;
       this.exercise = exercise;
       this.questionState = questionState;
       this.index = index;
+      this.refAudio = refAudio;
     }
 
     @Override
     protected PlayAudioPanel makePlayAudioPanel() {
-      final Button record = new Button("\u25ba record");
+      final Button record = new Button("record");
       final Widget outer = this;
+
       RecordButton rb = new RecordButton(record) {
         @Override
         protected void stopRecording() {
@@ -147,6 +146,7 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
             public void onSuccess(AudioAnswer result) {
               String path1 = result.path;
               if (path1.endsWith(".wav")) path1 = path1.replace(".wav", ".mp3");
+              setRefAudio(refAudio);
               getImagesForPath(path1);
               questionState.recordCompleted(outer);
             }
@@ -165,7 +165,7 @@ public class GoodwaveExercisePanel extends ExercisePanel implements RequiresResi
 
         @Override
         protected void showStopped() {
-          record.setText("\u25ba record");
+          record.setText("record");
         }
       };
 
