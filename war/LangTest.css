@@ -77,6 +77,15 @@ h1 {
   cursor                      :   pointer;
 }
 
+.gwt-Button {
+    background: none repeat scroll 0 0 #DDDDDD;
+    border: 1px solid #AAAAAA;
+    color: #333333;
+    margin-right: 5px;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
 .RecordPopup{
   background-color: white;
 }

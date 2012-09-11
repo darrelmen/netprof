@@ -7,6 +7,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
@@ -14,6 +15,7 @@ import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultsAndGrades;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.scoring.PretestScore;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -104,6 +106,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Get an image of desired dimensions for the audio file
+   *
+   * @see mitll.langtest.client.goodwave.AudioPanel#getImageURLForAudio
    * @param audioFile
    * @param imageType
    * @param width
@@ -115,7 +119,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     //System.out.println("getImageForAudioFile : for " + audioFile);
 
     if (audioFile.endsWith(".mp3")) {
-      String wavFile = audioFile.substring(0,audioFile.length()-".mp3".length())+".wav";
+      String wavFile = removeSuffix(audioFile) +".wav";
       //System.out.println("getImageForAudioFile : wav " + wavFile);
 
       File test = getAbsoluteFile(wavFile);
@@ -142,6 +146,50 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String relativeImagePath = ensureForwardSlashes(absolutePathToImage.substring(installPath.length()));
     //System.out.println("rel path is " + relativeImagePath);
     return relativeImagePath;
+  }
+
+  public PretestScore getScoreForAudioFile(String audioFile, int width, int height) {
+   // ImageWriter imageWriter = new ImageWriter();
+    //System.out.println("getImageForAudioFile : for " + audioFile);
+
+    String noSuffix = removeSuffix(audioFile);
+    if (audioFile.endsWith(".mp3")) {
+      String wavFile = noSuffix +".wav";
+      //System.out.println("getImageForAudioFile : wav " + wavFile);
+
+      File test = getAbsoluteFile(wavFile);
+        // System.out.println("found " + test);
+        audioFile = test.exists() ? test.getAbsolutePath() :  getWavForMP3(audioFile);
+
+    }
+   /* ImageType imageType1 =
+        imageType.equalsIgnoreCase(ImageType.WAVEFORM.toString()) ? ImageType.WAVEFORM :
+            imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM :
+                imageType.equalsIgnoreCase(ImageType.WORD_TRANSCRIPT.toString()) ? ImageType.WORD_TRANSCRIPT :
+                    imageType.equalsIgnoreCase(ImageType.PHONE_TRANSCRIPT.toString()) ? ImageType.PHONE_TRANSCRIPT :
+                        imageType.equalsIgnoreCase(ImageType.SPEECH_TRANSCRIPT.toString()) ? ImageType.SPEECH_TRANSCRIPT : null;
+*/
+    File testAudioFile = new File(audioFile);
+    String name = testAudioFile.getName();
+
+
+    String installPath = getInstallPath();
+    String imageOutDir = getImageOutDir();
+    String testAudioDir = testAudioFile.getParent().substring(installPath.length());
+
+    System.out.println("scoring " + name + " in dir " +testAudioDir);
+    // TODO : pass in reference audio and reference audio directory!
+    PretestScore pretestScore = new Scoring(installPath).scoreRepeat(testAudioDir, removeSuffix(name), testAudioDir, removeSuffix(name), imageOutDir, width, height);
+    //String absolutePathToImage = imageWriter.writeImageSimple(audioFile, getAbsoluteFile(imageOutDir).getAbsolutePath(), width, height, imageType1);
+   // assert (absolutePathToImage.startsWith(installPath));
+
+  //  String relativeImagePath = ensureForwardSlashes(absolutePathToImage.substring(installPath.length()));
+    System.out.println("score " + pretestScore);
+    return pretestScore;
+  }
+
+  private String removeSuffix(String audioFile) {
+    return audioFile.substring(0, audioFile.length() - ".mp3".length());
   }
 
   /**
@@ -266,7 +314,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Writes an mp3 equivalent as well.
    *
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopClicked(mitll.langtest.client.recorder.RecordButtonPanel.ImageAnchor, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.shared.Exercise, int, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    * @param base64EncodedString
    * @param plan
    * @param exercise
