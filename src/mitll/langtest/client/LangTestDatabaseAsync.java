@@ -3,6 +3,7 @@ package mitll.langtest.client;
 import audio.image.ImageType;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.*;
+import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.List;
 
@@ -39,4 +40,6 @@ public interface LangTestDatabaseAsync {
   void changeGrade(Grade toChange, AsyncCallback<Void> async);
 
   void getImageForAudioFile(String audioFile, String imageType, int width, int height, AsyncCallback<String> async);
+
+  void getScoreForAudioFile(String audioFile, int width, int height, AsyncCallback<PretestScore> async);
 }
