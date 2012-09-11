@@ -26,6 +26,8 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.langtest.shared.scoring.PretestScore;
 
 /**
  * Mainly delegates recording to the {@link mitll.langtest.client.recorder.SimpleRecordPanel}.
@@ -37,9 +39,10 @@ import mitll.langtest.shared.Exercise;
 public class AudioPanel extends VerticalPanel implements RequiresResize {
   public static final int MIN_WIDTH = 256;
   public static final int HEIGHT = 128;
+  public static final int ANNOTATION_HEIGHT = 20;
   public static final int RIGHT_MARGIN = 400;
   private String audioPath;
-  private Image waveform,spectrogram;
+  private ImageAndCheck waveform,spectrogram,speech,phones,words;
   private int lastWidth = 0;
   private PopupPanel imageOverlay;
   private double songDuration;
@@ -49,9 +52,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected SoundManagerAPI soundManager;
   private PlayAudioPanel playAudio;
   boolean debug = false;
+  private String refAudio;
 
   /**
-   * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
+   * @see GoodwaveExercisePanel#getQuestionContent(mitll.langtest.shared.Exercise)
    * @paramx e
    * @param service
    * @paramx userFeedback
@@ -59,9 +63,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   public AudioPanel(String path, LangTestDatabaseAsync service, SoundManagerAPI soundManager) {
     this.soundManager = soundManager;
-    //super(e, service, userFeedback, controller);
     this.service = service;
-  //  this.controller = controller;
+   // TODO call this from container
     Window.addResizeHandler(new ResizeHandler() {
       public void onResize(ResizeEvent event) {
         int diff = Math.abs(event.getWidth() - lastWidth);
@@ -100,16 +103,31 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     lastWidth = Window.getClientWidth();
 
     HorizontalPanel controlPanel = new HorizontalPanel();
-    waveform = new Image();
-    addCheckbox(controlPanel, "Waveform", waveform);
-    spectrogram = new Image();
-    addCheckbox(controlPanel, "Spectrogram", spectrogram);
+
+    waveform = new ImageAndCheck();
+    imageContainer.add(waveform.image);
+    controlPanel.add(addCheckbox("Waveform", waveform));
+
+    spectrogram = new ImageAndCheck();
+    imageContainer.add(spectrogram.image);
+    controlPanel.add(addCheckbox("Spectrogram", spectrogram));
+
+    words = new ImageAndCheck();
+    imageContainer.add(words.image);
+    controlPanel.add(addCheckbox("words", words));
+
+    phones = new ImageAndCheck();
+    imageContainer.add(phones.image);
+    controlPanel.add(addCheckbox("phones", phones));
+
+    speech = new ImageAndCheck();
+    imageContainer.add(speech.image);
+    controlPanel.add(addCheckbox("speech", speech));
+
     hp.setCellHorizontalAlignment(controlPanel, HasHorizontalAlignment.ALIGN_RIGHT);
     hp.add(controlPanel);
     add(hp);
 
-    imageContainer.add(waveform);
-    imageContainer.add(spectrogram);
     add(imageContainer);
 
     if (path != null) { // TODO awkward... better way?
@@ -117,10 +135,23 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
   }
 
+  private static class ImageAndCheck {
+    Image image;
+    Widget check;
+    public ImageAndCheck() {
+      image = new Image();
+      image.setVisible(false);
+    }
+  }
+
   public void getImagesForPath(String path) {
-    getImages(path, waveform, spectrogram);
     this.audioPath = path;
+    getImages();
     playAudio.startSong(path);
+  }
+
+  public void setRefAudio(String path) {
+    this.refAudio = path;
   }
 
   protected PlayAudioPanel addButtonsToButtonRow(HorizontalPanel hp, String path) {
@@ -149,37 +180,76 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   private void getImages() {
-    getImages(audioPath, waveform, spectrogram);
-  }
-
-  private void getImages(String path, Image waveform, Image spectrogram) {
     int width = Window.getClientWidth()- RIGHT_MARGIN;
-    getImageURLForAudio(path, "Waveform", width, waveform);
-    getImageURLForAudio(path, "Spectrogram", width, spectrogram);
+    getImageURLForAudio(audioPath, "Waveform", width, waveform);
+    getImageURLForAudio(audioPath, "Spectrogram", width, spectrogram);
+    if (refAudio != null) {
+      getTranscriptImageURLForAudio(audioPath,width,words,phones,speech);
+    }
   }
 
-  private void getImageURLForAudio(String path, String type,int width, final Image waveform) {
+  private void getImageURLForAudio(String path, String type,int width, final ImageAndCheck waveform) {
     int toUse = Math.max(MIN_WIDTH, width);
     int height = HEIGHT;
     service.getImageForAudioFile(path, type, toUse, height, new AsyncCallback<String>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(String result) {
-        waveform.setUrl(result);
+        waveform.image.setUrl(result);
+        waveform.image.setVisible(true);
+        waveform.check.setVisible(true);
         audioPositionPopup.reinitialize();
       }
     });
   }
 
-  private void addCheckbox(HorizontalPanel controlPanel,String label, final Widget widget) {
+  /**
+   * TODO configure for multi-ref
+   * @param path
+   * @param width
+   * @param wordTranscript
+   * @param phoneTranscript
+   * @param speechTranscript
+   */
+  private void getTranscriptImageURLForAudio(String path, int width, final ImageAndCheck wordTranscript,final ImageAndCheck phoneTranscript,final ImageAndCheck speechTranscript) {
+    int toUse = Math.max(MIN_WIDTH, width);
+    int height = ANNOTATION_HEIGHT;
+    service.getScoreForAudioFile(path, toUse, height, new AsyncCallback<PretestScore>() {
+      public void onFailure(Throwable caught) {}
+      public void onSuccess(PretestScore result) {
+        System.out.println("got " + result);
+        if (result.sTypeToImage.get(NetPronImageType.WORD_TRANSCRIPT) != null) {
+          wordTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.WORD_TRANSCRIPT));
+          wordTranscript.image.setVisible(true);
+          wordTranscript.check.setVisible(true);
+        }
+        if (result.sTypeToImage.get(NetPronImageType.PHONE_TRANSCRIPT) != null) {
+          phoneTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.PHONE_TRANSCRIPT));
+          phoneTranscript.image.setVisible(true);
+          phoneTranscript.check.setVisible(true);
+        }
+        if (result.sTypeToImage.get(NetPronImageType.SPEECH_TRANSCRIPT) != null) {
+          speechTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.SPEECH_TRANSCRIPT));
+          speechTranscript.image.setVisible(true);
+          speechTranscript.check.setVisible(true);
+        }
+      }
+    });
+  }
+
+  private Panel addCheckbox(String label, final ImageAndCheck widget) {
     CheckBox w = new CheckBox();
     w.setValue(true);
     w.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
       public void onValueChange(ValueChangeEvent<Boolean> event) {
-        widget.setVisible(event.getValue());
+        widget.image.setVisible(event.getValue());
       }
     });
-    controlPanel.add(w);
-    controlPanel.add(new Label(label));
+    Panel p = new HorizontalPanel();
+    p.add(w);
+    p.add(new Label(label));
+    p.setVisible(false);
+    widget.check = p;
+    return p;
   }
 
   private class AudioPositionPopup implements AudioControl {

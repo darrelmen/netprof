@@ -26,6 +26,13 @@ public class AudioConversion {
   private static final String FFMPEG_PATH_LINUX = "/usr/local/bin/ffmpeg";
   private AudioCheck audioCheck = new AudioCheck();
 
+  /**
+   * Also writes an MP3 file equivalent.
+   *
+   * @param base64EncodedString audio bytes from the client
+   * @param file where we want to write the wav file to
+   * @return true if audio is valid (not too short, not silence)
+   */
   public boolean convertBase64ToAudioFiles(String base64EncodedString, File file) {
     File parentFile = file.getParentFile();
     // System.out.println("making dir " + parentFile.getAbsolutePath());
@@ -110,6 +117,8 @@ public class AudioConversion {
   }
 
   /**
+   * Writes a WEBM file.  This is an open source format supported by Firefox (which doesn't handle mp3).
+   *
    * @see LangTestDatabaseImpl#ensureWriteMP3(String)
    * @see LangTestDatabaseImpl#writeAudioFile(String, String, String, String, String)
    * @param path
