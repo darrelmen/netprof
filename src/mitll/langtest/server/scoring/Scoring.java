@@ -34,6 +34,8 @@ import java.util.Map;
  */
 public class Scoring {
   private static final String CONFIGURATIONS = "windowsConfig";
+  public static final String LINUX_SOX_BIN_DIR = "/usr/local/bin";
+  public static final String WINDOWS_SOX_BIN_DIR = "C:\\Users\\go22670\\sox-14-3-2";
   private Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
   private Dirs dirs;
   private static final float MIN_AUDIO_SECONDS = 0.3f;
@@ -78,16 +80,28 @@ public class Scoring {
                                   int imageWidth, int imageHeight) {
     return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,refAudioDir,refAudioFileNoSuffix,"This is a test.","Arabic",scoringDir,imageOutDir,imageWidth,imageHeight);
   }
+
+  /**
+   * Use hydec to do scoring
+   * @param testAudioDir
+   * @param testAudioFileNoSuffix
+   * @param refAudioDir
+   * @param refAudioFileNoSuffix
+   * @param sentence
+   * @param asrLanguage
+   * @param scoringDir
+   * @param imageOutDir
+   * @param imageWidth
+   * @param imageHeight
+   * @return
+   */
   public PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
                                           String refAudioDir, String refAudioFileNoSuffix,
                                           String sentence, String asrLanguage,
                                           String scoringDir,
                                           String imageOutDir,
-                                          int imageWidth, int imageHeight//,
-                                          /*RepeatExercise repeatExercise,*/
-    //                                        String planName, String testName
-  ) /*throws Exception*/ {
-  //  try {
+                                          int imageWidth, int imageHeight
+  ) {
     String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + ".wav";
     File wavFile = new File(pathname);
     if (!wavFile.exists()) {
@@ -95,49 +109,25 @@ public class Scoring {
       return new PretestScore();
     }
 
-    try {
-      AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(wavFile);
-      float sampleRate = audioFileFormat.getFormat().getSampleRate();
-      if (sampleRate != 16000f) {
-        String s = new AudioConverter().convertTo16KHZ("C:\\Users\\go22670\\sox-14-3-2", pathname);     // TODO : work in linux
-        String sampled = testAudioDir + File.separator + testAudioFileNoSuffix + "_16K.wav";
-        if (new FileCopier().copy(s, sampled)) {
-          String name = new File(sampled).getName();
-          testAudioFileNoSuffix = name.substring(0,name.length()-4);
-        }
-      }
-    } catch (UnsupportedAudioFileException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    // convertTo16KHZ(testAudioFileNoSuffix +".wav");
-      // the path to the test audio is <tomcatWriteDirectory>/<pretestFilesRelativePath>/<planName>/<testsRelativePath>/<testName>
-      Audio testAudio = Audio$.MODULE$.apply(/*tomcatWriteDirectory +
-          File.separator + pretestFilesRelativePath +
-          File.separator + planName +
-          File.separator + testsRelativePath +
-          File.separator + testName,
-          repeatExercise.getBasename()*/
-          testAudioDir,testAudioFileNoSuffix,
-          false /* notForScoring */, dirs);
+    testAudioFileNoSuffix = convertTo16Khz(testAudioDir, testAudioFileNoSuffix, pathname, wavFile);
+    // the path to the test audio is <tomcatWriteDirectory>/<pretestFilesRelativePath>/<planName>/<testsRelativePath>/<testName>
+    Audio testAudio = Audio$.MODULE$.apply(
+        testAudioDir, testAudioFileNoSuffix,
+        false /* notForScoring */, dirs);
 
-      // the path to the ref audio is <tomcatWriteDirectory>/<pretestFilesRelativePath>/<planName>/<referenceName>
-      // referenceName is called exercise_name in the db.
-      Audio refAudio = Audio$.MODULE$.apply(/*tomcatWriteDirectory +
-          File.separator + pretestFilesRelativePath +
-          File.separator + planName,
-          repeatExercise.getReferenceName(),*/
-          refAudioDir, refAudioFileNoSuffix,
-          false /* notForScoring */, dirs);
+    // the path to the ref audio is <tomcatWriteDirectory>/<pretestFilesRelativePath>/<planName>/<referenceName>
+    // referenceName is called exercise_name in the db.
+    Audio refAudio = Audio$.MODULE$.apply(
+        refAudioDir, refAudioFileNoSuffix,
+        false /* notForScoring */, dirs);
 
-      Scores scores = computeRepeatExerciseScores(scoringDir,testAudio, refAudio, sentence, asrLanguage);
+    Scores scores = computeRepeatExerciseScores(scoringDir, testAudio, refAudio, sentence, asrLanguage);
 
-      // get the phones for display in the phone accuracy pane, maps start
-      // time to Transcript events
-      Map<String, Float> phones = scores.eventScores.get("phones");
-      Map<String, Float> emptyMap = Collections.emptyMap();
-      Map<String, Float> phoneScores = phones != null ? new HashMap<String, Float>(phones) : emptyMap;
+    // get the phones for display in the phone accuracy pane, maps start
+    // time to Transcript events
+    Map<String, Float> phones = scores.eventScores.get("phones");
+    Map<String, Float> emptyMap = Collections.emptyMap();
+    Map<String, Float> phoneScores = phones != null ? new HashMap<String, Float>(phones) : emptyMap;
 
 
     // These may not all exist. The speech file is created only by multisv
@@ -147,37 +137,68 @@ public class Scoring {
     //log("Phone File: " + phoneLabFile);
     String speechLabFile = testAudioDir + File.separator
         + testAudioFileNoSuffix + ".speech.lab";
-   // log("Speech File: " + speechLabFile);
+    // log("Speech File: " + speechLabFile);
     String wordLabFile = testAudioDir + File.separator
-        + testAudioFileNoSuffix+ ".words.lab";
-    Map<ImageType,String> typeToFile = new HashMap<ImageType, String>();
+        + testAudioFileNoSuffix + ".words.lab";
+    Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
 
-    if (new File(phoneLabFile).exists()) typeToFile.put(ImageType.PHONE_TRANSCRIPT,phoneLabFile);
-    if (new File(wordLabFile).exists()) typeToFile.put(ImageType.WORD_TRANSCRIPT,wordLabFile);
-    if (new File(speechLabFile).exists()) typeToFile.put(ImageType.SPEECH_TRANSCRIPT,speechLabFile);
+    if (new File(phoneLabFile).exists()) typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
+    if (new File(wordLabFile).exists()) typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
+    if (new File(speechLabFile).exists()) typeToFile.put(ImageType.SPEECH_TRANSCRIPT, speechLabFile);
 
     Map<ImageType, String> typeToImageFile = new ImageWriter().writeTranscripts(pathname, imageOutDir, imageWidth, imageHeight, typeToFile);
     Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
     for (Map.Entry<ImageType, String> kv : typeToImageFile.entrySet()) {
       String name = kv.getKey().toString();
       NetPronImageType key = NetPronImageType.valueOf(name);
-      System.out.println("key is " + name + "/" + key + " -> " +kv.getValue());
-      sTypeToImage.put(key,kv.getValue());
+      //System.out.println("key is " + name + "/" + key + " -> " +kv.getValue());
+      sTypeToImage.put(key, kv.getValue());
     }
 
-      // XXX
-      // TODO: Must compute transformed scores! Not implemented yet.
-      System.out.println("Hydec Score: " + scores.hydecScore);
+    // XXX
+    // TODO: Must compute transformed scores! Not implemented yet.
+    System.out.println("Hydec Score: " + scores.hydecScore);
     StringBuilder b = new StringBuilder();
     for (Float f : scores.svScoreVector) b.append(f).append(",");
     System.out.println("SV Score: " + b);
     System.out.println("Map: " + sTypeToImage);
 
-    return new PretestScore(scores.hydecScore, scores.svScoreVector, /*hydecScores, */phoneScores,sTypeToImage);//, goodWaveTranscriptEvents);
+    return new PretestScore(scores.hydecScore, scores.svScoreVector, phoneScores, sTypeToImage);
+  }
 
+  /**
+   * Checks if the sample rate is not 16K (as required by things like sv).
+   * If not, then uses sox to make an audio file with the right sample rate.
+   *
+   * @param testAudioDir
+   * @param testAudioFileNoSuffix
+   * @param pathname
+   * @param wavFile
+   * @return
+   */
+  private String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix, String pathname, File wavFile) {
+    try {
+      AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(wavFile);
+      float sampleRate = audioFileFormat.getFormat().getSampleRate();
+      if (sampleRate != 16000f) {
+        String binPath = WINDOWS_SOX_BIN_DIR;
+        if (! new File(binPath).exists()) binPath = LINUX_SOX_BIN_DIR;
+        String s = new AudioConverter().convertTo16KHZ(binPath, pathname);     // TODO : work in linux
+        String sampled = testAudioDir + File.separator + testAudioFileNoSuffix + "_16K.wav";
+        if (new FileCopier().copy(s, sampled)) {
+          String name = new File(sampled).getName();
+          testAudioFileNoSuffix = name.substring(0, name.length() - 4);
+        }
+      }
+    } catch (UnsupportedAudioFileException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
     }
+    return testAudioFileNoSuffix;
+  }
 
-    /**
+  /**
      *  convert the imageWriterTranscriptEvents to
       pretestTranscriptEvents (make them serializable for GWTRPC)
      */
