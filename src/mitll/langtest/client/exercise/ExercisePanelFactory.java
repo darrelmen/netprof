@@ -1,5 +1,6 @@
 package mitll.langtest.client.exercise;
 
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.SimpleRecordExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
@@ -30,7 +31,7 @@ public class ExercisePanelFactory {
     this.controller = controller;
   }
 
-  public ExercisePanel getExercisePanel(Exercise e) {
+  public Panel getExercisePanel(Exercise e) {
     if (e.getType() == Exercise.EXERCISE_TYPE.RECORD) {
       return new SimpleRecordExercisePanel(e, service, userFeedback, controller);
     } else {
