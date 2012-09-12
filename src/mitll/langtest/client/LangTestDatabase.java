@@ -5,6 +5,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.scoring.PretestScore;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -49,4 +50,6 @@ public interface LangTestDatabase extends RemoteService {
   String getImageForAudioFile(String audioFile, String imageType, int width, int height);
 
   PretestScore getScoreForAudioFile(String audioFile, int width, int height);
+
+  PretestScore getScoreForAudioFile(String audioFile, Collection<String> refs, int width, int height);
 }
