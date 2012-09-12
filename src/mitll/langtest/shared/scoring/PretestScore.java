@@ -25,19 +25,21 @@ public class PretestScore implements IsSerializable {
   public Map<NetPronImageType, String> sTypeToImage;
 
   public PretestScore(){} // required for serialization
-	
-	public PretestScore(float hydecScore, Float[] svScoreVector,
-                      //ArrayList<Float> historicalScores,
+
+  public PretestScore(Float[] svScoreVector,
+                      Map<NetPronImageType, String> sTypeToImage
+  ) {
+    this.svScoreVector = svScoreVector;
+    this.sTypeToImage = sTypeToImage;
+  }
+
+  public PretestScore(float hydecScore, Float[] svScoreVector,
                       Map<String, Float> phoneScores,
                       Map<NetPronImageType, String> sTypeToImage
-                    //  Map<NetPronImageType, Map<Float, NetPronTranscriptEvent>> transcriptEvents
   ) {
-		this.hydecScore = hydecScore;
-		this.svScoreVector = svScoreVector;
-		//this.historicalScores = historicalScores;
-		this.phoneScores = phoneScores;
-	//	this.transcriptEvents = transcriptEvents;
-    this.sTypeToImage = sTypeToImage;
+    this(svScoreVector,sTypeToImage);
+    this.hydecScore = hydecScore;
+    this.phoneScores = phoneScores;
 	}
 	
   public float getHydecScore() {
@@ -84,5 +86,12 @@ public class PretestScore implements IsSerializable {
 		return transcriptEvents;
 	}*/
 
-  public String toString() { return "hydec " + hydecScore + " transformed " + transformedHydecScore + " phones " + getPhoneScores() + " type->image " +sTypeToImage; }
+  public String toString() {
+    StringBuilder b = new StringBuilder();
+
+    for (Float f : svScoreVector) b.append(f).append(",");
+
+    return "hydec " + hydecScore + " transformed " + transformedHydecScore +
+        " phones " + getPhoneScores() + " sv " +b+" type->image " +sTypeToImage;
+  }
 }
