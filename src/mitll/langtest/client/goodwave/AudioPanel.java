@@ -38,7 +38,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public static final int MIN_WIDTH = 256;
   public static final int HEIGHT = 128;
   public static final int ANNOTATION_HEIGHT = 20;
-  public static final int RIGHT_MARGIN = 400;
+  public static final int RIGHT_MARGIN = 500;//1;//400;
   private String audioPath;
   private ImageAndCheck waveform,spectrogram,speech,phones,words;
   private int lastWidth = 0;
@@ -51,6 +51,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private PlayAudioPanel playAudio;
   boolean debug = false;
   private String refAudio;
+  private ScoreListener scoreListener;
 
   /**
    * @see GoodwaveExercisePanel#getQuestionContent(mitll.langtest.shared.Exercise)
@@ -81,6 +82,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public void onResize() {
     if (debug) System.out.println("got resize " + getOffsetWidth());
   }
+
+  public void addScoreListener(ScoreListener l) { this.scoreListener = l;}
 
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
@@ -179,6 +182,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   private void getImages() {
     int width = Window.getClientWidth()- RIGHT_MARGIN;
+    System.out.println("offset  width " + getOffsetWidth());
     getImageURLForAudio(audioPath, "Waveform", width, waveform);
     getImageURLForAudio(audioPath, "Spectrogram", width, spectrogram);
     if (refAudio != null) {
@@ -209,7 +213,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param phoneTranscript
    * @param speechTranscript
    */
-  private void getTranscriptImageURLForAudio(String path, String ref, int width, final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript, final ImageAndCheck speechTranscript) {
+  private void getTranscriptImageURLForAudio(String path, String ref, int width,
+                                             final ImageAndCheck wordTranscript,
+                                             final ImageAndCheck phoneTranscript, final ImageAndCheck speechTranscript) {
     int toUse = Math.max(MIN_WIDTH, width);
     int height = ANNOTATION_HEIGHT;
     if (false) {
@@ -252,6 +258,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       speechTranscript.image.setVisible(true);
       speechTranscript.check.setVisible(true);
     }
+    if (scoreListener != null) scoreListener.gotScore(result);
   }
 
   private Panel addCheckbox(String label, final ImageAndCheck widget) {

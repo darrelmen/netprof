@@ -1,5 +1,6 @@
 package mitll.langtest.client.grading;
 
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -26,7 +27,8 @@ public class GradingExercisePanelFactory extends ExercisePanelFactory {
     super(service, userFeedback, controller);
   }
 
-  public ExercisePanel getExercisePanel(Exercise e) {
+  @Override
+  public Panel getExercisePanel(Exercise e) {
      return new GradingExercisePanel(e, service, userFeedback, controller);
   }
 }
