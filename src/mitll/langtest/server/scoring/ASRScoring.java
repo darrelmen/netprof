@@ -120,12 +120,6 @@ public class ASRScoring extends Scoring {
 
     // XXX
     // TODO: Must compute transformed scores! Not implemented yet.
-    /*System.out.println("Hydec Score: " + scores.hydecScore);
-    StringBuilder b = new StringBuilder();
-    for (Float f : scores.svScoreVector) b.append(f).append(",");
-    System.out.println("SV Score: " + b);
-    System.out.println("Map: " + sTypeToImage);*/
-
     return new PretestScore(scores.hydecScore, scores.svScoreVector, phoneScores, sTypeToImage);
   }
 
@@ -170,7 +164,7 @@ public class ASRScoring extends Scoring {
         : tomcatWriteDirectory + File.separator + dict;
 
     boolean configExists = new File(configFile).exists();
-    boolean dictExists = new File(dictFile).exists();
+    boolean dictExists   = new File(dictFile).exists();
     if (!configExists || !dictExists) {
       if (!configExists) System.err.println("computeRepeatExerciseScores : Can't find config file at " + configFile);
       if (!dictExists) System.err.println("computeRepeatExerciseScores : Can't find dict file at " + dictFile);

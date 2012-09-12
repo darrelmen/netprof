@@ -86,6 +86,25 @@ h1 {
     padding-right: 6px;
 }
 
+.squareButton {
+    background: none repeat scroll 0 0 #DDDDDD;
+    border: 1px solid #AAAAAA;
+    color: #333333;
+    margin-right: 5px;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.Tooltip{
+    background-color: lightyellow;
+    padding: 3px;
+    border: 1px solid black;
+}
+
+.TooltipPopup{
+    border: none;
+}
+
 .RecordPopup{
   background-color: white;
 }
