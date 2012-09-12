@@ -5,6 +5,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.scoring.PretestScore;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -42,4 +43,6 @@ public interface LangTestDatabaseAsync {
   void getImageForAudioFile(String audioFile, String imageType, int width, int height, AsyncCallback<String> async);
 
   void getScoreForAudioFile(String audioFile, int width, int height, AsyncCallback<PretestScore> async);
+
+  void getScoreForAudioFile(String audioFile, Collection<String> refs, int width, int height, AsyncCallback<PretestScore> async);
 }
