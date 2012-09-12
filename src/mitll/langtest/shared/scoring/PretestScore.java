@@ -15,10 +15,10 @@ import java.util.Map;
  */
 public class PretestScore implements IsSerializable {
 	//private static final long serialVersionUID = 4879486889011650301L;
-	private float hydecScore;
+	private float hydecScore = -1f;
 	private float transformedHydecScore;
 	private Float[] svScoreVector;
-	private float transformedSVScore;
+	private float transformedSVScore = -1f;
 	//private Collection<Float> historicalScores;
 	private Map<String, Float> phoneScores;
 	//private Map<NetPronImageType, Map<Float, NetPronTranscriptEvent>> transcriptEvents;
@@ -30,6 +30,12 @@ public class PretestScore implements IsSerializable {
                       Map<NetPronImageType, String> sTypeToImage
   ) {
     this.svScoreVector = svScoreVector;
+
+    if (svScoreVector != null) {
+      int i = svScoreVector.length - 2;
+      if (i < 0) i = 0;
+      transformedSVScore = svScoreVector[i];
+    }
     this.sTypeToImage = sTypeToImage;
   }
 

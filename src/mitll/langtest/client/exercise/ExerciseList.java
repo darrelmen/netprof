@@ -125,6 +125,8 @@ public class ExerciseList extends VerticalPanel {
     loadExercise(toLoad);
   }
 
+  // TODO : add exercise by name
+
   /**
    * @see #addExerciseToList(mitll.langtest.shared.Exercise)
    * @see #loadFirstExercise()
