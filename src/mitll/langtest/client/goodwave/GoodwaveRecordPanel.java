@@ -36,6 +36,7 @@ import mitll.langtest.shared.Exercise;
  * Automatically stops recording after 20 seconds.
  *
  * @author Gordon Vidaver
+ * @deprecated
  */
 public class GoodwaveRecordPanel extends GoodWavePanel {
   /**
