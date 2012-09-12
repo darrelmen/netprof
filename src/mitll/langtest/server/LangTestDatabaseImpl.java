@@ -7,7 +7,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.scoring.Scoring;
+import mitll.langtest.server.scoring.ASRScoring;
+import mitll.langtest.server.scoring.DTWScoring;
+import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
@@ -21,6 +23,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -148,27 +151,57 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return relativeImagePath;
   }
 
-  public PretestScore getScoreForAudioFile(String audioFile, int width, int height) {
-   // ImageWriter imageWriter = new ImageWriter();
-    //System.out.println("getImageForAudioFile : for " + audioFile);
-
+  public PretestScore getScoreForAudioFile(String audioFile, Collection<String> refs, int width, int height) {
     String noSuffix = removeSuffix(audioFile);
     if (audioFile.endsWith(".mp3")) {
       String wavFile = noSuffix +".wav";
-      //System.out.println("getImageForAudioFile : wav " + wavFile);
-
       File test = getAbsoluteFile(wavFile);
-        // System.out.println("found " + test);
-        audioFile = test.exists() ? test.getAbsolutePath() :  getWavForMP3(audioFile);
-
+      audioFile = test.exists() ? test.getAbsolutePath() :  getWavForMP3(audioFile);
     }
-   /* ImageType imageType1 =
-        imageType.equalsIgnoreCase(ImageType.WAVEFORM.toString()) ? ImageType.WAVEFORM :
-            imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM :
-                imageType.equalsIgnoreCase(ImageType.WORD_TRANSCRIPT.toString()) ? ImageType.WORD_TRANSCRIPT :
-                    imageType.equalsIgnoreCase(ImageType.PHONE_TRANSCRIPT.toString()) ? ImageType.PHONE_TRANSCRIPT :
-                        imageType.equalsIgnoreCase(ImageType.SPEECH_TRANSCRIPT.toString()) ? ImageType.SPEECH_TRANSCRIPT : null;
-*/
+
+    File testAudioFile = new File(audioFile);
+    String name = testAudioFile.getName();
+
+    String installPath = getInstallPath();
+    String imageOutDir = getImageOutDir();
+    String testAudioDir = testAudioFile.getParent().substring(installPath.length());
+
+    System.out.println("scoring " + name + " in dir " +testAudioDir);
+    Collection<String> names = new ArrayList<String>();
+    String firstRef = refs.iterator().next();
+    String parent = new File(firstRef).getParent();
+    System.out.println("ref " + parent + " first ref " + firstRef + " install " + installPath);
+    String refAudioDir = (parent.startsWith(installPath)) ? parent.substring(installPath.length()) : parent;
+    for (String ref : refs) {
+      File file = new File(ref);
+      if (!file.exists()) System.err.println("can't find ref file " +file);
+      else {
+        //if (names.endsWith)
+        // names.add(removeSuffix(file.getName()));
+        String name1 = file.getName();
+        name1 = new AudioConversion().convertTo16Khz(file.getParent(), removeSuffix(name1));
+
+        names.add(name1);
+      }
+    }
+    if (names.isEmpty()) {
+      System.err.println("no valid ref files");
+      return new PretestScore();
+    } else {
+      PretestScore pretestScore = new DTWScoring(installPath).score(testAudioDir, removeSuffix(name), refAudioDir, names, imageOutDir, width, height);
+      System.out.println("score " + pretestScore);
+      return pretestScore;
+    }
+  }
+
+  public PretestScore getScoreForAudioFile(String audioFile, int width, int height) {
+    String noSuffix = removeSuffix(audioFile);
+    if (audioFile.endsWith(".mp3")) {
+      String wavFile = noSuffix +".wav";
+      File test = getAbsoluteFile(wavFile);
+        audioFile = test.exists() ? test.getAbsolutePath() :  getWavForMP3(audioFile);
+    }
+
     File testAudioFile = new File(audioFile);
     String name = testAudioFile.getName();
 
@@ -179,11 +212,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     System.out.println("scoring " + name + " in dir " +testAudioDir);
     // TODO : pass in reference audio and reference audio directory!
-    PretestScore pretestScore = new Scoring(installPath).scoreRepeat(testAudioDir, removeSuffix(name), testAudioDir, removeSuffix(name), imageOutDir, width, height);
-    //String absolutePathToImage = imageWriter.writeImageSimple(audioFile, getAbsoluteFile(imageOutDir).getAbsolutePath(), width, height, imageType1);
-   // assert (absolutePathToImage.startsWith(installPath));
-
-  //  String relativeImagePath = ensureForwardSlashes(absolutePathToImage.substring(installPath.length()));
+    PretestScore pretestScore = new ASRScoring(installPath).scoreRepeat(testAudioDir, removeSuffix(name), testAudioDir, removeSuffix(name), imageOutDir, width, height);
     System.out.println("score " + pretestScore);
     return pretestScore;
   }

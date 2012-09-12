@@ -10,7 +10,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -22,12 +21,11 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExercisePanel;
-import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Mainly delegates recording to the {@link mitll.langtest.client.recorder.SimpleRecordPanel}.
@@ -184,7 +182,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     getImageURLForAudio(audioPath, "Waveform", width, waveform);
     getImageURLForAudio(audioPath, "Spectrogram", width, spectrogram);
     if (refAudio != null) {
-      getTranscriptImageURLForAudio(audioPath,width,words,phones,speech);
+      getTranscriptImageURLForAudio(audioPath,refAudio,width,words,phones,speech);
     }
   }
 
@@ -204,36 +202,56 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   /**
    * TODO configure for multi-ref
+   * TODO : add multiple ref files
    * @param path
    * @param width
    * @param wordTranscript
    * @param phoneTranscript
    * @param speechTranscript
    */
-  private void getTranscriptImageURLForAudio(String path, int width, final ImageAndCheck wordTranscript,final ImageAndCheck phoneTranscript,final ImageAndCheck speechTranscript) {
+  private void getTranscriptImageURLForAudio(String path, String ref, int width, final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript, final ImageAndCheck speechTranscript) {
     int toUse = Math.max(MIN_WIDTH, width);
     int height = ANNOTATION_HEIGHT;
-    service.getScoreForAudioFile(path, toUse, height, new AsyncCallback<PretestScore>() {
-      public void onFailure(Throwable caught) {}
-      public void onSuccess(PretestScore result) {
-        System.out.println("got " + result);
-        if (result.sTypeToImage.get(NetPronImageType.WORD_TRANSCRIPT) != null) {
-          wordTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.WORD_TRANSCRIPT));
-          wordTranscript.image.setVisible(true);
-          wordTranscript.check.setVisible(true);
+    if (false) {
+      service.getScoreForAudioFile(path, toUse, height, new AsyncCallback<PretestScore>() {
+        public void onFailure(Throwable caught) {
         }
-        if (result.sTypeToImage.get(NetPronImageType.PHONE_TRANSCRIPT) != null) {
-          phoneTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.PHONE_TRANSCRIPT));
-          phoneTranscript.image.setVisible(true);
-          phoneTranscript.check.setVisible(true);
+
+        public void onSuccess(PretestScore result) {
+          useResult(result, wordTranscript, phoneTranscript, speechTranscript);
         }
-        if (result.sTypeToImage.get(NetPronImageType.SPEECH_TRANSCRIPT) != null) {
-          speechTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.SPEECH_TRANSCRIPT));
-          speechTranscript.image.setVisible(true);
-          speechTranscript.check.setVisible(true);
+      });
+    } else {
+      Collection<String> refs = new ArrayList<String>();
+      refs.add(ref);
+      service.getScoreForAudioFile(path, refs, toUse, height, new AsyncCallback<PretestScore>() {
+        public void onFailure(Throwable caught) {
         }
-      }
-    });
+
+        public void onSuccess(PretestScore result) {
+          useResult(result, wordTranscript, phoneTranscript, speechTranscript);
+        }
+      });
+    }
+  }
+
+  private void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript, ImageAndCheck speechTranscript) {
+    System.out.println("got " + result);
+    if (result.sTypeToImage.get(NetPronImageType.WORD_TRANSCRIPT) != null) {
+      wordTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.WORD_TRANSCRIPT));
+      wordTranscript.image.setVisible(true);
+      wordTranscript.check.setVisible(true);
+    }
+    if (result.sTypeToImage.get(NetPronImageType.PHONE_TRANSCRIPT) != null) {
+      phoneTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.PHONE_TRANSCRIPT));
+      phoneTranscript.image.setVisible(true);
+      phoneTranscript.check.setVisible(true);
+    }
+    if (result.sTypeToImage.get(NetPronImageType.SPEECH_TRANSCRIPT) != null) {
+      speechTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.SPEECH_TRANSCRIPT));
+      speechTranscript.image.setVisible(true);
+      speechTranscript.check.setVisible(true);
+    }
   }
 
   private Panel addCheckbox(String label, final ImageAndCheck widget) {
