@@ -1,8 +1,13 @@
 package mitll.langtest.server;
 
+import audio.imagewriter.AudioConverter;
+import audio.tools.FileCopier;
 import mitll.langtest.client.LangTestDatabase;
 import org.apache.commons.codec.binary.Base64;
 
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,6 +29,10 @@ public class AudioConversion {
 
   private static final String FFMPEG_PATH_WINDOWS = "C:\\Users\\go22670\\ffmpeg\\bin\\ffmpeg.exe";
   private static final String FFMPEG_PATH_LINUX = "/usr/local/bin/ffmpeg";
+
+  public static final String LINUX_SOX_BIN_DIR = "/usr/local/bin";
+  public static final String WINDOWS_SOX_BIN_DIR = "C:\\Users\\go22670\\sox-14-3-2";
+
   private AudioCheck audioCheck = new AudioCheck();
 
   /**
@@ -93,6 +102,39 @@ public class AudioConversion {
       e.printStackTrace();
     }
     return false;
+  }
+
+  /**
+   * Checks if the sample rate is not 16K (as required by things like sv).
+   * If not, then uses sox to make an audio file with the right sample rate.
+   *
+   * @param testAudioDir directory for audio
+   * @param testAudioFileNoSuffix name without suffix
+   * @return
+   */
+  public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix) {
+    String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + ".wav";
+    File wavFile = new File(pathname);
+
+    try {
+      AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(wavFile);
+      float sampleRate = audioFileFormat.getFormat().getSampleRate();
+      if (sampleRate != 16000f) {
+        String binPath = WINDOWS_SOX_BIN_DIR;
+        if (! new File(binPath).exists()) binPath = LINUX_SOX_BIN_DIR;
+        String s = new AudioConverter().convertTo16KHZ(binPath, pathname);
+        String sampled = testAudioDir + File.separator + testAudioFileNoSuffix + "_16K.wav";
+        if (new FileCopier().copy(s, sampled)) {
+          String name = new File(sampled).getName();
+          testAudioFileNoSuffix = name.substring(0, name.length() - 4);
+        }
+      }
+    } catch (UnsupportedAudioFileException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return testAudioFileNoSuffix;
   }
 
   /**
