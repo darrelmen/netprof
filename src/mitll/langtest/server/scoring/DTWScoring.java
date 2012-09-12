@@ -1,13 +1,13 @@
 package mitll.langtest.server.scoring;
 
+import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import pronz.speech.Audio;
 import pronz.speech.Audio$;
-import scala.Function1;
-import scala.runtime.AbstractFunction1;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,8 +16,40 @@ import java.util.ArrayList;
  * Time: 7:34 PM
  * To change this template use File | Settings | File Templates.
  */
-public class SVScoring {
-  public Scores computeMultiRefRepeatExerciseScores(Audio testAudio, String referenceName, String planName) throws Exception {
+public class DTWScoring extends Scoring {
+  public DTWScoring(String deployPath) {
+    super(deployPath);
+  }
+
+  public PretestScore score(String testAudioDir, String testAudioFileNoSuffix,
+                            String refAudioDir, Collection<String> refAudioFiles,
+                            // String scoringDir,
+                            String imageOutDir,
+                            int imageWidth, int imageHeight) {
+
+    String testNoSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
+    String testWav = testNoSuffix + ".wav";
+
+    System.out.println("scoring " +testAudioFileNoSuffix + "/" + testWav +
+        " against " + refAudioFiles + " in " + refAudioDir);
+
+    File wavFile = new File(testWav);
+    if (!wavFile.exists()) {
+      System.err.println("Can't find " + wavFile.getAbsolutePath());
+      return new PretestScore();
+    }
+    // the path to the test audio is <tomcatWriteDirectory>/<pretestFilesRelativePath>/<planName>/<testsRelativePath>/<testName>
+    Audio testAudio = Audio$.MODULE$.apply(
+        testAudioDir, testAudioFileNoSuffix,
+        false /* notForScoring */, dirs);
+
+    Float[] scores = computeMultiRefRepeatExerciseScores(testAudio, refAudioDir, refAudioFiles);
+    Map<NetPronImageType, String> sTypeToImage = writeTranscripts(imageOutDir, imageWidth, imageHeight, testNoSuffix);
+
+    return new PretestScore(scores, sTypeToImage);
+  }
+
+  private Float[] computeMultiRefRepeatExerciseScores(Audio testAudio, String refDir, Collection<String> refs)  {
 
 /*    float testAudioSeconds = testAudio.seconds();
     if (testAudioSeconds < MIN_AUDIO_SECONDS || testAudioSeconds > MAX_AUDIO_SECONDS) {
@@ -38,6 +70,7 @@ public class SVScoring {
     if (!numRecordings.first()) {
       throw new Exception("Could not fetch exercises.num_recordings where plan_name = " + planName + " and exercise_name = " + baseReferenceName);
     }*/
+/*
     int numRecs = 1;//numRecordings.getInt(1);
 
     // Skip the first audio file, which is just for demonstration and is not
@@ -50,38 +83,23 @@ public class SVScoring {
           + File.separator + pretestFilesRelativePath
           + File.separator + planName,
           audioRefName,
+          false */
+/* notForScoring *//*
+, dirs);
+    }
+*/
+
+    Audio[] referenceAudios = new Audio[refs.size()];
+
+    int i = 0;
+    for (String r : refs) {
+      System.out.println("ref is '" +r+ "'");
+      referenceAudios[i++] = Audio$.MODULE$.apply(refDir,
+          r,
           false /* notForScoring */, dirs);
     }
 
-    Function1<Float, Float> identityFn = new AbstractFunction1<Float, Float>() {
-      public Float apply(Float score) {
-        return score;
-      }
-    };
-
-    Float[] sv_score_vector = testAudio.multisvVectorScore(referenceAudios, os);
-    return new Scores(null, null, sv_score_vector);
+    return testAudio.multisvVectorScore(referenceAudios, os);
   }
 
-  @Override
-  public PretestScore scoreMultiRefRepeatExercise(
-      MultiRefRepeatExercise multiRefRepeatExercise, String planName,
-      String testName) throws Exception {
-    try {
-      // the path to the test audio is <tomcatWriteDirectory>/<pretestFilesRelativePath>/<planName>/<testsRelativePath>/<testName>
-      Audio testAudio = Audio$.MODULE$.apply(tomcatWriteDirectory +
-          File.separator + pretestFilesRelativePath +
-          File.separator + planName +
-          File.separator + testsRelativePath +
-          File.separator + testName,
-          multiRefRepeatExercise.getBasename(),
-          false /* notForScoring */, dirs);
-
-      Scores scores = computeMultiRefRepeatExerciseScores(testAudio, multiRefRepeatExercise.getReferenceName(), planName);
-      return new PretestScore(0, scores.svScoreVector, new ArrayList<Float>(), null, null);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      throw ex;
-    }
-  }
 }
