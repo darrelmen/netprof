@@ -54,6 +54,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     this.exercise = e;
     this.controller = controller;
     this.service = service;
+    //VerticalPanel left = new VerticalPanel();
     add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
 
     // attempt to left justify
