@@ -22,13 +22,12 @@ import java.util.Map;
 
 /**
  * @author gregbramble
- *
+ * TODO : make a separate version for ASR (get rid of all the if (scoreWithASR) stuff)
  */
 public class ScorePanel extends FlowPanel implements ScoreListener {
-//    protected PretestScoreTransformer scoreTransformer;
 	private PretestGauge DTWGauge;
 	private PretestGauge ASRGauge;
-	private FlowPanel chartPanel, gaugePanel, instructionsPanel, exerciseHistoryChartPanel, phoneAccuracyChartPanel;
+	private FlowPanel chartPanel, gaugePanel, instructionsPanel;
 	private CaptionPanel guageCaptionPanel, chartCaptionPanel, instructionsCaptionPanel;
 	private GChart exerciseHistoryChart,  phoneAccuracyChart;
 	private boolean scoreWithASR = false; // MultiRefRepeatExercises don't score with ASR
@@ -36,11 +35,8 @@ public class ScorePanel extends FlowPanel implements ScoreListener {
 			{192f, 255f, 0f}, {128f, 255f, 0f}, {64f, 255f, 0f}, {32f, 255f, 0f}, {32f, 255f, 0f}, {32f, 255f, 0f}, {32f, 255f, 0f},
 			{0f, 255f, 0f}, {0f, 255f, 0f}, {0f, 255f, 0f}};
 
-	public ScorePanel(/*PretestScoreTransformer scoreTransformer,*/ boolean scoreWithASR/*, int windowHeight, int scorePanelHeight*/){
-		//super(true);
-		//super();
-	//	this.scoreTransformer = scoreTransformer;
-		this.scoreWithASR = scoreWithASR; 
+	public ScorePanel(boolean scoreWithASR){
+		this.scoreWithASR = scoreWithASR;
 
 		setWidth("100%");
 
@@ -60,13 +56,10 @@ public class ScorePanel extends FlowPanel implements ScoreListener {
 			chartPanel.add(phoneAccuracyChart);
 			chartPanel.add(new HTML("<BR>"));
 		}
-		
 
 		chartCaptionPanel.add(chartPanel);
 
 		add(chartCaptionPanel);
-
-
 
 		guageCaptionPanel = new CaptionPanel("Scores");
 		gaugePanel = new FlowPanel();
@@ -98,6 +91,11 @@ public class ScorePanel extends FlowPanel implements ScoreListener {
 
   //  initialize();
 	}
+
+  @Override
+  public void onLoad() {
+    initialize();
+  }
 
 	//call this after adding the widget to the page
 	public void initialize(){
@@ -164,6 +162,7 @@ public class ScorePanel extends FlowPanel implements ScoreListener {
   List<Float> scores = new ArrayList<Float>();
   public void gotScore(PretestScore score) {
     float transformedSVScore = score.getTransformedSVScore();
+
 
     if (transformedSVScore != -1) {
       setDTWGaugeValue(transformedSVScore *100.0f);

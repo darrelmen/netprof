@@ -40,6 +40,7 @@
   <script src="js/jquery-1.4.2.js"/>
   <script src="js/swfobject.js"/>
   <script src="js/recorder.js"/>
+    <script src="js/gauge.js"/>
 <!--
   <script src="js/embedRecorder.js"/>
 -->
