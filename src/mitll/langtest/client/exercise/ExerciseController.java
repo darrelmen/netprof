@@ -31,4 +31,6 @@ public interface ExerciseController {
   boolean getEnglishOnly();
 
   SoundManagerAPI getSoundManager();
+
+  float getScreenPortion();
 }
