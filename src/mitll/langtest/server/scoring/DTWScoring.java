@@ -7,6 +7,7 @@ import pronz.speech.Audio$;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -26,7 +27,7 @@ public class DTWScoring extends Scoring {
     String testNoSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String testWav = testNoSuffix + ".wav";
 
-    System.out.println("scoring " +testAudioFileNoSuffix + "/" + testWav +
+    System.out.println(new Date() + " : scoring " +testAudioFileNoSuffix + "/" + testWav +
         " against " + refAudioFiles + " in " + refAudioDir);
 
     File wavFile = new File(testWav);
@@ -42,7 +43,9 @@ public class DTWScoring extends Scoring {
     Float[] scores = computeMultiRefRepeatExerciseScores(testAudio, refAudioDir, refAudioFiles);
     Map<NetPronImageType, String> sTypeToImage = writeTranscripts(imageOutDir, imageWidth, imageHeight, testNoSuffix);
 
-    return new PretestScore(scores, sTypeToImage);
+    PretestScore pretestScore = new PretestScore(scores, sTypeToImage);
+    //System.out.println(new Date() + " : DTWScoring : got score " + pretestScore);
+    return pretestScore;
   }
 
   private Float[] computeMultiRefRepeatExerciseScores(Audio testAudio, String refDir, Collection<String> refs)  {
