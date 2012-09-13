@@ -14,12 +14,10 @@ import java.util.Map;
  *
  */
 public class PretestScore implements IsSerializable {
-	//private static final long serialVersionUID = 4879486889011650301L;
 	private float hydecScore = -1f;
 	private float transformedHydecScore;
 	private Float[] svScoreVector;
 	private float transformedSVScore = -1f;
-	//private Collection<Float> historicalScores;
 	private Map<String, Float> phoneScores;
 	//private Map<NetPronImageType, Map<Float, NetPronTranscriptEvent>> transcriptEvents;
   public Map<NetPronImageType, String> sTypeToImage;
@@ -35,6 +33,11 @@ public class PretestScore implements IsSerializable {
       int i = svScoreVector.length - 2;
       if (i < 0) i = 0;
       transformedSVScore = svScoreVector[i];
+      System.out.println("trans score is " + transformedSVScore);
+      if (transformedSVScore > 1f) transformedSVScore = 1f;
+    }
+    else {
+      System.err.println("PretestScore : no sv score vector?");
     }
     this.sTypeToImage = sTypeToImage;
   }
@@ -97,7 +100,7 @@ public class PretestScore implements IsSerializable {
 
     for (Float f : svScoreVector) b.append(f).append(",");
 
-    return "hydec " + hydecScore + " transformed " + transformedHydecScore +
+    return "hydec " + hydecScore + " transformed hydec " + transformedHydecScore +" transformed dtw " + transformedSVScore +
         " phones " + getPhoneScores() + " sv " +b+" type->image " +sTypeToImage;
   }
 }
