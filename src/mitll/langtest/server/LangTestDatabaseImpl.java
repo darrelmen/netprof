@@ -166,7 +166,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String imageOutDir = getImageOutDir();
     String testAudioDir = testAudioFile.getParent().substring(installPath.length());
 
-    System.out.println("scoring " + name + " in dir " +testAudioDir);
+    System.out.println("DTW scoring " + name + " in dir " +testAudioDir);
     Collection<String> names = new ArrayList<String>();
     String firstRef = refs.iterator().next();
     String parent = new File(firstRef).getParent();
@@ -176,8 +176,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       File file = new File(ref);
       if (!file.exists()) System.err.println("can't find ref file " +file);
       else {
-        //if (names.endsWith)
-        // names.add(removeSuffix(file.getName()));
         String name1 = file.getName();
         name1 = new AudioConversion().convertTo16Khz(file.getParent(), removeSuffix(name1));
 
@@ -194,6 +192,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  /**
+   * @see mitll.langtest.client.goodwave.AudioPanel#getTranscriptImageURLForAudio(String, String, int, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck)
+   * @param audioFile
+   * @param width
+   * @param height
+   * @return
+   */
   public PretestScore getScoreForAudioFile(String audioFile, int width, int height) {
     String noSuffix = removeSuffix(audioFile);
     if (audioFile.endsWith(".mp3")) {
