@@ -31,7 +31,7 @@ import java.util.Set;
  * Time: 1:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExercisePanel extends VerticalPanel implements ExerciseQuestionState {
+public class ExercisePanel extends VerticalPanel implements ExerciseQuestionState, ProvidesResize, RequiresResize {
   private static final String ANSWER_BOX_WIDTH = "400px";
   private List<Widget> answers = new ArrayList<Widget>();
   private Set<Widget> completed = new HashSet<Widget>();
@@ -78,6 +78,9 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
 
   protected Widget getQuestionContent(Exercise e) {
     return new HTML(e.getContent());
+  }
+
+  public void onResize() {
   }
 
   /**

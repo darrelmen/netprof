@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -33,15 +34,16 @@ import java.util.List;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresResize {
+public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresResize, ProvidesResize {
   private String refAudio;
   protected Exercise exercise = null;
   protected ExerciseController controller;
   protected LangTestDatabaseAsync service;
   private ScorePanel scorePanel;
+  private AudioPanel contentAudio, answerAudio;
 
   /**
-   * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.goodwave.GoodwaveExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    * @param e
    * @param service
    * @param userFeedback
@@ -49,37 +51,24 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
    */
   public GoodwaveExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                                final ExerciseController controller) {
-   // super(Style.Unit.PX);
-    setWidth("100%");
-    setHeight("100%");
-    //super(e, service, userFeedback, controller);
     this.exercise = e;
     this.controller = controller;
     this.service = service;
     VerticalPanel center = new VerticalPanel();
-    center.setWidth("100%");
-    center.setHeight("100%");
     center.add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
 
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
     hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e));
-    //hp.setWidth((Window.getClientWidth()- LangTest.EXERCISE_LIST_WIDTH-100) + "px");
     center.add(hp);
-    /*addNorth(new SimplePanel(),0);
-    addSouth(new SimplePanel(),0);
-    addWest(new SimplePanel(),0);
-    addEast(new SimplePanel(),100);
-    */add(center);
+    add(center);
     scorePanel = new ScorePanel(false);
 
     add(scorePanel);
     int i = 1;
 
     addQuestions(e, service, controller, i, center);
-
-    //if (scorePanel != null) scorePanel.initialize(); // TODO : activate!
   }
 
   /**
@@ -133,7 +122,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
   }
 
   public void onResize() {
-    System.out.println("got resize " + getOffsetWidth());
+    //System.out.println("GoodwaveExercisePanel : got resize " + getOffsetWidth());
+    if (contentAudio != null) contentAudio.onResize();
+    if (answerAudio != null) answerAudio.onResize();
   }
 
   /**
@@ -164,6 +155,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     if (path != null) {
       AudioPanel w = new AudioPanel(path, service, controller.getSoundManager());
       vp.add(w);
+      contentAudio = w;
+      contentAudio.setScreenPortion(controller.getScreenPortion());
     }
     return vp;
   }
@@ -182,6 +175,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     //final ExerciseQuestionState questionState = this;
     RecordAudioPanel widgets = new RecordAudioPanel(service, controller, exercise, null, index, refAudio);
     widgets.addScoreListener(scorePanel);
+    answerAudio = widgets;
+    answerAudio.setScreenPortion(controller.getScreenPortion());
+
     return widgets;
   }
 
@@ -192,23 +188,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     return "&nbsp;&nbsp;&nbsp;Speak and record your answer in " +(promptInEnglish ? "English" : " the foreign language") +" :";
   }
 
-  /**
-   * on the server, notice which audio posts have arrived, and take the latest ones...
-   * <br></br>
-   * Move on to next exercise...
-   *
-   * @paramx service
-   * @paramx userFeedback
-   * @paramx controller
-   * @paramxs completedExercise
-   */
-/*
-  @Override
-  protected void postAnswers(LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller, Exercise completedExercise) {
-    controller.loadNextExercise(completedExercise);
-  }
-*/
-
   private static class RecordAudioPanel extends AudioPanel {
     private final ExerciseController controller;
     private final Exercise exercise;
@@ -216,6 +195,15 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     private final int index;
     private final String refAudio;
 
+    /**
+     * @see GoodwaveExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+     * @param service
+     * @param controller
+     * @param exercise
+     * @param questionState
+     * @param index
+     * @param refAudio
+     */
     public RecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, ExerciseQuestionState questionState, int index, String refAudio) {
       super(null, service, controller.getSoundManager());
       this.controller = controller;
