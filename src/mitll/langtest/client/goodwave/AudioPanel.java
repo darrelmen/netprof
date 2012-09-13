@@ -242,7 +242,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   private void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript, ImageAndCheck speechTranscript) {
-    System.out.println("got " + result);
+    System.out.println("useResult got " + result);
     if (result.sTypeToImage.get(NetPronImageType.WORD_TRANSCRIPT) != null) {
       wordTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.WORD_TRANSCRIPT));
       wordTranscript.image.setVisible(true);
