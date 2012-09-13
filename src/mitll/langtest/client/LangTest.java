@@ -10,6 +10,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
@@ -25,6 +27,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -69,6 +72,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
+  private ScrollPanel itemScroller;
+  private float screenPortion;
+  private boolean showOnlyOne;
 
   /**
    * Make an exception handler that displays the exception.
@@ -116,22 +122,29 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     userManager = new UserManager(this,service);
     resultManager = new ResultManager(service, this);
 
-    DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
+    final DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
     RootPanel.get().add(widgets);
 
+    // if you remove this line the layout doesn't work -- the dock layout appears blank!
     widgets.setSize((Window.getClientWidth()-EAST_WIDTH) + "px", (Window.getClientHeight()-FOOTER_HEIGHT) + "px");
-
+    Window.addResizeHandler(new ResizeHandler() {
+      public void onResize(ResizeEvent event) {
+        widgets.setSize((Window.getClientWidth()-EAST_WIDTH) + "px", (Window.getClientHeight()-FOOTER_HEIGHT) + "px");
+        itemScroller.setSize((EXERCISE_LIST_WIDTH) +"px",(Window.getClientHeight() - (2*HEADER_HEIGHT) - FOOTER_HEIGHT - 60) + "px"); // 54
+        exerciseList.onResize();
+      }
+    });
     // header/title line
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
     HTML title = new HTML("<h1>" + DLI_LANGUAGE_TESTING + "</h1>");
     browserCheck.getBrowserAndVersion();
-    hp.addEast(getLogout(),EAST_WIDTH);
-  //  hp.setHeight("180px");
+    hp.addEast(getLogout(), EAST_WIDTH);
     hp.add(title);
+
+    VerticalPanel exerciseListPanel = new VerticalPanel();
 
     widgets.addNorth(hp, HEADER_HEIGHT);
     widgets.addSouth(status = new Label(), FOOTER_HEIGHT);
-    VerticalPanel exerciseListPanel = new VerticalPanel();
     widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH/* +10*/);
    // exerciseListPanel.addStyleName("exerciseList");
 
@@ -158,6 +171,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     soundManager.initialize();
   }
 
+  public float getScreenPortion() {
+    return screenPortion;
+  }
+
   /**
    *
    * @param exerciseListPanel to add scroller to
@@ -172,7 +189,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           protected void checkBeforeLoad(Exercise e) {} // don't try to login
         }: new ExerciseList(currentExerciseVPanel,service, this, factory);
 
-    ScrollPanel itemScroller = new ScrollPanel(this.exerciseList);
+    itemScroller = new ScrollPanel(this.exerciseList);
     itemScroller.setSize((EXERCISE_LIST_WIDTH) +"px",(Window.getClientHeight() - (2*HEADER_HEIGHT) - FOOTER_HEIGHT - 60) + "px"); // 54
     exerciseListPanel.add(new HTML("<h2>Items</h2>"));
     exerciseListPanel.add(itemScroller);
@@ -200,9 +217,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     String isGrading = Window.Location.getParameter("grading");
     String isEnglish = Window.Location.getParameter("english");
     String goodwave = Window.Location.getParameter("goodwave");
+    String showOnlyOneParam = Window.Location.getParameter("showOnlyOne");
+    String screenPortionParam =  Window.Location.getParameter("screenPortion");
+    screenPortion = 1.0f;
+    if (screenPortionParam != null) {
+      try {
+        screenPortion = Float.parseFloat(screenPortionParam);
+      } catch (NumberFormatException e) {
+        e.printStackTrace();
+      }
+    }
     // System.out.println("param grading " + isGrading);
     englishOnlyMode = isEnglish != null && !isEnglish.equals("false");
     goodwaveMode = goodwave != null && !goodwave.equals("false");
+  //  showOnlyOne = showOnlyOneParam != null && !showOnlyOneParam.equals("false");
     boolean grading = (isGrading != null && !isGrading.equals("false")) || englishOnlyMode;
     return grading;
   }
@@ -382,7 +410,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers
-   * @see mitll.langtest.client.recorder.SimpleRecordPanel#stopClicked
+   * @see mitll.langtest.client.recorder.SimpleRecordPanel#stopRecording()
    * @return
    */
   public int getUser() { return userManager.getUser(); }

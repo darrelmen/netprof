@@ -26,6 +26,9 @@ import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Mainly delegates recording to the {@link mitll.langtest.client.recorder.SimpleRecordPanel}.
@@ -52,9 +55,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   boolean debug = false;
   private String refAudio;
   private ScoreListener scoreListener;
+  private float screenPortion = 1.0f;
 
   /**
    * @see GoodwaveExercisePanel#getQuestionContent(mitll.langtest.shared.Exercise)
+   * @see GoodwaveExercisePanel.RecordAudioPanel#RecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int, String)
    * @paramx e
    * @param service
    * @paramx userFeedback
@@ -63,24 +68,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public AudioPanel(String path, LangTestDatabaseAsync service, SoundManagerAPI soundManager) {
     this.soundManager = soundManager;
     this.service = service;
-   // TODO call this from container
-    Window.addResizeHandler(new ResizeHandler() {
-      public void onResize(ResizeEvent event) {
-        int diff = Math.abs(event.getWidth() - lastWidth);
-        //System.out.println("got resize " + getOffsetWidth() + " event " + event.getWidth() + " diff " + diff);
-        if (lastWidth == 0 || ((float)diff /(float)lastWidth) > 0.2) {
-          if (debug) System.out.println("new width " +  event.getWidth() + " vs old " + lastWidth);
-
-          lastWidth = event.getWidth();
-          getImages();
-        }
-      }
-    });
     addWidgets(path);
   }
 
   public void onResize() {
-    if (debug) System.out.println("got resize " + getOffsetWidth());
+    getImages();
   }
 
   public void addScoreListener(ScoreListener l) { this.scoreListener = l;}
@@ -91,17 +83,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @return
    */
   private void addWidgets(String path) {
-    //  ResizeLayoutPanel resizeLayoutPanel = new ResizeLayoutPanel();
-    //  imageContainer = new ResizeVP();
-    // resizeLayoutPanel.add(imageContainer);
     imageContainer = new VerticalPanel();
     HorizontalPanel hp = new HorizontalPanel();
     hp.setWidth("100%");
     hp.setSpacing(5);
 
-
     playAudio = addButtonsToButtonRow(hp, path);
-    lastWidth = Window.getClientWidth();
 
     HorizontalPanel controlPanel = new HorizontalPanel();
 
@@ -130,10 +117,23 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     add(hp);
 
     add(imageContainer);
+    //System.out.println(" got  path " +path);
 
-    if (path != null) { // TODO awkward... better way?
-      getImagesForPath(path);
+    this.audioPath = path;
+  }
+
+  @Override
+  public void onLoad() {
+    if (audioPath != null) { // TODO awkward... better way?
+      getImagesForPath(audioPath);
     }
+    else {
+      System.out.println("onLoad : for " + this + " got no audio path");
+    }
+  }
+
+  public void setScreenPortion(float screenPortion) {
+    this.screenPortion = screenPortion;
   }
 
   private static class ImageAndCheck {
@@ -146,7 +146,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   public void getImagesForPath(String path) {
-    this.audioPath = path;
+    if (path != null) {
+     // System.out.println("getImagesForPath got  path " +path);
+
+      this.audioPath = path;
+    }
+
     getImages();
     playAudio.startSong(path);
   }
@@ -174,36 +179,55 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     return new PlayAudioPanel(soundManager);
   }
 
-  private static class ResizeVP extends VerticalPanel implements RequiresResize {
+/*  private static class ResizeVP extends VerticalPanel implements RequiresResize {
     public void onResize() {
       System.out.println("Got resize width " + getOffsetWidth() + " height " + getOffsetHeight());
     }
-  }
+  }*/
 
   private void getImages() {
-    int width = Window.getClientWidth()- RIGHT_MARGIN;
-    System.out.println("offset  width " + getOffsetWidth());
-    getImageURLForAudio(audioPath, "Waveform", width, waveform);
-    getImageURLForAudio(audioPath, "Spectrogram", width, spectrogram);
-    if (refAudio != null) {
-      getTranscriptImageURLForAudio(audioPath,refAudio,width,words,phones,speech);
+    int rightMargin = screenPortion == 1.0f ? RIGHT_MARGIN : (int)(screenPortion*((float)RIGHT_MARGIN));
+    int width = (int) ((screenPortion*((float)Window.getClientWidth())) - rightMargin);
+    int diff = Math.abs(Window.getClientWidth() - lastWidth);
+    if (lastWidth == 0 || diff > 100) {
+      lastWidth = Window.getClientWidth();
+
+      System.out.println("getImages : offset width " + getOffsetWidth() + " width " + width + " path " + audioPath);
+      getImageURLForAudio(audioPath, "Waveform", width, waveform);
+      getImageURLForAudio(audioPath, "Spectrogram", width, spectrogram);
+      if (refAudio != null) {
+        getTranscriptImageURLForAudio(audioPath,refAudio,width,words,phones,speech);
+      }
+    }
+    else {
+      //System.out.println("getImages : not updating, offset width " + getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
+
     }
   }
 
   private void getImageURLForAudio(String path, String type,int width, final ImageAndCheck waveform) {
     int toUse = Math.max(MIN_WIDTH, width);
     int height = HEIGHT;
-    service.getImageForAudioFile(path, type, toUse, height, new AsyncCallback<String>() {
-      public void onFailure(Throwable caught) {}
-      public void onSuccess(String result) {
-        waveform.image.setUrl(result);
-        waveform.image.setVisible(true);
-        waveform.check.setVisible(true);
-        audioPositionPopup.reinitialize();
-      }
-    });
+    if (path != null) {
+      //System.out.println("asking for width " + toUse);
+      service.getImageForAudioFile(path, type, toUse, height, new AsyncCallback<String>() {
+        public void onFailure(Throwable caught) {
+        }
+
+        public void onSuccess(String result) {
+          waveform.image.setUrl(result);
+          waveform.image.setVisible(true);
+          waveform.check.setVisible(true);
+          audioPositionPopup.reinitialize();
+        }
+      });
+    }
+    else {
+      System.out.println("no audio path for " + type);
+    }
   }
 
+  Map<String,List<String>> testToRef = new HashMap<String, List<String>>();
   /**
    * TODO configure for multi-ref
    * TODO : add multiple ref files
@@ -213,7 +237,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param phoneTranscript
    * @param speechTranscript
    */
-  private void getTranscriptImageURLForAudio(String path, String ref, int width,
+  private void getTranscriptImageURLForAudio(final String path, final String ref, int width,
                                              final ImageAndCheck wordTranscript,
                                              final ImageAndCheck phoneTranscript, final ImageAndCheck speechTranscript) {
     int toUse = Math.max(MIN_WIDTH, width);
@@ -224,7 +248,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         }
 
         public void onSuccess(PretestScore result) {
-          useResult(result, wordTranscript, phoneTranscript, speechTranscript);
+          List<String> refs = testToRef.get(path);
+          if (refs == null) testToRef.put(path, refs = new ArrayList<String>());
+          useResult(result, wordTranscript, phoneTranscript, speechTranscript, refs.contains(ref));
+          refs.add(ref);
         }
       });
     } else {
@@ -235,13 +262,17 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         }
 
         public void onSuccess(PretestScore result) {
-          useResult(result, wordTranscript, phoneTranscript, speechTranscript);
+          List<String> refs = testToRef.get(path);
+          if (refs == null) testToRef.put(path, refs = new ArrayList<String>());
+
+          useResult(result, wordTranscript, phoneTranscript, speechTranscript, refs.contains(ref));
+          refs.add(ref);
         }
       });
     }
   }
 
-  private void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript, ImageAndCheck speechTranscript) {
+  private void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript, ImageAndCheck speechTranscript, boolean scoredBefore) {
     System.out.println("useResult got " + result);
     if (result.sTypeToImage.get(NetPronImageType.WORD_TRANSCRIPT) != null) {
       wordTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.WORD_TRANSCRIPT));
@@ -258,7 +289,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       speechTranscript.image.setVisible(true);
       speechTranscript.check.setVisible(true);
     }
-    if (scoreListener != null) scoreListener.gotScore(result);
+    if (!scoredBefore) {
+      System.out.println("new score returned " + result);
+      scoreListener.gotScore(result);
+    }
   }
 
   private Panel addCheckbox(String label, final ImageAndCheck widget) {
@@ -324,11 +358,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     private void showAt(double position) {
       int offsetHeight = imageContainer.getOffsetHeight();
       imageOverlay.setSize("2px", offsetHeight + "px");
-      //imageOverlay.getWidget().setSize("2px", offsetHeight + "px");
 
       int left = imageContainer.getAbsoluteLeft() + (int) (((double) imageContainer.getOffsetWidth()) * (position / songDuration));
       int top = imageContainer.getAbsoluteTop();
-      //System.out.println("update " + position + " left " + left + " top " + top);
       imageOverlay.setPopupPosition(left, top);
       if (debug) System.out.println("showAt " + imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() +
           " x " + imageOverlay.getPopupLeft() + " y " + imageOverlay.getPopupTop() + " dim " +
