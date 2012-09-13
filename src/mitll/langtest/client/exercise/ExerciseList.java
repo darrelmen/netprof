@@ -9,6 +9,8 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ProvidesResize;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
@@ -26,7 +28,7 @@ import java.util.List;
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseList extends VerticalPanel {
+public class ExerciseList extends VerticalPanel implements ProvidesResize, RequiresResize {
   protected List<Exercise> currentExercises = null;
   private int currentExercise = 0;
   private List<HTML> progressMarkers = new ArrayList<HTML>();
@@ -36,7 +38,6 @@ public class ExerciseList extends VerticalPanel {
   protected LangTestDatabaseAsync service;
   private UserFeedback feedback;
   private ExercisePanelFactory factory;
-  //private boolean doGrading = false;
   protected int expectedGrades = 1;
   protected UserManager user;
 
@@ -54,19 +55,11 @@ public class ExerciseList extends VerticalPanel {
    * @paramx doGrading
    * @param expectedGrades
    */
-  public void setFactory(ExercisePanelFactory factory, UserManager user, /*boolean doGrading, */int expectedGrades) {
-  //  this.doGrading = doGrading;
+  public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {
     this.factory = factory;
     this.user = user;
     this.expectedGrades = expectedGrades;
-/*    if (doGrading) {
-      loadGradingExercises();
-    }*/
   }
-
-/*  private void loadGradingExercises() {
-    service.getExercises(new SetExercisesCallback());
-  }*/
 
   /**
     * Get exercises for this user.
@@ -81,6 +74,10 @@ public class ExerciseList extends VerticalPanel {
 
   public void getExercisesInOrder() {
     service.getExercises(new SetExercisesCallback());
+  }
+
+  public void onResize() {
+    if (current != null && current instanceof RequiresResize) ((RequiresResize)current).onResize();
   }
 
   protected class SetExercisesCallback implements AsyncCallback<List<Exercise>> {
