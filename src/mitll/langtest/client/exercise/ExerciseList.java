@@ -40,6 +40,7 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
   private ExercisePanelFactory factory;
   protected int expectedGrades = 1;
   protected UserManager user;
+  private String exercise_title;
 
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback, ExercisePanelFactory factory) {
     this.currentExerciseVPanel = currentExerciseVPanel;
@@ -78,6 +79,14 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
 
   public void onResize() {
     if (current != null && current instanceof RequiresResize) ((RequiresResize)current).onResize();
+  }
+
+  /**
+   * So you an load a specific exercise
+   * @param exercise_title
+   */
+  public void setExercise_title(String exercise_title) {
+    this.exercise_title = exercise_title;
   }
 
   protected class SetExercisesCallback implements AsyncCallback<List<Exercise>> {
@@ -119,10 +128,25 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
 
   protected void loadFirstExercise() {
     Exercise toLoad = currentExercises.get(0);
+    if (exercise_title != null) {
+      Exercise e = byName(exercise_title);
+      if (e != null) toLoad = e;
+    }
+
     loadExercise(toLoad);
   }
 
-  // TODO : add exercise by name
+  private Exercise byName(String name) {
+    Exercise found = null;
+    for (Exercise e : currentExercises) {
+      String id = e.getID();
+      if (id.equals(name)) {
+        found = e;
+        break;
+      }
+    }
+    return found;
+  }
 
   /**
    * @see #addExerciseToList(mitll.langtest.shared.Exercise)
