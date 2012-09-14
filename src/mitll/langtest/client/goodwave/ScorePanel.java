@@ -38,8 +38,8 @@ public class ScorePanel extends FlowPanel implements ScoreListener {
 	public ScorePanel(boolean scoreWithASR){
 		this.scoreWithASR = scoreWithASR;
 
-		setWidth("100%");
-
+		//setWidth("100%");
+    setWidth("200px");
 		chartCaptionPanel = new CaptionPanel("Charts");
 
 		chartPanel = new FlowPanel();
