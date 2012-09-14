@@ -112,29 +112,46 @@ public class AudioConversion {
    * @param testAudioFileNoSuffix name without suffix
    * @return
    */
-  public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix) {
+  public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix) throws UnsupportedAudioFileException {
     String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + ".wav";
     File wavFile = new File(pathname);
 
+    wavFile = convertTo16Khz(wavFile);
+    String name1 = wavFile.getName();
+    return removeSuffix(name1);
+  }
+
+  public File convertTo16Khz(File wavFile) throws UnsupportedAudioFileException {
+    //String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + ".wav";
+    //File wavFile = new File(pathname);
+    if (!wavFile.exists()) {
+      System.err.println("convertTo16Khz " + wavFile + " doesn't exist");
+      return wavFile;
+    }
     try {
       AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(wavFile);
       float sampleRate = audioFileFormat.getFormat().getSampleRate();
       if (sampleRate != 16000f) {
         String binPath = WINDOWS_SOX_BIN_DIR;
         if (! new File(binPath).exists()) binPath = LINUX_SOX_BIN_DIR;
-        String s = new AudioConverter().convertTo16KHZ(binPath, pathname);
-        String sampled = testAudioDir + File.separator + testAudioFileNoSuffix + "_16K.wav";
+        String s = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
+        String name1 = wavFile.getName();
+        String sampled = wavFile.getParent() + File.separator + removeSuffix(name1) + "_16K.wav";
         if (new FileCopier().copy(s, sampled)) {
-          String name = new File(sampled).getName();
-          testAudioFileNoSuffix = name.substring(0, name.length() - 4);
+          wavFile = new File(sampled);
         }
       }
-    } catch (UnsupportedAudioFileException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
+    } /*catch (UnsupportedAudioFileException e) {
+     // e.printStackTrace();
+      throw e;
+    }*/ catch (IOException e) {
       e.printStackTrace();
     }
-    return testAudioFileNoSuffix;
+    return wavFile;
+  }
+
+  private String removeSuffix(String name1) {
+    return name1.substring(0,name1.length()-4);
   }
 
   /**
