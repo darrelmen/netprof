@@ -8,6 +8,7 @@ import pronz.dirs.Dirs;
 import pronz.speech.ASRParameters;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,14 +24,16 @@ public class Scoring {
   private static final String LINUX_CONFIGURATIONS = "mtexConfig";
 
   protected Dirs dirs;
-  private static final float MIN_AUDIO_SECONDS = 0.3f;
-  private static final float MAX_AUDIO_SECONDS = 15.0f;
+/*  private static final float MIN_AUDIO_SECONDS = 0.3f;
+  private static final float MAX_AUDIO_SECONDS = 15.0f;*/
 
   protected String scoringDir;
   protected String os;
   protected String configFullPath;
+  private String deployPath;
 
   public Scoring(String deployPath) {
+    this.deployPath = deployPath;
     String property = System.getProperty("os.name").toLowerCase();
     this.os = property.contains("win") ? "win32" : property
         .contains("mac") ? "macos"
@@ -48,8 +51,14 @@ public class Scoring {
 
   protected Map<NetPronImageType, String> writeTranscripts(String imageOutDir, int imageWidth, int imageHeight, String noSuffix) {
     String pathname = noSuffix + ".wav";
-
-    // These may not all exist. The speech file is created only by multisv
+    if (!new File(pathname).exists()) {
+       pathname = deployPath + File.separator + pathname;
+    }
+    if (!new File(pathname).exists()) {
+      System.err.println("writeTranscripts : can't find " + pathname);
+      return Collections.emptyMap();
+    }
+      // These may not all exist. The speech file is created only by multisv
     // right now. writeTranscriptImages() ignores missing files.
     String phoneLabFile = noSuffix + ".phones.lab";
     String speechLabFile = noSuffix + ".speech.lab";
@@ -68,7 +77,6 @@ public class Scoring {
     for (Map.Entry<ImageType, String> kv : typeToImageFile.entrySet()) {
       String name = kv.getKey().toString();
       NetPronImageType key = NetPronImageType.valueOf(name);
-      //System.out.println("key is " + name + "/" + key + " -> " +kv.getValue());
       sTypeToImage.put(key, kv.getValue());
     }
     return sTypeToImage;
