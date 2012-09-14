@@ -2,6 +2,7 @@ package mitll.langtest.server;
 
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
+import audio.tools.AudioFile;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -21,6 +22,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -146,30 +148,56 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String installPath = getInstallPath();
     assert (absolutePathToImage.startsWith(installPath));
 
-    String relativeImagePath = ensureForwardSlashes(absolutePathToImage.substring(installPath.length()+1)); // +1 removes initial slash!
-    //System.out.println("rel path is " + relativeImagePath);
+    String relativeImagePath = ensureForwardSlashes(absolutePathToImage.substring(installPath.length()));
+    if (relativeImagePath.startsWith("/")) {
+      relativeImagePath = relativeImagePath.substring(1);
+    }
+    // +1 removes initial slash!
+    System.out.println("rel path is " + relativeImagePath);
     return relativeImagePath;
   }
 
+  /**
+   * @see mitll.langtest.client.goodwave.AudioPanel#getTranscriptImageURLForAudio(String, String, int, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck)
+   * @param audioFile
+   * @param refs
+   * @param width
+   * @param height
+   * @return
+   */
   public PretestScore getScoreForAudioFile(String audioFile, Collection<String> refs, int width, int height) {
-    String noSuffix = removeSuffix(audioFile);
-    if (audioFile.endsWith(".mp3")) {
-      String wavFile = noSuffix +".wav";
-      File test = getAbsoluteFile(wavFile);
-      audioFile = test.exists() ? test.getAbsolutePath() :  getWavForMP3(audioFile);
+    System.out.println("DTW getScoreForAudioFile " + audioFile + " against " +refs);
+    if (refs.isEmpty()) {
+      System.err.println("DTW getScoreForAudioFile no refs? ");
+      return new PretestScore();
     }
+    String installPath = getInstallPath();
+    File testAudioFile = getProperAudioFile(audioFile, installPath);
 
-    File testAudioFile = new File(audioFile);
+    //String audioFileName = testAudioFile.getName();
+    //testAudioFile = new File(new AudioConversion().convertTo16Khz(parent1, removeSuffix(audioFileName)) +".wav");
+    System.out.println("DTW scoring after conversion " + testAudioFile.getAbsolutePath());
     String name = testAudioFile.getName();
 
-    String installPath = getInstallPath();
+//    String installPath = installPath1;
     String imageOutDir = getImageOutDir();
-    String testAudioDir = testAudioFile.getParent().substring(installPath.length());
+    String testAudioDir = testAudioFile.getParent();//.length());
 
     System.out.println("DTW scoring " + name + " in dir " +testAudioDir);
+
+    //List<File> refFiles = new ArrayList<File>();
     Collection<String> names = new ArrayList<String>();
-    String firstRef = refs.iterator().next();
-    String parent = new File(firstRef).getParent();
+    String refAudioDir = null;
+
+    for (String ref : refs) {
+      File properAudioFile = getProperAudioFile(ref, installPath);
+      if (refAudioDir == null) refAudioDir = properAudioFile.getParent();
+      names.add(removeSuffix(properAudioFile.getName()));
+    }
+    System.out.println("converted refs " + refs +" into " + names);
+
+/*    File firstRef = refFiles.iterator().next();
+    String parent = firstRef.getParent();
     System.out.println("ref " + parent + " first ref " + firstRef + " install " + installPath);
     String refAudioDir = (parent.startsWith(installPath)) ? parent.substring(installPath.length()) : parent;
     for (String ref : refs) {
@@ -188,7 +216,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
         names.add(name1);
       }
-    }
+    }*/
     if (names.isEmpty()) {
       System.err.println("no valid ref files");
       return new PretestScore();
@@ -197,6 +225,51 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       System.out.println("score " + pretestScore);
       return pretestScore;
     }
+  }
+
+  private File getProperAudioFile(String audioFile, String installPath) {
+    // check the path of the audio file!
+    File t = new File(audioFile);
+    if (!t.exists()) {
+      System.out.println("DTW getProperAudioFile " + t.getAbsolutePath() + " doesn't exist");
+    }
+    // make sure it's under the deploy location/install path
+    if (!audioFile.startsWith(installPath)) {
+      audioFile = installPath + File.separator + audioFile;
+    }
+    String noSuffix = removeSuffix(audioFile);
+
+    // convert it to wav, if needed
+    if (audioFile.endsWith(".mp3")) {
+      System.out.println("converting " +audioFile + " to wav ");
+      String wavFile = noSuffix +".wav";
+      File test = new File(wavFile);
+
+    //  File test = getAbsoluteFile(wavFile);
+      //File file = new AudioConversion().convertMP3ToWav(audioFile);
+
+      audioFile = test.exists() ? test.getAbsolutePath() : new AudioConversion().convertMP3ToWav(audioFile).getAbsolutePath();
+    }
+
+    File testAudioFile = new File(audioFile);
+
+    //  String parent1 = testAudioFile.getParent();
+    //System.out.println("DTW test audio is " + testAudioFile + " parent " + parent1);
+
+    // convert it to 16K sample rate, if needed
+    try {
+      File converted = new AudioConversion().convertTo16Khz(testAudioFile);
+      System.out.println("DTW test audio is " + testAudioFile.getAbsolutePath() + " converted " + converted.getAbsolutePath());
+      testAudioFile = converted;
+    } catch (UnsupportedAudioFileException e) {
+      System.err.println("DTW couldn't convert " + testAudioFile.getAbsolutePath() + " : " + e.getMessage());
+    }
+
+    if (!testAudioFile.exists()) {
+      System.err.println("DTW getProperAudioFile " + testAudioFile.getAbsolutePath() + " doesn't exist????");
+
+    }
+    return testAudioFile;
   }
 
   /**
@@ -233,15 +306,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return audioFile.substring(0, audioFile.length() - ".mp3".length());
   }
 
-  /**
-   * Ultimately does lame --decode from.mp3 to.wav
-   * @param audioFile to convert
-   * @return
-   */
   private String getWavForMP3(String audioFile) {
+    return getWavForMP3(audioFile, getInstallPath());
+  }
+
+  /**
+    * Ultimately does lame --decode from.mp3 to.wav
+    * @param audioFile to convert
+    * @return
+    */
+  private String getWavForMP3(String audioFile, String installPath) {
     assert(audioFile.endsWith(".mp3"));
     AudioConversion audioConversion = new AudioConversion();
-    String absolutePath = getAbsoluteFile(audioFile).getAbsolutePath();
+    String absolutePath = getAbsolute(audioFile,installPath).getAbsolutePath();
 
     if (!new File(absolutePath).exists())
       System.err.println("expecting file at " + absolutePath);
@@ -386,6 +463,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private File getAbsoluteFile(String filePath) {
     String realContextPath = getInstallPath();
+    return getAbsolute(filePath, realContextPath);
+  }
+
+  private File getAbsolute(String filePath, String realContextPath) {
     File file = new File(realContextPath, filePath);
     assert(file.exists());
     return file;
@@ -475,6 +556,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     //System.out.println("x\\y\\z".replaceAll("\\\\", "/"));
 
     LangTestDatabaseImpl langTestDatabase = new LangTestDatabaseImpl();
+
+    String audioFile = "answers/test/ac-L0P-001/1/subject--1/answer_1347645428580.mp3";
+    File properAudioFile = langTestDatabase.getProperAudioFile(audioFile, "C:\\Users\\go22670\\DLITest\\LangTest\\war");
+    System.out.println("From " +audioFile + " to " + properAudioFile);
+
+
+    if (true) return;
+
     langTestDatabase.init();
 
     String fred = langTestDatabase.userToExerciseID.getIfPresent("fred");
