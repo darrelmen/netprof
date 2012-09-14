@@ -41,9 +41,10 @@ import java.util.Set;
  */
 public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final int MIN_WIDTH = 256;
-  private static final int HEIGHT = 96;
+  private static final float HEIGHT = 128f;//96;
   private static final int ANNOTATION_HEIGHT = 20;
   private static final int RIGHT_MARGIN = 500;//1;//400;
+  public static final int SHORT_HEIGHT = 64;
   private String audioPath;
   private ImageAndCheck waveform,spectrogram,speech,phones,words;
   private int lastWidth = 0;
@@ -156,6 +157,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   public void setRefAudio(String path) {
+    lastWidth = 0;
     this.refAudio = path;
   }
 
@@ -199,13 +201,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   private void getImageURLForAudio(String path, String type,int width, final ImageAndCheck waveform) {
     int toUse = Math.max(MIN_WIDTH, width);
-    int height = HEIGHT;
+    int height = (int) (((float)Window.getClientHeight())/1200f * HEIGHT);
     if (path != null) {
       //System.out.println("asking for width " + toUse);
       service.getImageForAudioFile(path, type, toUse, height, new AsyncCallback<String>() {
-        public void onFailure(Throwable caught) {
-        }
-
+        public void onFailure(Throwable caught) {}
         public void onSuccess(String result) {
           waveform.image.setUrl(result);
           waveform.image.setVisible(true);
