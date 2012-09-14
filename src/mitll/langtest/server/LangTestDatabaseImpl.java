@@ -174,18 +174,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String installPath = getInstallPath();
     File testAudioFile = getProperAudioFile(audioFile, installPath);
 
-    //String audioFileName = testAudioFile.getName();
-    //testAudioFile = new File(new AudioConversion().convertTo16Khz(parent1, removeSuffix(audioFileName)) +".wav");
     System.out.println("DTW scoring after conversion " + testAudioFile.getAbsolutePath());
     String name = testAudioFile.getName();
 
-//    String installPath = installPath1;
     String imageOutDir = getImageOutDir();
-    String testAudioDir = testAudioFile.getParent();//.length());
+    String testAudioDir = testAudioFile.getParent();
 
     System.out.println("DTW scoring " + name + " in dir " +testAudioDir);
 
-    //List<File> refFiles = new ArrayList<File>();
     Collection<String> names = new ArrayList<String>();
     String refAudioDir = null;
 
@@ -196,32 +192,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     System.out.println("converted refs " + refs +" into " + names);
 
-/*    File firstRef = refFiles.iterator().next();
-    String parent = firstRef.getParent();
-    System.out.println("ref " + parent + " first ref " + firstRef + " install " + installPath);
-    String refAudioDir = (parent.startsWith(installPath)) ? parent.substring(installPath.length()) : parent;
-    for (String ref : refs) {
-      File file = new File(ref);
-      if (!file.exists()) {
-        //System.err.println("can't find ref file " +file);
-        file = new File(installPath,ref);
-      }
-
-      if (!file.exists()) {
-        System.err.println("can't find ref file " +file + " at " + file.getAbsolutePath());
-      }
-      else {
-        String name1 = file.getName();
-        name1 = new AudioConversion().convertTo16Khz(file.getParent(), removeSuffix(name1));
-
-        names.add(name1);
-      }
-    }*/
     if (names.isEmpty()) {
       System.err.println("no valid ref files");
       return new PretestScore();
     } else {
-      PretestScore pretestScore = new DTWScoring(installPath).score(testAudioDir, removeSuffix(name), refAudioDir, names, imageOutDir, width, height);
+      DTWScoring dtwScoring = new DTWScoring(installPath);
+      PretestScore pretestScore =
+          dtwScoring.score(testAudioDir, removeSuffix(name), refAudioDir, names, imageOutDir, width, height);
       System.out.println("score " + pretestScore);
       return pretestScore;
     }
