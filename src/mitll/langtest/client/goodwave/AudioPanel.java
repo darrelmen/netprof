@@ -43,8 +43,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final int MIN_WIDTH = 256;
   private static final float HEIGHT = 128f;//96;
   private static final int ANNOTATION_HEIGHT = 20;
-  private static final int RIGHT_MARGIN = 500;//1;//400;
-  public static final int SHORT_HEIGHT = 64;
+  private static final int RIGHT_MARGIN = 400;//1;//400;
   private String audioPath;
   private ImageAndCheck waveform,spectrogram,speech,phones,words;
   private int lastWidth = 0;
@@ -183,6 +182,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private void getImages() {
     int rightMargin = screenPortion == 1.0f ? RIGHT_MARGIN : (int)(screenPortion*((float)RIGHT_MARGIN));
     int width = (int) ((screenPortion*((float)Window.getClientWidth())) - rightMargin);
+    //int width = getOffsetWidth();
     int diff = Math.abs(Window.getClientWidth() - lastWidth);
     if (lastWidth == 0 || diff > 100) {
       lastWidth = Window.getClientWidth();
