@@ -75,6 +75,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private ScrollPanel itemScroller;
   private float screenPortion;
   private boolean showOnlyOne;
+  private String exercise_title;
 
   /**
    * Make an exception handler that displays the exception.
@@ -121,19 +122,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void onModuleLoad2() {
     userManager = new UserManager(this,service);
     resultManager = new ResultManager(service, this);
-
+    boolean isGrading = checkParams();
+    boolean usualLayout = exercise_title == null;
     final DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
-    RootPanel.get().add(widgets);
+    if (usualLayout) {
+      RootPanel.get().add(widgets);
+    }
 
     // if you remove this line the layout doesn't work -- the dock layout appears blank!
     widgets.setSize((Window.getClientWidth()-EAST_WIDTH) + "px", (Window.getClientHeight()-FOOTER_HEIGHT) + "px");
-    Window.addResizeHandler(new ResizeHandler() {
-      public void onResize(ResizeEvent event) {
-        widgets.setSize((Window.getClientWidth()-EAST_WIDTH) + "px", (Window.getClientHeight()-FOOTER_HEIGHT) + "px");
-        itemScroller.setSize((EXERCISE_LIST_WIDTH) +"px",(Window.getClientHeight() - (2*HEADER_HEIGHT) - FOOTER_HEIGHT - 60) + "px"); // 54
-        exerciseList.onResize();
-      }
-    });
+    addResizeHandler(widgets);
+
     // header/title line
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
     HTML title = new HTML("<h1>" + DLI_LANGUAGE_TESTING + "</h1>");
@@ -146,12 +145,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     widgets.addNorth(hp, HEADER_HEIGHT);
     widgets.addSouth(status = new Label(), FOOTER_HEIGHT);
     widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH/* +10*/);
-   // exerciseListPanel.addStyleName("exerciseList");
 
     // set up center panel, initially with flash record panel
     ScrollPanel sp = new ScrollPanel();
     sp.add(currentExerciseVPanel);
-    widgets.add(sp);
+    if (usualLayout) {
+      widgets.add(sp);
+    }
+    else {
+      RootPanel.get().add(sp);
+    }
     makeFlashContainer();
     currentExerciseVPanel.add(flashRecordPanel);
     currentExerciseVPanel.addStyleName("currentExercisePanel");
@@ -159,7 +162,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setupErrorDialog();
 
     // set up left side exercise list
-    boolean isGrading = checkParams();
     makeExerciseList(exerciseListPanel, isGrading);
 
     modeSelect();
@@ -169,6 +171,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     soundManager = new SoundManagerStatic();
     soundManager.exportStaticMethods();
     soundManager.initialize();
+  }
+
+  /**
+   * Tell the exercise list when the browser window changes size
+   * @param widgets
+   */
+  private void addResizeHandler(final DockLayoutPanel widgets) {
+    Window.addResizeHandler(new ResizeHandler() {
+      public void onResize(ResizeEvent event) {
+        widgets.setSize((Window.getClientWidth() - EAST_WIDTH) + "px", (Window.getClientHeight() - FOOTER_HEIGHT) + "px");
+        itemScroller.setSize((EXERCISE_LIST_WIDTH) + "px", (Window.getClientHeight() - (2 * HEADER_HEIGHT) - FOOTER_HEIGHT - 60) + "px"); // 54
+        exerciseList.onResize();
+      }
+    });
   }
 
   public float getScreenPortion() {
@@ -189,6 +205,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           protected void checkBeforeLoad(Exercise e) {} // don't try to login
         }: new ExerciseList(currentExerciseVPanel,service, this, factory);
 
+    if (exercise_title != null) exerciseList.setExercise_title(exercise_title);
     itemScroller = new ScrollPanel(this.exerciseList);
     itemScroller.setSize((EXERCISE_LIST_WIDTH) +"px",(Window.getClientHeight() - (2*HEADER_HEIGHT) - FOOTER_HEIGHT - 60) + "px"); // 54
     exerciseListPanel.add(new HTML("<h2>Items</h2>"));
@@ -213,11 +230,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
+  /**
+   * exercise_title=nl0002_lms&transform_score_c1=68.51101&transform_score_c2=2.67174
+   * @return
+   */
   private boolean checkParams() {
     String isGrading = Window.Location.getParameter("grading");
     String isEnglish = Window.Location.getParameter("english");
     String goodwave = Window.Location.getParameter("goodwave");
-    String showOnlyOneParam = Window.Location.getParameter("showOnlyOne");
+    String exercise_title = Window.Location.getParameter("exercise_title");
+    if (exercise_title != null) {
+     if (goodwave == null) goodwave = "true";
+      this.exercise_title = exercise_title;
+    }
     String screenPortionParam =  Window.Location.getParameter("screenPortion");
     screenPortion = 1.0f;
     if (screenPortionParam != null) {
@@ -230,7 +255,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // System.out.println("param grading " + isGrading);
     englishOnlyMode = isEnglish != null && !isEnglish.equals("false");
     goodwaveMode = goodwave != null && !goodwave.equals("false");
-  //  showOnlyOne = showOnlyOneParam != null && !showOnlyOneParam.equals("false");
     boolean grading = (isGrading != null && !isGrading.equals("false")) || englishOnlyMode;
     return grading;
   }
@@ -354,11 +378,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     });
     vp.add(showResults);
-
-    // HTML html = new HTML(browser + " " +ver);
-    //html.getElement().setId("status");
-   // SimplePanel sp = new SimplePanel();
-   // sp.add(html);
 
     // no click handler for this for now
     Anchor status = new Anchor(browserCheck.browser + " " +browserCheck.ver);

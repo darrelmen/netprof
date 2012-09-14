@@ -62,9 +62,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e));
     center.add(hp);
+    setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     add(center);
     scorePanel = new ScorePanel(false);
-
+    setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
     add(scorePanel);
     int i = 1;
 
@@ -226,9 +227,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
 
           service.writeAudioFile(controller.getBase64EncodedWavFile()
               , exercise.getPlan(), exercise.getID(), "" + index, "" + controller.getUser(), new AsyncCallback<AudioAnswer>() {
-            public void onFailure(Throwable caught) {
-            }
-
+            public void onFailure(Throwable caught) {}
             public void onSuccess(AudioAnswer result) {
               String path1 = result.path;
               if (path1.endsWith(".wav")) path1 = path1.replace(".wav", ".mp3");
