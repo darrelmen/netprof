@@ -10,6 +10,7 @@ import scala.Function1;
 import scala.Tuple2;
 import scala.runtime.AbstractFunction1;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
@@ -97,7 +98,11 @@ public class ASRScoring extends Scoring {
       return new PretestScore();
     }
 
-    testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(testAudioDir, testAudioFileNoSuffix);
+    try {
+      testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(testAudioDir, testAudioFileNoSuffix);
+    } catch (UnsupportedAudioFileException e) {
+      e.printStackTrace();
+    }
     // the path to the test audio is <tomcatWriteDirectory>/<pretestFilesRelativePath>/<planName>/<testsRelativePath>/<testName>
     Audio testAudio = Audio$.MODULE$.apply(
         testAudioDir, testAudioFileNoSuffix,
