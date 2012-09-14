@@ -98,8 +98,9 @@ public class PretestScore implements IsSerializable {
   public String toString() {
     StringBuilder b = new StringBuilder();
 
-    for (Float f : svScoreVector) b.append(f).append(",");
-
+    if (svScoreVector != null)  {
+      for (Float f : svScoreVector) b.append(f).append(",");
+    }
     return "hydec " + hydecScore + " transformed hydec " + transformedHydecScore +" transformed dtw " + transformedSVScore +
         " phones " + getPhoneScores() + " sv " +b+" type->image " +sTypeToImage;
   }
