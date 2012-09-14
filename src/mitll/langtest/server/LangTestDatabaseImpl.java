@@ -146,7 +146,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String installPath = getInstallPath();
     assert (absolutePathToImage.startsWith(installPath));
 
-    String relativeImagePath = ensureForwardSlashes(absolutePathToImage.substring(installPath.length()));
+    String relativeImagePath = ensureForwardSlashes(absolutePathToImage.substring(installPath.length()+1)); // +1 removes initial slash!
     //System.out.println("rel path is " + relativeImagePath);
     return relativeImagePath;
   }
@@ -174,7 +174,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String refAudioDir = (parent.startsWith(installPath)) ? parent.substring(installPath.length()) : parent;
     for (String ref : refs) {
       File file = new File(ref);
-      if (!file.exists()) System.err.println("can't find ref file " +file);
+      if (!file.exists()) {
+        //System.err.println("can't find ref file " +file);
+        file = new File(installPath,ref);
+      }
+
+      if (!file.exists()) {
+        System.err.println("can't find ref file " +file + " at " + file.getAbsolutePath());
+      }
       else {
         String name1 = file.getName();
         name1 = new AudioConversion().convertTo16Khz(file.getParent(), removeSuffix(name1));
