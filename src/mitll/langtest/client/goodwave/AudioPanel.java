@@ -27,8 +27,10 @@ import mitll.langtest.shared.scoring.PretestScore;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Mainly delegates recording to the {@link mitll.langtest.client.recorder.SimpleRecordPanel}.
@@ -38,10 +40,10 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioPanel extends VerticalPanel implements RequiresResize {
-  public static final int MIN_WIDTH = 256;
-  public static final int HEIGHT = 128;
-  public static final int ANNOTATION_HEIGHT = 20;
-  public static final int RIGHT_MARGIN = 500;//1;//400;
+  private static final int MIN_WIDTH = 256;
+  private static final int HEIGHT = 96;
+  private static final int ANNOTATION_HEIGHT = 20;
+  private static final int RIGHT_MARGIN = 500;//1;//400;
   private String audioPath;
   private ImageAndCheck waveform,spectrogram,speech,phones,words;
   private int lastWidth = 0;
@@ -52,7 +54,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected LangTestDatabaseAsync service;
   protected SoundManagerAPI soundManager;
   private PlayAudioPanel playAudio;
-  boolean debug = false;
+  private boolean debug = false;
   private String refAudio;
   private ScoreListener scoreListener;
   private float screenPortion = 1.0f;
@@ -117,7 +119,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     add(hp);
 
     add(imageContainer);
-    //System.out.println(" got  path " +path);
 
     this.audioPath = path;
   }
@@ -147,8 +148,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   public void getImagesForPath(String path) {
     if (path != null) {
-     // System.out.println("getImagesForPath got  path " +path);
-
       this.audioPath = path;
     }
 
@@ -179,12 +178,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     return new PlayAudioPanel(soundManager);
   }
 
-/*  private static class ResizeVP extends VerticalPanel implements RequiresResize {
-    public void onResize() {
-      System.out.println("Got resize width " + getOffsetWidth() + " height " + getOffsetHeight());
-    }
-  }*/
-
   private void getImages() {
     int rightMargin = screenPortion == 1.0f ? RIGHT_MARGIN : (int)(screenPortion*((float)RIGHT_MARGIN));
     int width = (int) ((screenPortion*((float)Window.getClientWidth())) - rightMargin);
@@ -201,7 +194,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
     else {
       //System.out.println("getImages : not updating, offset width " + getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
-
     }
   }
 
@@ -227,7 +219,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
   }
 
-  Map<String,List<String>> testToRef = new HashMap<String, List<String>>();
+  private Set<String> tested = new HashSet<String>();
   /**
    * TODO configure for multi-ref
    * TODO : add multiple ref files
@@ -244,29 +236,22 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     int height = ANNOTATION_HEIGHT;
     if (false) {
       service.getScoreForAudioFile(path, toUse, height, new AsyncCallback<PretestScore>() {
-        public void onFailure(Throwable caught) {
-        }
-
+        public void onFailure(Throwable caught) {}
         public void onSuccess(PretestScore result) {
-          List<String> refs = testToRef.get(path);
-          if (refs == null) testToRef.put(path, refs = new ArrayList<String>());
-          useResult(result, wordTranscript, phoneTranscript, speechTranscript, refs.contains(ref));
-          refs.add(ref);
+          useResult(result, wordTranscript, phoneTranscript, speechTranscript, tested.contains(path));
+          tested.add(path);
         }
       });
     } else {
       Collection<String> refs = new ArrayList<String>();
       refs.add(ref);
       service.getScoreForAudioFile(path, refs, toUse, height, new AsyncCallback<PretestScore>() {
-        public void onFailure(Throwable caught) {
-        }
-
+        public void onFailure(Throwable caught) {}
         public void onSuccess(PretestScore result) {
-          List<String> refs = testToRef.get(path);
-          if (refs == null) testToRef.put(path, refs = new ArrayList<String>());
-
-          useResult(result, wordTranscript, phoneTranscript, speechTranscript, refs.contains(ref));
-          refs.add(ref);
+          boolean contains = tested.contains(path);
+          if (contains) System.out.println("already asked to score " + path );
+          useResult(result, wordTranscript, phoneTranscript, speechTranscript, contains);
+          tested.add(path);
         }
       });
     }
@@ -350,7 +335,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
     public void show() {
       if (imageOverlay.isShowing()) {
-        //System.out.println("showing at " + last);
         showAt(last);
       }
     }
