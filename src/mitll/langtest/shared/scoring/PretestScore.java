@@ -30,7 +30,7 @@ public class PretestScore implements IsSerializable {
     this.svScoreVector = svScoreVector;
 
     if (svScoreVector != null) {
-      int i = svScoreVector.length - 2;
+      int i = svScoreVector.length - 1;
       if (i < 0) i = 0;
       transformedSVScore = svScoreVector[i];
       System.out.println("trans score is " + transformedSVScore);

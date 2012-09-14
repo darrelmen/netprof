@@ -25,6 +25,17 @@ public class DTWScoring extends Scoring {
     this.deployPath = deployPath;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile(String, java.util.Collection, int, int)
+   * @param testAudioDir
+   * @param testAudioFileNoSuffix
+   * @param refAudioDir
+   * @param refAudioFiles
+   * @param imageOutDir
+   * @param imageWidth
+   * @param imageHeight
+   * @return
+   */
   public PretestScore score(String testAudioDir, String testAudioFileNoSuffix,
                             String refAudioDir, Collection<String> refAudioFiles,
                             String imageOutDir,
@@ -57,7 +68,10 @@ public class DTWScoring extends Scoring {
       System.err.println("score Can't find ref dir " + new File(refAudioDir));
     }
     Float[] scores = computeMultiRefRepeatExerciseScores(testAudio, refAudioDir, refAudioFiles);
-    imageOutDir = checkExists(imageOutDir);
+
+    if (!imageOutDir.startsWith(deployPath)) {
+      imageOutDir =  deployPath + File.separator + imageOutDir;
+    }
 
     Map<NetPronImageType, String> sTypeToImage = writeTranscripts(imageOutDir, imageWidth, imageHeight, testNoSuffix);
 

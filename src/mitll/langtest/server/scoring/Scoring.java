@@ -49,27 +49,33 @@ public class Scoring {
         + "tmp", "", scoringDir, new Log(null, true));
   }
 
+  /**
+   * @see DTWScoring#score(String, String, String, java.util.Collection, String, int, int)
+   * @param imageOutDir
+   * @param imageWidth
+   * @param imageHeight
+   * @param noSuffix
+   * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
+   */
   protected Map<NetPronImageType, String> writeTranscripts(String imageOutDir, int imageWidth, int imageHeight, String noSuffix) {
     String pathname = noSuffix + ".wav";
-    if (!new File(pathname).exists()) {
-       pathname = deployPath + File.separator + pathname;
-    }
+    pathname = prependDeploy(pathname);
     if (!new File(pathname).exists()) {
       System.err.println("writeTranscripts : can't find " + pathname);
       return Collections.emptyMap();
     }
       // These may not all exist. The speech file is created only by multisv
-    // right now. writeTranscriptImages() ignores missing files.
-    String phoneLabFile = noSuffix + ".phones.lab";
-    String speechLabFile = noSuffix + ".speech.lab";
-    String wordLabFile = noSuffix + ".words.lab";
+    // right now.
+    String phoneLabFile = prependDeploy(noSuffix + ".phones.lab");
+    String speechLabFile = prependDeploy(noSuffix + ".speech.lab");
+    String wordLabFile = prependDeploy(noSuffix + ".words.lab");
     Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
 
     if (new File(phoneLabFile).exists()) typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
     if (new File(wordLabFile).exists()) typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
     if (new File(speechLabFile).exists()) {
       typeToFile.put(ImageType.SPEECH_TRANSCRIPT, speechLabFile);
-      System.out.println("found " + new File(speechLabFile).getAbsolutePath());
+      System.out.println("writeTranscripts found " + new File(speechLabFile).getAbsolutePath());
     }
 
     Map<ImageType, String> typeToImageFile = new ImageWriter().writeTranscripts(pathname, imageOutDir, imageWidth, imageHeight, typeToFile);
@@ -77,8 +83,26 @@ public class Scoring {
     for (Map.Entry<ImageType, String> kv : typeToImageFile.entrySet()) {
       String name = kv.getKey().toString();
       NetPronImageType key = NetPronImageType.valueOf(name);
-      sTypeToImage.put(key, kv.getValue());
+      String filePath = kv.getValue();
+      if (filePath.startsWith(deployPath)) {
+        filePath = filePath.substring(deployPath.length()); // make it a relative path
+        if (filePath.startsWith("/")) {
+         // System.out.println("removing initial slash from " + filePath);
+          filePath = filePath.substring(1);
+        }
+      }
+      else {
+        System.err.println("expecting image " +filePath + " to be under " +deployPath);
+      }
+      sTypeToImage.put(key, filePath);
     }
     return sTypeToImage;
+  }
+
+  private String prependDeploy(String pathname) {
+    if (!new File(pathname).exists()) {
+       pathname = deployPath + File.separator + pathname;
+    }
+    return pathname;
   }
 }
