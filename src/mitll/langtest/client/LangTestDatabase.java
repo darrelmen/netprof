@@ -47,9 +47,9 @@ public interface LangTestDatabase extends RemoteService {
 
   void checkoutExerciseID(String user,String id);
 
-  String getImageForAudioFile(String audioFile, String imageType, int width, int height);
+  ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height);
 
-  PretestScore getScoreForAudioFile(String audioFile, int width, int height);
+  PretestScore getScoreForAudioFile(int reqid, String audioFile, int width, int height);
 
-  PretestScore getScoreForAudioFile(String audioFile, Collection<String> refs, int width, int height);
+  PretestScore getScoreForAudioFile(int reqid, String audioFile, Collection<String> refs, int width, int height);
 }

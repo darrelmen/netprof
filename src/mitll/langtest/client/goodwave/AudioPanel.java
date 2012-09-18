@@ -3,8 +3,6 @@ package mitll.langtest.client.goodwave;
 import com.goodwave.client.PlayAudioPanel;
 import com.goodwave.client.sound.AudioControl;
 import com.goodwave.client.sound.SoundManagerAPI;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
@@ -21,6 +19,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -28,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +43,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final int MIN_WIDTH = 256;
   private static final float HEIGHT = 128f;//96;
   private static final int ANNOTATION_HEIGHT = 20;
-  private static final int RIGHT_MARGIN = 400;//1;//400;
+  private static final int RIGHT_MARGIN = 550;//1;//400;
+  private static final String WAVEFORM = "Waveform";
+  private static final String SPECTROGRAM = "Spectrogram";
   private String audioPath;
   private ImageAndCheck waveform,spectrogram,speech,phones,words;
   private int lastWidth = 0;
@@ -96,11 +98,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
     waveform = new ImageAndCheck();
     imageContainer.add(waveform.image);
-    controlPanel.add(addCheckbox("Waveform", waveform));
+    controlPanel.add(addCheckbox(WAVEFORM, waveform));
 
     spectrogram = new ImageAndCheck();
     imageContainer.add(spectrogram.image);
-    controlPanel.add(addCheckbox("Spectrogram", spectrogram));
+    controlPanel.add(addCheckbox(SPECTROGRAM, spectrogram));
 
     words = new ImageAndCheck();
     imageContainer.add(words.image);
@@ -160,7 +162,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.refAudio = path;
   }
 
-  protected PlayAudioPanel addButtonsToButtonRow(HorizontalPanel hp, String path) {
+  private PlayAudioPanel addButtonsToButtonRow(HorizontalPanel hp, String path) {
     final PlayAudioPanel playAudio = makePlayAudioPanel();
     imageOverlay = new PopupPanel(false);
     imageOverlay.setStyleName("ImageOverlay");
@@ -179,6 +181,13 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     return new PlayAudioPanel(soundManager);
   }
 
+  /**
+   * Ask the server for images of the waveform, spectrogram, and transcripts.
+   * <p></p>
+   * TODO uses the window width to determine the image width -- ideally we could find out what the width
+   * of this component is and then use that.  getOffsetWidth doesn't work well, although perhaps using a parent
+   * component's getOffsetWidth would.
+   */
   private void getImages() {
     int rightMargin = screenPortion == 1.0f ? RIGHT_MARGIN : (int)(screenPortion*((float)RIGHT_MARGIN));
     int width = (int) ((screenPortion*((float)Window.getClientWidth())) - rightMargin);
@@ -187,9 +196,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     if (lastWidth == 0 || diff > 100) {
       lastWidth = Window.getClientWidth();
 
-      System.out.println("getImages : offset width " + getOffsetWidth() + " width " + width + " path " + audioPath);
-      getImageURLForAudio(audioPath, "Waveform", width, waveform);
-      getImageURLForAudio(audioPath, "Spectrogram", width, spectrogram);
+      //System.out.println("getImages : offset width " + getOffsetWidth() + " width " + width + " path " + audioPath);
+      getImageURLForAudio(audioPath, WAVEFORM, width, waveform);
+      getImageURLForAudio(audioPath, SPECTROGRAM, width, spectrogram);
       if (refAudio != null) {
         getTranscriptImageURLForAudio(audioPath,refAudio,width,words,phones,speech);
       }
@@ -199,18 +208,25 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
   }
 
-  private void getImageURLForAudio(String path, String type,int width, final ImageAndCheck waveform) {
+  private void getImageURLForAudio(String path, final String type,int width, final ImageAndCheck waveform) {
     int toUse = Math.max(MIN_WIDTH, width);
     int height = (int) (((float)Window.getClientHeight())/1200f * HEIGHT);
     if (path != null) {
-      //System.out.println("asking for width " + toUse);
-      service.getImageForAudioFile(path, type, toUse, height, new AsyncCallback<String>() {
+      int reqid = getReqID(type);
+
+      //System.out.println("---> req " + reqid);
+      service.getImageForAudioFile(reqid, path, type, toUse, height, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {}
-        public void onSuccess(String result) {
-          waveform.image.setUrl(result);
-          waveform.image.setVisible(true);
-          waveform.check.setVisible(true);
-          audioPositionPopup.reinitialize();
+        public void onSuccess(ImageResponse result) {
+          if (isMostRecentRequest(type,result.req)) {
+            waveform.image.setUrl(result.imageURL);
+            waveform.image.setVisible(true);
+            waveform.check.setVisible(true);
+            audioPositionPopup.reinitialize();
+          }
+          else {
+            //System.out.println("----> ignoring out of sync response " + result.req);
+          }
         }
       });
     }
@@ -220,6 +236,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   private Set<String> tested = new HashSet<String>();
+  private Map<String,Integer> reqs = new HashMap<String, Integer>();
+  private int reqid;
+
   /**
    * TODO configure for multi-ref
    * TODO : add multiple ref files
@@ -234,26 +253,55 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
                                              final ImageAndCheck phoneTranscript, final ImageAndCheck speechTranscript) {
     int toUse = Math.max(MIN_WIDTH, width);
     int height = ANNOTATION_HEIGHT;
+
     if (false) {
-      service.getScoreForAudioFile(path, toUse, height, new AsyncCallback<PretestScore>() {
+      int reqid = getReqID("asrscore");
+      service.getScoreForAudioFile(reqid, path, toUse, height, new AsyncCallback<PretestScore>() {
         public void onFailure(Throwable caught) {}
         public void onSuccess(PretestScore result) {
-          useResult(result, wordTranscript, phoneTranscript, speechTranscript, tested.contains(path));
-          tested.add(path);
+          if (isMostRecentRequest("asrscore",result.reqid)) {
+            useResult(result, wordTranscript, phoneTranscript, speechTranscript, tested.contains(path));
+            tested.add(path);
+          }
         }
       });
     } else {
+      int reqid = getReqID("dtwscore");
+
       Collection<String> refs = new ArrayList<String>();
       refs.add(ref);
-      service.getScoreForAudioFile(path, refs, toUse, height, new AsyncCallback<PretestScore>() {
+      service.getScoreForAudioFile(reqid, path, refs, toUse, height, new AsyncCallback<PretestScore>() {
         public void onFailure(Throwable caught) {}
         public void onSuccess(PretestScore result) {
-          boolean contains = tested.contains(path);
-          if (contains) System.out.println("already asked to score " + path );
-          useResult(result, wordTranscript, phoneTranscript, speechTranscript, contains);
-          tested.add(path);
+          if (isMostRecentRequest("dtwscore",result.reqid)) {
+            boolean contains = tested.contains(path);
+            if (contains) System.out.println("already asked to score " + path);
+            useResult(result, wordTranscript, phoneTranscript, speechTranscript, contains);
+            tested.add(path);
+          }
         }
       });
+    }
+  }
+
+  private int getReqID(String type) {
+    synchronized (reqs) {
+      int current = reqid++;
+      reqs.put(type, current);
+      return current;
+    }
+  }
+
+  private boolean isMostRecentRequest(String type,int responseReqID) {
+    synchronized (reqs) {
+      Integer mostRecentIDForType = reqs.get(type);
+      if (mostRecentIDForType == null) {
+        System.err.println("huh? couldn't find req " + reqid + " in " +reqs);
+        return false;
+      }
+      else {
+        return mostRecentIDForType == responseReqID;
+      }
     }
   }
 
@@ -302,14 +350,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       imageOverlay.hide();
       int left = imageContainer.getAbsoluteLeft();
       int top  = imageContainer.getAbsoluteTop();
-      if (debug) System.out.println("reinit at " + left + ", " + top);
       imageOverlay.setPopupPosition(left, top);
     }
 
-    public void songFirstLoaded(double durationEstimate) {
-    //  System.out.println("songFirstLoaded");
-    }
-
+    public void songFirstLoaded(double durationEstimate) {}
     public void songLoaded(final double duration) {
           songDuration = duration;
           int offsetHeight = imageContainer.getOffsetHeight();
@@ -327,23 +371,17 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     public void update(double position) {
       if (!imageOverlay.isShowing()) {
         imageOverlay.show();
-        if (debug) System.out.println("\tshowingPopup");
       }
       last = position;
       showAt(position);
-    }
-
-    public void show() {
-      if (imageOverlay.isShowing()) {
-        showAt(last);
-      }
     }
 
     private void showAt(double position) {
       int offsetHeight = imageContainer.getOffsetHeight();
       imageOverlay.setSize("2px", offsetHeight + "px");
 
-      int left = imageContainer.getAbsoluteLeft() + (int) (((double) imageContainer.getOffsetWidth()) * (position / songDuration));
+      int pixelProgress = (int) (((double) imageContainer.getOffsetWidth()) * (position / songDuration));
+      int left = imageContainer.getAbsoluteLeft() + pixelProgress;
       int top = imageContainer.getAbsoluteTop();
       imageOverlay.setPopupPosition(left, top);
       if (debug) System.out.println("showAt " + imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() +
