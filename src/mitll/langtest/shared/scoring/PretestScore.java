@@ -14,6 +14,7 @@ import java.util.Map;
  *
  */
 public class PretestScore implements IsSerializable {
+  public int reqid;
 	private float hydecScore = -1f;
 	private float transformedHydecScore;
 	private Float[] svScoreVector;
@@ -24,9 +25,16 @@ public class PretestScore implements IsSerializable {
 
   public PretestScore(){} // required for serialization
 
-  public PretestScore(Float[] svScoreVector,
+  /**
+   * @see mitll.langtest.server.scoring.DTWScoring#score
+   * @param reqid
+   * @param svScoreVector
+   * @param sTypeToImage
+   */
+  public PretestScore(int reqid, Float[] svScoreVector,
                       Map<NetPronImageType, String> sTypeToImage
   ) {
+    this.reqid = reqid;
     this.svScoreVector = svScoreVector;
 
     if (svScoreVector != null) {
@@ -42,11 +50,21 @@ public class PretestScore implements IsSerializable {
     this.sTypeToImage = sTypeToImage;
   }
 
-  public PretestScore(float hydecScore, Float[] svScoreVector,
+  public void setReqid(int r) { this.reqid = r;}
+
+  /**
+   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise(String, String, String, String, String, String, String, String, int, int)
+   * @param reqid
+   * @param hydecScore
+   * @param svScoreVector
+   * @param phoneScores
+   * @param sTypeToImage
+   */
+  public PretestScore(int reqid, float hydecScore, Float[] svScoreVector,
                       Map<String, Float> phoneScores,
                       Map<NetPronImageType, String> sTypeToImage
   ) {
-    this(svScoreVector,sTypeToImage);
+    this(reqid, svScoreVector,sTypeToImage);
     this.hydecScore = hydecScore;
     this.phoneScores = phoneScores;
 	}
