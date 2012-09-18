@@ -5,6 +5,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -35,6 +36,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresResize, ProvidesResize {
+  public static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
   private String refAudio;
   protected Exercise exercise = null;
   protected ExerciseController controller;
@@ -55,7 +57,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     this.controller = controller;
     this.service = service;
     VerticalPanel center = new VerticalPanel();
-    center.add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
+    //center.add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
 
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
@@ -67,9 +69,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     scorePanel = new ScorePanel(false);
     setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
     add(scorePanel);
-    int i = 1;
 
-    addQuestions(e, service, controller, i, center);
+    addQuestions(e, service, controller, 1, center);
   }
 
   /**
@@ -86,41 +87,28 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
    * @param i
    */
   private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int i, Panel toAddTo) {
-    List<Exercise.QAPair> englishQuestions = e.getEnglishQuestions();
-    int n = englishQuestions.size();
-    //System.out.println("eng q " + englishQuestions);
-    for (Exercise.QAPair pair : e.getQuestions()) {
-      // add question header
-      Exercise.QAPair engQAPair = englishQuestions.get(i - 1);
+    Widget answerWidget = getAnswerWidget(e, service, controller, i);
 
-      getQuestionHeader(i, n, engQAPair, pair,toAddTo);
-      i++;
-      // add question prompt
-      VerticalPanel vp = new VerticalPanel();
-      addQuestionPrompt(vp, e);
-
-      // add answer widget
-      Widget answerWidget = getAnswerWidget(e, service, controller, i-1);
-      vp.add(answerWidget);
-   //   answers.add(answerWidget);
-
-      toAddTo.add(vp);
-    }
+    ResizableCaptionPanel cp = new ResizableCaptionPanel("User Recorder");
+    cp.setContentWidget(answerWidget);
+    toAddTo.add(cp);
   }
 
-  protected void getQuestionHeader(int i, int total, Exercise.QAPair engQAPair, Exercise.QAPair pair,  Panel toAddTo) {
+/*
+  private void getQuestionHeader(int i, int total, Exercise.QAPair engQAPair, Exercise.QAPair pair,  Panel toAddTo) {
     String questionHeader = "Question" +
         (total > 1 ? " #" + i : "")+
         " : " + pair.getQuestion();
     toAddTo.add(new HTML("<h4>" + questionHeader + "</h4>"));
   }
+*/
 
-  private void addQuestionPrompt(Panel vp, Exercise e) {
-    vp.add(new HTML(getQuestionPrompt(e.promptInEnglish)));
+/*  private void addQuestionPrompt(Panel vp, Exercise e) {
+   // vp.add(new HTML(getQuestionPrompt(e.promptInEnglish)));
     SimplePanel spacer = new SimplePanel();
     spacer.setSize("500px", 20 + "px");
     vp.add(spacer);
-  }
+  }*/
 
   public void onResize() {
     //System.out.println("GoodwaveExercisePanel : got resize " + getOffsetWidth());
@@ -134,7 +122,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
    * @param e
    * @return
    */
-  protected Widget getQuestionContent(Exercise e) {
+  private Widget getQuestionContent(Exercise e) {
     String content = e.getContent();
     String path = null;
     if (content.contains("audio")) {
@@ -151,15 +139,33 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     }
 
     VerticalPanel vp = new VerticalPanel();
+
+   // ResizableCaptionPanel cp = new ResizableCaptionPanel("Native Reference Speaker");
     Widget questionContent = new HTML(content);
+    questionContent.addStyleName("leftTenMargin");
+   // cp.setContentWidget(questionContent);
     vp.add(questionContent);
+   // vp.add(cp);
     if (path != null) {
       AudioPanel w = new AudioPanel(path, service, controller.getSoundManager());
-      vp.add(w);
+      ResizableCaptionPanel cp = new ResizableCaptionPanel(NATIVE_REFERENCE_SPEAKER);
+      cp.setContentWidget(w);
+      vp.add(cp);
+
       contentAudio = w;
       contentAudio.setScreenPortion(controller.getScreenPortion());
     }
     return vp;
+  }
+
+  private static class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
+   public ResizableCaptionPanel(String name) { super(name); }
+    public void onResize() {
+      Widget contentWidget = getContentWidget();
+      if (contentWidget instanceof RequiresResize) {
+        ((RequiresResize)contentWidget).onResize();
+      }
+    }
   }
 
   /**
@@ -172,7 +178,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
    * @return
    * @see mitll.langtest.client.exercise.ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController)
    */
-  protected Widget getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service, final ExerciseController controller, final int index) {
+  private Widget getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service, final ExerciseController controller, final int index) {
     //final ExerciseQuestionState questionState = this;
     RecordAudioPanel widgets = new RecordAudioPanel(service, controller, exercise, null, index, refAudio);
     widgets.addScoreListener(scorePanel);
@@ -182,10 +188,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     return widgets;
   }
 
-  protected String getQuestionPrompt(boolean promptInEnglish) {
+  private String getQuestionPrompt(boolean promptInEnglish) {
     return getSpokenPrompt(promptInEnglish);
   }
-  protected String getSpokenPrompt(boolean promptInEnglish) {
+  private String getSpokenPrompt(boolean promptInEnglish) {
     return "&nbsp;&nbsp;&nbsp;Speak and record your answer in " +(promptInEnglish ? "English" : " the foreign language") +" :";
   }
 
