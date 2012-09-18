@@ -1,6 +1,10 @@
 package mitll.langtest.client.goodwave;
 
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ProvidesResize;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanel;
@@ -30,6 +34,11 @@ public class GoodwaveExercisePanelFactory extends ExercisePanelFactory {
 
   @Override
   public Panel getExercisePanel(Exercise e) {
-     return new GoodwaveExercisePanel(e, service, userFeedback, controller);
+  //  new CaptionPanel
+    Panel widgets = new GoodwaveExercisePanel(e, service, userFeedback, controller);
+
+    return widgets;
   }
+
+
 }

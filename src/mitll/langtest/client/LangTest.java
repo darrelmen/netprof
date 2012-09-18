@@ -153,6 +153,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       widgets.add(sp);
     }
     else {
+      sp.addStyleName("body");
       RootPanel.get().add(sp);
     }
     makeFlashContainer();
