@@ -47,7 +47,7 @@ public class ASRScoring extends Scoring {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile(String, int, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile(int, String, int, int)
    * TODO : pass in ref sentence and language
    * @param testAudioDir
    * @param testAudioFileNoSuffix
@@ -125,7 +125,7 @@ public class ASRScoring extends Scoring {
 
     // XXX
     // TODO: Must compute transformed scores! Not implemented yet.
-    return new PretestScore(scores.hydecScore, scores.svScoreVector, phoneScores, sTypeToImage);
+    return new PretestScore(0, scores.hydecScore, scores.svScoreVector, phoneScores, sTypeToImage);
   }
 
   /**

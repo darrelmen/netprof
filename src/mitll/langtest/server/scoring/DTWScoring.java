@@ -78,7 +78,7 @@ public class DTWScoring extends Scoring {
 
     Map<NetPronImageType, String> sTypeToImage = writeTranscripts(imageOutDir, imageWidth, imageHeight, testNoSuffix);
 
-    PretestScore pretestScore = new PretestScore(scores, sTypeToImage);
+    PretestScore pretestScore = new PretestScore(0, scores, sTypeToImage);
     //System.out.println(new Date() + " : DTWScoring : got score " + pretestScore);
     return pretestScore;
   }
