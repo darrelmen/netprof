@@ -2,7 +2,6 @@ package mitll.langtest.server;
 
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
-import audio.tools.AudioFile;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -10,11 +9,11 @@ import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.DTWScoring;
-import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultsAndGrades;
 import mitll.langtest.shared.User;
@@ -113,28 +112,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * Get an image of desired dimensions for the audio file
    *
    * @see mitll.langtest.client.goodwave.AudioPanel#getImageURLForAudio
+   * @param reqid
    * @param audioFile
    * @param imageType
    * @param width
-   * @param height
-   * @return path to an image file
-   */
-  public String getImageForAudioFile(String audioFile, String imageType, int width, int height) {
+   * @param height     @return path to an image file
+   * */
+  public ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height) {
     ImageWriter imageWriter = new ImageWriter();
     //System.out.println("getImageForAudioFile : for " + audioFile);
 
     if (audioFile.endsWith(".mp3")) {
       String wavFile = removeSuffix(audioFile) +".wav";
-      //System.out.println("getImageForAudioFile : wav " + wavFile);
-
       File test = getAbsoluteFile(wavFile);
-      if (test.exists()) {
-        // System.out.println("found " + test);
-        audioFile = test.getAbsolutePath();
-      }
-      else {
-        audioFile = getWavForMP3(audioFile);
-      }
+      audioFile = test.exists() ? test.getAbsolutePath() : getWavForMP3(audioFile);
     }
     ImageType imageType1 =
         imageType.equalsIgnoreCase(ImageType.WAVEFORM.toString()) ? ImageType.WAVEFORM :
@@ -154,22 +145,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     // +1 removes initial slash!
     System.out.println("rel path is " + relativeImagePath);
-    return relativeImagePath;
+    return new ImageResponse(reqid,relativeImagePath);
   }
 
   /**
    * @see mitll.langtest.client.goodwave.AudioPanel#getTranscriptImageURLForAudio(String, String, int, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck)
-   * @param audioFile
+   * @param reqid
+   *@param audioFile
    * @param refs
    * @param width
    * @param height
    * @return
    */
-  public PretestScore getScoreForAudioFile(String audioFile, Collection<String> refs, int width, int height) {
+  public PretestScore getScoreForAudioFile(int reqid, String audioFile, Collection<String> refs, int width, int height) {
     System.out.println("DTW getScoreForAudioFile " + audioFile + " against " +refs);
     if (refs.isEmpty()) {
       System.err.println("DTW getScoreForAudioFile no refs? ");
-      return new PretestScore();
+      PretestScore pretestScore = new PretestScore();
+      pretestScore.setReqid(reqid);
+      return pretestScore;
     }
     String installPath = getInstallPath();
     File testAudioFile = getProperAudioFile(audioFile, installPath);
@@ -199,6 +193,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       DTWScoring dtwScoring = new DTWScoring(installPath);
       PretestScore pretestScore =
           dtwScoring.score(testAudioDir, removeSuffix(name), refAudioDir, names, imageOutDir, width, height);
+      pretestScore.setReqid(reqid);
       System.out.println("score " + pretestScore);
       return pretestScore;
     }
@@ -251,12 +246,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @see mitll.langtest.client.goodwave.AudioPanel#getTranscriptImageURLForAudio(String, String, int, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck)
+   * @param reqid
    * @param audioFile
    * @param width
    * @param height
    * @return
    */
-  public PretestScore getScoreForAudioFile(String audioFile, int width, int height) {
+  public PretestScore getScoreForAudioFile(int reqid, String audioFile, int width, int height) {
     String noSuffix = removeSuffix(audioFile);
     if (audioFile.endsWith(".mp3")) {
       String wavFile = noSuffix +".wav";
@@ -275,6 +271,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     System.out.println("scoring " + name + " in dir " +testAudioDir);
     // TODO : pass in reference audio and reference audio directory!
     PretestScore pretestScore = new ASRScoring(installPath).scoreRepeat(testAudioDir, removeSuffix(name), testAudioDir, removeSuffix(name), imageOutDir, width, height);
+    pretestScore.setReqid(reqid);
+
     System.out.println("score " + pretestScore);
     return pretestScore;
   }
