@@ -27,8 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,10 +51,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private double songDuration;
   private Panel imageContainer;
   private AudioPositionPopup audioPositionPopup;
-  protected LangTestDatabaseAsync service;
-  protected SoundManagerAPI soundManager;
+  protected final LangTestDatabaseAsync service;
+  protected final SoundManagerAPI soundManager;
   private PlayAudioPanel playAudio;
-  private boolean debug = false;
+  private final boolean debug = false;
   private String refAudio;
   private ScoreListener scoreListener;
   private float screenPortion = 1.0f;
@@ -92,7 +90,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     hp.setWidth("100%");
     hp.setSpacing(5);
 
-    playAudio = addButtonsToButtonRow(hp, path);
+    playAudio = addButtonsToButtonRow(hp);
 
     HorizontalPanel controlPanel = new HorizontalPanel();
 
@@ -140,7 +138,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   private static class ImageAndCheck {
-    Image image;
+    final Image image;
     Widget check;
     public ImageAndCheck() {
       image = new Image();
@@ -162,7 +160,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.refAudio = path;
   }
 
-  private PlayAudioPanel addButtonsToButtonRow(HorizontalPanel hp, String path) {
+  private PlayAudioPanel addButtonsToButtonRow(HorizontalPanel hp) {
     final PlayAudioPanel playAudio = makePlayAudioPanel();
     imageOverlay = new PopupPanel(false);
     imageOverlay.setStyleName("ImageOverlay");
@@ -235,8 +233,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
   }
 
-  private Set<String> tested = new HashSet<String>();
-  private Map<String,Integer> reqs = new HashMap<String, Integer>();
+  private final Set<String> tested = new HashSet<String>();
+  private final Map<String,Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
 
   /**
@@ -345,7 +343,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   private class AudioPositionPopup implements AudioControl {
-    double last = 0;
     public void reinitialize() {
       imageOverlay.hide();
       int left = imageContainer.getAbsoluteLeft();
@@ -372,7 +369,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       if (!imageOverlay.isShowing()) {
         imageOverlay.show();
       }
-      last = position;
       showAt(position);
     }
 
