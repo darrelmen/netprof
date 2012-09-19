@@ -381,7 +381,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     vp.add(showResults);
 
     // no click handler for this for now
-    Anchor status = new Anchor(browserCheck.browser + " " +browserCheck.ver);
+    Anchor status = new Anchor(browserCheck.browser + " " +browserCheck.ver + " 9/19/12");
     vp.add(status);
 
     return hp2;
