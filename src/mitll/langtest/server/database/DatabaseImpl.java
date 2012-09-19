@@ -106,15 +106,25 @@ public class DatabaseImpl implements Database {
      return exerciseDAO.getRawExercises();
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise(String, int)
+   * @param activeExercises
+   * @param expectedCount
+   * @return
+   */
   public Exercise getNextUngradedExercise(Collection<String> activeExercises, int expectedCount) {
     if (expectedCount == 1) return getNextUngradedExerciseQuick(activeExercises,expectedCount);
     else return getNextUngradedExerciseSlow(activeExercises,expectedCount);
   }
 
-    /**
-    * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
-    * @return
-    */
+  /**
+   * Walks through each exercise, checking if any have ungraded results.
+   *
+   * This gets slower as more exercises are graded.  Better to a "join" that determines after
+   * two queries what the next ungraded one is.
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
+   * @return
+   */
   public Exercise getNextUngradedExerciseSlow(Collection<String> activeExercises, int expectedCount) {
     List<Exercise> rawExercises = getExercises();
     System.out.println("getNextUngradedExercise : checking " +rawExercises.size() + " exercises.");
