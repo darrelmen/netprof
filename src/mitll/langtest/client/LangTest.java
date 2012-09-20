@@ -8,8 +8,11 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
@@ -48,7 +51,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int HEADER_HEIGHT = 80;
   private static final int FOOTER_HEIGHT = 40;
   public  static final int EXERCISE_LIST_WIDTH = 200;
-  private static final int EAST_WIDTH = 65;
+  private static final int EAST_WIDTH = 90;
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
 
   private Panel currentExerciseVPanel = new VerticalPanel();
@@ -66,6 +69,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
 
   private final BrowserCheck browserCheck = new BrowserCheck();
+  private ScrollPanel itemScroller;
 
   /**
    * Make an exception handler that displays the exception.
@@ -116,7 +120,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
     RootPanel.get().add(widgets);
 
-    widgets.setSize((Window.getClientWidth()-EAST_WIDTH) + "px", (Window.getClientHeight()-FOOTER_HEIGHT) + "px");
+    setMainWindowSize(widgets);
+    addResizeHandler(widgets);
 
     // header/title line
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
@@ -147,14 +152,40 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     modeSelect();
 
     browserCheck.checkForCompatibleBrowser();
+
+    Element elementById = DOM.getElementById("title-tag");   // set the page title to be consistent
+    elementById.setInnerText(DLI_LANGUAGE_TESTING);
+  }
+
+  /**
+   * Tell the exercise list when the browser window changes size
+   * @param widgets
+   */
+  private void addResizeHandler(final DockLayoutPanel widgets) {
+    Window.addResizeHandler(new ResizeHandler() {
+      public void onResize(ResizeEvent event) {
+//        System.out.println("updating width since got event " +event + " w = " + Window.getClientWidth());
+        setMainWindowSize(widgets);
+        setExerciseListSize();
+        exerciseList.onResize();
+      }
+    });
   }
 
   private void makeExerciseList(VerticalPanel exerciseListPanel) {
     this.exerciseList = new ExerciseList(currentExerciseVPanel,service,this, factory);
-    ScrollPanel itemScroller = new ScrollPanel(this.exerciseList);
-    itemScroller.setSize(EXERCISE_LIST_WIDTH +"px",(Window.getClientHeight() - (2*HEADER_HEIGHT) - FOOTER_HEIGHT - 60) + "px"); // 54
+    itemScroller = new ScrollPanel(this.exerciseList);
+    setExerciseListSize();
     exerciseListPanel.add(new HTML("<h2>Items</h2>"));
     exerciseListPanel.add(itemScroller);
+  }
+
+  private void setMainWindowSize(DockLayoutPanel widgets) {
+    widgets.setSize((Window.getClientWidth()-EAST_WIDTH) + "px", (Window.getClientHeight()-FOOTER_HEIGHT) + "px");
+  }
+
+  private void setExerciseListSize() {
+    itemScroller.setSize(EXERCISE_LIST_WIDTH +"px",(Window.getClientHeight() - (2*HEADER_HEIGHT) - FOOTER_HEIGHT - 60) + "px"); // 54
   }
 
   /**
@@ -261,9 +292,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   private Widget getLogout() {
-    DockLayoutPanel hp2 = new DockLayoutPanel(Style.Unit.PX);
+    //DockLayoutPanel hp2 = new DockLayoutPanel(Style.Unit.PX);
     VerticalPanel vp = new VerticalPanel();
-    hp2.addSouth(vp, 75);
+    //hp2.addSouth(vp, 75);
 
     // add logout link
     Anchor logout = new Anchor("Logout");
@@ -296,10 +327,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    // sp.add(html);
 
     // no click handler for this for now
-    Anchor status = new Anchor(browserCheck.browser + " " +browserCheck.ver);
+    Anchor status = new Anchor(browserCheck.browser + " " +browserCheck.ver +" 9/19");
     vp.add(status);
 
-    return hp2;
+    return vp;//hp2;
   }
 
   private void resetState() {

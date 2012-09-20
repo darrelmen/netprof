@@ -9,6 +9,8 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ProvidesResize;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
@@ -26,7 +28,7 @@ import java.util.List;
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseList extends VerticalPanel {
+public class ExerciseList extends VerticalPanel implements ProvidesResize, RequiresResize {
   private List<Exercise> currentExercises = null;
   private int currentExercise = 0;
   private List<HTML> progressMarkers = new ArrayList<HTML>();
@@ -45,6 +47,12 @@ public class ExerciseList extends VerticalPanel {
     this.service = service;
     this.feedback = feedback;
     this.factory = factory;
+  }
+
+  public void onResize() {
+    if (current != null && current instanceof RequiresResize) {
+      ((RequiresResize) current).onResize();
+    }
   }
 
   /**
