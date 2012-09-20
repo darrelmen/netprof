@@ -3,7 +3,15 @@ package mitll.langtest.shared;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
- * Created with IntelliJ IDEA.
+ * An answer to a question. <br></br>
+ * Records who answered it, which plan, which exercise, which question within a multi-question exercise, and
+ *  the answer, which may either be a) the text of a written response or b) a path to an audio file response
+ * <br></br>
+ * May be marked with whether the audio file was "valid" - long enough and not silence.<br></br>
+ * Also records the timestamp, and optionally whether the result was to a fl/english and spoken/written question.
+ * These may be added later via enrichment (joining) against the schedule, which says for a specific user, which
+ * of these two flags was presented.
+ *
  * User: go22670
  * Date: 5/18/12
  * Time: 5:45 PM
@@ -17,7 +25,6 @@ public class Result implements IsSerializable {
   public String id;
   public int qid;
   public String answer;
- // public String audioFile;
   public boolean valid;
   public long timestamp;
   public boolean flq;
@@ -35,15 +42,14 @@ public class Result implements IsSerializable {
    * @param valid
    * @param timestamp
    */
-  public Result(int uniqueID
-                ,long userid, String plan, String id, int qid, String answer, /*String audioFile,*/ boolean  valid, long timestamp) {
-   this.uniqueID = uniqueID;
+  public Result(int uniqueID, long userid, String plan, String id, int qid, String answer,
+                boolean valid, long timestamp) {
+    this.uniqueID = uniqueID;
     this.userid = userid;
-    this.plan  = plan;
+    this.plan = plan;
     this.id = id;
     this.qid = qid;
     this.answer = answer;
-//    this.audioFile = audioFile;
     this.valid = valid;
     this.timestamp = timestamp;
   }
@@ -53,6 +59,6 @@ public class Result implements IsSerializable {
 
   @Override
   public String toString() {
-    return "Result #"+uniqueID + " by user " + userid + " id " + id + " flq " + flq + " spoken " + spoken;
+    return "Result #"+uniqueID + "\tby user " + userid + "\texid " + id + " " + (flq ? "flq":"english") + " " + (spoken ? "spoken":"written");
   }
 }
