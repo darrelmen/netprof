@@ -16,6 +16,7 @@ public class ResultDAO {
   private final Database database;
   private GradeDAO gradeDAO;
   private ScheduleDAO scheduleDAO ;
+  boolean debug = false;
   public ResultDAO(Database database) {
     this.database = database;
 
@@ -87,14 +88,11 @@ public class ResultDAO {
   }
 
   /**
-   * @see DatabaseImpl#getNextUngradedExercise
+   * @see DatabaseImpl#getNextUngradedExerciseSlow
    * @param e
+   * @param expected
    * @return
    */
-/*  public boolean areAnyResultsLeftToGradeFor(Exercise e) {
-    return !getResultsForExercise(e.getID(),1).isEmpty();
-  }*/
-
   public boolean areAnyResultsLeftToGradeFor(Exercise e, int expected) {
     return !getResultsForExercise(e.getID(),expected).isEmpty();
   }
@@ -112,49 +110,78 @@ public class ResultDAO {
   }
 
   /**
+   * Return all answers that don't have the required number of grades (expected).<br></br>
+   * I.e. those that require some additional grading
+   * Does some fancy filtering for english --
    * TODO : Add proper filtering
+   * @see #getResultsForExercise(String, int)
    * @param exerciseID
    * @param gradedResults
-   * @param expected if > 1 remove flq results (hack!)
+   * @param expected if > 1 remove flq results (hack!), if = 2 assumes english-only
    * @return
    */
   private List<Result> getResultsForExercise(String exerciseID, Collection<Grade> gradedResults, int expected) {
     try {
       List<Result> resultsForQuery = getAllResultsForExercise(exerciseID);
       enrichResults(resultsForQuery,exerciseID);
-      //System.out.println("expected " + expected + " before " + resultsForQuery.size());
+      if (debug) System.out.println("for " + exerciseID + " expected " + expected +
+          " before " + resultsForQuery.size() + " results, and " + gradedResults.size() + " grades");
 
-      if (expected > 1) { // hack!
-        for (Iterator<Result> iter = resultsForQuery.iterator(); iter.hasNext(); ) {
-          Result next = iter.next();
-          if (next.flq) {
-            iter.remove();
+      boolean useEnglishGrades = expected == 2;
+
+      // conditionally narrow down to only english results
+      // hack!
+      for (Iterator<Result> iter = resultsForQuery.iterator(); iter.hasNext(); ) {
+        Result next = iter.next();
+        if (useEnglishGrades && next.flq || next.userid == -1) {
+          iter.remove();
+        }
+      }
+
+      if (debug) System.out.println("\tafter removing flq " + resultsForQuery.size());
+
+      // count the number of grades for each result
+      Map<Integer,Integer> idToCount = new HashMap<Integer, Integer>();
+      Set<Integer> englishResultsWithGrades = new HashSet<Integer>();
+
+      for (Grade g : gradedResults) {
+        Integer countForResult = idToCount.get(g.resultID);
+        if (g.grade == Grade.UNASSIGNED) {
+          if (debug) System.out.println("\tgetResultsForExercise : skipping grade " + g); // TODO make sure it skips only ungraded items and that we see ungraded items when we look for the next ungraded exercise
+        }
+        else {
+          if (debug) System.out.println("\tgetResultsForExercise : including grade " + g);
+
+          if (countForResult == null) idToCount.put(g.resultID, 1);
+          else {
+            idToCount.put(g.resultID, countForResult + 1);
+          }
+          if (useEnglishGrades && g.gradeType.equals("english-only")) {
+            englishResultsWithGrades.add(g.resultID);
           }
         }
       }
+      if (debug) System.out.println("\t map of result->count for result "+ idToCount.size());
 
-      Map<Integer,Integer> idToCount = new HashMap<Integer, Integer>();
-      for (Grade g : gradedResults) {
-        Integer countForResult = idToCount.get(g.resultID);
-        if (countForResult == null) idToCount.put(g.resultID,1);
-        else {
-          idToCount.put(g.resultID,countForResult+1);
-        }
-      }
-      //System.out.println("expected " + expected + " before " + resultsForQuery.size() + " map "+ idToCount);
-
+      // now go back through the list of results and remove all those that have the number of grades we require
+      // for this grading -- i.e. for english only grading we expect to have two...
       for (Iterator<Result> iter = resultsForQuery.iterator(); iter.hasNext();) {
         Result next = iter.next();
         Integer count = idToCount.get(next.uniqueID);
-        if (count != null && count >= expected) {
-        //  System.out.println("removing graded item for result " + next);
+        if (count != null && count >= expected || (useEnglishGrades && englishResultsWithGrades.contains(next.uniqueID))) {
+          if (debug) {
+            if (count != null && count >= expected)
+              System.out.println("\tremoving graded item for result " + next + " since count = " + count + " vs " + expected);
+            else
+              System.out.println("\tremoving graded item for result " + next + " since is english grade");
+          }
           iter.remove();
         }
         else {
           //System.out.println("NOT removing graded item for result " + next + " count = " + count);
         }
       }
-      //System.out.println("after removing graded items count = " + resultsForQuery.size());
+      if (debug) System.out.println("\tafter removing graded items count = " + resultsForQuery.size());
 
       return resultsForQuery;
     } catch (Exception ee) {
@@ -217,9 +244,11 @@ public class ResultDAO {
     Map<Long, List<Schedule>> scheduleForUserAndExercise = scheduleDAO.getScheduleForUserAndExercise(users, exid);
     for (Result r : resultsForExercise) {
       List<Schedule> schedules = scheduleForUserAndExercise.get(r.userid);
-      Schedule schedule = schedules.get(0);
-      r.setFLQ(schedule.flQ);
-      r.setSpoken(schedule.spoken);
+      if (schedules != null) {
+        Schedule schedule = schedules.get(0);
+        r.setFLQ(schedule.flQ);
+        r.setSpoken(schedule.spoken);
+      }
     }
   }
 
