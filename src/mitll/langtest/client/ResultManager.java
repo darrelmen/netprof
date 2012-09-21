@@ -45,7 +45,7 @@ public class ResultManager {
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
 
-  private Set<Integer> remainingResults = new HashSet<Integer>();
+  //private Set<Integer> remainingResults = new HashSet<Integer>();
   private final AudioTag audioTag = new AudioTag();
 
   /**
@@ -127,14 +127,11 @@ public class ResultManager {
    */
   public Widget getTable(Collection<Result> result, final boolean gradingView, boolean showQuestionColumn,
                          Collection<Grade> grades, final String grader, int numGrades) {
-    remainingResults.clear();
-
-/*    for (Result r: result) {
-      remainingResults.add(r.uniqueID);
-    }*/
+   // remainingResults.clear();
 
     CellTable<Result> table = new CellTable<Result>();
-    table.setWidth(gradingView ? "1000px" : "1200px");
+    String gradingWidth = 700 + "px";
+    if (!gradingView) table.setWidth(gradingView ? gradingWidth : "1200px");
     TextColumn<Result> id = null;
     id = addUserPlanExercise(table, id);
     if (showQuestionColumn) {
