@@ -65,7 +65,7 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
   /**
     * Get exercises for this user.
     * @see mitll.langtest.client.LangTest#gotUser(long)
-    * @see mitll.langtest.client.LangTest#makeFlashContainer()
+    * @see mitll.langtest.client.LangTest#makeFlashContainer
     * @param userID
     */
   public void getExercises(long userID) {
