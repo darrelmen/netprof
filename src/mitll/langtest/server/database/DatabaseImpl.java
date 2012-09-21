@@ -113,8 +113,12 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public Exercise getNextUngradedExercise(Collection<String> activeExercises, int expectedCount) {
-    if (expectedCount == 1) return getNextUngradedExerciseQuick(activeExercises,expectedCount);
-    else return getNextUngradedExerciseSlow(activeExercises,expectedCount);
+    if (expectedCount == 1) {
+      return getNextUngradedExerciseQuick(activeExercises,expectedCount);
+    }
+    else {
+      return getNextUngradedExerciseSlow(activeExercises,expectedCount);
+    }
   }
 
   /**
@@ -122,10 +126,12 @@ public class DatabaseImpl implements Database {
    *
    * This gets slower as more exercises are graded.  Better to a "join" that determines after
    * two queries what the next ungraded one is.
+   * Runs through each exercise in sequence -- slows down as more are completed!
+   * TODO : avoid using this.
    * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
    * @return
    */
-  public Exercise getNextUngradedExerciseSlow(Collection<String> activeExercises, int expectedCount) {
+  private Exercise getNextUngradedExerciseSlow(Collection<String> activeExercises, int expectedCount) {
     List<Exercise> rawExercises = getExercises();
     System.out.println("getNextUngradedExercise : checking " +rawExercises.size() + " exercises.");
     for (Exercise e : rawExercises) {
@@ -139,19 +145,24 @@ public class DatabaseImpl implements Database {
     return null;
   }
 
-  public Exercise getNextUngradedExerciseQuick(Collection<String> activeExercises, int expectedCount) {
+  /**
+   * Does a join of grades against results - avoid iterated solution above.
+   * @param activeExercises
+   * @param expectedCount
+   * @return next exercise containing ungraded results
+   */
+  private Exercise getNextUngradedExerciseQuick(Collection<String> activeExercises, int expectedCount) {
     List<Exercise> rawExercises = getExercises();
     Collection<Result> resultExcludingExercises = resultDAO.getResultExcludingExercises(activeExercises);
-    System.out.println("getNextUngradedExercise found  " + resultExcludingExercises.size() + " results, expected " +expectedCount);
 
     GradeDAO.GradesAndIDs allGradesExcluding = gradeDAO.getAllGradesExcluding(activeExercises);
                Map<Integer,Integer> idToCount = new HashMap<Integer, Integer>();
     for (Grade g : allGradesExcluding.grades) {
-      //Integer countOfGrades = idToCount.get(g.resultID);
       if (!idToCount.containsKey(g.resultID)) idToCount.put(g.resultID,1);
       else idToCount.put(g.resultID,2);
     }
-    System.out.println("getNextUngradedExercise found  " + allGradesExcluding.resultIDs.size() + " graded results");
+    System.out.println("getNextUngradedExercise found  " + resultExcludingExercises.size() + " results, " +
+        "expected " +expectedCount +"," +allGradesExcluding.resultIDs.size() + " graded results");
 
     // remove results that have grades...
     Iterator<Result> iterator = resultExcludingExercises.iterator();
@@ -169,7 +180,7 @@ public class DatabaseImpl implements Database {
       //}
     }
 
-    System.out.println("getNextUngradedExercise after removing  " + resultExcludingExercises.size() + " results");
+    //System.out.println("getNextUngradedExercise after removing  " + resultExcludingExercises.size() + " results");
 
     // whatever remains, find first exercise
 
@@ -177,7 +188,7 @@ public class DatabaseImpl implements Database {
     for (Result r : resultExcludingExercises) exids.add(r.id);
     if (exids.isEmpty()) return null;
     else {
-      System.out.println("getNextUngradedExercise candidates are   " + exids);
+      //System.out.println("getNextUngradedExercise candidates are   " + exids);
 
       String first = exids.first();
       for (Exercise e : rawExercises) {
@@ -315,9 +326,16 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * Find all the grades for this exercise.<br></br>
+   * Find all the results for this exercise.
+   * Get these schedules for this exercise and every user.
+   * For every result, get the user and use it to find the schedule.
+   * Use the data in the schedule to mark the en/fl and spoken/written bits on the Results.
+   * This lets us make a map of spoken->lang->results
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultsForExercise(String)
+   * @see mitll.langtest.client.grading.GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @param exid
-   * @return
+   * @return ResultsAndGrades
    */
   public ResultsAndGrades getResultsForExercise(String exid) {
     GradeDAO.GradesAndIDs gradesAndIDs = gradeDAO.getResultIDsForExercise(exid);
@@ -328,14 +346,20 @@ public class DatabaseImpl implements Database {
     Map<Boolean,Map<Boolean,List<Result>>> spokenToLangToResult = new HashMap<Boolean, Map<Boolean, List<Result>>>();
     for (Result r : resultsForExercise) {
       List<Schedule> schedules = scheduleForUserAndExercise.get(r.userid);
-      Schedule schedule = schedules.get(0);
-      r.setFLQ(schedule.flQ);
-      r.setSpoken(schedule.spoken);
-      Map<Boolean, List<Result>> langToResult = spokenToLangToResult.get(schedule.spoken);
-      if (langToResult == null) spokenToLangToResult.put(schedule.spoken, langToResult = new HashMap<Boolean, List<Result>>());
-      List<Result> resultsForLang = langToResult.get(schedule.flQ);
-      if (resultsForLang == null) langToResult.put(schedule.flQ, resultsForLang = new ArrayList<Result>());
-      resultsForLang.add(r);
+      if (schedules == null) {
+        //System.err.println("huh? couldn't find schedule for user " +r.userid +"?");
+      }
+      else {
+        Schedule schedule = schedules.get(0);
+        r.setFLQ(schedule.flQ);
+        r.setSpoken(schedule.spoken);
+        Map<Boolean, List<Result>> langToResult = spokenToLangToResult.get(schedule.spoken);
+        if (langToResult == null)
+          spokenToLangToResult.put(schedule.spoken, langToResult = new HashMap<Boolean, List<Result>>());
+        List<Result> resultsForLang = langToResult.get(schedule.flQ);
+        if (resultsForLang == null) langToResult.put(schedule.flQ, resultsForLang = new ArrayList<Result>());
+        resultsForLang.add(r);
+      }
     }
     return new ResultsAndGrades(resultsForExercise, gradesAndIDs.grades, spokenToLangToResult);
   }
