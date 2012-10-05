@@ -103,6 +103,11 @@ public class ASRScoring extends Scoring {
     } catch (UnsupportedAudioFileException e) {
       e.printStackTrace();
     }
+
+    if (testAudioFileNoSuffix.contains(AudioConversion.SIXTEEN_K_SUFFIX)) {
+      noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
+    }
+
     // the path to the test audio is <tomcatWriteDirectory>/<pretestFilesRelativePath>/<planName>/<testsRelativePath>/<testName>
     Audio testAudio = Audio$.MODULE$.apply(
         testAudioDir, testAudioFileNoSuffix,
@@ -123,9 +128,8 @@ public class ASRScoring extends Scoring {
     Map<String, Float> phoneScores = phones != null ? new HashMap<String, Float>(phones) : emptyMap;
     Map<NetPronImageType, String> sTypeToImage = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix);
 
-    // XXX
-    // TODO: Must compute transformed scores! Not implemented yet.
-    return new PretestScore(0, scores.hydecScore, scores.svScoreVector, phoneScores, sTypeToImage);
+    PretestScore pretestScore = new PretestScore(0, scores.hydecScore, scores.svScoreVector, phoneScores, sTypeToImage);
+    return pretestScore;
   }
 
   /**

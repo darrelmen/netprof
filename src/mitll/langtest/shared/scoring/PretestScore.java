@@ -5,8 +5,6 @@ package mitll.langtest.shared.scoring;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -16,7 +14,7 @@ import java.util.Map;
 public class PretestScore implements IsSerializable {
   public int reqid;
 	private float hydecScore = -1f;
-	private float transformedHydecScore;
+//	private float transformedHydecScore;
 	private Float[] svScoreVector;
 	private float transformedSVScore = -1f;
 	private Map<String, Float> phoneScores;
@@ -73,13 +71,13 @@ public class PretestScore implements IsSerializable {
     return hydecScore;
   }
   
-	public float getTransformedHydecScore() {
+/*	public float getTransformedHydecScore() {
 		return transformedHydecScore;
-	} 
+	} */
 	
-	public void setTransformedHydecScore(float score) {
+/*	public void setTransformedHydecScore(float score) {
 	  transformedHydecScore = score;
-	}
+	}*/
 	
   public Float[] getSVScoreVector() {
     return svScoreVector;
@@ -97,9 +95,9 @@ public class PretestScore implements IsSerializable {
    * TODO : remember in client
    * @return
    */
-	public Collection<Float> getHistoricalScores() {
+/*	public Collection<Float> getHistoricalScores() {
 		return Collections.emptyList();
-	}
+	}*/
 	
 /*  public void setHistoricalScores(ArrayList<Float> scores) {
     historicalScores = scores;
@@ -119,7 +117,9 @@ public class PretestScore implements IsSerializable {
     if (svScoreVector != null)  {
       for (Float f : svScoreVector) b.append(f).append(",");
     }
-    return "hydec " + hydecScore + " transformed hydec " + transformedHydecScore +" transformed dtw " + transformedSVScore +
+    return "hydec " + hydecScore +
+       // " transformed hydec " + transformedHydecScore +
+        " transformed dtw " + transformedSVScore +
         " phones " + getPhoneScores() + " sv " +b+" type->image " +sTypeToImage;
   }
 }
