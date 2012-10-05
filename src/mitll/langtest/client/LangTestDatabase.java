@@ -49,7 +49,7 @@ public interface LangTestDatabase extends RemoteService {
 
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height);
 
-  PretestScore getScoreForAudioFile(int reqid, String audioFile, int width, int height);
+  PretestScore getScoreForAudioFile(int reqid, String testAudioFile, String refAudioFile, String sentence, int width, int height);
 
   PretestScore getScoreForAudioFile(int reqid, String audioFile, Collection<String> refs, int width, int height);
 }
