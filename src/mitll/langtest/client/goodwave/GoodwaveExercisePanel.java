@@ -29,7 +29,10 @@ import mitll.langtest.shared.Exercise;
  */
 public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresResize, ProvidesResize {
   public static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
+
   private String refAudio;
+  private String refSentence;
+
   protected Exercise exercise = null;
   protected ExerciseController controller;
   protected LangTestDatabaseAsync service;
@@ -111,7 +114,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
   private Widget getQuestionContent(Exercise e) {
     String content = e.getContent();
     String path = null;
-    if (content.contains("audio")) {
+    if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT) {
+      this.refAudio = e.getRefAudio();
+      this.refSentence =e.getRefSentence();
+    }
+    else if (content.contains("audio")) {
       int i = content.indexOf("source src=");
       String s = content.substring(i + "source src=".length() + 1).split("\\\"")[0];
       System.err.println("audio path '" + s + "'");
@@ -166,7 +173,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
    */
   private Widget getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service, final ExerciseController controller, final int index) {
     //final ExerciseQuestionState questionState = this;
-    RecordAudioPanel widgets = new RecordAudioPanel(service, controller, exercise, null, index, refAudio);
+    RecordAudioPanel widgets = new RecordAudioPanel(service, controller, exercise, null, index, refAudio, exercise.getRefSentence());
     widgets.addScoreListener(scorePanel);
     answerAudio = widgets;
     answerAudio.setScreenPortion(controller.getScreenPortion());
@@ -187,6 +194,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     private final ExerciseQuestionState questionState;
     private final int index;
     private final String refAudio;
+    private final String refSentence;
 
     /**
      * @see GoodwaveExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
@@ -197,13 +205,15 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
      * @param index
      * @param refAudio
      */
-    public RecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, ExerciseQuestionState questionState, int index, String refAudio) {
+    public RecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise,
+                            ExerciseQuestionState questionState, int index, String refAudio, String refSentence) {
       super(null, service, controller.getSoundManager(), USE_ASR);
       this.controller = controller;
       this.exercise = exercise;
       this.questionState = questionState;
       this.index = index;
       this.refAudio = refAudio;
+      this.refSentence = refSentence;
     }
 
     @Override
@@ -221,7 +231,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
             public void onSuccess(AudioAnswer result) {
               String path1 = result.path;
               if (path1.endsWith(".wav")) path1 = path1.replace(".wav", ".mp3");
-              setRefAudio(refAudio);
+              setRefAudio(refAudio, "This is a test.");
               getImagesForPath(path1);
            //   questionState.recordCompleted(outer);
             }

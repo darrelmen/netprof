@@ -47,6 +47,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public static final String DEFAULT_APP_NAME = "netPron2";
   public static final String IMAGE_WRITER_IMAGES = "audioimages";
   private DatabaseImpl db;
+  ASRScoring asrScoring;
 
   private Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
       .concurrencyLevel(4)
@@ -56,6 +57,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public void init() {
     db = new DatabaseImpl(this);
+    asrScoring = new ASRScoring(getInstallPath());
   }
 
   /**
@@ -247,34 +249,52 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see mitll.langtest.client.goodwave.AudioPanel#getTranscriptImageURLForAudio(String, String, int, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck)
    * @param reqid
-   * @param audioFile
+   * @param testAudioFile
+   * @param refAudioFile
+   * @param sentence
    * @param width
    * @param height
    * @return
-   */
-  public PretestScore getScoreForAudioFile(int reqid, String audioFile, int width, int height) {
-    String noSuffix = removeSuffix(audioFile);
-    if (audioFile.endsWith(".mp3")) {
-      String wavFile = noSuffix +".wav";
-      File test = getAbsoluteFile(wavFile);
-        audioFile = test.exists() ? test.getAbsolutePath() :  getWavForMP3(audioFile);
-    }
-
-    File testAudioFile = new File(audioFile);
-    String name = testAudioFile.getName();
-
+   **/
+  public PretestScore getScoreForAudioFile(int reqid, String testAudioFile, String refAudioFile, String sentence,
+                                           int width, int height) {
+    testAudioFile = dealWithMP3Audio(testAudioFile);
+    refAudioFile  = dealWithMP3Audio(refAudioFile);
 
     String installPath = getInstallPath();
-    String imageOutDir = getImageOutDir();
-    String testAudioDir = testAudioFile.getParent().substring(installPath.length());
 
-    System.out.println("scoring " + name + " in dir " +testAudioDir);
+    DirAndName testDirAndName = new DirAndName(testAudioFile, installPath).invoke();
+    String testAudioName = testDirAndName.getName();
+    String testAudioDir = testDirAndName.getDir();
+
+    DirAndName refDirAndName = new DirAndName(refAudioFile, installPath).invoke();
+    String refAudioName = refDirAndName.getName();
+    String refAudioDir  = refDirAndName.getDir();
+
+    System.out.println("scoring " + testAudioName + " in dir " +testAudioDir +" against " + refAudioName + " in " + refAudioDir);
     // TODO : pass in reference audio and reference audio directory!
-    PretestScore pretestScore = new ASRScoring(installPath).scoreRepeat(testAudioDir, removeSuffix(name), testAudioDir, removeSuffix(name), imageOutDir, width, height);
+    PretestScore pretestScore = asrScoring.scoreRepeat(
+        testAudioDir, removeSuffix(testAudioName),
+        refAudioDir,  removeSuffix(refAudioName),
+        sentence,
+
+        getImageOutDir(), width, height);
     pretestScore.setReqid(reqid);
 
     System.out.println("score " + pretestScore);
     return pretestScore;
+  }
+
+  private String dealWithMP3Audio(String testAudioFile) {
+    if (testAudioFile.endsWith(".mp3")) {
+      String noSuffix = removeSuffix(testAudioFile);
+      String wavFile = noSuffix +".wav";
+      File test = getAbsoluteFile(wavFile);
+      return test.exists() ? test.getAbsolutePath() :  getWavForMP3(testAudioFile);
+    }
+    else {
+      return testAudioFile;
+    }
   }
 
   private String removeSuffix(String audioFile) {
@@ -559,4 +579,30 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
 
+  private class DirAndName {
+    private String testAudioFile;
+    private String installPath;
+    private String testAudioName;
+    private String testAudioDir;
+
+    public DirAndName(String testAudioFile, String installPath) {
+      this.testAudioFile = testAudioFile;
+      this.installPath = installPath;
+    }
+
+    public String getName() {
+      return testAudioName;
+    }
+
+    public String getDir() {
+      return testAudioDir;
+    }
+
+    public DirAndName invoke() {
+      File testAudio = new File(testAudioFile);
+      testAudioName = testAudio.getName();
+      testAudioDir = testAudio.getParent().substring(installPath.length());
+      return this;
+    }
+  }
 }
