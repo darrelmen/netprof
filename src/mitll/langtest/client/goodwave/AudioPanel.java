@@ -45,6 +45,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final String WAVEFORM = "Waveform";
   private static final String SPECTROGRAM = "Spectrogram";
   private String audioPath;
+  private String refSentence;
+
   private ImageAndCheck waveform,spectrogram,speech,phones,words;
   private int lastWidth = 0;
   private PopupPanel imageOverlay;
@@ -62,7 +64,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   /**
    * @see GoodwaveExercisePanel#getQuestionContent(mitll.langtest.shared.Exercise)
-   * @see GoodwaveExercisePanel.RecordAudioPanel#RecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int, String)
+   * @see GoodwaveExercisePanel.RecordAudioPanel#RecordAudioPanel
    * @paramx e
    * @param service
    * @param doASRScoring
@@ -158,9 +160,15 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     playAudio.startSong(path);
   }
 
-  public void setRefAudio(String path) {
+  /**
+   * @see mitll.langtest.client.goodwave.GoodwaveExercisePanel.RecordAudioPanel#makePlayAudioPanel()
+   * @param path
+   * @param refSentence
+   */
+  public void setRefAudio(String path, String refSentence) {
     lastWidth = 0;
     this.refAudio = path;
+    this.refSentence = refSentence;
   }
 
   private PlayAudioPanel addButtonsToButtonRow(HorizontalPanel hp) {
@@ -204,7 +212,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       getImageURLForAudio(audioPath, WAVEFORM, width, waveform);
       getImageURLForAudio(audioPath, SPECTROGRAM, width, spectrogram);
       if (refAudio != null) {
-        getTranscriptImageURLForAudio(audioPath,refAudio,width,words,phones,speech);
+        getTranscriptImageURLForAudio(audioPath, refAudio, refSentence, width,words,phones,speech);
       }
       else {
         System.err.println("getImages : no ref audio");
@@ -252,20 +260,22 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    *
    * @see #getImages()
    * @param path
+   * @param refSentence
    * @param width
    * @param wordTranscript
    * @param phoneTranscript
    * @param speechTranscript
    */
-  private void getTranscriptImageURLForAudio(final String path, final String ref, int width,
+  private void getTranscriptImageURLForAudio(final String path, final String ref, String refSentence, int width,
                                              final ImageAndCheck wordTranscript,
-                                             final ImageAndCheck phoneTranscript, final ImageAndCheck speechTranscript) {
+                                             final ImageAndCheck phoneTranscript,
+                                             final ImageAndCheck speechTranscript) {
     int toUse = Math.max(MIN_WIDTH, width);
     int height = ANNOTATION_HEIGHT;
 
     if (doASRScoring) {
       int reqid = getReqID("asrscore");
-      service.getScoreForAudioFile(reqid, path, toUse, height, new AsyncCallback<PretestScore>() {
+      service.getScoreForAudioFile(reqid, path, ref, refSentence, toUse, height, new AsyncCallback<PretestScore>() {
         public void onFailure(Throwable caught) {}
         public void onSuccess(PretestScore result) {
           if (isMostRecentRequest("asrscore",result.reqid)) {
@@ -315,7 +325,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   private void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript, ImageAndCheck speechTranscript, boolean scoredBefore) {
-    System.out.println("useResult got " + result);
+   // System.out.println("useResult got " + result);
     if (result.sTypeToImage.get(NetPronImageType.WORD_TRANSCRIPT) != null) {
       wordTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.WORD_TRANSCRIPT));
       wordTranscript.image.setVisible(true);
@@ -332,7 +342,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       speechTranscript.check.setVisible(true);
     }
     if (!scoredBefore) {
-      System.out.println("new score returned " + result);
+     // System.out.println("new score returned " + result);
       scoreListener.gotScore(result);
     }
   }
