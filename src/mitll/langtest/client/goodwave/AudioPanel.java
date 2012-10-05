@@ -58,19 +58,22 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private String refAudio;
   private ScoreListener scoreListener;
   private float screenPortion = 1.0f;
+  private boolean doASRScoring;
 
   /**
    * @see GoodwaveExercisePanel#getQuestionContent(mitll.langtest.shared.Exercise)
    * @see GoodwaveExercisePanel.RecordAudioPanel#RecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int, String)
    * @paramx e
    * @param service
+   * @param doASRScoring
    * @paramx userFeedback
    * @paramx controller
    */
-  public AudioPanel(String path, LangTestDatabaseAsync service, SoundManagerAPI soundManager) {
+  public AudioPanel(String path, LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean doASRScoring) {
     this.soundManager = soundManager;
     this.service = service;
     addWidgets(path);
+    this.doASRScoring = doASRScoring;
   }
 
   public void onResize() {
@@ -185,6 +188,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * TODO uses the window width to determine the image width -- ideally we could find out what the width
    * of this component is and then use that.  getOffsetWidth doesn't work well, although perhaps using a parent
    * component's getOffsetWidth would.
+   *
+   * @see #getImagesForPath(String)
+   * @see #onResize()
    */
   private void getImages() {
     int rightMargin = screenPortion == 1.0f ? RIGHT_MARGIN : (int)(screenPortion*((float)RIGHT_MARGIN));
@@ -199,6 +205,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       getImageURLForAudio(audioPath, SPECTROGRAM, width, spectrogram);
       if (refAudio != null) {
         getTranscriptImageURLForAudio(audioPath,refAudio,width,words,phones,speech);
+      }
+      else {
+        System.err.println("getImages : no ref audio");
       }
     }
     else {
@@ -240,6 +249,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   /**
    * TODO configure for multi-ref
    * TODO : add multiple ref files
+   *
+   * @see #getImages()
    * @param path
    * @param width
    * @param wordTranscript
@@ -252,7 +263,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     int toUse = Math.max(MIN_WIDTH, width);
     int height = ANNOTATION_HEIGHT;
 
-    if (false) {
+    if (doASRScoring) {
       int reqid = getReqID("asrscore");
       service.getScoreForAudioFile(reqid, path, toUse, height, new AsyncCallback<PretestScore>() {
         public void onFailure(Throwable caught) {}
@@ -342,7 +353,13 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     return p;
   }
 
+  /**
+   * Makes a red line appear on top of the waveform/spectogram,etc. marking playback position.
+   */
   private class AudioPositionPopup implements AudioControl {
+    /**
+     * @see AudioPanel#getImageURLForAudio(String, String, int, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck)
+     */
     public void reinitialize() {
       imageOverlay.hide();
       int left = imageContainer.getAbsoluteLeft();
@@ -351,6 +368,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
 
     public void songFirstLoaded(double durationEstimate) {}
+
+    /**
+     * @see PlayAudioPanel#songLoaded(double)
+     * @param duration
+     */
     public void songLoaded(final double duration) {
           songDuration = duration;
           int offsetHeight = imageContainer.getOffsetHeight();
@@ -363,8 +385,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       if (debug) System.out.println("songLoaded " + imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() +
           " x " + imageOverlay.getPopupLeft() + " y " + imageOverlay.getPopupTop() + " dim " +
           imageOverlay.getOffsetWidth() + " x " + imageOverlay.getOffsetHeight());
-  }
+    }
 
+    /**
+     * @see PlayAudioPanel#update(double)
+     * @param position
+     */
     public void update(double position) {
       if (!imageOverlay.isShowing()) {
         imageOverlay.show();
