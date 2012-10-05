@@ -29,7 +29,7 @@ public class DTWScoring extends Scoring {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile(String, java.util.Collection, int, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile(int, String, java.util.Collection, int, int)
    * @param testAudioDir
    * @param testAudioFileNoSuffix
    * @param refAudioDir
@@ -90,6 +90,13 @@ public class DTWScoring extends Scoring {
     return checkDir;
   }
 
+  /**
+   * @see #score
+   * @param testAudio
+   * @param refDir
+   * @param refs
+   * @return
+   */
   private Float[] computeMultiRefRepeatExerciseScores(Audio testAudio, String refDir, Collection<String> refs)  {
     Audio[] referenceAudios = new Audio[refs.size()];
 
