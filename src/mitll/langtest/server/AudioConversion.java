@@ -32,6 +32,7 @@ public class AudioConversion {
 
   public static final String LINUX_SOX_BIN_DIR = "/usr/local/bin";
   public static final String WINDOWS_SOX_BIN_DIR = "C:\\Users\\go22670\\sox-14-3-2";
+  public static final String SIXTEEN_K_SUFFIX = "_16K";
 
   private AudioCheck audioCheck = new AudioCheck();
 
@@ -136,7 +137,7 @@ public class AudioConversion {
         if (! new File(binPath).exists()) binPath = LINUX_SOX_BIN_DIR;
         String s = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
         String name1 = wavFile.getName();
-        String sampled = wavFile.getParent() + File.separator + removeSuffix(name1) + "_16K.wav";
+        String sampled = wavFile.getParent() + File.separator + removeSuffix(name1) + SIXTEEN_K_SUFFIX + ".wav";
         if (new FileCopier().copy(s, sampled)) {
           wavFile = new File(sampled);
         }
