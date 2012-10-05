@@ -38,13 +38,14 @@ public class ASRScoring extends Scoring {
       languageLookUp.put("Arabic", arabic);
     }
 
-    ASRParameters english = ASRParameters.jload("English", configFullPath);
+/*    ASRParameters english = ASRParameters.jload("English", configFullPath);
     if (english == null) {
       System.err.println("can't find English parameters at " + configFullPath);
     } else {
       languageLookUp.put("English", english);
-    }
+    }*/
   }
+
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile(int, String, int, int)
@@ -53,19 +54,18 @@ public class ASRScoring extends Scoring {
    * @param testAudioFileNoSuffix
    * @param refAudioDir
    * @param refAudioFileNoSuffix
+   * @param sentence
    * @param imageOutDir
    * @param imageWidth
    * @param imageHeight
-   * @return
+   * @return PretestScore object
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
                                   String refAudioDir, String refAudioFileNoSuffix,
-                                 // String sentence, String asrLanguage,
-                                 // String scoringDir,
-                                  String imageOutDir,
+                                  String sentence, String imageOutDir,
                                   int imageWidth, int imageHeight) {
     return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,refAudioDir,refAudioFileNoSuffix,
-        "This is a test.",
+        sentence,
         "Arabic",
         scoringDir,imageOutDir,imageWidth,imageHeight);
   }
@@ -88,6 +88,7 @@ public class ASRScoring extends Scoring {
                                           String refAudioDir, String refAudioFileNoSuffix,
                                           String sentence, String asrLanguage,
                                           String scoringDir,
+
                                           String imageOutDir,
                                           int imageWidth, int imageHeight) {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
@@ -121,15 +122,21 @@ public class ASRScoring extends Scoring {
 
     Scores scores = computeRepeatExerciseScores(scoringDir, testAudio, refAudio, sentence, asrLanguage);
 
-    // get the phones for display in the phone accuracy pane, maps start
-    // time to Transcript events
-    Map<String, Float> phones = scores.eventScores.get("phones");
-    Map<String, Float> emptyMap = Collections.emptyMap();
-    Map<String, Float> phoneScores = phones != null ? new HashMap<String, Float>(phones) : emptyMap;
     Map<NetPronImageType, String> sTypeToImage = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix);
 
-    PretestScore pretestScore = new PretestScore(0, scores.hydecScore, scores.svScoreVector, phoneScores, sTypeToImage);
+    PretestScore pretestScore = new PretestScore(0, scores.hydecScore, scores.svScoreVector, getPhoneToScore(scores), sTypeToImage);
     return pretestScore;
+  }
+
+  /**
+   * get the phones for display in the phone accuracy pane
+   * @param scores
+   * @return
+   */
+  private Map<String, Float> getPhoneToScore(Scores scores) {
+    Map<String, Float> phones = scores.eventScores.get("phones");
+    Map<String, Float> emptyMap = Collections.emptyMap();
+    return phones != null ? new HashMap<String, Float>(phones) : emptyMap;
   }
 
   /**
@@ -207,7 +214,7 @@ public class ASRScoring extends Scoring {
   public static void main(String [] arg) {
     ASRScoring scoring = new ASRScoring("C:\\Users\\go22670\\DLITest\\LangTest\\war");
     String testAudioDir = "C:\\Users\\go22670\\DLITest\\LangTest\\war\\media\\ac-L0P-001";
-    PretestScore pretestScore = scoring.scoreRepeat(testAudioDir, "ad0035_ems", testAudioDir, "ad0035_ems", "out", 1024, 100);
+    PretestScore pretestScore = scoring.scoreRepeat(testAudioDir, "ad0035_ems", testAudioDir, "ad0035_ems", "This is a test.", "out", 1024, 100);
     System.out.println("score " + pretestScore);
   }
 }

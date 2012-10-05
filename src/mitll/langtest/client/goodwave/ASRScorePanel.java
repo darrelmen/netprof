@@ -31,8 +31,9 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
 	private PretestGauge ASRGauge;
   private GChart exerciseHistoryChart,  phoneAccuracyChart;
+  private List<Float> scores = new ArrayList<Float>();
 
-	float[][] colormap = {{255f, 0f, 0f}, {255f, 32f, 0f}, {255f, 64f, 0f}, {255f, 128f, 0f}, {255f, 192f, 0f}, {255f, 255f, 0f},
+  private float[][] colormap = {{255f, 0f, 0f}, {255f, 32f, 0f}, {255f, 64f, 0f}, {255f, 128f, 0f}, {255f, 192f, 0f}, {255f, 255f, 0f},
 			{192f, 255f, 0f}, {128f, 255f, 0f}, {64f, 255f, 0f}, {32f, 255f, 0f}, {32f, 255f, 0f}, {32f, 255f, 0f}, {32f, 255f, 0f},
 			{0f, 255f, 0f}, {0f, 255f, 0f}, {0f, 255f, 0f}};
 
@@ -134,7 +135,6 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
   private void setASRGaugeValue(float v) { ASRGauge.setValue(v); }
 
-  private List<Float> scores = new ArrayList<Float>();
 
   /**
   *
@@ -143,7 +143,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    */
   public void gotScore(PretestScore score) {
     float zeroToHundred = score.getHydecScore() * 100f;
-    System.out.println("ASRScorePanel : " +score + " hydec " + score.getHydecScore() + " " +zeroToHundred);
+    //System.out.println("ASRScorePanel : " +score + " hydec " + score.getHydecScore() + " " +zeroToHundred);
     setASRGaugeValue(Math.min(100.0f, zeroToHundred));
     updatePhoneAccuracy(score.getPhoneScores());
     scores.add(score.getHydecScore());
