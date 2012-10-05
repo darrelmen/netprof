@@ -51,6 +51,8 @@ public class Scoring {
 
   /**
    * @see DTWScoring#score(String, String, String, java.util.Collection, String, int, int)
+   * @see ASRScoring#scoreRepeatExercise(String, String, String, String, String, String, String, String, int, int)
+   *
    * @param imageOutDir
    * @param imageWidth
    * @param imageHeight
@@ -66,13 +68,19 @@ public class Scoring {
     }
       // These may not all exist. The speech file is created only by multisv
     // right now.
-    String phoneLabFile = prependDeploy(noSuffix + ".phones.lab");
+    String phoneLabFile  = prependDeploy(noSuffix + ".phones.lab");
     String speechLabFile = prependDeploy(noSuffix + ".speech.lab");
-    String wordLabFile = prependDeploy(noSuffix + ".words.lab");
+    String wordLabFile   = prependDeploy(noSuffix + ".words.lab");
     Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
 
-    if (new File(phoneLabFile).exists()) typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
-    if (new File(wordLabFile).exists()) typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
+    if (new File(phoneLabFile).exists()) {
+      typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
+      System.out.println("writeTranscripts found " + new File(phoneLabFile).getAbsolutePath());
+    }
+    if (new File(wordLabFile).exists()) {
+      typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
+      System.out.println("writeTranscripts found " + new File(wordLabFile).getAbsolutePath());
+    }
     if (new File(speechLabFile).exists()) {
       typeToFile.put(ImageType.SPEECH_TRANSCRIPT, speechLabFile);
       System.out.println("writeTranscripts found " + new File(speechLabFile).getAbsolutePath());
