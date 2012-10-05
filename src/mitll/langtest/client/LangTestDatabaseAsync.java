@@ -40,7 +40,7 @@ public interface LangTestDatabaseAsync {
 
   void changeGrade(Grade toChange, AsyncCallback<Void> async);
 
-  void getScoreForAudioFile(int reqid, String audioFile, int width, int height, AsyncCallback<PretestScore> async);
+  void getScoreForAudioFile(int reqid, String testAudioFile, String refAudioFile, String sentence, int width, int height, AsyncCallback<PretestScore> async);
 
   void getScoreForAudioFile(int reqid, String audioFile, Collection<String> refs, int width, int height, AsyncCallback<PretestScore> async);
 
