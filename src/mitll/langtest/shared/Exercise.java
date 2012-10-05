@@ -15,7 +15,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class Exercise implements IsSerializable  {
-  public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE }
+  public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE, REPEAT }
 
   private String plan;
   private String content;
@@ -23,6 +23,9 @@ public class Exercise implements IsSerializable  {
   private EXERCISE_TYPE type = EXERCISE_TYPE.RECORD;
   public boolean promptInEnglish = true;
   private Map<String,List<QAPair>> langToQuestion = new HashMap<String, List<QAPair>>();
+  private String refAudio;
+  private String refSentence;
+
   public static class QAPair implements IsSerializable {
     private String question;
     private String answer;
@@ -82,6 +85,8 @@ public class Exercise implements IsSerializable  {
   public String getID() { return id; }
   public String getContent() { return content; }
   public EXERCISE_TYPE getType() { return type; }
+  public String getRefAudio() { return refAudio; }
+  public String getRefSentence() { return refSentence; }
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getExercises(long)
