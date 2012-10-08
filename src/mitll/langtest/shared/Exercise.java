@@ -55,7 +55,7 @@ public class Exercise implements IsSerializable  {
   public Exercise() {}     // required for serialization
 
   /**
-   * @see mitll.langtest.server.database.ExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
+   * @see mitll.langtest.server.database.ExerciseDAO#getExercise
    * @param id
    * @param content
    * @param promptInEnglish
@@ -65,6 +65,15 @@ public class Exercise implements IsSerializable  {
     this.plan = plan; this.id = id; this.content = content;
     this.type = recordAudio ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE;
     this.promptInEnglish = promptInEnglish;
+  }
+
+  public Exercise(String plan, String id, String content, String audioRef, String sentenceRef) {
+    this.plan = plan;
+    this.id = id;
+    this.content = content;
+    this.refAudio = audioRef;
+    this.refSentence = sentenceRef;
+    this.type = EXERCISE_TYPE.REPEAT;
   }
 
   /**
@@ -118,7 +127,12 @@ public class Exercise implements IsSerializable  {
   }
 
   public String toString() {
-    return "Exercise " + plan+"/"+ id + "/" + (promptInEnglish?"english":"foreign")+"/" + getType()+
-      " : content bytes = " + content.length() + " num questions " + langToQuestion.size();
+    if (getType() == EXERCISE_TYPE.REPEAT) {
+      return "Exercise " + plan+"/"+ id + "/" + " content bytes = " + content.length() + " ref sentence " + refSentence +" audio " + refAudio;
+    }
+    else {
+      return "Exercise " + plan+"/"+ id + "/" + (promptInEnglish?"english":"foreign")+"/" + getType()+
+          " : content bytes = " + content.length() + " num questions " + langToQuestion.size();
+    }
   }
 }
