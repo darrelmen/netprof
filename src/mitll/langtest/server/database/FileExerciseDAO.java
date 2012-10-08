@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.AudioConversion;
 import mitll.langtest.shared.Exercise;
 
 import java.io.BufferedReader;
@@ -24,11 +25,18 @@ public class FileExerciseDAO implements ExerciseDAO {
 
   private List<Exercise> exercises;
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO()
+   */
   public FileExerciseDAO() {}
-  public FileExerciseDAO(String installPath) {
+/*  public FileExerciseDAO(String installPath) {
     readExercises(installPath);
-  }
+  }*/
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getExercises()
+   * @paramx installPath
+   */
   public void readExercises(String installPath) {
     if (exercises != null) return;
     String exerciseFile = "lesson-737.csv";
@@ -45,6 +53,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       }
     }
     try {
+      AudioConversion audioConversion = new AudioConversion();
       exercises = new ArrayList<Exercise>();
       BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
       String line2;
@@ -78,7 +87,8 @@ public class FileExerciseDAO implements ExerciseDAO {
         if (!file.exists()) {
          // System.err.println("can't find audio file " + file.getAbsolutePath());
         } else {
-          Exercise exercise = new Exercise("repeat", name, content, audioRef, arabic);
+          audioConversion.ensureWriteMP3(audioRef,installPath);
+          Exercise exercise = new Exercise("repeat", name, content, ensureForwardSlashes(audioRef), arabic);
           exercises.add(exercise);
         }
       }
@@ -89,16 +99,20 @@ public class FileExerciseDAO implements ExerciseDAO {
       System.err.println("no exercises found in " + exerciseFile +"?");
     }
     else {
-      System.out.println("found " + exercises.size() + " exercises");
+      System.out.println("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
+  }
+
+  private String ensureForwardSlashes(String wavPath) {
+    return wavPath.replaceAll("\\\\", "/");
   }
 
   public List<Exercise> getRawExercises() {
     return exercises;  //To change body of implemented methods use File | Settings | File Templates.
   }
 
-  public static void main(String [] arg) {
-    List<Exercise> rawExercises = new FileExerciseDAO("war").getRawExercises();
+/*  public static void main(String [] arg) {
+    List<Exercise> rawExercises = new FileExerciseDAO(*//*"war"*//*).getRawExercises();
     System.out.println("first is " + rawExercises.iterator().next());
-  }
+  }*/
 }

@@ -1,5 +1,8 @@
 package mitll.langtest.server.scoring;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.LoadingCache;
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -26,15 +29,18 @@ import java.util.Map;
  */
 public class ASRScoring extends Scoring {
   private Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
-  private static final float MIN_AUDIO_SECONDS = 0.3f;
-  private static final float MAX_AUDIO_SECONDS = 15.0f;
+/*  private static final float MIN_AUDIO_SECONDS = 0.3f;
+  private static final float MAX_AUDIO_SECONDS = 15.0f;*/
+  Cache<String, Scores> audioToScore;
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#init
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile(int, String, java.util.Collection, int, int)
    * @param deployPath
    */
   public ASRScoring(String deployPath) {
     super(deployPath);
+
+    audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
     ASRParameters arabic = ASRParameters.jload("Arabic", configFullPath);
     if (arabic == null) {
@@ -53,23 +59,23 @@ public class ASRScoring extends Scoring {
 
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile(int, String, int, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile
    * TODO : pass in ref sentence and language
    * @param testAudioDir
    * @param testAudioFileNoSuffix
-   * @param refAudioDir
-   * @param refAudioFileNoSuffix
-   * @param sentence
+   * @paramx refAudioDir
+   * @paramx refAudioFileNoSuffix
+   * @param sentence that should be what the test audio contains
    * @param imageOutDir
    * @param imageWidth
    * @param imageHeight
    * @return PretestScore object
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-                                  String refAudioDir, String refAudioFileNoSuffix,
+                                //  String refAudioDir, String refAudioFileNoSuffix,
                                   String sentence, String imageOutDir,
                                   int imageWidth, int imageHeight) {
-    return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,refAudioDir,refAudioFileNoSuffix,
+    return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,//refAudioDir,refAudioFileNoSuffix,
         sentence,
         "Arabic",
         scoringDir,imageOutDir,imageWidth,imageHeight);
@@ -82,8 +88,8 @@ public class ASRScoring extends Scoring {
    *
    * @param testAudioDir
    * @param testAudioFileNoSuffix
-   * @param refAudioDir
-   * @param refAudioFileNoSuffix
+   * @paramx refAudioDir
+   * @paramx refAudioFileNoSuffix
    * @param sentence
    * @param asrLanguage
    * @param scoringDir
@@ -93,7 +99,7 @@ public class ASRScoring extends Scoring {
    * @return
    */
   public PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
-                                          String refAudioDir, String refAudioFileNoSuffix,
+                                         // String refAudioDir, String refAudioFileNoSuffix,
                                           String sentence, String asrLanguage,
                                           String scoringDir,
 
@@ -128,7 +134,15 @@ public class ASRScoring extends Scoring {
         refAudioDir, refAudioFileNoSuffix,
         false *//* notForScoring *//*, dirs);*/
 
-    Scores scores = computeRepeatExerciseScores(scoringDir, testAudio, /*refAudio, */sentence, asrLanguage);
+    Scores scores = audioToScore.getIfPresent(testAudioFileNoSuffix);
+
+    if (scores == null) {
+      scores = computeRepeatExerciseScores(scoringDir, testAudio, /*refAudio, */sentence, asrLanguage);
+      audioToScore.put(testAudioFileNoSuffix, scores);
+    }
+    else {
+      System.out.println("found cached score for " + testAudioFileNoSuffix);
+    }
 
     Map<NetPronImageType, String> sTypeToImage = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix);
 
@@ -154,6 +168,8 @@ public class ASRScoring extends Scoring {
     private void convertEvents() {}
 
     /**
+     * Assumes that testAudio was recorded through the UI, which should prevent audio that is too short or too long.
+     *
      * @seex #scoreAudio
      * @see #scoreRepeatExercise
      * @param testAudio
@@ -163,7 +179,6 @@ public class ASRScoring extends Scoring {
      * @return
      * @throws Exception
      */
-    // Just compute the score: don't deal with any GUI or history
   private Scores computeRepeatExerciseScores(String tomcatWriteDirectory, Audio testAudio, /*Audio refAudio,*/ String sentence, String language) {
 /*    float testAudioSeconds = testAudio.seconds();
     if (testAudioSeconds < MIN_AUDIO_SECONDS || testAudioSeconds > MAX_AUDIO_SECONDS) {
@@ -200,18 +215,21 @@ public class ASRScoring extends Scoring {
         dictFile,
         asrparameters.letterToSoundClassString(), platform);
 
+    //System.out.println(new Date() + " : Calling jscore with " + sentence + " and " + asrparametersFullPaths);
+    Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
+    synchronized (this) {   // hydec can't be called concurrently -- not thread safe
+      jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
+    }
+    Float hydec_score = jscoreOut._1;
+    System.out.println(new Date() + " : got score " + hydec_score);
+
+/*
     Function1<Float, Float> identityFn = new AbstractFunction1<Float, Float>() {
       public Float apply(Float score) {
         return score;
       }
     };
-
-    System.out.println(new Date() + " : Calling jscore with " + sentence + " and " + asrparametersFullPaths);
-    Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
-    Float hydec_score = jscoreOut._1;
-    System.out.println(new Date() + " : got score " + hydec_score);
-
-    //  Float sv_score = testAudio.sv(refAudio, os, identityFn);
+*/    //  Float sv_score = testAudio.sv(refAudio, os, identityFn);
     Float[] svScoreVector = { 0f, 1.0f }; // Fake ratio.
     return new Scores(hydec_score, jscoreOut._2, svScoreVector);
   }
@@ -225,7 +243,7 @@ public class ASRScoring extends Scoring {
   public static void main(String [] arg) {
     ASRScoring scoring = new ASRScoring("C:\\Users\\go22670\\DLITest\\LangTest\\war");
     String testAudioDir = "C:\\Users\\go22670\\DLITest\\LangTest\\war\\media\\ac-L0P-001";
-    PretestScore pretestScore = scoring.scoreRepeat(testAudioDir, "ad0035_ems", testAudioDir, "ad0035_ems", "This is a test.", "out", 1024, 100);
+    PretestScore pretestScore = scoring.scoreRepeat(testAudioDir, "ad0035_ems", /*testAudioDir, "ad0035_ems",*/ "This is a test.", "out", 1024, 100);
     System.out.println("score " + pretestScore);
   }
 }
