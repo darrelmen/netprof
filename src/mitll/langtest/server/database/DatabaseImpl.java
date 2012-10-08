@@ -27,6 +27,7 @@ import java.util.*;
  */
 public class DatabaseImpl implements Database {
   private static final boolean TESTING = false;
+  private static final boolean USE_LEVANTINE = true;
 
   private static final boolean DROP_USER = false;
   private static final boolean DROP_RESULT = false;
@@ -46,7 +47,8 @@ public class DatabaseImpl implements Database {
     driver = "org.h2.Driver";
 
   private HttpServlet servlet;
-  private final ExerciseDAO exerciseDAO = new ExerciseDAO(this);
+  private String installPath;
+  private ExerciseDAO exerciseDAO = null;/* = new ExerciseDAO(this)*/;
   public final UserDAO userDAO = new UserDAO(this);
   private final ResultDAO resultDAO = new ResultDAO(this);
   public final AnswerDAO answerDAO = new AnswerDAO(this);
@@ -54,6 +56,10 @@ public class DatabaseImpl implements Database {
   public final GraderDAO graderDAO = new GraderDAO(this);
   private final ScheduleDAO scheduleDAO = new ScheduleDAO(this);
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#init
+   * @param s
+   */
   public DatabaseImpl(HttpServlet s) {
     this.servlet = s;
     try {
@@ -69,6 +75,7 @@ public class DatabaseImpl implements Database {
     }
     ScheduleDAO scheduleDAO = new ScheduleDAO(this);
     this.userToSchedule = scheduleDAO.getSchedule();
+    this.exerciseDAO = makeExerciseDAO();
 
     if (DROP_USER) {
       try {
@@ -98,11 +105,20 @@ public class DatabaseImpl implements Database {
 
   }
 
+  private ExerciseDAO makeExerciseDAO() {
+    return USE_LEVANTINE ? new FileExerciseDAO() : new SQLExerciseDAO(this);
+  }
+
+  public void setInstallPath(String i) { this.installPath = i; }
+
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises()
    * @return
    */
   public List<Exercise> getExercises() {
+    if (USE_LEVANTINE) {
+      ((FileExerciseDAO)exerciseDAO).readExercises(installPath);
+    }
      return exerciseDAO.getRawExercises();
   }
 
@@ -449,10 +465,10 @@ public class DatabaseImpl implements Database {
    // System.err.println("Closing " + connection + " " + connection.isClosed());
   }
 
-  public static void main(String[] arg) {
-    DatabaseImpl langTestDatabase = new DatabaseImpl(null);
+/*  public static void main(String[] arg) {
+    DatabaseImpl langTestDatabase = new DatabaseImpl(null,"");
     //long id = langTestDatabase.addUser(23, "male", 0);
     //System.out.println("id =" + id);
      for (Exercise e : langTestDatabase.getExercises(0)) System.err.println("e " + e);
-  }
+  }*/
 }
