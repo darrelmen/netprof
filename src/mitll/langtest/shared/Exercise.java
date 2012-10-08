@@ -55,7 +55,7 @@ public class Exercise implements IsSerializable  {
   public Exercise() {}     // required for serialization
 
   /**
-   * @see mitll.langtest.server.database.ExerciseDAO#getExercise
+   * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise
    * @param id
    * @param content
    * @param promptInEnglish
@@ -77,7 +77,7 @@ public class Exercise implements IsSerializable  {
   }
 
   /**
-   * @see mitll.langtest.server.database.ExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
+   * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
    * @param lang
    * @param question
    * @param answer
