@@ -30,8 +30,10 @@ import mitll.langtest.shared.Exercise;
 public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresResize, ProvidesResize {
   public static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
 
+  /**
+   * Just for backward compatibility -- so we can run against old plan files
+   */
   private String refAudio;
-  private String refSentence;
 
   protected Exercise exercise = null;
   protected ExerciseController controller;
@@ -52,6 +54,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     this.exercise = e;
     this.controller = controller;
     this.service = service;
+
+    System.out.println("got exercise " + e + " with ref sentence '" +e.getRefSentence() +"'");
     VerticalPanel center = new VerticalPanel();
     //center.add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
 
@@ -108,6 +112,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
    *
+   * @see #GoodwaveExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController)
    * @param e
    * @return
    */
@@ -116,7 +121,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     String path = null;
     if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT) {
       this.refAudio = e.getRefAudio();
-      this.refSentence =e.getRefSentence();
+      path = refAudio;
     }
     else if (content.contains("audio")) {
       int i = content.indexOf("source src=");
@@ -134,10 +139,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     VerticalPanel vp = new VerticalPanel();
 
    // ResizableCaptionPanel cp = new ResizableCaptionPanel("Native Reference Speaker");
+    CaptionPanel cpContent = new CaptionPanel("Instructions");
     Widget questionContent = new HTML(content);
     questionContent.addStyleName("leftTenMargin");
    // cp.setContentWidget(questionContent);
-    vp.add(questionContent);
+    cpContent.setContentWidget(questionContent);
+    vp.add(cpContent);
    // vp.add(cp);
     if (path != null) {
       AudioPanel w = new AudioPanel(path, service, controller.getSoundManager(), true);
@@ -231,7 +238,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
             public void onSuccess(AudioAnswer result) {
               String path1 = result.path;
               if (path1.endsWith(".wav")) path1 = path1.replace(".wav", ".mp3");
-              setRefAudio(refAudio, "This is a test.");
+              setRefAudio(refAudio, refSentence);
               getImagesForPath(path1);
            //   questionState.recordCompleted(outer);
             }
