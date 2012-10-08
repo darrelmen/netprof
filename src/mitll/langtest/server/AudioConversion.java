@@ -205,6 +205,26 @@ public class AudioConversion {
     return writeWithFFMPEG(exePath, pathToWav, mp3File);
   }
 
+  public void ensureWriteMP3(String pathToWav,  String realContextPath) {
+    File absolutePathToWav = getAbsoluteFile(pathToWav,realContextPath);
+
+    String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
+    File mp3 = new File(mp3File);
+    if (!mp3.exists()) {
+      writeMP3(absolutePathToWav.getAbsolutePath());
+    }
+  }
+
+  private File getAbsoluteFile(String filePath,  String realContextPath) {
+    return getAbsolute(filePath, realContextPath);
+  }
+
+  private File getAbsolute(String filePath, String realContextPath) {
+    File file = new File(realContextPath, filePath);
+    assert(file.exists());
+    return file;
+  }
+
   /**
    * Use lame to write an mp3 file.
    * @param pathToWav

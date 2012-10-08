@@ -148,8 +148,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (relativeImagePath.startsWith("/")) {
       relativeImagePath = relativeImagePath.substring(1);
     }
-    // +1 removes initial slash!
-    System.out.println("rel path is " + relativeImagePath);
+    // System.out.println("rel path is " + relativeImagePath);
     return new ImageResponse(reqid,relativeImagePath);
   }
 
@@ -221,17 +220,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       System.out.println("converting " +audioFile + " to wav ");
       String wavFile = noSuffix +".wav";
       File test = new File(wavFile);
-
-    //  File test = getAbsoluteFile(wavFile);
-      //File file = new AudioConversion().convertMP3ToWav(audioFile);
-
       audioFile = test.exists() ? test.getAbsolutePath() : new AudioConversion().convertMP3ToWav(audioFile).getAbsolutePath();
     }
 
     File testAudioFile = new File(audioFile);
-
-    //  String parent1 = testAudioFile.getParent();
-    //System.out.println("DTW test audio is " + testAudioFile + " parent " + parent1);
 
     // convert it to 16K sample rate, if needed
     try {
@@ -250,22 +242,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
+   *
    * @see mitll.langtest.client.goodwave.AudioPanel#getTranscriptImageURLForAudio
    * @param reqid
    * @param testAudioFile
-   * @param refAudioFile
    * @param sentence
-   * @param width
-   * @param height
-   * @return
+   * @param width image dim
+   * @param height  image dim
+   * @return PretestScore
    **/
-  public PretestScore getScoreForAudioFile(int reqid, String testAudioFile, String refAudioFile, String sentence,
+  public PretestScore getScoreForAudioFile(int reqid, String testAudioFile, String sentence,
                                            int width, int height) {
     if (asrScoring == null) {
       asrScoring = new ASRScoring(getInstallPath()); // lazy eval since install path not ready at init() time.
     }
     testAudioFile = dealWithMP3Audio(testAudioFile);
-    refAudioFile  = dealWithMP3Audio(refAudioFile);
 
     String installPath = getInstallPath();
 
@@ -273,21 +265,23 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String testAudioName = testDirAndName.getName();
     String testAudioDir = testDirAndName.getDir();
 
+/*
+    refAudioFile  = dealWithMP3Audio(refAudioFile);
     DirAndName refDirAndName = new DirAndName(refAudioFile, installPath).invoke();
     String refAudioName = refDirAndName.getName();
     String refAudioDir  = refDirAndName.getDir();
+    */
 
-    System.out.println("scoring " + testAudioName + " in dir " +testAudioDir +" against " + refAudioName + " in " + refAudioDir);
-    // TODO : pass in reference audio and reference audio directory!
+    System.out.println("scoring " + testAudioName + " in dir " +testAudioDir);// +" against " + refAudioName + " in " + refAudioDir);
+
     PretestScore pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
-        refAudioDir,  removeSuffix(refAudioName),
+      //  refAudioDir,  removeSuffix(refAudioName),
         sentence,
 
         getImageOutDir(), width, height);
     pretestScore.setReqid(reqid);
 
-    System.out.println("score " + pretestScore);
     return pretestScore;
   }
 
@@ -496,6 +490,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Checks if file exists already...
+   * @see #ensureMP3(java.util.Collection)
    * @param pathToWav
    */
   private void ensureWriteMP3(String pathToWav) {
