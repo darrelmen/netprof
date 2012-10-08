@@ -130,6 +130,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   @Override
   public void onLoad() {
+   // System.out.println("audio path is " + audioPath);
     if (audioPath != null) { // TODO awkward... better way?
       getImagesForPath(audioPath);
     }
@@ -215,7 +216,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         getTranscriptImageURLForAudio(audioPath, refAudio, refSentence, width,words,phones,speech);
       }
       else {
-        System.err.println("getImages : no ref audio");
+        System.out.println("AudioPanel.getImages : no ref audio");
       }
     }
     else {
@@ -275,7 +276,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
     if (doASRScoring) {
       int reqid = getReqID("asrscore");
-      service.getScoreForAudioFile(reqid, path, ref, refSentence, toUse, height, new AsyncCallback<PretestScore>() {
+      service.getScoreForAudioFile(reqid, path, refSentence, toUse, height, new AsyncCallback<PretestScore>() {
         public void onFailure(Throwable caught) {}
         public void onSuccess(PretestScore result) {
           if (isMostRecentRequest("asrscore",result.reqid)) {

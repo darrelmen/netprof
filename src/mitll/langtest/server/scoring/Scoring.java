@@ -51,7 +51,7 @@ public class Scoring {
 
   /**
    * @see DTWScoring#score(String, String, String, java.util.Collection, String, int, int)
-   * @see ASRScoring#scoreRepeatExercise(String, String, String, String, String, String, String, String, int, int)
+   * @see ASRScoring#scoreRepeatExercise
    *
    * @param imageOutDir
    * @param imageWidth
@@ -100,7 +100,7 @@ public class Scoring {
         }
       }
       else {
-        System.err.println("expecting image " +filePath + " to be under " +deployPath);
+        System.err.println("expecting image " +filePath + "\tto be under " +deployPath);
       }
       sTypeToImage.put(key, filePath);
     }
