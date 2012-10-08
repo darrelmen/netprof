@@ -36,11 +36,6 @@ public class DatabaseImpl implements Database {
   private static final String EXID = "exid";
   private Map<Long, List<Schedule>> userToSchedule;
 
-  // mysql config info
-/*  private String url = "jdbc:mysql://localhost:3306/",
-    dbOptions = "?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull",
-    driver = "com.mysql.jdbc.Driver";*/
-
   // h2 config info
   private String url = "jdbc:h2:" + H2_DB_NAME + ";IFEXISTS=TRUE;QUERY_CACHE_SIZE=0;",
     dbOptions = "",//"?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull",
@@ -48,7 +43,7 @@ public class DatabaseImpl implements Database {
 
   private HttpServlet servlet;
   private String installPath;
-  private ExerciseDAO exerciseDAO = null;/* = new ExerciseDAO(this)*/;
+  private ExerciseDAO exerciseDAO = null;
   public final UserDAO userDAO = new UserDAO(this);
   private final ResultDAO resultDAO = new ResultDAO(this);
   public final AnswerDAO answerDAO = new AnswerDAO(this);
@@ -119,7 +114,7 @@ public class DatabaseImpl implements Database {
     if (USE_LEVANTINE) {
       ((FileExerciseDAO)exerciseDAO).readExercises(installPath);
     }
-     return exerciseDAO.getRawExercises();
+    return exerciseDAO.getRawExercises();
   }
 
   /**

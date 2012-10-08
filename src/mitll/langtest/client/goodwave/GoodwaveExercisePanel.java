@@ -28,7 +28,10 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresResize, ProvidesResize {
-  public static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
+  private static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
+  private static final String USER_RECORDER = "User Recorder";
+  private static final String INSTRUCTIONS = "Instructions";
+  private static final String RECORD = "record";
 
   /**
    * Just for backward compatibility -- so we can run against old plan files
@@ -55,9 +58,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     this.controller = controller;
     this.service = service;
 
-    System.out.println("got exercise " + e + " with ref sentence '" +e.getRefSentence() +"'");
+   // System.out.println("got exercise " + e + " with ref sentence '" +e.getRefSentence() +"'");
     VerticalPanel center = new VerticalPanel();
-    //center.add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
 
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
@@ -98,7 +100,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
   private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int i, Panel toAddTo) {
     Widget answerWidget = getAnswerWidget(e, service, controller, i);
 
-    ResizableCaptionPanel cp = new ResizableCaptionPanel("User Recorder");
+    ResizableCaptionPanel cp = new ResizableCaptionPanel(USER_RECORDER);
     cp.setContentWidget(answerWidget);
     toAddTo.add(cp);
   }
@@ -123,7 +125,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
       this.refAudio = e.getRefAudio();
       path = refAudio;
     }
-    else if (content.contains("audio")) {
+    else if (content.contains("audio")) {  // if we don't have proper REPEAT exercises
       int i = content.indexOf("source src=");
       String s = content.substring(i + "source src=".length() + 1).split("\\\"")[0];
       System.err.println("audio path '" + s + "'");
@@ -133,20 +135,19 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
       int end = content.indexOf("audio>");
       content = content.substring(0, start) + content.substring(end + "audio>".length());
       this.refAudio = path;
-      //  System.err.println("after " + content);
     }
 
     VerticalPanel vp = new VerticalPanel();
 
-   // ResizableCaptionPanel cp = new ResizableCaptionPanel("Native Reference Speaker");
-    CaptionPanel cpContent = new CaptionPanel("Instructions");
+    CaptionPanel cpContent = new CaptionPanel(INSTRUCTIONS);
     Widget questionContent = new HTML(content);
     questionContent.addStyleName("leftTenMargin");
-   // cp.setContentWidget(questionContent);
     cpContent.setContentWidget(questionContent);
     vp.add(cpContent);
-   // vp.add(cp);
+
     if (path != null) {
+      if (path.endsWith(".wav")) path = path.replace(".wav", ".mp3");
+
       AudioPanel w = new AudioPanel(path, service, controller.getSoundManager(), true);
       ResizableCaptionPanel cp = new ResizableCaptionPanel(NATIVE_REFERENCE_SPEAKER);
       cp.setContentWidget(w);
@@ -179,7 +180,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
    * @see mitll.langtest.client.exercise.ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController)
    */
   private Widget getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service, final ExerciseController controller, final int index) {
-    //final ExerciseQuestionState questionState = this;
     RecordAudioPanel widgets = new RecordAudioPanel(service, controller, exercise, null, index, refAudio, exercise.getRefSentence());
     widgets.addScoreListener(scorePanel);
     answerAudio = widgets;
@@ -187,13 +187,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
 
     return widgets;
   }
-
-/*  private String getQuestionPrompt(boolean promptInEnglish) {
-    return getSpokenPrompt(promptInEnglish);
-  }*/
-/*  private String getSpokenPrompt(boolean promptInEnglish) {
-    return "&nbsp;&nbsp;&nbsp;Speak and record your answer in " +(promptInEnglish ? "English" : " the foreign language") +" :";
-  }*/
 
   private static class RecordAudioPanel extends AudioPanel {
     private final ExerciseController controller;
@@ -225,7 +218,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
 
     @Override
     protected PlayAudioPanel makePlayAudioPanel() {
-      final Button record = new Button("record");
+      final Button record = new Button(RECORD);
 
       new RecordButton(record) {
         @Override
@@ -257,7 +250,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
 
         @Override
         protected void showStopped() {
-          record.setText("record");
+          record.setText(RECORD);
         }
       };
 
@@ -268,7 +261,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
           super.addButtons();
         }
       };
-
     }
   }
 }
