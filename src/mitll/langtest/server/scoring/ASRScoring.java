@@ -13,6 +13,7 @@ import scala.runtime.AbstractFunction1;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +29,10 @@ public class ASRScoring extends Scoring {
   private static final float MIN_AUDIO_SECONDS = 0.3f;
   private static final float MAX_AUDIO_SECONDS = 15.0f;
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#init
+   * @param deployPath
+   */
   public ASRScoring(String deployPath) {
     super(deployPath);
 
@@ -72,6 +77,9 @@ public class ASRScoring extends Scoring {
 
   /**
    * Use hydec to do scoring
+   *
+   * Skips sv scoring for the moment -- why would we do it?
+   *
    * @param testAudioDir
    * @param testAudioFileNoSuffix
    * @param refAudioDir
@@ -116,11 +124,11 @@ public class ASRScoring extends Scoring {
 
     // the path to the ref audio is <tomcatWriteDirectory>/<pretestFilesRelativePath>/<planName>/<referenceName>
     // referenceName is called exercise_name in the db.
-    Audio refAudio = Audio$.MODULE$.apply(
+/*    Audio refAudio = Audio$.MODULE$.apply(
         refAudioDir, refAudioFileNoSuffix,
-        false /* notForScoring */, dirs);
+        false *//* notForScoring *//*, dirs);*/
 
-    Scores scores = computeRepeatExerciseScores(scoringDir, testAudio, refAudio, sentence, asrLanguage);
+    Scores scores = computeRepeatExerciseScores(scoringDir, testAudio, /*refAudio, */sentence, asrLanguage);
 
     Map<NetPronImageType, String> sTypeToImage = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix);
 
@@ -147,7 +155,7 @@ public class ASRScoring extends Scoring {
 
     /**
      * @seex #scoreAudio
-     * @seex #scoreRepeatExercise(com.goodcomponents.exercises.RepeatExercise, String, String)
+     * @see #scoreRepeatExercise
      * @param testAudio
      * @param refAudio
      * @param sentence
@@ -156,11 +164,11 @@ public class ASRScoring extends Scoring {
      * @throws Exception
      */
     // Just compute the score: don't deal with any GUI or history
-  private Scores computeRepeatExerciseScores(String tomcatWriteDirectory, Audio testAudio, Audio refAudio, String sentence, String language) {
-    float testAudioSeconds = testAudio.seconds();
+  private Scores computeRepeatExerciseScores(String tomcatWriteDirectory, Audio testAudio, /*Audio refAudio,*/ String sentence, String language) {
+/*    float testAudioSeconds = testAudio.seconds();
     if (testAudioSeconds < MIN_AUDIO_SECONDS || testAudioSeconds > MAX_AUDIO_SECONDS) {
      // throw new Exception("Recording is too short (< " + MIN_AUDIO_SECONDS + "s) or too long (> " + MAX_AUDIO_SECONDS + "s)");
-    }
+    }*/
 
     // RepeatExercises use ASR for scoring, so get the language parameters.
     ASRParameters asrparameters = languageLookUp.get(language);
@@ -198,10 +206,13 @@ public class ASRScoring extends Scoring {
       }
     };
 
+    System.out.println(new Date() + " : Calling jscore with " + sentence + " and " + asrparametersFullPaths);
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
     Float hydec_score = jscoreOut._1;
-    Float sv_score = testAudio.sv(refAudio, os, identityFn);
-    Float[] svScoreVector = { sv_score, 1.0f }; // Fake ratio.
+    System.out.println(new Date() + " : got score " + hydec_score);
+
+    //  Float sv_score = testAudio.sv(refAudio, os, identityFn);
+    Float[] svScoreVector = { 0f, 1.0f }; // Fake ratio.
     return new Scores(hydec_score, jscoreOut._2, svScoreVector);
   }
 

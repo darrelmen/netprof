@@ -34,11 +34,7 @@ public class GoodwaveExercisePanelFactory extends ExercisePanelFactory {
 
   @Override
   public Panel getExercisePanel(Exercise e) {
-  //  new CaptionPanel
     Panel widgets = new GoodwaveExercisePanel(e, service, userFeedback, controller);
-
     return widgets;
   }
-
-
 }
