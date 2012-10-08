@@ -47,7 +47,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public static final String DEFAULT_APP_NAME = "netPron2";
   public static final String IMAGE_WRITER_IMAGES = "audioimages";
   private DatabaseImpl db;
-  ASRScoring asrScoring;
+  private ASRScoring asrScoring;
 
   private Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
       .concurrencyLevel(4)
@@ -57,7 +57,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public void init() {
     db = new DatabaseImpl(this);
-    asrScoring = new ASRScoring(getInstallPath());
   }
 
   /**
@@ -66,7 +65,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.LangTest#onModuleLoad
    */
   public List<Exercise> getExercises(long userID) {
-    return db.getExercises(userID);
+    db.setInstallPath(getInstallPath());
+    List<Exercise> exercises = db.getExercises(userID);
+    System.out.println("Got " + exercises.size() + " exercises , first ref sentence = '" + exercises.iterator().next().getRefSentence() +"'");
+    return exercises;
   }
 
   /**
@@ -74,6 +76,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public List<Exercise> getExercises() {
+    db.setInstallPath(getInstallPath());
     return db.getExercises();
   }
 
@@ -151,7 +154,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.goodwave.AudioPanel#getTranscriptImageURLForAudio(String, String, int, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck)
+   * @see mitll.langtest.client.goodwave.AudioPanel#getTranscriptImageURLForAudio
    * @param reqid
    *@param audioFile
    * @param refs
@@ -247,7 +250,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.goodwave.AudioPanel#getTranscriptImageURLForAudio(String, String, int, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck)
+   * @see mitll.langtest.client.goodwave.AudioPanel#getTranscriptImageURLForAudio
    * @param reqid
    * @param testAudioFile
    * @param refAudioFile
@@ -258,6 +261,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    **/
   public PretestScore getScoreForAudioFile(int reqid, String testAudioFile, String refAudioFile, String sentence,
                                            int width, int height) {
+    if (asrScoring == null) {
+      asrScoring = new ASRScoring(getInstallPath()); // lazy eval since install path not ready at init() time.
+    }
     testAudioFile = dealWithMP3Audio(testAudioFile);
     refAudioFile  = dealWithMP3Audio(refAudioFile);
 
@@ -467,9 +473,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return file;
   }
 
-  private String getInstallPath() {
+  public String getInstallPath() {
     ServletContext context = getServletContext();
-    String realContextPath = context.getRealPath(getThreadLocalRequest().getContextPath());
+    if (context == null) {
+      System.err.println("no servlet context.");
+      return "";
+    }
+
+    HttpServletRequest threadLocalRequest = getThreadLocalRequest();
+    if (threadLocalRequest == null) {
+      System.err.println("null local req");
+      return "";
+    }
+    String realContextPath = context.getRealPath(threadLocalRequest.getContextPath());
 
     String appName = getServletContext().getInitParameter("appName");
     if (appName == null) appName = DEFAULT_APP_NAME;
