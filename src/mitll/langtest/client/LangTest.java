@@ -75,7 +75,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private SoundManagerStatic soundManager;
   private ScrollPanel itemScroller;
   private float screenPortion;
-  private boolean showOnlyOne;
+  //private boolean showOnlyOne;
   private String exercise_title;
 
   /**
@@ -210,7 +210,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           protected void checkBeforeLoad(Exercise e) {} // don't try to login
         }: new ExerciseList(currentExerciseVPanel,service, this, factory);
 
-    if (exercise_title != null) exerciseList.setExercise_title(exercise_title);
+    if (exercise_title != null) {
+      exerciseList.setExercise_title(exercise_title);
+    }
     itemScroller = new ScrollPanel(this.exerciseList);
     setExerciseListSize();
     exerciseListPanel.add(new HTML("<h2>Items</h2>"));
