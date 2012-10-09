@@ -116,7 +116,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Get an image of desired dimensions for the audio file
    *
-   * @see mitll.langtest.client.goodwave.AudioPanel#getImageURLForAudio
+   * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio
    * @param reqid
    * @param audioFile
    * @param imageType
@@ -153,7 +153,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.goodwave.AudioPanel#getTranscriptImageURLForAudio
+   * @see mitll.langtest.client.scoring.AudioPanel#getTranscriptImageURLForAudio
    * @param reqid
    *@param audioFile
    * @param refs
@@ -244,7 +244,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
    *
-   * @see mitll.langtest.client.goodwave.AudioPanel#getTranscriptImageURLForAudio
+   * @see mitll.langtest.client.scoring.AudioPanel#getTranscriptImageURLForAudio
    * @param reqid
    * @param testAudioFile
    * @param sentence
@@ -254,6 +254,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    **/
   public PretestScore getScoreForAudioFile(int reqid, String testAudioFile, String sentence,
                                            int width, int height) {
+    assert(testAudioFile != null && sentence != null);
     if (asrScoring == null) {
       asrScoring = new ASRScoring(getInstallPath()); // lazy eval since install path not ready at init() time.
     }
