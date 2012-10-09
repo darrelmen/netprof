@@ -54,6 +54,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public  static final int EXERCISE_LIST_WIDTH = 200;
   private static final int EAST_WIDTH = 90;
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
+  private static final boolean DEFAULT_GOODWAVE_MODE = true;
 
   private Panel currentExerciseVPanel = new VerticalPanel();
   private ExerciseList exerciseList;
@@ -66,7 +67,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private long lastUser = -1;
   private boolean grading = false;
   private boolean englishOnlyMode = false;
-  private boolean goodwaveMode = false;
+  private boolean goodwaveMode = DEFAULT_GOODWAVE_MODE;
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
 
@@ -158,7 +159,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     makeFlashContainer();
     currentExerciseVPanel.add(flashRecordPanel);
-    currentExerciseVPanel.addStyleName("currentExercisePanel");
+    if (usualLayout) {
+      currentExerciseVPanel.addStyleName("currentExercisePanel");
+    }
 
     setupErrorDialog();
 
@@ -213,17 +216,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       exerciseList.setExercise_title(exercise_title);
     }
     itemScroller = new ScrollPanel(this.exerciseList);
-    setExerciseListSize();
+    if (exercise_title == null) {
+      setExerciseListSize();
+    }
     exerciseListPanel.add(new HTML("<h2>Items</h2>"));
     exerciseListPanel.add(itemScroller);
   }
 
   private void setMainWindowSize(DockLayoutPanel widgets) {
-    widgets.setSize((Window.getClientWidth()-EAST_WIDTH) + "px", (Window.getClientHeight()-FOOTER_HEIGHT) + "px");
+    widgets.setSize(Math.max((Window.getClientWidth() - EAST_WIDTH), 50) + "px", Math.max((Window.getClientHeight()-FOOTER_HEIGHT),50) + "px");
   }
 
   private void setExerciseListSize() {
-    itemScroller.setSize(EXERCISE_LIST_WIDTH +"px",(Window.getClientHeight() - (2*HEADER_HEIGHT) - FOOTER_HEIGHT - 60) + "px"); // 54
+    int height = Math.max(60, Window.getClientHeight() - (2 * HEADER_HEIGHT) - FOOTER_HEIGHT - 60);
+    itemScroller.setSize(EXERCISE_LIST_WIDTH + "px", height + "px"); // 54
   }
 
   /**
@@ -252,6 +258,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     String isGrading = Window.Location.getParameter("grading");
     String isEnglish = Window.Location.getParameter("english");
     String goodwave = Window.Location.getParameter("goodwave");
+
     String exercise_title = Window.Location.getParameter("exercise_title");
     if (exercise_title != null) {
      if (goodwave == null) goodwave = "true";
