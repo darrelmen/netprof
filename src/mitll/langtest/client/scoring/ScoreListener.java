@@ -1,4 +1,4 @@
-package mitll.langtest.client.goodwave;
+package mitll.langtest.client.scoring;
 
 import mitll.langtest.shared.scoring.PretestScore;
 
