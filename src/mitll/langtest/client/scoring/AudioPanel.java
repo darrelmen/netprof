@@ -1,8 +1,5 @@
-package mitll.langtest.client.goodwave;
+package mitll.langtest.client.scoring;
 
-import com.goodwave.client.PlayAudioPanel;
-import com.goodwave.client.sound.AudioControl;
-import com.goodwave.client.sound.SoundManagerAPI;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
@@ -19,16 +16,13 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.sound.AudioControl;
+import mitll.langtest.client.sound.PlayAudioPanel;
+import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.ImageResponse;
-import mitll.langtest.shared.scoring.NetPronImageType;
-import mitll.langtest.shared.scoring.PretestScore;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Mainly delegates recording to the {@link mitll.langtest.client.recorder.SimpleRecordPanel}.
@@ -38,16 +32,16 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioPanel extends VerticalPanel implements RequiresResize {
-  private static final int MIN_WIDTH = 256;
+  protected static final int MIN_WIDTH = 256;
   private static final float HEIGHT = 128f;//96;
-  private static final int ANNOTATION_HEIGHT = 20;
   private static final int RIGHT_MARGIN = 550;//1;//400;
-  private static final String WAVEFORM = "Waveform";
-  private static final String SPECTROGRAM = "Spectrogram";
-  private String audioPath;
-  private String refSentence;
+  protected static final String WAVEFORM = "Waveform";
+  protected static final String SPECTROGRAM = "Spectrogram";
+  protected String audioPath;
+  private final Map<String,Integer> reqs = new HashMap<String, Integer>();
+  private int reqid;
 
-  private ImageAndCheck waveform,spectrogram,speech,phones,words;
+  protected ImageAndCheck waveform,spectrogram,speech,phones,words;
   private int lastWidth = 0;
   private PopupPanel imageOverlay;
   private double songDuration;
@@ -57,32 +51,23 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected final SoundManagerAPI soundManager;
   private PlayAudioPanel playAudio;
   private final boolean debug = false;
-  private String refAudio;
-  private ScoreListener scoreListener;
   private float screenPortion = 1.0f;
-  private boolean doASRScoring;
 
   /**
    * @see GoodwaveExercisePanel#getQuestionContent(mitll.langtest.shared.Exercise)
-   * @see GoodwaveExercisePanel.RecordAudioPanel#RecordAudioPanel
+   * @see ScoringAudioPanel#ScoringAudioPanel
    * @paramx e
    * @param service
-   * @param doASRScoring
-   * @paramx userFeedback
-   * @paramx controller
    */
-  public AudioPanel(String path, LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean doASRScoring) {
+  public AudioPanel(String path, LangTestDatabaseAsync service, SoundManagerAPI soundManager) {
     this.soundManager = soundManager;
     this.service = service;
     addWidgets(path);
-    this.doASRScoring = doASRScoring;
   }
 
   public void onResize() {
     getImages();
   }
-
-  public void addScoreListener(ScoreListener l) { this.scoreListener = l;}
 
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
@@ -135,7 +120,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       getImagesForPath(audioPath);
     }
     else {
-      System.out.println("onLoad : for " + this + " got no audio path");
+      System.out.println("onLoad : for AudioPanel got no audio path?");
     }
   }
 
@@ -143,7 +128,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.screenPortion = screenPortion;
   }
 
-  private static class ImageAndCheck {
+  protected static class ImageAndCheck {
     final Image image;
     Widget check;
     public ImageAndCheck() {
@@ -152,7 +137,13 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
   }
 
+  /**
+   * @see #onLoad()
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.PostAudioRecordButton#stopRecording()
+   * @param path
+   */
   public void getImagesForPath(String path) {
+    System.out.println("getImagesForPath " +path);
     if (path != null) {
       this.audioPath = path;
     }
@@ -162,15 +153,13 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   /**
-   * @see mitll.langtest.client.goodwave.GoodwaveExercisePanel.RecordAudioPanel#makePlayAudioPanel()
-   * @param path
-   * @param refSentence
+   * @see
+   * @paramx path
+   * @paramx refSentence
    */
-  public void setRefAudio(String path, String refSentence) {
+/*  public void setRefAudio(String path, String refSentence) {
     lastWidth = 0;
-    this.refAudio = path;
-    this.refSentence = refSentence;
-  }
+  }*/
 
   private PlayAudioPanel addButtonsToButtonRow(HorizontalPanel hp) {
     final PlayAudioPanel playAudio = makePlayAudioPanel();
@@ -210,18 +199,16 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       lastWidth = Window.getClientWidth();
 
       //System.out.println("getImages : offset width " + getOffsetWidth() + " width " + width + " path " + audioPath);
-      getImageURLForAudio(audioPath, WAVEFORM, width, waveform);
-      getImageURLForAudio(audioPath, SPECTROGRAM, width, spectrogram);
-      if (refAudio != null) {
-        getTranscriptImageURLForAudio(audioPath, refAudio, refSentence, width,words,phones,speech);
-      }
-      else {
-        System.out.println("AudioPanel.getImages : no ref audio");
-      }
+      getEachImage(width);
     }
     else {
       //System.out.println("getImages : not updating, offset width " + getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
     }
+  }
+
+  protected void getEachImage(int width) {
+    getImageURLForAudio(audioPath, WAVEFORM, width, waveform);
+    getImageURLForAudio(audioPath, SPECTROGRAM, width, spectrogram);
   }
 
   private void getImageURLForAudio(String path, final String type,int width, final ImageAndCheck waveform) {
@@ -230,7 +217,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     if (path != null) {
       int reqid = getReqID(type);
 
-      //System.out.println("---> req " + reqid);
+      //System.out.println("getImageURLForAudio : req " + reqid);
       service.getImageForAudioFile(reqid, path, type, toUse, height, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {}
         public void onSuccess(ImageResponse result) {
@@ -241,110 +228,36 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
             audioPositionPopup.reinitialize();
           }
           else {
-            //System.out.println("----> ignoring out of sync response " + result.req);
+            System.out.println("getImageURLForAudio : ignoring out of sync response " + result.req + " for " + type);
           }
         }
       });
     }
     else {
-      System.out.println("no audio path for " + type);
+      System.out.println("getImageURLForAudio : no audio path for " + type);
     }
   }
 
-  private final Set<String> tested = new HashSet<String>();
-  private final Map<String,Integer> reqs = new HashMap<String, Integer>();
-  private int reqid;
-
-  /**
-   * TODO configure for multi-ref
-   * TODO : add multiple ref files
-   *
-   * @see #getImages()
-   * @param path
-   * @param refSentence
-   * @param width
-   * @param wordTranscript
-   * @param phoneTranscript
-   * @param speechTranscript
-   */
-  private void getTranscriptImageURLForAudio(final String path, final String ref, String refSentence, int width,
-                                             final ImageAndCheck wordTranscript,
-                                             final ImageAndCheck phoneTranscript,
-                                             final ImageAndCheck speechTranscript) {
-    int toUse = Math.max(MIN_WIDTH, width);
-    int height = ANNOTATION_HEIGHT;
-
-    if (doASRScoring) {
-      int reqid = getReqID("asrscore");
-      service.getScoreForAudioFile(reqid, path, refSentence, toUse, height, new AsyncCallback<PretestScore>() {
-        public void onFailure(Throwable caught) {}
-        public void onSuccess(PretestScore result) {
-          if (isMostRecentRequest("asrscore",result.reqid)) {
-            useResult(result, wordTranscript, phoneTranscript, speechTranscript, tested.contains(path));
-            tested.add(path);
-          }
-        }
-      });
-    } else {
-      int reqid = getReqID("dtwscore");
-
-      Collection<String> refs = new ArrayList<String>();
-      refs.add(ref);
-      service.getScoreForAudioFile(reqid, path, refs, toUse, height, new AsyncCallback<PretestScore>() {
-        public void onFailure(Throwable caught) {}
-        public void onSuccess(PretestScore result) {
-          if (isMostRecentRequest("dtwscore",result.reqid)) {
-            boolean contains = tested.contains(path);
-            if (contains) System.out.println("already asked to score " + path);
-            useResult(result, wordTranscript, phoneTranscript, speechTranscript, contains);
-            tested.add(path);
-          }
-        }
-      });
-    }
-  }
-
-  private int getReqID(String type) {
-    synchronized (reqs) {
+  protected int getReqID(String type) {
+    synchronized (this) {
       int current = reqid++;
       reqs.put(type, current);
+    //  System.out.println("req map now " + reqs);
       return current;
     }
   }
 
-  private boolean isMostRecentRequest(String type,int responseReqID) {
-    synchronized (reqs) {
+  protected boolean isMostRecentRequest(String type,int responseReqID) {
+    synchronized (this) {
       Integer mostRecentIDForType = reqs.get(type);
       if (mostRecentIDForType == null) {
         System.err.println("huh? couldn't find req " + reqid + " in " +reqs);
         return false;
       }
       else {
+       // System.out.println("req for " + type + " = " + mostRecentIDForType);
         return mostRecentIDForType == responseReqID;
       }
-    }
-  }
-
-  private void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript, ImageAndCheck speechTranscript, boolean scoredBefore) {
-   // System.out.println("useResult got " + result);
-    if (result.sTypeToImage.get(NetPronImageType.WORD_TRANSCRIPT) != null) {
-      wordTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.WORD_TRANSCRIPT));
-      wordTranscript.image.setVisible(true);
-      wordTranscript.check.setVisible(true);
-    }
-    if (result.sTypeToImage.get(NetPronImageType.PHONE_TRANSCRIPT) != null) {
-      phoneTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.PHONE_TRANSCRIPT));
-      phoneTranscript.image.setVisible(true);
-      phoneTranscript.check.setVisible(true);
-    }
-    if (result.sTypeToImage.get(NetPronImageType.SPEECH_TRANSCRIPT) != null) {
-      speechTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.SPEECH_TRANSCRIPT));
-      speechTranscript.image.setVisible(true);
-      speechTranscript.check.setVisible(true);
-    }
-    if (!scoredBefore) {
-     // System.out.println("new score returned " + result);
-      scoreListener.gotScore(result);
     }
   }
 
@@ -369,7 +282,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   private class AudioPositionPopup implements AudioControl {
     /**
-     * @see AudioPanel#getImageURLForAudio(String, String, int, mitll.langtest.client.goodwave.AudioPanel.ImageAndCheck)
+     * @see AudioPanel#getImageURLForAudio(String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
      */
     public void reinitialize() {
       imageOverlay.hide();
