@@ -212,7 +212,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           protected void checkBeforeLoad(Exercise e) {} // don't try to login
         }: new ExerciseList(currentExerciseVPanel,service, this, factory);
 
-    if (exercise_title != null) {
+    if (showOnlyOneExercise()) {
       exerciseList.setExercise_title(exercise_title);
     }
     itemScroller = new ScrollPanel(this.exerciseList);
@@ -221,6 +221,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     exerciseListPanel.add(new HTML("<h2>Items</h2>"));
     exerciseListPanel.add(itemScroller);
+  }
+
+  public boolean showOnlyOneExercise() {
+    return exercise_title != null;
   }
 
   private void setMainWindowSize(DockLayoutPanel widgets) {
@@ -275,7 +279,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     // System.out.println("param grading " + isGrading);
     englishOnlyMode = isEnglish != null && !isEnglish.equals("false");
-    goodwaveMode = goodwave != null && !goodwave.equals("false");
+    goodwaveMode = goodwaveMode || (goodwave != null && !goodwave.equals("false"));
     boolean grading = (isGrading != null && !isGrading.equals("false")) || englishOnlyMode;
     return grading;
   }
