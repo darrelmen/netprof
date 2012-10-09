@@ -29,4 +29,6 @@ public interface ExerciseController {
   SoundManagerAPI getSoundManager();
 
   float getScreenPortion();
+
+  boolean showOnlyOneExercise();
 }

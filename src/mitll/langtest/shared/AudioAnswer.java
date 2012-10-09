@@ -15,4 +15,5 @@ public class AudioAnswer implements IsSerializable {
 
   public AudioAnswer() {}
   public AudioAnswer(String path, boolean valid) { this.path = path; this.valid = valid; }
+  public String toString() { return "Path " + path; }
 }

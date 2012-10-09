@@ -53,16 +53,19 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private PlayAudioPanel playAudio;
   private final boolean debug = false;
   private float screenPortion = 1.0f;
+  private int rightMarginToUse;
 
   /**
    * @see GoodwaveExercisePanel#getQuestionContent(mitll.langtest.shared.Exercise)
    * @see ScoringAudioPanel#ScoringAudioPanel
    * @paramx e
    * @param service
+   * @param useFullWidth
    */
-  public AudioPanel(String path, LangTestDatabaseAsync service, SoundManagerAPI soundManager) {
+  public AudioPanel(String path, LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
     this.soundManager = soundManager;
     this.service = service;
+    rightMarginToUse = useFullWidth ? RIGHT_MARGIN :  ASRScorePanel.X_CHART_SIZE+400;
     addWidgets(path);
   }
 
@@ -117,7 +120,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   @Override
   public void onLoad() {
    // System.out.println("audio path is " + audioPath);
-    if (audioPath != null) { // TODO awkward... better way?
+    if (audioPath != null) {
       getImagesForPath(audioPath);
     }
     else {
@@ -148,19 +151,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     if (path != null) {
       this.audioPath = path;
     }
-
+    lastWidth = 0;
     getImages();
     playAudio.startSong(path);
   }
-
-  /**
-   * @see
-   * @paramx path
-   * @paramx refSentence
-   */
-/*  public void setRefAudio(String path, String refSentence) {
-    lastWidth = 0;
-  }*/
 
   private PlayAudioPanel addButtonsToButtonRow(HorizontalPanel hp) {
     final PlayAudioPanel playAudio = makePlayAudioPanel();
@@ -192,7 +186,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @see #onResize()
    */
   private void getImages() {
-    int rightMargin = screenPortion == 1.0f ? RIGHT_MARGIN : (int)(screenPortion*((float)RIGHT_MARGIN));
+    int rightMargin = screenPortion == 1.0f ? rightMarginToUse : (int)(screenPortion*((float)rightMarginToUse));
     int width = (int) ((screenPortion*((float)Window.getClientWidth())) - rightMargin);
     //int width = getOffsetWidth();
     int diff = Math.abs(Window.getClientWidth() - lastWidth);
