@@ -141,3 +141,18 @@ fieldset > legend {
 .RecordPopup{
   background-color: white;
 }
+
+.Instruction {
+    text-align: left;
+}
+
+.Instruction-title {
+    color: #333333;
+    font-size: 16px;
+}
+
+.Instruction-data {
+    color: #CC6600;
+    font-size: 18px;
+    font-weight: bold;
+}
