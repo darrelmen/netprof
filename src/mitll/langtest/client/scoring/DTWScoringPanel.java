@@ -16,8 +16,8 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class DTWScoringPanel extends ScoringAudioPanel {
-  public DTWScoringPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager) {
-    super(service, soundManager);
+  public DTWScoringPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
+    super(service, soundManager, useFullWidth);
   }
 
   @Override
