@@ -150,7 +150,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
 
     if (path != null) {
       path = wavToMP3(path);
-      AudioPanel w = new AudioPanel(path, service, controller.getSoundManager());
+      AudioPanel w = new AudioPanel(path, service, controller.getSoundManager(), controller.showOnlyOneExercise());
       ResizableCaptionPanel cp = new ResizableCaptionPanel(NATIVE_REFERENCE_SPEAKER);
       cp.setContentWidget(w);
       vp.add(cp);
@@ -185,7 +185,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
    * @return
    * @see mitll.langtest.client.exercise.ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController)
    */
-  private Widget getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service, final ExerciseController controller, final int index) {
+  private Widget getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service,
+                                 final ExerciseController controller, final int index) {
     ScoringAudioPanel widgets = exercise.getType() == Exercise.EXERCISE_TYPE.REPEAT ?
         new ASRRecordAudioPanel(service, index) :
         new DTWRecordAudioPanel(service, index);
@@ -205,7 +206,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
      * @param index
      */
     public DTWRecordAudioPanel(LangTestDatabaseAsync service, int index) {
-      super(service, controller.getSoundManager());
+      super(service, controller.getSoundManager(), controller.showOnlyOneExercise());
       this.index = index;
     }
 
@@ -233,7 +234,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
      * @param index
      */
     public ASRRecordAudioPanel(LangTestDatabaseAsync service, int index) {
-      super(service, controller.getSoundManager());
+      super(service, controller.getSoundManager(), controller.showOnlyOneExercise());
       this.index = index;
     }
 
@@ -271,6 +272,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
           new AsyncCallback<AudioAnswer>() {
             public void onFailure(Throwable caught) {}
             public void onSuccess(AudioAnswer result) {
+              System.out.println("PostAudioRecordButton : Got audio answer " + result);
               widgets.setRefAudio(refAudio, exercise.getRefSentence());
               widgets.getImagesForPath(wavToMP3(result.path));
             }
