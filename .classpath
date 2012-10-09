@@ -15,6 +15,5 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gchart.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/imagewriter"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/pronz.jar"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/GoodWave"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
