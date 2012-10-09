@@ -13,8 +13,8 @@ import mitll.langtest.shared.scoring.PretestScore;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoringAudioPanel extends ScoringAudioPanel {
-  public ASRScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager) {
-    super(service, soundManager);
+  public ASRScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
+    super(service, soundManager, useFullWidth);
   }
 
   /**
@@ -39,6 +39,9 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
         if (isMostRecentRequest("score",result.reqid)) {
           useResult(result, wordTranscript, phoneTranscript, speechTranscript, tested.contains(path));
           tested.add(path);
+        }
+        else {
+          System.out.println("ignoring " + path + " with req " + result.reqid);
         }
       }
     });
