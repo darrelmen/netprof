@@ -23,8 +23,8 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   protected final Set<String> tested = new HashSet<String>();
   private ScoreListener scoreListener;
 
-  public ScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager) {
-    super(null, service, soundManager);
+  public ScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
+    super(null, service, soundManager, useFullWidth);
   }
 
   public void addScoreListener(ScoreListener l) { this.scoreListener = l;}
