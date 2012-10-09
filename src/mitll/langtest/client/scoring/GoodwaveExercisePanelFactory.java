@@ -1,15 +1,9 @@
-package mitll.langtest.client.goodwave;
+package mitll.langtest.client.scoring;
 
-import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.ProvidesResize;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExercisePanel;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.grading.GradingExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
