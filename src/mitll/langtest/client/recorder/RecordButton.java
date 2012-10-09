@@ -3,6 +3,7 @@ package mitll.langtest.client.recorder;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FocusWidget;
 
 /**
@@ -17,7 +18,10 @@ public abstract class RecordButton {
 
   private boolean recording = false;
   private Timer recordTimer;
+  private final FocusWidget record;
+
   public RecordButton(FocusWidget recordButton) {
+    this.record = recordButton;
     recordButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         if (recording) {
@@ -77,4 +81,8 @@ public abstract class RecordButton {
     }
   }
   protected abstract void stopRecording();
+
+  public FocusWidget getRecord() {
+    return record;
+  }
 }
