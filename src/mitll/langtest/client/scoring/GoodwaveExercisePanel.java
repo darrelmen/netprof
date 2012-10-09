@@ -1,6 +1,5 @@
-package mitll.langtest.client.goodwave;
+package mitll.langtest.client.scoring;
 
-import com.goodwave.client.PlayAudioPanel;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -14,8 +13,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExerciseQuestionState;
+import mitll.langtest.client.gauge.ASRScorePanel;
+import mitll.langtest.client.gauge.ScorePanel;
 import mitll.langtest.client.recorder.RecordButton;
+import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
@@ -32,6 +33,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
   private static final String USER_RECORDER = "User Recorder";
   private static final String INSTRUCTIONS = "Instructions";
   private static final String RECORD = "record";
+  private static final String STOP = "stop";
+  private static final String WAV = ".wav";
+  private static final String MP3 = ".mp3";
 
   /**
    * Just for backward compatibility -- so we can run against old plan files
@@ -43,10 +47,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
   protected LangTestDatabaseAsync service;
   private ScoreListener scorePanel;
   private AudioPanel contentAudio, answerAudio;
-  private static final boolean USE_ASR = true;
 
   /**
-   * @see mitll.langtest.client.goodwave.GoodwaveExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    * @param e
    * @param service
    * @param userFeedback
@@ -70,7 +73,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     add(center);
     setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
-    if (USE_ASR) {
+    if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT) {
       ASRScorePanel widgets = new ASRScorePanel();
       add(widgets);
       scorePanel = widgets;
@@ -146,9 +149,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     vp.add(cpContent);
 
     if (path != null) {
-      if (path.endsWith(".wav")) path = path.replace(".wav", ".mp3");
-
-      AudioPanel w = new AudioPanel(path, service, controller.getSoundManager(), true);
+      path = wavToMP3(path);
+      AudioPanel w = new AudioPanel(path, service, controller.getSoundManager());
       ResizableCaptionPanel cp = new ResizableCaptionPanel(NATIVE_REFERENCE_SPEAKER);
       cp.setContentWidget(w);
       vp.add(cp);
@@ -157,6 +159,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
       contentAudio.setScreenPortion(controller.getScreenPortion());
     }
     return vp;
+  }
+
+  private String wavToMP3(String path) {
+    return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
   }
 
   private static class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
@@ -180,7 +186,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
    * @see mitll.langtest.client.exercise.ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController)
    */
   private Widget getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service, final ExerciseController controller, final int index) {
-    RecordAudioPanel widgets = new RecordAudioPanel(service, controller, exercise, null, index, refAudio, exercise.getRefSentence());
+    ScoringAudioPanel widgets = exercise.getType() == Exercise.EXERCISE_TYPE.REPEAT ?
+        new ASRRecordAudioPanel(service, index) :
+        new DTWRecordAudioPanel(service, index);
     widgets.addScoreListener(scorePanel);
     answerAudio = widgets;
     answerAudio.setScreenPortion(controller.getScreenPortion());
@@ -188,79 +196,100 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     return widgets;
   }
 
-  private static class RecordAudioPanel extends AudioPanel {
-    private final ExerciseController controller;
-    private final Exercise exercise;
-    private final ExerciseQuestionState questionState;
+  private class DTWRecordAudioPanel extends DTWScoringPanel {
     private final int index;
-    private final String refAudio;
-    private final String refSentence;
 
     /**
      * @see GoodwaveExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
      * @param service
-     * @param controller
-     * @param exercise
-     * @param questionState
      * @param index
-     * @param refAudio
      */
-    public RecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise,
-                            ExerciseQuestionState questionState, int index, String refAudio, String refSentence) {
-      super(null, service, controller.getSoundManager(), USE_ASR);
-      this.controller = controller;
-      this.exercise = exercise;
-      this.questionState = questionState;
+    public DTWRecordAudioPanel(LangTestDatabaseAsync service, int index) {
+      super(service, controller.getSoundManager());
       this.index = index;
-      this.refAudio = refAudio;
-      this.refSentence = refSentence;
     }
 
     @Override
     protected PlayAudioPanel makePlayAudioPanel() {
-      final Button record = new Button(RECORD);
-
-      new RecordButton(record) {
-        @Override
-        protected void stopRecording() {
-          controller.stopRecording();
-
-          service.writeAudioFile(controller.getBase64EncodedWavFile()
-              , exercise.getPlan(), exercise.getID(), "" + index, "" + controller.getUser(), new AsyncCallback<AudioAnswer>() {
-            public void onFailure(Throwable caught) {}
-            public void onSuccess(AudioAnswer result) {
-              String path1 = result.path;
-              if (path1.endsWith(".wav")) path1 = path1.replace(".wav", ".mp3");
-              setRefAudio(refAudio, refSentence);
-              getImagesForPath(path1);
-           //   questionState.recordCompleted(outer);
-            }
-          });
-        }
-
-        @Override
-        protected void startRecording() {
-          controller.startRecording();
-        }
-
-        @Override
-        protected void showRecording() {
-          record.setText("stop");
-        }
-
-        @Override
-        protected void showStopped() {
-          record.setText(RECORD);
-        }
-      };
+      final PostAudioRecordButton postAudioRecordButton = new PostAudioRecordButton(this, index);
 
       return new PlayAudioPanel(soundManager) {
         @Override
         protected void addButtons() {
-          add(record);
+          add(postAudioRecordButton.getRecord());
           super.addButtons();
         }
       };
+    }
+  }
+
+  private class ASRRecordAudioPanel extends ASRScoringAudioPanel {
+    private final int index;
+
+    /**
+     * @see GoodwaveExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+     * @param service
+     * @paramx controller
+     * @param index
+     */
+    public ASRRecordAudioPanel(LangTestDatabaseAsync service, int index) {
+      super(service, controller.getSoundManager());
+      this.index = index;
+    }
+
+    @Override
+    protected PlayAudioPanel makePlayAudioPanel() {
+      final PostAudioRecordButton postAudioRecordButton = new PostAudioRecordButton(this, index);
+
+      return new PlayAudioPanel(soundManager) {
+        @Override
+        protected void addButtons() {
+          add(postAudioRecordButton.getRecord());
+          super.addButtons();
+        }
+      };
+    }
+  }
+
+  private class PostAudioRecordButton extends RecordButton {
+    private ScoringAudioPanel widgets;
+    private int index;
+
+    public PostAudioRecordButton(final ScoringAudioPanel widgets, int index) {
+      super(new Button(RECORD));
+      this.widgets = widgets;
+      this.index = index;
+    }
+
+    @Override
+    protected void stopRecording() {
+      controller.stopRecording();
+
+      service.writeAudioFile(controller.getBase64EncodedWavFile()
+          , exercise.getPlan(), exercise.getID(),
+          "" + index, "" + controller.getUser(),
+          new AsyncCallback<AudioAnswer>() {
+            public void onFailure(Throwable caught) {}
+            public void onSuccess(AudioAnswer result) {
+              widgets.setRefAudio(refAudio, exercise.getRefSentence());
+              widgets.getImagesForPath(wavToMP3(result.path));
+            }
+          });
+    }
+
+    @Override
+    protected void startRecording() {
+      controller.startRecording();
+    }
+
+    @Override
+    protected void showRecording() {
+      ((Button)getRecord()).setText(STOP);
+    }
+
+    @Override
+    protected void showStopped() {
+      ((Button)getRecord()).setText(RECORD);
     }
   }
 }
