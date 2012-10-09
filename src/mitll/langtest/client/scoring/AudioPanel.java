@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -34,7 +35,7 @@ import java.util.Map;
 public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected static final int MIN_WIDTH = 256;
   private static final float HEIGHT = 128f;//96;
-  private static final int RIGHT_MARGIN = 550;//1;//400;
+  private static final int RIGHT_MARGIN = ASRScorePanel.X_CHART_SIZE+150;//550;//1;//400;
   protected static final String WAVEFORM = "Waveform";
   protected static final String SPECTROGRAM = "Spectrogram";
   protected String audioPath;
@@ -217,10 +218,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     if (path != null) {
       int reqid = getReqID(type);
 
-      //System.out.println("getImageURLForAudio : req " + reqid);
+      System.out.println("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
       service.getImageForAudioFile(reqid, path, type, toUse, height, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {}
         public void onSuccess(ImageResponse result) {
+          System.out.println("getImageURLForAudio : onSuccess " + result);
+
           if (isMostRecentRequest(type,result.req)) {
             waveform.image.setUrl(result.imageURL);
             waveform.image.setVisible(true);
