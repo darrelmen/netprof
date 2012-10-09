@@ -94,16 +94,18 @@ public class Scoring {
       String filePath = kv.getValue();
       if (filePath.startsWith(deployPath)) {
         filePath = filePath.substring(deployPath.length()); // make it a relative path
-        if (filePath.startsWith("/")) {
-         // System.out.println("removing initial slash from " + filePath);
-          filePath = filePath.substring(1);
-        }
       }
       else {
         System.err.println("expecting image " +filePath + "\tto be under " +deployPath);
       }
+      if (filePath.startsWith("/")) {
+        System.out.println("removing initial slash from " + filePath);
+        filePath = filePath.substring(1);
+      }
+      filePath = filePath.replaceAll("\\\\", "/");
       sTypeToImage.put(key, filePath);
     }
+    System.out.println("image map is " + sTypeToImage);
     return sTypeToImage;
   }
 
