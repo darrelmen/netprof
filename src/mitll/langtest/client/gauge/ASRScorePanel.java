@@ -8,6 +8,8 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.Label;
 import com.googlecode.gchart.client.GChart;
 import com.googlecode.gchart.client.GChart.AnnotationLocation;
 import com.googlecode.gchart.client.GChart.SymbolType;
@@ -28,9 +30,14 @@ import java.util.Map;
 public class ASRScorePanel extends FlowPanel implements ScoreListener {
   public static final String INSTRUCTIONS = "The ASR method uses a speech recognizer to compare the student recording to a model trained with hundreds of native speakers. " +
       "It generates scores for each word and phonetic unit (see the color-coded transcript for details).";
-  private static final int X_CHART_SIZE = 150;
+  public static final int X_CHART_SIZE = 150;
+  public static final String LISTENER_INSTRUCTIONS = "Listen to the Native Reference Speaker say the words shown. " +
+      "Record yourself saying the words. Your score will be displayed on the gauge in the Scores section." +
+      "You may record yourself multiple times." +
+   //   "You will see your scores for each recording in the Exercise History section.</p>";
+  "";
 
-	private PretestGauge ASRGauge;
+  private PretestGauge ASRGauge;
   private GChart exerciseHistoryChart,  phoneAccuracyChart;
   private List<Float> scores = new ArrayList<Float>();
 
@@ -73,10 +80,8 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
     CaptionPanel instructionsCaptionPanel = new CaptionPanel("Help");
     FlowPanel instructionsPanel = new FlowPanel();
-    HTML instructions = new HTML("<p>Listen to the Native Reference Speaker say the red words shown at the top. " +
-        "Record yourself saying the red words. Your score will be displayed on the gauge in the Scores section.</p>" +
-        "<p>You may record yourself saying the red words multiple times. " +
-        "You will see your scores for each recording in the Exercise History section.</p>");
+    Label instructions = new Label(LISTENER_INSTRUCTIONS);
+    instructions.addStyleName("leftAlign");
     instructionsPanel.add(instructions);
     instructionsCaptionPanel.add(instructionsPanel);
     add(instructionsCaptionPanel);

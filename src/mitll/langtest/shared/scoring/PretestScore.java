@@ -51,7 +51,7 @@ public class PretestScore implements IsSerializable {
   public void setReqid(int r) { this.reqid = r;}
 
   /**
-   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise(String, String, String, String, String, String, String, String, int, int)
+   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
    * @param reqid
    * @param hydecScore
    * @param svScoreVector
