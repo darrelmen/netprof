@@ -22,6 +22,7 @@ import java.util.Map;
 public class Scoring {
   private static final String WINDOWS_CONFIGURATIONS = "windowsConfig";
   private static final String LINUX_CONFIGURATIONS = "mtexConfig";
+  public static final float SCORE_SCALAR = 1.0f / 0.15f;
 
   protected Dirs dirs;
 /*  private static final float MIN_AUDIO_SECONDS = 0.3f;
@@ -54,47 +55,48 @@ public class Scoring {
   }
 
   /**
+   * Given an audio file without a suffix, check if there are label files, and if so, for each one,
+   * write out a transcript image file.  Write them to the imageOutDir, and use the specified width and height.
+   *
    * @see DTWScoring#score(String, String, String, java.util.Collection, String, int, int)
    * @see ASRScoring#scoreRepeatExercise
    *
    * @param imageOutDir
    * @param imageWidth
    * @param imageHeight
-   * @param noSuffix
+   * @param audioFileNoSuffix
    * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
    */
-  protected Map<NetPronImageType, String> writeTranscripts(String imageOutDir, int imageWidth, int imageHeight, String noSuffix) {
-    String pathname = noSuffix + ".wav";
+  protected Map<NetPronImageType, String> writeTranscripts(String imageOutDir, int imageWidth, int imageHeight, String audioFileNoSuffix) {
+    String pathname = audioFileNoSuffix + ".wav";
     pathname = prependDeploy(pathname);
     if (!new File(pathname).exists()) {
       System.err.println("writeTranscripts : can't find " + pathname);
       return Collections.emptyMap();
     }
-   // System.out.println("imageOutDir orig " + imageOutDir);
     imageOutDir = deployPath + File.separator + imageOutDir;
-  //  System.out.println("imageOutDir after " + imageOutDir);
 
     // These may not all exist. The speech file is created only by multisv
     // right now.
-    String phoneLabFile  = prependDeploy(noSuffix + ".phones.lab");
-    String speechLabFile = prependDeploy(noSuffix + ".speech.lab");
-    String wordLabFile   = prependDeploy(noSuffix + ".words.lab");
+    String phoneLabFile  = prependDeploy(audioFileNoSuffix + ".phones.lab");
+    String speechLabFile = prependDeploy(audioFileNoSuffix + ".speech.lab");
+    String wordLabFile   = prependDeploy(audioFileNoSuffix + ".words.lab");
     Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
 
     if (new File(phoneLabFile).exists()) {
       typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
-      System.out.println("writeTranscripts found " + new File(phoneLabFile).getAbsolutePath());
+    //  System.out.println("writeTranscripts found " + new File(phoneLabFile).getAbsolutePath());
     }
     if (new File(wordLabFile).exists()) {
       typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
-      System.out.println("writeTranscripts found " + new File(wordLabFile).getAbsolutePath());
+    //  System.out.println("writeTranscripts found " + new File(wordLabFile).getAbsolutePath());
     }
     if (new File(speechLabFile).exists()) {
       typeToFile.put(ImageType.SPEECH_TRANSCRIPT, speechLabFile);
-      System.out.println("writeTranscripts found " + new File(speechLabFile).getAbsolutePath());
+     // System.out.println("writeTranscripts found " + new File(speechLabFile).getAbsolutePath());
     }
 
-    Map<ImageType, String> typeToImageFile = new ImageWriter().writeTranscripts(pathname, imageOutDir, imageWidth, imageHeight, typeToFile);
+    Map<ImageType, String> typeToImageFile = new ImageWriter().writeTranscripts(pathname, imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR);
     Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
     for (Map.Entry<ImageType, String> kv : typeToImageFile.entrySet()) {
       String name = kv.getKey().toString();
@@ -106,11 +108,12 @@ public class Scoring {
       else {
         System.err.println("expecting image " +filePath + "\tto be under " +deployPath);
       }
+
+      filePath = filePath.replaceAll("\\\\", "/");
       if (filePath.startsWith("/")) {
-        System.out.println("removing initial slash from " + filePath);
+        //System.out.println("removing initial slash from " + filePath);
         filePath = filePath.substring(1);
       }
-      filePath = filePath.replaceAll("\\\\", "/");
       sTypeToImage.put(key, filePath);
     }
     System.out.println("image map is " + sTypeToImage);
