@@ -10,6 +10,20 @@
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
+
+    <!-- Arguments to gwtc and devmode targets -->
+    <property name="gwt.args" value="" />
+    <property name="gwt.lib" value="gwt/lib"/>
+
+ <!--   <path id="project.class.path">
+        <pathelement location="war/WEB-INF/classes"/>
+        <pathelement location="test-classes"/>
+        &lt;!&ndash; Add any additional non-server libs (such as JUnit) &ndash;&gt;
+        <fileset dir="war/WEB-INF/lib" includes="**/*.jar"/>
+        <fileset dir="${gwt.lib}" includes="**/*.jar"/>
+    </path>-->
+
+
     <path id="GWT SDK [GWT - 2.4.0].libraryclasspath">
         <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201208080121-rel-r42/gwt-2.4.0/gwt-user.jar"/>
         <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201208080121-rel-r42/gwt-2.4.0/gwt-dev.jar"/>
@@ -53,10 +67,16 @@
     <target depends="clean" name="cleanall">
         <ant antfile="build.xml" dir="${imagewriter.location}" inheritAll="false" target="clean"/>
     </target>
-    <target depends="build-subprojects,build-project" name="build"/>
+    <target depends="build-subprojects,gwtc" name="build"/>
+
     <target depends="build" name="war">
         <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**" >      
-	</jar>
+    	</jar>
+    </target>
+
+    <target depends="build-subprojects,javac" name="light-war">
+        <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**" >
+        </jar>
     </target>
     
     <target name="build-subprojects">
@@ -66,7 +86,26 @@
             </propertyset>
         </ant>
     </target>
-    <target depends="init" name="build-project">
+
+    <target name="gwtc" depends="javac" description="GWT compile to JavaScript (production mode)">
+        <java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
+            <classpath>
+                <pathelement location="src"/>
+                <path refid="LangTest.classpath"/>
+    <!--            <pathelement location="${gwt.lib}/validation-api-1.0.0.GA.jar" />
+                <pathelement location="${gwt.lib}/validation-api-1.0.0.GA-sources.jar" />-->
+            </classpath>
+            <!-- add jvmarg -Xss16M or similar if you see a StackOverflowError -->
+            <jvmarg value="-Xmx256M"/>
+            <arg line="-war"/>
+            <arg value="war"/>
+            <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
+            <arg line="${gwt.args}"/>
+            <arg value="mitll.langtest.LangTest"/>
+        </java>
+    </target>
+
+    <target depends="init" name="javac">
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="war/WEB-INF/classes" includeantruntime="false" source="${source}" target="${target}">
             <src path="src"/>
