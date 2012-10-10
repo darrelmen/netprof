@@ -61,10 +61,11 @@ public class FileExerciseDAO implements ExerciseDAO {
       BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
       String line2;
       int count = 0;
-      System.err.println("using install path " + installPath);
+      System.out.println("using install path " + installPath);
       while ((line2 = reader.readLine()) != null) {
         String[] split = line2.split(",");
         String name = split[1];
+        String displayName = split[2];
         String arabic = split[3];
         String translit = split[4];
         String english = split[5];
@@ -97,7 +98,8 @@ public class FileExerciseDAO implements ExerciseDAO {
           if (count++ < 5) System.err.println("can't find audio file " + file.getAbsolutePath());
         } else {
           audioConversion.ensureWriteMP3(audioRef,installPath);
-          Exercise exercise = new Exercise("repeat", name, content, ensureForwardSlashes(audioRef), arabic);
+          if (count++ < 20) System.out.println("name to use " + displayName);
+          Exercise exercise = new Exercise("repeat", displayName, content, ensureForwardSlashes(audioRef), arabic);
           exercises.add(exercise);
         }
       }
@@ -109,7 +111,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       System.err.println("no exercises found in " + exerciseFile +"?");
     }
     else {
-      System.err.println("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
+      System.out.println("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
   }
 
