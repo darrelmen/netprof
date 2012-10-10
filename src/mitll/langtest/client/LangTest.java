@@ -55,6 +55,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int EAST_WIDTH = 90;
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
   private static final boolean DEFAULT_GOODWAVE_MODE = true;
+  public static final String RELEASE_DATE = "10/9";
 
   private Panel currentExerciseVPanel = new VerticalPanel();
   private ExerciseList exerciseList;
@@ -405,7 +406,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     vp.add(showResults);
 
     // no click handler for this for now
-    Anchor status = new Anchor(browserCheck.browser + " " +browserCheck.ver +" 9/19");
+    Anchor status = new Anchor(browserCheck.browser + " " +browserCheck.ver +" " +
+        RELEASE_DATE);
     vp.add(status);
 
     return vp;//hp2;
