@@ -2,16 +2,13 @@ package mitll.langtest.server.scoring;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.LoadingCache;
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import pronz.speech.ASRParameters;
 import pronz.speech.Audio;
 import pronz.speech.Audio$;
-import scala.Function1;
 import scala.Tuple2;
-import scala.runtime.AbstractFunction1;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
@@ -31,7 +28,7 @@ public class ASRScoring extends Scoring {
   private Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
 /*  private static final float MIN_AUDIO_SECONDS = 0.3f;
   private static final float MAX_AUDIO_SECONDS = 15.0f;*/
-  Cache<String, Scores> audioToScore;
+  private Cache<String, Scores> audioToScore;
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile(int, String, java.util.Collection, int, int)
@@ -108,13 +105,25 @@ public class ASRScoring extends Scoring {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
     File wavFile = new File(pathname);
+    boolean mustPrepend = false;
     if (!wavFile.exists()) {
-      System.err.println("Can't find " + wavFile.getAbsolutePath());
+      wavFile = new File(deployPath + File.separator + pathname);
+      mustPrepend = true;
+    }
+    if (!wavFile.exists()) {
+      System.err.println("scoreRepeatExercise : Can't find audio wav file at : " + wavFile.getAbsolutePath());
       return new PretestScore();
     }
 
     try {
-      testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(testAudioDir, testAudioFileNoSuffix);
+      String audioDir = testAudioDir;
+      if (mustPrepend) {
+         audioDir = deployPath + File.separator + audioDir;
+       // System.out.println("didn't find audio in " + testAudioDir + " so checking " + audioDir);
+        if (!new File(audioDir).exists()) System.err.println("Couldn't find " + audioDir);
+        else testAudioDir = audioDir;
+      }
+      testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(audioDir, testAudioFileNoSuffix);
     } catch (UnsupportedAudioFileException e) {
       e.printStackTrace();
     }
@@ -137,7 +146,7 @@ public class ASRScoring extends Scoring {
     Scores scores = audioToScore.getIfPresent(testAudioFileNoSuffix);
 
     if (scores == null) {
-      scores = computeRepeatExerciseScores(scoringDir, testAudio, /*refAudio, */sentence, asrLanguage);
+      scores = computeRepeatExerciseScores(scoringDir, testAudio, sentence, asrLanguage);
       audioToScore.put(testAudioFileNoSuffix, scores);
     }
     else {
@@ -170,16 +179,14 @@ public class ASRScoring extends Scoring {
     /**
      * Assumes that testAudio was recorded through the UI, which should prevent audio that is too short or too long.
      *
-     * @seex #scoreAudio
      * @see #scoreRepeatExercise
      * @param testAudio
-     * @param refAudio
      * @param sentence
      * @param language
      * @return
      * @throws Exception
      */
-  private Scores computeRepeatExerciseScores(String tomcatWriteDirectory, Audio testAudio, /*Audio refAudio,*/ String sentence, String language) {
+  private Scores computeRepeatExerciseScores(String tomcatWriteDirectory, Audio testAudio, String sentence, String language) {
 /*    float testAudioSeconds = testAudio.seconds();
     if (testAudioSeconds < MIN_AUDIO_SECONDS || testAudioSeconds > MAX_AUDIO_SECONDS) {
      // throw new Exception("Recording is too short (< " + MIN_AUDIO_SECONDS + "s) or too long (> " + MAX_AUDIO_SECONDS + "s)");
