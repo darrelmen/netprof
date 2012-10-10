@@ -14,7 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
+ * Reads plan directly from a CSV.
+ *
+ * TODO : Ideally we'd load the data into h2, then read it out again.
+ *
  * User: GO22670
  * Date: 10/8/12
  * Time: 3:35 PM
@@ -22,6 +25,7 @@ import java.util.List;
  */
 public class FileExerciseDAO implements ExerciseDAO {
   private static final String ENCODING = "UTF8";
+  public static final String LESSON_FILE = "lesson-737.csv";
 
   private List<Exercise> exercises;
 
@@ -29,22 +33,20 @@ public class FileExerciseDAO implements ExerciseDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO()
    */
   public FileExerciseDAO() {}
-/*  public FileExerciseDAO(String installPath) {
-    readExercises(installPath);
-  }*/
 
   /**
+   * TODO : write to h2
    * @see mitll.langtest.server.database.DatabaseImpl#getExercises()
    * @paramx installPath
    */
   public void readExercises(String installPath) {
     if (exercises != null) return;
-    String exerciseFile = "lesson-737.csv";
+    String exerciseFile = LESSON_FILE;
     InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(exerciseFile);
     if (resourceAsStream == null) {
       System.err.println("can't find " + exerciseFile);
       try {
-        resourceAsStream = new FileInputStream("C:\\Users\\go22670\\DLITest\\LangTest\\src\\lesson-737.csv");
+        resourceAsStream = new FileInputStream("C:\\Users\\go22670\\DLITest\\LangTest\\src\\" +LESSON_FILE);
       } catch (FileNotFoundException e) {
         e.printStackTrace();
       }
@@ -52,11 +54,14 @@ public class FileExerciseDAO implements ExerciseDAO {
         return;
       }
     }
+
     try {
       AudioConversion audioConversion = new AudioConversion();
       exercises = new ArrayList<Exercise>();
       BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
       String line2;
+      int count = 0;
+      System.err.println("using install path " + installPath);
       while ((line2 = reader.readLine()) != null) {
         String[] split = line2.split(",");
         String name = split[1];
@@ -80,18 +85,23 @@ public class FileExerciseDAO implements ExerciseDAO {
             "</span>\n" +
             "</div>";
         String audioRef =  "ref"+ File.separator+name+File.separator+"reference.wav";
-      /*  if (installPath.length() > 0) {
-          audioRef = installPath +audioRef;
+       /* if (installPath.length() > 0) {
+          if (!installPath.endsWith(File.separator)) installPath += File.separator;
+          audioRef = installPath + audioRef;
         }*/
         File file = new File(audioRef);
         if (!file.exists()) {
-         // System.err.println("can't find audio file " + file.getAbsolutePath());
+          file = new File(installPath,audioRef);
+        }
+        if (!file.exists()) {
+          if (count++ < 5) System.err.println("can't find audio file " + file.getAbsolutePath());
         } else {
           audioConversion.ensureWriteMP3(audioRef,installPath);
           Exercise exercise = new Exercise("repeat", name, content, ensureForwardSlashes(audioRef), arabic);
           exercises.add(exercise);
         }
       }
+      reader.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -99,7 +109,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       System.err.println("no exercises found in " + exerciseFile +"?");
     }
     else {
-      System.out.println("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
+      System.err.println("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
   }
 
@@ -108,7 +118,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   public List<Exercise> getRawExercises() {
-    return exercises;  //To change body of implemented methods use File | Settings | File Templates.
+    return exercises;
   }
 
 /*  public static void main(String [] arg) {
