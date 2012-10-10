@@ -71,7 +71,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private boolean goodwaveMode = DEFAULT_GOODWAVE_MODE;
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
-
+  private int footerHeight = FOOTER_HEIGHT;
+  private int eastWidth = EAST_WIDTH;
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
   private ScrollPanel itemScroller;
@@ -130,6 +131,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (usualLayout) {
       RootPanel.get().add(widgets);
     }
+    if (goodwaveMode) {
+      footerHeight = 5;
+     // eastWidth = 15;
+    }
 
     // if you remove this line the layout doesn't work -- the dock layout appears blank!
     setMainWindowSize(widgets);
@@ -139,13 +144,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
     HTML title = new HTML("<h1>" + DLI_LANGUAGE_TESTING + "</h1>");
     browserCheck.getBrowserAndVersion();
-    hp.addEast(getLogout(), EAST_WIDTH);
+    hp.addEast(getLogout(), eastWidth);
     hp.add(title);
 
     VerticalPanel exerciseListPanel = new VerticalPanel();
 
     widgets.addNorth(hp, HEADER_HEIGHT);
-    widgets.addSouth(status = new Label(), FOOTER_HEIGHT);
+    widgets.addSouth(status = new Label(), footerHeight);
     widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH/* +10*/);
 
     // set up center panel, initially with flash record panel
@@ -156,6 +161,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     else {
       sp.addStyleName("body");
+      sp.addStyleName("noMargin");
       RootPanel.get().add(sp);
     }
     makeFlashContainer();
@@ -229,11 +235,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void setMainWindowSize(DockLayoutPanel widgets) {
-    widgets.setSize(Math.max((Window.getClientWidth() - EAST_WIDTH), 50) + "px", Math.max((Window.getClientHeight()-FOOTER_HEIGHT),50) + "px");
+    int widthToUse = Window.getClientWidth() - (goodwaveMode ? 15 : eastWidth);
+    widgets.setSize(Math.max(widthToUse, 50) + "px", Math.max((Window.getClientHeight()-footerHeight-15),50) + "px");
+    //widgets.setSize("100%","100%");
+    //widgets.setSize(Math.max((Window.getClientWidth() - EAST_WIDTH), 50) + "px","100%");
   }
 
   private void setExerciseListSize() {
-    int height = Math.max(60, Window.getClientHeight() - (2 * HEADER_HEIGHT) - FOOTER_HEIGHT - 60);
+    int height = Math.max(60, Window.getClientHeight() - (2 * HEADER_HEIGHT) - footerHeight - 60);
     itemScroller.setSize(EXERCISE_LIST_WIDTH + "px", height + "px"); // 54
   }
 
