@@ -30,8 +30,12 @@ public class Scoring {
   protected String scoringDir;
   protected String os;
   protected String configFullPath;
-  private String deployPath;
+  protected String deployPath;
 
+  /**
+   * @see ASRScoring#ASRScoring(String)
+   * @param deployPath
+   */
   public Scoring(String deployPath) {
     this.deployPath = deployPath;
     String property = System.getProperty("os.name").toLowerCase();
@@ -66,7 +70,11 @@ public class Scoring {
       System.err.println("writeTranscripts : can't find " + pathname);
       return Collections.emptyMap();
     }
-      // These may not all exist. The speech file is created only by multisv
+   // System.out.println("imageOutDir orig " + imageOutDir);
+    imageOutDir = deployPath + File.separator + imageOutDir;
+  //  System.out.println("imageOutDir after " + imageOutDir);
+
+    // These may not all exist. The speech file is created only by multisv
     // right now.
     String phoneLabFile  = prependDeploy(noSuffix + ".phones.lab");
     String speechLabFile = prependDeploy(noSuffix + ".speech.lab");
