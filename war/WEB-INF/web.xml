@@ -24,40 +24,33 @@
     <listener-class>org.h2.server.web.DbStarter</listener-class>
   </listener>
 
-    <context-param>
-        <param-name>tomcatWriteDirectoryFullPath</param-name>
-        <param-value>answers</param-value>
+  <context-param>
+    <param-name>tomcatWriteDirectoryFullPath</param-name>
+    <param-value>answers</param-value>
+  </context-param>
 
-        <!-- use the following on mtex -->
-        <!--
-    <param-value>/services/tomcat/webapps/netPron2/answers</param-value>
-        -->
-    </context-param>
+  <context-param>
+    <param-name>appName</param-name>
+    <param-value>netPron2</param-value>
+  </context-param>
 
-    <context-param>
-        <param-name>appName</param-name>
-        <param-value>netPron2</param-value>
-    </context-param>
+  <!-- note for the jdbc url, we seem to need an absolute file path on the webserver -->
+  <context-param>
+    <param-name>db.url</param-name>
+    <param-value>jdbc:h2:vlr-parle;IFEXISTS=TRUE</param-value>
 
-    <!-- note for the jdbc url, we seem to need an absolute file path on the webserver -->
-    <context-param>
-        <param-name>db.url</param-name>
+    <!-- use the following on mtex -->
+    <!--
+    <param-value>jdbc:h2:file://services/tomcat/webapps/netPron2/vlr-parle;IFEXISTS=TRUE</param-value>
+     -->
+  </context-param>
 
-        <param-value>jdbc:h2:vlr-parle;IFEXISTS=TRUE</param-value>
-
-        <!-- use the following on mtex -->
-        <!--
-           <param-value>jdbc:h2:file://services/tomcat/webapps/netPron2/vlr-parle;IFEXISTS=TRUE</param-value>
-        -->
-
-    </context-param>
-
-    <context-param>
-        <param-name>db.user</param-name>
-        <param-value></param-value>
-    </context-param>
-    <context-param>
-        <param-name>db.password</param-name>
-        <param-value></param-value>
-    </context-param>
+  <context-param>
+    <param-name>db.user</param-name>
+    <param-value></param-value>
+  </context-param>
+  <context-param>
+    <param-name>db.password</param-name>
+    <param-value></param-value>
+  </context-param>
 </web-app>

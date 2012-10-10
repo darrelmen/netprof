@@ -14,4 +14,6 @@ public class ImageResponse implements IsSerializable {
   public String imageURL;
   public ImageResponse() {}
   public ImageResponse(int req, String imageURL) {this.req = req; this.imageURL = imageURL; }
+
+  public String toString() { return " req " + req + " : " + imageURL; }
 }
