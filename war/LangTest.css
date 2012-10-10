@@ -63,6 +63,10 @@ fieldset {
     margin-left: 10px;
 }
 
+.noMargin {
+    margin: 0px;
+}
+
 fieldset > legend {
     font-size: 18px;
     font-weight: bold;
