@@ -119,13 +119,21 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   @Override
   public void onLoad() {
-   // System.out.println("audio path is " + audioPath);
+    System.out.println("onLoad : audio path is " + audioPath);
     if (audioPath != null) {
       getImagesForPath(audioPath);
     }
     else {
       System.out.println("onLoad : for AudioPanel got no audio path?");
     }
+  }
+
+  /**
+   * Not sure exactly why we have to do this --
+   */
+  @Override
+  protected void onUnload() {
+    audioPositionPopup.reinitialize();
   }
 
   public void setScreenPortion(float screenPortion) {
@@ -147,7 +155,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param path
    */
   public void getImagesForPath(String path) {
-    System.out.println("getImagesForPath " +path);
+    System.out.println("AudioPanel : getImagesForPath " +path);
     if (path != null) {
       this.audioPath = path;
     }
