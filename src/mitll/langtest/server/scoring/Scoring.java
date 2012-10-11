@@ -13,7 +13,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
+ * Base class for the two types of scoring : DTW (Dynamic Time Warping, using "sv") and ASR (Speech Recognition).
+ *
+ * Scoring (for now) goes through a thin layer in pronz (scala) to run a config file in hydec.
+ *
+ * TODO : In the future, we may want to make a new project that has just the hydec interface code in pronz.
+ *
  * User: go22670
  * Date: 9/12/12
  * Time: 11:07 AM
