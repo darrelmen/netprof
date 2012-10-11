@@ -77,18 +77,18 @@ public abstract class ScoringAudioPanel extends AudioPanel {
 
   protected void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript, ImageAndCheck speechTranscript, boolean scoredBefore) {
     // System.out.println("useResult got " + result);
-    if (result.sTypeToImage.get(NetPronImageType.WORD_TRANSCRIPT) != null) {
-      wordTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.WORD_TRANSCRIPT));
+    if (result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT) != null) {
+      wordTranscript.image.setUrl(result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT));
       wordTranscript.image.setVisible(true);
       wordTranscript.check.setVisible(true);
     }
-    if (result.sTypeToImage.get(NetPronImageType.PHONE_TRANSCRIPT) != null) {
-      phoneTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.PHONE_TRANSCRIPT));
+    if (result.getsTypeToImage().get(NetPronImageType.PHONE_TRANSCRIPT) != null) {
+      phoneTranscript.image.setUrl(result.getsTypeToImage().get(NetPronImageType.PHONE_TRANSCRIPT));
       phoneTranscript.image.setVisible(true);
       phoneTranscript.check.setVisible(true);
     }
-    if (result.sTypeToImage.get(NetPronImageType.SPEECH_TRANSCRIPT) != null) {
-      speechTranscript.image.setUrl(result.sTypeToImage.get(NetPronImageType.SPEECH_TRANSCRIPT));
+    if (result.getsTypeToImage().get(NetPronImageType.SPEECH_TRANSCRIPT) != null) {
+      speechTranscript.image.setUrl(result.getsTypeToImage().get(NetPronImageType.SPEECH_TRANSCRIPT));
       speechTranscript.image.setVisible(true);
       speechTranscript.check.setVisible(true);
     }
