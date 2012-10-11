@@ -162,7 +162,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     else {
       sp.addStyleName("body");
       sp.addStyleName("noMargin");
-      RootPanel.get().add(sp);
+   /*   Element netPron1 = DOM.getElementById("netPron");
+      if (netPron1 != null) {
+        RootPanel.get("netPron").add(sp);
+      }*/
+      RootPanel netPron = RootPanel.get("netPron");
+      if (netPron != null) {
+        netPron.add(sp);
+      }
+      else {
+        RootPanel.get().add(sp);
+      }
     }
     makeFlashContainer();
     currentExerciseVPanel.add(flashRecordPanel);
@@ -183,7 +193,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     soundManager.exportStaticMethods();
     soundManager.initialize();
     Element elementById = DOM.getElementById("title-tag");   // set the page title to be consistent
-    elementById.setInnerText(DLI_LANGUAGE_TESTING);
+    if (elementById != null) {
+      elementById.setInnerText(DLI_LANGUAGE_TESTING);
+    }
   }
 
   /**
@@ -277,6 +289,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (exercise_title != null) {
      if (goodwave == null) goodwave = "true";
       this.exercise_title = exercise_title;
+    }
+    else {
+      this.exercise_title = "nl0020_ams";
     }
     String screenPortionParam =  Window.Location.getParameter("screenPortion");
     screenPortion = 1.0f;
