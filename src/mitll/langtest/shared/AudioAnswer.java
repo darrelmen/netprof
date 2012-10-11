@@ -14,6 +14,12 @@ public class AudioAnswer implements IsSerializable {
   public boolean valid;
 
   public AudioAnswer() {}
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, String, String)
+   * @param path
+   * @param valid
+   */
   public AudioAnswer(String path, boolean valid) { this.path = path; this.valid = valid; }
   public String toString() { return "Path " + path; }
 }

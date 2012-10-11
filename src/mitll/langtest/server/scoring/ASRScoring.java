@@ -18,17 +18,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
+ * Does ASR scoring using hydec.
+ *
+ * Takes the label files and generates transcript images for display in the client.
+ *
  * User: go22670
  * Date: 9/10/12
  * Time: 11:16 AM
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoring extends Scoring {
-  private Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
+  private final Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
 /*  private static final float MIN_AUDIO_SECONDS = 0.3f;
   private static final float MAX_AUDIO_SECONDS = 15.0f;*/
-  private Cache<String, Scores> audioToScore;
+  private final Cache<String, Scores> audioToScore;
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile(int, String, java.util.Collection, int, int)
@@ -56,7 +59,7 @@ public class ASRScoring extends Scoring {
 
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile(int, String, String, int, int)
    * TODO : pass in ref sentence and language
    * @param testAudioDir
    * @param testAudioFileNoSuffix
@@ -83,6 +86,7 @@ public class ASRScoring extends Scoring {
    *
    * Skips sv scoring for the moment -- why would we do it?
    *
+   * @see #scoreRepeat(String, String, String, String, int, int)
    * @param testAudioDir
    * @param testAudioFileNoSuffix
    * @paramx refAudioDir
@@ -95,7 +99,7 @@ public class ASRScoring extends Scoring {
    * @param imageHeight
    * @return
    */
-  public PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
+  private PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
                                          // String refAudioDir, String refAudioFileNoSuffix,
                                           String sentence, String asrLanguage,
                                           String scoringDir,
@@ -170,12 +174,6 @@ public class ASRScoring extends Scoring {
     return phones != null ? new HashMap<String, Float>(phones) : emptyMap;
   }
 
-  /**
-     *  convert the imageWriterTranscriptEvents to
-      pretestTranscriptEvents (make them serializable for GWTRPC)
-     */
-    private void convertEvents() {}
-
     /**
      * Assumes that testAudio was recorded through the UI, which should prevent audio that is too short or too long.
      *
@@ -247,10 +245,10 @@ public class ASRScoring extends Scoring {
     return new Scores(0f, eventScores, floats);
   }
 
-  public static void main(String [] arg) {
+/*  public static void main(String [] arg) {
     ASRScoring scoring = new ASRScoring("C:\\Users\\go22670\\DLITest\\LangTest\\war");
     String testAudioDir = "C:\\Users\\go22670\\DLITest\\LangTest\\war\\media\\ac-L0P-001";
-    PretestScore pretestScore = scoring.scoreRepeat(testAudioDir, "ad0035_ems", /*testAudioDir, "ad0035_ems",*/ "This is a test.", "out", 1024, 100);
+    PretestScore pretestScore = scoring.scoreRepeat(testAudioDir, "ad0035_ems", *//*testAudioDir, "ad0035_ems",*//* "This is a test.", "out", 1024, 100);
     System.out.println("score " + pretestScore);
-  }
+  }*/
 }
