@@ -8,7 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
+ * Representation of a individual item of work the user sees.  Could be a pronunciation exercise or a question(s)
+ * based on a prompt.
+ *
+ * TODO : consider subclass for pronunciation exercises?
+ *
  * User: GO22670
  * Date: 5/8/12
  * Time: 1:03 PM
@@ -95,6 +99,7 @@ public class Exercise implements IsSerializable  {
   public String getContent() { return content; }
   public EXERCISE_TYPE getType() { return type; }
   public String getRefAudio() { return refAudio; }
+  public void setRefAudio(String s) { this.refAudio = s; }
   public String getRefSentence() { return refSentence; }
 
   /**
@@ -127,7 +132,7 @@ public class Exercise implements IsSerializable  {
   }
 
   public String toString() {
-    if (getType() == EXERCISE_TYPE.REPEAT) {
+    if (getType() == EXERCISE_TYPE.REPEAT || getType() == EXERCISE_TYPE.MULTI_REF) {
       return "Exercise " + plan+"/"+ id + "/" + " content bytes = " + content.length() + " ref sentence " + refSentence +" audio " + refAudio;
     }
     else {

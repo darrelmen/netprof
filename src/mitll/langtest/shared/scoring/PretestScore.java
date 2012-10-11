@@ -19,7 +19,7 @@ public class PretestScore implements IsSerializable {
 	private float transformedSVScore = -1f;
 	private Map<String, Float> phoneScores;
 	//private Map<NetPronImageType, Map<Float, NetPronTranscriptEvent>> transcriptEvents;
-  public Map<NetPronImageType, String> sTypeToImage;
+  private Map<NetPronImageType, String> sTypeToImage;
 
   public PretestScore(){} // required for serialization
 
@@ -44,7 +44,7 @@ public class PretestScore implements IsSerializable {
     else {
       System.err.println("PretestScore : no sv score vector?");
     }
-    this.sTypeToImage = sTypeToImage;
+    this.setsTypeToImage(sTypeToImage);
   }
 
   public void setReqid(int r) { this.reqid = r;}
@@ -110,6 +110,14 @@ public class PretestScore implements IsSerializable {
 		return transcriptEvents;
 	}*/
 
+  public Map<NetPronImageType, String> getsTypeToImage() {
+    return sTypeToImage;
+  }
+
+  public void setsTypeToImage(Map<NetPronImageType, String> sTypeToImage) {
+    this.sTypeToImage = sTypeToImage;
+  }
+
   public String toString() {
     StringBuilder b = new StringBuilder();
 
@@ -119,6 +127,7 @@ public class PretestScore implements IsSerializable {
     return "hydec " + hydecScore +
        // " transformed hydec " + transformedHydecScore +
         " transformed dtw " + transformedSVScore +
-        " phones " + getPhoneScores() + " sv " +b+" type->image " +sTypeToImage;
+        " phones " + getPhoneScores() + " sv " +b+" type->image " + getsTypeToImage();
   }
+
 }
