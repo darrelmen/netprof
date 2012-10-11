@@ -99,6 +99,10 @@
             <jvmarg value="-Xmx256M"/>
             <arg line="-war"/>
             <arg value="war"/>
+            <arg line="-style"/>
+            <arg value="PRETTY"/>
+  <!--          <arg line="-logLevel"/>
+            <arg value="DEBUG"/>-->
             <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
             <arg line="${gwt.args}"/>
             <arg value="mitll.langtest.LangTest"/>
