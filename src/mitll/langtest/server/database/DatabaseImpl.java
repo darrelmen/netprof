@@ -12,13 +12,13 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
- * Note with H2 that :
- *  * you can corrupt the database if you try to copy a file that's in use by another process.
+ * Note with H2 that :  <br></br>
+ *  * you can corrupt the database if you try to copy a file that's in use by another process. <br></br>
  *  * one process can lock the database and make it inaccessible to a second one, seemingly this can happen
- *    more easily when H2 lives inside a servlet container (e.g. tomcat).
+ *    more easily when H2 lives inside a servlet container (e.g. tomcat). <br></br>
  *  * it's not a good idea to close connections, especially in the context of a servlet inside a container, since
- *    H2 will return "new" connections that have already been closed.
- *  * it's not a good idea to reuse one connection...?
+ *    H2 will return "new" connections that have already been closed.   <br></br>
+ *  * it's not a good idea to reuse one connection...?  <br></br>
  *
  * User: go22670
  * Date: 5/14/12
@@ -32,8 +32,8 @@ public class DatabaseImpl implements Database {
   private static final boolean DROP_USER = false;
   private static final boolean DROP_RESULT = false;
   private static final String H2_DB_NAME = TESTING ? "vlr-parle" : "/services/apache-tomcat-7.0.27/webapps/langTest/vlr-parle";
-  private static final String TIME = "time";
-  private static final String EXID = "exid";
+  //private static final String TIME = "time";
+  //private static final String EXID = "exid";
   private Map<Long, List<Schedule>> userToSchedule;
 
   // h2 config info
