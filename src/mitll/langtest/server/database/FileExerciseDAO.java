@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.shared.Exercise;
+import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,8 +25,9 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class FileExerciseDAO implements ExerciseDAO {
+  private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
   private static final String ENCODING = "UTF8";
-  public static final String LESSON_FILE = "lesson-737.csv";
+  private static final String LESSON_FILE = "lesson-737.csv";
 
   private List<Exercise> exercises;
 
@@ -44,7 +46,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     String exerciseFile = LESSON_FILE;
     InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(exerciseFile);
     if (resourceAsStream == null) {
-      System.err.println("can't find " + exerciseFile);
+      logger.error("can't find " + exerciseFile);
       try {
         resourceAsStream = new FileInputStream("C:\\Users\\go22670\\DLITest\\LangTest\\src\\" +LESSON_FILE);
       } catch (FileNotFoundException e) {
@@ -61,7 +63,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
       String line2;
       int count = 0;
-      System.out.println("using install path " + installPath);
+      logger.debug("using install path " + installPath);
       while ((line2 = reader.readLine()) != null) {
         String[] split = line2.split(",");
         String name = split[1];
@@ -95,10 +97,9 @@ public class FileExerciseDAO implements ExerciseDAO {
           file = new File(installPath,audioRef);
         }
         if (!file.exists()) {
-          if (count++ < 5) System.err.println("can't find audio file " + file.getAbsolutePath());
+          if (count++ < 5) logger.debug("can't find audio file " + file.getAbsolutePath());
         } else {
           audioConversion.ensureWriteMP3(audioRef,installPath);
-          if (count++ < 20) System.out.println("name to use " + displayName);
           Exercise exercise = new Exercise("repeat", displayName, content, ensureForwardSlashes(audioRef), arabic);
           exercises.add(exercise);
         }
@@ -108,10 +109,10 @@ public class FileExerciseDAO implements ExerciseDAO {
       e.printStackTrace();
     }
     if (exercises.isEmpty()) {
-      System.err.println("no exercises found in " + exerciseFile +"?");
+      logger.error("no exercises found in " + exerciseFile +"?");
     }
     else {
-      System.out.println("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
+      logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
   }
 
