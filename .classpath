@@ -13,6 +13,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-codec-1.6.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guava-13.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gchart.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-1.2.17.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/imagewriter"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/pronz.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
