@@ -1,5 +1,6 @@
 package mitll.langtest.client.scoring;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -36,6 +37,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
   private static final String STOP = "stop";
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
+  private static final int AUTO_STOP_DELAY  = 15000; // millis
 
   /**
    * Just for backward compatibility -- so we can run against old plan files
@@ -257,7 +259,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     private int index;
 
     public PostAudioRecordButton(final ScoringAudioPanel widgets, int index) {
-      super(new Button(RECORD));
+      super(new Button(RECORD), AUTO_STOP_DELAY);
       this.widgets = widgets;
       this.index = index;
     }
@@ -273,8 +275,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
             public void onFailure(Throwable caught) {}
             public void onSuccess(AudioAnswer result) {
               System.out.println("PostAudioRecordButton : Got audio answer " + result);
-              widgets.setRefAudio(refAudio, exercise.getRefSentence());
-              widgets.getImagesForPath(wavToMP3(result.path));
+              if (!result.valid) {
+                Window.alert("Audio too short. Please record again.");
+              }
+              else {
+                widgets.setRefAudio(refAudio, exercise.getRefSentence());
+                widgets.getImagesForPath(wavToMP3(result.path));
+              }
             }
           });
     }
