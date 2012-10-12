@@ -4,6 +4,7 @@ import Utils.Log;
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import org.apache.log4j.Logger;
 import pronz.dirs.Dirs;
 import pronz.speech.ASRParameters;
 
@@ -25,6 +26,8 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class Scoring {
+  private static Logger logger = Logger.getLogger(Scoring.class);
+
   private static final String WINDOWS_CONFIGURATIONS = "windowsConfig";
   private static final String LINUX_CONFIGURATIONS = "mtexConfig";
   public static final float SCORE_SCALAR = 1.0f / 0.15f;
@@ -76,7 +79,7 @@ public class Scoring {
     String pathname = audioFileNoSuffix + ".wav";
     pathname = prependDeploy(pathname);
     if (!new File(pathname).exists()) {
-      System.err.println("writeTranscripts : can't find " + pathname);
+      logger.error("writeTranscripts : can't find " + pathname);
       return Collections.emptyMap();
     }
     imageOutDir = deployPath + File.separator + imageOutDir;
@@ -111,7 +114,7 @@ public class Scoring {
         filePath = filePath.substring(deployPath.length()); // make it a relative path
       }
       else {
-        System.err.println("expecting image " +filePath + "\tto be under " +deployPath);
+        logger.error("expecting image " +filePath + "\tto be under " +deployPath);
       }
 
       filePath = filePath.replaceAll("\\\\", "/");
@@ -121,7 +124,7 @@ public class Scoring {
       }
       sTypeToImage.put(key, filePath);
     }
-    System.out.println("image map is " + sTypeToImage);
+    logger.debug("image map is " + sTypeToImage);
     return sTypeToImage;
   }
 
