@@ -39,7 +39,8 @@ import java.util.Map;
  */
 public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected static final int MIN_WIDTH = 256;
-  private static final float HEIGHT = 128f;//96;
+  private static final float WAVEFORM_HEIGHT = 128f;//96;
+  private static final float SPECTROGRAM_HEIGHT = 96f;//96;
   private static final int RIGHT_MARGIN = ASRScorePanel.X_CHART_SIZE+150;//550;//1;//400;
   protected static final String WAVEFORM = "Waveform";
   protected static final String SPECTROGRAM = "Spectrogram";
@@ -231,7 +232,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   private void getImageURLForAudio(String path, final String type,int width, final ImageAndCheck waveform) {
     int toUse = Math.max(MIN_WIDTH, width);
-    int height = (int) (((float)Window.getClientHeight())/1200f * HEIGHT);
+    float heightForType = type.equals(WAVEFORM) ? WAVEFORM_HEIGHT : SPECTROGRAM_HEIGHT;
+    int height = (int) (((float)Window.getClientHeight())/1200f * heightForType);
     if (path != null) {
       int reqid = getReqID(type);
 
@@ -240,8 +242,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         public void onFailure(Throwable caught) {}
         public void onSuccess(ImageResponse result) {
           System.out.println("getImageURLForAudio : onSuccess " + result);
-
-          if (isMostRecentRequest(type,result.req)) {
+          if (!result.successful) {
+            System.err.println("got error for request for type " + type);
+          }
+          else if (isMostRecentRequest(type,result.req)) {
             waveform.image.setUrl(result.imageURL);
             waveform.image.setVisible(true);
             waveform.check.setVisible(true);
