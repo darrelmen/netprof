@@ -14,6 +14,7 @@ import java.util.Collection;
  * Date: 10/9/12
  * Time: 11:35 AM
  * To change this template use File | Settings | File Templates.
+ * @deprecated Tamas says we won't likely use this in the future
  */
 public class DTWScoringPanel extends ScoringAudioPanel {
   public DTWScoringPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
