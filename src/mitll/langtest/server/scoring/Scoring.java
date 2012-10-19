@@ -75,7 +75,8 @@ public class Scoring {
    * @param audioFileNoSuffix
    * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
    */
-  protected Map<NetPronImageType, String> writeTranscripts(String imageOutDir, int imageWidth, int imageHeight, String audioFileNoSuffix) {
+  protected Map<NetPronImageType, String> writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
+                                                           String audioFileNoSuffix) {
     String pathname = audioFileNoSuffix + ".wav";
     pathname = prependDeploy(pathname);
     if (!new File(pathname).exists()) {
@@ -90,21 +91,41 @@ public class Scoring {
     String speechLabFile = prependDeploy(audioFileNoSuffix + ".speech.lab");
     String wordLabFile   = prependDeploy(audioFileNoSuffix + ".words.lab");
     Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
-
+    boolean foundATranscript = false;
     if (new File(phoneLabFile).exists()) {
       typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
+      foundATranscript = true;
     //  System.out.println("writeTranscripts found " + new File(phoneLabFile).getAbsolutePath());
     }
     if (new File(wordLabFile).exists()) {
       typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
-    //  System.out.println("writeTranscripts found " + new File(wordLabFile).getAbsolutePath());
+      foundATranscript = true;
+      //  System.out.println("writeTranscripts found " + new File(wordLabFile).getAbsolutePath());
     }
     if (new File(speechLabFile).exists()) {
+      foundATranscript = true;
       typeToFile.put(ImageType.SPEECH_TRANSCRIPT, speechLabFile);
      // System.out.println("writeTranscripts found " + new File(speechLabFile).getAbsolutePath());
     }
+    if (!foundATranscript) {
+      logger.error("no label files found, e.g. " + phoneLabFile);
+    }
 
-    Map<ImageType, String> typeToImageFile = new ImageWriter().writeTranscripts(pathname, imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR);
+    Map<ImageType, String> typeToImageFile = new ImageWriter().writeTranscripts(pathname,
+        imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR);
+    Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(typeToImageFile);
+    logger.debug("image map is " + sTypeToImage);
+    return sTypeToImage;
+  }
+
+  /**
+   * Make sure the paths for each image are relative (don't include the deploy path prefix) and have
+   * the slashes going in the right direction.<br></br>
+   * I.e. make valid URLs.
+   * @param typeToImageFile
+   * @return map of image type to URL
+   */
+  private Map<NetPronImageType, String> getTypeToRelativeURLMap(Map<ImageType, String> typeToImageFile) {
     Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
     for (Map.Entry<ImageType, String> kv : typeToImageFile.entrySet()) {
       String name = kv.getKey().toString();
@@ -124,7 +145,6 @@ public class Scoring {
       }
       sTypeToImage.put(key, filePath);
     }
-    logger.debug("image map is " + sTypeToImage);
     return sTypeToImage;
   }
 
