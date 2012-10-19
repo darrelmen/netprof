@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import org.apache.log4j.Logger;
 import pronz.speech.ASRParameters;
 import pronz.speech.Audio;
 import pronz.speech.Audio$;
@@ -13,7 +14,6 @@ import scala.Tuple2;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +28,8 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoring extends Scoring {
+  private static Logger logger = Logger.getLogger(ASRScoring.class);
+
   private final Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
 /*  private static final float MIN_AUDIO_SECONDS = 0.3f;
   private static final float MAX_AUDIO_SECONDS = 15.0f;*/
@@ -44,7 +46,7 @@ public class ASRScoring extends Scoring {
 
     ASRParameters arabic = ASRParameters.jload("Arabic", configFullPath);
     if (arabic == null) {
-      System.err.println("can't find Arabic parameters at " + configFullPath);
+      logger.error("can't find Arabic parameters at " + configFullPath);
     } else {
       languageLookUp.put("Arabic", arabic);
     }
@@ -59,7 +61,7 @@ public class ASRScoring extends Scoring {
 
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile(int, String, String, int, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(int, String, String, int, int)
    * TODO : pass in ref sentence and language
    * @param testAudioDir
    * @param testAudioFileNoSuffix
@@ -115,7 +117,7 @@ public class ASRScoring extends Scoring {
       mustPrepend = true;
     }
     if (!wavFile.exists()) {
-      System.err.println("scoreRepeatExercise : Can't find audio wav file at : " + wavFile.getAbsolutePath());
+      logger.error("scoreRepeatExercise : Can't find audio wav file at : " + wavFile.getAbsolutePath());
       return new PretestScore();
     }
 
@@ -123,8 +125,7 @@ public class ASRScoring extends Scoring {
       String audioDir = testAudioDir;
       if (mustPrepend) {
          audioDir = deployPath + File.separator + audioDir;
-       // System.out.println("didn't find audio in " + testAudioDir + " so checking " + audioDir);
-        if (!new File(audioDir).exists()) System.err.println("Couldn't find " + audioDir);
+        if (!new File(audioDir).exists()) logger.error("Couldn't find " + audioDir);
         else testAudioDir = audioDir;
       }
       testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(audioDir, testAudioFileNoSuffix);
@@ -141,20 +142,14 @@ public class ASRScoring extends Scoring {
         testAudioDir, testAudioFileNoSuffix,
         false /* notForScoring */, dirs);
 
-    // the path to the ref audio is <tomcatWriteDirectory>/<pretestFilesRelativePath>/<planName>/<referenceName>
-    // referenceName is called exercise_name in the db.
-/*    Audio refAudio = Audio$.MODULE$.apply(
-        refAudioDir, refAudioFileNoSuffix,
-        false *//* notForScoring *//*, dirs);*/
-
-    Scores scores = audioToScore.getIfPresent(testAudioFileNoSuffix);
+    Scores scores = audioToScore.getIfPresent(testAudioDir + File.separator + testAudioFileNoSuffix);
 
     if (scores == null) {
       scores = computeRepeatExerciseScores(scoringDir, testAudio, sentence, asrLanguage);
-      audioToScore.put(testAudioFileNoSuffix, scores);
+      audioToScore.put(testAudioDir + File.separator + testAudioFileNoSuffix, scores);
     }
     else {
-      System.out.println("found cached score for " + testAudioFileNoSuffix);
+      logger.info("found cached score for file '" + testAudioDir + File.separator + testAudioFileNoSuffix + "'");
     }
 
     Map<NetPronImageType, String> sTypeToImage = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix);
@@ -193,7 +188,7 @@ public class ASRScoring extends Scoring {
     // RepeatExercises use ASR for scoring, so get the language parameters.
     ASRParameters asrparameters = languageLookUp.get(language);
     if (asrparameters == null) {
-      System.err.println("computeRepeatExerciseScores : no ASR parameters for " + language);
+      logger.error("computeRepeatExerciseScores : no ASR parameters for " + language);
       return getEmptyScores();
     }
     String platform = Utils.package$.MODULE$.platform();
@@ -210,8 +205,8 @@ public class ASRScoring extends Scoring {
     boolean configExists = new File(configFile).exists();
     boolean dictExists   = new File(dictFile).exists();
     if (!configExists || !dictExists) {
-      if (!configExists) System.err.println("computeRepeatExerciseScores : Can't find config file at " + configFile);
-      if (!dictExists) System.err.println("computeRepeatExerciseScores : Can't find dict file at " + dictFile);
+      if (!configExists) logger.error("computeRepeatExerciseScores : Can't find config file at " + configFile);
+      if (!dictExists)   logger.error("computeRepeatExerciseScores : Can't find dict file at " + dictFile);
       return getEmptyScores();
     }
 
@@ -220,21 +215,14 @@ public class ASRScoring extends Scoring {
         dictFile,
         asrparameters.letterToSoundClassString(), platform);
 
-    //System.out.println(new Date() + " : Calling jscore with " + sentence + " and " + asrparametersFullPaths);
+    //System.out.println(" : Calling jscore with " + sentence + " and " + asrparametersFullPaths);
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
     synchronized (this) {   // hydec can't be called concurrently -- not thread safe
       jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
     }
     Float hydec_score = jscoreOut._1;
-    System.out.println(new Date() + " : got score " + hydec_score);
+    logger.info(" : got score " + hydec_score);
 
-/*
-    Function1<Float, Float> identityFn = new AbstractFunction1<Float, Float>() {
-      public Float apply(Float score) {
-        return score;
-      }
-    };
-*/    //  Float sv_score = testAudio.sv(refAudio, os, identityFn);
     Float[] svScoreVector = { 0f, 1.0f }; // Fake ratio.
     return new Scores(hydec_score, jscoreOut._2, svScoreVector);
   }
