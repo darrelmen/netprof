@@ -73,6 +73,14 @@ public class SoundManager{
 		sound.@mitll.langtest.client.sound.Sound::sound = javascriptSound;
 	}-*/;
 
+  /**
+   * Actually calls destruct on sound object
+   * @param sound
+   */
+  public static native void destroySound(Sound sound) /*-{
+		sound.@mitll.langtest.client.sound.Sound::sound.destruct();
+  }-*/;
+
 	public static native void pause(Sound sound) /*-{
 		sound.@mitll.langtest.client.sound.Sound::sound.pause();
 	}-*/;
