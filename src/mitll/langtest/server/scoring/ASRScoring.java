@@ -62,11 +62,8 @@ public class ASRScoring extends Scoring {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(int, String, String, int, int)
-   * TODO : pass in ref sentence and language
    * @param testAudioDir
    * @param testAudioFileNoSuffix
-   * @paramx refAudioDir
-   * @paramx refAudioFileNoSuffix
    * @param sentence that should be what the test audio contains
    * @param imageOutDir
    * @param imageWidth
@@ -74,10 +71,9 @@ public class ASRScoring extends Scoring {
    * @return PretestScore object
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-                                //  String refAudioDir, String refAudioFileNoSuffix,
                                   String sentence, String imageOutDir,
                                   int imageWidth, int imageHeight) {
-    return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,//refAudioDir,refAudioFileNoSuffix,
+    return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,
         sentence,
         "Arabic",
         scoringDir,imageOutDir,imageWidth,imageHeight);
@@ -102,7 +98,6 @@ public class ASRScoring extends Scoring {
    * @return
    */
   private PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
-                                         // String refAudioDir, String refAudioFileNoSuffix,
                                           String sentence, String asrLanguage,
                                           String scoringDir,
 
