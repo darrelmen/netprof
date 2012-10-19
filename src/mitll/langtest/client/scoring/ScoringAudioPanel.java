@@ -26,7 +26,15 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   public ScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
     super(null, service, soundManager, useFullWidth);
   }
+  public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
+    super(path, service, soundManager, useFullWidth);
+    this.refSentence = refSentence;
+  }
 
+  /**
+   * @see GoodwaveExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @param l
+   */
   public void addScoreListener(ScoreListener l) { this.scoreListener = l;}
 
   /**
@@ -39,6 +47,10 @@ public abstract class ScoringAudioPanel extends AudioPanel {
     this.refSentence = refSentence;
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.AudioPanel#getImages()
+   * @param width
+   */
   @Override
   protected void getEachImage(int width) {
     super.getEachImage(width);
@@ -52,7 +64,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
 
   /**
    *
-   * @see #getImages()
+   * @see #getEachImage(int)
    * @param path
    * @param refSentence
    * @param width
@@ -75,8 +87,17 @@ public abstract class ScoringAudioPanel extends AudioPanel {
                                      final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                                      final ImageAndCheck speechTranscript, int toUse, int height, int reqid);
 
-  protected void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript, ImageAndCheck speechTranscript, boolean scoredBefore) {
-    // System.out.println("useResult got " + result);
+  /**
+   * Record the image URLs in the Image widgets and enable the check boxes
+   * @param result
+   * @param wordTranscript
+   * @param phoneTranscript
+   * @param speechTranscript
+   * @param scoredBefore
+   */
+  protected void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
+                           ImageAndCheck speechTranscript, boolean scoredBefore) {
+   // System.out.println("useResult got " + result);
     if (result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT) != null) {
       wordTranscript.image.setUrl(result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT));
       wordTranscript.image.setVisible(true);
@@ -92,7 +113,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
       speechTranscript.image.setVisible(true);
       speechTranscript.check.setVisible(true);
     }
-    if (!scoredBefore) {
+    if (!scoredBefore && scoreListener != null) {
       // System.out.println("new score returned " + result);
       scoreListener.gotScore(result);
     }
