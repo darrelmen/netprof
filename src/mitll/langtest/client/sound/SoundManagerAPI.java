@@ -10,6 +10,7 @@ package mitll.langtest.client.sound;
 public interface SoundManagerAPI {
  void initialize();
   void createSound(Sound sound, String title, String file);
+  void destroySound(Sound sound);
    void pause(Sound sound);
    void play(Sound sound);
    void setPosition(Sound sound, double position);

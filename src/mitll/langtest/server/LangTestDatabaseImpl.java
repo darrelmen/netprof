@@ -202,9 +202,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public PretestScore getScoreForAudioFile(int reqid, String audioFile, Collection<String> refs, int width, int height) {
-    logger.info("getScoreForAudioFile " + audioFile + " against " + refs);
+    logger.info("getASRScoreForAudio " + audioFile + " against " + refs);
     if (refs.isEmpty()) {
-      logger.error("getScoreForAudioFile no refs? ");
+      logger.error("getASRScoreForAudio no refs? ");
       PretestScore pretestScore = new PretestScore();
       pretestScore.setReqid(reqid);
       return pretestScore;
@@ -293,8 +293,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param height  image dim
    * @return PretestScore
    **/
-  public PretestScore getScoreForAudioFile(int reqid, String testAudioFile, String sentence,
-                                           int width, int height) {
+  public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
+                                          int width, int height) {
+    logger.info("getASRScoreForAudio scoring " + testAudioFile + " with " + sentence + " req# " + reqid);
+
     assert(testAudioFile != null && sentence != null);
     if (asrScoring == null) {
       asrScoring = new ASRScoring(getInstallPath()); // lazy eval since install path not ready at init() time.
@@ -314,7 +316,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String refAudioDir  = refDirAndName.getDir();
     */
 
-    logger.info("getScoreForAudioFile scoring " + testAudioName + " in dir " + testAudioDir);// +" against " + refAudioName + " in " + refAudioDir);
+    logger.info("getASRScoreForAudio scoring " + testAudioName + " in dir " + testAudioDir);
 
     PretestScore pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
@@ -336,7 +338,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see #getScoreForAudioFile(int, String, String, int, int)
+   * @see #getScoreForAudioFile
    * @param testAudioFile
    * @return
    */

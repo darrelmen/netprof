@@ -55,7 +55,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int EAST_WIDTH = 90;
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
   private static final boolean DEFAULT_GOODWAVE_MODE = true;
-  public static final String RELEASE_DATE = "10/9";
+  public static final String RELEASE_DATE = "10/19";
+  public static final String DEFAULT_EXERCISE = null;//"nl0020_ams";
 
   private Panel currentExerciseVPanel = new VerticalPanel();
   private ExerciseList exerciseList;
@@ -154,24 +155,21 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH/* +10*/);
 
     // set up center panel, initially with flash record panel
-    ScrollPanel sp = new ScrollPanel();
-    sp.add(currentExerciseVPanel);
+
     if (usualLayout) {
+      ScrollPanel sp = new ScrollPanel();
+      sp.add(currentExerciseVPanel);
       widgets.add(sp);
     }
     else {
-      sp.addStyleName("body");
-      sp.addStyleName("noMargin");
-   /*   Element netPron1 = DOM.getElementById("netPron");
-      if (netPron1 != null) {
-        RootPanel.get("netPron").add(sp);
-      }*/
+      currentExerciseVPanel.addStyleName("body");
+      currentExerciseVPanel.addStyleName("noMargin");
       RootPanel netPron = RootPanel.get("netPron");
       if (netPron != null) {
-        netPron.add(sp);
+        netPron.add(currentExerciseVPanel);
       }
       else {
-        RootPanel.get().add(sp);
+        RootPanel.get().add(currentExerciseVPanel);
       }
     }
     makeFlashContainer();
@@ -291,7 +289,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       this.exercise_title = exercise_title;
     }
     else {
-      this.exercise_title = "nl0020_ams";
+      this.exercise_title = DEFAULT_EXERCISE;
     }
     String screenPortionParam =  Window.Location.getParameter("screenPortion");
     screenPortion = 1.0f;
