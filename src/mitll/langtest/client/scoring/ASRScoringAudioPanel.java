@@ -17,6 +17,10 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
     super(service, soundManager, useFullWidth);
   }
 
+  public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
+    super(path, refSentence, service, soundManager, useFullWidth);
+  }
+
   /**
    * @see ScoringAudioPanel#getTranscriptImageURLForAudio(String, String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
    * @param path
@@ -33,14 +37,15 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
                             final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                             final ImageAndCheck speechTranscript, int toUse, int height, int reqid) {
     System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
-    service.getScoreForAudioFile(reqid, path, refSentence, toUse, height, new AsyncCallback<PretestScore>() {
-      public void onFailure(Throwable caught) {}
+    service.getASRScoreForAudio(reqid, path, refSentence, toUse, height, new AsyncCallback<PretestScore>() {
+      public void onFailure(Throwable caught) {
+      }
+
       public void onSuccess(PretestScore result) {
-        if (isMostRecentRequest("score",result.reqid)) {
+        if (isMostRecentRequest("score", result.reqid)) {
           useResult(result, wordTranscript, phoneTranscript, speechTranscript, tested.contains(path));
           tested.add(path);
-        }
-        else {
+        } else {
           System.out.println("ignoring " + path + " with req " + result.reqid);
         }
       }
