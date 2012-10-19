@@ -16,6 +16,10 @@ public class SoundManagerStatic implements SoundManagerAPI {
     SoundManager.createSound(sound, title, file);
   }
 
+  public void destroySound(Sound sound) {
+    SoundManager.destroySound(sound);
+  }
+
   public void pause(Sound sound) {
     SoundManager.pause(sound);
   }
