@@ -26,7 +26,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Mainly delegates recording to the {@link mitll.langtest.client.recorder.SimpleRecordPanel}.
+ * Does audio playback and fetches and shows various audio images (waveform, spectrogram, etc.) with a red line
+ * indicating audio position during playback.<br></br>
+ *
+ * Subclasses include the capability to record audio and post it to the server.<br></br>
+ *
+ * On window resize, requests new images compatible with current window size.
  * User: GO22670
  * Date: 5/11/12
  * Time: 11:51 AM
@@ -42,7 +47,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
 
-  protected ImageAndCheck waveform,spectrogram,speech,phones,words;
+  protected ImageAndCheck waveform,spectrogram,phones,words;
+  /**
+   * @deprecated
+   */
+  protected ImageAndCheck speech;
   private int lastWidth = 0;
   private PopupPanel imageOverlay;
   private double songDuration;
@@ -119,21 +128,13 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   @Override
   public void onLoad() {
-    System.out.println("onLoad : audio path is " + audioPath);
     if (audioPath != null) {
+      System.out.println("onLoad : audio path is " + audioPath);
       getImagesForPath(audioPath);
     }
     else {
       System.out.println("onLoad : for AudioPanel got no audio path?");
     }
-  }
-
-  /**
-   * Not sure exactly why we have to do this --
-   */
-  @Override
-  protected void onUnload() {
-    audioPositionPopup.reinitialize();
   }
 
   public void setScreenPortion(float screenPortion) {
@@ -164,8 +165,13 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     playAudio.startSong(path);
   }
 
+  /**
+   * @see #addWidgets(String)
+   * @param hp
+   * @return
+   */
   private PlayAudioPanel addButtonsToButtonRow(HorizontalPanel hp) {
-    final PlayAudioPanel playAudio = makePlayAudioPanel();
+    PlayAudioPanel playAudio = makePlayAudioPanel();
     imageOverlay = new PopupPanel(false);
     imageOverlay.setStyleName("ImageOverlay");
     SimplePanel w = new SimplePanel();
@@ -214,6 +220,15 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     getImageURLForAudio(audioPath, SPECTROGRAM, width, spectrogram);
   }
 
+  /**
+   * Worries about responses returning out of order for the same type of image request (as the window is resized)
+   * and ignores all but the most recent request.
+   *
+   * @param path
+   * @param type
+   * @param width
+   * @param waveform
+   */
   private void getImageURLForAudio(String path, final String type,int width, final ImageAndCheck waveform) {
     int toUse = Math.max(MIN_WIDTH, width);
     int height = (int) (((float)Window.getClientHeight())/1200f * HEIGHT);
@@ -282,10 +297,15 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     return p;
   }
 
+  private static int counter  = 0;
+
   /**
    * Makes a red line appear on top of the waveform/spectogram,etc. marking playback position.
    */
   private class AudioPositionPopup implements AudioControl {
+    private int id = 0;
+    public AudioPositionPopup() { id = counter++; }
+    public String toString() { return "popup #" +id; }
     /**
      * @see AudioPanel#getImageURLForAudio(String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
      */
@@ -296,20 +316,25 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       imageOverlay.setPopupPosition(left, top);
     }
 
-    public void songFirstLoaded(double durationEstimate) {}
+    public void songFirstLoaded(double durationEstimate) {
+    //  if (debug) System.out.println("songFirstLoaded " + durationEstimate);
+    }
 
     /**
-     * @see PlayAudioPanel#songLoaded(double)
      * @param duration
+     * @see PlayAudioPanel#songLoaded(double)
      */
     public void songLoaded(final double duration) {
-          songDuration = duration;
-          int offsetHeight = imageContainer.getOffsetHeight();
-          int left = imageContainer.getAbsoluteLeft();
-          int top = imageContainer.getAbsoluteTop();
-      if (debug) System.out.println("songLoaded " + duration + " height " + offsetHeight + " x " + left +
+      songDuration = duration;
+      int offsetHeight = imageContainer.getOffsetHeight();
+      int left = imageContainer.getAbsoluteLeft();
+      int top = imageContainer.getAbsoluteTop();
+      if (debug) System.out.println(this + " songLoaded " + duration + " height " + offsetHeight + " x " + left +
           " y " + top);
       imageOverlay.setSize("2px", offsetHeight + "px");
+/*      if (!imageOverlay.isShowing()) {
+        imageOverlay.show();
+      }*/
       imageOverlay.setPopupPosition(left, top);
       if (debug) System.out.println("songLoaded " + imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() +
           " x " + imageOverlay.getPopupLeft() + " y " + imageOverlay.getPopupTop() + " dim " +
@@ -335,9 +360,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       int left = imageContainer.getAbsoluteLeft() + pixelProgress;
       int top = imageContainer.getAbsoluteTop();
       imageOverlay.setPopupPosition(left, top);
-      if (debug) System.out.println("showAt " + imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() +
-          " x " + imageOverlay.getPopupLeft() + " y " + imageOverlay.getPopupTop() + " dim " +
-          imageOverlay.getOffsetWidth() + " x " + imageOverlay.getOffsetHeight());
+
+      if (debug) System.out.println(this + " showAt " + imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() +
+          " x " + imageOverlay.getPopupLeft() + " y " + imageOverlay.getPopupTop() + " dim x " +
+          imageOverlay.getOffsetWidth() + " y " + imageOverlay.getOffsetHeight());
     }
   }
 }
