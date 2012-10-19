@@ -12,8 +12,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class ImageResponse implements IsSerializable {
   public int req;
   public String imageURL;
+  public boolean successful = false;
   public ImageResponse() {}
-  public ImageResponse(int req, String imageURL) {this.req = req; this.imageURL = imageURL; }
+  public ImageResponse(int req, String imageURL) {this.req = req; this.imageURL = imageURL; this.successful = true;}
 
-  public String toString() { return " req " + req + " : " + imageURL; }
+  public String toString() { return successful ? " req " + req + " : " + imageURL : "error for req " + req; }
 }
