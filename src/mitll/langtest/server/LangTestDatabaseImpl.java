@@ -138,7 +138,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * Get an image of desired dimensions for the audio file
+   * Get an image of desired dimensions for the audio file - only for Waveform and spectrogram.
    *
    * TODO : Worrying about absolute vs relative path is maddening.  Must be a better way!
    *
@@ -163,13 +163,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     ImageType imageType1 =
         imageType.equalsIgnoreCase(ImageType.WAVEFORM.toString()) ? ImageType.WAVEFORM :
-            imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM :
-                imageType.equalsIgnoreCase(ImageType.WORD_TRANSCRIPT.toString()) ? ImageType.WORD_TRANSCRIPT :
-                    imageType.equalsIgnoreCase(ImageType.PHONE_TRANSCRIPT.toString()) ? ImageType.PHONE_TRANSCRIPT :
-                        imageType.equalsIgnoreCase(ImageType.SPEECH_TRANSCRIPT.toString()) ? ImageType.SPEECH_TRANSCRIPT : null;
-
+            imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM : null;
+    if (imageType1 == null) return new ImageResponse(); // success = false!
     String imageOutDir = getImageOutDir();
-    String absolutePathToImage = imageWriter.writeImageSimple(audioFile, getAbsoluteFile(imageOutDir).getAbsolutePath(), width, height, imageType1);
+    String absolutePathToImage = imageWriter.writeImageSimple(audioFile, getAbsoluteFile(imageOutDir).getAbsolutePath(),
+        width, height, imageType1);
     String installPath = getInstallPath();
     //System.out.println("Absolute path to image is " + absolutePathToImage);
 
@@ -309,18 +307,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String testAudioName = testDirAndName.getName();
     String testAudioDir = testDirAndName.getDir();
 
-/*
-    refAudioFile  = dealWithMP3Audio(refAudioFile);
-    DirAndName refDirAndName = new DirAndName(refAudioFile, installPath).invoke();
-    String refAudioName = refDirAndName.getName();
-    String refAudioDir  = refDirAndName.getDir();
-    */
-
     logger.info("getASRScoreForAudio scoring " + testAudioName + " in dir " + testAudioDir);
 
     PretestScore pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
-      //  refAudioDir,  removeSuffix(refAudioName),
         sentence,
 
         getImageOutDir(), width, height);
