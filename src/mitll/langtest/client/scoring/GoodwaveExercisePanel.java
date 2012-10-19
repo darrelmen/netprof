@@ -152,7 +152,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
 
     if (path != null) {
       path = wavToMP3(path);
-      AudioPanel w = new AudioPanel(path, service, controller.getSoundManager(), controller.showOnlyOneExercise());
+      ASRScoringAudioPanel w =
+          new ASRScoringAudioPanel(path, e.getRefSentence(), service,
+              controller.getSoundManager(),
+              controller.showOnlyOneExercise());
+      w.setRefAudio(path, e.getRefSentence());
       ResizableCaptionPanel cp = new ResizableCaptionPanel(NATIVE_REFERENCE_SPEAKER);
       cp.setContentWidget(w);
       vp.add(cp);
@@ -199,6 +203,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     return widgets;
   }
 
+  /**
+   * @deprecated Tamas says we won't use this in the future
+   */
   private class DTWRecordAudioPanel extends DTWScoringPanel {
     private final int index;
 
