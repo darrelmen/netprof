@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import pronz.speech.ASRParameters;
 import pronz.speech.Audio;
@@ -13,6 +14,7 @@ import scala.Tuple2;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -154,14 +156,30 @@ public class ASRScoring extends Scoring {
   }
 
   /**
+   * Make sure that when we scale the phone scores by {@link #SCORE_SCALAR} we do it for both the scores and the image.
+   * <br></br>
    * get the phones for display in the phone accuracy pane
-   * @param scores
-   * @return
+   * @param scores from hydec
+   * @return map of phone name to score
    */
   private Map<String, Float> getPhoneToScore(Scores scores) {
     Map<String, Float> phones = scores.eventScores.get("phones");
-    Map<String, Float> emptyMap = Collections.emptyMap();
-    return phones != null ? new HashMap<String, Float>(phones) : emptyMap;
+    if (phones == null) {
+      return Collections.emptyMap();
+    }
+    else {
+      Map<String, Float> phoneToScore = new HashMap<String, Float>();
+      for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
+        String key = phoneScorePair.getKey();
+        if (!key.equals("sil")) {
+          phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue() * SCORE_SCALAR));
+        }
+        else {
+          System.out.println("Skipping sils.");
+        }
+      }
+      return phoneToScore;
+    }
   }
 
     /**
@@ -210,16 +228,35 @@ public class ASRScoring extends Scoring {
         dictFile,
         asrparameters.letterToSoundClassString(), platform);
 
-    //System.out.println(" : Calling jscore with " + sentence + " and " + asrparametersFullPaths);
+      //System.out.println(" : Calling jscore with " + sentence + " and " + asrparametersFullPaths);
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
     synchronized (this) {   // hydec can't be called concurrently -- not thread safe
       jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
     }
     Float hydec_score = jscoreOut._1;
     logger.info(" : got score " + hydec_score);
+    deleteTmpDir();
 
     Float[] svScoreVector = { 0f, 1.0f }; // Fake ratio.
     return new Scores(hydec_score, jscoreOut._2, svScoreVector);
+  }
+
+  /**
+   * Note that the log file sticks around, so the delete doesn't completely succeed.
+   */
+  private void deleteTmpDir() {
+    File tmpDirFile = new File(tmpDir);
+    if (tmpDirFile.exists()) {
+      try {
+        logger.info("deleting " + tmpDirFile.getAbsolutePath());
+        FileUtils.deleteDirectory(tmpDirFile);
+      } catch (IOException e) {
+        //e.printStackTrace();
+      }
+    }
+/*    if (tmpDirFile.exists()) {
+      logger.warn("huh? " + tmpDirFile.getAbsolutePath() + " exists???");
+    }*/
   }
 
   private Scores getEmptyScores() {
