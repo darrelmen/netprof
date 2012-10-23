@@ -31,12 +31,15 @@ public class Scoring {
   private static final String WINDOWS_CONFIGURATIONS = "windowsConfig";
   private static final String LINUX_CONFIGURATIONS = "mtexConfig";
   public static final float SCORE_SCALAR = 1.0f / 0.15f;
+  public static final String TMP = "tmp";
+  public static final String SCORING = "scoring";
 
   protected Dirs dirs;
 /*  private static final float MIN_AUDIO_SECONDS = 0.3f;
   private static final float MAX_AUDIO_SECONDS = 15.0f;*/
 
   protected String scoringDir;
+  protected String tmpDir;
   protected String os;
   protected String configFullPath;
   protected String deployPath;
@@ -47,19 +50,23 @@ public class Scoring {
    */
   public Scoring(String deployPath) {
     this.deployPath = deployPath;
+    this.os = getOS();
+
+    scoringDir = deployPath + File.separator + SCORING;
+
+    configFullPath = scoringDir + File.separator + (os.equals("win32") ? WINDOWS_CONFIGURATIONS : LINUX_CONFIGURATIONS);   // TODO point at os specific config file
+
+    tmpDir = scoringDir + File.separator + TMP;
+    dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
+  }
+
+  private String getOS() {
     String property = System.getProperty("os.name").toLowerCase();
-    this.os = property.contains("win") ? "win32" : property
+    return property.contains("win") ? "win32" : property
         .contains("mac") ? "macos"
         : property.contains("linux") ? System
         .getProperty("os.arch").contains("64") ? "linux64"
         : "linux" : "linux";
-
-    scoringDir = deployPath + File.separator + "scoring";
-
-    configFullPath = scoringDir + File.separator + (os.equals("win32") ? WINDOWS_CONFIGURATIONS : LINUX_CONFIGURATIONS);   // TODO point at os specific config file
-
-    dirs = pronz.dirs.Dirs$.MODULE$.apply(scoringDir + File.separator
-        + "tmp", "", scoringDir, new Log(null, true));
   }
 
   /**
