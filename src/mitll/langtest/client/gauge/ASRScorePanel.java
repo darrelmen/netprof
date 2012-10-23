@@ -144,7 +144,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
   /**
   *
-   * @see mitll.langtest.client.scoring.AudioPanel#useResult(mitll.langtest.shared.scoring.PretestScore, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, boolean)
+   * @see mitll.langtest.client.scoring.ScoringAudioPanel#useResult
    * @param score
    */
   public void gotScore(PretestScore score) {
