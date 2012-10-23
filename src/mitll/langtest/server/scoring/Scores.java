@@ -18,6 +18,12 @@ public class Scores {
   public Map<String, Map<String, Float>> eventScores ;
   public Float[] svScoreVector;
 
+  /**
+   *
+   * @param hydecScore
+   * @param eventScores
+   * @param svScoreVector
+   */
   public Scores(Float hydecScore, Map<String, Map<String, Float>> eventScores, Float[] svScoreVector) {
     this.hydecScore = hydecScore;
     this.eventScores = eventScores;
