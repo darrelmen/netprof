@@ -5,6 +5,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
+import java.util.Date;
+
 /**
  * Two buttons, and an interface with the SoundManagerAPI to call off into the soundmanager.js
  * package to play, pause, and track the progress of audio.
@@ -22,6 +24,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private final Button playButton = new Button("\u25ba play");
   private final Button pauseButton = new Button("<b>||</b> pause");
   private AudioControl listener;
+  private double durationInMillis = -1;
 
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel()
@@ -42,7 +45,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   protected void onUnload() {
     super.onUnload();
     if (currentSound != null) {
-      System.out.println("unloading " + this + " so destroying sound.");
+      //System.out.println("unloading " + this + " so destroying sound.");
       this.soundManager.destroySound(currentSound);
     }
   }
@@ -74,6 +77,27 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     pauseButton.setEnabled(true);
     playButton.setEnabled(false);
     soundManager.play(currentSound);
+  }
+
+  /**
+   * @see mitll.langtest.client.scoring.AudioPanel#playSegment(float, float, float)
+   * @param start
+   * @param end
+   * @param wavDurInMillis
+   */
+  public void playSegment(float start, float end, float wavDurInMillis) {
+    float scalar = (float)durationInMillis/wavDurInMillis;
+    System.out.println("play from " + start + " to " + end + " scalar " + scalar);
+
+    playSegment(start*scalar,end*scalar);
+  }
+
+  private void playSegment(float start, float end) {
+    soundManager.pause(currentSound);
+    pauseButton.setEnabled(true);
+    playButton.setEnabled(false);
+//    System.out.println("play from " + start + " to " + end);
+    soundManager.playInterval(currentSound, start * 1000f, end * 1000f);
   }
 
   /**
@@ -115,6 +139,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   public void reinitialize(){
+    System.out.println(new Date() + " got reinitialize for " + this + " listener is " + listener);
+
     pause();
     update(0);
     soundManager.setPosition(currentSound, 0);
@@ -140,6 +166,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param duration
    */
   public void songLoaded(double duration){
+    durationInMillis = duration;
     if (listener != null) {
       listener.songLoaded(duration);
     }
@@ -148,8 +175,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     }
   }
 
-  static int counter = 0;
-  int id;
+  private static int counter = 0;
+  private int id;
   public String toString() { return "PlayAudioPanel #" +id; }
 }
 
