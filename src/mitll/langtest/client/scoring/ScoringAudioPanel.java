@@ -1,15 +1,22 @@
 package mitll.langtest.client.scoring;
 
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
- * Created with IntelliJ IDEA.
+ * Asks server to score the audio.  Gets back transcript image URLs, phonem scores and end times.
+ * Supports clicking on a phoneme or word and playing that audio.
  * User: GO22670
  * Date: 10/9/12
  * Time: 11:17 AM
@@ -22,13 +29,23 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private String refAudio;
   protected final Set<String> tested = new HashSet<String>();
   private ScoreListener scoreListener;
+  private PretestScore result;
 
   public ScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
     super(null, service, soundManager, useFullWidth);
+    addClickHandlers();
   }
   public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
     super(path, service, soundManager, useFullWidth);
     this.refSentence = refSentence;
+    addClickHandlers();
+  }
+
+  private void addClickHandlers() {
+    this.phones.image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
+    this.phones.image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.PHONE_TRANSCRIPT));
+    this.words.image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
+    this.words.image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.WORD_TRANSCRIPT));
   }
 
   /**
@@ -89,6 +106,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
 
   /**
    * Record the image URLs in the Image widgets and enable the check boxes
+   * @see ASRScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param result
    * @param wordTranscript
    * @param phoneTranscript
@@ -114,8 +132,54 @@ public abstract class ScoringAudioPanel extends AudioPanel {
       speechTranscript.check.setVisible(true);
     }
     if (!scoredBefore && scoreListener != null) {
-      // System.out.println("new score returned " + result);
+      System.out.println("new score returned " + result);
       scoreListener.gotScore(result);
+    }
+    this.result = result;
+  }
+
+  /**
+   * Find the start-end time period corresponding to the click on either the phone or the word image and then
+   * play the segment. <br></br>
+   * NOTE : the duration (or length) of the wav file is usually about 0.1 sec shorter than the
+   * the mp3 file (silence padding at the end).<br></br>
+   * This means we have to scale the values returned from alignment so the audio times
+   * line up with those in the mp3 file.
+   * @see #addClickHandlers
+   */
+  private class TranscriptEventClickHandler implements ClickHandler {
+    boolean debug = false;
+    private NetPronImageType type;
+
+    public TranscriptEventClickHandler(NetPronImageType type) {
+      this.type = type;
+    }
+
+    /**
+     * The last transcript event end time is guaranteed to be = the length of the wav audio file.
+     * @param event
+     */
+    public void onClick(ClickEvent event) {
+      float i = (float) event.getX() / (float) phones.image.getWidth();
+      if (result != null) {
+        int index = 0;
+        List<Float> endTimes = result.getsTypeToEndTimes().get(type);
+        float wavFileLengthInSeconds = endTimes.get(endTimes.size() - 1);
+        float mouseClickTime = wavFileLengthInSeconds * i;
+        if (debug) System.out.println("got client at " + event.getX() + " or " + i + " or time " + mouseClickTime +
+            " duration " + wavFileLengthInSeconds + " secs or " + wavFileLengthInSeconds * 1000 + " millis");
+        for (Float endTime : endTimes) {
+          float next = endTimes.get(Math.min(endTimes.size() - 1, index + 1));
+          if (mouseClickTime > endTime && mouseClickTime <= next) {
+            if (debug) System.out.println("\t playing from " + endTime + " to " + next);
+
+            playSegment(endTime, next, wavFileLengthInSeconds);
+          }
+          index++;
+        }
+      } else {
+        System.err.println("no result for to click against?");
+      }
     }
   }
 }

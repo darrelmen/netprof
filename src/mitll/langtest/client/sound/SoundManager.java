@@ -98,8 +98,27 @@ public class SoundManager{
 		sound.@mitll.langtest.client.sound.Sound::sound.play();
 	}-*/;
 
+  /**
+   * When the segment finished, calls songFinished
+   * @param sound
+   * @param start
+   * @param end
+   */
+  public static native void playInterval(Sound sound, double start, double end) /*-{
+    sound.@mitll.langtest.client.sound.Sound::sound.stop();
+    sound.@mitll.langtest.client.sound.Sound::sound.play({
+      from: start, // start playing at start msec
+      to: end,  // end at end msec
+      onstop: function() {
+        $wnd.songFinished(sound);
+//        soundManager._writeDebug('sound stopped at position ' + this.position);
+        // note that the "to" target may be over-shot by 200+ msec, depending on polling and other factors.
+      }
+    });
+  }-*/;
 
-	public static void loaded(){
+
+  public static void loaded(){
 		//Window.alert("SoundManager loaded.");
 	}
 
