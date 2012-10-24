@@ -4,6 +4,7 @@ import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
 import mitll.langtest.client.LangTestDatabase;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioSystem;
@@ -24,6 +25,7 @@ import java.io.OutputStream;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioConversion {
+  private static Logger logger = Logger.getLogger(AudioConversion.class);
   private static final String LAME_PATH_WINDOWS = "C:\\Users\\go22670\\lame\\lame.exe";
   private static final String LAME_PATH_LINUX = "/usr/local/bin/lame";
 
@@ -288,7 +290,7 @@ public class AudioConversion {
   private File writeMP3(String lamePath, String pathToAudioFile, String mp3File) {
     ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File);
     try {
-      //    System.out.println("writeMP3 running lame" + lameProc.command());
+      logger.info("running lame" + lameProc.command());
       new ProcessRunner().runProcess(lameProc);
       //     System.out.println("writeMP3 exited  lame" + lameProc);
     } catch (IOException e) {
