@@ -97,7 +97,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    */
   protected void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
                            ImageAndCheck speechTranscript, boolean scoredBefore) {
-   // System.out.println("useResult got " + result);
+    //System.out.println("useResult got " + result);
     if (result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT) != null) {
       wordTranscript.image.setUrl(result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT));
       wordTranscript.image.setVisible(true);
