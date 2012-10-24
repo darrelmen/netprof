@@ -31,7 +31,7 @@ public class DTWScoringPanel extends ScoringAudioPanel {
     service.getScoreForAudioFile(reqid, path, refs, toUse, height, new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(PretestScore result) {
-        if (isMostRecentRequest("score", result.reqid)) {
+        if (isMostRecentRequest("score", result.getReqid())) {
           boolean contains = tested.contains(path);
         //  if (contains) System.out.println("already asked to score " + path);
           useResult(result, wordTranscript, phoneTranscript, speechTranscript, contains);
