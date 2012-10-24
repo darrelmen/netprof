@@ -30,7 +30,7 @@ public class Scoring {
 
   private static final String WINDOWS_CONFIGURATIONS = "windowsConfig";
   private static final String LINUX_CONFIGURATIONS = "mtexConfig";
-  public static final float SCORE_SCALAR = 1.0f / 0.15f;
+  public static final float SCORE_SCALAR = 1.0f;// / 0.15f;
   public static final String TMP = "tmp";
   public static final String SCORING = "scoring";
 
@@ -82,13 +82,13 @@ public class Scoring {
    * @param audioFileNoSuffix
    * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
    */
-  protected Map<NetPronImageType, String> writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
+  protected ImageWriter.EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
                                                            String audioFileNoSuffix) {
     String pathname = audioFileNoSuffix + ".wav";
     pathname = prependDeploy(pathname);
     if (!new File(pathname).exists()) {
       logger.error("writeTranscripts : can't find " + pathname);
-      return Collections.emptyMap();
+      return new ImageWriter.EventAndFileInfo();
     }
     imageOutDir = deployPath + File.separator + imageOutDir;
 
@@ -118,11 +118,13 @@ public class Scoring {
       logger.error("no label files found, e.g. " + phoneLabFile);
     }
 
-    Map<ImageType, String> typeToImageFile = new ImageWriter().writeTranscripts(pathname,
+    //Map<ImageType, String> typeToImageFile2;
+
+    ImageWriter.EventAndFileInfo eventAndFileInfo = new ImageWriter().writeTranscripts(pathname,
         imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR);
-    Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(typeToImageFile);
-    logger.debug("image map is " + sTypeToImage);
-    return sTypeToImage;
+//    Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
+//    logger.debug("image map is " + sTypeToImage);
+    return eventAndFileInfo;
   }
 
   /**
@@ -132,7 +134,7 @@ public class Scoring {
    * @param typeToImageFile
    * @return map of image type to URL
    */
-  private Map<NetPronImageType, String> getTypeToRelativeURLMap(Map<ImageType, String> typeToImageFile) {
+  protected Map<NetPronImageType, String> getTypeToRelativeURLMap(Map<ImageType, String> typeToImageFile) {
     Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
     for (Map.Entry<ImageType, String> kv : typeToImageFile.entrySet()) {
       String name = kv.getKey().toString();
