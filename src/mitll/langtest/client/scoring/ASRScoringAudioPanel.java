@@ -38,15 +38,13 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
                             final ImageAndCheck speechTranscript, int toUse, int height, int reqid) {
     System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
     service.getASRScoreForAudio(reqid, path, refSentence, toUse, height, new AsyncCallback<PretestScore>() {
-      public void onFailure(Throwable caught) {
-      }
-
+      public void onFailure(Throwable caught) {}
       public void onSuccess(PretestScore result) {
-        if (isMostRecentRequest("score", result.reqid)) {
+        if (isMostRecentRequest("score", result.getReqid())) {
           useResult(result, wordTranscript, phoneTranscript, speechTranscript, tested.contains(path));
           tested.add(path);
         } else {
-          System.out.println("ignoring " + path + " with req " + result.reqid);
+          System.out.println("ignoring " + path + " with req " + result.getReqid());
         }
       }
     });

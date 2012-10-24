@@ -5,6 +5,7 @@ package mitll.langtest.shared.scoring;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,103 +13,72 @@ import java.util.Map;
  *
  */
 public class PretestScore implements IsSerializable {
-  public int reqid;
+  private int reqid = 0;
 	private float hydecScore = -1f;
-//	private float transformedHydecScore;
 	private Float[] svScoreVector;
 	private float transformedSVScore = -1f;
 	private Map<String, Float> phoneScores;
-	//private Map<NetPronImageType, Map<Float, NetPronTranscriptEvent>> transcriptEvents;
   private Map<NetPronImageType, String> sTypeToImage;
+  private Map<NetPronImageType, List<Float>> sTypeToEndTimes;
 
   public PretestScore(){} // required for serialization
 
   /**
    * @see mitll.langtest.server.scoring.DTWScoring#score
-   * @param reqid
+   * @paramx reqid
    * @param svScoreVector
    * @param sTypeToImage
    */
-  public PretestScore(int reqid, Float[] svScoreVector,
+  public PretestScore(Float[] svScoreVector,
                       Map<NetPronImageType, String> sTypeToImage
   ) {
-    this.reqid = reqid;
     this.svScoreVector = svScoreVector;
 
-    if (svScoreVector != null) {
+    if (svScoreVector != null && svScoreVector.length > 0) {
       int i = svScoreVector.length - 1;
       if (i < 0) i = 0;
       transformedSVScore = svScoreVector[i];
       if (transformedSVScore > 1f) transformedSVScore = 1f;
     }
     else {
-      System.err.println("PretestScore : no sv score vector?");
+     // System.err.println("PretestScore : no sv score vector?");
     }
     this.setsTypeToImage(sTypeToImage);
   }
 
   public void setReqid(int r) { this.reqid = r;}
+  public int getReqid() {  return reqid;  }
 
   /**
    * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
-   * @param reqid
+   * @paramx reqid
    * @param hydecScore
-   * @param svScoreVector
+   * @paramx svScoreVector
    * @param phoneScores
    * @param sTypeToImage
    */
-  public PretestScore(int reqid, float hydecScore, Float[] svScoreVector,
+  public PretestScore(float hydecScore,
                       Map<String, Float> phoneScores,
-                      Map<NetPronImageType, String> sTypeToImage
+                      Map<NetPronImageType, String> sTypeToImage,
+                      Map<NetPronImageType, List<Float>> sTypeToEndTimes
   ) {
-    this(reqid, svScoreVector,sTypeToImage);
+    this(new Float[]{},sTypeToImage);
     this.hydecScore = hydecScore;
     this.phoneScores = phoneScores;
+    this.sTypeToEndTimes = sTypeToEndTimes;
 	}
 	
   public float getHydecScore() {
     return hydecScore;
   }
-  
-/*	public float getTransformedHydecScore() {
-		return transformedHydecScore;
-	} */
-	
-/*	public void setTransformedHydecScore(float score) {
-	  transformedHydecScore = score;
-	}*/
-	
-  public Float[] getSVScoreVector() {
-    return svScoreVector;
-  }
-  
+
 	public float getTransformedSVScore() {
 		return transformedSVScore;
 	}
 	
-	public void setTransformedSVScore(float score) {
-	  transformedSVScore = score;
-	}
-
-  /**
-   * TODO : remember in client
-   * @return
-   */
-/*	public Collection<Float> getHistoricalScores() {
-		return Collections.emptyList();
-	}*/
-	
-/*  public void setHistoricalScores(ArrayList<Float> scores) {
-    historicalScores = scores;
-  }*/
-  
 	public Map<String, Float> getPhoneScores() {
 		return phoneScores;
 	}
-	
-/*	public Map<NetPronImageType, Map<Float, NetPronTranscriptEvent>> getTranscriptEvents() {
-		return transcriptEvents;
-	}*/
 
   public Map<NetPronImageType, String> getsTypeToImage() {
     return sTypeToImage;
@@ -118,6 +88,10 @@ public class PretestScore implements IsSerializable {
     this.sTypeToImage = sTypeToImage;
   }
 
+  public Map<NetPronImageType, List<Float>> getsTypeToEndTimes() {
+    return sTypeToEndTimes;
+  }
+
   public String toString() {
     StringBuilder b = new StringBuilder();
 
@@ -125,9 +99,11 @@ public class PretestScore implements IsSerializable {
       for (Float f : svScoreVector) b.append(f).append(",");
     }
     return "hydec " + hydecScore +
-       // " transformed hydec " + transformedHydecScore +
         " transformed dtw " + transformedSVScore +
-        " phones " + getPhoneScores() + " sv " +b+" type->image " + getsTypeToImage();
+        " phones " + getPhoneScores() + " sv " +b+
+        " type->image " + getsTypeToImage() +
+        " type->endtimes " + getsTypeToEndTimes()
+        ;
   }
 
 }
