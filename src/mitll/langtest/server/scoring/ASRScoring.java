@@ -1,5 +1,9 @@
 package mitll.langtest.server.scoring;
 
+import audio.image.ImageType;
+import audio.image.TranscriptEvent;
+import audio.image.TranscriptReader;
+import audio.imagewriter.ImageWriter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import mitll.langtest.server.AudioConversion;
@@ -15,8 +19,10 @@ import scala.Tuple2;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -149,9 +155,20 @@ public class ASRScoring extends Scoring {
       logger.info("found cached score for file '" + testAudioDir + File.separator + testAudioFileNoSuffix + "'");
     }
 
-    Map<NetPronImageType, String> sTypeToImage = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix);
+    ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix);
+    Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
+    Map<NetPronImageType, List<Float>> typeToEndTimes = new HashMap<NetPronImageType, List<Float>>();
+    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
+      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
+      List<Float> endTimes = typeToEndTimes.get(key);
+      if (endTimes == null) { typeToEndTimes.put(key, endTimes = new ArrayList<Float>()); }
+      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
+        endTimes.add(event.getValue().end);
+      }
+    }
 
-    PretestScore pretestScore = new PretestScore(0, scores.hydecScore, scores.svScoreVector, getPhoneToScore(scores), sTypeToImage);
+    PretestScore pretestScore =
+        new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes);
     return pretestScore;
   }
 
@@ -235,6 +252,7 @@ public class ASRScoring extends Scoring {
     }
     Float hydec_score = jscoreOut._1;
     logger.info(" : got score " + hydec_score);
+
     deleteTmpDir();
 
     Float[] svScoreVector = { 0f, 1.0f }; // Fake ratio.

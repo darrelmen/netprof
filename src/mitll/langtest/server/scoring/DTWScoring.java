@@ -1,5 +1,6 @@
 package mitll.langtest.server.scoring;
 
+import audio.image.ImageType;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import pronz.speech.Audio;
@@ -76,9 +77,10 @@ public class DTWScoring extends Scoring {
       imageOutDir =  deployPath + File.separator + imageOutDir;
     }
 
-    Map<NetPronImageType, String> sTypeToImage = writeTranscripts(imageOutDir, imageWidth, imageHeight, testNoSuffix);
+    Map<ImageType, String> typeToFile = writeTranscripts(imageOutDir, imageWidth, imageHeight, testNoSuffix).typeToFile;
+    Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(typeToFile);
 
-    PretestScore pretestScore = new PretestScore(0, scores, sTypeToImage);
+    PretestScore pretestScore = new PretestScore(scores, sTypeToImage);
     //System.out.println(new Date() + " : DTWScoring : got score " + pretestScore);
     return pretestScore;
   }
