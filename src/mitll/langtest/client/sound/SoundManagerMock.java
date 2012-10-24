@@ -21,6 +21,10 @@ public class SoundManagerMock implements SoundManagerAPI {
     GWT.log("SoundManagerMock createSound");
   }
 
+  public void playInterval(Sound sound, double start, double end) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
   public void destroySound(Sound sound) {
     GWT.log("SoundManagerMock destroySound");
   }

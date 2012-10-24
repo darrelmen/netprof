@@ -519,7 +519,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     dialogBox = new DialogBox();
     dialogBox.setText("Information");
     dialogBox.setAnimationEnabled(true);
-    this.closeButton = new Button("Close");
+    this.closeButton = new Button("Close(E)");
     // We can set the id of a widget by accessing its Element
     closeButton.getElement().setId("closeButton");
 
@@ -537,6 +537,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public void showErrorMessage(String msg) {
+    System.err.println("got error " + msg);
     dialogBox.setText(msg);
     dialogBox.center();
     closeButton.setFocus(true);
