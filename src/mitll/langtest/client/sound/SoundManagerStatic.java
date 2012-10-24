@@ -36,6 +36,10 @@ public class SoundManagerStatic implements SoundManagerAPI {
     SoundManager.setPositionAndPlay(sound, position);
   }
 
+  public void playInterval(Sound sound, double start, double end) {
+    SoundManager.playInterval(sound, start, end);
+  }
+
   public void exportStaticMethods() {
     SoundManager.exportStaticMethods();
   }
