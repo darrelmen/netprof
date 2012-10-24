@@ -384,9 +384,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     else {
       File file = audioConversion.convertMP3ToWav(absolutePath);
       if (file.exists()) {
-       // String orig = audioFile;
+        String orig = audioFile;
         audioFile = file.getAbsolutePath();
-        //System.out.println("getImageForAudioFile : from " + orig + " wrote to " + file + " or " + audioFile);
+        logger.info("from " + orig + " wrote to " + file + " or " + audioFile);
       }
       else {
         logger.error("getImageForAudioFile : can't find " + file.getAbsolutePath());
