@@ -15,6 +15,7 @@ public interface SoundManagerAPI {
    void play(Sound sound);
    void setPosition(Sound sound, double position);
   void setPositionAndPlay(Sound sound, double position);
+  void playInterval(Sound sound, double start, double end);
   void exportStaticMethods();
   void loaded();
   void songFinished(Sound sound);
