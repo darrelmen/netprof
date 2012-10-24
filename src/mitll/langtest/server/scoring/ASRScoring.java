@@ -6,6 +6,7 @@ import audio.image.TranscriptReader;
 import audio.imagewriter.ImageWriter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -123,7 +124,8 @@ public class ASRScoring extends Scoring {
       logger.error("scoreRepeatExercise : Can't find audio wav file at : " + wavFile.getAbsolutePath());
       return new PretestScore();
     }
-
+    double duration = new AudioCheck().getDuration(wavFile);
+    logger.info("duration of " + wavFile.getAbsolutePath() + " is " + duration + " secs or " + duration*1000 + " millis");
     try {
       String audioDir = testAudioDir;
       if (mustPrepend) {
@@ -157,6 +159,14 @@ public class ASRScoring extends Scoring {
 
     ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix);
     Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
+    Map<NetPronImageType, List<Float>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo, duration);
+
+    PretestScore pretestScore =
+        new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes);
+    return pretestScore;
+  }
+
+  private Map<NetPronImageType, List<Float>> getTypeToEndTimes(ImageWriter.EventAndFileInfo eventAndFileInfo, double fileDuration) {
     Map<NetPronImageType, List<Float>> typeToEndTimes = new HashMap<NetPronImageType, List<Float>>();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
@@ -166,10 +176,14 @@ public class ASRScoring extends Scoring {
         endTimes.add(event.getValue().end);
       }
     }
-
-    PretestScore pretestScore =
-        new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes);
-    return pretestScore;
+    for ( List<Float> times : typeToEndTimes.values()) {
+      Float lastEndTime = times.get(times.size() - 1);
+      if (lastEndTime < fileDuration) {
+        logger.info("setting last segment to end at end of file " + lastEndTime + " vs " + fileDuration);
+        times.set(times.size() - 1,(float)fileDuration);
+      }
+    }
+    return typeToEndTimes;
   }
 
   /**
@@ -192,7 +206,7 @@ public class ASRScoring extends Scoring {
           phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue() * SCORE_SCALAR));
         }
         else {
-          System.out.println("Skipping sils.");
+          //System.out.println("Skipping sils.");
         }
       }
       return phoneToScore;
