@@ -269,6 +269,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
       super(new Button(RECORD), AUTO_STOP_DELAY);
       this.widgets = widgets;
       this.index = index;
+      getRecord().setWidth("52px");
     }
 
     @Override
