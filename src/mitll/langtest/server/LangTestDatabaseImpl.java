@@ -210,13 +210,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String installPath = getInstallPath();
     File testAudioFile = getProperAudioFile(audioFile, installPath);
 
-    //System.out.println("scoring after conversion " + testAudioFile.getAbsolutePath());
+    logger.debug("\tscoring after conversion " + testAudioFile.getAbsolutePath());
     String name = testAudioFile.getName();
 
     String imageOutDir = getImageOutDir();
     String testAudioDir = testAudioFile.getParent();
 
-    //System.out.println("scoring " + name + " in dir " +testAudioDir);
+    logger.debug("\tscoring " + name + " in dir " +testAudioDir);
 
     Collection<String> names = new ArrayList<String>();
     String refAudioDir = null;

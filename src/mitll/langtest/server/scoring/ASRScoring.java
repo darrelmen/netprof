@@ -125,7 +125,7 @@ public class ASRScoring extends Scoring {
       return new PretestScore();
     }
     double duration = new AudioCheck().getDuration(wavFile);
-    logger.info("duration of " + wavFile.getAbsolutePath() + " is " + duration + " secs or " + duration*1000 + " millis");
+    //logger.info("duration of " + wavFile.getAbsolutePath() + " is " + duration + " secs or " + duration*1000 + " millis");
     try {
       String audioDir = testAudioDir;
       if (mustPrepend) {
@@ -166,6 +166,16 @@ public class ASRScoring extends Scoring {
     return pretestScore;
   }
 
+  /**
+   * Make a map of event type to segment end times (so we can map clicks to which segment is clicked on).<br></br>
+   * Note we have to adjust the last segment time to be the audio duration, so we can correct for wav vs mp3 time
+   * duration differences (mp3 files being typically about 0.1 seconds longer than wav files).
+   * The consumer of this map is at {@link mitll.langtest.client.scoring.ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)}
+   *
+   * @param eventAndFileInfo
+   * @param fileDuration
+   * @return
+   */
   private Map<NetPronImageType, List<Float>> getTypeToEndTimes(ImageWriter.EventAndFileInfo eventAndFileInfo, double fileDuration) {
     Map<NetPronImageType, List<Float>> typeToEndTimes = new HashMap<NetPronImageType, List<Float>>();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
@@ -179,7 +189,7 @@ public class ASRScoring extends Scoring {
     for ( List<Float> times : typeToEndTimes.values()) {
       Float lastEndTime = times.get(times.size() - 1);
       if (lastEndTime < fileDuration) {
-        logger.info("setting last segment to end at end of file " + lastEndTime + " vs " + fileDuration);
+        logger.debug("setting last segment to end at end of file " + lastEndTime + " vs " + fileDuration);
         times.set(times.size() - 1,(float)fileDuration);
       }
     }
@@ -204,9 +214,6 @@ public class ASRScoring extends Scoring {
         String key = phoneScorePair.getKey();
         if (!key.equals("sil")) {
           phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue() * SCORE_SCALAR));
-        }
-        else {
-          //System.out.println("Skipping sils.");
         }
       }
       return phoneToScore;
@@ -265,16 +272,15 @@ public class ASRScoring extends Scoring {
       jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
     }
     Float hydec_score = jscoreOut._1;
-    logger.info(" : got score " + hydec_score);
+    logger.info("got score " + hydec_score);
 
-    deleteTmpDir();
+    deleteTmpDir(); // necessary?
 
-    Float[] svScoreVector = { 0f, 1.0f }; // Fake ratio.
-    return new Scores(hydec_score, jscoreOut._2, svScoreVector);
+    return new Scores(hydec_score, jscoreOut._2);
   }
 
   /**
-   * Note that the log file sticks around, so the delete doesn't completely succeed.
+   * Note that on windows the log file sticks around, so the delete doesn't completely succeed.
    */
   private void deleteTmpDir() {
     File tmpDirFile = new File(tmpDir);
@@ -286,15 +292,15 @@ public class ASRScoring extends Scoring {
         //e.printStackTrace();
       }
     }
+    tmpDirFile.mkdir(); // we still need the directory though!
 /*    if (tmpDirFile.exists()) {
       logger.warn("huh? " + tmpDirFile.getAbsolutePath() + " exists???");
     }*/
   }
 
   private Scores getEmptyScores() {
-    Float[] floats = {0f, 1f};
     Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
-    return new Scores(0f, eventScores, floats);
+    return new Scores(0f, eventScores);
   }
 
 /*  public static void main(String [] arg) {
