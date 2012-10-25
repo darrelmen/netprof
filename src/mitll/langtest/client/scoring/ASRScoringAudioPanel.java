@@ -22,6 +22,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
   }
 
   /**
+   * Shows spinning beachball (ish) gif while we wait...
    * @see ScoringAudioPanel#getTranscriptImageURLForAudio(String, String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
    * @param path
    * @param refAudio
@@ -36,7 +37,10 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
   protected void scoreAudio(final String path, String refAudio, String refSentence,
                             final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                             final ImageAndCheck speechTranscript, int toUse, int height, int reqid) {
-    System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
+    //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
+    wordTranscript.image.setUrl("images/animated_progress.gif");
+    wordTranscript.image.setVisible(true);
+
     service.getASRScoreForAudio(reqid, path, refSentence, toUse, height, new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(PretestScore result) {
