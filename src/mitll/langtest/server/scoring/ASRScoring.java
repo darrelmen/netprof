@@ -1,8 +1,8 @@
 package mitll.langtest.server.scoring;
 
+import Utils.Log;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
-import audio.image.TranscriptReader;
 import audio.imagewriter.ImageWriter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -12,6 +12,7 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import pronz.dirs.Dirs;
 import pronz.speech.ASRParameters;
 import pronz.speech.Audio;
 import pronz.speech.Audio$;
@@ -59,13 +60,6 @@ public class ASRScoring extends Scoring {
     } else {
       languageLookUp.put("Arabic", arabic);
     }
-
-/*    ASRParameters english = ASRParameters.jload("English", configFullPath);
-    if (english == null) {
-      System.err.println("can't find English parameters at " + configFullPath);
-    } else {
-      languageLookUp.put("English", english);
-    }*/
   }
 
 
@@ -142,7 +136,10 @@ public class ASRScoring extends Scoring {
       noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
     }
 
-    // the path to the test audio is <tomcatWriteDirectory>/<pretestFilesRelativePath>/<planName>/<testsRelativePath>/<testName>
+    //String tmpDir = Files.createTempDir().getAbsolutePath(); // TODO this doesn't work reliably!
+    String tmpDir = scoringDir + File.separator + TMP;
+    Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
+
     Audio testAudio = Audio$.MODULE$.apply(
         testAudioDir, testAudioFileNoSuffix,
         false /* notForScoring */, dirs);
@@ -150,7 +147,7 @@ public class ASRScoring extends Scoring {
     Scores scores = audioToScore.getIfPresent(testAudioDir + File.separator + testAudioFileNoSuffix);
 
     if (scores == null) {
-      scores = computeRepeatExerciseScores(scoringDir, testAudio, sentence, asrLanguage);
+      scores = computeRepeatExerciseScores(scoringDir, testAudio, sentence, asrLanguage, tmpDir);
       audioToScore.put(testAudioDir + File.separator + testAudioFileNoSuffix, scores);
     }
     else {
@@ -228,14 +225,9 @@ public class ASRScoring extends Scoring {
      * @param sentence
      * @param language
      * @return
-     * @throws Exception
      */
-  private Scores computeRepeatExerciseScores(String tomcatWriteDirectory, Audio testAudio, String sentence, String language) {
-/*    float testAudioSeconds = testAudio.seconds();
-    if (testAudioSeconds < MIN_AUDIO_SECONDS || testAudioSeconds > MAX_AUDIO_SECONDS) {
-     // throw new Exception("Recording is too short (< " + MIN_AUDIO_SECONDS + "s) or too long (> " + MAX_AUDIO_SECONDS + "s)");
-    }*/
-
+  private Scores computeRepeatExerciseScores(String tomcatWriteDirectory, Audio testAudio, String sentence,
+                                             String language, String tmpDir) {
     // RepeatExercises use ASR for scoring, so get the language parameters.
     ASRParameters asrparameters = languageLookUp.get(language);
     if (asrparameters == null) {
@@ -266,15 +258,18 @@ public class ASRScoring extends Scoring {
         dictFile,
         asrparameters.letterToSoundClassString(), platform);
 
-      //System.out.println(" : Calling jscore with " + sentence + " and " + asrparametersFullPaths);
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
     synchronized (this) {   // hydec can't be called concurrently -- not thread safe
-      jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
+      try {
+        jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
+        deleteTmpDir(tmpDir); // necessary?
+      } catch (AssertionError e) {
+        logger.error("Got assertion error " + e,e);
+        return new Scores();
+      }
     }
-    Float hydec_score = jscoreOut._1;
+    float hydec_score = jscoreOut._1;
     logger.info("got score " + hydec_score);
-
-    deleteTmpDir(); // necessary?
 
     return new Scores(hydec_score, jscoreOut._2);
   }
@@ -282,7 +277,7 @@ public class ASRScoring extends Scoring {
   /**
    * Note that on windows the log file sticks around, so the delete doesn't completely succeed.
    */
-  private void deleteTmpDir() {
+  private void deleteTmpDir(String tmpDir) {
     File tmpDirFile = new File(tmpDir);
     if (tmpDirFile.exists()) {
       try {
@@ -292,10 +287,13 @@ public class ASRScoring extends Scoring {
         //e.printStackTrace();
       }
     }
+    else {
+      logger.info("" + tmpDirFile.getAbsolutePath() + " does not exist");
+    }
     tmpDirFile.mkdir(); // we still need the directory though!
-/*    if (tmpDirFile.exists()) {
-      logger.warn("huh? " + tmpDirFile.getAbsolutePath() + " exists???");
-    }*/
+    if (tmpDirFile.exists()) {
+      logger.info(" " + tmpDirFile.getAbsolutePath() + " still exists???");
+    }
   }
 
   private Scores getEmptyScores() {
