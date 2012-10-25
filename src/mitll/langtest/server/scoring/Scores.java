@@ -3,6 +3,7 @@
  */
 package mitll.langtest.server.scoring;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -14,15 +15,16 @@ import java.util.Map;
  *
  */
 public class Scores {
-  public Float hydecScore;
+  public float hydecScore;
   public Map<String, Map<String, Float>> eventScores ;
 
+  public Scores() { eventScores = Collections.emptyMap(); }
   /**
    *
    * @param hydecScore
    * @param eventScores
    */
-  public Scores(Float hydecScore, Map<String, Map<String, Float>> eventScores) {
+  public Scores(float hydecScore, Map<String, Map<String, Float>> eventScores) {
     this.hydecScore = hydecScore;
     this.eventScores = eventScores;
   }
