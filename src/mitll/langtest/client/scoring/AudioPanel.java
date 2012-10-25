@@ -375,7 +375,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       int offsetHeight = imageContainer.getOffsetHeight();
       imageOverlay.setSize("2px", offsetHeight + "px");
 
-      int pixelProgress = (int) (((double) imageContainer.getOffsetWidth()) * (position / songDurationInMillis));
+      int pixelProgress = (int) (((float) imageContainer.getOffsetWidth()) * ((float)position / (float)songDurationInMillis));
       int left = imageContainer.getAbsoluteLeft() + pixelProgress;
       int top = imageContainer.getAbsoluteTop();
       imageOverlay.setPopupPosition(left, top);

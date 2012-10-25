@@ -1,15 +1,11 @@
 package mitll.langtest.server.scoring;
 
-import Utils.Log;
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.log4j.Logger;
-import pronz.dirs.Dirs;
-import pronz.speech.ASRParameters;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,12 +30,7 @@ public class Scoring {
   public static final String TMP = "tmp";
   public static final String SCORING = "scoring";
 
-  protected Dirs dirs;
-/*  private static final float MIN_AUDIO_SECONDS = 0.3f;
-  private static final float MAX_AUDIO_SECONDS = 15.0f;*/
-
   protected String scoringDir;
-  protected String tmpDir;
   protected String os;
   protected String configFullPath;
   protected String deployPath;
@@ -51,13 +42,8 @@ public class Scoring {
   public Scoring(String deployPath) {
     this.deployPath = deployPath;
     this.os = getOS();
-
-    scoringDir = deployPath + File.separator + SCORING;
-
-    configFullPath = scoringDir + File.separator + (os.equals("win32") ? WINDOWS_CONFIGURATIONS : LINUX_CONFIGURATIONS);   // TODO point at os specific config file
-
-    tmpDir = scoringDir + File.separator + TMP;
-    dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
+    this.scoringDir = deployPath + File.separator + SCORING;
+    this.configFullPath = scoringDir + File.separator + (os.equals("win32") ? WINDOWS_CONFIGURATIONS : LINUX_CONFIGURATIONS);   // TODO point at os specific config file
   }
 
   private String getOS() {
