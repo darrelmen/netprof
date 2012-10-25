@@ -2,6 +2,8 @@ package mitll.langtest.client.sound;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
@@ -19,6 +21,7 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
+  public static final int QUIET_BETWEEN_REPEATS = 300;
   private Sound currentSound;
   private SoundManagerAPI soundManager;
   private final Button playButton = new Button("\u25ba play");
@@ -74,36 +77,61 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   private void play() {
+    count = 0;
     pauseButton.setEnabled(true);
     playButton.setEnabled(false);
     soundManager.play(currentSound);
   }
 
+  private int count = 0;
+  private float start, end, wavDurInMillis;
+
   /**
+   * Repeat the segment 2 or 3 times, depending on length
+   * @param start
+   * @param end
+   * @param wavDurInMillis
+   */
+  public void repeatSegment(float start, float end, float wavDurInMillis) {
+    playSegment(start,end,wavDurInMillis,(end-start > 1) ? 1 : 2);
+  }
+
+  private void playSegment(float start, float end, float wavDurInMillis, int times) {
+    count = times;
+    this.start = start;
+    this.end = end;
+    this.wavDurInMillis = wavDurInMillis;
+
+    playSegment(start,end,wavDurInMillis);
+  }
+
+  /**
+   * Corrects for mp3/wav audio length disparity.
+   *
    * @see mitll.langtest.client.scoring.AudioPanel#playSegment(float, float, float)
    * @param start
    * @param end
    * @param wavDurInMillis
    */
-  public void playSegment(float start, float end, float wavDurInMillis) {
+  private void playSegment(float start, float end, float wavDurInMillis) {
     float scalar = (float)durationInMillis/wavDurInMillis;
-    System.out.println("play from " + start + " to " + end + " scalar " + scalar);
-
     playSegment(start*scalar,end*scalar);
   }
 
-  private void playSegment(float start, float end) {
+  private void playSegment(float startInSeconds, float endInSeconds) {
     soundManager.pause(currentSound);
     pauseButton.setEnabled(true);
     playButton.setEnabled(false);
-//    System.out.println("play from " + start + " to " + end);
-    soundManager.playInterval(currentSound, start * 1000f, end * 1000f);
+//    System.out.println("play from " + startInSeconds + " to " + endInSeconds);
+    soundManager.playInterval(currentSound, startInSeconds * 1000f, endInSeconds * 1000f);
   }
 
   /**
    * @see #reinitialize()
    */
   private void pause() {
+    count = 0;
+
     pauseButton.setEnabled(false);
     playButton.setEnabled(true);
 
@@ -113,7 +141,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   public void update(double position){
     if (listener != null) {
      // if (count++ < 3) System.out.println("update for " + this + " listener is " + listener);
-
       listener.update(position);
     }
   }
@@ -133,21 +160,32 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param song
    */
   private void createSound(String song){
-    //System.out.println("PlayAudioPanel.createSound " + song);
     currentSound = new Sound(this);
     soundManager.createSound(currentSound, song, song);
   }
 
+  /**
+   * Does repeat audio if count > 0
+   */
   public void reinitialize(){
-    System.out.println(new Date() + " got reinitialize for " + this + " listener is " + listener);
-
+    final int localCount = count;
     pause();
     update(0);
     soundManager.setPosition(currentSound, 0);
 
     if (listener != null) {
-      //System.out.println("reinitialize for " + this + " listener is " + listener);
       listener.reinitialize();
+    }
+
+    if (localCount > 0) {
+      Timer t = new Timer() {
+        public void run() {
+          int times = localCount-1;
+          playSegment(start, end, wavDurInMillis, times);
+        }
+      };
+
+      t.schedule(QUIET_BETWEEN_REPEATS);
     }
   }
 
@@ -156,7 +194,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     pauseButton.setEnabled(false);
     if (listener != null) {
      // System.out.println("songFirstLoaded for " + this + " listener is " + listener);
-
       listener.songFirstLoaded(durationEstimate);
     }
   }
