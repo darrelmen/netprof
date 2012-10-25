@@ -33,7 +33,6 @@ public class AudioCheck {
       AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
       long frames = audioInputStream.getFrameLength();
       AudioFormat format = audioInputStream.getFormat();
-      System.out.println("format sample rate " + format.getSampleRate() + " sample size bits " + format.getSampleSizeInBits());
       return (frames+0.0d) / format.getFrameRate();
     } catch (UnsupportedAudioFileException e) {
       e.printStackTrace();
