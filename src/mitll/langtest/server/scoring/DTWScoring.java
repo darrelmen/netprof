@@ -1,12 +1,16 @@
 package mitll.langtest.server.scoring;
 
+import Utils.Log;
 import audio.image.ImageType;
+import com.google.common.io.Files;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import pronz.dirs.Dirs;
 import pronz.speech.Audio;
 import pronz.speech.Audio$;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,10 +23,10 @@ import java.util.Map;
  * User: go22670
  * Date: 9/11/12
  * Time: 7:34 PM
- * To change this template use File | Settings | File Templates.
+ * @deprecated not going to use this in the future
  */
 public class DTWScoring extends Scoring {
-  String deployPath;
+  private String deployPath;
 
   public DTWScoring(String deployPath) {
     super(deployPath);
@@ -61,6 +65,8 @@ public class DTWScoring extends Scoring {
       return new PretestScore();
     }
 
+    String tmpDir = Files.createTempDir().getAbsolutePath();
+    Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
     System.out.println("test audio dir " + testAudioDir + " file " + testAudioFileNoSuffix + " dirs " + dirs);
     // the path to the test audio is <tomcatWriteDirectory>/<pretestFilesRelativePath>/<planName>/<testsRelativePath>/<testName>
     Audio testAudio = Audio$.MODULE$.apply(
@@ -71,7 +77,7 @@ public class DTWScoring extends Scoring {
     if (!new File(refAudioDir).exists()) {
       System.err.println("score Can't find ref dir " + new File(refAudioDir));
     }
-    Float[] scores = computeMultiRefRepeatExerciseScores(testAudio, refAudioDir, refAudioFiles);
+    Float[] scores = computeMultiRefRepeatExerciseScores(testAudio, refAudioDir, refAudioFiles, dirs);
 
     if (!imageOutDir.startsWith(deployPath)) {
       imageOutDir =  deployPath + File.separator + imageOutDir;
@@ -99,7 +105,7 @@ public class DTWScoring extends Scoring {
    * @param refs
    * @return
    */
-  private Float[] computeMultiRefRepeatExerciseScores(Audio testAudio, String refDir, Collection<String> refs)  {
+  private Float[] computeMultiRefRepeatExerciseScores(Audio testAudio, String refDir, Collection<String> refs,  Dirs dirs)  {
     Audio[] referenceAudios = new Audio[refs.size()];
 
     int i = 0;
