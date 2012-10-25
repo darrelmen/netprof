@@ -156,7 +156,13 @@ public abstract class ScoringAudioPanel extends AudioPanel {
     }
 
     /**
-     * The last transcript event end time is guaranteed to be = the length of the wav audio file.
+     * The last transcript event end time is guaranteed to be = the length of the wav audio file.<br></br>
+     * First normalize the click location, then scale it to the audio file length, then find which segment
+     * it's in by looking for a click that falls between the end time of a candidate segment and the
+     * end time of the next segment.  <br></br>
+     * Then plays, the segment - note we have to adjust between the duration of a wav file and an mp3 file, which
+     * will likely be different. (A little surprising to me, initially.)
+     * @see ScoringAudioPanel#playSegment(float, float, float)
      * @param event
      */
     public void onClick(ClickEvent event) {

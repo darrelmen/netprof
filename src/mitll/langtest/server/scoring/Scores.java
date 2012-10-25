@@ -16,18 +16,14 @@ import java.util.Map;
 public class Scores {
   public Float hydecScore;
   public Map<String, Map<String, Float>> eventScores ;
-  public Float[] svScoreVector;
 
   /**
    *
    * @param hydecScore
    * @param eventScores
-   * @param svScoreVector
    */
-  public Scores(Float hydecScore, Map<String, Map<String, Float>> eventScores, Float[] svScoreVector) {
+  public Scores(Float hydecScore, Map<String, Map<String, Float>> eventScores) {
     this.hydecScore = hydecScore;
     this.eventScores = eventScores;
-    // The score vector is score1, ratioForScore1, score2, ..., min(scores), ratioForMinScore.
-    this.svScoreVector = svScoreVector;
   }
 }
