@@ -177,7 +177,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       System.err.println("bad segment " + start + "-" + end);
     }
     else {
-      playAudio.playSegment(start,end,waveDurInSeconds*1000);
+      playAudio.repeatSegment(start,end,waveDurInSeconds*1000);
     }
   }
 
@@ -329,7 +329,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
      * @see AudioPanel#getImageURLForAudio(String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
      */
     public void reinitialize() {
-       if (debug || true) System.out.println(this + "AudioPositionPopup.reinitialize ");
+      if (debug) System.out.println(this + "  : AudioPositionPopup.reinitialize ");
 
       imageOverlay.hide();
       int left = imageContainer.getAbsoluteLeft();
@@ -337,9 +337,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       imageOverlay.setPopupPosition(left, top);
     }
 
-    public void songFirstLoaded(double durationEstimate) {
-    //  if (debug) System.out.println("songFirstLoaded " + durationEstimate);
-    }
+    public void songFirstLoaded(double durationEstimate) {}
 
     /**
      * @param durationInMillis
@@ -350,7 +348,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       int offsetHeight = imageContainer.getOffsetHeight();
       int left = imageContainer.getAbsoluteLeft();
       int top = imageContainer.getAbsoluteTop();
-      if (debug || true) System.out.println(this + " songLoaded " + durationInMillis + " height " + offsetHeight + " x " + left +
+      if (debug) System.out.println(this + " songLoaded " + durationInMillis + " height " + offsetHeight + " x " + left +
           " y " + top);
       imageOverlay.setSize("2px", offsetHeight + "px");
 /*      if (!imageOverlay.isShowing()) {
