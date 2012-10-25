@@ -25,6 +25,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,7 +64,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       .concurrencyLevel(4)
       .maximumSize(10000)
       .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();
-  private long tuserCount;
+  //private long tuserCount;
 
   @Override
   public void init() {
@@ -73,7 +74,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @param userID
    * @return
-   * @see mitll.langtest.client.LangTest#onModuleLoad
+   * @see mitll.langtest.client.exercise.ExerciseList#getExercises(long)
    */
   public List<Exercise> getExercises(long userID) {
     db.setInstallPath(getInstallPath());
@@ -232,7 +233,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.error("no valid ref files");
       return new PretestScore();
     } else {
-      DTWScoring dtwScoring = new DTWScoring(installPath);
+      DTWScoring dtwScoring;
+      dtwScoring = new DTWScoring(installPath);
       PretestScore pretestScore =
           dtwScoring.score(testAudioDir, removeSuffix(name), refAudioDir, names, imageOutDir, width, height);
       pretestScore.setReqid(reqid);
@@ -297,7 +299,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     assert(testAudioFile != null && sentence != null);
     if (asrScoring == null) {
-      asrScoring = new ASRScoring(getInstallPath()); // lazy eval since install path not ready at init() time.
+        asrScoring = new ASRScoring(getInstallPath()); // lazy eval since install path not ready at init() time.
+
     }
     testAudioFile = dealWithMP3Audio(testAudioFile);
 
@@ -308,8 +311,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String testAudioDir = testDirAndName.getDir();
 
     logger.info("getASRScoreForAudio scoring " + testAudioName + " in dir " + testAudioDir);
-
-    PretestScore pretestScore = asrScoring.scoreRepeat(
+    PretestScore pretestScore;
+    pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence,
 

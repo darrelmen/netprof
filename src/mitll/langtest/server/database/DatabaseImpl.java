@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import com.google.gwt.core.client.GWT;
 import mitll.langtest.shared.*;
+import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -26,6 +27,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class DatabaseImpl implements Database {
+  private static Logger logger = Logger.getLogger(DatabaseImpl.class);
   private static final boolean TESTING = false;
   private static final boolean USE_LEVANTINE = true;
 
@@ -288,6 +290,7 @@ public class DatabaseImpl implements Database {
   public Connection getConnection() throws Exception {
   //  if (c != null) return c;
 	  Connection c;
+  //  logger.info("install path is " +servlet.getInitParameter());
     try {
       if (servlet == null) {
         c = this.dbLogin();
