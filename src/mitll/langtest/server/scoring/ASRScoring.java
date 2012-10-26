@@ -6,6 +6,7 @@ import audio.image.TranscriptEvent;
 import audio.imagewriter.ImageWriter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.io.Files;
 import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -136,8 +137,8 @@ public class ASRScoring extends Scoring {
       noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
     }
 
-    //String tmpDir = Files.createTempDir().getAbsolutePath(); // TODO this doesn't work reliably!
-    String tmpDir = scoringDir + File.separator + TMP;
+    String tmpDir = Files.createTempDir().getAbsolutePath(); // TODO this doesn't work reliably!
+   // String tmpDir = scoringDir + File.separator + TMP;
     Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
 
     Audio testAudio = Audio$.MODULE$.apply(
@@ -259,17 +260,18 @@ public class ASRScoring extends Scoring {
         asrparameters.letterToSoundClassString(), platform);
 
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
+    long then = System.currentTimeMillis();
     synchronized (this) {   // hydec can't be called concurrently -- not thread safe
       try {
         jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
-        deleteTmpDir(tmpDir); // necessary?
+       // deleteTmpDir(tmpDir); // necessary?
       } catch (AssertionError e) {
         logger.error("Got assertion error " + e,e);
         return new Scores();
       }
     }
     float hydec_score = jscoreOut._1;
-    logger.info("got score " + hydec_score);
+    logger.info("got score " + hydec_score +" and took " + (System.currentTimeMillis()-then) + " millis");
 
     return new Scores(hydec_score, jscoreOut._2);
   }
