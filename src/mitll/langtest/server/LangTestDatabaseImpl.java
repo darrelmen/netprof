@@ -310,12 +310,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String testAudioName = testDirAndName.getName();
     String testAudioDir = testDirAndName.getDir();
 
-    logger.info("getASRScoreForAudio scoring " + testAudioName + " in dir " + testAudioDir);
+    logger.debug("getASRScoreForAudio scoring " + testAudioName + " in dir " + testAudioDir);
     PretestScore pretestScore;
     pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence,
-
         getImageOutDir(), width, height);
     pretestScore.setReqid(reqid);
 
