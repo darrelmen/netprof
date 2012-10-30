@@ -170,6 +170,7 @@ public class ASRScoring extends Scoring {
    * duration differences (mp3 files being typically about 0.1 seconds longer than wav files).
    * The consumer of this map is at {@link mitll.langtest.client.scoring.ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)}
    *
+   * @see #scoreRepeatExercise(String, String, String, String, String, String, int, int)
    * @param eventAndFileInfo
    * @param fileDuration
    * @return
@@ -187,7 +188,7 @@ public class ASRScoring extends Scoring {
     for ( List<Float> times : typeToEndTimes.values()) {
       Float lastEndTime = times.get(times.size() - 1);
       if (lastEndTime < fileDuration) {
-        logger.debug("setting last segment to end at end of file " + lastEndTime + " vs " + fileDuration);
+       // logger.debug("setting last segment to end at end of file " + lastEndTime + " vs " + fileDuration);
         times.set(times.size() - 1,(float)fileDuration);
       }
     }
