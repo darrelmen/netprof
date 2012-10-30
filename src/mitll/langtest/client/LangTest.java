@@ -163,6 +163,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     else {
       currentExerciseVPanel.addStyleName("body");
+      currentExerciseVPanel.getElement().getStyle().setBackgroundImage("url("+"images/"+"levantine_window_bg.jpg"+")");
       currentExerciseVPanel.addStyleName("noMargin");
       RootPanel netPron = RootPanel.get("netPron");
       if (netPron != null) {
