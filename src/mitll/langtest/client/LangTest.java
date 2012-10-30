@@ -163,15 +163,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     else {
       currentExerciseVPanel.addStyleName("body");
-      currentExerciseVPanel.getElement().getStyle().setBackgroundImage("url("+"images/"+"levantine_window_bg.jpg"+")");
+      currentExerciseVPanel.getElement().getStyle().setBackgroundImage("url("+"langtest/images/"+"levantine_window_bg.jpg"+")");
       currentExerciseVPanel.addStyleName("noMargin");
-      RootPanel netPron = RootPanel.get("netPron");
+/*      RootPanel netPron = RootPanel.get("netPron");
       if (netPron != null) {
         netPron.add(currentExerciseVPanel);
       }
-      else {
+      else {*/
         RootPanel.get().add(currentExerciseVPanel);
-      }
+//      }
     }
     makeFlashContainer();
     currentExerciseVPanel.add(flashRecordPanel);
@@ -321,6 +321,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void gotPermission() {
         System.out.println("got permission!");
         flashRecordPanel.hide();
+        flashRecordPanel.hide2();
+
         exerciseList.getExercises(lastUser);
       }
 
