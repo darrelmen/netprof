@@ -38,7 +38,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
                             final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                             final ImageAndCheck speechTranscript, int toUse, int height, int reqid) {
     //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
-    wordTranscript.image.setUrl("images/animated_progress.gif");
+    wordTranscript.image.setUrl("langtest/images/animated_progress.gif");
     wordTranscript.image.setVisible(true);
 
     service.getASRScoreForAudio(reqid, path, refSentence, toUse, height, new AsyncCallback<PretestScore>() {
