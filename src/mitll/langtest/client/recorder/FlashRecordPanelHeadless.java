@@ -56,6 +56,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
   /**
    * Show this widget (make it big enough to accommodate the permission dialog) and install the flash player.
+   * @see mitll.langtest.client.LangTest#gotUser(long)
    */
   public void initFlash() {
     Scheduler.get().scheduleDeferred(new Command() {
