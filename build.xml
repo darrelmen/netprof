@@ -5,8 +5,8 @@
               directory with the processing instruction <?eclipse.ant.import?>
               as the first entry and export the buildfile again. --><project basedir="." default="build" name="LangTest">
     <property environment="env"/>
-    <property name="ECLIPSE_HOME" value="../../eclipse_juno"/>
-    <property name="imagewriter.location" value="../../mt_repo/github/imagewriter"/>
+    <property name="ECLIPSE_HOME" value="../../../eclipse_juno"/>
+    <property name="imagewriter.location" value="imagewriter"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
@@ -14,8 +14,9 @@
     <!-- Arguments to gwtc and devmode targets -->
     <property name="gwt.args" value="" />
     <property name="gwt.lib" value="gwt/lib"/>
+    <property name="tomcat.deploy" value="../../../apache-tomcat-7.0.25/webapps"/>
 
- <!--   <path id="project.class.path">
+    <!--   <path id="project.class.path">
         <pathelement location="war/WEB-INF/classes"/>
         <pathelement location="test-classes"/>
         &lt;!&ndash; Add any additional non-server libs (such as JUnit) &ndash;&gt;
@@ -55,11 +56,13 @@
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
+<!--
         <copy includeemptydirs="false" todir="test-classes">
             <fileset dir="test">
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
+-->
     </target>
     <target name="clean">
         <delete dir="war/WEB-INF/classes"/>
@@ -73,6 +76,13 @@
     <target depends="build" name="war">
         <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**" >      
     	</jar>
+    </target>
+
+    <target depends="war" name="deploy">
+        <copy todir="${tomcat.deploy}">
+            <fileset dir="." includes="netPron2.war"/>
+        </copy>
+
     </target>
 
     <target depends="build-subprojects,javac" name="light-war">
@@ -116,12 +126,17 @@
             <src path="src"/>
             <classpath refid="LangTest.classpath"/>
         </javac>
+<!--
         <javac debug="true" debuglevel="${debuglevel}" destdir="test-classes" includeantruntime="false" source="${source}" target="${target}">
             <src path="test"/>
             <classpath refid="LangTest.classpath"/>
         </javac>
+-->
         <copy todir="war/WEB-INF/lib">
             <fileset dir="${imagewriter.location}" includes="imagewriter.jar"/>
+        </copy>
+        <copy todir="war/WEB-INF/lib">
+            <fileset dir="${imagewriter.location}/audioimage/lib" includes="jtransforms-2.3.jar"/>
         </copy>
 
     </target>
