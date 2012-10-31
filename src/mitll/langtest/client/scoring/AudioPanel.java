@@ -1,10 +1,12 @@
 package mitll.langtest.client.scoring;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -54,7 +56,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   protected ImageAndCheck speech;
   private int lastWidth = 0;
-  private PopupPanel imageOverlay;
   private double songDurationInMillis;
   private Panel imageContainer;
   private AudioPositionPopup audioPositionPopup;
@@ -91,10 +92,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private void addWidgets(String path) {
     imageContainer = new VerticalPanel();
     HorizontalPanel hp = new HorizontalPanel();
-    hp.setWidth("100%");
-    hp.setSpacing(5);
+    hp.setVerticalAlignment(ALIGN_MIDDLE);
 
-    playAudio = addButtonsToButtonRow(hp);
+    Widget beforePlayWidget = getBeforePlayWidget();
+    playAudio = getPlayButtons(beforePlayWidget == null ? new SimplePanel() : beforePlayWidget);
+    hp.add(playAudio);
+    hp.setCellHorizontalAlignment(playAudio,HorizontalPanel.ALIGN_LEFT);
 
     HorizontalPanel controlPanel = new HorizontalPanel();
 
@@ -118,13 +121,23 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     imageContainer.add(speech.image);
     controlPanel.add(addCheckbox("speech", speech));
 
-    hp.setCellHorizontalAlignment(controlPanel, HasHorizontalAlignment.ALIGN_RIGHT);
     hp.add(controlPanel);
+    hp.setCellHorizontalAlignment(controlPanel, HorizontalPanel.ALIGN_RIGHT);
+    hp.setWidth("100%");
+
     add(hp);
 
     add(imageContainer);
 
     this.audioPath = path;
+  }
+
+  /**
+   * This is sort of a hack -- so we can get left justify...
+   * @return
+   */
+  protected Widget getBeforePlayWidget() {
+    return null;
   }
 
   @Override
@@ -183,26 +196,23 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
     /**
     * @see #addWidgets(String)
-    * @param hp
-    * @return
+    * @return PlayAudioPanel
     */
-  private PlayAudioPanel addButtonsToButtonRow(HorizontalPanel hp) {
-    PlayAudioPanel playAudio = makePlayAudioPanel();
-    imageOverlay = new PopupPanel(false);
-    imageOverlay.setStyleName("ImageOverlay");
-    SimplePanel w = new SimplePanel();
-    imageOverlay.add(w);
-    w.setStyleName("ImageOverlay");
-
+  private PlayAudioPanel getPlayButtons(Widget toTheLeftWidget) {
+    PlayAudioPanel playAudio = makePlayAudioPanel(toTheLeftWidget);
     audioPositionPopup = new AudioPositionPopup();
     playAudio.addListener(audioPositionPopup);
-
-    hp.add(playAudio);
     return playAudio;
   }
 
-  protected PlayAudioPanel makePlayAudioPanel() {
-    return new PlayAudioPanel(soundManager);
+  protected PlayAudioPanel makePlayAudioPanel(final Widget toTheLeftWidget) {
+    return new PlayAudioPanel(soundManager) {
+      @Override
+      protected void addButtons() {
+        add(toTheLeftWidget);
+        super.addButtons();
+      }
+    };
   }
 
   /**
@@ -243,9 +253,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param path
    * @param type
    * @param width
-   * @param waveform
+   * @param imageAndCheck
    */
-  private void getImageURLForAudio(String path, final String type,int width, final ImageAndCheck waveform) {
+  private void getImageURLForAudio(String path, final String type,int width, final ImageAndCheck imageAndCheck) {
     int toUse = Math.max(MIN_WIDTH, width);
     float heightForType = type.equals(WAVEFORM) ? WAVEFORM_HEIGHT : SPECTROGRAM_HEIGHT;
     int height = (int) (((float)Window.getClientHeight())/1200f * heightForType);
@@ -261,9 +271,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
             System.err.println("got error for request for type " + type);
           }
           else if (isMostRecentRequest(type,result.req)) {
-            waveform.image.setUrl(result.imageURL);
-            waveform.image.setVisible(true);
-            waveform.check.setVisible(true);
+            imageAndCheck.image.setUrl(result.imageURL);
+            imageAndCheck.image.setVisible(true);
+            imageAndCheck.check.setVisible(true);
             audioPositionPopup.reinitialize();
           }
           else {
@@ -323,7 +333,19 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   private class AudioPositionPopup implements AudioControl {
     private int id = 0;
-    public AudioPositionPopup() { id = counter++; }
+    private PopupPanel imageOverlay;
+
+    /**
+     * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
+     */
+    public AudioPositionPopup() {
+      id = counter++;
+      imageOverlay = new PopupPanel(false);
+      imageOverlay.setStyleName("ImageOverlay");
+      SimplePanel w = new SimplePanel();
+      imageOverlay.add(w);
+      w.setStyleName("ImageOverlay");
+    }
     public String toString() { return "popup #" +id; }
     /**
      * @see AudioPanel#getImageURLForAudio(String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
@@ -351,9 +373,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       if (debug) System.out.println(this + " songLoaded " + durationInMillis + " height " + offsetHeight + " x " + left +
           " y " + top);
       imageOverlay.setSize("2px", offsetHeight + "px");
-/*      if (!imageOverlay.isShowing()) {
-        imageOverlay.show();
-      }*/
       imageOverlay.setPopupPosition(left, top);
       if (debug) System.out.println("songLoaded " + imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() +
           " x " + imageOverlay.getPopupLeft() + " y " + imageOverlay.getPopupTop() + " dim " +

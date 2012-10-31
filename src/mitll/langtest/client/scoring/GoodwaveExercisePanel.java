@@ -1,5 +1,7 @@
 package mitll.langtest.client.scoring;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -9,6 +11,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ProvidesResize;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -75,7 +78,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     add(center);
     setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
-    if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT) {
+    if (e.isRepeat()) {
       ASRScorePanel widgets = new ASRScorePanel();
       add(widgets);
       scorePanel = widgets;
@@ -126,7 +129,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
   private Widget getQuestionContent(Exercise e) {
     String content = e.getContent();
     String path = null;
-    if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT) {
+    if (e.isRepeat()) {
       this.refAudio = e.getRefAudio();
       path = refAudio;
     }
@@ -151,20 +154,65 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     vp.add(cpContent);
 
     if (path != null) {
-      path = wavToMP3(path);
-      ASRScoringAudioPanel w =
-          new ASRScoringAudioPanel(path, e.getRefSentence(), service,
-              controller.getSoundManager(),
-              controller.showOnlyOneExercise());
-      w.setRefAudio(path, e.getRefSentence());
-      ResizableCaptionPanel cp = new ResizableCaptionPanel(NATIVE_REFERENCE_SPEAKER);
-      cp.setContentWidget(w);
-      vp.add(cp);
-
-      contentAudio = w;
-      contentAudio.setScreenPortion(controller.getScreenPortion());
+      vp.add(getScoringAudioPanel(e, path));
     }
     return vp;
+  }
+
+  private Widget getScoringAudioPanel(final Exercise e, String path) {
+    path = wavToMP3(path);
+    ASRScoringAudioPanel w =
+        new ASRScoringAudioPanel(path, e.getRefSentence(), service,
+            controller.getSoundManager(),
+            controller.showOnlyOneExercise()) {
+          @Override
+          protected Widget getBeforePlayWidget() {
+            if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
+              VerticalPanel vp = new VerticalPanel();
+              //vp.addStyleName("demo-vp-padded");
+              RadioButton fast = new RadioButton("group", "Fast");
+              vp.add(fast);
+              fast.setWidth("40px");
+
+              fast.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                  setRefAudio(e.getRefAudio());
+                  getImagesForPath(wavToMP3(e.getRefAudio()));
+                }
+              });
+              RadioButton slow = new RadioButton("group", "Slow");
+              slow.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                  setRefAudio(e.getSlowAudioRef());
+                  getImagesForPath(wavToMP3(e.getSlowAudioRef()));
+                }
+              });
+              slow.setWidth("40px");
+              vp.add(slow);
+              vp.setWidth("50px");
+              fast.setValue(true);
+              HorizontalPanel hp = new HorizontalPanel();
+              hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+              hp.add(vp);
+              hp.setWidth("60px");
+
+              return vp;
+            }
+            else {
+              return super.getBeforePlayWidget();
+            }
+          }
+        };
+    w.setRefAudio(path, e.getRefSentence());
+    ResizableCaptionPanel cp = new ResizableCaptionPanel(NATIVE_REFERENCE_SPEAKER);
+    cp.setContentWidget(w);
+    //vp.add(cp);
+
+    contentAudio = w;
+    contentAudio.setScreenPortion(controller.getScreenPortion());
+    return cp;
   }
 
   private String wavToMP3(String path) {
@@ -193,7 +241,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
    */
   private Widget getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service,
                                  final ExerciseController controller, final int index) {
-    ScoringAudioPanel widgets = exercise.getType() == Exercise.EXERCISE_TYPE.REPEAT ?
+    ScoringAudioPanel widgets = exercise.isRepeat() ?
         new ASRRecordAudioPanel(service, index) :
         new DTWRecordAudioPanel(service, index);
     widgets.addScoreListener(scorePanel);
@@ -220,7 +268,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     }
 
     @Override
-    protected PlayAudioPanel makePlayAudioPanel() {
+    protected PlayAudioPanel makePlayAudioPanel(Widget toadd) {
       final PostAudioRecordButton postAudioRecordButton = new PostAudioRecordButton(this, index);
 
       return new PlayAudioPanel(soundManager) {
@@ -248,7 +296,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     }
 
     @Override
-    protected PlayAudioPanel makePlayAudioPanel() {
+    protected PlayAudioPanel makePlayAudioPanel(Widget toAdd) {
       final PostAudioRecordButton postAudioRecordButton = new PostAudioRecordButton(this, index);
 
       return new PlayAudioPanel(soundManager) {
