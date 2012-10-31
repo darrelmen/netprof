@@ -28,6 +28,10 @@ public class AudioCheck {
     return 20.0 * Math.log(power < 0.0001f ? 0.0001f : power) / LOG_OF_TEN;
   }
 
+  public double getDuration(String file) {
+    return getDuration(new File(file));
+  }
+
   public double getDuration(File file) {
     try {
       AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);

@@ -30,6 +30,7 @@ public class DatabaseImpl implements Database {
   private static Logger logger = Logger.getLogger(DatabaseImpl.class);
   private static final boolean TESTING = false;
   private static final boolean USE_LEVANTINE = true;
+  private static final boolean USE_FAST_SLOW_LEVANTINE = true;
 
   private static final boolean DROP_USER = false;
   private static final boolean DROP_RESULT = false;
@@ -106,7 +107,10 @@ public class DatabaseImpl implements Database {
     return USE_LEVANTINE ? new FileExerciseDAO() : new SQLExerciseDAO(this);
   }
 
-  public void setInstallPath(String i) { this.installPath = i; }
+  public void setInstallPath(String i) {
+    logger.debug("got install path " + i);
+    this.installPath = i;
+  }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises()
@@ -114,7 +118,12 @@ public class DatabaseImpl implements Database {
    */
   public List<Exercise> getExercises() {
     if (USE_LEVANTINE) {
-      ((FileExerciseDAO)exerciseDAO).readExercises(installPath);
+      if (USE_FAST_SLOW_LEVANTINE) {
+        ((FileExerciseDAO)exerciseDAO).readFastAndSlowExercises(installPath);
+      }
+      else {
+        ((FileExerciseDAO)exerciseDAO).readExercises(installPath);
+      }
     }
     return exerciseDAO.getRawExercises();
   }

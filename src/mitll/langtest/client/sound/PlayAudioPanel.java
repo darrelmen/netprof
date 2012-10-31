@@ -3,11 +3,8 @@ package mitll.langtest.client.sound;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-
-import java.util.Date;
 
 /**
  * Two buttons, and an interface with the SoundManagerAPI to call off into the soundmanager.js
@@ -21,7 +18,11 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
-  public static final int QUIET_BETWEEN_REPEATS = 300;
+  private static final int QUIET_BETWEEN_REPEATS = 300;
+  private static final int REPEATS_SHORT_AUDIO = 2;
+  private static final int REPEATS_LONG_AUDIO = REPEATS_SHORT_AUDIO-1;
+  // anything longer than this gets the long audio number of repeats
+  private static final float LONG_AUDIO_THRESHOLD = 1f;
   private Sound currentSound;
   private SoundManagerAPI soundManager;
   private final Button playButton = new Button("\u25ba play");
@@ -30,12 +31,13 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private double durationInMillis = -1;
 
   /**
-   * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel()
+   * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    * @param soundManager
    */
   public PlayAudioPanel(SoundManagerAPI soundManager) {
     this.soundManager = soundManager;
-    setSpacing(5);
+    setSpacing(10);
+    setVerticalAlignment(ALIGN_MIDDLE);
     addButtons();
     id = counter++;
   }
@@ -47,8 +49,12 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   @Override
   protected void onUnload() {
     super.onUnload();
+    destroySound();
+  }
+
+  private void destroySound() {
     if (currentSound != null) {
-      //System.out.println("unloading " + this + " so destroying sound.");
+      System.out.println("destroySound : " + this + " so destroying sound " + currentSound);
       this.soundManager.destroySound(currentSound);
     }
   }
@@ -93,7 +99,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param wavDurInMillis
    */
   public void repeatSegment(float start, float end, float wavDurInMillis) {
-    playSegment(start,end,wavDurInMillis,(end-start > 1) ? 1 : 2);
+    playSegment(start,end,wavDurInMillis,(end-start > LONG_AUDIO_THRESHOLD) ? REPEATS_LONG_AUDIO : REPEATS_SHORT_AUDIO);
   }
 
   private void playSegment(float start, float end, float wavDurInMillis, int times) {
@@ -150,6 +156,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param path
    */
   public void startSong(String path){
+    destroySound();
     createSound(path);
     pauseButton.setEnabled(false);
     playButton.setEnabled(true);
