@@ -84,6 +84,10 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     $wnd.Recorder.stop();
   }-*/;
 
+  public native void hide2() /*-{
+    $wnd.Recorder.hide2();
+  }-*/;
+
   /**
    * Base64 encoded byte array from action script.
    * @return
