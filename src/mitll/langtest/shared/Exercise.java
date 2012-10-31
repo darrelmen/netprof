@@ -19,15 +19,16 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class Exercise implements IsSerializable  {
-  public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE, REPEAT, MULTI_REF }
+  public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE, REPEAT, REPEAT_FAST_SLOW, MULTI_REF }
 
   private String plan;
   private String content;
   private String id;
   private EXERCISE_TYPE type = EXERCISE_TYPE.RECORD;
   public boolean promptInEnglish = true;
-  private Map<String,List<QAPair>> langToQuestion = new HashMap<String, List<QAPair>>();
+  private Map<String,List<QAPair>> langToQuestion = null;
   private String refAudio;
+  private String slowAudioRef;
   private String refSentence;
 
   public static class QAPair implements IsSerializable {
@@ -80,13 +81,20 @@ public class Exercise implements IsSerializable  {
     this.type = EXERCISE_TYPE.REPEAT;
   }
 
-  /**
-   * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
-   * @param lang
-   * @param question
-   * @param answer
-   */
+  public Exercise(String plan, String id, String content, String fastAudioRef, String slowAudioRef, String sentenceRef) {
+    this(plan,id,content,fastAudioRef,sentenceRef);
+    this.slowAudioRef = slowAudioRef;
+    this.type = EXERCISE_TYPE.REPEAT_FAST_SLOW;
+  }
+
+    /**
+    * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
+    * @param lang
+    * @param question
+    * @param answer
+    */
   public void addQuestion(String lang, String question, String answer) {
+    if (langToQuestion == null) langToQuestion = new HashMap<String, List<QAPair>>();
     List<QAPair> qaPairs = langToQuestion.get(lang);
     if (qaPairs == null) {
       langToQuestion.put(lang, qaPairs = new ArrayList<QAPair>());
@@ -98,7 +106,9 @@ public class Exercise implements IsSerializable  {
   public String getID() { return id; }
   public String getContent() { return content; }
   public EXERCISE_TYPE getType() { return type; }
+  public boolean isRepeat() { return type == EXERCISE_TYPE.REPEAT || type == EXERCISE_TYPE.REPEAT_FAST_SLOW; }
   public String getRefAudio() { return refAudio; }
+  public String getSlowAudioRef() { return slowAudioRef; }
   public void setRefAudio(String s) { this.refAudio = s; }
   public String getRefSentence() { return refSentence; }
 
@@ -132,7 +142,7 @@ public class Exercise implements IsSerializable  {
   }
 
   public String toString() {
-    if (getType() == EXERCISE_TYPE.REPEAT || getType() == EXERCISE_TYPE.MULTI_REF) {
+    if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
       return "Exercise " + plan+"/"+ id + "/" + " content bytes = " + content.length() + " ref sentence " + refSentence +" audio " + refAudio;
     }
     else {
