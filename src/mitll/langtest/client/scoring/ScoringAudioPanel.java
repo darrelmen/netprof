@@ -31,10 +31,25 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private ScoreListener scoreListener;
   private PretestScore result;
 
+  /**
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.sound.SoundManagerAPI, boolean)
+   * @param service
+   * @param soundManager
+   * @param useFullWidth
+   */
   public ScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
     super(null, service, soundManager, useFullWidth);
     addClickHandlers();
   }
+
+  /**
+   * @see ASRScoringAudioPanel
+   * @param path
+   * @param refSentence
+   * @param service
+   * @param soundManager
+   * @param useFullWidth
+   */
   public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
     super(path, service, soundManager, useFullWidth);
     this.refSentence = refSentence;
@@ -60,8 +75,12 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param refSentence
    */
   public void setRefAudio(String path, String refSentence) {
-    this.refAudio = path;
+    setRefAudio(path);
     this.refSentence = refSentence;
+  }
+
+  public void setRefAudio(String path) {
+    this.refAudio = path;
   }
 
   /**
@@ -117,25 +136,25 @@ public abstract class ScoringAudioPanel extends AudioPanel {
                            ImageAndCheck speechTranscript, boolean scoredBefore) {
     //System.out.println("useResult got " + result);
     if (result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT) != null) {
-      wordTranscript.image.setUrl(result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT));
-      wordTranscript.image.setVisible(true);
-      wordTranscript.check.setVisible(true);
+      showImageAndCheck(result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT), wordTranscript);
     }
     if (result.getsTypeToImage().get(NetPronImageType.PHONE_TRANSCRIPT) != null) {
-      phoneTranscript.image.setUrl(result.getsTypeToImage().get(NetPronImageType.PHONE_TRANSCRIPT));
-      phoneTranscript.image.setVisible(true);
-      phoneTranscript.check.setVisible(true);
+      showImageAndCheck(result.getsTypeToImage().get(NetPronImageType.PHONE_TRANSCRIPT), phoneTranscript);
     }
     if (result.getsTypeToImage().get(NetPronImageType.SPEECH_TRANSCRIPT) != null) {
-      speechTranscript.image.setUrl(result.getsTypeToImage().get(NetPronImageType.SPEECH_TRANSCRIPT));
-      speechTranscript.image.setVisible(true);
-      speechTranscript.check.setVisible(true);
+      showImageAndCheck(result.getsTypeToImage().get(NetPronImageType.SPEECH_TRANSCRIPT), speechTranscript);
     }
     if (!scoredBefore && scoreListener != null) {
       System.out.println("new score returned " + result);
       scoreListener.gotScore(result);
     }
     this.result = result;
+  }
+
+  private void showImageAndCheck(String imageURL, ImageAndCheck wordTranscript) {
+    wordTranscript.image.setUrl(imageURL);
+    wordTranscript.image.setVisible(true);
+    wordTranscript.check.setVisible(true);
   }
 
   /**
