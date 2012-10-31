@@ -13,10 +13,25 @@ import mitll.langtest.shared.scoring.PretestScore;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoringAudioPanel extends ScoringAudioPanel {
+  /**
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#ASRRecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int)
+   *
+   * @param service
+   * @param soundManager
+   * @param useFullWidth
+   */
   public ASRScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
     super(service, soundManager, useFullWidth);
   }
 
+  /**
+   * @see GoodwaveExercisePanel#getQuestionContent(mitll.langtest.shared.Exercise)
+   * @param path
+   * @param refSentence
+   * @param service
+   * @param soundManager
+   * @param useFullWidth
+   */
   public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
     super(path, refSentence, service, soundManager, useFullWidth);
   }
@@ -40,6 +55,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
     //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
     wordTranscript.image.setUrl("langtest/images/animated_progress.gif");
     wordTranscript.image.setVisible(true);
+    phoneTranscript.image.setVisible(false);
 
     service.getASRScoreForAudio(reqid, path, refSentence, toUse, height, new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {}
