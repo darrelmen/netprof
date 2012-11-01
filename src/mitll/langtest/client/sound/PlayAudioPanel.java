@@ -54,7 +54,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
   private void destroySound() {
     if (currentSound != null) {
-      System.out.println("destroySound : " + this + " so destroying sound " + currentSound);
+      //System.out.println("destroySound : " + this + " so destroying sound " + currentSound);
       this.soundManager.destroySound(currentSound);
     }
   }
