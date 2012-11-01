@@ -2,27 +2,20 @@ package mitll.langtest.server.database;
 
 import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
-import com.sun.media.sound.WaveFileWriter;
-import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.shared.Exercise;
 import org.apache.log4j.Logger;
 
-import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,6 +64,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       int count = 0;
       logger.debug("using install path " + installPath);
       while ((line2 = reader.readLine()) != null) {
+        if (count++ > 10) break;
         String[] split = line2.split(",");
         String name = split[1];
         String displayName = split[2];
