@@ -1,80 +1,104 @@
 package mitll.langtest.server.scoring;
 
+import Utils.Log;
+import audio.image.ImageType;
+import audio.image.TranscriptEvent;
+import audio.imagewriter.ImageWriter;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.io.Files;
+import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+import pronz.dirs.Dirs;
 import pronz.speech.ASRParameters;
 import pronz.speech.Audio;
 import pronz.speech.Audio$;
-import scala.Function1;
 import scala.Tuple2;
-import scala.runtime.AbstractFunction1;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
+ * Does ASR scoring using hydec.
+ *
+ * Takes the label files and generates transcript images for display in the client.
+ *
  * User: go22670
  * Date: 9/10/12
  * Time: 11:16 AM
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoring extends Scoring {
-  private Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
-  private static final float MIN_AUDIO_SECONDS = 0.3f;
-  private static final float MAX_AUDIO_SECONDS = 15.0f;
+  private static Logger logger = Logger.getLogger(ASRScoring.class);
+  private static final String CFG_TEMPLATE = "levantine-nn-model.cfg.template";
+  private static final String MODELS_DIR = "models.dli-levantine";
 
+  private final Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
+/*  private static final float MIN_AUDIO_SECONDS = 0.3f;
+  private static final float MAX_AUDIO_SECONDS = 15.0f;*/
+  private final Cache<String, Scores> audioToScore;
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile(int, String, java.util.Collection, int, int)
+   * @param deployPath
+   */
   public ASRScoring(String deployPath) {
     super(deployPath);
 
+    audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
+
     ASRParameters arabic = ASRParameters.jload("Arabic", configFullPath);
     if (arabic == null) {
-      System.err.println("can't find Arabic parameters at " + configFullPath);
+      logger.error("can't find Arabic parameters at " + configFullPath);
     } else {
       languageLookUp.put("Arabic", arabic);
     }
-
-    ASRParameters english = ASRParameters.jload("English", configFullPath);
-    if (english == null) {
-      System.err.println("can't find English parameters at " + configFullPath);
-    } else {
-      languageLookUp.put("English", english);
-    }
   }
 
+
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile(String, int, int)
-   * TODO : pass in ref sentence and language
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(int, String, String, int, int)
    * @param testAudioDir
    * @param testAudioFileNoSuffix
-   * @param refAudioDir
-   * @param refAudioFileNoSuffix
+   * @param sentence that should be what the test audio contains
    * @param imageOutDir
    * @param imageWidth
    * @param imageHeight
-   * @return
+   * @return PretestScore object
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-                                  String refAudioDir, String refAudioFileNoSuffix,
-                                 // String sentence, String asrLanguage,
-                                 // String scoringDir,
-                                  String imageOutDir,
+                                  String sentence, String imageOutDir,
                                   int imageWidth, int imageHeight) {
-    return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,refAudioDir,refAudioFileNoSuffix,
-        "This is a test.",
+    return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,
+        sentence,
         "Arabic",
         scoringDir,imageOutDir,imageWidth,imageHeight);
   }
 
   /**
    * Use hydec to do scoring
+   *
+   * Skips sv scoring for the moment -- why would we do it?
+   *
+   * @see #scoreRepeat(String, String, String, String, int, int)
    * @param testAudioDir
    * @param testAudioFileNoSuffix
-   * @param refAudioDir
-   * @param refAudioFileNoSuffix
+   * @paramx refAudioDir
+   * @paramx refAudioFileNoSuffix
    * @param sentence
    * @param asrLanguage
    * @param scoringDir
@@ -83,122 +107,268 @@ public class ASRScoring extends Scoring {
    * @param imageHeight
    * @return
    */
-  public PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
-                                          String refAudioDir, String refAudioFileNoSuffix,
+  private PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
                                           String sentence, String asrLanguage,
                                           String scoringDir,
+
                                           String imageOutDir,
                                           int imageWidth, int imageHeight) {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
     File wavFile = new File(pathname);
+    boolean mustPrepend = false;
     if (!wavFile.exists()) {
-      System.err.println("Can't find " + wavFile.getAbsolutePath());
+      wavFile = new File(deployPath + File.separator + pathname);
+      mustPrepend = true;
+    }
+    if (!wavFile.exists()) {
+      logger.error("scoreRepeatExercise : Can't find audio wav file at : " + wavFile.getAbsolutePath());
       return new PretestScore();
     }
+    double duration = new AudioCheck().getDuration(wavFile);
+    //logger.info("duration of " + wavFile.getAbsolutePath() + " is " + duration + " secs or " + duration*1000 + " millis");
+    try {
+      String audioDir = testAudioDir;
+      if (mustPrepend) {
+         audioDir = deployPath + File.separator + audioDir;
+        if (!new File(audioDir).exists()) logger.error("Couldn't find " + audioDir);
+        else testAudioDir = audioDir;
+      }
+      testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(audioDir, testAudioFileNoSuffix);
+    } catch (UnsupportedAudioFileException e) {
+      e.printStackTrace();
+    }
 
-    testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(testAudioDir, testAudioFileNoSuffix);
-    // the path to the test audio is <tomcatWriteDirectory>/<pretestFilesRelativePath>/<planName>/<testsRelativePath>/<testName>
+    if (testAudioFileNoSuffix.contains(AudioConversion.SIXTEEN_K_SUFFIX)) {
+      noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
+    }
+
+    String tmpDir = Files.createTempDir().getAbsolutePath(); // TODO this doesn't work reliably!
+   // String tmpDir = scoringDir + File.separator + TMP;
+    Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
+
     Audio testAudio = Audio$.MODULE$.apply(
         testAudioDir, testAudioFileNoSuffix,
         false /* notForScoring */, dirs);
 
-    // the path to the ref audio is <tomcatWriteDirectory>/<pretestFilesRelativePath>/<planName>/<referenceName>
-    // referenceName is called exercise_name in the db.
-    Audio refAudio = Audio$.MODULE$.apply(
-        refAudioDir, refAudioFileNoSuffix,
-        false /* notForScoring */, dirs);
+    Scores scores = audioToScore.getIfPresent(testAudioDir + File.separator + testAudioFileNoSuffix);
 
-    Scores scores = computeRepeatExerciseScores(scoringDir, testAudio, refAudio, sentence, asrLanguage);
+    if (scores == null) {
+      scores = computeRepeatExerciseScores(scoringDir, testAudio, sentence, asrLanguage, tmpDir);
+      audioToScore.put(testAudioDir + File.separator + testAudioFileNoSuffix, scores);
+    }
+    else {
+      logger.info("found cached score for file '" + testAudioDir + File.separator + testAudioFileNoSuffix + "'");
+    }
 
-    // get the phones for display in the phone accuracy pane, maps start
-    // time to Transcript events
-    Map<String, Float> phones = scores.eventScores.get("phones");
-    Map<String, Float> emptyMap = Collections.emptyMap();
-    Map<String, Float> phoneScores = phones != null ? new HashMap<String, Float>(phones) : emptyMap;
-    Map<NetPronImageType, String> sTypeToImage = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix);
+    ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix);
+    Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
+    Map<NetPronImageType, List<Float>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo, duration);
 
-    // XXX
-    // TODO: Must compute transformed scores! Not implemented yet.
-    return new PretestScore(scores.hydecScore, scores.svScoreVector, phoneScores, sTypeToImage);
+    PretestScore pretestScore =
+        new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes);
+    return pretestScore;
   }
 
   /**
-     *  convert the imageWriterTranscriptEvents to
-      pretestTranscriptEvents (make them serializable for GWTRPC)
-     */
-    private void convertEvents() {}
+   * Make a map of event type to segment end times (so we can map clicks to which segment is clicked on).<br></br>
+   * Note we have to adjust the last segment time to be the audio duration, so we can correct for wav vs mp3 time
+   * duration differences (mp3 files being typically about 0.1 seconds longer than wav files).
+   * The consumer of this map is at {@link mitll.langtest.client.scoring.ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)}
+   *
+   * @see #scoreRepeatExercise(String, String, String, String, String, String, int, int)
+   * @param eventAndFileInfo
+   * @param fileDuration
+   * @return
+   */
+  private Map<NetPronImageType, List<Float>> getTypeToEndTimes(ImageWriter.EventAndFileInfo eventAndFileInfo, double fileDuration) {
+    Map<NetPronImageType, List<Float>> typeToEndTimes = new HashMap<NetPronImageType, List<Float>>();
+    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
+      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
+      List<Float> endTimes = typeToEndTimes.get(key);
+      if (endTimes == null) { typeToEndTimes.put(key, endTimes = new ArrayList<Float>()); }
+      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
+        endTimes.add(event.getValue().end);
+      }
+    }
+    for ( List<Float> times : typeToEndTimes.values()) {
+      Float lastEndTime = times.get(times.size() - 1);
+      if (lastEndTime < fileDuration) {
+       // logger.debug("setting last segment to end at end of file " + lastEndTime + " vs " + fileDuration);
+        times.set(times.size() - 1,(float)fileDuration);
+      }
+    }
+    return typeToEndTimes;
+  }
+
+  /**
+   * Make sure that when we scale the phone scores by {@link #SCORE_SCALAR} we do it for both the scores and the image.
+   * <br></br>
+   * get the phones for display in the phone accuracy pane
+   * @param scores from hydec
+   * @return map of phone name to score
+   */
+  private Map<String, Float> getPhoneToScore(Scores scores) {
+    Map<String, Float> phones = scores.eventScores.get("phones");
+    if (phones == null) {
+      return Collections.emptyMap();
+    }
+    else {
+      Map<String, Float> phoneToScore = new HashMap<String, Float>();
+      for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
+        String key = phoneScorePair.getKey();
+        if (!key.equals("sil")) {
+          phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue() * SCORE_SCALAR));
+        }
+      }
+      return phoneToScore;
+    }
+  }
 
     /**
-     * @seex #scoreAudio
-     * @seex #scoreRepeatExercise(com.goodcomponents.exercises.RepeatExercise, String, String)
+     * Assumes that testAudio was recorded through the UI, which should prevent audio that is too short or too long.
+     *
+     * @see #scoreRepeatExercise
      * @param testAudio
-     * @param refAudio
      * @param sentence
      * @param language
      * @return
-     * @throws Exception
      */
-    // Just compute the score: don't deal with any GUI or history
-  private Scores computeRepeatExerciseScores(String tomcatWriteDirectory, Audio testAudio, Audio refAudio, String sentence, String language) {
-    float testAudioSeconds = testAudio.seconds();
-    if (testAudioSeconds < MIN_AUDIO_SECONDS || testAudioSeconds > MAX_AUDIO_SECONDS) {
-     // throw new Exception("Recording is too short (< " + MIN_AUDIO_SECONDS + "s) or too long (> " + MAX_AUDIO_SECONDS + "s)");
-    }
-
+  private Scores computeRepeatExerciseScores(String tomcatWriteDirectory, Audio testAudio, String sentence,
+                                             String language, String tmpDir) {
     // RepeatExercises use ASR for scoring, so get the language parameters.
-    ASRParameters asrparameters = languageLookUp.get(language);
-    if (asrparameters == null) {
-      System.err.println("computeRepeatExerciseScores : no ASR parameters for " + language);
+   // ASRParameters asrparameters = languageLookUp.get(language);
+ /*   if (asrparameters == null) {
+      logger.error("computeRepeatExerciseScores : no ASR parameters for " + language);
       return getEmptyScores();
-    }
+    }*/
     String platform = Utils.package$.MODULE$.platform();
 
     // Make sure that we have an absolute path to the config and dict files.
     // Make sure that we have absolute paths.
-    String config = asrparameters.configFile();
-    String dict = asrparameters.dictFile();
-    String configFile = new File(config).isAbsolute() ? config
+    //String config = asrparameters.configFile();
+    //String dict = asrparameters.dictFile();
+    String pathToConfigTemplate = scoringDir + File.separator + "configurations" + File.separator + CFG_TEMPLATE;   // TODO point at os specific config file
+    logger.debug("template config is at " + pathToConfigTemplate);
+    Map<String,String> kv = new HashMap<String, String>();
+    String modelsDir = scoringDir + File.separator + MODELS_DIR;
+    if (platform.startsWith("win")) {
+      modelsDir = modelsDir.replaceAll("\\\\","\\\\\\\\");
+      tmpDir = tmpDir.replaceAll("\\\\","\\\\\\\\");
+    }
+
+    kv.put("TEMP_DIR",tmpDir);
+    kv.put("MODELS_DIR", modelsDir);
+    if (platform.startsWith("win")) kv.put("/","\\\\");
+    logger.debug("map is " + kv);
+
+    String configFile = tmpDir+File.separator+"levantine-nn-model.cfg";
+
+    doTemplateReplace(pathToConfigTemplate,configFile,kv);
+    String dictFile = modelsDir + File.separator + "rsi-sctm-hlda"+File.separator+"dict-wo-sp";
+/*    String configFile = new File(config).isAbsolute() ? config
         : tomcatWriteDirectory + File.separator + config;
     String dictFile = new File(dict).isAbsolute() ? dict
-        : tomcatWriteDirectory + File.separator + dict;
+        : tomcatWriteDirectory + File.separator + dict;*/
 
     boolean configExists = new File(configFile).exists();
     boolean dictExists   = new File(dictFile).exists();
     if (!configExists || !dictExists) {
-      if (!configExists) System.err.println("computeRepeatExerciseScores : Can't find config file at " + configFile);
-      if (!dictExists) System.err.println("computeRepeatExerciseScores : Can't find dict file at " + dictFile);
+      if (!configExists) logger.error("computeRepeatExerciseScores : Can't find config file at " + configFile);
+      if (!dictExists)   logger.error("computeRepeatExerciseScores : Can't find dict file at " + dictFile);
       return getEmptyScores();
     }
 
     ASRParameters asrparametersFullPaths = new ASRParameters(
         configFile,
         dictFile,
-        asrparameters.letterToSoundClassString(), platform);
+      //  asrparameters.letterToSoundClassString(),
+        "corpus.ArabicLTS",
+        platform);
 
-    Function1<Float, Float> identityFn = new AbstractFunction1<Float, Float>() {
-      public Float apply(Float score) {
-        return score;
+    Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
+    long then = System.currentTimeMillis();
+    synchronized (this) {   // hydec can't be called concurrently -- not thread safe
+      try {
+        jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
+       // deleteTmpDir(tmpDir); // necessary?
+      } catch (AssertionError e) {
+        logger.error("Got assertion error " + e,e);
+        return new Scores();
       }
-    };
+    }
+    float hydec_score = jscoreOut._1;
+    logger.info("got score " + hydec_score +" and took " + (System.currentTimeMillis()-then) + " millis");
 
-    Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
-    Float hydec_score = jscoreOut._1;
-    Float sv_score = testAudio.sv(refAudio, os, identityFn);
-    Float[] svScoreVector = { sv_score, 1.0f }; // Fake ratio.
-    return new Scores(hydec_score, jscoreOut._2, svScoreVector);
+    return new Scores(hydec_score, jscoreOut._2);
+  }
+
+
+  private String ensureForwardSlashes(String wavPath) {
+    return wavPath.replaceAll("\\\\", "/");
+  }
+
+  private void doTemplateReplace(String infile, String outfile, Map<String,String> replaceMap) {
+    FileReader file;
+    String line = "";
+    try {
+      file = new FileReader(infile);
+      BufferedReader reader = new BufferedReader(file);
+
+      FileWriter output = new FileWriter(outfile);
+        BufferedWriter writer = new BufferedWriter(output);
+
+      while ((line = reader.readLine()) != null) {
+        String replaced = line;
+        for (Map.Entry<String, String> kv : replaceMap.entrySet()) {
+          replaced = replaced.replaceAll(kv.getKey(),kv.getValue());
+        }
+        writer.write(replaced +"\n");
+      }
+      reader.close();
+      writer.close();
+    } catch (Exception e) {
+      logger.error("got " +e,e);
+    }
+  }
+
+  /**
+   * Note that on windows the log file sticks around, so the delete doesn't completely succeed.
+   */
+  private void deleteTmpDir(String tmpDir) {
+    File tmpDirFile = new File(tmpDir);
+    if (tmpDirFile.exists()) {
+      try {
+        logger.info("deleting " + tmpDirFile.getAbsolutePath());
+        FileUtils.deleteDirectory(tmpDirFile);
+      } catch (IOException e) {
+        //e.printStackTrace();
+      }
+    }
+    else {
+      logger.info("" + tmpDirFile.getAbsolutePath() + " does not exist");
+    }
+    tmpDirFile.mkdir(); // we still need the directory though!
+    if (tmpDirFile.exists()) {
+      logger.info(" " + tmpDirFile.getAbsolutePath() + " still exists???");
+    }
   }
 
   private Scores getEmptyScores() {
-    Float[] floats = {0f, 1f};
     Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
-    return new Scores(0f, eventScores, floats);
+    return new Scores(0f, eventScores);
   }
 
   public static void main(String [] arg) {
-    ASRScoring scoring = new ASRScoring("C:\\Users\\go22670\\DLITest\\LangTest\\war");
-    String testAudioDir = "C:\\Users\\go22670\\DLITest\\LangTest\\war\\media\\ac-L0P-001";
-    PretestScore pretestScore = scoring.scoreRepeat(testAudioDir, "ad0035_ems", testAudioDir, "ad0035_ems", "out", 1024, 100);
-    System.out.println("score " + pretestScore);
+    String deployPath1 = "C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\scoring";
+    ASRScoring scoring = new ASRScoring(deployPath1);
+    Map<String,String> kv = new HashMap<String, String>();
+    kv.put("TEMP_DIR","C:\\Users\\go22670\\AppData\\Local\\Temp\\1351790200971-0");
+    kv.put("MODELS_DIR","models_dir_to_use");
+    scoring.doTemplateReplace(deployPath1 + File.separator + "configurations" + File.separator +"levantine-nn-model.cfg.template",
+        deployPath1 + File.separator + "configurations" + File.separator +"new-levantine-nn-model.cfg",kv);
+    //String testAudioDir = "C:\\Users\\go22670\\DLITest\\LangTest\\war\\media\\ac-L0P-001";
+    //PretestScore pretestScore = scoring.scoreRepeat(testAudioDir, "ad0035_ems", *//*testAudioDir, "ad0035_ems",*//* "This is a test.", "out", 1024, 100);
+   // System.out.println("score " + pretestScore);
   }
 }

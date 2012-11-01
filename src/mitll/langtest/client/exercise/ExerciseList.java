@@ -9,6 +9,8 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ProvidesResize;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
@@ -26,7 +28,7 @@ import java.util.List;
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseList extends VerticalPanel {
+public class ExerciseList extends VerticalPanel implements ProvidesResize, RequiresResize {
   protected List<Exercise> currentExercises = null;
   private int currentExercise = 0;
   private List<HTML> progressMarkers = new ArrayList<HTML>();
@@ -36,9 +38,9 @@ public class ExerciseList extends VerticalPanel {
   protected LangTestDatabaseAsync service;
   private UserFeedback feedback;
   private ExercisePanelFactory factory;
-  //private boolean doGrading = false;
   protected int expectedGrades = 1;
   protected UserManager user;
+  private String exercise_title;
 
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback, ExercisePanelFactory factory) {
     this.currentExerciseVPanel = currentExerciseVPanel;
@@ -54,24 +56,16 @@ public class ExerciseList extends VerticalPanel {
    * @paramx doGrading
    * @param expectedGrades
    */
-  public void setFactory(ExercisePanelFactory factory, UserManager user, /*boolean doGrading, */int expectedGrades) {
-  //  this.doGrading = doGrading;
+  public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {
     this.factory = factory;
     this.user = user;
     this.expectedGrades = expectedGrades;
-/*    if (doGrading) {
-      loadGradingExercises();
-    }*/
   }
-
-/*  private void loadGradingExercises() {
-    service.getExercises(new SetExercisesCallback());
-  }*/
 
   /**
     * Get exercises for this user.
     * @see mitll.langtest.client.LangTest#gotUser(long)
-    * @see mitll.langtest.client.LangTest#makeFlashContainer()
+    * @see mitll.langtest.client.LangTest#makeFlashContainer
     * @param userID
     */
   public void getExercises(long userID) {
@@ -81,6 +75,18 @@ public class ExerciseList extends VerticalPanel {
 
   public void getExercisesInOrder() {
     service.getExercises(new SetExercisesCallback());
+  }
+
+  public void onResize() {
+    if (current != null && current instanceof RequiresResize) ((RequiresResize)current).onResize();
+  }
+
+  /**
+   * So you an load a specific exercise
+   * @param exercise_title
+   */
+  public void setExercise_title(String exercise_title) {
+    this.exercise_title = exercise_title;
   }
 
   protected class SetExercisesCallback implements AsyncCallback<List<Exercise>> {
@@ -122,10 +128,25 @@ public class ExerciseList extends VerticalPanel {
 
   protected void loadFirstExercise() {
     Exercise toLoad = currentExercises.get(0);
+    if (exercise_title != null) {
+      Exercise e = byName(exercise_title);
+      if (e != null) toLoad = e;
+    }
+
     loadExercise(toLoad);
   }
 
-  // TODO : add exercise by name
+  private Exercise byName(String name) {
+    Exercise found = null;
+    for (Exercise e : currentExercises) {
+      String id = e.getID();
+      if (id.equals(name)) {
+        found = e;
+        break;
+      }
+    }
+    return found;
+  }
 
   /**
    * @see #addExerciseToList(mitll.langtest.shared.Exercise)

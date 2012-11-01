@@ -1,10 +1,6 @@
 package mitll.langtest.client.exercise;
 
-import com.goodwave.client.sound.SoundManager;
-import com.goodwave.client.sound.SoundManagerAPI;
-import com.google.gwt.core.client.JsArrayInteger;
-import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.recorder.SaveNotification;
+import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -31,4 +27,8 @@ public interface ExerciseController {
   boolean getEnglishOnly();
 
   SoundManagerAPI getSoundManager();
+
+  float getScreenPortion();
+
+  boolean showOnlyOneExercise();
 }
