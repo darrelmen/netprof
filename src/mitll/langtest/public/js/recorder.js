@@ -122,6 +122,11 @@ Recorder = {
     Recorder.recorder.record(name, filename);
   },
 
+  hide2:function () {
+    Recorder.recorder.width = 1 + "px";
+    Recorder.recorder.height = 1 + "px";
+  },
+
   show: function() {
     Recorder.recorder.show();
   },

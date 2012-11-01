@@ -40,9 +40,9 @@ public interface LangTestDatabaseAsync {
 
   void changeGrade(Grade toChange, AsyncCallback<Void> async);
 
-  void getImageForAudioFile(String audioFile, String imageType, int width, int height, AsyncCallback<String> async);
+  void getASRScoreForAudio(int reqid, String testAudioFile, String sentence, int width, int height, AsyncCallback<PretestScore> async);
 
-  void getScoreForAudioFile(String audioFile, int width, int height, AsyncCallback<PretestScore> async);
+  void getScoreForAudioFile(int reqid, String audioFile, Collection<String> refs, int width, int height, AsyncCallback<PretestScore> async);
 
-  void getScoreForAudioFile(String audioFile, Collection<String> refs, int width, int height, AsyncCallback<PretestScore> async);
+  void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, AsyncCallback<ImageResponse> async);
 }
