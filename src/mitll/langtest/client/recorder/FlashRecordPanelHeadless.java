@@ -21,6 +21,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
  * @author Gordon Vidaver *
  */
 public class FlashRecordPanelHeadless extends AbsolutePanel {
+  private static final int WIDTH = 250;
+  private static final int HEIGHT = 170;
   private String id = "flashcontent";
   private static MicPermission micPermission;
   private boolean didPopup = false;
@@ -41,15 +43,20 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   public void show() {
-    setSize(250 + "px", 170 + "px");
+    setSize(WIDTH + "px", HEIGHT + "px");
+    //setVisible(true);
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#makeFlashContainer()
+   */
   public void hide() {
     setSize("0px", "0px");
   }
 
   /**
    * Show this widget (make it big enough to accommodate the permission dialog) and install the flash player.
+   * @see mitll.langtest.client.LangTest#gotUser(long)
    */
   public void initFlash() {
     Scheduler.get().scheduleDeferred(new Command() {
@@ -75,6 +82,10 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
   public native void stopRecording() /*-{
     $wnd.Recorder.stop();
+  }-*/;
+
+  public native void hide2() /*-{
+    $wnd.Recorder.hide2();
   }-*/;
 
   /**
