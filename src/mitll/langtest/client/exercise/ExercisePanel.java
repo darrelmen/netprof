@@ -31,7 +31,7 @@ import java.util.Set;
  * Time: 1:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExercisePanel extends VerticalPanel implements ExerciseQuestionState {
+public class ExercisePanel extends VerticalPanel implements ExerciseQuestionState, ProvidesResize, RequiresResize {
   private static final String ANSWER_BOX_WIDTH = "400px";
   private List<Widget> answers = new ArrayList<Widget>();
   private Set<Widget> completed = new HashSet<Widget>();
@@ -61,7 +61,6 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     HorizontalPanel hp = new HorizontalPanel();
     hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e));
-    hp.setWidth((Window.getClientWidth()- LangTest.EXERCISE_LIST_WIDTH-100) + "px");
     add(hp);
 
     int i = 1;
@@ -69,7 +68,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     addQuestions(e, service, controller, i);
 
     SimplePanel spacer = new SimplePanel();
-    spacer.setSize("500px", "20px");
+    spacer.setSize("50px", "20px");
     add(spacer);
 
     Panel buttonRow = getNextAndPreviousButtons(e, service, userFeedback, controller);
@@ -78,6 +77,9 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
 
   protected Widget getQuestionContent(Exercise e) {
     return new HTML(e.getContent());
+  }
+
+  public void onResize() {
   }
 
   /**
@@ -126,7 +128,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
   private void addQuestionPrompt(Panel vp, Exercise e) {
     vp.add(new HTML(getQuestionPrompt(e.promptInEnglish)));
     SimplePanel spacer = new SimplePanel();
-    spacer.setSize("500px", getQuestionPromptSpacer() + "px");
+    spacer.setSize("50px", getQuestionPromptSpacer() + "px");
     vp.add(spacer);
   }
 
