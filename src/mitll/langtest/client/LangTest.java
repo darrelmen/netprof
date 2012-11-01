@@ -1,7 +1,5 @@
 package mitll.langtest.client;
 
-import com.goodwave.client.sound.SoundManagerAPI;
-import com.goodwave.client.sound.SoundManagerStatic;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -10,8 +8,11 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
@@ -31,10 +32,12 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.GradedExerciseList;
-import mitll.langtest.client.goodwave.GoodwaveExercisePanelFactory;
+import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
+import mitll.langtest.client.sound.SoundManagerAPI;
+import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
@@ -49,8 +52,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int HEADER_HEIGHT = 80;
   private static final int FOOTER_HEIGHT = 40;
   public  static final int EXERCISE_LIST_WIDTH = 200;
-  private static final int EAST_WIDTH = 65;
+  private static final int EAST_WIDTH = 90;
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
+  private static final boolean DEFAULT_GOODWAVE_MODE = true;
+  public static final String RELEASE_DATE = "10/19";
+  public static final String DEFAULT_EXERCISE = null;//"nl0020_ams";
 
   private Panel currentExerciseVPanel = new VerticalPanel();
   private ExerciseList exerciseList;
@@ -63,12 +69,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private long lastUser = -1;
   private boolean grading = false;
   private boolean englishOnlyMode = false;
-  private boolean goodwaveMode = false;
+  private boolean goodwaveMode = DEFAULT_GOODWAVE_MODE;
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
-
+  private int footerHeight = FOOTER_HEIGHT;
+  private int eastWidth = EAST_WIDTH;
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
+  private ScrollPanel itemScroller;
+  private float screenPortion;
+  //private boolean showOnlyOne;
+  private String exercise_title;
 
   /**
    * Make an exception handler that displays the exception.
@@ -115,38 +126,62 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void onModuleLoad2() {
     userManager = new UserManager(this,service);
     resultManager = new ResultManager(service, this);
+    boolean isGrading = checkParams();
+    boolean usualLayout = exercise_title == null;
+    final DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
+    if (usualLayout) {
+      RootPanel.get().add(widgets);
+    }
+    if (goodwaveMode) {
+      footerHeight = 5;
+     // eastWidth = 15;
+    }
 
-    DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
-    RootPanel.get().add(widgets);
-
-    widgets.setSize((Window.getClientWidth()-EAST_WIDTH) + "px", (Window.getClientHeight()-FOOTER_HEIGHT) + "px");
+    // if you remove this line the layout doesn't work -- the dock layout appears blank!
+    setMainWindowSize(widgets);
+    addResizeHandler(widgets);
 
     // header/title line
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
     HTML title = new HTML("<h1>" + DLI_LANGUAGE_TESTING + "</h1>");
     browserCheck.getBrowserAndVersion();
-    hp.addEast(getLogout(),EAST_WIDTH);
-  //  hp.setHeight("180px");
+    hp.addEast(getLogout(), eastWidth);
     hp.add(title);
 
-    widgets.addNorth(hp, HEADER_HEIGHT);
-    widgets.addSouth(status = new Label(), FOOTER_HEIGHT);
     VerticalPanel exerciseListPanel = new VerticalPanel();
+
+    widgets.addNorth(hp, HEADER_HEIGHT);
+    widgets.addSouth(status = new Label(), footerHeight);
     widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH/* +10*/);
-   // exerciseListPanel.addStyleName("exerciseList");
 
     // set up center panel, initially with flash record panel
-    ScrollPanel sp = new ScrollPanel();
-    sp.add(currentExerciseVPanel);
-    widgets.add(sp);
+
+    if (usualLayout) {
+      ScrollPanel sp = new ScrollPanel();
+      sp.add(currentExerciseVPanel);
+      widgets.add(sp);
+    }
+    else {
+      currentExerciseVPanel.addStyleName("body");
+      currentExerciseVPanel.getElement().getStyle().setBackgroundImage("url("+"langtest/images/"+"levantine_window_bg.jpg"+")");
+      currentExerciseVPanel.addStyleName("noMargin");
+/*      RootPanel netPron = RootPanel.get("netPron");
+      if (netPron != null) {
+        netPron.add(currentExerciseVPanel);
+      }
+      else {*/
+        RootPanel.get().add(currentExerciseVPanel);
+//      }
+    }
     makeFlashContainer();
     currentExerciseVPanel.add(flashRecordPanel);
-    currentExerciseVPanel.addStyleName("currentExercisePanel");
+    if (usualLayout) {
+      currentExerciseVPanel.addStyleName("currentExercisePanel");
+    }
 
     setupErrorDialog();
 
     // set up left side exercise list
-    boolean isGrading = checkParams();
     makeExerciseList(exerciseListPanel, isGrading);
 
     modeSelect();
@@ -156,6 +191,29 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     soundManager = new SoundManagerStatic();
     soundManager.exportStaticMethods();
     soundManager.initialize();
+    Element elementById = DOM.getElementById("title-tag");   // set the page title to be consistent
+    if (elementById != null) {
+      elementById.setInnerText(DLI_LANGUAGE_TESTING);
+    }
+  }
+
+  /**
+   * Tell the exercise list when the browser window changes size
+   * @param widgets
+   */
+  private void addResizeHandler(final DockLayoutPanel widgets) {
+    Window.addResizeHandler(new ResizeHandler() {
+      public void onResize(ResizeEvent event) {
+//        System.out.println("updating width since got event " +event + " w = " + Window.getClientWidth());
+        setMainWindowSize(widgets);
+        setExerciseListSize();
+        exerciseList.onResize();
+      }
+    });
+  }
+
+  public float getScreenPortion() {
+    return screenPortion;
   }
 
   /**
@@ -172,10 +230,31 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           protected void checkBeforeLoad(Exercise e) {} // don't try to login
         }: new ExerciseList(currentExerciseVPanel,service, this, factory);
 
-    ScrollPanel itemScroller = new ScrollPanel(this.exerciseList);
-    itemScroller.setSize((EXERCISE_LIST_WIDTH) +"px",(Window.getClientHeight() - (2*HEADER_HEIGHT) - FOOTER_HEIGHT - 60) + "px"); // 54
+    if (showOnlyOneExercise()) {
+      exerciseList.setExercise_title(exercise_title);
+    }
+    itemScroller = new ScrollPanel(this.exerciseList);
+    if (exercise_title == null) {
+      setExerciseListSize();
+    }
     exerciseListPanel.add(new HTML("<h2>Items</h2>"));
     exerciseListPanel.add(itemScroller);
+  }
+
+  public boolean showOnlyOneExercise() {
+    return exercise_title != null;
+  }
+
+  private void setMainWindowSize(DockLayoutPanel widgets) {
+    int widthToUse = Window.getClientWidth() - (goodwaveMode ? 15 : eastWidth);
+    widgets.setSize(Math.max(widthToUse, 50) + "px", Math.max((Window.getClientHeight()-footerHeight-15),50) + "px");
+    //widgets.setSize("100%","100%");
+    //widgets.setSize(Math.max((Window.getClientWidth() - EAST_WIDTH), 50) + "px","100%");
+  }
+
+  private void setExerciseListSize() {
+    int height = Math.max(60, Window.getClientHeight() - (2 * HEADER_HEIGHT) - footerHeight - 60);
+    itemScroller.setSize(EXERCISE_LIST_WIDTH + "px", height + "px"); // 54
   }
 
   /**
@@ -196,13 +275,35 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
+  /**
+   * exercise_title=nl0002_lms&transform_score_c1=68.51101&transform_score_c2=2.67174
+   * @return
+   */
   private boolean checkParams() {
     String isGrading = Window.Location.getParameter("grading");
     String isEnglish = Window.Location.getParameter("english");
     String goodwave = Window.Location.getParameter("goodwave");
+
+    String exercise_title = Window.Location.getParameter("exercise_title");
+    if (exercise_title != null) {
+     if (goodwave == null) goodwave = "true";
+      this.exercise_title = exercise_title;
+    }
+    else {
+      this.exercise_title = DEFAULT_EXERCISE;
+    }
+    String screenPortionParam =  Window.Location.getParameter("screenPortion");
+    screenPortion = 1.0f;
+    if (screenPortionParam != null) {
+      try {
+        screenPortion = Float.parseFloat(screenPortionParam);
+      } catch (NumberFormatException e) {
+        e.printStackTrace();
+      }
+    }
     // System.out.println("param grading " + isGrading);
     englishOnlyMode = isEnglish != null && !isEnglish.equals("false");
-    goodwaveMode = goodwave != null && !goodwave.equals("false");
+    goodwaveMode = goodwaveMode || (goodwave != null && !goodwave.equals("false"));
     boolean grading = (isGrading != null && !isGrading.equals("false")) || englishOnlyMode;
     return grading;
   }
@@ -220,6 +321,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void gotPermission() {
         System.out.println("got permission!");
         flashRecordPanel.hide();
+        flashRecordPanel.hide2();
+
         exerciseList.getExercises(lastUser);
       }
 
@@ -298,9 +401,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   private Widget getLogout() {
-    DockLayoutPanel hp2 = new DockLayoutPanel(Style.Unit.PX);
+    //DockLayoutPanel hp2 = new DockLayoutPanel(Style.Unit.PX);
     VerticalPanel vp = new VerticalPanel();
-    hp2.addSouth(vp, 75);
+    //hp2.addSouth(vp, 75);
 
     // add logout link
     Anchor logout = new Anchor("Logout");
@@ -327,16 +430,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
     vp.add(showResults);
 
-    // HTML html = new HTML(browser + " " +ver);
-    //html.getElement().setId("status");
-   // SimplePanel sp = new SimplePanel();
-   // sp.add(html);
-
     // no click handler for this for now
-    Anchor status = new Anchor(browserCheck.browser + " " +browserCheck.ver);
+    Anchor status = new Anchor(browserCheck.browser + " " +browserCheck.ver +" " +
+        RELEASE_DATE);
     vp.add(status);
 
-    return hp2;
+    return vp;//hp2;
   }
 
   private void resetState() {
@@ -382,7 +481,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers
-   * @see mitll.langtest.client.recorder.SimpleRecordPanel#stopClicked
+   * @see mitll.langtest.client.recorder.SimpleRecordPanel#stopRecording()
    * @return
    */
   public int getUser() { return userManager.getUser(); }
@@ -423,7 +522,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     dialogBox = new DialogBox();
     dialogBox.setText("Information");
     dialogBox.setAnimationEnabled(true);
-    this.closeButton = new Button("Close");
+    this.closeButton = new Button("Close(E)");
     // We can set the id of a widget by accessing its Element
     closeButton.getElement().setId("closeButton");
 
@@ -441,6 +540,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public void showErrorMessage(String msg) {
+    System.err.println("got error " + msg);
     dialogBox.setText(msg);
     dialogBox.center();
     closeButton.setFocus(true);

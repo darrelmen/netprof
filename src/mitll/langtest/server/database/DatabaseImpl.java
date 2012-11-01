@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import com.google.gwt.core.client.GWT;
 import mitll.langtest.shared.*;
+import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -12,13 +13,13 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
- * Note with H2 that :
- *  * you can corrupt the database if you try to copy a file that's in use by another process.
+ * Note with H2 that :  <br></br>
+ *  * you can corrupt the database if you try to copy a file that's in use by another process. <br></br>
  *  * one process can lock the database and make it inaccessible to a second one, seemingly this can happen
- *    more easily when H2 lives inside a servlet container (e.g. tomcat).
+ *    more easily when H2 lives inside a servlet container (e.g. tomcat). <br></br>
  *  * it's not a good idea to close connections, especially in the context of a servlet inside a container, since
- *    H2 will return "new" connections that have already been closed.
- *  * it's not a good idea to reuse one connection...?
+ *    H2 will return "new" connections that have already been closed.   <br></br>
+ *  * it's not a good idea to reuse one connection...?  <br></br>
  *
  * User: go22670
  * Date: 5/14/12
@@ -26,19 +27,17 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class DatabaseImpl implements Database {
+  private static Logger logger = Logger.getLogger(DatabaseImpl.class);
   private static final boolean TESTING = false;
+  private static final boolean USE_LEVANTINE = true;
+  private static final boolean USE_FAST_SLOW_LEVANTINE = true;
 
   private static final boolean DROP_USER = false;
   private static final boolean DROP_RESULT = false;
   private static final String H2_DB_NAME = TESTING ? "vlr-parle" : "/services/apache-tomcat-7.0.27/webapps/langTest/vlr-parle";
-  private static final String TIME = "time";
-  private static final String EXID = "exid";
+  //private static final String TIME = "time";
+  //private static final String EXID = "exid";
   private Map<Long, List<Schedule>> userToSchedule;
-
-  // mysql config info
-/*  private String url = "jdbc:mysql://localhost:3306/",
-    dbOptions = "?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull",
-    driver = "com.mysql.jdbc.Driver";*/
 
   // h2 config info
   private String url = "jdbc:h2:" + H2_DB_NAME + ";IFEXISTS=TRUE;QUERY_CACHE_SIZE=0;",
@@ -46,7 +45,8 @@ public class DatabaseImpl implements Database {
     driver = "org.h2.Driver";
 
   private HttpServlet servlet;
-  private final ExerciseDAO exerciseDAO = new ExerciseDAO(this);
+  private String installPath;
+  private ExerciseDAO exerciseDAO = null;
   public final UserDAO userDAO = new UserDAO(this);
   private final ResultDAO resultDAO = new ResultDAO(this);
   public final AnswerDAO answerDAO = new AnswerDAO(this);
@@ -54,6 +54,10 @@ public class DatabaseImpl implements Database {
   public final GraderDAO graderDAO = new GraderDAO(this);
   private final ScheduleDAO scheduleDAO = new ScheduleDAO(this);
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#init
+   * @param s
+   */
   public DatabaseImpl(HttpServlet s) {
     this.servlet = s;
     try {
@@ -69,6 +73,7 @@ public class DatabaseImpl implements Database {
     }
     ScheduleDAO scheduleDAO = new ScheduleDAO(this);
     this.userToSchedule = scheduleDAO.getSchedule();
+    this.exerciseDAO = makeExerciseDAO();
 
     if (DROP_USER) {
       try {
@@ -98,24 +103,57 @@ public class DatabaseImpl implements Database {
 
   }
 
+  private ExerciseDAO makeExerciseDAO() {
+    return USE_LEVANTINE ? new FileExerciseDAO() : new SQLExerciseDAO(this);
+  }
+
+  public void setInstallPath(String i) {
+    logger.debug("got install path " + i);
+    this.installPath = i;
+  }
+
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises()
    * @return
    */
   public List<Exercise> getExercises() {
-     return exerciseDAO.getRawExercises();
+    if (USE_LEVANTINE) {
+      if (USE_FAST_SLOW_LEVANTINE) {
+        ((FileExerciseDAO)exerciseDAO).readFastAndSlowExercises(installPath);
+      }
+      else {
+        ((FileExerciseDAO)exerciseDAO).readExercises(installPath);
+      }
+    }
+    return exerciseDAO.getRawExercises();
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise(String, int)
+   * @param activeExercises
+   * @param expectedCount
+   * @return
+   */
   public Exercise getNextUngradedExercise(Collection<String> activeExercises, int expectedCount) {
-    if (expectedCount == 1) return getNextUngradedExerciseQuick(activeExercises,expectedCount);
-    else return getNextUngradedExerciseSlow(activeExercises,expectedCount);
+    if (expectedCount == 1) {
+      return getNextUngradedExerciseQuick(activeExercises,expectedCount);
+    }
+    else {
+      return getNextUngradedExerciseSlow(activeExercises,expectedCount);
+    }
   }
 
-    /**
-    * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
-    * @return
-    */
-  public Exercise getNextUngradedExerciseSlow(Collection<String> activeExercises, int expectedCount) {
+  /**
+   * Walks through each exercise, checking if any have ungraded results.
+   *
+   * This gets slower as more exercises are graded.  Better to a "join" that determines after
+   * two queries what the next ungraded one is.
+   * Runs through each exercise in sequence -- slows down as more are completed!
+   * TODO : avoid using this.
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
+   * @return
+   */
+  private Exercise getNextUngradedExerciseSlow(Collection<String> activeExercises, int expectedCount) {
     List<Exercise> rawExercises = getExercises();
     System.out.println("getNextUngradedExercise : checking " +rawExercises.size() + " exercises.");
     for (Exercise e : rawExercises) {
@@ -129,19 +167,24 @@ public class DatabaseImpl implements Database {
     return null;
   }
 
-  public Exercise getNextUngradedExerciseQuick(Collection<String> activeExercises, int expectedCount) {
+  /**
+   * Does a join of grades against results - avoid iterated solution above.
+   * @param activeExercises
+   * @param expectedCount
+   * @return next exercise containing ungraded results
+   */
+  private Exercise getNextUngradedExerciseQuick(Collection<String> activeExercises, int expectedCount) {
     List<Exercise> rawExercises = getExercises();
     Collection<Result> resultExcludingExercises = resultDAO.getResultExcludingExercises(activeExercises);
-    System.out.println("getNextUngradedExercise found  " + resultExcludingExercises.size() + " results, expected " +expectedCount);
 
     GradeDAO.GradesAndIDs allGradesExcluding = gradeDAO.getAllGradesExcluding(activeExercises);
                Map<Integer,Integer> idToCount = new HashMap<Integer, Integer>();
     for (Grade g : allGradesExcluding.grades) {
-      //Integer countOfGrades = idToCount.get(g.resultID);
       if (!idToCount.containsKey(g.resultID)) idToCount.put(g.resultID,1);
       else idToCount.put(g.resultID,2);
     }
-    System.out.println("getNextUngradedExercise found  " + allGradesExcluding.resultIDs.size() + " graded results");
+    System.out.println("getNextUngradedExercise found  " + resultExcludingExercises.size() + " results, " +
+        "expected " +expectedCount +"," +allGradesExcluding.resultIDs.size() + " graded results");
 
     // remove results that have grades...
     Iterator<Result> iterator = resultExcludingExercises.iterator();
@@ -159,7 +202,7 @@ public class DatabaseImpl implements Database {
       //}
     }
 
-    System.out.println("getNextUngradedExercise after removing  " + resultExcludingExercises.size() + " results");
+    //System.out.println("getNextUngradedExercise after removing  " + resultExcludingExercises.size() + " results");
 
     // whatever remains, find first exercise
 
@@ -167,7 +210,7 @@ public class DatabaseImpl implements Database {
     for (Result r : resultExcludingExercises) exids.add(r.id);
     if (exids.isEmpty()) return null;
     else {
-      System.out.println("getNextUngradedExercise candidates are   " + exids);
+      //System.out.println("getNextUngradedExercise candidates are   " + exids);
 
       String first = exids.first();
       for (Exercise e : rawExercises) {
@@ -256,6 +299,7 @@ public class DatabaseImpl implements Database {
   public Connection getConnection() throws Exception {
   //  if (c != null) return c;
 	  Connection c;
+  //  logger.info("install path is " +servlet.getInitParameter());
     try {
       if (servlet == null) {
         c = this.dbLogin();
@@ -305,9 +349,16 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * Find all the grades for this exercise.<br></br>
+   * Find all the results for this exercise.
+   * Get these schedules for this exercise and every user.
+   * For every result, get the user and use it to find the schedule.
+   * Use the data in the schedule to mark the en/fl and spoken/written bits on the Results.
+   * This lets us make a map of spoken->lang->results
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultsForExercise(String)
+   * @see mitll.langtest.client.grading.GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @param exid
-   * @return
+   * @return ResultsAndGrades
    */
   public ResultsAndGrades getResultsForExercise(String exid) {
     GradeDAO.GradesAndIDs gradesAndIDs = gradeDAO.getResultIDsForExercise(exid);
@@ -318,14 +369,20 @@ public class DatabaseImpl implements Database {
     Map<Boolean,Map<Boolean,List<Result>>> spokenToLangToResult = new HashMap<Boolean, Map<Boolean, List<Result>>>();
     for (Result r : resultsForExercise) {
       List<Schedule> schedules = scheduleForUserAndExercise.get(r.userid);
-      Schedule schedule = schedules.get(0);
-      r.setFLQ(schedule.flQ);
-      r.setSpoken(schedule.spoken);
-      Map<Boolean, List<Result>> langToResult = spokenToLangToResult.get(schedule.spoken);
-      if (langToResult == null) spokenToLangToResult.put(schedule.spoken, langToResult = new HashMap<Boolean, List<Result>>());
-      List<Result> resultsForLang = langToResult.get(schedule.flQ);
-      if (resultsForLang == null) langToResult.put(schedule.flQ, resultsForLang = new ArrayList<Result>());
-      resultsForLang.add(r);
+      if (schedules == null) {
+        //System.err.println("huh? couldn't find schedule for user " +r.userid +"?");
+      }
+      else {
+        Schedule schedule = schedules.get(0);
+        r.setFLQ(schedule.flQ);
+        r.setSpoken(schedule.spoken);
+        Map<Boolean, List<Result>> langToResult = spokenToLangToResult.get(schedule.spoken);
+        if (langToResult == null)
+          spokenToLangToResult.put(schedule.spoken, langToResult = new HashMap<Boolean, List<Result>>());
+        List<Result> resultsForLang = langToResult.get(schedule.flQ);
+        if (resultsForLang == null) langToResult.put(schedule.flQ, resultsForLang = new ArrayList<Result>());
+        resultsForLang.add(r);
+      }
     }
     return new ResultsAndGrades(resultsForExercise, gradesAndIDs.grades, spokenToLangToResult);
   }
@@ -415,10 +472,10 @@ public class DatabaseImpl implements Database {
    // System.err.println("Closing " + connection + " " + connection.isClosed());
   }
 
-  public static void main(String[] arg) {
-    DatabaseImpl langTestDatabase = new DatabaseImpl(null);
+/*  public static void main(String[] arg) {
+    DatabaseImpl langTestDatabase = new DatabaseImpl(null,"");
     //long id = langTestDatabase.addUser(23, "male", 0);
     //System.out.println("id =" + id);
      for (Exercise e : langTestDatabase.getExercises(0)) System.err.println("e " + e);
-  }
+  }*/
 }
