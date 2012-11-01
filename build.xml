@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. --><project basedir="." default="build" name="LangTest">
+    <property environment="env"/>
+    <property name="ECLIPSE_HOME" value="../../../eclipse_juno"/>
+    <property name="imagewriter.location" value="imagewriter"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+
+    <!-- Arguments to gwtc and devmode targets -->
+    <property name="gwt.args" value="" />
+    <property name="gwt.lib" value="gwt/lib"/>
+    <property name="tomcat.deploy" value="../../../apache-tomcat-7.0.25/webapps"/>
+
+    <!--   <path id="project.class.path">
+        <pathelement location="war/WEB-INF/classes"/>
+        <pathelement location="test-classes"/>
+        &lt;!&ndash; Add any additional non-server libs (such as JUnit) &ndash;&gt;
+        <fileset dir="war/WEB-INF/lib" includes="**/*.jar"/>
+        <fileset dir="${gwt.lib}" includes="**/*.jar"/>
+    </path>-->
+
+
+    <path id="GWT SDK [GWT - 2.4.0].libraryclasspath">
+        <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201208080121-rel-r42/gwt-2.4.0/gwt-user.jar"/>
+        <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201208080121-rel-r42/gwt-2.4.0/gwt-dev.jar"/>
+        <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201208080121-rel-r42/gwt-2.4.0/validation-api-1.0.0.GA-sources.jar"/>
+        <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201208080121-rel-r42/gwt-2.4.0/validation-api-1.0.0.GA.jar"/>
+    </path>
+    <path id="imagewriter.classpath">
+        <pathelement location="${imagewriter.location}/bin"/>
+        <pathelement location="${imagewriter.location}/audioimage/lib/jtransforms-2.3.jar"/>
+    </path>
+    <path id="LangTest.classpath">
+        <pathelement location="war/WEB-INF/classes"/>
+        <pathelement location="test-classes"/>
+        <path refid="GWT SDK [GWT - 2.4.0].libraryclasspath"/>
+        <pathelement location="../../eclipse_indigo/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201201120043-rel-r37/gwt-2.4.0/gwt-user.jar"/>
+        <pathelement location="war/WEB-INF/lib/json-lib-2.4-jdk15.jar"/>
+        <pathelement location="war/WEB-INF/lib/commons-codec-1.6.jar"/>
+        <pathelement location="war/WEB-INF/lib/guava-13.0.jar"/>
+        <pathelement location="war/WEB-INF/lib/gchart.jar"/>
+        <pathelement location="war/WEB-INF/lib/log4j-1.2.17.jar"/>
+        <path refid="imagewriter.classpath"/>
+        <pathelement location="war/WEB-INF/lib/pronz.jar"/>
+    </path>
+    <target name="init">
+        <mkdir dir="war/WEB-INF/classes"/>
+        <mkdir dir="test-classes"/>
+        <copy includeemptydirs="false" todir="war/WEB-INF/classes">
+            <fileset dir="src">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+<!--
+        <copy includeemptydirs="false" todir="test-classes">
+            <fileset dir="test">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+-->
+    </target>
+    <target name="clean">
+        <delete dir="war/WEB-INF/classes"/>
+        <delete dir="test-classes"/>
+    </target>
+    <target depends="clean" name="cleanall">
+        <ant antfile="build.xml" dir="${imagewriter.location}" inheritAll="false" target="clean"/>
+    </target>
+    <target depends="build-subprojects,gwtc" name="build"/>
+
+    <target depends="build" name="war">
+        <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**" >      
+    	</jar>
+    </target>
+
+    <target depends="war" name="deploy">
+        <copy todir="${tomcat.deploy}">
+            <fileset dir="." includes="netPron2.war"/>
+        </copy>
+
+    </target>
+
+    <target depends="build-subprojects,javac" name="light-war">
+        <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**" >
+        </jar>
+    </target>
+    
+    <target name="build-subprojects">
+        <ant antfile="build.xml" dir="${imagewriter.location}" inheritAll="false" target="build-project">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+    </target>
+
+    <target name="gwtc" depends="javac" description="GWT compile to JavaScript (production mode)">
+        <java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
+            <classpath>
+                <pathelement location="src"/>
+                <path refid="LangTest.classpath"/>
+    <!--            <pathelement location="${gwt.lib}/validation-api-1.0.0.GA.jar" />
+                <pathelement location="${gwt.lib}/validation-api-1.0.0.GA-sources.jar" />-->
+            </classpath>
+            <!-- add jvmarg -Xss16M or similar if you see a StackOverflowError -->
+            <jvmarg value="-Xmx256M"/>
+            <arg line="-war"/>
+            <arg value="war"/>
+            <arg line="-style"/>
+            <arg value="PRETTY"/>
+  <!--          <arg line="-logLevel"/>
+            <arg value="DEBUG"/>-->
+            <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
+            <arg line="${gwt.args}"/>
+            <arg value="mitll.langtest.LangTest"/>
+        </java>
+    </target>
+
+    <target depends="init" name="javac">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="war/WEB-INF/classes" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="LangTest.classpath"/>
+        </javac>
+<!--
+        <javac debug="true" debuglevel="${debuglevel}" destdir="test-classes" includeantruntime="false" source="${source}" target="${target}">
+            <src path="test"/>
+            <classpath refid="LangTest.classpath"/>
+        </javac>
+-->
+        <copy todir="war/WEB-INF/lib">
+            <fileset dir="${imagewriter.location}" includes="imagewriter.jar"/>
+        </copy>
+        <copy todir="war/WEB-INF/lib">
+            <fileset dir="${imagewriter.location}/audioimage/lib" includes="jtransforms-2.3.jar"/>
+        </copy>
+
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+        <copy todir="${ant.library.dir}">
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </copy>
+        <unzip dest="${ant.library.dir}">
+            <patternset includes="jdtCompilerAdapter.jar"/>
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </unzip>
+    </target>
+    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <antcall target="build"/>
+    </target>
+</project>
