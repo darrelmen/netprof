@@ -13,25 +13,26 @@ import com.google.gwt.user.client.ui.FocusWidget;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class RecordButton {
-  private static final int DELAY_MILLIS = 20000;
+  private static final int DELAY_MILLIS = 20000; // default
 
   private boolean recording = false;
   private Timer recordTimer;
+  private final FocusWidget record;
+  private int autoStopDelay;
+
   public RecordButton(FocusWidget recordButton) {
+    this(recordButton, DELAY_MILLIS);
+  }
+  public RecordButton(FocusWidget recordButton, int delay) {
+    this.autoStopDelay = delay;
+    this.record = recordButton;
     recordButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         if (recording) {
-          //System.err.println("got click -- 1");
-          recording = false;
           cancelTimer();
-          showStopped();
-          stopRecording();
+          stop();
         } else {
-          //System.err.println("got click -- 2");
-
-          recording = true;
-          startRecording();
-          showRecording();
+          start();
 
           addRecordingMaxLengthTimeout();
         }
@@ -39,9 +40,21 @@ public abstract class RecordButton {
     });
   }
 
-  protected void startRecording() {}
-  protected void showRecording() {}
-  protected void showStopped() {}
+  private void start() {
+    recording = true;
+    startRecording();
+    showRecording();
+  }
+
+  private void stop() {
+    recording = false;
+    showStopped();
+    stopRecording();
+  }
+
+  protected abstract void startRecording();
+  protected abstract void showRecording();
+  protected abstract void showStopped();
 
   /**
    * Add a timer to automatically stop recording after 20 seconds.
@@ -61,14 +74,13 @@ public abstract class RecordButton {
       @Override
       public void run() {
         if (recording) {
-          recording = false;
-          stopRecording();
+          stop();
         }
       }
     };
 
     // Schedule the timer to run once in 20 seconds.
-    recordTimer.schedule(DELAY_MILLIS);
+    recordTimer.schedule(autoStopDelay);
   }
 
   private void cancelTimer() {
@@ -77,4 +89,8 @@ public abstract class RecordButton {
     }
   }
   protected abstract void stopRecording();
+
+  public FocusWidget getRecord() {
+    return record;
+  }
 }
