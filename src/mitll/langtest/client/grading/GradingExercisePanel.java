@@ -139,7 +139,7 @@ public class GradingExercisePanel extends ExercisePanel {
     int twoQuestionPageSize = bigPage ? BIG_TWO_QUESTION_PAGE_SIZE : TWO_QUESTION_PAGE_SIZE;
     vp.add(new HTML(prompt));
     SimplePanel spacer = new SimplePanel();
-    spacer.setSize("500px", "5px");
+    spacer.setSize("50px", "5px");
     vp.add(spacer);
 
     vp.add(showResults(results, grades, service, outer, n > 1, index,
