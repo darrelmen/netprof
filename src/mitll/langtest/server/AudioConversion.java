@@ -4,6 +4,7 @@ import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
 import mitll.langtest.client.LangTestDatabase;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioSystem;
@@ -24,6 +25,7 @@ import java.io.OutputStream;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioConversion {
+  private static Logger logger = Logger.getLogger(AudioConversion.class);
   private static final String LAME_PATH_WINDOWS = "C:\\Users\\go22670\\lame\\lame.exe";
   private static final String LAME_PATH_LINUX = "/usr/local/bin/lame";
 
@@ -32,6 +34,7 @@ public class AudioConversion {
 
   public static final String LINUX_SOX_BIN_DIR = "/usr/local/bin";
   public static final String WINDOWS_SOX_BIN_DIR = "C:\\Users\\go22670\\sox-14-3-2";
+  public static final String SIXTEEN_K_SUFFIX = "_16K";
 
   private AudioCheck audioCheck = new AudioCheck();
 
@@ -112,29 +115,46 @@ public class AudioConversion {
    * @param testAudioFileNoSuffix name without suffix
    * @return
    */
-  public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix) {
+  public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix) throws UnsupportedAudioFileException {
     String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + ".wav";
     File wavFile = new File(pathname);
 
+    wavFile = convertTo16Khz(wavFile);
+    String name1 = wavFile.getName();
+    return removeSuffix(name1);
+  }
+
+  public File convertTo16Khz(File wavFile) throws UnsupportedAudioFileException {
+    //String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + ".wav";
+    //File wavFile = new File(pathname);
+    if (!wavFile.exists()) {
+      System.err.println("convertTo16Khz " + wavFile + " doesn't exist");
+      return wavFile;
+    }
     try {
       AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(wavFile);
       float sampleRate = audioFileFormat.getFormat().getSampleRate();
       if (sampleRate != 16000f) {
         String binPath = WINDOWS_SOX_BIN_DIR;
         if (! new File(binPath).exists()) binPath = LINUX_SOX_BIN_DIR;
-        String s = new AudioConverter().convertTo16KHZ(binPath, pathname);
-        String sampled = testAudioDir + File.separator + testAudioFileNoSuffix + "_16K.wav";
+        String s = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
+        String name1 = wavFile.getName();
+        String sampled = wavFile.getParent() + File.separator + removeSuffix(name1) + SIXTEEN_K_SUFFIX + ".wav";
         if (new FileCopier().copy(s, sampled)) {
-          String name = new File(sampled).getName();
-          testAudioFileNoSuffix = name.substring(0, name.length() - 4);
+          wavFile = new File(sampled);
         }
       }
-    } catch (UnsupportedAudioFileException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
+    } /*catch (UnsupportedAudioFileException e) {
+     // e.printStackTrace();
+      throw e;
+    }*/ catch (IOException e) {
       e.printStackTrace();
     }
-    return testAudioFileNoSuffix;
+    return wavFile;
+  }
+
+  private String removeSuffix(String name1) {
+    return name1.substring(0,name1.length()-4);
   }
 
   /**
@@ -185,6 +205,26 @@ public class AudioConversion {
         "' mp3 '" +mp3File+
         "'");*/
     return writeWithFFMPEG(exePath, pathToWav, mp3File);
+  }
+
+  public void ensureWriteMP3(String pathToWav,  String realContextPath) {
+    File absolutePathToWav = getAbsoluteFile(pathToWav,realContextPath);
+
+    String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
+    File mp3 = new File(mp3File);
+    if (!mp3.exists()) {
+      writeMP3(absolutePathToWav.getAbsolutePath());
+    }
+  }
+
+  private File getAbsoluteFile(String filePath,  String realContextPath) {
+    return getAbsolute(filePath, realContextPath);
+  }
+
+  private File getAbsolute(String filePath, String realContextPath) {
+    File file = new File(realContextPath, filePath);
+    assert(file.exists());
+    return file;
   }
 
   /**
@@ -250,7 +290,7 @@ public class AudioConversion {
   private File writeMP3(String lamePath, String pathToAudioFile, String mp3File) {
     ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File);
     try {
-      //    System.out.println("writeMP3 running lame" + lameProc.command());
+      logger.info("running lame" + lameProc.command());
       new ProcessRunner().runProcess(lameProc);
       //     System.out.println("writeMP3 exited  lame" + lameProc);
     } catch (IOException e) {

@@ -10,8 +10,24 @@ h1 {
   text-align: center;
 }
 
+.body {
+    font-family: Arial,Helvetica,sans-serif;
+    color: #333333;
+
+    background: #d3d3d3; /* for non-css3 browsers */
+    /* These gradients are nice, but displaying the page shows weird-looking intermediate states. */
+    /*filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#b4b4b4'); */ /* for IE */
+    /*background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#b4b4b4));*/ /* for webkit browsers */
+    /*background: -moz-linear-gradient(top,  #ffffff,  #b4b4b4);*/ /* for firefox 3.6+ */
+
+}
+
 .center {
     text-align: center;
+}
+
+.leftAlign {
+    text-align: left;
 }
 
 .sendButton {
@@ -30,6 +46,31 @@ h1 {
 
 .serverResponseLabelError {
   color: red;
+}
+
+fieldset {
+    margin: 5px 15px 0px 15px;
+    border-style: none;
+    /*border-bottom-style: solid;
+      border-bottom-width: 1px;
+      border-bottom-color: #666666;*/
+
+    /*margin: 0;
+      padding: 20px 15px 20px 15px;*/
+}
+
+.leftTenMargin {
+    margin-left: 10px;
+}
+
+.noMargin {
+    margin: 0px;
+}
+
+fieldset > legend {
+    font-size: 18px;
+    font-weight: bold;
+    color: #666666;
 }
 
 /** Set ids using widget.getElement().setId("idOfElement") */
@@ -107,4 +148,19 @@ h1 {
 
 .RecordPopup{
   background-color: white;
+}
+
+.Instruction {
+    text-align: left;
+}
+
+.Instruction-title {
+    color: #333333;
+    font-size: 16px;
+}
+
+.Instruction-data {
+    color: #CC6600;
+    font-size: 18px;
+    font-weight: bold;
 }
