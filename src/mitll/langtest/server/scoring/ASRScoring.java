@@ -20,7 +20,11 @@ import pronz.speech.Audio$;
 import scala.Tuple2;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,6 +44,8 @@ import java.util.Map;
  */
 public class ASRScoring extends Scoring {
   private static Logger logger = Logger.getLogger(ASRScoring.class);
+  private static final String CFG_TEMPLATE = "levantine-nn-model.cfg.template";
+  private static final String MODELS_DIR = "models.dli-levantine";
 
   private final Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
 /*  private static final float MIN_AUDIO_SECONDS = 0.3f;
@@ -231,21 +237,39 @@ public class ASRScoring extends Scoring {
   private Scores computeRepeatExerciseScores(String tomcatWriteDirectory, Audio testAudio, String sentence,
                                              String language, String tmpDir) {
     // RepeatExercises use ASR for scoring, so get the language parameters.
-    ASRParameters asrparameters = languageLookUp.get(language);
-    if (asrparameters == null) {
+   // ASRParameters asrparameters = languageLookUp.get(language);
+ /*   if (asrparameters == null) {
       logger.error("computeRepeatExerciseScores : no ASR parameters for " + language);
       return getEmptyScores();
-    }
+    }*/
     String platform = Utils.package$.MODULE$.platform();
 
     // Make sure that we have an absolute path to the config and dict files.
     // Make sure that we have absolute paths.
-    String config = asrparameters.configFile();
-    String dict = asrparameters.dictFile();
-    String configFile = new File(config).isAbsolute() ? config
+    //String config = asrparameters.configFile();
+    //String dict = asrparameters.dictFile();
+    String pathToConfigTemplate = scoringDir + File.separator + "configurations" + File.separator + CFG_TEMPLATE;   // TODO point at os specific config file
+    logger.debug("template config is at " + pathToConfigTemplate);
+    Map<String,String> kv = new HashMap<String, String>();
+    String modelsDir = scoringDir + File.separator + MODELS_DIR;
+    if (platform.startsWith("win")) {
+      modelsDir = modelsDir.replaceAll("\\\\","\\\\\\\\");
+      tmpDir = tmpDir.replaceAll("\\\\","\\\\\\\\");
+    }
+
+    kv.put("TEMP_DIR",tmpDir);
+    kv.put("MODELS_DIR", modelsDir);
+    if (platform.startsWith("win")) kv.put("/","\\\\");
+    logger.debug("map is " + kv);
+
+    String configFile = tmpDir+File.separator+"levantine-nn-model.cfg";
+
+    doTemplateReplace(pathToConfigTemplate,configFile,kv);
+    String dictFile = modelsDir + File.separator + "rsi-sctm-hlda"+File.separator+"dict-wo-sp";
+/*    String configFile = new File(config).isAbsolute() ? config
         : tomcatWriteDirectory + File.separator + config;
     String dictFile = new File(dict).isAbsolute() ? dict
-        : tomcatWriteDirectory + File.separator + dict;
+        : tomcatWriteDirectory + File.separator + dict;*/
 
     boolean configExists = new File(configFile).exists();
     boolean dictExists   = new File(dictFile).exists();
@@ -258,7 +282,9 @@ public class ASRScoring extends Scoring {
     ASRParameters asrparametersFullPaths = new ASRParameters(
         configFile,
         dictFile,
-        asrparameters.letterToSoundClassString(), platform);
+      //  asrparameters.letterToSoundClassString(),
+        "corpus.ArabicLTS",
+        platform);
 
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
     long then = System.currentTimeMillis();
@@ -275,6 +301,35 @@ public class ASRScoring extends Scoring {
     logger.info("got score " + hydec_score +" and took " + (System.currentTimeMillis()-then) + " millis");
 
     return new Scores(hydec_score, jscoreOut._2);
+  }
+
+
+  private String ensureForwardSlashes(String wavPath) {
+    return wavPath.replaceAll("\\\\", "/");
+  }
+
+  private void doTemplateReplace(String infile, String outfile, Map<String,String> replaceMap) {
+    FileReader file;
+    String line = "";
+    try {
+      file = new FileReader(infile);
+      BufferedReader reader = new BufferedReader(file);
+
+      FileWriter output = new FileWriter(outfile);
+        BufferedWriter writer = new BufferedWriter(output);
+
+      while ((line = reader.readLine()) != null) {
+        String replaced = line;
+        for (Map.Entry<String, String> kv : replaceMap.entrySet()) {
+          replaced = replaced.replaceAll(kv.getKey(),kv.getValue());
+        }
+        writer.write(replaced +"\n");
+      }
+      reader.close();
+      writer.close();
+    } catch (Exception e) {
+      logger.error("got " +e,e);
+    }
   }
 
   /**
@@ -304,10 +359,16 @@ public class ASRScoring extends Scoring {
     return new Scores(0f, eventScores);
   }
 
-/*  public static void main(String [] arg) {
-    ASRScoring scoring = new ASRScoring("C:\\Users\\go22670\\DLITest\\LangTest\\war");
-    String testAudioDir = "C:\\Users\\go22670\\DLITest\\LangTest\\war\\media\\ac-L0P-001";
-    PretestScore pretestScore = scoring.scoreRepeat(testAudioDir, "ad0035_ems", *//*testAudioDir, "ad0035_ems",*//* "This is a test.", "out", 1024, 100);
-    System.out.println("score " + pretestScore);
-  }*/
+  public static void main(String [] arg) {
+    String deployPath1 = "C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\scoring";
+    ASRScoring scoring = new ASRScoring(deployPath1);
+    Map<String,String> kv = new HashMap<String, String>();
+    kv.put("TEMP_DIR","C:\\Users\\go22670\\AppData\\Local\\Temp\\1351790200971-0");
+    kv.put("MODELS_DIR","models_dir_to_use");
+    scoring.doTemplateReplace(deployPath1 + File.separator + "configurations" + File.separator +"levantine-nn-model.cfg.template",
+        deployPath1 + File.separator + "configurations" + File.separator +"new-levantine-nn-model.cfg",kv);
+    //String testAudioDir = "C:\\Users\\go22670\\DLITest\\LangTest\\war\\media\\ac-L0P-001";
+    //PretestScore pretestScore = scoring.scoreRepeat(testAudioDir, "ad0035_ems", *//*testAudioDir, "ad0035_ems",*//* "This is a test.", "out", 1024, 100);
+   // System.out.println("score " + pretestScore);
+  }
 }
