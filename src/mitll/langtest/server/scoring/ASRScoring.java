@@ -11,7 +11,6 @@ import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import pronz.dirs.Dirs;
 import pronz.speech.ASRParameters;
@@ -25,7 +24,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,10 +44,9 @@ public class ASRScoring extends Scoring {
   private static Logger logger = Logger.getLogger(ASRScoring.class);
   private static final String CFG_TEMPLATE = "levantine-nn-model.cfg.template";
   private static final String MODELS_DIR = "models.dli-levantine";
+  public static final String MODEL_CFG = "levantine-nn-model.cfg";
 
-  private final Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
-/*  private static final float MIN_AUDIO_SECONDS = 0.3f;
-  private static final float MAX_AUDIO_SECONDS = 15.0f;*/
+ // private final Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
   private final Cache<String, Scores> audioToScore;
 
   /**
@@ -61,14 +58,14 @@ public class ASRScoring extends Scoring {
 
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
-    ASRParameters arabic = ASRParameters.jload("Arabic", configFullPath);
+    // not for now... later if dict gets too big
+/*    ASRParameters arabic = ASRParameters.jload("Arabic", configFullPath);
     if (arabic == null) {
       logger.error("can't find Arabic parameters at " + configFullPath);
     } else {
       languageLookUp.put("Arabic", arabic);
-    }
+    }*/
   }
-
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(int, String, String, int, int)
@@ -143,7 +140,7 @@ public class ASRScoring extends Scoring {
       noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
     }
 
-    String tmpDir = Files.createTempDir().getAbsolutePath(); // TODO this doesn't work reliably!
+    String tmpDir = Files.createTempDir().getAbsolutePath();
    // String tmpDir = scoringDir + File.separator + TMP;
     Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
 
@@ -154,7 +151,7 @@ public class ASRScoring extends Scoring {
     Scores scores = audioToScore.getIfPresent(testAudioDir + File.separator + testAudioFileNoSuffix);
 
     if (scores == null) {
-      scores = computeRepeatExerciseScores(scoringDir, testAudio, sentence, asrLanguage, tmpDir);
+      scores = computeRepeatExerciseScores(testAudio, sentence, tmpDir);
       audioToScore.put(testAudioDir + File.separator + testAudioFileNoSuffix, scores);
     }
     else {
@@ -227,29 +224,18 @@ public class ASRScoring extends Scoring {
 
     /**
      * Assumes that testAudio was recorded through the UI, which should prevent audio that is too short or too long.
-     *
+     * Assumes Arabic (levantine)
      * @see #scoreRepeatExercise
      * @param testAudio
      * @param sentence
-     * @param language
      * @return
      */
-  private Scores computeRepeatExerciseScores(String tomcatWriteDirectory, Audio testAudio, String sentence,
-                                             String language, String tmpDir) {
-    // RepeatExercises use ASR for scoring, so get the language parameters.
-   // ASRParameters asrparameters = languageLookUp.get(language);
- /*   if (asrparameters == null) {
-      logger.error("computeRepeatExerciseScores : no ASR parameters for " + language);
-      return getEmptyScores();
-    }*/
+  private Scores computeRepeatExerciseScores(Audio testAudio, String sentence, String tmpDir) {
     String platform = Utils.package$.MODULE$.platform();
 
     // Make sure that we have an absolute path to the config and dict files.
     // Make sure that we have absolute paths.
-    //String config = asrparameters.configFile();
-    //String dict = asrparameters.dictFile();
     String pathToConfigTemplate = scoringDir + File.separator + "configurations" + File.separator + CFG_TEMPLATE;   // TODO point at os specific config file
-    logger.debug("template config is at " + pathToConfigTemplate);
     Map<String,String> kv = new HashMap<String, String>();
     String modelsDir = scoringDir + File.separator + MODELS_DIR;
     if (platform.startsWith("win")) {
@@ -260,16 +246,20 @@ public class ASRScoring extends Scoring {
     kv.put("TEMP_DIR",tmpDir);
     kv.put("MODELS_DIR", modelsDir);
     if (platform.startsWith("win")) kv.put("/","\\\\");
-    logger.debug("map is " + kv);
+    logger.debug("template config is at " + pathToConfigTemplate + " map is " + kv);
 
-    String configFile = tmpDir+File.separator+"levantine-nn-model.cfg";
+    // we need to create a custom config file for each run, complicating the caching of the ASRParameters...
+    String configFile = tmpDir+File.separator+ MODEL_CFG;
 
     doTemplateReplace(pathToConfigTemplate,configFile,kv);
     String dictFile = modelsDir + File.separator + "rsi-sctm-hlda"+File.separator+"dict-wo-sp";
-/*    String configFile = new File(config).isAbsolute() ? config
-        : tomcatWriteDirectory + File.separator + config;
-    String dictFile = new File(dict).isAbsolute() ? dict
-        : tomcatWriteDirectory + File.separator + dict;*/
+    String grammarAlignTemplate = modelsDir + File.separator +"grammar.align.template";
+    String grammarAlign = modelsDir + File.separator +"grammar.align";
+    Map<String,String> kv2 = new HashMap<String, String>();
+    kv2.put("MODELS_DIR", modelsDir);
+
+    // grammar align file points to a dictionary file in the models directory...
+    doTemplateReplace(grammarAlignTemplate,grammarAlign,kv2);
 
     boolean configExists = new File(configFile).exists();
     boolean dictExists   = new File(dictFile).exists();
@@ -279,19 +269,13 @@ public class ASRScoring extends Scoring {
       return getEmptyScores();
     }
 
-    ASRParameters asrparametersFullPaths = new ASRParameters(
-        configFile,
-        dictFile,
-      //  asrparameters.letterToSoundClassString(),
-        "corpus.ArabicLTS",
-        platform);
+    ASRParameters asrparametersFullPaths = getASRParameters(platform, configFile, dictFile);
 
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
     long then = System.currentTimeMillis();
     synchronized (this) {   // hydec can't be called concurrently -- not thread safe
       try {
         jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
-       // deleteTmpDir(tmpDir); // necessary?
       } catch (AssertionError e) {
         logger.error("Got assertion error " + e,e);
         return new Scores();
@@ -303,9 +287,23 @@ public class ASRScoring extends Scoring {
     return new Scores(hydec_score, jscoreOut._2);
   }
 
-
-  private String ensureForwardSlashes(String wavPath) {
-    return wavPath.replaceAll("\\\\", "/");
+  //private ASRParameters cachedParams;
+  private ASRParameters getASRParameters(String platform, String configFile, String dictFile) {
+/*    if (false && cachedParams != null) return cachedParams;
+    else {
+      cachedParams = new ASRParameters(
+          configFile,
+          dictFile,
+          //  asrparameters.letterToSoundClassString(),
+          "corpus.ArabicLTS",
+          platform);
+      return cachedParams;
+    }*/
+    return new ASRParameters(
+        configFile,
+        dictFile,
+        "corpus.ArabicLTS",
+        platform);
   }
 
   private void doTemplateReplace(String infile, String outfile, Map<String,String> replaceMap) {
@@ -335,7 +333,7 @@ public class ASRScoring extends Scoring {
   /**
    * Note that on windows the log file sticks around, so the delete doesn't completely succeed.
    */
-  private void deleteTmpDir(String tmpDir) {
+/*  private void deleteTmpDir(String tmpDir) {
     File tmpDirFile = new File(tmpDir);
     if (tmpDirFile.exists()) {
       try {
@@ -352,7 +350,7 @@ public class ASRScoring extends Scoring {
     if (tmpDirFile.exists()) {
       logger.info(" " + tmpDirFile.getAbsolutePath() + " still exists???");
     }
-  }
+  }*/
 
   private Scores getEmptyScores() {
     Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
