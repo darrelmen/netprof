@@ -1,6 +1,5 @@
 package mitll.langtest.client;
 
-import audio.image.ImageType;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.scoring.PretestScore;
