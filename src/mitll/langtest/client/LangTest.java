@@ -55,8 +55,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int EAST_WIDTH = 90;
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
   private static final boolean DEFAULT_GOODWAVE_MODE = true;
-  public static final String RELEASE_DATE = "10/19";
+  public static final String RELEASE_DATE = "11/06";
   public static final String DEFAULT_EXERCISE = null;//"nl0020_ams";
+  public static final String LANGTEST_IMAGES = "langtest/images/";
 
   private Panel currentExerciseVPanel = new VerticalPanel();
   private ExerciseList exerciseList;
@@ -163,7 +164,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     else {
       currentExerciseVPanel.addStyleName("body");
-      currentExerciseVPanel.getElement().getStyle().setBackgroundImage("url("+"langtest/images/"+"levantine_window_bg.jpg"+")");
+      currentExerciseVPanel.getElement().getStyle().setBackgroundImage("url("+ LANGTEST_IMAGES +"levantine_window_bg.jpg"+")");
       currentExerciseVPanel.addStyleName("noMargin");
 /*      RootPanel netPron = RootPanel.get("netPron");
       if (netPron != null) {
@@ -362,7 +363,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void showPopupOnDenial() {
     final PopupPanel popupImage = new PopupPanel();
     popupImage.setAutoHideEnabled(true);
-    final Image image = new Image("images/really.png");
+    final Image image = new Image(LANGTEST_IMAGES +"really.png");
     image.addLoadHandler(new LoadHandler() {
       public void onLoad(LoadEvent event) {
         // since the image has been loaded, the dimensions are known
@@ -431,9 +432,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     vp.add(showResults);
 
     // no click handler for this for now
-    Anchor status = new Anchor(browserCheck.browser + " " +browserCheck.ver +" " +
-        RELEASE_DATE);
-    vp.add(status);
+    HTML statusLine = new HTML("<span><font size=-2>"+browserCheck.browser + " " +browserCheck.ver +" " +
+        RELEASE_DATE+"</font></span>");
+   // Anchor status = new Anchor(browserCheck.browser + " " +browserCheck.ver +" " +
+    //    RELEASE_DATE);
+    vp.add(statusLine);
 
     return vp;//hp2;
   }

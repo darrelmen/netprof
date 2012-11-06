@@ -1,6 +1,8 @@
 package mitll.langtest.client.scoring;
 
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -53,13 +55,26 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
                             final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                             final ImageAndCheck speechTranscript, int toUse, int height, int reqid) {
     //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
-    wordTranscript.image.setUrl("langtest/images/animated_progress.gif");
-    wordTranscript.image.setVisible(true);
-    phoneTranscript.image.setVisible(false);
+    boolean wasVisible = wordTranscript.image.isVisible();
+
+    // only show the spinning icon if it's going to take awhile
+    final Timer t = new Timer() {
+      @Override
+      public void run() {
+        wordTranscript.image.setUrl(LangTest.LANGTEST_IMAGES +"animated_progress.gif");
+        wordTranscript.image.setVisible(true);
+        phoneTranscript.image.setVisible(false);
+      }
+    };
+
+    // Schedule the timer to run once in 1 seconds.
+    t.schedule(wasVisible ? 1000 : 1);
 
     service.getASRScoreForAudio(reqid, path, refSentence, toUse, height, new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(PretestScore result) {
+        t.cancel();
+
         if (isMostRecentRequest("score", result.getReqid())) {
           useResult(result, wordTranscript, phoneTranscript, speechTranscript, tested.contains(path));
           tested.add(path);
