@@ -78,7 +78,19 @@
     	</jar>
     </target>
 
+
+    <target depends="build" name="warLevantine">
+        <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**,media/**,ref/**" >
+        </jar>
+    </target>
+
     <target depends="war" name="deploy">
+        <copy todir="${tomcat.deploy}">
+            <fileset dir="." includes="netPron2.war"/>
+        </copy>
+    </target>
+
+    <target depends="warLevantine" name="deployLevantine">
         <copy todir="${tomcat.deploy}">
             <fileset dir="." includes="netPron2.war"/>
         </copy>

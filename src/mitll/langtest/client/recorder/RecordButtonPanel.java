@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
@@ -26,6 +27,8 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class RecordButtonPanel extends HorizontalPanel {
+  public static final String RECORD_PNG = LangTest.LANGTEST_IMAGES +"record.png";
+  public static final String STOP_PNG   = LangTest.LANGTEST_IMAGES +"stop.png";
   private final Image recordImage;
   private final Image stopImage;
   private ImageAnchor recordButton;
@@ -50,9 +53,9 @@ public class RecordButtonPanel extends HorizontalPanel {
     this.index = index;
     // make record button
     // make images
-    recordImage = new Image("images/record.png");
+    recordImage = new Image(RECORD_PNG);
     recordImage.setAltText("Record");
-    stopImage = new Image("images/stop.png");
+    stopImage = new Image(STOP_PNG);
     stopImage.setAltText("Stop");
 
     // add record button
