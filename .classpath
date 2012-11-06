@@ -3,14 +3,13 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" output="test-classes" path="test"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/imagewriter"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/json-lib-2.4-jdk15.jar" sourcepath="C:/Users/go22670/langTestIngest/json/json-lib-2.4-jdk15-sources.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-codec-1.6.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guava-13.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gchart.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/imagewriter"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/pronz.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/imagewriter"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
