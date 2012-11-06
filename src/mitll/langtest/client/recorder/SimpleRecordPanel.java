@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.AudioTag;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
@@ -26,8 +27,8 @@ import mitll.langtest.shared.Exercise;
  * @author Gordon Vidaver
  */
 public class SimpleRecordPanel extends RecordButtonPanel {
-  private static final String IMAGES_CHECKMARK = "images/checkmark.png";
-  private static final String IMAGES_REDX_PNG = "images/redx.png";
+  private static final String IMAGES_CHECKMARK = LangTest.LANGTEST_IMAGES +"checkmark.png";
+  private static final String IMAGES_REDX_PNG  = LangTest.LANGTEST_IMAGES +"redx.png";
   private Image check;
   private SimplePanel playback = new SimplePanel();
   private final AudioTag audioTag = new AudioTag();

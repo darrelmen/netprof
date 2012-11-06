@@ -115,7 +115,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       int count = 0;
       logger.debug("using install path " + installPath);
       while ((line2 = reader.readLine()) != null) {
-        // if (count++ > 10) break;
+      //   if (count++ > 30) break;
         String[] split = line2.split("\\|");
         String lastCol = split[6];
         String[] split1 = lastCol.split("->");

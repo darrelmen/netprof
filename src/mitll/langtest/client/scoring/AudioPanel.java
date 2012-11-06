@@ -42,7 +42,7 @@ import java.util.Map;
 public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected static final int MIN_WIDTH = 256;
   private static final float WAVEFORM_HEIGHT = 128f;//96;
-  private static final float SPECTROGRAM_HEIGHT = 90f;//96;
+  private static final float SPECTROGRAM_HEIGHT = 88f;//96;
   private static final int RIGHT_MARGIN = ASRScorePanel.X_CHART_SIZE+150;//550;//1;//400;
   protected static final String WAVEFORM = "Waveform";
   protected static final String SPECTROGRAM = "Spectrogram";
@@ -316,6 +316,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     w.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
       public void onValueChange(ValueChangeEvent<Boolean> event) {
         widget.image.setVisible(event.getValue());
+        audioPositionPopup.setHeightFromContainer();
       }
     });
     Panel p = new HorizontalPanel();
@@ -391,8 +392,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
 
     private void showAt(double position) {
-      int offsetHeight = imageContainer.getOffsetHeight();
-      imageOverlay.setSize("2px", offsetHeight + "px");
+      setHeightFromContainer();
 
       int pixelProgress = (int) (((float) imageContainer.getOffsetWidth()) * ((float)position / (float)songDurationInMillis));
       int left = imageContainer.getAbsoluteLeft() + pixelProgress;
@@ -402,6 +402,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       if (debug) System.out.println(this + " showAt " + imageOverlay.isShowing() + " vis " + imageOverlay.isVisible() +
           " x " + imageOverlay.getPopupLeft() + " y " + imageOverlay.getPopupTop() + " dim x " +
           imageOverlay.getOffsetWidth() + " y " + imageOverlay.getOffsetHeight());
+    }
+
+    public void setHeightFromContainer() {
+      int offsetHeight = imageContainer.getOffsetHeight();
+      imageOverlay.setSize("2px", offsetHeight + "px");
     }
   }
 }
