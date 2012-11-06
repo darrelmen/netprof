@@ -168,41 +168,43 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
           @Override
           protected Widget getBeforePlayWidget() {
             if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
-              VerticalPanel vp = new VerticalPanel();
-              //vp.addStyleName("demo-vp-padded");
-              RadioButton fast = new RadioButton("group", "Fast");
-              vp.add(fast);
-              fast.setWidth("40px");
-
-              fast.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                  setRefAudio(e.getRefAudio());
-                  getImagesForPath(wavToMP3(e.getRefAudio()));
-                }
-              });
-              RadioButton slow = new RadioButton("group", "Slow");
-              slow.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                  setRefAudio(e.getSlowAudioRef());
-                  getImagesForPath(wavToMP3(e.getSlowAudioRef()));
-                }
-              });
-              slow.setWidth("40px");
-              vp.add(slow);
-              vp.setWidth("50px");
-              fast.setValue(true);
-              HorizontalPanel hp = new HorizontalPanel();
-              hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-              hp.add(vp);
-              hp.setWidth("60px");
-
-              return vp;
+              return getFastAndSlowRadioButtons();
             }
             else {
               return super.getBeforePlayWidget();
             }
+          }
+
+          private VerticalPanel getFastAndSlowRadioButtons() {
+            VerticalPanel vp = new VerticalPanel();
+            RadioButton fast = new RadioButton("group", "Fast");
+            vp.add(fast);
+            fast.setWidth("40px");
+
+            fast.addClickHandler(new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
+                setRefAudio(e.getRefAudio());
+                getImagesForPath(wavToMP3(e.getRefAudio()));
+              }
+            });
+            RadioButton slow = new RadioButton("group", "Slow");
+            slow.addClickHandler(new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
+                setRefAudio(e.getSlowAudioRef());
+                getImagesForPath(wavToMP3(e.getSlowAudioRef()));
+              }
+            });
+            slow.setWidth("40px");
+            vp.add(slow);
+            vp.setWidth("50px");
+            fast.setValue(true);
+            HorizontalPanel hp = new HorizontalPanel();
+            hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+            hp.add(vp);
+            hp.setWidth("60px");
+            return vp;
           }
         };
     w.setRefAudio(path, e.getRefSentence());
@@ -317,7 +319,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
       super(new Button(RECORD), AUTO_STOP_DELAY);
       this.widgets = widgets;
       this.index = index;
-      getRecord().setWidth("52px");
     }
 
     @Override
@@ -349,7 +350,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
 
     @Override
     protected void showRecording() {
+      int w = getRecord().getOffsetWidth();
       ((Button)getRecord()).setText(STOP);
+      if (getRecord().getOffsetWidth() < w) getRecord().setWidth(w +"px");
     }
 
     @Override
