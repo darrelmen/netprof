@@ -7,14 +7,15 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.googlecode.gchart.client.GChart;
 import com.googlecode.gchart.client.GChart.AnnotationLocation;
 import com.googlecode.gchart.client.GChart.SymbolType;
-import mitll.langtest.client.scoring.ScoreListener;
 import mitll.langtest.client.pretest.PretestGauge;
+import mitll.langtest.client.scoring.ScoreListener;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.ArrayList;
@@ -53,15 +54,24 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     setWidth("200px");
     CaptionPanel chartCaptionPanel = new CaptionPanel("Charts");
 
-    FlowPanel chartPanel = new FlowPanel();
-		chartPanel.setWidth("100%");
+    //FlowPanel chartPanel = new FlowPanel();
+    VerticalPanel chartPanel = new VerticalPanel();
+    chartPanel.setSpacing(5);
+    chartPanel.setWidth("100%");
 
 		exerciseHistoryChart = new GChart();
 		chartPanel.add(exerciseHistoryChart);
-		chartPanel.add(new HTML("<BR>"));
+
+		//chartPanel.add(new HTML("<BR>"));
 		
     phoneAccuracyChart = new GChart();
-    chartPanel.add(phoneAccuracyChart);
+    HorizontalPanel hp = new HorizontalPanel();
+    SimplePanel w = new SimplePanel();
+    w.setWidth("10px");
+    hp.add(w);
+    hp.add(phoneAccuracyChart);
+    //chartPanel.add(phoneAccuracyChart);
+    chartPanel.add(hp);
     //chartPanel.add(new HTML("<BR>"));
 
     chartCaptionPanel.add(chartPanel);
@@ -183,14 +193,10 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 				exerciseHistoryChart.getCurve().getSymbol().setModelWidth(0.3);
 				exerciseHistoryChart.setChartSize(X_CHART_SIZE, 50);
 				
-				float rounded_score = Math.round(score * 100.0f); 
-        //exerciseHistoryChart.getCurve().addPoint(i, rounded_score);
+				float rounded_score = Math.round(score * 100.0f);
         exerciseHistoryChart.getCurve().addPoint(i, rounded_score == 0.0f ? 0.001f : rounded_score);
-        //exerciseHistoryChart.getCurve().getPoint().setAnnotationText(Integer.toString(rounded_score));
-        //exerciseHistoryChart.getCurve().getPoint().setAnnotationLocation(AnnotationLocation.SOUTH);
-        //exerciseHistoryChart.getCurve().getPoint().setAnnotationYShift(-5);
-
-				i++;
+        exerciseHistoryChart.getCurve().setHovertextTemplate(GChart.formatAsHovertext("${y}%"));
+        i++;
 			}
 
 			while(i < 10.0){
@@ -221,8 +227,6 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 		phoneAccuracyChart.clearCurves();
 
 		if(phoneAccuracies != null){
-		//	float i = 10.0f;			//TODO: Improve spacing, fix view
-
 			List<String> phones = new ArrayList<String>(phoneAccuracies.keySet());
 			Collections.sort(phones, new Comparator<String>(){
 				public int compare(String key1, String key2){
@@ -235,7 +239,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
       double i = 10f;
 
-     if (true) {
+      if (true) {
         //add one empty row for spacing
         phoneAccuracyChart.addCurve();
         phoneAccuracyChart.getCurve().getSymbol().setSymbolType(SymbolType.HBAR_SOUTHWEST);
@@ -243,21 +247,25 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
         phoneAccuracyChart.getCurve().getSymbol().setBackgroundColor("white");
         phoneAccuracyChart.getCurve().getSymbol().setModelWidth(0);
         phoneAccuracyChart.getCurve().addPoint(0, i--);
-
-        //  i--;
       }
 
-      //TODO: Remove sil?
-			for(String phone: phones){
-				phoneAccuracyChart.addCurve();
+      if (phones.size() > i) phones = phones.subList(phones.size()-(int)i,phones.size());
+
+      for (String phone : phones) {
+        phoneAccuracyChart.addCurve();
 				phoneAccuracyChart.getCurve().getSymbol().setSymbolType(SymbolType.HBAR_SOUTHWEST);
 				phoneAccuracyChart.getCurve().getSymbol().setBorderWidth(0);
 				phoneAccuracyChart.getCurve().getSymbol().setBackgroundColor(getColor(phoneAccuracies.get(phone)));
 				phoneAccuracyChart.getCurve().getSymbol().setModelWidth(0.3);
-				phoneAccuracyChart.getCurve().addPoint(phoneAccuracies.get(phone) * 100.0f, i--);
+        float x = phoneAccuracies.get(phone) * 100.0f;
+        if (x < 1) x = 1;
+        phoneAccuracyChart.getCurve().addPoint((int)x, i--);
 				phoneAccuracyChart.getCurve().getPoint().setAnnotationText(phone);
-				phoneAccuracyChart.getCurve().getPoint().setAnnotationLocation(AnnotationLocation.EAST);
-				phoneAccuracyChart.getCurve().getPoint().setAnnotationXShift(5);
+				phoneAccuracyChart.getCurve().getPoint().setAnnotationLocation(AnnotationLocation.WEST);
+        phoneAccuracyChart.getCurve().getPoint().setAnnotationXShift(-10);
+        phoneAccuracyChart.getCurve().setHovertextTemplate(GChart.formatAsHovertext("&nbsp;&nbsp;&nbsp;${x}%"));
+        phoneAccuracyChart.getCurve().getSymbol().setHoverLocation(
+            AnnotationLocation.EAST);
 
         if (i < 0) break;
 			}
