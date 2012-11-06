@@ -24,8 +24,8 @@ import mitll.langtest.shared.Exercise;
  * @deprecated
  */
 public class RecordExercisePanel extends ExercisePanel {
-  private static final String IMAGES_CHECKMARK = "images/checkmark.png";
-  private static final String IMAGES_REDX_PNG = "images/redx.png";
+  private static final String IMAGES_CHECKMARK = LangTest.LANGTEST_IMAGES +"checkmark.png";
+  private static final String IMAGES_REDX_PNG  = LangTest.LANGTEST_IMAGES +"redx.png";
   private ExerciseController controller;
   private LangTestDatabaseAsync service;
 
