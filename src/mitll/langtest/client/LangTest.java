@@ -226,10 +226,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     System.out.println("makeExerciseList : english only " + englishOnlyMode + " goodwave " + goodwaveMode);
     this.exerciseList = isGrading ?
         new GradedExerciseList(currentExerciseVPanel,service,this,factory) :
-        goodwaveMode ? new ExerciseList(currentExerciseVPanel,service,this,factory) {
+        goodwaveMode ? new ExerciseList(currentExerciseVPanel,service,this,factory, goodwaveMode) {
           @Override
           protected void checkBeforeLoad(Exercise e) {} // don't try to login
-        }: new ExerciseList(currentExerciseVPanel,service, this, factory);
+        }: new ExerciseList(currentExerciseVPanel,service, this, factory, goodwaveMode);
 
     if (showOnlyOneExercise()) {
       exerciseList.setExercise_title(exercise_title);
@@ -305,6 +305,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // System.out.println("param grading " + isGrading);
     englishOnlyMode = isEnglish != null && !isEnglish.equals("false");
     goodwaveMode = goodwaveMode || (goodwave != null && !goodwave.equals("false"));
+    if (goodwave != null && goodwave.equals("false")) goodwaveMode = false;
+    //GWT.log("goodwave mode = " + goodwaveMode + "/" +goodwave);
     boolean grading = (isGrading != null && !isGrading.equals("false")) || englishOnlyMode;
     return grading;
   }
