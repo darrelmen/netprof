@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -130,6 +131,8 @@ public class RecordButtonPanel extends HorizontalPanel {
     recordButton.setResource(recordImage);
     recordButton.setTitle("Record");
   }
+
+  protected Widget getRecordButton() { return recordButton; }
 
   protected void receivedAudioAnswer(AudioAnswer result,  final ExerciseQuestionState questionState, final Panel outer) {}
 
