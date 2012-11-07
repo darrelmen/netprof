@@ -1,6 +1,7 @@
 package mitll.langtest.client.scoring;
 
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -71,7 +72,11 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
     t.schedule(wasVisible ? 1000 : 1);
 
     service.getASRScoreForAudio(reqid, path, refSentence, toUse, height, new AsyncCallback<PretestScore>() {
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+        Window.alert("Server error -- please report.");
+        wordTranscript.image.setVisible(false);
+        phoneTranscript.image.setVisible(false);
+      }
       public void onSuccess(PretestScore result) {
         t.cancel();
 
