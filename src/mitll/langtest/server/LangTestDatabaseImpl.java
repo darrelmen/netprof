@@ -25,7 +25,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,13 +71,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   *
    * @param userID
+   * @param useFile
    * @return
    * @see mitll.langtest.client.exercise.ExerciseList#getExercises(long)
    */
-  public List<Exercise> getExercises(long userID) {
+  public List<Exercise> getExercises(long userID, boolean useFile) {
     db.setInstallPath(getInstallPath());
-    List<Exercise> exercises = db.getExercises(userID);
+    logger.debug("usefile = " +useFile);
+    List<Exercise> exercises = db.getExercises(userID, useFile);
     if (makeFullURLs) convertRefAudioURLs(exercises);
     if (!exercises.isEmpty())
       logger.debug("Got " + exercises.size() + " exercises , first ref sentence = '" + exercises.iterator().next().getRefSentence() + "'");
@@ -88,10 +90,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see mitll.langtest.client.exercise.ExerciseList#getExercisesInOrder()
    * @return
+   * @param useFile
    */
-  public List<Exercise> getExercises() {
+  public List<Exercise> getExercises(boolean useFile) {
     db.setInstallPath(getInstallPath());
-    List<Exercise> exercises = db.getExercises();
+    logger.debug("usefile = " +useFile);
+    List<Exercise> exercises = db.getExercises(useFile);
     if (makeFullURLs) convertRefAudioURLs(exercises);
     return exercises;
   }
@@ -514,12 +518,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     File file = getAbsoluteFile(wavPath);
 
-    boolean valid = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
-    db.answerDAO.addAnswer(Integer.parseInt(user), plan, exercise, Integer.parseInt(question), "", file.getPath(), valid, db);
+    AudioAnswer.Validity validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
+    db.answerDAO.addAnswer(Integer.parseInt(user), plan, exercise, Integer.parseInt(question), "", file.getPath(),
+        validity == AudioAnswer.Validity.OK, db);
     String wavPathWithForwardSlashSeparators = ensureForwardSlashes(wavPath);
     String url = optionallyMakeURL(wavPathWithForwardSlashSeparators);
     logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
-    return new AudioAnswer(url, valid);
+    return new AudioAnswer(url, validity);
   }
 
   private String optionallyMakeURL(String wavPathWithForwardSlashSeparators) {
