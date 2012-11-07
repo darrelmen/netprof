@@ -29,7 +29,6 @@ import java.util.*;
 public class DatabaseImpl implements Database {
   private static Logger logger = Logger.getLogger(DatabaseImpl.class);
   private static final boolean TESTING = false;
-  private static final boolean USE_LEVANTINE = true;
   private static final boolean USE_FAST_SLOW_LEVANTINE = true;
 
   private static final boolean DROP_USER = false;
@@ -63,17 +62,16 @@ public class DatabaseImpl implements Database {
     try {
       boolean open = getConnection() != null;
       if (!open) {
-        System.err.println("couldn't open connection to database");
+        logger.warn("couldn't open connection to database");
         return;
       }
     } catch (Exception e) {
-      System.err.println("couldn't open connection to database, got " +e.getMessage());
+      logger.warn("couldn't open connection to database, got " +e.getMessage());
       e.printStackTrace();
       return;
     }
     ScheduleDAO scheduleDAO = new ScheduleDAO(this);
     this.userToSchedule = scheduleDAO.getSchedule();
-    this.exerciseDAO = makeExerciseDAO();
 
     if (DROP_USER) {
       try {
@@ -84,7 +82,7 @@ public class DatabaseImpl implements Database {
       }
     }
     if (DROP_RESULT) {
-      System.out.println("------------ dropping results table");
+      logger.info("------------ dropping results table");
       resultDAO.dropResults(this);
       try {
         resultDAO.createResultTable(getConnection());
@@ -103,8 +101,8 @@ public class DatabaseImpl implements Database {
 
   }
 
-  private ExerciseDAO makeExerciseDAO() {
-    return USE_LEVANTINE ? new FileExerciseDAO() : new SQLExerciseDAO(this);
+  private ExerciseDAO makeExerciseDAO(boolean useFile) {
+    return useFile ? new FileExerciseDAO() : new SQLExerciseDAO(this);
   }
 
   public void setInstallPath(String i) {
@@ -113,11 +111,18 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises()
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
    * @return
+   * @param useFile
    */
-  public List<Exercise> getExercises() {
-    if (USE_LEVANTINE) {
+  public List<Exercise> getExercises(boolean useFile) {
+    logger.info("use file = " + useFile);
+
+    if (exerciseDAO == null || useFile && exerciseDAO instanceof SQLExerciseDAO || !useFile && exerciseDAO instanceof FileExerciseDAO) {
+      this.exerciseDAO = makeExerciseDAO(useFile);
+    }
+
+    if (useFile) {
       if (USE_FAST_SLOW_LEVANTINE) {
         ((FileExerciseDAO)exerciseDAO).readFastAndSlowExercises(installPath);
       }
@@ -154,12 +159,12 @@ public class DatabaseImpl implements Database {
    * @return
    */
   private Exercise getNextUngradedExerciseSlow(Collection<String> activeExercises, int expectedCount) {
-    List<Exercise> rawExercises = getExercises();
-    System.out.println("getNextUngradedExercise : checking " +rawExercises.size() + " exercises.");
+    List<Exercise> rawExercises = getExercises(false);
+    logger.info("getNextUngradedExercise : checking " +rawExercises.size() + " exercises.");
     for (Exercise e : rawExercises) {
       if (!activeExercises.contains(e.getID()) && // no one is working on it
           resultDAO.areAnyResultsLeftToGradeFor(e, expectedCount)) {
-        //System.out.println("Exercise " +e + " needs grading.");
+        //logger.info("Exercise " +e + " needs grading.");
 
         return e;
       }
@@ -174,7 +179,7 @@ public class DatabaseImpl implements Database {
    * @return next exercise containing ungraded results
    */
   private Exercise getNextUngradedExerciseQuick(Collection<String> activeExercises, int expectedCount) {
-    List<Exercise> rawExercises = getExercises();
+    List<Exercise> rawExercises = getExercises(false);
     Collection<Result> resultExcludingExercises = resultDAO.getResultExcludingExercises(activeExercises);
 
     GradeDAO.GradesAndIDs allGradesExcluding = gradeDAO.getAllGradesExcluding(activeExercises);
@@ -183,7 +188,7 @@ public class DatabaseImpl implements Database {
       if (!idToCount.containsKey(g.resultID)) idToCount.put(g.resultID,1);
       else idToCount.put(g.resultID,2);
     }
-    System.out.println("getNextUngradedExercise found  " + resultExcludingExercises.size() + " results, " +
+    logger.info("getNextUngradedExercise found  " + resultExcludingExercises.size() + " results, " +
         "expected " +expectedCount +"," +allGradesExcluding.resultIDs.size() + " graded results");
 
     // remove results that have grades...
@@ -215,36 +220,42 @@ public class DatabaseImpl implements Database {
       String first = exids.first();
       for (Exercise e : rawExercises) {
         if (e.getID().equals(first)) {
-          System.out.println("getNextUngradedExercise  " + e);
+          logger.info("getNextUngradedExercise  " + e);
 
           return e;
         }
       }
       if (!rawExercises.isEmpty()) {
-        System.err.println("getNextUngradedExercise2 expecting an exercise to match " + first);
+        logger.warn("getNextUngradedExercise2 expecting an exercise to match " + first);
       }
     }
 
     return null;
   }
 
-  public List<Exercise> getExercises(long userID) {
-    System.out.println("getExercises : for user  " +userID);
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
+   * @param userID
+   * @param useFile
+   * @return
+   */
+  public List<Exercise> getExercises(long userID, boolean useFile) {
+    logger.info("getExercises : for user  " +userID);
 
     List<Schedule> forUser = userToSchedule.get(userID);
     if (forUser == null) {
-      System.err.println("no schedule for user " +userID);
-      return getExercises();
+      logger.warn("no schedule for user " +userID);
+      return getExercises(useFile);
     }
     List<Exercise> exercises = new ArrayList<Exercise>();
 
-    List<Exercise> rawExercises = getExercises();
+    List<Exercise> rawExercises = getExercises(useFile);
     Map<String,Exercise> idToExercise = new HashMap<String, Exercise>();
     for (Exercise e : rawExercises) { idToExercise.put(e.getID(),e); }
     for (Schedule s : forUser) {
       Exercise exercise = idToExercise.get(s.exid);
       if (exercise == null) {
-        System.err.println("no exercise for id " +s.exid + "? Foreign key constraint violated???");
+        logger.warn("no exercise for id " +s.exid + "? Foreign key constraint violated???");
         continue;
       }
       exercise.setPromptInEnglish(!s.flQ);
@@ -266,17 +277,17 @@ public class DatabaseImpl implements Database {
       try {
         url = servlet.getServletContext().getInitParameter("db.url"); // from web.xml
       } catch (Exception e) {
-        System.err.println("no servlet context?");
+        logger.warn("no servlet context?");
         //e.printStackTrace();
       }
-      System.out.println("connecting to " + url);
+      logger.info("connecting to " + url);
 
       GWT.log("connecting to " + url);
       File f = new java.io.File(H2_DB_NAME +
         ".h2.db");
       if (!f.exists()) {
         String s = "huh? no file at " + f.getAbsolutePath();
-        System.err.println(s);
+        logger.warn(s);
 
         GWT.log(s);
       }
@@ -284,7 +295,7 @@ public class DatabaseImpl implements Database {
       connection.setAutoCommit(false);
       boolean closed = connection.isClosed();
       if (closed) {
-        System.err.println("connection is closed to : " + url);
+        logger.warn("connection is closed to : " + url);
       }
       return connection;
     } catch (Exception ex) {
@@ -308,7 +319,7 @@ public class DatabaseImpl implements Database {
         c = (Connection) servletContext.getAttribute("connection");
       }
     } catch (Exception e) {  // for standalone testing
-      System.err.println("The context DBStarter is not working : " + e.getMessage());
+      logger.warn("The context DBStarter is not working : " + e.getMessage());
       e.printStackTrace();
       c = this.dbLogin();
     }
@@ -317,7 +328,7 @@ public class DatabaseImpl implements Database {
     }
     c.setAutoCommit(true);
     if (c.isClosed())  {
-      System.err.println("getConnection : conn " + c + " is closed!");
+      logger.warn("getConnection : conn " + c + " is closed!");
     }
     return c;
   }
@@ -386,18 +397,6 @@ public class DatabaseImpl implements Database {
     }
     return new ResultsAndGrades(resultsForExercise, gradesAndIDs.grades, spokenToLangToResult);
   }
-
-
-
-/*  public void enrichResults(Collection<Result> results,String exid) { {
-    Map<Long, List<Schedule>> scheduleForUserAndExercise = scheduleDAO.getScheduleForUserAndExercise(exid);
-    for (Result r : results) {
-      List<Schedule> schedules = scheduleForUserAndExercise.get(r.userid);
-      Schedule schedule = schedules.get(0);
-      r.setFLQ(schedule.flQ);
-      r.setSpoken(schedule.spoken);
-    }
-  }*/
 
   /**
    * Creates the result table if it's not there.
