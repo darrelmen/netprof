@@ -48,7 +48,7 @@
         <path refid="imagewriter.classpath"/>
         <pathelement location="war/WEB-INF/lib/pronz.jar"/>
     </path>
-    <target name="init">
+    <target name="init" depends="clean">
         <mkdir dir="war/WEB-INF/classes"/>
         <mkdir dir="test-classes"/>
         <copy includeemptydirs="false" todir="war/WEB-INF/classes">
