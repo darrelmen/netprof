@@ -2,6 +2,7 @@ package mitll.langtest.client.scoring;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -10,6 +11,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -38,6 +40,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
   private static final String INSTRUCTIONS = "Instructions";
   private static final String RECORD = "record";
   private static final String STOP = "stop";
+  private static final String FAST = "Fast";
+  private static final String SLOW = "Slow";
+
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
   private static final int AUTO_STOP_DELAY  = 15000; // millis
@@ -54,13 +59,14 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
   private AudioPanel contentAudio, answerAudio;
 
   /**
+   * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
+   * and a right side -- the charts and gauges {@link ASRScorePanel}
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
-   * @param e
-   * @param service
-   * @param userFeedback
+   * @param e for this exercise
+   * @param service so we can post recorded audio
    * @param controller
    */
-  public GoodwaveExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
+  public GoodwaveExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
                                final ExerciseController controller) {
     this.exercise = e;
     this.controller = controller;
@@ -120,11 +126,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
   }
 
   /**
+   * Show the instructions and the audio panel.<br></br>
+   *
    * Replace the html 5 audio tag with our fancy waveform widget.
    *
-   * @see #GoodwaveExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController)
-   * @param e
-   * @return
+   * @see #GoodwaveExercisePanel
+   * @param e for this exercise
+   * @return the panel that has the instructions and the audio panel
    */
   private Widget getQuestionContent(Exercise e) {
     String content = e.getContent();
@@ -159,6 +167,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     return vp;
   }
 
+  /**
+   * If the exercise type is {@link Exercise.EXERCISE_TYPE#REPEAT_FAST_SLOW} then we put the fast/slow radio
+   * buttons before the play button.
+   * @param e
+   * @param path
+   * @return
+   */
   private Widget getScoringAudioPanel(final Exercise e, String path) {
     path = wavToMP3(path);
     ASRScoringAudioPanel w =
@@ -177,7 +192,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
 
           private VerticalPanel getFastAndSlowRadioButtons() {
             VerticalPanel vp = new VerticalPanel();
-            RadioButton fast = new RadioButton("group", "Fast");
+            RadioButton fast = new RadioButton("group", FAST);
             vp.add(fast);
             fast.setWidth("40px");
 
@@ -188,7 +203,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
                 getImagesForPath(wavToMP3(e.getRefAudio()));
               }
             });
-            RadioButton slow = new RadioButton("group", "Slow");
+            RadioButton slow = new RadioButton("group", SLOW);
             slow.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
@@ -210,7 +225,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     w.setRefAudio(path, e.getRefSentence());
     ResizableCaptionPanel cp = new ResizableCaptionPanel(NATIVE_REFERENCE_SPEAKER);
     cp.setContentWidget(w);
-    //vp.add(cp);
 
     contentAudio = w;
     contentAudio.setScreenPortion(controller.getScreenPortion());
@@ -329,15 +343,29 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
           , exercise.getPlan(), exercise.getID(),
           "" + index, "" + controller.getUser(),
           new AsyncCallback<AudioAnswer>() {
-            public void onFailure(Throwable caught) {}
+            public void onFailure(Throwable caught) {
+              showPopup(AudioAnswer.Validity.INVALID.getPrompt());
+            }
+
+            private void showPopup(String toShow) {
+              final PopupPanel popupImage = new PopupPanel(true);
+              popupImage.add(new HTML(toShow));
+              popupImage.showRelativeTo(getRecord());
+              Timer t = new Timer() {
+                @Override
+                public void run() { popupImage.hide(); }
+              };
+              t.schedule(3000);
+            }
+
             public void onSuccess(AudioAnswer result) {
               System.out.println("PostAudioRecordButton : Got audio answer " + result);
-              if (!result.valid) {
-                Window.alert("Audio too short. Please record again.");
-              }
-              else {
+              if (result.validity == AudioAnswer.Validity.OK) {
                 widgets.setRefAudio(refAudio, exercise.getRefSentence());
                 widgets.getImagesForPath(wavToMP3(result.path));
+              }
+              else {
+                showPopup(result.validity.getPrompt());
               }
             }
           });
@@ -348,6 +376,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
       controller.startRecording();
     }
 
+    /**
+     * So we don't want the button changing width when we change the text.
+     */
     @Override
     protected void showRecording() {
       int w = getRecord().getOffsetWidth();
