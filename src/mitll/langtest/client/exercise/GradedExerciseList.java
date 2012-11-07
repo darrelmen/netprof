@@ -17,7 +17,7 @@ import mitll.langtest.shared.Exercise;
  */
 public class GradedExerciseList extends ExerciseList {
   public GradedExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback, ExercisePanelFactory factory) {
-    super(currentExerciseVPanel, service, feedback, factory);
+    super(currentExerciseVPanel, service, feedback, factory, false);
   }
 
   /**

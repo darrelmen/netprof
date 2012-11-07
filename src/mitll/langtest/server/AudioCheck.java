@@ -1,5 +1,7 @@
 package mitll.langtest.server;
 
+import mitll.langtest.shared.AudioAnswer;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -48,10 +50,11 @@ public class AudioCheck {
   /**
    * Verify audio messages
    *
+   * @see AudioConversion#isValid(java.io.File)
    * @param file audio byte array with header
    * @return true if well formed
    */
-  public boolean checkWavFile(File file){
+  public AudioAnswer.Validity checkWavFile(File file){
     AudioInputStream ais = null;
     try {
       ais = AudioSystem.getAudioInputStream(file);
@@ -61,7 +64,7 @@ public class AudioCheck {
 
       if (ais.getFrameLength() < MinRecordLength) {
         System.err.println("INFO: audio recording too short (Length: " + ais.getFrameLength() + ") < min (" +MinRecordLength+ ") ");
-        return false;
+        return AudioAnswer.Validity.TOO_SHORT;
       }
       int fsize = ais.getFormat().getFrameSize();
 
@@ -91,7 +94,7 @@ public class AudioCheck {
       final boolean validAudio = mean > PowerThreshold || Math.sqrt(var) > VarianceThreshold;
       System.out.println("INFO: audio recording (Length: " + ais.getFrameLength() + ") " +
         "mean power = " + mean + " (dB), std = " + Math.sqrt(var) + " valid = " + validAudio);
-      return validAudio;
+      return validAudio ? AudioAnswer.Validity.OK : AudioAnswer.Validity.TOO_QUIET;
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
@@ -102,7 +105,7 @@ public class AudioCheck {
       }
     }
 
-    return false;
+    return AudioAnswer.Validity.INVALID;
   }
 
   public static void main(String []a ) {
