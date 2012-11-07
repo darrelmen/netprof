@@ -74,7 +74,7 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
     */
   public void getExercises(long userID) {
  //   doGrading = false;
-    GWT.log("goodwave mode = " +goodwaveMode);
+  //  GWT.log("goodwave mode = " +goodwaveMode);
     service.getExercises(userID, goodwaveMode, new SetExercisesCallback());
   }
 
