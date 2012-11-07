@@ -151,6 +151,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
   }
 
+  @Override
+  protected void onUnload() {
+    audioPositionPopup.reinitialize();
+  }
+
   public void setScreenPortion(float screenPortion) {
     this.screenPortion = screenPortion;
   }
