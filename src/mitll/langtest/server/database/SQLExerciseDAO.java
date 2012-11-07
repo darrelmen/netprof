@@ -3,6 +3,7 @@ package mitll.langtest.server.database;
 import mitll.langtest.shared.Exercise;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,6 +19,8 @@ import java.util.List;
 import java.util.Set;
 
 public class SQLExerciseDAO implements ExerciseDAO {
+  private static Logger logger = Logger.getLogger(SQLExerciseDAO.class);
+
   private final Database database;
   private static final String ENCODING = "UTF8";
 
@@ -45,7 +48,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
       connection = database.getConnection();
       String sql = "SELECT * FROM exercises";
       PreparedStatement statement = connection.prepareStatement(sql);
-      // System.out.println("doing " + sql + " on " + connection);
+      // logger.info("doing " + sql + " on " + connection);
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         String plan = rs.getString(1);
@@ -58,26 +61,24 @@ public class SQLExerciseDAO implements ExerciseDAO {
           JSONObject obj = JSONObject.fromObject(content);
           Exercise e = getExercise(plan, exid, obj);
           if (e == null) {
-            System.err.println("couldn't find exercise for plan '" + plan + "'");
+            logger.warn("couldn't find exercise for plan '" + plan + "'");
             continue;
           }
           if (e.getID() == null) {
-            System.err.println("no valid exid for " + e);
+            logger.warn("no valid exid for " + e);
             continue;
           }
       //    ids.add(e.getID());
           exercises.add(e);
         } else {
-          System.err.println("expecting a { (marking json data), so skipping " + content);
+          logger.warn("expecting a { (marking json data), so skipping " + content);
         }
       }
       rs.close();
       statement.close();
       database.closeConnection(connection);
     } catch (Exception e) {
-      System.err.println("got " + e);
-
-      e.printStackTrace();
+      logger.warn("got " + e,e);
     } finally {
       if (connection != null) {
         /*   try {
@@ -88,9 +89,9 @@ public class SQLExerciseDAO implements ExerciseDAO {
       }
     }
     if (exercises.isEmpty()) {
-      System.err.println("no exercises found in database?");
+      logger.warn("no exercises found in database?");
     } else {
-      System.out.println("getRawExercises : found " + exercises.size() + " exercises.");
+      logger.info("getRawExercises : found " + exercises.size() + " exercises.");
     }
     return exercises;
   }
@@ -108,12 +109,12 @@ public class SQLExerciseDAO implements ExerciseDAO {
     boolean recordAudio = false;
     String content = (String) obj.get("content");
     if (content == null) {
-      System.err.println("no content key in " + obj.keySet());
+      logger.warn("no content key in " + obj.keySet());
     }
     Exercise exercise = new Exercise(plan, exid, content, promptInEnglish, recordAudio);
     Object qa1 = obj.get("qa");
     if (qa1 == null) {
-      System.err.println("no qa key in " + obj.keySet());
+      logger.warn("no qa key in " + obj.keySet());
     }
     Collection<JSONObject> qa = JSONArray.toCollection((JSONArray) qa1, JSONObject.class);
     for (JSONObject o : qa) {

@@ -1,5 +1,6 @@
 package mitll.langtest.client.exercise;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -41,12 +42,15 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
   protected int expectedGrades = 1;
   protected UserManager user;
   private String exercise_title;
+  private boolean goodwaveMode;
 
-  public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback, ExercisePanelFactory factory) {
+  public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
+                      ExercisePanelFactory factory, boolean goodwaveMode) {
     this.currentExerciseVPanel = currentExerciseVPanel;
     this.service = service;
     this.feedback = feedback;
     this.factory = factory;
+    this.goodwaveMode = goodwaveMode;
   }
 
   /**
@@ -70,11 +74,12 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
     */
   public void getExercises(long userID) {
  //   doGrading = false;
-    service.getExercises(userID, new SetExercisesCallback());
+    GWT.log("goodwave mode = " +goodwaveMode);
+    service.getExercises(userID, goodwaveMode, new SetExercisesCallback());
   }
 
   public void getExercisesInOrder() {
-    service.getExercises(new SetExercisesCallback());
+    service.getExercises(goodwaveMode, new SetExercisesCallback());
   }
 
   public void onResize() {
