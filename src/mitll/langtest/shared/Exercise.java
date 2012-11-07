@@ -113,7 +113,7 @@ public class Exercise implements IsSerializable  {
   public String getRefSentence() { return refSentence; }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getExercises(long)
+   * @see mitll.langtest.server.database.DatabaseImpl#getExercises(long, boolean)
    * @param b
    */
   public void setPromptInEnglish(boolean b) {
