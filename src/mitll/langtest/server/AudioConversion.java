@@ -3,6 +3,7 @@ package mitll.langtest.server;
 import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
 import mitll.langtest.client.LangTestDatabase;
+import mitll.langtest.shared.AudioAnswer;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
@@ -41,11 +42,12 @@ public class AudioConversion {
   /**
    * Also writes an MP3 file equivalent.
    *
+   * @see LangTestDatabaseImpl#writeAudioFile(String, String, String, String, String)
    * @param base64EncodedString audio bytes from the client
    * @param file where we want to write the wav file to
    * @return true if audio is valid (not too short, not silence)
    */
-  public boolean convertBase64ToAudioFiles(String base64EncodedString, File file) {
+  public AudioAnswer.Validity convertBase64ToAudioFiles(String base64EncodedString, File file) {
     File parentFile = file.getParentFile();
     // System.out.println("making dir " + parentFile.getAbsolutePath());
 
@@ -58,7 +60,7 @@ public class AudioConversion {
     if (!file.exists()) {
       System.err.println("writeAudioFile : huh? can't find " + file.getAbsolutePath());
     }
-    boolean valid = isValid(file);
+    AudioAnswer.Validity valid = isValid(file);
 
     AudioConversion audioConversion = new AudioConversion();
     audioConversion.writeMP3(file.getAbsolutePath());
@@ -98,13 +100,18 @@ public class AudioConversion {
     }
   }
 
-  private boolean isValid(File file) {
+  /**
+   * @see #convertBase64ToAudioFiles(String, java.io.File)
+   * @param file
+   * @return
+   */
+  private AudioAnswer.Validity isValid(File file) {
     try {
       return audioCheck.checkWavFile(file);
     } catch (Exception e) {
       e.printStackTrace();
     }
-    return false;
+    return AudioAnswer.Validity.INVALID;
   }
 
   /**
