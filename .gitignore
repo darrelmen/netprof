@@ -1,0 +1,4 @@
+war/langtest/*.cache.*
+war/ref/*-repeat/ref*.lab
+war/fastAndSlowRef/nl*/*.lab
+war/fastAndSlowRef/nl*/*.raw
