@@ -3,6 +3,7 @@
  */
 package mitll.langtest.client.recorder;
 
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
@@ -13,6 +14,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
+import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
@@ -97,7 +99,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
    */
   @Override
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {
-    showAudioValidity(result.valid, questionState, outer);
+    showAudioValidity(result.validity, questionState, outer);
     setAudioTag(result.path);
   }
 
@@ -109,9 +111,9 @@ public class SimpleRecordPanel extends RecordButtonPanel {
     playback.setWidget(new HTML(audioTag.getAudioTag(result)));
   }
 
-  private void showAudioValidity(Boolean result, ExerciseQuestionState questionState, Panel outer) {
+  private void showAudioValidity(AudioAnswer.Validity result, ExerciseQuestionState questionState, Panel outer) {
     check.setVisible(false);
-    if (result) {
+    if (result == AudioAnswer.Validity.OK) {
       check.setUrl(IMAGES_CHECKMARK);
       check.setAltText("Audio Saved");
       questionState.recordCompleted(outer);
@@ -121,10 +123,19 @@ public class SimpleRecordPanel extends RecordButtonPanel {
       check.setAltText("Audio Invalid");
       questionState.recordIncomplete(outer);
 
-      final PopupPanel popupImage = new PopupPanel(true);
-      popupImage.add(new HTML("Audio too short, or too quiet.<br/>Please re-record."));
-      popupImage.showRelativeTo(this);
+      showPopup(result.getPrompt());
     }
     check.setVisible(true);
+  }
+
+  private void showPopup(String toShow) {
+    final PopupPanel popupImage = new PopupPanel(true);
+    popupImage.add(new HTML(toShow));
+    popupImage.showRelativeTo(getRecordButton());
+    Timer t = new Timer() {
+      @Override
+      public void run() { popupImage.hide(); }
+    };
+    t.schedule(3000);
   }
 }
