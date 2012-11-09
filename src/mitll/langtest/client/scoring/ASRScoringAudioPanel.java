@@ -18,25 +18,28 @@ import mitll.langtest.shared.scoring.PretestScore;
 public class ASRScoringAudioPanel extends ScoringAudioPanel {
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#ASRRecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int)
-   *
    * @param service
    * @param soundManager
    * @param useFullWidth
+   * @param numRepeats
    */
-  public ASRScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
-    super(service, soundManager, useFullWidth);
+  public ASRScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth,
+                              int numRepeats) {
+    super(service, soundManager, useFullWidth, numRepeats);
   }
 
   /**
-   * @see GoodwaveExercisePanel#getQuestionContent(mitll.langtest.shared.Exercise)
+   * @see GoodwaveExercisePanel#getScoringAudioPanel(mitll.langtest.shared.Exercise, String)
    * @param path
    * @param refSentence
    * @param service
    * @param soundManager
    * @param useFullWidth
+   * @param numRepeats
    */
-  public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
-    super(path, refSentence, service, soundManager, useFullWidth);
+  public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service, SoundManagerAPI soundManager,
+                              boolean useFullWidth, int numRepeats) {
+    super(path, refSentence, service, soundManager, useFullWidth, numRepeats);
   }
 
   /**
