@@ -3,6 +3,7 @@
  */
 package mitll.langtest.client.gauge;
 
+import audio.image.AudioImage;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -37,17 +38,29 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
       "You may record yourself multiple times." +
    //   "You will see your scores for each recording in the Exercise History section.</p>";
   "";
+  private static final String HOVERTEXT_TEMPLATE = GChart.formatAsHovertext("${y}%");
+  private static final String PHONE_HOVERTEXT_TEMPLATE = GChart.formatAsHovertext("&nbsp;&nbsp;&nbsp;${x}%");
 
   private PretestGauge ASRGauge;
   private GChart exerciseHistoryChart,  phoneAccuracyChart;
   private List<Float> scores = new ArrayList<Float>();
 
-  private float[][] colormap = {{255f, 0f, 0f}, {255f, 32f, 0f}, {255f, 64f, 0f}, {255f, 128f, 0f}, {255f, 192f, 0f}, {255f, 255f, 0f},
-			{192f, 255f, 0f}, {128f, 255f, 0f}, {64f, 255f, 0f}, {32f, 255f, 0f}, {32f, 255f, 0f}, {32f, 255f, 0f}, {32f, 255f, 0f},
-			{0f, 255f, 0f}, {0f, 255f, 0f}, {0f, 255f, 0f}};
+  private float[][] colormap = RYB_COLOR_MAP;
+
+  private static final float[][] RYB_COLOR_MAP = {{255f, 0f, 0f}, // red
+      {255f, 32f, 0f},
+      {255f, 64f, 0f},
+      {255f, 128f, 0f},
+      {255f, 192f, 0f},
+      {255f, 255f, 0f}, // yellow
+      {192f, 255f, 0f},
+      {128f, 255f, 0f},
+      {64f, 255f, 0f},
+      {32f, 255f, 0f},
+      {0f, 255f, 0f}};  // green
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
 	public ASRScorePanel(){
 		//setWidth("100%");
@@ -192,10 +205,12 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 				exerciseHistoryChart.getCurve().getSymbol().setBackgroundColor(getColor(score));
 				exerciseHistoryChart.getCurve().getSymbol().setModelWidth(0.3);
 				exerciseHistoryChart.setChartSize(X_CHART_SIZE, 50);
-				
-				float rounded_score = Math.round(score * 100.0f);
-        exerciseHistoryChart.getCurve().addPoint(i, rounded_score == 0.0f ? 0.001f : rounded_score);
-        exerciseHistoryChart.getCurve().setHovertextTemplate(GChart.formatAsHovertext("${y}%"));
+
+				double rounded_score = Math.max(0.01, Math.round(score * 100.0f));
+        //System.out.println("using score " + score + "/" + rounded_score);
+        int intScore = (int) rounded_score;
+        exerciseHistoryChart.getCurve().addPoint(i, intScore);
+        exerciseHistoryChart.getCurve().setHovertextTemplate(HOVERTEXT_TEMPLATE);
         i++;
 			}
 
@@ -263,7 +278,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 				phoneAccuracyChart.getCurve().getPoint().setAnnotationText(phone);
 				phoneAccuracyChart.getCurve().getPoint().setAnnotationLocation(AnnotationLocation.WEST);
         phoneAccuracyChart.getCurve().getPoint().setAnnotationXShift(-10);
-        phoneAccuracyChart.getCurve().setHovertextTemplate(GChart.formatAsHovertext("&nbsp;&nbsp;&nbsp;${x}%"));
+        phoneAccuracyChart.getCurve().setHovertextTemplate(PHONE_HOVERTEXT_TEMPLATE);
         phoneAccuracyChart.getCurve().getSymbol().setHoverLocation(
             AnnotationLocation.EAST);
 
