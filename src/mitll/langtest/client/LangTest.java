@@ -55,8 +55,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int EAST_WIDTH = 90;
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
   private static final boolean DEFAULT_GOODWAVE_MODE = true;
-  public static final String RELEASE_DATE = "11/06";
-  public static final String DEFAULT_EXERCISE = null;//"nl0020_ams";
+  private static final int DEFAULT_SEGMENT_REPEATS = 2;
+  private static final String RELEASE_DATE = "11/09";
+  private static final String DEFAULT_EXERCISE = null;//"nl0020_ams";
   public static final String LANGTEST_IMAGES = "langtest/images/";
 
   private Panel currentExerciseVPanel = new VerticalPanel();
@@ -79,8 +80,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private SoundManagerStatic soundManager;
   private ScrollPanel itemScroller;
   private float screenPortion;
-  //private boolean showOnlyOne;
   private String exercise_title;
+  private int segmentRepeats = DEFAULT_SEGMENT_REPEATS;
 
   /**
    * Make an exception handler that displays the exception.
@@ -284,6 +285,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     String isGrading = Window.Location.getParameter("grading");
     String isEnglish = Window.Location.getParameter("english");
     String goodwave = Window.Location.getParameter("goodwave");
+    String repeats = Window.Location.getParameter("repeats");
 
     String exercise_title = Window.Location.getParameter("exercise_title");
     if (exercise_title != null) {
@@ -308,6 +310,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (goodwave != null && goodwave.equals("false")) goodwaveMode = false;
     //GWT.log("goodwave mode = " + goodwaveMode + "/" +goodwave);
     boolean grading = (isGrading != null && !isGrading.equals("false")) || englishOnlyMode;
+
+    // get audio repeats
+    if (repeats != null) {
+      try {
+        segmentRepeats = Integer.parseInt(repeats)-1;
+      } catch (NumberFormatException e) {
+        e.printStackTrace();
+      }
+    }
     return grading;
   }
 
@@ -492,6 +503,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public int getUser() { return userManager.getUser(); }
   public String getGrader() { return userManager.getGrader(); }
   public boolean getEnglishOnly() { return englishOnlyMode; }
+  public int getSegmentRepeats() { return segmentRepeats; }
 
   // recording methods...
   /**
