@@ -1,13 +1,11 @@
 package mitll.langtest.client.scoring;
 
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -46,6 +44,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final int RIGHT_MARGIN = ASRScorePanel.X_CHART_SIZE+150;//550;//1;//400;
   protected static final String WAVEFORM = "Waveform";
   protected static final String SPECTROGRAM = "Spectrogram";
+  public static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence and speech occur, or whether the mic is working properly.";
   protected String audioPath;
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
@@ -104,8 +103,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     waveform = new ImageAndCheck();
     imageContainer.add(waveform.image);
     controlPanel.add(addCheckbox(WAVEFORM, waveform));
-    waveform.image.setAltText("The waveform should only be used to determine when periods of silence and speech occur, or whether the mic is working properly.");
-    waveform.image.setTitle("The waveform should only be used to determine when periods of silence and speech occur, or whether the mic is working properly.");
+    waveform.image.setAltText(WAVEFORM_TOOLTIP);
+    waveform.image.setTitle(WAVEFORM_TOOLTIP);
     spectrogram = new ImageAndCheck();
     imageContainer.add(spectrogram.image);
     controlPanel.add(addCheckbox(SPECTROGRAM, spectrogram));
@@ -186,17 +185,18 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   /**
-   * @see ScoringAudioPanel#ScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.sound.SoundManagerAPI, boolean)
+   * @see ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    * @param start
    * @param end
    * @param waveDurInSeconds
+   * @param numRepeats
    */
-  public void playSegment(float start, float end, float waveDurInSeconds) {
+  public void playSegment(float start, float end, float waveDurInSeconds, int numRepeats) {
     if (start >= end) {
       System.err.println("bad segment " + start + "-" + end);
     }
     else {
-      playAudio.repeatSegment(start,end,waveDurInSeconds*1000);
+      playAudio.repeatSegment(start,end,waveDurInSeconds*1000, numRepeats);
     }
   }
 
@@ -279,8 +279,16 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
           else if (isMostRecentRequest(type,result.req)) {
             imageAndCheck.image.setUrl(result.imageURL);
             imageAndCheck.image.setVisible(true);
-            imageAndCheck.check.setVisible(true);
             audioPositionPopup.reinitialize();
+
+            // attempt to have the check not become visible until the image comes back from the server
+            Timer t = new Timer() {
+              public void run() {
+                imageAndCheck.check.setVisible(true);
+              }
+            };
+
+            t.schedule(50);
           }
           else {
             System.out.println("getImageURLForAudio : ignoring out of sync response " + result.req + " for " + type);
