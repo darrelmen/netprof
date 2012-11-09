@@ -31,4 +31,6 @@ public interface ExerciseController {
   float getScreenPortion();
 
   boolean showOnlyOneExercise();
+
+  int getSegmentRepeats();
 }

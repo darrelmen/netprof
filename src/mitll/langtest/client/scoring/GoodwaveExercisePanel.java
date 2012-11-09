@@ -3,7 +3,6 @@ package mitll.langtest.client.scoring;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -23,7 +22,6 @@ import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.gauge.ScorePanel;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
@@ -179,7 +177,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     ASRScoringAudioPanel w =
         new ASRScoringAudioPanel(path, e.getRefSentence(), service,
             controller.getSoundManager(),
-            controller.showOnlyOneExercise()) {
+            controller.showOnlyOneExercise(), controller.getSegmentRepeats()) {
           @Override
           protected Widget getBeforePlayWidget() {
             if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
@@ -307,7 +305,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
      * @param index
      */
     public ASRRecordAudioPanel(LangTestDatabaseAsync service, int index) {
-      super(service, controller.getSoundManager(), controller.showOnlyOneExercise());
+      super(service, controller.getSoundManager(), controller.showOnlyOneExercise(), controller.getSegmentRepeats());
       this.index = index;
     }
 
@@ -347,6 +345,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
               showPopup(AudioAnswer.Validity.INVALID.getPrompt());
             }
 
+            /**
+             * Feedback for when audio isn't valid for some reason.
+             * @param toShow
+             */
             private void showPopup(String toShow) {
               final PopupPanel popupImage = new PopupPanel(true);
               popupImage.add(new HTML(toShow));
