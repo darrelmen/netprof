@@ -3,8 +3,6 @@ package mitll.langtest.client.scoring;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseMoveEvent;
-import com.google.gwt.event.dom.client.MouseMoveHandler;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -32,35 +30,38 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private PretestScore result;
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.sound.SoundManagerAPI, boolean)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.sound.SoundManagerAPI, boolean, int)
    * @param service
    * @param soundManager
    * @param useFullWidth
+   * @param numRepeats
    */
-  public ScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
+  public ScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth, int numRepeats) {
     super(null, service, soundManager, useFullWidth);
-    addClickHandlers();
+    addClickHandlers(numRepeats);
   }
 
   /**
-   * @see ASRScoringAudioPanel
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.sound.SoundManagerAPI, boolean, int)
    * @param path
    * @param refSentence
    * @param service
    * @param soundManager
    * @param useFullWidth
+   * @param numRepeats
    */
-  public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
+  public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service, SoundManagerAPI soundManager,
+                           boolean useFullWidth, int numRepeats) {
     super(path, service, soundManager, useFullWidth);
     this.refSentence = refSentence;
-    addClickHandlers();
+    addClickHandlers(numRepeats);
   }
 
-  private void addClickHandlers() {
+  private void addClickHandlers(int numRepeats) {
     this.phones.image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-    this.phones.image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.PHONE_TRANSCRIPT));
+    this.phones.image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.PHONE_TRANSCRIPT, numRepeats));
     this.words.image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-    this.words.image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.WORD_TRANSCRIPT));
+    this.words.image.addClickHandler(new TranscriptEventClickHandler(NetPronImageType.WORD_TRANSCRIPT, numRepeats));
   }
 
   /**
@@ -167,11 +168,18 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @see #addClickHandlers
    */
   private class TranscriptEventClickHandler implements ClickHandler {
-    boolean debug = false;
-    private NetPronImageType type;
+    private final boolean debug = false;
+    private final NetPronImageType type;
+    private final int numRepeats;
 
-    public TranscriptEventClickHandler(NetPronImageType type) {
+    /**
+     * @see mitll.langtest.client.scoring.ScoringAudioPanel#addClickHandlers
+     * @param type
+     * @param numRepeats
+     */
+    public TranscriptEventClickHandler(NetPronImageType type, int numRepeats) {
       this.type = type;
+      this.numRepeats = numRepeats;
     }
 
     /**
@@ -181,7 +189,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
      * end time of the next segment.  <br></br>
      * Then plays, the segment - note we have to adjust between the duration of a wav file and an mp3 file, which
      * will likely be different. (A little surprising to me, initially.)
-     * @see ScoringAudioPanel#playSegment(float, float, float)
+     * @see AudioPanel#playSegment(float, float, float, int)
      * @param event
      */
     public void onClick(ClickEvent event) {
@@ -198,7 +206,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
           if (mouseClickTime > endTime && mouseClickTime <= next) {
             if (debug) System.out.println("\t playing from " + endTime + " to " + next);
 
-            playSegment(endTime, next, wavFileLengthInSeconds);
+            playSegment(endTime, next, wavFileLengthInSeconds, numRepeats);
           }
           index++;
         }
