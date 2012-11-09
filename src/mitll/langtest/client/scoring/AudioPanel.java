@@ -104,7 +104,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     waveform = new ImageAndCheck();
     imageContainer.add(waveform.image);
     controlPanel.add(addCheckbox(WAVEFORM, waveform));
-
+    waveform.image.setAltText("The waveform should only be used to determine when periods of silence and speech occur, or whether the mic is working properly.");
+    waveform.image.setTitle("The waveform should only be used to determine when periods of silence and speech occur, or whether the mic is working properly.");
     spectrogram = new ImageAndCheck();
     imageContainer.add(spectrogram.image);
     controlPanel.add(addCheckbox(SPECTROGRAM, spectrogram));
