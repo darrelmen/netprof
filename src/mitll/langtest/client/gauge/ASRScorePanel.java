@@ -3,7 +3,6 @@
  */
 package mitll.langtest.client.gauge;
 
-import audio.image.AudioImage;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -30,10 +29,10 @@ import java.util.Map;
  * @author gregbramble
  */
 public class ASRScorePanel extends FlowPanel implements ScoreListener {
-  public static final String INSTRUCTIONS = "The ASR method uses a speech recognizer to compare the student recording to a model trained with hundreds of native speakers. " +
+  private static final String INSTRUCTIONS = "The ASR method uses a speech recognizer to compare the student recording to a model trained with hundreds of native speakers. " +
       "It generates scores for each word and phonetic unit (see the color-coded transcript for details).";
-  public static final int X_CHART_SIZE = 150;
-  public static final String LISTENER_INSTRUCTIONS = "Listen to the Native Reference Speaker say the words shown. " +
+  private static final int X_CHART_SIZE = 150;
+  private static final String LISTENER_INSTRUCTIONS = "Listen to the Native Reference Speaker say the words shown. " +
       "Record yourself saying the words. Your score will be displayed on the gauge in the Scores section." +
       "You may record yourself multiple times." +
    //   "You will see your scores for each recording in the Exercise History section.</p>";
@@ -41,11 +40,12 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private static final String HOVERTEXT_TEMPLATE = GChart.formatAsHovertext("${y}%");
   private static final String PHONE_HOVERTEXT_TEMPLATE = GChart.formatAsHovertext("&nbsp;&nbsp;&nbsp;${x}%");
 
-  private PretestGauge ASRGauge;
-  private GChart exerciseHistoryChart,  phoneAccuracyChart;
-  private List<Float> scores = new ArrayList<Float>();
+  private final PretestGauge ASRGauge;
+  private final GChart exerciseHistoryChart;
+  private final GChart phoneAccuracyChart;
+  private final List<Float> scores = new ArrayList<Float>();
 
-  private float[][] colormap = RYB_COLOR_MAP;
+  private final float[][] colormap = RYB_COLOR_MAP;
 
   private static final float[][] RYB_COLOR_MAP = {{255f, 0f, 0f}, // red
       {255f, 32f, 0f},
@@ -63,11 +63,9 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
 	public ASRScorePanel(){
-		//setWidth("100%");
     setWidth("200px");
     CaptionPanel chartCaptionPanel = new CaptionPanel("Charts");
 
-    //FlowPanel chartPanel = new FlowPanel();
     VerticalPanel chartPanel = new VerticalPanel();
     chartPanel.setSpacing(5);
     chartPanel.setWidth("100%");
@@ -75,17 +73,13 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 		exerciseHistoryChart = new GChart();
 		chartPanel.add(exerciseHistoryChart);
 
-		//chartPanel.add(new HTML("<BR>"));
-		
     phoneAccuracyChart = new GChart();
     HorizontalPanel hp = new HorizontalPanel();
     SimplePanel w = new SimplePanel();
     w.setWidth("10px");
     hp.add(w);
     hp.add(phoneAccuracyChart);
-    //chartPanel.add(phoneAccuracyChart);
     chartPanel.add(hp);
-    //chartPanel.add(new HTML("<BR>"));
 
     chartCaptionPanel.add(chartPanel);
 
