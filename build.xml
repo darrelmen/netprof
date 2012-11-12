@@ -69,7 +69,7 @@
         <delete dir="test-classes"/>
     </target>
     <target depends="clean" name="cleanall">
-        <ant antfile="build.xml" dir="${imagewriter.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${imagewriter.location}" inheritAll="false" target="cleanall"/>
     </target>
     <target depends="build-subprojects,gwtc" name="build"/>
 
