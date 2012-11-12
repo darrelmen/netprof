@@ -31,7 +31,7 @@ import java.util.Map;
 public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private static final String INSTRUCTIONS = "The ASR method uses a speech recognizer to compare the student recording to a model trained with hundreds of native speakers. " +
       "It generates scores for each word and phonetic unit (see the color-coded transcript for details).";
-  private static final int X_CHART_SIZE = 150;
+  public static final int X_CHART_SIZE = 150;
   private static final String LISTENER_INSTRUCTIONS = "Listen to the Native Reference Speaker say the words shown. " +
       "Record yourself saying the words. Your score will be displayed on the gauge in the Scores section." +
       "You may record yourself multiple times." +
