@@ -92,6 +92,19 @@ public class PretestScore implements IsSerializable {
     return sTypeToEndTimes;
   }
 
+  public float getWavFileLengthInSeconds() {
+    List<Float> endTimes = getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
+    if (endTimes == null) {
+      endTimes = getsTypeToEndTimes().get(NetPronImageType.PHONE_TRANSCRIPT);
+    }
+    if (endTimes != null && !endTimes.isEmpty()) {
+      return endTimes.get(endTimes.size() - 1);
+    }
+    else {
+      return 0f;
+    }
+  }
+
   public String toString() {
     StringBuilder b = new StringBuilder();
 

@@ -27,7 +27,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private SoundManagerAPI soundManager;
   private final Button playButton = new Button(PLAY_LABEL);
   private AudioControl listener;
-  private double durationInMillis = -1;
 
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
@@ -55,9 +54,9 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     playButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         if (isPlaying())
-            pause();
+          pause();
         else
-            play();
+          play();
       }
     });
     add(playButton);
@@ -98,45 +97,34 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
   /**
    * Repeat the segment 2 or 3 times, depending on length
-   * @see mitll.langtest.client.scoring.AudioPanel#playSegment(float, float, float, int)
+   * @see mitll.langtest.client.scoring.AudioPanel#playSegment
    * @param start
    * @param end
-   * @param wavDurInMillis
    * @param numRepeats
    */
-  public void repeatSegment(float start, float end, float wavDurInMillis, int numRepeats) {
+  public void repeatSegment(float start, float end, int numRepeats) {
     setPlayButtonText();
     int times = (end - start > LONG_AUDIO_THRESHOLD) ? numRepeats-1 : numRepeats;
     times = Math.max(0,times);
-    playSegment(start,end,wavDurInMillis, times);
+    playSegment(start,end, times);
   }
 
-  private void playSegment(float start, float end, float wavDurInMillis, int times) {
+  private void playSegment(float start, float end, int times) {
     count = times;
     this.start = start;
     this.end = end;
-    this.wavDurInMillis = wavDurInMillis;
 
-    playSegment(start,end,wavDurInMillis);
-  }
-
-  /**
-   * Corrects for mp3/wav audio length disparity.
-   *
-   * @see mitll.langtest.client.scoring.AudioPanel#playSegment(float, float, float, int)
-   * @param start
-   * @param end
-   * @param wavDurInMillis
-   */
-  private void playSegment(float start, float end, float wavDurInMillis) {
-    float scalar = (float)durationInMillis/wavDurInMillis;
-    playSegment(start*scalar,end*scalar);
+    playSegment(start,end);
   }
 
   private void playSegment(float startInSeconds, float endInSeconds) {
     soundManager.pause(currentSound);
-//    System.out.println("play from " + startInSeconds + " to " + endInSeconds);
-    soundManager.playInterval(currentSound, startInSeconds * 1000f, endInSeconds * 1000f);
+    float start1 = startInSeconds * 1000f;
+    float end1 = endInSeconds * 1000f;
+    int s = (int) start1;
+    int e = (int) end1;
+
+    soundManager.playInterval(currentSound, s, e);
   }
 
   /**
@@ -151,7 +139,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
   public void update(double position){
     if (listener != null) {
-     // if (count++ < 3) System.out.println("update for " + this + " listener is " + listener);
       listener.update(position);
     }
   }
@@ -196,7 +183,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (count > 0) {
       Timer t = new Timer() {
         public void run() {
-          playSegment(start, end, wavDurInMillis, --count);
+          playSegment(start, end, --count);
         }
       };
 
@@ -217,7 +204,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param duration
    */
   public void songLoaded(double duration){
-    durationInMillis = duration;
     if (listener != null) {
       listener.songLoaded(duration);
     }
