@@ -197,7 +197,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
       if (result != null) {
         int index = 0;
         List<Float> endTimes = result.getsTypeToEndTimes().get(type);
-        float wavFileLengthInSeconds = endTimes.get(endTimes.size() - 1);
+        float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//endTimes.get(endTimes.size() - 1);
         float mouseClickTime = wavFileLengthInSeconds * i;
         if (debug) System.out.println("got client at " + event.getX() + " or " + i + " or time " + mouseClickTime +
             " duration " + wavFileLengthInSeconds + " secs or " + wavFileLengthInSeconds * 1000 + " millis");
@@ -206,7 +206,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
           if (mouseClickTime > endTime && mouseClickTime <= next) {
             if (debug) System.out.println("\t playing from " + endTime + " to " + next);
 
-            playSegment(endTime, next, wavFileLengthInSeconds, numRepeats);
+            playSegment(endTime, next, numRepeats);
           }
           index++;
         }
