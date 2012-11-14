@@ -55,7 +55,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   protected ImageAndCheck speech;
   private int lastWidth = 0;
-  private double songDurationInMillis;
   private Panel imageContainer;
   private AudioPositionPopup audioPositionPopup;
   protected final LangTestDatabaseAsync service;
@@ -188,15 +187,15 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @see ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    * @param start
    * @param end
-   * @param waveDurInSeconds
+   * @paramx waveDurInSeconds
    * @param numRepeats
    */
-  public void playSegment(float start, float end, float waveDurInSeconds, int numRepeats) {
+  public void playSegment(float start, float end, int numRepeats) {
     if (start >= end) {
       System.err.println("bad segment " + start + "-" + end);
     }
     else {
-      playAudio.repeatSegment(start,end,waveDurInSeconds*1000, numRepeats);
+      playAudio.repeatSegment(start,end,numRepeats);
     }
   }
 
@@ -279,7 +278,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
           else if (isMostRecentRequest(type,result.req)) {
             imageAndCheck.image.setUrl(result.imageURL);
             imageAndCheck.image.setVisible(true);
-            audioPositionPopup.reinitialize();
+            audioPositionPopup.reinitialize(result.durationInSeconds);
 
             // attempt to have the check not become visible until the image comes back from the server
             Timer t = new Timer() {
@@ -349,6 +348,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private class AudioPositionPopup implements AudioControl {
     private int id = 0;
     private PopupPanel imageOverlay;
+    private float durationInMillis;
 
     /**
      * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
@@ -361,10 +361,15 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       imageOverlay.add(w);
       w.setStyleName("ImageOverlay");
     }
-    public String toString() { return "popup #" +id; }
+
     /**
      * @see AudioPanel#getImageURLForAudio(String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
      */
+    public void reinitialize(double durationInSeconds) {
+      setWavDurationInSeconds(durationInSeconds);
+      reinitialize();
+    }
+
     public void reinitialize() {
       if (debug) System.out.println(this + "  : AudioPositionPopup.reinitialize ");
 
@@ -374,18 +379,21 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       imageOverlay.setPopupPosition(left, top);
     }
 
+    private void setWavDurationInSeconds(double durationInSeconds) {
+      this.durationInMillis = (float)durationInSeconds*1000f;
+    }
+
     public void songFirstLoaded(double durationEstimate) {}
 
     /**
-     * @param durationInMillis
+     * @param durationInMillisIgnored
      * @see PlayAudioPanel#songLoaded(double)
      */
-    public void songLoaded(final double durationInMillis) {
-      songDurationInMillis = durationInMillis;
+    public void songLoaded(final double durationInMillisIgnored) {
       int offsetHeight = imageContainer.getOffsetHeight();
       int left = imageContainer.getAbsoluteLeft();
       int top = imageContainer.getAbsoluteTop();
-      if (debug) System.out.println(this + " songLoaded " + durationInMillis + " height " + offsetHeight + " x " + left +
+      if (debug) System.out.println(this + " songLoaded " + durationInMillisIgnored + " height " + offsetHeight + " x " + left +
           " y " + top);
       imageOverlay.setSize("2px", offsetHeight + "px");
       imageOverlay.setPopupPosition(left, top);
@@ -405,10 +413,19 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       showAt(position);
     }
 
-    private void showAt(double position) {
+    /**
+     * So the story here is that the wav->mp3 conversion adds about 0.1 sec to the end of the mp3 file
+     * So to get the audio positionInMillis to translate to a positionInMillis on the image, we need to use the
+     * wav file duration from the server and not the mp3 duration {@link #setWavDurationInSeconds(double)}
+     *
+     * @param positionInMillis where soundmanager tells us the audio cursor is during playback
+     */
+    private void showAt(double positionInMillis) {
       setHeightFromContainer();
 
-      int pixelProgress = (int) (((float) imageContainer.getOffsetWidth()) * ((float)position / (float)songDurationInMillis));
+      float horizontalFraction = (float) positionInMillis / durationInMillis;
+      if (horizontalFraction > 1f) horizontalFraction = 1f;
+      int pixelProgress = (int) (((float) imageContainer.getOffsetWidth()) * horizontalFraction);
       int left = imageContainer.getAbsoluteLeft() + pixelProgress;
       int top = imageContainer.getAbsoluteTop();
       imageOverlay.setPopupPosition(left, top);
@@ -422,5 +439,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       int offsetHeight = imageContainer.getOffsetHeight();
       imageOverlay.setSize("2px", offsetHeight + "px");
     }
+
+    public String toString() { return "popup #" +id; }
   }
 }
