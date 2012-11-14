@@ -57,9 +57,9 @@ public class SoundManager{
 		//if(typeof(sound) != 'undefined'){
 		//	sound.destruct();
 		//}
+//    bufferTime: 3,
 
-		var javascriptSound = $wnd.soundManager.createSound({
-			bufferTime: 3,
+    var javascriptSound = $wnd.soundManager.createSound({
 			id: title,
 			url: file,
 			autoLoad: true,
@@ -104,7 +104,7 @@ public class SoundManager{
    * @param start
    * @param end
    */
-  public static native void playInterval(Sound sound, double start, double end) /*-{
+  public static native void playInterval(Sound sound, int start, int end) /*-{
     sound.@mitll.langtest.client.sound.Sound::sound.stop();
     sound.@mitll.langtest.client.sound.Sound::sound.play({
       from: start, // start playing at start msec
