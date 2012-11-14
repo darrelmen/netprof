@@ -4,15 +4,17 @@
 package mitll.langtest.client.gauge;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.googlecode.gchart.client.GChart;
-import com.googlecode.gchart.client.GChart.AnnotationLocation;
 import com.googlecode.gchart.client.GChart.SymbolType;
 import mitll.langtest.client.pretest.PretestGauge;
 import mitll.langtest.client.scoring.ScoreListener;
@@ -38,11 +40,12 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    //   "You will see your scores for each recording in the Exercise History section.</p>";
   "";
   private static final String HOVERTEXT_TEMPLATE = GChart.formatAsHovertext("${y}%");
-  private static final String PHONE_HOVERTEXT_TEMPLATE = GChart.formatAsHovertext("&nbsp;&nbsp;&nbsp;${x}%");
+//  private static final String PHONE_HOVERTEXT_TEMPLATE = GChart.formatAsHovertext("&nbsp;&nbsp;&nbsp;${x}%");
 
   private final PretestGauge ASRGauge;
   private final GChart exerciseHistoryChart;
-  private final GChart phoneAccuracyChart;
+  private Panel phoneList;
+  //private final GChart phoneAccuracyChart;
   private final List<Float> scores = new ArrayList<Float>();
 
   private final float[][] colormap = RYB_COLOR_MAP;
@@ -64,7 +67,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    */
 	public ASRScorePanel(){
     setWidth("200px");
-    CaptionPanel chartCaptionPanel = new CaptionPanel("Charts");
+    CaptionPanel chartCaptionPanel = new CaptionPanel("Exercise History");
 
     VerticalPanel chartPanel = new VerticalPanel();
     chartPanel.setSpacing(5);
@@ -73,27 +76,29 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 		exerciseHistoryChart = new GChart();
 		chartPanel.add(exerciseHistoryChart);
 
-    phoneAccuracyChart = new GChart();
-    HorizontalPanel hp = new HorizontalPanel();
-    SimplePanel w = new SimplePanel();
-    w.setWidth("10px");
-    hp.add(w);
-    hp.add(phoneAccuracyChart);
-    chartPanel.add(hp);
-
     chartCaptionPanel.add(chartPanel);
 
-		add(chartCaptionPanel);
+    add(chartCaptionPanel);
 
-    CaptionPanel guageCaptionPanel = new CaptionPanel("Scores");
+    //phoneAccuracyChart = new GChart();
+    CaptionPanel captionPanel = new CaptionPanel("Phone Accuracy");
+
+    phoneList = new FlowPanel();
+    phoneList.getElement().getStyle().setFloat(Style.Float.LEFT);
+
+    captionPanel.add(phoneList);
+
+    add(captionPanel);
+
+    CaptionPanel gaugeCaptionPanel = new CaptionPanel("Score");
     FlowPanel gaugePanel = new FlowPanel();
 		gaugePanel.setHeight("100%");
 		gaugePanel.setWidth("100%");
     ASRGauge = new PretestGauge("ASR", INSTRUCTIONS);
     gaugePanel.add(ASRGauge);
 
-		guageCaptionPanel.add(gaugePanel);
-		add(guageCaptionPanel);
+    gaugeCaptionPanel.add(gaugePanel);
+		add(gaugeCaptionPanel);
 
     CaptionPanel instructionsCaptionPanel = new CaptionPanel("Help");
     FlowPanel instructionsPanel = new FlowPanel();
@@ -116,7 +121,6 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
     exerciseHistoryChart.setChartSize(X_CHART_SIZE, 50);
     exerciseHistoryChart.setChartTitleThickness(20);
-    exerciseHistoryChart.setChartTitle("<html>Exercise History</html>");
 
     exerciseHistoryChart.getXAxis().setTickThickness(0);
     exerciseHistoryChart.getXAxis().setTickLength(0);
@@ -130,7 +134,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     exerciseHistoryChart.getYAxis().setAxisMin(0);
     exerciseHistoryChart.getYAxis().setAxisMax(100);
 
-    phoneAccuracyChart.setChartSize(X_CHART_SIZE, 150);
+/*    phoneAccuracyChart.setChartSize(X_CHART_SIZE, 150);
     phoneAccuracyChart.setChartTitleThickness(20);
     phoneAccuracyChart.setChartTitle("<html>Phone Accuracy</html>");
 
@@ -144,7 +148,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     phoneAccuracyChart.getYAxis().setTickLabelThickness(0);
     phoneAccuracyChart.getYAxis().setTickLength(0);
     phoneAccuracyChart.getYAxis().setAxisVisible(false);
-    phoneAccuracyChart.getYAxis().setTickCount(0);
+    phoneAccuracyChart.getYAxis().setTickCount(0);*/
 
   }
 
@@ -233,7 +237,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    * @param phoneAccuracies
    */
   private void updatePhoneAccuracy(final Map<String, Float> phoneAccuracies){
-		phoneAccuracyChart.clearCurves();
+    phoneList.clear();
 
 		if(phoneAccuracies != null){
 			List<String> phones = new ArrayList<String>(phoneAccuracies.keySet());
@@ -246,8 +250,9 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 				}
 			});
 
-      double i = 10f;
+     // double i = 10f;
 
+/*
       if (true) {
         //add one empty row for spacing
         phoneAccuracyChart.addCurve();
@@ -257,10 +262,30 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
         phoneAccuracyChart.getCurve().getSymbol().setModelWidth(0);
         phoneAccuracyChart.getCurve().addPoint(0, i--);
       }
+*/
 
-      if (phones.size() > i) phones = phones.subList(phones.size()-(int)i,phones.size());
+     // if (phones.size() > i) phones = phones.subList(phones.size()-(int)i,phones.size());
 
+      VerticalPanel vp = new VerticalPanel();
+      HorizontalPanel hp = new HorizontalPanel();
+      vp.add(hp);
+      hp.setSpacing(5);
+      hp.getElement().getStyle().setFloat(Style.Float.LEFT);
+
+      int c = 0;
       for (String phone : phones) {
+        HorizontalPanel p = getPhone(phoneAccuracies, phone);
+        hp.add(p);
+        if (++c % 5 == 0) {
+          hp = new HorizontalPanel();
+          hp.setSpacing(5);
+          vp.add(hp);
+        }
+      }
+
+       phoneList.add(vp);
+
+/*      for (String phone : phones) {
         phoneAccuracyChart.addCurve();
 				phoneAccuracyChart.getCurve().getSymbol().setSymbolType(SymbolType.HBAR_SOUTHWEST);
 				phoneAccuracyChart.getCurve().getSymbol().setBorderWidth(0);
@@ -286,14 +311,37 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 				phoneAccuracyChart.getCurve().getSymbol().setBackgroundColor("white");
 				phoneAccuracyChart.getCurve().getSymbol().setModelWidth(0);
 				phoneAccuracyChart.getCurve().addPoint(0, i--);
-			}
+			}*/
 		}
 
-		phoneAccuracyChart.update();
+		//phoneAccuracyChart.update();
 	}
 
+  private HorizontalPanel getPhone(Map<String, Float> phoneAccuracies, String phone) {
+    HorizontalPanel p = new HorizontalPanel();
 
-	private String getColor(float score){
+    p.getElement().getStyle().setFloat(Style.Float.LEFT);
+
+    SimplePanel left = new SimplePanel();
+    left.setWidth("5px");
+    left.setHeight("5px");
+    p.add(left);
+    HTML child = new HTML(phone);
+    Float score = phoneAccuracies.get(phone);
+    p.getElement().getStyle().setBackgroundColor(getColor(score));
+    float x = score * 100.0f;
+    child.setTitle(((int) x ) +"%");
+    p.add(child);
+    SimplePanel r  = new SimplePanel();
+    r.setWidth("5px");
+    r.setHeight("5px");
+
+    p.add(r);
+    return p;
+  }
+
+
+  private String getColor(float score){
 	  if (score > 1.0) {
 	    Window.alert("ERROR: getColor: score > 1");
 	    return "#000000";
