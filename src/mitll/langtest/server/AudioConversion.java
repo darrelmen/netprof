@@ -165,9 +165,8 @@ public class AudioConversion {
   }
 
   /**
-   * @see LangTestDatabaseImpl#ensureWriteMP3(String)
-   * @see LangTestDatabaseImpl#writeAudioFile(String, String, String, String, String)
    * @param pathToWav
+   * @deprecated
    */
   private void writeOGG(String pathToWav) {
     String mp3File = pathToWav.replace(".wav",".ogg");
@@ -188,11 +187,9 @@ public class AudioConversion {
   /**
    * Writes a WEBM file.  This is an open source format supported by Firefox (which doesn't handle mp3).
    *
-   * @see LangTestDatabaseImpl#ensureWriteMP3(String)
-   * @see LangTestDatabaseImpl#writeAudioFile(String, String, String, String, String)
    * @param path
    */
-  public boolean writeCompressed(String path) {
+  private boolean writeCompressed(String path) {
     String outputFile = path.replace(".wav", ".webm");
     File ogg = new File(outputFile);
     return ogg.exists() || writeWEBMM(path);
@@ -214,13 +211,41 @@ public class AudioConversion {
     return writeWithFFMPEG(exePath, pathToWav, mp3File);
   }
 
+  /**
+   * Remember to resample wav to 48K before doing lame on it.
+   * This is required b/c soundmanager doesn't do audio segment playing properly otherwise (it plays the wrong
+   * part of the file.)
+   *
+   * @param pathToWav
+   * @param realContextPath
+   */
   public void ensureWriteMP3(String pathToWav,  String realContextPath) {
     File absolutePathToWav = getAbsoluteFile(pathToWav,realContextPath);
 
     String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
     File mp3 = new File(mp3File);
     if (!mp3.exists()) {
-      writeMP3(absolutePathToWav.getAbsolutePath());
+      logger.info("doing mp3 conversion for " + absolutePathToWav);
+
+      String binPath = WINDOWS_SOX_BIN_DIR;
+      if (! new File(binPath).exists()) binPath = LINUX_SOX_BIN_DIR;
+      File tempFile;
+      try {
+        tempFile = File.createTempFile("fortyEightK",".wav");
+        logger.info("sox conversion from " + absolutePathToWav + " to " + tempFile.getAbsolutePath());
+        ProcessBuilder soxFirst = new ProcessBuilder(new AudioConverter().getSox(binPath),
+            absolutePathToWav.getAbsolutePath(), "-s", "-2", "-c", "1", "-q",tempFile.getAbsolutePath(), "rate", "48000");
+
+        new ProcessRunner().runProcess(soxFirst);
+
+        if (!tempFile.exists()) logger.error("didn't make " + tempFile);
+
+        String lamePath = getLame();
+        logger.info("run lame on " + tempFile + " making " + mp3File);
+        writeMP3(lamePath, tempFile.getAbsolutePath(), mp3File);
+      } catch (IOException e) {
+        logger.error("got " + e,e);
+      }
     }
   }
 
@@ -240,13 +265,7 @@ public class AudioConversion {
    */
   public void writeMP3(String pathToWav) {
     String mp3File = pathToWav.replace(".wav",".mp3");
-    String lamePath = LAME_PATH_WINDOWS;    // Windows
-    if (!new File(lamePath).exists()) {
-      lamePath = LAME_PATH_LINUX;
-    }
-    if (!new File(lamePath).exists()) {
-      System.err.println("no lame installed at " + lamePath + " or " +LAME_PATH_WINDOWS);
-    }
+    String lamePath = getLame();
 
 /*    System.out.println("using " +lamePath +" audio :'" +pathToWav +
         "' mp3 '" +mp3File+
@@ -254,9 +273,7 @@ public class AudioConversion {
     writeMP3(lamePath, pathToWav, mp3File);
   }
 
-  public File convertMP3ToWav(String pathToWav) {
-    assert(pathToWav.endsWith(".mp3"));
-    String mp3File = pathToWav.replace(".mp3",".wav");
+  private String getLame() {
     String lamePath = LAME_PATH_WINDOWS;    // Windows
     if (!new File(lamePath).exists()) {
       lamePath = LAME_PATH_LINUX;
@@ -264,6 +281,13 @@ public class AudioConversion {
     if (!new File(lamePath).exists()) {
       System.err.println("no lame installed at " + lamePath + " or " +LAME_PATH_WINDOWS);
     }
+    return lamePath;
+  }
+
+  public File convertMP3ToWav(String pathToWav) {
+    assert(pathToWav.endsWith(".mp3"));
+    String mp3File = pathToWav.replace(".mp3",".wav");
+    String lamePath = getLame();
 
 
     File file = writeWavFromMP3(lamePath, pathToWav, mp3File);
