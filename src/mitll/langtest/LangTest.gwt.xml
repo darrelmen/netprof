@@ -7,17 +7,13 @@
   <inherits name="com.google.gwt.logging.Logging"/>
 -->
 
-
   <!-- Inherit the default GWT style sheet.  You can change       -->
   <!-- the theme of your GWT application by uncommenting          -->
   <!-- any one of the following lines.                            -->
   <inherits name='com.google.gwt.user.theme.clean.Clean'/>
-<!--
-    <inherits name="com.goodwave.GoodWave"/>
--->
-    <inherits name='com.googlecode.gchart.GChart'/>
+  <inherits name='com.googlecode.gchart.GChart'/>
 
-    <!-- <inherits name='com.google.gwt.user.theme.standard.Standard'/> -->
+  <!-- <inherits name='com.google.gwt.user.theme.standard.Standard'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 
@@ -37,14 +33,9 @@
   <!-- <script src="soundmanager2.js"/>  -->
 
   <!-- These 3 scripts are necessary so that Flash Recording can work -->
-  <!-- ADD THIS IF IT BREAKS WITH THE NEWER ONE -->
-  <!--   <script src="js/jquery-1.4.2.js"/>   -->
   <script src="js/jquery-1.4.2.js"/>
   <script src="js/swfobject.js"/>
   <script src="js/recorder.js"/>
-    <script src="js/gauge.js"/>
-<!--
-  <script src="js/embedRecorder.js"/>
--->
 
+  <script src="js/gauge.js"/>
 </module>
