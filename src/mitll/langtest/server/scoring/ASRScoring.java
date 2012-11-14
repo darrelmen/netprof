@@ -82,7 +82,7 @@ public class ASRScoring extends Scoring {
                                   int imageWidth, int imageHeight) {
     return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,
         sentence,
-        "Arabic",
+    //    "Arabic",
         scoringDir,imageOutDir,imageWidth,imageHeight);
   }
 
@@ -94,10 +94,8 @@ public class ASRScoring extends Scoring {
    * @see #scoreRepeat(String, String, String, String, int, int)
    * @param testAudioDir
    * @param testAudioFileNoSuffix
-   * @paramx refAudioDir
-   * @paramx refAudioFileNoSuffix
    * @param sentence
-   * @param asrLanguage
+   * @paramx asrLanguage
    * @param scoringDir
    * @param imageOutDir
    * @param imageWidth
@@ -105,7 +103,7 @@ public class ASRScoring extends Scoring {
    * @return
    */
   private PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
-                                          String sentence, String asrLanguage,
+                                          String sentence, //String asrLanguage,
                                           String scoringDir,
 
                                           String imageOutDir,
@@ -122,7 +120,7 @@ public class ASRScoring extends Scoring {
       logger.error("scoreRepeatExercise : Can't find audio wav file at : " + wavFile.getAbsolutePath());
       return new PretestScore();
     }
-    double duration = new AudioCheck().getDuration(wavFile);
+    double duration = new AudioCheck().getDurationInSeconds(wavFile);
     //logger.info("duration of " + wavFile.getAbsolutePath() + " is " + duration + " secs or " + duration*1000 + " millis");
     try {
       String audioDir = testAudioDir;
@@ -173,7 +171,7 @@ public class ASRScoring extends Scoring {
    * duration differences (mp3 files being typically about 0.1 seconds longer than wav files).
    * The consumer of this map is at {@link mitll.langtest.client.scoring.ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)}
    *
-   * @see #scoreRepeatExercise(String, String, String, String, String, String, int, int)
+   * @see #scoreRepeatExercise
    * @param eventAndFileInfo
    * @param fileDuration
    * @return
