@@ -106,8 +106,9 @@ public class FileExerciseDAO implements ExerciseDAO {
     String exerciseFile = LESSON_PLAN;
     InputStream resourceAsStream = getExerciseListStream(exerciseFile);
     if (resourceAsStream == null) return;
-
     try {
+     // BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("lessonPlan752.txt"),ENCODING));
+
       AudioConversion audioConversion = new AudioConversion();
       exercises = new ArrayList<Exercise>();
       BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
@@ -115,13 +116,17 @@ public class FileExerciseDAO implements ExerciseDAO {
       int count = 0;
       logger.debug("using install path " + installPath);
       while ((line2 = reader.readLine()) != null) {
-  //      if (count++ > 30) break;
+       // if (count++ > 55) break;
         String[] split = line2.split("\\|");
         String lastCol = split[6];
         String[] split1 = lastCol.split("->");
         String name = split1[1].trim();
         String displayName = name;
         String arabic = split1[2];
+       /* w.write(name);
+        w.write(",");
+        w.write(arabic);
+        w.write("\n");*/
         String translit = split1[3];
         String english = split1[4];
 
@@ -145,6 +150,7 @@ public class FileExerciseDAO implements ExerciseDAO {
               ensureForwardSlashes(fastAudioRef), ensureForwardSlashes(slowAudioRef), arabic);
           exercises.add(exercise);
       }
+     // w.close();
       reader.close();
     } catch (IOException e) {
       e.printStackTrace();
