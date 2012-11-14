@@ -30,16 +30,18 @@ public class AudioCheck {
     return 20.0 * Math.log(power < 0.0001f ? 0.0001f : power) / LOG_OF_TEN;
   }
 
-  public double getDuration(String file) {
-    return getDuration(new File(file));
+  public double getDurationInSeconds(String file) {
+    return getDurationInSeconds(new File(file));
   }
 
-  public double getDuration(File file) {
+  public double getDurationInSeconds(File file) {
     try {
       AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
       long frames = audioInputStream.getFrameLength();
       AudioFormat format = audioInputStream.getFormat();
-      return (frames+0.0d) / format.getFrameRate();
+      double dur = (frames + 0.0d) / format.getFrameRate();
+      audioInputStream.close();
+      return dur;
     } catch (UnsupportedAudioFileException e) {
       e.printStackTrace();
     } catch (IOException e) {
@@ -111,7 +113,7 @@ public class AudioCheck {
   public static void main(String []a ) {
     try {
 //      boolean b = new AudioCheck().checkWavFile(new File("C:\\Users\\go22670\\DLITest\\LangTest\\war\\answers\\test\\ac-LC1-006\\0\\subject-1\\answer.wav"));
-      double b = new AudioCheck().getDuration(new File("C:\\Users\\go22670\\DLITest\\LangTest\\war\\answers\\test\\ac-LC1-006\\0\\subject-1\\answer.wav"));
+      double b = new AudioCheck().getDurationInSeconds(new File("C:\\Users\\go22670\\DLITest\\LangTest\\war\\answers\\test\\ac-LC1-006\\0\\subject-1\\answer.wav"));
       System.out.println("duration " + b);
     } catch (Exception e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
