@@ -37,13 +37,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
-
 /**
  * Supports all the database interactions.
  * User: GO22670
  * Date: 5/7/12
  * Time: 5:49 PM
- * To change this template use File | Settings | File Templates.
  */
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase {
@@ -94,7 +92,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public List<Exercise> getExercises(boolean useFile) {
     db.setInstallPath(getInstallPath());
-    logger.debug("usefile = " +useFile);
+   // logger.debug("usefile = " +useFile);
     List<Exercise> exercises = db.getExercises(useFile);
     if (makeFullURLs) convertRefAudioURLs(exercises);
     return exercises;
@@ -144,6 +142,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Get an image of desired dimensions for the audio file - only for Waveform and spectrogram.
+   * Also returns the audio file duration -- so we can deal with the difference in length between mp3 and wav
+   * versions of the same audio file.  (The browser soundmanager plays mp3 and reports audio offsets into
+   * the mp3 file, but all the images are generated from the shorter wav file.)
    *
    * TODO : Worrying about absolute vs relative path is maddening.  Must be a better way!
    *
@@ -158,20 +159,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height) {
     ImageWriter imageWriter = new ImageWriter();
 
-    if (audioFile.endsWith(".mp3")) {
-      String wavFile = removeSuffix(audioFile) +".wav";
-      File test = getAbsoluteFile(wavFile);
-      audioFile = test.exists() ? test.getAbsolutePath() : getWavForMP3(audioFile);
-    }
-    else if (makeFullURLs) {
-      audioFile = new URLUtils(getThreadLocalRequest()).convertURLToRelativeFile(audioFile);
-    }
+    String wavAudioFile = getWavAudioFile(audioFile);
+
     ImageType imageType1 =
         imageType.equalsIgnoreCase(ImageType.WAVEFORM.toString()) ? ImageType.WAVEFORM :
             imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM : null;
     if (imageType1 == null) return new ImageResponse(); // success = false!
     String imageOutDir = getImageOutDir();
-    String absolutePathToImage = imageWriter.writeImageSimple(audioFile, getAbsoluteFile(imageOutDir).getAbsolutePath(),
+    String absolutePathToImage = imageWriter.writeImageSimple(wavAudioFile, getAbsoluteFile(imageOutDir).getAbsolutePath(),
         width, height, imageType1);
     String installPath = getInstallPath();
     //System.out.println("Absolute path to image is " + absolutePathToImage);
@@ -189,8 +184,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       relativeImagePath = relativeImagePath.substring(1);
     }
     String imageURL = optionallyMakeURL(relativeImagePath);
-    logger.info("for " + audioFile + " type " + imageType + " rel path is " + relativeImagePath + " url " + imageURL);
-    return new ImageResponse(reqid,imageURL);
+    logger.info("for " + wavAudioFile + " type " + imageType + " rel path is " + relativeImagePath + " url " + imageURL);
+
+    double duration = new AudioCheck().getDurationInSeconds(wavAudioFile);
+    return new ImageResponse(reqid,imageURL, duration);
+  }
+
+  private String getWavAudioFile(String audioFile) {
+    if (audioFile.endsWith(".mp3")) {
+      String wavFile = removeSuffix(audioFile) +".wav";
+      File test = getAbsoluteFile(wavFile);
+      audioFile = test.exists() ? test.getAbsolutePath() : getWavForMP3(audioFile);
+    }
+    else if (makeFullURLs) {
+      audioFile = new URLUtils(getThreadLocalRequest()).convertURLToRelativeFile(audioFile);
+    }
+    return audioFile;
   }
 
   /**
