@@ -41,9 +41,11 @@ public class Result implements IsSerializable {
    * @param answer
    * @param valid
    * @param timestamp
+   * @param flq
+   * @param spoken
    */
   public Result(int uniqueID, long userid, String plan, String id, int qid, String answer,
-                boolean valid, long timestamp) {
+                boolean valid, long timestamp, boolean flq, boolean spoken) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.plan = plan;
@@ -52,6 +54,8 @@ public class Result implements IsSerializable {
     this.answer = answer;
     this.valid = valid;
     this.timestamp = timestamp;
+    this.flq = flq;
+    this.spoken = spoken;
   }
 
   public void setFLQ(boolean flq)  { this.flq = flq; }
@@ -59,6 +63,6 @@ public class Result implements IsSerializable {
 
   @Override
   public String toString() {
-    return "Result #"+uniqueID + "\tby user " + userid + "\texid " + id + " " + (flq ? "flq":"english") + " " + (spoken ? "spoken":"written");
+    return "Result #"+uniqueID + "\t\tby user " + userid + "\texid " + id + " " + (flq ? "flq":"english") + " " + (spoken ? "spoken":"written");
   }
 }
