@@ -16,8 +16,16 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class GradedExerciseList extends ExerciseList {
-  public GradedExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback, ExercisePanelFactory factory) {
-    super(currentExerciseVPanel, service, feedback, factory, false);
+  /**
+   * @see LangTest#makeExerciseList
+   * @param currentExerciseVPanel
+   * @param service
+   * @param feedback
+   * @param factory
+   * @param arabicDataCollect
+   */
+  public GradedExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback, ExercisePanelFactory factory, boolean arabicDataCollect) {
+    super(currentExerciseVPanel, service, feedback, factory, false, arabicDataCollect);
   }
 
   /**
