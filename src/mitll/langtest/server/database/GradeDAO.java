@@ -10,12 +10,13 @@ import java.util.*;
 /**
  * Stored and retrieves grades from the database.
  */
-public class GradeDAO {
-  private final Database database;
+public class GradeDAO extends DAO {
+  private static final String GRADES = "grades";
+  //private final Database database;
   private boolean debug = false;
 
   public GradeDAO(Database database) {
-    this.database = database;
+    super(database);
   }
 
   /**
@@ -145,6 +146,11 @@ public class GradeDAO {
     return getGradesForSQL(sql);
   }
 
+  public Collection<Grade> getGrades() {
+    Set<String> objects = Collections.emptySet();
+    return getAllGradesExcluding(objects).grades;
+  }
+
   public GradesAndIDs getAllGradesExcluding(Collection<String> toExclude) {
     StringBuilder b = new StringBuilder();
     for (String id : toExclude) b.append("'").append(id).append("'").append(",");
@@ -243,14 +249,7 @@ public class GradeDAO {
   }
 
   private int getNumColumns(Connection connection) throws SQLException {
-    Statement stmt = connection.createStatement();
-    ResultSet rs = stmt.executeQuery("SELECT * FROM grades");
-
-    // Get result set meta data
-    ResultSetMetaData rsmd = rs.getMetaData();
-    int numColumns = rsmd.getColumnCount();
-    stmt.close();
-    return numColumns;
+    return getNumColumns(connection, GRADES);
   }
 
   private void addColumnToTable(Connection connection) throws SQLException {
