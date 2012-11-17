@@ -20,8 +20,8 @@ public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
   // exerciseDAO
-  List<Exercise> getExercises(long userID, boolean useFile);
-  List<Exercise> getExercises(boolean useFile);
+  List<Exercise> getExercises(long userID, boolean useFile, boolean arabicDataCollect);
+  List<Exercise> getExercises(boolean useFile, boolean arabicDataCollect);
   ResultsAndGrades getResultsForExercise(String exid);
 
   // gradeDAO

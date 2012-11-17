@@ -69,16 +69,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * Called from the client.
    *
    * @param userID
    * @param useFile
+   * @param arabicDataCollect
    * @return
    * @see mitll.langtest.client.exercise.ExerciseList#getExercises(long)
    */
-  public List<Exercise> getExercises(long userID, boolean useFile) {
+  public List<Exercise> getExercises(long userID, boolean useFile, boolean arabicDataCollect) {
     db.setInstallPath(getInstallPath());
-    logger.debug("usefile = " +useFile);
-    List<Exercise> exercises = db.getExercises(userID, useFile);
+    logger.info("usefile = " +useFile + " arabic data collect " +arabicDataCollect);
+    List<Exercise> exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(userID, useFile);
     if (makeFullURLs) convertRefAudioURLs(exercises);
     if (!exercises.isEmpty())
       logger.debug("Got " + exercises.size() + " exercises , first ref sentence = '" + exercises.iterator().next().getRefSentence() + "'");
@@ -86,14 +88,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * Called from the client.
    * @see mitll.langtest.client.exercise.ExerciseList#getExercisesInOrder()
    * @return
    * @param useFile
+   * @param arabicDataCollect
    */
-  public List<Exercise> getExercises(boolean useFile) {
+  public List<Exercise> getExercises(boolean useFile, boolean arabicDataCollect) {
     db.setInstallPath(getInstallPath());
    // logger.debug("usefile = " +useFile);
-    List<Exercise> exercises = db.getExercises(useFile);
+    List<Exercise> exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(useFile);
     if (makeFullURLs) convertRefAudioURLs(exercises);
     return exercises;
   }
