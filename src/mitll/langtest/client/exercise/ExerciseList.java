@@ -1,6 +1,5 @@
 package mitll.langtest.client.exercise;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -43,14 +42,16 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
   protected UserManager user;
   private String exercise_title;
   private boolean goodwaveMode;
+  private final boolean arabicDataCollect;
 
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                      ExercisePanelFactory factory, boolean goodwaveMode) {
+                      ExercisePanelFactory factory, boolean goodwaveMode, boolean arabicDataCollect) {
     this.currentExerciseVPanel = currentExerciseVPanel;
     this.service = service;
     this.feedback = feedback;
     this.factory = factory;
     this.goodwaveMode = goodwaveMode;
+    this.arabicDataCollect = arabicDataCollect;
   }
 
   /**
@@ -75,11 +76,11 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
   public void getExercises(long userID) {
  //   doGrading = false;
   //  GWT.log("goodwave mode = " +goodwaveMode);
-    service.getExercises(userID, goodwaveMode, new SetExercisesCallback());
+    service.getExercises(userID, goodwaveMode, arabicDataCollect, new SetExercisesCallback());
   }
 
   public void getExercisesInOrder() {
-    service.getExercises(goodwaveMode, new SetExercisesCallback());
+    service.getExercises(goodwaveMode, arabicDataCollect, new SetExercisesCallback());
   }
 
   public void onResize() {
