@@ -35,4 +35,9 @@ class Schedule {
       e.printStackTrace();
     }
   }
+
+  @Override
+  public String toString() {
+    return "Schedule " + id + " user " + userid + " exid " + exid + " flq " + flQ + " spoken " + spoken;
+  }
 }

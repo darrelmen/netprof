@@ -54,9 +54,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public  static final int EXERCISE_LIST_WIDTH = 200;
   private static final int EAST_WIDTH = 90;
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
-  private static final boolean DEFAULT_GOODWAVE_MODE = true;
+  private static final boolean DEFAULT_GOODWAVE_MODE = false;
+  private static final boolean DEFAULT_ARABIC_TEXT_COLLECT = true;
   private static final int DEFAULT_SEGMENT_REPEATS = 2;
-  private static final String RELEASE_DATE = "11/09";
+  private static final String RELEASE_DATE = "11/16";
   private static final String DEFAULT_EXERCISE = null;//"nl0020_ams";
   public static final String LANGTEST_IMAGES = "langtest/images/";
 
@@ -72,6 +73,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private boolean grading = false;
   private boolean englishOnlyMode = false;
   private boolean goodwaveMode = DEFAULT_GOODWAVE_MODE;
+  private boolean arabicTextDataCollect = DEFAULT_ARABIC_TEXT_COLLECT;
+
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
   private int footerHeight = FOOTER_HEIGHT;
@@ -226,11 +229,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void makeExerciseList(Panel exerciseListPanel, boolean isGrading) {
     System.out.println("makeExerciseList : english only " + englishOnlyMode + " goodwave " + goodwaveMode);
     this.exerciseList = isGrading ?
-        new GradedExerciseList(currentExerciseVPanel,service,this,factory) :
-        goodwaveMode ? new ExerciseList(currentExerciseVPanel,service,this,factory, goodwaveMode) {
+        new GradedExerciseList(currentExerciseVPanel,service,this,factory, arabicTextDataCollect) :
+        goodwaveMode ? new ExerciseList(currentExerciseVPanel,service,this,factory, goodwaveMode, arabicTextDataCollect) {
           @Override
           protected void checkBeforeLoad(Exercise e) {} // don't try to login
-        }: new ExerciseList(currentExerciseVPanel,service, this, factory, goodwaveMode);
+        }: new ExerciseList(currentExerciseVPanel,service, this, factory, goodwaveMode, arabicTextDataCollect);
 
     if (showOnlyOneExercise()) {
       exerciseList.setExercise_title(exercise_title);
@@ -286,6 +289,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     String isEnglish = Window.Location.getParameter("english");
     String goodwave = Window.Location.getParameter("goodwave");
     String repeats = Window.Location.getParameter("repeats");
+    String arabicCollect = Window.Location.getParameter("arabicCollect");
 
     String exercise_title = Window.Location.getParameter("exercise_title");
     if (exercise_title != null) {
@@ -318,6 +322,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       } catch (NumberFormatException e) {
         e.printStackTrace();
       }
+    }
+    if (arabicCollect != null) {
+      arabicTextDataCollect = !arabicCollect.equals("false");
     }
     return grading;
   }
