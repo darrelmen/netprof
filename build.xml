@@ -67,6 +67,7 @@
     <target name="clean">
         <delete dir="war/WEB-INF/classes"/>
         <delete dir="test-classes"/>
+        <delete file="war/WEB-INF/lib/imagewriter.jar"/>
     </target>
     <target depends="clean" name="cleanall">
         <ant antfile="build.xml" dir="${imagewriter.location}" inheritAll="false" target="cleanall"/>
