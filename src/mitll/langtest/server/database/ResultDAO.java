@@ -12,13 +12,14 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 
-public class ResultDAO {
-  private final Database database;
+public class ResultDAO extends DAO {
+  private static final String RESULTS = "results";
+  //private final Database database;
   private GradeDAO gradeDAO;
   private ScheduleDAO scheduleDAO ;
   boolean debug = false;
   public ResultDAO(Database database) {
-    this.database = database;
+    super(database);
 
     gradeDAO = new GradeDAO(database);
     scheduleDAO = new ScheduleDAO(database);
@@ -62,6 +63,8 @@ public class ResultDAO {
       Timestamp timestamp = rs.getTimestamp(i++);
       String answer = rs.getString(i++);
       boolean valid = rs.getBoolean(i++);
+      boolean flq = rs.getBoolean(i++);
+      boolean spoken = rs.getBoolean(i++);
       Result e = new Result(uniqueID, userID, //id
           plan, // plan
           exid, // id
@@ -69,8 +72,8 @@ public class ResultDAO {
           answer, // answer
           //rs.getString(i++), // audioFile
           valid, // valid
-          timestamp.getTime()
-      );
+          timestamp.getTime(),
+          flq, spoken);
       trimPathForWebPage(e);
       results.add(e);
     }
@@ -123,7 +126,7 @@ public class ResultDAO {
   private List<Result> getResultsForExercise(String exerciseID, Collection<Grade> gradedResults, int expected) {
     try {
       List<Result> resultsForQuery = getAllResultsForExercise(exerciseID);
-      enrichResults(resultsForQuery,exerciseID);
+      //enrichResults(resultsForQuery,exerciseID);
       if (debug) System.out.println("for " + exerciseID + " expected " + expected +
           " before " + resultsForQuery.size() + " results, and " + gradedResults.size() + " grades");
 
@@ -235,9 +238,10 @@ public class ResultDAO {
    * Currently the results aren't marked with the spoken/written, foreign/english flags -- have to recover
    * them from the schedule.
    *
-   * @param resultsForExercise
-   * @param exid
+   * @paramx resultsForExercise
+   * @paramx exid
    */
+/*
   public void enrichResults(List<Result> resultsForExercise, String exid) {
     Set<Long> users = getUsers(resultsForExercise);
 
@@ -250,6 +254,70 @@ public class ResultDAO {
         r.setSpoken(schedule.spoken);
       }
     }
+  }
+*/
+
+  /**
+   * This should only be run once, on an old result table to update it.
+   */
+  public void enrichResults() {
+    List<Result> results = getResults();
+    Map<String,List<Result>> exidToResult = new HashMap<String, List<Result>>();
+
+    for (Result r : results) {
+      List<Result> resultsForExercise = exidToResult.get(r.id);
+      if (resultsForExercise == null) {
+        exidToResult.put(r.id, resultsForExercise = new ArrayList<Result>());
+      }
+      resultsForExercise.add(r);
+    }
+
+    Map<Long, List<Schedule>> scheduleForUserAndExercise = scheduleDAO.getSchedule();
+    for (String exid : exidToResult.keySet()) {
+      for (Result r : exidToResult.get(exid)) {
+        List<Schedule> schedules = scheduleForUserAndExercise.get(r.userid);
+        if (schedules != null) {
+          for (Schedule schedule : schedules) {
+            if (schedule.exid.equals(exid)) {
+           //   System.out.println("found schedule " + schedule + " for " + exid + " and result " + r);
+              r.setFLQ(schedule.flQ);
+              r.setSpoken(schedule.spoken);
+              enrichResult(r);
+            }
+          }
+        //  Schedule schedule = schedules.get(0);
+
+        }
+      }
+    }
+  }
+
+  public void enrichResult(Result toChange) {
+    try {
+      Connection connection = database.getConnection();
+      PreparedStatement statement;
+
+      String sql = "UPDATE " + RESULTS + " " +
+          "SET " +
+          "flq='" + toChange.flq + "', " +
+          "spoken='" + toChange.spoken + "' " +
+          "WHERE id=" + toChange.uniqueID;
+      if (debug) System.out.println("enrichResult " + toChange);
+      statement = connection.prepareStatement(sql);
+
+      int i = statement.executeUpdate();
+
+      if (debug) System.out.println("UPDATE " + i);
+      if (i == 0) {
+        System.err.println("huh? didn't update the grade for " + toChange);
+      }
+
+      statement.close();
+      database.closeConnection(connection);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    //return new CountAndGradeID(getCount(), id);
   }
 
   void dropResults(Database database) {
@@ -295,9 +363,26 @@ public class ResultDAO {
     database.closeConnection(connection);
   }*/
 
+  /**
+   * No op if table exists and has the current number of columns.
+   *
+   * @see DatabaseImpl#DatabaseImpl(javax.servlet.http.HttpServlet)
+   * @param connection
+   * @throws SQLException
+   */
   void createResultTable(Connection connection) throws SQLException {
+    createTable(connection);
+    int numColumns = getNumColumns(connection, RESULTS);
+    if (numColumns == 8) {
+      addColumnToTable(connection);
+      enrichResults();
+    }
+  }
+
+  private void createTable(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
-      "results (id IDENTITY, userid INT, plan VARCHAR, " +
+        RESULTS +
+        " (id IDENTITY, userid INT, plan VARCHAR, " +
       Database.EXID +" VARCHAR, " +
       "qid INT," +
       Database.TIME + " TIMESTAMP AS CURRENT_TIMESTAMP," +
@@ -309,5 +394,17 @@ public class ResultDAO {
     statement.close();
   }
 
+  private void addColumnToTable(Connection connection) throws SQLException {
+ /*   PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD scheduled BOOLEAN NOT NULL default false");
+    statement.execute();
+    statement.close();*/
 
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD flq BOOLEAN");
+    statement.execute();
+    statement.close();
+
+    statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD spoken BOOLEAN");
+    statement.execute();
+    statement.close();
+  }
 }
