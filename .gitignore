@@ -2,3 +2,7 @@ war/langtest/*.cache.*
 war/ref/*-repeat/ref*.lab
 war/fastAndSlowRef/nl*/*.lab
 war/fastAndSlowRef/nl*/*.raw
+war/fastAndSlowRef/nl*/*_16K.wav
+war/fastAndSlowRef/nl*/*.mp3
+war/media/ac*/*.wav
+war/media/ac*/*.raw
