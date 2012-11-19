@@ -7,10 +7,8 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
@@ -198,7 +196,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     for (final Widget tb : answers) {
       service.addAnswer(user, exercise, i++, ((TextBox)tb).getText(), "", new AsyncCallback<Void>() {
         public void onFailure(Throwable caught) {
-          userFeedback.showErrorMessage("Couldn't post answers for exercise.");
+          userFeedback.showErrorMessage("Server error", "Couldn't post answers for exercise.");
         }
 
         public void onSuccess(Void result) {
