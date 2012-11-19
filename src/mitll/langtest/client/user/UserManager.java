@@ -31,6 +31,7 @@ public class UserManager {
   private static final int EXPIRATION_HOURS = 240;
   private static final int MIN_AGE = 6;
   private static final int MAX_AGE = 90;
+  private static final int TEST_AGE = 100;
   private static final int NO_USER_SET = -1;
   private static final String GRADING = "grading";
   private static final List<String> EXPERIENCE_CHOICES = Arrays.asList(
@@ -416,7 +417,7 @@ public class UserManager {
         }
         try {
           int age = Integer.parseInt(text);
-          closeButton.setEnabled (age > MIN_AGE && age < MAX_AGE);
+          closeButton.setEnabled ((age > MIN_AGE && age < MAX_AGE) || age == TEST_AGE);
         } catch (NumberFormatException e) {
           closeButton.setEnabled(false);
         }
@@ -452,17 +453,12 @@ public class UserManager {
           boolean passwordMatch = checkPassword(password);
 
           if (passwordMatch) {
-           // boolean existAndValidPassword = result;
-
-            //if (existAndValidPassword && onExists) {
             closeButton.setEnabled(result);
             regButton.setEnabled(!result);
-          }
-          else {
+          } else {
             closeButton.setEnabled(false);
             regButton.setEnabled(false);
           }
-         // }
         }
       });
     }
