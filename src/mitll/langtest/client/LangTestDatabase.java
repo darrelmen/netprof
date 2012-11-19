@@ -22,7 +22,7 @@ public interface LangTestDatabase extends RemoteService {
   // exerciseDAO
   List<Exercise> getExercises(long userID, boolean useFile, boolean arabicDataCollect);
   List<Exercise> getExercises(boolean useFile, boolean arabicDataCollect);
-  ResultsAndGrades getResultsForExercise(String exid);
+  ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
 
   // gradeDAO
  // CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader, String gradeType);
@@ -43,7 +43,7 @@ public interface LangTestDatabase extends RemoteService {
   boolean isAnswerValid(int userID, Exercise exercise, int questionID);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user);
 
-  Exercise getNextUngradedExercise(String user, int expectedGrades);
+  Exercise getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly);
 
   void checkoutExerciseID(String user,String id);
 
