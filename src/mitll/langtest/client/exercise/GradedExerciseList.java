@@ -17,15 +17,16 @@ import mitll.langtest.shared.Exercise;
  */
 public class GradedExerciseList extends ExerciseList {
   /**
-   * @see LangTest#makeExerciseList
+   * @see mitll.langtest.client.LangTest#makeExerciseList
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
    * @param factory
    * @param arabicDataCollect
    */
-  public GradedExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback, ExercisePanelFactory factory, boolean arabicDataCollect) {
-    super(currentExerciseVPanel, service, feedback, factory, false, arabicDataCollect);
+  public GradedExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
+                            ExercisePanelFactory factory, boolean arabicDataCollect) {
+    super(currentExerciseVPanel, service, feedback, factory, false, arabicDataCollect, false);
   }
 
   /**
@@ -56,7 +57,7 @@ public class GradedExerciseList extends ExerciseList {
   }
 
   private void getNextUngraded() {
-    service.getNextUngradedExercise(user.getGrader(), expectedGrades, new AsyncCallback<Exercise>() {
+    service.getNextUngradedExercise(user.getGrader(), expectedGrades, arabicDataCollect, new AsyncCallback<Exercise>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Exercise result) {
         if (result != null) {
