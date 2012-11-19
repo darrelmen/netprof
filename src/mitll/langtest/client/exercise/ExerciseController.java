@@ -33,4 +33,6 @@ public interface ExerciseController {
   boolean showOnlyOneExercise();
 
   int getSegmentRepeats();
+
+  boolean isArabicTextDataCollect();
 }
