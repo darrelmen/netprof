@@ -97,7 +97,7 @@ public class GradingExercisePanel extends ExercisePanel {
     final int n = exercise.getNumQuestions();
     final GradingExercisePanel outer = this;
     final boolean englishOnly = controller.getEnglishOnly();
-    service.getResultsForExercise(exercise.getID(), new AsyncCallback<ResultsAndGrades>() {
+    service.getResultsForExercise(exercise.getID(), controller.isArabicTextDataCollect(), new AsyncCallback<ResultsAndGrades>() {
       public void onFailure(Throwable caught) {}
 
       public void onSuccess(ResultsAndGrades resultsAndGrades) {
