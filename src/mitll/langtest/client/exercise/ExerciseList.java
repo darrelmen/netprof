@@ -8,6 +8,7 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ProvidesResize;
@@ -30,6 +31,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class ExerciseList extends VerticalPanel implements ProvidesResize, RequiresResize {
+  private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
   protected List<Exercise> currentExercises = null;
   private int currentExercise = 0;
   private List<HTML> progressMarkers = new ArrayList<HTML>();
@@ -110,7 +112,7 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
 
   protected class SetExercisesCallback implements AsyncCallback<List<Exercise>> {
     public void onFailure(Throwable caught) {
-      feedback.showErrorMessage("Server error - couldn't get exercises.");
+      feedback.showErrorMessage("Server error", "Server error - couldn't get exercises.");
     }
 
     public void onSuccess(List<Exercise> result) {
@@ -224,13 +226,22 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
     int i = currentExercises.indexOf(current);
     boolean onLast = i == currentExercises.size() - 1;
     if (onLast) {
-      feedback.showErrorMessage("Test Complete! Thank you!");
+      feedback.showErrorMessage("Test Complete", "Test Complete! Thank you!");
     }
     else {
       getNextExercise(current);
     }
-    if (showTurkToken && (onLast || ++countSincePrompt % 5 == 0)) {
-      Window.alert("Please enter this token : " + user.getUser() + "_" + current.getID());
+    if (showTurkToken && (onLast || ++countSincePrompt % NUM_QUESTIONS_FOR_TOKEN == 0)) {
+      String code = user.getUser() + "_" + current.getID();
+     // feedback.showErrorMessage("Copy the token below", "To receive credit, copy and paste this token : " + code.hashCode());
+
+      // Create a basic popup widget
+      final DecoratedPopupPanel simplePopup = new DecoratedPopupPanel(true);
+      simplePopup.ensureDebugId("cwBasicPopup-simplePopup");
+      simplePopup.setWidth("250px");
+      simplePopup.setWidget(new HTML("To receive credit, copy and paste this token : " + code.hashCode() + "<br/>Click on the page to dismiss.<br/>"));
+      simplePopup.setPopupPosition(Window.getClientWidth()/2,Window.getClientHeight()/2);
+      simplePopup.show();
     }
     return onLast;
   }
