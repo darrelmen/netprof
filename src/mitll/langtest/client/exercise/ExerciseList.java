@@ -6,6 +6,7 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -42,16 +43,28 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
   protected UserManager user;
   private String exercise_title;
   private boolean goodwaveMode;
-  private final boolean arabicDataCollect;
+  protected final boolean arabicDataCollect;
+  protected final boolean showTurkToken;
 
+  /**
+   * @see  mitll.langtest.client.LangTest#makeExerciseList
+   * @param currentExerciseVPanel
+   * @param service
+   * @param feedback
+   * @param factory
+   * @param goodwaveMode
+   * @param arabicDataCollect
+   * @param showTurkToken
+   */
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                      ExercisePanelFactory factory, boolean goodwaveMode, boolean arabicDataCollect) {
+                      ExercisePanelFactory factory, boolean goodwaveMode, boolean arabicDataCollect, boolean showTurkToken) {
     this.currentExerciseVPanel = currentExerciseVPanel;
     this.service = service;
     this.feedback = feedback;
     this.factory = factory;
     this.goodwaveMode = goodwaveMode;
     this.arabicDataCollect = arabicDataCollect;
+    this.showTurkToken = showTurkToken;
   }
 
   /**
@@ -203,8 +216,10 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
     html.setStyleDependentName("highlighted", false);
     html = progressMarkers.get(i);
     html.setStyleDependentName("highlighted", true);
+    html.getElement().scrollIntoView();
   }
 
+  private int countSincePrompt = 0;
   public boolean loadNextExercise(Exercise current) {
     int i = currentExercises.indexOf(current);
     boolean onLast = i == currentExercises.size() - 1;
@@ -213,6 +228,9 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
     }
     else {
       getNextExercise(current);
+    }
+    if (showTurkToken && (onLast || ++countSincePrompt % 5 == 0)) {
+      Window.alert("Please enter this token : " + user.getUser() + "_" + current.getID());
     }
     return onLast;
   }
