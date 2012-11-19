@@ -56,6 +56,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
   private static final boolean DEFAULT_GOODWAVE_MODE = false;
   private static final boolean DEFAULT_ARABIC_TEXT_COLLECT = true;
+  private static final boolean DEFAULT_SHOW_TURK_TOKEN = false;
   private static final int DEFAULT_SEGMENT_REPEATS = 2;
   private static final String RELEASE_DATE = "11/16";
   private static final String DEFAULT_EXERCISE = null;//"nl0020_ams";
@@ -74,6 +75,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private boolean englishOnlyMode = false;
   private boolean goodwaveMode = DEFAULT_GOODWAVE_MODE;
   private boolean arabicTextDataCollect = DEFAULT_ARABIC_TEXT_COLLECT;
+  private boolean showTurkToken = DEFAULT_SHOW_TURK_TOKEN;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
@@ -227,13 +229,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param isGrading true if grading, false if not
    */
   private void makeExerciseList(Panel exerciseListPanel, boolean isGrading) {
-    System.out.println("makeExerciseList : english only " + englishOnlyMode + " goodwave " + goodwaveMode);
+    //System.out.println("makeExerciseList : english only " + englishOnlyMode + " goodwave " + goodwaveMode);
     this.exerciseList = isGrading ?
-        new GradedExerciseList(currentExerciseVPanel,service,this,factory, arabicTextDataCollect) :
-        goodwaveMode ? new ExerciseList(currentExerciseVPanel,service,this,factory, goodwaveMode, arabicTextDataCollect) {
+        new GradedExerciseList(currentExerciseVPanel,service,this,factory, isArabicTextDataCollect()) :
+        goodwaveMode ? new ExerciseList(currentExerciseVPanel,service,this,factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken) {
           @Override
           protected void checkBeforeLoad(Exercise e) {} // don't try to login
-        }: new ExerciseList(currentExerciseVPanel,service, this, factory, goodwaveMode, arabicTextDataCollect);
+        }: new ExerciseList(currentExerciseVPanel,service, this, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken);
 
     if (showOnlyOneExercise()) {
       exerciseList.setExercise_title(exercise_title);
@@ -268,6 +270,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void modeSelect() {
     boolean isGrading = checkParams();
     System.out.println("modeSelect english " +englishOnlyMode + " grading " +isGrading );
+
+    users.setVisible(isGrading);
+    showResults.setVisible(isGrading);
+
     if (goodwaveMode) {
       gotUser(-1);
     }
@@ -290,6 +296,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     String goodwave = Window.Location.getParameter("goodwave");
     String repeats = Window.Location.getParameter("repeats");
     String arabicCollect = Window.Location.getParameter("arabicCollect");
+    String turk = Window.Location.getParameter("turk");
 
     String exercise_title = Window.Location.getParameter("exercise_title");
     if (exercise_title != null) {
@@ -325,6 +332,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     if (arabicCollect != null) {
       arabicTextDataCollect = !arabicCollect.equals("false");
+    }
+    if (turk != null) {
+      showTurkToken = !turk.equals("turk");
     }
     return grading;
   }
@@ -417,6 +427,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     t.schedule(1000);
   }
 
+  Anchor users;
+  Anchor showResults;
   /**
    * Has both a logout and a users link and a results link
    * @return
@@ -435,21 +447,23 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     });
 
-    Anchor users = new Anchor("Users");
+    users = new Anchor("Users");
     users.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         userTable.showUsers(service);
       }
     });
     vp.add(users);
+    users.setVisible(!isArabicTextDataCollect());
 
-    Anchor showResults = new Anchor("Results");
+    showResults = new Anchor("Results");
     showResults.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         resultManager.showResults();
       }
     });
     vp.add(showResults);
+    showResults.setVisible(!isArabicTextDataCollect());
 
     // no click handler for this for now
     HTML statusLine = new HTML("<span><font size=-2>"+browserCheck.browser + " " +browserCheck.ver +" " +
@@ -473,7 +487,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #modeSelect()
    */
   public void login() {
-    System.out.println("LangTest.login");
+   // System.out.println("LangTest.login");
     userManager.login();
   }
 
@@ -488,7 +502,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
-    System.out.println("gotUser " + userID + " vs " + lastUser);
+  //  System.out.println("gotUser " + userID + " vs " + lastUser);
 
     grading = false;
     setGrading(grading);
@@ -511,6 +525,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public String getGrader() { return userManager.getGrader(); }
   public boolean getEnglishOnly() { return englishOnlyMode; }
   public int getSegmentRepeats() { return segmentRepeats; }
+  public boolean isArabicTextDataCollect() {  return arabicTextDataCollect; }
 
   // recording methods...
   /**
@@ -536,8 +551,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public SoundManagerAPI getSoundManager() {
     return soundManager;
-
-
   }
 
   private DialogBox dialogBox;
@@ -546,7 +559,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     dialogBox = new DialogBox();
     dialogBox.setText("Information");
     dialogBox.setAnimationEnabled(true);
-    this.closeButton = new Button("Close(E)");
+    this.closeButton = new Button("Close");
     // We can set the id of a widget by accessing its Element
     closeButton.getElement().setId("closeButton");
 

@@ -21,7 +21,7 @@ public interface LangTestDatabaseAsync {
 
   void writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user, AsyncCallback<AudioAnswer> async);
 
-  void getNextUngradedExercise(String user, int expectedGrades, AsyncCallback<Exercise> async);
+  void getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly, AsyncCallback<Exercise> async);
 
   void checkoutExerciseID(String user,String id, AsyncCallback<Void> async);
 
@@ -29,11 +29,7 @@ public interface LangTestDatabaseAsync {
 
   void graderExists(String login, AsyncCallback<Boolean> async);
 
-  void getResultsForExercise(String exid, AsyncCallback<ResultsAndGrades> async);
-
-  //void addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader, String gradeType, AsyncCallback<CountAndGradeID> async);
-  //void addGradeEasy( String exerciseID,Grade toAdd, AsyncCallback<CountAndGradeID> async);
-
+  void getResultsForExercise(String exid, boolean arabicTextDataCollect, AsyncCallback<ResultsAndGrades> async);
 
   void addGrade(String exerciseID, Grade grade, AsyncCallback<CountAndGradeID> async);
 
