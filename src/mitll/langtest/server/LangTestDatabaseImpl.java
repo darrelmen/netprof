@@ -79,7 +79,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public List<Exercise> getExercises(long userID, boolean useFile, boolean arabicDataCollect) {
     db.setInstallPath(getInstallPath());
-    logger.info("usefile = " +useFile + " arabic data collect " +arabicDataCollect);
+    logger.debug("usefile = " + useFile + " arabic data collect " + arabicDataCollect);
     List<Exercise> exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(userID, useFile);
     if (makeFullURLs) convertRefAudioURLs(exercises);
     if (!exercises.isEmpty())
@@ -97,7 +97,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public List<Exercise> getExercises(boolean useFile, boolean arabicDataCollect) {
     db.setInstallPath(getInstallPath());
    // logger.debug("usefile = " +useFile);
-    List<Exercise> exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(useFile);
+    List<Exercise> exercises = db.getExercises(useFile);
     if (makeFullURLs) convertRefAudioURLs(exercises);
     return exercises;
   }
@@ -114,12 +114,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Remember who is grading which exercise.  Time out reservation after 30 minutes.
    *
-   * @seex mitll.langtest.client.exercise.ExerciseList#getNextUngraded
+   * @see mitll.langtest.client.exercise.GradedExerciseList#getNextUngraded
    * @param user
    * @param expectedGrades
-   * @return
+   * @param filterForArabicTextOnly
+   * @return next ungraded exercise
    */
-  public Exercise getNextUngradedExercise(String user, int expectedGrades) {
+  public Exercise getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly) {
     synchronized (this) {
       ConcurrentMap<String,String> stringStringConcurrentMap = userToExerciseID.asMap();
       Collection<String> values = stringStringConcurrentMap.values();
@@ -133,7 +134,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
       //System.out.println("current set minus " + user + " is " + currentActiveExercises);
 
-      return db.getNextUngradedExercise(currentActiveExercises, expectedGrades);
+      return db.getNextUngradedExercise(currentActiveExercises, expectedGrades,
+          filterForArabicTextOnly, filterForArabicTextOnly, !filterForArabicTextOnly);
     }
   }
 
@@ -416,12 +418,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   *
    * @param exid
+   * @param arabicTextDataCollect
    * @return
    * @see mitll.langtest.client.grading.GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
-  public ResultsAndGrades getResultsForExercise(String exid) {
-    ResultsAndGrades resultsForExercise = db.getResultsForExercise(exid);
+  public ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect) {
+    ResultsAndGrades resultsForExercise =
+        arabicTextDataCollect ?
+            db.getResultsForExercise(exid, true, true, false) :
+            db.getResultsForExercise(exid);
+
     ensureMP3(resultsForExercise.results);
     return resultsForExercise;
   }
