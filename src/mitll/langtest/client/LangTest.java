@@ -180,8 +180,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         RootPanel.get().add(currentExerciseVPanel);
 //      }
     }
-    makeFlashContainer();
-    currentExerciseVPanel.add(flashRecordPanel);
+    if (!arabicTextDataCollect) {
+      makeFlashContainer();
+      currentExerciseVPanel.add(flashRecordPanel);
+    }
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("currentExercisePanel");
     }
@@ -506,10 +508,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     grading = false;
     setGrading(grading);
-    flashRecordPanel.initFlash();
+    if (!arabicTextDataCollect) flashRecordPanel.initFlash();
 
     if (userID != lastUser) {
-      if (flashRecordPanel.gotPermission()) {
+      if (arabicTextDataCollect || flashRecordPanel.gotPermission()) {
         exerciseList.getExercises(userID);
       }
       lastUser = userID;
@@ -554,17 +556,22 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private DialogBox dialogBox;
+  private Label msgLabel;
   private Button closeButton;
   private void setupErrorDialog() {
     dialogBox = new DialogBox();
     dialogBox.setText("Information");
-    dialogBox.setAnimationEnabled(true);
+  //  dialogBox.setAnimationEnabled(true);
+    dialogBox.setGlassEnabled(true);
+
     this.closeButton = new Button("Close");
     // We can set the id of a widget by accessing its Element
     closeButton.getElement().setId("closeButton");
 
     VerticalPanel dialogVPanel = new VerticalPanel();
     dialogVPanel.addStyleName("dialogVPanel");
+    dialogVPanel.add(msgLabel = new Label());
+
     dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
     dialogVPanel.add(closeButton);
     dialogBox.setWidget(dialogVPanel);
@@ -576,9 +583,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
   }
 
-  public void showErrorMessage(String msg) {
+  public void showErrorMessage(String title, String msg) {
     System.err.println("got error " + msg);
-    dialogBox.setText(msg);
+    dialogBox.setText(title);
+    msgLabel.setText(msg);
     dialogBox.center();
     closeButton.setFocus(true);
   }
