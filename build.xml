@@ -79,6 +79,10 @@
     	</jar>
     </target>
 
+    <target depends="build" name="warArabic">
+        <jar destfile="npArabicText.war" basedir="war" excludes="answers/**,audioimages/**,scoring/**,fastAndSlowRef/**" >
+        </jar>
+    </target>
 
     <target depends="build" name="warLevantine">
         <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**,media/**,ref/**" >
@@ -103,7 +107,7 @@
         </jar>
     </target>
     
-    <target name="build-subprojects">
+    <target name="build-subprojects" depends="cleanall">
         <ant antfile="build.xml" dir="${imagewriter.location}" inheritAll="false" target="build-project">
             <propertyset>
                 <propertyref name="build.compiler"/>
