@@ -8,7 +8,7 @@ package mitll.langtest.client.user;
  * To change this template use File | Settings | File Templates.
  */
 public interface UserFeedback {
-  void showErrorMessage(String msg);
+  void showErrorMessage(String title, String msg);
   void showStatus(String msg);
   void login();
 }
