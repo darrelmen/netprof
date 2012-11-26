@@ -33,21 +33,25 @@ public class FileExerciseDAO implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
   private static final String ENCODING = "UTF8";
   private static final String LESSON_FILE = "lesson-737.csv";
-  private static final String FAST_AND_SLOW_REF = "fastAndSlowRef";
+  //private static final String FAST_AND_SLOW_REF = "fastAndSlowRef";
   private static final String LESSON_PLAN = "lesson.plan";
   private static final String FAST = "fast";
   private static final String SLOW = "slow";
 
   private List<Exercise> exercises;
+  private final String mediaDir;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
+   * @param mediaDir
    */
-  public FileExerciseDAO() {}
+  public FileExerciseDAO(String mediaDir) {
+    this.mediaDir = mediaDir;
+  }
 
   /**
    * TODO : write to h2
-   * @see DatabaseImpl#getExercises(boolean)
+   * @see DatabaseImpl#getExercises(boolean, String)
    * @param installPath
    */
   public void readExercises(String installPath) {
@@ -101,54 +105,27 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
   }
 
-  public void readFastAndSlowExercises(String installPath) {
+  /**
+   * @see DatabaseImpl#getExercises(boolean, String)
+   * @param installPath
+   * @param lessonPlanFile
+   */
+  public void readFastAndSlowExercises(String installPath, String lessonPlanFile) {
     if (exercises != null) return;
     String exerciseFile = LESSON_PLAN;
-    InputStream resourceAsStream = getExerciseListStream(exerciseFile);
-    if (resourceAsStream == null) return;
     try {
-     // BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("lessonPlan752.txt"),ENCODING));
-
+      FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
       AudioConversion audioConversion = new AudioConversion();
       exercises = new ArrayList<Exercise>();
       BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
       String line2;
-      int count = 0;
+     // int count = 0;
       logger.debug("using install path " + installPath);
       while ((line2 = reader.readLine()) != null) {
-       // if (count++ > 55) break;
-        String[] split = line2.split("\\|");
-        String lastCol = split[6];
-        String[] split1 = lastCol.split("->");
-        String name = split1[1].trim();
-        String displayName = name;
-        String arabic = split1[2];
-       /* w.write(name);
-        w.write(",");
-        w.write(arabic);
-        w.write("\n");*/
-        String translit = split1[3];
-        String english = split1[4];
-
-        String content = getContent(arabic, translit, english);
-        String fastAudioRef = FAST_AND_SLOW_REF + File.separator+name+File.separator+ FAST + ".wav";
-        String slowAudioRef = FAST_AND_SLOW_REF+ File.separator+name+File.separator+ SLOW + ".wav";
-
-        for (String audioRef : new String[]{fastAudioRef,slowAudioRef}) {
-          File file = new File(audioRef);
-          if (!file.exists()) {
-            file = new File(installPath,audioRef);
-          }
-          if (!file.exists()) {
-            if (count++ < 5) logger.debug("can't find audio file " + file.getAbsolutePath());
-          } else {
-            audioConversion.ensureWriteMP3(audioRef,installPath);
-          }
-        }
-
-          Exercise exercise = new Exercise("repeat", displayName, content,
-              ensureForwardSlashes(fastAudioRef), ensureForwardSlashes(slowAudioRef), arabic);
-          exercises.add(exercise);
+      //  if (count++ > 25) break;
+       // if (line2.contains("\\|"))
+        Exercise exercise = (line2.contains("\\|")) ? getExerciseForLine(installPath, audioConversion, line2) : getSimpleExerciseForLine(installPath, audioConversion, line2);
+        exercises.add(exercise);
       }
      // w.close();
       reader.close();
@@ -161,6 +138,40 @@ public class FileExerciseDAO implements ExerciseDAO {
     else {
       logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
+  }
+
+  private Exercise getSimpleExerciseForLine(String installPath, AudioConversion audioConversion, String line2) {
+    return null;  //To change body of created methods use File | Settings | File Templates.
+  }
+
+  private Exercise getExerciseForLine(String installPath, AudioConversion audioConversion, String line2) {
+    String[] split = line2.split("\\|");
+    String lastCol = split[6];
+    String[] split1 = lastCol.split("->");
+    String name = split1[1].trim();
+    String displayName = name;
+    String arabic = split1[2];
+    String translit = split1[3];
+    String english = split1[4];
+
+    String content = getContent(arabic, translit, english);
+    String fastAudioRef = mediaDir + File.separator+"media"+File.separator+name+File.separator+ FAST + ".wav";
+    String slowAudioRef = mediaDir + File.separator+"media"+File.separator+name+File.separator+ SLOW + ".wav";
+
+    for (String audioRef : new String[]{fastAudioRef,slowAudioRef}) {
+      File file = new File(audioRef);
+      if (!file.exists()) {
+        file = new File(installPath,audioRef);
+      }
+      if (!file.exists()) {
+       // if (count++ < 5) logger.debug("can't find audio file " + file.getAbsolutePath());
+      } else {
+        audioConversion.ensureWriteMP3(audioRef,installPath);
+      }
+    }
+
+    return new Exercise("repeat", displayName, content,
+        ensureForwardSlashes(fastAudioRef), ensureForwardSlashes(slowAudioRef), arabic);
   }
 
   private String getContent(String arabic, String translit, String english) {
@@ -210,7 +221,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     return exercises;
   }
 
-  public void convertPlan() {
+  private void convertPlan() {
     InputStream resourceAsStream = getExerciseListStream("lesson.plan");
 
     if (resourceAsStream == null) return;
@@ -262,7 +273,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   public static void main(String [] arg) {
-    new FileExerciseDAO().convertPlan();
+    //new FileExerciseDAO(mediaDir).convertPlan();
     /*List<Exercise> rawExercises = new FileExerciseDAO(*//**//*"war"*//**//*).getRawExercises();
     System.out.println("first is " + rawExercises.iterator().next());*/
   }

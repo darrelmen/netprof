@@ -41,10 +41,21 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoring extends Scoring {
+  private static final String RSI_SCTM_HLDA = "rsi-sctm-hlda";
+  private static final String DICT_WO_SP = "dict-wo-sp";
+  private static final String GRAMMAR_ALIGN_TEMPLATE = "grammar.align.template";
+  private static final String GRAMMAR_ALIGN =
+      GRAMMAR_ALIGN_TEMPLATE.substring(0,GRAMMAR_ALIGN_TEMPLATE.length()-".template".length());
+  public static final String TEMP_DIR = "TEMP_DIR";
+  public static final String MODELS_DIR_VARIABLE = "MODELS_DIR";
+  public static final String N_OUTPUT = "N_OUTPUT";
+  public static final String LEVANTINE_N_OUTPUT = "" + 38;
   private static Logger logger = Logger.getLogger(ASRScoring.class);
-  private static final String CFG_TEMPLATE = "levantine-nn-model.cfg.template";
+  // private static final String CFG_TEMPLATE = "levantine-nn-model.cfg.template";
+  private static final String CFG_TEMPLATE = "generic-nn-model.cfg.template";
   private static final String MODELS_DIR = "models.dli-levantine";
-  public static final String MODEL_CFG = "levantine-nn-model.cfg";
+ // private static final String MODEL_CFG = "levantine-nn-model.cfg";
+  private static final String MODEL_CFG = CFG_TEMPLATE.substring(0,CFG_TEMPLATE.length()-".template".length());
 
  // private final Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
   private final Cache<String, Scores> audioToScore;
@@ -233,7 +244,8 @@ public class ASRScoring extends Scoring {
 
     // Make sure that we have an absolute path to the config and dict files.
     // Make sure that we have absolute paths.
-    String pathToConfigTemplate = scoringDir + File.separator + "configurations" + File.separator + CFG_TEMPLATE;   // TODO point at os specific config file
+
+    // do template replace on config file
     Map<String,String> kv = new HashMap<String, String>();
     String modelsDir = scoringDir + File.separator + MODELS_DIR;
     if (platform.startsWith("win")) {
@@ -241,18 +253,21 @@ public class ASRScoring extends Scoring {
       tmpDir = tmpDir.replaceAll("\\\\","\\\\\\\\");
     }
 
-    kv.put("TEMP_DIR",tmpDir);
-    kv.put("MODELS_DIR", modelsDir);
+    kv.put(TEMP_DIR,tmpDir);
+    kv.put(MODELS_DIR_VARIABLE, modelsDir);
+    kv.put(N_OUTPUT, LEVANTINE_N_OUTPUT);
     if (platform.startsWith("win")) kv.put("/","\\\\");
-    logger.debug("template config is at " + pathToConfigTemplate + " map is " + kv);
 
     // we need to create a custom config file for each run, complicating the caching of the ASRParameters...
     String configFile = tmpDir+File.separator+ MODEL_CFG;
 
+    String pathToConfigTemplate = scoringDir + File.separator + "configurations" + File.separator + CFG_TEMPLATE;   // TODO point at os specific config file
+    logger.debug("template config is at " + pathToConfigTemplate + " map is " + kv);
     doTemplateReplace(pathToConfigTemplate,configFile,kv);
-    String dictFile = modelsDir + File.separator + "rsi-sctm-hlda"+File.separator+"dict-wo-sp";
-    String grammarAlignTemplate = modelsDir + File.separator +"grammar.align.template";
-    String grammarAlign = modelsDir + File.separator +"grammar.align";
+
+    // do template replace on grammar file
+    String grammarAlignTemplate = modelsDir + File.separator + GRAMMAR_ALIGN_TEMPLATE;
+    String grammarAlign = modelsDir + File.separator +GRAMMAR_ALIGN;
     Map<String,String> kv2 = new HashMap<String, String>();
     kv2.put("MODELS_DIR", modelsDir);
 
@@ -260,6 +275,8 @@ public class ASRScoring extends Scoring {
     doTemplateReplace(grammarAlignTemplate,grammarAlign,kv2);
 
     boolean configExists = new File(configFile).exists();
+
+    String dictFile = modelsDir + File.separator + RSI_SCTM_HLDA +File.separator+ DICT_WO_SP;
     boolean dictExists   = new File(dictFile).exists();
     if (!configExists || !dictExists) {
       if (!configExists) logger.error("computeRepeatExerciseScores : Can't find config file at " + configFile);
