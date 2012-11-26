@@ -25,6 +25,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
@@ -45,23 +48,22 @@ import java.util.concurrent.TimeUnit;
  */
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase {
+  private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
   private static Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   public static final String ANSWERS = "answers";
-  public static final int TIMEOUT = 30;
-  public static final String IMAGE_WRITER_IMAGES = "audioimages";
+  private static final int TIMEOUT = 30;
+  private static final String IMAGE_WRITER_IMAGES = "audioimages";
   private DatabaseImpl db;
   private ASRScoring asrScoring;
   private boolean makeFullURLs = false;
-
-/*  private Cache<Long, String> tuserToExercise = CacheBuilder.newBuilder()
-      .concurrencyLevel(4)
-      .maximumSize(10000).build();*/
+  private Properties props = null;
+  private String relativeConfigDir;
+  private String configDir;
 
   private Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
       .concurrencyLevel(4)
       .maximumSize(10000)
       .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();
-  //private long tuserCount;
 
   @Override
   public void init() {
@@ -78,7 +80,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.exercise.ExerciseList#getExercises(long)
    */
   public List<Exercise> getExercises(long userID, boolean useFile, boolean arabicDataCollect) {
-    db.setInstallPath(getInstallPath());
+    String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
+    if (!new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
+    db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir);
     logger.debug("usefile = " + useFile + " arabic data collect " + arabicDataCollect);
     List<Exercise> exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(userID, useFile);
     if (makeFullURLs) convertRefAudioURLs(exercises);
@@ -95,8 +99,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param arabicDataCollect
    */
   public List<Exercise> getExercises(boolean useFile, boolean arabicDataCollect) {
-    db.setInstallPath(getInstallPath());
-   // logger.debug("usefile = " +useFile);
+    String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
+    db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir);
     List<Exercise> exercises = db.getExercises(useFile);
     if (makeFullURLs) convertRefAudioURLs(exercises);
     return exercises;
@@ -217,6 +221,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param refs
    * @param width
    * @param height
+   * @deprecated use {@link #getASRScoreForAudio}
    * @return
    */
   public PretestScore getScoreForAudioFile(int reqid, String audioFile, Collection<String> refs, int width, int height) {
@@ -260,6 +265,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       //System.out.println("score " + pretestScore);
       return pretestScore;
     }
+  }
+
+  /**
+   * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
+   * @return
+   */
+  public Map<String, String> getProperties() {
+    if (props == null) readProperties(getServletContext());
+    Map<String,String> kv = new HashMap<String, String>();
+    for (Object prop : props.keySet()) {
+      String sp = (String)prop;
+      kv.put(sp,props.getProperty(sp));
+    }
+    System.out.println("prop file has " + kv.size() + " properties.");
+    return kv;
   }
 
   private File getProperAudioFile(String audioFile, String installPath) {
@@ -567,7 +587,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return new File(realContextPath, filePath);
   }
 
-  public String getInstallPath() {
+  private String getInstallPath() {
     ServletContext context = getServletContext();
     if (context == null) {
       logger.error("no servlet context.");
@@ -663,39 +683,27 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.destroy();
   }
 
-/*
-  public static void main(String[] arg) {
-    //System.out.println("x\\y\\z".replaceAll("\\\\", "/"));
+  private void readProperties(ServletContext servletContext) {
+    String config = servletContext.getInitParameter("config");
+    String installPath = getInstallPath();
+    this.relativeConfigDir = "config" + File.separator + config;
+    this.configDir = installPath + File.separator + relativeConfigDir;
 
-    LangTestDatabaseImpl langTestDatabase = new LangTestDatabaseImpl();
-
-    String audioFile = "answers/test/ac-L0P-001/1/subject--1/answer_1347645428580.mp3";
-    File properAudioFile = langTestDatabase.getProperAudioFile(audioFile, "C:\\Users\\go22670\\DLITest\\LangTest\\war");
-    System.out.println("From " +audioFile + " to " + properAudioFile);
-
-
-    if (true) return;
-
-    langTestDatabase.init();
-
-    String fred = langTestDatabase.userToExerciseID.getIfPresent("fred");
-    System.out.println("Val " + fred);
-    langTestDatabase.userToExerciseID.put("fred","Barney");
-    fred = langTestDatabase.userToExerciseID.getIfPresent("fred");
-    System.out.println("Val " + fred);
-    try {
-      Object o = new Object();
-      synchronized (o) {
-        o.wait(6000);
+    logger.info("rel config dir " + relativeConfigDir);
+    String configFile = getServletContext().getInitParameter("configFile");
+    if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
+    String configFileFullPath = configDir + File.separator + configFile;
+    if (!new File(configFileFullPath).exists()) {
+      logger.error("couldn't find config file " + new File(configFileFullPath));
+    } else {
+      try {
+        props = new Properties();
+        props.load(new FileInputStream(configFileFullPath));
+      } catch (IOException e) {
+        logger.error("got " + e, e);
       }
-    } catch (InterruptedException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
-    fred = langTestDatabase.userToExerciseID.getIfPresent("fred");
-    System.out.println("Val " + fred);
   }
-*/
-
 
   private class DirAndName {
     private String testAudioFile;
