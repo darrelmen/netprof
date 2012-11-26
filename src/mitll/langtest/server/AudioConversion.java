@@ -225,14 +225,14 @@ public class AudioConversion {
     String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
     File mp3 = new File(mp3File);
     if (!mp3.exists()) {
-      logger.info("doing mp3 conversion for " + absolutePathToWav);
+      //logger.info("doing mp3 conversion for " + absolutePathToWav);
 
       String binPath = WINDOWS_SOX_BIN_DIR;
       if (! new File(binPath).exists()) binPath = LINUX_SOX_BIN_DIR;
       File tempFile;
       try {
         tempFile = File.createTempFile("fortyEightK",".wav");
-        logger.info("sox conversion from " + absolutePathToWav + " to " + tempFile.getAbsolutePath());
+        logger.debug("sox conversion from " + absolutePathToWav + " to " + tempFile.getAbsolutePath());
         ProcessBuilder soxFirst = new ProcessBuilder(new AudioConverter().getSox(binPath),
             absolutePathToWav.getAbsolutePath(), "-s", "-2", "-c", "1", "-q",tempFile.getAbsolutePath(), "rate", "48000");
 
@@ -241,7 +241,7 @@ public class AudioConversion {
         if (!tempFile.exists()) logger.error("didn't make " + tempFile);
 
         String lamePath = getLame();
-        logger.info("run lame on " + tempFile + " making " + mp3File);
+      //  logger.info("run lame on " + tempFile + " making " + mp3File);
         writeMP3(lamePath, tempFile.getAbsolutePath(), mp3File);
       } catch (IOException e) {
         logger.error("got " + e,e);
@@ -321,7 +321,7 @@ public class AudioConversion {
   private File writeMP3(String lamePath, String pathToAudioFile, String mp3File) {
     ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File);
     try {
-      logger.info("running lame" + lameProc.command());
+      logger.debug("running lame" + lameProc.command());
       new ProcessRunner().runProcess(lameProc);
       //     System.out.println("writeMP3 exited  lame" + lameProc);
     } catch (IOException e) {
