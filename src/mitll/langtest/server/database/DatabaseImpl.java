@@ -70,6 +70,11 @@ public class DatabaseImpl implements Database {
   public final GraderDAO graderDAO = new GraderDAO(this);
   private final ScheduleDAO scheduleDAO = new ScheduleDAO(this);
   private String h2DbName = H2_DB_NAME;
+  /**
+   * TODO : consider making proper v2 database!
+   */
+  private String lessonPlanFile;
+  private String mediaDir;
 
   public DatabaseImpl(String dburl) {
     this.h2DbName = dburl;
@@ -138,14 +143,21 @@ public class DatabaseImpl implements Database {
   }
 
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    return useFile ? new FileExerciseDAO() : new SQLExerciseDAO(this);
+    return useFile ? new FileExerciseDAO(mediaDir) : new SQLExerciseDAO(this, mediaDir);
   }
 
-  public void setInstallPath(String i) {
-    logger.debug("got install path " + i);
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(boolean, boolean)
+   * @param i
+   * @param lessonPlanFile
+   * @param mediaDir
+   */
+  public void setInstallPath(String i, String lessonPlanFile, String mediaDir) {
+    logger.debug("got install path " + i + " media " + mediaDir);
     this.installPath = i;
+    this.lessonPlanFile = lessonPlanFile;
+    this.mediaDir = mediaDir;
   }
-
 
   public List<ExerciseExport> getExport(boolean useFLQ,boolean useSpoken) {
     List<ExerciseExport> names = new ArrayList<ExerciseExport>();
@@ -187,15 +199,26 @@ public class DatabaseImpl implements Database {
     public String toString() { return "" + grade + " for '" + response +"'"; }
   }
 
+  /**
+   * @see #getExport(boolean, boolean)
+   * @return
+   */
   private List<Exercise> getExercises() {
     return getExercises(false);
   }
-    /**
-    * @param useFile
-    * @return
-    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
-    */
+
   public List<Exercise> getExercises(boolean useFile) {
+    return getExercises(useFile, lessonPlanFile);
+  }
+
+  /**
+   *
+   * @param useFile
+   * @param lessonPlanFile
+   * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
+   */
+  private List<Exercise> getExercises(boolean useFile, String lessonPlanFile) {
     logger.info("use file = " + useFile);
 
     if (exerciseDAO == null || useFile && exerciseDAO instanceof SQLExerciseDAO || !useFile && exerciseDAO instanceof FileExerciseDAO) {
@@ -204,7 +227,7 @@ public class DatabaseImpl implements Database {
 
     if (useFile) {
       if (USE_FAST_SLOW_LEVANTINE) {
-        ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath);
+        ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, lessonPlanFile);
       } else {
         ((FileExerciseDAO) exerciseDAO).readExercises(installPath);
       }
@@ -337,7 +360,7 @@ public class DatabaseImpl implements Database {
     List<Schedule> forUser = userToSchedule.get(userID);
     if (forUser == null) {
       logger.warn("no schedule for user " + userID);
-      return getExercises(useFile);
+      return getExercises(useFile, lessonPlanFile);
     }
     List<Exercise> exercises = new ArrayList<Exercise>();
 
