@@ -6,6 +6,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The async counterpart of <code>LangTestDatabase</code>.
@@ -40,4 +41,6 @@ public interface LangTestDatabaseAsync {
   void getScoreForAudioFile(int reqid, String audioFile, Collection<String> refs, int width, int height, AsyncCallback<PretestScore> async);
 
   void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, AsyncCallback<ImageResponse> async);
+
+  void getProperties(AsyncCallback<Map<String, String>> async);
 }
