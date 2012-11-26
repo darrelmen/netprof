@@ -23,13 +23,16 @@ public class SQLExerciseDAO implements ExerciseDAO {
 
   private final Database database;
   private static final String ENCODING = "UTF8";
+  private final String mediaDir;
 
   /**
-   * @see DatabaseImpl
+   * @see DatabaseImpl#makeExerciseDAO(boolean)
    * @param database
+   * @param mediaDir
    */
-  public SQLExerciseDAO(Database database) {
+  public SQLExerciseDAO(Database database, String mediaDir) {
     this.database = database;
+    this.mediaDir = mediaDir;
   }
 
   /**
@@ -50,7 +53,9 @@ public class SQLExerciseDAO implements ExerciseDAO {
       PreparedStatement statement = connection.prepareStatement(sql);
       // logger.info("doing " + sql + " on " + connection);
       ResultSet rs = statement.executeQuery();
+      int count = 0;
       while (rs.next()) {
+      //  if (count++ > 10) break;
         String plan = rs.getString(1);
         String exid = rs.getString(2);
         String type = rs.getString(3);
@@ -101,6 +106,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
   /**
    * Parse the json that represents the exercise.  Created during ingest process (see ingest.scala).
    *
+   * @see #getRawExercises()
    * @param obj
    * @return
    */
@@ -110,6 +116,12 @@ public class SQLExerciseDAO implements ExerciseDAO {
     String content = (String) obj.get("content");
     if (content == null) {
       logger.warn("no content key in " + obj.keySet());
+    } else {
+
+      // prefix the media dir
+      content = content.replaceAll("source src=\"", "source src=\"" + mediaDir.replaceAll("\\\\", "/") + "/");
+      content = content.replaceAll("img src=\"",    "img src=\"" + mediaDir.replaceAll("\\\\", "/") + "/");
+     // System.out.println("content " + content);
     }
     Exercise exercise = new Exercise(plan, exid, content, promptInEnglish, recordAudio);
     Object qa1 = obj.get("qa");
@@ -126,7 +138,6 @@ public class SQLExerciseDAO implements ExerciseDAO {
     }
     return exercise;
   }
-
 
   private String getStringFromClob(Clob clob) throws SQLException, IOException {
     InputStreamReader utf8 = new InputStreamReader(clob.getAsciiStream(), ENCODING);
