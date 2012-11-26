@@ -15,6 +15,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -44,6 +45,8 @@ import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.Exercise;
 
+import java.util.Map;
+
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
@@ -55,10 +58,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int EAST_WIDTH = 90;
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
   private static final boolean DEFAULT_GOODWAVE_MODE = false;
-  private static final boolean DEFAULT_ARABIC_TEXT_COLLECT = true;
+  private static final boolean DEFAULT_ARABIC_TEXT_COLLECT = false;
   private static final boolean DEFAULT_SHOW_TURK_TOKEN = false;
   private static final int DEFAULT_SEGMENT_REPEATS = 2;
-  private static final String RELEASE_DATE = "11/16";
+  //private static final String RELEASE_DATE = "11/16";
   private static final String DEFAULT_EXERCISE = null;//"nl0020_ams";
   public static final String LANGTEST_IMAGES = "langtest/images/";
 
@@ -71,11 +74,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private FlashRecordPanelHeadless flashRecordPanel;
 
   private long lastUser = -1;
+
+  // properties
   private boolean grading = false;
   private boolean englishOnlyMode = false;
   private boolean goodwaveMode = DEFAULT_GOODWAVE_MODE;
   private boolean arabicTextDataCollect = DEFAULT_ARABIC_TEXT_COLLECT;
   private boolean showTurkToken = DEFAULT_SHOW_TURK_TOKEN;
+  private String appTitle = DLI_LANGUAGE_TESTING;
+  private int segmentRepeats = DEFAULT_SEGMENT_REPEATS;
+  private boolean readFromFile;
+  private String releaseDate;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
@@ -86,7 +95,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private ScrollPanel itemScroller;
   private float screenPortion;
   private String exercise_title;
-  private int segmentRepeats = DEFAULT_SEGMENT_REPEATS;
+  private Map<String, String> props;
 
   /**
    * Make an exception handler that displays the exception.
@@ -116,12 +125,26 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     });
 
-    // use a deferred command so that the handler catches onModuleLoad2() exceptions
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
+
+    service.getProperties(new AsyncCallback<Map<String, String>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(Map<String, String> result) {
+        props = result;
         onModuleLoad2();
       }
     });
+
+    // use a deferred command so that the handler catches onModuleLoad2() exceptions
+  /*  Scheduler.get().scheduleDeferred(new Command() {
+      public void execute() {
+        onModuleLoad2();
+      }
+    });*/
   }
 
   /**
@@ -131,6 +154,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Initially the flash record player is put in the center of the DockLayout
    */
   public void onModuleLoad2() {
+    useProps();
     userManager = new UserManager(this,service);
     resultManager = new ResultManager(service, this);
     boolean isGrading = checkParams();
@@ -150,7 +174,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // header/title line
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
-    HTML title = new HTML("<h1>" + DLI_LANGUAGE_TESTING + "</h1>");
+    HTML title = new HTML("<h1>" + appTitle + "</h1>");
     browserCheck.getBrowserAndVersion();
     hp.addEast(getLogout(), eastWidth);
     hp.add(title);
@@ -202,7 +226,21 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     soundManager.initialize();
     Element elementById = DOM.getElementById("title-tag");   // set the page title to be consistent
     if (elementById != null) {
-      elementById.setInnerText(DLI_LANGUAGE_TESTING);
+      elementById.setInnerText(appTitle);
+    }
+  }
+
+  private void useProps() {
+    for (Map.Entry<String, String> kv : props.entrySet()) {
+      if (kv.getKey().equals("grading")) grading = Boolean.parseBoolean(kv.getValue());
+      if (kv.getKey().equals("englishOnlyMode")) englishOnlyMode = Boolean.parseBoolean(kv.getValue());
+      if (kv.getKey().equals("goodwaveMode")) goodwaveMode = Boolean.parseBoolean(kv.getValue());
+      if (kv.getKey().equals("arabicTextDataCollect")) arabicTextDataCollect = Boolean.parseBoolean(kv.getValue());
+      if (kv.getKey().equals("showTurkToken")) showTurkToken = Boolean.parseBoolean(kv.getValue());
+      if (kv.getKey().equals("appTitle")) appTitle = kv.getValue();
+      if (kv.getKey().equals("segmentRepeats")) segmentRepeats = Integer.parseInt(kv.getValue());
+      if (kv.getKey().equals("readFromFile")) readFromFile = Boolean.parseBoolean(kv.getValue());
+      if (kv.getKey().equals("releaseDate")) releaseDate = kv.getValue();
     }
   }
 
@@ -289,6 +327,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
+   * Override config.properties settings with URL parameters, if provided.
+   * <br></br>
    * exercise_title=nl0002_lms&transform_score_c1=68.51101&transform_score_c2=2.67174
    * @return
    */
@@ -318,11 +358,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     }
     // System.out.println("param grading " + isGrading);
-    englishOnlyMode = isEnglish != null && !isEnglish.equals("false");
-    goodwaveMode = goodwaveMode || (goodwave != null && !goodwave.equals("false"));
+    englishOnlyMode = englishOnlyMode || (isEnglish != null && !isEnglish.equals("false"));
+    goodwaveMode    = goodwaveMode || (goodwave != null && !goodwave.equals("false"));
     if (goodwave != null && goodwave.equals("false")) goodwaveMode = false;
     //GWT.log("goodwave mode = " + goodwaveMode + "/" +goodwave);
-    boolean grading = (isGrading != null && !isGrading.equals("false")) || englishOnlyMode;
+    boolean grading = this.grading || (isGrading != null && !isGrading.equals("false")) || englishOnlyMode;
 
     // get audio repeats
     if (repeats != null) {
@@ -469,7 +509,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // no click handler for this for now
     HTML statusLine = new HTML("<span><font size=-2>"+browserCheck.browser + " " +browserCheck.ver +" " +
-        RELEASE_DATE+"</font></span>");
+        releaseDate+"</font></span>");
    // Anchor status = new Anchor(browserCheck.browser + " " +browserCheck.ver +" " +
     //    RELEASE_DATE);
     vp.add(statusLine);
