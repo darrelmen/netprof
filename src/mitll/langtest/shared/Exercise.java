@@ -72,6 +72,14 @@ public class Exercise implements IsSerializable  {
     this.promptInEnglish = promptInEnglish;
   }
 
+  /**
+   * @see mitll.langtest.server.database.FileExerciseDAO#readExercises(String)
+   * @param plan
+   * @param id
+   * @param content
+   * @param audioRef
+   * @param sentenceRef
+   */
   public Exercise(String plan, String id, String content, String audioRef, String sentenceRef) {
     this.plan = plan;
     this.id = id;
@@ -81,6 +89,15 @@ public class Exercise implements IsSerializable  {
     this.type = EXERCISE_TYPE.REPEAT;
   }
 
+  /**
+   * @see mitll.langtest.server.database.FileExerciseDAO#readFastAndSlowExercises(String, String)
+   * @param plan
+   * @param id
+   * @param content
+   * @param fastAudioRef
+   * @param slowAudioRef
+   * @param sentenceRef
+   */
   public Exercise(String plan, String id, String content, String fastAudioRef, String slowAudioRef, String sentenceRef) {
     this(plan,id,content,fastAudioRef,sentenceRef);
     this.slowAudioRef = slowAudioRef;
