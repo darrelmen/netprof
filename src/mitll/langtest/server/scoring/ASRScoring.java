@@ -53,22 +53,25 @@ public class ASRScoring extends Scoring {
   private static Logger logger = Logger.getLogger(ASRScoring.class);
   // private static final String CFG_TEMPLATE = "levantine-nn-model.cfg.template";
   private static final String CFG_TEMPLATE = "generic-nn-model.cfg.template";
-  private static final String MODELS_DIR = "models.dli-levantine";
+  private static final String DEFAULT_MODELS_DIR = "models.dli-levantine";
  // private static final String MODEL_CFG = "levantine-nn-model.cfg";
   private static final String MODEL_CFG = CFG_TEMPLATE.substring(0,CFG_TEMPLATE.length()-".template".length());
 
  // private final Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
   private final Cache<String, Scores> audioToScore;
+  private final Map<String, String> properties;
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile(int, String, java.util.Collection, int, int)
    * @param deployPath
+   * @param properties
    */
-  public ASRScoring(String deployPath) {
+  public ASRScoring(String deployPath, Map<String, String> properties) {
     super(deployPath);
 
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
+    this.properties = properties;
     // not for now... later if dict gets too big
 /*    ASRParameters arabic = ASRParameters.jload("Arabic", configFullPath);
     if (arabic == null) {
@@ -241,41 +244,19 @@ public class ASRScoring extends Scoring {
      */
   private Scores computeRepeatExerciseScores(Audio testAudio, String sentence, String tmpDir) {
     String platform = Utils.package$.MODULE$.platform();
+    String modelsDir = getModelsDir();
 
     // Make sure that we have an absolute path to the config and dict files.
     // Make sure that we have absolute paths.
 
     // do template replace on config file
-    Map<String,String> kv = new HashMap<String, String>();
-    String modelsDir = scoringDir + File.separator + MODELS_DIR;
-    if (platform.startsWith("win")) {
-      modelsDir = modelsDir.replaceAll("\\\\","\\\\\\\\");
-      tmpDir = tmpDir.replaceAll("\\\\","\\\\\\\\");
-    }
-
-    kv.put(TEMP_DIR,tmpDir);
-    kv.put(MODELS_DIR_VARIABLE, modelsDir);
-    kv.put(N_OUTPUT, LEVANTINE_N_OUTPUT);
-    if (platform.startsWith("win")) kv.put("/","\\\\");
-
-    // we need to create a custom config file for each run, complicating the caching of the ASRParameters...
-    String configFile = tmpDir+File.separator+ MODEL_CFG;
-
-    String pathToConfigTemplate = scoringDir + File.separator + "configurations" + File.separator + CFG_TEMPLATE;   // TODO point at os specific config file
-    logger.debug("template config is at " + pathToConfigTemplate + " map is " + kv);
-    doTemplateReplace(pathToConfigTemplate,configFile,kv);
+    String configFile = getHydecConfigFile(tmpDir, modelsDir);
 
     // do template replace on grammar file
-    String grammarAlignTemplate = modelsDir + File.separator + GRAMMAR_ALIGN_TEMPLATE;
-    String grammarAlign = modelsDir + File.separator +GRAMMAR_ALIGN;
-    Map<String,String> kv2 = new HashMap<String, String>();
-    kv2.put("MODELS_DIR", modelsDir);
+    createGrammarFile(modelsDir);
 
-    // grammar align file points to a dictionary file in the models directory...
-    doTemplateReplace(grammarAlignTemplate,grammarAlign,kv2);
-
+    // do some sanity checking
     boolean configExists = new File(configFile).exists();
-
     String dictFile = modelsDir + File.separator + RSI_SCTM_HLDA +File.separator+ DICT_WO_SP;
     boolean dictExists   = new File(dictFile).exists();
     if (!configExists || !dictExists) {
@@ -285,10 +266,10 @@ public class ASRScoring extends Scoring {
     }
 
     ASRParameters asrparametersFullPaths = getASRParameters(platform, configFile, dictFile);
-
+    //logger.debug("using 'dict without sp' file " + dictFile);
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
     long then = System.currentTimeMillis();
-    synchronized (this) {   // hydec can't be called concurrently -- not thread safe
+    synchronized (this) {   // hydec can't be called concurrently -- not thread safe?
       try {
         jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
       } catch (AssertionError e) {
@@ -300,6 +281,67 @@ public class ASRScoring extends Scoring {
     logger.info("got score " + hydec_score +" and took " + (System.currentTimeMillis()-then) + " millis");
 
     return new Scores(hydec_score, jscoreOut._2);
+  }
+
+  /**
+   * Creates a grammar file from the template file
+   * @param modelsDir
+   */
+  private void createGrammarFile(String modelsDir) {
+    String grammarAlignTemplate = modelsDir + File.separator + GRAMMAR_ALIGN_TEMPLATE;
+    String grammarAlign = modelsDir + File.separator +GRAMMAR_ALIGN;
+    Map<String,String> kv2 = new HashMap<String, String>();
+    kv2.put(MODELS_DIR_VARIABLE, modelsDir);
+
+    // grammar align file points to a dictionary file in the models directory...
+    doTemplateReplace(grammarAlignTemplate,grammarAlign,kv2);
+  }
+
+  /**
+   * Creates a hydec config file from a template file by doing variable substitution.<br></br>
+   * Also use the properties map to look for variables.
+   *
+   * @param tmpDir
+   * @param modelsDir
+   * @return path to config file
+   */
+  private String getHydecConfigFile(String tmpDir, String modelsDir) {
+    String platform = Utils.package$.MODULE$.platform();
+    boolean onWindows = platform.startsWith("win");
+    Map<String,String> kv = new HashMap<String, String>();
+
+    String levantineNOutput = getProp(N_OUTPUT, LEVANTINE_N_OUTPUT);
+
+    if (onWindows) {
+      tmpDir = tmpDir.replaceAll("\\\\","\\\\\\\\");
+    }
+
+    kv.put(TEMP_DIR,tmpDir);
+    kv.put(MODELS_DIR_VARIABLE, modelsDir);
+    kv.put(N_OUTPUT, levantineNOutput);
+    if (onWindows) kv.put("/","\\\\");
+
+    // we need to create a custom config file for each run, complicating the caching of the ASRParameters...
+    String configFile = tmpDir+ File.separator+ MODEL_CFG;
+
+    String pathToConfigTemplate = scoringDir + File.separator + "configurations" + File.separator + CFG_TEMPLATE;   // TODO point at os specific config file
+    logger.debug("template config is at " + pathToConfigTemplate + " map is " + kv);
+    doTemplateReplace(pathToConfigTemplate,configFile,kv);
+    return configFile;
+  }
+
+  private String getModelsDir() {
+    String platform = Utils.package$.MODULE$.platform();
+
+    String modelsDir = scoringDir + File.separator + getProp(MODELS_DIR_VARIABLE, DEFAULT_MODELS_DIR);
+    if (platform.startsWith("win")) {
+      modelsDir = modelsDir.replaceAll("\\\\","\\\\\\\\");
+    }
+    return modelsDir;
+  }
+
+  private String getProp(String var, String defaultValue) {
+    return properties.containsKey(var) ? properties.get(var) : defaultValue;
   }
 
   //private ASRParameters cachedParams;
@@ -373,13 +415,13 @@ public class ASRScoring extends Scoring {
   }
 
   public static void main(String [] arg) {
-    String deployPath1 = "C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\scoring";
-    ASRScoring scoring = new ASRScoring(deployPath1);
+ /*   String deployPath1 = "C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\scoring";
+    ASRScoring scoring = new ASRScoring(deployPath1, properties);
     Map<String,String> kv = new HashMap<String, String>();
     kv.put("TEMP_DIR","C:\\Users\\go22670\\AppData\\Local\\Temp\\1351790200971-0");
     kv.put("MODELS_DIR","models_dir_to_use");
     scoring.doTemplateReplace(deployPath1 + File.separator + "configurations" + File.separator +"levantine-nn-model.cfg.template",
-        deployPath1 + File.separator + "configurations" + File.separator +"new-levantine-nn-model.cfg",kv);
+        deployPath1 + File.separator + "configurations" + File.separator +"new-levantine-nn-model.cfg",kv);*/
     //String testAudioDir = "C:\\Users\\go22670\\DLITest\\LangTest\\war\\media\\ac-L0P-001";
     //PretestScore pretestScore = scoring.scoreRepeat(testAudioDir, "ad0035_ems", *//*testAudioDir, "ad0035_ems",*//* "This is a test.", "out", 1024, 100);
    // System.out.println("score " + pretestScore);
