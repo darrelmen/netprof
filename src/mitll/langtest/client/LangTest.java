@@ -83,6 +83,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private boolean showTurkToken = DEFAULT_SHOW_TURK_TOKEN;
   private String appTitle = DLI_LANGUAGE_TESTING;
   private int segmentRepeats = DEFAULT_SEGMENT_REPEATS;
+  private boolean bkgColorForRef = false;
   private boolean readFromFile;
   private String releaseDate;
 
@@ -127,24 +128,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
 
     service.getProperties(new AsyncCallback<Map<String, String>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-
-      }
-
-      @Override
+      public void onFailure(Throwable caught) {}
       public void onSuccess(Map<String, String> result) {
         props = result;
         onModuleLoad2();
       }
     });
-
-    // use a deferred command so that the handler catches onModuleLoad2() exceptions
-  /*  Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-        onModuleLoad2();
-      }
-    });*/
   }
 
   /**
@@ -233,14 +222,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void useProps() {
     for (Map.Entry<String, String> kv : props.entrySet()) {
       if (kv.getKey().equals("grading")) grading = Boolean.parseBoolean(kv.getValue());
-      if (kv.getKey().equals("englishOnlyMode")) englishOnlyMode = Boolean.parseBoolean(kv.getValue());
-      if (kv.getKey().equals("goodwaveMode")) goodwaveMode = Boolean.parseBoolean(kv.getValue());
-      if (kv.getKey().equals("arabicTextDataCollect")) arabicTextDataCollect = Boolean.parseBoolean(kv.getValue());
-      if (kv.getKey().equals("showTurkToken")) showTurkToken = Boolean.parseBoolean(kv.getValue());
-      if (kv.getKey().equals("appTitle")) appTitle = kv.getValue();
-      if (kv.getKey().equals("segmentRepeats")) segmentRepeats = Integer.parseInt(kv.getValue());
-      if (kv.getKey().equals("readFromFile")) readFromFile = Boolean.parseBoolean(kv.getValue());
-      if (kv.getKey().equals("releaseDate")) releaseDate = kv.getValue();
+      else if (kv.getKey().equals("englishOnlyMode")) englishOnlyMode = Boolean.parseBoolean(kv.getValue());
+      else if (kv.getKey().equals("goodwaveMode")) goodwaveMode = Boolean.parseBoolean(kv.getValue());
+      else if (kv.getKey().equals("arabicTextDataCollect")) arabicTextDataCollect = Boolean.parseBoolean(kv.getValue());
+      else if (kv.getKey().equals("showTurkToken")) showTurkToken = Boolean.parseBoolean(kv.getValue());
+      else if (kv.getKey().equals("appTitle")) appTitle = kv.getValue();
+      else if (kv.getKey().equals("segmentRepeats")) segmentRepeats = Integer.parseInt(kv.getValue());
+      else if (kv.getKey().equals("readFromFile")) readFromFile = Boolean.parseBoolean(kv.getValue());
+      else if (kv.getKey().equals("releaseDate")) releaseDate = kv.getValue();
+      else if (kv.getKey().equals("bkgColorForRef")) bkgColorForRef = Boolean.parseBoolean(kv.getValue());
     }
   }
 
@@ -340,6 +330,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     String repeats = Window.Location.getParameter("repeats");
     String arabicCollect = Window.Location.getParameter("arabicCollect");
     String turk = Window.Location.getParameter("turk");
+    String bkgColorForRefParam = Window.Location.getParameter("bkgColorForRef");
 
     String exercise_title = Window.Location.getParameter("exercise_title");
     if (exercise_title != null) {
@@ -377,7 +368,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       arabicTextDataCollect = !arabicCollect.equals("false");
     }
     if (turk != null) {
-      showTurkToken = !turk.equals("turk");
+      showTurkToken = !turk.equals("false");
+    }
+    if (bkgColorForRefParam != null) {
+      bkgColorForRef = !bkgColorForRefParam.equals("false");
     }
     return grading;
   }
@@ -570,6 +564,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean getEnglishOnly() { return englishOnlyMode; }
   public int getSegmentRepeats() { return segmentRepeats; }
   public boolean isArabicTextDataCollect() {  return arabicTextDataCollect; }
+  public boolean useBkgColorForRef() {  return bkgColorForRef; }
 
   // recording methods...
   /**
