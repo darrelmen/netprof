@@ -177,7 +177,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     ASRScoringAudioPanel w =
         new ASRScoringAudioPanel(path, e.getRefSentence(), service,
             controller.getSoundManager(),
-            controller.showOnlyOneExercise(), controller.getSegmentRepeats()) {
+            controller.showOnlyOneExercise(), controller.getSegmentRepeats(), controller.useBkgColorForRef()) {
           @Override
           protected Widget getBeforePlayWidget() {
             if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
@@ -295,6 +295,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     }
   }
 
+  /**
+   * An ASR scoring panel with a record button.
+   */
   private class ASRRecordAudioPanel extends ASRScoringAudioPanel {
     private final int index;
 
