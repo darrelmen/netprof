@@ -338,8 +338,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     assert(testAudioFile != null && sentence != null);
     if (asrScoring == null) {
-        asrScoring = new ASRScoring(getInstallPath()); // lazy eval since install path not ready at init() time.
-
+        asrScoring = new ASRScoring(getInstallPath(), getProperties()); // lazy eval since install path not ready at init() time.
     }
     testAudioFile = dealWithMP3Audio(testAudioFile);
 
