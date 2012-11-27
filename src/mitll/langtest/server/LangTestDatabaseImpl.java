@@ -330,10 +330,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param sentence
    * @param width image dim
    * @param height  image dim
+   * @param useScoreToColorBkg
    * @return PretestScore
    **/
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
-                                          int width, int height) {
+                                          int width, int height, boolean useScoreToColorBkg) {
     logger.info("getASRScoreForAudio scoring " + testAudioFile + " with " + sentence + " req# " + reqid);
 
     assert(testAudioFile != null && sentence != null);
@@ -353,7 +354,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence,
-        getImageOutDir(), width, height);
+        getImageOutDir(), width, height, useScoreToColorBkg);
     pretestScore.setReqid(reqid);
 
     if (makeFullURLs) {

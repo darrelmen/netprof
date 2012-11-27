@@ -10,7 +10,6 @@ import pronz.speech.Audio;
 import pronz.speech.Audio$;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -83,7 +82,7 @@ public class DTWScoring extends Scoring {
       imageOutDir =  deployPath + File.separator + imageOutDir;
     }
 
-    Map<ImageType, String> typeToFile = writeTranscripts(imageOutDir, imageWidth, imageHeight, testNoSuffix).typeToFile;
+    Map<ImageType, String> typeToFile = writeTranscripts(imageOutDir, imageWidth, imageHeight, testNoSuffix, true).typeToFile;
     Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(typeToFile);
 
     PretestScore pretestScore = new PretestScore(scores, sTypeToImage);
