@@ -311,6 +311,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     boolean isGrading = checkParams();
     System.out.println("modeSelect english " +englishOnlyMode + " grading " +isGrading );
 
+    logout.setVisible(!goodwaveMode);
     users.setVisible(isGrading);
     showResults.setVisible(isGrading);
 
@@ -469,8 +470,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     t.schedule(1000);
   }
 
-  Anchor users;
-  Anchor showResults;
+  private Anchor logout;
+  private Anchor users;
+  private Anchor showResults;
   /**
    * Has both a logout and a users link and a results link
    * @return
@@ -481,7 +483,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     //hp2.addSouth(vp, 75);
 
     // add logout link
-    Anchor logout = new Anchor("Logout");
+    logout = new Anchor("Logout");
     vp.add(logout);
     logout.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {

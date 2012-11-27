@@ -36,7 +36,7 @@ public class Scoring {
   protected String deployPath;
 
   /**
-   * @see ASRScoring#ASRScoring(String)
+   * @see ASRScoring#ASRScoring(String, java.util.Map
    * @param deployPath
    */
   public Scoring(String deployPath) {
