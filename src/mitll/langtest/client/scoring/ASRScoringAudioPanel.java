@@ -16,6 +16,8 @@ import mitll.langtest.shared.scoring.PretestScore;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoringAudioPanel extends ScoringAudioPanel {
+  private boolean useScoreToColorBkg = true;
+
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#ASRRecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int)
    * @param service
@@ -36,10 +38,12 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param soundManager
    * @param useFullWidth
    * @param numRepeats
+   * @param useScoreToColorBkg
    */
   public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service, SoundManagerAPI soundManager,
-                              boolean useFullWidth, int numRepeats) {
+                              boolean useFullWidth, int numRepeats, boolean useScoreToColorBkg) {
     super(path, refSentence, service, soundManager, useFullWidth, numRepeats);
+    this.useScoreToColorBkg = useScoreToColorBkg;
   }
 
   /**
@@ -74,7 +78,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
     // Schedule the timer to run once in 1 seconds.
     t.schedule(wasVisible ? 1000 : 1);
 
-    service.getASRScoreForAudio(reqid, path, refSentence, toUse, height, new AsyncCallback<PretestScore>() {
+    service.getASRScoreForAudio(reqid, path, refSentence, toUse, height, useScoreToColorBkg, new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {
         Window.alert("Server error -- please report.");
         wordTranscript.image.setVisible(false);
