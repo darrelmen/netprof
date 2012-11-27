@@ -93,7 +93,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     hp.setVerticalAlignment(ALIGN_MIDDLE);
 
     Widget beforePlayWidget = getBeforePlayWidget();
-    playAudio = getPlayButtons(beforePlayWidget == null ? new SimplePanel() : beforePlayWidget);
+    playAudio = getPlayButtons(beforePlayWidget);
     hp.add(playAudio);
     hp.setCellHorizontalAlignment(playAudio,HorizontalPanel.ALIGN_LEFT);
 
@@ -214,7 +214,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     return new PlayAudioPanel(soundManager) {
       @Override
       protected void addButtons() {
-        add(toTheLeftWidget);
+        if (toTheLeftWidget != null) {
+          add(toTheLeftWidget);
+        }
         super.addButtons();
       }
     };
