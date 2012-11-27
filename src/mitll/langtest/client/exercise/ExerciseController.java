@@ -28,11 +28,10 @@ public interface ExerciseController {
 
   SoundManagerAPI getSoundManager();
 
+  // parameters
   float getScreenPortion();
-
   boolean showOnlyOneExercise();
-
   int getSegmentRepeats();
-
   boolean isArabicTextDataCollect();
+  boolean useBkgColorForRef();
 }
