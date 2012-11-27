@@ -33,7 +33,6 @@ public class FileExerciseDAO implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
   private static final String ENCODING = "UTF8";
   private static final String LESSON_FILE = "lesson-737.csv";
-  //private static final String FAST_AND_SLOW_REF = "fastAndSlowRef";
   private static final String LESSON_PLAN = "lesson.plan";
   private static final String FAST = "fast";
   private static final String SLOW = "slow";
@@ -116,15 +115,16 @@ public class FileExerciseDAO implements ExerciseDAO {
     try {
       FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
       AudioConversion audioConversion = new AudioConversion();
-      exercises = new ArrayList<Exercise>();
       BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
       String line2;
-     // int count = 0;
+      int count = 0;
       logger.debug("using install path " + installPath);
+      exercises = new ArrayList<Exercise>();
       while ((line2 = reader.readLine()) != null) {
-      //  if (count++ > 25) break;
-       // if (line2.contains("\\|"))
-        Exercise exercise = (line2.contains("\\|")) ? getExerciseForLine(installPath, audioConversion, line2) : getSimpleExerciseForLine(installPath, audioConversion, line2);
+        if (count++ > 25) break;
+        Exercise exercise = (line2.contains("\\|")) ?
+            getExerciseForLine(installPath, audioConversion, line2) :
+            getSimpleExerciseForLine(installPath, audioConversion, line2);
         exercises.add(exercise);
       }
      // w.close();
@@ -140,10 +140,54 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
   }
 
+  /**
+   * Assumes a file that looks like:
+   * <br></br>
+   *
+   * <s> word word word </s> (audio_file_name_without_suffix)
+   *
+   * @param installPath
+   * @param audioConversion
+   * @param line2
+   * @return
+   */
   private Exercise getSimpleExerciseForLine(String installPath, AudioConversion audioConversion, String line2) {
-    return null;  //To change body of created methods use File | Settings | File Templates.
+    String[] split = line2.split("\\(");
+    String name = split[1].trim();
+    name = name.substring(0,name.length()-1); // remove trailing )
+    String displayName = name;
+    String arabic = split[0].trim();
+
+    String content = getArabic(arabic);
+    String slowAudioRef = mediaDir + File.separator+"media"+File.separator+name+".wav";
+
+    for (String audioRef : new String[]{slowAudioRef}) {
+      File file = new File(audioRef);
+      if (!file.exists()) {
+        file = new File(installPath,audioRef);
+      }
+      if (!file.exists()) {
+        // if (count++ < 5) logger.debug("can't find audio file " + file.getAbsolutePath());
+      } else {
+        audioConversion.ensureWriteMP3(audioRef,installPath);
+      }
+    }
+
+    Exercise repeat = new Exercise("repeat", displayName, content, ensureForwardSlashes(slowAudioRef), arabic);
+    //logger.debug("got " +repeat);
+    return repeat;
   }
 
+  /**
+   * Parses file that looks like:
+   * <br></br>
+   * pronz.MultiRefRepeatExercise$: nl0001_ams, nl0001_ams | reference, nl0001_ams | Female_01, nl0001_ams | Male_01, nl0001_ams | REF_MALE, nl0001_ams | STE-004M, nl0001_ams | STE-006F -> nl0001_ams -> FOREIGN_LANGUAGE_SENTENCE -> marHaba -> Hello.
+   *
+   * @param installPath
+   * @param audioConversion
+   * @param line2
+   * @return
+   */
   private Exercise getExerciseForLine(String installPath, AudioConversion audioConversion, String line2) {
     String[] split = line2.split("\\|");
     String lastCol = split[6];
@@ -175,21 +219,25 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   private String getContent(String arabic, String translit, String english) {
-    return "<div class=\"Instruction\">\n" +
-        "<span class=\"Instruction-title\">Say:</span>\n" +
-        "<span class=\"Instruction-data\"> " + arabic +
-        "</span>\n" +
-        "</div>\n" +
+    return getArabic(arabic) +
         "<div class=\"Instruction\">\n" +
         "<span class=\"Instruction-title\">Transliteration:</span>\n" +
-        "<span class=\"Instruction-data\"> " + translit+
+        "<span class=\"Instruction-data\"> " + translit +
         "</span>\n" +
         "</div>\n" +
         "<div class=\"Instruction\">\n" +
         "<span class=\"Instruction-title\">Translation:</span>\n" +
-        "<span class=\"Instruction-data\"> " + english+
+        "<span class=\"Instruction-data\"> " + english +
         "</span>\n" +
         "</div>";
+  }
+
+  private String getArabic(String arabic) {
+    return "<div class=\"Instruction\">\n" +
+        "<span class=\"Instruction-title\">Say:</span>\n" +
+        "<span class=\"Instruction-data\"> " + arabic +
+        "</span>\n" +
+        "</div>\n";
   }
 
   private InputStream getExerciseListStream(String exerciseFile) {
