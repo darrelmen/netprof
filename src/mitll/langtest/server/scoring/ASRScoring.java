@@ -51,10 +51,8 @@ public class ASRScoring extends Scoring {
   public static final String N_OUTPUT = "N_OUTPUT";
   public static final String LEVANTINE_N_OUTPUT = "" + 38;
   private static Logger logger = Logger.getLogger(ASRScoring.class);
-  // private static final String CFG_TEMPLATE = "levantine-nn-model.cfg.template";
   private static final String CFG_TEMPLATE = "generic-nn-model.cfg.template";
   private static final String DEFAULT_MODELS_DIR = "models.dli-levantine";
- // private static final String MODEL_CFG = "levantine-nn-model.cfg";
   private static final String MODEL_CFG = CFG_TEMPLATE.substring(0,CFG_TEMPLATE.length()-".template".length());
 
  // private final Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
@@ -62,7 +60,7 @@ public class ASRScoring extends Scoring {
   private final Map<String, String> properties;
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAudioFile(int, String, java.util.Collection, int, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    * @param deployPath
    * @param properties
    */
@@ -82,22 +80,23 @@ public class ASRScoring extends Scoring {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(int, String, String, int, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    * @param testAudioDir
    * @param testAudioFileNoSuffix
    * @param sentence that should be what the test audio contains
    * @param imageOutDir
    * @param imageWidth
    * @param imageHeight
+   * @param useScoreForBkgColor
    * @return PretestScore object
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
                                   String sentence, String imageOutDir,
-                                  int imageWidth, int imageHeight) {
+                                  int imageWidth, int imageHeight, boolean useScoreForBkgColor) {
     return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,
         sentence,
     //    "Arabic",
-        scoringDir,imageOutDir,imageWidth,imageHeight);
+        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor);
   }
 
   /**
@@ -105,23 +104,24 @@ public class ASRScoring extends Scoring {
    *
    * Skips sv scoring for the moment -- why would we do it?
    *
-   * @see #scoreRepeat(String, String, String, String, int, int)
+   * @see #scoreRepeat(String, String, String, String, int, int, boolean)
    * @param testAudioDir
    * @param testAudioFileNoSuffix
    * @param sentence
-   * @paramx asrLanguage
    * @param scoringDir
    * @param imageOutDir
    * @param imageWidth
    * @param imageHeight
+   * @param useScoreForBkgColor
+   * @paramx asrLanguage
    * @return
    */
   private PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
-                                          String sentence, //String asrLanguage,
-                                          String scoringDir,
+                                           String sentence, //String asrLanguage,
+                                           String scoringDir,
 
-                                          String imageOutDir,
-                                          int imageWidth, int imageHeight) {
+                                           String imageOutDir,
+                                           int imageWidth, int imageHeight, boolean useScoreForBkgColor) {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
     File wavFile = new File(pathname);
@@ -170,7 +170,7 @@ public class ASRScoring extends Scoring {
       logger.info("found cached score for file '" + testAudioDir + File.separator + testAudioFileNoSuffix + "'");
     }
 
-    ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix);
+    ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix, useScoreForBkgColor);
     Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
     Map<NetPronImageType, List<Float>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo, duration);
 

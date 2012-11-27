@@ -26,9 +26,8 @@ public class Scoring {
 
   private static final String WINDOWS_CONFIGURATIONS = "windowsConfig";
   private static final String LINUX_CONFIGURATIONS = "mtexConfig";
-  public static final float SCORE_SCALAR = 1.0f;// / 0.15f;
-  public static final String TMP = "tmp";
-  public static final String SCORING = "scoring";
+  protected static final float SCORE_SCALAR = 1.0f;// / 0.15f;
+  private static final String SCORING = "scoring";
 
   protected String scoringDir;
   protected String os;
@@ -36,14 +35,18 @@ public class Scoring {
   protected String deployPath;
 
   /**
-   * @see ASRScoring#ASRScoring(String, java.util.Map
-   * @param deployPath
+   * @see ASRScoring#ASRScoring
+   *
+   * @param  deployPath
    */
-  public Scoring(String deployPath) {
+  protected Scoring(String deployPath) {
     this.deployPath = deployPath;
     this.os = getOS();
     this.scoringDir = deployPath + File.separator + SCORING;
-    this.configFullPath = scoringDir + File.separator + (os.equals("win32") ? WINDOWS_CONFIGURATIONS : LINUX_CONFIGURATIONS);   // TODO point at os specific config file
+    this.configFullPath = scoringDir + File.separator +
+        (os.equals("win32") ?
+        WINDOWS_CONFIGURATIONS :
+        LINUX_CONFIGURATIONS);
   }
 
   private String getOS() {
@@ -66,10 +69,11 @@ public class Scoring {
    * @param imageWidth
    * @param imageHeight
    * @param audioFileNoSuffix
+   * @param useScoreToColorBkg
    * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
    */
   protected ImageWriter.EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
-                                                           String audioFileNoSuffix) {
+                                                          String audioFileNoSuffix, boolean useScoreToColorBkg) {
     String pathname = audioFileNoSuffix + ".wav";
     pathname = prependDeploy(pathname);
     if (!new File(pathname).exists()) {
@@ -107,7 +111,7 @@ public class Scoring {
     //Map<ImageType, String> typeToImageFile2;
 
     ImageWriter.EventAndFileInfo eventAndFileInfo = new ImageWriter().writeTranscripts(pathname,
-        imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR);
+        imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg);
 //    Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
 //    logger.debug("image map is " + sTypeToImage);
     return eventAndFileInfo;
