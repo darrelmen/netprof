@@ -8,7 +8,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Created with IntelliJ IDEA.
@@ -51,7 +50,7 @@ public interface LangTestDatabase extends RemoteService {
 
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height);
 
-  PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence, int width, int height);
+  PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg);
 
   /**
    * @deprecated
