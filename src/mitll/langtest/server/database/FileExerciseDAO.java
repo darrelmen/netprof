@@ -121,7 +121,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       logger.debug("using install path " + installPath);
       exercises = new ArrayList<Exercise>();
       while ((line2 = reader.readLine()) != null) {
-        if (count++ > 25) break;
+     //   if (count++ > 500) break;
         Exercise exercise = (line2.contains("\\|")) ?
             getExerciseForLine(installPath, audioConversion, line2) :
             getSimpleExerciseForLine(installPath, audioConversion, line2);
@@ -157,7 +157,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     name = name.substring(0,name.length()-1); // remove trailing )
     String displayName = name;
     String arabic = split[0].trim();
-
+    arabic = arabic.replaceAll("<s>","").replaceAll("</s>","").trim();
     String content = getArabic(arabic);
     String slowAudioRef = mediaDir + File.separator+"media"+File.separator+name+".wav";
 
