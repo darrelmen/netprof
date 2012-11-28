@@ -1,0 +1,7 @@
+.cellTableKeyboardSelectedRow {
+    background: #628cd5;
+}
+
+.cellTableKeyboardSelectedRowCell {
+    border: 2px solid #628cd5;
+}
