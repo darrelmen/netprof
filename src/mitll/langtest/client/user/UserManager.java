@@ -430,7 +430,6 @@ public class UserManager {
     private final TextBox user;
     private final Button closeButton, regButton;
     private final TextBox password;
-    //private final boolean onExists;
 
     public MyKeyUpHandler(TextBox user, Button closeButton, Button regButton, TextBox password) {
       this.user = user;
@@ -449,7 +448,7 @@ public class UserManager {
       service.graderExists(text, new AsyncCallback<Boolean>() {
         public void onFailure(Throwable caught) {}
         public void onSuccess(Boolean result) {
-          System.out.println("user '" + user.getText() + "' exists " + result);
+          //System.out.println("user '" + user.getText() + "' exists " + result);
           boolean passwordMatch = checkPassword(password);
 
           if (passwordMatch) {
