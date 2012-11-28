@@ -101,8 +101,6 @@ public class SQLExerciseDAO implements ExerciseDAO {
     return exercises;
   }
 
-
-
   /**
    * Parse the json that represents the exercise.  Created during ingest process (see ingest.scala).
    *
@@ -123,7 +121,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
       content = content.replaceAll("img src=\"",    "img src=\"" + mediaDir.replaceAll("\\\\", "/") + "/");
      // System.out.println("content " + content);
     }
-    Exercise exercise = new Exercise(plan, exid, content, promptInEnglish, recordAudio);
+    Exercise exercise = new Exercise(plan, exid, content, promptInEnglish, recordAudio, content);
     Object qa1 = obj.get("qa");
     if (qa1 == null) {
       logger.warn("no qa key in " + obj.keySet());

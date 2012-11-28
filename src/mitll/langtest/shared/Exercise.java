@@ -23,6 +23,7 @@ public class Exercise implements IsSerializable  {
 
   private String plan;
   private String content;
+  private String tooltip;
   private String id;
   private EXERCISE_TYPE type = EXERCISE_TYPE.RECORD;
   public boolean promptInEnglish = true;
@@ -65,11 +66,13 @@ public class Exercise implements IsSerializable  {
    * @param content
    * @param promptInEnglish
    * @param recordAudio
+   * @param tooltip
    */
-  public Exercise(String plan, String id, String content, boolean promptInEnglish, boolean recordAudio) {
+  public Exercise(String plan, String id, String content, boolean promptInEnglish, boolean recordAudio, String tooltip) {
     this.plan = plan; this.id = id; this.content = content;
     this.type = recordAudio ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE;
     this.promptInEnglish = promptInEnglish;
+    this.tooltip = tooltip;
   }
 
   /**
@@ -79,14 +82,16 @@ public class Exercise implements IsSerializable  {
    * @param content
    * @param audioRef
    * @param sentenceRef
+   * @param tooltip
    */
-  public Exercise(String plan, String id, String content, String audioRef, String sentenceRef) {
+  public Exercise(String plan, String id, String content, String audioRef, String sentenceRef, String tooltip) {
     this.plan = plan;
     this.id = id;
     this.content = content;
     this.refAudio = audioRef;
     this.refSentence = sentenceRef;
     this.type = EXERCISE_TYPE.REPEAT;
+    this.tooltip = tooltip;
   }
 
   /**
@@ -97,11 +102,13 @@ public class Exercise implements IsSerializable  {
    * @param fastAudioRef
    * @param slowAudioRef
    * @param sentenceRef
+   * @param tooltip
    */
-  public Exercise(String plan, String id, String content, String fastAudioRef, String slowAudioRef, String sentenceRef) {
-    this(plan,id,content,fastAudioRef,sentenceRef);
+  public Exercise(String plan, String id, String content, String fastAudioRef, String slowAudioRef, String sentenceRef, String tooltip) {
+    this(plan,id,content,fastAudioRef,sentenceRef, tooltip);
     this.slowAudioRef = slowAudioRef;
     this.type = EXERCISE_TYPE.REPEAT_FAST_SLOW;
+
   }
 
     /**
@@ -128,6 +135,9 @@ public class Exercise implements IsSerializable  {
   public String getSlowAudioRef() { return slowAudioRef; }
   public void setRefAudio(String s) { this.refAudio = s; }
   public String getRefSentence() { return refSentence; }
+  public String getTooltip() {
+    return tooltip;
+  }
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getExercises(long, boolean)
