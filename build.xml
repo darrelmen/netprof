@@ -89,6 +89,11 @@
         </jar>
     </target>
 
+    <target depends="build" name="warDari">
+        <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**,config/first/**,config/levantine/**,config/pilot/**">
+        </jar>
+    </target>
+
     <target depends="war" name="deploy">
         <copy todir="${tomcat.deploy}">
             <fileset dir="." includes="netPron2.war"/>
@@ -113,6 +118,9 @@
                 <propertyref name="build.compiler"/>
             </propertyset>
         </ant>
+        <copy todir="war/WEB-INF/lib">
+            <fileset dir="${imagewriter.location}" includes="imagewriter.jar"/>
+        </copy>
     </target>
 
     <target name="gwtc" depends="javac" description="GWT compile to JavaScript (production mode)">
