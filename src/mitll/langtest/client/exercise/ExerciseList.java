@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -30,10 +31,10 @@ import java.util.List;
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseList extends VerticalPanel implements ProvidesResize, RequiresResize {
+public class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize {
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
   protected List<Exercise> currentExercises = null;
-  private int currentExercise = 0;
+  protected int currentExercise = 0;
   private List<HTML> progressMarkers = new ArrayList<HTML>();
   private Panel current = null;
 
@@ -94,6 +95,9 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
     service.getExercises(userID, goodwaveMode, arabicDataCollect, new SetExercisesCallback());
   }
 
+  /**
+   * @see GradedExerciseList#setFactory(ExercisePanelFactory, mitll.langtest.client.user.UserManager, int)
+   */
   public void getExercisesInOrder() {
     service.getExercises(goodwaveMode, arabicDataCollect, new SetExercisesCallback());
   }
@@ -104,13 +108,15 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
 
   /**
    * So you an load a specific exercise
+   * @see mitll.langtest.client.LangTest#makeExerciseList(com.google.gwt.user.client.ui.Panel, boolean)
    * @param exercise_title
    */
+  @Override
   public void setExercise_title(String exercise_title) {
     this.exercise_title = exercise_title;
   }
 
-  protected class SetExercisesCallback implements AsyncCallback<List<Exercise>> {
+  private class SetExercisesCallback implements AsyncCallback<List<Exercise>> {
     public void onFailure(Throwable caught) {
       feedback.showErrorMessage("Server error", "Server error - couldn't get exercises.");
     }
@@ -124,7 +130,7 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
     }
   }
 
-  private void addExerciseToList(final Exercise e) {
+  protected void addExerciseToList(final Exercise e) {
     final HTML w = new HTML("<b>" + e.getID() + "</b>");
     w.setStylePrimaryName("exercise");
     add(w);
@@ -191,6 +197,10 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
     currentExercise = i;
   }
 
+  /**
+   * @see #loadExercise(mitll.langtest.shared.Exercise)
+   * @param e
+   */
   protected void checkBeforeLoad(Exercise e) {
     feedback.login();
   }
@@ -200,7 +210,9 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
     loadExercise(currentExercises.get(i+1));
   }
 
+  @Override
   public void removeCurrentExercise() {
+    //System.out.println("removing " +current);
     if (current != null) {
       currentExerciseVPanel.remove(current);
       current = null;
@@ -213,7 +225,7 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
     progressMarkers.clear();
   }
 
-  private void markCurrentExercise(int i) {
+  protected void markCurrentExercise(int i) {
     HTML html = progressMarkers.get(currentExercise);
     html.setStyleDependentName("highlighted", false);
     html = progressMarkers.get(i);
@@ -222,6 +234,13 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
   }
 
   private int countSincePrompt = 0;
+
+  /**
+   * @see mitll.langtest.client.LangTest#loadNextExercise
+   * @param current
+   * @return
+   */
+  @Override
   public boolean loadNextExercise(Exercise current) {
     int i = currentExercises.indexOf(current);
     boolean onLast = i == currentExercises.size() - 1;
@@ -246,15 +265,31 @@ public class ExerciseList extends VerticalPanel implements ProvidesResize, Requi
     return onLast;
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#loadPreviousExercise(mitll.langtest.shared.Exercise)
+   * @param current
+   * @return
+   */
+  @Override
   public boolean loadPreviousExercise(Exercise current) {
     int i = currentExercises.indexOf(current);
     boolean onFirst = i == 0;
-    if (onFirst) {}
-    else {
+    if (!onFirst) {
       loadExercise(currentExercises.get(i-1));
     }
     return onFirst;
   }
 
+  @Override
+  public Widget getWidget() {
+    return this;
+  }
+
+  /**
+   * @see mitll.langtest.client.LangTest#onFirst(mitll.langtest.shared.Exercise)
+   * @param current
+   * @return
+   */
+  @Override
   public boolean onFirst(Exercise current) { return currentExercises.indexOf(current) == 0; }
 }
