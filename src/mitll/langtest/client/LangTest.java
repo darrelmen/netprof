@@ -33,6 +33,8 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.GradedExerciseList;
+import mitll.langtest.client.exercise.ListInterface;
+import mitll.langtest.client.exercise.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
@@ -66,7 +68,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public static final String LANGTEST_IMAGES = "langtest/images/";
 
   private Panel currentExerciseVPanel = new VerticalPanel();
-  private ExerciseList exerciseList;
+  //private ExerciseList exerciseList;
+  private ListInterface exerciseList;
   private Label status;
   private UserManager userManager;
   private final UserTable userTable = new UserTable();
@@ -260,17 +263,40 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void makeExerciseList(Panel exerciseListPanel, boolean isGrading) {
     //System.out.println("makeExerciseList : english only " + englishOnlyMode + " goodwave " + goodwaveMode);
+    final UserFeedback feedback = (UserFeedback) this;
+    if (isGrading) {
+      this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback, factory, isArabicTextDataCollect());
+    }
+    else if (goodwaveMode) {
+   /*   this.exerciseList = new ExerciseList(currentExerciseVPanel, service, feedback, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken) {
+        @Override
+        protected void checkBeforeLoad(Exercise e) {
+        } // don't try to login
+      }; */
+      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken) {
+        @Override
+        protected void checkBeforeLoad(Exercise e) {} // don't try to login
+      };
+    }
+    else {
+      this.exerciseList = new ExerciseList(currentExerciseVPanel, service, feedback, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken);
+    }
+/*
     this.exerciseList = isGrading ?
-        new GradedExerciseList(currentExerciseVPanel,service,this,factory, isArabicTextDataCollect()) :
-        goodwaveMode ? new ExerciseList(currentExerciseVPanel,service,this,factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken) {
-          @Override
-          protected void checkBeforeLoad(Exercise e) {} // don't try to login
-        }: new ExerciseList(currentExerciseVPanel,service, this, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken);
+        new GradedExerciseList(currentExerciseVPanel, service, feedback, factory, isArabicTextDataCollect()) :
+        goodwaveMode ?
+            new ExerciseList(currentExerciseVPanel, service, feedback, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken) {
+              @Override
+              protected void checkBeforeLoad(Exercise e) {
+              } // don't try to login
+            } :
+            new ExerciseList(currentExerciseVPanel, service, feedback, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken);
+*/
 
     if (showOnlyOneExercise()) {
       exerciseList.setExercise_title(exercise_title);
     }
-    itemScroller = new ScrollPanel(this.exerciseList);
+    itemScroller = new ScrollPanel(this.exerciseList.getWidget());
     if (exercise_title == null) {
       setExerciseListSize();
     }
