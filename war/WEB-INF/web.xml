@@ -31,30 +31,46 @@
 
   <context-param>
     <param-name>config</param-name>
-    <param-value>levantine</param-value>
+
+      <!--
+        <param-value>dari</param-value>
+        -->
+             <param-value>levantine</param-value>
+  <!--        <param-value>pilot</param-value> -->
+      <!--    <param-value>pashto</param-value>-->
+
   </context-param>
 
 <!--  <context-param>
-    <param-name>configFile</param-name>
-    <param-value>arabicText.properties</param-value>
+        <param-name>configFile</param-name>
+        <param-value>arabicText.properties</param-value>
   </context-param>-->
 
   <!-- note for the jdbc url, we seem to need an absolute file path on the webserver -->
   <context-param>
     <param-name>db.url</param-name>
-<!--
-    <param-value>jdbc:h2:vlr-parle;IFEXISTS=TRUE</param-value>
--->
-
     <!-- use the following on mtex -->
     <!--
     <param-value>jdbc:h2:file://services/tomcat/webapps/netPron2/vlr-parle;IFEXISTS=TRUE</param-value>
      -->
+      <!--
+        <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\pilot\vlr-parle;IFEXISTS=TRUE</param-value>
+            -->
+  <!--
+        <param-value>jdbc:h2:file://services/tomcat/webapps/netPron2/war/config/pilot/vlr-parle;IFEXISTS=TRUE</param-value>
+  -->
+
+         <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\levantine\vlr-parle;IFEXISTS=TRUE</param-value>
 
 <!--
-      <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\pilot\vlr-parle;IFEXISTS=TRUE</param-value>
+            <param-value>jdbc:h2:file://services/tomcat/webapps/netPron2/war/config/levantine/vlr-parle;IFEXISTS=TRUE</param-value>
 -->
-      <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\levantine\vlr-parle;IFEXISTS=TRUE</param-value>
+      <!--
+      <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\dari\vlr-parle;IFEXISTS=TRUE</param-value>
+          -->
+<!--
+      <param-value>jdbc:h2:file://services/tomcat/webapps/netPron2/war/config/dari/vlr-parle;IFEXISTS=TRUE</param-value>
+-->
 
   </context-param>
 
