@@ -88,7 +88,7 @@ public class FileExerciseDAO implements ExerciseDAO {
           if (count++ < 5) logger.debug("can't find audio file " + file.getAbsolutePath());
         } else {
           audioConversion.ensureWriteMP3(audioRef,installPath);
-          Exercise exercise = new Exercise("repeat", displayName, content, ensureForwardSlashes(audioRef), arabic);
+          Exercise exercise = new Exercise("repeat", displayName, content, ensureForwardSlashes(audioRef), arabic, english);
           exercises.add(exercise);
         }
       }
@@ -121,10 +121,15 @@ public class FileExerciseDAO implements ExerciseDAO {
       logger.debug("using install path " + installPath);
       exercises = new ArrayList<Exercise>();
       while ((line2 = reader.readLine()) != null) {
-     //   if (count++ > 500) break;
-        Exercise exercise = (line2.contains("\\|")) ?
-            getExerciseForLine(installPath, audioConversion, line2) :
-            getSimpleExerciseForLine(installPath, audioConversion, line2);
+        //if (count++ > 20) break;
+       // boolean contains = line2.contains("\\(");
+        int length = line2.split("\\(").length;
+        boolean simpleFile = length == 2 && line2.split("\\(")[1].trim().endsWith(")");
+
+        Exercise exercise = simpleFile ?
+            getSimpleExerciseForLine(installPath, audioConversion, line2) :
+            getExerciseForLine(installPath, audioConversion, line2);
+
         exercises.add(exercise);
       }
      // w.close();
@@ -173,7 +178,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       }
     }
 
-    Exercise repeat = new Exercise("repeat", displayName, content, ensureForwardSlashes(slowAudioRef), arabic);
+    Exercise repeat = new Exercise("repeat", displayName, content, ensureForwardSlashes(slowAudioRef), arabic, arabic);
     //logger.debug("got " +repeat);
     return repeat;
   }
@@ -215,7 +220,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
 
     return new Exercise("repeat", displayName, content,
-        ensureForwardSlashes(fastAudioRef), ensureForwardSlashes(slowAudioRef), arabic);
+        ensureForwardSlashes(fastAudioRef), ensureForwardSlashes(slowAudioRef), arabic, english);
   }
 
   private String getContent(String arabic, String translit, String english) {
