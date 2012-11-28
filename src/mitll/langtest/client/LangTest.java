@@ -56,20 +56,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   // TODO : consider putting these in the .css file?
   private static final int HEADER_HEIGHT = 80;
   private static final int FOOTER_HEIGHT = 40;
-  public  static final int EXERCISE_LIST_WIDTH = 200;
+  private  static final int EXERCISE_LIST_WIDTH = 200;
   private static final int EAST_WIDTH = 90;
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
   private static final boolean DEFAULT_GOODWAVE_MODE = false;
   private static final boolean DEFAULT_ARABIC_TEXT_COLLECT = false;
   private static final boolean DEFAULT_SHOW_TURK_TOKEN = false;
   private static final int DEFAULT_SEGMENT_REPEATS = 2;
-  //private static final String RELEASE_DATE = "11/16";
   private static final String DEFAULT_EXERCISE = null;//"nl0020_ams";
   public static final String LANGTEST_IMAGES = "langtest/images/";
 
   private Panel currentExerciseVPanel = new VerticalPanel();
-  //private ExerciseList exerciseList;
   private ListInterface exerciseList;
+  private ScrollPanel itemScroller;
   private Label status;
   private UserManager userManager;
   private final UserTable userTable = new UserTable();
@@ -78,28 +77,49 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private long lastUser = -1;
 
-  // properties
-  private boolean grading = false;
-  private boolean englishOnlyMode = false;
-  private boolean goodwaveMode = DEFAULT_GOODWAVE_MODE;
-  private boolean arabicTextDataCollect = DEFAULT_ARABIC_TEXT_COLLECT;
-  private boolean showTurkToken = DEFAULT_SHOW_TURK_TOKEN;
-  private String appTitle = DLI_LANGUAGE_TESTING;
-  private int segmentRepeats = DEFAULT_SEGMENT_REPEATS;
-  private boolean bkgColorForRef = false;
-  private boolean readFromFile;
-  private String releaseDate;
-
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
   private int footerHeight = FOOTER_HEIGHT;
   private int eastWidth = EAST_WIDTH;
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
-  private ScrollPanel itemScroller;
   private float screenPortion;
-  private String exercise_title;
   private Map<String, String> props;
+
+  // properties -- todo rationalize properties, url params
+  private boolean grading = false;
+  private boolean englishOnlyMode = false;
+  private boolean goodwaveMode = DEFAULT_GOODWAVE_MODE;
+  private boolean arabicTextDataCollect = DEFAULT_ARABIC_TEXT_COLLECT;
+  private boolean showTurkToken = DEFAULT_SHOW_TURK_TOKEN;
+  private int segmentRepeats = DEFAULT_SEGMENT_REPEATS;
+  private boolean bkgColorForRef = false;
+  private String exercise_title;
+  private String appTitle = DLI_LANGUAGE_TESTING;
+  private boolean readFromFile;
+  private String releaseDate;
+
+  // property file property names
+  private static final String GRADING_PROP = "grading";
+  private static final String ENGLISH_ONLY_MODE = "englishOnlyMode";
+  private static final String GOODWAVE_MODE = "goodwaveMode";
+  private static final String ARABIC_TEXT_DATA_COLLECT = "arabicTextDataCollect";
+  private static final String SHOW_TURK_TOKEN = "showTurkToken";
+  private static final String APP_TITLE = "appTitle";
+  private static final String SEGMENT_REPEATS = "segmentRepeats";
+  private static final String READ_FROM_FILE = "readFromFile";
+  private static final String RELEASE_DATE = "releaseDate";
+  private static final String BKG_COLOR_FOR_REF1 = "bkgColorForRef";
+
+  // URL parameters that can override above parameters
+  private static final String GRADING = "grading";
+  private static final String ENGLISH = "english";
+  private static final String GOODWAVE = "goodwave";
+  private static final String ARABIC_COLLECT = "arabicCollect";
+  private static final String TURK = "turk";
+  private static final String REPEATS = "repeats";
+  private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
+  private static final String EXERCISE_TITLE = "exercise_title";
 
   /**
    * Make an exception handler that displays the exception.
@@ -157,7 +177,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     if (goodwaveMode) {
       footerHeight = 5;
-     // eastWidth = 15;
     }
 
     // if you remove this line the layout doesn't work -- the dock layout appears blank!
@@ -184,17 +203,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       sp.add(currentExerciseVPanel);
       widgets.add(sp);
     }
-    else {
+    else {  // show fancy lace background image
       currentExerciseVPanel.addStyleName("body");
       currentExerciseVPanel.getElement().getStyle().setBackgroundImage("url("+ LANGTEST_IMAGES +"levantine_window_bg.jpg"+")");
       currentExerciseVPanel.addStyleName("noMargin");
-/*      RootPanel netPron = RootPanel.get("netPron");
-      if (netPron != null) {
-        netPron.add(currentExerciseVPanel);
-      }
-      else {*/
-        RootPanel.get().add(currentExerciseVPanel);
-//      }
+      RootPanel.get().add(currentExerciseVPanel);
     }
     if (!arabicTextDataCollect) {
       makeFlashContainer();
@@ -224,16 +237,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void useProps() {
     for (Map.Entry<String, String> kv : props.entrySet()) {
-      if (kv.getKey().equals("grading")) grading = Boolean.parseBoolean(kv.getValue());
-      else if (kv.getKey().equals("englishOnlyMode")) englishOnlyMode = Boolean.parseBoolean(kv.getValue());
-      else if (kv.getKey().equals("goodwaveMode")) goodwaveMode = Boolean.parseBoolean(kv.getValue());
-      else if (kv.getKey().equals("arabicTextDataCollect")) arabicTextDataCollect = Boolean.parseBoolean(kv.getValue());
-      else if (kv.getKey().equals("showTurkToken")) showTurkToken = Boolean.parseBoolean(kv.getValue());
-      else if (kv.getKey().equals("appTitle")) appTitle = kv.getValue();
-      else if (kv.getKey().equals("segmentRepeats")) segmentRepeats = Integer.parseInt(kv.getValue());
-      else if (kv.getKey().equals("readFromFile")) readFromFile = Boolean.parseBoolean(kv.getValue());
-      else if (kv.getKey().equals("releaseDate")) releaseDate = kv.getValue();
-      else if (kv.getKey().equals("bkgColorForRef")) bkgColorForRef = Boolean.parseBoolean(kv.getValue());
+      if (kv.getKey().equals(GRADING_PROP)) grading = Boolean.parseBoolean(kv.getValue());
+      else if (kv.getKey().equals(ENGLISH_ONLY_MODE)) englishOnlyMode = Boolean.parseBoolean(kv.getValue());
+      else if (kv.getKey().equals(GOODWAVE_MODE)) goodwaveMode = Boolean.parseBoolean(kv.getValue());
+      else if (kv.getKey().equals(ARABIC_TEXT_DATA_COLLECT)) arabicTextDataCollect = Boolean.parseBoolean(kv.getValue());
+      else if (kv.getKey().equals(SHOW_TURK_TOKEN)) showTurkToken = Boolean.parseBoolean(kv.getValue());
+      else if (kv.getKey().equals(APP_TITLE)) appTitle = kv.getValue();
+      else if (kv.getKey().equals(SEGMENT_REPEATS)) segmentRepeats = Integer.parseInt(kv.getValue());
+      else if (kv.getKey().equals(READ_FROM_FILE)) readFromFile = Boolean.parseBoolean(kv.getValue());
+      else if (kv.getKey().equals(RELEASE_DATE)) releaseDate = kv.getValue();
+      else if (kv.getKey().equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = Boolean.parseBoolean(kv.getValue());
     }
   }
 
@@ -257,22 +270,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
+   * Supports different flavors of exercise list -- Paging, Grading, and vanilla.
    *
    * @param exerciseListPanel to add scroller to
    * @param isGrading true if grading, false if not
    */
   private void makeExerciseList(Panel exerciseListPanel, boolean isGrading) {
-    //System.out.println("makeExerciseList : english only " + englishOnlyMode + " goodwave " + goodwaveMode);
     final UserFeedback feedback = (UserFeedback) this;
     if (isGrading) {
       this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback, factory, isArabicTextDataCollect());
     }
     else if (goodwaveMode) {
-   /*   this.exerciseList = new ExerciseList(currentExerciseVPanel, service, feedback, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken) {
-        @Override
-        protected void checkBeforeLoad(Exercise e) {
-        } // don't try to login
-      }; */
       this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken) {
         @Override
         protected void checkBeforeLoad(Exercise e) {} // don't try to login
@@ -281,27 +289,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     else {
       this.exerciseList = new ExerciseList(currentExerciseVPanel, service, feedback, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken);
     }
-/*
-    this.exerciseList = isGrading ?
-        new GradedExerciseList(currentExerciseVPanel, service, feedback, factory, isArabicTextDataCollect()) :
-        goodwaveMode ?
-            new ExerciseList(currentExerciseVPanel, service, feedback, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken) {
-              @Override
-              protected void checkBeforeLoad(Exercise e) {
-              } // don't try to login
-            } :
-            new ExerciseList(currentExerciseVPanel, service, feedback, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken);
-*/
 
     if (showOnlyOneExercise()) {
       exerciseList.setExercise_title(exercise_title);
     }
-    itemScroller = new ScrollPanel(this.exerciseList.getWidget());
+    if (!goodwaveMode) {
+      itemScroller = new ScrollPanel(this.exerciseList.getWidget());
+    }
     if (exercise_title == null) {
       setExerciseListSize();
     }
-    exerciseListPanel.add(new HTML("<h2>Items</h2>"));
-    exerciseListPanel.add(itemScroller);
+    HTML child = new HTML("<h2>Items</h2>");
+    child.addStyleName("center");
+    exerciseListPanel.add(child);
+    exerciseListPanel.add(goodwaveMode ? this.exerciseList.getWidget() : itemScroller);
   }
 
   public boolean showOnlyOneExercise() {
@@ -317,7 +318,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void setExerciseListSize() {
     int height = Math.max(60, Window.getClientHeight() - (2 * HEADER_HEIGHT) - footerHeight - 60);
-    itemScroller.setSize(EXERCISE_LIST_WIDTH + "px", height + "px"); // 54
+    if (!goodwaveMode) itemScroller.setSize(EXERCISE_LIST_WIDTH + "px", height + "px"); // 54
   }
 
   /**
@@ -325,7 +326,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void modeSelect() {
     boolean isGrading = checkParams();
-    System.out.println("modeSelect english " +englishOnlyMode + " grading " +isGrading );
+    //System.out.println("modeSelect english " +englishOnlyMode + " grading " +isGrading );
 
     logout.setVisible(!goodwaveMode);
     users.setVisible(isGrading);
@@ -335,7 +336,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       gotUser(-1);
     }
     else if (englishOnlyMode || isGrading) {
-      //System.out.println("jump to choice box " + isGrading);
       userManager.graderLogin();
     }
     else {
@@ -350,15 +350,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   private boolean checkParams() {
-    String isGrading = Window.Location.getParameter("grading");
-    String isEnglish = Window.Location.getParameter("english");
-    String goodwave = Window.Location.getParameter("goodwave");
-    String repeats = Window.Location.getParameter("repeats");
-    String arabicCollect = Window.Location.getParameter("arabicCollect");
-    String turk = Window.Location.getParameter("turk");
-    String bkgColorForRefParam = Window.Location.getParameter("bkgColorForRef");
+    String isGrading = Window.Location.getParameter(GRADING);
+    String isEnglish = Window.Location.getParameter(ENGLISH);
+    String goodwave = Window.Location.getParameter(GOODWAVE);
+    String repeats = Window.Location.getParameter(REPEATS);
+    String arabicCollect = Window.Location.getParameter(ARABIC_COLLECT);
+    String turk = Window.Location.getParameter(TURK);
+    String bkgColorForRefParam = Window.Location.getParameter(BKG_COLOR_FOR_REF);
 
-    String exercise_title = Window.Location.getParameter("exercise_title");
+    String exercise_title = Window.Location.getParameter(EXERCISE_TITLE);
     if (exercise_title != null) {
      if (goodwave == null) goodwave = "true";
       this.exercise_title = exercise_title;
@@ -432,7 +432,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param g
    */
   public void setGrading(boolean g) {
-  //  System.out.println("setGrading " + g);
     this.grading = g;
 
     if (goodwaveMode) {
@@ -498,9 +497,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   private Widget getLogout() {
-    //DockLayoutPanel hp2 = new DockLayoutPanel(Style.Unit.PX);
     VerticalPanel vp = new VerticalPanel();
-    //hp2.addSouth(vp, 75);
 
     // add logout link
     logout = new Anchor("Logout");
@@ -532,11 +529,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // no click handler for this for now
     HTML statusLine = new HTML("<span><font size=-2>"+browserCheck.browser + " " +browserCheck.ver +" " +
         releaseDate+"</font></span>");
-   // Anchor status = new Anchor(browserCheck.browser + " " +browserCheck.ver +" " +
-    //    RELEASE_DATE);
     vp.add(statusLine);
 
-    return vp;//hp2;
+    return vp;
   }
 
   private void resetState() {
@@ -550,10 +545,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see ExerciseList#loadExercise(mitll.langtest.shared.Exercise)
    * @see #modeSelect()
    */
-  public void login() {
-   // System.out.println("LangTest.login");
-    userManager.login();
-  }
+  public void login() {  userManager.login(); }
 
   /**
    * Init Flash recorder once we login.
