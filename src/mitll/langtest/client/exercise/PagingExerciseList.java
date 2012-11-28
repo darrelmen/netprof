@@ -1,20 +1,17 @@
 package mitll.langtest.client.exercise;
 
 import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.dom.client.TableRowElement;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.SimplePager;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -26,23 +23,25 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created with IntelliJ IDEA.
+ * Show exercises with a cell table that can handle thousands of rows.
+ * Does tooltips using tooltip field on {@link Exercise#tooltip}
+ *
  * User: GO22670
  * Date: 11/27/12
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
 public class PagingExerciseList extends ExerciseList {
-  ListDataProvider<Exercise> dataProvider;
-  CellTable<Exercise> table;
+  private static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
+  private ListDataProvider<Exercise> dataProvider;
+  private CellTable<Exercise> table;
 
   public interface TableResources extends CellTable.Resources {
 
     /**
      * The styles applied to the table.
      */
-    interface TableStyle extends CellTable.Style {
-    }
+    interface TableStyle extends CellTable.Style {}
 
     @Override
     @Source({ CellTable.Style.DEFAULT_CSS, "ExerciseCellTableStyleSheet.css" })
@@ -53,25 +52,15 @@ public class PagingExerciseList extends ExerciseList {
                              ExercisePanelFactory factory, boolean goodwaveMode, boolean arabicDataCollect, boolean showTurkToken) {
      super(currentExerciseVPanel,service,feedback,factory,goodwaveMode,arabicDataCollect,showTurkToken);
 
-    // this.table = new CellTable<Exercise>();
-
     CellTable.Resources o = GWT.create(TableResources.class);
-    this.table = new CellTable<Exercise>(15, o);
-    System.out.println("selection model " +table.getSelectionModel());
+    this.table = new CellTable<Exercise>(PAGE_SIZE, o);
+    table.setWidth("100%",true);
 
     // Add a selection model to handle user selection.
     final SingleSelectionModel<Exercise> selectionModel = new SingleSelectionModel<Exercise>();
     table.setSelectionModel(selectionModel);
-    selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-      public void onSelectionChange(SelectionChangeEvent event) {
-        Exercise selected = selectionModel.getSelectedObject();
-        System.out.println("selected " + selected);
-      }
-    });
 
-    // table.getSelectionModel()
-
-    Column<Exercise, String> id2 = new Column<Exercise, String>(new TextCell() {
+    Column<Exercise, SafeHtml> id2 = new Column<Exercise, SafeHtml>(new SafeHtmlCell() {
       @Override
       public Set<String> getConsumedEvents() {
         Set<String> events = new HashSet<String>();
@@ -80,22 +69,35 @@ public class PagingExerciseList extends ExerciseList {
       }
     }) {
       @Override
-      public String getValue(Exercise object) {
-        return object.getID();
+      public SafeHtml getValue(Exercise object) {
+      return getColumnToolTip(object.getID(), object.getTooltip());
       }
 
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, Exercise object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         if ("click".equals(event.getType())) {
-          System.out.println("loading " +object);
-           loadExercise(object);
+          loadExercise(object);
         }
+      }
+
+      private SafeHtml getColumnToolTip(String columnText, String toolTipText) {
+        String htmlConstant = "<html>" + "<head><style>" +
+            "A.tip { TEXT-DECORATION: none; color:#1776B3}" +
+            "A.tip:hover  {CURSOR:default;}" +
+            "A.tip span   {DISPLAY:none}" +
+            "A.tip span p {background:#d30300;color:#fff;font-weight:500;border-radius:5px;padding:5px;font-size:12px}" +
+            "A.tip:hover span {border:1px solid #e6e3e5;DISPLAY: block;Z-INDEX: 1000; PADDING: 0px 10px 0px 10px;" +
+            //"POSITION:absolute;float:left;background:#ffffd1;   TEXT-DECORATION: none}" +
+            "POSITION:absolute;background:#ffffd1;   TEXT-DECORATION: none}" +
+            "</style></head>" +
+            "<body>" +
+            "<a href=\"#\" class=\"tip\">" + columnText + "<span>" + toolTipText + "</span></a>" + "</body>" + "</html>";
+        return new SafeHtmlBuilder().appendHtmlConstant(htmlConstant).toSafeHtml();
       }
     };
 
-     //id.setSortable(true);
-     table.addColumn(id2, "Item");
+     table.addColumn(id2);
 
      // Create a data provider.
      this.dataProvider = new ListDataProvider<Exercise>();
@@ -119,15 +121,9 @@ public class PagingExerciseList extends ExerciseList {
     selectFirst();
   }
 
-  @Override
-  protected void onLoad() {
-    super.onLoad();
-  }
-
   private void selectFirst() {
     SelectionModel<? super Exercise> selectionModel = table.getSelectionModel();
     Exercise object = currentExercises.get(0);
-    System.out.println("selection model " + selectionModel + " ex " +object);
     selectionModel.setSelected(object, true);
   }
 
@@ -136,31 +132,8 @@ public class PagingExerciseList extends ExerciseList {
     List<Exercise> list = dataProvider.getList();
     list.add(exercise);
     table.setRowCount(list.size());
- //   if (list.size() == 1)
-    //super.addExerciseToList(e);    //To change body of overridden methods use File | Settings | File Templates.
   }
 
   @Override
-  protected void markCurrentExercise(int i) {
-    int pstart = table.getPageStart();
-    final int onPage = currentExercise - pstart;
-    final int nextOnPage = i - pstart;
-
-    System.out.println("mark current " + i + " page start " + pstart + " onPage " +onPage + " next " +nextOnPage);
-
-    int visibleItemCount = table.getVisibleItemCount();
-    System.out.println("visibleItemCount " + visibleItemCount);
-/*    //if (visibleItemCount == 0) {
-    Timer timer = new Timer() {
-      @Override
-      public void run() {
-        TableRowElement currentHighlightRowElement = table.getRowElement(onPage);
-        TableRowElement nextElement = table.getRowElement(nextOnPage);
-        currentHighlightRowElement.removeClassName("highlighted");
-        nextElement.addClassName("highlighted");
-      }
-    };
-    timer.schedule(100);*/
-
-  }
+  protected void markCurrentExercise(int i) {}
 }
