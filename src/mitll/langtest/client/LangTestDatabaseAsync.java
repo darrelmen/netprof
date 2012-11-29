@@ -12,8 +12,11 @@ import java.util.Map;
  * The async counterpart of <code>LangTestDatabase</code>.
  */
 public interface LangTestDatabaseAsync {
+  @Deprecated
   void getExercises(long userID, boolean useFile, boolean arabicDataCollect, AsyncCallback<List<Exercise>> async);
-  void getExercises(boolean useFile, boolean arabicDataCollect, AsyncCallback<List<Exercise>> async);
+  @Deprecated
+  void getExercises(boolean useFile, AsyncCallback<List<Exercise>> async);
+
   void addAnswer(int usedID, Exercise exercise, int questionID, String answer, String audioFile, AsyncCallback<Void> async);
   void addUser(int age, String gender, int experience, AsyncCallback<Long> async);
   void isAnswerValid(int userID, Exercise exercise, int questionID, AsyncCallback<Boolean> async);
@@ -43,4 +46,14 @@ public interface LangTestDatabaseAsync {
   void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, AsyncCallback<ImageResponse> async);
 
   void getProperties(AsyncCallback<Map<String, String>> async);
+
+  void ensureMP3(String wavFile, AsyncCallback<Void> async);
+
+  void getExerciseIds(long userID, boolean useFile, boolean arabicDataCollect, AsyncCallback<List<ExerciseShell>> async);
+
+  void getExerciseIds(boolean useFile, AsyncCallback<List<ExerciseShell>> async);
+
+  void getExercise(String id, boolean useFile, AsyncCallback<Exercise> async);
+
+  void getExercise(String id, long userID, boolean useFile, boolean arabicDataCollect, AsyncCallback<Exercise> async);
 }
