@@ -51,6 +51,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   /**
    * TODO : write to h2
    * @see DatabaseImpl#getExercises(boolean, String)
+   * @deprecated
    * @param installPath
    */
   public void readExercises(String installPath) {
