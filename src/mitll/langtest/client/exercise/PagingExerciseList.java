@@ -13,11 +13,10 @@ import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 
 import java.util.HashSet;
 import java.util.List;
@@ -25,7 +24,7 @@ import java.util.Set;
 
 /**
  * Show exercises with a cell table that can handle thousands of rows.
- * Does tooltips using tooltip field on {@link Exercise#tooltip}
+ * Does tooltips using tooltip field on {@link ExerciseShell#tooltip}
  * <p/>
  * User: GO22670
  * Date: 11/27/12
@@ -34,8 +33,8 @@ import java.util.Set;
  */
 public class PagingExerciseList extends ExerciseList {
   private static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
-  private ListDataProvider<Exercise> dataProvider;
-  private CellTable<Exercise> table;
+  private ListDataProvider<ExerciseShell> dataProvider;
+  private CellTable<ExerciseShell> table;
 
   public interface TableResources extends CellTable.Resources {
 
@@ -55,14 +54,14 @@ public class PagingExerciseList extends ExerciseList {
     super(currentExerciseVPanel, service, feedback, factory, goodwaveMode, arabicDataCollect, showTurkToken);
 
     CellTable.Resources o = GWT.create(TableResources.class);
-    this.table = new CellTable<Exercise>(PAGE_SIZE, o);
+    this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
     table.setWidth("100%", true);
 
     // Add a selection model to handle user selection.
-    final SingleSelectionModel<Exercise> selectionModel = new SingleSelectionModel<Exercise>();
+    final SingleSelectionModel<ExerciseShell> selectionModel = new SingleSelectionModel<ExerciseShell>();
     table.setSelectionModel(selectionModel);
 
-    Column<Exercise, SafeHtml> id2 = new Column<Exercise, SafeHtml>(new SafeHtmlCell() {
+    Column<ExerciseShell, SafeHtml> id2 = new Column<ExerciseShell, SafeHtml>(new SafeHtmlCell() {
       @Override
       public Set<String> getConsumedEvents() {
         Set<String> events = new HashSet<String>();
@@ -71,15 +70,15 @@ public class PagingExerciseList extends ExerciseList {
       }
     }) {
       @Override
-      public SafeHtml getValue(Exercise object) {
+      public SafeHtml getValue(ExerciseShell object) {
         return getColumnToolTip(object.getID(), object.getTooltip());
       }
 
       @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, Exercise object, NativeEvent event) {
+      public void onBrowserEvent(Cell.Context context, Element elem, ExerciseShell object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         if ("click".equals(event.getType())) {
-          final Exercise e = object;
+          final ExerciseShell e = object;
           Timer timer = new Timer() {
             @Override
             public void run() {
@@ -109,7 +108,7 @@ public class PagingExerciseList extends ExerciseList {
     table.addColumn(id2);
 
     // Create a data provider.
-    this.dataProvider = new ListDataProvider<Exercise>();
+    this.dataProvider = new ListDataProvider<ExerciseShell>();
 
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
@@ -131,14 +130,12 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   private void selectFirst() {
-    SelectionModel<? super Exercise> selectionModel = table.getSelectionModel();
-    Exercise object = currentExercises.get(0);
-    selectionModel.setSelected(object, true);
+    table.getSelectionModel().setSelected(currentExercises.get(0), true);
   }
 
   @Override
-  protected void addExerciseToList(Exercise exercise) {
-    List<Exercise> list = dataProvider.getList();
+  protected void addExerciseToList(ExerciseShell exercise) {
+    List<ExerciseShell> list = dataProvider.getList();
     list.add(exercise);
     table.setRowCount(list.size());
   }
