@@ -18,13 +18,11 @@ import java.util.Map;
  * Time: 1:03 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Exercise implements IsSerializable  {
+public class Exercise extends ExerciseShell  {
   public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE, REPEAT, REPEAT_FAST_SLOW, MULTI_REF }
 
   private String plan;
   private String content;
-  private String tooltip;
-  private String id;
   private EXERCISE_TYPE type = EXERCISE_TYPE.RECORD;
   public boolean promptInEnglish = true;
   private Map<String,List<QAPair>> langToQuestion = null;
@@ -69,10 +67,10 @@ public class Exercise implements IsSerializable  {
    * @param tooltip
    */
   public Exercise(String plan, String id, String content, boolean promptInEnglish, boolean recordAudio, String tooltip) {
-    this.plan = plan; this.id = id; this.content = content;
+    super(id,tooltip);
+    this.plan = plan; this.content = content;
     this.type = recordAudio ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE;
     this.promptInEnglish = promptInEnglish;
-    this.tooltip = tooltip;
   }
 
   /**
@@ -85,13 +83,13 @@ public class Exercise implements IsSerializable  {
    * @param tooltip
    */
   public Exercise(String plan, String id, String content, String audioRef, String sentenceRef, String tooltip) {
+    super(id,tooltip);
+
     this.plan = plan;
-    this.id = id;
     this.content = content;
     this.refAudio = audioRef;
     this.refSentence = sentenceRef;
     this.type = EXERCISE_TYPE.REPEAT;
-    this.tooltip = tooltip;
   }
 
   /**
@@ -127,7 +125,7 @@ public class Exercise implements IsSerializable  {
   }
 
   public String getPlan() { return plan; }
-  public String getID() { return id; }
+
   public String getContent() { return content; }
   public EXERCISE_TYPE getType() { return type; }
   public boolean isRepeat() { return type == EXERCISE_TYPE.REPEAT || type == EXERCISE_TYPE.REPEAT_FAST_SLOW; }
@@ -135,9 +133,6 @@ public class Exercise implements IsSerializable  {
   public String getSlowAudioRef() { return slowAudioRef; }
   public void setRefAudio(String s) { this.refAudio = s; }
   public String getRefSentence() { return refSentence; }
-  public String getTooltip() {
-    return tooltip;
-  }
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getExercises(long, boolean)
