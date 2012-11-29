@@ -6,6 +6,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 
 /**
  * Handles left side of NetPron2 -- which exercise is the current one, highlighting, etc.
@@ -47,12 +48,12 @@ public class GradedExerciseList extends ExerciseList {
   }
 
   @Override
-  protected void checkBeforeLoad(Exercise e) {
+  protected void checkBeforeLoad(ExerciseShell e) {
     checkoutExercise(e);
   }
 
   @Override
-  protected void getNextExercise(Exercise current) {
+  protected void getNextExercise(ExerciseShell current) {
     getNextUngraded();
   }
 
@@ -61,9 +62,10 @@ public class GradedExerciseList extends ExerciseList {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Exercise result) {
         if (result != null) {
-          for (Exercise e : currentExercises) {
+          for (ExerciseShell e : currentExercises) {
             if (e.getID().equals(result.getID())) {
               loadExercise(e);
+              break;
             }
           }
         }
@@ -71,7 +73,7 @@ public class GradedExerciseList extends ExerciseList {
     });
   }
 
-  private void checkoutExercise(Exercise result) {
+  private void checkoutExercise(ExerciseShell result) {
      service.checkoutExerciseID(user.getGrader(), result.getID(), new AsyncCallback<Void>() {
        public void onFailure(Throwable caught) {}
        public void onSuccess(Void result) {}
