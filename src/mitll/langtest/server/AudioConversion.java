@@ -225,7 +225,7 @@ public class AudioConversion {
     String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav",".mp3");
     File mp3 = new File(mp3File);
     if (!mp3.exists()) {
-      //logger.info("doing mp3 conversion for " + absolutePathToWav);
+      logger.info("doing mp3 conversion for " + absolutePathToWav);
 
       String binPath = WINDOWS_SOX_BIN_DIR;
       if (! new File(binPath).exists()) binPath = LINUX_SOX_BIN_DIR;
