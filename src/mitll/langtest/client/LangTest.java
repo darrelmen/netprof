@@ -2,7 +2,6 @@ package mitll.langtest.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -10,7 +9,6 @@ import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
@@ -46,6 +44,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 
 import java.util.Map;
 
@@ -283,7 +282,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     else if (goodwaveMode) {
       this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken) {
         @Override
-        protected void checkBeforeLoad(Exercise e) {} // don't try to login
+        protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
       };
     }
     else {
