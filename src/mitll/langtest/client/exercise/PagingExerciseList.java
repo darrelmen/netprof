@@ -10,6 +10,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.SimplePager;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
@@ -25,7 +26,7 @@ import java.util.Set;
 /**
  * Show exercises with a cell table that can handle thousands of rows.
  * Does tooltips using tooltip field on {@link Exercise#tooltip}
- *
+ * <p/>
  * User: GO22670
  * Date: 11/27/12
  * Time: 5:35 PM
@@ -41,20 +42,21 @@ public class PagingExerciseList extends ExerciseList {
     /**
      * The styles applied to the table.
      */
-    interface TableStyle extends CellTable.Style {}
+    interface TableStyle extends CellTable.Style {
+    }
 
     @Override
-    @Source({ CellTable.Style.DEFAULT_CSS, "ExerciseCellTableStyleSheet.css" })
+    @Source({CellTable.Style.DEFAULT_CSS, "ExerciseCellTableStyleSheet.css"})
     TableStyle cellTableStyle();
   }
 
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                             ExercisePanelFactory factory, boolean goodwaveMode, boolean arabicDataCollect, boolean showTurkToken) {
-     super(currentExerciseVPanel,service,feedback,factory,goodwaveMode,arabicDataCollect,showTurkToken);
+                            ExercisePanelFactory factory, boolean goodwaveMode, boolean arabicDataCollect, boolean showTurkToken) {
+    super(currentExerciseVPanel, service, feedback, factory, goodwaveMode, arabicDataCollect, showTurkToken);
 
     CellTable.Resources o = GWT.create(TableResources.class);
     this.table = new CellTable<Exercise>(PAGE_SIZE, o);
-    table.setWidth("100%",true);
+    table.setWidth("100%", true);
 
     // Add a selection model to handle user selection.
     final SingleSelectionModel<Exercise> selectionModel = new SingleSelectionModel<Exercise>();
@@ -70,14 +72,21 @@ public class PagingExerciseList extends ExerciseList {
     }) {
       @Override
       public SafeHtml getValue(Exercise object) {
-      return getColumnToolTip(object.getID(), object.getTooltip());
+        return getColumnToolTip(object.getID(), object.getTooltip());
       }
 
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, Exercise object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         if ("click".equals(event.getType())) {
-          loadExercise(object);
+          final Exercise e = object;
+          Timer timer = new Timer() {
+            @Override
+            public void run() {
+              loadExercise(e);
+            }
+          };
+          timer.schedule(100);
         }
       }
 
@@ -97,23 +106,23 @@ public class PagingExerciseList extends ExerciseList {
       }
     };
 
-     table.addColumn(id2);
+    table.addColumn(id2);
 
-     // Create a data provider.
-     this.dataProvider = new ListDataProvider<Exercise>();
+    // Create a data provider.
+    this.dataProvider = new ListDataProvider<Exercise>();
 
-     // Connect the table to the data provider.
-     dataProvider.addDataDisplay(table);
+    // Connect the table to the data provider.
+    dataProvider.addDataDisplay(table);
 
-     // Create a SimplePager.
-     SimplePager pager = new SimplePager();
+    // Create a SimplePager.
+    SimplePager pager = new SimplePager();
 
-     // Set the cellList as the display.
-     pager.setDisplay(table);
+    // Set the cellList as the display.
+    pager.setDisplay(table);
 
-     add(pager);
-     add(table);
-   }
+    add(pager);
+    add(table);
+  }
 
   @Override
   protected void loadFirstExercise() {

@@ -232,7 +232,7 @@ public class AudioConversion {
       File tempFile;
       try {
         tempFile = File.createTempFile("fortyEightK",".wav");
-        logger.debug("sox conversion from " + absolutePathToWav + " to " + tempFile.getAbsolutePath());
+       // logger.debug("sox conversion from " + absolutePathToWav + " to " + tempFile.getAbsolutePath());
         ProcessBuilder soxFirst = new ProcessBuilder(new AudioConverter().getSox(binPath),
             absolutePathToWav.getAbsolutePath(), "-s", "-2", "-c", "1", "-q",tempFile.getAbsolutePath(), "rate", "48000");
 
@@ -321,7 +321,7 @@ public class AudioConversion {
   private File writeMP3(String lamePath, String pathToAudioFile, String mp3File) {
     ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File);
     try {
-      logger.debug("running lame" + lameProc.command());
+      //logger.debug("running lame" + lameProc.command());
       new ProcessRunner().runProcess(lameProc);
       //     System.out.println("writeMP3 exited  lame" + lameProc);
     } catch (IOException e) {
