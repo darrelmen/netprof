@@ -46,7 +46,6 @@ import java.util.TreeSet;
 public class DatabaseImpl implements Database {
   private static Logger logger = Logger.getLogger(DatabaseImpl.class);
   private static final boolean TESTING = false;
-  private static final boolean USE_FAST_SLOW_LEVANTINE = true;
 
   private static final boolean DROP_USER = false;
   private static final boolean DROP_RESULT = false;
@@ -178,7 +177,6 @@ public class DatabaseImpl implements Database {
     public ExerciseExport(String id, String key) {
       this.id  = id;
       this.key = Arrays.asList(key.split("\\|\\|"));
-   //   this.key = key;
     }
     public void addRG(String response, int grade) { rgs.add(new ResponseAndGrade(response,grade)); }
 
@@ -219,18 +217,12 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
    */
   private List<Exercise> getExercises(boolean useFile, String lessonPlanFile) {
-    logger.info("use file = " + useFile);
-
     if (exerciseDAO == null || useFile && exerciseDAO instanceof SQLExerciseDAO || !useFile && exerciseDAO instanceof FileExerciseDAO) {
       this.exerciseDAO = makeExerciseDAO(useFile);
     }
 
     if (useFile) {
-      if (USE_FAST_SLOW_LEVANTINE) {
-        ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, lessonPlanFile);
-      } else {
-        ((FileExerciseDAO) exerciseDAO).readExercises(installPath);
-      }
+      ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, lessonPlanFile);
     }
     return exerciseDAO.getRawExercises();
   }
