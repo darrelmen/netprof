@@ -21,8 +21,11 @@ public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
   // exerciseDAO
+  List<ExerciseShell> getExerciseIds(long userID, boolean useFile, boolean arabicDataCollect);
+  List<ExerciseShell> getExerciseIds(boolean useFile);
+
   List<Exercise> getExercises(long userID, boolean useFile, boolean arabicDataCollect);
-  List<Exercise> getExercises(boolean useFile, boolean arabicDataCollect);
+  List<Exercise> getExercises(boolean useFile);
   ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
 
   // gradeDAO
@@ -48,6 +51,7 @@ public interface LangTestDatabase extends RemoteService {
 
   void checkoutExerciseID(String user,String id);
 
+  void ensureMP3(String wavFile);
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height);
 
   PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg);
@@ -64,4 +68,8 @@ public interface LangTestDatabase extends RemoteService {
   PretestScore getScoreForAudioFile(int reqid, String audioFile, Collection<String> refs, int width, int height);
 
   Map<String,String> getProperties();
+
+  Exercise getExercise(String id, boolean useFile);
+
+  Exercise getExercise(String id, long userID, boolean useFile, boolean arabicDataCollect);
 }
