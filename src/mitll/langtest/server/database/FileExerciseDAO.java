@@ -110,12 +110,11 @@ public class FileExerciseDAO implements ExerciseDAO {
    * @param installPath
    * @param lessonPlanFile
    */
-  public void readFastAndSlowExercises(String installPath, String lessonPlanFile) {
+  public void readFastAndSlowExercises(final String installPath, String lessonPlanFile) {
     if (exercises != null) return;
     String exerciseFile = LESSON_PLAN;
     try {
       FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
-      AudioConversion audioConversion = new AudioConversion();
       BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
       String line2;
       int count = 0;
@@ -128,8 +127,8 @@ public class FileExerciseDAO implements ExerciseDAO {
         boolean simpleFile = length == 2 && line2.split("\\(")[1].trim().endsWith(")");
 
         Exercise exercise = simpleFile ?
-            getSimpleExerciseForLine(installPath, audioConversion, line2) :
-            getExerciseForLine(installPath, audioConversion, line2);
+            getSimpleExerciseForLine(installPath, line2) :
+            getExerciseForLine(installPath, line2);
 
         exercises.add(exercise);
       }
@@ -153,11 +152,13 @@ public class FileExerciseDAO implements ExerciseDAO {
    * <s> word word word </s> (audio_file_name_without_suffix)
    *
    * @param installPath
-   * @param audioConversion
+   * @paramx audioConversion
    * @param line2
    * @return
    */
-  private Exercise getSimpleExerciseForLine(String installPath, AudioConversion audioConversion, String line2) {
+  private Exercise getSimpleExerciseForLine(String installPath, String line2) {
+   // AudioConversion audioConversion = new AudioConversion();
+
     String[] split = line2.split("\\(");
     String name = split[1].trim();
     name = name.substring(0,name.length()-1); // remove trailing )
@@ -165,21 +166,11 @@ public class FileExerciseDAO implements ExerciseDAO {
     String arabic = split[0].trim();
     arabic = arabic.replaceAll("<s>","").replaceAll("</s>","").trim();
     String content = getArabic(arabic);
-    String slowAudioRef = mediaDir + File.separator+"media"+File.separator+name+".wav";
+    String audioRef = mediaDir + File.separator+"media"+File.separator+name+".wav";
 
-    for (String audioRef : new String[]{slowAudioRef}) {
-      File file = new File(audioRef);
-      if (!file.exists()) {
-        file = new File(installPath,audioRef);
-      }
-      if (!file.exists()) {
-        // if (count++ < 5) logger.debug("can't find audio file " + file.getAbsolutePath());
-      } else {
-        audioConversion.ensureWriteMP3(audioRef,installPath);
-      }
-    }
+    //audioConversion.ensureWriteMP3(audioRef, installPath);
 
-    Exercise repeat = new Exercise("repeat", displayName, content, ensureForwardSlashes(slowAudioRef), arabic, arabic);
+    Exercise repeat = new Exercise("repeat", displayName, content, ensureForwardSlashes(audioRef), arabic, arabic);
     //logger.debug("got " +repeat);
     return repeat;
   }
@@ -190,11 +181,11 @@ public class FileExerciseDAO implements ExerciseDAO {
    * pronz.MultiRefRepeatExercise$: nl0001_ams, nl0001_ams | reference, nl0001_ams | Female_01, nl0001_ams | Male_01, nl0001_ams | REF_MALE, nl0001_ams | STE-004M, nl0001_ams | STE-006F -> nl0001_ams -> FOREIGN_LANGUAGE_SENTENCE -> marHaba -> Hello.
    *
    * @param installPath
-   * @param audioConversion
+   * @paramx xaudioConversion
    * @param line2
    * @return
    */
-  private Exercise getExerciseForLine(String installPath, AudioConversion audioConversion, String line2) {
+  private Exercise getExerciseForLine(String installPath, String line2) {
     String[] split = line2.split("\\|");
     String lastCol = split[6];
     String[] split1 = lastCol.split("->");
@@ -207,17 +198,18 @@ public class FileExerciseDAO implements ExerciseDAO {
     String content = getContent(arabic, translit, english);
     String fastAudioRef = mediaDir + File.separator+"media"+File.separator+name+File.separator+ FAST + ".wav";
     String slowAudioRef = mediaDir + File.separator+"media"+File.separator+name+File.separator+ SLOW + ".wav";
+    AudioConversion audioConversion = new AudioConversion();
 
     for (String audioRef : new String[]{fastAudioRef,slowAudioRef}) {
-      File file = new File(audioRef);
+/*      File file = new File(audioRef);
       if (!file.exists()) {
         file = new File(installPath,audioRef);
       }
       if (!file.exists()) {
        // if (count++ < 5) logger.debug("can't find audio file " + file.getAbsolutePath());
-      } else {
+      } else {*/
         audioConversion.ensureWriteMP3(audioRef,installPath);
-      }
+  //    }
     }
 
     return new Exercise("repeat", displayName, content,

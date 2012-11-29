@@ -4,6 +4,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,11 +27,11 @@ public interface ListInterface extends RequiresResize {
   Widget getWidget();
 
 
-  boolean loadNextExercise(Exercise current);
+  boolean loadNextExercise(ExerciseShell current);
 
-  boolean loadPreviousExercise(Exercise current);
+  boolean loadPreviousExercise(ExerciseShell current);
 
-  boolean onFirst(Exercise current);
+  boolean onFirst(ExerciseShell current);
 
   void removeCurrentExercise();
 }

@@ -12,6 +12,7 @@ import mitll.langtest.server.scoring.DTWScoring;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
@@ -70,6 +71,45 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db = new DatabaseImpl(this);
   }
 
+  @Override
+  public List<ExerciseShell> getExerciseIds(long userID, boolean useFile, boolean arabicDataCollect) {
+    List<Exercise> exercises = getExercises(userID, useFile, arabicDataCollect);
+    List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
+    for (Exercise e : exercises) {
+      ids.add(new ExerciseShell(e.getID(), e.getTooltip()));
+    }
+    return ids;
+  }
+
+  @Override
+  public List<ExerciseShell> getExerciseIds(boolean useFile) {
+    List<Exercise> exercises = getExercises(useFile);
+    List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
+    for (Exercise e : exercises) {
+      ids.add(new ExerciseShell(e.getID(), e.getTooltip()));
+    }
+
+    return ids;
+  }
+
+  @Override
+  public Exercise getExercise(String id, boolean useFile) {
+    List<Exercise> exercises = getExercises(useFile);
+    for (Exercise e : exercises) {
+      if (id.equals(e.getID())) return e;
+    }
+    return null;
+  }
+
+  @Override
+  public Exercise getExercise(String id, long userID, boolean useFile, boolean arabicDataCollect) {
+    List<Exercise> exercises = getExercises(userID, useFile, arabicDataCollect);
+    for (Exercise e : exercises) {
+      if (id.equals(e.getID())) return e;
+    }
+    return null;
+  }
+
   /**
    * Called from the client.
    *
@@ -96,9 +136,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.exercise.ExerciseList#getExercisesInOrder()
    * @return
    * @param useFile
-   * @param arabicDataCollect
    */
-  public List<Exercise> getExercises(boolean useFile, boolean arabicDataCollect) {
+  public List<Exercise> getExercises(boolean useFile) {
     String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
     db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir);
     List<Exercise> exercises = db.getExercises(useFile);
@@ -148,6 +187,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       userToExerciseID.put(user, id);
       logger.debug("after adding " + user + "->" + id + " active exercise map now " + userToExerciseID.asMap());
     }
+  }
+
+  /**
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getQuestionContent(mitll.langtest.shared.Exercise)
+   *
+   * @param wavFile
+   */
+  public void ensureMP3(String wavFile) {
+   // logger.info("check for mp3 for " + wavFile);
+    new AudioConversion().ensureWriteMP3(wavFile, getInstallPath());
   }
 
   /**
@@ -601,7 +650,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     String realContextPath = context.getRealPath(threadLocalRequest.getContextPath());
 
-    List<String> pathElements = Arrays.asList(realContextPath.split( realContextPath.contains("\\") ? "\\\\":"/"));
+    List<String> pathElements = Arrays.asList(realContextPath.split(realContextPath.contains("\\") ? "\\\\" : "/"));
 
     // hack to deal with the app name being duplicated in the path
     if (pathElements.size() > 1) {
