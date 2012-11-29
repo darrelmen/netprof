@@ -19,6 +19,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,7 @@ import java.util.List;
  */
 public class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize {
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
-  protected List<Exercise> currentExercises = null;
+  protected List<ExerciseShell> currentExercises = null;
   protected int currentExercise = 0;
   private List<HTML> progressMarkers = new ArrayList<HTML>();
   private Panel current = null;
@@ -48,6 +49,8 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
   private boolean goodwaveMode;
   protected final boolean arabicDataCollect;
   protected final boolean showTurkToken;
+  private boolean useUserID = false;
+  private long userID;
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -90,16 +93,16 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
     * @param userID
     */
   public void getExercises(long userID) {
- //   doGrading = false;
-  //  GWT.log("goodwave mode = " +goodwaveMode);
-    service.getExercises(userID, goodwaveMode, arabicDataCollect, new SetExercisesCallback());
+    useUserID = true;
+    this.userID = userID;
+    service.getExerciseIds(userID, goodwaveMode, arabicDataCollect, new SetExercisesCallback());
   }
 
   /**
    * @see GradedExerciseList#setFactory(ExercisePanelFactory, mitll.langtest.client.user.UserManager, int)
    */
   public void getExercisesInOrder() {
-    service.getExercises(goodwaveMode, arabicDataCollect, new SetExercisesCallback());
+    service.getExerciseIds(goodwaveMode, new SetExercisesCallback());
   }
 
   public void onResize() {
@@ -116,21 +119,21 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
     this.exercise_title = exercise_title;
   }
 
-  private class SetExercisesCallback implements AsyncCallback<List<Exercise>> {
+  private class SetExercisesCallback implements AsyncCallback<List<ExerciseShell>> {
     public void onFailure(Throwable caught) {
       feedback.showErrorMessage("Server error", "Server error - couldn't get exercises.");
     }
 
-    public void onSuccess(List<Exercise> result) {
+    public void onSuccess(List<ExerciseShell> result) {
       currentExercises = result; // remember current exercises
-      for (final Exercise e : result) {
-        addExerciseToList(e);
+      for (final ExerciseShell es : result) {
+        addExerciseToList(es);
       }
       loadFirstExercise();
     }
   }
 
-  protected void addExerciseToList(final Exercise e) {
+  protected void addExerciseToList(final ExerciseShell e) {
     final HTML w = new HTML("<b>" + e.getID() + "</b>");
     w.setStylePrimaryName("exercise");
     add(w);
@@ -154,18 +157,18 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
   }
 
   protected void loadFirstExercise() {
-    Exercise toLoad = currentExercises.get(0);
+    ExerciseShell toLoad = currentExercises.get(0);
     if (exercise_title != null) {
-      Exercise e = byName(exercise_title);
+      ExerciseShell e = byName(exercise_title);
       if (e != null) toLoad = e;
     }
 
     loadExercise(toLoad);
   }
 
-  private Exercise byName(String name) {
-    Exercise found = null;
-    for (Exercise e : currentExercises) {
+  private ExerciseShell byName(String name) {
+    ExerciseShell found = null;
+    for (ExerciseShell e : currentExercises) {
       String id = e.getID();
       if (id.equals(name)) {
         found = e;
@@ -176,18 +179,43 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
   }
 
   /**
-   * @see #addExerciseToList(mitll.langtest.shared.Exercise)
+   * @see #addExerciseToList(mitll.langtest.shared.ExerciseShell)
    * @see #loadFirstExercise()
-   * @see #loadNextExercise(mitll.langtest.shared.Exercise)
-   * @see #loadPreviousExercise(mitll.langtest.shared.Exercise)
-   * @param e
+   * @see #loadNextExercise
+   * @see #loadPreviousExercise
+   * @param exerciseShell
    */
-  protected void loadExercise(Exercise e) {
-    checkBeforeLoad(e);
+  protected void loadExercise(ExerciseShell exerciseShell) {
+    checkBeforeLoad(exerciseShell);
 
     removeCurrentExercise();
 
-    currentExerciseVPanel.add(current = factory.getExercisePanel(e));
+    System.out.println("loading " + exerciseShell);
+    if (useUserID) {
+      service.getExercise(exerciseShell.getID(), userID, goodwaveMode, arabicDataCollect, new ExerciseAsyncCallback(exerciseShell));
+    } else {
+      service.getExercise(exerciseShell.getID(), goodwaveMode, new ExerciseAsyncCallback(exerciseShell));
+    }
+  }
+
+  private class ExerciseAsyncCallback implements AsyncCallback<Exercise> {
+    private final ExerciseShell exerciseShell;
+
+    public ExerciseAsyncCallback(ExerciseShell exerciseShell) {
+      this.exerciseShell = exerciseShell;
+    }
+
+    @Override
+    public void onFailure(Throwable caught) {}
+
+    @Override
+    public void onSuccess(Exercise result) {
+      useExercise(result, exerciseShell);
+    }
+  }
+
+  private void useExercise(Exercise result, ExerciseShell e) {
+    currentExerciseVPanel.add(current = factory.getExercisePanel(result));
     int i = currentExercises.indexOf(e);
     if (i == -1) {
       System.err.println("can't find " + e + " in list of " + currentExercises.size() + " exercises.");
@@ -198,14 +226,14 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
   }
 
   /**
-   * @see #loadExercise(mitll.langtest.shared.Exercise)
+   * @see #loadExercise
    * @param e
    */
-  protected void checkBeforeLoad(Exercise e) {
+  protected void checkBeforeLoad(ExerciseShell e) {
     feedback.login();
   }
 
-  protected void getNextExercise(Exercise current) {
+  protected void getNextExercise(ExerciseShell current) {
     int i = currentExercises.indexOf(current);
     loadExercise(currentExercises.get(i+1));
   }
@@ -241,7 +269,7 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
    * @return
    */
   @Override
-  public boolean loadNextExercise(Exercise current) {
+  public boolean loadNextExercise(ExerciseShell current) {
     int i = currentExercises.indexOf(current);
     boolean onLast = i == currentExercises.size() - 1;
     if (onLast) {
@@ -271,7 +299,7 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
    * @return
    */
   @Override
-  public boolean loadPreviousExercise(Exercise current) {
+  public boolean loadPreviousExercise(ExerciseShell current) {
     int i = currentExercises.indexOf(current);
     boolean onFirst = i == 0;
     if (!onFirst) {
@@ -291,5 +319,5 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
    * @return
    */
   @Override
-  public boolean onFirst(Exercise current) { return currentExercises.indexOf(current) == 0; }
+  public boolean onFirst(ExerciseShell current) { return currentExercises.indexOf(current) == 0; }
 }
