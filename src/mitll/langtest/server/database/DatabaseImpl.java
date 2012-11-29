@@ -158,53 +158,6 @@ public class DatabaseImpl implements Database {
     this.mediaDir = mediaDir;
   }
 
-  public List<ExerciseExport> getExport(boolean useFLQ,boolean useSpoken) {
-    List<ExerciseExport> names = new ArrayList<ExerciseExport>();
-//    int n = 20;
-    for (Exercise e : getExercises()) {
-      System.out.println("on " + e);
-      List<ExerciseExport> resultsForExercise = getExports(e, useFLQ, useSpoken);
-      names.addAll(resultsForExercise);
-     // if (n-- == 0) break;
-    }
-    return names;
-  }
-
-  public static class ExerciseExport {
-    public String id;
-    public List<String> key = new ArrayList<String>();
-    public List<ResponseAndGrade> rgs = new ArrayList<ResponseAndGrade>();
-    public ExerciseExport(String id, String key) {
-      this.id  = id;
-      this.key = Arrays.asList(key.split("\\|\\|"));
-    }
-    public void addRG(String response, int grade) { rgs.add(new ResponseAndGrade(response,grade)); }
-
-    public String toString() {
-      return "id " + id + " " + key.size() + " keys : " + new HashSet<String>(key) +
-          " " + rgs.size() + " responses " + new HashSet<ResponseAndGrade>(rgs);
-    }
-  }
-
-  public static class ResponseAndGrade {
-    public String response;
-    public float grade;
-    public ResponseAndGrade(String response, int grade) {
-      this.response = response;
-      this.grade = ((float) grade)/5;
-    }
-    @Override
-    public String toString() { return "" + grade + " for '" + response +"'"; }
-  }
-
-  /**
-   * @see #getExport(boolean, boolean)
-   * @return
-   */
-  private List<Exercise> getExercises() {
-    return getExercises(false);
-  }
-
   public List<Exercise> getExercises(boolean useFile) {
     return getExercises(useFile, lessonPlanFile);
   }
@@ -675,74 +628,6 @@ public class DatabaseImpl implements Database {
     return new ResultsAndGrades(resultsForExercise, gradesAndIDs.grades, spokenToLangToResult);
   }
 
-  /**
-   * Complicated.  To figure out spoken/written, flq/english we have to go back and join against the schedule.
-   * Unless the result column is set.
-   * @param exercise
-   * @param useFLQ
-   * @param useSpoken
-   * @return
-   */
-  public List<ExerciseExport> getExports(Exercise exercise, boolean useFLQ, boolean useSpoken) {
-    boolean debug = false;
-    String exid = exercise.getID();
-    GradeDAO.GradesAndIDs gradesAndIDs = gradeDAO.getResultIDsForExercise(exid);
-    List<Result> resultsForExercise = resultDAO.getAllResultsForExercise(exid);
-    Set<Long> users = resultDAO.getUsers(resultsForExercise);
-
-    Map<Long, List<Schedule>> scheduleForUserAndExercise = scheduleDAO.getScheduleForUserAndExercise(users, exid);
-
-    List<ExerciseExport> ret = new ArrayList<ExerciseExport>();
-
-    Map<Integer,ExerciseExport> qidToExport = new HashMap<Integer, ExerciseExport>();
-  //  for (Exercise e : getExercises()) {
-      int qid = 0;
-      for (Exercise.QAPair q : exercise.getQuestions()) {
-        ExerciseExport e1 = new ExerciseExport(exercise.getID()+"_"+ ++qid, q.getAnswer());
-      //  ret.add(e1);
-        qidToExport.put(qid,e1);
-      }
-    Set<ExerciseExport> valid = new HashSet<ExerciseExport>();
-   // }
-
-    Map<Integer, List<Grade>> idToGrade = getIdToGrade(gradesAndIDs.grades);
-
-    // find results, after join with schedule, add join with the grade
-    for (Result r : resultsForExercise) {
-      List<Schedule> schedules = scheduleForUserAndExercise.get(r.userid);
-      if (schedules == null) {
-        //System.err.println("huh? couldn't find schedule for user " +r.userid +"?");
-      } else {
-      //  System.out.println("for " + r + " there were " +schedules.size() + " schedules");
-        if (schedules.size() > 1) System.err.println("ERROR for " + r + " there were " +schedules.size() + " schedules");
-
-        Schedule schedule = schedules.get(0);
-
-        Collection<Grade> grades = gradesAndIDs.grades;
-        if (debug) System.out.println("for " + r + " there were " +schedules.size() + " and " +grades.size() + " grades");
-        if (schedule.flQ == useFLQ && schedule.spoken == useSpoken) {
-          ExerciseExport exerciseExport = qidToExport.get(r.qid);
-          //for (Grade g : grades) {
-          List<Grade> gradesForResult = idToGrade.get(r.uniqueID);
-          for (Grade g : gradesForResult) {
-            exerciseExport.addRG(r.answer, g.grade);
-            if (!valid.contains(exerciseExport)) {
-              ret.add(exerciseExport);
-              valid.add(exerciseExport);
-            }
-          } /*else {
-            if (debug) System.out.println("\tSkipping grade " + grade + " since not match to " + r.uniqueID);
-          }*/
-          //}
-        }
-        else {
-          if (debug) System.out.println("\tSkipping schedule " + schedule + " since not match to " +useFLQ + " and " + useSpoken);
-        }
-      }
-    }
-    return ret;
-  }
-
   private Map<Integer, List<Grade>> getIdToGrade(Collection<Grade> grades) {
     Map<Integer,List<Grade>> idToGrade = new HashMap<Integer, List<Grade>>();
     for (Grade g : grades) {
@@ -755,7 +640,7 @@ public class DatabaseImpl implements Database {
         System.out.println("r  " +g.resultID+ " grades " + gradesForResult.size());*/
 
     }
-    System.out.println("r->g " +idToGrade.size() + " keys " + idToGrade.keySet());
+   // System.out.println("r->g " +idToGrade.size() + " keys " + idToGrade.keySet());
     return idToGrade;
   }
 
@@ -846,13 +731,13 @@ public class DatabaseImpl implements Database {
   public static void main(String[] arg) {
     DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\mt_repo\\jdewitt\\pilot\\vlr-parle");
     //List<Exercise> exercises = langTestDatabase.getExercises();
-    if (false) {
-      List<ExerciseExport> exerciseNames = langTestDatabase.getExport(true, false);
+    if (true) {
+/*      List<ExerciseExport> exerciseNames = langTestDatabase.getExport(true, false);
 
       System.out.println("names " + exerciseNames.size() + " e.g. " + exerciseNames.get(0));
       for (ExerciseExport ee : exerciseNames) {
         System.out.println("ee " + ee);
-      }
+      }*/
     } else {
       List<Exercise> exercises = langTestDatabase.getRandomBalancedList();
 

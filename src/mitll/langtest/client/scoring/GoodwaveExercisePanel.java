@@ -160,6 +160,19 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     vp.add(cpContent);
 
     if (path != null) {
+      final String fpath = path;
+      service.ensureMP3(path,new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          System.err.println("huh? couldn't write an MP3?");
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          //System.out.println("wrote MP3 for " +fpath);
+        }
+      });
+
       vp.add(getScoringAudioPanel(e, path));
     }
     return vp;
