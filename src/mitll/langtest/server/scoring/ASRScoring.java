@@ -46,10 +46,14 @@ public class ASRScoring extends Scoring {
   private static final String GRAMMAR_ALIGN_TEMPLATE = "grammar.align.template";
   private static final String GRAMMAR_ALIGN =
       GRAMMAR_ALIGN_TEMPLATE.substring(0,GRAMMAR_ALIGN_TEMPLATE.length()-".template".length());
-  public static final String TEMP_DIR = "TEMP_DIR";
-  public static final String MODELS_DIR_VARIABLE = "MODELS_DIR";
-  public static final String N_OUTPUT = "N_OUTPUT";
-  public static final String LEVANTINE_N_OUTPUT = "" + 38;
+  private static final String TEMP_DIR = "TEMP_DIR";
+  private static final String MODELS_DIR_VARIABLE = "MODELS_DIR";
+  private static final String N_OUTPUT = "N_OUTPUT";
+  private static final String LEVANTINE_N_OUTPUT = "" + 38;
+  private static final String OPT_SIL = "OPT_SIL";
+  private static final String OPT_SIL_DEFAULT = "true";   // rsi-sctm-hlda
+  private static final String HLDA_DIR = "HLDA_DIR";
+  private static final String HLDA_DIR_DEFAULT = "rsi-sctm-hlda";   // rsi-sctm-hlda
   private static Logger logger = Logger.getLogger(ASRScoring.class);
   private static final String CFG_TEMPLATE = "generic-nn-model.cfg.template";
   private static final String DEFAULT_MODELS_DIR = "models.dli-levantine";
@@ -102,8 +106,6 @@ public class ASRScoring extends Scoring {
   /**
    * Use hydec to do scoring
    *
-   * Skips sv scoring for the moment -- why would we do it?
-   *
    * @see #scoreRepeat(String, String, String, String, int, int, boolean)
    * @param testAudioDir
    * @param testAudioFileNoSuffix
@@ -152,22 +154,24 @@ public class ASRScoring extends Scoring {
       noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
     }
 
-    String tmpDir = Files.createTempDir().getAbsolutePath();
-   // String tmpDir = scoringDir + File.separator + TMP;
-    Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
+    Scores scores;
+    synchronized (this) {
+      String tmpDir = Files.createTempDir().getAbsolutePath();
+      // String tmpDir = scoringDir + File.separator + TMP;
+      Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
 
-    Audio testAudio = Audio$.MODULE$.apply(
-        testAudioDir, testAudioFileNoSuffix,
-        false /* notForScoring */, dirs);
+      Audio testAudio = Audio$.MODULE$.apply(
+          testAudioDir, testAudioFileNoSuffix,
+          false /* notForScoring */, dirs);
 
-    Scores scores = audioToScore.getIfPresent(testAudioDir + File.separator + testAudioFileNoSuffix);
+      scores = audioToScore.getIfPresent(testAudioDir + File.separator + testAudioFileNoSuffix);
 
-    if (scores == null) {
-      scores = computeRepeatExerciseScores(testAudio, sentence, tmpDir);
-      audioToScore.put(testAudioDir + File.separator + testAudioFileNoSuffix, scores);
-    }
-    else {
-      logger.info("found cached score for file '" + testAudioDir + File.separator + testAudioFileNoSuffix + "'");
+      if (scores == null) {
+        scores = computeRepeatExerciseScores(testAudio, sentence, tmpDir);
+        audioToScore.put(testAudioDir + File.separator + testAudioFileNoSuffix, scores);
+      } else {
+        logger.info("found cached score for file '" + testAudioDir + File.separator + testAudioFileNoSuffix + "'");
+      }
     }
 
     ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix, useScoreForBkgColor);
@@ -257,7 +261,8 @@ public class ASRScoring extends Scoring {
 
     // do some sanity checking
     boolean configExists = new File(configFile).exists();
-    String dictFile = modelsDir + File.separator + RSI_SCTM_HLDA +File.separator+ DICT_WO_SP;
+    String hldaDir = getProp(HLDA_DIR, HLDA_DIR_DEFAULT);
+    String dictFile = modelsDir + File.separator + hldaDir +File.separator+ DICT_WO_SP;
     boolean dictExists   = new File(dictFile).exists();
     if (!configExists || !dictExists) {
       if (!configExists) logger.error("computeRepeatExerciseScores : Can't find config file at " + configFile);
@@ -269,14 +274,14 @@ public class ASRScoring extends Scoring {
     //logger.debug("using 'dict without sp' file " + dictFile);
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
     long then = System.currentTimeMillis();
-    synchronized (this) {   // hydec can't be called concurrently -- not thread safe?
+  //  synchronized (this) {   // hydec can't be called concurrently -- not thread safe?
       try {
         jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
       } catch (AssertionError e) {
         logger.error("Got assertion error " + e,e);
         return new Scores();
       }
-    }
+   // }
     float hydec_score = jscoreOut._1;
     logger.info("got score " + hydec_score +" and took " + (System.currentTimeMillis()-then) + " millis");
 
@@ -319,6 +324,8 @@ public class ASRScoring extends Scoring {
     kv.put(TEMP_DIR,tmpDir);
     kv.put(MODELS_DIR_VARIABLE, modelsDir);
     kv.put(N_OUTPUT, levantineNOutput);
+    kv.put(OPT_SIL, getProp(OPT_SIL, OPT_SIL_DEFAULT));
+    kv.put(HLDA_DIR, getProp(HLDA_DIR, HLDA_DIR_DEFAULT));
     if (onWindows) kv.put("/","\\\\");
 
     // we need to create a custom config file for each run, complicating the caching of the ASRParameters...
