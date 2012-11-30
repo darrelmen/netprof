@@ -50,7 +50,7 @@ lpcorder: 12
 
 
 [decode.Align]
-models: MODELS_DIR/rsi-sctm-hlda
+models: MODELS_DIR/HLDA_DIR
 align-transcript: /data/archive/jray/dli/levantine/trans.lev.test  
 output-type: words+sil
 
@@ -73,8 +73,8 @@ frame-window: 7
 [decode.HybridAlign]
 grammar: MODELS_DIR/grammar.align
 trace-flags: 3
-dictionary: MODELS_DIR/rsi-sctm-hlda/dict-wo-sp
-opt-sil: true
+dictionary: MODELS_DIR/HLDA_DIR/dict-wo-sp
+opt-sil: OPT_SIL
 
 [pron.NNScore]
 phone-index: MODELS_DIR/label-map
