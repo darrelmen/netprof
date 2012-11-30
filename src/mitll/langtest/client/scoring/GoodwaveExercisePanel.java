@@ -151,7 +151,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
       this.refAudio = path;
     }
 
-    VerticalPanel vp = new VerticalPanel();
+    final VerticalPanel vp = new VerticalPanel();
 
     CaptionPanel cpContent = new CaptionPanel(INSTRUCTIONS);
     Widget questionContent = new HTML(content);
@@ -161,6 +161,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
 
     if (path != null) {
       final String fpath = path;
+      final Exercise fe = e;
       service.ensureMP3(path,new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -169,11 +170,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
 
         @Override
         public void onSuccess(Void result) {
-          //System.out.println("wrote MP3 for " +fpath);
+          vp.add(getScoringAudioPanel(fe, fpath));
         }
       });
-
-      vp.add(getScoringAudioPanel(e, path));
     }
     return vp;
   }
