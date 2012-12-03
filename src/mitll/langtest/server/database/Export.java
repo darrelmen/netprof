@@ -26,12 +26,9 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class Export implements Database {
-
   private ExerciseDAO exerciseDAO = null;
   private final ResultDAO resultDAO = new ResultDAO(this);
-  public final GradeDAO gradeDAO = new GradeDAO(this);
-  private final ScheduleDAO scheduleDAO = new ScheduleDAO(this);
-
+  private final GradeDAO gradeDAO = new GradeDAO(this);
 
   public Export(String dburl) {
     this.h2DbName = dburl;
@@ -49,9 +46,21 @@ public class Export implements Database {
   public List<ExerciseExport> getExport(boolean useFLQ,boolean useSpoken) {
     List<ExerciseExport> names = new ArrayList<ExerciseExport>();
 //    int n = 20;
+
+    Map<Integer, List<Grade>> idToGrade = getIdToGrade(gradeDAO.getGrades());
+    Map<String,List<Result>> exerciseToResult = new HashMap<String, List<Result>>();
+    List<Result> results = resultDAO.getResults();
+
+    for (Result r : results) {
+      List<Result> res = exerciseToResult.get(r.id);
+      if (res == null) exerciseToResult.put(r.id, res = new ArrayList<Result>());
+      res.add(r);
+    }
+
     for (Exercise e : getExercises()) {
-      System.out.println("on " + e);
-      List<ExerciseExport> resultsForExercise = getExports(e, useFLQ, useSpoken);
+//      System.out.println("on " + e);
+      List<Result> results1 = exerciseToResult.get(e.getID());
+      List<ExerciseExport> resultsForExercise = getExports(idToGrade, results1, e, useFLQ, useSpoken);
       names.addAll(resultsForExercise);
       // if (n-- == 0) break;
     }
@@ -94,10 +103,6 @@ public class Export implements Database {
   private List<Exercise> getExercises() {
     return exerciseDAO.getRawExercises();
   }
-/*
-  private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    return  new SQLExerciseDAO(this, "");
-  }*/
 
   /**
    * Complicated.  To figure out spoken/written, flq/english we have to go back and join against the schedule.
@@ -107,67 +112,42 @@ public class Export implements Database {
    * @param useSpoken
    * @return
    */
-  public List<ExerciseExport> getExports(Exercise exercise, boolean useFLQ, boolean useSpoken) {
+  public List<ExerciseExport> getExports(Map<Integer, List<Grade>> idToGrade, List<Result> resultsForExercise,Exercise exercise, boolean useFLQ, boolean useSpoken) {
     boolean debug = false;
-    String exid = exercise.getID();
-    GradeDAO.GradesAndIDs gradesAndIDs = gradeDAO.getResultIDsForExercise(exid);
-    List<Result> resultsForExercise = resultDAO.getAllResultsForExercise(exid);
-    Set<Long> users = resultDAO.getUsers(resultsForExercise);
-
-    Map<Long, List<Schedule>> scheduleForUserAndExercise = scheduleDAO.getScheduleForUserAndExercise(users, exid);
 
     List<ExerciseExport> ret = new ArrayList<ExerciseExport>();
 
     Map<Integer,ExerciseExport> qidToExport = new HashMap<Integer, ExerciseExport>();
-    //  for (Exercise e : getExercises()) {
     int qid = 0;
     for (Exercise.QAPair q : exercise.getQuestions()) {
       ExerciseExport e1 = new ExerciseExport(exercise.getID()+"_"+ ++qid, q.getAnswer());
-      //  ret.add(e1);
       qidToExport.put(qid,e1);
     }
     Set<ExerciseExport> valid = new HashSet<ExerciseExport>();
-    // }
-
-    Map<Integer, List<Grade>> idToGrade = getIdToGrade(gradesAndIDs.grades);
 
     // find results, after join with schedule, add join with the grade
     for (Result r : resultsForExercise) {
-      List<Schedule> schedules = scheduleForUserAndExercise.get(r.userid);
-      if (schedules == null) {
-        //System.err.println("huh? couldn't find schedule for user " +r.userid +"?");
-      } else {
-        //  System.out.println("for " + r + " there were " +schedules.size() + " schedules");
-        if (schedules.size() > 1) System.err.println("ERROR for " + r + " there were " +schedules.size() + " schedules");
-
-        Schedule schedule = schedules.get(0);
-
-        Collection<Grade> grades = gradesAndIDs.grades;
-        if (debug) System.out.println("for " + r + " there were " +schedules.size() + " and " +grades.size() + " grades");
-        if (schedule.flQ == useFLQ && schedule.spoken == useSpoken) {
+        if (r.flq == useFLQ && r.spoken == useSpoken) {
           ExerciseExport exerciseExport = qidToExport.get(r.qid);
-          //for (Grade g : grades) {
           List<Grade> gradesForResult = idToGrade.get(r.uniqueID);
           if (gradesForResult == null) {
             //System.err.println("no grades for result " + r);
           }
           else {
             for (Grade g : gradesForResult) {
+              if (g.grade > 0) {
               exerciseExport.addRG(r.answer, g.grade);
               if (!valid.contains(exerciseExport)) {
                 ret.add(exerciseExport);
                 valid.add(exerciseExport);
               }
             }
-          }/*else {
-            if (debug) System.out.println("\tSkipping grade " + grade + " since not match to " + r.uniqueID);
-          }*/
-          //}
+            }
+          }
         }
         else {
-          if (debug) System.out.println("\tSkipping schedule " + schedule + " since not match to " +useFLQ + " and " + useSpoken);
+          if (debug) System.out.println("\tSkipping result " + r + " since not match to " +useFLQ + " and " + useSpoken);
         }
-      }
     }
     return ret;
   }
