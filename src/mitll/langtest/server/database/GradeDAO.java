@@ -2,7 +2,6 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Grade;
-import mitll.langtest.shared.Result;
 
 import java.sql.*;
 import java.util.*;
@@ -141,7 +140,7 @@ public class GradeDAO extends DAO {
    * @return
    */
   public GradesAndIDs getResultIDsForExercise(String exerciseID) {
-    String sql = "SELECT id, resultID, grade, grader, gradeType from grades where exerciseID='" + exerciseID + "'";
+    String sql = "SELECT id, exerciseID, resultID, grade, grader, gradeType from grades where exerciseID='" + exerciseID + "'";
 
     return getGradesForSQL(sql);
   }
@@ -157,7 +156,7 @@ public class GradeDAO extends DAO {
     String list = b.toString();
     list = list.substring(0,Math.max(0,list.length()-1));
 
-    String sql = "SELECT id, resultID, grade, grader, gradeType from grades where exerciseID not in (" + list + ")";
+    String sql = "SELECT id, exerciseID, resultID, grade, grader, gradeType from grades where exerciseID not in (" + list + ")";
 
     return getGradesForSQL(sql);
   }
@@ -173,12 +172,13 @@ public class GradeDAO extends DAO {
       while (rs.next()) {
         int i = 1;
         int id = rs.getInt(i++);
+        String exerciseID = rs.getString(i++);
         int resultID = rs.getInt(i++);
         int grade = rs.getInt(i++);
         String grader = rs.getString(i++);
         String type = rs.getString(i++);
         if (type == null) type = "";
-        Grade g = new Grade(id, resultID, grade, grader, type);
+        Grade g = new Grade(id, exerciseID, resultID, grade, grader, type);
        // System.out.println("made " +g);
         grades.add(g);
         ids.add(resultID);
