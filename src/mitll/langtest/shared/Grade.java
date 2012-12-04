@@ -19,6 +19,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class Grade implements IsSerializable {
   public static final int UNASSIGNED = -1;
   public int id;
+  public String exerciseID;
   public int resultID;
   public int grade;
   public String grader;
@@ -34,14 +35,15 @@ public class Grade implements IsSerializable {
    * @param gradeType
    */
   public Grade(int resultID, int grade, String grader, String gradeType) {
-    this(UNASSIGNED,resultID,grade,grader,gradeType);
+    this(UNASSIGNED, "", resultID,grade,grader,gradeType);
   }
     /**
-    * @see mitll.langtest.server.database.GradeDAO#getResultIDsForExercise(String)
+    * @see mitll.langtest.server.database.GradeDAO#getGradesForSQL(String)
     *
     */
-  public Grade(int id, int resultID, int grade,String grader, String gradeType) {
+  public Grade(int id, String exerciseID, int resultID, int grade, String grader, String gradeType) {
     this.id = id;
+    this.exerciseID = exerciseID;
     this.resultID = resultID;
     this.grade  = grade;
     this.grader  = grader;
@@ -60,6 +62,6 @@ public class Grade implements IsSerializable {
 
   @Override
   public String toString() {
-    return "ID = " + id +"\t: result " + resultID + "\t= " + grade + " by " + grader + " type " +gradeType ;
+    return "ID = " + id +"\t: exercise "+exerciseID +"\t: result " + resultID + "\t= " + grade + " by " + grader + " type " +gradeType ;
   }
 }
