@@ -97,6 +97,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private String appTitle = DLI_LANGUAGE_TESTING;
   private boolean readFromFile;
   private boolean autocrt;
+  private boolean demoMode;
   private String releaseDate;
 
   // property file property names
@@ -111,6 +112,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final String RELEASE_DATE = "releaseDate";
   private static final String BKG_COLOR_FOR_REF1 = "bkgColorForRef";
   private static final String AUTO_CRT = "autocrt";
+  private static final String DEMO_MODE = "demo";
 
   // URL parameters that can override above parameters
   private static final String GRADING = "grading";
@@ -238,16 +240,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void useProps() {
     for (Map.Entry<String, String> kv : props.entrySet()) {
-      if (kv.getKey().equals(GRADING_PROP)) grading = Boolean.parseBoolean(kv.getValue());
-      else if (kv.getKey().equals(ENGLISH_ONLY_MODE)) englishOnlyMode = Boolean.parseBoolean(kv.getValue());
-      else if (kv.getKey().equals(GOODWAVE_MODE)) goodwaveMode = Boolean.parseBoolean(kv.getValue());
-      else if (kv.getKey().equals(ARABIC_TEXT_DATA_COLLECT)) arabicTextDataCollect = Boolean.parseBoolean(kv.getValue());
-      else if (kv.getKey().equals(SHOW_TURK_TOKEN)) showTurkToken = Boolean.parseBoolean(kv.getValue());
-      else if (kv.getKey().equals(APP_TITLE)) appTitle = kv.getValue();
-      else if (kv.getKey().equals(SEGMENT_REPEATS)) segmentRepeats = Integer.parseInt(kv.getValue());
-      else if (kv.getKey().equals(READ_FROM_FILE)) readFromFile = Boolean.parseBoolean(kv.getValue());
-      else if (kv.getKey().equals(RELEASE_DATE)) releaseDate = kv.getValue();
-      else if (kv.getKey().equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = Boolean.parseBoolean(kv.getValue());
+      String key = kv.getKey();
+      String value = kv.getValue();
+      if (key.equals(GRADING_PROP)) grading = Boolean.parseBoolean(value);
+      else if (key.equals(ENGLISH_ONLY_MODE)) englishOnlyMode = Boolean.parseBoolean(value);
+      else if (key.equals(GOODWAVE_MODE)) goodwaveMode = Boolean.parseBoolean(value);
+      else if (key.equals(ARABIC_TEXT_DATA_COLLECT)) arabicTextDataCollect = Boolean.parseBoolean(value);
+      else if (key.equals(SHOW_TURK_TOKEN)) showTurkToken = Boolean.parseBoolean(value);
+      else if (key.equals(APP_TITLE)) appTitle = value;
+      else if (key.equals(SEGMENT_REPEATS)) segmentRepeats = Integer.parseInt(value);
+      else if (key.equals(READ_FROM_FILE)) readFromFile = Boolean.parseBoolean(value);
+      else if (key.equals(RELEASE_DATE)) releaseDate = value;
+      else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = Boolean.parseBoolean(value);
+      else if (key.equals(AUTO_CRT)) autocrt = Boolean.parseBoolean(value);
+      else if (key.equals(DEMO_MODE)) demoMode = Boolean.parseBoolean(value);
     }
   }
 
@@ -543,7 +549,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see ExerciseList#loadExercise(mitll.langtest.shared.Exercise)
+   * @see ExerciseList#loadExercise
    * @see #modeSelect()
    */
   public void login() {  userManager.login(); }
@@ -566,7 +572,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (!arabicTextDataCollect) flashRecordPanel.initFlash();
 
     if (userID != lastUser) {
+      System.out.println("gotUser " + userID + " vs " + lastUser);
       if (arabicTextDataCollect || flashRecordPanel.gotPermission()) {
+     //   System.out.println("\tgetExercises for " + userID);
+
         exerciseList.getExercises(userID);
       }
       lastUser = userID;
@@ -584,6 +593,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public int getSegmentRepeats() { return segmentRepeats; }
   public boolean isArabicTextDataCollect() {  return arabicTextDataCollect; }
   public boolean useBkgColorForRef() {  return bkgColorForRef; }
+  public boolean isDemoMode() {  return demoMode; }
+  public boolean isAutoCRTMode() {  return autocrt; }
 
   // recording methods...
   /**
