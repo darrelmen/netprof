@@ -33,14 +33,16 @@ public class Exercise extends ExerciseShell  {
   public static class QAPair implements IsSerializable {
     private String question;
     private String answer;
+    private List<String> alternateAnswers;
     public QAPair() {}   // required for serialization
 
     /**
-     * @see Exercise#addQuestion(String, String, String)
      * @param q
      * @param a
+     * @param alternateAnswers
+     * @see Exercise#addQuestion(String, String, String, java.util.List
      */
-    public QAPair(String q, String a) { question = q; answer = a;}
+    public QAPair(String q, String a, List<String> alternateAnswers) { question = q; answer = a; this.alternateAnswers = alternateAnswers;}
     public String toString() { return "'"+ getQuestion() + "' : '" + getAnswer() +"'"; }
 
     /**
@@ -51,8 +53,16 @@ public class Exercise extends ExerciseShell  {
       return question;
     }
 
+    /**
+     * @see mitll.langtest.client.exercise.ExercisePanel#getQuestionHeader
+     * @return
+     */
     public String getAnswer() {
       return answer;
+    }
+
+    public List<String> getAlternateAnswers() {
+      return alternateAnswers;
     }
   }
 
@@ -111,17 +121,19 @@ public class Exercise extends ExerciseShell  {
 
     /**
     * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
-    * @param lang
-    * @param question
-    * @param answer
-    */
-  public void addQuestion(String lang, String question, String answer) {
+     * @param lang
+     * @param question
+     * @param answer
+     * @param alternateAnswers
+     */
+  public void addQuestion(String lang, String question, String answer, List<String> alternateAnswers) {
     if (langToQuestion == null) langToQuestion = new HashMap<String, List<QAPair>>();
     List<QAPair> qaPairs = langToQuestion.get(lang);
     if (qaPairs == null) {
       langToQuestion.put(lang, qaPairs = new ArrayList<QAPair>());
     }
-    qaPairs.add(new QAPair(question, answer));
+
+    qaPairs.add(new QAPair(question, answer, alternateAnswers));
   }
 
   public String getPlan() { return plan; }
@@ -155,7 +167,7 @@ public class Exercise extends ExerciseShell  {
   }
 
   public List<QAPair> getEnglishQuestions() { return langToQuestion.get("en"); }
-  //public List<QAPair> getForeignLanguageQuestions() { return langToQuestion.get("fl"); }
+  public List<QAPair> getForeignLanguageQuestions() { return langToQuestion.get("fl"); }
 
   public int getNumQuestions() {
     List<QAPair> en = langToQuestion.get("en");

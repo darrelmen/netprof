@@ -34,4 +34,6 @@ public interface ExerciseController {
   int getSegmentRepeats();
   boolean isArabicTextDataCollect();
   boolean useBkgColorForRef();
+  boolean isDemoMode();
+  boolean isAutoCRTMode();
 }
