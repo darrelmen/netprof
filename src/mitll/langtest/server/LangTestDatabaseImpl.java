@@ -325,9 +325,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Map<String,String> kv = new HashMap<String, String>();
     for (Object prop : props.keySet()) {
       String sp = (String)prop;
-      kv.put(sp,props.getProperty(sp));
+      kv.put(sp,props.getProperty(sp).trim());
     }
-    System.out.println("prop file has " + kv.size() + " properties.");
+    System.out.println("prop file has " + kv.size() + " properties : " + props.keySet());
     return kv;
   }
 
@@ -531,6 +531,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public boolean isAnswerValid(int userID, Exercise exercise, int questionID) {
     return db.isAnswerValid(userID, exercise, questionID, db);
+  }
+
+  @Override
+  public double getScoreForAnswer(Exercise e, int questionID, String answer) {
+    return db.getScoreForExercise(e, questionID, answer);
   }
 
   // Grades ---------------------
