@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -133,7 +134,9 @@ public class SQLExerciseDAO implements ExerciseDAO {
       Set<String> keys = o.keySet();
       for (String k : keys) {
         JSONObject qaForLang = (JSONObject) o.get(k);
-        exercise.addQuestion(k, (String) qaForLang.get("question"), (String) qaForLang.get("answerKey"));
+        String answerKey = (String) qaForLang.get("answerKey");
+        List<String> alternateAnswers = Arrays.asList(answerKey.split("\\|\\|"));
+        exercise.addQuestion(k, (String) qaForLang.get("question"), answerKey, alternateAnswers);
       }
     }
     return exercise;
