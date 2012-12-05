@@ -164,3 +164,11 @@ fieldset > legend {
     font-size: 18px;
     font-weight: bold;
 }
+
+.correct {
+   color:green
+}
+
+.incorrect {
+    color:red
+}
