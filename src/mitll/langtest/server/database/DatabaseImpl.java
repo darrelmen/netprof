@@ -1,6 +1,8 @@
 package mitll.langtest.server.database;
 
+import ag.experiment.AutoGradeExperiment;
 import com.google.gwt.core.client.GWT;
+import mira.classifier.Classifier;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Grade;
@@ -67,13 +69,16 @@ public class DatabaseImpl implements Database {
   public final AnswerDAO answerDAO = new AnswerDAO(this);
   public final GradeDAO gradeDAO = new GradeDAO(this);
   public final GraderDAO graderDAO = new GraderDAO(this);
-  private final ScheduleDAO scheduleDAO = new ScheduleDAO(this);
+  //private final ScheduleDAO scheduleDAO = new ScheduleDAO(this);
   private String h2DbName = H2_DB_NAME;
+  private Classifier<AutoGradeExperiment.Event> classifier = null;
   /**
    * TODO : consider making proper v2 database!
    */
   private String lessonPlanFile;
   private String mediaDir;
+  private Map<String, Export.ExerciseExport> exerciseIDToExport;
+  private boolean autocrt = true;
 
   public DatabaseImpl(String dburl) {
     this.h2DbName = dburl;
@@ -139,6 +144,19 @@ public class DatabaseImpl implements Database {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
 
+  //  getClassifier();
+  }
+
+  private Classifier<AutoGradeExperiment.Event> getClassifier() {
+    if (classifier != null) return classifier;
+    Export exporter = new Export(exerciseDAO,resultDAO,gradeDAO);
+    List<Export.ExerciseExport> export = exporter.getExport(true, false);
+    exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
+    for (Export.ExerciseExport exp : export) {
+       exerciseIDToExport.put(exp.id,exp);
+    }
+    classifier = AutoGradeExperiment.getClassifierFromExport(export);
+    return classifier;
   }
 
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
@@ -656,6 +674,18 @@ public class DatabaseImpl implements Database {
    */
   public void addAnswer(int userID, Exercise e, int questionID, String answer, String audioFile) {
     answerDAO.addAnswer(userID, e, questionID, answer, audioFile);
+    logger.info("Got " + answer);
+  /*  if (answer.endsWith(".mp3") || answer.endsWith(".wav")) {
+
+    }*/
+
+    if (autocrt) {
+    Classifier<AutoGradeExperiment.Event> classifier1 = getClassifier();
+
+    Export.ExerciseExport exerciseExport = exerciseIDToExport.get(e.getID());
+    double score = ag.experiment.AutoGradeExperiment.getScore(classifier1,answer,exerciseExport);
+    logger.info("score was " +score);
+    }
   }
 
   /**
