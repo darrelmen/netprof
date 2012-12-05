@@ -56,4 +56,6 @@ public interface LangTestDatabaseAsync {
   void getExercise(String id, boolean useFile, AsyncCallback<Exercise> async);
 
   void getExercise(String id, long userID, boolean useFile, boolean arabicDataCollect, AsyncCallback<Exercise> async);
+
+  void getScoreForAnswer(Exercise e, int questionID, String answer, AsyncCallback<Double> async);
 }
