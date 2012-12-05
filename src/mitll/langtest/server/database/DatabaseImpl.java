@@ -155,6 +155,13 @@ public class DatabaseImpl implements Database {
     for (Export.ExerciseExport exp : export) {
        exerciseIDToExport.put(exp.id,exp);
     }
+    String[] args = new String[2];
+
+    String config = mediaDir + File.separator + "runAutoGradeWinNoBad.cfg";     // TODO use template for deploy/platform specific config
+    if (!new File(config).exists()) logger.error("couldn't find " + config);
+    args[0] = "-C";
+    args[1] = config;
+    ag.experiment.AutoGradeExperiment.main(args);
     classifier = AutoGradeExperiment.getClassifierFromExport(export);
     return classifier;
   }
@@ -164,7 +171,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(boolean, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
    * @param i
    * @param lessonPlanFile
    * @param mediaDir
@@ -177,7 +184,9 @@ public class DatabaseImpl implements Database {
   }
 
   public List<Exercise> getExercises(boolean useFile) {
-    return getExercises(useFile, lessonPlanFile);
+    List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
+    getClassifier();
+    return exercises;
   }
 
   /**
@@ -654,11 +663,8 @@ public class DatabaseImpl implements Database {
         idToGrade.put(g.resultID, gradesForResult = new ArrayList<Grade>());
       }
       gradesForResult.add(g);
-     /* if (gradesForResult.size() > 1)
-        System.out.println("r  " +g.resultID+ " grades " + gradesForResult.size());*/
-
     }
-   // System.out.println("r->g " +idToGrade.size() + " keys " + idToGrade.keySet());
+
     return idToGrade;
   }
 
@@ -674,17 +680,37 @@ public class DatabaseImpl implements Database {
    */
   public void addAnswer(int userID, Exercise e, int questionID, String answer, String audioFile) {
     answerDAO.addAnswer(userID, e, questionID, answer, audioFile);
-    logger.info("Got " + answer);
-  /*  if (answer.endsWith(".mp3") || answer.endsWith(".wav")) {
-
-    }*/
-
+/*
     if (autocrt) {
-    Classifier<AutoGradeExperiment.Event> classifier1 = getClassifier();
+     // Classifier<AutoGradeExperiment.Event> classifier1 = getClassifier();
 
-    Export.ExerciseExport exerciseExport = exerciseIDToExport.get(e.getID());
-    double score = ag.experiment.AutoGradeExperiment.getScore(classifier1,answer,exerciseExport);
-    logger.info("score was " +score);
+      double score = getScoreForExercise(e, questionID, answer);
+      logger.info("score was " + score);
+    }*/
+  }
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer(mitll.langtest.shared.Exercise, int, String)
+   * @param e
+   * @param questionID
+   * @param answer
+   * @return
+   */
+  public double getScoreForExercise(Exercise e, int questionID, String answer) {
+    return getScoreForExercise(e.getID(), questionID, answer);
+  }
+
+  private double getScoreForExercise(String id, int questionID, String answer) {
+    String key = id + "_" + questionID;
+    Export.ExerciseExport exerciseExport = exerciseIDToExport.get(key);
+    if (exerciseExport == null) {
+      logger.error("couldn't find exercise id " + key + " in " + exerciseIDToExport.keySet());
+      return 0d;
+    }
+    else {
+      double score = AutoGradeExperiment.getScore(getClassifier(), answer, exerciseExport);
+      logger.info("Score was " + score + " for " + exerciseExport);
+      return score;
     }
   }
 
@@ -760,7 +786,10 @@ public class DatabaseImpl implements Database {
 
   public static void main(String[] arg) {
     DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\mt_repo\\jdewitt\\pilot\\vlr-parle");
-    //List<Exercise> exercises = langTestDatabase.getExercises();
+    langTestDatabase.mediaDir = "C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\autocrt\\";
+    List<Exercise> exercises = langTestDatabase.getExercises(false);
+    double score = langTestDatabase.getScoreForExercise("bc-R10-k227",1,"bueller");
+    System.out.println("Score was " + score);
     if (true) {
 /*      List<ExerciseExport> exerciseNames = langTestDatabase.getExport(true, false);
 
@@ -769,7 +798,7 @@ public class DatabaseImpl implements Database {
         System.out.println("ee " + ee);
       }*/
     } else {
-      List<Exercise> exercises = langTestDatabase.getRandomBalancedList();
+      //List<Exercise> exercises = langTestDatabase.getRandomBalancedList();
 
     }
   }
