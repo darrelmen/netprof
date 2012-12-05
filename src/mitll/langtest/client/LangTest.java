@@ -96,6 +96,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private String exercise_title;
   private String appTitle = DLI_LANGUAGE_TESTING;
   private boolean readFromFile;
+  private boolean autocrt;
   private String releaseDate;
 
   // property file property names
@@ -109,6 +110,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final String READ_FROM_FILE = "readFromFile";
   private static final String RELEASE_DATE = "releaseDate";
   private static final String BKG_COLOR_FOR_REF1 = "bkgColorForRef";
+  private static final String AUTO_CRT = "autocrt";
 
   // URL parameters that can override above parameters
   private static final String GRADING = "grading";
