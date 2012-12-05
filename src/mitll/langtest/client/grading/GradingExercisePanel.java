@@ -54,23 +54,33 @@ public class GradingExercisePanel extends ExercisePanel {
    * @param total
    * @param engQAPair
    * @param pair
+   * @param showAnswer
    */
   @Override
-  protected void getQuestionHeader(int i, int total, Exercise.QAPair engQAPair, Exercise.QAPair pair) {
+  protected void getQuestionHeader(int i, int total, Exercise.QAPair engQAPair, Exercise.QAPair pair, boolean showAnswer) {
     String english = engQAPair.getQuestion();
     String prefix = "Question" +
         (total > 1 ? " #" + i : "") +
         " : ";
-    String questionHeader = prefix + pair.getQuestion();
 
-    if (controller.getEnglishOnly())  {
+    if (showAnswer)  {
       String answer = engQAPair.getAnswer();
       add(new HTML("<br></br><b>" + prefix + "</b>" +english));
       add(new HTML("<b>Answer : &nbsp;&nbsp;</b>"+answer + "<br></br>"));
     }
     else {
+      String questionHeader = prefix + pair.getQuestion();
       add(new HTML("<h4>" + questionHeader + " / " + english + "</h4>"));
     }
+  }
+
+  /**
+   * If controller is english only, then show the answer too.
+   * @return true if in english only mode
+   */
+  @Override
+  protected boolean shouldShowAnswer() {
+    return super.shouldShowAnswer() || controller.getEnglishOnly();
   }
 
   protected int getQuestionPromptSpacer() {
