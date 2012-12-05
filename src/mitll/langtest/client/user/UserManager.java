@@ -74,9 +74,9 @@ public class UserManager {
    */
   public void login() {
     int user = getUser();
-    System.out.println("login called : " +user);
     //Thread.dumpStack();
     if (user != NO_USER_SET) {
+      System.out.println("login user : " +user);
       langTest.gotUser(user);
     } else {
       displayLoginBox();
