@@ -27,21 +27,29 @@ import java.util.Set;
  */
 public class Export implements Database {
   private ExerciseDAO exerciseDAO = null;
-  private final ResultDAO resultDAO = new ResultDAO(this);
-  private final GradeDAO gradeDAO = new GradeDAO(this);
+  private ResultDAO resultDAO = null;
+  private GradeDAO gradeDAO = null;
 
   public Export(String dburl) {
     this.h2DbName = dburl;
     this.url = "jdbc:h2:" + h2DbName + ";IFEXISTS=TRUE;QUERY_CACHE_SIZE=0;";
     try {
       getConnection();
+      resultDAO = new ResultDAO(this);
       resultDAO.createResultTable(getConnection());
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
-
     exerciseDAO = new SQLExerciseDAO(this, "");
+    gradeDAO = new GradeDAO(this);
   }
+
+  public Export(ExerciseDAO exerciseDAO, ResultDAO resultDAO, GradeDAO gradeDAO) {
+    this.exerciseDAO = exerciseDAO;
+    this.resultDAO = resultDAO;
+    this.gradeDAO = gradeDAO;
+  }
+
 
   public List<ExerciseExport> getExport(boolean useFLQ,boolean useSpoken) {
     List<ExerciseExport> names = new ArrayList<ExerciseExport>();
