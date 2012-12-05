@@ -23,6 +23,6 @@ public class ExerciseShell implements IsSerializable {
   public String getTooltip() { return tooltip; }
 
   public String toString() {
-      return "Exercise id =" +id;
+      return "Exercise id = " +id;
   }
 }
