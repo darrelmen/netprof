@@ -4,6 +4,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
@@ -95,13 +96,18 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
    */
   private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int i) {
     List<Exercise.QAPair> englishQuestions = e.getEnglishQuestions();
+    List<Exercise.QAPair> flQuestions = e.getForeignLanguageQuestions();
     int n = englishQuestions.size();
     //System.out.println("eng q " + englishQuestions);
     for (Exercise.QAPair pair : e.getQuestions()) {
       // add question header
       Exercise.QAPair engQAPair = englishQuestions.get(i - 1);
 
-      getQuestionHeader(i, n, engQAPair, pair);
+      getQuestionHeader(i, n, engQAPair, shouldShowAnswer(),!controller.isDemoMode());
+      if (controller.isDemoMode()) {
+        Exercise.QAPair flQAPair  = flQuestions.get(i - 1);
+        getQuestionHeader(i, n, flQAPair, pair, shouldShowAnswer());
+      }
       i++;
       // add question prompt
       VerticalPanel vp = new VerticalPanel();
@@ -116,11 +122,38 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     }
   }
 
-  protected void getQuestionHeader(int i, int total, Exercise.QAPair engQAPair, Exercise.QAPair pair) {
-    String questionHeader = "Question" +
-        (total > 1 ? " #" + i : "")+
-        " : " + pair.getQuestion();
-    add(new HTML("<h4>" + questionHeader + "</h4>"));
+  protected boolean shouldShowAnswer() {
+    return controller.isDemoMode();
+  }
+
+  protected void getQuestionHeader(int i, int total, Exercise.QAPair qaPair, Exercise.QAPair pair, boolean showAnswer) {
+    getQuestionHeader(i,total,qaPair,showAnswer,true);
+  }
+  private void getQuestionHeader(int i, int total, Exercise.QAPair qaPair, boolean showAnswer, boolean addSpacerAfter) {
+    String question = qaPair.getQuestion();
+    String prefix = "Question" +
+        (total > 1 ? " #" + i : "") +
+        " : ";
+
+    if (showAnswer) {
+      String answer = qaPair.getAnswer();
+
+      add(new HTML("<br></br><b>" + prefix + "</b>" + question));
+      if (qaPair.getAlternateAnswers().size() > 1) {
+        int j = 1;
+        for (String alternate : qaPair.getAlternateAnswers()) {
+          add(new HTML("<b>Possible answer #" + j++ +
+              " : &nbsp;&nbsp;</b>" + alternate));
+        }
+        if (addSpacerAfter) add(new HTML("<br></br>"));
+      } else {
+        add(new HTML("<b>Answer : &nbsp;&nbsp;</b>" + answer + (addSpacerAfter ? "<br></br>" : "")));
+      }
+    }
+    else {
+      String questionHeader = prefix + question;
+      add(new HTML("<h4>" + questionHeader + "</h4>"));
+    }
   }
 
   private void addQuestionPrompt(Panel vp, Exercise e) {
@@ -215,15 +248,17 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
    * <br></br>
    * Keeps track of which text fields have been typed in, so we can enable/disable the next button.
    *
+   * @see #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
    * @param exercise here used to determine the prompt language (English/FL)
    * @param service used in subclasses
    * @param controller  used in subclasses
    * @param index of the question (0 for first, 1 for second, etc.) (used in subclasses)
    * @return widget that handles the answer
    */
-  protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, int index) {
+  protected Widget getAnswerWidget(final Exercise exercise, final LangTestDatabaseAsync service, ExerciseController controller, final int index) {
   //  GWT.log("getAnswerWidget for #" +index);
-    final TextBox answer = new NoPasteTextBox();
+    boolean allowPaste = controller.isDemoMode();
+    final TextBox answer = allowPaste ? new TextBox() : new NoPasteTextBox();
     answer.setWidth(ANSWER_BOX_WIDTH);
     if (!exercise.promptInEnglish) {
       answer.setDirection(HasDirection.Direction.RTL);
@@ -238,6 +273,46 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
           }
         }
       });
+    }
+
+    if (controller.isAutoCRTMode()) {
+      HorizontalPanel hp = new HorizontalPanel();
+      hp.setSpacing(5);
+      hp.add(answer);
+      final Button check = new Button("Check Answer");
+      check.setEnabled(false);
+      hp.add(check);
+      final Label resp = new Label();
+      hp.add(resp);
+
+      answer.addKeyUpHandler(new KeyUpHandler() {
+        public void onKeyUp(KeyUpEvent event) {
+          resp.setText("");
+          check.setEnabled(answer.getText().length() > 0);
+        }
+      });
+
+      check.addClickHandler(new ClickHandler() {
+        public void onClick(ClickEvent event) {
+          service.getScoreForAnswer(exercise, index, answer.getText(), new AsyncCallback<Double>() {
+            @Override
+            public void onFailure(Throwable caught) {}
+            @Override
+            public void onSuccess(Double result) {
+              String percent = ((int) (result * 100)) + "%";
+              if (result > 0.6) {
+                resp.setText("Correct! Score was " + percent);
+                resp.setStyleName("correct");
+              }
+              else {
+                resp.setText("Try again - score was " + percent);
+                resp.setStyleName("incorrect");
+              }
+            }
+          });
+        }
+      });
+      return hp;
     }
     return answer;
   }
