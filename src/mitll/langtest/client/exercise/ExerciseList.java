@@ -22,7 +22,9 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Handles left side of NetPron2 -- which exercise is the current one, highlighting, etc.
@@ -35,6 +37,7 @@ import java.util.List;
 public class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize {
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
   protected List<ExerciseShell> currentExercises = null;
+  protected Map<String,ExerciseShell> idToExercise = null;
   protected int currentExercise = 0;
   private List<HTML> progressMarkers = new ArrayList<HTML>();
   private Panel current = null;
@@ -126,7 +129,9 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
 
     public void onSuccess(List<ExerciseShell> result) {
       currentExercises = result; // remember current exercises
+      idToExercise = new HashMap<String, ExerciseShell>();
       for (final ExerciseShell es : result) {
+        idToExercise.put(es.getID(),es);
         addExerciseToList(es);
       }
       loadFirstExercise();
@@ -159,23 +164,15 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
   protected void loadFirstExercise() {
     ExerciseShell toLoad = currentExercises.get(0);
     if (exercise_title != null) {
-      ExerciseShell e = byName(exercise_title);
+      ExerciseShell e = byID(exercise_title);
       if (e != null) toLoad = e;
     }
 
     loadExercise(toLoad);
   }
 
-  private ExerciseShell byName(String name) {
-    ExerciseShell found = null;
-    for (ExerciseShell e : currentExercises) {
-      String id = e.getID();
-      if (id.equals(name)) {
-        found = e;
-        break;
-      }
-    }
-    return found;
+  private ExerciseShell byID(String name) {
+    return idToExercise.get(name);
   }
 
   /**
@@ -216,7 +213,8 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
 
   private void useExercise(Exercise result, ExerciseShell e) {
     currentExerciseVPanel.add(current = factory.getExercisePanel(result));
-    int i = currentExercises.indexOf(e);
+
+    int i = getIndex(e);
     if (i == -1) {
       System.err.println("can't find " + e + " in list of " + currentExercises.size() + " exercises.");
       return;
@@ -233,9 +231,20 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
     feedback.login();
   }
 
+  /**
+   * @see #loadNextExercise(mitll.langtest.shared.ExerciseShell)
+   * @param current
+   */
   protected void getNextExercise(ExerciseShell current) {
-    int i = currentExercises.indexOf(current);
-    loadExercise(currentExercises.get(i+1));
+    int i = getIndex(current);
+    if (i == -1) System.err.println("huh? couldn't find " +current + " in " + currentExercises.size() + " exercises?");
+    ExerciseShell next = currentExercises.get(i + 1);
+    loadExercise(next);
+  }
+
+  private int getIndex(ExerciseShell current) {
+    ExerciseShell shell = idToExercise.get(current.getID());
+    return shell != null ? currentExercises.indexOf(shell) : -1;
   }
 
   @Override
@@ -270,7 +279,8 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
    */
   @Override
   public boolean loadNextExercise(ExerciseShell current) {
-    int i = currentExercises.indexOf(current);
+    int i = getIndex(current);
+
     boolean onLast = i == currentExercises.size() - 1;
     if (onLast) {
       feedback.showErrorMessage("Test Complete", "Test Complete! Thank you!");
@@ -300,7 +310,7 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
    */
   @Override
   public boolean loadPreviousExercise(ExerciseShell current) {
-    int i = currentExercises.indexOf(current);
+    int i = getIndex(current);
     boolean onFirst = i == 0;
     if (!onFirst) {
       loadExercise(currentExercises.get(i-1));
@@ -319,5 +329,5 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
    * @return
    */
   @Override
-  public boolean onFirst(ExerciseShell current) { return currentExercises.indexOf(current) == 0; }
+  public boolean onFirst(ExerciseShell current) { return getIndex(current) == 0; }
 }
