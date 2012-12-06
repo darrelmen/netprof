@@ -355,7 +355,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
       service.writeAudioFile(controller.getBase64EncodedWavFile()
           , exercise.getPlan(), exercise.getID(),
           "" + index, "" + controller.getUser(),
-          new AsyncCallback<AudioAnswer>() {
+          false, new AsyncCallback<AudioAnswer>() {
             public void onFailure(Throwable caught) {
               showPopup(AudioAnswer.Validity.INVALID.getPrompt());
             }

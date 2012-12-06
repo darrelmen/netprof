@@ -51,7 +51,7 @@ public class PagingExerciseList extends ExerciseList {
 
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                             ExercisePanelFactory factory, boolean goodwaveMode, boolean arabicDataCollect, boolean showTurkToken) {
-    super(currentExerciseVPanel, service, feedback, factory, goodwaveMode, arabicDataCollect, showTurkToken);
+    super(currentExerciseVPanel, service, feedback, factory, goodwaveMode, arabicDataCollect, showTurkToken, false);
 
     CellTable.Resources o = GWT.create(TableResources.class);
     this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
