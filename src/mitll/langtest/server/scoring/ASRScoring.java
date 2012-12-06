@@ -41,7 +41,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoring extends Scoring {
-  private static final String RSI_SCTM_HLDA = "rsi-sctm-hlda";
+  //private static final String RSI_SCTM_HLDA = "rsi-sctm-hlda";
   private static final String DICT_WO_SP = "dict-wo-sp";
   private static final String GRAMMAR_ALIGN_TEMPLATE = "grammar.align.template";
   private static final String GRAMMAR_ALIGN =
@@ -50,6 +50,9 @@ public class ASRScoring extends Scoring {
   private static final String MODELS_DIR_VARIABLE = "MODELS_DIR";
   private static final String N_OUTPUT = "N_OUTPUT";
   private static final String LEVANTINE_N_OUTPUT = "" + 38;
+
+  private static final String N_HIDDEN = "N_HIDDEN";
+  private static final String N_HIDDEN_DEFAULT = "" + 2500;
   private static final String OPT_SIL = "OPT_SIL";
   private static final String OPT_SIL_DEFAULT = "true";   // rsi-sctm-hlda
   private static final String HLDA_DIR = "HLDA_DIR";
@@ -316,6 +319,7 @@ public class ASRScoring extends Scoring {
     Map<String,String> kv = new HashMap<String, String>();
 
     String levantineNOutput = getProp(N_OUTPUT, LEVANTINE_N_OUTPUT);
+    String nHidden = getProp(N_HIDDEN, N_HIDDEN_DEFAULT);
 
     if (onWindows) {
       tmpDir = tmpDir.replaceAll("\\\\","\\\\\\\\");
@@ -324,6 +328,7 @@ public class ASRScoring extends Scoring {
     kv.put(TEMP_DIR,tmpDir);
     kv.put(MODELS_DIR_VARIABLE, modelsDir);
     kv.put(N_OUTPUT, levantineNOutput);
+    kv.put(N_HIDDEN, nHidden);
     kv.put(OPT_SIL, getProp(OPT_SIL, OPT_SIL_DEFAULT));
     kv.put(HLDA_DIR, getProp(HLDA_DIR, HLDA_DIR_DEFAULT));
     if (onWindows) kv.put("/","\\\\");
