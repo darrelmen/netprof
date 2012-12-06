@@ -123,11 +123,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
     db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir);
-    logger.debug("usefile = " + useFile + " arabic data collect " + arabicDataCollect);
+    //logger.debug("usefile = " + useFile + " arabic data collect " + arabicDataCollect);
     List<Exercise> exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(userID, useFile);
     if (makeFullURLs) convertRefAudioURLs(exercises);
     if (!exercises.isEmpty())
-      logger.debug("Got " + exercises.size() + " exercises , first ref sentence = '" + exercises.iterator().next().getRefSentence() + "'");
+      logger.debug("for user #" + userID +" got " + exercises.size() + " exercises , first ref sentence = '" + exercises.iterator().next().getRefSentence() + "'");
     return exercises;
   }
 
