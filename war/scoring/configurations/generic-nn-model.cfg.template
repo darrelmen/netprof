@@ -66,7 +66,7 @@ write-format: reseg
 
 [fe.NNBatch]
 n-output: N_OUTPUT
-n-hidden: 2500
+n-hidden: N_HIDDEN
 mlp: MODELS_DIR/nn-weights
 frame-window: 7
 
