@@ -606,9 +606,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param exercise exercise within the plan
    * @param question question within the exercise
    * @param user answering the question
+   * @param doAutoCRT
    * @return URL to audio on server and if audio is valid (not too short, etc.)
    */
-  public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user) {
+  public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, String question,
+                                    String user, boolean doAutoCRT) {
     String wavPath = getLocalPathToAnswer(plan, exercise, question, user);
 
     File file = getAbsoluteFile(wavPath);
@@ -616,6 +618,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     AudioAnswer.Validity validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
     db.answerDAO.addAnswer(Integer.parseInt(user), plan, exercise, Integer.parseInt(question), "", file.getPath(),
         validity == AudioAnswer.Validity.OK, db);
+
+    if (doAutoCRT || false) {
+      PretestScore asrScoreForAudio = getASRScoreForAudio(0, file.getPath(), "", 128, 128, false);
+    }
+    // TODO check for autoCRT flag  x
+    // call getASRScoreForAudio
+    // create a sentence out of the result
+    // score the sentence
+    // return the sentence and score (expand returned object)
+    // use new pronz
+    // use new config
+
     String wavPathWithForwardSlashSeparators = ensureForwardSlashes(wavPath);
     String url = optionallyMakeURL(wavPathWithForwardSlashSeparators);
     logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
