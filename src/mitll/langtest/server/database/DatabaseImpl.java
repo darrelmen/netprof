@@ -78,7 +78,7 @@ public class DatabaseImpl implements Database {
   private String lessonPlanFile;
   private String mediaDir;
   private Map<String, Export.ExerciseExport> exerciseIDToExport;
-  private boolean autocrt = true;
+  //private boolean autocrt = true;
 
   public DatabaseImpl(String dburl) {
     this.h2DbName = dburl;
@@ -143,8 +143,6 @@ public class DatabaseImpl implements Database {
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
-
-  //  getClassifier();
   }
 
   private Classifier<AutoGradeExperiment.Event> getClassifier() {
@@ -155,12 +153,18 @@ public class DatabaseImpl implements Database {
     for (Export.ExerciseExport exp : export) {
        exerciseIDToExport.put(exp.id,exp);
     }
-    String[] args = new String[2];
+    String[] args = new String[6];
 
-    String config = mediaDir + File.separator + "runAutoGradeWinNoBad.cfg";     // TODO use template for deploy/platform specific config
+    String configDir = installPath + File.separator + mediaDir + File.separator;
+    String config = configDir + "runAutoGradeWinNoBad.cfg";     // TODO use template for deploy/platform specific config
     if (!new File(config).exists()) logger.error("couldn't find " + config);
     args[0] = "-C";
     args[1] = config;
+    args[2] = "-log";
+    args[3] =  configDir + "out.log";
+    args[4] = "-blacklist-file";
+    args[5] = configDir + "blacklist.txt";
+
     ag.experiment.AutoGradeExperiment.main(args);
     classifier = AutoGradeExperiment.getClassifierFromExport(export);
     return classifier;
@@ -177,7 +181,7 @@ public class DatabaseImpl implements Database {
    * @param mediaDir
    */
   public void setInstallPath(String i, String lessonPlanFile, String mediaDir) {
-    logger.debug("got install path " + i + " media " + mediaDir);
+   // logger.debug("got install path " + i + " media " + mediaDir);
     this.installPath = i;
     this.lessonPlanFile = lessonPlanFile;
     this.mediaDir = mediaDir;
@@ -185,7 +189,7 @@ public class DatabaseImpl implements Database {
 
   public List<Exercise> getExercises(boolean useFile) {
     List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
-    getClassifier();
+    //if (autocrt) getClassifier();
     return exercises;
   }
 
@@ -701,6 +705,7 @@ public class DatabaseImpl implements Database {
   }
 
   private double getScoreForExercise(String id, int questionID, String answer) {
+    getClassifier();
     String key = id + "_" + questionID;
     Export.ExerciseExport exerciseExport = exerciseIDToExport.get(key);
     if (exerciseExport == null) {
@@ -787,7 +792,8 @@ public class DatabaseImpl implements Database {
   public static void main(String[] arg) {
     DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\mt_repo\\jdewitt\\pilot\\vlr-parle");
     langTestDatabase.mediaDir = "C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\autocrt\\";
-    List<Exercise> exercises = langTestDatabase.getExercises(false);
+     langTestDatabase.getExercises(false);
+     langTestDatabase.getClassifier();
     double score = langTestDatabase.getScoreForExercise("bc-R10-k227",1,"bueller");
     System.out.println("Score was " + score);
     if (true) {
