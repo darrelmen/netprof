@@ -12,6 +12,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class AudioAnswer implements IsSerializable {
   public String path;
   public Validity validity;
+  public String decodeOutput;
+  public double score;
 
   public enum Validity implements IsSerializable {
     OK("Audio OK."),
@@ -30,10 +32,11 @@ public class AudioAnswer implements IsSerializable {
   public AudioAnswer() {}
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @param path
    * @param validity
    */
   public AudioAnswer(String path, Validity validity) { this.path = path; this.validity = validity; }
+  public AudioAnswer(String path, Validity validity, String decodeOutput, double score) { this(path,validity); this.decodeOutput = decodeOutput; this.score = score;}
   public String toString() { return "Path " + path; }
 }
