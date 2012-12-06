@@ -27,7 +27,7 @@ public class GradedExerciseList extends ExerciseList {
    */
   public GradedExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                             ExercisePanelFactory factory, boolean arabicDataCollect) {
-    super(currentExerciseVPanel, service, feedback, factory, false, arabicDataCollect, false);
+    super(currentExerciseVPanel, service, feedback, factory, false, arabicDataCollect, false, false);
   }
 
   /**

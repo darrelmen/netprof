@@ -23,7 +23,7 @@ public interface LangTestDatabaseAsync {
   void getUsers(AsyncCallback<List<User>> async);
   void getResults(AsyncCallback<List<Result>> async);
 
-  void writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user, AsyncCallback<AudioAnswer> async);
+  void writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user, boolean doAutoCRT, AsyncCallback<AudioAnswer> async);
 
   void getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly, AsyncCallback<Exercise> async);
 
