@@ -45,7 +45,7 @@ public interface LangTestDatabase extends RemoteService {
   // answer DAO
   void addAnswer(int userID, Exercise exercise, int questionID, String answer, String audioFile);
   boolean isAnswerValid(int userID, Exercise exercise, int questionID);
-  AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user);
+  AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user, boolean doAutoCRT);
   double getScoreForAnswer(Exercise e, int questionID, String answer);
 
   Exercise getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly);
