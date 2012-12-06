@@ -47,6 +47,7 @@
         <pathelement location="war/WEB-INF/lib/log4j-1.2.17.jar"/>
         <path refid="imagewriter.classpath"/>
         <pathelement location="war/WEB-INF/lib/pronz.jar"/>
+        <pathelement location="war/WEB-INF/lib/mira.jar"/>
     </path>
     <target name="init" depends="clean">
         <mkdir dir="war/WEB-INF/classes"/>
@@ -91,6 +92,11 @@
 
     <target depends="build" name="warDari">
         <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**,config/first/**,config/levantine/**,config/pilot/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-ara/**">
+        </jar>
+    </target>
+
+    <target depends="build" name="warAutocrt">
+        <jar destfile="npAutocrt.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**,config/first/**,config/levantine/**,config/pilot/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**">
         </jar>
     </target>
 
