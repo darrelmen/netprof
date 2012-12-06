@@ -294,7 +294,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       };
     }
     else {
-      this.exerciseList = new ExerciseList(currentExerciseVPanel, service, feedback, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken);
+      this.exerciseList = new ExerciseList(currentExerciseVPanel, service, feedback, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken, isAutoCRTMode());
     }
 
     if (showOnlyOneExercise()) {
