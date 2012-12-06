@@ -1,6 +1,7 @@
 package mitll.langtest.client.recorder;
 
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -114,12 +115,15 @@ public class RecordButtonPanel extends HorizontalPanel {
     controller.stopRecording();
     final Panel outer = this;
     service.writeAudioFile(controller.getBase64EncodedWavFile()
-        ,exercise.getPlan(),exercise.getID(),""+index,""+controller.getUser(),new AsyncCallback<AudioAnswer>() {
-      public void onFailure(Throwable caught) {}
-      public void onSuccess(AudioAnswer result) {
-        receivedAudioAnswer(result, questionState, outer);
-      }
-    });
+        , exercise.getPlan(), exercise.getID(), "" + index, "" + controller.getUser(), controller.isAutoCRTMode(),
+        new AsyncCallback<AudioAnswer>() {
+          public void onFailure(Throwable caught) {
+            Window.alert("Server error : Couldn't post answers for exercise.");
+          }
+          public void onSuccess(AudioAnswer result) {
+            receivedAudioAnswer(result, questionState, outer);
+          }
+        });
   }
 
   protected void showRecording() {
