@@ -49,15 +49,15 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
   /**
    * Shows spinning beachball (ish) gif while we wait...
    * @see ScoringAudioPanel#getTranscriptImageURLForAudio(String, String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
-   * @param path
-   * @param refAudio
-   * @param refSentence
-   * @param wordTranscript
-   * @param phoneTranscript
-   * @param speechTranscript
-   * @param toUse
-   * @param height
-   * @param reqid
+   * @param path to audio file on server
+   * @param refAudio IGNORED HERE
+   * @param refSentence what should be aligned
+   * @param wordTranscript image panel that needs a URL pointing to an image generated on the server
+   * @param phoneTranscript image panel that needs a URL pointing to an image generated on the server
+   * @param speechTranscript IGNORED HERE
+   * @param toUse width of images made on serer
+   * @param height of images returned
+   * @param reqid so if many requests are made quickly and the returns are out of order, we can ignore older requests
    */
   protected void scoreAudio(final String path, String refAudio, String refSentence,
                             final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
