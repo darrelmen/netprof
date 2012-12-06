@@ -120,42 +120,56 @@ public class Export implements Database {
    * @param useSpoken
    * @return
    */
-  public List<ExerciseExport> getExports(Map<Integer, List<Grade>> idToGrade, List<Result> resultsForExercise,Exercise exercise, boolean useFLQ, boolean useSpoken) {
+  public List<ExerciseExport> getExports(Map<Integer, List<Grade>> idToGrade, List<Result> resultsForExercise,
+                                         Exercise exercise, boolean useFLQ, boolean useSpoken) {
     boolean debug = false;
 
     List<ExerciseExport> ret = new ArrayList<ExerciseExport>();
 
-    Map<Integer,ExerciseExport> qidToExport = new HashMap<Integer, ExerciseExport>();
+    Map<Integer, ExerciseExport> qidToExport = new HashMap<Integer, ExerciseExport>();
     int qid = 0;
     for (Exercise.QAPair q : exercise.getQuestions()) {
-      ExerciseExport e1 = new ExerciseExport(exercise.getID()+"_"+ ++qid, q.getAnswer());
-      qidToExport.put(qid,e1);
+      ExerciseExport e1 = new ExerciseExport(exercise.getID() + "_" + ++qid, q.getAnswer());
+      qidToExport.put(qid, e1);
     }
     Set<ExerciseExport> valid = new HashSet<ExerciseExport>();
 
+    List<Exercise.QAPair> qaPairs = useFLQ ? exercise.getForeignLanguageQuestions() : exercise.getEnglishQuestions();
+    qid = 1;
+    for (Exercise.QAPair q : qaPairs) {
+      ExerciseExport exerciseExport = qidToExport.get(qid);
+
+      if (exerciseExport == null)
+        System.err.println("no qid " + qid + " in " + qidToExport.keySet() + " for " + exercise);
+      else {
+        for (String answer : q.getAlternateAnswers()) {
+          exerciseExport.addRG(answer, 5);
+        }
+      }
+      qid++;
+    }
+
     // find results, after join with schedule, add join with the grade
     for (Result r : resultsForExercise) {
-        if (r.flq == useFLQ && r.spoken == useSpoken) {
-          ExerciseExport exerciseExport = qidToExport.get(r.qid);
-          List<Grade> gradesForResult = idToGrade.get(r.uniqueID);
-          if (gradesForResult == null) {
-            //System.err.println("no grades for result " + r);
-          }
-          else {
-            for (Grade g : gradesForResult) {
-              if (g.grade > 0) {
+      if (r.flq == useFLQ && r.spoken == useSpoken) {
+        ExerciseExport exerciseExport = qidToExport.get(r.qid);
+        List<Grade> gradesForResult = idToGrade.get(r.uniqueID);
+        if (gradesForResult == null) {
+          //System.err.println("no grades for result " + r);
+        } else {
+          for (Grade g : gradesForResult) {
+            if (g.grade > 0) {
               exerciseExport.addRG(r.answer, g.grade);
               if (!valid.contains(exerciseExport)) {
                 ret.add(exerciseExport);
                 valid.add(exerciseExport);
               }
             }
-            }
           }
         }
-        else {
-          if (debug) System.out.println("\tSkipping result " + r + " since not match to " +useFLQ + " and " + useSpoken);
-        }
+      } else {
+        if (debug) System.out.println("\tSkipping result " + r + " since not match to " + useFLQ + " and " + useSpoken);
+      }
     }
     return ret;
   }
