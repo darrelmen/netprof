@@ -54,6 +54,7 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
   protected final boolean showTurkToken;
   private boolean useUserID = false;
   private long userID;
+  private final boolean autoCRT;
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -64,9 +65,10 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
    * @param goodwaveMode
    * @param arabicDataCollect
    * @param showTurkToken
+   * @param autoCRT
    */
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                      ExercisePanelFactory factory, boolean goodwaveMode, boolean arabicDataCollect, boolean showTurkToken) {
+                      ExercisePanelFactory factory, boolean goodwaveMode, boolean arabicDataCollect, boolean showTurkToken, boolean autoCRT) {
     this.currentExerciseVPanel = currentExerciseVPanel;
     this.service = service;
     this.feedback = feedback;
@@ -74,6 +76,7 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
     this.goodwaveMode = goodwaveMode;
     this.arabicDataCollect = arabicDataCollect;
     this.showTurkToken = showTurkToken;
+    this.autoCRT = autoCRT;
   }
 
   /**
@@ -94,11 +97,16 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
     * @see mitll.langtest.client.LangTest#gotUser(long)
     * @see mitll.langtest.client.LangTest#makeFlashContainer
     * @param userID
-    */
+   */
   public void getExercises(long userID) {
     useUserID = true;
     this.userID = userID;
-    service.getExerciseIds(userID, goodwaveMode, arabicDataCollect, new SetExercisesCallback());
+    if (autoCRT) {
+      getExercisesInOrder();
+    }
+    else {
+      service.getExerciseIds(userID, goodwaveMode, arabicDataCollect, new SetExercisesCallback());
+    }
   }
 
   /**
