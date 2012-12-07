@@ -20,6 +20,7 @@ public class PretestScore implements IsSerializable {
 	private Map<String, Float> phoneScores;
   private Map<NetPronImageType, String> sTypeToImage;
   private Map<NetPronImageType, List<Float>> sTypeToEndTimes;
+  private String recoSentence;
 
   public PretestScore(){} // required for serialization
 
@@ -51,21 +52,22 @@ public class PretestScore implements IsSerializable {
 
   /**
    * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
-   * @paramx reqid
    * @param hydecScore
-   * @paramx svScoreVector
    * @param phoneScores
    * @param sTypeToImage
+   * @param sTypeToEndTimes
+   * @param recoSentence
    */
   public PretestScore(float hydecScore,
                       Map<String, Float> phoneScores,
                       Map<NetPronImageType, String> sTypeToImage,
-                      Map<NetPronImageType, List<Float>> sTypeToEndTimes
-  ) {
+                      Map<NetPronImageType, List<Float>> sTypeToEndTimes,
+                      String recoSentence) {
     this(new Float[]{},sTypeToImage);
     this.hydecScore = hydecScore;
     this.phoneScores = phoneScores;
     this.sTypeToEndTimes = sTypeToEndTimes;
+    this.recoSentence = recoSentence;
 	}
 	
   public float getHydecScore() {
@@ -90,6 +92,10 @@ public class PretestScore implements IsSerializable {
 
   public Map<NetPronImageType, List<Float>> getsTypeToEndTimes() {
     return sTypeToEndTimes;
+  }
+
+  public String getRecoSentence() {
+    return recoSentence;
   }
 
   public float getWavFileLengthInSeconds() {
@@ -118,5 +124,4 @@ public class PretestScore implements IsSerializable {
         " type->endtimes " + getsTypeToEndTimes()
         ;
   }
-
 }

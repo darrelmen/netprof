@@ -12,8 +12,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class AudioAnswer implements IsSerializable {
   public String path;
   public Validity validity;
-  public String decodeOutput;
-  public double score;
+  public String decodeOutput = "";
+  public double score = -1;
 
   public enum Validity implements IsSerializable {
     OK("Audio OK."),
