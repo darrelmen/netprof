@@ -616,12 +616,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     File file = getAbsoluteFile(wavPath);
 
     AudioAnswer.Validity validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
-    db.answerDAO.addAnswer(Integer.parseInt(user), plan, exercise, Integer.parseInt(question), "", file.getPath(),
+    int questionID = Integer.parseInt(question);
+    db.answerDAO.addAnswer(Integer.parseInt(user), plan, exercise, questionID, "", file.getPath(),
         validity == AudioAnswer.Validity.OK, db);
 
-    if (doAutoCRT || false) {
-      PretestScore asrScoreForAudio = getASRScoreForAudio(0, file.getPath(), "", 128, 128, false);
-    }
     // TODO check for autoCRT flag  x
     // call getASRScoreForAudio
     // create a sentence out of the result
@@ -633,7 +631,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String wavPathWithForwardSlashSeparators = ensureForwardSlashes(wavPath);
     String url = optionallyMakeURL(wavPathWithForwardSlashSeparators);
     logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
-    return new AudioAnswer(url, validity);
+
+    if (doAutoCRT) {
+      String test = "خليني";
+      System.out.println("scoring " + test);
+      PretestScore asrScoreForAudio = getASRScoreForAudio(0, file.getPath(), test, 128, 128, false);
+      String recoSentence = asrScoreForAudio.getRecoSentence();
+
+      double scoreForAnswer = getScoreForAnswer(getExercise(exercise, false), questionID, recoSentence);
+      return new AudioAnswer(url, validity, recoSentence, scoreForAnswer);
+    }
+    else {
+      return new AudioAnswer(url, validity);
+    }
   }
 
   private String optionallyMakeURL(String wavPathWithForwardSlashSeparators) {
