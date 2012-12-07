@@ -155,7 +155,7 @@ public class DatabaseImpl implements Database {
     }
     String[] args = new String[6];
 
-    String configDir = installPath + File.separator + mediaDir + File.separator;
+    String configDir = (installPath != null ? installPath + File.separator : "") + mediaDir + File.separator;
     String config = configDir + "runAutoGradeWinNoBad.cfg";     // TODO use template for deploy/platform specific config
     if (!new File(config).exists()) logger.error("couldn't find " + config);
     args[0] = "-C";
