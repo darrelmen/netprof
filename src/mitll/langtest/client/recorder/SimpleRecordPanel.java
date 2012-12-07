@@ -4,8 +4,11 @@
 package mitll.langtest.client.recorder;
 
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -20,9 +23,9 @@ import mitll.langtest.shared.Exercise;
 
 /**
  *
- * Has three parts -- record/stop button, audio validity feedback, and audio html 5 control to playback audio just posted to the server.
+ * Has three parts -- record/stop button, audio validity feedback, and audio html 5 control to playback audio just posted to the server. <br></br>
  *
- * On click on the stop button, posts audio to the server.
+ * On click on the stop button, posts audio to the server. <br></br>
  *
  * Automatically stops recording after 20 seconds.
  *
@@ -34,6 +37,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
   private Image check;
   private SimplePanel playback = new SimplePanel();
   private final AudioTag audioTag = new AudioTag();
+  private final Label resp = new Label();
 
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
@@ -44,6 +48,8 @@ public class SimpleRecordPanel extends RecordButtonPanel {
                            final Exercise exercise, final ExerciseQuestionState questionState, final int index){
     super(service, controller, exercise, questionState, index);
 
+    setSpacing(10);
+
     playback.setHeight("30px"); // for audio controls to show
 
     // make audio feedback widget
@@ -51,24 +57,15 @@ public class SimpleRecordPanel extends RecordButtonPanel {
 
     // add playback html
     addPlayback();
+
+    add(resp);
   }
 
   private void addPlayback() {
-    // add spacer
-    addSpacer();
-
     add(playback);
   }
 
   protected void addValidityFeedback(int index) {
-    SimplePanel spacer = new SimplePanel();
-
-    // add spacer
-    spacer.setHeight("24px");
-    spacer.setWidth("110px") ;
-
-    add(spacer);
-   // SimplePanel spacer;
     this.check = new Image(IMAGES_CHECKMARK);
     check.getElement().setId("checkmark_" +index);
     check.setAltText("Audio Saved");
@@ -77,18 +74,11 @@ public class SimpleRecordPanel extends RecordButtonPanel {
     add(check);
   }
 
-  private void addSpacer() {
-    SimplePanel spacer;
-    spacer = new SimplePanel();
-    spacer.setHeight("24px");
-    spacer.setWidth("10px");
-    add(spacer);
-  }
-
   @Override
   protected void startRecording() {
     super.startRecording();
     playback.setWidget(new HTML(""));
+    resp.setText("");
   }
 
   /**
@@ -101,6 +91,27 @@ public class SimpleRecordPanel extends RecordButtonPanel {
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {
     showAudioValidity(result.validity, questionState, outer);
     setAudioTag(result.path);
+
+    if (result.decodeOutput.length() > 0) {    // i.e. autocrt -- revisit?
+      String percent = ((int) (result.score * 100)) + "%";
+      if (result.score > 0.6) {
+        resp.setText("Correct! Score for '" + result.decodeOutput + "' was " + percent);
+        resp.setStyleName("correct");
+      } else {
+        resp.setText("Try again - score for '" + result.decodeOutput + "' was " + percent);
+        resp.setStyleName("incorrect");
+      }
+    }
+  }
+
+  @Override
+  protected void stopRecording() {
+    super.stopRecording();
+    if (controller.isAutoCRTMode())  {
+      resp.removeStyleName("incorrect");
+      resp.removeStyleName("correct");
+      resp.setText("Scoring... please wait.");
+    }
   }
 
   /**
