@@ -4,6 +4,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.user.client.DOM;
@@ -227,7 +228,8 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     final Set<Widget> incomplete = new HashSet<Widget>();
     incomplete.addAll(answers);
     for (final Widget tb : answers) {
-      service.addAnswer(user, exercise, i++, ((TextBox)tb).getText(), "", new AsyncCallback<Void>() {
+      String text = ((HasValue<String>) tb).getValue();
+      service.addAnswer(user, exercise, i++, text, "", new AsyncCallback<Void>() {
         public void onFailure(Throwable caught) {
           userFeedback.showErrorMessage("Server error", "Couldn't post answers for exercise.");
         }
@@ -276,7 +278,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     }
 
     if (controller.isAutoCRTMode()) {
-      HorizontalPanel hp = new HorizontalPanel();
+      HorizontalPanel hp = new TextValue();
       hp.setSpacing(5);
       hp.add(answer);
       final Button check = new Button("Check Answer");
@@ -315,6 +317,29 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
       return hp;
     }
     return answer;
+  }
+
+  private static class TextValue extends HorizontalPanel implements HasValue<String> {
+    String value;
+    @Override
+    public String getValue() {
+      return value;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void setValue(String value) {
+      this.value = value;
+    }
+
+    @Override
+    public void setValue(String value, boolean fireEvents) {
+      this.value = value;
+    }
+
+    @Override
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
+      return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
   }
 
   public void recordIncomplete(Widget answer) {
