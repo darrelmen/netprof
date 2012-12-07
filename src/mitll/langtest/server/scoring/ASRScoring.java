@@ -41,7 +41,6 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoring extends Scoring {
-  //private static final String RSI_SCTM_HLDA = "rsi-sctm-hlda";
   private static final String DICT_WO_SP = "dict-wo-sp";
   private static final String GRAMMAR_ALIGN_TEMPLATE = "grammar.align.template";
   private static final String GRAMMAR_ALIGN =
@@ -102,7 +101,6 @@ public class ASRScoring extends Scoring {
                                   int imageWidth, int imageHeight, boolean useScoreForBkgColor) {
     return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,
         sentence,
-    //    "Arabic",
         scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor);
   }
 
@@ -118,11 +116,10 @@ public class ASRScoring extends Scoring {
    * @param imageWidth
    * @param imageHeight
    * @param useScoreForBkgColor
-   * @paramx asrLanguage
-   * @return
+   * @return score info coming back from alignment/reco
    */
   private PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
-                                           String sentence, //String asrLanguage,
+                                           String sentence,
                                            String scoringDir,
 
                                            String imageOutDir,
@@ -180,9 +177,10 @@ public class ASRScoring extends Scoring {
     ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix, useScoreForBkgColor);
     Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
     Map<NetPronImageType, List<Float>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo, duration);
+    String recoSentence = getRecoSentence(eventAndFileInfo);
 
     PretestScore pretestScore =
-        new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes);
+        new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence);
     return pretestScore;
   }
 
@@ -217,6 +215,24 @@ public class ASRScoring extends Scoring {
     return typeToEndTimes;
   }
 
+  private String getRecoSentence(ImageWriter.EventAndFileInfo eventAndFileInfo) {
+    StringBuilder b = new StringBuilder();
+    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
+      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
+      if (key == NetPronImageType.WORD_TRANSCRIPT) {
+        Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
+        for (Float timeStamp : timeToEvent.keySet()) {
+          String event = timeToEvent.get(timeStamp).event;
+          if (!event.equals("<s>") && !event.equals("</s>")) {
+            b.append(event);
+            b.append(" ");
+          }
+        }
+      }
+    }
+    return b.toString().trim();
+  }
+
   /**
    * Make sure that when we scale the phone scores by {@link #SCORE_SCALAR} we do it for both the scores and the image.
    * <br></br>
@@ -243,7 +259,7 @@ public class ASRScoring extends Scoring {
 
     /**
      * Assumes that testAudio was recorded through the UI, which should prevent audio that is too short or too long.
-     * Assumes Arabic (levantine)
+     *
      * @see #scoreRepeatExercise
      * @param testAudio
      * @param sentence
@@ -309,6 +325,7 @@ public class ASRScoring extends Scoring {
    * Creates a hydec config file from a template file by doing variable substitution.<br></br>
    * Also use the properties map to look for variables.
    *
+   * @see #computeRepeatExerciseScores(pronz.speech.Audio, String, String)
    * @param tmpDir
    * @param modelsDir
    * @return path to config file
@@ -336,7 +353,7 @@ public class ASRScoring extends Scoring {
     // we need to create a custom config file for each run, complicating the caching of the ASRParameters...
     String configFile = tmpDir+ File.separator+ MODEL_CFG;
 
-    String pathToConfigTemplate = scoringDir + File.separator + "configurations" + File.separator + CFG_TEMPLATE;   // TODO point at os specific config file
+    String pathToConfigTemplate = scoringDir + File.separator + "configurations" + File.separator + CFG_TEMPLATE;
     logger.debug("template config is at " + pathToConfigTemplate + " map is " + kv);
     doTemplateReplace(pathToConfigTemplate,configFile,kv);
     return configFile;
