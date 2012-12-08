@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.User;
+import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDAO {
+  private static Logger logger = Logger.getLogger(UserDAO.class);
+
   private final Database database;
 
   public UserDAO(Database database) {
@@ -28,34 +31,42 @@ public class UserDAO {
    * @param ipAddr
    * @return newly inserted user id, or 0 if something goes horribly wrong
    */
-  public long addUser(int age, String gender, int experience, String ipAddr) {
+  public synchronized long addUser(int age, String gender, int experience, String ipAddr) {
     try {
+      // there are much better ways of doing this...
+      long max = 0;
+      for (User u : getUsers()) if (u.id > max) max = u.id;
+      logger.info("addUser : max is " + max);
       Connection connection = database.getConnection();
       PreparedStatement statement;
 
       //System.out.println("adding " + age + " and " + gender + " and " + experience);
-      statement = connection.prepareStatement("INSERT INTO users(age,gender,experience,ipaddr) VALUES(?,?,?,?);",
-        Statement.RETURN_GENERATED_KEYS);
+    //  statement = connection.prepareStatement("INSERT INTO users(id,age,gender,experience,ipaddr) VALUES(?,?,?,?,?);", Statement.RETURN_GENERATED_KEYS);
+      statement = connection.prepareStatement("INSERT INTO users(id,age,gender,experience,ipaddr) VALUES(?,?,?,?,?);");
       int i = 1;
+      long newID = max + 1;
+      statement.setLong(i++, newID);
       statement.setInt(i++, age);
       statement.setInt(i++, gender.equalsIgnoreCase("male") ? 0 : 1);
       statement.setInt(i++, experience);
-      statement.setString(i++, ipAddr);
+      statement.setString(i, ipAddr);
       statement.executeUpdate();
 
-      ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
+      if (false) {
+        ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
 
-      long id = 0;
-      while (rs.next()) {
-        id = rs.getLong(1);
-        //System.out.println("Database : addUser got user #" + id);
-        //  System.out.println(rs.getString(1) + "," + rs.getString(2) + "," + rs.getInt(3) + "," + rs.getString(4) + "," + rs.getTimestamp(5));
+        long id = 0;
+        while (rs.next()) {
+          id = rs.getLong(1);
+          //System.out.println("Database : addUser got user #" + id);
+          //  System.out.println(rs.getString(1) + "," + rs.getString(2) + "," + rs.getInt(3) + "," + rs.getString(4) + "," + rs.getTimestamp(5));
+        }
+        rs.close();
       }
-      rs.close();
       statement.close();
       database.closeConnection(connection);
 
-      return id;
+      return newID;
     } catch (Exception ee) {
       ee.printStackTrace();
     }
@@ -90,7 +101,7 @@ public class UserDAO {
    * @return
    * @paramx database
    */
-  public List<User> getUsers() {
+  public synchronized List<User> getUsers() {
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement;
@@ -114,7 +125,7 @@ public class UserDAO {
           rs.getInt(i++), //gender
           rs.getInt(i++), // exp
           rs.getString(i++), // ip
-          rs.getString(i++), // password
+          rs.getString(i), // password
           timestamp.getTime()
         ));
       }
