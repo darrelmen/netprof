@@ -32,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -370,6 +371,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return testAudioFile;
   }
 
+  public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
+                                          int width, int height, boolean useScoreToColorBkg) {
+      return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg, Collections.EMPTY_LIST);
+  }
   /**
    * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
    *
@@ -383,7 +388,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return PretestScore
    **/
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
-                                          int width, int height, boolean useScoreToColorBkg) {
+                                          int width, int height, boolean useScoreToColorBkg, List<String> lmSentences) {
     logger.info("getASRScoreForAudio scoring " + testAudioFile + " with " + sentence + " req# " + reqid);
 
     assert(testAudioFile != null && sentence != null);
@@ -403,7 +408,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence,
-        getImageOutDir(), width, height, useScoreToColorBkg);
+        getImageOutDir(), width, height, useScoreToColorBkg, lmSentences);
     pretestScore.setReqid(reqid);
 
     if (makeFullURLs) {
@@ -633,10 +638,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
 
     if (doAutoCRT) {
-      String test = "خليني";
-      System.out.println("scoring " + test);
-      PretestScore asrScoreForAudio = getASRScoreForAudio(0, file.getPath(), test, 128, 128, false);
+     // String test = "خليني";
+      //System.out.println("scoring " + test);
+
+
+      List<String> exportedAnswers = db.getExportedAnswers(exercise, questionID);
+      //System.out.println("got " + new HashSet<String>(exportedAnswers));
+
+      PretestScore asrScoreForAudio = getASRScoreForAudio(0, file.getPath(), "", 128, 128, false, exportedAnswers);
+
       String recoSentence = asrScoreForAudio.getRecoSentence();
+      logger.warn("reco sentence was '" + recoSentence + "'");
+
+
 
       double scoreForAnswer = getScoreForAnswer(getExercise(exercise, false), questionID, recoSentence);
       return new AudioAnswer(url, validity, recoSentence, scoreForAnswer);
