@@ -31,7 +31,7 @@ import java.util.List;
  */
 public class FileExerciseDAO implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
-  private static final String ENCODING = "UTF8";
+  public static final String ENCODING = "UTF8";
   private static final String LESSON_FILE = "lesson-737.csv";
   private static final String LESSON_PLAN = "lesson.plan";
   private static final String FAST = "fast";
