@@ -1,8 +1,7 @@
 Grammar hybrid
 StartWord <s>
 EndWord </s>
-Dictionary /services/pretest-data/models.dli-ara/dict.words
-#Network 
+#Dictionary C:\Users\go22670\DLITest\clean\netPron2\war\\scoring\models.dli-ara/dict.words
 
 ########################################################
 # Model: Z
