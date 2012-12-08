@@ -1,8 +1,7 @@
 Grammar hybrid
 StartWord <s>
 EndWord </s>
-Dictionary models.dli-ara/dict.words.pruned
-#Network 
+#Dictionary MODELS_DIR/dict.words
 
 ########################################################
 # Model: Z
