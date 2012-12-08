@@ -4,11 +4,14 @@ import Utils.Log;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import audio.imagewriter.ImageWriter;
+import audio.tools.FileCopier;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
+import corpus.package$;
 import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.AudioConversion;
+import mitll.langtest.server.database.FileExerciseDAO;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
@@ -22,8 +25,13 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,11 +63,19 @@ public class ASRScoring extends Scoring {
   private static final String OPT_SIL = "OPT_SIL";
   private static final String OPT_SIL_DEFAULT = "true";   // rsi-sctm-hlda
   private static final String HLDA_DIR = "HLDA_DIR";
+  private static final String LM_TO_USE = "LM_TO_USE";
+ // private static final String LM_TO_USE = "LM_TO_USE";
   private static final String HLDA_DIR_DEFAULT = "rsi-sctm-hlda";   // rsi-sctm-hlda
   private static Logger logger = Logger.getLogger(ASRScoring.class);
-  private static final String CFG_TEMPLATE = "generic-nn-model.cfg.template";
+
+  private static final String CFG_TEMPLATE_PROP = "configTemplate";
+  private static final String CFG_TEMPLATE_DEFAULT = "generic-nn-model.cfg.template";
+
+  private static final String DECODE_CFG_TEMPLATE_PROP = "decodeConfigTemplate";
+  private static final String DECODE_CFG_TEMPLATE_DEFAULT = "arabic-nn-model-decode.cfg.template";
+
   private static final String DEFAULT_MODELS_DIR = "models.dli-levantine";
-  private static final String MODEL_CFG = CFG_TEMPLATE.substring(0,CFG_TEMPLATE.length()-".template".length());
+ // private static final String MODEL_CFG = CFG_TEMPLATE_DEFAULT.substring(0,CFG_TEMPLATE_DEFAULT.length()-".template".length());
 
  // private final Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
   private final Cache<String, Scores> audioToScore;
@@ -101,7 +117,15 @@ public class ASRScoring extends Scoring {
                                   int imageWidth, int imageHeight, boolean useScoreForBkgColor) {
     return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,
         sentence,
-        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor);
+        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor, Collections.EMPTY_LIST);
+  }
+
+  public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
+                                  String sentence, String imageOutDir,
+                                  int imageWidth, int imageHeight, boolean useScoreForBkgColor, List<String> lmSentences) {
+    return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,
+        sentence,
+        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor,lmSentences);
   }
 
   /**
@@ -123,7 +147,7 @@ public class ASRScoring extends Scoring {
                                            String scoringDir,
 
                                            String imageOutDir,
-                                           int imageWidth, int imageHeight, boolean useScoreForBkgColor) {
+                                           int imageWidth, int imageHeight, boolean useScoreForBkgColor, List<String> lmSentences) {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
     File wavFile = new File(pathname);
@@ -157,6 +181,19 @@ public class ASRScoring extends Scoring {
     Scores scores;
     synchronized (this) {
       String tmpDir = Files.createTempDir().getAbsolutePath();
+
+      File lmFile = writeLMToFile(lmSentences, tmpDir);
+      boolean decode = !lmSentences.isEmpty();
+
+      String platform = Utils.package$.MODULE$.platform();
+      if (platform.startsWith("win")) {
+        // hack -- get slf file from model dir
+        String slfFile = getModelsDir() + File.separator + "smallLM.slf";
+        String convertedFile = tmpDir + File.separator + "smallLM.slf";
+        doOctalConversion(slfFile, convertedFile);
+        //   new FileCopier().copy(slfFile,tmpDir +File.separator+"smallLM.slf");
+
+      }
       // String tmpDir = scoringDir + File.separator + TMP;
       Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
 
@@ -167,7 +204,7 @@ public class ASRScoring extends Scoring {
       scores = audioToScore.getIfPresent(testAudioDir + File.separator + testAudioFileNoSuffix);
 
       if (scores == null) {
-        scores = computeRepeatExerciseScores(testAudio, sentence, tmpDir);
+        scores = computeRepeatExerciseScores(testAudio, sentence, tmpDir, decode);
         audioToScore.put(testAudioDir + File.separator + testAudioFileNoSuffix, scores);
       } else {
         logger.info("found cached score for file '" + testAudioDir + File.separator + testAudioFileNoSuffix + "'");
@@ -182,6 +219,47 @@ public class ASRScoring extends Scoring {
     PretestScore pretestScore =
         new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence);
     return pretestScore;
+  }
+
+  private void doOctalConversion(String slfFile, String convertedFile) {
+    try {
+      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(slfFile), FileExerciseDAO.ENCODING));
+      String line2;
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(convertedFile), FileExerciseDAO.ENCODING));          //     int count = 0;
+      //   logger.debug("using install path " + installPath);
+      while ((line2 = reader.readLine()) != null) {
+        writer.write(package$.MODULE$.oct2string(line2).trim());
+        writer.write("\n");
+      }
+      reader.close();
+      writer.close();
+    } catch (IOException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+  }
+
+  /**
+   * ngram-count -text smallLM.txt -lm smallLmOut.srilm -write-vocab out.vocab -order 2 -cdiscount 0.0001 –unk
+   * ngram-count -text smallLM.txt -lm smallLmOut.srilm -write-vocab out.vocab -order 2 -cdiscount 0.0001 –unk
+   * HBuild -n smallLmOut.srilm -s '<s>' '</s>' out.vocab smallLM.slf
+   *
+   * @param lmSentences
+   * @param tmpDir
+   * @return
+   */
+
+  private File writeLMToFile(List<String> lmSentences, String tmpDir) {
+    try {
+      File outFile = new File(tmpDir, "smallLM.txt");
+      logger.info("wrote lm to " +outFile.getAbsolutePath());
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), FileExerciseDAO.ENCODING));
+      for (String s : lmSentences) writer.write(s.trim().replaceAll("\\p{P}","") + "\n");
+      writer.close();
+      return outFile;
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
   /**
@@ -263,9 +341,10 @@ public class ASRScoring extends Scoring {
      * @see #scoreRepeatExercise
      * @param testAudio
      * @param sentence
+     * @param decode
      * @return
      */
-  private Scores computeRepeatExerciseScores(Audio testAudio, String sentence, String tmpDir) {
+  private Scores computeRepeatExerciseScores(Audio testAudio, String sentence, String tmpDir, boolean decode) {
     String platform = Utils.package$.MODULE$.platform();
     String modelsDir = getModelsDir();
 
@@ -273,7 +352,7 @@ public class ASRScoring extends Scoring {
     // Make sure that we have absolute paths.
 
     // do template replace on config file
-    String configFile = getHydecConfigFile(tmpDir, modelsDir);
+    String configFile = getHydecConfigFile(tmpDir, modelsDir, decode);
 
     // do template replace on grammar file
     createGrammarFile(modelsDir);
@@ -325,22 +404,29 @@ public class ASRScoring extends Scoring {
    * Creates a hydec config file from a template file by doing variable substitution.<br></br>
    * Also use the properties map to look for variables.
    *
-   * @see #computeRepeatExerciseScores(pronz.speech.Audio, String, String)
+   * @see #computeRepeatExerciseScores(pronz.speech.Audio, String, String, boolean)
    * @param tmpDir
    * @param modelsDir
    * @return path to config file
    */
-  private String getHydecConfigFile(String tmpDir, String modelsDir) {
+  private String getHydecConfigFile(String tmpDir, String modelsDir, boolean decode) {
     String platform = Utils.package$.MODULE$.platform();
     boolean onWindows = platform.startsWith("win");
     Map<String,String> kv = new HashMap<String, String>();
 
     String levantineNOutput = getProp(N_OUTPUT, LEVANTINE_N_OUTPUT);
     String nHidden = getProp(N_HIDDEN, N_HIDDEN_DEFAULT);
-
+    String cfgTemplate = getProp(CFG_TEMPLATE_PROP, CFG_TEMPLATE_DEFAULT);
     if (onWindows) {
       tmpDir = tmpDir.replaceAll("\\\\","\\\\\\\\");
     }
+
+    if (decode) {
+      cfgTemplate = getProp(DECODE_CFG_TEMPLATE_PROP, DECODE_CFG_TEMPLATE_DEFAULT);
+      kv.put(LM_TO_USE, tmpDir +File.separator + File.separator + "smallLM.slf"); // hack! TODO hack replace
+     // new FileCopier().copy(modelsDir+File.separator+"phones.dict",tmpDir+File.separator +"dict");   // Audio.hscore in pron sets dictionary=this value
+    }
+    logger.info("using config from template " + cfgTemplate);
 
     kv.put(TEMP_DIR,tmpDir);
     kv.put(MODELS_DIR_VARIABLE, modelsDir);
@@ -351,9 +437,11 @@ public class ASRScoring extends Scoring {
     if (onWindows) kv.put("/","\\\\");
 
     // we need to create a custom config file for each run, complicating the caching of the ASRParameters...
-    String configFile = tmpDir+ File.separator+ MODEL_CFG;
+    String modelCfg = cfgTemplate.substring(0, cfgTemplate.length() - ".template".length());
 
-    String pathToConfigTemplate = scoringDir + File.separator + "configurations" + File.separator + CFG_TEMPLATE;
+    String configFile = tmpDir+ File.separator+ modelCfg;
+
+    String pathToConfigTemplate = scoringDir + File.separator + "configurations" + File.separator + cfgTemplate;
     logger.debug("template config is at " + pathToConfigTemplate + " map is " + kv);
     doTemplateReplace(pathToConfigTemplate,configFile,kv);
     return configFile;
