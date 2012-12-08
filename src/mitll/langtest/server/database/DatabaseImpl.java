@@ -707,7 +707,7 @@ public class DatabaseImpl implements Database {
   private double getScoreForExercise(String id, int questionID, String answer) {
     getClassifier();
     String key = id + "_" + questionID;
-    Export.ExerciseExport exerciseExport = exerciseIDToExport.get(key);
+    Export.ExerciseExport exerciseExport = getExportForExercise(key);
     if (exerciseExport == null) {
       logger.error("couldn't find exercise id " + key + " in " + exerciseIDToExport.keySet());
       return 0d;
@@ -717,6 +717,23 @@ public class DatabaseImpl implements Database {
       logger.info("Score was " + score + " for " + exerciseExport);
       return score;
     }
+  }
+
+  public List<String> getExportedAnswers(String id, int questionID) {
+    getClassifier();
+
+    List<String> answers = new ArrayList<String>();
+    for (Export.ResponseAndGrade resp : getExportForExercise(id, questionID).rgs) answers.add(resp.response);
+    return answers;
+  }
+  private Export.ExerciseExport getExportForExercise(Exercise e, int questionID) {
+    return getExportForExercise(e.getID(), questionID);
+  }
+  private Export.ExerciseExport getExportForExercise(String id, int questionID) {
+    return getExportForExercise(id + "_" + questionID);
+  }
+  private Export.ExerciseExport getExportForExercise(String key) {
+    return exerciseIDToExport.get(key);
   }
 
   /**
