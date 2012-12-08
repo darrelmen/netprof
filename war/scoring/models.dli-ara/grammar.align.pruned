@@ -1,7 +1,7 @@
 Grammar hybrid
 StartWord <s>
 EndWord </s>
-Dictionary /services/pretest-data/models.dli-ara/dict.words.pruned
+Dictionary models.dli-ara/dict.words.pruned
 #Network 
 
 ########################################################
