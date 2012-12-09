@@ -28,8 +28,10 @@ public class BrowserCheck {
     if (min == null) {
       Window.alert("Your browser is " + browser + " version " + version + ". We strongly recommend any of " + browserToVersion.keySet());
     } else if (ver < min) {
-      Window.alert("Your browser is " +browser + " version " + version+
-          ". We strongly recommend upgrading to version " + min + " or later.");
+        if (!browser.equals("firefox") || !version.startsWith("10.0")) {
+            Window.alert("Your browser is " + browser + " version " + version +
+                    ". We strongly recommend upgrading to version " + min + " or later.");
+        }
     } else {
       System.out.println("browser " +browser + " ver " + ver + " version " + version + " vs " + min);
     }
