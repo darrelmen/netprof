@@ -186,7 +186,7 @@ public class ASRScoring extends Scoring {
       boolean decode = !lmSentences.isEmpty();
 
       String platform = Utils.package$.MODULE$.platform();
-      if (platform.startsWith("win")) {
+      if (true || platform.startsWith("win")) {
         // hack -- get slf file from model dir
         String slfFile = getModelsDir() + File.separator + "smallLM.slf";
         String convertedFile = tmpDir + File.separator + "smallLM.slf";
@@ -215,7 +215,7 @@ public class ASRScoring extends Scoring {
     Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
     Map<NetPronImageType, List<Float>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo, duration);
     String recoSentence = getRecoSentence(eventAndFileInfo);
-
+      recoSentence = recoSentence.replaceAll("sil","");
     PretestScore pretestScore =
         new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence);
     return pretestScore;
@@ -224,9 +224,9 @@ public class ASRScoring extends Scoring {
   private void doOctalConversion(String slfFile, String convertedFile) {
     try {
       BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(slfFile), FileExerciseDAO.ENCODING));
-      String line2;
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(convertedFile), FileExerciseDAO.ENCODING));          //     int count = 0;
       //   logger.debug("using install path " + installPath);
+      String line2;
       while ((line2 = reader.readLine()) != null) {
         writer.write(package$.MODULE$.oct2string(line2).trim());
         writer.write("\n");
@@ -375,15 +375,21 @@ public class ASRScoring extends Scoring {
   //  synchronized (this) {   // hydec can't be called concurrently -- not thread safe?
       try {
         jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
+          float hydec_score = jscoreOut._1;
+          logger.info("got score " + hydec_score +" and took " + (System.currentTimeMillis()-then) + " millis");
+
+          return new Scores(hydec_score, jscoreOut._2);
       } catch (AssertionError e) {
         logger.error("Got assertion error " + e,e);
         return new Scores();
+      } catch (Exception ee) {
+          logger.info("Got " +ee);
       }
-   // }
-    float hydec_score = jscoreOut._1;
-    logger.info("got score " + hydec_score +" and took " + (System.currentTimeMillis()-then) + " millis");
 
-    return new Scores(hydec_score, jscoreOut._2);
+   // }
+    logger.info("got score and took " + (System.currentTimeMillis()-then) + " millis");
+
+    return new Scores();
   }
 
   /**
