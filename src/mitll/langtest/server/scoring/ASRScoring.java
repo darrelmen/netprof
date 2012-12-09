@@ -374,7 +374,7 @@ public class ASRScoring extends Scoring {
     }
     for ( List<Float> times : typeToEndTimes.values()) {
       Float lastEndTime = times.isEmpty() ? (float)fileDuration : times.get(times.size() - 1);
-      if (lastEndTime < fileDuration) {
+      if (lastEndTime < fileDuration && !times.isEmpty()) {
        // logger.debug("setting last segment to end at end of file " + lastEndTime + " vs " + fileDuration);
         times.set(times.size() - 1,(float)fileDuration);
       }
