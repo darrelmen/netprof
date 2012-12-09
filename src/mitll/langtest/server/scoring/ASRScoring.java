@@ -3,6 +3,7 @@ package mitll.langtest.server.scoring;
 import Utils.Log;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
+import audio.imagewriter.AudioConverter;
 import audio.imagewriter.ImageWriter;
 import audio.tools.FileCopier;
 import com.google.common.cache.Cache;
@@ -11,6 +12,7 @@ import com.google.common.io.Files;
 import corpus.package$;
 import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.AudioConversion;
+import mitll.langtest.server.ProcessRunner;
 import mitll.langtest.server.database.FileExerciseDAO;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -32,11 +34,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Does ASR scoring using hydec.
@@ -182,18 +180,11 @@ public class ASRScoring extends Scoring {
     synchronized (this) {
       String tmpDir = Files.createTempDir().getAbsolutePath();
 
-      File lmFile = writeLMToFile(lmSentences, tmpDir);
       boolean decode = !lmSentences.isEmpty();
-
-      String platform = Utils.package$.MODULE$.platform();
-      if (true || platform.startsWith("win")) {
-        // hack -- get slf file from model dir
-        String slfFile = getModelsDir() + File.separator + "smallLM.slf";
-        String convertedFile = tmpDir + File.separator + "smallLM.slf";
-        doOctalConversion(slfFile, convertedFile);
-        //   new FileCopier().copy(slfFile,tmpDir +File.separator+"smallLM.slf");
-
+      if (decode) {
+        createSLFFile(lmSentences, tmpDir);
       }
+
       // String tmpDir = scoringDir + File.separator + TMP;
       Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
 
@@ -209,16 +200,47 @@ public class ASRScoring extends Scoring {
       } else {
         logger.info("found cached score for file '" + testAudioDir + File.separator + testAudioFileNoSuffix + "'");
       }
+      //}
     }
 
     ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix, useScoreForBkgColor);
     Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
     Map<NetPronImageType, List<Float>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo, duration);
     String recoSentence = getRecoSentence(eventAndFileInfo);
-      recoSentence = recoSentence.replaceAll("sil","");
+    recoSentence = recoSentence.replaceAll("sil","").trim();
+
     PretestScore pretestScore =
         new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence);
     return pretestScore;
+  }
+
+  /**
+   * Get the graded sentences.
+   * Create an srilm file using ngram-count
+   * Create an slf file using HBuild
+   * Do the octal conversion to utf-8 text on the result
+   *
+   * This only works properly on the mac and linux, sorta emulated on win32
+   * @param lmSentences
+   * @param tmpDir
+   */
+  private void createSLFFile(List<String> lmSentences, String tmpDir) {
+    File lmFile = writeLMToFile(lmSentences, tmpDir);
+    String platform = Utils.package$.MODULE$.platform();
+    String pathToBinDir = deployPath + File.separator + "scoring" + File.separator + "bin." + platform;
+    logger.info("platform  "+platform + " bins " + pathToBinDir);
+    File srilmFile = runNgramCount(tmpDir, lmFile, pathToBinDir);
+    String slfFile = runHBuild(tmpDir,srilmFile,pathToBinDir);
+    //if (new File(slfFile).exists()) {
+    String convertedFile = tmpDir + File.separator + "smallLM.slf";
+    doOctalConversion(slfFile, convertedFile);
+
+    if (platform.startsWith("win")) {
+      // hack -- get slf file from model dir
+      String slfDefaultFile = getModelsDir() + File.separator + "smallLM.slf";
+      //   new FileCopier().copy(slfFile,tmpDir +File.separator+"smallLM.slf");
+      doOctalConversion(slfDefaultFile, convertedFile);
+    }
   }
 
   private void doOctalConversion(String slfFile, String convertedFile) {
@@ -260,6 +282,73 @@ public class ASRScoring extends Scoring {
       e.printStackTrace();
     }
     return null;
+  }
+
+  /**
+   * ngram-count -text smallLM.txt -lm smallLmOut.srilm -write-vocab out.vocab -order 2 -cdiscount 0.0001 –unk
+   * @param tmpDir
+   * @param lmFile
+   * @param pathToBinDir
+   * @return
+   */
+  private File runNgramCount(String tmpDir, File lmFile, String pathToBinDir) {
+    String srilm = tmpDir + File.separator + "smallLMOut.srilm";
+    ProcessBuilder soxFirst = new ProcessBuilder(pathToBinDir +File.separator+"ngram-count",
+        "-text",
+        lmFile.getAbsolutePath(),
+        "-lm",
+        srilm,
+        "-write-vocab",
+        tmpDir + File.separator + "out.vocab",
+        "-order",
+        "2",
+        "-cdiscount",
+        "0.0001",
+        "-unk"
+        );
+
+    try {
+      new ProcessRunner().runProcess(soxFirst);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    if (!new File(srilm).exists()) logger.error("didn't make " + srilm);
+    return new File(srilm);
+  }
+
+  /**
+   * HBuild -n smallLmOut.srilm -s '<s>' '</s>' out.vocab smallLM.slf
+   * @param tmpDir
+   * @param srilmFile
+   * @param pathToBinDir
+   */
+  private String runHBuild(String tmpDir, File srilmFile, String pathToBinDir) {
+    //String srilm = tmpDir + File.separator + "smallLMOut.srilm";
+    logger.info("running hbuild on " + srilmFile);
+    String slfOut = tmpDir + File.separator + "smallLMFromHBuild.slf";
+    ProcessBuilder soxFirst = new ProcessBuilder(pathToBinDir +File.separator+"HBuild",
+        "-n",
+        srilmFile.getAbsolutePath(),
+        "-s",
+        "<s>",
+        "</s>",
+        tmpDir + File.separator + "out.vocab",
+        slfOut
+    );
+    //String cmd = pathToBinDir +File.separator+"HBuild"
+
+    logger.info("proc is " + new HashSet<String>(soxFirst.command())
+    );
+
+    try {
+      new ProcessRunner().runProcess(soxFirst);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    if (!new File(slfOut).exists()) logger.error("runHBuild didn't make " + slfOut);
+    return slfOut;
   }
 
   /**
