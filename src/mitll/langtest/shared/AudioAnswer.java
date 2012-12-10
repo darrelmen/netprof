@@ -10,6 +10,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 * To change this template use File | Settings | File Templates.
 */
 public class AudioAnswer implements IsSerializable {
+  public int reqid;
   public String path;
   public Validity validity;
   public String decodeOutput = "";
@@ -35,8 +36,9 @@ public class AudioAnswer implements IsSerializable {
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @param path
    * @param validity
+   * @param reqid
    */
-  public AudioAnswer(String path, Validity validity) { this.path = path; this.validity = validity; }
-  public AudioAnswer(String path, Validity validity, String decodeOutput, double score) { this(path,validity); this.decodeOutput = decodeOutput; this.score = score;}
-  public String toString() { return "Path " + path; }
+  public AudioAnswer(String path, Validity validity, int reqid) { this.path = path; this.validity = validity; this.reqid = reqid;}
+  public AudioAnswer(String path, Validity validity, String decodeOutput, double score, int reqid) { this(path,validity, reqid); this.decodeOutput = decodeOutput; this.score = score;}
+  public String toString() { return "Path " + path + " id " +reqid; }
 }

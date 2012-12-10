@@ -89,5 +89,6 @@ dictionary: MODELS_DIR/HLDA_DIR/dict-wo-sp
 lm: LM_TO_USE
 letter-to-sound-class: corpus.ArabicLTS
 lm-weight: 4.0
+beam-threshold: 200.0
 
 # End Configuration
