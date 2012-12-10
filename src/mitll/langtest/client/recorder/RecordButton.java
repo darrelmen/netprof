@@ -19,6 +19,7 @@ public abstract class RecordButton {
   private Timer recordTimer;
   private final FocusWidget record;
   private int autoStopDelay;
+  private boolean enabled=true;
 
   public RecordButton(FocusWidget recordButton) {
     this(recordButton, DELAY_MILLIS);
@@ -28,6 +29,11 @@ public abstract class RecordButton {
     this.record = recordButton;
     recordButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
+        System.out.println("RecordButton : Got click " + event);
+        if (!enabled) {
+          System.out.println("ignoring click -- busy!");
+          return;
+        }
         if (recording) {
           cancelTimer();
           stop();
@@ -39,6 +45,9 @@ public abstract class RecordButton {
       }
     });
   }
+
+  public void disable() { enabled = false; }
+  public void enable() { enabled = true; }
 
   private void start() {
     recording = true;
