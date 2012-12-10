@@ -72,6 +72,7 @@ public class DatabaseImpl implements Database {
   //private final ScheduleDAO scheduleDAO = new ScheduleDAO(this);
   private String h2DbName = H2_DB_NAME;
   private Classifier<AutoGradeExperiment.Event> classifier = null;
+  private Set<String> allAnswers = new HashSet<String>();
   /**
    * TODO : consider making proper v2 database!
    */
@@ -147,11 +148,13 @@ public class DatabaseImpl implements Database {
 
   private Classifier<AutoGradeExperiment.Event> getClassifier() {
     if (classifier != null) return classifier;
+    allAnswers = new HashSet<String>();
     Export exporter = new Export(exerciseDAO,resultDAO,gradeDAO);
     List<Export.ExerciseExport> export = exporter.getExport(true, false);
     exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
     for (Export.ExerciseExport exp : export) {
        exerciseIDToExport.put(exp.id,exp);
+      for (Export.ResponseAndGrade rg : exp.rgs) allAnswers.add(rg.response);
     }
     String[] args = new String[6];
 
@@ -719,6 +722,7 @@ public class DatabaseImpl implements Database {
     }
   }
 
+  public Collection<String> getAllExportedAnswers() { return allAnswers; }
   public List<String> getExportedAnswers(String id, int questionID) {
     getClassifier();
 
