@@ -3,9 +3,7 @@ package mitll.langtest.server.scoring;
 import Utils.Log;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
-import audio.imagewriter.AudioConverter;
 import audio.imagewriter.ImageWriter;
-import audio.tools.FileCopier;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
@@ -65,6 +63,8 @@ public class ASRScoring extends Scoring {
  // private static final String LM_TO_USE = "LM_TO_USE";
   private static final String HLDA_DIR_DEFAULT = "rsi-sctm-hlda";   // rsi-sctm-hlda
   private static Logger logger = Logger.getLogger(ASRScoring.class);
+  public static final float BLEND_FOREGROUND_BACKGROUND = 0.8f;
+  public static final String SMALL_LM_SLF = "smallLM.slf";
 
   private static final String CFG_TEMPLATE_PROP = "configTemplate";
   private static final String CFG_TEMPLATE_DEFAULT = "generic-nn-model.cfg.template";
@@ -115,15 +115,19 @@ public class ASRScoring extends Scoring {
                                   int imageWidth, int imageHeight, boolean useScoreForBkgColor) {
     return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,
         sentence,
-        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor, Collections.EMPTY_LIST);
+        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
+   * @return
+   */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
                                   String sentence, String imageOutDir,
-                                  int imageWidth, int imageHeight, boolean useScoreForBkgColor, List<String> lmSentences) {
+                                  int imageWidth, int imageHeight, boolean useScoreForBkgColor, List<String> lmSentences, List<String> background) {
     return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,
         sentence,
-        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor,lmSentences);
+        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor,lmSentences, background);
   }
 
   /**
@@ -138,6 +142,7 @@ public class ASRScoring extends Scoring {
    * @param imageWidth
    * @param imageHeight
    * @param useScoreForBkgColor
+   * @param background
    * @return score info coming back from alignment/reco
    */
   private PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
@@ -145,7 +150,8 @@ public class ASRScoring extends Scoring {
                                            String scoringDir,
 
                                            String imageOutDir,
-                                           int imageWidth, int imageHeight, boolean useScoreForBkgColor, List<String> lmSentences) {
+                                           int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+                                           List<String> lmSentences, List<String> background) {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
     File wavFile = new File(pathname);
@@ -182,7 +188,7 @@ public class ASRScoring extends Scoring {
 
       boolean decode = !lmSentences.isEmpty();
       if (decode) {
-        createSLFFile(lmSentences, tmpDir);
+        createSLFFile(lmSentences, background, tmpDir);
       }
 
       // String tmpDir = scoringDir + File.separator + TMP;
@@ -221,24 +227,32 @@ public class ASRScoring extends Scoring {
    * Do the octal conversion to utf-8 text on the result
    *
    * This only works properly on the mac and linux, sorta emulated on win32
+   *
+   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, java.util.List, java.util.List)
    * @param lmSentences
    * @param tmpDir
    */
-  private void createSLFFile(List<String> lmSentences, String tmpDir) {
-    File lmFile = writeLMToFile(lmSentences, tmpDir);
+  private void createSLFFile(List<String> lmSentences, List<String> background, String tmpDir) {
     String platform = Utils.package$.MODULE$.platform();
     String pathToBinDir = deployPath + File.separator + "scoring" + File.separator + "bin." + platform;
-    logger.info("platform  "+platform + " bins " + pathToBinDir);
-    File srilmFile = runNgramCount(tmpDir, lmFile, pathToBinDir);
-    String slfFile = runHBuild(tmpDir,srilmFile,pathToBinDir);
-    //if (new File(slfFile).exists()) {
-    String convertedFile = tmpDir + File.separator + "smallLM.slf";
+    //logger.info("platform  "+platform + " bins " + pathToBinDir);
+    File foregroundLMSentenceFile = writeLMToFile(lmSentences, tmpDir);
+    File foreGroundSRILMFile = runNgramCount(tmpDir, "smallLMOut.srilm", foregroundLMSentenceFile, pathToBinDir, true);
+
+    File backgroundLMSentenceFile = writeLMToFile(background, tmpDir);
+    File backgroundSRILMFile = runNgramCount(tmpDir, "backgroundLMOut.srilm", backgroundLMSentenceFile, pathToBinDir, false);
+
+    File combinedSRILM =runNgram(tmpDir,"combined.srilm",foreGroundSRILMFile,backgroundSRILMFile,pathToBinDir);
+
+    //String slfFile = runHBuild(tmpDir,foreGroundSRILMFile,pathToBinDir);
+    String slfFile = runHBuild(tmpDir,combinedSRILM,pathToBinDir);
+
+    String convertedFile = tmpDir + File.separator + SMALL_LM_SLF;
     doOctalConversion(slfFile, convertedFile);
 
     if (platform.startsWith("win")) {
       // hack -- get slf file from model dir
-      String slfDefaultFile = getModelsDir() + File.separator + "smallLM.slf";
-      //   new FileCopier().copy(slfFile,tmpDir +File.separator+"smallLM.slf");
+      String slfDefaultFile = getModelsDir() + File.separator + SMALL_LM_SLF;
       doOctalConversion(slfDefaultFile, convertedFile);
     }
   }
@@ -246,8 +260,7 @@ public class ASRScoring extends Scoring {
   private void doOctalConversion(String slfFile, String convertedFile) {
     try {
       BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(slfFile), FileExerciseDAO.ENCODING));
-      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(convertedFile), FileExerciseDAO.ENCODING));          //     int count = 0;
-      //   logger.debug("using install path " + installPath);
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(convertedFile), FileExerciseDAO.ENCODING));
       String line2;
       while ((line2 = reader.readLine()) != null) {
         writer.write(package$.MODULE$.oct2string(line2).trim());
@@ -256,12 +269,11 @@ public class ASRScoring extends Scoring {
       reader.close();
       writer.close();
     } catch (IOException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      e.printStackTrace();
     }
   }
 
   /**
-   * ngram-count -text smallLM.txt -lm smallLmOut.srilm -write-vocab out.vocab -order 2 -cdiscount 0.0001 –unk
    * ngram-count -text smallLM.txt -lm smallLmOut.srilm -write-vocab out.vocab -order 2 -cdiscount 0.0001 –unk
    * HBuild -n smallLmOut.srilm -s '<s>' '</s>' out.vocab smallLM.slf
    *
@@ -286,26 +298,55 @@ public class ASRScoring extends Scoring {
 
   /**
    * ngram-count -text smallLM.txt -lm smallLmOut.srilm -write-vocab out.vocab -order 2 -cdiscount 0.0001 –unk
+   * ngram-count -text $1 -lm $2 -order 2 -kndiscount -interpolate -unk
    * @param tmpDir
    * @param lmFile
    * @param pathToBinDir
    * @return
    */
-  private File runNgramCount(String tmpDir, File lmFile, String pathToBinDir) {
-    String srilm = tmpDir + File.separator + "smallLMOut.srilm";
-    ProcessBuilder soxFirst = new ProcessBuilder(pathToBinDir +File.separator+"ngram-count",
+  private File runNgramCount(String tmpDir, String srllmOut, File lmFile, String pathToBinDir, boolean isSmall) {
+    String srilm = tmpDir + File.separator + srllmOut;
+    ProcessBuilder soxFirst = isSmall ? new ProcessBuilder(pathToBinDir +File.separator+"ngram-count",
         "-text",
         lmFile.getAbsolutePath(),
         "-lm",
         srilm,
         "-write-vocab",
-        tmpDir + File.separator + "out.vocab",
+        tmpDir + File.separator + "small_out.vocab",
         "-order",
         "2",
         "-cdiscount",
         "0.0001",
         "-unk"
-        );
+        ) : new ProcessBuilder(pathToBinDir +File.separator+"ngram-count",
+        "-text",
+        lmFile.getAbsolutePath(),
+        "-lm",
+        srilm,
+        "-gt1min", "3",
+        "-gt2min", "3",
+        "-write-vocab",
+        tmpDir + File.separator + "large_out.vocab",
+        "-order",
+        "2",
+        "-kndiscount",
+        "-interpolate",
+        "-unk"
+    );
+    logger.info("ran " +pathToBinDir +File.separator+"ngram-count"+" "+
+        "-text"+" "+
+        lmFile.getAbsolutePath()+" "+
+        "-lm"+" "+
+        srilm+" "+
+        "-gt1min"+" "+ "3"+" "+
+        "-gt2min"+" "+ "3"+" "+
+        "-write-vocab"+" "+
+        tmpDir + File.separator + "large_out.vocab"+" "+
+        "-order"+" "+
+        "2"+" "+
+        "-kndiscount"+" "+
+        "-interpolate"+" "+
+        "-unk");
 
     try {
       new ProcessRunner().runProcess(soxFirst);
@@ -318,15 +359,52 @@ public class ASRScoring extends Scoring {
   }
 
   /**
+   * @see #createSLFFile(java.util.List, java.util.List, String)
+   * $BIN/ngram -lm $1 -lambda $3 -mix-lm $2 -order 2 -unk -write-lm $4.srilm -write-vocab $4.vocab
+   * @param tmpDir
+   * @param foregroundLM
+   * @param pathToBinDir
+   * @return
+   */
+  private File runNgram(String tmpDir, String srilmOut, File foregroundLM, File backgroundLM, String pathToBinDir) {
+    String srilm = tmpDir + File.separator + srilmOut;
+    float weightForForeground = BLEND_FOREGROUND_BACKGROUND;
+    ProcessBuilder ngram = new ProcessBuilder(pathToBinDir +File.separator+"ngram",
+        "-lm",
+        foregroundLM.getAbsolutePath(),
+        "-lambda",
+        ""+weightForForeground,
+        "-mix-lm",
+        backgroundLM.getAbsolutePath(),
+        "-order",
+        "2",
+        "-unk",
+        "-write-lm",
+        srilm,
+        "-write-vocab",
+        tmpDir + File.separator +"out.vocab"
+    );
+
+    try {
+      new ProcessRunner().runProcess(ngram);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    if (!new File(srilm).exists()) logger.error("didn't make " + srilm);
+    return new File(srilm);
+  }
+
+
+  /**
    * HBuild -n smallLmOut.srilm -s '<s>' '</s>' out.vocab smallLM.slf
    * @param tmpDir
    * @param srilmFile
    * @param pathToBinDir
    */
   private String runHBuild(String tmpDir, File srilmFile, String pathToBinDir) {
-    //String srilm = tmpDir + File.separator + "smallLMOut.srilm";
     logger.info("running hbuild on " + srilmFile);
-    String slfOut = tmpDir + File.separator + "smallLMFromHBuild.slf";
+    String slfOut = tmpDir + File.separator + "smallOctalLMFromHBuild.slf";
     ProcessBuilder soxFirst = new ProcessBuilder(pathToBinDir +File.separator+"HBuild",
         "-n",
         srilmFile.getAbsolutePath(),
@@ -335,10 +413,6 @@ public class ASRScoring extends Scoring {
         "</s>",
         tmpDir + File.separator + "out.vocab",
         slfOut
-    );
-    //String cmd = pathToBinDir +File.separator+"HBuild"
-
-    logger.info("proc is " + new HashSet<String>(soxFirst.command())
     );
 
     try {
@@ -461,21 +535,19 @@ public class ASRScoring extends Scoring {
     //logger.debug("using 'dict without sp' file " + dictFile);
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
     long then = System.currentTimeMillis();
-  //  synchronized (this) {   // hydec can't be called concurrently -- not thread safe?
-      try {
-        jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
-          float hydec_score = jscoreOut._1;
-          logger.info("got score " + hydec_score +" and took " + (System.currentTimeMillis()-then) + " millis");
+    try {
+      jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
+      float hydec_score = jscoreOut._1;
+      logger.info("got score " + hydec_score +" and took " + (System.currentTimeMillis()-then) + " millis");
 
-          return new Scores(hydec_score, jscoreOut._2);
-      } catch (AssertionError e) {
-        logger.error("Got assertion error " + e,e);
-        return new Scores();
-      } catch (Exception ee) {
-          logger.info("Got " +ee);
-      }
+      return new Scores(hydec_score, jscoreOut._2);
+    } catch (AssertionError e) {
+      logger.error("Got assertion error " + e,e);
+      return new Scores();
+    } catch (Exception ee) {
+      if (!decode) logger.warn("Got " + ee, ee);  // TODO make pronz not through exception when decoding
+    }
 
-   // }
     logger.info("got score and took " + (System.currentTimeMillis()-then) + " millis");
 
     return new Scores();
@@ -518,7 +590,7 @@ public class ASRScoring extends Scoring {
 
     if (decode) {
       cfgTemplate = getProp(DECODE_CFG_TEMPLATE_PROP, DECODE_CFG_TEMPLATE_DEFAULT);
-      kv.put(LM_TO_USE, tmpDir +File.separator + File.separator + "smallLM.slf"); // hack! TODO hack replace
+      kv.put(LM_TO_USE, tmpDir +File.separator + File.separator + SMALL_LM_SLF); // hack! TODO hack replace
      // new FileCopier().copy(modelsDir+File.separator+"phones.dict",tmpDir+File.separator +"dict");   // Audio.hscore in pron sets dictionary=this value
     }
     logger.info("using config from template " + cfgTemplate);
