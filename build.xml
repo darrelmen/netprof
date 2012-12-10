@@ -92,7 +92,7 @@
     </target>
 
     <target depends="build" name="warLevantine">
-        <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**,config/first/**,config/dari/**,config/pilot/**,scoring/models.dli-dari/**,scoring/models.wsj01-16/**,,scoring/models.dli-ara/**" >
+        <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**,config/first/**,config/autocrt/**,config/dari/**,config/pilot/**,scoring/models.dli-dari/**,scoring/models.wsj01-16/**,scoring/models.dli-ara/**,scoring/models.dli-ara.old/**" >
         </jar>
     </target>
 
