@@ -11,6 +11,9 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/pronz.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/imagewriter.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/lm.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/mira.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/svm.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/imagewriter"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
