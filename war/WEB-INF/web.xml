@@ -31,19 +31,28 @@
 
   <context-param>
     <param-name>config</param-name>
-        <param-value>dari</param-value>
 <!--
-             <param-value>levantine</param-value>
+      <param-value>dari</param-value>
+-->
+
+       <param-value>autocrt</param-value>
+<!--
+                   <param-value>levantine</param-value>
 -->
   <!--        <param-value>pilot</param-value> -->
       <!--    <param-value>pashto</param-value>-->
+<!--
+     <param-value>msa</param-value>
+-->
 
   </context-param>
 
-<!--  <context-param>
+<!--
+  <context-param>
         <param-name>configFile</param-name>
         <param-value>arabicText.properties</param-value>
-  </context-param>-->
+  </context-param>
+-->
 
   <!-- note for the jdbc url, we seem to need an absolute file path on the webserver -->
   <context-param>
@@ -59,17 +68,27 @@
         <param-value>jdbc:h2:file://services/tomcat/webapps/netPron2/config/pilot/vlr-parle;IFEXISTS=TRUE</param-value>
   -->
 
+      <!--
+               <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\levantine\vlr-parle;IFEXISTS=TRUE</param-value>
+
+ -->
+
 <!--
-         <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\levantine\vlr-parle;IFEXISTS=TRUE</param-value>
+           <param-value>jdbc:h2:file://services/tomcat/webapps/npHeadstart2/config/levantine/vlr-parle;IFEXISTS=TRUE</param-value>
 -->
 
 <!--
-            <param-value>jdbc:h2:file://services/tomcat/webapps/npHeadstart2/config/levantine/vlr-parle;IFEXISTS=TRUE</param-value>
--->
       <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\dari\vlr-parle;IFEXISTS=TRUE</param-value>
-<!--
-      <param-value>jdbc:h2:file://services/tomcat/webapps/npDari/config/dari/vlr-parle;IFEXISTS=TRUE</param-value>
 -->
+
+      <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\autocrt\vlr-parle;IFEXISTS=TRUE</param-value>
+<!--
+      <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\msa\vlr-parle;IFEXISTS=TRUE</param-value>
+-->
+
+      <!--
+            <param-value>jdbc:h2:file://services/tomcat/webapps/npDari/config/dari/vlr-parle;IFEXISTS=TRUE</param-value>
+      -->
 <!--
       <param-value>jdbc:h2:file://var/lib/tomcat6/webapps/npDari/vlr-parle;IFEXISTS=TRUE</param-value>
 -->
