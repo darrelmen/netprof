@@ -73,10 +73,10 @@ write-format: reseg
 
 [fe.NNBatch]
 n-output: N_OUTPUT
-n-hidden: 2000,2000
+n-hidden: 2500
 mlp: MODELS_DIR/nn-weights
-frame-window: 13
-#frame-window: 7
+#frame-window: 13
+frame-window: 7
 
 [pron.NNScore]
 phone-index: MODELS_DIR/label-map
