@@ -341,7 +341,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
   private class PostAudioRecordButton extends RecordButton {
     private ScoringAudioPanel widgets;
     private int index;
-
+    int reqid = 0;
     public PostAudioRecordButton(final ScoringAudioPanel widgets, int index) {
       super(new Button(RECORD), AUTO_STOP_DELAY);
       this.widgets = widgets;
@@ -351,11 +351,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     @Override
     protected void stopRecording() {
       controller.stopRecording();
-
+      reqid++;
       service.writeAudioFile(controller.getBase64EncodedWavFile()
           , exercise.getPlan(), exercise.getID(),
           "" + index, "" + controller.getUser(),
-          false, new AsyncCallback<AudioAnswer>() {
+          false, reqid, new AsyncCallback<AudioAnswer>() {
             public void onFailure(Throwable caught) {
               showPopup(AudioAnswer.Validity.INVALID.getPrompt());
             }
@@ -377,6 +377,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
 
             public void onSuccess(AudioAnswer result) {
               System.out.println("PostAudioRecordButton : Got audio answer " + result);
+              if (result.reqid != reqid) {
+                System.out.println("ignoring old response " + result);
+                return;
+              }
               if (result.validity == AudioAnswer.Validity.OK) {
                 widgets.setRefAudio(refAudio, exercise.getRefSentence());
                 widgets.getImagesForPath(wavToMP3(result.path));
