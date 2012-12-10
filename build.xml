@@ -30,6 +30,11 @@
         <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201208080121-rel-r42/gwt-2.4.0/gwt-dev.jar"/>
         <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201208080121-rel-r42/gwt-2.4.0/validation-api-1.0.0.GA-sources.jar"/>
         <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201208080121-rel-r42/gwt-2.4.0/validation-api-1.0.0.GA.jar"/>
+
+        <pathelement location="/Applications/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201201120043-rel-r37/gwt-2.4.0/gwt-user.jar"/>
+        <pathelement location="/Applications/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201201120043-rel-r37/gwt-2.4.0/gwt-dev.jar"/>
+        <pathelement location="/Applications/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201201120043-rel-r37/gwt-2.4.0/validation-api-1.0.0.GA-sources.jar"/>
+        <pathelement location="/Applications/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201201120043-rel-r37/gwt-2.4.0/validation-api-1.0.0.GA.jar"/>
     </path>
     <path id="imagewriter.classpath">
         <pathelement location="${imagewriter.location}/bin"/>
@@ -40,6 +45,7 @@
         <pathelement location="test-classes"/>
         <path refid="GWT SDK [GWT - 2.4.0].libraryclasspath"/>
         <pathelement location="../../eclipse_indigo/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201201120043-rel-r37/gwt-2.4.0/gwt-user.jar"/>
+        <pathelement location="/Applications/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201201120043-rel-r37/gwt-2.4.0/gwt-user.jar"/>
         <pathelement location="war/WEB-INF/lib/json-lib-2.4-jdk15.jar"/>
         <pathelement location="war/WEB-INF/lib/commons-codec-1.6.jar"/>
         <pathelement location="war/WEB-INF/lib/guava-13.0.jar"/>
