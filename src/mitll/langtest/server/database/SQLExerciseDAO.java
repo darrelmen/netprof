@@ -122,7 +122,10 @@ public class SQLExerciseDAO implements ExerciseDAO {
         content = content.replaceAll("source src=\"", "source src=\"" + mediaDir.replaceAll("\\\\", "/") + "/");
         content = content.replaceAll("img src=\"", "img src=\"" + mediaDir.replaceAll("\\\\", "/") + "/");
       }
-     // System.out.println("content " + content);
+      //System.out.println("content " + content);
+      //String noHTML = content.replaceAll("\\<.*?\\>", "");
+      //System.out.println("no html " + noHTML);
+
     }
     Exercise exercise = new Exercise(plan, exid, content, promptInEnglish, recordAudio, content);
     Object qa1 = obj.get("qa");
