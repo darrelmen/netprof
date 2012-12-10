@@ -51,6 +51,7 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase {
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
+  public static final int MAX_EXPORTED_ANSWERS_BKG = 300;
   private static Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   public static final String ANSWERS = "answers";
   private static final int TIMEOUT = 30;
@@ -72,7 +73,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db = new DatabaseImpl(this);
   }
 
-  @Override
   public List<ExerciseShell> getExerciseIds(long userID, boolean useFile, boolean arabicDataCollect) {
     List<Exercise> exercises = getExercises(userID, useFile, arabicDataCollect);
     List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
@@ -82,7 +82,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return ids;
   }
 
-  @Override
   public List<ExerciseShell> getExerciseIds(boolean useFile) {
     List<Exercise> exercises = getExercises(useFile);
     List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
@@ -93,7 +92,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return ids;
   }
 
-  @Override
   public Exercise getExercise(String id, boolean useFile) {
     List<Exercise> exercises = getExercises(useFile);
     for (Exercise e : exercises) {
@@ -102,7 +100,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return null;
   }
 
-  @Override
+  /**
+   * TODO make this work with english questions too
+   * @param useFile
+   * @return
+   */
+  public List<String> getQuestions(boolean useFile) {
+    List<String> questions = new ArrayList<String>();
+    List<Exercise> exercises = getExercises(useFile);
+     for (Exercise e : exercises) {
+       for (Exercise.QAPair qaPair : e.getForeignLanguageQuestions()) questions.add(qaPair.getQuestion());
+     }
+    return questions;
+  }
+
   public Exercise getExercise(String id, long userID, boolean useFile, boolean arabicDataCollect) {
     List<Exercise> exercises = getExercises(userID, useFile, arabicDataCollect);
     for (Exercise e : exercises) {
@@ -373,11 +384,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg) {
-      return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg, Collections.EMPTY_LIST);
+      return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
   }
   /**
    * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
    *
+   * @see #writeAudioFile
    * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param testAudioFile
@@ -385,10 +397,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param width image dim
    * @param height  image dim
    * @param useScoreToColorBkg
+   * @param background
    * @return PretestScore
    **/
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
-                                          int width, int height, boolean useScoreToColorBkg, List<String> lmSentences) {
+                                          int width, int height, boolean useScoreToColorBkg, List<String> lmSentences, List<String> background) {
     logger.info("getASRScoreForAudio scoring " + testAudioFile + " with " + sentence + " req# " + reqid);
 
     assert(testAudioFile != null && sentence != null);
@@ -408,7 +421,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence,
-        getImageOutDir(), width, height, useScoreToColorBkg, lmSentences);
+        getImageOutDir(), width, height, useScoreToColorBkg, lmSentences, background);
     pretestScore.setReqid(reqid);
 
     if (makeFullURLs) {
@@ -538,7 +551,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.isAnswerValid(userID, exercise, questionID, db);
   }
 
-  @Override
   public double getScoreForAnswer(Exercise e, int questionID, String answer) {
     return db.getScoreForExercise(e, questionID, answer);
   }
@@ -612,10 +624,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param question question within the exercise
    * @param user answering the question
    * @param doAutoCRT
+   * @param reqid
    * @return URL to audio on server and if audio is valid (not too short, etc.)
    */
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, String question,
-                                    String user, boolean doAutoCRT) {
+                                    String user, boolean doAutoCRT, int reqid) {
     String wavPath = getLocalPathToAnswer(plan, exercise, question, user);
 
     File file = getAbsoluteFile(wavPath);
@@ -625,39 +638,66 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.answerDAO.addAnswer(Integer.parseInt(user), plan, exercise, questionID, "", file.getPath(),
         validity == AudioAnswer.Validity.OK, db);
 
-    // TODO check for autoCRT flag  x
-    // call getASRScoreForAudio
-    // create a sentence out of the result
-    // score the sentence
-    // return the sentence and score (expand returned object)
-    // use new pronz
-    // use new config
-
     String wavPathWithForwardSlashSeparators = ensureForwardSlashes(wavPath);
     String url = optionallyMakeURL(wavPathWithForwardSlashSeparators);
     logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
 
-    if (doAutoCRT) {
-     // String test = "خليني";
-      //System.out.println("scoring " + test);
-
-
+    if (doAutoCRT && validity == AudioAnswer.Validity.OK) {
       List<String> exportedAnswers = db.getExportedAnswers(exercise, questionID);
-      //System.out.println("got " + new HashSet<String>(exportedAnswers));
+      Exercise e = getExercise(exercise, false); // TODO : hack need to pass in useFile
+      //for (Exercise.QAPair pair : e.getForeignLanguageQuestions()) exportedAnswers.add(pair.getQuestion());
+      logger.info("got answers " + new HashSet<String>(exportedAnswers));
 
-      PretestScore asrScoreForAudio = getASRScoreForAudio(0, file.getPath(), "", 128, 128, false, exportedAnswers);
+      //List<String> background = getQuestions(false);
+      List<String> background = getBackgroundText(e);
+
+   /*   for (String b : background) logger.debug("background '" +  b +
+          "'");*/
+      PretestScore asrScoreForAudio = getASRScoreForAudio(0, file.getPath(), "", 128, 128, false, exportedAnswers, background);
 
       String recoSentence = asrScoreForAudio.getRecoSentence();
-      logger.warn("reco sentence was '" + recoSentence + "'");
+      logger.info("reco sentence was '" + recoSentence + "'");
 
-
-
-      double scoreForAnswer = getScoreForAnswer(getExercise(exercise, false), questionID, recoSentence);
-      return new AudioAnswer(url, validity, recoSentence, scoreForAnswer);
+      double scoreForAnswer = (recoSentence.length() > 0) ? getScoreForAnswer(getExercise(exercise, false), questionID, recoSentence) :0.0d;
+      return new AudioAnswer(url, validity, recoSentence, scoreForAnswer, reqid);
     }
     else {
-      return new AudioAnswer(url, validity);
+      return new AudioAnswer(url, validity, reqid);
     }
+  }
+
+  private List<String> getBackgroundText(Exercise e) {
+    List<String> background = new ArrayList<String>();
+    String content = e.getContent().replaceAll("\\<.*?\\>", "").replaceAll("&nbsp;", "");
+    for (String line : content.split("\n")) {
+      String trimmed = line.trim();
+      if (trimmed.length() > 0 && !trimmed.contains("Orient") && !trimmed.contains("Listen")) background.add(trimmed);
+    }
+    //background.add(content);
+    for (Exercise.QAPair pair : e.getForeignLanguageQuestions())  {
+      background.add(pair.getQuestion());
+    }
+
+    int c = 0;
+    for (String answer : db.getAllExportedAnswers()) {
+    //  boolean allDigit = true;
+      StringBuilder b = new StringBuilder();
+      for (int i = 0; i < answer.length(); i++) {
+        if (!Character.isDigit(answer.charAt(i))) {
+          b.append(answer.charAt(i));
+        }
+        else {
+          b.append(" ");
+        }
+      }
+      String result = b.toString().trim();
+      if (result.length() > 0) background.add(result);
+      if (c++ > MAX_EXPORTED_ANSWERS_BKG) break;
+    }
+    // background.addAll(db.getAllExportedAnswers());
+
+    logger.info("background has " + background.size() + " lines");
+    return background;
   }
 
   private String optionallyMakeURL(String wavPathWithForwardSlashSeparators) {
@@ -721,7 +761,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * C:\Users\go22670\apache-tomcat-7.0.25\webapps\netPron2\answers\repeat\nl0020_ams\0\subject--1\answer_1349987649590.wav
    *
-   * @see #writeAudioFile(String, String, String, String, String)
+   * @see #writeAudioFile
    * @param plan
    * @param exercise
    * @param question
