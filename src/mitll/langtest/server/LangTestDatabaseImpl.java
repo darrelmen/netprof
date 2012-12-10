@@ -51,6 +51,7 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase {
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
+  public static final int MAX_EXPORTED_ANSWERS_BKG = 300;
   private static Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   public static final String ANSWERS = "answers";
   private static final int TIMEOUT = 30;
@@ -677,6 +678,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       background.add(pair.getQuestion());
     }
 
+    int c = 0;
     for (String answer : db.getAllExportedAnswers()) {
     //  boolean allDigit = true;
       StringBuilder b = new StringBuilder();
@@ -690,6 +692,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
       String result = b.toString().trim();
       if (result.length() > 0) background.add(result);
+      if (c++ > MAX_EXPORTED_ANSWERS_BKG) break;
     }
     // background.addAll(db.getAllExportedAnswers());
 
