@@ -296,11 +296,16 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
 
       check.addClickHandler(new ClickHandler() {
         public void onClick(ClickEvent event) {
+          check.setEnabled(false);
           service.getScoreForAnswer(exercise, index, answer.getText(), new AsyncCallback<Double>() {
             @Override
-            public void onFailure(Throwable caught) {}
+            public void onFailure(Throwable caught) {
+              check.setEnabled(true);
+            }
             @Override
             public void onSuccess(Double result) {
+              check.setEnabled(true);
+
               String percent = ((int) (result * 100)) + "%";
               if (result > 0.6) {
                 resp.setText("Correct! Score was " + percent);
