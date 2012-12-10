@@ -63,7 +63,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
     check.setAltText("Audio Saved");
     check.setVisible(false);
 
-    add(check);
+    if (!controller.isAutoCRTMode()) add(check);
   }
 
   @Override
