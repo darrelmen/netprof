@@ -26,7 +26,7 @@ output: tmp/levantine.out
 output-index: 1
 
 [Processing Stages]
-decprocess: 1 = 0   :> decode.Splitter -> fe.SPFE -> decode.Align[dictionary="TEMP_DIR/dict-with-sp"] -> decode.ResegmentDecoderOutput -> decode.Reco2Meta -> fe.NNBatch -> decode.HybridAlign[align-transcript="",dictionary="TEMP_DIR/dict-wo-sp"] -> pron.NNScore
+decprocess: 1 = 0   :> fe.SPFE -> decode.Align[dictionary="TEMP_DIR/dict-with-sp", align-transcript="TEMP_DIR/trans" ] -> decode.ResegmentDecoderOutput -> decode.Reco2Meta -> decode.SegmentedFeatureFile2SegmentedFile -> fe.SPFE -> fe.NNBatch -> decode.HybridAlign[align-transcript="TEMP_DIR/reseg.trans", dictionary="TEMP_DIR/dict-wo-sp"] -> pron.NNScore
 
 [E-mail Experiment Options]
 name: 
@@ -50,8 +50,7 @@ lpcorder: 12
 
 
 [decode.Align]
-models: MODELS_DIR/rsi-sctm-hlda
-align-transcript: /data/archive/jray/dli/levantine/trans.lev.test  
+models: MODELS_DIR/HLDA_DIR
 output-type: words+sil
 
 [decode.ResegmentDecoderOutput]
@@ -61,11 +60,12 @@ split-threshold: 0.50
 sil-padding: 0.25
 
 [decode.Reco2Meta]
-write-transcript: 
+write-transcript: reseg
 write-format: reseg
+outdir: TEMP_DIR
 
 [fe.NNBatch]
-n-output: 38
+n-output: N_OUTPUT
 n-hidden: 2500
 mlp: MODELS_DIR/nn-weights
 frame-window: 7
@@ -73,8 +73,8 @@ frame-window: 7
 [decode.HybridAlign]
 grammar: MODELS_DIR/grammar.align
 trace-flags: 3
-dictionary: MODELS_DIR/rsi-sctm-hlda/dict-wo-sp
-opt-sil: true
+dictionary: MODELS_DIR/HLDA_DIR/dict-wo-sp
+opt-sil: OPT_SIL
 
 [pron.NNScore]
 phone-index: MODELS_DIR/label-map
