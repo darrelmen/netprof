@@ -78,6 +78,7 @@ public class ASRScoring extends Scoring {
  // private final Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
   private final Cache<String, Scores> audioToScore;
   private final Map<String, String> properties;
+  private final String platform = Utils.package$.MODULE$.platform();
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
@@ -232,29 +233,32 @@ public class ASRScoring extends Scoring {
    * @param lmSentences
    * @param tmpDir
    */
-  private void createSLFFile(List<String> lmSentences, List<String> background, String tmpDir) {
-    String platform = Utils.package$.MODULE$.platform();
-    String pathToBinDir = deployPath + File.separator + "scoring" + File.separator + "bin." + platform;
-    //logger.info("platform  "+platform + " bins " + pathToBinDir);
-    File foregroundLMSentenceFile = writeLMToFile(lmSentences, tmpDir);
-    File foreGroundSRILMFile = runNgramCount(tmpDir, "smallLMOut.srilm", foregroundLMSentenceFile, pathToBinDir, true);
-
-    File backgroundLMSentenceFile = writeLMToFile(background, tmpDir);
-    File backgroundSRILMFile = runNgramCount(tmpDir, "backgroundLMOut.srilm", backgroundLMSentenceFile, pathToBinDir, false);
-
-    File combinedSRILM =runNgram(tmpDir,"combined.srilm",foreGroundSRILMFile,backgroundSRILMFile,pathToBinDir);
-
-    //String slfFile = runHBuild(tmpDir,foreGroundSRILMFile,pathToBinDir);
-    String slfFile = runHBuild(tmpDir,combinedSRILM,pathToBinDir);
-
+  private String createSLFFile(List<String> lmSentences, List<String> background, String tmpDir) {
     String convertedFile = tmpDir + File.separator + SMALL_LM_SLF;
-    doOctalConversion(slfFile, convertedFile);
-
     if (platform.startsWith("win")) {
       // hack -- get slf file from model dir
       String slfDefaultFile = getModelsDir() + File.separator + SMALL_LM_SLF;
       doOctalConversion(slfDefaultFile, convertedFile);
     }
+    else {
+      String platform = Utils.package$.MODULE$.platform();
+      String pathToBinDir = deployPath + File.separator + "scoring" + File.separator + "bin." + platform;
+      //logger.info("platform  "+platform + " bins " + pathToBinDir);
+      File foregroundLMSentenceFile = writeLMToFile(lmSentences, tmpDir);
+      File foreGroundSRILMFile = runNgramCount(tmpDir, "smallLMOut.srilm", foregroundLMSentenceFile, pathToBinDir, true);
+
+      File backgroundLMSentenceFile = writeLMToFile(background, tmpDir);
+      File backgroundSRILMFile = runNgramCount(tmpDir, "backgroundLMOut.srilm", backgroundLMSentenceFile, pathToBinDir, false);
+
+      File combinedSRILM =runNgram(tmpDir,"combined.srilm",foreGroundSRILMFile,backgroundSRILMFile,pathToBinDir);
+
+      //String slfFile = runHBuild(tmpDir,foreGroundSRILMFile,pathToBinDir); // only use foreground model
+      String slfFile = runHBuild(tmpDir,combinedSRILM,pathToBinDir);
+
+      doOctalConversion(slfFile, convertedFile);
+    }
+    if (!new File(convertedFile).exists()) logger.error("Couldn't create " +convertedFile);
+    return convertedFile;
   }
 
   private void doOctalConversion(String slfFile, String convertedFile) {
@@ -456,6 +460,11 @@ public class ASRScoring extends Scoring {
     return typeToEndTimes;
   }
 
+  /**
+   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, java.util.List, java.util.List)
+   * @param eventAndFileInfo
+   * @return
+   */
   private String getRecoSentence(ImageWriter.EventAndFileInfo eventAndFileInfo) {
     StringBuilder b = new StringBuilder();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
