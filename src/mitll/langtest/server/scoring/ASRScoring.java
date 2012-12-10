@@ -45,6 +45,8 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoring extends Scoring {
+  private static Logger logger = Logger.getLogger(ASRScoring.class);
+
   private static final String DICT_WO_SP = "dict-wo-sp";
   private static final String GRAMMAR_ALIGN_TEMPLATE = "grammar.align.template";
   private static final String GRAMMAR_ALIGN =
@@ -60,9 +62,8 @@ public class ASRScoring extends Scoring {
   private static final String OPT_SIL_DEFAULT = "true";   // rsi-sctm-hlda
   private static final String HLDA_DIR = "HLDA_DIR";
   private static final String LM_TO_USE = "LM_TO_USE";
- // private static final String LM_TO_USE = "LM_TO_USE";
-  private static final String HLDA_DIR_DEFAULT = "rsi-sctm-hlda";   // rsi-sctm-hlda
-  private static Logger logger = Logger.getLogger(ASRScoring.class);
+
+  private static final String HLDA_DIR_DEFAULT = "rsi-sctm-hlda";
   public static final float BLEND_FOREGROUND_BACKGROUND = 0.8f;
   public static final String SMALL_LM_SLF = "smallLM.slf";
 
@@ -73,7 +74,6 @@ public class ASRScoring extends Scoring {
   private static final String DECODE_CFG_TEMPLATE_DEFAULT = "arabic-nn-model-decode.cfg.template";
 
   private static final String DEFAULT_MODELS_DIR = "models.dli-levantine";
- // private static final String MODEL_CFG = CFG_TEMPLATE_DEFAULT.substring(0,CFG_TEMPLATE_DEFAULT.length()-".template".length());
 
  // private final Map<String, ASRParameters> languageLookUp = new HashMap<String, ASRParameters>();
   private final Cache<String, Scores> audioToScore;
