@@ -4,20 +4,12 @@
 package mitll.langtest.client.recorder;
 
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
-import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
@@ -111,6 +103,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
       resp.removeStyleName("incorrect");
       resp.removeStyleName("correct");
       resp.setText("Scoring... please wait.");
+
     }
   }
 
@@ -125,12 +118,12 @@ public class SimpleRecordPanel extends RecordButtonPanel {
   private void showAudioValidity(AudioAnswer.Validity result, ExerciseQuestionState questionState, Panel outer) {
     check.setVisible(false);
     if (result == AudioAnswer.Validity.OK) {
-      check.setUrl(IMAGES_CHECKMARK);
+      if (!controller.isAutoCRTMode()) check.setUrl(IMAGES_CHECKMARK);
       check.setAltText("Audio Saved");
       questionState.recordCompleted(outer);
     }
     else {
-      check.setUrl(IMAGES_REDX_PNG);
+      if (!controller.isAutoCRTMode()) check.setUrl(IMAGES_REDX_PNG);
       check.setAltText("Audio Invalid");
       questionState.recordIncomplete(outer);
 
