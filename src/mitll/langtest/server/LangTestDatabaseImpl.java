@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase {
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
-  public static final int MAX_EXPORTED_ANSWERS_BKG = 300;
+  public static final int MAX_EXPORTED_ANSWERS_BKG = 100;
   private static Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   public static final String ANSWERS = "answers";
   private static final int TIMEOUT = 30;
