@@ -305,7 +305,10 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
             @Override
             public void onSuccess(Double result) {
               check.setEnabled(true);
-
+              result *= 2.5;
+              result -= 1.25;
+              result = Math.max(0,result);
+              result = Math.min(1.0,result);
               String percent = ((int) (result * 100)) + "%";
               if (result > 0.6) {
                 resp.setText("Correct! Score was " + percent);
