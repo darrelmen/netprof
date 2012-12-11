@@ -45,6 +45,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoring extends Scoring {
+  public static final String FINAL_BLEND_VOCAB = "finalBlend.vocab";
   private static Logger logger = Logger.getLogger(ASRScoring.class);
 
   private static final String DICT_WO_SP = "dict-wo-sp";
@@ -116,7 +117,7 @@ public class ASRScoring extends Scoring {
                                   int imageWidth, int imageHeight, boolean useScoreForBkgColor) {
     return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,
         sentence,
-        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor, Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
   }
 
   /**
@@ -125,10 +126,10 @@ public class ASRScoring extends Scoring {
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
                                   String sentence, String imageOutDir,
-                                  int imageWidth, int imageHeight, boolean useScoreForBkgColor, List<String> lmSentences, List<String> background) {
+                                  int imageWidth, int imageHeight, boolean useScoreForBkgColor, List<String> lmSentences, List<String> background, List<String> vocab) {
     return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,
         sentence,
-        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor,lmSentences, background);
+        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor,lmSentences, background, vocab);
   }
 
   /**
@@ -144,6 +145,7 @@ public class ASRScoring extends Scoring {
    * @param imageHeight
    * @param useScoreForBkgColor
    * @param background
+   * @param vocab
    * @return score info coming back from alignment/reco
    */
   private PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
@@ -152,7 +154,7 @@ public class ASRScoring extends Scoring {
 
                                            String imageOutDir,
                                            int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-                                           List<String> lmSentences, List<String> background) {
+                                           List<String> lmSentences, List<String> background, List<String> vocab) {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
     File wavFile = new File(pathname);
@@ -189,7 +191,7 @@ public class ASRScoring extends Scoring {
 
       boolean decode = !lmSentences.isEmpty();
       if (decode) {
-        createSLFFile(lmSentences, background, tmpDir);
+        createSLFFile(lmSentences, background, vocab, tmpDir);
       }
 
       // String tmpDir = scoringDir + File.separator + TMP;
@@ -229,11 +231,11 @@ public class ASRScoring extends Scoring {
    *
    * This only works properly on the mac and linux, sorta emulated on win32
    *
-   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, java.util.List, java.util.List)
+   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, java.util.List
    * @param lmSentences
    * @param tmpDir
    */
-  private String createSLFFile(List<String> lmSentences, List<String> background, String tmpDir) {
+  private String createSLFFile(List<String> lmSentences, List<String> background,  List<String> vocab, String tmpDir) {
     String convertedFile = tmpDir + File.separator + SMALL_LM_SLF;
     if (platform.startsWith("win")) {
       // hack -- get slf file from model dir
@@ -245,10 +247,12 @@ public class ASRScoring extends Scoring {
       String pathToBinDir = deployPath + File.separator + "scoring" + File.separator + "bin." + platform;
       //logger.info("platform  "+platform + " bins " + pathToBinDir);
       File foregroundLMSentenceFile = writeLMToFile(lmSentences, tmpDir);
-      File foreGroundSRILMFile = runNgramCount(tmpDir, "smallLMOut.srilm", foregroundLMSentenceFile, pathToBinDir, true);
+      File foreGroundSRILMFile = runNgramCount(tmpDir, "smallLMOut.srilm", foregroundLMSentenceFile, null, pathToBinDir, true);
 
       File backgroundLMSentenceFile = writeLMToFile(background, tmpDir);
-      File backgroundSRILMFile = runNgramCount(tmpDir, "backgroundLMOut.srilm", backgroundLMSentenceFile, pathToBinDir, false);
+      String vocabFile = tmpDir + File.separator + "largeVocab.txt";
+      writeVocab(vocabFile,vocab);
+      File backgroundSRILMFile = runNgramCount(tmpDir, "backgroundLMOut.srilm", backgroundLMSentenceFile, vocabFile, pathToBinDir, false);
 
       File combinedSRILM =runNgram(tmpDir,"combined.srilm",foreGroundSRILMFile,backgroundSRILMFile,pathToBinDir);
 
@@ -271,6 +275,20 @@ public class ASRScoring extends Scoring {
         writer.write("\n");
       }
       reader.close();
+      writer.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void writeVocab(String vocabFile, List<String> vocab) {
+    try {
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(vocabFile), FileExerciseDAO.ENCODING));
+
+      for (String v : vocab) {
+        writer.write(v +"\n");
+     //   writer.write("\n");
+      }
       writer.close();
     } catch (IOException e) {
       e.printStackTrace();
@@ -308,7 +326,7 @@ public class ASRScoring extends Scoring {
    * @param pathToBinDir
    * @return
    */
-  private File runNgramCount(String tmpDir, String srllmOut, File lmFile, String pathToBinDir, boolean isSmall) {
+  private File runNgramCount(String tmpDir, String srllmOut, File lmFile, String vocabFile, String pathToBinDir, boolean isSmall) {
     String srilm = tmpDir + File.separator + srllmOut;
     ProcessBuilder soxFirst = isSmall ? new ProcessBuilder(pathToBinDir +File.separator+"ngram-count",
         "-text",
@@ -327,8 +345,10 @@ public class ASRScoring extends Scoring {
         lmFile.getAbsolutePath(),
         "-lm",
         srilm,
-        "-gt1min", "3",
-        "-gt2min", "3",
+       // "-gt1min", "3",
+       // "-gt2min", "3",
+        "-vocab",
+        vocabFile,
         "-write-vocab",
         tmpDir + File.separator + "large_out.vocab",
         "-order",
@@ -363,7 +383,7 @@ public class ASRScoring extends Scoring {
   }
 
   /**
-   * @see #createSLFFile(java.util.List, java.util.List, String)
+   * @see #createSLFFile
    * $BIN/ngram -lm $1 -lambda $3 -mix-lm $2 -order 2 -unk -write-lm $4.srilm -write-vocab $4.vocab
    * @param tmpDir
    * @param foregroundLM
@@ -386,7 +406,7 @@ public class ASRScoring extends Scoring {
         "-write-lm",
         srilm,
         "-write-vocab",
-        tmpDir + File.separator +"out.vocab"
+        tmpDir + File.separator + FINAL_BLEND_VOCAB
     );
 
     try {
@@ -415,7 +435,7 @@ public class ASRScoring extends Scoring {
         "-s",
         "<s>",
         "</s>",
-        tmpDir + File.separator + "out.vocab",
+        tmpDir + File.separator + FINAL_BLEND_VOCAB,
         slfOut
     );
 
@@ -461,7 +481,7 @@ public class ASRScoring extends Scoring {
   }
 
   /**
-   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, java.util.List, java.util.List)
+   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, java.util.List
    * @param eventAndFileInfo
    * @return
    */
@@ -517,7 +537,7 @@ public class ASRScoring extends Scoring {
      * @return
      */
   private Scores computeRepeatExerciseScores(Audio testAudio, String sentence, String tmpDir, boolean decode) {
-    String platform = Utils.package$.MODULE$.platform();
+    //String platform = Utils.package$.MODULE$.platform();
     String modelsDir = getModelsDir();
 
     // Make sure that we have an absolute path to the config and dict files.
@@ -586,7 +606,6 @@ public class ASRScoring extends Scoring {
    * @return path to config file
    */
   private String getHydecConfigFile(String tmpDir, String modelsDir, boolean decode) {
-    String platform = Utils.package$.MODULE$.platform();
     boolean onWindows = platform.startsWith("win");
     Map<String,String> kv = new HashMap<String, String>();
 
@@ -624,8 +643,6 @@ public class ASRScoring extends Scoring {
   }
 
   private String getModelsDir() {
-    String platform = Utils.package$.MODULE$.platform();
-
     String modelsDir = scoringDir + File.separator + getProp(MODELS_DIR_VARIABLE, DEFAULT_MODELS_DIR);
     if (platform.startsWith("win")) {
       modelsDir = modelsDir.replaceAll("\\\\","\\\\\\\\");
