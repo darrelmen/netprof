@@ -84,8 +84,15 @@ public class SimpleRecordPanel extends RecordButtonPanel {
     showAudioValidity(result.validity, questionState, outer);
     setAudioTag(result.path);
 
-    if (result.decodeOutput.length() > 0) {    // i.e. autocrt -- revisit?
-      String percent = ((int) (result.score * 100)) + "%";
+    if (result.decodeOutput.length() > 0) {
+
+      // i.e. autocrt -- revisit?
+      double score = result.score;
+      score *= 2.5;
+      score -= 1.25;
+      score = Math.max(0,score);
+      score = Math.min(1.0,score);
+      String percent = ((int) (score * 100)) + "%";
       if (result.score > 0.6) {
         resp.setText("Correct! Score for '" + result.decodeOutput + "' was " + percent);
         resp.setStyleName("correct");
