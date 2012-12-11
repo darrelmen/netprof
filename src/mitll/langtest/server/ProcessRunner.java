@@ -16,7 +16,6 @@ import java.util.Date;
 public class ProcessRunner {
   private static final boolean SHOW_OUTPUT = true;
 
-
   public void runProcess(ProcessBuilder shellProc) throws IOException {
    // System.out.println(new Date() + " : proc " + shellProc.command() + " started...");
 
