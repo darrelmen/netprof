@@ -25,20 +25,9 @@ import org.apache.log4j.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
@@ -384,7 +373,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg) {
-      return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+      return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg, Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
   }
   /**
    * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
@@ -398,10 +387,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param height  image dim
    * @param useScoreToColorBkg
    * @param background
+   * @param vocab
    * @return PretestScore
    **/
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
-                                          int width, int height, boolean useScoreToColorBkg, List<String> lmSentences, List<String> background) {
+                                          int width, int height, boolean useScoreToColorBkg, List<String> lmSentences,
+                                          List<String> background, List<String> vocab) {
     logger.info("getASRScoreForAudio scoring " + testAudioFile + " with " + sentence + " req# " + reqid);
 
     assert(testAudioFile != null && sentence != null);
@@ -421,7 +412,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence,
-        getImageOutDir(), width, height, useScoreToColorBkg, lmSentences, background);
+        getImageOutDir(), width, height, useScoreToColorBkg, lmSentences, background, vocab);
     pretestScore.setReqid(reqid);
 
     if (makeFullURLs) {
@@ -650,10 +641,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       //List<String> background = getQuestions(false);
       List<String> background = getBackgroundText(e);
-
+      List<String> vocab = getVocab(background);
    /*   for (String b : background) logger.debug("background '" +  b +
           "'");*/
-      PretestScore asrScoreForAudio = getASRScoreForAudio(0, file.getPath(), "", 128, 128, false, exportedAnswers, background);
+      PretestScore asrScoreForAudio = getASRScoreForAudio(0, file.getPath(), "", 128, 128, false, exportedAnswers, background, vocab);
 
       String recoSentence = asrScoreForAudio.getRecoSentence();
       logger.info("reco sentence was '" + recoSentence + "'");
@@ -666,6 +657,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  /**
+   * @see #writeAudioFile(String, String, String, String, String, boolean, int)
+   * @param e
+   * @return
+   */
   private List<String> getBackgroundText(Exercise e) {
     List<String> background = new ArrayList<String>();
     String content = e.getContent().replaceAll("\\<.*?\\>", "").replaceAll("&nbsp;", "");
@@ -673,7 +669,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       String trimmed = line.trim();
       if (trimmed.length() > 0 && !trimmed.contains("Orient") && !trimmed.contains("Listen")) background.add(trimmed);
     }
-    //background.add(content);
+
     for (Exercise.QAPair pair : e.getForeignLanguageQuestions())  {
       background.add(pair.getQuestion());
     }
@@ -692,12 +688,58 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
       String result = b.toString().trim();
       if (result.length() > 0) background.add(result);
-      if (c++ > MAX_EXPORTED_ANSWERS_BKG) break;
+      //if (c++ > MAX_EXPORTED_ANSWERS_BKG) break;
     }
     // background.addAll(db.getAllExportedAnswers());
 
     logger.info("background has " + background.size() + " lines");
     return background;
+  }
+
+  private List<String> getVocab(List<String> background) {
+    List<String> all = new ArrayList<String>();
+    all.addAll(Arrays.asList("-pau-", "</s>", "<s>", "<unk>"));
+
+    final Map<String,Integer> sc = new HashMap<String, Integer>();
+    for (String l : background) {
+      for (String t : l.split("\\s")) {
+        String tt = t.replaceAll("\\p{P}","");
+        if (tt.trim().length() > 0) {
+          Integer c = sc.get(t);
+          if (c == null) sc.put(t,1);
+          else sc.put(t,c+1);
+        }
+      }
+    }
+    List<String> vocab = null;
+    try {
+/*      System.out.println("map : " +sc);
+
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("map"), FileExerciseDAO.ENCODING));
+      for (Map.Entry<String, Integer> kv : sc.entrySet()) writer.write(kv.getKey() +"\t"+kv.getValue()+"\n");
+      writer.close();*/
+
+      vocab = new ArrayList<String>(sc.keySet());
+      Collections.sort(vocab, new Comparator<String>() {
+        public int compare(String s, String s2) {
+          Integer first = sc.get(s);
+          Integer second = sc.get(s2);
+          return first < second ? +1 : first > second ? -1 : 0;
+        }
+      });
+
+ /*     writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("vocab"), FileExerciseDAO.ENCODING));
+      for (String v : vocab) writer.write(v+"\n");
+      writer.close();*/
+    } catch (Exception e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+
+    //System.out.println("map : " +sc);
+
+    all.addAll(vocab.subList(0,Math.min(vocab.size(),200)));
+  //  System.out.println("vocab " + new HashSet<String>(all));
+    return all;
   }
 
   private String optionallyMakeURL(String wavPathWithForwardSlashSeparators) {
