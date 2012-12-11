@@ -189,7 +189,11 @@ public class ASRScoring extends Scoring {
 
       boolean decode = !lmSentences.isEmpty();
       if (decode) {
-        createSLFFile(lmSentences, background, tmpDir);
+        String slfFile = createSLFFile(lmSentences, background, tmpDir);
+        if (! new File(slfFile).exists()) {
+          logger.error("couldn't make slf file?");
+          return new PretestScore();
+        }
       }
 
       // String tmpDir = scoringDir + File.separator + TMP;
@@ -288,7 +292,7 @@ public class ASRScoring extends Scoring {
 
   private File writeLMToFile(List<String> lmSentences, String tmpDir) {
     try {
-      File outFile = new File(tmpDir, "smallLM.txt");
+      File outFile = new File(tmpDir, "smallLM_" +lmSentences.size()+ ".txt");
       logger.info("wrote lm to " +outFile.getAbsolutePath());
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), FileExerciseDAO.ENCODING));
       for (String s : lmSentences) writer.write(s.trim().replaceAll("\\p{P}","") + "\n");
@@ -327,8 +331,8 @@ public class ASRScoring extends Scoring {
         lmFile.getAbsolutePath(),
         "-lm",
         srilm,
-        "-gt1min", "3",
-        "-gt2min", "3",
+   //     "-gt1min", "3",
+    //    "-gt2min", "3",
         "-write-vocab",
         tmpDir + File.separator + "large_out.vocab",
         "-order",
@@ -337,13 +341,14 @@ public class ASRScoring extends Scoring {
         "-interpolate",
         "-unk"
     );
+
     logger.info("ran " +pathToBinDir +File.separator+"ngram-count"+" "+
         "-text"+" "+
         lmFile.getAbsolutePath()+" "+
         "-lm"+" "+
         srilm+" "+
-        "-gt1min"+" "+ "3"+" "+
-        "-gt2min"+" "+ "3"+" "+
+      //  "-gt1min"+" "+ "3"+" "+
+     //   "-gt2min"+" "+ "3"+" "+
         "-write-vocab"+" "+
         tmpDir + File.separator + "large_out.vocab"+" "+
         "-order"+" "+
@@ -358,7 +363,36 @@ public class ASRScoring extends Scoring {
       e.printStackTrace();
     }
 
-    if (!new File(srilm).exists()) logger.error("didn't make " + srilm);
+    if (!new File(srilm).exists()) {
+      logger.warn("didn't make " + srilm);
+      if (!isSmall) {
+        ProcessBuilder soxFirst2 = new ProcessBuilder(pathToBinDir +File.separator+"ngram-count",
+            "-text",
+            lmFile.getAbsolutePath(),
+            "-lm",
+            srilm,
+            //     "-gt1min", "3",
+            //    "-gt2min", "3",
+            "-write-vocab",
+            tmpDir + File.separator + "large_out.vocab",
+            "-order",
+            "2",
+            "-cdiscount",
+            "0.0001",
+            "-unk");
+
+        try {
+          new ProcessRunner().runProcess(soxFirst2);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+
+
+    if (!new File(srilm).exists()) {
+      logger.error("didn't make " + srilm);
+    }
     return new File(srilm);
   }
 
