@@ -364,6 +364,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     String arabicCollect = Window.Location.getParameter(ARABIC_COLLECT);
     String turk = Window.Location.getParameter(TURK);
     String bkgColorForRefParam = Window.Location.getParameter(BKG_COLOR_FOR_REF);
+    String demoParam = Window.Location.getParameter(DEMO_MODE);
 
     String exercise_title = Window.Location.getParameter(EXERCISE_TITLE);
     if (exercise_title != null) {
@@ -405,6 +406,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     if (bkgColorForRefParam != null) {
       bkgColorForRef = !bkgColorForRefParam.equals("false");
+    }
+    if (demoParam != null) {
+      demoMode = !demoParam.equals("false");
     }
     return grading;
   }

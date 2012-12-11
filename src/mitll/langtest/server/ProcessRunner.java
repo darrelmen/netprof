@@ -14,7 +14,8 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public class ProcessRunner {
-  private static final boolean SHOW_OUTPUT = false;
+  private static final boolean SHOW_OUTPUT = true;
+
 
   public void runProcess(ProcessBuilder shellProc) throws IOException {
    // System.out.println(new Date() + " : proc " + shellProc.command() + " started...");
