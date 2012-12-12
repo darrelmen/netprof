@@ -371,6 +371,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return testAudioFile;
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @param reqid
+   * @param testAudioFile
+   * @param sentence
+   * @param width
+   * @param height
+   * @param useScoreToColorBkg
+   * @return
+   */
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg) {
       return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg, Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
