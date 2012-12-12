@@ -3,6 +3,7 @@ package mitll.langtest.client.scoring;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -124,6 +125,8 @@ public abstract class ScoringAudioPanel extends AudioPanel {
                                      final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                                      final ImageAndCheck speechTranscript, int toUse, int height, int reqid);
 
+  private static final String IMAGES_REDX_PNG  = LangTest.LANGTEST_IMAGES +"redx.png";
+
   /**
    * Record the image URLs in the Image widgets and enable the check boxes
    * @see ASRScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
@@ -139,8 +142,14 @@ public abstract class ScoringAudioPanel extends AudioPanel {
     if (result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT) != null) {
       showImageAndCheck(result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT), wordTranscript);
     }
+    else {
+      wordTranscript.image.setUrl(IMAGES_REDX_PNG);
+    }
     if (result.getsTypeToImage().get(NetPronImageType.PHONE_TRANSCRIPT) != null) {
       showImageAndCheck(result.getsTypeToImage().get(NetPronImageType.PHONE_TRANSCRIPT), phoneTranscript);
+    }
+    else {
+      phoneTranscript.image.setUrl(IMAGES_REDX_PNG);
     }
     if (result.getsTypeToImage().get(NetPronImageType.SPEECH_TRANSCRIPT) != null) {
       showImageAndCheck(result.getsTypeToImage().get(NetPronImageType.SPEECH_TRANSCRIPT), speechTranscript);
