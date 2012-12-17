@@ -7,6 +7,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.Export;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.DTWScoring;
 import mitll.langtest.shared.AudioAnswer;
@@ -649,12 +650,39 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       String recoSentence = asrScoreForAudio.getRecoSentence();
       logger.info("reco sentence was '" + recoSentence + "'");
 
+      List<String> good = new ArrayList<String>();
+      List<String> bad = new ArrayList<String>();
+      for (Export.ResponseAndGrade resp : db.getExportForExercise(exercise, questionID).rgs) { if (resp.grade >= 0.6) good.add(resp.response); else bad.add(resp.response);}
+
+      Set<String> goodTokens = getTokenSet(good);
+      Set<String> badTokens = getTokenSet(bad);
+
+      StringBuilder sb = new StringBuilder();
+      for (String recoToken : recoSentence.split("\\s")) {
+        if (goodTokens.contains(recoToken)) {
+          sb.append("<u>"+recoToken +"</u> ");
+        } else if (badTokens.contains(recoToken)) {
+          sb.append("<s>"+recoToken +"</s> ");
+        } else sb.append(recoToken + " ");
+      }
+
       double scoreForAnswer = (recoSentence.length() > 0) ? getScoreForAnswer(getExercise(exercise, false), questionID, recoSentence) :0.0d;
-      return new AudioAnswer(url, validity, recoSentence, scoreForAnswer, reqid);
+      return new AudioAnswer(url, validity, sb.toString().trim(), scoreForAnswer, reqid);
     }
     else {
       return new AudioAnswer(url, validity, reqid);
     }
+  }
+
+  private Set<String> getTokenSet(List<String> exportedAnswers) {
+    Set<String> tokens = new HashSet<String>();
+    for (String l : exportedAnswers) {
+      for (String t : l.split("\\s")) {
+        String tt = t.replaceAll("\\p{P}","");
+        if (tt.trim().length() > 0) {
+            tokens.add(tt.trim());
+        }}}
+    return tokens;
   }
 
   /**
