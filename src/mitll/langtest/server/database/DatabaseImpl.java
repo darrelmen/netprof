@@ -733,7 +733,7 @@ public class DatabaseImpl implements Database {
   private Export.ExerciseExport getExportForExercise(Exercise e, int questionID) {
     return getExportForExercise(e.getID(), questionID);
   }
-  private Export.ExerciseExport getExportForExercise(String id, int questionID) {
+  public Export.ExerciseExport getExportForExercise(String id, int questionID) {
     return getExportForExercise(id + "_" + questionID);
   }
   private Export.ExerciseExport getExportForExercise(String key) {
