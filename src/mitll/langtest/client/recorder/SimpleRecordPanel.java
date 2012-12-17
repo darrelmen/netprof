@@ -29,7 +29,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
   private Image check;
   private SimplePanel playback = new SimplePanel();
   private final AudioTag audioTag = new AudioTag();
-  private final Label resp = new Label();
+  private final HTML resp = new HTML();
 
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
@@ -94,10 +94,10 @@ public class SimpleRecordPanel extends RecordButtonPanel {
       score = Math.min(1.0,score);
       String percent = ((int) (score * 100)) + "%";
       if (result.score > 0.6) {
-        resp.setText("Correct! Score for '" + result.decodeOutput + "' was " + percent);
+        resp.setHTML("Correct! Score for <font size=+1>" + result.decodeOutput + "</font> was " + percent);
         resp.setStyleName("correct");
       } else {
-        resp.setText("Try again - score for '" + result.decodeOutput + "' was " + percent);
+        resp.setHTML("Try again - score for <font size=+1>" + result.decodeOutput + "</font> was " + percent);
         resp.setStyleName("incorrect");
       }
     }
