@@ -368,7 +368,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     String exercise_title = Window.Location.getParameter(EXERCISE_TITLE);
     if (exercise_title != null) {
-     if (goodwave == null) goodwave = "true";
+     //if (goodwave == null) goodwave = "true";
       this.exercise_title = exercise_title;
     }
     else {
