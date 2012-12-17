@@ -75,8 +75,8 @@ public class SimpleRecordPanel extends RecordButtonPanel {
 
   /**
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
-   * @param result
-   * @param questionState
+   * @param result from server about the audio we just posted
+   * @param questionState so we keep track of which questions have been answered
    * @param outer
    */
   @Override
@@ -100,6 +100,9 @@ public class SimpleRecordPanel extends RecordButtonPanel {
         resp.setHTML("Try again - score for <font size=+1>" + result.decodeOutput + "</font> was " + percent);
         resp.setStyleName("incorrect");
       }
+    }
+    else {
+      resp.setHTML("I couldn't understand that, please record again.");
     }
   }
 
