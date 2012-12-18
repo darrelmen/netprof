@@ -173,6 +173,11 @@ public class DatabaseImpl implements Database {
     return classifier;
   }
 
+  /**
+   * @see #getExercises(boolean, String)
+   * @param useFile
+   * @return
+   */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
     return useFile ? new FileExerciseDAO(mediaDir) : new SQLExerciseDAO(this, mediaDir);
   }
@@ -190,9 +195,13 @@ public class DatabaseImpl implements Database {
     this.mediaDir = mediaDir;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(boolean)
+   * @param useFile
+   * @return
+   */
   public List<Exercise> getExercises(boolean useFile) {
     List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
-    //if (autocrt) getClassifier();
     return exercises;
   }
 
@@ -201,7 +210,8 @@ public class DatabaseImpl implements Database {
    * @param useFile
    * @param lessonPlanFile
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
+   * @see #getExercises(boolean)
+   * @see #getExercises(long, boolean)
    */
   private List<Exercise> getExercises(boolean useFile, String lessonPlanFile) {
     if (exerciseDAO == null || useFile && exerciseDAO instanceof SQLExerciseDAO || !useFile && exerciseDAO instanceof FileExerciseDAO) {
@@ -437,6 +447,19 @@ public class DatabaseImpl implements Database {
     }
     logger.info("total valid grades " + total);
     return ret;
+  }
+
+  public List<Exercise> getExercisesFirstNInOrder(long userID, boolean useFile, int firstNInOrder) {
+    List<Exercise> rawExercises = getExercises(useFile);
+    int numInOrder = Math.min(firstNInOrder, rawExercises.size());
+    List<Exercise> newList = new ArrayList<Exercise>(rawExercises.subList(0, numInOrder));
+
+    List<Exercise> randomExercises = rawExercises.size() > numInOrder ? new ArrayList<Exercise>(rawExercises.subList(numInOrder,rawExercises.size())) : new ArrayList<Exercise>();
+
+    Collections.shuffle(randomExercises,new Random(userID));
+    newList.addAll(randomExercises);
+
+    return newList;
   }
 
   private static class ResultAndGrade implements Comparable<ResultAndGrade> {
