@@ -102,7 +102,7 @@
     </target>
 
     <target depends="build" name="warAutocrt">
-        <jar destfile="npAutocrt.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**,config/first/**,config/levantine/**,config/pilot/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**">
+        <jar destfile="npAutocrt.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**,config/first/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**">
         </jar>
     </target>
 

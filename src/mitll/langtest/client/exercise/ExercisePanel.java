@@ -102,9 +102,14 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     //System.out.println("eng q " + englishQuestions);
     for (Exercise.QAPair pair : e.getQuestions()) {
       // add question header
-      Exercise.QAPair engQAPair = englishQuestions.get(i - 1);
+      Exercise.QAPair engQAPair = i - 1 < n ? englishQuestions.get(i - 1) : null;
 
-      getQuestionHeader(i, n, engQAPair, shouldShowAnswer(),!controller.isDemoMode());
+      if (engQAPair != null) {
+        getQuestionHeader(i, n, engQAPair, shouldShowAnswer(),!controller.isDemoMode());
+      }
+      else {
+        add(new HTML("<br></br>"));
+      }
       if (controller.isDemoMode()) {
         Exercise.QAPair flQAPair  = flQuestions.get(i - 1);
         getQuestionHeader(i, n, flQAPair, pair, shouldShowAnswer());
