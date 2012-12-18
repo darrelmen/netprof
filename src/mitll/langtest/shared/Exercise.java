@@ -20,6 +20,8 @@ import java.util.Map;
  */
 public class Exercise extends ExerciseShell  {
   public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE, REPEAT, REPEAT_FAST_SLOW, MULTI_REF }
+  public static final String EN = "en";
+  public static final String FL = "fl";
 
   private String plan;
   private String content;
@@ -163,14 +165,21 @@ public class Exercise extends ExerciseShell  {
    * @return
    */
   public List<QAPair> getQuestions() {
-    return langToQuestion.get(promptInEnglish ? "en" : "fl");
+    List<QAPair> qaPairs = langToQuestion == null ? new ArrayList<QAPair>() : langToQuestion.get(promptInEnglish ? EN : FL);
+    return qaPairs == null ? new ArrayList<QAPair>() : qaPairs;
   }
 
-  public List<QAPair> getEnglishQuestions() { return langToQuestion.get("en"); }
-  public List<QAPair> getForeignLanguageQuestions() { return langToQuestion.get("fl"); }
+  public List<QAPair> getEnglishQuestions() {
+    List<QAPair> qaPairs = langToQuestion == null ? new ArrayList<QAPair>() : langToQuestion.get(EN);
+    return qaPairs == null ? new ArrayList<QAPair>() : qaPairs;
+  }
+  public List<QAPair> getForeignLanguageQuestions() {
+    List<QAPair> qaPairs = langToQuestion == null ? new ArrayList<QAPair>() : langToQuestion.get(FL);
+    return qaPairs == null ? new ArrayList<QAPair>() : qaPairs;
+  }
 
   public int getNumQuestions() {
-    List<QAPair> en = langToQuestion.get("en");
+    List<QAPair> en = langToQuestion == null ? new ArrayList<QAPair>() : langToQuestion.get("en");
     if (en == null) return 0; // should never happen
     return en.size();
   }
@@ -181,7 +190,7 @@ public class Exercise extends ExerciseShell  {
     }
     else {
       return "Exercise " + plan+"/"+ id + "/" + (promptInEnglish?"english":"foreign")+"/" + getType()+
-          " : content bytes = " + content.length() + " num questions " + langToQuestion.size();
+          " : content bytes = " + content.length() + (langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size());
     }
   }
 }
