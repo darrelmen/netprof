@@ -141,5 +141,7 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   @Override
-  protected void markCurrentExercise(int i) {}
+  protected void markCurrentExercise(int i) {
+    table.getSelectionModel().setSelected(currentExercises.get(i), true);
+  }
 }
