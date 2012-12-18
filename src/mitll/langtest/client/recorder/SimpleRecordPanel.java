@@ -101,7 +101,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
         resp.setStyleName("incorrect");
       }
     }
-    else {
+    else if (result.score != -1) {
       resp.setHTML("I couldn't understand that, please record again.");
     }
   }
