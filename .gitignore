@@ -4,5 +4,11 @@ war/fastAndSlowRef/nl*/*.lab
 war/fastAndSlowRef/nl*/*.raw
 war/fastAndSlowRef/nl*/*_16K.wav
 war/fastAndSlowRef/nl*/*.mp3
+war/config/dari/media/*.mp3
+war/config/dari/media/*.raw
+war/config/dari/media/*.lab
+war/config/levantine/media/*/*.mp3
+war/config/levantine/media/nl*/*.lab
+war/config/levantine/media/nl*/*.raw
 war/media/ac*/*.wav
 war/media/ac*/*.raw
