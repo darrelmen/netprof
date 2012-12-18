@@ -98,6 +98,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private boolean readFromFile;
   private boolean autocrt;
   private boolean demoMode;
+  private boolean dataCollectMode;
   private String releaseDate;
 
   // property file property names
@@ -113,6 +114,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final String BKG_COLOR_FOR_REF1 = "bkgColorForRef";
   private static final String AUTO_CRT = "autocrt";
   private static final String DEMO_MODE = "demo";
+  private static final String DATA_COLLECT_MODE = "dataCollect";
 
   // URL parameters that can override above parameters
   private static final String GRADING = "grading";
@@ -254,6 +256,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = Boolean.parseBoolean(value);
       else if (key.equals(AUTO_CRT)) autocrt = Boolean.parseBoolean(value);
       else if (key.equals(DEMO_MODE)) demoMode = Boolean.parseBoolean(value);
+      else if (key.equals(DATA_COLLECT_MODE)) dataCollectMode = Boolean.parseBoolean(value);
     }
   }
 
@@ -284,11 +287,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void makeExerciseList(Panel exerciseListPanel, boolean isGrading) {
     final UserFeedback feedback = (UserFeedback) this;
+    final boolean usePagingExerciseList = goodwaveMode || dataCollectMode;
     if (isGrading) {
       this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback, factory, isArabicTextDataCollect());
     }
-    else if (goodwaveMode) {
-      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken) {
+    else if (usePagingExerciseList) {
+      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, factory, usePagingExerciseList, isArabicTextDataCollect(), showTurkToken) {
         @Override
         protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
       };
@@ -300,7 +304,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (showOnlyOneExercise()) {
       exerciseList.setExercise_title(exercise_title);
     }
-    if (!goodwaveMode) {
+    if (!usePagingExerciseList) {
       itemScroller = new ScrollPanel(this.exerciseList.getWidget());
     }
     if (exercise_title == null) {
@@ -309,7 +313,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     HTML child = new HTML("<h2>Items</h2>");
     child.addStyleName("center");
     exerciseListPanel.add(child);
-    exerciseListPanel.add(goodwaveMode ? this.exerciseList.getWidget() : itemScroller);
+    exerciseListPanel.add(usePagingExerciseList ? this.exerciseList.getWidget() : itemScroller);
   }
 
   public boolean showOnlyOneExercise() {
@@ -325,7 +329,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void setExerciseListSize() {
     int height = Math.max(60, Window.getClientHeight() - (2 * HEADER_HEIGHT) - footerHeight - 60);
-    if (!goodwaveMode) itemScroller.setSize(EXERCISE_LIST_WIDTH + "px", height + "px"); // 54
+    if (!goodwaveMode && !dataCollectMode) itemScroller.setSize(EXERCISE_LIST_WIDTH + "px", height + "px"); // 54
   }
 
   /**
@@ -409,6 +413,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     if (demoParam != null) {
       demoMode = !demoParam.equals("false");
+    }
+    if (Window.Location.getParameter(DATA_COLLECT_MODE) != null) {
+      dataCollectMode = !Window.Location.getParameter(DATA_COLLECT_MODE).equals("false");
     }
     return grading;
   }
