@@ -41,7 +41,8 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase {
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
-  public static final int MAX_EXPORTED_ANSWERS_BKG = 100;
+  public static final String FIRST_N_IN_ORDER = "firstNInOrder";
+  private static final String DATA_COLLECT_MODE = "dataCollect";
   private static Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   public static final String ANSWERS = "answers";
   private static final int TIMEOUT = 30;
@@ -52,6 +53,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private Properties props = null;
   private String relativeConfigDir;
   private String configDir;
+  private boolean dataCollectMode;
+  private int firstNInOrder;
 
   private Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
       .concurrencyLevel(4)
@@ -95,14 +98,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param useFile
    * @return
    */
-  public List<String> getQuestions(boolean useFile) {
+/*  public List<String> getQuestions(boolean useFile) {
     List<String> questions = new ArrayList<String>();
     List<Exercise> exercises = getExercises(useFile);
      for (Exercise e : exercises) {
        for (Exercise.QAPair qaPair : e.getForeignLanguageQuestions()) questions.add(qaPair.getQuestion());
      }
     return questions;
-  }
+  }*/
 
   public Exercise getExercise(String id, long userID, boolean useFile, boolean arabicDataCollect) {
     List<Exercise> exercises = getExercises(userID, useFile, arabicDataCollect);
@@ -126,7 +129,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
     db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir);
     //logger.debug("usefile = " + useFile + " arabic data collect " + arabicDataCollect);
-    List<Exercise> exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(userID, useFile);
+    List<Exercise> exercises;
+    if (dataCollectMode) {
+      exercises = db.getExercisesFirstNInOrder(userID, useFile, firstNInOrder);
+    }
+    else {
+      exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(userID, useFile);
+    }
+
     if (makeFullURLs) convertRefAudioURLs(exercises);
     if (!exercises.isEmpty())
       logger.debug("for user #" + userID +" got " + exercises.size() + " exercises , first ref sentence = '" + exercises.iterator().next().getRefSentence() + "'");
@@ -915,6 +925,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         logger.error("got " + e, e);
       }
     }
+    try {
+      firstNInOrder = Integer.parseInt(props.getProperty(FIRST_N_IN_ORDER, "" + Integer.MAX_VALUE));
+    } catch (NumberFormatException e) {
+      logger.error("Couldn't parse property " + FIRST_N_IN_ORDER,e);
+      firstNInOrder = Integer.MAX_VALUE;
+    }
+    dataCollectMode = !props.getProperty(DATA_COLLECT_MODE, "false").equals("false");
+    //logger.info("props dataCollectMode="+dataCollectMode);
   }
 
   private class DirAndName {
