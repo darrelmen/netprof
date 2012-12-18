@@ -40,7 +40,7 @@ import java.util.Map;
 public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected static final int MIN_WIDTH = 256;
   private static final float WAVEFORM_HEIGHT = 128f;//96;
-  private static final float SPECTROGRAM_HEIGHT = 88f;//96;
+  private static final float SPECTROGRAM_HEIGHT = 80f;//96;
   private static final int RIGHT_MARGIN = ASRScorePanel.X_CHART_SIZE+150;//550;//1;//400;
   protected static final String WAVEFORM = "Waveform";
   protected static final String SPECTROGRAM = "Spectrogram";
