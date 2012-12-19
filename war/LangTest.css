@@ -172,3 +172,9 @@ fieldset > legend {
 .incorrect {
     color:red
 }
+
+.urdufont {
+    color: #CC6600;
+    font-family: 'Nafees Naskh',Nafees,sans-serif;
+    font-size: 24px;
+}
