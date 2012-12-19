@@ -91,6 +91,51 @@ public class UserTable {
     id.setSortable(true);
     table.addColumn(id, "ID");
 
+    TextColumn<User> userID = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return "" + contact.userID;
+      }
+    };
+    userID.setSortable(true);
+    table.addColumn(userID, "User ID");
+
+    TextColumn<User> firstName = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return "" + contact.firstName;
+      }
+    };
+    firstName.setSortable(true);
+    table.addColumn(firstName, "First");
+
+    TextColumn<User> lastName = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return "" + contact.lastName;
+      }
+    };
+    lastName.setSortable(true);
+    table.addColumn(lastName, "Last");
+
+    TextColumn<User> lang = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return "" + contact.nativeLang;
+      }
+    };
+    lang.setSortable(true);
+    table.addColumn(lang, "Lang");
+
+    TextColumn<User> dialect = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return "" + contact.dialect;
+      }
+    };
+    dialect.setSortable(true);
+    table.addColumn(dialect, "Dialect");
+
     TextColumn<User> age = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
@@ -124,6 +169,7 @@ public class UserTable {
         return "" + contact.ipaddr;
       }
     };
+
     ipaddr.setSortable(true);
     table.addColumn(ipaddr, "IP Addr");
 
