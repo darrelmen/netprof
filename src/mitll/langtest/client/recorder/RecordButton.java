@@ -1,9 +1,20 @@
 package mitll.langtest.client.recorder;
 
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.AttachDetachException;
 import com.google.gwt.user.client.ui.FocusWidget;
+import lm.K;
 
 /**
  * Basically a click handler and a timer to click stop recording, if the user doesn't.
@@ -34,16 +45,45 @@ public abstract class RecordButton {
           System.out.println("ignoring click -- busy!");
           return;
         }
-        if (recording) {
-          cancelTimer();
-          stop();
-        } else {
-          start();
-
-          addRecordingMaxLengthTimeout();
-        }
+        doClick();
       }
     });
+    recordButton.setTitle("Press Return to record/stop recording");
+
+    logHandler = Event.addNativePreviewHandler(new
+                                                   Event.NativePreviewHandler() {
+
+                                                     @Override
+                                                     public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                                                       NativeEvent ne = event.getNativeEvent();
+
+                                                       if (ne.getKeyCode() == KeyCodes.KEY_ENTER && event.getTypeInt() == 512) {
+                                                         ne.preventDefault();
+/*
+                                                         System.out.println("Got " + event + " type int " +
+                                                             event.getTypeInt() + " assoc " + event.getAssociatedType() +
+                                                             " native " + event.getNativeEvent() + " source " + event.getSource());
+*/
+                                                           System.out.println("clicking record button...");
+
+                                                           doClick();
+                                                       }
+                                                     }
+                                                   });
+  }
+
+  HandlerRegistration logHandler;
+  public void onUnload() { logHandler.removeHandler(); }
+
+  private void doClick() {
+    if (recording) {
+      cancelTimer();
+      stop();
+    } else {
+      start();
+
+      addRecordingMaxLengthTimeout();
+    }
   }
 
   public void disable() { enabled = false; }
