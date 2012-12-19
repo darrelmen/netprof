@@ -225,16 +225,16 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
                                                      public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
                                                        NativeEvent ne = event.getNativeEvent();
 
-                                                      // System.out.println("got key " + ne.getCharCode() + " string '" + ne.getString() +"'");
+                                                       //System.out.println("got key " + ne.getCharCode() + " string '" + ne.getString() +"'");
                                                        int keyCode = ne.getKeyCode();
                                                        boolean isLeft  = keyCode == KeyCodes.KEY_LEFT;
                                                        boolean isRight = keyCode == KeyCodes.KEY_RIGHT;
-                                                       if ((isLeft || isRight) && event.getTypeInt() == 512) {
+                                                       if ((isLeft || isRight) && event.getTypeInt() == 512 && "[object KeyboardEvent]".equals(ne.getString())) {
                                                          ne.preventDefault();
 
-                                             /*            System.out.println(new Date() + " : key handler : Got " + event + " type int " +
+                                                        System.out.println(new Date() + " : key handler : Got " + event + " type int " +
                                                              event.getTypeInt() + " assoc " + event.getAssociatedType() +
-                                                             " native " + event.getNativeEvent() + " source " + event.getSource());*/
+                                                             " native " + event.getNativeEvent() + " source " + event.getSource());
 
                                                          if (isLeft) {
                                                            if (prev.isEnabled()) clickPrev(controller, e);
