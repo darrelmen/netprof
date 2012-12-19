@@ -39,6 +39,8 @@ public interface LangTestDatabase extends RemoteService {
 
   // user DAO
   long addUser(int age, String gender, int experience);
+  long addUser(int age, String gender, int experience, String firstName, String lastName, String nativeLang, String dialect, String userID);
+
   List<User> getUsers();
   List<Result> getResults();
 
@@ -73,4 +75,7 @@ public interface LangTestDatabase extends RemoteService {
   Exercise getExercise(String id, boolean useFile);
 
   Exercise getExercise(String id, long userID, boolean useFile, boolean arabicDataCollect);
+
+  int userExists(String login);
+
 }
