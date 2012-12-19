@@ -1,7 +1,9 @@
 package mitll.langtest.client.exercise;
 
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -16,6 +18,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -185,14 +188,16 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     return 20;
   }
 
+  private HandlerRegistration logHandler;
+
   private Panel getNextAndPreviousButtons(final Exercise e, final LangTestDatabaseAsync service,
                                           final UserFeedback userFeedback, final ExerciseController controller) {
     HorizontalPanel buttonRow = new HorizontalPanel();
 
-    Button prev = new Button("Previous");
+    final Button prev = new Button("Previous");
     prev.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        controller.loadPreviousExercise(e);
+        clickPrev(controller, e);
       }
     });
     prev.setEnabled(!controller.onFirst(e));
@@ -208,10 +213,54 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     // send answers to server
     next.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        postAnswers(service, userFeedback, controller, e);
+        clickNext(service, userFeedback, controller, e);
       }
     });
+
+    // TODO : revisit in the context of text data collections
+    logHandler = Event.addNativePreviewHandler(new
+                                                   Event.NativePreviewHandler() {
+
+                                                     @Override
+                                                     public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                                                       NativeEvent ne = event.getNativeEvent();
+
+                                                      // System.out.println("got key " + ne.getCharCode() + " string '" + ne.getString() +"'");
+                                                       int keyCode = ne.getKeyCode();
+                                                       boolean isLeft  = keyCode == KeyCodes.KEY_LEFT;
+                                                       boolean isRight = keyCode == KeyCodes.KEY_RIGHT;
+                                                       if ((isLeft || isRight) && event.getTypeInt() == 512) {
+                                                         ne.preventDefault();
+
+                                             /*            System.out.println(new Date() + " : key handler : Got " + event + " type int " +
+                                                             event.getTypeInt() + " assoc " + event.getAssociatedType() +
+                                                             " native " + event.getNativeEvent() + " source " + event.getSource());*/
+
+                                                         if (isLeft) {
+                                                           if (prev.isEnabled()) clickPrev(controller, e);
+                                                         }
+                                                         else {
+                                                           if (next.isEnabled()) clickNext(service, userFeedback, controller, e);
+                                                         }
+                                                       }
+                                                     }
+                                                   });
+
     return buttonRow;
+  }
+
+  private void clickNext(LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller, Exercise e) {
+    postAnswers(service, userFeedback, controller, e);
+  }
+
+  private void clickPrev(ExerciseController controller, Exercise e) {
+    controller.loadPreviousExercise(e);
+  }
+
+  @Override
+  protected void onUnload() {
+    super.onUnload();
+    logHandler.removeHandler();
   }
 
   /**
