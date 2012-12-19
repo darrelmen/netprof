@@ -46,6 +46,7 @@ public class UserManager {
   private final UserNotification langTest;
   private final boolean useCookie = false;
   private long userID = NO_USER_SET;
+  private Integer rememberedUser;
 
   public UserManager(UserNotification lt, LangTestDatabaseAsync service) {
     this.langTest = lt;
@@ -59,6 +60,7 @@ public class UserManager {
    * @see #displayLoginBox()
    */
   private void storeUser(long sessionID) {
+    System.out.println("user now " + sessionID);
     final long DURATION = 1000 * 60 * 60 * EXPIRATION_HOURS; //duration remembering login
     Date expires = new Date(System.currentTimeMillis() + DURATION);
     if (useCookie) {
@@ -191,6 +193,16 @@ public class UserManager {
     }
   }
 
+  public void teacherLogin() {
+    int user = getUser();
+    if (user != NO_USER_SET) {
+      System.out.println("login user : " +user);
+      langTest.gotUser(user);
+    } else {
+      displayTeacherLogin();
+    }
+  }
+
   private void displayGraderLogin() {
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Grader Login");
@@ -212,7 +224,7 @@ public class UserManager {
     closeButton.getElement().setId("closeButton");
 
 
-    KeyUpHandler keyHandler = new MyKeyUpHandler(user, closeButton, reg, password);
+    KeyUpHandler keyHandler = new GraderMyKeyUpHandler(user, closeButton, reg, password, true);
     user.addKeyUpHandler(keyHandler);
     password.addKeyUpHandler(keyHandler);
 
@@ -281,6 +293,150 @@ public class UserManager {
     show(dialogBox);
   }
 
+  private void displayTeacherLogin() {
+    final DialogBox dialogBox = new DialogBox();
+    dialogBox.setText("Data Collector Login");
+    dialogBox.setAnimationEnabled(true);
+
+    // Enable glass background.
+    dialogBox.setGlassEnabled(true);
+
+    final TextBox user = new TextBox();
+    final TextBox password = new PasswordTextBox();
+
+    final TextBox first = new TextBox();
+
+    final TextBox last = new TextBox();
+
+    final TextBox nativeLang = new TextBox();
+
+    final TextBox dialect = new TextBox();
+
+    final TextBox ageEntryBox = new TextBox();
+    final Button closeButton = makeCloseButton(ageEntryBox);
+
+
+
+    final Button reg = new Button("Register");
+
+    final ListBox genderBox = getGenderBox();
+    VerticalPanel genderPanel = getGenderPanel(genderBox);
+
+    final ListBox experienceBox = getExperienceBox();
+    VerticalPanel experiencePanel = getGenderPanel(experienceBox);
+
+    closeButton.setEnabled(false);
+
+    // We can set the id of a widget by accessing its Element
+    closeButton.getElement().setId("closeButton");
+
+
+    KeyUpHandler keyHandler = new GraderMyKeyUpHandler(user, closeButton, reg, password, false);
+    user.addKeyUpHandler(keyHandler);
+    password.addKeyUpHandler(keyHandler);
+
+
+    VerticalPanel dialogVPanel = new VerticalPanel();
+    dialogVPanel.addStyleName("dialogVPanel");
+    dialogVPanel.add(new HTML("<b>User ID</b>"));
+    dialogVPanel.add(user);
+    HTML w = new HTML("<b>Password</b>");
+    w.setTitle("See email for your password.");
+    dialogVPanel.add(w);
+    dialogVPanel.add(password);
+    dialogVPanel.add(new HTML("<i>(New users : fill in the fields below and click <b>register</b>.)</i>"));
+    dialogVPanel.add(new HTML("<br></br>"));
+
+
+    dialogVPanel.add(new HTML("<b>First Name</b>"));
+    dialogVPanel.add(first);
+    dialogVPanel.add(new HTML("<b>Last Name</b>"));
+    dialogVPanel.add(last);
+    dialogVPanel.add(new HTML("<b>Native Lang (L1)</b>"));
+    dialogVPanel.add(nativeLang);
+    dialogVPanel.add(new HTML("<b>Dialect</b>"));
+    dialogVPanel.add(dialect);
+    dialogVPanel.add(new HTML("<b>Your age</b>"));
+    dialogVPanel.add(ageEntryBox);
+    dialogVPanel.add(new HTML("<br><b>Select gender</b>"));
+    dialogVPanel.add(genderPanel);
+    dialogVPanel.add(new HTML("<br><b>Select months of experience in this language</b>"));
+    dialogVPanel.add(experiencePanel);
+
+
+
+    reg.setEnabled(false);
+    reg.getElement().setId("registerButton");
+
+    reg.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        if (user.getText().length() > 0 && password.getText().length() > 0) {
+
+          int monthsOfExperience = experienceBox.getSelectedIndex() * 3;
+          if (experienceBox.getSelectedIndex() == EXPERIENCE_CHOICES.size() - 1) {
+            monthsOfExperience = 20 * 12;
+          }
+          service.addUser(Integer.parseInt(ageEntryBox.getText()),
+              genderBox.getValue(genderBox.getSelectedIndex()),
+              monthsOfExperience,
+              first.getText(),
+              last.getText(),
+              nativeLang.getText(),
+              dialect.getText(),
+              user.getText(),
+
+
+              new AsyncCallback<Long>() {
+                public void onFailure(Throwable caught) {
+                  // Show the RPC error message to the user
+                  dialogBox.setText("Remote Procedure Call - Failure");
+                  dialogBox.center();
+                  closeButton.setFocus(true);
+                }
+
+                public void onSuccess(Long result) {
+                  System.out.println("server result is " + result);
+                  long result1 = result;
+                  rememberedUser = (int) result1;
+                  dialogBox.hide();
+                  storeUser(rememberedUser);
+                /*  boolean passwordMatch = checkPassword(password);
+                  closeButton.setEnabled(passwordMatch);
+                  closeButton.click();
+                  if (passwordMatch) storeUser(result);*/
+                }
+              });
+
+
+        }
+      }
+    });
+    //w1.addStyleName("paddedHorizontalPanel");
+
+    dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
+    HorizontalPanel hp = new HorizontalPanel();
+    hp.add(reg);
+
+    SimplePanel spacer = new SimplePanel();
+    spacer.setSize("20px", "20px");
+
+    hp.add(spacer);
+    hp.add(closeButton);
+
+    dialogVPanel.add(hp);
+    dialogBox.setWidget(dialogVPanel);
+
+    closeButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+
+        dialogBox.hide();
+        storeUser(rememberedUser);
+       // langTest.setGrading(true);
+      }
+    });
+    show(dialogBox);
+  }
+
   private boolean checkPassword(TextBox password) {
     return password.getText().trim().equalsIgnoreCase(GRADING);
   }
@@ -308,26 +464,12 @@ public class UserManager {
     final Button closeButton = makeCloseButton(ageEntryBox);
 
     // Add a drop box with the list types
-    final ListBox genderBox = new ListBox(false);
-    for (String s : Arrays.asList("Male", "Female")) {
-      genderBox.addItem(s);
-    }
-    genderBox.ensureDebugId("cwListBox-dropBox");
-    VerticalPanel genderPanel = new VerticalPanel();
-    genderPanel.setSpacing(4);
-    genderPanel.add(genderBox);
+    final ListBox genderBox = getGenderBox();
+    VerticalPanel genderPanel = getGenderPanel(genderBox);
 
     // add experience drop box
-    final ListBox experienceBox = new ListBox(false);
-    List<String> choices = EXPERIENCE_CHOICES;
-    final int lastChoice = choices.size()-1;
-    for (String c : choices) {
-      experienceBox.addItem(c);
-    }
-    experienceBox.ensureDebugId("cwListBox-dropBox");
-    VerticalPanel experiencePanel = new VerticalPanel();
-    experiencePanel.setSpacing(4);
-    experiencePanel.add(experienceBox);
+    final ListBox experienceBox = getExperienceBox();
+    VerticalPanel experiencePanel = getGenderPanel(experienceBox);
 
     VerticalPanel dialogVPanel = new VerticalPanel();
     dialogVPanel.addStyleName("dialogVPanel");
@@ -365,7 +507,7 @@ public class UserManager {
        */
       private void sendNameToServer() {
         int monthsOfExperience = experienceBox.getSelectedIndex()*3;
-        if (experienceBox.getSelectedIndex() == lastChoice) {
+        if (experienceBox.getSelectedIndex() == EXPERIENCE_CHOICES.size()-1) {
           monthsOfExperience = 20*12;
         }
         service.addUser(Integer.parseInt(ageEntryBox.getText()),
@@ -394,6 +536,32 @@ public class UserManager {
     show(dialogBox);
   }
 
+  private ListBox getExperienceBox() {
+    final ListBox experienceBox = new ListBox(false);
+    List<String> choices = EXPERIENCE_CHOICES;
+    for (String c : choices) {
+      experienceBox.addItem(c);
+    }
+    experienceBox.ensureDebugId("cwListBox-dropBox");
+    return experienceBox;
+  }
+
+  private VerticalPanel getGenderPanel(ListBox genderBox) {
+    VerticalPanel genderPanel = new VerticalPanel();
+    genderPanel.setSpacing(4);
+    genderPanel.add(genderBox);
+    return genderPanel;
+  }
+
+  private ListBox getGenderBox() {
+    final ListBox genderBox = new ListBox(false);
+    for (String s : Arrays.asList("Male", "Female")) {
+      genderBox.addItem(s);
+    }
+    genderBox.ensureDebugId("cwListBox-dropBox");
+    return genderBox;
+  }
+
   private void show(DialogBox dialogBox) {
     int left = Window.getClientWidth() / 3;
     int top  = Window.getClientHeight() / 3;
@@ -417,7 +585,7 @@ public class UserManager {
         }
         try {
           int age = Integer.parseInt(text);
-          closeButton.setEnabled ((age > MIN_AGE && age < MAX_AGE) || age == TEST_AGE);
+          //closeButton.setEnabled ((age > MIN_AGE && age < MAX_AGE) || age == TEST_AGE);
         } catch (NumberFormatException e) {
           closeButton.setEnabled(false);
         }
@@ -426,16 +594,18 @@ public class UserManager {
     return closeButton;
   }
 
-  private class MyKeyUpHandler implements KeyUpHandler {
+  private class GraderMyKeyUpHandler implements KeyUpHandler {
     private final TextBox user;
     private final Button closeButton, regButton;
     private final TextBox password;
+    private final boolean isGrader;
 
-    public MyKeyUpHandler(TextBox user, Button closeButton, Button regButton, TextBox password) {
+    public GraderMyKeyUpHandler(TextBox user, Button closeButton, Button regButton, TextBox password, boolean isGrader) {
       this.user = user;
       this.closeButton = closeButton;
       this.password = password;
       this.regButton = regButton;
+      this.isGrader = isGrader;
     }
 
     public void onKeyUp(KeyUpEvent event) {
@@ -445,21 +615,47 @@ public class UserManager {
         return;
       }
 
-      service.graderExists(text, new AsyncCallback<Boolean>() {
-        public void onFailure(Throwable caught) {}
-        public void onSuccess(Boolean result) {
-          //System.out.println("user '" + user.getText() + "' exists " + result);
-          boolean passwordMatch = checkPassword(password);
+      if (isGrader) {
+        service.graderExists(text, new AsyncCallback<Boolean>() {
+          public void onFailure(Throwable caught) {}
+          public void onSuccess(Boolean result) {
+            //System.out.println("user '" + user.getText() + "' exists " + result);
+            boolean passwordMatch = checkPassword(password);
 
-          if (passwordMatch) {
-            closeButton.setEnabled(result);
-            regButton.setEnabled(!result);
-          } else {
-            closeButton.setEnabled(false);
-            regButton.setEnabled(false);
+            if (passwordMatch) {
+              closeButton.setEnabled(result);
+              regButton.setEnabled(!result);
+            } else {
+              closeButton.setEnabled(false);
+              regButton.setEnabled(false);
+            }
           }
-        }
-      });
+        });
+      }
+
+      else {
+        service.userExists(text, new AsyncCallback<Integer>() {
+          public void onFailure(Throwable caught) {
+          }
+
+          public void onSuccess(Integer result) {
+            System.out.println("user '" + user.getText() + "' exists " + result);
+            boolean passwordMatch = checkPassword(password);
+
+            if (passwordMatch) {
+              closeButton.setEnabled(result != -1);
+              regButton.setEnabled(result == -1);
+              if (result != -1) {
+                //storeUser(result);
+                rememberedUser = result;
+              }
+            } else {
+              closeButton.setEnabled(false);
+              regButton.setEnabled(false);
+            }
+          }
+        });
+      }
     }
   }
 }

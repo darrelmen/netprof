@@ -60,9 +60,9 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   protected void addButtons() {
     playButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        System.out.println(new Date() + " : PlayButton : Got click " + event + " type int " +
-            /*event.getTypeInt() +*/ " assoc " + event.getAssociatedType() +
-            " native " + event.getNativeEvent() + " source " + event.getSource());
+/*        System.out.println(new Date() + " : PlayButton : Got click " + event + " type int " +
+            *//*event.getTypeInt() +*//* " assoc " + event.getAssociatedType() +
+            " native " + event.getNativeEvent() + " source " + event.getSource());*/
         doClick();
       }
     });
@@ -75,7 +75,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
                                                        NativeEvent ne = event.getNativeEvent();
 
                                                     //   System.out.println("got key " + ne.getCharCode() + " string '" + ne.getString() +"'");
-                                                       if (ne.getCharCode() == 32) {
+                                                       if (ne.getCharCode() == 32 && "[object KeyboardEvent]".equals(ne.getString())) {
                                                          ne.preventDefault();
 
                                                          System.out.println(new Date() + " : Play click handler : Got " + event + " type int " +
