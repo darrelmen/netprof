@@ -41,13 +41,17 @@ public class FileExerciseDAO implements ExerciseDAO {
 
   private List<Exercise> exercises;
   private final String mediaDir;
+  private final boolean isUrdu;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
    * @param mediaDir
+   * @param isUrdu
    */
-  public FileExerciseDAO(String mediaDir) {
+  public FileExerciseDAO(String mediaDir, boolean isUrdu) {
     this.mediaDir = mediaDir;
+    this.isUrdu = isUrdu;
+    logger.debug("is urdu " + isUrdu);
   }
 
   /**
@@ -108,7 +112,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   /**
-   * @see DatabaseImpl#getExercises(boolean, String)
+   * @see DatabaseImpl#getExercises
    * @param installPath
    * @param lessonPlanFile
    */
@@ -120,7 +124,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
       String line2;
       int count = 0;
-      logger.debug("using install path " + installPath);
+      logger.debug("using install path " + installPath + " lesson " + lessonPlanFile + " isurdu " +isUrdu);
       exercises = new ArrayList<Exercise>();
       Pattern pattern = Pattern.compile("^\\d+\\.(.+)");
       while ((line2 = reader.readLine()) != null) {
@@ -133,7 +137,7 @@ public class FileExerciseDAO implements ExerciseDAO {
         Exercise exercise;
         if (wordListOnly) {
           String group = matcher.group(1);
-          exercise = getWordListExercise(group,line2.trim());
+          exercise = getWordListExercise(group,""+count);//line2.trim());
         }
         else {
           int length = line2.split("\\(").length;
@@ -247,7 +251,9 @@ public class FileExerciseDAO implements ExerciseDAO {
   private String getArabic(String arabic) {
     return "<div class=\"Instruction\">\n" +
         "<span class=\"Instruction-title\">Say:</span>\n" +
-        "<span class=\"Instruction-data\"> " + arabic +
+        "<span class=\"" +
+        (isUrdu ? "urdufont" : "Instruction-data") +
+        "\"> " + arabic +
         "</span>\n" +
         "</div>\n";
   }
