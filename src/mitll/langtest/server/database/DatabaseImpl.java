@@ -18,7 +18,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -69,7 +68,6 @@ public class DatabaseImpl implements Database {
   public final AnswerDAO answerDAO = new AnswerDAO(this);
   public final GradeDAO gradeDAO = new GradeDAO(this);
   public final GraderDAO graderDAO = new GraderDAO(this);
-  //private final ScheduleDAO scheduleDAO = new ScheduleDAO(this);
   private String h2DbName = H2_DB_NAME;
   private Classifier<AutoGradeExperiment.Event> classifier = null;
   private Set<String> allAnswers = new HashSet<String>();
@@ -79,7 +77,7 @@ public class DatabaseImpl implements Database {
   private String lessonPlanFile;
   private String mediaDir;
   private Map<String, Export.ExerciseExport> exerciseIDToExport;
-  //private boolean autocrt = true;
+  private boolean isUrdu;
 
   public DatabaseImpl(String dburl) {
     this.h2DbName = dburl;
@@ -179,7 +177,8 @@ public class DatabaseImpl implements Database {
    * @return
    */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    return useFile ? new FileExerciseDAO(mediaDir) : new SQLExerciseDAO(this, mediaDir);
+    System.out.println("isurdu " + isUrdu);
+    return useFile ? new FileExerciseDAO(mediaDir, isUrdu) : new SQLExerciseDAO(this, mediaDir);
   }
 
   /**
@@ -187,12 +186,14 @@ public class DatabaseImpl implements Database {
    * @param i
    * @param lessonPlanFile
    * @param mediaDir
+   * @param isUrdu
    */
-  public void setInstallPath(String i, String lessonPlanFile, String mediaDir) {
-   // logger.debug("got install path " + i + " media " + mediaDir);
+  public void setInstallPath(String i, String lessonPlanFile, String mediaDir, boolean isUrdu) {
+    logger.debug("got install path " + i + " media " + mediaDir + " is urdu " +isUrdu);
     this.installPath = i;
     this.lessonPlanFile = lessonPlanFile;
     this.mediaDir = mediaDir;
+    this.isUrdu = isUrdu;
   }
 
   /**
@@ -206,6 +207,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   *
    *
    * @param useFile
    * @param lessonPlanFile
@@ -338,6 +340,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   *
    * @param userID
    * @param useFile
    * @return
