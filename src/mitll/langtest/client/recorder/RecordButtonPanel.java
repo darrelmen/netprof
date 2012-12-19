@@ -99,8 +99,7 @@ public class RecordButtonPanel extends HorizontalPanel {
     controller.startRecording();
   }
 
-
-  int reqid = 0;
+  private int reqid = 0;
   /**
    * Send the audio to the server.<br></br>
    *
@@ -116,20 +115,16 @@ public class RecordButtonPanel extends HorizontalPanel {
   protected void stopRecording() {
     controller.stopRecording();
     final Panel outer = this;
-    //recordButton.setEnabled(false);
-    //rb.disable();
+
     reqid++;
     service.writeAudioFile(controller.getBase64EncodedWavFile()
         , exercise.getPlan(), exercise.getID(), "" + index, "" + controller.getUser(), controller.isAutoCRTMode(),
         reqid, new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
             recordButton.setEnabled(true);
-            rb.enable();
             Window.alert("Server error : Couldn't post answers for exercise.");
           }
           public void onSuccess(AudioAnswer result) {
-            rb.enable();
-
             if (reqid != result.reqid) {
               System.out.println("ignoring old answer "+ result);
               return;
