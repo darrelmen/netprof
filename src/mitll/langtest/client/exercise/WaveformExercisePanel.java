@@ -1,6 +1,8 @@
 package mitll.langtest.client.exercise;
 
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
@@ -17,6 +19,7 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class WaveformExercisePanel extends ExercisePanel {
+  private RecordAudioPanel audioPanel;
   /**
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    * @param e
@@ -42,7 +45,13 @@ public class WaveformExercisePanel extends ExercisePanel {
    */
   @Override
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
-    return new RecordAudioPanel(service, index);
+    audioPanel = new RecordAudioPanel(service, index);
+    return audioPanel;
+  }
+
+  @Override
+  public void onResize() {
+    audioPanel.onResize();
   }
 
   @Override
@@ -87,10 +96,45 @@ public class WaveformExercisePanel extends ExercisePanel {
     @Override
     protected PlayAudioPanel makePlayAudioPanel(Widget toAdd) {
       postAudioRecordButton = new PostAudioRecordButton(exercise, controller, service, index) {
+        Timer t = null;
+
+        /**
+         * @see mitll.langtest.client.recorder.RecordButton#stop()
+         */
+        @Override
+        protected void stopRecording() {
+          boolean wasVisible = waveform.isVisible();
+
+          // only show the spinning icon if it's going to take awhile
+          t = new Timer() {
+            @Override
+            public void run() {
+              waveform.setVisible(true);
+              waveform.setUrl(LangTest.LANGTEST_IMAGES +"animated_progress.gif");
+            }
+          };
+
+          // Schedule the timer to run once in 1 seconds.
+          t.schedule(wasVisible ? 700 : 1);
+
+          super.stopRecording();
+        }
+
         @Override
         public void useResult(AudioAnswer result) {
-          //setRefAudio(refAudio, exercise.getRefSentence());
+          if (t != null) t.cancel();
           getImagesForPath(wavToMP3(result.path));
+          ExerciseQuestionState state = WaveformExercisePanel.this;
+          state.recordCompleted(WaveformExercisePanel.this);
+        }
+
+        @Override
+        protected void useInvalidResult(AudioAnswer result) {
+          if (t != null) t.cancel();
+          waveform.setVisible(false);
+          spectrogram.setVisible(false);
+          ExerciseQuestionState state = WaveformExercisePanel.this;
+          state.recordIncomplete(WaveformExercisePanel.this);
         }
       };
 
@@ -114,5 +158,4 @@ public class WaveformExercisePanel extends ExercisePanel {
   private String wavToMP3(String path) {
     return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
   }
-
 }
