@@ -50,6 +50,11 @@ public class GraderDAO {
     return getCount();
   }
 
+  /**
+   * @see DatabaseImpl#graderExists(String)
+   * @param id
+   * @return
+   */
   public boolean graderExists(String id) {
     boolean val = false;
     try {
