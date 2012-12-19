@@ -166,11 +166,14 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       image = new Image();
       image.setVisible(false);
     }
+    public boolean isVisible() { return image.isVisible(); }
+    public void setVisible(boolean visible) { image.setVisible(visible); }
+    public void setUrl(String url) { image.setUrl(url); }
   }
 
   /**
    * @see #onLoad()
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.PostAudioRecordButton#stopRecording()
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
    * @param path
    */
   public void getImagesForPath(String path) {
