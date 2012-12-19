@@ -129,7 +129,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       Pattern pattern = Pattern.compile("^\\d+\\.(.+)");
       while ((line2 = reader.readLine()) != null) {
         count++;
-        if (count > 20) break;
+    //    if (count > 20) break;
 
         Matcher matcher = pattern.matcher(line2.trim());
         boolean wordListOnly = matcher.matches();

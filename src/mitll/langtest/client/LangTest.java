@@ -567,7 +567,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see ExerciseList#loadExercise
    * @see #modeSelect()
    */
-  public void login() {  userManager.login(); }
+  public void login() {
+    if (dataCollectMode) userManager.teacherLogin();
+    else userManager.login();
+  }
 
   /**
    * Init Flash recorder once we login.

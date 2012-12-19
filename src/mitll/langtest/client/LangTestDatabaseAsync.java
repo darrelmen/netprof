@@ -58,4 +58,8 @@ public interface LangTestDatabaseAsync {
   void getExercise(String id, long userID, boolean useFile, boolean arabicDataCollect, AsyncCallback<Exercise> async);
 
   void getScoreForAnswer(Exercise e, int questionID, String answer, AsyncCallback<Double> async);
+
+  void addUser(int age, String gender, int experience, String firstName, String lastName, String nativeLang, String dialect, String userID, AsyncCallback<Long> async);
+
+  void userExists(String login, AsyncCallback<Integer> async);
 }

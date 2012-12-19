@@ -139,6 +139,7 @@ public class DatabaseImpl implements Database {
       // gradeDAO.dropGrades();
       gradeDAO.createGradesTable(getConnection());
       graderDAO.createGraderTable(getConnection());
+      userDAO.createUserTable(this);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
@@ -462,6 +463,8 @@ public class DatabaseImpl implements Database {
     Collections.shuffle(randomExercises,new Random(userID));
     newList.addAll(randomExercises);
 
+    logger.debug("got " + newList.size());
+    if (newList.isEmpty()) logger.warn("no exercises for " + userID + "?");
     return newList;
   }
 
@@ -614,6 +617,7 @@ public class DatabaseImpl implements Database {
    * <p/>
    * Uses return generated keys to get the user id
    *
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(int, String, int)
    * @param age
    * @param gender
    * @param experience
@@ -621,8 +625,13 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public long addUser(int age, String gender, int experience, String ipAddr) {
-    return userDAO.addUser(age, gender, experience, ipAddr);
+    return userDAO.addUser(age, gender, experience, ipAddr, "", "", "", "", "");
   }
+
+  public long addUser(int age, String gender, int experience, String ipAddr, String firstName, String lastName, String nativeLang,String dialect, String userID) {
+    return userDAO.addUser(age, gender, experience, ipAddr, firstName, lastName, nativeLang, dialect, userID);
+  }
+
 
   public List<User> getUsers() {
     return userDAO.getUsers();
@@ -803,8 +812,17 @@ public class DatabaseImpl implements Database {
     graderDAO.addGrader(login);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#graderExists(String)
+   * @param login
+   * @return
+   */
   public boolean graderExists(String login) {
     return graderDAO.graderExists(login);
+  }
+
+  public int userExists(String login) {
+    return userDAO.userExists(login);
   }
 
   public boolean isAnswerValid(int userID, Exercise exercise, int questionID, Database database) {
