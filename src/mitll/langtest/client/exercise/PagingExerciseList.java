@@ -18,6 +18,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,7 +53,7 @@ public class PagingExerciseList extends ExerciseList {
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                             ExercisePanelFactory factory, boolean goodwaveMode, boolean arabicDataCollect, boolean showTurkToken) {
     super(currentExerciseVPanel, service, feedback, factory, goodwaveMode, arabicDataCollect, showTurkToken, false);
-
+    System.out.println("making paging list!\n\n\n");
     CellTable.Resources o = GWT.create(TableResources.class);
     this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
     table.setWidth("100%", true);
@@ -133,11 +134,27 @@ public class PagingExerciseList extends ExerciseList {
     table.getSelectionModel().setSelected(currentExercises.get(0), true);
   }
 
+  public void clear() {
+    List<ExerciseShell> list = dataProvider.getList();
+   List<ExerciseShell> copy = new ArrayList<ExerciseShell>();
+
+    for (ExerciseShell es : list) copy.add(es);
+    for (ExerciseShell es : copy) list.remove(es);
+    table.setRowCount(list.size());
+
+  }
+
+  @Override
+  public void flush() {
+    dataProvider.flush();
+    table.setRowCount(dataProvider.getList().size());
+  }
+
   @Override
   protected void addExerciseToList(ExerciseShell exercise) {
     List<ExerciseShell> list = dataProvider.getList();
     list.add(exercise);
-    table.setRowCount(list.size());
+
   }
 
   @Override
