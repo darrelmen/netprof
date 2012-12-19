@@ -16,6 +16,8 @@ import com.google.gwt.user.client.ui.AttachDetachException;
 import com.google.gwt.user.client.ui.FocusWidget;
 import lm.K;
 
+import java.util.Date;
+
 /**
  * Basically a click handler and a timer to click stop recording, if the user doesn't.
  * User: go22670
@@ -30,7 +32,6 @@ public abstract class RecordButton {
   private Timer recordTimer;
   private final FocusWidget record;
   private int autoStopDelay;
-  private boolean enabled=true;
 
   public RecordButton(FocusWidget recordButton) {
     this(recordButton, DELAY_MILLIS);
@@ -40,11 +41,9 @@ public abstract class RecordButton {
     this.record = recordButton;
     recordButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        System.out.println("RecordButton : Got click " + event);
-        if (!enabled) {
-          System.out.println("ignoring click -- busy!");
-          return;
-        }
+/*        System.out.println(new Date() + " : RecordButton : Got click " + event + " type int " +
+            " assoc " + event.getAssociatedType() +
+            " native " + event.getNativeEvent() + " source " + event.getSource());*/
         doClick();
       }
     });
@@ -59,25 +58,31 @@ public abstract class RecordButton {
 
                                                        if (ne.getKeyCode() == KeyCodes.KEY_ENTER && event.getTypeInt() == 512) {
                                                          ne.preventDefault();
-/*
-                                                         System.out.println("Got " + event + " type int " +
+
+                                                         System.out.println(new Date() + " : Click handler : Got " + event + " type int " +
                                                              event.getTypeInt() + " assoc " + event.getAssociatedType() +
                                                              " native " + event.getNativeEvent() + " source " + event.getSource());
-*/
-                                                           System.out.println("clicking record button...");
-
-                                                           doClick();
+                                                         doClick();
                                                        }
                                                      }
                                                    });
   }
 
-  HandlerRegistration logHandler;
-  public void onUnload() { logHandler.removeHandler(); }
+  private HandlerRegistration logHandler;
+  public void onUnload() {
+    logHandler.removeHandler();
+  }
 
   private void doClick() {
     if (recording) {
       cancelTimer();
+      // TODO : worry about issue where seems to stop recording too early sometimes
+/*      new Timer() {
+        @Override
+        public void run() {
+          stop();
+        }
+      }.schedule(10);*/
       stop();
     } else {
       start();
@@ -85,9 +90,6 @@ public abstract class RecordButton {
       addRecordingMaxLengthTimeout();
     }
   }
-
-  public void disable() { enabled = false; }
-  public void enable() { enabled = true; }
 
   private void start() {
     recording = true;
