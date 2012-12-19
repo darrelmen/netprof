@@ -33,6 +33,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
+import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
@@ -458,6 +459,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     else if (grading) {
       exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, englishOnlyMode ? 2 : 1);
       lastUser = -1; // no user
+    }
+    else if (dataCollectMode) {
+      exerciseList.setFactory(new WaveformExercisePanelFactory(service, this, this), userManager, 1);
     }
     else {
       exerciseList.setFactory(new ExercisePanelFactory(service, this, this), userManager, 1);

@@ -2,15 +2,12 @@ package mitll.langtest.client.scoring;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -20,7 +17,6 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.gauge.ScorePanel;
-import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
@@ -36,17 +32,17 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
   private static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
   private static final String USER_RECORDER = "User Recorder";
   private static final String INSTRUCTIONS = "Instructions";
-  private static final String RECORD = "record";
-  private static final String STOP = "stop";
+  //public static final String RECORD = "record";
+  //public static final String STOP = "stop";
   private static final String FAST = "Fast";
   private static final String SLOW = "Slow";
 
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
-  private static final int AUTO_STOP_DELAY  = 15000; // millis
+  //public static final int AUTO_STOP_DELAY  = 15000; // millis
 
   /**
-   * Just for backward compatibility -- so we can run against old plan files
+   * ??? Just for backward compatibility -- so we can run against old plan files
    */
   private String refAudio;
 
@@ -122,6 +118,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     if (contentAudio != null) contentAudio.onResize();
     if (answerAudio != null) answerAudio.onResize();
   }
+/*
+  @Override
+  protected void onUnload() {
+    super.onUnload();
+    //contentAudio.onUnload();
+  }*/
 
   /**
    * Show the instructions and the audio panel.<br></br>
@@ -295,7 +297,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
 
     @Override
     protected PlayAudioPanel makePlayAudioPanel(Widget toadd) {
-      final PostAudioRecordButton postAudioRecordButton = new PostAudioRecordButton(this, index);
+      final PostAudioRecordButton postAudioRecordButton = new PostAudioRecordButton(exercise, controller, service, index) {
+        @Override
+        public void useResult(AudioAnswer result) {
+          setRefAudio(refAudio, exercise.getRefSentence());
+          getImagesForPath(wavToMP3(result.path));
+        }
+      };
 
       return new PlayAudioPanel(soundManager) {
         @Override
@@ -312,6 +320,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
    */
   private class ASRRecordAudioPanel extends ASRScoringAudioPanel {
     private final int index;
+    private PostAudioRecordButton postAudioRecordButton;
 
     /**
      * @see GoodwaveExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
@@ -324,9 +333,20 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
       this.index = index;
     }
 
+    /**
+     * @see AudioPanel#getPlayButtons(com.google.gwt.user.client.ui.Widget)
+     * @param toAdd
+     * @return
+     */
     @Override
     protected PlayAudioPanel makePlayAudioPanel(Widget toAdd) {
-      final PostAudioRecordButton postAudioRecordButton = new PostAudioRecordButton(this, index);
+      postAudioRecordButton = new PostAudioRecordButton(exercise, controller, service, index) {
+        @Override
+        public void useResult(AudioAnswer result) {
+          setRefAudio(refAudio, exercise.getRefSentence());
+          getImagesForPath(wavToMP3(result.path));
+        }
+      };
 
       return new PlayAudioPanel(soundManager) {
         @Override
@@ -336,80 +356,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
         }
       };
     }
-  }
-
-  private class PostAudioRecordButton extends RecordButton {
-    private ScoringAudioPanel widgets;
-    private int index;
-    int reqid = 0;
-    public PostAudioRecordButton(final ScoringAudioPanel widgets, int index) {
-      super(new Button(RECORD), AUTO_STOP_DELAY);
-      this.widgets = widgets;
-      this.index = index;
-    }
 
     @Override
-    protected void stopRecording() {
-      controller.stopRecording();
-      reqid++;
-      service.writeAudioFile(controller.getBase64EncodedWavFile()
-          , exercise.getPlan(), exercise.getID(),
-          "" + index, "" + controller.getUser(),
-          false, reqid, new AsyncCallback<AudioAnswer>() {
-            public void onFailure(Throwable caught) {
-              showPopup(AudioAnswer.Validity.INVALID.getPrompt());
-            }
-
-            /**
-             * Feedback for when audio isn't valid for some reason.
-             * @param toShow
-             */
-            private void showPopup(String toShow) {
-              final PopupPanel popupImage = new PopupPanel(true);
-              popupImage.add(new HTML(toShow));
-              popupImage.showRelativeTo(getRecord());
-              Timer t = new Timer() {
-                @Override
-                public void run() { popupImage.hide(); }
-              };
-              t.schedule(3000);
-            }
-
-            public void onSuccess(AudioAnswer result) {
-              System.out.println("PostAudioRecordButton : Got audio answer " + result);
-              if (result.reqid != reqid) {
-                System.out.println("ignoring old response " + result);
-                return;
-              }
-              if (result.validity == AudioAnswer.Validity.OK) {
-                widgets.setRefAudio(refAudio, exercise.getRefSentence());
-                widgets.getImagesForPath(wavToMP3(result.path));
-              }
-              else {
-                showPopup(result.validity.getPrompt());
-              }
-            }
-          });
-    }
-
-    @Override
-    protected void startRecording() {
-      controller.startRecording();
-    }
-
-    /**
-     * So we don't want the button changing width when we change the text.
-     */
-    @Override
-    protected void showRecording() {
-      int w = getRecord().getOffsetWidth();
-      ((Button)getRecord()).setText(STOP);
-      if (getRecord().getOffsetWidth() < w) getRecord().setWidth(w +"px");
-    }
-
-    @Override
-    protected void showStopped() {
-      ((Button)getRecord()).setText(RECORD);
+    protected void onUnload() {
+      super.onUnload();
+      postAudioRecordButton.onUnload();
     }
   }
 }
