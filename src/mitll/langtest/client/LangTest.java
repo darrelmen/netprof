@@ -341,8 +341,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     //System.out.println("modeSelect english " +englishOnlyMode + " grading " +isGrading );
 
     logout.setVisible(!goodwaveMode);
-    users.setVisible(isGrading);
-    showResults.setVisible(isGrading);
+    users.setVisible(isGrading || dataCollectMode);
+    showResults.setVisible(isGrading || dataCollectMode);
 
     if (goodwaveMode) {
       gotUser(-1);
