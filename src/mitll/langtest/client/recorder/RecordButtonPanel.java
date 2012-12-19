@@ -165,4 +165,9 @@ public class RecordButtonPanel extends HorizontalPanel {
       DOM.insertBefore(getElement(), img.getElement(), DOM.getFirstChild(getElement()));
     }
   }
+
+  @Override
+  protected void onUnload() {
+    rb.onUnload();
+  }
 }
