@@ -74,15 +74,16 @@ public class PostAudioRecordButton extends RecordButton {
           return;
         }
         if (result.validity == AudioAnswer.Validity.OK) {
-          //   audioPanel.setRefAudio(refAudio, exercise.getRefSentence());
           useResult(result);
-          //audioPanel.getImagesForPath(wavToMP3(result.path));
         } else {
           showPopup(result.validity.getPrompt());
+          useInvalidResult(result);
         }
       }
     });
   }
+
+  protected void useInvalidResult(AudioAnswer result) {}
 
   @Override
   protected void startRecording() {
