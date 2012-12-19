@@ -56,7 +56,9 @@ public abstract class RecordButton {
                                                      public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
                                                        NativeEvent ne = event.getNativeEvent();
 
-                                                       if (ne.getKeyCode() == KeyCodes.KEY_ENTER && event.getTypeInt() == 512) {
+                                                       if (ne.getKeyCode() == KeyCodes.KEY_ENTER &&
+                                                           event.getTypeInt() == 512 &&
+                                                           "[object KeyboardEvent]".equals(ne.getString())) {
                                                          ne.preventDefault();
 
                                                          System.out.println(new Date() + " : Click handler : Got " + event + " type int " +
