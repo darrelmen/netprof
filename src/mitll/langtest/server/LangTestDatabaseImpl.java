@@ -69,6 +69,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public List<ExerciseShell> getExerciseIds(long userID, boolean useFile, boolean arabicDataCollect) {
+    logger.debug("getting exercise ids for " + userID);
     List<Exercise> exercises = getExercises(userID, useFile, arabicDataCollect);
     List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
     for (Exercise e : exercises) {
@@ -130,7 +131,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
-    logger.debug("getExercises isurdu = " + isUrdu);
+    logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
     db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, isUrdu);
     //logger.debug("usefile = " + useFile + " arabic data collect " + arabicDataCollect);
     List<Exercise> exercises;
@@ -596,8 +597,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.addGrader(login);
   }
 
+  /**
+   * @see mitll.langtest.client.user.UserManager#displayGraderLogin()
+   * @param login
+   * @return
+   */
   public boolean graderExists(String login) {
     return db.graderExists(login);
+  }
+
+  @Override
+  public int userExists(String login) {
+    return db.userExists(login);
   }
 
   // Users ---------------------
@@ -610,6 +621,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String format = sdf.format(new Date());
     String ip = request.getRemoteHost() +/*"/"+ request.getRemoteAddr()+*/(header != null ? "/" + header : "") + " at " + format;
     return db.addUser(age, gender, experience, ip);
+  }
+
+  @Override
+  public long addUser(int age, String gender, int experience, String firstName, String lastName, String nativeLang, String dialect, String userID) {
+    HttpServletRequest request = getThreadLocalRequest();
+    // String header = request.getHeader("X-FORWARDED-FOR");
+    String header = request.getHeader("User-Agent");
+    SimpleDateFormat sdf = new SimpleDateFormat();
+    String format = sdf.format(new Date());
+    String ip = request.getRemoteHost() +/*"/"+ request.getRemoteAddr()+*/(header != null ? "/" + header : "") + " at " + format;
+    return db.addUser(age, gender, experience, ip, firstName, lastName, nativeLang, dialect, userID);
   }
 
   public List<User> getUsers() {
