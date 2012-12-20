@@ -17,11 +17,11 @@ import java.util.List;
 
 /**
  * Handles storing cookies for users, etc. IF user ids are stored as cookies.
- *
+ * <p/>
  * Prompts user for login info.
- *
+ * <p/>
  * NOTE : will keep prompting them if the browser doesn't let you store cookies.
- *
+ * <p/>
  * User: GO22670
  * Date: 5/15/12
  * Time: 11:32 AM
@@ -46,7 +46,7 @@ public class UserManager {
   private final UserNotification langTest;
   private final boolean useCookie = false;
   private long userID = NO_USER_SET;
-  private Integer rememberedUser;
+  private int rememberedUser = -1;
 
   public UserManager(UserNotification lt, LangTestDatabaseAsync service) {
     this.langTest = lt;
@@ -78,7 +78,7 @@ public class UserManager {
     int user = getUser();
     //Thread.dumpStack();
     if (user != NO_USER_SET) {
-      System.out.println("login user : " +user);
+      System.out.println("login user : " + user);
       langTest.gotUser(user);
     } else {
       displayLoginBox();
@@ -86,7 +86,7 @@ public class UserManager {
   }
 
   void logout() {
-    Cookies.setCookie("grader","");
+    Cookies.setCookie("grader", "");
 
     System.out.println("logout : grader now " + getGrader());
   }
@@ -107,12 +107,15 @@ public class UserManager {
     }
   }
 
-  public String getGrader() { return Cookies.getCookie("grader"); }
+  public String getGrader() {
+    return Cookies.getCookie("grader");
+  }
 
   /**
    * @see mitll.langtest.client.LangTest#getLogout()
    */
   public void clearUser() {
+    rememberedUser = -1;
     if (useCookie) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
       logout();
@@ -123,6 +126,7 @@ public class UserManager {
 
   /**
    * We don't use this anymore
+   *
    * @deprecated
    */
   private void displayChoiceBox() {
@@ -186,8 +190,7 @@ public class UserManager {
     String sid = getGrader();
     if (sid == null || sid.length() == 0) {
       displayGraderLogin();
-    }
-    else {
+    } else {
       System.out.println("grader cookie " + getGrader());
       langTest.setGrading(true);
     }
@@ -196,7 +199,7 @@ public class UserManager {
   public void teacherLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
-      System.out.println("login user : " +user);
+      System.out.println("login user : " + user);
       langTest.gotUser(user);
     } else {
       displayTeacherLogin();
@@ -229,7 +232,6 @@ public class UserManager {
     password.addKeyUpHandler(keyHandler);
 
 
-
     VerticalPanel dialogVPanel = new VerticalPanel();
     dialogVPanel.addStyleName("dialogVPanel");
     dialogVPanel.add(new HTML("<b>User ID</b>"));
@@ -245,7 +247,8 @@ public class UserManager {
       public void onClick(ClickEvent event) {
         if (user.getText().length() > 0 && password.getText().length() > 0) {
           service.graderExists(user.getText(), new AsyncCallback<Boolean>() {
-            public void onFailure(Throwable caught) {}
+            public void onFailure(Throwable caught) {
+            }
 
             public void onSuccess(Boolean result) {
               if (result) {
@@ -313,9 +316,9 @@ public class UserManager {
     final TextBox dialect = new TextBox();
 
     final TextBox ageEntryBox = new TextBox();
-    final Button closeButton = makeCloseButton(ageEntryBox);
 
-
+    //final Button closeButton = makeCloseButton(ageEntryBox);
+    final Button closeButton = new Button("Login");
 
     final Button reg = new Button("Register");
 
@@ -325,11 +328,10 @@ public class UserManager {
     final ListBox experienceBox = getExperienceBox();
     VerticalPanel experiencePanel = getGenderPanel(experienceBox);
 
-    closeButton.setEnabled(false);
+    closeButton.setEnabled(true);
 
     // We can set the id of a widget by accessing its Element
     closeButton.getElement().setId("closeButton");
-
 
     KeyUpHandler keyHandler = new GraderMyKeyUpHandler(user, closeButton, reg, password, false);
     user.addKeyUpHandler(keyHandler);
@@ -364,8 +366,7 @@ public class UserManager {
     dialogVPanel.add(experiencePanel);
 
 
-
-    reg.setEnabled(false);
+    reg.setEnabled(true);
     reg.getElement().setId("registerButton");
 
     reg.addClickHandler(new ClickHandler() {
@@ -376,37 +377,71 @@ public class UserManager {
           if (experienceBox.getSelectedIndex() == EXPERIENCE_CHOICES.size() - 1) {
             monthsOfExperience = 20 * 12;
           }
-          service.addUser(Integer.parseInt(ageEntryBox.getText()),
-              genderBox.getValue(genderBox.getSelectedIndex()),
-              monthsOfExperience,
-              first.getText(),
-              last.getText(),
-              nativeLang.getText(),
-              dialect.getText(),
-              user.getText(),
+          boolean valid = true;
+
+          if (first.getText().isEmpty()) {
+            Window.alert("first name is empty");
+            valid = false;
+          }
+          if (valid && last.getText().isEmpty()) {
+            Window.alert("last name is empty");
+            valid = false;
+          }
+          if (valid && nativeLang.getText().isEmpty()) {
+            Window.alert("language is empty");
+            valid = false;
+          }
+          if (valid && dialect.getText().isEmpty()) {
+            Window.alert("dialect is empty");
+            valid = false;
+          }
+          if (valid && user.getText().isEmpty()) {
+            Window.alert("user id is empty");
+            valid = false;
+          }
+
+          int age = 0;
+          if (valid) {
+            try {
+              age = Integer.parseInt(ageEntryBox.getText());
+            } catch (NumberFormatException e) {
+              Window.alert("age '" + ageEntryBox.getText() + "' is invalid.");
+              valid = false;
+              //e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+          }
+          if (valid) {
+            service.addUser(age,
+                genderBox.getValue(genderBox.getSelectedIndex()),
+                monthsOfExperience,
+                first.getText(),
+                last.getText(),
+                nativeLang.getText(),
+                dialect.getText(),
+                user.getText(),
 
 
-              new AsyncCallback<Long>() {
-                public void onFailure(Throwable caught) {
-                  // Show the RPC error message to the user
-                  dialogBox.setText("Remote Procedure Call - Failure");
-                  dialogBox.center();
-                  closeButton.setFocus(true);
-                }
+                new AsyncCallback<Long>() {
+                  public void onFailure(Throwable caught) {
+                    // Show the RPC error message to the user
+                    dialogBox.setText("Remote Procedure Call - Failure");
+                    dialogBox.center();
+                    closeButton.setFocus(true);
+                  }
 
-                public void onSuccess(Long result) {
-                  System.out.println("server result is " + result);
-                  long result1 = result;
-                  rememberedUser = (int) result1;
-                  dialogBox.hide();
-                  storeUser(rememberedUser);
+                  public void onSuccess(Long result) {
+                    System.out.println("server result is " + result);
+                    long result1 = result;
+                    rememberedUser = (int) result1;
+                    dialogBox.hide();
+                    storeUser(rememberedUser);
                 /*  boolean passwordMatch = checkPassword(password);
                   closeButton.setEnabled(passwordMatch);
                   closeButton.click();
                   if (passwordMatch) storeUser(result);*/
-                }
-              });
-
+                  }
+                });
+          }
 
         }
       }
@@ -429,9 +464,17 @@ public class UserManager {
     closeButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
 
-        dialogBox.hide();
-        storeUser(rememberedUser);
-       // langTest.setGrading(true);
+        if (rememberedUser == -1) {
+          if (checkPassword(password)) {
+            Window.alert("please register -- " + user.getText() + " has not registered");
+          } else {
+            Window.alert("please use password from the email");
+          }
+        } else {
+          dialogBox.hide();
+          storeUser(rememberedUser);
+        }
+        // langTest.setGrading(true);
       }
     });
     show(dialogBox);
@@ -506,13 +549,13 @@ public class UserManager {
        * Send the name from the nameField to the server and wait for a response.
        */
       private void sendNameToServer() {
-        int monthsOfExperience = experienceBox.getSelectedIndex()*3;
-        if (experienceBox.getSelectedIndex() == EXPERIENCE_CHOICES.size()-1) {
-          monthsOfExperience = 20*12;
+        int monthsOfExperience = experienceBox.getSelectedIndex() * 3;
+        if (experienceBox.getSelectedIndex() == EXPERIENCE_CHOICES.size() - 1) {
+          monthsOfExperience = 20 * 12;
         }
         service.addUser(Integer.parseInt(ageEntryBox.getText()),
-          genderBox.getValue(genderBox.getSelectedIndex()),
-          monthsOfExperience, new AsyncCallback<Long>() {
+            genderBox.getValue(genderBox.getSelectedIndex()),
+            monthsOfExperience, new AsyncCallback<Long>() {
           public void onFailure(Throwable caught) {
             // Show the RPC error message to the user
             dialogBox.setText("Remote Procedure Call - Failure");
@@ -564,7 +607,7 @@ public class UserManager {
 
   private void show(DialogBox dialogBox) {
     int left = Window.getClientWidth() / 10;
-    int top  = Window.getClientHeight() / 10;
+    int top = Window.getClientHeight() / 10;
     dialogBox.setPopupPosition(left, top);
 
     dialogBox.show();
@@ -611,13 +654,15 @@ public class UserManager {
     public void onKeyUp(KeyUpEvent event) {
       String text = user.getText();
       if (text.length() == 0) {
-        closeButton.setEnabled(false);
+        // closeButton.setEnabled(false);
         return;
       }
 
       if (isGrader) {
         service.graderExists(text, new AsyncCallback<Boolean>() {
-          public void onFailure(Throwable caught) {}
+          public void onFailure(Throwable caught) {
+          }
+
           public void onSuccess(Boolean result) {
             //System.out.println("user '" + user.getText() + "' exists " + result);
             boolean passwordMatch = checkPassword(password);
@@ -631,27 +676,26 @@ public class UserManager {
             }
           }
         });
-      }
-
-      else {
+      } else {
         service.userExists(text, new AsyncCallback<Integer>() {
           public void onFailure(Throwable caught) {
           }
 
           public void onSuccess(Integer result) {
-           // System.out.println("user '" + user.getText() + "' exists " + result);
+            // System.out.println("user '" + user.getText() + "' exists " + result);
             boolean passwordMatch = checkPassword(password);
-
+            //  if (!passwordMatch) Window.alert("password is incorrect - check your email for the correct password");
+            rememberedUser = -1;
             if (passwordMatch) {
-              closeButton.setEnabled(result != -1);
-              regButton.setEnabled(result == -1);
+//              closeButton.setEnabled(result != -1);
+              //            regButton.setEnabled(result == -1);
               if (result != -1) {
                 //storeUser(result);
                 rememberedUser = result;
               }
             } else {
-              closeButton.setEnabled(false);
-              regButton.setEnabled(false);
+              //          closeButton.setEnabled(false);
+              //        regButton.setEnabled(false);
             }
           }
         });
