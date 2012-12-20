@@ -49,6 +49,14 @@ public abstract class RecordButton {
     });
     recordButton.setTitle("Press Return to record/stop recording");
 
+    recordButton.addKeyPressHandler(new KeyPressHandler() {
+      @Override
+      public void onKeyPress(KeyPressEvent event) {
+        System.out.println("Got " + event);
+      }
+    });
+
+
     logHandler = Event.addNativePreviewHandler(new
                                                    Event.NativePreviewHandler() {
 
@@ -64,7 +72,12 @@ public abstract class RecordButton {
                                                          System.out.println(new Date() + " : Click handler : Got " + event + " type int " +
                                                              event.getTypeInt() + " assoc " + event.getAssociatedType() +
                                                              " native " + event.getNativeEvent() + " source " + event.getSource());
-                                                         doClick();
+                                                         new Timer() {
+                                                           @Override
+                                                           public void run() {
+                                                             doClick();
+                                                           }
+                                                         }.schedule(10);
                                                        }
                                                      }
                                                    });
@@ -72,24 +85,27 @@ public abstract class RecordButton {
 
   private HandlerRegistration logHandler;
   public void onUnload() {
+    System.out.println("removing handler for recording----------------->");
     logHandler.removeHandler();
   }
 
   private void doClick() {
-    if (recording) {
-      cancelTimer();
-      // TODO : worry about issue where seems to stop recording too early sometimes
+    if (record.isVisible() && record.isEnabled()) {
+      if (recording) {
+        cancelTimer();
+        // TODO : worry about issue where seems to stop recording too early sometimes
 /*      new Timer() {
         @Override
         public void run() {
           stop();
         }
       }.schedule(10);*/
-      stop();
-    } else {
-      start();
+        stop();
+      } else {
+        start();
 
-      addRecordingMaxLengthTimeout();
+        addRecordingMaxLengthTimeout();
+      }
     }
   }
 
