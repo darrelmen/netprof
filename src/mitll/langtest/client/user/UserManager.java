@@ -563,8 +563,8 @@ public class UserManager {
   }
 
   private void show(DialogBox dialogBox) {
-    int left = Window.getClientWidth() / 3;
-    int top  = Window.getClientHeight() / 3;
+    int left = Window.getClientWidth() / 10;
+    int top  = Window.getClientHeight() / 10;
     dialogBox.setPopupPosition(left, top);
 
     dialogBox.show();
@@ -639,7 +639,7 @@ public class UserManager {
           }
 
           public void onSuccess(Integer result) {
-            System.out.println("user '" + user.getText() + "' exists " + result);
+           // System.out.println("user '" + user.getText() + "' exists " + result);
             boolean passwordMatch = checkPassword(password);
 
             if (passwordMatch) {

@@ -260,6 +260,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
   @Override
   protected void onUnload() {
     super.onUnload();
+    System.out.println("doing unload of prev/next------------------> ");
     logHandler.removeHandler();
   }
 
