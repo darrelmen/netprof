@@ -54,6 +54,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   protected void onUnload() {
     super.onUnload();
     destroySound();
+    System.out.println("doing unload of play ------------------> ");
+
     logHandler.removeHandler();
   }
 
@@ -92,10 +94,12 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private HandlerRegistration logHandler;
 
   private void doClick() {
-    if (isPlaying())
-      pause();
-    else
-      play();
+    if (playButton.isVisible() && playButton.isEnabled()) {
+      if (isPlaying())
+        pause();
+      else
+        play();
+    }
   }
 
   /**
@@ -202,6 +206,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (currentSound != null) {
       System.out.println("destroySound : " + this + " so destroying sound " + currentSound);
       this.soundManager.destroySound(currentSound);
+      //currentSound = null;
     }
   }
 
@@ -229,6 +234,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   public void songFirstLoaded(double durationEstimate){
+    System.out.println("songFirstLoaded for " + this + " listener is " + listener);
     playButton.setVisible(true);
     if (listener != null) {
      // System.out.println("songFirstLoaded for " + this + " listener is " + listener);
