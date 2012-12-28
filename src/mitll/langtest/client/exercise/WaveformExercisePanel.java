@@ -96,26 +96,23 @@ public class WaveformExercisePanel extends ExercisePanel {
     @Override
     protected PlayAudioPanel makePlayAudioPanel(Widget toAdd) {
       postAudioRecordButton = new PostAudioRecordButton(exercise, controller, service, index) {
-        Timer t = null;
+        private Timer t = null;
+
+        @Override
+        protected void startRecording() {
+          super.startRecording();
+          setButtonsEnabled(false);
+        }
 
         /**
          * @see mitll.langtest.client.recorder.RecordButton#stop()
          */
         @Override
         protected void stopRecording() {
-          boolean wasVisible = waveform.isVisible();
+          setButtonsEnabled(true);
 
-          // only show the spinning icon if it's going to take awhile
-          t = new Timer() {
-            @Override
-            public void run() {
-              waveform.setVisible(true);
-              waveform.setUrl(LangTest.LANGTEST_IMAGES +"animated_progress.gif");
-            }
-          };
-
-          // Schedule the timer to run once in 1 seconds.
-          t.schedule(wasVisible ? 700 : 1);
+          waveform.setVisible(true);
+          waveform.setUrl(LangTest.LANGTEST_IMAGES +"animated_progress.gif");
 
           super.stopRecording();
         }

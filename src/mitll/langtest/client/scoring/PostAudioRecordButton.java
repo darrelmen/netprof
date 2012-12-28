@@ -38,6 +38,9 @@ public class PostAudioRecordButton extends RecordButton {
     this.service = service;
   }
 
+  /**
+   * @see mitll.langtest.client.recorder.RecordButton#stop()
+   */
   @Override
   protected void stopRecording() {
     controller.stopRecording();

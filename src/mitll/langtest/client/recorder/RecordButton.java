@@ -41,21 +41,17 @@ public abstract class RecordButton {
     this.record = recordButton;
     recordButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-/*        System.out.println(new Date() + " : RecordButton : Got click " + event + " type int " +
-            " assoc " + event.getAssociatedType() +
-            " native " + event.getNativeEvent() + " source " + event.getSource());*/
         doClick();
       }
     });
     recordButton.setTitle("Press Return to record/stop recording");
 
-    recordButton.addKeyPressHandler(new KeyPressHandler() {
+/*    recordButton.addKeyPressHandler(new KeyPressHandler() {
       @Override
       public void onKeyPress(KeyPressEvent event) {
         System.out.println("Got " + event);
       }
-    });
-
+    });*/
 
     logHandler = Event.addNativePreviewHandler(new
                                                    Event.NativePreviewHandler() {
@@ -81,11 +77,12 @@ public abstract class RecordButton {
                                                        }
                                                      }
                                                    });
+    System.out.println("creating handler for recording " + logHandler);
   }
 
   private HandlerRegistration logHandler;
   public void onUnload() {
-    System.out.println("removing handler for recording----------------->");
+    System.out.println("removing handler for recording " + logHandler);
     logHandler.removeHandler();
   }
 
