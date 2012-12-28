@@ -2,6 +2,7 @@ package mitll.langtest.client.scoring;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
@@ -28,7 +29,6 @@ public class GoodwaveExercisePanelFactory extends ExercisePanelFactory {
 
   @Override
   public Panel getExercisePanel(Exercise e) {
-    Panel widgets = new GoodwaveExercisePanel(e, service, controller);
-    return widgets;
+    return new GoodwaveExercisePanel(e, service, controller);
   }
 }
