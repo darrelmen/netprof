@@ -44,6 +44,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public static final String FIRST_N_IN_ORDER = "firstNInOrder";
   private static final String DATA_COLLECT_MODE = "dataCollect";
   private static final String URDU = "urdu";
+  private static final int MB = (1024 * 1024);
   private static Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   public static final String ANSWERS = "answers";
   private static final int TIMEOUT = 30;
@@ -75,7 +76,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     for (Exercise e : exercises) {
       ids.add(new ExerciseShell(e.getID(), e.getTooltip()));
     }
+    logMemory();
     return ids;
+  }
+
+  private void logMemory() {
+    Runtime rt = Runtime.getRuntime();
+    long free = rt.freeMemory();
+    long used = rt.totalMemory()-free;
+    long max = rt.maxMemory();
+    logger.debug("heap info free " + free/MB + "M used " + used/MB + "M max " + max/MB +"M");
   }
 
   public List<ExerciseShell> getExerciseIds(boolean useFile) {
@@ -93,6 +103,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     for (Exercise e : exercises) {
       if (id.equals(e.getID())) return e;
     }
+    logMemory();
+
     return null;
   }
 
@@ -115,6 +127,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     for (Exercise e : exercises) {
       if (id.equals(e.getID())) return e;
     }
+    logMemory();
+
     return null;
   }
 
@@ -145,6 +159,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (makeFullURLs) convertRefAudioURLs(exercises);
     if (!exercises.isEmpty())
       logger.debug("for user #" + userID +" got " + exercises.size() + " exercises , first ref sentence = '" + exercises.iterator().next().getRefSentence() + "'");
+    logMemory();
+
     return exercises;
   }
 
