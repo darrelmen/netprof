@@ -38,6 +38,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   private static final String LESSON_FILE = "lesson-737.csv";
   private static final String FAST = "fast";
   private static final String SLOW = "slow";
+  private static final boolean TESTING = false;
 
   private List<Exercise> exercises;
   private final String mediaDir;
@@ -129,7 +130,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       Pattern pattern = Pattern.compile("^\\d+\\.(.+)");
       while ((line2 = reader.readLine()) != null) {
         count++;
-    //    if (count > 20) break;
+       if (TESTING && count > 200) break;
 
         Matcher matcher = pattern.matcher(line2.trim());
         boolean wordListOnly = matcher.matches();
