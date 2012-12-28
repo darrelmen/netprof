@@ -34,14 +34,15 @@ import java.util.Set;
  * Time: 1:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExercisePanel extends VerticalPanel implements ExerciseQuestionState, ProvidesResize, RequiresResize {
+public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQuestionState, ProvidesResize, RequiresResize {
   private static final String ANSWER_BOX_WIDTH = "400px";
   private List<Widget> answers = new ArrayList<Widget>();
   private Set<Widget> completed = new HashSet<Widget>();
   protected Exercise exercise = null;
   protected ExerciseController controller;
   private boolean enableNextOnlyWhenAllCompleted = true;
-  private Button next;
+  private Button prev,next;
+  private HandlerRegistration keyHandler;
   protected LangTestDatabaseAsync service;
 
   /**
@@ -84,6 +85,8 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
 
   public void onResize() {
   }
+
+  public boolean isBusy() { return false; }
 
   /**
    * For every question,
@@ -188,19 +191,18 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     return 20;
   }
 
-  private HandlerRegistration logHandler;
-
   private Panel getNextAndPreviousButtons(final Exercise e, final LangTestDatabaseAsync service,
                                           final UserFeedback userFeedback, final ExerciseController controller) {
     HorizontalPanel buttonRow = new HorizontalPanel();
 
-    final Button prev = new Button("Previous");
+    this.prev = new Button("Previous");
     prev.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         clickPrev(controller, e);
       }
     });
-    prev.setEnabled(!controller.onFirst(e));
+    boolean onFirst = !controller.onFirst(e);
+    prev.setEnabled(onFirst);
     buttonRow.add(prev);
 
     this.next = new Button("Next");
@@ -218,33 +220,39 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     });
 
     // TODO : revisit in the context of text data collections
-    logHandler = Event.addNativePreviewHandler(new
+    keyHandler = Event.addNativePreviewHandler(new
                                                    Event.NativePreviewHandler() {
 
                                                      @Override
                                                      public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
                                                        NativeEvent ne = event.getNativeEvent();
-
-                                                       //System.out.println("got key " + ne.getCharCode() + " string '" + ne.getString() +"'");
                                                        int keyCode = ne.getKeyCode();
                                                        boolean isLeft  = keyCode == KeyCodes.KEY_LEFT;
                                                        boolean isRight = keyCode == KeyCodes.KEY_RIGHT;
                                                        if ((isLeft || isRight) && event.getTypeInt() == 512 && "[object KeyboardEvent]".equals(ne.getString())) {
                                                          ne.preventDefault();
 
-                                                        System.out.println(new Date() + " : key handler : Got " + event + " type int " +
+                                                        System.out.println(new Date() +
+                                                            " : getNextAndPreviousButtons - key handler : Got " + event + " type int " +
                                                              event.getTypeInt() + " assoc " + event.getAssociatedType() +
                                                              " native " + event.getNativeEvent() + " source " + event.getSource());
 
                                                          if (isLeft) {
-                                                           if (prev.isEnabled()) clickPrev(controller, e);
+                                                           if (prev.isEnabled() && prev.isVisible()) clickPrev(controller, e);
                                                          }
                                                          else {
-                                                           if (next.isEnabled()) clickNext(service, userFeedback, controller, e);
+                                                           if (next.isEnabled() && next.isVisible()) {
+                                                             System.out.println(keyHandler + " getNextAndPreviousButtons next " + next.isEnabled() + " vis " +next.isVisible());
+                                                             clickNext(service, userFeedback, controller, e);
+                                                           }
+                                                           else {
+                                                             System.out.println(keyHandler + " getNextAndPreviousButtons ignoring next click " + next.isEnabled() + " vis " +next.isVisible());
+                                                           }
                                                          }
                                                        }
                                                      }
                                                    });
+    System.out.println("getNextAndPreviousButtons made click handler " + keyHandler);
 
     return buttonRow;
   }
@@ -260,8 +268,8 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
   @Override
   protected void onUnload() {
     super.onUnload();
-    System.out.println("doing unload of prev/next------------------> ");
-    logHandler.removeHandler();
+    System.out.println("onUnload : doing unload of prev/next handler " +keyHandler);
+    keyHandler.removeHandler();
   }
 
   /**
@@ -360,19 +368,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
             @Override
             public void onSuccess(Double result) {
               check.setEnabled(true);
-              result *= 2.5;
-              result -= 1.25;
-              result = Math.max(0,result);
-              result = Math.min(1.0,result);
-              String percent = ((int) (result * 100)) + "%";
-              if (result > 0.6) {
-                resp.setText("Correct! Score was " + percent);
-                resp.setStyleName("correct");
-              }
-              else {
-                resp.setText("Try again - score was " + percent);
-                resp.setStyleName("incorrect");
-              }
+              showAutoCRTScore(result, resp);
             }
           });
         }
@@ -382,11 +378,27 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     return answer;
   }
 
+  private void showAutoCRTScore(Double result, Label resp) {
+    result *= 2.5;
+    result -= 1.25;
+    result = Math.max(0,result);
+    result = Math.min(1.0,result);
+    String percent = ((int) (result * 100)) + "%";
+    if (result > 0.6) {
+      resp.setText("Correct! Score was " + percent);
+      resp.setStyleName("correct");
+    }
+    else {
+      resp.setText("Try again - score was " + percent);
+      resp.setStyleName("incorrect");
+    }
+  }
+
   private static class TextValue extends HorizontalPanel implements HasValue<String> {
     String value;
     @Override
     public String getValue() {
-      return value;  //To change body of implemented methods use File | Settings | File Templates.
+      return value;
     }
 
     @Override
@@ -401,7 +413,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
 
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
-      return null;  //To change body of implemented methods use File | Settings | File Templates.
+      return null;
     }
   }
 
@@ -416,10 +428,18 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
   }
 
   private void enableNext() {
+    System.out.println("enableNext enable next completed " + completed.size() + " vs " + answers.size());
     enableNextButton((completed.size() == answers.size()));
   }
 
   public void enableNextButton(boolean val) {
+    System.out.println("enableNextButton enable next = " + val);
+    next.setEnabled(val);
+  }
+
+  public void setButtonsEnabled(boolean val) {
+    System.out.println("setButtonsEnabled enable prev, next = " + val);
+    prev.setEnabled(val);
     next.setEnabled(val);
   }
 
