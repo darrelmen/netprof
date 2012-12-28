@@ -44,8 +44,6 @@ public class UserDAO {
       Connection connection = database.getConnection();
       PreparedStatement statement;
 
-      //System.out.println("adding " + age + " and " + gender + " and " + experience);
-    //  statement = connection.prepareStatement("INSERT INTO users(id,age,gender,experience,ipaddr) VALUES(?,?,?,?,?);", Statement.RETURN_GENERATED_KEYS);
       statement = connection.prepareStatement("INSERT INTO users(id,age,gender,experience,ipaddr,firstName,lastName,nativeLang,dialect, userID) VALUES(?,?,?,?,?,?,?,?,?,?);");
       int i = 1;
       long newID = max + 1;
@@ -61,17 +59,6 @@ public class UserDAO {
       statement.setString(i++, userID);
       statement.executeUpdate();
 
-      if (false) {
-        ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
-
-        long id = 0;
-        while (rs.next()) {
-          id = rs.getLong(1);
-          //System.out.println("Database : addUser got user #" + id);
-          //  System.out.println(rs.getString(1) + "," + rs.getString(2) + "," + rs.getInt(3) + "," + rs.getString(4) + "," + rs.getTimestamp(5));
-        }
-        rs.close();
-      }
       statement.close();
       database.closeConnection(connection);
 
@@ -154,13 +141,6 @@ public class UserDAO {
       List<User> users = new ArrayList<User>();
       while (rs.next()) {
     	  i = 1;
-    /*    Timestamp timestamp;
-        if (rs.getMetaData().getColumnCount() == 7) { // if we have a timestamp column --
-          timestamp = rs.getTimestamp(i++);
-        }
-        else { // Wade's db schema doesn't have a timestamp column, currently
-          timestamp = new Timestamp(System.currentTimeMillis());
-        }*/
         users.add(new User(rs.getLong(i++), //id
           rs.getInt(i++), // age
           rs.getInt(i++), //gender
