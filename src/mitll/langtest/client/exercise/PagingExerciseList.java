@@ -11,6 +11,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -50,10 +51,19 @@ public class PagingExerciseList extends ExerciseList {
     TableStyle cellTableStyle();
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#makeExerciseList
+   * @param currentExerciseVPanel
+   * @param service
+   * @param feedback
+   * @param factory
+   * @param goodwaveMode
+   * @param arabicDataCollect
+   * @param showTurkToken
+   */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                             ExercisePanelFactory factory, boolean goodwaveMode, boolean arabicDataCollect, boolean showTurkToken) {
     super(currentExerciseVPanel, service, feedback, factory, goodwaveMode, arabicDataCollect, showTurkToken, false);
-    System.out.println("making paging list!\n\n\n");
     CellTable.Resources o = GWT.create(TableResources.class);
     this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
     table.setWidth("100%", true);
@@ -80,13 +90,17 @@ public class PagingExerciseList extends ExerciseList {
         super.onBrowserEvent(context, elem, object, event);
         if ("click".equals(event.getType())) {
           final ExerciseShell e = object;
-          Timer timer = new Timer() {
-            @Override
-            public void run() {
-              loadExercise(e);
-            }
-          };
-          timer.schedule(100);
+          if (isExercisePanelBusy()) {
+            Window.alert("Exercise busy.");
+          } else {
+            Timer timer = new Timer() {
+              @Override
+              public void run() {
+                loadExercise(e);
+              }
+            };
+            timer.schedule(100);
+          }
         }
       }
 
@@ -136,12 +150,11 @@ public class PagingExerciseList extends ExerciseList {
 
   public void clear() {
     List<ExerciseShell> list = dataProvider.getList();
-   List<ExerciseShell> copy = new ArrayList<ExerciseShell>();
+    List<ExerciseShell> copy = new ArrayList<ExerciseShell>();
 
     for (ExerciseShell es : list) copy.add(es);
     for (ExerciseShell es : copy) list.remove(es);
     table.setRowCount(list.size());
-
   }
 
   @Override
@@ -158,7 +171,32 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   @Override
+  protected void unselectCurrent() {
+    table.getSelectionModel().setSelected(currentExercises.get(currentExercise), false);
+  }
+
+  /**
+   * @see ExerciseList#useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
+   * @param i
+   */
+  @Override
   protected void markCurrentExercise(int i) {
     table.getSelectionModel().setSelected(currentExercises.get(i), true);
+    int pageEnd = table.getPageStart() + table.getPageSize();
+/*    System.out.println("marking " +i +" out of " +table.getRowCount() + " page start " +table.getPageStart() +
+        " end " + pageEnd);*/
+
+    if (i < table.getPageStart()) {
+      int newStart = Math.max(0, table.getPageStart() - table.getPageSize());
+     // System.out.println("new start of prev page " +newStart + " vs current " + table.getVisibleRange());
+      table.setVisibleRange(newStart,table.getPageSize());
+    }
+    else {
+      if (i >= pageEnd) {
+        int newStart = Math.min(table.getRowCount() - table.getPageSize(), pageEnd);
+       // System.out.println("new start of next page " +newStart + " vs current " + table.getVisibleRange());
+        table.setVisibleRange(newStart,table.getPageSize());
+      }
+    }
   }
 }
