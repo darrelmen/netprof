@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.gauge.ScorePanel;
@@ -28,7 +29,7 @@ import mitll.langtest.shared.Exercise;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresResize, ProvidesResize {
+public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize {
   private static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
   private static final String USER_RECORDER = "User Recorder";
   private static final String INSTRUCTIONS = "Instructions";
@@ -315,6 +316,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
     }
   }
 
+  boolean isBusy = false;
+
   /**
    * An ASR scoring panel with a record button.
    */
@@ -346,6 +349,18 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
           setRefAudio(refAudio, exercise.getRefSentence());
           getImagesForPath(wavToMP3(result.path));
         }
+
+        @Override
+        protected void startRecording() {
+          isBusy = true;
+          super.startRecording();
+        }
+
+        @Override
+        protected void stopRecording() {
+          isBusy = false;
+          super.stopRecording();
+        }
       };
 
       return new PlayAudioPanel(soundManager) {
@@ -362,5 +377,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements RequiresRe
       super.onUnload();
       postAudioRecordButton.onUnload();
     }
+  }
+
+
+  public boolean isBusy() {
+    return isBusy;
   }
 }
