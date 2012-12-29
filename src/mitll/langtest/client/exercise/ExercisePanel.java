@@ -1,7 +1,9 @@
 package mitll.langtest.client.exercise;
 
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -16,6 +18,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,14 +34,15 @@ import java.util.Set;
  * Time: 1:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExercisePanel extends VerticalPanel implements ExerciseQuestionState, ProvidesResize, RequiresResize {
+public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQuestionState, ProvidesResize, RequiresResize {
   private static final String ANSWER_BOX_WIDTH = "400px";
   private List<Widget> answers = new ArrayList<Widget>();
   private Set<Widget> completed = new HashSet<Widget>();
   protected Exercise exercise = null;
   protected ExerciseController controller;
   private boolean enableNextOnlyWhenAllCompleted = true;
-  private Button next;
+  private Button prev,next;
+  private HandlerRegistration keyHandler;
   protected LangTestDatabaseAsync service;
 
   /**
@@ -82,6 +86,8 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
   public void onResize() {
   }
 
+  public boolean isBusy() { return false; }
+
   /**
    * For every question,
    * <ul>
@@ -102,9 +108,14 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     //System.out.println("eng q " + englishQuestions);
     for (Exercise.QAPair pair : e.getQuestions()) {
       // add question header
-      Exercise.QAPair engQAPair = englishQuestions.get(i - 1);
+      Exercise.QAPair engQAPair = i - 1 < n ? englishQuestions.get(i - 1) : null;
 
-      getQuestionHeader(i, n, engQAPair, shouldShowAnswer(),!controller.isDemoMode());
+      if (engQAPair != null) {
+        getQuestionHeader(i, n, engQAPair, shouldShowAnswer(),!controller.isDemoMode());
+      }
+      else {
+        add(new HTML("<br></br>"));
+      }
       if (controller.isDemoMode()) {
         Exercise.QAPair flQAPair  = flQuestions.get(i - 1);
         getQuestionHeader(i, n, flQAPair, pair, shouldShowAnswer());
@@ -184,13 +195,14 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
                                           final UserFeedback userFeedback, final ExerciseController controller) {
     HorizontalPanel buttonRow = new HorizontalPanel();
 
-    Button prev = new Button("Previous");
+    this.prev = new Button("Previous");
     prev.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        controller.loadPreviousExercise(e);
+        clickPrev(controller, e);
       }
     });
-    prev.setEnabled(!controller.onFirst(e));
+    boolean onFirst = !controller.onFirst(e);
+    prev.setEnabled(onFirst);
     buttonRow.add(prev);
 
     this.next = new Button("Next");
@@ -203,10 +215,61 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     // send answers to server
     next.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        postAnswers(service, userFeedback, controller, e);
+        clickNext(service, userFeedback, controller, e);
       }
     });
+
+    // TODO : revisit in the context of text data collections
+    keyHandler = Event.addNativePreviewHandler(new
+                                                   Event.NativePreviewHandler() {
+
+                                                     @Override
+                                                     public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                                                       NativeEvent ne = event.getNativeEvent();
+                                                       int keyCode = ne.getKeyCode();
+                                                       boolean isLeft  = keyCode == KeyCodes.KEY_LEFT;
+                                                       boolean isRight = keyCode == KeyCodes.KEY_RIGHT;
+                                                       if ((isLeft || isRight) && event.getTypeInt() == 512 && "[object KeyboardEvent]".equals(ne.getString())) {
+                                                         ne.preventDefault();
+
+                                                        System.out.println(new Date() +
+                                                            " : getNextAndPreviousButtons - key handler : Got " + event + " type int " +
+                                                             event.getTypeInt() + " assoc " + event.getAssociatedType() +
+                                                             " native " + event.getNativeEvent() + " source " + event.getSource());
+
+                                                         if (isLeft) {
+                                                           if (prev.isEnabled() && prev.isVisible()) clickPrev(controller, e);
+                                                         }
+                                                         else {
+                                                           if (next.isEnabled() && next.isVisible()) {
+                                                             System.out.println(keyHandler + " getNextAndPreviousButtons next " + next.isEnabled() + " vis " +next.isVisible());
+                                                             clickNext(service, userFeedback, controller, e);
+                                                           }
+                                                           else {
+                                                             System.out.println(keyHandler + " getNextAndPreviousButtons ignoring next click " + next.isEnabled() + " vis " +next.isVisible());
+                                                           }
+                                                         }
+                                                       }
+                                                     }
+                                                   });
+    System.out.println("getNextAndPreviousButtons made click handler " + keyHandler);
+
     return buttonRow;
+  }
+
+  private void clickNext(LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller, Exercise e) {
+    postAnswers(service, userFeedback, controller, e);
+  }
+
+  private void clickPrev(ExerciseController controller, Exercise e) {
+    controller.loadPreviousExercise(e);
+  }
+
+  @Override
+  protected void onUnload() {
+    super.onUnload();
+    System.out.println("onUnload : doing unload of prev/next handler " +keyHandler);
+    keyHandler.removeHandler();
   }
 
   /**
@@ -305,19 +368,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
             @Override
             public void onSuccess(Double result) {
               check.setEnabled(true);
-              result *= 2.5;
-              result -= 1.25;
-              result = Math.max(0,result);
-              result = Math.min(1.0,result);
-              String percent = ((int) (result * 100)) + "%";
-              if (result > 0.6) {
-                resp.setText("Correct! Score was " + percent);
-                resp.setStyleName("correct");
-              }
-              else {
-                resp.setText("Try again - score was " + percent);
-                resp.setStyleName("incorrect");
-              }
+              showAutoCRTScore(result, resp);
             }
           });
         }
@@ -327,11 +378,27 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
     return answer;
   }
 
+  private void showAutoCRTScore(Double result, Label resp) {
+    result *= 2.5;
+    result -= 1.25;
+    result = Math.max(0,result);
+    result = Math.min(1.0,result);
+    String percent = ((int) (result * 100)) + "%";
+    if (result > 0.6) {
+      resp.setText("Correct! Score was " + percent);
+      resp.setStyleName("correct");
+    }
+    else {
+      resp.setText("Try again - score was " + percent);
+      resp.setStyleName("incorrect");
+    }
+  }
+
   private static class TextValue extends HorizontalPanel implements HasValue<String> {
     String value;
     @Override
     public String getValue() {
-      return value;  //To change body of implemented methods use File | Settings | File Templates.
+      return value;
     }
 
     @Override
@@ -346,7 +413,7 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
 
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
-      return null;  //To change body of implemented methods use File | Settings | File Templates.
+      return null;
     }
   }
 
@@ -361,10 +428,18 @@ public class ExercisePanel extends VerticalPanel implements ExerciseQuestionStat
   }
 
   private void enableNext() {
+    System.out.println("enableNext enable next completed " + completed.size() + " vs " + answers.size());
     enableNextButton((completed.size() == answers.size()));
   }
 
   public void enableNextButton(boolean val) {
+    System.out.println("enableNextButton enable next = " + val);
+    next.setEnabled(val);
+  }
+
+  public void setButtonsEnabled(boolean val) {
+    System.out.println("setButtonsEnabled enable prev, next = " + val);
+    prev.setEnabled(val);
     next.setEnabled(val);
   }
 
