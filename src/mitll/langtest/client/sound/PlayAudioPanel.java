@@ -1,10 +1,16 @@
 package mitll.langtest.client.sound;
 
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+
+import java.util.Date;
 
 /**
  * A play button, and an interface with the SoundManagerAPI to call off into the soundmanager.js
@@ -48,19 +54,52 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   protected void onUnload() {
     super.onUnload();
     destroySound();
+    System.out.println("doing unload of play ------------------> ");
+
+    logHandler.removeHandler();
   }
 
   protected void addButtons() {
     playButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        if (isPlaying())
-          pause();
-        else
-          play();
+/*        System.out.println(new Date() + " : PlayButton : Got click " + event + " type int " +
+            *//*event.getTypeInt() +*//* " assoc " + event.getAssociatedType() +
+            " native " + event.getNativeEvent() + " source " + event.getSource());*/
+        doClick();
       }
     });
+
+    logHandler = Event.addNativePreviewHandler(new
+                                                   Event.NativePreviewHandler() {
+
+                                                     @Override
+                                                     public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                                                       NativeEvent ne = event.getNativeEvent();
+
+                                                    //   System.out.println("got key " + ne.getCharCode() + " string '" + ne.getString() +"'");
+                                                       if (ne.getCharCode() == 32 && "[object KeyboardEvent]".equals(ne.getString())) {
+                                                         ne.preventDefault();
+
+                                                         System.out.println(new Date() + " : Play click handler : Got " + event + " type int " +
+                                                             event.getTypeInt() + " assoc " + event.getAssociatedType() +
+                                                             " native " + event.getNativeEvent() + " source " + event.getSource());
+                                                         doClick();
+                                                       }
+                                                     }
+                                                   });
     add(playButton);
     playButton.setVisible(false);
+  }
+
+  private HandlerRegistration logHandler;
+
+  private void doClick() {
+    if (playButton.isVisible() && playButton.isEnabled()) {
+      if (isPlaying())
+        pause();
+      else
+        play();
+    }
   }
 
   /**
@@ -158,13 +197,16 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    */
   private void createSound(String song){
     currentSound = new Sound(this);
+    System.out.println("createSound : " + this + " created sound " + currentSound);
+
     soundManager.createSound(currentSound, song, song);
   }
 
   private void destroySound() {
     if (currentSound != null) {
-      //System.out.println("destroySound : " + this + " so destroying sound " + currentSound);
+      System.out.println("destroySound : " + this + " so destroying sound " + currentSound);
       this.soundManager.destroySound(currentSound);
+      //currentSound = null;
     }
   }
 
@@ -192,6 +234,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   public void songFirstLoaded(double durationEstimate){
+    System.out.println("songFirstLoaded for " + this + " listener is " + listener);
     playButton.setVisible(true);
     if (listener != null) {
      // System.out.println("songFirstLoaded for " + this + " listener is " + listener);

@@ -18,9 +18,24 @@ public class User implements IsSerializable {
   public String ipaddr;
   public String  password;
   public long timestamp;
+  public String firstName,lastName,nativeLang,dialect;
+  public String userID;
 
   public User() {} // for serialization
-  public User (long id,int age,int gender,int experience, String ipaddr, String password, long timestamp) {
+
+  /**
+   * @see mitll.langtest.server.database.UserDAO#getUsers()
+   * @param id
+   * @param age
+   * @param gender
+   * @param experience
+   * @param ipaddr
+   * @param password
+   * @param userID
+   * @param timestamp
+   */
+  public User(long id, int age, int gender, int experience, String ipaddr, String password,
+              String first, String last, String nativeLang, String dialect, String userID, long timestamp) {
      this.id = id;
     this.age = age;
     this.gender = gender;
@@ -28,6 +43,11 @@ public class User implements IsSerializable {
     this.ipaddr = ipaddr;
     this.password = password;
     this.timestamp = timestamp;
+    this.firstName = first;
+    this.lastName = last;
+    this.nativeLang = nativeLang;
+    this.dialect = dialect;
+    this.userID = userID;
   }
 
   public String getTimestamp() {
@@ -37,5 +57,9 @@ public class User implements IsSerializable {
       return ipaddr.substring(i);
     }
     else return "";
+  }
+
+  public String toString() {
+    return "user " + id + " age " + age + " gender " + gender + " name " + firstName + " " + lastName + " native " + nativeLang + " dialect " + dialect;
   }
 }
