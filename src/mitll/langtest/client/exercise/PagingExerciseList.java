@@ -37,6 +37,7 @@ public class PagingExerciseList extends ExerciseList {
   private static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
   private ListDataProvider<ExerciseShell> dataProvider;
   private CellTable<ExerciseShell> table;
+  private ExerciseShell clickedOn = null;
 
   public interface TableResources extends CellTable.Resources {
 
@@ -90,6 +91,7 @@ public class PagingExerciseList extends ExerciseList {
         super.onBrowserEvent(context, elem, object, event);
         if ("click".equals(event.getType())) {
           final ExerciseShell e = object;
+          clickedOn = e;
           if (isExercisePanelBusy()) {
             Window.alert("Exercise busy.");
           } else {
@@ -146,6 +148,7 @@ public class PagingExerciseList extends ExerciseList {
 
   private void selectFirst() {
     table.getSelectionModel().setSelected(currentExercises.get(0), true);
+    table.redraw();
   }
 
   public void clear() {
@@ -170,33 +173,32 @@ public class PagingExerciseList extends ExerciseList {
 
   }
 
-  @Override
-  protected void unselectCurrent() {
-    table.getSelectionModel().setSelected(currentExercises.get(currentExercise), false);
-  }
-
   /**
    * @see ExerciseList#useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
    * @param i
    */
   @Override
   protected void markCurrentExercise(int i) {
-    table.getSelectionModel().setSelected(currentExercises.get(i), true);
-    int pageEnd = table.getPageStart() + table.getPageSize();
+    ExerciseShell itemToSelect = currentExercises.get(i);
+    System.out.println("Comparing selected " +itemToSelect + " with clicked on " + clickedOn);
+    if (clickedOn == null || !itemToSelect.equals(clickedOn)) {
+      table.getSelectionModel().setSelected(itemToSelect, true);
+      int pageEnd = table.getPageStart() + table.getPageSize();
 /*    System.out.println("marking " +i +" out of " +table.getRowCount() + " page start " +table.getPageStart() +
         " end " + pageEnd);*/
 
-    if (i < table.getPageStart()) {
-      int newStart = Math.max(0, table.getPageStart() - table.getPageSize());
-     // System.out.println("new start of prev page " +newStart + " vs current " + table.getVisibleRange());
-      table.setVisibleRange(newStart,table.getPageSize());
-    }
-    else {
-      if (i >= pageEnd) {
-        int newStart = Math.min(table.getRowCount() - table.getPageSize(), pageEnd);
-       // System.out.println("new start of next page " +newStart + " vs current " + table.getVisibleRange());
-        table.setVisibleRange(newStart,table.getPageSize());
+      if (i < table.getPageStart()) {
+        int newStart = Math.max(0, table.getPageStart() - table.getPageSize());
+        // System.out.println("new start of prev page " +newStart + " vs current " + table.getVisibleRange());
+        table.setVisibleRange(newStart, table.getPageSize());
+      } else {
+        if (i >= pageEnd) {
+          int newStart = Math.min(table.getRowCount() - table.getPageSize(), pageEnd);
+          // System.out.println("new start of next page " +newStart + " vs current " + table.getVisibleRange());
+          table.setVisibleRange(newStart, table.getPageSize());
+        }
       }
+      table.redraw();
     }
   }
 }
