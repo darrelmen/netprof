@@ -21,7 +21,10 @@ public class ExerciseShell implements IsSerializable {
 
   public String getID() { return id; }
   public String getTooltip() { return tooltip; }
-
+  @Override
+  public boolean equals(Object other) {
+    return other instanceof ExerciseShell && id.equals(((ExerciseShell)other).getID());
+  }
   public String toString() {
       return "Exercise id = " +id;
   }
