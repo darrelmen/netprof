@@ -22,6 +22,28 @@
         <listener-class>net.bull.javamelody.SessionListener</listener-class>
     </listener>
 
+    <login-config>
+        <auth-method>BASIC</auth-method>
+        <realm-name>Monitoring</realm-name>
+    </login-config>
+    <security-role>
+        <role-name>access</role-name>
+    </security-role>
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Monitoring</web-resource-name>
+            <url-pattern>/monitoring</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>access</role-name>
+        </auth-constraint>
+        <!-- if SSL enabled (SSL and certificate must then be configured in the server)
+        <user-data-constraint>
+                <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+        -->
+    </security-constraint>
+
   <servlet>
     <servlet-name>databaseServlet</servlet-name>
     <servlet-class>mitll.langtest.server.LangTestDatabaseImpl</servlet-class>
@@ -104,7 +126,11 @@
 <!--
       <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\msa\vlr-parle;IFEXISTS=TRUE</param-value>
 -->
-      <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\urdu\vlr-parle;IFEXISTS=TRUE</param-value>
+<!--
+      <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\urdu\vlr-parle;IFEXISTS=TRUE;CACHE_SIZE=30000</param-value>
+-->
+      <param-value>jdbc:h2:file:/Users/go22670/mt_repo/LangTest/war/config/urdu/vlr-parle;IFEXISTS=TRUE;CACHE_SIZE=30000</param-value>
+
 
       <!--
             <param-value>jdbc:h2:file://services/tomcat/webapps/npDari/config/dari/vlr-parle;IFEXISTS=TRUE</param-value>
