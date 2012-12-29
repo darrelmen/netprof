@@ -372,12 +372,11 @@ public class UserManager {
     reg.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         if (user.getText().length() > 0 && password.getText().length() > 0) {
+          boolean valid = checkPassword(password);
+          if (!valid) {
 
-          int monthsOfExperience = experienceBox.getSelectedIndex() * 3;
-          if (experienceBox.getSelectedIndex() == EXPERIENCE_CHOICES.size() - 1) {
-            monthsOfExperience = 20 * 12;
           }
-          boolean valid = true;
+
 
           if (first.getText().isEmpty()) {
             Window.alert("first name is empty");
@@ -411,38 +410,26 @@ public class UserManager {
             }
           }
           if (valid) {
-            service.addUser(age,
-                genderBox.getValue(genderBox.getSelectedIndex()),
-                monthsOfExperience,
-                first.getText(),
-                last.getText(),
-                nativeLang.getText(),
-                dialect.getText(),
-                user.getText(),
+            service.userExists(user.getText(), new AsyncCallback<Integer>() {
+              public void onFailure(Throwable caught) {}
 
-
-                new AsyncCallback<Long>() {
-                  public void onFailure(Throwable caught) {
-                    // Show the RPC error message to the user
-                    dialogBox.setText("Remote Procedure Call - Failure");
-                    dialogBox.center();
-                    closeButton.setFocus(true);
-                  }
-
-                  public void onSuccess(Long result) {
-                    System.out.println("server result is " + result);
-                    long result1 = result;
-                    rememberedUser = (int) result1;
-                    dialogBox.hide();
-                    storeUser(rememberedUser);
-                /*  boolean passwordMatch = checkPassword(password);
-                  closeButton.setEnabled(passwordMatch);
-                  closeButton.click();
-                  if (passwordMatch) storeUser(result);*/
-                  }
-                });
+              public void onSuccess(Integer result) {
+                System.out.println("user '" + user.getText() + "' exists " + result);
+                rememberedUser = -1;
+                if (result != -1) {
+                  rememberedUser = result;
+                  Window.alert("User " +user.getText() + " already registered, click login.");
+                }
+                else {
+                  addTeacher(Integer.parseInt(ageEntryBox.getText()),
+                      experienceBox, genderBox, first, last, nativeLang, dialect, user, dialogBox, closeButton);
+                }
+              }
+            });
           }
-
+          else {
+            System.out.println("not valid ------------ ?");
+          }
         }
       }
     });
@@ -478,6 +465,42 @@ public class UserManager {
       }
     });
     show(dialogBox);
+  }
+
+  private void addTeacher(int age, ListBox experienceBox, ListBox genderBox,
+                          TextBox first, TextBox last, TextBox nativeLang,
+                          TextBox dialect, TextBox user, final DialogBox dialogBox, final Button closeButton) {
+    int monthsOfExperience = experienceBox.getSelectedIndex() * 3;
+    if (experienceBox.getSelectedIndex() == EXPERIENCE_CHOICES.size() - 1) {
+      monthsOfExperience = 20 * 12;
+    }
+
+    service.addUser(age,
+        genderBox.getValue(genderBox.getSelectedIndex()),
+        monthsOfExperience,
+        first.getText(),
+        last.getText(),
+        nativeLang.getText(),
+        dialect.getText(),
+        user.getText(),
+
+
+        new AsyncCallback<Long>() {
+          public void onFailure(Throwable caught) {
+            // Show the RPC error message to the user
+            dialogBox.setText("Remote Procedure Call - Failure");
+            dialogBox.center();
+            closeButton.setFocus(true);
+          }
+
+          public void onSuccess(Long result) {
+            System.out.println("server result is " + result);
+            long result1 = result;
+            rememberedUser = (int) result1;
+            dialogBox.hide();
+            storeUser(rememberedUser);
+          }
+        });
   }
 
   private boolean checkPassword(TextBox password) {
@@ -678,24 +701,16 @@ public class UserManager {
         });
       } else {
         service.userExists(text, new AsyncCallback<Integer>() {
-          public void onFailure(Throwable caught) {
-          }
+          public void onFailure(Throwable caught) {}
 
           public void onSuccess(Integer result) {
             // System.out.println("user '" + user.getText() + "' exists " + result);
             boolean passwordMatch = checkPassword(password);
-            //  if (!passwordMatch) Window.alert("password is incorrect - check your email for the correct password");
             rememberedUser = -1;
             if (passwordMatch) {
-//              closeButton.setEnabled(result != -1);
-              //            regButton.setEnabled(result == -1);
               if (result != -1) {
-                //storeUser(result);
                 rememberedUser = result;
               }
-            } else {
-              //          closeButton.setEnabled(false);
-              //        regButton.setEnabled(false);
             }
           }
         });
