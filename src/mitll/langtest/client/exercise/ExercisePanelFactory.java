@@ -19,14 +19,14 @@ public class ExercisePanelFactory {
   protected ExerciseController controller;
 
   /**
-   * @see mitll.langtest.client.LangTest#onModuleLoad2()
+   * @see mitll.langtest.client.LangTest#setGrading(boolean)
    * @param service
    * @param userFeedback
    * @param controller
    */
   public ExercisePanelFactory( final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                                final ExerciseController controller) {
-    this.service =service;
+    this.service = service;
     this.userFeedback = userFeedback;
     this.controller = controller;
   }
