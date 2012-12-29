@@ -33,6 +33,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
+import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
@@ -98,6 +99,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private boolean readFromFile;
   private boolean autocrt;
   private boolean demoMode;
+  private boolean dataCollectMode;
   private String releaseDate;
 
   // property file property names
@@ -113,6 +115,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final String BKG_COLOR_FOR_REF1 = "bkgColorForRef";
   private static final String AUTO_CRT = "autocrt";
   private static final String DEMO_MODE = "demo";
+  private static final String DATA_COLLECT_MODE = "dataCollect";
 
   // URL parameters that can override above parameters
   private static final String GRADING = "grading";
@@ -254,6 +257,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = Boolean.parseBoolean(value);
       else if (key.equals(AUTO_CRT)) autocrt = Boolean.parseBoolean(value);
       else if (key.equals(DEMO_MODE)) demoMode = Boolean.parseBoolean(value);
+      else if (key.equals(DATA_COLLECT_MODE)) dataCollectMode = Boolean.parseBoolean(value);
     }
   }
 
@@ -284,11 +288,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void makeExerciseList(Panel exerciseListPanel, boolean isGrading) {
     final UserFeedback feedback = (UserFeedback) this;
+    final boolean usePagingExerciseList = goodwaveMode || dataCollectMode;
     if (isGrading) {
       this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback, factory, isArabicTextDataCollect());
     }
-    else if (goodwaveMode) {
-      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken) {
+    else if (usePagingExerciseList) {
+      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, factory, usePagingExerciseList, isArabicTextDataCollect(), showTurkToken) {
         @Override
         protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
       };
@@ -300,7 +305,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (showOnlyOneExercise()) {
       exerciseList.setExercise_title(exercise_title);
     }
-    if (!goodwaveMode) {
+    if (!usePagingExerciseList) {
       itemScroller = new ScrollPanel(this.exerciseList.getWidget());
     }
     if (exercise_title == null) {
@@ -309,7 +314,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     HTML child = new HTML("<h2>Items</h2>");
     child.addStyleName("center");
     exerciseListPanel.add(child);
-    exerciseListPanel.add(goodwaveMode ? this.exerciseList.getWidget() : itemScroller);
+    exerciseListPanel.add(usePagingExerciseList ? this.exerciseList.getWidget() : itemScroller);
   }
 
   public boolean showOnlyOneExercise() {
@@ -325,7 +330,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void setExerciseListSize() {
     int height = Math.max(60, Window.getClientHeight() - (2 * HEADER_HEIGHT) - footerHeight - 60);
-    if (!goodwaveMode) itemScroller.setSize(EXERCISE_LIST_WIDTH + "px", height + "px"); // 54
+    if (!goodwaveMode && !dataCollectMode) itemScroller.setSize(EXERCISE_LIST_WIDTH + "px", height + "px"); // 54
   }
 
   /**
@@ -336,8 +341,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     //System.out.println("modeSelect english " +englishOnlyMode + " grading " +isGrading );
 
     logout.setVisible(!goodwaveMode);
-    users.setVisible(isGrading);
-    showResults.setVisible(isGrading);
+    users.setVisible(isGrading || dataCollectMode);
+    showResults.setVisible(isGrading || dataCollectMode);
 
     if (goodwaveMode) {
       gotUser(-1);
@@ -364,6 +369,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     String arabicCollect = Window.Location.getParameter(ARABIC_COLLECT);
     String turk = Window.Location.getParameter(TURK);
     String bkgColorForRefParam = Window.Location.getParameter(BKG_COLOR_FOR_REF);
+    String demoParam = Window.Location.getParameter(DEMO_MODE);
 
     String exercise_title = Window.Location.getParameter(EXERCISE_TITLE);
     if (exercise_title != null) {
@@ -406,6 +412,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (bkgColorForRefParam != null) {
       bkgColorForRef = !bkgColorForRefParam.equals("false");
     }
+    if (demoParam != null) {
+      demoMode = !demoParam.equals("false");
+    }
+    if (Window.Location.getParameter(DATA_COLLECT_MODE) != null) {
+      dataCollectMode = !Window.Location.getParameter(DATA_COLLECT_MODE).equals("false");
+    }
     return grading;
   }
 
@@ -447,6 +459,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     else if (grading) {
       exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, englishOnlyMode ? 2 : 1);
       lastUser = -1; // no user
+    }
+    else if (dataCollectMode) {
+      exerciseList.setFactory(new WaveformExercisePanelFactory(service, this, this), userManager, 1);
     }
     else {
       exerciseList.setFactory(new ExercisePanelFactory(service, this, this), userManager, 1);
@@ -552,7 +567,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see ExerciseList#loadExercise
    * @see #modeSelect()
    */
-  public void login() {  userManager.login(); }
+  public void login() {
+    if (dataCollectMode) userManager.teacherLogin();
+    else userManager.login();
+  }
 
   /**
    * Init Flash recorder once we login.
