@@ -99,6 +99,7 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
     * @param userID
    */
   public void getExercises(long userID) {
+    System.out.println("getting exercises for " + userID);
     useUserID = true;
     this.userID = userID;
     if (autoCRT) {
@@ -136,15 +137,20 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
     }
 
     public void onSuccess(List<ExerciseShell> result) {
+      System.out.println("SetExercisesCallback Got " +result.size() + " results");
       currentExercises = result; // remember current exercises
       idToExercise = new HashMap<String, ExerciseShell>();
+      clear();
       for (final ExerciseShell es : result) {
         idToExercise.put(es.getID(),es);
         addExerciseToList(es);
       }
+      flush();
       loadFirstExercise();
     }
   }
+
+  protected void flush() {}
 
   protected void addExerciseToList(final ExerciseShell e) {
     final HTML w = new HTML("<b>" + e.getID() + "</b>");
@@ -231,6 +237,8 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
     currentExercise = i;
   }
 
+  protected boolean isExercisePanelBusy() { return ((BusyPanel) current).isBusy(); }
+
   /**
    * @see #loadExercise
    * @param e
@@ -251,13 +259,16 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
   }
 
   private int getIndex(ExerciseShell current) {
-    ExerciseShell shell = idToExercise.get(current.getID());
-    return shell != null ? currentExercises.indexOf(shell) : -1;
+    String id = current.getID();
+    ExerciseShell shell = idToExercise.get(id);
+    int i = shell != null ? currentExercises.indexOf(shell) : -1;
+/*    System.out.println("index of '" + id + "' is #" + i + " and item is " + current +
+        " map size " + idToExercise.size() + " exercise list size " +currentExercises.size());*/
+    return i;
   }
 
   @Override
   public void removeCurrentExercise() {
-    //System.out.println("removing " +current);
     if (current != null) {
       currentExerciseVPanel.remove(current);
       current = null;
@@ -266,16 +277,21 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
 
   @Override
   public void clear() {
+    System.out.println("Clearing list.");
     super.clear();
     progressMarkers.clear();
   }
 
   protected void markCurrentExercise(int i) {
-    HTML html = progressMarkers.get(currentExercise);
-    html.setStyleDependentName("highlighted", false);
-    html = progressMarkers.get(i);
+    unselectCurrent();
+    HTML html = progressMarkers.get(i);
     html.setStyleDependentName("highlighted", true);
     html.getElement().scrollIntoView();
+  }
+
+  protected void unselectCurrent() {
+    HTML html = progressMarkers.get(currentExercise);
+    html.setStyleDependentName("highlighted", false);
   }
 
   private int countSincePrompt = 0;
