@@ -54,6 +54,8 @@
         <path refid="imagewriter.classpath"/>
         <pathelement location="war/WEB-INF/lib/pronz.jar"/>
         <pathelement location="war/WEB-INF/lib/mira.jar"/>
+        <pathelement location="war/WEB-INF/lib/javamelody-1.42.0.jar"/>
+        <pathelement location="war/WEB-INF/lib/jrobin-1.5.9.jar"/>
     </path>
     <target name="init" depends="clean">
         <mkdir dir="war/WEB-INF/classes"/>
@@ -102,7 +104,7 @@
     </target>
 
     <target depends="build" name="warUrdu">
-        <jar destfile="npUrduData.war" basedir="war" excludes="answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+        <jar destfile="npUrduData.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
         </jar>
     </target>
 
