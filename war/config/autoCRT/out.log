@@ -1,0 +1,2478 @@
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\config\autocrt\\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-05 18:29:40.131 [INFO]     Starting training
+2012-12-05 18:29:40.149 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-05 18:29:40.310 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\config\autocrt\\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\config\autocrt\\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-05 18:32:06.206 [INFO]     Starting training
+2012-12-05 18:32:06.210 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-05 18:32:06.373 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-06 17:31:57.943 [INFO]     Starting training
+2012-12-06 17:31:57.948 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-06 17:31:58.139 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-06 18:39:38.976 [INFO]     Starting training
+2012-12-06 18:39:38.984 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\config\autocrt\\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\config\autocrt\\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-06 18:49:04.128 [INFO]     Starting training
+2012-12-06 18:49:04.132 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\config\autocrt\\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\config\autocrt\\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-06 18:49:28.091 [INFO]     Starting training
+2012-12-06 18:49:28.095 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-06 18:49:28.271 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-06 18:51:14.156 [INFO]     Starting training
+2012-12-06 18:51:14.157 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-06 18:51:14.328 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-06 19:06:25.030 [INFO]     Starting training
+2012-12-06 19:06:25.032 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-06 19:06:25.196 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-06 19:15:45.609 [INFO]     Starting training
+2012-12-06 19:15:45.611 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-06 19:15:45.771 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-06 19:37:19.836 [INFO]     Starting training
+2012-12-06 19:37:19.838 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-06 19:37:20.035 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-07 12:02:16.459 [INFO]     Starting training
+2012-12-07 12:02:16.461 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 12:02:16.624 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-07 12:06:15.962 [INFO]     Starting training
+2012-12-07 12:06:15.964 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 12:06:16.126 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-07 14:01:59.881 [INFO]     Starting training
+2012-12-07 14:01:59.883 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 14:02:00.050 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-07 14:52:12.874 [INFO]     Starting training
+2012-12-07 14:52:12.876 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 14:52:13.035 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-07 14:57:12.435 [INFO]     Starting training
+2012-12-07 14:57:12.438 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 14:57:12.596 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-07 15:12:41.745 [INFO]     Starting training
+2012-12-07 15:12:41.748 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 15:12:41.908 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-07 15:58:45.912 [INFO]     Starting training
+2012-12-07 15:58:45.914 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 15:58:46.083 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-07 16:03:49.752 [INFO]     Starting training
+2012-12-07 16:03:49.754 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 16:03:49.916 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-07 16:21:02.997 [INFO]     Starting training
+2012-12-07 16:21:03.000 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 16:21:03.162 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-07 16:23:43.771 [INFO]     Starting training
+2012-12-07 16:23:43.774 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 16:23:44.030 [INFO]     Completed training
+2012-12-07 16:23:44.249 [INFO]     Starting training
+2012-12-07 16:23:44.250 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 16:23:44.440 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-07 16:53:02.874 [INFO]     Starting training
+2012-12-07 16:53:02.877 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 16:53:03.039 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-07 17:08:36.740 [INFO]     Starting training
+2012-12-07 17:08:36.742 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 17:08:36.903 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-07 17:58:26.656 [INFO]     Starting training
+2012-12-07 17:58:26.659 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 17:58:26.821 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-07 18:27:53.224 [INFO]     Starting training
+2012-12-07 18:27:53.226 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 18:27:53.387 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-07 19:28:20.665 [INFO]     Starting training
+2012-12-07 19:28:20.668 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 19:28:20.852 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-07 19:34:28.627 [INFO]     Starting training
+2012-12-07 19:34:28.629 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-07 19:34:28.789 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-10 16:20:06.737 [INFO]     Starting training
+2012-12-10 16:20:06.748 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-10 16:20:06.929 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-10 16:28:49.397 [INFO]     Starting training
+2012-12-10 16:28:49.400 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-10 16:28:49.562 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-10 16:33:55.850 [INFO]     Starting training
+2012-12-10 16:33:55.852 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-10 16:33:56.012 [INFO]     Completed training
+# Begin Configuration
+
+[Shared Parameters]                        # These settings take precidence over the section-specific settings below
+
+[General]
+log: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\out.log
+parts: 1
+train: 
+all: 
+split: 0.33
+model: svm
+test: 
+score: 
+refcount: 3
+file-list: .\newSpecWin.txt
+
+[Training]
+train-method: svm
+average: true
+iterations: 100
+regress: true
+sim-score-nearest: false
+filtered-word-vectors: false
+separate-models: false
+
+[MIRA]
+k-best: 4
+slack: 0.01
+
+[SVM]
+c: 1.0
+gamma: 0.02
+
+[WordNet]
+wn-database-dir: .\WordNet-3.0\dict
+wn-cache-file: .\autoGradeData\WNcache
+
+[Edit Distance]
+edit-distance-options: reg,good,min,max,avg
+
+[Word Vectors]
+word-vector-options: reg,good,min,max,avg
+
+[BLEU Score]
+min-bleu-gram: 1
+max-bleu-gram: 3
+min-comp-bleu-gram: 1
+max-comp-bleu-gram: 3
+composite-bleu-options: reg,good
+individual-bleu-options: reg,good,min,max,avg
+bleu-smoothing: true
+
+[Mod Ngram]
+min-mod-gram: 1
+max-mod-gram: 3
+mod-gram-options: reg,good,min,max,avg
+
+[Dual Brevity Penalty]
+rate-lengths-options: reg,good,min,max,avg
+
+[Keygrams]
+min-key-gram: 1
+max-key-gram: 3
+blacklist-file: C:\Users\go22670\DLITest\clean\netPron2\war\\config\autocrt\blacklist.txt
+key-gram-options: reg,good,bad
+
+[Feature Normalization]
+zgroup: false
+
+[Scoring]
+dataset-breakdown: false
+score-norm-method: range
+report-group-scores: true
+report-overall-scores: true
+print-features: false
+
+# End Configuration
+2012-12-10 16:37:00.983 [INFO]     Starting training
+2012-12-10 16:37:00.986 [INFO]     Labels in the training data are: 1.0 0.800000011920929 0.6000000238418579 0.4000000059604645
+2012-12-10 16:37:01.144 [INFO]     Completed training
