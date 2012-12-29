@@ -139,6 +139,8 @@ public class DatabaseImpl implements Database {
       // gradeDAO.dropGrades();
       gradeDAO.createGradesTable(getConnection());
       graderDAO.createGraderTable(getConnection());
+      //userDAO.dropUserTable(this);
+
       userDAO.createUserTable(this);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
