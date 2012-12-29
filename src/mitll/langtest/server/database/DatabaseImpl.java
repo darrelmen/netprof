@@ -18,7 +18,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -69,7 +68,6 @@ public class DatabaseImpl implements Database {
   public final AnswerDAO answerDAO = new AnswerDAO(this);
   public final GradeDAO gradeDAO = new GradeDAO(this);
   public final GraderDAO graderDAO = new GraderDAO(this);
-  //private final ScheduleDAO scheduleDAO = new ScheduleDAO(this);
   private String h2DbName = H2_DB_NAME;
   private Classifier<AutoGradeExperiment.Event> classifier = null;
   private Set<String> allAnswers = new HashSet<String>();
@@ -79,7 +77,7 @@ public class DatabaseImpl implements Database {
   private String lessonPlanFile;
   private String mediaDir;
   private Map<String, Export.ExerciseExport> exerciseIDToExport;
-  //private boolean autocrt = true;
+  private boolean isUrdu;
 
   public DatabaseImpl(String dburl) {
     this.h2DbName = dburl;
@@ -141,6 +139,7 @@ public class DatabaseImpl implements Database {
       // gradeDAO.dropGrades();
       gradeDAO.createGradesTable(getConnection());
       graderDAO.createGraderTable(getConnection());
+      userDAO.createUserTable(this);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
@@ -173,8 +172,14 @@ public class DatabaseImpl implements Database {
     return classifier;
   }
 
+  /**
+   * @see #getExercises(boolean, String)
+   * @param useFile
+   * @return
+   */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    return useFile ? new FileExerciseDAO(mediaDir) : new SQLExerciseDAO(this, mediaDir);
+    System.out.println("isurdu " + isUrdu);
+    return useFile ? new FileExerciseDAO(mediaDir, isUrdu) : new SQLExerciseDAO(this, mediaDir);
   }
 
   /**
@@ -182,26 +187,34 @@ public class DatabaseImpl implements Database {
    * @param i
    * @param lessonPlanFile
    * @param mediaDir
+   * @param isUrdu
    */
-  public void setInstallPath(String i, String lessonPlanFile, String mediaDir) {
-   // logger.debug("got install path " + i + " media " + mediaDir);
+  public void setInstallPath(String i, String lessonPlanFile, String mediaDir, boolean isUrdu) {
+    logger.debug("got install path " + i + " media " + mediaDir + " is urdu " +isUrdu);
     this.installPath = i;
     this.lessonPlanFile = lessonPlanFile;
     this.mediaDir = mediaDir;
+    this.isUrdu = isUrdu;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(boolean)
+   * @param useFile
+   * @return
+   */
   public List<Exercise> getExercises(boolean useFile) {
     List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
-    //if (autocrt) getClassifier();
     return exercises;
   }
 
   /**
    *
+   *
    * @param useFile
    * @param lessonPlanFile
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
+   * @see #getExercises(boolean)
+   * @see #getExercises(long, boolean)
    */
   private List<Exercise> getExercises(boolean useFile, String lessonPlanFile) {
     if (exerciseDAO == null || useFile && exerciseDAO instanceof SQLExerciseDAO || !useFile && exerciseDAO instanceof FileExerciseDAO) {
@@ -328,6 +341,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   *
    * @param userID
    * @param useFile
    * @return
@@ -437,6 +451,21 @@ public class DatabaseImpl implements Database {
     }
     logger.info("total valid grades " + total);
     return ret;
+  }
+
+  public List<Exercise> getExercisesFirstNInOrder(long userID, boolean useFile, int firstNInOrder) {
+    List<Exercise> rawExercises = getExercises(useFile);
+    int numInOrder = Math.min(firstNInOrder, rawExercises.size());
+    List<Exercise> newList = new ArrayList<Exercise>(rawExercises.subList(0, numInOrder));
+
+    List<Exercise> randomExercises = rawExercises.size() > numInOrder ? new ArrayList<Exercise>(rawExercises.subList(numInOrder,rawExercises.size())) : new ArrayList<Exercise>();
+
+    Collections.shuffle(randomExercises,new Random(userID));
+    newList.addAll(randomExercises);
+
+    logger.debug("got " + newList.size());
+    if (newList.isEmpty()) logger.warn("no exercises for " + userID + "?");
+    return newList;
   }
 
   private static class ResultAndGrade implements Comparable<ResultAndGrade> {
@@ -588,6 +617,7 @@ public class DatabaseImpl implements Database {
    * <p/>
    * Uses return generated keys to get the user id
    *
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(int, String, int)
    * @param age
    * @param gender
    * @param experience
@@ -595,8 +625,13 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public long addUser(int age, String gender, int experience, String ipAddr) {
-    return userDAO.addUser(age, gender, experience, ipAddr);
+    return userDAO.addUser(age, gender, experience, ipAddr, "", "", "", "", "");
   }
+
+  public long addUser(int age, String gender, int experience, String ipAddr, String firstName, String lastName, String nativeLang,String dialect, String userID) {
+    return userDAO.addUser(age, gender, experience, ipAddr, firstName, lastName, nativeLang, dialect, userID);
+  }
+
 
   public List<User> getUsers() {
     return userDAO.getUsers();
@@ -733,7 +768,7 @@ public class DatabaseImpl implements Database {
   private Export.ExerciseExport getExportForExercise(Exercise e, int questionID) {
     return getExportForExercise(e.getID(), questionID);
   }
-  private Export.ExerciseExport getExportForExercise(String id, int questionID) {
+  public Export.ExerciseExport getExportForExercise(String id, int questionID) {
     return getExportForExercise(id + "_" + questionID);
   }
   private Export.ExerciseExport getExportForExercise(String key) {
@@ -777,8 +812,17 @@ public class DatabaseImpl implements Database {
     graderDAO.addGrader(login);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#graderExists(String)
+   * @param login
+   * @return
+   */
   public boolean graderExists(String login) {
     return graderDAO.graderExists(login);
+  }
+
+  public int userExists(String login) {
+    return userDAO.userExists(login);
   }
 
   public boolean isAnswerValid(int userID, Exercise exercise, int questionID, Database database) {
