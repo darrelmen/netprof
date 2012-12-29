@@ -17,7 +17,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Reads plan directly from a CSV.
@@ -33,19 +36,23 @@ public class FileExerciseDAO implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
   public static final String ENCODING = "UTF8";
   private static final String LESSON_FILE = "lesson-737.csv";
-  private static final String LESSON_PLAN = "lesson.plan";
   private static final String FAST = "fast";
   private static final String SLOW = "slow";
+  private static final boolean TESTING = false;
 
   private List<Exercise> exercises;
   private final String mediaDir;
+  private final boolean isUrdu;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
    * @param mediaDir
+   * @param isUrdu
    */
-  public FileExerciseDAO(String mediaDir) {
+  public FileExerciseDAO(String mediaDir, boolean isUrdu) {
     this.mediaDir = mediaDir;
+    this.isUrdu = isUrdu;
+    logger.debug("is urdu " + isUrdu);
   }
 
   /**
@@ -106,29 +113,40 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   /**
-   * @see DatabaseImpl#getExercises(boolean, String)
+   * @see DatabaseImpl#getExercises
    * @param installPath
    * @param lessonPlanFile
    */
   public void readFastAndSlowExercises(final String installPath, String lessonPlanFile) {
     if (exercises != null) return;
-    String exerciseFile = LESSON_PLAN;
+
     try {
       FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
       BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
       String line2;
       int count = 0;
-      logger.debug("using install path " + installPath);
+      logger.debug("using install path " + installPath + " lesson " + lessonPlanFile + " isurdu " +isUrdu);
       exercises = new ArrayList<Exercise>();
+      Pattern pattern = Pattern.compile("^\\d+\\.(.+)");
       while ((line2 = reader.readLine()) != null) {
-        //if (count++ > 20) break;
-       // boolean contains = line2.contains("\\(");
-        int length = line2.split("\\(").length;
-        boolean simpleFile = length == 2 && line2.split("\\(")[1].trim().endsWith(")");
+        count++;
+       if (TESTING && count > 200) break;
 
-        Exercise exercise = simpleFile ?
-            getSimpleExerciseForLine(installPath, line2) :
-            getExerciseForLine(installPath, line2);
+        Matcher matcher = pattern.matcher(line2.trim());
+        boolean wordListOnly = matcher.matches();
+
+        Exercise exercise;
+        if (wordListOnly) {
+          String group = matcher.group(1);
+          exercise = getWordListExercise(group,""+count);//line2.trim());
+        }
+        else {
+          int length = line2.split("\\(").length;
+          boolean simpleFile = length == 2 && line2.split("\\(")[1].trim().endsWith(")");
+          exercise = simpleFile ?
+              getSimpleExerciseForLine(line2) :
+              getExerciseForLine(installPath, line2);
+        }
 
         exercises.add(exercise);
       }
@@ -138,27 +156,30 @@ public class FileExerciseDAO implements ExerciseDAO {
       e.printStackTrace();
     }
     if (exercises.isEmpty()) {
-      logger.error("no exercises found in " + exerciseFile +"?");
+      logger.error("no exercises found in " + lessonPlanFile +"?");
     }
     else {
       logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
   }
 
+  private Exercise getWordListExercise(String arabic, String id) {
+    String content = getArabic(arabic);
+
+    Exercise exercise = new Exercise("repeat", id, content, false, true, arabic);
+    exercise.addQuestion(Exercise.FL, "Please record the sentence above.","", Collections.EMPTY_LIST);
+    return exercise;
+  }
   /**
    * Assumes a file that looks like:
    * <br></br>
    *
    * <s> word word word </s> (audio_file_name_without_suffix)
    *
-   * @param installPath
-   * @paramx audioConversion
    * @param line2
    * @return
    */
-  private Exercise getSimpleExerciseForLine(String installPath, String line2) {
-   // AudioConversion audioConversion = new AudioConversion();
-
+  private Exercise getSimpleExerciseForLine(String line2) {
     String[] split = line2.split("\\(");
     String name = split[1].trim();
     name = name.substring(0,name.length()-1); // remove trailing )
@@ -167,8 +188,6 @@ public class FileExerciseDAO implements ExerciseDAO {
     arabic = arabic.replaceAll("<s>","").replaceAll("</s>","").trim();
     String content = getArabic(arabic);
     String audioRef = mediaDir + File.separator+"media"+File.separator+name+".wav";
-
-    //audioConversion.ensureWriteMP3(audioRef, installPath);
 
     Exercise repeat = new Exercise("repeat", displayName, content, ensureForwardSlashes(audioRef), arabic, arabic);
     //logger.debug("got " +repeat);
@@ -233,7 +252,9 @@ public class FileExerciseDAO implements ExerciseDAO {
   private String getArabic(String arabic) {
     return "<div class=\"Instruction\">\n" +
         "<span class=\"Instruction-title\">Say:</span>\n" +
-        "<span class=\"Instruction-data\"> " + arabic +
+        "<span class=\"" +
+        (isUrdu ? "urdufont" : "Instruction-data") +
+        "\"> " + arabic +
         "</span>\n" +
         "</div>\n";
   }
@@ -319,6 +340,11 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   public static void main(String [] arg) {
+    Pattern pattern = Pattern.compile("^\\d+\\.(.+)");
+    Matcher matcher = pattern.matcher("1. ????????? ????????");
+    System.out.println(matcher.matches());
+  //  System.out.println(" group " + matcher.find());
+    System.out.println(" match " + matcher.group(1));
     //new FileExerciseDAO(mediaDir).convertPlan();
     /*List<Exercise> rawExercises = new FileExerciseDAO(*//**//*"war"*//**//*).getRawExercises();
     System.out.println("first is " + rawExercises.iterator().next());*/

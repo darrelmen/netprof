@@ -13,10 +13,12 @@ public class SoundManagerStatic implements SoundManagerAPI {
   }
 
   public void createSound(Sound sound, String title, String file) {
+    System.out.println("SoundManagerStatic.createSound " +sound);
     SoundManager.createSound(sound, title, file);
   }
 
   public void destroySound(Sound sound) {
+    System.out.println("SoundManagerStatic.destroy " +sound);
     SoundManager.destroySound(sound);
   }
 
