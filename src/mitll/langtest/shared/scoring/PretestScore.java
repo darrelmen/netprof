@@ -5,6 +5,8 @@ package mitll.langtest.shared.scoring;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,8 +20,8 @@ public class PretestScore implements IsSerializable {
 	private Float[] svScoreVector;
 	private float transformedSVScore = -1f;
 	private Map<String, Float> phoneScores;
-  private Map<NetPronImageType, String> sTypeToImage;
-  private Map<NetPronImageType, List<Float>> sTypeToEndTimes;
+  private Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
+  private Map<NetPronImageType, List<Float>> sTypeToEndTimes = new HashMap<NetPronImageType, List<Float>>();
   private String recoSentence;
 
   public PretestScore(){} // required for serialization
