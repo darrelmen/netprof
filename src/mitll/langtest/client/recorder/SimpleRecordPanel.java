@@ -75,8 +75,8 @@ public class SimpleRecordPanel extends RecordButtonPanel {
 
   /**
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
-   * @param result
-   * @param questionState
+   * @param result from server about the audio we just posted
+   * @param questionState so we keep track of which questions have been answered
    * @param outer
    */
   @Override
@@ -94,14 +94,14 @@ public class SimpleRecordPanel extends RecordButtonPanel {
       score = Math.min(1.0,score);
       String percent = ((int) (score * 100)) + "%";
       if (result.score > 0.6) {
-        resp.setHTML("Correct! Score for '" + result.decodeOutput + "' was " + percent);
+        resp.setHTML("Correct! Score for <font size=+1>" + result.decodeOutput + "</font> was " + percent);
         resp.setStyleName("correct");
       } else {
-        resp.setHTML("Try again - score for '" + result.decodeOutput + "' was " + percent);
+        resp.setHTML("Try again - score for <font size=+1>" + result.decodeOutput + "</font> was " + percent);
         resp.setStyleName("incorrect");
       }
     }
-    else {
+    else if (result.score != -1) {
       resp.setHTML("I couldn't understand that, please record again.");
     }
   }
