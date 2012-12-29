@@ -6,3 +6,4 @@ war/fastAndSlowRef/nl*/*_16K.wav
 war/fastAndSlowRef/nl*/*.mp3
 war/media/ac*/*.wav
 war/media/ac*/*.raw
+war/config/levantine/media/nl*/*.mp3
