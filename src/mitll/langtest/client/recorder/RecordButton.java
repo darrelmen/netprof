@@ -1,9 +1,22 @@
 package mitll.langtest.client.recorder;
 
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.AttachDetachException;
 import com.google.gwt.user.client.ui.FocusWidget;
+import lm.K;
+
+import java.util.Date;
 
 /**
  * Basically a click handler and a timer to click stop recording, if the user doesn't.
@@ -19,7 +32,6 @@ public abstract class RecordButton {
   private Timer recordTimer;
   private final FocusWidget record;
   private int autoStopDelay;
-  private boolean enabled=true;
 
   public RecordButton(FocusWidget recordButton) {
     this(recordButton, DELAY_MILLIS);
@@ -29,25 +41,70 @@ public abstract class RecordButton {
     this.record = recordButton;
     recordButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        System.out.println("RecordButton : Got click " + event);
-        if (!enabled) {
-          System.out.println("ignoring click -- busy!");
-          return;
-        }
-        if (recording) {
-          cancelTimer();
-          stop();
-        } else {
-          start();
-
-          addRecordingMaxLengthTimeout();
-        }
+        doClick();
       }
     });
+    recordButton.setTitle("Press Return to record/stop recording");
+
+/*    recordButton.addKeyPressHandler(new KeyPressHandler() {
+      @Override
+      public void onKeyPress(KeyPressEvent event) {
+        System.out.println("Got " + event);
+      }
+    });*/
+
+    logHandler = Event.addNativePreviewHandler(new
+                                                   Event.NativePreviewHandler() {
+
+                                                     @Override
+                                                     public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                                                       NativeEvent ne = event.getNativeEvent();
+
+                                                       if (ne.getKeyCode() == KeyCodes.KEY_ENTER &&
+                                                           event.getTypeInt() == 512 &&
+                                                           "[object KeyboardEvent]".equals(ne.getString())) {
+                                                         ne.preventDefault();
+
+                                                         System.out.println(new Date() + " : Click handler : Got " + event + " type int " +
+                                                             event.getTypeInt() + " assoc " + event.getAssociatedType() +
+                                                             " native " + event.getNativeEvent() + " source " + event.getSource());
+                                                         new Timer() {
+                                                           @Override
+                                                           public void run() {
+                                                             doClick();
+                                                           }
+                                                         }.schedule(10);
+                                                       }
+                                                     }
+                                                   });
+    System.out.println("creating handler for recording " + logHandler);
   }
 
-  public void disable() { enabled = false; }
-  public void enable() { enabled = true; }
+  private HandlerRegistration logHandler;
+  public void onUnload() {
+    System.out.println("removing handler for recording " + logHandler);
+    logHandler.removeHandler();
+  }
+
+  private void doClick() {
+    if (record.isVisible() && record.isEnabled()) {
+      if (recording) {
+        cancelTimer();
+        // TODO : worry about issue where seems to stop recording too early sometimes
+/*      new Timer() {
+        @Override
+        public void run() {
+          stop();
+        }
+      }.schedule(10);*/
+        stop();
+      } else {
+        start();
+
+        addRecordingMaxLengthTimeout();
+      }
+    }
+  }
 
   private void start() {
     recording = true;
