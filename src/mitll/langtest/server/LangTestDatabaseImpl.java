@@ -103,31 +103,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     for (Exercise e : exercises) {
       if (id.equals(e.getID())) return e;
     }
-    logMemory();
+  //  logMemory();
 
     return null;
   }
-
-  /**
-   * TODO make this work with english questions too
-   * @param useFile
-   * @return
-   */
-/*  public List<String> getQuestions(boolean useFile) {
-    List<String> questions = new ArrayList<String>();
-    List<Exercise> exercises = getExercises(useFile);
-     for (Exercise e : exercises) {
-       for (Exercise.QAPair qaPair : e.getForeignLanguageQuestions()) questions.add(qaPair.getQuestion());
-     }
-    return questions;
-  }*/
 
   public Exercise getExercise(String id, long userID, boolean useFile, boolean arabicDataCollect) {
     List<Exercise> exercises = getExercises(userID, useFile, arabicDataCollect);
     for (Exercise e : exercises) {
       if (id.equals(e.getID())) return e;
     }
-    logMemory();
+  //  logMemory();
 
     return null;
   }

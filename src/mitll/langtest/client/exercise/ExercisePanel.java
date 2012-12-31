@@ -44,6 +44,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   private Button prev,next;
   private HandlerRegistration keyHandler;
   protected LangTestDatabaseAsync service;
+  protected UserFeedback feedback;
 
   /**
    * @see ExercisePanelFactory#getExercisePanel
@@ -58,7 +59,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     this.exercise = e;
     this.controller = controller;
     this.service = service;
-    //VerticalPanel left = new VerticalPanel();
+    this.feedback = userFeedback;
     add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
 
     // attempt to left justify
@@ -72,7 +73,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     addQuestions(e, service, controller, i);
 
     SimplePanel spacer = new SimplePanel();
-    spacer.setSize("50px", "20px");
+    spacer.setSize("100%", "20px");
     add(spacer);
 
     Panel buttonRow = getNextAndPreviousButtons(e, service, userFeedback, controller);
@@ -83,8 +84,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     return new HTML(e.getContent());
   }
 
-  public void onResize() {
-  }
+  public void onResize() {}
 
   public boolean isBusy() { return false; }
 
@@ -233,21 +233,16 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
                                                          ne.preventDefault();
 
                                                         System.out.println(new Date() +
-                                                            " : getNextAndPreviousButtons - key handler : Got " + event + " type int " +
+                                                            " : getNextAndPreviousButtons - key handler : " + keyHandler +
+                                                            " Got " + event + " type int " +
                                                              event.getTypeInt() + " assoc " + event.getAssociatedType() +
                                                              " native " + event.getNativeEvent() + " source " + event.getSource());
 
                                                          if (isLeft) {
-                                                           if (prev.isEnabled() && prev.isVisible()) clickPrev(controller, e);
+                                                           clickPrev(controller, e);
                                                          }
                                                          else {
-                                                           if (next.isEnabled() && next.isVisible()) {
-                                                             System.out.println(keyHandler + " getNextAndPreviousButtons next " + next.isEnabled() + " vis " +next.isVisible());
-                                                             clickNext(service, userFeedback, controller, e);
-                                                           }
-                                                           else {
-                                                             System.out.println(keyHandler + " getNextAndPreviousButtons ignoring next click " + next.isEnabled() + " vis " +next.isVisible());
-                                                           }
+                                                           clickNext(service, userFeedback, controller, e);
                                                          }
                                                        }
                                                      }
@@ -257,12 +252,31 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     return buttonRow;
   }
 
+  /**
+   * Ignore clicks or keyboard activity when the widget is not enabled.
+   * @param service
+   * @param userFeedback
+   * @param controller
+   * @param e
+   */
   private void clickNext(LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller, Exercise e) {
-    postAnswers(service, userFeedback, controller, e);
+    if (next.isEnabled() && next.isVisible()) {
+      System.out.println("clickNext " +keyHandler+ " click on next " + next);
+      postAnswers(service, userFeedback, controller, e);
+    }
+    else {
+      System.out.println("clickNext " +keyHandler+ " ignoring next");
+    }
   }
 
   private void clickPrev(ExerciseController controller, Exercise e) {
-    controller.loadPreviousExercise(e);
+    if (prev.isEnabled() && prev.isVisible()) {
+      System.out.println("clickPrev " +keyHandler+ " click on prev " + prev);
+      controller.loadPreviousExercise(e);
+    }
+    else {
+      System.out.println("clickPrev " +keyHandler+ " ignoring click prev.");
+    }
   }
 
   @Override
@@ -311,7 +325,10 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   /**
    * Remember to have the text default to RTL direction if the prompt is in the foreign (Arabic) language.
    * <br></br>
-   * Keeps track of which text fields have been typed in, so we can enable/disable the next button.
+   * Keeps track of which text fields have been typed in, so we can enable/disable the next button.<br></br>
+   *
+   * If we're in autoCRT mode {@link mitll.langtest.client.exercise.ExerciseController#isAutoCRTMode()} then we
+   * add a check answer button after the text box to allow the user to see if they answered correctly.
    *
    * @see #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
    * @param exercise here used to determine the prompt language (English/FL)
@@ -320,7 +337,8 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
    * @param index of the question (0 for first, 1 for second, etc.) (used in subclasses)
    * @return widget that handles the answer
    */
-  protected Widget getAnswerWidget(final Exercise exercise, final LangTestDatabaseAsync service, ExerciseController controller, final int index) {
+  protected Widget getAnswerWidget(final Exercise exercise, final LangTestDatabaseAsync service,
+                                   ExerciseController controller, final int index) {
   //  GWT.log("getAnswerWidget for #" +index);
     boolean allowPaste = controller.isDemoMode();
     final TextBox answer = allowPaste ? new TextBox() : new NoPasteTextBox();
@@ -341,41 +359,48 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     }
 
     if (controller.isAutoCRTMode()) {
-      HorizontalPanel hp = new TextValue();
-      hp.setSpacing(5);
-      hp.add(answer);
-      final Button check = new Button("Check Answer");
-      check.setEnabled(false);
-      hp.add(check);
-      final Label resp = new Label();
-      hp.add(resp);
-
-      answer.addKeyUpHandler(new KeyUpHandler() {
-        public void onKeyUp(KeyUpEvent event) {
-          resp.setText("");
-          check.setEnabled(answer.getText().length() > 0);
-        }
-      });
-
-      check.addClickHandler(new ClickHandler() {
-        public void onClick(ClickEvent event) {
-          check.setEnabled(false);
-          service.getScoreForAnswer(exercise, index, answer.getText(), new AsyncCallback<Double>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              check.setEnabled(true);
-            }
-            @Override
-            public void onSuccess(Double result) {
-              check.setEnabled(true);
-              showAutoCRTScore(result, resp);
-            }
-          });
-        }
-      });
-      return hp;
+      return getAutoCRTCheckAnswerWidget(exercise, service, index, answer);
     }
-    return answer;
+    else {
+      return answer;
+    }
+  }
+
+  private HorizontalPanel getAutoCRTCheckAnswerWidget(final Exercise exercise, final LangTestDatabaseAsync service,
+                                                      final int index, final TextBox answer) {
+    HorizontalPanel hp = new TextValue();
+    hp.setSpacing(5);
+    hp.add(answer);
+    final Button check = new Button("Check Answer");
+    check.setEnabled(false);
+    hp.add(check);
+    final Label resp = new Label();
+    hp.add(resp);
+
+    answer.addKeyUpHandler(new KeyUpHandler() {
+      public void onKeyUp(KeyUpEvent event) {
+        resp.setText("");
+        check.setEnabled(answer.getText().length() > 0);
+      }
+    });
+
+    check.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        check.setEnabled(false);
+        service.getScoreForAnswer(exercise, index, answer.getText(), new AsyncCallback<Double>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            check.setEnabled(true);
+          }
+          @Override
+          public void onSuccess(Double result) {
+            check.setEnabled(true);
+            showAutoCRTScore(result, resp);
+          }
+        });
+      }
+    });
+    return hp;
   }
 
   private void showAutoCRTScore(Double result, Label resp) {
