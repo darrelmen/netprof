@@ -67,7 +67,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   /**
    * @see GoodwaveExercisePanel#getQuestionContent(mitll.langtest.shared.Exercise)
    * @see ScoringAudioPanel#ScoringAudioPanel
-   * @paramx e
    * @param service
    * @param useFullWidth
    */
@@ -77,6 +76,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     rightMarginToUse = useFullWidth ? RIGHT_MARGIN :  ASRScorePanel.X_CHART_SIZE+400;
     addWidgets(path);
   }
+
+  protected void setRightMargin(int m) { this.rightMarginToUse = m; }
 
   public void onResize() {
     getImages();
