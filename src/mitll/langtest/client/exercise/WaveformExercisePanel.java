@@ -7,6 +7,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
+import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
@@ -21,6 +22,7 @@ import mitll.langtest.shared.Exercise;
 public class WaveformExercisePanel extends ExercisePanel {
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
+  private boolean isBusy = false;
   private RecordAudioPanel audioPanel;
 
   /**
@@ -32,7 +34,7 @@ public class WaveformExercisePanel extends ExercisePanel {
    */
   public WaveformExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                                    final ExerciseController controller) {
-    super(e,service,userFeedback,controller);
+    super(e, service, userFeedback, controller);
   }
 
   /**
@@ -77,7 +79,6 @@ public class WaveformExercisePanel extends ExercisePanel {
     controller.loadNextExercise(completedExercise);
   }
 
-  private boolean isBusy = false;
 
   /**
    * An ASR scoring panel with a record button.
@@ -86,7 +87,7 @@ public class WaveformExercisePanel extends ExercisePanel {
     private final int index;
 
     private PostAudioRecordButton postAudioRecordButton;
-
+    private PlayAudioPanel playAudioPanel;
     /**
      * @param service
      * @paramx controller
@@ -106,11 +107,9 @@ public class WaveformExercisePanel extends ExercisePanel {
         @Override
         protected void startRecording() {
           isBusy = true;
-/*          if (waveform.isVisible()) {
-            waveform.setUrl(LangTest.LANGTEST_IMAGES +"animated_progress.gif");
-          }*/
           super.startRecording();
           setButtonsEnabled(false);
+          playAudioPanel.setPlayEnabled(false);
         }
 
         /**
@@ -118,13 +117,16 @@ public class WaveformExercisePanel extends ExercisePanel {
          */
         @Override
         protected void stopRecording() {
-          isBusy = false;
-          setButtonsEnabled(true);
           System.out.println("RecordAudioPanel : Stop recording!");
+
+          setButtonsEnabled(true);
           waveform.setVisible(true);
           waveform.setUrl(LangTest.LANGTEST_IMAGES +"animated_progress.gif");
 
           super.stopRecording();
+
+          playAudioPanel.setPlayEnabled(true);
+          isBusy = false;
         }
 
         @Override
@@ -145,13 +147,25 @@ public class WaveformExercisePanel extends ExercisePanel {
         }
       };
 
-      return new PlayAudioPanel(soundManager) {
+      playAudioPanel = new PlayAudioPanel(soundManager, new PlayListener() {
+        public void playStarted() {
+          isBusy = true;
+          setButtonsEnabled(false);
+          postAudioRecordButton.getRecord().setEnabled(false);
+        }
+        public void playStopped() {
+          isBusy = false;
+          setButtonsEnabled(true);
+          postAudioRecordButton.getRecord().setEnabled(true);
+        }
+      }) {
         @Override
         protected void addButtons() {
           add(postAudioRecordButton.getRecord());
           super.addButtons();
         }
       };
+      return playAudioPanel;
     }
 
     @Override
