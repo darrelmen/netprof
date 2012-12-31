@@ -54,5 +54,5 @@ public class AudioAnswer implements IsSerializable {
     this.score = score;
   }
 
-  public String toString() { return "Path " + path + " id " +reqid; }
+  public String toString() { return "Path " + path + " id " +reqid + " validity " + validity; }
 }
