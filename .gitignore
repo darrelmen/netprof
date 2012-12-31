@@ -12,3 +12,4 @@ war/config/levantine/media/nl*/*.lab
 war/config/levantine/media/nl*/*.raw
 war/media/ac*/*.wav
 war/media/ac*/*.raw
+war/config/levantine/media/nl*/*.mp3
