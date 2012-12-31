@@ -22,6 +22,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,7 +43,6 @@ public class PagingExerciseList extends ExerciseList {
   private ExerciseShell clickedOn = null;
 
   public interface TableResources extends CellTable.Resources {
-
     /**
      * The styles applied to the table.
      */
@@ -69,21 +69,7 @@ public class PagingExerciseList extends ExerciseList {
     super(currentExerciseVPanel, service, feedback, factory, goodwaveMode, arabicDataCollect, showTurkToken, false);
     CellTable.Resources o = GWT.create(TableResources.class);
     this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
-
-    HasKeyboardSelectionPolicy.KeyboardSelectionPolicy keyboardSelectionPolicy = table.getKeyboardSelectionPolicy();
-
-    table.addCellPreviewHandler(new CellPreviewEvent.Handler<ExerciseShell>() {
-      @Override
-      public void onCellPreview(CellPreviewEvent<ExerciseShell> event) {
-        System.out.println("got selection event " +event + " " +event.getValue() + " type " +event.getNativeEvent().getType());
-        if (isExercisePanelBusy()) {
-          System.out.println("cancel selection!");
-
-          event.setCanceled(true);
-        }
-      }
-    });
-    System.out.println("sel policy " +keyboardSelectionPolicy.name());
+    table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
 
     table.setWidth("100%", true);
 
@@ -112,6 +98,7 @@ public class PagingExerciseList extends ExerciseList {
           clickedOn = e;
           if (isExercisePanelBusy()) {
             Window.alert("Exercise busy.");
+            markCurrentExercise(currentExercise);
           } else {
             Timer timer = new Timer() {
               @Override
@@ -198,25 +185,23 @@ public class PagingExerciseList extends ExerciseList {
   @Override
   protected void markCurrentExercise(int i) {
     ExerciseShell itemToSelect = currentExercises.get(i);
-    System.out.println("Comparing selected " +itemToSelect + " with clicked on " + clickedOn);
-    if (clickedOn == null || !itemToSelect.equals(clickedOn)) {
-      table.getSelectionModel().setSelected(itemToSelect, true);
-      int pageEnd = table.getPageStart() + table.getPageSize();
+    System.out.println(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect + " with clicked on " + clickedOn);
+    table.getSelectionModel().setSelected(itemToSelect, true);
+    int pageEnd = table.getPageStart() + table.getPageSize();
 /*    System.out.println("marking " +i +" out of " +table.getRowCount() + " page start " +table.getPageStart() +
         " end " + pageEnd);*/
 
-      if (i < table.getPageStart()) {
-        int newStart = Math.max(0, table.getPageStart() - table.getPageSize());
-        // System.out.println("new start of prev page " +newStart + " vs current " + table.getVisibleRange());
+    if (i < table.getPageStart()) {
+      int newStart = Math.max(0, table.getPageStart() - table.getPageSize());
+      // System.out.println("new start of prev page " +newStart + " vs current " + table.getVisibleRange());
+      table.setVisibleRange(newStart, table.getPageSize());
+    } else {
+      if (i >= pageEnd) {
+        int newStart = Math.min(table.getRowCount() - table.getPageSize(), pageEnd);
+        // System.out.println("new start of next page " +newStart + " vs current " + table.getVisibleRange());
         table.setVisibleRange(newStart, table.getPageSize());
-      } else {
-        if (i >= pageEnd) {
-          int newStart = Math.min(table.getRowCount() - table.getPageSize(), pageEnd);
-          // System.out.println("new start of next page " +newStart + " vs current " + table.getVisibleRange());
-          table.setVisibleRange(newStart, table.getPageSize());
-        }
       }
-      table.redraw();
     }
+    table.redraw();
   }
 }
