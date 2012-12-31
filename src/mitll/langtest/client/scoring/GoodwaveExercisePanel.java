@@ -19,6 +19,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.gauge.ScorePanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
+import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
@@ -33,14 +34,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
   private static final String USER_RECORDER = "User Recorder";
   private static final String INSTRUCTIONS = "Instructions";
-  //public static final String RECORD = "record";
-  //public static final String STOP = "stop";
+  private boolean isBusy = false;
   private static final String FAST = "Fast";
   private static final String SLOW = "Slow";
 
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
-  //public static final int AUTO_STOP_DELAY  = 15000; // millis
 
   /**
    * ??? Just for backward compatibility -- so we can run against old plan files
@@ -119,12 +118,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     if (contentAudio != null) contentAudio.onResize();
     if (answerAudio != null) answerAudio.onResize();
   }
-/*
-  @Override
-  protected void onUnload() {
-    super.onUnload();
-    //contentAudio.onUnload();
-  }*/
 
   /**
    * Show the instructions and the audio panel.<br></br>
@@ -316,14 +309,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
   }
 
-  boolean isBusy = false;
-
   /**
    * An ASR scoring panel with a record button.
    */
   private class ASRRecordAudioPanel extends ASRScoringAudioPanel {
     private final int index;
     private PostAudioRecordButton postAudioRecordButton;
+    private PlayAudioPanel playAudioPanel;
 
     /**
      * @see GoodwaveExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
@@ -352,24 +344,37 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
         @Override
         protected void startRecording() {
+          playAudioPanel.setPlayEnabled(false);
           isBusy = true;
           super.startRecording();
         }
 
         @Override
         protected void stopRecording() {
+          playAudioPanel.setPlayEnabled(true);
           isBusy = false;
           super.stopRecording();
         }
       };
 
-      return new PlayAudioPanel(soundManager) {
+      playAudioPanel = new PlayAudioPanel(soundManager, new PlayListener() {
+        public void playStarted() {
+          isBusy = true;
+          postAudioRecordButton.getRecord().setEnabled(false);
+        }
+
+        public void playStopped() {
+          isBusy = false;
+          postAudioRecordButton.getRecord().setEnabled(true);
+        }
+      }) {
         @Override
         protected void addButtons() {
           add(postAudioRecordButton.getRecord());
           super.addButtons();
         }
       };
+      return playAudioPanel;
     }
 
     @Override
@@ -383,4 +388,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   public boolean isBusy() {
     return isBusy;
   }
+
+ // public void notifyKeyPress(int keyCode) {}
 }

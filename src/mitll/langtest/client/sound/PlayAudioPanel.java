@@ -3,7 +3,6 @@ package mitll.langtest.client.sound;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
@@ -29,10 +28,13 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private static final float LONG_AUDIO_THRESHOLD = 1f;
   private static final String PLAY_LABEL = "\u25ba play";
   private static final String PAUSE_LABEL = "<b>||</b> pause";
+  public static final int SPACE_BAR = 32;
   private Sound currentSound;
   private SoundManagerAPI soundManager;
   private final Button playButton = new Button(PLAY_LABEL);
   private AudioControl listener;
+  private HandlerRegistration keyHandler;
+  private PlayListener playListener;
 
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
@@ -46,6 +48,11 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     id = counter++;
   }
 
+  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener) {
+    this(soundManager);
+    this.playListener = playListener;
+  }
+
   /**
    * Remember to destroy a sound once we are done with it, otherwise SoundManager
    * will maintain references to it, listener references, etc.
@@ -56,50 +63,51 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     destroySound();
     System.out.println("doing unload of play ------------------> ");
 
-    logHandler.removeHandler();
+    keyHandler.removeHandler();
   }
 
   protected void addButtons() {
     playButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-/*        System.out.println(new Date() + " : PlayButton : Got click " + event + " type int " +
-            *//*event.getTypeInt() +*//* " assoc " + event.getAssociatedType() +
-            " native " + event.getNativeEvent() + " source " + event.getSource());*/
         doClick();
       }
     });
 
-    logHandler = Event.addNativePreviewHandler(new
+    keyHandler = Event.addNativePreviewHandler(new
                                                    Event.NativePreviewHandler() {
 
                                                      @Override
                                                      public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
                                                        NativeEvent ne = event.getNativeEvent();
-
-                                                    //   System.out.println("got key " + ne.getCharCode() + " string '" + ne.getString() +"'");
-                                                       if (ne.getCharCode() == 32 && "[object KeyboardEvent]".equals(ne.getString())) {
+                                                       if (ne.getCharCode() == SPACE_BAR && "[object KeyboardEvent]".equals(ne.getString())) {
                                                          ne.preventDefault();
 
-                                                         System.out.println(new Date() + " : Play click handler : Got " + event + " type int " +
+/*                                                         System.out.println(new Date() + " : Play click handler : Got " + event + " type int " +
                                                              event.getTypeInt() + " assoc " + event.getAssociatedType() +
-                                                             " native " + event.getNativeEvent() + " source " + event.getSource());
+                                                             " native " + event.getNativeEvent() + " source " + event.getSource());*/
                                                          doClick();
                                                        }
                                                      }
                                                    });
-    add(playButton);
     playButton.setVisible(false);
+    add(playButton);
   }
-
-  private HandlerRegistration logHandler;
 
   private void doClick() {
     if (playButton.isVisible() && playButton.isEnabled()) {
-      if (isPlaying())
+      if (isPlaying()) {
         pause();
-      else
+      }
+      else {
+        if (playListener != null) playListener.playStarted();
         play();
+      }
     }
+    else System.out.println("ignore play click");
+  }
+
+  public void setPlayEnabled(boolean val) {
+    playButton.setEnabled(val);
   }
 
   /**
@@ -126,13 +134,18 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   private void setPlayLabel() {
-    if (count == 0) playButton.setHTML(PLAY_LABEL);
+    if (count == 0) {
+      playButton.setHTML(PLAY_LABEL);
+      if (playListener != null) {
+        playListener.playStopped();
+      }
+    }
   }
 
   // --- playing audio ---
 
   private int count = 0;
-  private float start, end, wavDurInMillis;
+  private float start, end;
 
   /**
    * Repeat the segment 2 or 3 times, depending on length
@@ -187,6 +200,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param path
    */
   public void startSong(String path){
+    System.out.println("PlayAudioPanel : start song : " + path);
+
     destroySound();
     createSound(path);
   }
@@ -197,16 +212,15 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    */
   private void createSound(String song){
     currentSound = new Sound(this);
-    System.out.println("createSound : " + this + " created sound " + currentSound);
+    System.out.println("PlayAudioPanel.createSound : " + this + " created sound " + currentSound);
 
     soundManager.createSound(currentSound, song, song);
   }
 
   private void destroySound() {
     if (currentSound != null) {
-      System.out.println("destroySound : " + this + " so destroying sound " + currentSound);
+      System.out.println("PlayAudioPanel.destroySound : " + this + " so destroying sound " + currentSound);
       this.soundManager.destroySound(currentSound);
-      //currentSound = null;
     }
   }
 
@@ -234,10 +248,10 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   public void songFirstLoaded(double durationEstimate){
-    System.out.println("songFirstLoaded for " + this + " listener is " + listener);
+    System.out.println("PlayAudioPanel.songFirstLoaded - listener is " + listener);
+    if (!playButton.isEnabled()) setPlayEnabled(true);
     playButton.setVisible(true);
     if (listener != null) {
-     // System.out.println("songFirstLoaded for " + this + " listener is " + listener);
       listener.songFirstLoaded(durationEstimate);
     }
   }
@@ -247,6 +261,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param duration
    */
   public void songLoaded(double duration){
+//    System.out.println("PlayAudioPanel.songLoaded - listener is " + listener);
+
     if (listener != null) {
       listener.songLoaded(duration);
     }
