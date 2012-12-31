@@ -2,6 +2,8 @@ package mitll.langtest.server.database;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.Set;
 
 /**
 * Created with IntelliJ IDEA.
@@ -21,14 +23,23 @@ class Schedule {
   /**
    * @see mitll.langtest.server.database.ScheduleDAO#getSchedule()
    * @param rs
+   * @param stringRefs
    */
-  public Schedule(ResultSet rs) {
+  public Schedule(ResultSet rs, Map<String,String> stringRefs) {
     int i = 1;
     try {
       id = rs.getLong(i++);
-      plan = rs.getString(i++);
+
+      String planRef = rs.getString(i++);
+      if (!stringRefs.containsKey(planRef)) stringRefs.put(planRef, planRef);
+      plan = stringRefs.get(planRef);
+
       userid = rs.getLong(i++);
-      exid = rs.getString(i++);
+
+      String exRef = rs.getString(i++);
+      if (!stringRefs.containsKey(exRef)) stringRefs.put(exRef,exRef);
+      exid = stringRefs.get(exRef);
+
       flQ = rs.getBoolean(i++);
       spoken = rs.getBoolean(i++);
     } catch (SQLException e) {
