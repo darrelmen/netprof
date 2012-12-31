@@ -9,10 +9,12 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -66,6 +68,22 @@ public class PagingExerciseList extends ExerciseList {
     super(currentExerciseVPanel, service, feedback, factory, goodwaveMode, arabicDataCollect, showTurkToken, false);
     CellTable.Resources o = GWT.create(TableResources.class);
     this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
+
+    HasKeyboardSelectionPolicy.KeyboardSelectionPolicy keyboardSelectionPolicy = table.getKeyboardSelectionPolicy();
+
+    table.addCellPreviewHandler(new CellPreviewEvent.Handler<ExerciseShell>() {
+      @Override
+      public void onCellPreview(CellPreviewEvent<ExerciseShell> event) {
+        System.out.println("got selection event " +event + " " +event.getValue() + " type " +event.getNativeEvent().getType());
+        if (isExercisePanelBusy()) {
+          System.out.println("cancel selection!");
+
+          event.setCanceled(true);
+        }
+      }
+    });
+    System.out.println("sel policy " +keyboardSelectionPolicy.name());
+
     table.setWidth("100%", true);
 
     // Add a selection model to handle user selection.
