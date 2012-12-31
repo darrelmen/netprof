@@ -4,17 +4,10 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.AttachDetachException;
 import com.google.gwt.user.client.ui.FocusWidget;
-import lm.K;
 
 import java.util.Date;
 
@@ -32,6 +25,7 @@ public abstract class RecordButton {
   private Timer recordTimer;
   private final FocusWidget record;
   private int autoStopDelay;
+  private HandlerRegistration keyHandler;
 
   public RecordButton(FocusWidget recordButton) {
     this(recordButton, DELAY_MILLIS);
@@ -46,14 +40,7 @@ public abstract class RecordButton {
     });
     recordButton.setTitle("Press Return to record/stop recording");
 
-/*    recordButton.addKeyPressHandler(new KeyPressHandler() {
-      @Override
-      public void onKeyPress(KeyPressEvent event) {
-        System.out.println("Got " + event);
-      }
-    });*/
-
-    logHandler = Event.addNativePreviewHandler(new
+    keyHandler = Event.addNativePreviewHandler(new
                                                    Event.NativePreviewHandler() {
 
                                                      @Override
@@ -77,16 +64,15 @@ public abstract class RecordButton {
                                                        }
                                                      }
                                                    });
-    System.out.println("creating handler for recording " + logHandler);
+    System.out.println("creating handler for recording " + keyHandler);
   }
 
-  private HandlerRegistration logHandler;
   public void onUnload() {
-    System.out.println("removing handler for recording " + logHandler);
-    logHandler.removeHandler();
+    System.out.println("removing handler for recording " + keyHandler);
+    keyHandler.removeHandler();
   }
 
-  private void doClick() {
+  public void doClick() {
     if (record.isVisible() && record.isEnabled()) {
       if (recording) {
         cancelTimer();
