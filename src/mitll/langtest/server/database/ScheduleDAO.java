@@ -49,9 +49,10 @@ public class ScheduleDAO {
       }
       PreparedStatement statement = connection.prepareStatement(sql);
 
+      Map<String,String> stringRefs = new HashMap<String,String>();
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
-        schedules.add(new Schedule(rs));
+        schedules.add(new Schedule(rs, stringRefs));
       }
       rs.close();
       statement.close();

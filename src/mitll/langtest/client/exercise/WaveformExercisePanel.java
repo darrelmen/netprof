@@ -19,7 +19,10 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class WaveformExercisePanel extends ExercisePanel {
+  private static final String WAV = ".wav";
+  private static final String MP3 = ".mp3";
   private RecordAudioPanel audioPanel;
+
   /**
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    * @param e
@@ -74,6 +77,7 @@ public class WaveformExercisePanel extends ExercisePanel {
     controller.loadNextExercise(completedExercise);
   }
 
+  private boolean isBusy = false;
 
   /**
    * An ASR scoring panel with a record button.
@@ -89,8 +93,9 @@ public class WaveformExercisePanel extends ExercisePanel {
      * @param index
      */
     public RecordAudioPanel(LangTestDatabaseAsync service, int index) {
-      super(null, service, controller.getSoundManager(), true);
+      super(null, service, controller.getSoundManager(), false);
       this.index = index;
+      setRightMargin(400);
     }
 
     @Override
@@ -100,6 +105,10 @@ public class WaveformExercisePanel extends ExercisePanel {
 
         @Override
         protected void startRecording() {
+          isBusy = true;
+/*          if (waveform.isVisible()) {
+            waveform.setUrl(LangTest.LANGTEST_IMAGES +"animated_progress.gif");
+          }*/
           super.startRecording();
           setButtonsEnabled(false);
         }
@@ -109,8 +118,9 @@ public class WaveformExercisePanel extends ExercisePanel {
          */
         @Override
         protected void stopRecording() {
+          isBusy = false;
           setButtonsEnabled(true);
-
+          System.out.println("RecordAudioPanel : Stop recording!");
           waveform.setVisible(true);
           waveform.setUrl(LangTest.LANGTEST_IMAGES +"animated_progress.gif");
 
@@ -150,8 +160,11 @@ public class WaveformExercisePanel extends ExercisePanel {
       postAudioRecordButton.onUnload();
     }
   }
-  private static final String WAV = ".wav";
-  private static final String MP3 = ".mp3";
+
+  public boolean isBusy() {
+    return isBusy;
+  }
+
   private String wavToMP3(String path) {
     return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
   }
