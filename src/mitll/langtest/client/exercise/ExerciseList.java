@@ -201,7 +201,7 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
 
     removeCurrentExercise();
 
-    System.out.println("loading " + exerciseShell);
+    //System.out.println("loadExercise : " + exerciseShell);
     if (useUserID) {
       service.getExercise(exerciseShell.getID(), userID, goodwaveMode, arabicDataCollect, new ExerciseAsyncCallback(exerciseShell));
     } else {
@@ -226,6 +226,7 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
   }
 
   private void useExercise(Exercise result, ExerciseShell e) {
+    //System.out.println("useExercise using " + e);
     currentExerciseVPanel.add(current = factory.getExercisePanel(result));
 
     int i = getIndex(e);
@@ -237,7 +238,7 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
     currentExercise = i;
   }
 
-  protected boolean isExercisePanelBusy() { return ((BusyPanel) current).isBusy(); }
+  protected boolean isExercisePanelBusy() { return current != null && ((BusyPanel) current).isBusy(); }
 
   /**
    * @see #loadExercise
@@ -313,18 +314,26 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
       getNextExercise(current);
     }
     if (showTurkToken && (onLast || ++countSincePrompt % NUM_QUESTIONS_FOR_TOKEN == 0)) {
-      String code = user.getUser() + "_" + current.getID();
-     // feedback.showErrorMessage("Copy the token below", "To receive credit, copy and paste this token : " + code.hashCode());
-
-      // Create a basic popup widget
-      final DecoratedPopupPanel simplePopup = new DecoratedPopupPanel(true);
-      simplePopup.ensureDebugId("cwBasicPopup-simplePopup");
-      simplePopup.setWidth("250px");
-      simplePopup.setWidget(new HTML("To receive credit, copy and paste this token : " + code.hashCode() + "<br/>Click on the page to dismiss.<br/>"));
-      simplePopup.setPopupPosition(Window.getClientWidth()/2,Window.getClientHeight()/2);
-      simplePopup.show();
+      showTurkToken(current);
     }
     return onLast;
+  }
+
+  /**
+   * So a turker can get credit for their work.
+   * @param current
+   */
+  private void showTurkToken(ExerciseShell current) {
+    String code = user.getUser() + "_" + current.getID();
+    // feedback.showErrorMessage("Copy the token below", "To receive credit, copy and paste this token : " + code.hashCode());
+
+    // Create a basic popup widget
+    final DecoratedPopupPanel simplePopup = new DecoratedPopupPanel(true);
+    simplePopup.ensureDebugId("cwBasicPopup-simplePopup");
+    simplePopup.setWidth("250px");
+    simplePopup.setWidget(new HTML("To receive credit, copy and paste this token : " + code.hashCode() + "<br/>Click on the page to dismiss.<br/>"));
+    simplePopup.setPopupPosition(Window.getClientWidth()/2,Window.getClientHeight()/2);
+    simplePopup.show();
   }
 
   /**
