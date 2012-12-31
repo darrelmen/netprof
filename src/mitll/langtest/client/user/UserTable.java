@@ -24,9 +24,6 @@ public class UserTable {
   private Widget lastTable = null;
   private Button closeButton;
 
-  public UserTable() {
-  }
-
   /**
    * @see mitll.langtest.client.LangTest#getLogout()
    */
@@ -81,6 +78,7 @@ public class UserTable {
 
   Widget getTable(List<User> result) {
     CellTable<User> table = new CellTable<User>();
+    table.setPageSize(10);
     table.setWidth("1100px");
     TextColumn<User> id = new TextColumn<User>() {
       @Override
