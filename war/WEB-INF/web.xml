@@ -10,6 +10,7 @@
     <welcome-file>LangTest.html</welcome-file>
   </welcome-file-list>
 
+    <!-- setup java melody -->
     <filter>
         <filter-name>monitoring</filter-name>
         <filter-class>net.bull.javamelody.MonitoringFilter</filter-class>
@@ -22,6 +23,7 @@
         <listener-class>net.bull.javamelody.SessionListener</listener-class>
     </listener>
 
+    <!-- setup security for java melody -->
     <login-config>
         <auth-method>BASIC</auth-method>
         <realm-name>Monitoring</realm-name>
@@ -54,10 +56,6 @@
     <url-pattern>/langtest/langtestdatabase</url-pattern>
   </servlet-mapping>
 
-  <listener>
-    <listener-class>org.h2.server.web.DbStarter</listener-class>
-  </listener>
-
   <context-param>
     <param-name>tomcatWriteDirectoryFullPath</param-name>
     <param-value>answers</param-value>
@@ -68,13 +66,11 @@
 <!--
       <param-value>dari</param-value>
 -->
-
 <!--
       <param-value>autocrt</param-value>
 -->
       <param-value>urdu</param-value>
-      <!--
-
+<!--
       <param-value>levantine</param-value>
 -->
   <!--        <param-value>pilot</param-value> -->
@@ -82,7 +78,6 @@
 <!--
      <param-value>msa</param-value>
 -->
-
   </context-param>
 
 <!--
@@ -92,61 +87,4 @@
   </context-param>
 -->
 
-  <!-- note for the jdbc url, we seem to need an absolute file path on the webserver -->
-  <context-param>
-    <param-name>db.url</param-name>
-    <!-- use the following on mtex -->
-    <!--
-    <param-value>jdbc:h2:file://services/tomcat/webapps/netPron2/vlr-parle;IFEXISTS=TRUE</param-value>
-     -->
-      <!--
-        <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\pilot\vlr-parle;IFEXISTS=TRUE</param-value>
-            -->
-  <!--
-        <param-value>jdbc:h2:file://services/tomcat/webapps/netPron2/config/pilot/vlr-parle;IFEXISTS=TRUE</param-value>
-  -->
-
-<!--
-               <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\levantine\vlr-parle;IFEXISTS=TRUE</param-value>
--->
-
-
-
-<!--
-           <param-value>jdbc:h2:file://services/tomcat/webapps/npHeadstart2/config/levantine/vlr-parle;IFEXISTS=TRUE</param-value>
--->
-
-<!--
-      <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\dari\vlr-parle;IFEXISTS=TRUE</param-value>
--->
-
-<!--
-      <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\autocrt\vlr-parle;IFEXISTS=TRUE</param-value>
--->
-<!--
-      <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\msa\vlr-parle;IFEXISTS=TRUE</param-value>
--->
-<!--
-      <param-value>jdbc:h2:file:C:\Users\go22670\DLITest\clean\netPron2\war\config\urdu\vlr-parle;IFEXISTS=TRUE;CACHE_SIZE=30000</param-value>
--->
-      <param-value>jdbc:h2:file:/Users/go22670/mt_repo/LangTest/war/config/urdu/vlr-parle;IFEXISTS=TRUE;CACHE_SIZE=30000</param-value>
-
-
-      <!--
-            <param-value>jdbc:h2:file://services/tomcat/webapps/npDari/config/dari/vlr-parle;IFEXISTS=TRUE</param-value>
-      -->
-<!--
-      <param-value>jdbc:h2:file://var/lib/tomcat6/webapps/npDari/vlr-parle;IFEXISTS=TRUE</param-value>
--->
-  </context-param>
-
-  <context-param>
-    <param-name>db.user</param-name>
-    <param-value></param-value>
-  </context-param>
-
-  <context-param>
-    <param-name>db.password</param-name>
-    <param-value></param-value>
-  </context-param>
 </web-app>
