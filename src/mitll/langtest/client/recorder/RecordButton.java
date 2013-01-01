@@ -1,8 +1,12 @@
 package mitll.langtest.client.recorder;
 
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
@@ -26,7 +30,7 @@ public abstract class RecordButton {
   private final FocusWidget record;
   private int autoStopDelay;
   private HandlerRegistration keyHandler;
-
+  private boolean hasFocus = false;
   public RecordButton(FocusWidget recordButton) {
     this(recordButton, DELAY_MILLIS);
   }
@@ -36,6 +40,21 @@ public abstract class RecordButton {
     recordButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         doClick();
+      }
+    });
+    recordButton.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        //System.out.println(new Date() + " : recordButton GOT   focus !----> ");
+        hasFocus = true;
+      }
+    });
+    recordButton.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        hasFocus = false;
+
+       // System.out.println(new Date() + " : recordButton LOST  focus !----> ");
       }
     });
     recordButton.setTitle("Press Return to record/stop recording");
@@ -49,9 +68,11 @@ public abstract class RecordButton {
 
                                                        if (ne.getKeyCode() == KeyCodes.KEY_ENTER &&
                                                            event.getTypeInt() == 512 &&
-                                                           "[object KeyboardEvent]".equals(ne.getString())) {
+                                                           "[object KeyboardEvent]".equals(ne.getString()) &&
+                                                           !hasFocus) {
                                                          ne.preventDefault();
 
+                                                        // boolean hasFocus = recordButton.
                                                          System.out.println(new Date() + " : Click handler : Got " + event + " type int " +
                                                              event.getTypeInt() + " assoc " + event.getAssociatedType() +
                                                              " native " + event.getNativeEvent() + " source " + event.getSource());
