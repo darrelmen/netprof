@@ -203,6 +203,8 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     });
     boolean onFirst = !controller.onFirst(e);
     prev.setEnabled(onFirst);
+    prev.setTitle("Click left arrow key to go to previous item.");
+
     buttonRow.add(prev);
 
     this.next = new Button("Next");
@@ -210,6 +212,8 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
       next.setEnabled(false);
     }
     buttonRow.add(next);
+    next.setTitle("Click right arrow key to go to next item.");
+
     DOM.setElementAttribute(next.getElement(), "id", "nextButton");
 
     // send answers to server
@@ -463,7 +467,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   }
 
   public void setButtonsEnabled(boolean val) {
-    System.out.println("setButtonsEnabled enable prev, next = " + val);
+    //System.out.println("setButtonsEnabled enable prev, next = " + val);
     prev.setEnabled(val);
     next.setEnabled(val);
   }
