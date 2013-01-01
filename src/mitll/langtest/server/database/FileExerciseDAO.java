@@ -38,7 +38,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   private static final String LESSON_FILE = "lesson-737.csv";
   private static final String FAST = "fast";
   private static final String SLOW = "slow";
-  private static final boolean TESTING = true;
+  private static final boolean TESTING = false;
 
   private List<Exercise> exercises;
   private final String mediaDir;
