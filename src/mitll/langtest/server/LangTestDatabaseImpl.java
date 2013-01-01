@@ -26,9 +26,22 @@ import org.apache.log4j.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
@@ -45,6 +58,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final String DATA_COLLECT_MODE = "dataCollect";
   private static final String URDU = "urdu";
   private static final int MB = (1024 * 1024);
+  private static final int MAX_AUTO_CRT_VOCAB = 200;
   private static Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   public static final String ANSWERS = "answers";
   private static final int TIMEOUT = 30;
@@ -63,11 +77,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       .concurrencyLevel(4)
       .maximumSize(10000)
       .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();
-
-  @Override
-  public void init() {
-    db = new DatabaseImpl(this);
-  }
 
   public List<ExerciseShell> getExerciseIds(long userID, boolean useFile, boolean arabicDataCollect) {
     logger.debug("getting exercise ids for " + userID);
@@ -131,7 +140,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
-    logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
+    //logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
     db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, isUrdu);
     //logger.debug("usefile = " + useFile + " arabic data collect " + arabicDataCollect);
     List<Exercise> exercises;
@@ -145,7 +154,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (makeFullURLs) convertRefAudioURLs(exercises);
     if (!exercises.isEmpty())
       logger.debug("for user #" + userID +" got " + exercises.size() + " exercises , first ref sentence = '" + exercises.iterator().next().getRefSentence() + "'");
-    logMemory();
+    //logMemory();
 
     return exercises;
   }
@@ -214,7 +223,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param wavFile
    */
   public void ensureMP3(String wavFile) {
-   // logger.info("check for mp3 for " + wavFile);
     new AudioConversion().ensureWriteMP3(wavFile, getInstallPath());
   }
 
@@ -680,7 +688,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     String wavPathWithForwardSlashSeparators = ensureForwardSlashes(wavPath);
     String url = optionallyMakeURL(wavPathWithForwardSlashSeparators);
-    logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
+    // logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
 
     if (doAutoCRT && validity == AudioAnswer.Validity.OK) {
       List<String> exportedAnswers = db.getExportedAnswers(exercise, questionID);
@@ -787,7 +795,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
       }
     }
-    List<String> vocab = null;
+    List<String> vocab = new ArrayList<String>();
     try {
 /*      System.out.println("map : " +sc);
 
@@ -808,12 +816,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       for (String v : vocab) writer.write(v+"\n");
       writer.close();*/
     } catch (Exception e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      e.printStackTrace();
     }
 
     //System.out.println("map : " +sc);
 
-    all.addAll(vocab.subList(0,Math.min(vocab.size(),200)));
+    all.addAll(vocab.subList(0,Math.min(vocab.size(), MAX_AUTO_CRT_VOCAB)));
   //  System.out.println("vocab " + new HashSet<String>(all));
     return all;
   }
@@ -933,6 +941,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.destroy();
   }
 
+  /**
+   * As a final step, creates the DatabaseImpl!<br></br>
+   *
+   * Note that this will only ever be called once.
+   * @param servletContext
+   */
   private void readProperties(ServletContext servletContext) {
     String config = servletContext.getInitParameter("config");
     String installPath = getInstallPath();
@@ -962,6 +976,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     dataCollectMode = !props.getProperty(DATA_COLLECT_MODE, "false").equals("false");
     isUrdu = !props.getProperty(URDU, "false").equals("false");
     //logger.info("props dataCollectMode="+dataCollectMode);
+    db = new DatabaseImpl(configDir);
   }
 
   private class DirAndName {
