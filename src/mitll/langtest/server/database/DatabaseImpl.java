@@ -1,7 +1,6 @@
 package mitll.langtest.server.database;
 
 import ag.experiment.AutoGradeExperiment;
-import com.google.gwt.core.client.GWT;
 import mira.classifier.Classifier;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
@@ -11,11 +10,8 @@ import mitll.langtest.shared.ResultsAndGrades;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServlet;
 import java.io.File;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,17 +46,8 @@ public class DatabaseImpl implements Database {
 
   private static final boolean DROP_USER = false;
   private static final boolean DROP_RESULT = false;
-  private static final String H2_DB_NAME = TESTING ? "vlr-parle" : "/services/apache-tomcat-7.0.27/webapps/langTest/vlr-parle";
-  //private static final String TIME = "time";
-  //private static final String EXID = "exid";
   private Map<Long, List<Schedule>> userToSchedule;
 
-  // h2 config info
-  private String url = "jdbc:h2:" + H2_DB_NAME + ";IFEXISTS=TRUE;QUERY_CACHE_SIZE=0;",
-      dbOptions = "",//"?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull",
-      driver = "org.h2.Driver";
-
-  private HttpServlet servlet;
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
   public final UserDAO userDAO = new UserDAO(this);
@@ -68,9 +55,10 @@ public class DatabaseImpl implements Database {
   public final AnswerDAO answerDAO = new AnswerDAO(this);
   public final GradeDAO gradeDAO = new GradeDAO(this);
   public final GraderDAO graderDAO = new GraderDAO(this);
-  private String h2DbName = H2_DB_NAME;
   private Classifier<AutoGradeExperiment.Event> classifier = null;
   private Set<String> allAnswers = new HashSet<String>();
+  private DatabaseConnection connection = null;
+
   /**
    * TODO : consider making proper v2 database!
    */
@@ -79,23 +67,12 @@ public class DatabaseImpl implements Database {
   private Map<String, Export.ExerciseExport> exerciseIDToExport;
   private boolean isUrdu;
 
-  public DatabaseImpl(String dburl) {
-    this.h2DbName = dburl;
-    this.url = "jdbc:h2:" + h2DbName + ";IFEXISTS=TRUE;QUERY_CACHE_SIZE=0;";
-    try {
-      getConnection();
-      resultDAO.createResultTable(getConnection());
-    } catch (Exception e) {
-      logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
-    }
-  }
-
   /**
-   * @param s
+   * @param configDir
    * @see mitll.langtest.server.LangTestDatabaseImpl#init
    */
-  public DatabaseImpl(HttpServlet s) {
-    this.servlet = s;
+  public DatabaseImpl(String configDir) {
+    connection = new H2Connection(configDir, "vlr-parle");
     try {
       boolean open = getConnection() != null;
       if (!open) {
@@ -107,6 +84,10 @@ public class DatabaseImpl implements Database {
       logger.error("got " + e, e);
       return;
     }
+    initializeDAOs();
+  }
+
+  private void initializeDAOs() {
     ScheduleDAO scheduleDAO = new ScheduleDAO(this);
     this.userToSchedule = scheduleDAO.getSchedule();
 
@@ -128,12 +109,12 @@ public class DatabaseImpl implements Database {
       }*/
     }
     //else {
-      try {
-        resultDAO.createResultTable(getConnection());
-      } catch (Exception e) {
-        logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
-      }
- //   }
+    try {
+      resultDAO.createResultTable(getConnection());
+    } catch (Exception e) {
+      logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
+    }
+    //   }
 
     try {
       // gradeDAO.dropGrades();
@@ -145,6 +126,11 @@ public class DatabaseImpl implements Database {
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
+  }
+
+  @Override
+  public Connection getConnection() throws Exception {
+    return connection.getConnection();
   }
 
   private Classifier<AutoGradeExperiment.Event> getClassifier() {
@@ -180,7 +166,7 @@ public class DatabaseImpl implements Database {
    * @return
    */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    System.out.println("isurdu " + isUrdu);
+    //System.out.println("isurdu " + isUrdu);
     return useFile ? new FileExerciseDAO(mediaDir, isUrdu) : new SQLExerciseDAO(this, mediaDir);
   }
 
@@ -192,7 +178,7 @@ public class DatabaseImpl implements Database {
    * @param isUrdu
    */
   public void setInstallPath(String i, String lessonPlanFile, String mediaDir, boolean isUrdu) {
-    logger.debug("got install path " + i + " media " + mediaDir + " is urdu " +isUrdu);
+    //logger.debug("got install path " + i + " media " + mediaDir + " is urdu " +isUrdu);
     this.installPath = i;
     this.lessonPlanFile = lessonPlanFile;
     this.mediaDir = mediaDir;
@@ -465,7 +451,7 @@ public class DatabaseImpl implements Database {
     Collections.shuffle(randomExercises,new Random(userID));
     newList.addAll(randomExercises);
 
-    logger.debug("got " + newList.size());
+    //logger.debug("got " + newList.size());
     if (newList.isEmpty()) logger.warn("no exercises for " + userID + "?");
     return newList;
   }
@@ -541,77 +527,6 @@ public class DatabaseImpl implements Database {
       return "'" + result + "'\tand grades (" + grades.size() + ")" + " ratio " + getRatio() +
           new HashSet<Grade>(grades);
     }
-  }
-
-    /**
-     * Just for dbLogin
-     */
-  private Connection localConnection;
-  /**
-   * Not necessary if we use the h2 DBStarter service -- see web.xml reference
-   *
-   * @return
-   * @throws Exception
-   */
-  private Connection dbLogin() throws Exception {
-    if (localConnection != null) return localConnection;
-    try {
-      Class.forName(driver).newInstance();
-      try {
-        url = servlet.getServletContext().getInitParameter("db.url"); // from web.xml
-      } catch (Exception e) {
-        logger.warn("no servlet context?");
-      }
-      logger.info("connecting to " + url);
-
-      GWT.log("connecting to " + url);
-      File f = new java.io.File(h2DbName + ".h2.db");
-      if (!f.exists()) {
-        String s = "huh? no file at " + f.getAbsolutePath();
-        logger.warn(s);
-
-        GWT.log(s);
-      }
-      Connection connection = DriverManager.getConnection(url + dbOptions);
-      connection.setAutoCommit(false);
-      boolean closed = connection.isClosed();
-      if (closed) {
-        logger.warn("connection is closed to : " + url);
-      }
-      this.localConnection = connection;
-      return connection;
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      throw ex;
-    }
-  }
-
-  // should we have one connection???
-  // Connection c = null;
-
-  public Connection getConnection() throws Exception {
-    //  if (c != null) return c;
-    Connection c;
-    //  logger.info("install path is " +servlet.getInitParameter());
-    try {
-      if (servlet == null) {
-        c = this.dbLogin();
-      } else {
-        ServletContext servletContext = servlet.getServletContext();
-        c = (Connection) servletContext.getAttribute("connection");
-      }
-    } catch (Exception e) {  // for standalone testing
-      logger.warn("The context DBStarter is not working : " + e.getMessage(), e);
-      c = this.dbLogin();
-    }
-    if (c == null) {
-      return c;
-    }
-    c.setAutoCommit(true);
-    if (c.isClosed()) {
-      logger.warn("getConnection : conn " + c + " is closed!");
-    }
-    return c;
   }
 
   /**
@@ -833,11 +748,7 @@ public class DatabaseImpl implements Database {
 
   public void destroy() {
     try {
-      /*   Connection connection = getConnection();
-      if (!connection.isClosed()) {
-         connection.close();
-      }*/
-      //    DriverManager.deregisterDriver((Driver)Class.forName(driver).newInstance());
+      connection.contextDestroyed();
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
