@@ -618,6 +618,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public int userExists(String login) {
+    getProperties();
     return db.userExists(login);
   }
 
