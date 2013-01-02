@@ -34,7 +34,7 @@
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>Monitoring</web-resource-name>
-            <url-pattern>/monitoring</url-pattern>
+            <url-pattern>/monitoring/*</url-pattern>   <!-- note ending star to make it work on mtex -->
         </web-resource-collection>
         <auth-constraint>
             <role-name>access</role-name>
