@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 public class UserTable {
+  public static final int PAGE_SIZE = 5;
   private Widget lastTable = null;
   private Button closeButton;
 
@@ -78,7 +79,7 @@ public class UserTable {
 
   Widget getTable(List<User> result) {
     CellTable<User> table = new CellTable<User>();
-    table.setPageSize(10);
+    table.setPageSize(PAGE_SIZE);
     table.setWidth("1100px");
     TextColumn<User> id = new TextColumn<User>() {
       @Override
