@@ -53,6 +53,12 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     id = counter++;
   }
 
+  /**
+   * @see mitll.langtest.client.exercise.WaveformExercisePanel.RecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
+   * @param soundManager
+   * @param playListener
+   */
   public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener) {
     this(soundManager);
     this.playListener = playListener;
@@ -68,7 +74,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     destroySound();
     //System.out.println("doing unload of play ------------------> ");
 
-    keyHandler.removeHandler();
+    if (keyHandler != null) keyHandler.removeHandler();
   }
 
   protected void addButtons() {
@@ -93,8 +99,16 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
       //  System.out.println(new Date() + " : playButton LOST  focus !----> ");
       }
     });
-    playButton.setTitle("Press space bar to play/stop playing audio.");
 
+    addKeyboardListener();
+    if (keyHandler != null) {
+      playButton.setTitle("Press space bar to play/stop playing audio.");
+    }
+    playButton.setVisible(false);
+    add(playButton);
+  }
+
+  protected void addKeyboardListener() {
     keyHandler = Event.addNativePreviewHandler(new
                                                    Event.NativePreviewHandler() {
 
@@ -106,15 +120,13 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
                                                            !hasFocus) {
                                                          ne.preventDefault();
 
-                                                        System.out.println(new Date() + " : Play click handler : Got " + event + " type int " +
+                                                         System.out.println(new Date() + " : Play click handler : Got " + event + " type int " +
                                                              event.getTypeInt() + " assoc " + event.getAssociatedType() +
                                                              " native " + event.getNativeEvent() + " source " + event.getSource());
                                                          doClick();
                                                        }
                                                      }
                                                    });
-    playButton.setVisible(false);
-    add(playButton);
   }
 
   private void doClick() {
