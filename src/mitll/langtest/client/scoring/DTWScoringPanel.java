@@ -18,7 +18,7 @@ import java.util.Collection;
  */
 public class DTWScoringPanel extends ScoringAudioPanel {
   public DTWScoringPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
-    super(service, soundManager, useFullWidth, 1);
+    super(service, soundManager, useFullWidth, 1, true);
   }
 
   @Override

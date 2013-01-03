@@ -31,29 +31,31 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private PretestScore result;
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.sound.SoundManagerAPI, boolean, int)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.sound.SoundManagerAPI, boolean, int, boolean)
    * @param service
    * @param soundManager
    * @param useFullWidth
    * @param numRepeats
+   * @param useKeyboard
    */
-  public ScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth, int numRepeats) {
-    super(null, service, soundManager, useFullWidth);
-    addClickHandlers(numRepeats);
+  public ScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth,
+                           int numRepeats, boolean useKeyboard) {
+    this(null, null, service, soundManager, useFullWidth, numRepeats, useKeyboard);
   }
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.sound.SoundManagerAPI, boolean, int, boolean)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean)
    * @param path
    * @param refSentence
    * @param service
    * @param soundManager
    * @param useFullWidth
    * @param numRepeats
+   * @param useKeyboard
    */
   public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service, SoundManagerAPI soundManager,
-                           boolean useFullWidth, int numRepeats) {
-    super(path, service, soundManager, useFullWidth);
+                           boolean useFullWidth, int numRepeats, boolean useKeyboard) {
+    super(path, service, soundManager, useFullWidth, useKeyboard);
     this.refSentence = refSentence;
     addClickHandlers(numRepeats);
   }
@@ -66,13 +68,13 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   }
 
   /**
-   * @see GoodwaveExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see GoodwaveExercisePanel#getAnswerWidget(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @param l
    */
   public void addScoreListener(ScoreListener l) { this.scoreListener = l;}
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.PostAudioRecordButton#stopRecording()
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getScoringAudioPanel(mitll.langtest.shared.Exercise, String)
    * @param path
    * @param refSentence
    */
@@ -198,7 +200,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
      * end time of the next segment.  <br></br>
      * Then plays, the segment - note we have to adjust between the duration of a wav file and an mp3 file, which
      * will likely be different. (A little surprising to me, initially.)
-     * @see AudioPanel#playSegment(float, float, float, int)
+     * @see AudioPanel#playSegment
      * @param event
      */
     public void onClick(ClickEvent event) {
