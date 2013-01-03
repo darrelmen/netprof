@@ -5,11 +5,12 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.scoring.PretestScore;
 
 /**
- * Created with IntelliJ IDEA.
+ * Does ASR scoring -- adds phone and word transcript images below waveform and spectrum
  * User: GO22670
  * Date: 10/9/12
  * Time: 11:31 AM
@@ -24,10 +25,11 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param soundManager
    * @param useFullWidth
    * @param numRepeats
+   * @param useKeyboard
    */
   public ASRScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth,
-                              int numRepeats) {
-    super(service, soundManager, useFullWidth, numRepeats);
+                              int numRepeats, boolean useKeyboard) {
+    super(service, soundManager, useFullWidth, numRepeats, useKeyboard);
   }
 
   /**
@@ -35,15 +37,14 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param path
    * @param refSentence
    * @param service
-   * @param soundManager
-   * @param useFullWidth
-   * @param numRepeats
-   * @param useScoreToColorBkg
+   * @param controller
+   * @param useKeyboard
    */
-  public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service, SoundManagerAPI soundManager,
-                              boolean useFullWidth, int numRepeats, boolean useScoreToColorBkg) {
-    super(path, refSentence, service, soundManager, useFullWidth, numRepeats);
-    this.useScoreToColorBkg = useScoreToColorBkg;
+  public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
+                              ExerciseController controller, boolean useKeyboard) {
+    super(path, refSentence, service, controller.getSoundManager(), controller.showOnlyOneExercise(),
+        controller.getSegmentRepeats(), useKeyboard);
+    this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
   /**
