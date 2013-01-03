@@ -94,7 +94,7 @@ public class WaveformExercisePanel extends ExercisePanel {
      * @param index
      */
     public RecordAudioPanel(LangTestDatabaseAsync service, int index) {
-      super(null, service, controller.getSoundManager(), false);
+      super(null, service, controller.getSoundManager(), false, true);
       this.index = index;
       setRightMargin(400);
     }
