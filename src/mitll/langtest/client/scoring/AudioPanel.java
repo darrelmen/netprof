@@ -48,6 +48,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected String audioPath;
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
+  private boolean useKeyboard = true;
 
   protected ImageAndCheck waveform,spectrogram,phones,words;
   /**
@@ -69,11 +70,14 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @see ScoringAudioPanel#ScoringAudioPanel
    * @param service
    * @param useFullWidth
+   * @param useKeyboard
    */
-  public AudioPanel(String path, LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth) {
+  public AudioPanel(String path, LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth,
+                    boolean useKeyboard) {
     this.soundManager = soundManager;
     this.service = service;
     rightMarginToUse = useFullWidth ? RIGHT_MARGIN :  ASRScorePanel.X_CHART_SIZE+400;
+    this.useKeyboard = useKeyboard;
     addWidgets(path);
   }
 
@@ -222,6 +226,13 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
           add(toTheLeftWidget);
         }
         super.addButtons();
+      }
+
+      @Override
+      protected void addKeyboardListener() {
+        if (useKeyboard) {
+          super.addKeyboardListener();
+        }
       }
     };
   }
