@@ -45,6 +45,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   private HandlerRegistration keyHandler;
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
+  private boolean debug = false;
 
   /**
    * @see ExercisePanelFactory#getExercisePanel
@@ -236,7 +237,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
                                                        if ((isLeft || isRight) && event.getTypeInt() == 512 && "[object KeyboardEvent]".equals(ne.getString())) {
                                                          ne.preventDefault();
 
-                                                        System.out.println(new Date() +
+                                                        if (debug) System.out.println(new Date() +
                                                             " : getNextAndPreviousButtons - key handler : " + keyHandler +
                                                             " Got " + event + " type int " +
                                                              event.getTypeInt() + " assoc " + event.getAssociatedType() +
