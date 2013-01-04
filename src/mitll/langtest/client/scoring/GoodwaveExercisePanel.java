@@ -194,10 +194,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     ASRScoringAudioPanel audioPanel;
 
     if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
-      audioPanel = new ASRScoringAudioPanel(path,e.getRefSentence(),service,controller, false);
+      audioPanel = new FastAndSlowASRScoringAudioPanel(path);
     }
     else {
-      audioPanel = new FastAndSlowASRScoringAudioPanel(path);
+      audioPanel = new ASRScoringAudioPanel(path,e.getRefSentence(),service,controller, false);
     }
     audioPanel.setRefAudio(path, e.getRefSentence());
     ResizableCaptionPanel cp = new ResizableCaptionPanel(NATIVE_REFERENCE_SPEAKER);
