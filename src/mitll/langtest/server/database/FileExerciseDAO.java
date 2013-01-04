@@ -148,6 +148,7 @@ public class FileExerciseDAO implements ExerciseDAO {
               getExerciseForLine(installPath, line2);
         }
 
+       // if (count < 10) logger.info("Got " + exercise);
         exercises.add(exercise);
       }
      // w.close();
