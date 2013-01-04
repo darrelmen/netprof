@@ -186,10 +186,10 @@ public class Exercise extends ExerciseShell  {
 
   public String toString() {
     if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
-      return "Exercise " + plan+"/"+ id + "/" + " content bytes = " + content.length() + " ref sentence " + refSentence +" audio " + refAudio;
+      return "Exercise " + type + " " +plan+"/"+ id + "/" + " content bytes = " + content.length() + " ref sentence " + refSentence +" audio " + refAudio;
     }
     else {
-      return "Exercise " + plan+"/"+ id + "/" + (promptInEnglish?"english":"foreign")+"/" + getType()+
+      return "Exercise " + type + " " +plan+"/"+ id + "/" + (promptInEnglish?"english":"foreign")+"/" + getType()+
           " : content bytes = " + content.length() + (langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size());
     }
   }
