@@ -62,4 +62,6 @@ public interface LangTestDatabaseAsync {
   void addUser(int age, String gender, int experience, String firstName, String lastName, String nativeLang, String dialect, String userID, AsyncCallback<Long> async);
 
   void userExists(String login, AsyncCallback<Integer> async);
+
+  void getUserToResultCount(AsyncCallback<Map<User, Integer>> async);
 }
