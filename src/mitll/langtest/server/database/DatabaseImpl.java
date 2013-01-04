@@ -72,7 +72,11 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#init
    */
   public DatabaseImpl(String configDir) {
-    connection = new H2Connection(configDir, "vlr-parle");
+    this(configDir, "vlr-parle");
+  }
+
+  public DatabaseImpl(String configDir, String dbName) {
+    connection = new H2Connection(configDir, dbName);
     try {
       boolean open = getConnection() != null;
       if (!open) {
@@ -746,6 +750,30 @@ public class DatabaseImpl implements Database {
     return answerDAO.isAnswerValid(userID, exercise, questionID, database);
   }
 
+  /**
+   * TODO : worry about duplicate userid?
+   * @return
+   */
+  public Map<User, Integer> getUserToResultCount() {
+    List<User> users = getUsers();
+    //System.out.println("First " + users.iterator().next());
+    List<Result> results = getResults();
+    //System.out.println("First " + results.iterator().next());
+
+    Map<User,Integer> idToCount = new HashMap<User, Integer>();
+    Map<Long,User> idToUser = new HashMap<Long, User>();
+    for (User u : users) {
+      idToUser.put(u.id,u);
+      idToCount.put(u,0);
+    }
+    for (Result r : results) {
+      User user = idToUser.get(r.userid);
+      Integer c = idToCount.get(user);
+      idToCount.put(user,c+1);
+    }
+    return idToCount;
+  }
+
   public void destroy() {
     try {
       connection.contextDestroyed();
@@ -768,22 +796,26 @@ public class DatabaseImpl implements Database {
   }*/
 
   public static void main(String[] arg) {
-    DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\mt_repo\\jdewitt\\pilot\\vlr-parle");
+/*    DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\mt_repo\\jdewitt\\pilot\\vlr-parle");
     langTestDatabase.mediaDir = "C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\autocrt\\";
      langTestDatabase.getExercises(false);
      langTestDatabase.getClassifier();
     double score = langTestDatabase.getScoreForExercise("bc-R10-k227",1,"bueller");
     System.out.println("Score was " + score);
     if (true) {
-/*      List<ExerciseExport> exerciseNames = langTestDatabase.getExport(true, false);
+*//*      List<ExerciseExport> exerciseNames = langTestDatabase.getExport(true, false);
 
       System.out.println("names " + exerciseNames.size() + " e.g. " + exerciseNames.get(0));
       for (ExerciseExport ee : exerciseNames) {
         System.out.println("ee " + ee);
-      }*/
+      }*//*
     } else {
       //List<Exercise> exercises = langTestDatabase.getRandomBalancedList();
 
-    }
+    }*/
+
+    DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\DLITest\\","farsi");
+    Map<User, Integer> idToCount = langTestDatabase.getUserToResultCount();
+    System.out.println("map " +idToCount);
   }
 }
