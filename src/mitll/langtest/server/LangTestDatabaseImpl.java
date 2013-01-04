@@ -692,43 +692,52 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     // logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
 
     if (doAutoCRT && validity == AudioAnswer.Validity.OK) {
-      List<String> exportedAnswers = db.getExportedAnswers(exercise, questionID);
-      Exercise e = getExercise(exercise, false); // TODO : hack need to pass in useFile
-      //for (Exercise.QAPair pair : e.getForeignLanguageQuestions()) exportedAnswers.add(pair.getQuestion());
-      logger.info("got answers " + new HashSet<String>(exportedAnswers));
-
-      //List<String> background = getQuestions(false);
-      List<String> background = getBackgroundText(e);
-      List<String> vocab = getVocab(background);
-   /*   for (String b : background) logger.debug("background '" +  b +
-          "'");*/
-      PretestScore asrScoreForAudio = getASRScoreForAudio(0, file.getPath(), "", 128, 128, false, exportedAnswers, background, vocab);
-
-      String recoSentence = asrScoreForAudio.getRecoSentence();
-      logger.info("reco sentence was '" + recoSentence + "'");
-
-      List<String> good = new ArrayList<String>();
-      List<String> bad = new ArrayList<String>();
-      for (Export.ResponseAndGrade resp : db.getExportForExercise(exercise, questionID).rgs) { if (resp.grade >= 0.6) good.add(resp.response); else bad.add(resp.response);}
-
-      Set<String> goodTokens = getTokenSet(good);
-      Set<String> badTokens = getTokenSet(bad);
-
-      StringBuilder sb = new StringBuilder();
-      for (String recoToken : recoSentence.split("\\s")) {
-        if (goodTokens.contains(recoToken)) {
-          sb.append("<u>"+recoToken +"</u> ");
-        } else if (badTokens.contains(recoToken)) {
-          sb.append("<s>"+recoToken +"</s> ");
-        } else sb.append(recoToken + " ");
-      }
-
-      double scoreForAnswer = (recoSentence.length() > 0) ? getScoreForAnswer(getExercise(exercise, false), questionID, recoSentence) :0.0d;
-      return new AudioAnswer(url, validity, sb.toString().trim(), scoreForAnswer, reqid);
+      return getAutoCRTAnswer(exercise, reqid, file, validity, questionID, url);
     }
     else {
       return new AudioAnswer(url, validity, reqid);
     }
+  }
+
+  private AudioAnswer getAutoCRTAnswer(String exercise, int reqid, File file, AudioAnswer.Validity validity, int questionID, String url) {
+    List<String> exportedAnswers = db.getExportedAnswers(exercise, questionID);
+    Exercise e = getExercise(exercise, false); // TODO : hack need to pass in useFile
+    //for (Exercise.QAPair pair : e.getForeignLanguageQuestions()) exportedAnswers.add(pair.getQuestion());
+    logger.info("got answers " + new HashSet<String>(exportedAnswers));
+
+    //List<String> background = getQuestions(false);
+    List<String> background = getBackgroundText(e);
+    List<String> vocab = getVocab(background);
+   /*   for (String b : background) logger.debug("background '" +  b +
+          "'");*/
+    PretestScore asrScoreForAudio = getASRScoreForAudio(0, file.getPath(), "", 128, 128, false, exportedAnswers, background, vocab);
+
+    String recoSentence = asrScoreForAudio.getRecoSentence();
+    logger.info("reco sentence was '" + recoSentence + "'");
+
+    List<String> good = new ArrayList<String>();
+    List<String> bad = new ArrayList<String>();
+    for (Export.ResponseAndGrade resp : db.getExportForExercise(exercise, questionID).rgs) { if (resp.grade >= 0.6) good.add(resp.response); else bad.add(resp.response);}
+
+    Set<String> goodTokens = getTokenSet(good);
+    Set<String> badTokens = getTokenSet(bad);
+
+    StringBuilder sb = new StringBuilder();
+    for (String recoToken : recoSentence.split("\\s")) {
+      if (goodTokens.contains(recoToken)) {
+        sb.append("<u>"+recoToken +"</u> ");
+      } else if (badTokens.contains(recoToken)) {
+        sb.append("<s>"+recoToken +"</s> ");
+      } else sb.append(recoToken + " ");
+    }
+
+    double scoreForAnswer = (recoSentence.length() > 0) ? getScoreForAnswer(getExercise(exercise, false), questionID, recoSentence) :0.0d;
+    return new AudioAnswer(url, validity, sb.toString().trim(), scoreForAnswer, reqid);
+  }
+
+  @Override
+  public Map<User, Integer> getUserToResultCount() {
+    return db.getUserToResultCount();
   }
 
   private Set<String> getTokenSet(List<String> exportedAnswers) {
