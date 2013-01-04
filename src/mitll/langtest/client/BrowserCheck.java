@@ -39,6 +39,11 @@ public class BrowserCheck {
 
   public void getBrowserAndVersion() {
     String agent = getUserAgent();
+    getBrowser(agent);
+  }
+
+  public String getBrowser(String agent) {
+    agent = agent.toLowerCase();
     if (agent.contains("firefox")) {
       version = agent.substring(agent.indexOf("firefox") + "firefox".length() + 1).split("\\s+")[0];
       browser = "firefox";
@@ -62,6 +67,8 @@ public class BrowserCheck {
       System.err.println("couldn't parse " + agent + " and " + major);
       e.printStackTrace();
     }
+
+    return browser + " " + ver;
   }
 
   private static native String getUserAgent() /*-{
