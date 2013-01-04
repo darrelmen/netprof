@@ -27,6 +27,9 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.visualization.client.VisualizationUtils;
+import com.google.gwt.visualization.client.visualizations.PieChart;
+import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -34,6 +37,7 @@ import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
+import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
@@ -54,9 +58,9 @@ import java.util.Map;
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   // TODO : consider putting these in the .css file?
-  private static final int HEADER_HEIGHT = 80;
+  private static final int HEADER_HEIGHT = 90;
   private static final int FOOTER_HEIGHT = 40;
-  private  static final int EXERCISE_LIST_WIDTH = 200;
+  private static final int EXERCISE_LIST_WIDTH = 210;
   private static final int EAST_WIDTH = 90;
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
   private static final boolean DEFAULT_GOODWAVE_MODE = false;
@@ -73,6 +77,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private UserManager userManager;
   private final UserTable userTable = new UserTable();
   private ResultManager resultManager;
+  private MonitoringManager monitoringManager;
   private FlashRecordPanelHeadless flashRecordPanel;
 
   private long lastUser = -1;
@@ -173,8 +178,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void onModuleLoad2() {
     useProps();
+    // Load the visualization api, passing the onLoadCallback to be called
+    // when loading is done.
+    VisualizationUtils.loadVisualizationApi(new Runnable() {
+      @Override
+      public void run() {
+        System.out.println("visualizations loaded...");
+      }
+    }, ColumnChart.PACKAGE);
+
     userManager = new UserManager(this,service);
     resultManager = new ResultManager(service, this);
+    monitoringManager = new MonitoringManager(service, this);
     boolean isGrading = checkParams();
     boolean usualLayout = exercise_title == null;
     final DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
@@ -513,7 +528,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Anchor logout;
   private Anchor users;
-  private Anchor showResults;
+  private Anchor showResults,mointoring;
   /**
    * Has both a logout and a users link and a results link
    * @return
@@ -547,6 +562,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
     vp.add(showResults);
     showResults.setVisible(!isArabicTextDataCollect());
+
+    mointoring = new Anchor("Monitoring");
+    mointoring.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        monitoringManager.showResults();
+      }
+    });
+    vp.add(mointoring);
+    mointoring.setVisible(!isArabicTextDataCollect());
 
     // no click handler for this for now
     HTML statusLine = new HTML("<span><font size=-2>"+browserCheck.browser + " " +browserCheck.ver +" " +
