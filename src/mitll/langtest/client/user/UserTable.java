@@ -41,11 +41,9 @@ public class UserTable {
     closeButton.getElement().setId("closeButton");
 
     final VerticalPanel dialogVPanel = new VerticalPanel();
-    dialogVPanel.setWidth("1200px");
-    dialogBox.setWidth("1200px");
 
-    int left = (Window.getClientWidth()) / 10;
-    int top = (Window.getClientHeight()) / 10;
+    int left = (Window.getClientWidth()) / 20;
+    int top = (Window.getClientHeight()) / 20;
     dialogBox.setPopupPosition(left, top);
 
     service.getUsers(new AsyncCallback<List<User>>() {
@@ -80,7 +78,8 @@ public class UserTable {
   Widget getTable(List<User> result) {
     CellTable<User> table = new CellTable<User>();
     table.setPageSize(PAGE_SIZE);
-    table.setWidth("1100px");
+    int width = (int)(Window.getClientWidth() * 0.9);
+    table.setWidth(width + "px");
     TextColumn<User> id = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
