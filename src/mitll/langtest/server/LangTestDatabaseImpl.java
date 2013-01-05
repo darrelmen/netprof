@@ -740,6 +740,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getUserToResultCount();
   }
 
+  @Override
+  public Map<Integer, Integer> getResultCountToCount(boolean useFile) {
+    return db.getResultCountToCount(useFile);
+  }
+  @Override
+  public Map<String, Integer> getResultByDay() {
+    return db.getResultByDay();
+  }
+  @Override
+  public Map<String, Integer> getResultByHourOfDay() {
+    return db.getResultByHourOfDay();
+  }
+
   private Set<String> getTokenSet(List<String> exportedAnswers) {
     Set<String> tokens = new HashSet<String>();
     for (String l : exportedAnswers) {
