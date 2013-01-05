@@ -80,8 +80,8 @@ public class ResultManager {
     closeButton.getElement().setId("closeButton");
 
     final VerticalPanel dialogVPanel = new VerticalPanel();
-    dialogVPanel.setWidth("1200px");
-    dialogBox.setWidth("1200px");
+/*    dialogVPanel.setWidth("1200px");
+    dialogBox.setWidth("1200px");*/
 
     int left = (Window.getClientWidth()) / 10;
     int top  = (Window.getClientHeight()) / 10;
@@ -131,7 +131,10 @@ public class ResultManager {
 
     CellTable<Result> table = new CellTable<Result>();
     String gradingWidth = 700 + "px";
-    if (!gradingView) table.setWidth(gradingView ? gradingWidth : "1200px");
+    if (!gradingView) {
+      int i = (int)(Window.getClientWidth()*0.8f);
+      table.setWidth(gradingView ? gradingWidth : i + "px");
+    }
     TextColumn<Result> id = null;
     id = addUserPlanExercise(table, id);
     if (showQuestionColumn) {
