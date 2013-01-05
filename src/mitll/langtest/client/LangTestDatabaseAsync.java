@@ -64,4 +64,10 @@ public interface LangTestDatabaseAsync {
   void userExists(String login, AsyncCallback<Integer> async);
 
   void getUserToResultCount(AsyncCallback<Map<User, Integer>> async);
+
+  void getResultCountToCount(boolean useFile, AsyncCallback<Map<Integer, Integer>> async);
+
+  void getResultByDay(AsyncCallback<Map<String, Integer>> async);
+
+  void getResultByHourOfDay(AsyncCallback<Map<String, Integer>> async);
 }
