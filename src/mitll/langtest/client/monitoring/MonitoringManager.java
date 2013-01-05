@@ -1,23 +1,16 @@
 package mitll.langtest.client.monitoring;
 
-import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.SimplePager;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
@@ -27,15 +20,10 @@ import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.grading.GradingExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.Grade;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,33 +36,21 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class MonitoringManager {
-  private static final int PAGE_SIZE = 12;
-  protected static final String UNGRADED = "Ungraded";
-  protected static final String SKIP = "Skip";
-  private int pageSize = PAGE_SIZE;
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
-
-  //private Set<Integer> remainingResults = new HashSet<Integer>();
-  private final AudioTag audioTag = new AudioTag();
+  private final boolean useFile;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2
    * @param s
    * @param feedback
+   * @param useFile
    */
-  public MonitoringManager(LangTestDatabaseAsync s, UserFeedback feedback) {
+  public MonitoringManager(LangTestDatabaseAsync s, UserFeedback feedback, boolean useFile) {
     this.service = s;
     this.feedback = feedback;
+    this.useFile = useFile;
   }
-
-  public void setFeedback(GradingExercisePanel panel) {
-    //this.panel = panel;
-  }
-
-  public void setPageSize(int s) { this.pageSize = s; }
-
-  private Widget lastTable = null;
   private Button closeButton;
 
   public void showResults() {
@@ -90,9 +66,6 @@ public class MonitoringManager {
     closeButton.getElement().setId("closeButton");
 
     final VerticalPanel dialogVPanel = new VerticalPanel();
-/*    dialogVPanel.setWidth(1200 + "px");
-    dialogBox.setWidth(1200 + "px");*/
-
     dialogBox.setHeight("80%");
     dialogVPanel.setHeight("80%");
 
@@ -100,29 +73,17 @@ public class MonitoringManager {
     int top  = (Window.getClientHeight()) / 20;
     dialogBox.setPopupPosition(left, top);
 
-    service.getUserToResultCount(new AsyncCallback<Map<User, Integer>>() {
-      public void onFailure(Throwable caught) {
-      }
+    ScrollPanel sp = new ScrollPanel();
+    sp.setHeight((int)(Window.getClientHeight()*0.8f) + "px");
+    sp.setWidth((int)(Window.getClientWidth()*0.8f) + "px");
 
-      public void onSuccess(Map<User, Integer> userToCount) {
-        ScrollPanel sp = new ScrollPanel();
-        sp.setHeight((int)(Window.getClientHeight()*0.8f) + "px");
-        VerticalPanel vp = new VerticalPanel();
-        vp.setWidth("90%");
-        sp.add(vp);
-        dialogVPanel.add(sp);
-        vp.add(getGenderChart(userToCount));
-        vp.add(getAgeChart(userToCount));
-        vp.add(getLangChart(userToCount));
-        vp.add(getDialectChart(userToCount));
-        vp.add(getExperienceChart(userToCount));
-        vp.add(getBrowserChart(userToCount));
-        dialogVPanel.add(closeButton);
+    final VerticalPanel vp = new VerticalPanel();
+    vp.setWidth((int)(Window.getClientWidth()*0.78f) + "px");
+    sp.add(vp);
+    dialogVPanel.add(sp);
 
-       // lastTable = table;
-        dialogBox.show();
-      }
-    });
+    //showUserInfo(dialogBox, dialogVPanel, vp);
+    doResultQuery(vp, dialogVPanel, dialogBox);
 
     dialogBox.setWidget(dialogVPanel);
 
@@ -134,10 +95,74 @@ public class MonitoringManager {
     });
   }
 
+  private void doResultQuery(final Panel vp, final Panel outer, final DialogBox dialogBox) {
+    service.getResultCountToCount(useFile, new AsyncCallback<Map<Integer, Integer>>() {
+      public void onFailure(Throwable caught) {}
+      public void onSuccess(Map<Integer, Integer> userToCount) {
+        int total = 0;
+        for (int v : userToCount.values()) total += v;
+        Integer unanswered = userToCount.get(0);
+        float ratio = ((float) unanswered) / ((float) total);
+        int percent = (int) (ratio*100f);
+        vp.add(getResultCountChart(userToCount));
+        vp.add(new HTML("<b><font color='red'>Number unanswered = " + unanswered +" or " + percent +
+            "%</font></b>") );
+        vp.add(new HTML("<b>Number answered = " +(total-unanswered)+" or " + (100-percent) +"%</b>") );
+        vp.add(new HTML("<b>Number with one answer = " +userToCount.get(1)+"</b>"));
+        doResultByDayQuery(vp, outer, dialogBox);
+      }
+    });
+  }
+
+  private void doResultByDayQuery(final Panel vp, final Panel outer, final DialogBox dialogBox) {
+    service.getResultByDay(new AsyncCallback<Map<String, Integer>>() {
+      public void onFailure(Throwable caught) {
+      }
+
+      public void onSuccess(Map<String, Integer> userToCount) {
+        vp.add(getResultByDayChart(userToCount));
+        doResultByHourOfDayQuery(vp, outer, dialogBox);
+      }
+    });
+  }
+
+  private void doResultByHourOfDayQuery(final Panel vp, final Panel outer, final DialogBox dialogBox) {
+    service.getResultByHourOfDay(new AsyncCallback<Map<String, Integer>>() {
+      public void onFailure(Throwable caught) {
+      }
+
+      public void onSuccess(Map<String, Integer> userToCount) {
+        vp.add(getResultByHourOfDayChart(userToCount));
+        showUserInfo(vp, outer, dialogBox);
+  /*      outer.add(closeButton);
+        dialogBox.show();*/
+      }
+    });
+  }
+
+  private void showUserInfo(final Panel vp, final Panel dialogVPanel, final DialogBox dialogBox) {
+    service.getUserToResultCount(new AsyncCallback<Map<User, Integer>>() {
+      public void onFailure(Throwable caught) {}
+      public void onSuccess(Map<User, Integer> userToCount) {
+        vp.add(getPerUserChart(userToCount));
+        vp.add(getGenderChart(userToCount));
+        vp.add(getAgeChart(userToCount));
+        vp.add(getLangChart(userToCount));
+        vp.add(getDialectChart(userToCount));
+        vp.add(getExperienceChart(userToCount));
+        vp.add(getBrowserChart(userToCount));
+        dialogVPanel.add(closeButton);
+
+        dialogBox.show();
+        // doResultQuery(vp,dialogVPanel,dialogBox);
+      }
+    });
+  }
+
   private ColumnChart getGenderChart(Map<User, Integer> userToCount) {
     Options options = Options.create();
     options.setTitle("Answers by Gender");
-    options.setWidth((int)(Window.getClientWidth()*0.7f));
+
     DataTable data = DataTable.create();
     data.addColumn(AbstractDataTable.ColumnType.STRING, "Gender");
     data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Items");
@@ -160,7 +185,6 @@ public class MonitoringManager {
   private ColumnChart getAgeChart(Map<User, Integer> userToCount) {
     Options options = Options.create();
     options.setTitle("Answers by Age");
-    options.setWidth((int) (Window.getClientWidth() * 0.7f));
 
     DataTable data = DataTable.create();
     data.addColumn(AbstractDataTable.ColumnType.STRING, "Age");
@@ -172,6 +196,7 @@ public class MonitoringManager {
       User user = pair.getKey();
       int age = (user.age / 5)*5;
       Integer c = ageToCount.get(age);
+
       if (c == null) ageToCount.put(age,count); else ageToCount.put(age,c+count);
     }
 
@@ -180,10 +205,92 @@ public class MonitoringManager {
     Collections.sort(ages);
     for (Integer age : ages) {
       data.addRow();
-      data.setValue(r, 0, (age -5)+"-"+ age);
+      data.setValue(r, 0, (age -5)+"-"+ (age-1));
       data.setValue(r++, 1, ageToCount.get(age));
     }
 
+    return new ColumnChart(data, options);
+  }
+
+  private ColumnChart getPerUserChart(Map<User, Integer> userToCount) {
+    Options options = Options.create();
+    options.setTitle("Number of answers per user");
+
+    DataTable data = DataTable.create();
+    data.addColumn(AbstractDataTable.ColumnType.STRING, "Num Answers");
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Users with this many");
+
+    Map<Integer,Integer> ageToCount = new HashMap<Integer,Integer>();
+    for (Map.Entry<User,Integer> pair : userToCount.entrySet()) {
+      Integer count = pair.getValue();
+      int binned = count >= 100 ? (count / 100)*100 : count >= 10 ? (count / 10)*10 : count;
+      Integer c = ageToCount.get(binned);
+      if (c == null) ageToCount.put(binned,1); else ageToCount.put(binned,c+1);
+    }
+
+    int r = 0;
+    List<Integer> ages = new ArrayList<Integer>(ageToCount.keySet());
+    Collections.sort(ages);
+    for (Integer age : ages) {
+      data.addRow();
+      data.setValue(r, 0, age >= 100 ? age +"-"+(age+99): (age >= 10 ? age +"-" +(age+9) : ""+age));
+      data.setValue(r++, 1, ageToCount.get(age));
+    }
+
+    return new ColumnChart(data, options);
+  }
+
+  private ColumnChart getResultCountChart(Map<Integer, Integer> resultToCount) {
+    Options options = Options.create();
+    options.setTitle("Count of answers by item");
+
+    DataTable data = DataTable.create();
+    data.addColumn(AbstractDataTable.ColumnType.STRING, "Num Answers");
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Exercises with this many");
+
+    Map<Integer, Integer> ageToCount = new HashMap<Integer, Integer>();
+    for (Map.Entry<Integer, Integer> pair : resultToCount.entrySet()) {
+      Integer count = pair.getKey();
+      int binned =
+          count >= 100 ? (count / 100) * 100 :
+              //count >= 30 ? (count / 10) * 10 :
+                  count >= 10 ? (count / 5) * 5 :
+                      count;
+      Integer c = ageToCount.get(binned);
+      if (c == null) ageToCount.put(binned, pair.getValue());
+      else ageToCount.put(binned, c + pair.getValue());
+    }
+
+    int r = 0;
+    List<Integer> ages = new ArrayList<Integer>(ageToCount.keySet());
+    Collections.sort(ages);
+    for (Integer age : ages) {
+      if (age > 1) {
+        data.addRow();
+        //     data.setValue(r, 0, age);
+        data.setValue(r, 0,
+            age >= 100 ? ""+ age+"-"+(age+99) :
+                //(age >= 30 ? (age - 10) + "-" + age :
+                    (age >= 10 ? age +"-"+(age+4) :
+                        "" + age));
+        data.setValue(r++, 1, ageToCount.get(age));
+      }
+    }
+
+    return new ColumnChart(data, options);
+  }
+
+  private ColumnChart getResultByDayChart(Map<String, Integer> dayToCount) {
+    String slot = "Day";
+    Options options = getOptions(slot);
+    DataTable data = getDataTable(slot, dayToCount);
+    return new ColumnChart(data, options);
+  }
+
+  private ColumnChart getResultByHourOfDayChart(Map<String, Integer> dayToCount) {
+    String slot = "Hour of day (EST)";
+    Options options = getOptions(slot);
+    DataTable data = getDataTable(slot, dayToCount);
     return new ColumnChart(data, options);
   }
 
@@ -256,7 +363,6 @@ public class MonitoringManager {
   private Options getOptions(String slot) {
     Options options = Options.create();
     options.setTitle("Answers by " + slot);
-    options.setWidth((int) (Window.getClientWidth() * 0.7f));
     return options;
   }
 
@@ -264,7 +370,6 @@ public class MonitoringManager {
     String slot = "Experience";
     Options options = Options.create();
     options.setTitle("Answers by " + slot + " (months)");
-    options.setWidth((int) (Window.getClientWidth() * 0.7f));
 
     Map<Integer,Integer> slotToCount = new HashMap<Integer,Integer>();
 
@@ -300,11 +405,15 @@ public class MonitoringManager {
     data.addColumn(AbstractDataTable.ColumnType.STRING, slot);
     data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Items");
     int r = 0;
-    for (Map.Entry<String,Integer> pair : langToCount.entrySet()) {
-      String key = pair.getKey();
+
+    List<String> slotValues = new ArrayList<String>(langToCount.keySet());
+    Collections.sort(slotValues);
+
+    for (String key : slotValues) {
+      //String key = pair.getKey();
       data.addRow();
       data.setValue(r, 0, key);
-      data.setValue(r++, 1, pair.getValue());
+      data.setValue(r++, 1, langToCount.get(key));
     }
     return data;
   }
