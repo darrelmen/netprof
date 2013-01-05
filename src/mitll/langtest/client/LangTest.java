@@ -28,7 +28,6 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
-import com.google.gwt.visualization.client.visualizations.PieChart;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
@@ -183,14 +182,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
       public void run() {
-        System.out.println("visualizations loaded...");
+       // System.out.println("visualizations loaded...");
       }
     }, ColumnChart.PACKAGE);
 
     userManager = new UserManager(this,service);
     resultManager = new ResultManager(service, this);
-    monitoringManager = new MonitoringManager(service, this);
     boolean isGrading = checkParams();
+    monitoringManager = new MonitoringManager(service, this, !goodwaveMode);
     boolean usualLayout = exercise_title == null;
     final DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
     if (usualLayout) {
