@@ -13,9 +13,11 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -756,9 +758,7 @@ public class DatabaseImpl implements Database {
    */
   public Map<User, Integer> getUserToResultCount() {
     List<User> users = getUsers();
-    //System.out.println("First " + users.iterator().next());
     List<Result> results = getResults();
-    //System.out.println("First " + results.iterator().next());
 
     Map<User,Integer> idToCount = new HashMap<User, Integer>();
     Map<Long,User> idToUser = new HashMap<Long, User>();
@@ -772,6 +772,89 @@ public class DatabaseImpl implements Database {
       idToCount.put(user,c+1);
     }
     return idToCount;
+  }
+
+  /**
+   * TODO : worry about duplicate userid?
+   * @return
+   */
+  public Map<Integer, Integer> getResultCountToCount(boolean useFile) {
+    List<Exercise> exercises = getExercises(useFile);
+    Map<String,Integer> idToCount = new HashMap<String, Integer>();
+    for (Exercise e : exercises) {
+
+      if (e.getNumQuestions() == 0) {
+        String key = e.getID() + "/0";
+        idToCount.put(key,0);
+      }
+      else {
+        for (int i = 0; i < e.getNumQuestions(); i++) {
+          String key = e.getID() + "/" + i;
+          idToCount.put(key,0);
+        }
+      }
+    }
+   // System.out.println("keys " + idToCount.keySet());
+
+    List<Result> results = getResults();
+    for (Result r : results) {
+      String key = r.id + "/" + r.qid;
+      Integer c = idToCount.get(key);
+      if (c == null) {
+        idToCount.put(key, 1);
+      //  System.err.println("couldn't find key '" + key + "'");
+      }
+      else idToCount.put(key, c + 1);
+    }
+  //  System.out.println("map is " + idToCount);
+
+    Map<Integer,Integer> resCountToCount = new HashMap<Integer, Integer>();
+    //System.out.println("values is " + idToCount.values());
+
+    for (Integer c : idToCount.values()) {
+      Integer rc = resCountToCount.get(c);
+      if (rc == null) resCountToCount.put(c, 1);
+      else resCountToCount.put(c, rc + 1);
+    }
+    System.out.println("map size is " + resCountToCount.size());
+    System.out.println("map is " + resCountToCount);
+    return resCountToCount;
+  }
+
+  /**
+   * TODO : worry about duplicate userid?
+   * @return
+   */
+  public Map<String, Integer> getResultByDay() {
+    List<Result> results = getResults();
+    SimpleDateFormat df = new SimpleDateFormat("MM-dd-yy");
+    Map<String,Integer> dayToCount = new HashMap<String, Integer>();
+    for (Result r : results) {
+      Date date = new Date(r.timestamp);
+      String day = df.format(date);
+      Integer c = dayToCount.get(day);
+      if (c == null) {
+        dayToCount.put(day, 1);
+      }
+      else dayToCount.put(day, c + 1);
+    }
+    return dayToCount;
+  }
+
+  public Map<String, Integer> getResultByHourOfDay() {
+    List<Result> results = getResults();
+    SimpleDateFormat df = new SimpleDateFormat("HH");
+    Map<String,Integer> dayToCount = new HashMap<String, Integer>();
+    for (Result r : results) {
+      Date date = new Date(r.timestamp);
+      String day = df.format(date);
+      Integer c = dayToCount.get(day);
+      if (c == null) {
+        dayToCount.put(day, 1);
+      }
+      else dayToCount.put(day, c + 1);
+    }
+    return dayToCount;
   }
 
   public void destroy() {
@@ -816,6 +899,9 @@ public class DatabaseImpl implements Database {
 
     DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\DLITest\\","farsi");
     Map<User, Integer> idToCount = langTestDatabase.getUserToResultCount();
-    System.out.println("map " +idToCount);
+    langTestDatabase.setInstallPath("","","",false);
+    System.out.println("map " + idToCount);
+    langTestDatabase.getUserToResultCount();
+   // System.out.println("map " + langTestDatabase.getResultCountToCount());
   }
 }
