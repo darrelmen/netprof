@@ -78,6 +78,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       .maximumSize(10000)
       .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();
 
+  /**
+   * @see mitll.langtest.client.exercise.ExerciseList#getExercises
+   * @param userID
+   * @param useFile
+   * @param arabicDataCollect
+   * @return
+   */
   public List<ExerciseShell> getExerciseIds(long userID, boolean useFile, boolean arabicDataCollect) {
     logger.debug("getting exercise ids for " + userID);
     List<Exercise> exercises = getExercises(userID, useFile, arabicDataCollect);
@@ -270,7 +277,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       relativeImagePath = relativeImagePath.substring(1);
     }
     String imageURL = optionallyMakeURL(relativeImagePath);
-    logger.info("for " + wavAudioFile + " type " + imageType + " rel path is " + relativeImagePath + " url " + imageURL);
+    logger.debug("for " + wavAudioFile + " type " + imageType + " rel path is " + relativeImagePath + " url " + imageURL);
 
     double duration = new AudioCheck().getDurationInSeconds(wavAudioFile);
     return new ImageResponse(reqid,imageURL, duration);
@@ -751,6 +758,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public Map<String, Integer> getResultByHourOfDay() {
     return db.getResultByHourOfDay();
+  }
+
+  @Override
+  public List<Integer> getResultPerExercise(boolean useFile) {
+    return db.getResultPerExercise(useFile);
   }
 
   private Set<String> getTokenSet(List<String> exportedAnswers) {
