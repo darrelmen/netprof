@@ -625,7 +625,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public int userExists(String login) {
-    if (props == null) getProperties();
+    if (db == null) getProperties();
     return db.userExists(login);
   }
 
@@ -987,6 +987,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String installPath = getInstallPath();
     this.relativeConfigDir = "config" + File.separator + config;
     this.configDir = installPath + File.separator + relativeConfigDir;
+    db = new DatabaseImpl(configDir);
+    logger.debug("Db now " + db);
 
     logger.info("rel config dir " + relativeConfigDir);
     String configFile = getServletContext().getInitParameter("configFile");
@@ -1010,8 +1012,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     dataCollectMode = !props.getProperty(DATA_COLLECT_MODE, "false").equals("false");
     isUrdu = !props.getProperty(URDU, "false").equals("false");
-    //logger.info("props dataCollectMode="+dataCollectMode);
-    db = new DatabaseImpl(configDir);
   }
 
   private class DirAndName {
