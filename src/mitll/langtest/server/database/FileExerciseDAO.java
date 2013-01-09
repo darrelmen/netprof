@@ -52,7 +52,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   public FileExerciseDAO(String mediaDir, boolean isUrdu) {
     this.mediaDir = mediaDir;
     this.isUrdu = isUrdu;
-    logger.debug("is urdu " + isUrdu);
+    //logger.debug("is urdu " + isUrdu);
   }
 
   /**
