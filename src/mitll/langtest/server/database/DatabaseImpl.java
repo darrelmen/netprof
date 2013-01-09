@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import ag.experiment.AutoGradeExperiment;
+import com.google.gwt.text.client.IntegerParser;
 import mira.classifier.Classifier;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -44,7 +46,7 @@ import java.util.TreeSet;
  */
 public class DatabaseImpl implements Database {
   private static Logger logger = Logger.getLogger(DatabaseImpl.class);
-  private static final boolean TESTING = false;
+ // private static final boolean TESTING = false;
 
   private static final boolean DROP_USER = false;
   private static final boolean DROP_RESULT = false;
@@ -459,6 +461,25 @@ public class DatabaseImpl implements Database {
 
     //logger.debug("got " + newList.size());
     if (newList.isEmpty()) logger.warn("no exercises for " + userID + "?");
+
+    String exerciseIDLastResult = resultDAO.getExerciseIDLastResult(userID);
+    if (!exerciseIDLastResult.equals("INVALID")) {
+      int i = 0;
+      for (Exercise e : newList) {
+        if (e.getID().equals(exerciseIDLastResult)) {
+          break;
+        }
+        else { i++; }
+      }
+      i++;
+      if (i == newList.size()-1) i = 0;
+      List<Exercise> back = newList.subList(i, newList.size());
+      List<Exercise> front = newList.subList(0, i);
+      logger.info("starting from #" + i + " or " + exerciseIDLastResult + " back " + back.size() + " front " + front.size());
+      back.addAll(front);
+      newList = back;
+      assert(newList.size() == back.size());//, "huh? sizes aren't equal " + newList.size() + " vs " + back.size());
+    }
     return newList;
   }
 
@@ -769,7 +790,9 @@ public class DatabaseImpl implements Database {
     for (Result r : results) {
       User user = idToUser.get(r.userid);
       Integer c = idToCount.get(user);
-      idToCount.put(user,c+1);
+      if (c != null) {
+        idToCount.put(user, c + 1);
+      }
     }
     return idToCount;
   }
@@ -779,10 +802,21 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public Map<Integer, Integer> getResultCountToCount(boolean useFile) {
+    Map<String, Integer> idToCount = getExToCount(useFile);
+    Map<Integer,Integer> resCountToCount = new HashMap<Integer, Integer>();
+
+    for (Integer c : idToCount.values()) {
+      Integer rc = resCountToCount.get(c);
+      if (rc == null) resCountToCount.put(c, 1);
+      else resCountToCount.put(c, rc + 1);
+    }
+    return resCountToCount;
+  }
+
+  private Map<String, Integer> getExToCount(boolean useFile) {
     List<Exercise> exercises = getExercises(useFile);
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
     for (Exercise e : exercises) {
-
       if (e.getNumQuestions() == 0) {
         String key = e.getID() + "/0";
         idToCount.put(key,0);
@@ -794,7 +828,6 @@ public class DatabaseImpl implements Database {
         }
       }
     }
-   // System.out.println("keys " + idToCount.keySet());
 
     List<Result> results = getResults();
     for (Result r : results) {
@@ -802,23 +835,33 @@ public class DatabaseImpl implements Database {
       Integer c = idToCount.get(key);
       if (c == null) {
         idToCount.put(key, 1);
-      //  System.err.println("couldn't find key '" + key + "'");
       }
       else idToCount.put(key, c + 1);
     }
-  //  System.out.println("map is " + idToCount);
 
-    Map<Integer,Integer> resCountToCount = new HashMap<Integer, Integer>();
-    //System.out.println("values is " + idToCount.values());
+    return idToCount;
+  }
 
-    for (Integer c : idToCount.values()) {
-      Integer rc = resCountToCount.get(c);
-      if (rc == null) resCountToCount.put(c, 1);
-      else resCountToCount.put(c, rc + 1);
+  private static class CompoundKey implements Comparable<CompoundKey> {
+    public final int first,second;
+
+    public CompoundKey(int first, int second) {
+      this.first = first;
+      this.second = second;
     }
-    System.out.println("map size is " + resCountToCount.size());
-    System.out.println("map is " + resCountToCount);
-    return resCountToCount;
+
+    @Override
+    public boolean equals(Object obj) {
+      CompoundKey other =(CompoundKey) obj;
+      return compareTo(other) == 0;
+    }
+
+    @Override
+    public int compareTo(CompoundKey o) {
+      return first < o.first ? -1 : first > o.first ? +1 : second < o.second ? -1 : second > o.second ? +1 : 0;
+    }
+
+    public String toString() { return first +"/"+second; }
   }
 
   /**
@@ -855,6 +898,42 @@ public class DatabaseImpl implements Database {
       else dayToCount.put(day, c + 1);
     }
     return dayToCount;
+  }
+
+  public List<Integer> getResultPerExercise(boolean useFile) {
+    Map<String, Integer> exToCount = getExToCount(useFile);
+    List<Integer> countArray = new ArrayList<Integer>(exToCount.size());
+    String next = exToCount.keySet().iterator().next();
+    boolean isInt = false;
+    try {
+      String left = next.split("/")[0];
+      Integer.parseInt(left);
+      isInt = true;
+    } catch (NumberFormatException e) {
+    }
+    if (isInt) {
+      Map<CompoundKey, Integer> keyToCount = new TreeMap<CompoundKey, Integer>();
+      for (Map.Entry<String, Integer> pair : exToCount.entrySet()) {
+        try {
+          String[] split = pair.getKey().split("/");
+          String left = split[0];
+          int exid = Integer.parseInt(left);
+          String right = split[0];
+          int qid = Integer.parseInt(right);
+
+          keyToCount.put(new CompoundKey(exid, qid), pair.getValue());
+        } catch (NumberFormatException e) {
+          e.printStackTrace();
+        }
+      }
+      countArray.addAll(keyToCount.values());
+      return countArray;
+    } else {
+      for (Map.Entry<String, Integer> pair : exToCount.entrySet()) {
+        countArray.add(pair.getValue());
+      }
+      return countArray;
+    }
   }
 
   public void destroy() {
