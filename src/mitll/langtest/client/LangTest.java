@@ -50,6 +50,7 @@ import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -446,7 +447,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     FlashRecordPanelHeadless.setMicPermission(new MicPermission() {
       public void gotPermission() {
-        System.out.println("got permission!");
+        System.out.println(new Date() + " : got permission!");
         flashRecordPanel.hide();
         flashRecordPanel.hide2();
 
