@@ -99,7 +99,7 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
     * @param userID
    */
   public void getExercises(long userID) {
-    System.out.println("getting exercises for " + userID);
+    //System.out.println("getting exercises for " + userID);
     useUserID = true;
     this.userID = userID;
     if (autoCRT) {
