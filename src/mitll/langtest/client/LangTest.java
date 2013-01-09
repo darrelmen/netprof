@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
+import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -36,11 +37,11 @@ import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
-import mitll.langtest.client.monitoring.MonitoringManager;
-import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
+import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
+import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.user.UserFeedback;
@@ -185,7 +186,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void run() {
        // System.out.println("visualizations loaded...");
       }
-    }, ColumnChart.PACKAGE);
+    }, ColumnChart.PACKAGE, LineChart.PACKAGE);
 
     userManager = new UserManager(this,service);
     resultManager = new ResultManager(service, this);
@@ -584,6 +585,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     userManager.clearUser();
     exerciseList.removeCurrentExercise();
     exerciseList.clear();
+    lastUser = -1;
     modeSelect();
   }
 
