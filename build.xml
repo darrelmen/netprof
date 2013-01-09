@@ -112,7 +112,7 @@
 
     <!-- Makes data collection target -->
     <target depends="build" name="patch">
-        <jar destfile="npPatch.war" basedir="war" excludes="config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+        <jar destfile="npPatch.war" basedir="war" excludes="config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
         </jar>
     </target>
 
