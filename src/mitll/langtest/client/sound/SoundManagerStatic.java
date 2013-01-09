@@ -12,6 +12,30 @@ public class SoundManagerStatic implements SoundManagerAPI {
     SoundManager.initialize();
   }
 
+  /**
+   * This always seems to be true, whether or not a flash blocker is active.
+   * @return
+   */
+  public boolean isReady() {
+    return SoundManager.isReady();
+  }
+
+  /**
+   * Did the SoundManager load properly (i.e. if it uses Flash, was that installed and allowed to load?)
+   * @return
+   */
+  public boolean isOK() {
+    return SoundManager.isOK();
+  }
+
+  /**
+   * If you call this when SoundManger is not OK, will throw an exception.
+   *
+   * @see mitll.langtest.client.sound.PlayAudioPanel#createSound
+   * @param sound
+   * @param title
+   * @param file
+   */
   public void createSound(Sound sound, String title, String file) {
   //  System.out.println("SoundManagerStatic.createSound " +sound);
     SoundManager.createSound(sound, title, file);

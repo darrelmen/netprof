@@ -48,17 +48,26 @@ package mitll.langtest.client.sound;
  * @author gregbramble
  *
  */
-public class SoundManager{
-	public static native void initialize() /*-{
-		$wnd.soundManager.onload = $wnd.loaded();
-	}-*/;
-	
-	public static native void createSound(Sound sound, String title, String file) /*-{
-		//if(typeof(sound) != 'undefined'){
-		//	sound.destruct();
-		//}
-//    bufferTime: 3,
+public class SoundManager {
+  private static boolean onreadyWasCalled = false;
 
+  public static native void initialize() /*-{
+    $wnd.soundManager.onload = $wnd.loaded();
+    $wnd.soundManager.ontimeout = $wnd.ontimeout();
+    $wnd.soundManager.onready = $wnd.myready();
+	}-*/;
+
+  public static native boolean isOK()/*-{
+    return $wnd.soundManager.ok();
+  }-*/;
+
+  /**
+   * @see SoundManagerStatic#createSound(Sound, String, String)
+   * @param sound
+   * @param title
+   * @param file
+   */
+	public static native void createSound(Sound sound, String title, String file) /*-{
     var javascriptSound = $wnd.soundManager.createSound({
 			id: title,
 			url: file,
@@ -117,10 +126,33 @@ public class SoundManager{
     });
   }-*/;
 
-
+  /**
+   * Not helpful in determining whether SoundManager is actually available in the context of a flash blocker.
+   */
   public static void loaded(){
-		//Window.alert("SoundManager loaded.");
-	}
+    //System.out.println(new Date() + " : Got loaded call!");
+    //Window.alert("SoundManager loaded.");
+  }
+
+  /**
+   * Not helpful in determining whether SoundManager is actually available in the context of a flash blocker.
+   */
+  public static void ontimeout(){
+    //System.out.println(new Date() + " : Got ontimeout call!");
+    //Window.alert("Do you have a flashblocker on?  Please add this site to your whitelist.");
+  }
+
+  /**
+   * Not helpful in determining whether SoundManager is actually available in the context of a flash blocker.
+   */
+  public static void myready(){
+    //System.out.println(new Date() + " : Got myready call!");
+    onreadyWasCalled = true;
+  }
+
+  public static boolean isReady() {
+    return onreadyWasCalled;
+  }
 
 	public static void songFinished(Sound sound){
 		sound.parent.reinitialize();
@@ -140,6 +172,8 @@ public class SoundManager{
 	
 	public static native void exportStaticMethods() /*-{
     $wnd.loaded = $entry(@mitll.langtest.client.sound.SoundManager::loaded());
+    $wnd.ontimeout = $entry(@mitll.langtest.client.sound.SoundManager::ontimeout());
+    $wnd.myready = $entry(@mitll.langtest.client.sound.SoundManager::myready());
     $wnd.songFinished = $entry(@mitll.langtest.client.sound.SoundManager::songFinished(Lmitll/langtest/client/sound/Sound;));
     $wnd.songFirstLoaded = $entry(@mitll.langtest.client.sound.SoundManager::songFirstLoaded(Lmitll/langtest/client/sound/Sound;D));
     $wnd.songLoaded = $entry(@mitll.langtest.client.sound.SoundManager::songLoaded(Lmitll/langtest/client/sound/Sound;D));
