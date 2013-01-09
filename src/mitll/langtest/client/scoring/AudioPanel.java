@@ -66,7 +66,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private int rightMarginToUse;
 
   /**
-   * @see GoodwaveExercisePanel#getQuestionContent(mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.exercise.WaveformExercisePanel.RecordAudioPanel#RecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int)
    * @see ScoringAudioPanel#ScoringAudioPanel
    * @param service
    * @param useFullWidth
