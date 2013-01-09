@@ -193,6 +193,31 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
+  public String getExerciseIDLastResult(long userid) {
+    try {
+      Connection connection = database.getConnection();
+      String sql = "select exid from results where time in (select max(time) from results where userid = " +
+          userid +
+          ");";
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      ResultSet rs = statement.executeQuery();
+      //List<Result> results = new ArrayList<Result>();
+      String exid = "INVALID";
+      if (rs.next()) {
+        exid = rs.getString(1);
+      }
+      rs.close();
+      statement.close();
+      database.closeConnection(connection);
+      return exid;
+
+    } catch (Exception ee) {
+      ee.printStackTrace();
+    }
+    return "INVALID";
+  }
+
   public List<Result> getAllResultsForExercise(String exerciseID) {
     try {
       Connection connection = database.getConnection();
