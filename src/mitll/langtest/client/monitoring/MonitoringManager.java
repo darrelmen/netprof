@@ -13,7 +13,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.DataTable;
+import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
+import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.BrowserCheck;
@@ -83,7 +85,8 @@ public class MonitoringManager {
     dialogVPanel.add(sp);
 
     //showUserInfo(dialogBox, dialogVPanel, vp);
-    doResultQuery(vp, dialogVPanel, dialogBox);
+    doResultLineQuery(vp, dialogVPanel, dialogBox);
+   // doResultQuery(vp, dialogVPanel, dialogBox);
 
     dialogBox.setWidget(dialogVPanel);
 
@@ -93,6 +96,58 @@ public class MonitoringManager {
         dialogBox.hide();
       }
     });
+  }
+
+  private void doResultLineQuery(final Panel vp, final Panel outer, final DialogBox dialogBox) {
+    service.getResultPerExercise(useFile, new AsyncCallback<List<Integer>>() {
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(List<Integer> result) {
+        String title = "Answers per Exercise";
+        //if (result.size() > 1000) {
+        int chartSamples = 1000;
+        for (int i = 0; i < result.size(); i += chartSamples) {
+            List<Integer> toShow = result.subList(i, Math.min(result.size(), i + chartSamples));
+            LineChart lineChart = getLineChart(toShow, title + " (" + i + "-" + (i+ chartSamples)+ ")");
+            vp.add(lineChart);
+          }
+        //}
+        //LineChart lineChart = getLineChart(result, title);
+/*        String width = (int) (Window.getClientWidth() * 0.78f) + "px";
+        String height = (int) (Window.getClientHeight() * 0.78f) + "px";*/
+
+/*
+        AnnotatedTimeLine.Options options = AnnotatedTimeLine.Options.create();
+        AnnotatedTimeLine lineChart = new AnnotatedTimeLine(data, options, width, height);
+*/
+      //  vp.add(lineChart);
+
+        //vp.add(getResultCountChart(userToCount));
+
+        doResultQuery(vp, outer, dialogBox);
+      }
+    });
+  }
+
+  private LineChart getLineChart(List<Integer> result, String title) {
+    Options options = Options.create();
+    options.setTitle(title);
+
+    DataTable data = DataTable.create();
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Index");
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Answers");
+
+    data.addRows(result.size());
+    int r = 0;
+    for (Integer n : result) {
+    //  data.addRow();
+      data.setValue(r, 0, r);
+      data.setValue(r++, 1, n);
+    }
+
+    return new LineChart(data, options);
   }
 
   private void doResultQuery(final Panel vp, final Panel outer, final DialogBox dialogBox) {
@@ -116,9 +171,7 @@ public class MonitoringManager {
 
   private void doResultByDayQuery(final Panel vp, final Panel outer, final DialogBox dialogBox) {
     service.getResultByDay(new AsyncCallback<Map<String, Integer>>() {
-      public void onFailure(Throwable caught) {
-      }
-
+      public void onFailure(Throwable caught) {}
       public void onSuccess(Map<String, Integer> userToCount) {
         vp.add(getResultByDayChart(userToCount));
         doResultByHourOfDayQuery(vp, outer, dialogBox);
@@ -128,9 +181,7 @@ public class MonitoringManager {
 
   private void doResultByHourOfDayQuery(final Panel vp, final Panel outer, final DialogBox dialogBox) {
     service.getResultByHourOfDay(new AsyncCallback<Map<String, Integer>>() {
-      public void onFailure(Throwable caught) {
-      }
-
+      public void onFailure(Throwable caught) {}
       public void onSuccess(Map<String, Integer> userToCount) {
         vp.add(getResultByHourOfDayChart(userToCount));
         showUserInfo(vp, outer, dialogBox);
