@@ -22,7 +22,11 @@ public class SoundManagerMock implements SoundManagerAPI {
   }
 
   public void playInterval(Sound sound, int start, int end) {
-    //To change body of implemented methods use File | Settings | File Templates.
+
+  }
+
+  public boolean isReady() {
+    return true;
   }
 
   public void destroySound(Sound sound) {
@@ -67,5 +71,10 @@ public class SoundManagerMock implements SoundManagerAPI {
 
   public void update(Sound sound, double position) {
     GWT.log("SoundManagerMock update " + position);
+  }
+
+  @Override
+  public boolean isOK() {
+    return true;
   }
 }
