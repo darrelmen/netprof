@@ -11,6 +11,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
 import java.util.Date;
@@ -20,6 +21,9 @@ import java.util.Date;
  * package to play, pause, and track the progress of audio.<br></br>
  *
  * Tells an option AudioControl listener about the state transitions and current playing audio location.<br></br>
+ *
+ * Warns if a flash blocker is preventing flash from loading, preventing soundmanager2 from loading.<br></br>
+ * There is an option to use HTML5 Audio but that seems to have playback issues when clicking on words or phonemes.
  *
  * User: go22670
  * Date: 8/30/12
@@ -33,9 +37,10 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private static final String PLAY_LABEL = "\u25ba play";
   private static final String PAUSE_LABEL = "<b>||</b> pause";
   public static final int SPACE_BAR = 32;
-  private Sound currentSound;
+  private Sound currentSound = null;
   private SoundManagerAPI soundManager;
   private final Button playButton = new Button(PLAY_LABEL);
+  private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>");
   private AudioControl listener;
   private HandlerRegistration keyHandler;
   private PlayListener playListener;
@@ -87,7 +92,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     playButton.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
-       // System.out.println(new Date() + " : playButton GOT   focus !----> ");
         hasFocus = true;
       }
     });
@@ -95,8 +99,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
       @Override
       public void onBlur(BlurEvent event) {
         hasFocus = false;
-
-      //  System.out.println(new Date() + " : playButton LOST  focus !----> ");
       }
     });
 
@@ -106,6 +108,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     }
     playButton.setVisible(false);
     add(playButton);
+    warnNoFlash.setVisible(false);
+    add(warnNoFlash);
   }
 
   protected void addKeyboardListener() {
@@ -130,8 +134,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   private void doClick() {
-  //  System.out.println(new Date() + " : doClick ");
-
     if (playButton.isVisible() && playButton.isEnabled()) {
       if (isPlaying()) {
         pause();
@@ -141,7 +143,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
         play();
       }
     }
-    //else System.out.println("ignore play click");
   }
 
   public void setPlayEnabled(boolean val) {
@@ -160,7 +161,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @see #doClick()
    */
   private void play() {
-   // System.out.println(new Date() + " : doing play ");
     count = 0;
     setPlayButtonText();
     soundManager.play(currentSound);
@@ -199,7 +199,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param numRepeats
    */
   public void repeatSegment(float start, float end, int numRepeats) {
-   // System.out.println("repeat segment");
     setPlayButtonText();
     int times = (end - start > LONG_AUDIO_THRESHOLD) ? numRepeats-1 : numRepeats;
     times = Math.max(0,times);
@@ -214,21 +213,27 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     playSegment(start,end);
   }
 
+  /**
+   * Checks to see if the sound was created properly before trying to play it.
+   * @param startInSeconds
+   * @param endInSeconds
+   */
   private void playSegment(float startInSeconds, float endInSeconds) {
-    soundManager.pause(currentSound);
-    float start1 = startInSeconds * 1000f;
-    float end1 = endInSeconds * 1000f;
-    int s = (int) start1;
-    int e = (int) end1;
+    if (currentSound != null) {
+      soundManager.pause(currentSound);
+      float start1 = startInSeconds * 1000f;
+      float end1 = endInSeconds * 1000f;
+      int s = (int) start1;
+      int e = (int) end1;
 
-    soundManager.playInterval(currentSound, s, e);
+      soundManager.playInterval(currentSound, s, e);
+    }
   }
 
   /**
    * @see #reinitialize()
    */
   private void pause() {
-    //System.out.println(new Date() + " : Got pause");
     count = 0;
 
     setPlayLabel();
@@ -242,14 +247,23 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   /**
+   * Check if soundmanager loaded properly, warn if it didn't.
+   *
    * @see mitll.langtest.client.scoring.AudioPanel#getImagesForPath(String)
-   * @param path
+   * @param path to audio file on server
    */
   public void startSong(String path){
    // System.out.println("PlayAudioPanel : start song : " + path);
-
-    destroySound();
-    createSound(path);
+    if (soundManager.isReady()) {
+      //System.out.println(new Date() + " Sound manager is ready.");
+      if (soundManager.isOK()) {
+        destroySound();
+        createSound(path);
+      } else {
+        System.out.println(new Date() + " Sound manager is not OK!.");
+        warnNoFlash.setVisible(true);
+      }
+    }
   }
 
   /**
@@ -265,7 +279,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
   private void destroySound() {
     if (currentSound != null) {
-    //  System.out.println("PlayAudioPanel.destroySound : " + this + " so destroying sound " + currentSound);
       this.soundManager.destroySound(currentSound);
     }
   }
@@ -274,7 +287,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * Does repeat audio if count > 0
    */
   public void reinitialize(){
-    //System.out.println("got reinitialize");
     if (count == 0) setPlayLabel();
     update(0);
     soundManager.setPosition(currentSound, 0);
@@ -295,7 +307,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   public void songFirstLoaded(double durationEstimate){
-   // System.out.println("PlayAudioPanel.songFirstLoaded - listener is " + listener);
     if (!playButton.isEnabled()) setPlayEnabled(true);
     playButton.setVisible(true);
     if (listener != null) {
@@ -308,8 +319,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param duration
    */
   public void songLoaded(double duration){
-//    System.out.println("PlayAudioPanel.songLoaded - listener is " + listener);
-
     if (listener != null) {
       listener.songLoaded(duration);
     }
