@@ -9,6 +9,8 @@ package mitll.langtest.client.sound;
  */
 public interface SoundManagerAPI {
  void initialize();
+  boolean isReady();
+
   void createSound(Sound sound, String title, String file);
   void destroySound(Sound sound);
    void pause(Sound sound);
@@ -22,4 +24,6 @@ public interface SoundManagerAPI {
    void songFirstLoaded(Sound sound, double durationEstimate);
    void songLoaded(Sound sound, double duration);
   void update(Sound sound, double position);
+
+  boolean isOK();
 }
