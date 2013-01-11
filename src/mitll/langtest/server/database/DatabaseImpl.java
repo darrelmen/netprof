@@ -1,7 +1,6 @@
 package mitll.langtest.server.database;
 
 import ag.experiment.AutoGradeExperiment;
-import com.google.gwt.text.client.IntegerParser;
 import mira.classifier.Classifier;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
@@ -11,13 +10,19 @@ import mitll.langtest.shared.ResultsAndGrades;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
-import java.io.File;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,8 +64,6 @@ public class DatabaseImpl implements Database {
   public final AnswerDAO answerDAO = new AnswerDAO(this);
   public final GradeDAO gradeDAO = new GradeDAO(this);
   public final GraderDAO graderDAO = new GraderDAO(this);
-  private Classifier<AutoGradeExperiment.Event> classifier = null;
-  private Set<String> allAnswers = new HashSet<String>();
   private DatabaseConnection connection = null;
 
   /**
@@ -68,7 +71,6 @@ public class DatabaseImpl implements Database {
    */
   private String lessonPlanFile;
   private String mediaDir;
-  private Map<String, Export.ExerciseExport> exerciseIDToExport;
   private boolean isUrdu;
 
   /**
@@ -141,31 +143,8 @@ public class DatabaseImpl implements Database {
     return connection.getConnection();
   }
 
-  private Classifier<AutoGradeExperiment.Event> getClassifier() {
-    if (classifier != null) return classifier;
-    allAnswers = new HashSet<String>();
-    Export exporter = new Export(exerciseDAO,resultDAO,gradeDAO);
-    List<Export.ExerciseExport> export = exporter.getExport(true, false);
-    exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
-    for (Export.ExerciseExport exp : export) {
-       exerciseIDToExport.put(exp.id,exp);
-      for (Export.ResponseAndGrade rg : exp.rgs) allAnswers.add(rg.response);
-    }
-    String[] args = new String[6];
-
-    String configDir = (installPath != null ? installPath + File.separator : "") + mediaDir + File.separator;
-    String config = configDir + "runAutoGradeWinNoBad.cfg";     // TODO use template for deploy/platform specific config
-    if (!new File(config).exists()) logger.error("couldn't find " + config);
-    args[0] = "-C";
-    args[1] = config;
-    args[2] = "-log";
-    args[3] =  configDir + "out.log";
-    args[4] = "-blacklist-file";
-    args[5] = configDir + "blacklist.txt";
-
-    ag.experiment.AutoGradeExperiment.main(args);
-    classifier = AutoGradeExperiment.getClassifierFromExport(export);
-    return classifier;
+  public Export getExport() {
+    return new Export(exerciseDAO,resultDAO,gradeDAO);
   }
 
   /**
@@ -666,73 +645,7 @@ public class DatabaseImpl implements Database {
    */
   public void addAnswer(int userID, Exercise e, int questionID, String answer, String audioFile) {
     answerDAO.addAnswer(userID, e, questionID, answer, audioFile);
-/*
-    if (autocrt) {
-     // Classifier<AutoGradeExperiment.Event> classifier1 = getClassifier();
-
-      double score = getScoreForExercise(e, questionID, answer);
-      logger.info("score was " + score);
-    }*/
   }
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer(mitll.langtest.shared.Exercise, int, String)
-   * @param e
-   * @param questionID
-   * @param answer
-   * @return
-   */
-  public double getScoreForExercise(Exercise e, int questionID, String answer) {
-    return getScoreForExercise(e.getID(), questionID, answer);
-  }
-
-  private double getScoreForExercise(String id, int questionID, String answer) {
-    getClassifier();
-    String key = id + "_" + questionID;
-    Export.ExerciseExport exerciseExport = getExportForExercise(key);
-    if (exerciseExport == null) {
-      logger.error("couldn't find exercise id " + key + " in " + exerciseIDToExport.keySet());
-      return 0d;
-    }
-    else {
-      double score = AutoGradeExperiment.getScore(getClassifier(), answer, exerciseExport);
-      logger.info("Score was " + score + " for " + exerciseExport);
-      return score;
-    }
-  }
-
-  public Collection<String> getAllExportedAnswers() { return allAnswers; }
-  public List<String> getExportedAnswers(String id, int questionID) {
-    getClassifier();
-
-    List<String> answers = new ArrayList<String>();
-    for (Export.ResponseAndGrade resp : getExportForExercise(id, questionID).rgs) answers.add(resp.response);
-    return answers;
-  }
-  private Export.ExerciseExport getExportForExercise(Exercise e, int questionID) {
-    return getExportForExercise(e.getID(), questionID);
-  }
-  public Export.ExerciseExport getExportForExercise(String id, int questionID) {
-    return getExportForExercise(id + "_" + questionID);
-  }
-  private Export.ExerciseExport getExportForExercise(String key) {
-    return exerciseIDToExport.get(key);
-  }
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addGrade
-   * @param resultID
-   * @param exerciseID
-   * @param grade
-   * @param gradeID
-   * @param correct
-   * @param grader
-   * @param gradeType
-   * @return
-   * */
-/*  public CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader, String gradeType) {
-    return gradeDAO.addGrade(resultID, exerciseID, grade, gradeID, correct, grader, gradeType);
-  }*/
 
   /**
    * @param exerciseID
@@ -797,6 +710,64 @@ public class DatabaseImpl implements Database {
     return idToCount;
   }
 
+  public Map<Exercise, Integer> getResultIdToCount(boolean useFile, boolean getMale) {
+    List<Result> results = getResults();
+    List<Exercise> exercises = getExercises(useFile);
+    Map<String,Exercise> idToEx = new HashMap<String, Exercise>();
+    for (Exercise e: exercises) idToEx.put(e.getID(),e);
+    boolean isInt = false;
+    try {
+      String id = exercises.iterator().next().getID();
+      Integer.parseInt(id);
+      isInt = true;
+    } catch (NumberFormatException e) {
+    }
+
+    final boolean fint = isInt;
+    Map<Exercise,Integer> idToCount = new TreeMap<Exercise, Integer>(new Comparator<Exercise>() {
+      @Override
+      public int compare(Exercise o1, Exercise o2) {
+        String fid = o1.getID();
+        String sid = o2.getID();
+        if (fint) {
+          Integer fint = Integer.parseInt(fid);
+          Integer sint = Integer.parseInt(sid);
+          return fint.compareTo(sint);
+        }
+        else {
+          return fid.compareTo(sid);
+        }
+      }
+    });
+    Map<Long, User> idToUser = getUserMap(getMale);
+    for (Result r : results) {
+      User user = idToUser.get(r.userid);
+      if (user != null) {
+        Exercise exercise = idToEx.get(r.id);
+        if (exercise != null) {
+          Integer c = idToCount.get(exercise);
+          if (c != null) {
+            idToCount.put(exercise, c + 1);
+          } else {
+            idToCount.put(exercise, 1);
+          }
+        }
+      }
+    }
+    return idToCount;
+  }
+
+  private Map<Long, User> getUserMap(boolean getMale) {
+    List<User> users = getUsers();
+    Map<Long,User> idToUser = new HashMap<Long, User>();
+    for (User u : users) {
+      if (u.isMale() && getMale || (!u.isMale() && !getMale)) {
+        idToUser.put(u.id, u);
+      }
+    }
+    return idToUser;
+  }
+
   /**
    * TODO : worry about duplicate userid?
    * @return
@@ -814,6 +785,41 @@ public class DatabaseImpl implements Database {
   }
 
   private Map<String, Integer> getExToCount(boolean useFile) {
+    Map<String, Integer> idToCount = getInitialIdToCount(useFile);
+
+    List<Result> results = getResults();
+    for (Result r : results) {
+      String key = r.id + "/" + r.qid;
+      Integer c = idToCount.get(key);
+      if (c == null) {
+        idToCount.put(key, 1);
+      }
+      else idToCount.put(key, c + 1);
+    }
+
+    return idToCount;
+  }
+
+  private Map<String, Integer> getExToCountMaleOrFemale(boolean useFile,boolean isMale) {
+    Map<String, Integer> idToCount = getInitialIdToCount(useFile);
+
+    Map<Long, User> userMap = getUserMap(isMale);
+
+    List<Result> results = getResults();
+    for (Result r : results) {
+      if (userMap.containsKey(r.userid)) {
+        String key = r.id + "/" + r.qid;
+        Integer c = idToCount.get(key);
+        if (c == null) {
+          idToCount.put(key, 1);
+        } else idToCount.put(key, c + 1);
+      }
+    }
+
+    return idToCount;
+  }
+
+  private Map<String, Integer> getInitialIdToCount(boolean useFile) {
     List<Exercise> exercises = getExercises(useFile);
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
     for (Exercise e : exercises) {
@@ -828,17 +834,6 @@ public class DatabaseImpl implements Database {
         }
       }
     }
-
-    List<Result> results = getResults();
-    for (Result r : results) {
-      String key = r.id + "/" + r.qid;
-      Integer c = idToCount.get(key);
-      if (c == null) {
-        idToCount.put(key, 1);
-      }
-      else idToCount.put(key, c + 1);
-    }
-
     return idToCount;
   }
 
@@ -900,8 +895,27 @@ public class DatabaseImpl implements Database {
     return dayToCount;
   }
 
-  public List<Integer> getResultPerExercise(boolean useFile) {
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise(boolean)
+   * @param useFile
+   * @return
+   */
+  public Map<String,List<Integer>> getResultPerExercise(boolean useFile) {
     Map<String, Integer> exToCount = getExToCount(useFile);
+    List<Integer> overall = getCountArray(exToCount);
+
+    List<Integer> male = getCountArray(getExToCountMaleOrFemale(useFile,true));
+
+    List<Integer> female = getCountArray(getExToCountMaleOrFemale(useFile,false));
+
+    Map<String,List<Integer>> typeToList = new HashMap<String, List<Integer>>();
+    typeToList.put("overall",overall);
+    typeToList.put("male",male);
+    typeToList.put("female",female);
+    return typeToList;
+  }
+
+  private List<Integer> getCountArray(Map<String, Integer> exToCount) {
     List<Integer> countArray = new ArrayList<Integer>(exToCount.size());
     String next = exToCount.keySet().iterator().next();
     boolean isInt = false;
@@ -976,11 +990,32 @@ public class DatabaseImpl implements Database {
 
     }*/
 
-    DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\DLITest\\","farsi");
-    Map<User, Integer> idToCount = langTestDatabase.getUserToResultCount();
-    langTestDatabase.setInstallPath("","","",false);
-    System.out.println("map " + idToCount);
-    langTestDatabase.getUserToResultCount();
+    DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\DLITest\\","farsi2");
+    langTestDatabase.setInstallPath("C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu","C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu\\5000-no-english.unvow.farsi.txt","",false);
+    Map<Exercise, Integer> idToCount = langTestDatabase.getResultIdToCount(true,true);
+    writeMap(idToCount, "farsiMaleCounts.csv");
+    Map<Exercise, Integer> idToCount2 = langTestDatabase.getResultIdToCount(true,false);
+    writeMap(idToCount2,"farsiFemaleCounts.csv");
+
+    langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\DLITest\\","urdu");
+    langTestDatabase.setInstallPath("","C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu\\urdu-3684-no-english.txt","",false);
+    idToCount = langTestDatabase.getResultIdToCount(true,true);
+    writeMap(idToCount,"urduMaleCounts.csv");
+    idToCount2 = langTestDatabase.getResultIdToCount(true,false);
+    writeMap(idToCount2,"urduFemaleCounts.csv");
+
+//    langTestDatabase.getUserToResultCount();
    // System.out.println("map " + langTestDatabase.getResultCountToCount());
+  }
+
+  private static void writeMap(Map<Exercise, Integer> idToCount2, String fileName) {
+    try {
+      Writer w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), "UTF-8"));
+      for (Map.Entry<Exercise, Integer> pair : idToCount2.entrySet())
+        w.write(pair.getKey().getID() + "," + pair.getValue() + "," + pair.getKey().getTooltip().trim()+ "\n");
+      w.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 }
