@@ -50,6 +50,8 @@ public class User implements IsSerializable {
     this.userID = userID;
   }
 
+  public boolean isMale() { return gender == 0; }
+
   public String getTimestamp() {
 	  if (ipaddr == null) return "";
     if (ipaddr.contains("at ")) {
