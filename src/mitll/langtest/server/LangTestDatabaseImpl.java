@@ -7,8 +7,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.Export;
 import mitll.langtest.server.scoring.ASRScoring;
+import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.DTWScoring;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CountAndGradeID;
@@ -34,14 +34,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
@@ -52,19 +50,19 @@ import java.util.concurrent.TimeUnit;
  * Time: 5:49 PM
  */
 @SuppressWarnings("serial")
-public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase {
+public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring {
+  private static Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
   public static final String FIRST_N_IN_ORDER = "firstNInOrder";
   private static final String DATA_COLLECT_MODE = "dataCollect";
   private static final String URDU = "urdu";
   private static final int MB = (1024 * 1024);
-  private static final int MAX_AUTO_CRT_VOCAB = 200;
-  private static Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   public static final String ANSWERS = "answers";
   private static final int TIMEOUT = 30;
   private static final String IMAGE_WRITER_IMAGES = "audioimages";
   private DatabaseImpl db;
   private ASRScoring asrScoring;
+  private AutoCRT autoCRT;
   private boolean makeFullURLs = false;
   private Properties props = null;
   private String relativeConfigDir;
@@ -101,7 +99,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     long free = rt.freeMemory();
     long used = rt.totalMemory()-free;
     long max = rt.maxMemory();
-    logger.debug("heap info free " + free/MB + "M used " + used/MB + "M max " + max/MB +"M");
+    logger.debug("heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
   }
 
   public List<ExerciseShell> getExerciseIds(boolean useFile) {
@@ -119,8 +117,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     for (Exercise e : exercises) {
       if (id.equals(e.getID())) return e;
     }
-  //  logMemory();
-
     return null;
   }
 
@@ -129,8 +125,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     for (Exercise e : exercises) {
       if (id.equals(e.getID())) return e;
     }
-  //  logMemory();
-
     return null;
   }
 
@@ -149,6 +143,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     //logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
     db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, isUrdu);
+    synchronized (this) {
+      if (autoCRT == null) {
+        autoCRT = new AutoCRT(db.getExport(), this, getInstallPath(), relativeConfigDir);
+      }
+    }
     //logger.debug("usefile = " + useFile + " arabic data collect " + arabicDataCollect);
     List<Exercise> exercises;
     if (dataCollectMode) {
@@ -416,8 +415,23 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg) {
-      return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg, Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+      return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
+          Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
   }
+
+  /**
+   * Get score when doing autoCRT on an audio file.
+   * @param testAudioFile
+   * @param lmSentences
+   * @param background
+   * @param vocab
+   * @return PretestScore for audio
+   */
+  public PretestScore getASRScoreForAudio(File testAudioFile, List<String> lmSentences,
+                                          List<String> background, List<String> vocab) {
+     return getASRScoreForAudio(0, testAudioFile.getPath(), "", 128, 128, false, lmSentences, background, vocab);
+  }
+
   /**
    * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
    *
@@ -433,7 +447,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param vocab
    * @return PretestScore
    **/
-  public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
+  private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg, List<String> lmSentences,
                                           List<String> background, List<String> vocab) {
     logger.info("getASRScoreForAudio scoring " + testAudioFile + " with " + sentence + " req# " + reqid);
@@ -586,7 +600,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public double getScoreForAnswer(Exercise e, int questionID, String answer) {
-    return db.getScoreForExercise(e, questionID, answer);
+    return autoCRT.getScoreForExercise(e, questionID, answer);
   }
 
   // Grades ---------------------
@@ -624,7 +638,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public int userExists(String login) {
+  public synchronized int userExists(String login) {
     if (db == null) getProperties();
     return db.userExists(login);
   }
@@ -699,47 +713,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     // logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
 
     if (doAutoCRT && validity == AudioAnswer.Validity.OK) {
-      return getAutoCRTAnswer(exercise, reqid, file, validity, questionID, url);
+      return autoCRT.getAutoCRTAnswer(exercise, getExercise(exercise, false), reqid, file, validity, questionID, url);
     }
     else {
       return new AudioAnswer(url, validity, reqid);
     }
-  }
-
-  private AudioAnswer getAutoCRTAnswer(String exercise, int reqid, File file, AudioAnswer.Validity validity, int questionID, String url) {
-    List<String> exportedAnswers = db.getExportedAnswers(exercise, questionID);
-    Exercise e = getExercise(exercise, false); // TODO : hack need to pass in useFile
-    //for (Exercise.QAPair pair : e.getForeignLanguageQuestions()) exportedAnswers.add(pair.getQuestion());
-    logger.info("got answers " + new HashSet<String>(exportedAnswers));
-
-    //List<String> background = getQuestions(false);
-    List<String> background = getBackgroundText(e);
-    List<String> vocab = getVocab(background);
-   /*   for (String b : background) logger.debug("background '" +  b +
-          "'");*/
-    PretestScore asrScoreForAudio = getASRScoreForAudio(0, file.getPath(), "", 128, 128, false, exportedAnswers, background, vocab);
-
-    String recoSentence = asrScoreForAudio.getRecoSentence();
-    logger.info("reco sentence was '" + recoSentence + "'");
-
-    List<String> good = new ArrayList<String>();
-    List<String> bad = new ArrayList<String>();
-    for (Export.ResponseAndGrade resp : db.getExportForExercise(exercise, questionID).rgs) { if (resp.grade >= 0.6) good.add(resp.response); else bad.add(resp.response);}
-
-    Set<String> goodTokens = getTokenSet(good);
-    Set<String> badTokens = getTokenSet(bad);
-
-    StringBuilder sb = new StringBuilder();
-    for (String recoToken : recoSentence.split("\\s")) {
-      if (goodTokens.contains(recoToken)) {
-        sb.append("<u>"+recoToken +"</u> ");
-      } else if (badTokens.contains(recoToken)) {
-        sb.append("<s>"+recoToken +"</s> ");
-      } else sb.append(recoToken + " ");
-    }
-
-    double scoreForAnswer = (recoSentence.length() > 0) ? getScoreForAnswer(getExercise(exercise, false), questionID, recoSentence) :0.0d;
-    return new AudioAnswer(url, validity, sb.toString().trim(), scoreForAnswer, reqid);
   }
 
   @Override
@@ -760,105 +738,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getResultByHourOfDay();
   }
 
-  @Override
-  public List<Integer> getResultPerExercise(boolean useFile) {
+  public Map<String, List<Integer>> getResultPerExercise(boolean useFile) {
     return db.getResultPerExercise(useFile);
-  }
-
-  private Set<String> getTokenSet(List<String> exportedAnswers) {
-    Set<String> tokens = new HashSet<String>();
-    for (String l : exportedAnswers) {
-      for (String t : l.split("\\s")) {
-        String tt = t.replaceAll("\\p{P}","");
-        if (tt.trim().length() > 0) {
-            tokens.add(tt.trim());
-        }}}
-    return tokens;
-  }
-
-  /**
-   * @see #writeAudioFile(String, String, String, String, String, boolean, int)
-   * @param e
-   * @return
-   */
-  private List<String> getBackgroundText(Exercise e) {
-    List<String> background = new ArrayList<String>();
-    String content = e.getContent().replaceAll("\\<.*?\\>", "").replaceAll("&nbsp;", "");
-    for (String line : content.split("\n")) {
-      String trimmed = line.trim();
-      if (trimmed.length() > 0 && !trimmed.contains("Orient") && !trimmed.contains("Listen")) background.add(trimmed);
-    }
-
-    for (Exercise.QAPair pair : e.getForeignLanguageQuestions())  {
-      background.add(pair.getQuestion());
-    }
-
-    int c = 0;
-    for (String answer : db.getAllExportedAnswers()) {
-    //  boolean allDigit = true;
-      StringBuilder b = new StringBuilder();
-      for (int i = 0; i < answer.length(); i++) {
-        if (!Character.isDigit(answer.charAt(i))) {
-          b.append(answer.charAt(i));
-        }
-        else {
-          b.append(" ");
-        }
-      }
-      String result = b.toString().trim();
-      if (result.length() > 0) background.add(result);
-      //if (c++ > MAX_EXPORTED_ANSWERS_BKG) break;
-    }
-    // background.addAll(db.getAllExportedAnswers());
-
-    logger.info("background has " + background.size() + " lines");
-    return background;
-  }
-
-  private List<String> getVocab(List<String> background) {
-    List<String> all = new ArrayList<String>();
-    all.addAll(Arrays.asList("-pau-", "</s>", "<s>", "<unk>"));
-
-    final Map<String,Integer> sc = new HashMap<String, Integer>();
-    for (String l : background) {
-      for (String t : l.split("\\s")) {
-        String tt = t.replaceAll("\\p{P}","");
-        if (tt.trim().length() > 0) {
-          Integer c = sc.get(t);
-          if (c == null) sc.put(t,1);
-          else sc.put(t,c+1);
-        }
-      }
-    }
-    List<String> vocab = new ArrayList<String>();
-    try {
-/*      System.out.println("map : " +sc);
-
-      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("map"), FileExerciseDAO.ENCODING));
-      for (Map.Entry<String, Integer> kv : sc.entrySet()) writer.write(kv.getKey() +"\t"+kv.getValue()+"\n");
-      writer.close();*/
-
-      vocab = new ArrayList<String>(sc.keySet());
-      Collections.sort(vocab, new Comparator<String>() {
-        public int compare(String s, String s2) {
-          Integer first = sc.get(s);
-          Integer second = sc.get(s2);
-          return first < second ? +1 : first > second ? -1 : 0;
-        }
-      });
-
- /*     writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("vocab"), FileExerciseDAO.ENCODING));
-      for (String v : vocab) writer.write(v+"\n");
-      writer.close();*/
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    //System.out.println("map : " +sc);
-
-    all.addAll(vocab.subList(0,Math.min(vocab.size(), MAX_AUTO_CRT_VOCAB)));
-  //  System.out.println("vocab " + new HashSet<String>(all));
-    return all;
   }
 
   private String optionallyMakeURL(String wavPathWithForwardSlashSeparators) {
@@ -1012,6 +893,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     dataCollectMode = !props.getProperty(DATA_COLLECT_MODE, "false").equals("false");
     isUrdu = !props.getProperty(URDU, "false").equals("false");
+//    readFromFile = !props.getProperty(URDU, "false").equals("false");
   }
 
   private class DirAndName {
