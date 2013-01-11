@@ -191,7 +191,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     userManager = new UserManager(this,service);
     resultManager = new ResultManager(service, this);
     boolean isGrading = checkParams();
-    monitoringManager = new MonitoringManager(service, this, !goodwaveMode);
+    monitoringManager = new MonitoringManager(service, this, readFromFile);
     boolean usualLayout = exercise_title == null;
     final DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
     if (usualLayout) {
@@ -308,14 +308,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (isGrading) {
       this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback, factory, isArabicTextDataCollect());
     }
-    else if (usePagingExerciseList) {
-      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, factory, usePagingExerciseList, isArabicTextDataCollect(), showTurkToken) {
+    else {
+      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, factory, usePagingExerciseList,
+          isArabicTextDataCollect(), showTurkToken, isAutoCRTMode()) {
         @Override
         protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
       };
-    }
-    else {
-      this.exerciseList = new ExerciseList(currentExerciseVPanel, service, feedback, factory, goodwaveMode, isArabicTextDataCollect(), showTurkToken, isAutoCRTMode());
     }
 
     if (showOnlyOneExercise()) {
@@ -354,13 +352,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void modeSelect() {
     boolean isGrading = checkParams();
-    //System.out.println("modeSelect english " +englishOnlyMode + " grading " +isGrading );
+    //System.out.println("modeSelect : english " +englishOnlyMode + " grading " +isGrading + " is auto crt " + isAutoCRTMode());
 
     logout.setVisible(!goodwaveMode);
     users.setVisible(isGrading || dataCollectMode);
     showResults.setVisible(isGrading || dataCollectMode);
 
-    if (goodwaveMode) {
+    if (goodwaveMode || isAutoCRTMode()) {
       gotUser(-1);
     }
     else if (englishOnlyMode || isGrading) {
