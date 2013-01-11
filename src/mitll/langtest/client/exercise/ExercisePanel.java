@@ -77,7 +77,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     spacer.setSize("100%", "20px");
     add(spacer);
 
-    Panel buttonRow = getNextAndPreviousButtons(e, service, userFeedback, controller);
+    Panel buttonRow = getNextAndPreviousButtons(e, service, userFeedback, controller, !controller.isAutoCRTMode());
     add(buttonRow);
   }
 
@@ -193,7 +193,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   }
 
   private Panel getNextAndPreviousButtons(final Exercise e, final LangTestDatabaseAsync service,
-                                          final UserFeedback userFeedback, final ExerciseController controller) {
+                                          final UserFeedback userFeedback, final ExerciseController controller, boolean useKeyHandler) {
     HorizontalPanel buttonRow = new HorizontalPanel();
 
     this.prev = new Button("Previous");
@@ -225,34 +225,35 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     });
 
     // TODO : revisit in the context of text data collections
-    keyHandler = Event.addNativePreviewHandler(new
-                                                   Event.NativePreviewHandler() {
+    if (useKeyHandler) {
+      keyHandler = Event.addNativePreviewHandler(new
+                                                     Event.NativePreviewHandler() {
 
-                                                     @Override
-                                                     public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                                                       NativeEvent ne = event.getNativeEvent();
-                                                       int keyCode = ne.getKeyCode();
-                                                       boolean isLeft  = keyCode == KeyCodes.KEY_LEFT;
-                                                       boolean isRight = keyCode == KeyCodes.KEY_RIGHT;
-                                                       if ((isLeft || isRight) && event.getTypeInt() == 512 && "[object KeyboardEvent]".equals(ne.getString())) {
-                                                         ne.preventDefault();
+                                                       @Override
+                                                       public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                                                         NativeEvent ne = event.getNativeEvent();
+                                                         int keyCode = ne.getKeyCode();
+                                                         boolean isLeft = keyCode == KeyCodes.KEY_LEFT;
+                                                         boolean isRight = keyCode == KeyCodes.KEY_RIGHT;
+                                                         if ((isLeft || isRight) && event.getTypeInt() == 512 && "[object KeyboardEvent]".equals(ne.getString())) {
+                                                           ne.preventDefault();
 
-                                                        if (debug) System.out.println(new Date() +
-                                                            " : getNextAndPreviousButtons - key handler : " + keyHandler +
-                                                            " Got " + event + " type int " +
-                                                             event.getTypeInt() + " assoc " + event.getAssociatedType() +
-                                                             " native " + event.getNativeEvent() + " source " + event.getSource());
+                                                           if (debug) System.out.println(new Date() +
+                                                               " : getNextAndPreviousButtons - key handler : " + keyHandler +
+                                                               " Got " + event + " type int " +
+                                                               event.getTypeInt() + " assoc " + event.getAssociatedType() +
+                                                               " native " + event.getNativeEvent() + " source " + event.getSource());
 
-                                                         if (isLeft) {
-                                                           clickPrev(controller, e);
-                                                         }
-                                                         else {
-                                                           clickNext(service, userFeedback, controller, e);
+                                                           if (isLeft) {
+                                                             clickPrev(controller, e);
+                                                           } else {
+                                                             clickNext(service, userFeedback, controller, e);
+                                                           }
                                                          }
                                                        }
-                                                     }
-                                                   });
-    System.out.println("getNextAndPreviousButtons made click handler " + keyHandler);
+                                                     });
+      System.out.println("getNextAndPreviousButtons made click handler " + keyHandler);
+    }
 
     return buttonRow;
   }
@@ -288,7 +289,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   protected void onUnload() {
     super.onUnload();
     System.out.println("onUnload : doing unload of prev/next handler " +keyHandler);
-    keyHandler.removeHandler();
+    if (keyHandler != null) keyHandler.removeHandler();
   }
 
   /**
@@ -297,7 +298,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
    * <br></br>
    * Loads next exercise after the post.
    *
-   * @see ExercisePanel#getNextAndPreviousButtons(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, UserFeedback, ExerciseController)
+   * @see ExercisePanel#getNextAndPreviousButtons(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, boolean)
    * @param service
    * @param userFeedback
    * @param controller
@@ -458,12 +459,12 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   }
 
   private void enableNext() {
-    System.out.println("enableNext enable next completed " + completed.size() + " vs " + answers.size());
+    //System.out.println("enableNext enable next completed " + completed.size() + " vs " + answers.size());
     enableNextButton((completed.size() == answers.size()));
   }
 
   public void enableNextButton(boolean val) {
-    System.out.println("enableNextButton enable next = " + val);
+    //System.out.println("enableNextButton enable next = " + val);
     next.setEnabled(val);
   }
 
