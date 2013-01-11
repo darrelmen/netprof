@@ -121,6 +121,14 @@ public class FileExerciseDAO implements ExerciseDAO {
     if (exercises != null) return;
 
     try {
+      File file = new File(lessonPlanFile);
+      if (!file.exists()) {
+        logger.error("can't find '" + file +"'");
+        return;
+      }
+      else {
+       // logger.debug("found file at " + file.getAbsolutePath());
+      }
       FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
       BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
       String line2;

@@ -65,8 +65,9 @@ public class PagingExerciseList extends ExerciseList {
    * @param showTurkToken
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            ExercisePanelFactory factory, boolean goodwaveMode, boolean arabicDataCollect, boolean showTurkToken) {
-    super(currentExerciseVPanel, service, feedback, factory, goodwaveMode, arabicDataCollect, showTurkToken, false);
+                            ExercisePanelFactory factory, boolean goodwaveMode, boolean arabicDataCollect,
+                            boolean showTurkToken, boolean autoCRT) {
+    super(currentExerciseVPanel, service, feedback, factory, goodwaveMode, arabicDataCollect, showTurkToken, autoCRT);
     CellTable.Resources o = GWT.create(TableResources.class);
     this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
