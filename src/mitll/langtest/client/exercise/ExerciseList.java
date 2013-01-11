@@ -34,7 +34,7 @@ import java.util.Map;
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize {
+public abstract class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize {
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
   protected List<ExerciseShell> currentExercises = null;
   protected Map<String,ExerciseShell> idToExercise = null;
@@ -278,7 +278,7 @@ public class ExerciseList extends VerticalPanel implements ListInterface, Provid
 
   @Override
   public void clear() {
-    System.out.println("Clearing list.");
+    System.out.println("ExerciseList : Clearing list.");
     super.clear();
     progressMarkers.clear();
   }
