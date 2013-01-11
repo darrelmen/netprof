@@ -35,7 +35,8 @@ import java.io.OutputStreamWriter;
 import java.util.*;
 
 /**
- * Does ASR scoring using hydec.
+ * Does ASR scoring using hydec.  Results in either alignment or decoding, depending on the mode.
+ * Decoding is used with autoCRT of audio.
  *
  * Takes the label files and generates transcript images for display in the client.
  *
@@ -133,19 +134,28 @@ public class ASRScoring extends Scoring {
   }
 
   /**
-   * Use hydec to do scoring
+   * Use hydec to do scoring<br></br>
+   *
+   * Some magic happens in {@link #writeTranscripts(String, int, int, String, boolean)} where .lab files are
+   * parsed to determine the start and end times for each event, which lets us both create images that
+   * show the location of the words and phonemes, and for decoding, the actual reco sentence returned. <br></br>
+   *
+   * For alignment, of course, the reco sentence is just the given sentence echoed back (unless alignment fails to
+   * generate any alignments (e.g. for audio that's complete silence or when the
+   * spoken sentence is utterly unrelated to the reference.)).
    *
    * @see #scoreRepeat(String, String, String, String, int, int, boolean)
-   * @param testAudioDir
-   * @param testAudioFileNoSuffix
-   * @param sentence
+   * @param testAudioDir where the audio is
+   * @param testAudioFileNoSuffix file name without a suffix
+   * @param sentence to align
    * @param scoringDir
-   * @param imageOutDir
-   * @param imageWidth
-   * @param imageHeight
-   * @param useScoreForBkgColor
-   * @param background
-   * @param vocab
+   * @param imageOutDir where to write the images (audioImage)
+   * @param imageWidth image width
+   * @param imageHeight image height
+   * @param useScoreForBkgColor true if we want to color the segments by score else all are gray
+   * @param lmSentences
+   * @param background sentences
+   * @param vocab words
    * @return score info coming back from alignment/reco
    */
   private PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
@@ -185,6 +195,45 @@ public class ASRScoring extends Scoring {
       noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
     }
 
+    Scores scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, lmSentences, background, vocab);
+    if (scores == null) {
+      logger.warn("getScoreForAudio failed to generate scores.");
+      return new PretestScore();
+    }
+    ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix, useScoreForBkgColor);
+    Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
+    Map<NetPronImageType, List<Float>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo, duration);
+    String recoSentence = getRecoSentence(eventAndFileInfo);
+    recoSentence = recoSentence.replaceAll("sil","").trim();
+
+    PretestScore pretestScore =
+        new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence);
+    return pretestScore;
+  }
+
+  /**
+   * There are two modes you can use to score the audio : align mode and decode mode
+   * In align mode, the decoder figures out where the words and phonemes in the sentence occur in the audio.
+   * In decode mode, given a lattice file
+   * (HTK slf file) <a href="http://www1.icsi.berkeley.edu/Speech/docs/HTKBook/node293_mn.html">SLF Example</a>
+   * will do decoding.
+   * The event scores returned are a map of event type to event name to score (e.g. "words"->"dog"->0.5)
+   * The score per audio file is cached in {@link #audioToScore}
+   *
+   * @param testAudioDir
+   * @param testAudioFileNoSuffix
+   * @param sentence  only for align
+   * @param scoringDir
+   * @param lmSentences if empty, doing align, if not, doing decode!
+   * @param background only for decode
+   * @param vocab  only for decode
+   * @return Scores which is the overall score and the event scores
+   */
+  private Scores getScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
+                                  String sentence,
+                                  String scoringDir,
+
+                                  List<String> lmSentences, List<String> background, List<String> vocab) {
     Scores scores;
     synchronized (this) {
       String tmpDir = Files.createTempDir().getAbsolutePath();
@@ -194,11 +243,10 @@ public class ASRScoring extends Scoring {
         String slfFile = createSLFFile(lmSentences, background, vocab, tmpDir);
         if (! new File(slfFile).exists()) {
           logger.error("couldn't make slf file?");
-          return new PretestScore();
+          return null;
         }
       }
 
-      // String tmpDir = scoringDir + File.separator + TMP;
       Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
 
       Audio testAudio = Audio$.MODULE$.apply(
@@ -213,31 +261,24 @@ public class ASRScoring extends Scoring {
       } else {
         logger.info("found cached score for file '" + testAudioDir + File.separator + testAudioFileNoSuffix + "'");
       }
-      //}
     }
-
-    ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix, useScoreForBkgColor);
-    Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
-    Map<NetPronImageType, List<Float>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo, duration);
-    String recoSentence = getRecoSentence(eventAndFileInfo);
-    recoSentence = recoSentence.replaceAll("sil","").trim();
-
-    PretestScore pretestScore =
-        new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence);
-    return pretestScore;
+    return scores;
   }
 
   /**
-   * Get the graded sentences.
-   * Create an srilm file using ngram-count
-   * Create an slf file using HBuild
-   * Do the octal conversion to utf-8 text on the result
+   * Get the graded sentences. <br></br>
+   * Create an srilm file using ngram-count <br></br>
+   * Create an slf file using HBuild <br></br>
+   * Do the octal conversion to utf-8 text on the result <br></br>
    *
    * This only works properly on the mac and linux, sorta emulated on win32
    *
    * @see #scoreRepeatExercise
-   * @param lmSentences
-   * @param tmpDir
+   * @param lmSentences foreground sentences
+   * @param background background sentences
+   * @param vocab limit background lm to contain only these words
+   * @param tmpDir where everything is written
+   * @return SLF file that is created, might fail if things
    */
   private String createSLFFile(List<String> lmSentences, List<String> background,  List<String> vocab, String tmpDir) {
     String convertedFile = tmpDir + File.separator + SMALL_LM_SLF;
@@ -417,6 +458,8 @@ public class ASRScoring extends Scoring {
   }
 
   /**
+   * By default the weight is 0.8 for the foreground model.
+   *
    * @see #createSLFFile
    * $BIN/ngram -lm $1 -lambda $3 -mix-lm $2 -order 2 -unk -write-lm $4.srilm -write-vocab $4.vocab
    * @param tmpDir
@@ -568,10 +611,9 @@ public class ASRScoring extends Scoring {
      * @param testAudio
      * @param sentence
      * @param decode
-     * @return
+     * @return Scores - score for audio, given the sentence and event info
      */
   private Scores computeRepeatExerciseScores(Audio testAudio, String sentence, String tmpDir, boolean decode) {
-    //String platform = Utils.package$.MODULE$.platform();
     String modelsDir = getModelsDir();
 
     // Make sure that we have an absolute path to the config and dict files.
@@ -608,7 +650,7 @@ public class ASRScoring extends Scoring {
       logger.error("Got assertion error " + e,e);
       return new Scores();
     } catch (Exception ee) {
-      if (!decode) logger.warn("Got " + ee, ee);  // TODO make pronz not through exception when decoding
+      if (!decode) logger.warn("Got " + ee, ee);  // TODO make pronz not throw exception when decoding
     }
 
     logger.info("got score and took " + (System.currentTimeMillis()-then) + " millis");
@@ -618,6 +660,7 @@ public class ASRScoring extends Scoring {
 
   /**
    * Creates a grammar file from the template file
+   * TODO : this isn't required anymore - remove it
    * @param modelsDir
    */
   private void createGrammarFile(String modelsDir) {
@@ -635,8 +678,9 @@ public class ASRScoring extends Scoring {
    * Also use the properties map to look for variables.
    *
    * @see #computeRepeatExerciseScores(pronz.speech.Audio, String, String, boolean)
-   * @param tmpDir
-   * @param modelsDir
+   * @param tmpDir where hydec will run and where the config file will be
+   * @param modelsDir to point to, for config to use
+   * @param decode if using the decoder cfg
    * @return path to config file
    */
   private String getHydecConfigFile(String tmpDir, String modelsDir, boolean decode) {

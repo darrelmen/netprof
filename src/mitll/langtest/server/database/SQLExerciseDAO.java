@@ -127,7 +127,8 @@ public class SQLExerciseDAO implements ExerciseDAO {
       //System.out.println("no html " + noHTML);
 
     }
-    Exercise exercise = new Exercise(plan, exid, content, promptInEnglish, recordAudio, content);
+    String tip = "Item #"+exid; // TODO : have more informative tooltip
+    Exercise exercise = new Exercise(plan, exid, content, promptInEnglish, recordAudio, tip);
     Object qa1 = obj.get("qa");
     if (qa1 == null) {
       logger.warn("no qa key in " + obj.keySet());
