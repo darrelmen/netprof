@@ -86,4 +86,5 @@ public interface LangTestDatabase extends RemoteService {
   Map<String,Integer> getResultByHourOfDay();
 
   Map<String, List<Integer>> getResultPerExercise(boolean useFile);
+  List<Session> getSessions();
 }
