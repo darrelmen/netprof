@@ -72,4 +72,6 @@ public interface LangTestDatabaseAsync {
   void getResultByHourOfDay(AsyncCallback<Map<String, Integer>> async);
 
   void getResultPerExercise(boolean useFile, AsyncCallback<Map<String, List<Integer>>> async);
+
+  void getSessions(AsyncCallback<List<Session>> async);
 }
