@@ -18,6 +18,7 @@ import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultsAndGrades;
+import mitll.langtest.shared.Session;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -740,6 +741,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public Map<String, List<Integer>> getResultPerExercise(boolean useFile) {
     return db.getResultPerExercise(useFile);
+  }
+
+  public List<Session> getSessions() {
+    return db.getSessions();
   }
 
   private String optionallyMakeURL(String wavPathWithForwardSlashSeparators) {
