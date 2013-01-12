@@ -1,18 +1,16 @@
 package mitll.langtest.server.database;
 
-import ag.experiment.AutoGradeExperiment;
-import mira.classifier.Classifier;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultsAndGrades;
+import mitll.langtest.shared.Session;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -30,7 +28,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -768,6 +765,42 @@ public class DatabaseImpl implements Database {
     return idToUser;
   }
 
+  public List<Session> getSessions() {
+    List<Result> results = getResults();
+    logger.debug("total " + results.size());
+    Map<Long,List<Result>> userToAnswers = new HashMap<Long, List<Result>>();
+    for (Result r : results) {
+      List<Result> results1 = userToAnswers.get(r.userid);
+      if (results1 == null) userToAnswers.put(r.userid, results1 = new ArrayList<Result>());
+      results1.add(r);
+    }
+    List<Session> sessions = new ArrayList<Session>();
+    for (List<Result> resultList : userToAnswers.values()) {
+      Collections.sort(resultList, new Comparator<Result>() {
+        @Override
+        public int compare(Result o1, Result o2) {
+          return o1.timestamp < o2.timestamp ? -1 : o1.timestamp > o2.timestamp ? +1 : 0;
+        }
+      });
+      Session s = null;
+      long last = 0;
+      for (Result r : resultList) {
+        int sessionGap = 10 * 60 * 1000;
+        if (s == null || r.timestamp - last > sessionGap) {
+          //if (s != null
+          s = new Session();
+          sessions.add(s);
+          //s.duration = 0l;
+        } else {
+          s.duration += r.timestamp - last;
+        }
+        s.numAnswers++;
+        last = r.timestamp;
+      }
+    }
+    return sessions;
+  }
+
   /**
    * TODO : worry about duplicate userid?
    * @return
@@ -992,7 +1025,16 @@ public class DatabaseImpl implements Database {
 
     DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\DLITest\\","farsi2");
     langTestDatabase.setInstallPath("C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu","C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu\\5000-no-english.unvow.farsi.txt","",false);
-    Map<Exercise, Integer> idToCount = langTestDatabase.getResultIdToCount(true,true);
+
+
+    List<Session> sessions = langTestDatabase.getSessions();
+    long total = 0;
+    for (Session s : sessions) {
+      System.out.println(s);
+      total += s.numAnswers;
+    }
+    System.out.println("total " + total);
+    /*Map<Exercise, Integer> idToCount = langTestDatabase.getResultIdToCount(true,true);
     writeMap(idToCount, "farsiMaleCounts.csv");
     Map<Exercise, Integer> idToCount2 = langTestDatabase.getResultIdToCount(true,false);
     writeMap(idToCount2,"farsiFemaleCounts.csv");
@@ -1003,7 +1045,7 @@ public class DatabaseImpl implements Database {
     writeMap(idToCount,"urduMaleCounts.csv");
     idToCount2 = langTestDatabase.getResultIdToCount(true,false);
     writeMap(idToCount2,"urduFemaleCounts.csv");
-
+*/
 //    langTestDatabase.getUserToResultCount();
    // System.out.println("map " + langTestDatabase.getResultCountToCount());
   }
