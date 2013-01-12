@@ -22,6 +22,7 @@ import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.grading.GradingExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.Session;
 import mitll.langtest.shared.User;
 
 import java.util.ArrayList;
@@ -39,6 +40,8 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class MonitoringManager {
+  private static final int MIN = (60 * 1000);
+  private static final int HOUR = (60 * MIN);
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
   private final boolean useFile;
@@ -84,6 +87,9 @@ public class MonitoringManager {
     vp.setWidth((int)(Window.getClientWidth()*0.88f) + "px");
     sp.add(vp);
     dialogVPanel.add(sp);
+    VerticalPanel toUse = new VerticalPanel();
+    vp.add(toUse);
+    doSessionQuery(vp);
 
     //showUserInfo(dialogBox, dialogVPanel, vp);
    // doResultLineQuery(vp, dialogVPanel, dialogBox);
@@ -97,6 +103,62 @@ public class MonitoringManager {
         dialogBox.hide();
       }
     });
+  }
+
+  private void doSessionQuery(final Panel vp) {
+    service.getSessions(new AsyncCallback<List<Session>>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+
+      @Override
+      public void onSuccess(List<Session> result) {
+        long totalTime = 0;
+        long total = 0;
+        long valid = 0;
+        Map<Long,Integer> rateToCount = new HashMap<Long, Integer>();
+        for (Session s: result) {
+          if (s.numAnswers > 1) {
+            valid++;
+            totalTime += s.duration;
+            total += s.numAnswers;
+
+            Integer count = rateToCount.get(s.getSecAverage());
+            if (count == null) rateToCount.put(s.getSecAverage(), s.numAnswers);
+            else rateToCount.put(s.getSecAverage(),count+s.numAnswers);
+          }
+        }
+        vp.add(new HTML("<b>Num sessions " +valid + "</b>"));
+        vp.add(new HTML("<b>Time spent " +totalTime/HOUR + " hours " + (totalTime - (totalTime/HOUR)*HOUR)/MIN + " mins"+ "</b>"));
+        vp.add(new HTML("<b>Answers = " +total+ "</b>"));
+        vp.add(new HTML("<b>Avg Answers/session = " +total/valid+ "</b>"));
+        vp.add(new HTML("<b>Avg time spent/session = " +(totalTime/valid)/MIN + " mins"+ "</b>"));
+        vp.add(new HTML("<b>Avg time spent/item = " +(totalTime/total)/1000 + " sec"+ "</b>"));
+
+        getRateChart(rateToCount, vp);
+      }
+    });
+  }
+
+  private void getRateChart(Map<Long, Integer> rateToCount, Panel vp) {
+    Options options = Options.create();
+    options.setTitle("Answers by rate");
+
+    DataTable data = DataTable.create();
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Seconds/Answer");
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Seconds");
+
+    data.addRows(rateToCount.size());
+
+    int r = 0;
+    List<Long> ages = new ArrayList<Long>(rateToCount.keySet());
+    Collections.sort(ages);
+    for (Long age : ages) {
+      data.addRow();
+      data.setValue(r, 0, age);
+      data.setValue(r++, 1, rateToCount.get(age));
+    }
+
+    vp.add(new ColumnChart(data,options));
   }
 
   private void doResultLineQuery(final Panel vp, final Panel outer, final DialogBox dialogBox) {
@@ -345,6 +407,10 @@ public class MonitoringManager {
 
   private Widget getResultByDayChart(Map<String, Integer> dayToCount) {
     String slot = "Day";
+    return getColumnChart(dayToCount, slot);
+  }
+
+  private Widget getColumnChart(Map<String, Integer> dayToCount, String slot) {
     Options options = getOptions(slot);
     DataTable data = getDataTable(slot, dayToCount);
     return new ColumnChart(data, options);
@@ -381,11 +447,9 @@ public class MonitoringManager {
     return new AnnotatedTimeLine(data, options, (int)(Window.getClientWidth()*0.6f) + "px", (int)(Window.getClientHeight()*0.2f) + "px");
   }
 
-  private ColumnChart getResultByHourOfDayChart(Map<String, Integer> dayToCount) {
+  private Widget getResultByHourOfDayChart(Map<String, Integer> dayToCount) {
     String slot = "Hour of day (EST)";
-    Options options = getOptions(slot);
-    DataTable data = getDataTable(slot, dayToCount);
-    return new ColumnChart(data, options);
+    return getColumnChart(dayToCount, slot);
   }
 
   private ColumnChart getLangChart(Map<User, Integer> userToCount) {

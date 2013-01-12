@@ -13,6 +13,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/imagewriter.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/mira.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/svm.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-visualization.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/imagewriter"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
