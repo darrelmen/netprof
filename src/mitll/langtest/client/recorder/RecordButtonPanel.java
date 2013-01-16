@@ -15,6 +15,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Result;
 
 /**
  * Just a single record button for the UI component.
@@ -29,8 +30,10 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class RecordButtonPanel extends HorizontalPanel {
-  public static final String RECORD_PNG = LangTest.LANGTEST_IMAGES +"record.png";
-  public static final String STOP_PNG   = LangTest.LANGTEST_IMAGES +"stop.png";
+  private static final String RECORD_PNG = LangTest.LANGTEST_IMAGES +"record.png";
+  private static final String STOP_PNG   = LangTest.LANGTEST_IMAGES +"stop.png";
+  private static final String RECORD = "Record";
+  private static final String STOP = "Stop";
   private final Image recordImage;
   private final Image stopImage;
   private ImageAnchor recordButton;
@@ -40,6 +43,7 @@ public class RecordButtonPanel extends HorizontalPanel {
   private ExerciseQuestionState questionState;
   private int index;
   private final RecordButton rb;
+  private int reqid = 0;
 
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
@@ -57,16 +61,16 @@ public class RecordButtonPanel extends HorizontalPanel {
     // make record button
     // make images
     recordImage = new Image(RECORD_PNG);
-    recordImage.setAltText("Record");
+    recordImage.setAltText(RECORD);
     stopImage = new Image(STOP_PNG);
-    stopImage.setAltText("Stop");
+    stopImage.setAltText(STOP);
 
     // add record button
     recordButton = new ImageAnchor();
     recordButton.setResource(recordImage);
 
     recordButton.getElement().setId("record_button");
-    recordButton.setTitle("Record");
+    recordButton.setTitle(RECORD);
 
     this.rb = new RecordButton(recordButton) {
       @Override
@@ -99,7 +103,6 @@ public class RecordButtonPanel extends HorizontalPanel {
     controller.startRecording();
   }
 
-  private int reqid = 0;
   /**
    * Send the audio to the server.<br></br>
    *
@@ -117,9 +120,16 @@ public class RecordButtonPanel extends HorizontalPanel {
     final Panel outer = this;
 
     reqid++;
-    service.writeAudioFile(controller.getBase64EncodedWavFile()
-        , exercise.getPlan(), exercise.getID(), "" + index, "" + controller.getUser(), controller.isAutoCRTMode(),
-        reqid, new AsyncCallback<AudioAnswer>() {
+    service.writeAudioFile(controller.getBase64EncodedWavFile(),
+        exercise.getPlan(),
+        exercise.getID(),
+        index,
+        controller.getUser(),
+        controller.isAutoCRTMode(),
+        reqid,
+        !exercise.promptInEnglish,
+        controller.getAudioType(),
+        new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
             recordButton.setEnabled(true);
             Window.alert("Server error : Couldn't post answers for exercise.");
@@ -137,12 +147,12 @@ public class RecordButtonPanel extends HorizontalPanel {
 
   protected void showRecording() {
     recordButton.setResource(stopImage);
-    recordButton.setTitle("Stop");
+    recordButton.setTitle(STOP);
   }
 
   protected void showStopped() {
     recordButton.setResource(recordImage);
-    recordButton.setTitle("Record");
+    recordButton.setTitle(RECORD);
   }
 
   protected Widget getRecordButton() { return recordButton; }
