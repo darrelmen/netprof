@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,6 +37,8 @@ import java.util.Set;
  */
 public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQuestionState, ProvidesResize, RequiresResize {
   private static final String ANSWER_BOX_WIDTH = "400px";
+  private static final String REPEAT_ONCE = "<i>Repeat the phrase once at normal speed.</i>";
+  private static final String REPEAT_TWICE = "<i>Repeat the phrase twice, first at normal and then at slow speed.</i>";
   private List<Widget> answers = new ArrayList<Widget>();
   private Set<Widget> completed = new HashSet<Widget>();
   protected Exercise exercise = null;
@@ -185,7 +188,16 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   }
 
   protected String getSpokenPrompt(boolean promptInEnglish) {
-    return "&nbsp;&nbsp;&nbsp;Speak and record your answer in " +(promptInEnglish ? "English" : " the foreign language") +" :";
+    String instructions = ":";
+    String prefix = "<br></br>&nbsp;&nbsp;&nbsp;";
+    if (controller.getAudioType().equals(Result.AUDIO_TYPE_FAST_AND_SLOW)) {
+      instructions = prefix +REPEAT_TWICE;
+    }
+    else if (controller.getAudioType().equals(Result.AUDIO_TYPE_REGULAR)) {
+      instructions = prefix +REPEAT_ONCE;
+    }
+    return "&nbsp;&nbsp;&nbsp;Speak and record your answer in " + (promptInEnglish ? "English" : " the foreign language") + " " +
+        instructions;
   }
 
   protected int getQuestionPromptSpacer() {
@@ -225,6 +237,13 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     });
 
     // TODO : revisit in the context of text data collections
+    addKeyHandler(e, service, userFeedback, controller, useKeyHandler);
+
+    return buttonRow;
+  }
+
+  private void addKeyHandler(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
+                             final ExerciseController controller, boolean useKeyHandler) {
     if (useKeyHandler) {
       keyHandler = Event.addNativePreviewHandler(new
                                                      Event.NativePreviewHandler() {
@@ -235,14 +254,18 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
                                                          int keyCode = ne.getKeyCode();
                                                          boolean isLeft = keyCode == KeyCodes.KEY_LEFT;
                                                          boolean isRight = keyCode == KeyCodes.KEY_RIGHT;
-                                                         if ((isLeft || isRight) && event.getTypeInt() == 512 && "[object KeyboardEvent]".equals(ne.getString())) {
+                                                         if ((isLeft || isRight) && event.getTypeInt() == 512 &&
+                                                             "[object KeyboardEvent]".equals(ne.getString())) {
                                                            ne.preventDefault();
 
-                                                           if (debug) System.out.println(new Date() +
-                                                               " : getNextAndPreviousButtons - key handler : " + keyHandler +
-                                                               " Got " + event + " type int " +
-                                                               event.getTypeInt() + " assoc " + event.getAssociatedType() +
-                                                               " native " + event.getNativeEvent() + " source " + event.getSource());
+                                                           if (debug) {
+                                                             System.out.println(new Date() +
+                                                                 " : getNextAndPreviousButtons - key handler : " + keyHandler +
+                                                                 " Got " + event + " type int " +
+                                                                 event.getTypeInt() + " assoc " + event.getAssociatedType() +
+                                                                 " native " + event.getNativeEvent() +
+                                                                 " source " + event.getSource());
+                                                           }
 
                                                            if (isLeft) {
                                                              clickPrev(controller, e);
@@ -252,10 +275,8 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
                                                          }
                                                        }
                                                      });
-      System.out.println("getNextAndPreviousButtons made click handler " + keyHandler);
+      //System.out.println("getNextAndPreviousButtons made click handler " + keyHandler);
     }
-
-    return buttonRow;
   }
 
   /**
@@ -312,7 +333,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     incomplete.addAll(answers);
     for (final Widget tb : answers) {
       String text = ((HasValue<String>) tb).getValue();
-      service.addAnswer(user, exercise, i++, text, "", new AsyncCallback<Void>() {
+      service.addTextAnswer(user, exercise, i++, text, new AsyncCallback<Void>() {
         public void onFailure(Throwable caught) {
           userFeedback.showErrorMessage("Server error", "Couldn't post answers for exercise.");
         }
@@ -459,17 +480,14 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   }
 
   private void enableNext() {
-    //System.out.println("enableNext enable next completed " + completed.size() + " vs " + answers.size());
     enableNextButton((completed.size() == answers.size()));
   }
 
   public void enableNextButton(boolean val) {
-    //System.out.println("enableNextButton enable next = " + val);
     next.setEnabled(val);
   }
 
   public void setButtonsEnabled(boolean val) {
-    //System.out.println("setButtonsEnabled enable prev, next = " + val);
     prev.setEnabled(val);
     next.setEnabled(val);
   }
