@@ -1,5 +1,7 @@
 package mitll.langtest.client.user;
 
+import mitll.langtest.shared.Result;
+
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -10,4 +12,6 @@ package mitll.langtest.client.user;
 public interface UserNotification {
   void gotUser(long userID);
   void setGrading(boolean g);
+
+  void rememberAudioType(String audioType);
 }
