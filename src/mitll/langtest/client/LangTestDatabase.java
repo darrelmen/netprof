@@ -45,9 +45,10 @@ public interface LangTestDatabase extends RemoteService {
   List<Result> getResults();
 
   // answer DAO
-  void addAnswer(int userID, Exercise exercise, int questionID, String answer, String audioFile);
+  void addTextAnswer(int userID, Exercise exercise, int questionID, String answer);
   boolean isAnswerValid(int userID, Exercise exercise, int questionID);
-  AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user, boolean doAutoCRT, int reqid);
+  AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
+                             boolean doAutoCRT, int reqid, boolean flq, String audioType);
   double getScoreForAnswer(Exercise e, int questionID, String answer);
 
   Exercise getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly);
@@ -77,6 +78,8 @@ public interface LangTestDatabase extends RemoteService {
   Exercise getExercise(String id, long userID, boolean useFile, boolean arabicDataCollect);
 
   int userExists(String login);
+
+  // monitoring support
 
   Map<User, Integer> getUserToResultCount();
 
