@@ -17,13 +17,14 @@ public interface LangTestDatabaseAsync {
   @Deprecated
   void getExercises(boolean useFile, AsyncCallback<List<Exercise>> async);
 
-  void addAnswer(int usedID, Exercise exercise, int questionID, String answer, String audioFile, AsyncCallback<Void> async);
+  void addTextAnswer(int usedID, Exercise exercise, int questionID, String answer, AsyncCallback<Void> async);
   void addUser(int age, String gender, int experience, AsyncCallback<Long> async);
   void isAnswerValid(int userID, Exercise exercise, int questionID, AsyncCallback<Boolean> async);
   void getUsers(AsyncCallback<List<User>> async);
   void getResults(AsyncCallback<List<Result>> async);
 
-  void writeAudioFile(String base64EncodedString, String plan, String exercise, String question, String user, boolean doAutoCRT, int reqid, AsyncCallback<AudioAnswer> async);
+  void writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
+                      boolean doAutoCRT, int reqid, boolean flq, String audioType, AsyncCallback<AudioAnswer> async);
 
   void getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly, AsyncCallback<Exercise> async);
 
