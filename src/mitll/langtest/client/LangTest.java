@@ -50,6 +50,7 @@ import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.Result;
 
 import java.util.Date;
 import java.util.Map;
@@ -68,7 +69,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final boolean DEFAULT_ARABIC_TEXT_COLLECT = false;
   private static final boolean DEFAULT_SHOW_TURK_TOKEN = false;
   private static final int DEFAULT_SEGMENT_REPEATS = 2;
-  private static final String DEFAULT_EXERCISE = null;//"nl0020_ams";
+  private static final String DEFAULT_EXERCISE = null;
   public static final String LANGTEST_IMAGES = "langtest/images/";
 
   private Panel currentExerciseVPanel = new VerticalPanel();
@@ -82,6 +83,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private FlashRecordPanelHeadless flashRecordPanel;
 
   private long lastUser = -1;
+  private String audioType = Result.AUDIO_TYPE_UNSET;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
@@ -622,6 +624,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
       lastUser = userID;
     }
+  }
+
+  @Override
+  public void rememberAudioType(String audioType) {
+    this.audioType = audioType;
+  }
+
+  @Override
+  public String getAudioType() {
+    return audioType;
   }
 
   /**

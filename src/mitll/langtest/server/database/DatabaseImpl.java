@@ -633,15 +633,15 @@ public class DatabaseImpl implements Database {
   /**
    * Creates the result table if it's not there.
    *
+   *
    * @param userID
    * @param e
    * @param questionID
    * @param answer
-   * @param audioFile
    * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
    */
-  public void addAnswer(int userID, Exercise e, int questionID, String answer, String audioFile) {
-    answerDAO.addAnswer(userID, e, questionID, answer, audioFile);
+  public void addAnswer(int userID, Exercise e, int questionID, String answer) {
+    answerDAO.addAnswer(userID, e, questionID, answer, "", !e.promptInEnglish, false, Result.AUDIO_TYPE_UNSET);
   }
 
   /**
