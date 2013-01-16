@@ -1,6 +1,7 @@
 package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -11,6 +12,7 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Result;
 
 /**
  * Created with IntelliJ IDEA.
@@ -79,7 +81,6 @@ public class WaveformExercisePanel extends ExercisePanel {
     controller.loadNextExercise(completedExercise);
   }
 
-
   /**
    * An ASR scoring panel with a record button.
    */
@@ -94,7 +95,10 @@ public class WaveformExercisePanel extends ExercisePanel {
      * @param index
      */
     public RecordAudioPanel(LangTestDatabaseAsync service, int index) {
-      super(null, service, controller.getSoundManager(), false, true);
+      super(null, service, controller.getSoundManager(),
+          false, // use full screen width
+          true // use keyboard
+      );
       this.index = index;
       setRightMargin(400);
     }
