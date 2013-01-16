@@ -1,5 +1,6 @@
 package mitll.langtest.client.user;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -10,6 +11,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.shared.Result;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -58,6 +60,8 @@ public class UserManager {
   /**
    * @param sessionID from database
    * @see #displayLoginBox()
+   * @see #displayTeacherLogin()
+   * @see #addTeacher
    */
   private void storeUser(long sessionID) {
     System.out.println("user now " + sessionID);
@@ -69,6 +73,10 @@ public class UserManager {
       userID = sessionID;
     }
     langTest.gotUser(sessionID);
+  }
+
+  private void storeAudioType(String type) {
+    langTest.rememberAudioType(type);
   }
 
   /**
@@ -299,27 +307,23 @@ public class UserManager {
   private void displayTeacherLogin() {
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Data Collector Login");
-    dialogBox.setAnimationEnabled(true);
+   // dialogBox.setAnimationEnabled(true);
 
     // Enable glass background.
     dialogBox.setGlassEnabled(true);
 
     final TextBox user = new TextBox();
     final TextBox password = new PasswordTextBox();
+    final RadioButton regular = new RadioButton("AudioType","Regular Audio Recording");
+    final RadioButton fastThenSlow = new RadioButton("AudioType","Record Regular Speed then Slow");
 
     final TextBox first = new TextBox();
-
     final TextBox last = new TextBox();
-
     final TextBox nativeLang = new TextBox();
-
     final TextBox dialect = new TextBox();
-
     final TextBox ageEntryBox = new TextBox();
 
-    //final Button closeButton = makeCloseButton(ageEntryBox);
-    final Button closeButton = new Button("Login");
-
+    final Button login = new Button("Login");
     final Button reg = new Button("Register");
 
     final ListBox genderBox = getGenderBox();
@@ -328,27 +332,38 @@ public class UserManager {
     final ListBox experienceBox = getExperienceBox();
     VerticalPanel experiencePanel = getGenderPanel(experienceBox);
 
-    closeButton.setEnabled(true);
+    login.setEnabled(true);
 
     // We can set the id of a widget by accessing its Element
-    closeButton.getElement().setId("closeButton");
+    login.getElement().setId("login");
 
-    KeyUpHandler keyHandler = new GraderMyKeyUpHandler(user, closeButton, reg, password, false);
+    KeyUpHandler keyHandler = new GraderMyKeyUpHandler(user, login, reg, password, false);
     user.addKeyUpHandler(keyHandler);
     password.addKeyUpHandler(keyHandler);
-
 
     VerticalPanel dialogVPanel = new VerticalPanel();
     dialogVPanel.addStyleName("dialogVPanel");
     dialogVPanel.add(new HTML("<b>User ID</b>"));
     dialogVPanel.add(user);
+
     HTML w = new HTML("<b>Password</b>");
     w.setTitle("See email for your password.");
     dialogVPanel.add(w);
     dialogVPanel.add(password);
-    dialogVPanel.add(new HTML("<i>(New users : fill in the fields below and click <b>register</b>.)</i>"));
-    dialogVPanel.add(new HTML("<br></br>"));
 
+    HTML ww = new HTML("<b>Audio Recording Style</b>");
+    w.setTitle("Choose type of audio recording.");
+    dialogVPanel.add(ww);
+    dialogVPanel.add(regular);
+    dialogVPanel.add(fastThenSlow);
+
+    SimplePanel spacer = new SimplePanel();
+    spacer.setSize("20px", "5px");
+    dialogVPanel.add(spacer);
+    dialogVPanel.add(new HTML("<i>(New users : fill in the fields below and click <b>register</b>.)</i>"));
+    SimplePanel spacer2 = new SimplePanel();
+    spacer2.setSize("20px", "5px");
+    dialogVPanel.add(spacer2);
 
     dialogVPanel.add(new HTML("<b>First Name</b>"));
     dialogVPanel.add(first);
@@ -365,92 +380,76 @@ public class UserManager {
     dialogVPanel.add(new HTML("<br><b>Select months of experience in this language</b>"));
     dialogVPanel.add(experiencePanel);
 
-
     reg.setEnabled(true);
     reg.getElement().setId("registerButton");
 
     reg.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
+        //System.out.println("register got click " + event);
         if (user.getText().length() > 0 && password.getText().length() > 0) {
           boolean valid = checkPassword(password);
           if (!valid) {
+            Window.alert("Please use password from the email sent to you.");
+            valid = false;
+          }
+          else if (!regular.getValue() && !fastThenSlow.getValue()) {
+            Window.alert("Please choose either regular or regular then slow audio recording.");
+            valid = false;
+          }
+          else if (first.getText().isEmpty()) {
+            Window.alert("First name is empty");
+            valid = false;
+          }
+          else if (last.getText().isEmpty()) {
+            Window.alert("Last name is empty");
+            valid = false;
+          }
+          else if (nativeLang.getText().isEmpty()) {
+            Window.alert("Language is empty");
+            valid = false;
+          }
+          else if (dialect.getText().isEmpty()) {
+            Window.alert("Dialect is empty");
+            valid = false;
+          }
+          else if (user.getText().isEmpty()) {
+            Window.alert("User id is empty");
+            valid = false;
+          }
 
-          }
-
-
-          if (first.getText().isEmpty()) {
-            Window.alert("first name is empty");
-            valid = false;
-          }
-          if (valid && last.getText().isEmpty()) {
-            Window.alert("last name is empty");
-            valid = false;
-          }
-          if (valid && nativeLang.getText().isEmpty()) {
-            Window.alert("language is empty");
-            valid = false;
-          }
-          if (valid && dialect.getText().isEmpty()) {
-            Window.alert("dialect is empty");
-            valid = false;
-          }
-          if (valid && user.getText().isEmpty()) {
-            Window.alert("user id is empty");
-            valid = false;
-          }
-
-          int age = 0;
           if (valid) {
             try {
-              age = Integer.parseInt(ageEntryBox.getText());
+              int age = Integer.parseInt(ageEntryBox.getText());
+              if ((age < MIN_AGE) || (age > MAX_AGE && age != TEST_AGE)) {
+                valid = false;
+                Window.alert("age '" + age + "' is too young or old.");
+              }
             } catch (NumberFormatException e) {
               Window.alert("age '" + ageEntryBox.getText() + "' is invalid.");
               valid = false;
-              //e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
           }
           if (valid) {
-            service.userExists(user.getText(), new AsyncCallback<Integer>() {
-              public void onFailure(Throwable caught) {}
-
-              public void onSuccess(Integer result) {
-                System.out.println("user '" + user.getText() + "' exists " + result);
-                rememberedUser = -1;
-                if (result != -1) {
-                  rememberedUser = result;
-                  Window.alert("User " +user.getText() + " already registered, click login.");
-                }
-                else {
-                  addTeacher(Integer.parseInt(ageEntryBox.getText()),
-                      experienceBox, genderBox, first, last, nativeLang, dialect, user, dialogBox, closeButton);
-                }
-              }
-            });
-          }
-          else {
+            int enteredAge = Integer.parseInt(ageEntryBox.getText());
+            checkUserOrCreate(enteredAge, user, experienceBox, genderBox, first, last, nativeLang, dialect, dialogBox,
+                login, fastThenSlow.getValue());
+          } else {
             System.out.println("not valid ------------ ?");
           }
         }
       }
     });
-    //w1.addStyleName("paddedHorizontalPanel");
-
-    dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
-    HorizontalPanel hp = new HorizontalPanel();
+    FlowPanel hp = new FlowPanel();
+    hp.getElement().getStyle().setFloat(Style.Float.RIGHT);
     hp.add(reg);
-
-    SimplePanel spacer = new SimplePanel();
-    spacer.setSize("20px", "20px");
-
-    hp.add(spacer);
-    hp.add(closeButton);
+    hp.add(login);
 
     dialogVPanel.add(hp);
     dialogBox.setWidget(dialogVPanel);
 
-    closeButton.addClickHandler(new ClickHandler() {
+    login.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-
+        // System.out.println("login button got click " + event);
         if (rememberedUser == -1) {
           if (checkPassword(password)) {
             Window.alert("please register -- " + user.getText() + " has not registered");
@@ -458,18 +457,48 @@ public class UserManager {
             Window.alert("please use password from the email");
           }
         } else {
-          dialogBox.hide();
-          storeUser(rememberedUser);
+          if (!regular.getValue() && !fastThenSlow.getValue()) {
+            Window.alert("Please choose either regular or regular then slow audio recording.");
+          }
+          else {
+            dialogBox.hide();
+            storeAudioType(fastThenSlow.getValue() ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR);
+            storeUser(rememberedUser);
+          }
         }
-        // langTest.setGrading(true);
       }
     });
     show(dialogBox);
   }
 
+  private void checkUserOrCreate(final int enteredAge, final TextBox user, final ListBox experienceBox,
+                                 final ListBox genderBox,
+                                 final TextBox first, final TextBox last,
+                                 final TextBox nativeLang, final TextBox dialect,
+                                 final DialogBox dialogBox, final Button closeButton,
+                                 final boolean isFastAndSlow) {
+    service.userExists(user.getText(), new AsyncCallback<Integer>() {
+      public void onFailure(Throwable caught) {}
+
+      public void onSuccess(Integer result) {
+        System.out.println("user '" + user.getText() + "' exists " + result);
+        rememberedUser = -1;
+        if (result != -1) {
+          rememberedUser = result;
+          Window.alert("User " + user.getText() + " already registered, click login.");
+        }
+        else {
+          addTeacher(enteredAge,
+              experienceBox, genderBox, first, last, nativeLang, dialect, user, dialogBox, closeButton, isFastAndSlow);
+        }
+      }
+    });
+  }
+
   private void addTeacher(int age, ListBox experienceBox, ListBox genderBox,
                           TextBox first, TextBox last, TextBox nativeLang,
-                          TextBox dialect, TextBox user, final DialogBox dialogBox, final Button closeButton) {
+                          TextBox dialect, TextBox user, final DialogBox dialogBox, final Button closeButton,
+                          final boolean isFastAndSlow) {
     int monthsOfExperience = experienceBox.getSelectedIndex() * 3;
     if (experienceBox.getSelectedIndex() == EXPERIENCE_CHOICES.size() - 1) {
       monthsOfExperience = 20 * 12;
@@ -484,7 +513,6 @@ public class UserManager {
         dialect.getText(),
         user.getText(),
 
-
         new AsyncCallback<Long>() {
           public void onFailure(Throwable caught) {
             // Show the RPC error message to the user
@@ -498,6 +526,7 @@ public class UserManager {
             long result1 = result;
             rememberedUser = (int) result1;
             dialogBox.hide();
+            storeAudioType(isFastAndSlow ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR);
             storeUser(rememberedUser);
           }
         });

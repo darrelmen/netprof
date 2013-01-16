@@ -31,7 +31,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created with IntelliJ IDEA.
+ * Show a dialog with all the results we've collected so far.
+ *
  * User: go22670
  * Date: 5/18/12
  * Time: 5:43 PM
@@ -44,8 +45,6 @@ public class ResultManager {
   private int pageSize = PAGE_SIZE;
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
-
-  //private Set<Integer> remainingResults = new HashSet<Integer>();
   private final AudioTag audioTag = new AudioTag();
 
   /**
@@ -58,10 +57,7 @@ public class ResultManager {
     this.feedback = feedback;
   }
 
-  public void setFeedback(GradingExercisePanel panel) {
-    //this.panel = panel;
-  }
-
+  public void setFeedback(GradingExercisePanel panel) {}
   public void setPageSize(int s) { this.pageSize = s; }
 
   private Widget lastTable = null;
@@ -135,8 +131,7 @@ public class ResultManager {
       int i = (int)(Window.getClientWidth()*0.8f);
       table.setWidth(gradingView ? gradingWidth : i + "px");
     }
-    TextColumn<Result> id = null;
-    id = addUserPlanExercise(table, id);
+    TextColumn<Result> id = addUserPlanExercise(table);
     if (showQuestionColumn) {
       TextColumn<Result> experience = new TextColumn<Result>() {
         @Override
@@ -199,8 +194,8 @@ public class ResultManager {
     return getPager(table);
   }
 
-  protected TextColumn<Result> addUserPlanExercise(CellTable<Result> table, TextColumn<Result> id) {
-      id = new TextColumn<Result>() {
+  protected TextColumn<Result> addUserPlanExercise(CellTable<Result> table) {
+    TextColumn<Result> id = new TextColumn<Result>() {
         @Override
         public String getValue(Result answer) {
           return "" + answer.userid;
@@ -238,6 +233,15 @@ public class ResultManager {
       };
       date.setSortable(true);
       table.addColumn(date, "Time");
+
+    TextColumn<Result> audioType = new TextColumn<Result>() {
+      @Override
+      public String getValue(Result answer) {
+        return answer.isFastAndSlowAudio() ? "Fast and Slow" : "Regular";
+      }
+    };
+    audioType.setSortable(true);
+    table.addColumn(audioType, "Audio Type");
   }
 
   private VerticalPanel getPager(CellTable<Result> table) {

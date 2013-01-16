@@ -2,6 +2,7 @@ package mitll.langtest.client.exercise;
 
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Result;
 
 /**
  * Created with IntelliJ IDEA.
@@ -36,4 +37,5 @@ public interface ExerciseController {
   boolean useBkgColorForRef();
   boolean isDemoMode();
   boolean isAutoCRTMode();
+  String getAudioType();
 }

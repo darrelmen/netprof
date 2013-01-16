@@ -47,11 +47,10 @@ public class GradingResultManager extends ResultManager {
   /**
    * @see #getTable(java.util.Collection, boolean, boolean, java.util.Collection, String, int)
    * @param table
-   * @param id
    * @return
    */
   @Override
-  protected TextColumn<Result> addUserPlanExercise(CellTable<Result> table, TextColumn<Result> id) {
+  protected TextColumn<Result> addUserPlanExercise(CellTable<Result> table) {
     return null;
   }
 
