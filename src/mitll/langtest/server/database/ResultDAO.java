@@ -4,6 +4,7 @@ import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
+import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,18 +13,29 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 
+/**
+ * Create, drop, alter, read from the results table.
+ * Note that writing to the table takes place in the {@link AnswerDAO}. Not sure if that's a good idea or not. :)
+ *
+ */
 public class ResultDAO extends DAO {
+  private static Logger logger = Logger.getLogger(ResultDAO.class);
+
   private static final String RESULTS = "results";
-  //private final Database database;
+
+  static final String FLQ = "flq";
+  static final String SPOKEN = "spoken";
+  static final String AUDIO_TYPE = "audioType";
+
   private GradeDAO gradeDAO;
   private ScheduleDAO scheduleDAO ;
-  boolean debug = false;
+  private boolean debug = false;
+
   public ResultDAO(Database database) {
     super(database);
 
     gradeDAO = new GradeDAO(database);
     scheduleDAO = new ScheduleDAO(database);
-
   }
 
   /**
@@ -34,7 +46,7 @@ public class ResultDAO extends DAO {
   public List<Result> getResults() {
     try {
       Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement("SELECT * from results;");
+      PreparedStatement statement = connection.prepareStatement("SELECT * from " +RESULTS+";");
 
       return getResultsForQuery(connection, statement);
     } catch (Exception ee) {
@@ -65,15 +77,15 @@ public class ResultDAO extends DAO {
       boolean valid = rs.getBoolean(i++);
       boolean flq = rs.getBoolean(i++);
       boolean spoken = rs.getBoolean(i++);
+      String type = rs.getString(i++);
       Result e = new Result(uniqueID, userID, //id
           plan, // plan
           exid, // id
           qid, // qid
           answer, // answer
-          //rs.getString(i++), // audioFile
           valid, // valid
           timestamp.getTime(),
-          flq, spoken);
+          flq, spoken, type);
       trimPathForWebPage(e);
       results.add(e);
     }
@@ -193,6 +205,11 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
+  /**
+   * @see DatabaseImpl#getExercisesFirstNInOrder(long, boolean, int)
+   * @param userid
+   * @return
+   */
   public String getExerciseIDLastResult(long userid) {
     try {
       Connection connection = database.getConnection();
@@ -202,7 +219,6 @@ public class ResultDAO extends DAO {
       PreparedStatement statement = connection.prepareStatement(sql);
 
       ResultSet rs = statement.executeQuery();
-      //List<Result> results = new ArrayList<Result>();
       String exid = "INVALID";
       if (rs.next()) {
         exid = rs.getString(1);
@@ -218,6 +234,11 @@ public class ResultDAO extends DAO {
     return "INVALID";
   }
 
+  /**
+   * @see DatabaseImpl#getResultsForExercise(String, boolean, boolean, boolean)
+   * @param exerciseID
+   * @return
+   */
   public List<Result> getAllResultsForExercise(String exerciseID) {
     try {
       Connection connection = database.getConnection();
@@ -230,6 +251,11 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
+  /**
+   * @see DatabaseImpl#getNextUngradedExerciseQuick(java.util.Collection, int, boolean, boolean, boolean)
+   * @param toExclude
+   * @return
+   */
   public Collection<Result> getResultExcludingExercises(Collection<String> toExclude) {
     // select results.* from results where results.exid not in ('ac-R0P-006','ac-LOP-001','ac-L0P-013')
     try {
@@ -250,42 +276,11 @@ public class ResultDAO extends DAO {
 
   }
 
-  public Set<Long> getUsers(List<Result> resultsForExercise) {
-    Set<Long> users = new HashSet<Long>();
-
-    for (Result r : resultsForExercise) {
-      users.add(r.userid);
-    }
-    return users;
-  }
-
-  /**
-   * Currently the results aren't marked with the spoken/written, foreign/english flags -- have to recover
-   * them from the schedule.
-   *
-   * @paramx resultsForExercise
-   * @paramx exid
-   */
-/*
-  public void enrichResults(List<Result> resultsForExercise, String exid) {
-    Set<Long> users = getUsers(resultsForExercise);
-
-    Map<Long, List<Schedule>> scheduleForUserAndExercise = scheduleDAO.getScheduleForUserAndExercise(users, exid);
-    for (Result r : resultsForExercise) {
-      List<Schedule> schedules = scheduleForUserAndExercise.get(r.userid);
-      if (schedules != null) {
-        Schedule schedule = schedules.get(0);
-        r.setFLQ(schedule.flQ);
-        r.setSpoken(schedule.spoken);
-      }
-    }
-  }
-*/
-
   /**
    * This should only be run once, on an old result table to update it.
+   * @see #createResultTable(java.sql.Connection)
    */
-  public void enrichResults() {
+  private void enrichResults() {
     List<Result> results = getResults();
     Map<String,List<Result>> exidToResult = new HashMap<String, List<Result>>();
 
@@ -310,14 +305,16 @@ public class ResultDAO extends DAO {
               enrichResult(r);
             }
           }
-        //  Schedule schedule = schedules.get(0);
-
         }
       }
     }
   }
 
-  public void enrichResult(Result toChange) {
+  /**
+   * @see #enrichResults
+   * @param toChange
+   */
+  private void enrichResult(Result toChange) {
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement;
@@ -342,7 +339,6 @@ public class ResultDAO extends DAO {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    //return new CountAndGradeID(getCount(), id);
   }
 
   void dropResults(Database database) {
@@ -356,79 +352,85 @@ public class ResultDAO extends DAO {
       database.closeConnection(connection);
 
     } catch (Exception e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.  }
+      e.printStackTrace();
     }
   }
 
   /**
-   * @deprecated
-   * @paramx database
-   * @throws Exception
-   */
-/*  private void showResults(Database database) throws Exception {
-    Connection connection = database.getConnection();
-    PreparedStatement statement = connection.prepareStatement("SELECT * FROM results order by " + Database.TIME);
-    ResultSet rs = statement.executeQuery();
-    int c = 0;
-    while (rs.next()) {
-      c++;
-      int i = 1;
-      if (false) {
-        System.out.println(rs.getInt(i++) + "," + rs.getString(i++) + "," +
-          rs.getString(i++) + "," +
-          rs.getInt(i++) + "," +
-          rs.getString(i++) + "," +
-          rs.getString(i++) + "," +
-          rs.getTimestamp(i++));
-      }
-    }
- //   System.out.println("now " + c + " answers");
-    rs.close();
-    statement.close();
-    database.closeConnection(connection);
-  }*/
-
-  /**
    * No op if table exists and has the current number of columns.
    *
-   * @see DatabaseImpl#DatabaseImpl(javax.servlet.http.HttpServlet)
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs()
    * @param connection
    * @throws SQLException
    */
   void createResultTable(Connection connection) throws SQLException {
     createTable(connection);
     int numColumns = getNumColumns(connection, RESULTS);
+    logger.info("num columns = " + numColumns);
     if (numColumns == 8) {
       addColumnToTable(connection);
       enrichResults();
     }
+    else if (numColumns < 11) {//!columnExists(connection,RESULTS, AUDIO_TYPE)) {
+      addTypeColumnToTable(connection);
+    }
   }
 
+  /**
+   * So we don't want to use CURRENT_TIMESTAMP as the default for TIMESTAMP
+   * b/c if we ever alter the table, say by adding a new column, we will effectively lose
+   * the timestamp that was put there when we inserted the row initially.
+   * <p></p>
+   * Note that the answer column can be either the text of an answer for a written response
+   * or a relative path to an audio file on the server.
+   *
+   * @param connection to make a statement from
+   * @throws SQLException
+   */
   private void createTable(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
         RESULTS +
-        " (id IDENTITY, userid INT, plan VARCHAR, " +
+        " (" +
+        "id IDENTITY, " +
+        "userid INT, " +
+        "plan VARCHAR, " +
       Database.EXID +" VARCHAR, " +
       "qid INT," +
-      Database.TIME + " TIMESTAMP AS CURRENT_TIMESTAMP," +
+      Database.TIME + " TIMESTAMP, " +// " AS CURRENT_TIMESTAMP," +
       "answer CLOB," +
-      //"audioFile VARCHAR, " +
-      "valid BOOLEAN" +
+        "valid BOOLEAN," +
+        FLQ + " BOOLEAN," +
+        SPOKEN + " BOOLEAN," +
+        AUDIO_TYPE + " VARCHAR" +
       ")");
     statement.execute();
     statement.close();
   }
 
   private void addColumnToTable(Connection connection) throws SQLException {
- /*   PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD scheduled BOOLEAN NOT NULL default false");
-    statement.execute();
-    statement.close();*/
-
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD flq BOOLEAN");
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
+        FLQ +
+        " BOOLEAN");
     statement.execute();
     statement.close();
 
-    statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD spoken BOOLEAN");
+    statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
+        SPOKEN +
+        " BOOLEAN");
+    statement.execute();
+    statement.close();
+  }
+
+  private void addTypeColumnToTable(Connection connection) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " +Database.TIME+
+        " DROP DEFAULT");
+    statement.execute();
+    statement.close();
+
+    statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
+        AUDIO_TYPE +
+        " " +
+        "VARCHAR");
     statement.execute();
     statement.close();
   }
