@@ -1,36 +1,52 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Result;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
+/**
+ * Does writing to the results table.
+ * Reading, etc. happens in {@link ResultDAO} - might be a little confusing... :)
+ */
 public class AnswerDAO {
   private final Database database;
-  private static final boolean LOG_RESULTS = false;
 
   public AnswerDAO(Database database) {
     this.database = database;
   }
 
   /**
-   * Creates the result table if it's not there.
    *
+   * @see DatabaseImpl#addAnswer(int, mitll.langtest.shared.Exercise, int, String)
    * @param userID
    * @param e
    * @param questionID
    * @param answer
    * @param audioFile
-   * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
+   * @param flq
+   *@param spoken
+   * @param audioType @see mitll.langtest.client.exercise.ExercisePanel#postAnswers(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
    */
-  public void addAnswer(int userID, Exercise e, int questionID, String answer, String audioFile) {
+  public void addAnswer(int userID, Exercise e, int questionID, String answer, String audioFile,
+                        boolean flq, boolean spoken, String audioType) {
     String plan = e.getPlan();
     String id = e.getID();
-    addAnswer(userID, plan, id, questionID, answer, audioFile, true, database);
+    addAnswer(database,userID, plan, id, questionID, answer, audioFile, true,  flq, spoken, audioType);
   }
 
+  /**
+   * @see DatabaseImpl#isAnswerValid(int, mitll.langtest.shared.Exercise, int, Database)
+   * @param userID
+   * @param e
+   * @param questionID
+   * @param database
+   * @return
+   */
   public boolean isAnswerValid(int userID, Exercise e, int questionID, Database database) {
     boolean val = false;
     try {
@@ -62,7 +78,8 @@ public class AnswerDAO {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
+   * @param database
    * @param userID
    * @param plan
    * @param id
@@ -70,12 +87,13 @@ public class AnswerDAO {
    * @param answer
    * @param audioFile
    * @param valid
-   * @param database
+   * @param spoken
    */
-  public void addAnswer(int userID, String plan, String id, int questionID, String answer, String audioFile, boolean valid, Database database) {
+  public void addAnswer(Database database, int userID, String plan, String id, int questionID, String answer,
+                        String audioFile, boolean valid, boolean flq, boolean spoken, String audioType) {
     try {
       Connection connection = database.getConnection();
-      addAnswerToTable(userID, plan, id, questionID, answer, audioFile, connection, valid);
+      addAnswerToTable(connection, userID, plan, id, questionID, answer, audioFile, valid,flq,spoken,audioType);
       database.closeConnection(connection);
 
  /*     if (LOG_RESULTS) { // true to see what is in the table
@@ -92,31 +110,44 @@ public class AnswerDAO {
   }
 
   /**
+   * Add a row to the table.
+   * Each insert is marked with a timestamp.
+   * This allows us to determine user completion rate.
    *
-   *
+   * @param connection
    * @param userid
    * @param plan
    * @param id
    * @param questionID
    * @param answer
    * @param audioFile
-   * @param connection
    * @param valid
    * @throws java.sql.SQLException
    * @see #addAnswer
    */
-  private void addAnswerToTable(int userid, String plan, String id, int questionID, String answer, String audioFile,
-                                Connection connection, boolean valid) throws SQLException {
+  private void addAnswerToTable(Connection connection, int userid, String plan, String id, int questionID, String answer, String audioFile,
+                                boolean valid, boolean flq, boolean spoken, String audioType) throws SQLException {
     PreparedStatement statement;
-    statement = connection.prepareStatement("INSERT INTO results(userid,plan," +
-      Database.EXID +
-      ",qid,answer,valid) VALUES(?,?,?,?,?,?)");
+    statement = connection.prepareStatement("INSERT INTO results(" +
+        "userid," +
+        "plan," +
+      Database.EXID +"," +
+        "qid," +
+        Database.TIME+
+        "," +
+        "answer," +
+        "valid," +
+        ResultDAO.FLQ +"," +
+        ResultDAO.SPOKEN +"," +
+        ResultDAO.AUDIO_TYPE+
+        ") VALUES(?,?,?,?,?,?,?,?,?,?)");
     int i = 1;
     statement.setInt(i++, userid);
     statement.setString(i++, plan);
     statement.setString(i++, id);
     statement.setInt(i++, questionID);
     //System.err.println("got " + userid + ", " + plan +", "+ id +", " + questionID + ", " +answer + ", " +audioFile +", " + valid);
+    statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
 
     boolean isAudioAnswer = answer == null || answer.length() == 0;
     String x = isAudioAnswer ? audioFile : answer;
@@ -124,6 +155,9 @@ public class AnswerDAO {
     statement.setString(i++, x);
     //statement.setString(i++, audioFile);
     statement.setBoolean(i++, valid);
+    statement.setBoolean(i++, flq);
+    statement.setBoolean(i++, spoken);
+    statement.setString(i, audioType);
     statement.executeUpdate();
     statement.close();
   }
