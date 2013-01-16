@@ -29,6 +29,20 @@ public class Result implements IsSerializable {
   public long timestamp;
   public boolean flq;
   public boolean spoken;
+  //private AudioType audioType; // so having another object in here seemed to slow down serialization a lot
+  public String audioType;
+
+  public static final String AUDIO_TYPE_UNSET = "unset";
+  public static final String AUDIO_TYPE_REGULAR = "regular";
+  public static final String AUDIO_TYPE_FAST_AND_SLOW = "fastAndSlow";
+
+/*  public enum AudioType implements IsSerializable {
+    UNSET,
+    REGULAR,
+    FAST_AND_SLOW;
+
+    AudioType() {} // for gwt serialization
+  }*/
 
   public Result() {}
 
@@ -43,9 +57,10 @@ public class Result implements IsSerializable {
    * @param timestamp
    * @param flq
    * @param spoken
+   * @param answerType
    */
   public Result(int uniqueID, long userid, String plan, String id, int qid, String answer,
-                boolean valid, long timestamp, boolean flq, boolean spoken) {
+                boolean valid, long timestamp, boolean flq, boolean spoken, String answerType) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.plan = plan;
@@ -56,13 +71,16 @@ public class Result implements IsSerializable {
     this.timestamp = timestamp;
     this.flq = flq;
     this.spoken = spoken;
+    this.audioType = answerType == null || answerType.length() == 0 ? "unset" : answerType;
   }
 
   public void setFLQ(boolean flq)  { this.flq = flq; }
   public void setSpoken(boolean v) { this.spoken = v; }
+ // public boolean isRegularAudio() { return audioType == null || audioType.equals(AUDIO_TYPE_UNSET) || audioType.equals(AUDIO_TYPE_REGULAR); }
+  public boolean isFastAndSlowAudio() { return audioType != null && audioType.equals(AUDIO_TYPE_FAST_AND_SLOW); }
 
   @Override
   public String toString() {
-    return "Result #"+uniqueID + "\t\tby user " + userid + "\texid " + id + " " + (flq ? "flq":"english") + " " + (spoken ? "spoken":"written");
+    return "Result #"+uniqueID + "\t\tby user " + userid + "\texid " + id + " " + (flq ? "flq":"english") + " " + (spoken ? "spoken":"written") + " " + audioType;
   }
 }
