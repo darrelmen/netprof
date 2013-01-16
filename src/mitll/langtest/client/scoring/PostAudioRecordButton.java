@@ -10,6 +10,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Result;
 
 /**
  * Created with IntelliJ IDEA.
@@ -45,10 +46,16 @@ public class PostAudioRecordButton extends RecordButton {
   protected void stopRecording() {
     controller.stopRecording();
     reqid++;
-    service.writeAudioFile(controller.getBase64EncodedWavFile()
-        , exercise.getPlan(), exercise.getID(),
-        "" + index, "" + controller.getUser(),
-        false, reqid, new AsyncCallback<AudioAnswer>() {
+    service.writeAudioFile(controller.getBase64EncodedWavFile(),
+        exercise.getPlan(),
+        exercise.getID(),
+        index,
+        controller.getUser(),
+        controller.isAutoCRTMode(),
+        reqid,
+        !exercise.promptInEnglish,
+        controller.getAudioType(),
+        new AsyncCallback<AudioAnswer>() {
       public void onFailure(Throwable caught) {
         showPopup(AudioAnswer.Validity.INVALID.getPrompt());
       }
