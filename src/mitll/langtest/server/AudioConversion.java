@@ -42,7 +42,7 @@ public class AudioConversion {
   /**
    * Also writes an MP3 file equivalent.
    *
-   * @see LangTestDatabaseImpl#writeAudioFile(String, String, String, String, String)
+   * @see LangTestDatabaseImpl#writeAudioFile
    * @param base64EncodedString audio bytes from the client
    * @param file where we want to write the wav file to
    * @return true if audio is valid (not too short, not silence)
@@ -112,6 +112,54 @@ public class AudioConversion {
       e.printStackTrace();
     }
     return AudioAnswer.Validity.INVALID;
+  }
+
+  /**
+   * Return a reference to a wav file that is at the proper (expected) sample rate of 16K.
+   * If the audio file path is relative, make it absolute.
+   * If the audio file is an mp3 file convert it to wav
+   * If the audio file is not at the right sample rate, convert it.
+   * @param audioFile
+   * @param installPath
+   * @return reference to a wav file at the expected sample rate
+   */
+  public File getProperAudioFile(String audioFile, String installPath) {
+    // check the path of the audio file!
+    File t = new File(audioFile);
+    if (!t.exists()) {
+      System.out.println("getProperAudioFile getProperAudioFile " + t.getAbsolutePath() + " doesn't exist");
+    }
+    // make sure it's under the deploy location/install path
+    if (!audioFile.startsWith(installPath)) {
+      audioFile = installPath + File.separator + audioFile;
+    }
+    String noSuffix = removeSuffix(audioFile);
+
+    // convert it to wav, if needed
+    if (audioFile.endsWith(".mp3")) {
+      logger.debug("converting " + audioFile + " to wav ");
+      String wavFile = noSuffix +".wav";
+      File test = new File(wavFile);
+      audioFile = test.exists() ? test.getAbsolutePath() : convertMP3ToWav(audioFile).getAbsolutePath();
+    }
+
+    File testAudioFile = new File(audioFile);
+    if (!testAudioFile.exists()) {
+      logger.error("getProperAudioFile can't find file at " + testAudioFile.getAbsolutePath());
+    }
+    // convert it to 16K sample rate, if needed
+    try {
+      File converted = convertTo16Khz(testAudioFile);
+//      System.out.println("getProperAudioFile test audio is " + testAudioFile.getAbsolutePath() + " converted " + converted.getAbsolutePath());
+      testAudioFile = converted;
+    } catch (UnsupportedAudioFileException e) {
+      logger.error("getProperAudioFile couldn't convert " + testAudioFile.getAbsolutePath() + " : " + e.getMessage());
+    }
+
+    if (!testAudioFile.exists()) {
+      logger.error("getProperAudioFile getProperAudioFile " + testAudioFile.getAbsolutePath() + " doesn't exist????");
+    }
+    return testAudioFile;
   }
 
   /**
