@@ -1,7 +1,7 @@
 
 function microphone_recorder_events()
 {
-  $('#status').append("<p>Microphone recorder event: " + arguments[0]);
+  $('#status').append("<p>Microphone recorder event: " + arguments[0] + "  at " + new Date().getTime());
 
   switch(arguments[0]) {
   case "ready":
@@ -17,7 +17,6 @@ function microphone_recorder_events()
   case "microphone_connected":
     var mic = arguments[1];
     micConnected();
-
     $('#status').css({'color': '#000'}).append("<p>Microphone: " + mic.name);
     break;
 
@@ -25,62 +24,20 @@ function microphone_recorder_events()
     micNotConnected();
     break;
 
-  case "microphone_activity":
+/*  case "microphone_activity":
     $('#activity_level').text(arguments[1]);
-    break;
+      $('#status').css({'color': '#000'}).append("<p> activity - " + arguments[1] + " at " + new Date().getTime());
+      break;*/
 
   case "recording":
     var name = arguments[1];
+    $('#status').css({'color': '#000'}).append("<p> recording - " + name + " at " + new Date().getTime());
     break;
 
   case "recording_stopped":
     var name = arguments[1];
     var duration = arguments[2];
-    break;
-
-  case "playing":
-    var name = arguments[1];
-    break;
-
-  case "playback_started":
-    var name = arguments[1];
-    var latency = arguments[2];
-    break;
-
-  case "stopped":
-    var name = arguments[1];
-    playbackStopped();
-    break;
-
-  case "save_pressed":
-    break;
-
-  case "saving":
-    var name = arguments[1];
-    break;
-
-  case "saved":
-    var name = arguments[1];
-    var data = $.parseJSON(arguments[2]);
-    gotSaveComplete();
-    if(data.saved) {
-      $('#upload_status').css({'color': '#0F0'}).text(name + " was saved");
-    } else {
-      $('#upload_status').css({'color': '#F00'}).text(name + " was not saved");
-    }
-    break;
-
-  case "save_failed":
-    var name = arguments[1];
-    var errorMessage = arguments[2];
-    $('#upload_status').css({'color': '#F00'}).text(name + " failed: " + errorMessage);
-    break;
-
-  case "save_progress":
-    var name = arguments[1];
-    var bytesLoaded = arguments[2];
-    var bytesTotal = arguments[3];
-    $('#upload_status').css({'color': '#000'}).text(name + " progress: " + bytesLoaded + " / " + bytesTotal);
+    $('#status').css({'color': '#000'}).append("<p> recording_stopped - " + name + " Duration: " + duration + "  at " + new Date().getTime());
     break;
   }
 }
@@ -92,7 +49,7 @@ Recorder = {
   permitCalled: 0,
 
   connect: function(name, attempts) {
-    $('#status').css({'color': '#0F0'}).append("<p>connect called: ");
+    $('#status').css({'color': '#0F0'}).append("<p>connect called:  at " + new Date().getTime());
 
     if(navigator.appName.indexOf("Microsoft") != -1) {
       Recorder.recorder = window[name];
@@ -106,7 +63,7 @@ Recorder = {
 
     // flash app needs time to load and initialize
     if(Recorder.recorder && Recorder.recorder.init) {
-      $('#status').css({'color': '#0F0'}).append("<p>calling permit");
+      $('#status').css({'color': '#0F0'}).append("<p>calling permit at " + new Date().getTime());
       Recorder.recorder.permit();
       return;
     }
@@ -114,17 +71,14 @@ Recorder = {
     setTimeout(function() {Recorder.connect(name, attempts+1);}, 100);
   },
 
-  playBack: function(name) {
-    Recorder.recorder.playBack(name);
-  },
-
   record: function(name, filename) {
-    Recorder.recorder.record(name, filename);
+      $('#status').css({'color': '#0F0'}).append("<p>record at " + new Date().getTime());
+      Recorder.recorder.record(name, filename);
   },
 
   hide2:function () {
-    Recorder.recorder.width = 1 + "px";
-    Recorder.recorder.height = 1 + "px";
+    Recorder.recorder.width = 8 + "px";
+    Recorder.recorder.height = 8 + "px";
   },
 
   show: function() {
@@ -135,13 +89,9 @@ Recorder = {
     Recorder.recorder.hide();
   },
 
-  updateForm: function() {
-    var frm = $(Recorder.uploadFormId);
-    Recorder.recorder.update(frm.serializeArray());
-  },
-
   stop: function() {
-    Recorder.recorder.record("", "");
+      $('#status').css({'color': '#0F0'}).append("<p>stop at " + new Date().getTime());
+      Recorder.recorder.stopRecording();
   },
 
   getWav: function() {
@@ -150,12 +100,14 @@ Recorder = {
 
   showPermission: function() {
     Recorder.recorder.permit();
-  },
+  }
+
+  /*,
 
   showPermissionWindow: function() {
       $('#upload_status').css({'color': '#0F0'}).append(" permit called: ");
 
     // need to wait until app is resized before displaying permissions screen
       setTimeout(function(){Recorder.recorder.permit();}, 1);
-  }
+  }*/
 }
