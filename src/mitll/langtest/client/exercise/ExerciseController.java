@@ -37,5 +37,6 @@ public interface ExerciseController {
   boolean useBkgColorForRef();
   boolean isDemoMode();
   boolean isAutoCRTMode();
+  int getRecordTimeout();
   String getAudioType();
 }

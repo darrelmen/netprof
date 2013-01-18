@@ -90,4 +90,10 @@ public interface LangTestDatabase extends RemoteService {
 
   Map<String, List<Integer>> getResultPerExercise(boolean useFile);
   List<Session> getSessions();
+
+  int getNumResults();
+
+  List<Result> getResults(int start, int end);
+
+  Map<Integer, Float> getHoursToCompletion(boolean useFile);
 }
