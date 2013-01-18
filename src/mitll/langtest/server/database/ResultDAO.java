@@ -46,13 +46,33 @@ public class ResultDAO extends DAO {
   public List<Result> getResults() {
     try {
       Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement("SELECT * from " +RESULTS+";");
+      PreparedStatement statement = connection.prepareStatement("SELECT * FROM " +RESULTS+";");
 
       return getResultsForQuery(connection, statement);
     } catch (Exception ee) {
       ee.printStackTrace();
     }
     return new ArrayList<Result>();
+  }
+
+  public int getNumResults() {
+    int numResults = 0;
+    try {
+      Connection connection = database.getConnection();
+      PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + RESULTS + ";");
+      ResultSet rs = statement.executeQuery();
+      //List<Result> results = new ArrayList<Result>();
+      if (rs.next()) {
+        int i = 1;
+        numResults = rs.getInt(i++);
+      }
+      rs.close();
+      statement.close();
+      database.closeConnection(connection);
+    } catch (Exception ee) {
+      ee.printStackTrace();
+    }
+    return numResults;
   }
 
   /**
