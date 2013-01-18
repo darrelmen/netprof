@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
@@ -17,10 +18,8 @@ import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.grading.GradingExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Session;
 import mitll.langtest.shared.User;
@@ -80,22 +79,26 @@ public class MonitoringManager {
     dialogBox.setPopupPosition(left, top);
 
     ScrollPanel sp = new ScrollPanel();
-    sp.setHeight((int)(Window.getClientHeight()*0.9f) + "px");
+    sp.setHeight((int)(Window.getClientHeight()*0.8f) + "px");
     sp.setWidth((int)(Window.getClientWidth()*0.9f) + "px");
 
     final VerticalPanel vp = new VerticalPanel();
     vp.setWidth((int)(Window.getClientWidth()*0.88f) + "px");
     sp.add(vp);
     dialogVPanel.add(sp);
-    VerticalPanel toUse = new VerticalPanel();
-    vp.add(toUse);
-    doSessionQuery(vp);
 
-    //showUserInfo(dialogBox, dialogVPanel, vp);
-   // doResultLineQuery(vp, dialogVPanel, dialogBox);
-    doResultQuery(vp, dialogVPanel, dialogBox);
+    doSessionQuery(getVPanel(vp));
+    doResultQuery(getVPanel(vp));
+    doTimeUntilItems(getSPanel(vp));
+    doResultLineQuery(getVPanel(vp));
+    doResultByDayQuery(getSPanel(vp));
+    doResultByHourOfDayQuery(getSPanel(vp));
+
+    showUserInfo(getVPanel(vp));
+    dialogVPanel.add(closeButton);
 
     dialogBox.setWidget(dialogVPanel);
+    dialogBox.show();
 
     // Add a handler to send the name to the server
     closeButton.addClickHandler(new ClickHandler() {
@@ -104,6 +107,34 @@ public class MonitoringManager {
       }
     });
   }
+
+  private Panel getSPanel(VerticalPanel vp) {
+    Panel toUse4 = new SimplePanel();
+    vp.add(toUse4);
+    toUse4.setWidth("100%");
+    return toUse4;
+  }
+
+  private Panel getVPanel(VerticalPanel vp) {
+    Panel toUse2 = new VerticalPanel();
+    vp.add(toUse2);
+    toUse2.setWidth("100%");
+    return toUse2;
+  }
+
+  private void doTimeUntilItems(final Panel vp) {
+    service.getHoursToCompletion(useFile, new AsyncCallback<Map<Integer,Float>>() {
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Map<Integer, Float> result) {
+       // String slot = "Projected hours until answers per item";
+        vp.add(getNumToHoursChart(result));
+      }
+    });
+  }
+
 
   private void doSessionQuery(final Panel vp) {
     service.getSessions(new AsyncCallback<List<Session>>() {
@@ -114,29 +145,49 @@ public class MonitoringManager {
       public void onSuccess(List<Session> result) {
         long totalTime = 0;
         long total = 0;
-        long valid = 0;
+        long valid = result.size();
         Map<Long,Integer> rateToCount = new HashMap<Long, Integer>();
         for (Session s: result) {
-          if (s.numAnswers > 1) {
-            valid++;
             totalTime += s.duration;
             total += s.numAnswers;
 
             Integer count = rateToCount.get(s.getSecAverage());
             if (count == null) rateToCount.put(s.getSecAverage(), s.numAnswers);
             else rateToCount.put(s.getSecAverage(),count+s.numAnswers);
-          }
         }
         vp.add(new HTML("<b>Num sessions " +valid + "</b>"));
         vp.add(new HTML("<b>Time spent " +totalTime/HOUR + " hours " + (totalTime - (totalTime/HOUR)*HOUR)/MIN + " mins"+ "</b>"));
         vp.add(new HTML("<b>Answers = " +total+ "</b>"));
         vp.add(new HTML("<b>Avg Answers/session = " +total/valid+ "</b>"));
         vp.add(new HTML("<b>Avg time spent/session = " +(totalTime/valid)/MIN + " mins"+ "</b>"));
-        vp.add(new HTML("<b>Avg time spent/item = " +(totalTime/total)/1000 + " sec"+ "</b>"));
+        long rateInMillis = totalTime / total;
+        vp.add(new HTML("<b>Avg time spent/item = " + (rateInMillis/1000) + " sec"+ "</b>"));
 
         getRateChart(rateToCount, vp);
       }
     });
+  }
+
+  private ColumnChart getNumToHoursChart(Map<Integer, Float> rateToCount) {
+    Options options = Options.create();
+    options.setTitle("Hours until responses/item (given the current rate).  How long until completion?");
+
+    DataTable data = DataTable.create();
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Num Answers");
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Projected Hours");
+
+    data.addRows(rateToCount.size());
+
+    int r = 0;
+    List<Integer> ages = new ArrayList<Integer>(rateToCount.keySet());
+    Collections.sort(ages);
+    for (Integer age : ages) {
+      data.addRow();
+      data.setValue(r, 0, age);
+      data.setValue(r++, 1, rateToCount.get(age));
+    }
+
+    return new ColumnChart(data, options);
   }
 
   private void getRateChart(Map<Long, Integer> rateToCount, Panel vp) {
@@ -161,16 +212,22 @@ public class MonitoringManager {
     vp.add(new ColumnChart(data,options));
   }
 
-  private void doResultLineQuery(final Panel vp, final Panel outer, final DialogBox dialogBox) {
+  private void doResultLineQuery(final Panel vp) {
     service.getResultPerExercise(useFile, new AsyncCallback<Map<String,List<Integer>>>() {
-      public void onFailure(Throwable caught) {
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Map<String, List<Integer>> result) {
         String title = "Answers per Exercise";
         int size = result.values().iterator().next().size();
         int chartSamples = 1000;
+
+        List<Integer> overall = result.get("overall");
+        int total = 0;
+        for (Integer c : overall) total += c;
+        float ratio = ((float) total)/((float)overall.size());
+        vp.add(new HTML("<b>Avg answers/item = " + ratio +"</b>") );
+
         for (int i = 0; i < size; i += chartSamples) {
           Map<String, List<Integer>> typeToList = new HashMap<String, List<Integer>>();
           for (Map.Entry<String, List<Integer>> pair : result.entrySet()) {
@@ -179,20 +236,11 @@ public class MonitoringManager {
           LineChart lineChart = getLineChart(typeToList, title + " (" + i + "-" + (i + chartSamples) + ")", i == 0);
           vp.add(lineChart);
         }
-        //}
-        //LineChart lineChart = getLineChart(result, title);
-/*        String width = (int) (Window.getClientWidth() * 0.78f) + "px";
-        String height = (int) (Window.getClientHeight() * 0.78f) + "px";*/
-
 /*
         AnnotatedTimeLine.Options options = AnnotatedTimeLine.Options.create();
         AnnotatedTimeLine lineChart = new AnnotatedTimeLine(data, options, width, height);
 */
-        //  vp.add(lineChart);
-        //vp.add(getResultCountChart(userToCount));
-
-        //doResultQuery(vp, outer, dialogBox);
-        doResultByDayQuery(vp, outer, dialogBox);
+      //  doResultByDayQuery(vp, outer, dialogBox);
       }
     });
   }
@@ -224,7 +272,7 @@ public class MonitoringManager {
     return new LineChart(data, options);
   }
 
-  private void doResultQuery(final Panel vp, final Panel outer, final DialogBox dialogBox) {
+  private void doResultQuery(final Panel vp) {
     service.getResultCountToCount(useFile, new AsyncCallback<Map<Integer, Integer>>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Map<Integer, Integer> userToCount) {
@@ -235,38 +283,33 @@ public class MonitoringManager {
         int percent = (int) (ratio*100f);
         vp.add(new HTML("<b><font color='red'>Number unanswered = " + unanswered +" or " + percent +
             "%</font></b>") );
-        vp.add(new HTML("<b>Number answered = " +(total-unanswered)+" or " + (100-percent) +"%</b>") );
+        int numAnswered = total - unanswered;
+        vp.add(new HTML("<b>Number answered = " + numAnswered +" or " + (100-percent) +"%</b>") );
         vp.add(new HTML("<b>Number with one answer = " +userToCount.get(1)+"</b>"));
         vp.add(getResultCountChart(userToCount));
-       // doResultByDayQuery(vp, outer, dialogBox);
-        doResultLineQuery(vp, outer, dialogBox);
       }
     });
   }
 
-  private void doResultByDayQuery(final Panel vp, final Panel outer, final DialogBox dialogBox) {
+  private void doResultByDayQuery(final Panel vp) {
     service.getResultByDay(new AsyncCallback<Map<String, Integer>>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Map<String, Integer> userToCount) {
         vp.add(getResultByDayChart(userToCount));
-        doResultByHourOfDayQuery(vp, outer, dialogBox);
       }
     });
   }
 
-  private void doResultByHourOfDayQuery(final Panel vp, final Panel outer, final DialogBox dialogBox) {
+  private void doResultByHourOfDayQuery(final Panel vp) {
     service.getResultByHourOfDay(new AsyncCallback<Map<String, Integer>>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Map<String, Integer> userToCount) {
         vp.add(getResultByHourOfDayChart(userToCount));
-        showUserInfo(vp, outer, dialogBox);
-  /*      outer.add(closeButton);
-        dialogBox.show();*/
       }
     });
   }
 
-  private void showUserInfo(final Panel vp, final Panel dialogVPanel, final DialogBox dialogBox) {
+  private void showUserInfo(final Panel vp) {
     service.getUserToResultCount(new AsyncCallback<Map<User, Integer>>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Map<User, Integer> userToCount) {
@@ -277,9 +320,6 @@ public class MonitoringManager {
         vp.add(getDialectChart(userToCount));
         vp.add(getExperienceChart(userToCount));
         vp.add(getBrowserChart(userToCount));
-        dialogVPanel.add(closeButton);
-
-        dialogBox.show();
       }
     });
   }
@@ -416,7 +456,7 @@ public class MonitoringManager {
     return new ColumnChart(data, options);
   }
 
-  private Widget getAnnotatedResultByDayChart(Map<String, Integer> dayToCount) {
+/*  private Widget getAnnotatedResultByDayChart(Map<String, Integer> dayToCount) {
     String slot = "Day";
     //Options options = getOptions(slot);
     //DataTable data = getDataTable(slot, dayToCount);
@@ -445,7 +485,7 @@ public class MonitoringManager {
 
     AnnotatedTimeLine.Options options = AnnotatedTimeLine.Options.create();
     return new AnnotatedTimeLine(data, options, (int)(Window.getClientWidth()*0.6f) + "px", (int)(Window.getClientHeight()*0.2f) + "px");
-  }
+  }*/
 
   private Widget getResultByHourOfDayChart(Map<String, Integer> dayToCount) {
     String slot = "Hour of day (EST)";

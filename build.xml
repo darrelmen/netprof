@@ -16,20 +16,12 @@
     <property name="gwt.lib" value="gwt/lib"/>
     <property name="tomcat.deploy" value="../../../apache-tomcat-7.0.25/webapps"/>
 
-    <!--   <path id="project.class.path">
-        <pathelement location="war/WEB-INF/classes"/>
-        <pathelement location="test-classes"/>
-        &lt;!&ndash; Add any additional non-server libs (such as JUnit) &ndash;&gt;
-        <fileset dir="war/WEB-INF/lib" includes="**/*.jar"/>
-        <fileset dir="${gwt.lib}" includes="**/*.jar"/>
-    </path>-->
+    <path id="GWT SDK [GWT - 2.5.0].libraryclasspath">
+        <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122042-rel-r42/gwt-2.5.0/gwt-user.jar"/>
+        <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122042-rel-r42/gwt-2.5.0/gwt-dev.jar"/>
+        <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122042-rel-r42/gwt-2.5.0/validation-api-1.0.0.GA-sources.jar"/>
+        <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122042-rel-r42/gwt-2.5.0/validation-api-1.0.0.GA.jar"/>
 
-
-    <path id="GWT SDK [GWT - 2.4.0].libraryclasspath">
-        <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201208080121-rel-r42/gwt-2.4.0/gwt-user.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201208080121-rel-r42/gwt-2.4.0/gwt-dev.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201208080121-rel-r42/gwt-2.4.0/validation-api-1.0.0.GA-sources.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201208080121-rel-r42/gwt-2.4.0/validation-api-1.0.0.GA.jar"/>
 
         <pathelement location="/Applications/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201201120043-rel-r37/gwt-2.4.0/gwt-user.jar"/>
         <pathelement location="/Applications/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201201120043-rel-r37/gwt-2.4.0/gwt-dev.jar"/>
@@ -43,9 +35,7 @@
     <path id="LangTest.classpath">
         <pathelement location="war/WEB-INF/classes"/>
         <pathelement location="test-classes"/>
-        <path refid="GWT SDK [GWT - 2.4.0].libraryclasspath"/>
-        <pathelement location="../../eclipse_indigo/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201201120043-rel-r37/gwt-2.4.0/gwt-user.jar"/>
-        <pathelement location="/Applications/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201201120043-rel-r37/gwt-2.4.0/gwt-user.jar"/>
+        <path refid="GWT SDK [GWT - 2.5.0].libraryclasspath"/>
         <pathelement location="war/WEB-INF/lib/json-lib-2.4-jdk15.jar"/>
         <pathelement location="war/WEB-INF/lib/commons-codec-1.6.jar"/>
         <pathelement location="war/WEB-INF/lib/guava-13.0.jar"/>
@@ -66,13 +56,6 @@
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
-<!--
-        <copy includeemptydirs="false" todir="test-classes">
-            <fileset dir="test">
-                <exclude name="**/*.java"/>
-            </fileset>
-        </copy>
--->
     </target>
     <target name="clean">
         <delete dir="war/WEB-INF/classes"/>
@@ -110,7 +93,7 @@
         </jar>
     </target>
 
-    <!-- Makes data collection target -->
+    <!-- Makes a jar of just the .class files and the javascript, so you can overlay it on an active webapp -->
     <target depends="build" name="patch">
         <jar destfile="npPatch.war" basedir="war" excludes="config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
         </jar>
