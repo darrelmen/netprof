@@ -26,7 +26,6 @@ import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -277,9 +276,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       relativeImagePath = relativeImagePath.substring(1);
     }
     String imageURL = optionallyMakeURL(relativeImagePath);
-    logger.debug("for " + wavAudioFile + " type " + imageType + " rel path is " + relativeImagePath + " url " + imageURL);
-
     double duration = new AudioCheck().getDurationInSeconds(wavAudioFile);
+    logger.debug("for " + wavAudioFile + " type " + imageType + " rel path is " + relativeImagePath +
+        " url " + imageURL + " duration " + duration);
+
     return new ImageResponse(reqid,imageURL, duration);
   }
 
@@ -316,7 +316,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       return pretestScore;
     }
     String installPath = getInstallPath();
-    File testAudioFile = getProperAudioFile(audioFile, installPath);
+    AudioConversion audioConversion = new AudioConversion();
+
+    File testAudioFile = audioConversion.getProperAudioFile(audioFile, installPath);
 
     logger.debug("\tscoring after conversion " + testAudioFile.getAbsolutePath());
     String name = testAudioFile.getName();
@@ -330,7 +332,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String refAudioDir = null;
 
     for (String ref : refs) {
-      File properAudioFile = getProperAudioFile(ref, installPath);
+      File properAudioFile = audioConversion.getProperAudioFile(ref, installPath);
       if (refAudioDir == null) refAudioDir = properAudioFile.getParent();
       names.add(removeSuffix(properAudioFile.getName()));
     }
@@ -363,45 +365,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     System.out.println("prop file has " + kv.size() + " properties : " + props.keySet());
     return kv;
-  }
-
-  private File getProperAudioFile(String audioFile, String installPath) {
-    // check the path of the audio file!
-    File t = new File(audioFile);
-    if (!t.exists()) {
-      System.out.println("getProperAudioFile getProperAudioFile " + t.getAbsolutePath() + " doesn't exist");
-    }
-    // make sure it's under the deploy location/install path
-    if (!audioFile.startsWith(installPath)) {
-      audioFile = installPath + File.separator + audioFile;
-    }
-    String noSuffix = removeSuffix(audioFile);
-
-    // convert it to wav, if needed
-    if (audioFile.endsWith(".mp3")) {
-      logger.debug("converting " + audioFile + " to wav ");
-      String wavFile = noSuffix +".wav";
-      File test = new File(wavFile);
-      audioFile = test.exists() ? test.getAbsolutePath() : new AudioConversion().convertMP3ToWav(audioFile).getAbsolutePath();
-    }
-
-    File testAudioFile = new File(audioFile);
-    if (!testAudioFile.exists()) {
-      logger.error("getProperAudioFile can't find file at " + testAudioFile.getAbsolutePath());
-    }
-    // convert it to 16K sample rate, if needed
-    try {
-      File converted = new AudioConversion().convertTo16Khz(testAudioFile);
-//      System.out.println("getProperAudioFile test audio is " + testAudioFile.getAbsolutePath() + " converted " + converted.getAbsolutePath());
-      testAudioFile = converted;
-    } catch (UnsupportedAudioFileException e) {
-      logger.error("getProperAudioFile couldn't convert " + testAudioFile.getAbsolutePath() + " : " + e.getMessage());
-    }
-
-    if (!testAudioFile.exists()) {
-      logger.error("getProperAudioFile getProperAudioFile " + testAudioFile.getAbsolutePath() + " doesn't exist????");
-    }
-    return testAudioFile;
   }
 
   /**
@@ -536,13 +499,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private String getWavForMP3(String audioFile, String installPath) {
     assert(audioFile.endsWith(".mp3"));
-    AudioConversion audioConversion = new AudioConversion();
     if (makeFullURLs) audioFile = new URLUtils(getThreadLocalRequest()).convertURLToRelativeFile(audioFile);
     String absolutePath = getAbsolute(audioFile,installPath).getAbsolutePath();
 
     if (!new File(absolutePath).exists())
       logger.error("getWavForMP3 : expecting file at " + absolutePath);
     else {
+      AudioConversion audioConversion = new AudioConversion();
       File file = audioConversion.convertMP3ToWav(absolutePath);
       if (file.exists()) {
         String orig = audioFile;
@@ -686,6 +649,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getResults();
   }
 
+  @Override
+  public List<Result> getResults(int start, int end) {
+    List<Result> resultList = db.getResults().subList(start, end);
+    List<Result> copy = new ArrayList<Result>(resultList);
+    return copy;
+  }
+
+  @Override
+  public int getNumResults() { return db.getNumResults(); }
+
   /**
    * Record an answer entry in the database.<br></br>
    * Write the posted data to a wav and an mp3 file (since all the browser audio works with mp3).
@@ -746,6 +719,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public Map<String, List<Integer>> getResultPerExercise(boolean useFile) {
     return db.getResultPerExercise(useFile);
+  }
+
+  @Override
+  public Map<Integer, Float> getHoursToCompletion(boolean useFile) {
+    return db.getHoursToCompletion(useFile);
   }
 
   public List<Session> getSessions() {
