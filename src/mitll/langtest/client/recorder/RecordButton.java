@@ -23,17 +23,13 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class RecordButton {
-  private static final int DELAY_MILLIS = 20000; // default
-
   private boolean recording = false;
   private Timer recordTimer;
   private final FocusWidget record;
   private int autoStopDelay;
   private HandlerRegistration keyHandler;
   private boolean hasFocus = false;
-  public RecordButton(FocusWidget recordButton) {
-    this(recordButton, DELAY_MILLIS);
-  }
+
   public RecordButton(FocusWidget recordButton, int delay) {
     this.autoStopDelay = delay;
     this.record = recordButton;
@@ -53,12 +49,15 @@ public abstract class RecordButton {
       @Override
       public void onBlur(BlurEvent event) {
         hasFocus = false;
-
        // System.out.println(new Date() + " : recordButton LOST  focus !----> ");
       }
     });
     recordButton.setTitle("Press Return to record/stop recording");
 
+    addKeyHandler();
+  }
+
+  private void addKeyHandler() {
     keyHandler = Event.addNativePreviewHandler(new
                                                    Event.NativePreviewHandler() {
 
@@ -72,10 +71,9 @@ public abstract class RecordButton {
                                                            !hasFocus) {
                                                          ne.preventDefault();
 
-                                                        // boolean hasFocus = recordButton.
-                                                         System.out.println(new Date() + " : Click handler : Got " + event + " type int " +
+/*                                                         System.out.println(new Date() + " : Click handler : Got " + event + " type int " +
                                                              event.getTypeInt() + " assoc " + event.getAssociatedType() +
-                                                             " native " + event.getNativeEvent() + " source " + event.getSource());
+                                                             " native " + event.getNativeEvent() + " source " + event.getSource());*/
                                                          new Timer() {
                                                            @Override
                                                            public void run() {
@@ -85,11 +83,11 @@ public abstract class RecordButton {
                                                        }
                                                      }
                                                    });
-    System.out.println("creating handler for recording " + keyHandler);
+    //System.out.println("creating handler for recording " + keyHandler);
   }
 
   public void onUnload() {
-    System.out.println("removing handler for recording " + keyHandler);
+    //System.out.println("removing handler for recording " + keyHandler);
     keyHandler.removeHandler();
   }
 
@@ -97,17 +95,9 @@ public abstract class RecordButton {
     if (record.isVisible() && record.isEnabled()) {
       if (recording) {
         cancelTimer();
-        // TODO : worry about issue where seems to stop recording too early sometimes
-/*      new Timer() {
-        @Override
-        public void run() {
-          stop();
-        }
-      }.schedule(10);*/
         stop();
       } else {
         start();
-
         addRecordingMaxLengthTimeout();
       }
     }
@@ -120,6 +110,8 @@ public abstract class RecordButton {
   }
 
   private void stop() {
+    long now = System.currentTimeMillis();
+  //  System.out.println("stop recording at " + now + " " + (now-then));
     recording = false;
     showStopped();
     stopRecording();
@@ -147,15 +139,18 @@ public abstract class RecordButton {
       @Override
       public void run() {
         if (recording) {
+         // long now = System.currentTimeMillis();
+        //  System.out.println("stop schedule timer at " + now + " " + (now-then));
           stop();
         }
       }
     };
 
     // Schedule the timer to run once in 20 seconds.
+    //System.out.println("start schedule timer at " + (then = System.currentTimeMillis()));
     recordTimer.schedule(autoStopDelay);
   }
-
+  //private long then = 0;
   private void cancelTimer() {
     if (recordTimer != null) {
       recordTimer.cancel();
