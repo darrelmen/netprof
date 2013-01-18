@@ -30,10 +30,20 @@ public class AudioCheck {
     return 20.0 * Math.log(power < 0.0001f ? 0.0001f : power) / LOG_OF_TEN;
   }
 
+  /**
+   * @see LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int)
+   * @param file
+   * @return
+   */
   public double getDurationInSeconds(String file) {
     return getDurationInSeconds(new File(file));
   }
 
+  /**
+   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise(String, String, String, String, String, int, int, boolean, java.util.List, java.util.List, java.util.List)
+   * @param file
+   * @return
+   */
   public double getDurationInSeconds(File file) {
     try {
       AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
