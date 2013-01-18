@@ -47,6 +47,8 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class DatabaseImpl implements Database {
+  public static final int SESSION_GAP = 10 * 60 * 1000;
+  public static final int HOUR_IN_MILLIS = (60 * 60 * 1000);
   private static Logger logger = Logger.getLogger(DatabaseImpl.class);
  // private static final boolean TESTING = false;
 
@@ -189,6 +191,10 @@ public class DatabaseImpl implements Database {
    * @see #getExercises(long, boolean)
    */
   private List<Exercise> getExercises(boolean useFile, String lessonPlanFile) {
+    if (lessonPlanFile == null) {
+      logger.error("huh? lesson plan file is null???", new Exception());
+      return Collections.emptyList();
+    }
     if (exerciseDAO == null || useFile && exerciseDAO instanceof SQLExerciseDAO || !useFile && exerciseDAO instanceof FileExerciseDAO) {
       this.exerciseDAO = makeExerciseDAO(useFile);
     }
@@ -568,6 +574,8 @@ public class DatabaseImpl implements Database {
     return resultDAO.getResults();
   }
 
+  public int getNumResults() { return resultDAO.getNumResults(); }
+
   public ResultsAndGrades getResultsForExercise(String exid) {
     return getResultsForExercise(exid, false, false, false);
   }
@@ -767,7 +775,7 @@ public class DatabaseImpl implements Database {
 
   public List<Session> getSessions() {
     List<Result> results = getResults();
-    logger.debug("total " + results.size());
+
     Map<Long,List<Result>> userToAnswers = new HashMap<Long, List<Result>>();
     for (Result r : results) {
       List<Result> results1 = userToAnswers.get(r.userid);
@@ -785,12 +793,9 @@ public class DatabaseImpl implements Database {
       Session s = null;
       long last = 0;
       for (Result r : resultList) {
-        int sessionGap = 10 * 60 * 1000;
-        if (s == null || r.timestamp - last > sessionGap) {
-          //if (s != null
+        if (s == null || r.timestamp - last > SESSION_GAP) {
           s = new Session();
           sessions.add(s);
-          //s.duration = 0l;
         } else {
           s.duration += r.timestamp - last;
         }
@@ -798,7 +803,43 @@ public class DatabaseImpl implements Database {
         last = r.timestamp;
       }
     }
+    Iterator<Session> iter = sessions.iterator();
+    while(iter.hasNext()) if (iter.next().numAnswers < 2) iter.remove();
     return sessions;
+  }
+
+  public Map<Integer,Float> getHoursToCompletion(boolean useFile) {
+    long totalTime = 0;
+    long total = 0;
+    for (Session s: getSessions()) {
+      totalTime += s.duration;
+      total += s.numAnswers;
+    }
+
+    long rateInMillis = totalTime / total;
+
+    Map<String, Integer> exToCount = getExToCount(useFile);
+    List<Integer> overall = getCountArray(exToCount);
+    int totalAnswers = 0;
+    for (Integer c : overall) totalAnswers += c;
+    double numItems = (double) overall.size();
+    double ratio = ((double) totalAnswers)/ numItems;
+    double next = Math.ceil(ratio);
+    double remainingForNext = (next-ratio)* numItems;
+    double dRate = (double) rateInMillis;
+    double millisForNext = dRate *remainingForNext;
+    double hoursForNext = millisForNext/ HOUR_IN_MILLIS;
+
+    Map<Integer,Float> estToItems = new HashMap<Integer, Float>();
+    estToItems.put((int) next, (float) hoursForNext);
+    double millisForFollowing = numItems * dRate;
+    double hoursPerFollowing = millisForFollowing / HOUR_IN_MILLIS;
+    for (double i = 1d; i < 10d; i += 1.0d) {
+      estToItems.put((int) (next + i), ((float) (hoursForNext + (i*hoursPerFollowing))));
+    }
+
+   // logger.info("Est time to completion " +estToItems);
+    return estToItems;
   }
 
   /**
