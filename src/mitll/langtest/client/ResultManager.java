@@ -14,8 +14,11 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.grading.GradingExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
@@ -76,27 +79,17 @@ public class ResultManager {
     closeButton.getElement().setId("closeButton");
 
     final VerticalPanel dialogVPanel = new VerticalPanel();
-/*    dialogVPanel.setWidth("1200px");
-    dialogBox.setWidth("1200px");*/
 
     int left = (Window.getClientWidth()) / 10;
     int top  = (Window.getClientHeight()) / 10;
     dialogBox.setPopupPosition(left, top);
 
-    service.getResults(new AsyncCallback<List<Result>>() {
+    service.getNumResults(new AsyncCallback<Integer>() {
+      @Override
       public void onFailure(Throwable caught) {}
-      public void onSuccess(List<Result> result) {
-        if (lastTable != null) {
-          dialogVPanel.remove(lastTable);
-          dialogVPanel.remove(closeButton);
-        }
-
-        Widget table = getTable(result, false, true, new ArrayList<Grade>(), "", 1);
-        dialogVPanel.add(table);
-        dialogVPanel.add(closeButton);
-
-        lastTable = table;
-        dialogBox.show();
+      @Override
+      public void onSuccess(Integer result) {
+        populateTable(result, dialogVPanel, dialogBox);
       }
     });
 
@@ -108,6 +101,20 @@ public class ResultManager {
         dialogBox.hide();
       }
     });
+  }
+
+  private void populateTable(int numResults, Panel dialogVPanel, DialogBox dialogBox) {
+    if (lastTable != null) {
+      dialogVPanel.remove(lastTable);
+      dialogVPanel.remove(closeButton);
+    }
+
+    Widget table = getAsyncTable(numResults, false, true, new ArrayList<Grade>(), "", 1);
+    dialogVPanel.add(table);
+    dialogVPanel.add(closeButton);
+
+    lastTable = table;
+    dialogBox.show();
   }
 
   /**
@@ -123,9 +130,57 @@ public class ResultManager {
    */
   public Widget getTable(Collection<Result> result, final boolean gradingView, boolean showQuestionColumn,
                          Collection<Grade> grades, final String grader, int numGrades) {
-   // remainingResults.clear();
-
     CellTable<Result> table = new CellTable<Result>();
+    TextColumn<Result> id = addColumnsToTable(gradingView, showQuestionColumn, grades, grader, numGrades, table);
+
+    // Create a data provider.
+    List<Result> list = createProvider(result, table);
+
+    // Add a ColumnSortEvent.ListHandler to connect sorting to the
+    // java.util.List.
+    addSorter(table, id, list);
+
+    // Create a SimplePager.
+    return getPager(table);
+  }
+
+  private List<Result> createProvider(Collection<Result> result, CellTable<Result> table) {
+    ListDataProvider<Result> dataProvider = new ListDataProvider<Result>();
+
+    // Connect the table to the data provider.
+    dataProvider.addDataDisplay(table);
+
+    // Add the data to the data provider, which automatically pushes it to the
+    // widget.
+    List<Result> list = dataProvider.getList();
+    for (Result answer : result) {
+      list.add(answer);
+    }
+    table.setRowCount(list.size());
+    return list;
+  }
+
+  private Widget getAsyncTable(int numResults, final boolean gradingView, boolean showQuestionColumn,
+                         Collection<Grade> grades, final String grader, int numGrades) {
+    CellTable<Result> table = new CellTable<Result>();
+    TextColumn<Result> id = addColumnsToTable(gradingView, showQuestionColumn, grades, grader, numGrades, table);
+    table.setRowCount(numResults, true);
+    table.setVisibleRange(0,15);
+    createProvider(numResults, table);
+
+    // Add a ColumnSortEvent.AsyncHandler to connect sorting to the
+    // AsyncDataPRrovider.
+    ColumnSortEvent.AsyncHandler columnSortHandler = new ColumnSortEvent.AsyncHandler(table);
+    table.addColumnSortHandler(columnSortHandler);
+
+    // We know that the data is sorted alphabetically by default.
+    table.getColumnSortList().push(id);
+
+    // Create a SimplePager.
+    return getPager(table);
+  }
+
+  private TextColumn<Result> addColumnsToTable(boolean gradingView, boolean showQuestionColumn, Collection<Grade> grades, String grader, int numGrades, CellTable<Result> table) {
     String gradingWidth = 700 + "px";
     if (!gradingView) {
       int i = (int)(Window.getClientWidth()*0.8f);
@@ -170,57 +225,62 @@ public class ResultManager {
 
     addResultColumn(grades, grader, numGrades, table);
     // Create a data provider.
-    ListDataProvider<Result> dataProvider = new ListDataProvider<Result>();
+    return id;
+  }
+
+  private AsyncDataProvider<Result> createProvider(final int numResults, CellTable<Result> table) {
+    // ListDataProvider<Result> dataProvider = new ListDataProvider<Result>();
+    AsyncDataProvider<Result> dataProvider = new AsyncDataProvider<Result>() {
+      @Override
+      protected void onRangeChanged(HasData<Result> display) {
+        final int start = display.getVisibleRange().getStart();
+        int end = start + display.getVisibleRange().getLength();
+        end = end >= numResults ? numResults : end;
+        service.getResults(start, end, new AsyncCallback<List<Result>>() {
+          @Override
+          public void onFailure(Throwable caught) {}
+          @Override
+          public void onSuccess(List<Result> result) {
+            updateRowData(start, result);
+          }
+        });
+      }
+    };
 
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
+    dataProvider.updateRowCount(numResults, true);
 
-    // Add the data to the data provider, which automatically pushes it to the
-    // widget.
-    List<Result> list = dataProvider.getList();
-    for (Result answer : result) {
-      list.add(answer);
-    }
-    table.setRowCount(list.size());
-
-    // Add a ColumnSortEvent.ListHandler to connect sorting to the
-    // java.util.List.
-    addSorter(table, id, list);
-
-    // We know that the data is sorted alphabetically by default.
-   // table.getColumnSortList().push(id);
-
-    // Create a SimplePager.
-    return getPager(table);
+    return dataProvider;
   }
 
   protected TextColumn<Result> addUserPlanExercise(CellTable<Result> table) {
     TextColumn<Result> id = new TextColumn<Result>() {
-        @Override
-        public String getValue(Result answer) {
-          return "" + answer.userid;
-        }
-      };
-      id.setSortable(true);
-      table.addColumn(id, "User ID");
+      @Override
+      public String getValue(Result answer) {
+        return "" + answer.userid;
+      }
+    };
+    id.setSortable(true);
+    table.addColumn(id, "User ID");
 
-      TextColumn<Result> age = new TextColumn<Result>() {
-        @Override
-        public String getValue(Result answer) {
-          return "" + answer.plan;
-        }
-      };
-      age.setSortable(true);
-      table.addColumn(age, "Plan");
+    TextColumn<Result> age = new TextColumn<Result>() {
+      @Override
+      public String getValue(Result answer) {
+        return "" + answer.plan;
+      }
+    };
+    age.setSortable(true);
+    table.addColumn(age, "Plan");
 
-      TextColumn<Result> gender = new TextColumn<Result>() {
-        @Override
-        public String getValue(Result answer) {
-          return answer.id;
-        }
-      };
-      gender.setSortable(true);
-      table.addColumn(gender, "Exercise");
+    TextColumn<Result> gender = new TextColumn<Result>() {
+      @Override
+      public String getValue(Result answer) {
+        return answer.id;
+      }
+    };
+    gender.setSortable(true);
+    table.addColumn(gender, "Exercise");
     return id;
   }
 
