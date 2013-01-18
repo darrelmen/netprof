@@ -44,14 +44,13 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
   public void show() {
     setSize(WIDTH + "px", HEIGHT + "px");
-    //setVisible(true);
   }
 
   /**
    * @see mitll.langtest.client.LangTest#makeFlashContainer()
    */
   public void hide() {
-    setSize("0px", "0px");
+    setSize("8px", "8px");
   }
 
   /**
@@ -63,7 +62,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
       public void execute() {
         if (!didPopup) {
           show();
-          System.out.println("initFlash : doing installFlash");
+          //System.out.println("initFlash : doing installFlash");
           installFlash();
           System.out.println("initFlash : did   installFlash");
           didPopup = true;
@@ -145,7 +144,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * Event from flash when user clicks Deny
    */
   public static void micNotConnected() {
-    System.out.println("mic  NOT   Connected!");
+    System.err.println("mic  NOT   Connected!");
     permissionReceived = false;
     micPermission.gotDenial();
   }
