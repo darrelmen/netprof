@@ -30,6 +30,6 @@ public class ImageResponse implements IsSerializable {
   }
 
   public String toString() {
-    return successful ? " req " + req + " : " + imageURL + " dur " + durationInSeconds : "error for req " + req;
+    return successful ? " req " + req + " : " + imageURL + " dur " + durationInSeconds : " error for req " + req;
   }
 }
