@@ -75,4 +75,10 @@ public interface LangTestDatabaseAsync {
   void getResultPerExercise(boolean useFile, AsyncCallback<Map<String, List<Integer>>> async);
 
   void getSessions(AsyncCallback<List<Session>> async);
+
+  void getNumResults(AsyncCallback<Integer> async);
+
+  void getResults(int start, int end, AsyncCallback<List<Result>> async);
+
+  void getHoursToCompletion(boolean useFile, AsyncCallback<Map<Integer, Float>> async);
 }
