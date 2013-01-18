@@ -70,6 +70,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final boolean DEFAULT_SHOW_TURK_TOKEN = false;
   private static final int DEFAULT_SEGMENT_REPEATS = 2;
   private static final String DEFAULT_EXERCISE = null;
+  private static final int DEFAULT_TIMEOUT = 45000;
   public static final String LANGTEST_IMAGES = "langtest/images/";
 
   private Panel currentExerciseVPanel = new VerticalPanel();
@@ -109,6 +110,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private boolean demoMode;
   private boolean dataCollectMode;
   private String releaseDate;
+  private int recordTimeout = DEFAULT_TIMEOUT;
 
   // property file property names
   private static final String GRADING_PROP = "grading";
@@ -124,6 +126,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final String AUTO_CRT = "autocrt";
   private static final String DEMO_MODE = "demo";
   private static final String DATA_COLLECT_MODE = "dataCollect";
+  private static final String RECORD_TIMEOUT = "recordTimeout";
 
   // URL parameters that can override above parameters
   private static final String GRADING = "grading";
@@ -276,6 +279,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       else if (key.equals(AUTO_CRT)) autocrt = Boolean.parseBoolean(value);
       else if (key.equals(DEMO_MODE)) demoMode = Boolean.parseBoolean(value);
       else if (key.equals(DATA_COLLECT_MODE)) dataCollectMode = Boolean.parseBoolean(value);
+      else if (key.equals(RECORD_TIMEOUT)) recordTimeout = Integer.parseInt(value);
     }
   }
 
@@ -649,6 +653,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean useBkgColorForRef() {  return bkgColorForRef; }
   public boolean isDemoMode() {  return demoMode; }
   public boolean isAutoCRTMode() {  return autocrt; }
+  public int getRecordTimeout() {  return recordTimeout; }
 
   // recording methods...
   /**
