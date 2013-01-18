@@ -72,7 +72,7 @@ public class RecordButtonPanel extends HorizontalPanel {
     recordButton.getElement().setId("record_button");
     recordButton.setTitle(RECORD);
 
-    this.rb = new RecordButton(recordButton) {
+    this.rb = new RecordButton(recordButton, controller.getRecordTimeout()) {
       @Override
       protected void stopRecording() {
         outer.stopRecording();

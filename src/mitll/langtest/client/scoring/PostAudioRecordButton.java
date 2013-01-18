@@ -10,10 +10,11 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Result;
 
 /**
- * Created with IntelliJ IDEA.
+ * This binds a record button with the act of posting recorded audio to the server.
+ *
+ * This is not a widget itself, but a helper.
  * User: GO22670
  * Date: 12/18/12
  * Time: 6:51 PM
@@ -22,7 +23,6 @@ import mitll.langtest.shared.Result;
 public class PostAudioRecordButton extends RecordButton {
   private static final String RECORD = "record";
   private static final String STOP = "stop";
-  private static final int AUTO_STOP_DELAY = 15000; // millis
 
   private int index;
   private int reqid = 0;
@@ -31,7 +31,7 @@ public class PostAudioRecordButton extends RecordButton {
   private final LangTestDatabaseAsync service;
 
   public PostAudioRecordButton(Exercise exercise, ExerciseController controller, LangTestDatabaseAsync service, int index) {
-    super(new Button(RECORD), AUTO_STOP_DELAY);
+    super(new Button(RECORD), controller.getRecordTimeout());
 
     this.index = index;
     this.exercise = exercise;
