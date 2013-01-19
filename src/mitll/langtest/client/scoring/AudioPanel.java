@@ -182,7 +182,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param path
    */
   public void getImagesForPath(String path) {
-    System.out.println("AudioPanel : getImagesForPath " +path);
+    //System.out.println("AudioPanel : getImagesForPath " +path);
     if (path != null) {
       this.audioPath = path;
     }
