@@ -257,7 +257,8 @@ public class DatabaseImpl implements Database {
    *@param useFLQ
    * @param useSpoken @return next exercise containing ungraded results
    */
-  private Exercise getNextUngradedExerciseQuick(Collection<String> activeExercises, int expectedCount, boolean filterResults, boolean useFLQ, boolean useSpoken) {
+  private Exercise getNextUngradedExerciseQuick(Collection<String> activeExercises, int expectedCount,
+                                                boolean filterResults, boolean useFLQ, boolean useSpoken) {
     List<Exercise> rawExercises = getExercises(false);
     Collection<Result> resultExcludingExercises = resultDAO.getResultExcludingExercises(activeExercises);
 
@@ -351,6 +352,70 @@ public class DatabaseImpl implements Database {
       exercises.add(exercise);
     }
     return exercises;
+  }
+
+  /**
+   * Show unanswered questions first, then ones with 1, then 2, then 3,... answers
+   * Also be aware of the user's gender -- if you're female, show questions that have no female answers first.
+   * @param useFile
+   * @param userID
+   * @return
+   */
+  public List<Exercise> getExercisesBiasTowardsUnanswered(boolean useFile, long userID) {
+    List<Exercise> rawExercises = getExercises(useFile);
+    Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
+    Map<String,Integer> idToCount = new HashMap<String, Integer>();
+
+    for (Exercise e : rawExercises) {
+      idToCount.put(e.getID(), 0);
+      idToExercise.put(e.getID(), e);
+    }
+
+
+    Map<Long, User> userMap = getUserMap(isUserMale(userID));
+    List<Result> results = getResults();
+    for (Result r: results ) {
+      Integer current = idToCount.get(r.id);
+      if (current != null) {
+        if (userMap.containsKey(r.userid)) {
+          idToCount.put(r.id,current+1);
+        }
+      }
+    }
+
+    // only find answers that are for the gender
+
+    Map<Integer,List<String>> countToIds = new TreeMap<Integer, List<String>>();
+    for (Map.Entry<String,Integer> pair : idToCount.entrySet()) {
+      List<String> idsAtCount = countToIds.get(pair.getValue());
+      if (idsAtCount == null) { countToIds.put(pair.getValue(), idsAtCount = new ArrayList<String>()); }
+      idsAtCount.add(pair.getKey());
+    }
+    List<Exercise> result = new ArrayList<Exercise>();
+    Random rnd = new Random(userID);
+
+    for (List<String> itemsAtCount : countToIds.values()) {
+      Collections.shuffle(itemsAtCount, rnd);
+      for (String id : itemsAtCount) {
+        Exercise e = idToExercise.get(id);
+        if (e == null) logger.error("huh? couldn't find exercise " + id);
+        else result.add(e);
+      }
+    }
+
+    return result;
+  }
+
+  private boolean isUserMale(long userID) {
+    List<User> users = userDAO.getUsers();
+    User thisUser = null;
+    for (User u : users) {
+      if (u.id == userID) {
+        thisUser = u;
+        break;
+      }
+    }
+    return thisUser != null && thisUser.isMale();
   }
 
   private Random random = new Random();
