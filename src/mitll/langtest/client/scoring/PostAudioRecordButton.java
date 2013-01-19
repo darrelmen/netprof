@@ -78,7 +78,7 @@ public class PostAudioRecordButton extends RecordButton {
       }
 
       public void onSuccess(AudioAnswer result) {
-        System.out.println("PostAudioRecordButton : Got audio answer " + result);
+        //System.out.println("PostAudioRecordButton : Got audio answer " + result);
         if (result.reqid != reqid) {
           System.out.println("ignoring old response " + result);
           return;
