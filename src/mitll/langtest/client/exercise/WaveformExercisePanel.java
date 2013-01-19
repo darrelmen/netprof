@@ -121,7 +121,7 @@ public class WaveformExercisePanel extends ExercisePanel {
          */
         @Override
         protected void stopRecording() {
-          System.out.println("RecordAudioPanel : Stop recording!");
+          //System.out.println("RecordAudioPanel : Stop recording!");
 
           setButtonsEnabled(true);
           waveform.setVisible(true);

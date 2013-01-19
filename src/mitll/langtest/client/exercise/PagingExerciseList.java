@@ -186,7 +186,7 @@ public class PagingExerciseList extends ExerciseList {
   @Override
   protected void markCurrentExercise(int i) {
     ExerciseShell itemToSelect = currentExercises.get(i);
-    System.out.println(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect + " with clicked on " + clickedOn);
+   // System.out.println(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect + " with clicked on " + clickedOn);
     table.getSelectionModel().setSelected(itemToSelect, true);
     int pageEnd = table.getPageStart() + table.getPageSize();
 /*    System.out.println("marking " +i +" out of " +table.getRowCount() + " page start " +table.getPageStart() +
