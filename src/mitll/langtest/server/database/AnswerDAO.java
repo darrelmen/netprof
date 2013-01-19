@@ -36,7 +36,7 @@ public class AnswerDAO {
                         boolean flq, boolean spoken, String audioType) {
     String plan = e.getPlan();
     String id = e.getID();
-    addAnswer(database,userID, plan, id, questionID, answer, audioFile, true,  flq, spoken, audioType);
+    addAnswer(database,userID, plan, id, questionID, answer, audioFile, true,  flq, spoken, audioType, 0);
   }
 
   /**
@@ -90,10 +90,10 @@ public class AnswerDAO {
    * @param spoken
    */
   public void addAnswer(Database database, int userID, String plan, String id, int questionID, String answer,
-                        String audioFile, boolean valid, boolean flq, boolean spoken, String audioType) {
+                        String audioFile, boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis) {
     try {
       Connection connection = database.getConnection();
-      addAnswerToTable(connection, userID, plan, id, questionID, answer, audioFile, valid,flq,spoken,audioType);
+      addAnswerToTable(connection, userID, plan, id, questionID, answer, audioFile, valid,flq,spoken,audioType,durationInMillis);
       database.closeConnection(connection);
 
  /*     if (LOG_RESULTS) { // true to see what is in the table
@@ -126,7 +126,7 @@ public class AnswerDAO {
    * @see #addAnswer
    */
   private void addAnswerToTable(Connection connection, int userid, String plan, String id, int questionID, String answer, String audioFile,
-                                boolean valid, boolean flq, boolean spoken, String audioType) throws SQLException {
+                                boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis) throws SQLException {
     PreparedStatement statement;
     statement = connection.prepareStatement("INSERT INTO results(" +
         "userid," +
@@ -139,8 +139,9 @@ public class AnswerDAO {
         "valid," +
         ResultDAO.FLQ +"," +
         ResultDAO.SPOKEN +"," +
-        ResultDAO.AUDIO_TYPE+
-        ") VALUES(?,?,?,?,?,?,?,?,?,?)");
+        ResultDAO.AUDIO_TYPE +","+
+        ResultDAO.DURATION+
+        ") VALUES(?,?,?,?,?,?,?,?,?,?,?)");
     int i = 1;
     statement.setInt(i++, userid);
     statement.setString(i++, plan);
@@ -157,7 +158,8 @@ public class AnswerDAO {
     statement.setBoolean(i++, valid);
     statement.setBoolean(i++, flq);
     statement.setBoolean(i++, spoken);
-    statement.setString(i, audioType);
+    statement.setString(i++, audioType);
+    statement.setInt(i, durationInMillis);
     statement.executeUpdate();
     statement.close();
   }

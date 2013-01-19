@@ -25,6 +25,9 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 
+import java.text.FieldPosition;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -83,7 +86,14 @@ public class ResultManager {
     int left = (Window.getClientWidth()) / 10;
     int top  = (Window.getClientHeight()) / 10;
     dialogBox.setPopupPosition(left, top);
-
+    Button w = new Button("Last Page");
+    dialogVPanel.add(w);
+    w.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        pager.lastPage();
+      }
+    });
     service.getNumResults(new AsyncCallback<Integer>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -160,6 +170,7 @@ public class ResultManager {
     return list;
   }
 
+  private CellTable<Result> actualTable;
   private Widget getAsyncTable(int numResults, final boolean gradingView, boolean showQuestionColumn,
                          Collection<Grade> grades, final String grader, int numGrades) {
     CellTable<Result> table = new CellTable<Result>();
@@ -176,6 +187,7 @@ public class ResultManager {
     // We know that the data is sorted alphabetically by default.
     table.getColumnSortList().push(id);
 
+    this.actualTable = table;
     // Create a SimplePager.
     return getPager(table);
   }
@@ -302,10 +314,23 @@ public class ResultManager {
     };
     audioType.setSortable(true);
     table.addColumn(audioType, "Audio Type");
+
+    TextColumn<Result> dur = new TextColumn<Result>() {
+      @Override
+      public String getValue(Result answer) {
+        float secs = ((float) answer.durationInMillis) / 1000f;
+      //  System.out.println("Value " +answer.durationInMillis + " or " +secs);
+        return "" + secs;
+      }
+    };
+    dur.setSortable(true);
+    table.addColumn(dur, "Duration (Sec)");
   }
 
+  private SimplePager pager;
   private VerticalPanel getPager(CellTable<Result> table) {
     SimplePager pager = new SimplePager();
+    this.pager = pager;
 
     // Set the cellList as the display.
     pager.setDisplay(table);
