@@ -124,8 +124,7 @@ public class MonitoringManager {
 
   private void doTimeUntilItems(final Panel vp) {
     service.getHoursToCompletion(useFile, new AsyncCallback<Map<Integer,Float>>() {
-      public void onFailure(Throwable caught) {
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Map<Integer, Float> result) {
@@ -240,7 +239,6 @@ public class MonitoringManager {
         AnnotatedTimeLine.Options options = AnnotatedTimeLine.Options.create();
         AnnotatedTimeLine lineChart = new AnnotatedTimeLine(data, options, width, height);
 */
-      //  doResultByDayQuery(vp, outer, dialogBox);
       }
     });
   }
@@ -609,7 +607,6 @@ public class MonitoringManager {
     Collections.sort(slotValues);
 
     for (String key : slotValues) {
-      //String key = pair.getKey();
       data.addRow();
       data.setValue(r, 0, key);
       data.setValue(r++, 1, langToCount.get(key));
