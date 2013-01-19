@@ -31,6 +31,7 @@ public class Result implements IsSerializable {
   public boolean spoken;
   //private AudioType audioType; // so having another object in here seemed to slow down serialization a lot
   public String audioType;
+  public int durationInMillis;
 
   public static final String AUDIO_TYPE_UNSET = "unset";
   public static final String AUDIO_TYPE_REGULAR = "regular";
@@ -58,9 +59,10 @@ public class Result implements IsSerializable {
    * @param flq
    * @param spoken
    * @param answerType
+   * @param durationInMillis
    */
   public Result(int uniqueID, long userid, String plan, String id, int qid, String answer,
-                boolean valid, long timestamp, boolean flq, boolean spoken, String answerType) {
+                boolean valid, long timestamp, boolean flq, boolean spoken, String answerType, int durationInMillis) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.plan = plan;
@@ -72,6 +74,7 @@ public class Result implements IsSerializable {
     this.flq = flq;
     this.spoken = spoken;
     this.audioType = answerType == null || answerType.length() == 0 ? "unset" : answerType;
+    this.durationInMillis = durationInMillis;
   }
 
   public void setFLQ(boolean flq)  { this.flq = flq; }
@@ -81,6 +84,7 @@ public class Result implements IsSerializable {
 
   @Override
   public String toString() {
-    return "Result #"+uniqueID + "\t\tby user " + userid + "\texid " + id + " " + (flq ? "flq":"english") + " " + (spoken ? "spoken":"written") + " " + audioType;
+    return "Result #" + uniqueID + "\t\tby user " + userid + "\texid " + id + " " +
+        (flq ? "flq" : "english") + " " + (spoken ? "spoken" : "written") + " " + audioType;
   }
 }
