@@ -127,7 +127,6 @@ public class UserDAO {
   /**
    * Pulls the list of users out of the database.
    * @return
-   * @paramx database
    */
   public synchronized List<User> getUsers() {
     try {
