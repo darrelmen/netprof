@@ -288,7 +288,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
    */
   private void clickNext(LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller, Exercise e) {
     if (next.isEnabled() && next.isVisible()) {
-      System.out.println("clickNext " +keyHandler+ " click on next " + next);
+      //System.out.println("clickNext " +keyHandler+ " click on next " + next);
       postAnswers(service, userFeedback, controller, e);
     }
     else {
@@ -298,7 +298,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
 
   private void clickPrev(ExerciseController controller, Exercise e) {
     if (prev.isEnabled() && prev.isVisible()) {
-      System.out.println("clickPrev " +keyHandler+ " click on prev " + prev);
+    //  System.out.println("clickPrev " +keyHandler+ " click on prev " + prev);
       controller.loadPreviousExercise(e);
     }
     else {
@@ -309,7 +309,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   @Override
   protected void onUnload() {
     super.onUnload();
-    System.out.println("onUnload : doing unload of prev/next handler " +keyHandler);
+   // System.out.println("onUnload : doing unload of prev/next handler " +keyHandler);
     if (keyHandler != null) keyHandler.removeHandler();
   }
 
