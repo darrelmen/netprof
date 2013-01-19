@@ -47,7 +47,7 @@ public class AudioConversion {
    * @param file where we want to write the wav file to
    * @return true if audio is valid (not too short, not silence)
    */
-  public AudioAnswer.Validity convertBase64ToAudioFiles(String base64EncodedString, File file) {
+  public AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString, File file) {
     File parentFile = file.getParentFile();
     // System.out.println("making dir " + parentFile.getAbsolutePath());
 
@@ -60,7 +60,7 @@ public class AudioConversion {
     if (!file.exists()) {
       System.err.println("writeAudioFile : huh? can't find " + file.getAbsolutePath());
     }
-    AudioAnswer.Validity valid = isValid(file);
+    AudioCheck.ValidityAndDur valid = isValid(file);
 
     AudioConversion audioConversion = new AudioConversion();
     audioConversion.writeMP3(file.getAbsolutePath());
@@ -105,13 +105,13 @@ public class AudioConversion {
    * @param file
    * @return
    */
-  private AudioAnswer.Validity isValid(File file) {
+  private AudioCheck.ValidityAndDur isValid(File file) {
     try {
       return audioCheck.checkWavFile(file);
     } catch (Exception e) {
       e.printStackTrace();
     }
-    return AudioAnswer.Validity.INVALID;
+    return new AudioCheck.ValidityAndDur(AudioAnswer.Validity.INVALID);
   }
 
   /**
