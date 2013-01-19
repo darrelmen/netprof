@@ -55,6 +55,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
   public static final String FIRST_N_IN_ORDER = "firstNInOrder";
   private static final String DATA_COLLECT_MODE = "dataCollect";
+  private static final String BIAS_TOWARDS_UNANSWERED = "biasTowardsUnanswered";
   private static final String URDU = "urdu";
   private static final int MB = (1024 * 1024);
   public static final String ANSWERS = "answers";
@@ -68,6 +69,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String relativeConfigDir;
   private String configDir;
   private boolean dataCollectMode;
+  private boolean biasTowardsUnanswered;
   private boolean isUrdu;
   private int firstNInOrder;
 
@@ -84,7 +86,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public List<ExerciseShell> getExerciseIds(long userID, boolean useFile, boolean arabicDataCollect) {
-    logger.debug("getting exercise ids for " + userID);
+    logger.debug("getting exercise ids for User id=" + userID);
     List<Exercise> exercises = getExercises(userID, useFile, arabicDataCollect);
     List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
     for (Exercise e : exercises) {
@@ -151,7 +153,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     //logger.debug("usefile = " + useFile + " arabic data collect " + arabicDataCollect);
     List<Exercise> exercises;
     if (dataCollectMode) {
-      exercises = db.getExercisesFirstNInOrder(userID, useFile, firstNInOrder);
+      if (biasTowardsUnanswered) {
+        exercises = db.getExercisesBiasTowardsUnanswered(useFile, userID);
+      } else {
+        exercises = db.getExercisesFirstNInOrder(userID, useFile, firstNInOrder);
+      }
     }
     else {
       exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(userID, useFile);
@@ -683,19 +689,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     File file = getAbsoluteFile(wavPath);
 
-    AudioAnswer.Validity validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
+    AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
     db.answerDAO.addAnswer(db, user, plan, exercise, questionID, "", file.getPath(),
-        validity == AudioAnswer.Validity.OK, flq, true, audioType);
+        validity.validity == AudioAnswer.Validity.OK, flq, true, audioType, validity.durationInMillis);
 
     String wavPathWithForwardSlashSeparators = ensureForwardSlashes(wavPath);
     String url = optionallyMakeURL(wavPathWithForwardSlashSeparators);
     // logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
 
-    if (doAutoCRT && validity == AudioAnswer.Validity.OK) {
-      return autoCRT.getAutoCRTAnswer(exercise, getExercise(exercise, false), reqid, file, validity, questionID, url);
+    if (doAutoCRT && validity.validity == AudioAnswer.Validity.OK) {
+      return autoCRT.getAutoCRTAnswer(exercise, getExercise(exercise, false), reqid, file, validity.validity, questionID, url);
     }
     else {
-      return new AudioAnswer(url, validity, reqid);
+      return new AudioAnswer(url, validity.validity, reqid);
     }
   }
 
@@ -887,6 +893,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     dataCollectMode = !props.getProperty(DATA_COLLECT_MODE, "false").equals("false");
     isUrdu = !props.getProperty(URDU, "false").equals("false");
+    biasTowardsUnanswered = !props.getProperty(BIAS_TOWARDS_UNANSWERED, "true").equals("false");
   }
 
   private class DirAndName {
