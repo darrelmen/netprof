@@ -26,6 +26,7 @@ public class ResultDAO extends DAO {
   static final String FLQ = "flq";
   static final String SPOKEN = "spoken";
   static final String AUDIO_TYPE = "audioType";
+  static final String DURATION = "duration";
 
   private GradeDAO gradeDAO;
   private ScheduleDAO scheduleDAO ;
@@ -98,6 +99,7 @@ public class ResultDAO extends DAO {
       boolean flq = rs.getBoolean(i++);
       boolean spoken = rs.getBoolean(i++);
       String type = rs.getString(i++);
+      int dur = rs.getInt(i++);
       Result e = new Result(uniqueID, userID, //id
           plan, // plan
           exid, // id
@@ -105,7 +107,7 @@ public class ResultDAO extends DAO {
           answer, // answer
           valid, // valid
           timestamp.getTime(),
-          flq, spoken, type);
+          flq, spoken, type, dur);
       trimPathForWebPage(e);
       results.add(e);
     }
@@ -394,6 +396,9 @@ public class ResultDAO extends DAO {
     else if (numColumns < 11) {//!columnExists(connection,RESULTS, AUDIO_TYPE)) {
       addTypeColumnToTable(connection);
     }
+    if (numColumns < 12) {
+      addDurationColumnToTable(connection);
+    }
   }
 
   /**
@@ -421,7 +426,8 @@ public class ResultDAO extends DAO {
         "valid BOOLEAN," +
         FLQ + " BOOLEAN," +
         SPOKEN + " BOOLEAN," +
-        AUDIO_TYPE + " VARCHAR" +
+        AUDIO_TYPE + " VARCHAR," +
+        DURATION + " INT" +
       ")");
     statement.execute();
     statement.close();
@@ -451,6 +457,15 @@ public class ResultDAO extends DAO {
         AUDIO_TYPE +
         " " +
         "VARCHAR");
+    statement.execute();
+    statement.close();
+  }
+
+  private void addDurationColumnToTable(Connection connection) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
+        DURATION +
+        " " +
+        "INT");
     statement.execute();
     statement.close();
   }
