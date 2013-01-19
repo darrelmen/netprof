@@ -1,6 +1,7 @@
 package mitll.langtest.server;
 
 import mitll.langtest.shared.AudioAnswer;
+import org.apache.log4j.Logger;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -20,6 +21,8 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioCheck {
+  private static Logger logger = Logger.getLogger(AudioCheck.class);
+
   private static final int MinRecordLength = 1*(10000/2); // 10000 = 0.7 second
   private static final int WinSize = 10;
   private static final float PowerThreshold = -55.0f;
@@ -47,9 +50,7 @@ public class AudioCheck {
   public double getDurationInSeconds(File file) {
     try {
       AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
-      long frames = audioInputStream.getFrameLength();
-      AudioFormat format = audioInputStream.getFormat();
-      double dur = (frames + 0.0d) / format.getFrameRate();
+      double dur = getDurationInSeconds(audioInputStream);
       audioInputStream.close();
       return dur;
     } catch (UnsupportedAudioFileException e) {
@@ -59,6 +60,13 @@ public class AudioCheck {
     }
     return 0d;
   }
+
+  private double getDurationInSeconds(AudioInputStream audioInputStream) {
+    long frames = audioInputStream.getFrameLength();
+    AudioFormat format = audioInputStream.getFormat();
+    return (frames + 0.0d) / format.getFrameRate();
+  }
+
   /**
    * Verify audio messages
    *
@@ -66,17 +74,18 @@ public class AudioCheck {
    * @param file audio byte array with header
    * @return true if well formed
    */
-  public AudioAnswer.Validity checkWavFile(File file){
+  public ValidityAndDur checkWavFile(File file){
     AudioInputStream ais = null;
     try {
       ais = AudioSystem.getAudioInputStream(file);
       int sSize = ais.getFormat().getFrameSize();
       assert(sSize == 2);
       assert(ais.getFormat().getChannels() == 1);
+      double dur = getDurationInSeconds(ais);
 
       if (ais.getFrameLength() < MinRecordLength) {
         System.err.println("INFO: audio recording too short (Length: " + ais.getFrameLength() + ") < min (" +MinRecordLength+ ") ");
-        return AudioAnswer.Validity.TOO_SHORT;
+        return new ValidityAndDur(AudioAnswer.Validity.TOO_SHORT, dur);
       }
       int fsize = ais.getFormat().getFrameSize();
 
@@ -104,9 +113,12 @@ public class AudioCheck {
       float mean = pm / n;
       float var = p2 / n - mean * mean;
       final boolean validAudio = mean > PowerThreshold || Math.sqrt(var) > VarianceThreshold;
-      System.out.println("INFO: audio recording (Length: " + ais.getFrameLength() + ") " +
-        "mean power = " + mean + " (dB), std = " + Math.sqrt(var) + " valid = " + validAudio);
-      return validAudio ? AudioAnswer.Validity.OK : AudioAnswer.Validity.TOO_QUIET;
+/*      System.out.println("INFO: audio recording (Length: " + ais.getFrameLength() + ") " +
+        "mean power = " + mean + " (dB), std = " + Math.sqrt(var) + " valid = " + validAudio);*/
+      ValidityAndDur validityAndDur = new ValidityAndDur(validAudio ? AudioAnswer.Validity.OK : AudioAnswer.Validity.TOO_QUIET, dur);
+
+      logger.info("validity " + validityAndDur);
+      return validityAndDur;
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
@@ -117,7 +129,22 @@ public class AudioCheck {
       }
     }
 
-    return AudioAnswer.Validity.INVALID;
+    return new ValidityAndDur(AudioAnswer.Validity.INVALID);
+  }
+
+  public static class ValidityAndDur {
+    public AudioAnswer.Validity validity;
+    public int durationInMillis;
+
+    public ValidityAndDur(AudioAnswer.Validity validity) {
+      this(validity, 0d);
+    }
+
+    public ValidityAndDur(AudioAnswer.Validity validity, double dur) {
+      this.validity = validity;
+      this.durationInMillis = (int) (1000d * dur);
+    }
+    public String toString() { return " valid " + validity + " dur " + durationInMillis; }
   }
 
   public static void main(String []a ) {
