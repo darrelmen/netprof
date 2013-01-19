@@ -15,6 +15,7 @@ public class AudioAnswer implements IsSerializable {
   public Validity validity;
   public String decodeOutput = "";
   public double score = -1;
+  public int durationInMillis;
 
   public enum Validity implements IsSerializable {
     OK("Audio OK."),
@@ -41,7 +42,7 @@ public class AudioAnswer implements IsSerializable {
   public AudioAnswer(String path, Validity validity, int reqid) { this.path = path; this.validity = validity; this.reqid = reqid;}
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, String, String, boolean, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @param path
    * @param validity
    * @param decodeOutput
