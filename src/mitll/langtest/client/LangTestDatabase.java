@@ -42,7 +42,6 @@ public interface LangTestDatabase extends RemoteService {
   long addUser(int age, String gender, int experience, String firstName, String lastName, String nativeLang, String dialect, String userID);
 
   List<User> getUsers();
-  List<Result> getResults();
 
   // answer DAO
   void addTextAnswer(int userID, Exercise exercise, int questionID, String answer);
@@ -96,4 +95,5 @@ public interface LangTestDatabase extends RemoteService {
   List<Result> getResults(int start, int end);
 
   Map<Integer, Float> getHoursToCompletion(boolean useFile);
+  Map<String,Number> getResultStats();
 }
