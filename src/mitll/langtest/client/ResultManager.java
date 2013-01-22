@@ -1,6 +1,7 @@
 package mitll.langtest.client;
 
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -25,16 +26,11 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 
-import java.text.FieldPosition;
-import java.text.NumberFormat;
-import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Show a dialog with all the results we've collected so far.
@@ -48,6 +44,7 @@ public class ResultManager {
   private static final int PAGE_SIZE = 12;
   protected static final String UNGRADED = "Ungraded";
   protected static final String SKIP = "Skip";
+  public static final int GRADING_WIDTH = 700;
   private int pageSize = PAGE_SIZE;
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
@@ -83,17 +80,10 @@ public class ResultManager {
 
     final VerticalPanel dialogVPanel = new VerticalPanel();
 
-    int left = (Window.getClientWidth()) / 10;
-    int top  = (Window.getClientHeight()) / 10;
+    int left = (Window.getClientWidth()) / 20;
+    int top  = (Window.getClientHeight()) / 20;
     dialogBox.setPopupPosition(left, top);
-    Button w = new Button("Last Page");
-    dialogVPanel.add(w);
-    w.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        pager.lastPage();
-      }
-    });
+
     service.getNumResults(new AsyncCallback<Integer>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -170,7 +160,6 @@ public class ResultManager {
     return list;
   }
 
-  private CellTable<Result> actualTable;
   private Widget getAsyncTable(int numResults, final boolean gradingView, boolean showQuestionColumn,
                          Collection<Grade> grades, final String grader, int numGrades) {
     CellTable<Result> table = new CellTable<Result>();
@@ -187,13 +176,13 @@ public class ResultManager {
     // We know that the data is sorted alphabetically by default.
     table.getColumnSortList().push(id);
 
-    this.actualTable = table;
     // Create a SimplePager.
     return getPager(table);
   }
 
-  private TextColumn<Result> addColumnsToTable(boolean gradingView, boolean showQuestionColumn, Collection<Grade> grades, String grader, int numGrades, CellTable<Result> table) {
-    String gradingWidth = 700 + "px";
+  private TextColumn<Result> addColumnsToTable(boolean gradingView, boolean showQuestionColumn, Collection<Grade> grades,
+                                               String grader, int numGrades, CellTable<Result> table) {
+    String gradingWidth = GRADING_WIDTH + "px";
     if (!gradingView) {
       int i = (int)(Window.getClientWidth()*0.8f);
       table.setWidth(gradingView ? gradingWidth : i + "px");
@@ -320,17 +309,30 @@ public class ResultManager {
       public String getValue(Result answer) {
         float secs = ((float) answer.durationInMillis) / 1000f;
       //  System.out.println("Value " +answer.durationInMillis + " or " +secs);
-        return "" + secs;
+        return "" + roundToHundredth(secs);
       }
     };
     dur.setSortable(true);
     table.addColumn(dur, "Duration (Sec)");
+
+    TextColumn<Result> valid = new TextColumn<Result>() {
+      @Override
+      public String getValue(Result answer) {
+        return ""+answer.valid;
+      }
+    };
+    valid.setSortable(true);
+    table.addColumn(valid, "Valid");
   }
 
-  private SimplePager pager;
+
+  private float roundToHundredth(double totalHours) {
+    return ((float)((Math.round(totalHours*100))))/100f;
+  }
+
   private VerticalPanel getPager(CellTable<Result> table) {
-    SimplePager pager = new SimplePager();
-    this.pager = pager;
+    SimplePager.Resources DEFAULT_RESOURCES = GWT.create(SimplePager.Resources.class);
+    SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, true, 1000, true);
 
     // Set the cellList as the display.
     pager.setDisplay(table);

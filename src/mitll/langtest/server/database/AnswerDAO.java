@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
+import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,6 +15,8 @@ import java.sql.Timestamp;
  * Reading, etc. happens in {@link ResultDAO} - might be a little confusing... :)
  */
 public class AnswerDAO {
+  private static Logger logger = Logger.getLogger(AnswerDAO.class);
+
   private final Database database;
 
   public AnswerDAO(Database database) {
@@ -133,8 +136,7 @@ public class AnswerDAO {
         "plan," +
       Database.EXID +"," +
         "qid," +
-        Database.TIME+
-        "," +
+        Database.TIME+"," +
         "answer," +
         "valid," +
         ResultDAO.FLQ +"," +
@@ -143,23 +145,24 @@ public class AnswerDAO {
         ResultDAO.DURATION+
         ") VALUES(?,?,?,?,?,?,?,?,?,?,?)");
     int i = 1;
+
+    boolean isAudioAnswer = answer == null || answer.length() == 0;
+    String x = isAudioAnswer ? audioFile : answer;
+
     statement.setInt(i++, userid);
     statement.setString(i++, plan);
     statement.setString(i++, id);
     statement.setInt(i++, questionID);
-    //System.err.println("got " + userid + ", " + plan +", "+ id +", " + questionID + ", " +answer + ", " +audioFile +", " + valid);
     statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
-
-    boolean isAudioAnswer = answer == null || answer.length() == 0;
-    String x = isAudioAnswer ? audioFile : answer;
-    //  System.err.println("got " + answer + " and " + audioFile + " -> " + x);
     statement.setString(i++, x);
-    //statement.setString(i++, audioFile);
     statement.setBoolean(i++, valid);
     statement.setBoolean(i++, flq);
     statement.setBoolean(i++, spoken);
     statement.setString(i++, audioType);
     statement.setInt(i, durationInMillis);
+
+    //logger.info("valid is " +valid + " for " +statement);
+
     statement.executeUpdate();
     statement.close();
   }
