@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.DataTable;
-import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
@@ -26,7 +25,6 @@ import mitll.langtest.shared.User;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +40,6 @@ public class MonitoringManager {
   private static final int MIN = (60 * 1000);
   private static final int HOUR = (60 * MIN);
   protected LangTestDatabaseAsync service;
-  protected UserFeedback feedback;
   private final boolean useFile;
 
   /**
@@ -53,10 +50,8 @@ public class MonitoringManager {
    */
   public MonitoringManager(LangTestDatabaseAsync s, UserFeedback feedback, boolean useFile) {
     this.service = s;
-    this.feedback = feedback;
     this.useFile = useFile;
   }
-  private Button closeButton;
 
   public void showResults() {
     // Create the popup dialog box
@@ -66,7 +61,7 @@ public class MonitoringManager {
     // Enable glass background.
     dialogBox.setGlassEnabled(true);
 
-    closeButton = new Button("Close");
+    Button closeButton = new Button("Close");
     closeButton.setEnabled(true);
     closeButton.getElement().setId("closeButton");
 
@@ -136,36 +131,68 @@ public class MonitoringManager {
 
 
   private void doSessionQuery(final Panel vp) {
-    service.getSessions(new AsyncCallback<List<Session>>() {
+    service.getResultStats(new AsyncCallback<Map<String, Number>>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
-      public void onSuccess(List<Session> result) {
-        long totalTime = 0;
-        long total = 0;
-        long valid = result.size();
-        Map<Long,Integer> rateToCount = new HashMap<Long, Integer>();
-        for (Session s: result) {
-            totalTime += s.duration;
-            total += s.numAnswers;
+      public void onSuccess(Map<String, Number> result) {
+        Number total = result.get("totalHrs");
+        final double totalHours = total.doubleValue();
+        final double avgSecs = result.get("avgSecs").doubleValue();
+        final int badRecordings = result.get("badRecordings").intValue();
 
-            Integer count = rateToCount.get(s.getSecAverage());
-            if (count == null) rateToCount.put(s.getSecAverage(), s.numAnswers);
-            else rateToCount.put(s.getSecAverage(),count+s.numAnswers);
-        }
-        vp.add(new HTML("<b>Num sessions " +valid + "</b>"));
-        vp.add(new HTML("<b>Time spent " +totalTime/HOUR + " hours " + (totalTime - (totalTime/HOUR)*HOUR)/MIN + " mins"+ "</b>"));
-        vp.add(new HTML("<b>Answers = " +total+ "</b>"));
-        vp.add(new HTML("<b>Avg Answers/session = " +total/valid+ "</b>"));
-        vp.add(new HTML("<b>Avg time spent/session = " +(totalTime/valid)/MIN + " mins"+ "</b>"));
-        long rateInMillis = totalTime / total;
-        vp.add(new HTML("<b>Avg time spent/item = " + (rateInMillis/1000) + " sec"+ "</b>"));
+        service.getSessions(new AsyncCallback<List<Session>>() {
+          @Override
+          public void onFailure(Throwable caught) {}
 
-        getRateChart(rateToCount, vp);
+          @Override
+          public void onSuccess(List<Session> result) {
+            long totalTime = 0;
+            long total = 0;
+            long valid = result.size();
+            Map<Long,Integer> rateToCount = new HashMap<Long, Integer>();
+            for (Session s: result) {
+              totalTime += s.duration;
+              total += s.numAnswers;
+
+              Integer count = rateToCount.get(s.getSecAverage());
+              if (count == null) rateToCount.put(s.getSecAverage(), s.numAnswers);
+              else rateToCount.put(s.getSecAverage(),count+s.numAnswers);
+            }
+            vp.add(new HTML("<b>Num sessions " +valid + "</b>"));
+            long hoursSpent = totalTime / HOUR;
+            double dhoursSpent = (double)hoursSpent;
+            vp.add(new HTML("<b>Time spent " + hoursSpent + " hours " + (totalTime - hoursSpent *HOUR)/MIN + " mins"+ "</b>"));
+            vp.add(new HTML("<b>Audio collected = " + roundToHundredth(totalHours) + " hours</b>"));
+            vp.add(new HTML("<b># Bad audio recordings (zero length) = " + badRecordings + "</b>"));
+            if (dhoursSpent > 0) {
+             // vp.add(new HTML("<b>Audio yield collected/spent = " +(totalHours/dhoursSpent) + " ratio</b>"));
+              vp.add(new HTML("<b>Audio yield (collected/spent) = " +Math.round((totalHours/dhoursSpent)*100) + "%</b>"));
+            }
+            vp.add(new HTML("<b>Answers = " +total+ "</b>"));
+            vp.add(new HTML("<b>Avg Answers/session = " +total/valid+ "</b>"));
+            vp.add(new HTML("<b>Avg time spent/session = " +(totalTime/valid)/MIN + " mins"+ "</b>"));
+            long rateInMillis = totalTime / total;
+            vp.add(new HTML("<b>Avg time spent/item = " + (rateInMillis/1000) + " sec"+ "</b>"));
+            vp.add(new HTML("<b>Avg audio collected/item = " + roundToHundredth(avgSecs) + " sec"+ "</b>"));
+
+            getRateChart(rateToCount, vp);
+          }
+        });
       }
     });
+
   }
+
+  private float roundToHundredth(double totalHours) {
+    return ((float)((Math.round(totalHours*100))))/100f;
+  }
+
+ /* private float roundToHundredth(double totalHours) {
+    return ((float)((int)totalHours*100))/100f;
+  }*/
 
   private ColumnChart getNumToHoursChart(Map<Integer, Float> rateToCount) {
     Options options = Options.create();
@@ -205,7 +232,9 @@ public class MonitoringManager {
     for (Long age : ages) {
       data.addRow();
       data.setValue(r, 0, age);
-      data.setValue(r++, 1, rateToCount.get(age));
+      Integer value = rateToCount.get(age);
+      data.setValue(r++, 1, value);
+      //System.out.println("age " + age + " rate " + value);
     }
 
     vp.add(new ColumnChart(data,options));
@@ -225,7 +254,7 @@ public class MonitoringManager {
         int total = 0;
         for (Integer c : overall) total += c;
         float ratio = ((float) total)/((float)overall.size());
-        vp.add(new HTML("<b>Avg answers/item = " + ratio +"</b>") );
+        vp.add(new HTML("<b>Avg answers/item = " + roundToHundredth(ratio) +"</b>") );
 
         for (int i = 0; i < size; i += chartSamples) {
           Map<String, List<Integer>> typeToList = new HashMap<String, List<Integer>>();
