@@ -21,7 +21,6 @@ public interface LangTestDatabaseAsync {
   void addUser(int age, String gender, int experience, AsyncCallback<Long> async);
   void isAnswerValid(int userID, Exercise exercise, int questionID, AsyncCallback<Boolean> async);
   void getUsers(AsyncCallback<List<User>> async);
-  void getResults(AsyncCallback<List<Result>> async);
 
   void writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                       boolean doAutoCRT, int reqid, boolean flq, String audioType, AsyncCallback<AudioAnswer> async);
@@ -81,4 +80,6 @@ public interface LangTestDatabaseAsync {
   void getResults(int start, int end, AsyncCallback<List<Result>> async);
 
   void getHoursToCompletion(boolean useFile, AsyncCallback<Map<Integer, Float>> async);
+
+  void getResultStats(AsyncCallback<Map<String, Number>> async);
 }
