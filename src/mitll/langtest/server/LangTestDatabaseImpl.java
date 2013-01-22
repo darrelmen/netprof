@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -651,13 +652,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see mitll.langtest.client.ResultManager#showResults()
    */
-  public List<Result> getResults() {
-    return db.getResults();
-  }
-
   @Override
   public List<Result> getResults(int start, int end) {
-    List<Result> resultList = db.getResults().subList(start, end);
+    List<Result> results = db.getResults();
+    Collections.sort(results, new Comparator<Result>() {
+      @Override
+      public int compare(Result o1, Result o2) {
+        return o1.uniqueID < o2.uniqueID ? -1 : o1.uniqueID > o2.uniqueID ? +1 : 0;
+      }
+    });
+    List<Result> resultList = results.subList(start, end);
     List<Result> copy = new ArrayList<Result>(resultList);
     return copy;
   }
@@ -690,14 +694,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     File file = getAbsoluteFile(wavPath);
 
     AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
+    boolean isValid = validity.validity == AudioAnswer.Validity.OK;
+    if (!isValid) {
+      logger.warn("got invalid audio file (" + validity +
+          ") user = " + user + " exercise " + exercise +
+          " question " + questionID + " file " + file.getAbsolutePath());
+    }
     db.answerDAO.addAnswer(db, user, plan, exercise, questionID, "", file.getPath(),
-        validity.validity == AudioAnswer.Validity.OK, flq, true, audioType, validity.durationInMillis);
+        isValid, flq, true, audioType, validity.durationInMillis);
 
     String wavPathWithForwardSlashSeparators = ensureForwardSlashes(wavPath);
     String url = optionallyMakeURL(wavPathWithForwardSlashSeparators);
     // logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
 
-    if (doAutoCRT && validity.validity == AudioAnswer.Validity.OK) {
+    if (doAutoCRT && isValid) {
       return autoCRT.getAutoCRTAnswer(exercise, getExercise(exercise, false), reqid, file, validity.validity, questionID, url);
     }
     else {
@@ -734,6 +744,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public List<Session> getSessions() {
     return db.getSessions();
+  }
+
+  public Map<String,Number> getResultStats() {
+    return db.getResultStats();
   }
 
   private String optionallyMakeURL(String wavPathWithForwardSlashSeparators) {
