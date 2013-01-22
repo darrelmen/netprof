@@ -73,7 +73,7 @@ public class Result implements IsSerializable {
     this.timestamp = timestamp;
     this.flq = flq;
     this.spoken = spoken;
-    this.audioType = answerType == null || answerType.length() == 0 ? "unset" : answerType;
+    this.audioType = answerType == null || answerType.length() == 0 ? AUDIO_TYPE_UNSET : answerType;
     this.durationInMillis = durationInMillis;
   }
 
@@ -85,6 +85,6 @@ public class Result implements IsSerializable {
   @Override
   public String toString() {
     return "Result #" + uniqueID + "\t\tby user " + userid + "\texid " + id + " " +
-        (flq ? "flq" : "english") + " " + (spoken ? "spoken" : "written") + " " + audioType;
+        (flq ? "flq" : "english") + " " + (spoken ? "spoken" : "written") + " " + audioType + " valid " + valid;
   }
 }
