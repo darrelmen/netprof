@@ -1,17 +1,26 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -235,7 +244,7 @@ public class ResultDAO extends DAO {
   public String getExerciseIDLastResult(long userid) {
     try {
       Connection connection = database.getConnection();
-      String sql = "select exid from results where time in (select max(time) from results where userid = " +
+      String sql = "SELECT exid FROM results WHERE TIME IN (SELECT MAX(TIME) FROM results WHERE userid = " +
           userid +
           ");";
       PreparedStatement statement = connection.prepareStatement(sql);
@@ -264,7 +273,7 @@ public class ResultDAO extends DAO {
   public List<Result> getAllResultsForExercise(String exerciseID) {
     try {
       Connection connection = database.getConnection();
-      String sql = "SELECT * from results where EXID='" + exerciseID + "'";
+      String sql = "SELECT * FROM results WHERE EXID='" + exerciseID + "'";
       PreparedStatement statement = connection.prepareStatement(sql);
       return getResultsForQuery(connection, statement);
     } catch (Exception ee) {
@@ -287,7 +296,7 @@ public class ResultDAO extends DAO {
       for (String id : toExclude) b.append("'").append(id).append("'").append(",");
       String list = b.toString();
       list = list.substring(0,Math.max(0,list.length()-1));
-      String sql = "SELECT * from results where EXID not in (" + list + ")";
+      String sql = "SELECT * FROM results WHERE EXID NOT IN (" + list + ")";
 
       PreparedStatement statement = connection.prepareStatement(sql);
       return getResultsForQuery(connection, statement);
@@ -333,6 +342,33 @@ public class ResultDAO extends DAO {
   }
 
   /**
+   * Add values for the duration field to old collections that don't have them.
+   * @param installPath
+   */
+  public void enrichResultDurations(String installPath) {
+    List<Result> results = getResults();
+    AudioCheck check = new AudioCheck();
+    logger.debug("enrichResultDurations checking " + results.size() + " results");
+    int count = 0;
+    for (Result r : results) {
+      if (r.durationInMillis == 0 && r.valid) {
+        File file = new File(installPath +File.separator +r.answer);
+        if (file.exists()) {
+          double durationInSeconds = check.getDurationInSeconds(file);
+          r.durationInMillis = (int)(durationInSeconds*1000d);
+      //    logger.debug("dur for " + file + " is " +r.durationInMillis);
+          enrichDur(r);
+          count++;
+        }
+        else {
+        //  logger.debug("couldn't find " + file.getAbsolutePath());
+        }
+      }
+    }
+    logger.debug("enriched " + count + " items of " + results.size() + " results");
+  }
+
+  /**
    * @see #enrichResults
    * @param toChange
    */
@@ -348,6 +384,35 @@ public class ResultDAO extends DAO {
           "WHERE id=" + toChange.uniqueID;
       if (debug) System.out.println("enrichResult " + toChange);
       statement = connection.prepareStatement(sql);
+
+      int i = statement.executeUpdate();
+
+      if (debug) System.out.println("UPDATE " + i);
+      if (i == 0) {
+        System.err.println("huh? didn't update the grade for " + toChange);
+      }
+
+      statement.close();
+      database.closeConnection(connection);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Set the duration for one entry.
+   * @param toChange
+   */
+  private void enrichDur(Result toChange) {
+    try {
+      Connection connection = database.getConnection();
+
+      String sql = "UPDATE " + RESULTS + " " +
+          "SET " +
+          DURATION + "=" + toChange.durationInMillis + " " +
+          "WHERE id=" + toChange.uniqueID;
+     // logger.info("enrichResult " + toChange);
+      PreparedStatement statement = connection.prepareStatement(sql);
 
       int i = statement.executeUpdate();
 
@@ -399,6 +464,9 @@ public class ResultDAO extends DAO {
     if (numColumns < 12) {
       addDurationColumnToTable(connection);
     }
+   // removeTimeDefault(connection);
+    //removeValidDefault(connection);
+   // addValidDefault(connection);
   }
 
   /**
@@ -448,10 +516,7 @@ public class ResultDAO extends DAO {
   }
 
   private void addTypeColumnToTable(Connection connection) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " +Database.TIME+
-        " DROP DEFAULT");
-    statement.execute();
-    statement.close();
+    PreparedStatement statement;
 
     statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
         AUDIO_TYPE +
@@ -461,11 +526,38 @@ public class ResultDAO extends DAO {
     statement.close();
   }
 
+  private void removeTimeDefault(Connection connection) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " + Database.TIME+
+        " DROP DEFAULT");
+    statement.execute();
+    statement.close();
+  }
+
   private void addDurationColumnToTable(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
         DURATION +
         " " +
         "INT");
+    statement.execute();
+    statement.close();
+  }
+
+  /**
+   * So it seems like if I alter an existing table and remove a default boolean value, h2 throws an exception
+   * on subsequent inserts.
+   * @param connection
+   * @throws SQLException
+   */
+  private void removeValidDefault(Connection connection) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " +"valid"+
+        " DROP DEFAULT");
+    statement.execute();
+    statement.close();
+  }
+
+  private void addValidDefault(Connection connection) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " +"valid"+
+        " set DEFAULT true");
     statement.execute();
     statement.close();
   }
