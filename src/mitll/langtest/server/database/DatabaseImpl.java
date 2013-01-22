@@ -163,12 +163,14 @@ public class DatabaseImpl implements Database {
    * @param mediaDir
    * @param isUrdu
    */
-  public void setInstallPath(String i, String lessonPlanFile, String mediaDir, boolean isUrdu) {
+  public void setInstallPath(String installPath, String lessonPlanFile, String mediaDir, boolean isUrdu) {
     //logger.debug("got install path " + i + " media " + mediaDir + " is urdu " +isUrdu);
-    this.installPath = i;
+    this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
     this.mediaDir = mediaDir;
     this.isUrdu = isUrdu;
+
+    resultDAO.enrichResultDurations(installPath);
   }
 
   /**
@@ -633,7 +635,7 @@ public class DatabaseImpl implements Database {
    * Pulls the list of results out of the database.
    *
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults()
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(int, int)
    */
   public List<Result> getResults() {
     return resultDAO.getResults();
@@ -758,7 +760,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * TODO : worry about duplicate userid?
-   * @return
+   * @return map of user to number of answers the user entered
    */
   public Map<User, Integer> getUserToResultCount() {
     List<User> users = getUsers();
@@ -780,7 +782,7 @@ public class DatabaseImpl implements Database {
     return idToCount;
   }
 
-  public Map<Exercise, Integer> getResultIdToCount(boolean useFile, boolean getMale) {
+/*  public Map<Exercise, Integer> getResultIdToCount(boolean useFile, boolean getMale) {
     List<Result> results = getResults();
     List<Exercise> exercises = getExercises(useFile);
     Map<String,Exercise> idToEx = new HashMap<String, Exercise>();
@@ -825,8 +827,13 @@ public class DatabaseImpl implements Database {
       }
     }
     return idToCount;
-  }
+  }*/
 
+  /**
+   * Map of user id to user
+   * @param getMale
+   * @return
+   */
   private Map<Long, User> getUserMap(boolean getMale) {
     List<User> users = getUsers();
     Map<Long,User> idToUser = new HashMap<Long, User>();
@@ -838,6 +845,12 @@ public class DatabaseImpl implements Database {
     return idToUser;
   }
 
+  /**
+   * Determine sessions per user.  If two consecutive items are more than {@link #SESSION_GAP} seconds
+   * apart, then we've reached a session boundary.
+   * Remove all sessions that have just one answer - must be test sessions.
+   * @return list of duration and numAnswer pairs
+   */
   public List<Session> getSessions() {
     List<Result> results = getResults();
 
@@ -873,6 +886,13 @@ public class DatabaseImpl implements Database {
     return sessions;
   }
 
+  /**
+   * Given the observed rate of responses and the number of exercises to get
+   * responses for, make a map of number of responses->hours
+   * required to get that number of responses.
+   * @param useFile
+   * @return # responses->hours to get that number
+   */
   public Map<Integer,Float> getHoursToCompletion(boolean useFile) {
     long totalTime = 0;
     long total = 0;
@@ -939,6 +959,12 @@ public class DatabaseImpl implements Database {
     return idToCount;
   }
 
+  /**
+   * Get results for only male or only female users.
+   * @param useFile
+   * @param isMale
+   * @return
+   */
   private Map<String, Integer> getExToCountMaleOrFemale(boolean useFile,boolean isMale) {
     Map<String, Integer> idToCount = getInitialIdToCount(useFile);
 
@@ -958,6 +984,11 @@ public class DatabaseImpl implements Database {
     return idToCount;
   }
 
+  /**
+   * Make a map of exerciseid->0
+   * @param useFile
+   * @return
+   */
   private Map<String, Integer> getInitialIdToCount(boolean useFile) {
     List<Exercise> exercises = getExercises(useFile);
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
@@ -976,6 +1007,9 @@ public class DatabaseImpl implements Database {
     return idToCount;
   }
 
+  /**
+   * Sort first by exercise id then by question within the exercise
+   */
   private static class CompoundKey implements Comparable<CompoundKey> {
     public final int first,second;
 
@@ -999,6 +1033,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * Get counts of answers by date
    * TODO : worry about duplicate userid?
    * @return
    */
@@ -1018,6 +1053,10 @@ public class DatabaseImpl implements Database {
     return dayToCount;
   }
 
+  /**
+   * get counts of answers by hours of the day
+   * @return
+   */
   public Map<String, Integer> getResultByHourOfDay() {
     List<Result> results = getResults();
     SimpleDateFormat df = new SimpleDateFormat("HH");
@@ -1035,6 +1074,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * Split exid->count by gender.
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise(boolean)
    * @param useFile
    * @return
@@ -1042,9 +1082,7 @@ public class DatabaseImpl implements Database {
   public Map<String,List<Integer>> getResultPerExercise(boolean useFile) {
     Map<String, Integer> exToCount = getExToCount(useFile);
     List<Integer> overall = getCountArray(exToCount);
-
     List<Integer> male = getCountArray(getExToCountMaleOrFemale(useFile,true));
-
     List<Integer> female = getCountArray(getExToCountMaleOrFemale(useFile,false));
 
     Map<String,List<Integer>> typeToList = new HashMap<String, List<Integer>>();
@@ -1054,6 +1092,13 @@ public class DatabaseImpl implements Database {
     return typeToList;
   }
 
+  /**
+   * Get list of counts of answers for each exercise, in order.
+   * If the exercise ids are numbers, sort them as numbers, not as strings.
+   * We don't want 11 to be between 109 and 110.
+   * @param exToCount
+   * @return list of counts of answers per exercise
+   */
   private List<Integer> getCountArray(Map<String, Integer> exToCount) {
     List<Integer> countArray = new ArrayList<Integer>(exToCount.size());
     String next = exToCount.keySet().iterator().next();
@@ -1089,6 +1134,40 @@ public class DatabaseImpl implements Database {
     }
   }
 
+  private static final int MIN = (60 * 1000);
+  private static final int HOUR = (60 * MIN);
+
+  /**
+   * Return some statistics related to the hours of audio that have been collected
+   * @return
+   */
+  public Map<String,Number> getResultStats() {
+    List<Result> results = getResults();
+    double total = 0;
+    int count = 0;
+    int badDur = 0;
+
+    for (Result r : results) {
+      total += r.durationInMillis;
+      if (r.durationInMillis > 0) {
+        count++;
+      }
+      else if (r.spoken || r.audioType.equals(Result.AUDIO_TYPE_UNSET)) {
+        badDur++;
+        logger.info("got bad audio result " + r + " path " + r.answer);
+      }
+    }
+    Map<String,Number> typeToStat = new HashMap<String,Number>();
+    Number aDouble = total / ((double)HOUR);
+    typeToStat.put("totalHrs", aDouble);
+    double value = total / ((double)count);
+    typeToStat.put("avgSecs", value/1000);
+    typeToStat.put("totalAudioAnswers", count);
+    typeToStat.put("badRecordings", badDur);
+    logger.debug("audio dur stats " + typeToStat);
+    return typeToStat;
+  }
+
   public void destroy() {
     try {
       connection.contextDestroyed();
@@ -1097,18 +1176,7 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  public void closeConnection(Connection connection) throws SQLException {
-    //  System.err.println("Closing " + connection);
-    //connection.close();
-    // System.err.println("Closing " + connection + " " + connection.isClosed());
-  }
-
-/*  public static void main(String[] arg) {
-    DatabaseImpl langTestDatabase = new DatabaseImpl(null,"");
-    //long id = langTestDatabase.addUser(23, "male", 0);
-    //System.out.println("id =" + id);
-     for (Exercise e : langTestDatabase.getExercises(0)) System.err.println("e " + e);
-  }*/
+  public void closeConnection(Connection connection) throws SQLException {}
 
   public static void main(String[] arg) {
 /*    DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\mt_repo\\jdewitt\\pilot\\vlr-parle");
@@ -1131,7 +1199,6 @@ public class DatabaseImpl implements Database {
 
     DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\DLITest\\","farsi2");
     langTestDatabase.setInstallPath("C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu","C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu\\5000-no-english.unvow.farsi.txt","",false);
-
 
     List<Session> sessions = langTestDatabase.getSessions();
     long total = 0;
@@ -1156,7 +1223,7 @@ public class DatabaseImpl implements Database {
    // System.out.println("map " + langTestDatabase.getResultCountToCount());
   }
 
-  private static void writeMap(Map<Exercise, Integer> idToCount2, String fileName) {
+/*  private static void writeMap(Map<Exercise, Integer> idToCount2, String fileName) {
     try {
       Writer w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), "UTF-8"));
       for (Map.Entry<Exercise, Integer> pair : idToCount2.entrySet())
@@ -1165,5 +1232,5 @@ public class DatabaseImpl implements Database {
     } catch (IOException e) {
       e.printStackTrace();
     }
-  }
+  }*/
 }
