@@ -9,9 +9,13 @@ import mitll.langtest.shared.Session;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.Connection;
@@ -31,6 +35,7 @@ import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 /**
  * Note with H2 that :  <br></br>
@@ -158,7 +163,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
-   * @param i
+   * @param installPath
    * @param lessonPlanFile
    * @param mediaDir
    * @param isUrdu
@@ -170,7 +175,7 @@ public class DatabaseImpl implements Database {
     this.mediaDir = mediaDir;
     this.isUrdu = isUrdu;
 
-    resultDAO.enrichResultDurations(installPath);
+    //resultDAO.enrichResultDurations(installPath);
   }
 
   /**
@@ -364,35 +369,112 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public List<Exercise> getExercisesBiasTowardsUnanswered(boolean useFile, long userID) {
-    List<Exercise> rawExercises = getExercises(useFile);
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
 
-    for (Exercise e : rawExercises) {
-      idToCount.put(e.getID(), 0);
-      idToExercise.put(e.getID(), e);
-    }
+    populateInitialExerciseIDToCount(useFile, idToExercise, idToCount);
 
-
-    Map<Long, User> userMap = getUserMap(isUserMale(userID));
-    List<Result> results = getResults();
-    for (Result r: results ) {
-      Integer current = idToCount.get(r.id);
-      if (current != null) {
-        if (userMap.containsKey(r.userid)) {
-          idToCount.put(r.id,current+1);
-        }
-      }
-    }
+    getExerciseIDToResultCount(isUserMale(userID), idToCount);
 
     // only find answers that are for the gender
 
-    Map<Integer,List<String>> countToIds = new TreeMap<Integer, List<String>>();
-    for (Map.Entry<String,Integer> pair : idToCount.entrySet()) {
-      List<String> idsAtCount = countToIds.get(pair.getValue());
-      if (idsAtCount == null) { countToIds.put(pair.getValue(), idsAtCount = new ArrayList<String>()); }
-      idsAtCount.add(pair.getKey());
+    Map<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
+    List<Exercise> result = getResultsRandomizedPerUser(userID, idToExercise, countToIds);
+
+    return result;
+  }
+
+  public List<Exercise> getExercisesBiasTowardsUnanswered(boolean useFile, long userID, String outsideFile) {
+    Map<String, Exercise> phraseToExercise = new HashMap<String, Exercise>();
+    Map<String,Integer> idToCount = new HashMap<String, Integer>();
+    Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
+
+    int c= 0;
+    logger.info("plan file " +lessonPlanFile + " outside " + outsideFile);
+    List<Exercise> rawExercises = getExercises(useFile);
+    for (Exercise e : rawExercises) {
+      idToCount.put(e.getID(), 0);
+      String trim = e.getTooltip().trim();
+      phraseToExercise.put(trim, e);
+      if (c++ < 20) logger.warn("phrase '" +trim+ "'");
+      idToExercise.put(e.getID(), e);
     }
+
+    boolean isMale = isUserMale(userID);
+    Map<Boolean, Map<String, Integer>> counts = getCounts(outsideFile);
+    Map<String, Integer> phraseToCount = counts.get(isMale);
+
+    int count = 0;
+    for (Map.Entry<String,Integer> pair : phraseToCount.entrySet()) {
+      Exercise exercise = phraseToExercise.get(pair.getKey());
+      if (exercise == null) {
+        if (count++ < 20) logger.warn("huh? couldn't find phrase '" + pair.getKey()+  "' in map of size " +phraseToExercise.size());
+      }
+      else idToCount.put(exercise.getID(), pair.getValue());
+    }
+
+    Map<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
+    List<Exercise> result = getResultsRandomizedPerUser(userID, idToExercise, countToIds);
+
+    return result;
+  }
+
+
+  public Map<Boolean,Map<String,Integer>> getCounts(String overrideCountsFile) {
+    try {
+      File file = new File(overrideCountsFile);
+      if (!file.exists()) {
+        logger.error("can't find '" + file +"'");
+        return null;
+      }
+      else {
+        // logger.debug("found file at " + file.getAbsolutePath());
+      }
+      FileInputStream resourceAsStream = new FileInputStream(file);
+      BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,FileExerciseDAO.ENCODING));
+      String line2;
+      int count = 0;
+      Map<Boolean,Map<String,Integer>> genderToPhraseToCount = new HashMap<Boolean, Map<String, Integer>>();
+      genderToPhraseToCount.put(true, new HashMap<String, Integer>());
+      genderToPhraseToCount.put(false, new HashMap<String, Integer>());
+      logger.debug("using install path " + installPath + " lesson " + file + " isurdu " +isUrdu);
+      //exercises = new ArrayList<Exercise>();
+     // Pattern pattern = Pattern.compile("^\\d+\\.(.+)");
+      line2 = reader.readLine();
+      while ((line2 = reader.readLine()) != null) {
+        count++;
+        String[] split = line2.split("\\s+");
+        if (split.length < 3) {
+          logger.warn(" Couldn't parse " + line2);
+          continue;
+        }
+        String male = split[1].trim();
+        String female = split[2].trim();
+        String phrase = line2.split("--")[1].trim();
+        if (count < 20) logger.info("Got "+line2 + " male '" + male + "' female '" + female + "' phrase '" + phrase + "'");
+        try {
+          int maleCount = (int) Double.parseDouble(male);
+          genderToPhraseToCount.get(true).put(phrase,maleCount);
+        } catch (NumberFormatException e) {
+          if (count < 20)logger.warn("male Couldn't parse " + line2 + " got " +e);
+        }
+
+        try {
+          int femaleCount = (int) Double.parseDouble(female);
+          genderToPhraseToCount.get(false).put(phrase,femaleCount);
+        } catch (NumberFormatException e) {
+          if (count < 20)logger.warn("female Couldn't parse " + line2 + " got " +e);
+        }
+      }
+      reader.close();
+      return  genderToPhraseToCount;
+    } catch (Exception e) {
+      logger.error("got " +e,e);
+    }
+    return null;
+  }
+
+  private List<Exercise> getResultsRandomizedPerUser(long userID, Map<String, Exercise> idToExercise, Map<Integer, List<String>> countToIds) {
     List<Exercise> result = new ArrayList<Exercise>();
     Random rnd = new Random(userID);
 
@@ -404,8 +486,41 @@ public class DatabaseImpl implements Database {
         else result.add(e);
       }
     }
-
     return result;
+  }
+
+  private Map<Integer, List<String>> getCountToExerciseIDs(Map<String, Integer> idToCount) {
+    Map<Integer,List<String>> countToIds = new TreeMap<Integer, List<String>>();
+    for (Map.Entry<String,Integer> pair : idToCount.entrySet()) {
+      List<String> idsAtCount = countToIds.get(pair.getValue());
+      if (idsAtCount == null) { countToIds.put(pair.getValue(), idsAtCount = new ArrayList<String>()); }
+      idsAtCount.add(pair.getKey());
+    }
+    //logger.info("map is " +countToIds);
+    for (Integer c: countToIds.keySet()) logger.info("count = " +c + " : " + countToIds.get(c) );
+    return countToIds;
+  }
+
+  private void populateInitialExerciseIDToCount(boolean useFile, Map<String, Exercise> idToExercise, Map<String, Integer> idToCount) {
+    List<Exercise> rawExercises = getExercises(useFile);
+    for (Exercise e : rawExercises) {
+      idToCount.put(e.getID(), 0);
+      idToExercise.put(e.getID(), e);
+    }
+  }
+
+  private void getExerciseIDToResultCount(boolean userMale, Map<String, Integer> idToCount) {
+  //  boolean userMale = isUserMale(userID);
+    Map<Long, User> userMap = getUserMap(userMale);
+    List<Result> results = getResults();
+    for (Result r: results ) {
+      Integer current = idToCount.get(r.id);
+      if (current != null) {
+        if (userMap.containsKey(r.userid)) {
+          idToCount.put(r.id,current+1);
+        }
+      }
+    }
   }
 
   private boolean isUserMale(long userID) {
