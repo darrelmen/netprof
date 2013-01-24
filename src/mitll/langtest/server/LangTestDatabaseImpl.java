@@ -57,6 +57,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public static final String FIRST_N_IN_ORDER = "firstNInOrder";
   private static final String DATA_COLLECT_MODE = "dataCollect";
   private static final String BIAS_TOWARDS_UNANSWERED = "biasTowardsUnanswered";
+  private static final String USE_OUTSIDE_RESULT_COUNTS = "useOutsideResultCounts";
+  private static final String OUTSIDE_FILE = "outsideFile";
+  private static final String OUTSIDE_FILE_DEFAULT = "distributions.txt";
   private static final String URDU = "urdu";
   private static final int MB = (1024 * 1024);
   public static final String ANSWERS = "answers";
@@ -70,7 +73,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String relativeConfigDir;
   private String configDir;
   private boolean dataCollectMode;
-  private boolean biasTowardsUnanswered;
+  private boolean biasTowardsUnanswered, useOutsideResultCounts;
+  private String outsideFile;
   private boolean isUrdu;
   private int firstNInOrder;
 
@@ -155,7 +159,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<Exercise> exercises;
     if (dataCollectMode) {
       if (biasTowardsUnanswered) {
-        exercises = db.getExercisesBiasTowardsUnanswered(useFile, userID);
+        if (useOutsideResultCounts) {
+          String outsideFileOverride = outsideFile;
+          if (lessonPlanFile.contains("farsi")) outsideFileOverride = configDir + File.separator + "farsi.txt";
+          else if (lessonPlanFile.contains("urdu")) outsideFileOverride = configDir + File.separator + "urdu.txt";
+          else if (lessonPlanFile.contains("sudanese")) outsideFileOverride = configDir + File.separator + "sudanese.txt";
+          exercises = db.getExercisesBiasTowardsUnanswered(useFile, userID, outsideFileOverride);
+        }
+        else {
+          exercises = db.getExercisesBiasTowardsUnanswered(useFile, userID);
+        }
       } else {
         exercises = db.getExercisesFirstNInOrder(userID, useFile, firstNInOrder);
       }
@@ -908,6 +921,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     dataCollectMode = !props.getProperty(DATA_COLLECT_MODE, "false").equals("false");
     isUrdu = !props.getProperty(URDU, "false").equals("false");
     biasTowardsUnanswered = !props.getProperty(BIAS_TOWARDS_UNANSWERED, "true").equals("false");
+    useOutsideResultCounts = !props.getProperty(USE_OUTSIDE_RESULT_COUNTS, "true").equals("false");
+    outsideFile = props.getProperty(OUTSIDE_FILE, OUTSIDE_FILE_DEFAULT);
   }
 
   private class DirAndName {
