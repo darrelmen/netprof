@@ -17,16 +17,10 @@
     <property name="tomcat.deploy" value="../../../apache-tomcat-7.0.25/webapps"/>
 
     <path id="GWT SDK [GWT - 2.5.0].libraryclasspath">
-        <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122042-rel-r42/gwt-2.5.0/gwt-user.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122042-rel-r42/gwt-2.5.0/gwt-dev.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122042-rel-r42/gwt-2.5.0/validation-api-1.0.0.GA-sources.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122042-rel-r42/gwt-2.5.0/validation-api-1.0.0.GA.jar"/>
-
-
-        <pathelement location="/Applications/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201201120043-rel-r37/gwt-2.4.0/gwt-user.jar"/>
-        <pathelement location="/Applications/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201201120043-rel-r37/gwt-2.4.0/gwt-dev.jar"/>
-        <pathelement location="/Applications/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201201120043-rel-r37/gwt-2.4.0/validation-api-1.0.0.GA-sources.jar"/>
-        <pathelement location="/Applications/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201201120043-rel-r37/gwt-2.4.0/validation-api-1.0.0.GA.jar"/>
+        <pathelement location="gwt/gwt-user.jar"/>
+        <pathelement location="gwt/gwt-dev.jar"/>
+        <pathelement location="gwt/validation-api-1.0.0.GA-sources.jar"/>
+        <pathelement location="gwt/validation-api-1.0.0.GA.jar"/>
     </path>
     <path id="imagewriter.classpath">
         <pathelement location="${imagewriter.location}/bin"/>
