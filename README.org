@@ -1,0 +1,21 @@
+* netPron2 : Prononciation scoring, data collection, testing, and grading
+
+** Prerequisites
+
+*** Ant installed
+
+** Deployment
+
+*** 1) git submodule update --init –recursive
+*** 2) in war/WEB-INF/web.xml choose which config you would like to use, e.g. urdu
+
+This will control which of config directory under war/config/<name> will be used
+
+*** 3) ant warUrdu (or other config target), this will produce npUrduData.war
+*** 4) copy the war 
+Either copy the war directly into the webapps directory of the webserver OR 
+jar xf npUrduDara.war into another directory and then cp -r <other dir> <webapps dir>
+The second option would be good if you want to rename the webapp to be something else.
+If so, also change the title property in config.properties in war/config/urdu/config.properties (or equivalent)
+
+
