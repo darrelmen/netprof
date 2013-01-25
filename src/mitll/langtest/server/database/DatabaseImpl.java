@@ -402,7 +402,7 @@ public class DatabaseImpl implements Database {
 
     boolean isMale = isUserMale(userID);
     Map<Boolean, Map<String, Integer>> counts = getCounts(outsideFile);
-    Map<String, Integer> phraseToCount = counts.get(isMale);
+    Map<String, Integer> phraseToCount = counts != null ? counts.get(isMale) : new HashMap<String,Integer>();
 
     int count = 0;
     for (Map.Entry<String,Integer> pair : phraseToCount.entrySet()) {
@@ -1015,6 +1015,7 @@ public class DatabaseImpl implements Database {
       totalTime += s.duration;
       total += s.numAnswers;
     }
+    if (total == 0) return new HashMap<Integer,Float>();
 
     long rateInMillis = totalTime / total;
 
