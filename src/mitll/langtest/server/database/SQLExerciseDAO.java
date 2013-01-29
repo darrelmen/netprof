@@ -54,13 +54,13 @@ public class SQLExerciseDAO implements ExerciseDAO {
       PreparedStatement statement = connection.prepareStatement(sql);
       // logger.info("doing " + sql + " on " + connection);
       ResultSet rs = statement.executeQuery();
-      int count = 0;
+      // int count = 0;
       while (rs.next()) {
       //  if (count++ > 10) break;
         String plan = rs.getString(1);
         String exid = rs.getString(2);
-        String type = rs.getString(3);
-        boolean onlyfa = rs.getBoolean(4);
+        // String type = rs.getString(3);
+        // boolean onlyfa = rs.getBoolean(4);
         String content = getStringFromClob(rs.getClob(5));
 
         if (content.startsWith("{")) {
