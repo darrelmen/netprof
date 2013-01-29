@@ -136,8 +136,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * Called from the client.
-   *
+   * Called from the client.<br></br>
+   * Complicated? Sure.
+   * <ul>
+   * <li>If in data collection mode, we have the option of biasing collection towards
+   * items that have not yet been answered. </li>
+   * <li>And for those, we can merge the counts from another collection system
+   * and bias the presentation order to try to get answers for items that have least coverage in both systems. </li>
+   * <li>Alternatively, we can present the first N items in order then random after that (based on the user). </li>
+   * <li>Or we can attempt to present items in an order that biases towards presenting items that were all graded "correct"  </li>
+   * first and all graded "incorrect" last.
+   * </ul>
    * @param userID
    * @param useFile
    * @param arabicDataCollect
@@ -713,7 +722,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           ") user = " + user + " exercise " + exercise +
           " question " + questionID + " file " + file.getAbsolutePath());
     }
-    db.answerDAO.addAnswer(db, user, plan, exercise, questionID, "", file.getPath(),
+    db.addAudioAnswer(user, plan, exercise, questionID, file.getPath(),
         isValid, flq, true, audioType, validity.durationInMillis);
 
     String wavPathWithForwardSlashSeparators = ensureForwardSlashes(wavPath);
