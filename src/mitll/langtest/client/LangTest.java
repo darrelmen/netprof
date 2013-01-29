@@ -654,6 +654,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isDemoMode() {  return demoMode; }
   public boolean isAutoCRTMode() {  return autocrt; }
   public int getRecordTimeout() {  return recordTimeout; }
+  public boolean isDataCollectMode() {  return dataCollectMode; }
 
   // recording methods...
   /**
