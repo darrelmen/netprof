@@ -10,14 +10,9 @@ import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -35,7 +30,6 @@ import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.regex.Pattern;
 
 /**
  * Note with H2 that :  <br></br>
@@ -52,8 +46,10 @@ import java.util.regex.Pattern;
  * To change this template use File | Settings | File Templates.
  */
 public class DatabaseImpl implements Database {
-  public static final int SESSION_GAP = 10 * 60 * 1000;
-  public static final int HOUR_IN_MILLIS = (60 * 60 * 1000);
+  private static final int KB = (1024);
+  private static final int MB = (KB * KB);
+  private static final int SESSION_GAP = 10 * 60 * 1000;
+  private static final int HOUR_IN_MILLIS = (60 * 60 * 1000);
   private static Logger logger = Logger.getLogger(DatabaseImpl.class);
  // private static final boolean TESTING = false;
 
@@ -63,11 +59,11 @@ public class DatabaseImpl implements Database {
 
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
-  public final UserDAO userDAO = new UserDAO(this);
+  private final UserDAO userDAO = new UserDAO(this);
   private final ResultDAO resultDAO = new ResultDAO(this);
   public final AnswerDAO answerDAO = new AnswerDAO(this);
-  public final GradeDAO gradeDAO = new GradeDAO(this);
-  public final GraderDAO graderDAO = new GraderDAO(this);
+  private final GradeDAO gradeDAO = new GradeDAO(this);
+  private final GraderDAO graderDAO = new GraderDAO(this);
   private DatabaseConnection connection = null;
 
   /**
@@ -157,7 +153,6 @@ public class DatabaseImpl implements Database {
    * @return
    */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    //System.out.println("isurdu " + isUrdu);
     return useFile ? new FileExerciseDAO(mediaDir, isUrdu) : new SQLExerciseDAO(this, mediaDir);
   }
 
@@ -184,8 +179,7 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public List<Exercise> getExercises(boolean useFile) {
-    List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
-    return exercises;
+    return getExercises(useFile, lessonPlanFile);
   }
 
   /**
@@ -364,6 +358,7 @@ public class DatabaseImpl implements Database {
   /**
    * Show unanswered questions first, then ones with 1, then 2, then 3,... answers
    * Also be aware of the user's gender -- if you're female, show questions that have no female answers first.
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long, boolean, boolean)
    * @param useFile
    * @param userID
    * @return
@@ -374,29 +369,35 @@ public class DatabaseImpl implements Database {
 
     populateInitialExerciseIDToCount(useFile, idToExercise, idToCount);
 
+    // only find answers that are for the gender
     getExerciseIDToResultCount(isUserMale(userID), idToCount);
 
-    // only find answers that are for the gender
-
     Map<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
-    List<Exercise> result = getResultsRandomizedPerUser(userID, idToExercise, countToIds);
-
-    return result;
+    return getResultsRandomizedPerUser(userID, idToExercise, countToIds);
   }
 
+  /**
+   * Merge the online counts with counts from an external file.
+   *
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long, boolean, boolean)
+   * @param useFile
+   * @param userID
+   * @param outsideFile
+   * @return
+   */
   public List<Exercise> getExercisesBiasTowardsUnanswered(boolean useFile, long userID, String outsideFile) {
     Map<String, Exercise> phraseToExercise = new HashMap<String, Exercise>();
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
 
-    int c= 0;
+    //int c= 0;
     logger.info("plan file " +lessonPlanFile + " outside " + outsideFile);
     List<Exercise> rawExercises = getExercises(useFile);
     for (Exercise e : rawExercises) {
       idToCount.put(e.getID(), 0);
       String trim = e.getTooltip().trim();
       phraseToExercise.put(trim, e);
-      if (c++ < 20) logger.warn("phrase '" +trim+ "'");
+     // if (c++ < 20) logger.warn("phrase '" +trim+ "'");
       idToExercise.put(e.getID(), e);
     }
 
@@ -412,15 +413,22 @@ public class DatabaseImpl implements Database {
       }
       else idToCount.put(exercise.getID(), pair.getValue());
     }
-
+    if (count > 0) logger.warn("there were " +count + " missing phrases ");
     Map<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
     List<Exercise> result = getResultsRandomizedPerUser(userID, idToExercise, countToIds);
 
     return result;
   }
 
-
-  public Map<Boolean,Map<String,Integer>> getCounts(String overrideCountsFile) {
+  /**
+   * Parse the external count file from Wade.
+   * This should only be a one off if people are consistently using the website.
+   *
+   * @see #getExercisesBiasTowardsUnanswered(boolean, long, String)
+   * @param overrideCountsFile
+   * @return
+   */
+  private Map<Boolean,Map<String,Integer>> getCounts(String overrideCountsFile) {
     try {
       File file = new File(overrideCountsFile);
       if (!file.exists()) {
@@ -437,7 +445,7 @@ public class DatabaseImpl implements Database {
       Map<Boolean,Map<String,Integer>> genderToPhraseToCount = new HashMap<Boolean, Map<String, Integer>>();
       genderToPhraseToCount.put(true, new HashMap<String, Integer>());
       genderToPhraseToCount.put(false, new HashMap<String, Integer>());
-      logger.debug("using install path " + installPath + " lesson " + file + " isurdu " +isUrdu);
+      //logger.debug("using install path " + installPath + " lesson " + file + " isurdu " +isUrdu);
       //exercises = new ArrayList<Exercise>();
      // Pattern pattern = Pattern.compile("^\\d+\\.(.+)");
       line2 = reader.readLine();
@@ -474,6 +482,17 @@ public class DatabaseImpl implements Database {
     return null;
   }
 
+  /**
+   * Given a map of answer counts to exercise ids at those counts, randomize the order based on the
+   * user id, then return a list of Exercises with those ids.
+   *
+   * @see #getExercisesBiasTowardsUnanswered(boolean, long)
+   * @see #getExercisesBiasTowardsUnanswered(boolean, long, String)
+   * @param userID for this user
+   * @param idToExercise so we can go from id to exercise
+   * @param countToIds statistics about answers for each exercise
+   * @return List of exercises in order from least answers to most
+   */
   private List<Exercise> getResultsRandomizedPerUser(long userID, Map<String, Exercise> idToExercise, Map<Integer, List<String>> countToIds) {
     List<Exercise> result = new ArrayList<Exercise>();
     Random rnd = new Random(userID);
@@ -497,7 +516,7 @@ public class DatabaseImpl implements Database {
       idsAtCount.add(pair.getKey());
     }
     //logger.info("map is " +countToIds);
-    for (Integer c: countToIds.keySet()) logger.info("count = " +c + " : " + countToIds.get(c) );
+   // for (Integer c: countToIds.keySet()) logger.info("count = " +c + " : " + countToIds.get(c) );
     return countToIds;
   }
 
@@ -564,12 +583,16 @@ public class DatabaseImpl implements Database {
   }
 
     /**
+     * Return exercises in an order that puts the items with all right answers towards the front and all wrong
+     * toward the back (in the arabic data collect the students were too advanced for the questions, so
+     * they mostly got them right).<br></br>
+     *
      * Remember there can be multiple questions per exercise, so we need to average over the grades for all
      * answers for all questions for an exercise.
      *
-     * @paramx userID
      * @param useFile
-     * @paramx doGradeBalancing
+     * @param useFLQ
+     * @param useSpoken
      * @return
      */
   private List<Exercise> getExercisesGradeBalancing(boolean useFile, boolean useFLQ, boolean useSpoken) {
@@ -834,6 +857,14 @@ public class DatabaseImpl implements Database {
     answerDAO.addAnswer(userID, e, questionID, answer, "", !e.promptInEnglish, false, Result.AUDIO_TYPE_UNSET);
   }
 
+  public void addAudioAnswer(int userID, String plan, String exerciseID, int questionID,
+                             String audioFile,
+                             boolean valid, boolean flq, boolean spoken,
+                             String audioType, int durationInMillis) {
+    answerDAO.addAnswer(this, userID, plan, exerciseID, questionID, "", audioFile, valid, flq, spoken, audioType,
+        durationInMillis);
+  }
+
   /**
    * @param exerciseID
    * @param toAdd
@@ -1059,6 +1090,13 @@ public class DatabaseImpl implements Database {
     return resCountToCount;
   }
 
+  /**
+   * @see #getHoursToCompletion(boolean)
+   * @see #getResultCountToCount(boolean)
+   * @see #getResultPerExercise(boolean)
+   * @param useFile
+   * @return
+   */
   private Map<String, Integer> getExToCount(boolean useFile) {
     Map<String, Integer> idToCount = getInitialIdToCount(useFile);
 
@@ -1293,6 +1331,13 @@ public class DatabaseImpl implements Database {
   }
 
   public void closeConnection(Connection connection) throws SQLException {}
+  private void logMemory() {
+    Runtime rt = Runtime.getRuntime();
+    long free = rt.freeMemory();
+    long used = rt.totalMemory()-free;
+    long max = rt.maxMemory();
+    logger.debug("heap info free " + free / KB + "K used " + used / KB + "K max " + max / KB + "K total " + rt.totalMemory()/KB + " K ");
+  }
 
   public static void main(String[] arg) {
 /*    DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\mt_repo\\jdewitt\\pilot\\vlr-parle");
@@ -1315,14 +1360,33 @@ public class DatabaseImpl implements Database {
 
     DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\DLITest\\","farsi2");
     langTestDatabase.setInstallPath("C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu","C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu\\5000-no-english.unvow.farsi.txt","",false);
-
+/*
     List<Session> sessions = langTestDatabase.getSessions();
     long total = 0;
     for (Session s : sessions) {
       System.out.println(s);
       total += s.numAnswers;
     }
-    System.out.println("total " + total);
+    System.out.println("total " + total);*/
+    System.gc();
+
+    langTestDatabase.logMemory();
+
+    for (int i = 0; i < 10000; i++) {
+      String whole = makeString();
+      langTestDatabase.answerDAO.addAnswer(langTestDatabase, 12, whole.substring(0,10), whole.substring(10,20), 0, "", "/path/to/file",
+          true, true, true, Result.AUDIO_TYPE_REGULAR, 5000);
+      if (i % 100 == 0) System.gc();
+      if (i % 100 == 0) langTestDatabase.logMemory();
+    }
+     System.gc();
+    langTestDatabase.logMemory();
+    try {
+      Thread.sleep(1000000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+    // langTestDatabase.
     /*Map<Exercise, Integer> idToCount = langTestDatabase.getResultIdToCount(true,true);
     writeMap(idToCount, "farsiMaleCounts.csv");
     Map<Exercise, Integer> idToCount2 = langTestDatabase.getResultIdToCount(true,false);
@@ -1337,6 +1401,22 @@ public class DatabaseImpl implements Database {
 */
 //    langTestDatabase.getUserToResultCount();
    // System.out.println("map " + langTestDatabase.getResultCountToCount());
+  }
+
+  private static String makeString() {
+    StringBuilder b = new StringBuilder(10000000);
+    char[] array = new char[10];
+    for (int i = 0; i < 10; i++) {
+      String s = "" + i;
+      array[i] = s.charAt(0);
+
+    }
+    for (int i = 0; i < 10000000; i++) {
+      char str = array[i%10];
+      b.append(str);
+    }
+    //System.err.print("string len " + b.length());
+    return b.toString();
   }
 
 /*  private static void writeMap(Map<Exercise, Integer> idToCount2, String fileName) {
