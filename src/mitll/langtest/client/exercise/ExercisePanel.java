@@ -39,6 +39,15 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   private static final String ANSWER_BOX_WIDTH = "400px";
   private static final String REPEAT_ONCE = "<i>Repeat the phrase once at normal speed.</i>";
   private static final String REPEAT_TWICE = "<i>Repeat the phrase twice, first at normal and then at slow speed.</i>";
+  private static final String TWO_SPACES = "&nbsp;&nbsp;";
+  private static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
+  private static final String TEACHER_PROMPT = "Record the phrase above by clicking the record button, speaking, then stop when finished. ";
+  private static final String LEFT_ARROW_TOOLTIP = "Press the left arrow key to go to the previous item.";
+  private static final String RIGHT_ARROW_TOOLTIP = "Press the right arrow key to go to the next item.";
+  private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
+  private static final String ENGLISH = "English";
+  private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
+  private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak and record your answer in ";
   private List<Widget> answers = new ArrayList<Widget>();
   private Set<Widget> completed = new HashSet<Widget>();
   protected Exercise exercise = null;
@@ -159,11 +168,15 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
         int j = 1;
         for (String alternate : qaPair.getAlternateAnswers()) {
           add(new HTML("<b>Possible answer #" + j++ +
-              " : &nbsp;&nbsp;</b>" + alternate));
+              " : " +
+              TWO_SPACES +
+              "</b>" + alternate));
         }
         if (addSpacerAfter) add(new HTML("<br></br>"));
       } else {
-        add(new HTML("<b>Answer : &nbsp;&nbsp;</b>" + answer + (addSpacerAfter ? "<br></br>" : "")));
+        add(new HTML("<b>Answer : " +
+            TWO_SPACES +
+            "</b>" + answer + (addSpacerAfter ? "<br></br>" : "")));
       }
     }
     else {
@@ -184,20 +197,22 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   }
 
   protected String getWrittenPrompt(boolean promptInEnglish) {
-    return "&nbsp;&nbsp;&nbsp;Type your answer in " +(promptInEnglish ? "english" : " the foreign language") +" :";
+    return THREE_SPACES +
+        TYPE_YOUR_ANSWER_IN +(promptInEnglish ? ENGLISH : THE_FOREIGN_LANGUAGE) +" :";
   }
 
   protected String getSpokenPrompt(boolean promptInEnglish) {
     String instructions = ":";
-    String prefix = "<br></br>&nbsp;&nbsp;&nbsp;";
+    String prefix = "<br></br>" + THREE_SPACES;
     if (controller.getAudioType().equals(Result.AUDIO_TYPE_FAST_AND_SLOW)) {
       instructions = prefix +REPEAT_TWICE;
     }
     else if (controller.getAudioType().equals(Result.AUDIO_TYPE_REGULAR)) {
       instructions = prefix +REPEAT_ONCE;
     }
-    return "&nbsp;&nbsp;&nbsp;Speak and record your answer in " + (promptInEnglish ? "English" : " the foreign language") + " " +
-        instructions;
+    String studentPrompt = SPEAK_AND_RECORD_YOUR_ANSWER_IN + (promptInEnglish ? ENGLISH : THE_FOREIGN_LANGUAGE) + " ";
+    String teacherPrompt = TEACHER_PROMPT;
+    return THREE_SPACES + (controller.isDataCollectMode() ? teacherPrompt : studentPrompt) + instructions;
   }
 
   protected int getQuestionPromptSpacer() {
@@ -216,7 +231,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     });
     boolean onFirst = !controller.onFirst(e);
     prev.setEnabled(onFirst);
-    prev.setTitle("Press left arrow key to go to previous item.");
+    prev.setTitle(LEFT_ARROW_TOOLTIP);
 
     buttonRow.add(prev);
 
@@ -225,7 +240,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
       next.setEnabled(false);
     }
     buttonRow.add(next);
-    next.setTitle("Press right arrow key to go to next item.");
+    next.setTitle(RIGHT_ARROW_TOOLTIP);
 
     DOM.setElementAttribute(next.getElement(), "id", "nextButton");
 
@@ -447,26 +462,18 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   }
 
   private static class TextValue extends HorizontalPanel implements HasValue<String> {
-    String value;
+    private String value;
     @Override
-    public String getValue() {
-      return value;
-    }
+    public String getValue() { return value; }
 
     @Override
-    public void setValue(String value) {
-      this.value = value;
-    }
+    public void setValue(String value) { this.value = value; }
 
     @Override
-    public void setValue(String value, boolean fireEvents) {
-      this.value = value;
-    }
+    public void setValue(String value, boolean fireEvents) {  this.value = value; }
 
     @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
-      return null;
-    }
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) { return null; }
   }
 
   public void recordIncomplete(Widget answer) {
