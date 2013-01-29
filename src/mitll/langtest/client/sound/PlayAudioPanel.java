@@ -104,7 +104,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
     addKeyboardListener();
     if (keyHandler != null) {
-      playButton.setTitle("Press space bar to play/stop playing audio.");
+      playButton.setTitle("Press the space bar to play/stop playing audio.");
     }
     playButton.setVisible(false);
     add(playButton);

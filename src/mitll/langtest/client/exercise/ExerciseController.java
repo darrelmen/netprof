@@ -38,5 +38,6 @@ public interface ExerciseController {
   boolean isDemoMode();
   boolean isAutoCRTMode();
   int getRecordTimeout();
+  boolean isDataCollectMode();
   String getAudioType();
 }
