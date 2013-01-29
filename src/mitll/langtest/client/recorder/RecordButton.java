@@ -52,7 +52,7 @@ public abstract class RecordButton {
        // System.out.println(new Date() + " : recordButton LOST  focus !----> ");
       }
     });
-    recordButton.setTitle("Press Return to record/stop recording");
+    recordButton.setTitle("Press Enter to record/stop recording");
 
     addKeyHandler();
   }
