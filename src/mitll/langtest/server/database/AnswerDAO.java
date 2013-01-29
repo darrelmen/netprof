@@ -32,8 +32,9 @@ public class AnswerDAO {
    * @param answer
    * @param audioFile
    * @param flq
-   *@param spoken
-   * @param audioType @see mitll.langtest.client.exercise.ExercisePanel#postAnswers(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
+   * @param spoken
+   * @param audioType
+   * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
    */
   public void addAnswer(int userID, Exercise e, int questionID, String answer, String audioFile,
                         boolean flq, boolean spoken, String audioType) {
@@ -147,23 +148,27 @@ public class AnswerDAO {
     int i = 1;
 
     boolean isAudioAnswer = answer == null || answer.length() == 0;
-    String x = isAudioAnswer ? audioFile : answer;
+    String answerInserted = isAudioAnswer ? audioFile : answer;
 
     statement.setInt(i++, userid);
-    statement.setString(i++, plan);
-    statement.setString(i++, id);
+    statement.setString(i++, copyStringChar(plan));
+    statement.setString(i++, copyStringChar(id));
     statement.setInt(i++, questionID);
     statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
-    statement.setString(i++, x);
+    statement.setString(i++, copyStringChar(answerInserted));
     statement.setBoolean(i++, valid);
     statement.setBoolean(i++, flq);
     statement.setBoolean(i++, spoken);
-    statement.setString(i++, audioType);
+    statement.setString(i++, copyStringChar(audioType));
     statement.setInt(i, durationInMillis);
 
     //logger.info("valid is " +valid + " for " +statement);
 
     statement.executeUpdate();
     statement.close();
+  }
+
+  private String copyStringChar(String plan) {
+    return new String(plan.toCharArray());
   }
 }
