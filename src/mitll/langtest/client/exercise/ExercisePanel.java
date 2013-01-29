@@ -41,7 +41,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   private static final String REPEAT_TWICE = "<i>Repeat the phrase twice, first at normal and then at slow speed.</i>";
   private static final String TWO_SPACES = "&nbsp;&nbsp;";
   private static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
-  private static final String TEACHER_PROMPT = "Record the phrase above by clicking the record button, speaking, then stop when finished. ";
+  private static final String TEACHER_PROMPT = "Record the phrase above by clicking the record button, speak, and then stop when finished. ";
   private static final String LEFT_ARROW_TOOLTIP = "Press the left arrow key to go to the previous item.";
   private static final String RIGHT_ARROW_TOOLTIP = "Press the right arrow key to go to the next item.";
   private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
