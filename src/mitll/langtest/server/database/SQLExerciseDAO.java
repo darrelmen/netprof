@@ -136,13 +136,14 @@ public class SQLExerciseDAO implements ExerciseDAO {
     Collection<JSONObject> qa = JSONArray.toCollection((JSONArray) qa1, JSONObject.class);
     for (JSONObject o : qa) {
       Set<String> keys = o.keySet();
-      for (String k : keys) {
-        JSONObject qaForLang = (JSONObject) o.get(k);
+      for (String lang : keys) {
+        JSONObject qaForLang = (JSONObject) o.get(lang);
         String answerKey = (String) qaForLang.get("answerKey");
         List<String> alternateAnswers = Arrays.asList(answerKey.split("\\|\\|"));
-        exercise.addQuestion(k, (String) qaForLang.get("question"), answerKey, alternateAnswers);
+        exercise.addQuestion(lang, (String) qaForLang.get("question"), answerKey, alternateAnswers);
       }
     }
+   // logger.debug("got " +exercise);
     return exercise;
   }
 
