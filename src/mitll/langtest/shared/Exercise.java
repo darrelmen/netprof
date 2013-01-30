@@ -22,7 +22,7 @@ public class Exercise extends ExerciseShell  {
   public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE, REPEAT, REPEAT_FAST_SLOW, MULTI_REF }
   public static final String EN = "en";
   public static final String FL = "fl";
-
+  private static final boolean DEBUG = false;
   private String plan;
   private String content;
   private EXERCISE_TYPE type = EXERCISE_TYPE.RECORD;
@@ -45,7 +45,6 @@ public class Exercise extends ExerciseShell  {
      * @see Exercise#addQuestion(String, String, String, java.util.List
      */
     public QAPair(String q, String a, List<String> alternateAnswers) { question = q; answer = a; this.alternateAnswers = alternateAnswers;}
-    public String toString() { return "'"+ getQuestion() + "' : '" + getAnswer() +"'"; }
 
     /**
      * @see mitll.langtest.client.exercise.ExercisePanel#addQuestions
@@ -66,6 +65,16 @@ public class Exercise extends ExerciseShell  {
     public List<String> getAlternateAnswers() {
       return alternateAnswers;
     }
+
+    public String toString() {
+      String alts = "";
+      int i = 1;
+      if (alternateAnswers != null && !alternateAnswers.isEmpty()) {
+        alts += "alternates ";
+        for (String answer : alternateAnswers) alts += "#" + (i++) + " : " +answer +"; ";
+      }
+      return "Q: '"+ getQuestion() + "' A: '" + getAnswer() +"' " + alts;
+    }
   }
 
   public Exercise() {}     // required for serialization
@@ -80,7 +89,8 @@ public class Exercise extends ExerciseShell  {
    */
   public Exercise(String plan, String id, String content, boolean promptInEnglish, boolean recordAudio, String tooltip) {
     super(id,tooltip);
-    this.plan = plan; this.content = content;
+    this.plan = plan;
+    this.content = content;
     this.type = recordAudio ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE;
     this.promptInEnglish = promptInEnglish;
   }
@@ -118,7 +128,6 @@ public class Exercise extends ExerciseShell  {
     this(plan,id,content,fastAudioRef,sentenceRef, tooltip);
     this.slowAudioRef = slowAudioRef;
     this.type = EXERCISE_TYPE.REPEAT_FAST_SLOW;
-
   }
 
     /**
@@ -186,11 +195,24 @@ public class Exercise extends ExerciseShell  {
 
   public String toString() {
     if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
-      return "Exercise " + type + " " +plan+"/"+ id + "/" + " content bytes = " + content.length() + " ref sentence " + refSentence +" audio " + refAudio;
+      return "Exercise " + type + " " +plan+"/"+ id + "/" + " content bytes = " + content.length() +
+          " ref sentence " + refSentence +" audio " + refAudio;
     }
     else {
-      return "Exercise " + type + " " +plan+"/"+ id + "/" + (promptInEnglish?"english":"foreign")+"/" + getType()+
-          " : content bytes = " + content.length() + (langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size());
+      String questions = "";
+      if (langToQuestion != null) {
+        for (Map.Entry<String, List<QAPair>> pair : langToQuestion.entrySet()) {
+          questions += pair.getKey() + " -> ";
+          int i =1;
+          for (QAPair qa : pair.getValue()) {
+            questions += "#"+ (i++) +" : "+qa.toString() + ", ";
+          }
+        }
+      }
+      String moreAboutQuestions = DEBUG ? " : " + questions : "";
+      return "Exercise " + getType() + " " +plan+"/"+ id + "/" + (promptInEnglish?"english":"foreign")+
+          " : content bytes = " + content.length() + (DEBUG ? " content : " +content : "")+
+          (langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size() + moreAboutQuestions);
     }
   }
 }
