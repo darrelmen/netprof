@@ -75,7 +75,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Panel currentExerciseVPanel = new VerticalPanel();
   private ListInterface exerciseList;
-  private ScrollPanel itemScroller;
   private Label status;
   private UserManager userManager;
   private final UserTable userTable = new UserTable();
@@ -109,7 +108,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private boolean autocrt;
   private boolean demoMode;
   private boolean dataCollectMode;
-  private boolean collectAudio;
+  private boolean collectAudio = true;
   private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
 
@@ -159,6 +158,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
             text += "Caused by: ";
           }
         }
+        if (browserCheck.isIE7() && text.contains("Unknown runtime error")) { // hack for IE 7
+          return;
+        }
         DialogBox dialogBox = new DialogBox(true, false);
         DOM.setStyleAttribute(dialogBox.getElement(), "backgroundColor", "#ABCDEF");
         System.err.print(text);
@@ -167,7 +169,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         dialogBox.center();
       }
     });
-
 
     service.getProperties(new AsyncCallback<Map<String, String>>() {
       public void onFailure(Throwable caught) {}
@@ -236,15 +237,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       currentExerciseVPanel.addStyleName("noMargin");
       RootPanel.get().add(currentExerciseVPanel);
     }
-    if (!arabicTextDataCollect) {
+    if (!arabicTextDataCollect && collectAudio) {
       makeFlashContainer();
       currentExerciseVPanel.add(flashRecordPanel);
     }
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("currentExercisePanel");
     }
-
-    setupErrorDialog();
 
     // set up left side exercise list
     makeExerciseList(exerciseListPanel, isGrading);
@@ -347,8 +346,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void setExerciseListSize() {
-    int height = Math.max(60, Window.getClientHeight() - (2 * HEADER_HEIGHT) - footerHeight - 60);
-    if (!goodwaveMode && !dataCollectMode) itemScroller.setSize(EXERCISE_LIST_WIDTH + "px", height + "px"); // 54
+   // int height = Math.max(60, Window.getClientHeight() - (2 * HEADER_HEIGHT) - footerHeight - 60);
   }
 
   /**
@@ -615,11 +613,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     grading = false;
     setGrading(grading);
-    if (!arabicTextDataCollect) flashRecordPanel.initFlash();
+    if (!arabicTextDataCollect && collectAudio) {
+      flashRecordPanel.initFlash();
+    }
 
     if (userID != lastUser) {
       System.out.println("gotUser " + userID + " vs " + lastUser);
-      if (arabicTextDataCollect || flashRecordPanel.gotPermission()) {
+      if ((arabicTextDataCollect || !collectAudio) || flashRecordPanel.gotPermission()) {
      //   System.out.println("\tgetExercises for " + userID);
 
         exerciseList.getExercises(userID);
@@ -681,22 +681,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return soundManager;
   }
 
-  private DialogBox dialogBox;
-  private Label msgLabel;
-  private Button closeButton;
-  private void setupErrorDialog() {
-    dialogBox = new DialogBox();
-    dialogBox.setText("Information");
-  //  dialogBox.setAnimationEnabled(true);
-    dialogBox.setGlassEnabled(true);
+  public void showErrorMessage(String title, String msg) {
+    final DialogBox dialogBox;
+    Button closeButton;
 
-    this.closeButton = new Button("Close");
-    // We can set the id of a widget by accessing its Element
+    dialogBox = new DialogBox();
+    dialogBox.setText(title);
+
+    closeButton = new Button("Close");
     closeButton.getElement().setId("closeButton");
+    closeButton.setFocus(true);
 
     VerticalPanel dialogVPanel = new VerticalPanel();
     dialogVPanel.addStyleName("dialogVPanel");
-    dialogVPanel.add(msgLabel = new Label());
+    dialogVPanel.add(new Label(msg));
 
     dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
     dialogVPanel.add(closeButton);
@@ -707,14 +705,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         dialogBox.hide();
       }
     });
-  }
-
-  public void showErrorMessage(String title, String msg) {
-    System.err.println("got error " + msg);
-    dialogBox.setText(title);
-    msgLabel.setText(msg);
     dialogBox.center();
-    closeButton.setFocus(true);
   }
 
   public void showStatus(String msg) { status.setText(msg); }
