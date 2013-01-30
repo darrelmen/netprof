@@ -36,6 +36,7 @@ public class UserManager {
   private static final int TEST_AGE = 100;
   private static final int NO_USER_SET = -1;
   private static final String GRADING = "grading";
+  private static final String TESTING = "testing";
   private static final List<String> EXPERIENCE_CHOICES = Arrays.asList(
       "0-3 months (Semester 1)",
       "4-6 months (Semester 1)",
@@ -49,10 +50,17 @@ public class UserManager {
   private final boolean useCookie = false;
   private long userID = NO_USER_SET;
   private int rememberedUser = -1;
+  boolean isCollectAudio;
 
-  public UserManager(UserNotification lt, LangTestDatabaseAsync service) {
+  /**
+   * @see mitll.langtest.client.LangTest#onModuleLoad2()
+   * @param lt
+   * @param service
+   */
+  public UserManager(UserNotification lt, LangTestDatabaseAsync service, boolean isCollectAudio) {
     this.langTest = lt;
     this.service = service;
+    this.isCollectAudio = isCollectAudio;
   }
 
   // user tracking
@@ -76,7 +84,9 @@ public class UserManager {
   }
 
   private void storeAudioType(String type) {
-    langTest.rememberAudioType(type);
+    if (isCollectAudio) {
+      langTest.rememberAudioType(type);
+    }
   }
 
   /**
@@ -353,9 +363,11 @@ public class UserManager {
 
     HTML ww = new HTML("<b>Audio Recording Style</b>");
     w.setTitle("Choose type of audio recording.");
-    dialogVPanel.add(ww);
-    dialogVPanel.add(regular);
-    dialogVPanel.add(fastThenSlow);
+    if (isCollectAudio) {
+      dialogVPanel.add(ww);
+      dialogVPanel.add(regular);
+      dialogVPanel.add(fastThenSlow);
+    }
 
     SimplePanel spacer = new SimplePanel();
     spacer.setSize("20px", "5px");
@@ -392,7 +404,7 @@ public class UserManager {
             Window.alert("Please use password from the email sent to you.");
             valid = false;
           }
-          else if (!regular.getValue() && !fastThenSlow.getValue()) {
+          else if (checkAudioSelection(regular, fastThenSlow)) {
             Window.alert("Please choose either regular or regular then slow audio recording.");
             valid = false;
           }
@@ -457,7 +469,7 @@ public class UserManager {
             Window.alert("please use password from the email");
           }
         } else {
-          if (!regular.getValue() && !fastThenSlow.getValue()) {
+          if (checkAudioSelection(regular, fastThenSlow)) {
             Window.alert("Please choose either regular or regular then slow audio recording.");
           }
           else {
@@ -469,6 +481,10 @@ public class UserManager {
       }
     });
     show(dialogBox);
+  }
+
+  private boolean checkAudioSelection(RadioButton regular, RadioButton fastThenSlow) {
+    return isCollectAudio && !regular.getValue() && !fastThenSlow.getValue();
   }
 
   private void checkUserOrCreate(final int enteredAge, final TextBox user, final ListBox experienceBox,
@@ -533,7 +549,8 @@ public class UserManager {
   }
 
   private boolean checkPassword(TextBox password) {
-    return password.getText().trim().equalsIgnoreCase(GRADING);
+    String trim = password.getText().trim();
+    return trim.equalsIgnoreCase(GRADING) || trim.equalsIgnoreCase(TESTING);
   }
 
   private void setGraderCookie(String user) {
