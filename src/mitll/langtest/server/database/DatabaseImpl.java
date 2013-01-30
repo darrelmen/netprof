@@ -75,7 +75,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * @param configDir
-   * @see mitll.langtest.server.LangTestDatabaseImpl#init
+   * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    */
   public DatabaseImpl(String configDir) {
     this(configDir, "vlr-parle");
@@ -98,9 +98,6 @@ public class DatabaseImpl implements Database {
   }
 
   private void initializeDAOs() {
-    ScheduleDAO scheduleDAO = new ScheduleDAO(this);
-    this.userToSchedule = scheduleDAO.getSchedule();
-
     if (DROP_USER) {
       try {
         userDAO.dropUserTable(this);
@@ -330,6 +327,10 @@ public class DatabaseImpl implements Database {
   public List<Exercise> getExercises(long userID, boolean useFile) {
     logger.info("getExercises : for user  " + userID);
 
+    if (userToSchedule == null) {
+      ScheduleDAO scheduleDAO = new ScheduleDAO(this);
+      this.userToSchedule = scheduleDAO.getSchedule();
+    }
     List<Schedule> forUser = userToSchedule.get(userID);
     if (forUser == null) {
       logger.warn("no schedule for user " + userID);
