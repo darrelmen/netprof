@@ -87,6 +87,11 @@
         </jar>
     </target>
 
+    <target depends="build" name="warArabicVLL">
+        <jar destfile="npArabicVLL.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,answers/**,audioimages/**,scoring/**,config/first/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+        </jar>
+    </target>
+
     <!-- Makes a jar of just the .class files and the javascript, so you can overlay it on an active webapp -->
     <target depends="build" name="patch">
         <jar destfile="npPatch.war" basedir="war" excludes="config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
