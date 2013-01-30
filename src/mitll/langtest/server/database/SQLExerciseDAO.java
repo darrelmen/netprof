@@ -22,8 +22,9 @@ import java.util.Set;
 public class SQLExerciseDAO implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(SQLExerciseDAO.class);
 
-  private final Database database;
   private static final String ENCODING = "UTF8";
+
+  private final Database database;
   private final String mediaDir;
 
   /**
@@ -46,13 +47,10 @@ public class SQLExerciseDAO implements ExerciseDAO {
    */
   public List<Exercise> getRawExercises() {
     List<Exercise> exercises = new ArrayList<Exercise>();
-    Connection connection = null;
-  //  SortedSet<String> ids = new TreeSet<String>();
     try {
-      connection = database.getConnection();
+      Connection connection = database.getConnection();
       String sql = "SELECT * FROM exercises";
       PreparedStatement statement = connection.prepareStatement(sql);
-      // logger.info("doing " + sql + " on " + connection);
       ResultSet rs = statement.executeQuery();
       // int count = 0;
       while (rs.next()) {
@@ -68,14 +66,11 @@ public class SQLExerciseDAO implements ExerciseDAO {
           Exercise e = getExercise(plan, exid, obj);
           if (e == null) {
             logger.warn("couldn't find exercise for plan '" + plan + "'");
-            continue;
-          }
-          if (e.getID() == null) {
+          } else if (e.getID() == null) {
             logger.warn("no valid exid for " + e);
-            continue;
+          } else {
+            exercises.add(e);
           }
-      //    ids.add(e.getID());
-          exercises.add(e);
         } else {
           logger.warn("expecting a { (marking json data), so skipping " + content);
         }
@@ -85,55 +80,63 @@ public class SQLExerciseDAO implements ExerciseDAO {
       database.closeConnection(connection);
     } catch (Exception e) {
       logger.warn("got " + e,e);
-    } finally {
-      if (connection != null) {
-        /*   try {
-          //connection.close();
-        } catch (SQLException e) {
-          e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }*/
-      }
     }
+
     if (exercises.isEmpty()) {
       logger.warn("no exercises found in database?");
     } else {
-      logger.info("getRawExercises : found " + exercises.size() + " exercises.");
+      logger.debug("getRawExercises : found " + exercises.size() + " exercises.");
     }
     return exercises;
   }
 
   /**
    * Parse the json that represents the exercise.  Created during ingest process (see ingest.scala).
+   * Remember to prefix any media references (audio or images) with the location of the media directory,
+   *
+   * e.g. config/pilot/media
    *
    * @see #getRawExercises()
-   * @param obj
-   * @return
+   * @param plan that this exercise is a part of
+   * @param exid id for the exercise
+   * @param obj json to get content and questions from
+   * @return Exercise from the json
    */
   private Exercise getExercise(String plan, String exid, JSONObject obj) {
-    boolean promptInEnglish = false;
-    boolean recordAudio = false;
-    String content = (String) obj.get("content");
-    if (content == null) {
-      logger.warn("no content key in " + obj.keySet());
-    } else {
+    String content = getContent(obj);
 
-      // prefix the media dir
-      if (mediaDir != null) {
-        content = content.replaceAll("source src=\"", "source src=\"" + mediaDir.replaceAll("\\\\", "/") + "/");
-        content = content.replaceAll("img src=\"", "img src=\"" + mediaDir.replaceAll("\\\\", "/") + "/");
-      }
-      //System.out.println("content " + content);
-      //String noHTML = content.replaceAll("\\<.*?\\>", "");
-      //System.out.println("no html " + noHTML);
-
-    }
     String tip = "Item #"+exid; // TODO : have more informative tooltip
-    Exercise exercise = new Exercise(plan, exid, content, promptInEnglish, recordAudio, tip);
+    Exercise exercise = new Exercise(plan, exid, content, false, false, tip);
     Object qa1 = obj.get("qa");
     if (qa1 == null) {
       logger.warn("no qa key in " + obj.keySet());
     }
     Collection<JSONObject> qa = JSONArray.toCollection((JSONArray) qa1, JSONObject.class);
+    addQuestions(exercise, qa);
+    return exercise;
+  }
+
+  /**
+   * Remember to prefix any media references (audio or images) with the location of the media directory,
+   *
+   * e.g. config/pilot/media
+   *
+   * @param obj json to get content from
+   * @return content with media paths set
+   */
+  private String getContent(JSONObject obj) {
+    String content = (String) obj.get("content");
+    if (content == null) {
+      logger.warn("no content key in " + obj.keySet());
+    } else {
+      // prefix the media dir
+      String srcPattern = " src\\s*=\\s*\"";
+      content = content.replaceAll(srcPattern, " src=\"" + mediaDir.replaceAll("\\\\", "/") + "/");
+    }
+    return content;
+  }
+
+  private void addQuestions(Exercise exercise, Collection<JSONObject> qa) {
     for (JSONObject o : qa) {
       Set<String> keys = o.keySet();
       for (String lang : keys) {
@@ -143,8 +146,6 @@ public class SQLExerciseDAO implements ExerciseDAO {
         exercise.addQuestion(lang, (String) qaForLang.get("question"), answerKey, alternateAnswers);
       }
     }
-   // logger.debug("got " +exercise);
-    return exercise;
   }
 
   private String getStringFromClob(Clob clob) throws SQLException, IOException {
