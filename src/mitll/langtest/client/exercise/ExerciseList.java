@@ -49,7 +49,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected int expectedGrades = 1;
   protected UserManager user;
   private String exercise_title;
-  private boolean goodwaveMode;
+  private boolean readFromFile;
   protected final boolean arabicDataCollect;
   protected final boolean showTurkToken;
   private boolean useUserID = false;
@@ -62,18 +62,18 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param service
    * @param feedback
    * @param factory
-   * @param goodwaveMode
+   * @param readFromFile
    * @param arabicDataCollect
    * @param showTurkToken
    * @param autoCRT
    */
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                      ExercisePanelFactory factory, boolean goodwaveMode, boolean arabicDataCollect, boolean showTurkToken, boolean autoCRT) {
+                      ExercisePanelFactory factory, boolean readFromFile, boolean arabicDataCollect, boolean showTurkToken, boolean autoCRT) {
     this.currentExerciseVPanel = currentExerciseVPanel;
     this.service = service;
     this.feedback = feedback;
     this.factory = factory;
-    this.goodwaveMode = goodwaveMode;
+    this.readFromFile = readFromFile;
     this.arabicDataCollect = arabicDataCollect;
     this.showTurkToken = showTurkToken;
     this.autoCRT = autoCRT;
@@ -106,7 +106,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       getExercisesInOrder();
     }
     else {
-      service.getExerciseIds(userID, goodwaveMode, arabicDataCollect, new SetExercisesCallback());
+      System.out.println("for " + userID + " usefile " + readFromFile + " arabic " + arabicDataCollect);
+      service.getExerciseIds(userID, readFromFile, arabicDataCollect, new SetExercisesCallback());
     }
   }
 
@@ -114,11 +115,15 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see GradedExerciseList#setFactory(ExercisePanelFactory, mitll.langtest.client.user.UserManager, int)
    */
   public void getExercisesInOrder() {
-    service.getExerciseIds(goodwaveMode, new SetExercisesCallback());
+    service.getExerciseIds(readFromFile, new SetExercisesCallback());
   }
 
   public void onResize() {
-    if (current != null && current instanceof RequiresResize) ((RequiresResize)current).onResize();
+    if (current != null) {
+      if (current instanceof RequiresResize) {
+        ((RequiresResize) current).onResize();
+      }
+    }
   }
 
   /**
@@ -203,9 +208,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
     //System.out.println("loadExercise : " + exerciseShell);
     if (useUserID) {
-      service.getExercise(exerciseShell.getID(), userID, goodwaveMode, arabicDataCollect, new ExerciseAsyncCallback(exerciseShell));
+      service.getExercise(exerciseShell.getID(), userID, readFromFile, arabicDataCollect, new ExerciseAsyncCallback(exerciseShell));
     } else {
-      service.getExercise(exerciseShell.getID(), goodwaveMode, new ExerciseAsyncCallback(exerciseShell));
+      service.getExercise(exerciseShell.getID(), readFromFile, new ExerciseAsyncCallback(exerciseShell));
     }
   }
 
