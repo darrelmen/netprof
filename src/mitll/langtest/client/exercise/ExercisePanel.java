@@ -89,7 +89,8 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     spacer.setSize("100%", "20px");
     add(spacer);
 
-    Panel buttonRow = getNextAndPreviousButtons(e, service, userFeedback, controller, !controller.isAutoCRTMode());
+    boolean includeKeyHandler = /*!controller.isAutoCRTMode() ||*/ controller.isCollectAudio();
+    Panel buttonRow = getNextAndPreviousButtons(e, service, userFeedback, controller, includeKeyHandler);
     add(buttonRow);
   }
 
@@ -231,7 +232,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     });
     boolean onFirst = !controller.onFirst(e);
     prev.setEnabled(onFirst);
-    prev.setTitle(LEFT_ARROW_TOOLTIP);
+    if (useKeyHandler) prev.setTitle(LEFT_ARROW_TOOLTIP);
 
     buttonRow.add(prev);
 
@@ -240,7 +241,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
       next.setEnabled(false);
     }
     buttonRow.add(next);
-    next.setTitle(RIGHT_ARROW_TOOLTIP);
+    if (useKeyHandler) next.setTitle(RIGHT_ARROW_TOOLTIP);
 
     DOM.setElementAttribute(next.getElement(), "id", "nextButton");
 
@@ -296,6 +297,8 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
 
   /**
    * Ignore clicks or keyboard activity when the widget is not enabled.
+   * @see #getNextAndPreviousButtons(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, boolean)
+   * @see #addKeyHandler(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, boolean)
    * @param service
    * @param userFeedback
    * @param controller
