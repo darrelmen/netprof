@@ -109,6 +109,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private boolean autocrt;
   private boolean demoMode;
   private boolean dataCollectMode;
+  private boolean collectAudio;
   private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
 
@@ -126,6 +127,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final String AUTO_CRT = "autocrt";
   private static final String DEMO_MODE = "demo";
   private static final String DATA_COLLECT_MODE = "dataCollect";
+  private static final String COLLECT_AUDIO= "collectAudio";
   private static final String RECORD_TIMEOUT = "recordTimeout";
 
   // URL parameters that can override above parameters
@@ -188,12 +190,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // when loading is done.
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
-      public void run() {
-       // System.out.println("visualizations loaded...");
-      }
+      public void run() {}
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
 
-    userManager = new UserManager(this,service);
+    userManager = new UserManager(this,service, isCollectAudio());
     resultManager = new ResultManager(service, this);
     boolean isGrading = checkParams();
     monitoringManager = new MonitoringManager(service, this, readFromFile);
@@ -280,6 +280,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       else if (key.equals(DEMO_MODE)) demoMode = Boolean.parseBoolean(value);
       else if (key.equals(DATA_COLLECT_MODE)) dataCollectMode = Boolean.parseBoolean(value);
       else if (key.equals(RECORD_TIMEOUT)) recordTimeout = Integer.parseInt(value);
+      else if (key.equals(COLLECT_AUDIO)) collectAudio = Boolean.parseBoolean(value);
     }
   }
 
@@ -310,12 +311,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void makeExerciseList(Panel exerciseListPanel, boolean isGrading) {
     final UserFeedback feedback = (UserFeedback) this;
-    final boolean usePagingExerciseList = goodwaveMode || dataCollectMode;
+    //final boolean usePagingExerciseList = goodwaveMode || dataCollectMode;
     if (isGrading) {
       this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback, factory, isArabicTextDataCollect());
     }
     else {
-      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, factory, usePagingExerciseList,
+      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, factory, readFromFile,
           isArabicTextDataCollect(), showTurkToken, isAutoCRTMode()) {
         @Override
         protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
@@ -325,16 +326,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (showOnlyOneExercise()) {
       exerciseList.setExercise_title(exercise_title);
     }
-    if (!usePagingExerciseList) {
-      itemScroller = new ScrollPanel(this.exerciseList.getWidget());
-    }
     if (exercise_title == null) {
       setExerciseListSize();
     }
     HTML child = new HTML("<h2>Items</h2>");
     child.addStyleName("center");
     exerciseListPanel.add(child);
-    exerciseListPanel.add(usePagingExerciseList ? this.exerciseList.getWidget() : itemScroller);
+    exerciseListPanel.add(this.exerciseList.getWidget());
   }
 
   public boolean showOnlyOneExercise() {
@@ -480,7 +478,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, englishOnlyMode ? 2 : 1);
       lastUser = -1; // no user
     }
-    else if (dataCollectMode) {
+    else if (dataCollectMode && collectAudio) {
       exerciseList.setFactory(new WaveformExercisePanelFactory(service, this, this), userManager, 1);
     }
     else {
@@ -655,6 +653,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isAutoCRTMode() {  return autocrt; }
   public int getRecordTimeout() {  return recordTimeout; }
   public boolean isDataCollectMode() {  return dataCollectMode; }
+  public boolean isCollectAudio() {  return collectAudio; }
 
   // recording methods...
   /**
