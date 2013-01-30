@@ -56,10 +56,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
   public static final String FIRST_N_IN_ORDER = "firstNInOrder";
   private static final String DATA_COLLECT_MODE = "dataCollect";
+  private static final String COLLECT_AUDIO = "collectAudio";
+  private static final String COLLECT_AUDIO_DEFAULT = "true";
   private static final String BIAS_TOWARDS_UNANSWERED = "biasTowardsUnanswered";
   private static final String USE_OUTSIDE_RESULT_COUNTS = "useOutsideResultCounts";
   private static final String OUTSIDE_FILE = "outsideFile";
   private static final String OUTSIDE_FILE_DEFAULT = "distributions.txt";
+  private static final String H2_DATABASE = "h2Database";
+  private static final String H2_DATABASE_DEFAULT = "vlr-parle";
   private static final String URDU = "urdu";
   private static final int MB = (1024 * 1024);
   public static final String ANSWERS = "answers";
@@ -73,6 +77,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String relativeConfigDir;
   private String configDir;
   private boolean dataCollectMode;
+  private boolean collectAudio;
   private boolean biasTowardsUnanswered, useOutsideResultCounts;
   private String outsideFile;
   private boolean isUrdu;
@@ -91,7 +96,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public List<ExerciseShell> getExerciseIds(long userID, boolean useFile, boolean arabicDataCollect) {
-    logger.debug("getting exercise ids for User id=" + userID);
+    logger.debug("getting exercise ids for User id=" + userID + " use file " + useFile);
     List<Exercise> exercises = getExercises(userID, useFile, arabicDataCollect);
     List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
     for (Exercise e : exercises) {
@@ -120,17 +125,27 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public Exercise getExercise(String id, boolean useFile) {
+    //logger.warn("getExercise Getting exercise "+ id);
     List<Exercise> exercises = getExercises(useFile);
     for (Exercise e : exercises) {
-      if (id.equals(e.getID())) return e;
+      if (id.equals(e.getID())) {
+        //logger.warn("Found exercise "+ e);
+
+        return e;
+      }
     }
     return null;
   }
 
   public Exercise getExercise(String id, long userID, boolean useFile, boolean arabicDataCollect) {
+   // logger.warn("getExercise Getting exercise "+ id + " for user " +userID + " use file " + useFile);
+
     List<Exercise> exercises = getExercises(userID, useFile, arabicDataCollect);
     for (Exercise e : exercises) {
-      if (id.equals(e.getID())) return e;
+      if (id.equals(e.getID())) {
+     //   logger.warn("Found exercise "+ e);
+        return e;
+      }
     }
     return null;
   }
@@ -155,6 +170,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public List<Exercise> getExercises(long userID, boolean useFile, boolean arabicDataCollect) {
     String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
+    //logger.warn("use file " + useFile + " collect audio " + collectAudio);
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
     //logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
@@ -181,6 +197,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       } else {
         exercises = db.getExercisesFirstNInOrder(userID, useFile, firstNInOrder);
       }
+      if (!collectAudio) {
+        for (Exercise e : exercises) {
+          e.setRecordAnswer(false);
+          e.setPromptInEnglish(false);
+        }
+      }
     }
     else {
       exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(userID, useFile);
@@ -188,7 +210,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     if (makeFullURLs) convertRefAudioURLs(exercises);
     if (!exercises.isEmpty())
-      logger.debug("for user #" + userID +" got " + exercises.size() + " exercises , first ref sentence = '" + exercises.iterator().next().getRefSentence() + "'");
+      logger.debug("for user #" + userID +" got " + exercises.size() + " exercises , first " + exercises.iterator().next());
+          //" ref sentence = '" + exercises.iterator().next().getRefSentence() + "'");
     //logMemory();
 
     return exercises;
@@ -895,6 +918,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * The config web.xml file.
    * As a final step, creates the DatabaseImpl!<br></br>
    *
    * Note that this will only ever be called once.
@@ -904,10 +928,29 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String config = servletContext.getInitParameter("config");
     this.relativeConfigDir = "config" + File.separator + config;
     this.configDir = getInstallPath() + File.separator + relativeConfigDir;
-    db = new DatabaseImpl(configDir);
+
+    //logger.info("rel config dir " + relativeConfigDir);
+    readPropertiesFile();
+
+    String h2DatabaseFile = props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT);
+    db = new DatabaseImpl(configDir, h2DatabaseFile);
     logger.debug("Db now " + db);
 
-    logger.info("rel config dir " + relativeConfigDir);
+    try {
+      firstNInOrder = Integer.parseInt(props.getProperty(FIRST_N_IN_ORDER, "" + Integer.MAX_VALUE));
+    } catch (NumberFormatException e) {
+      logger.error("Couldn't parse property " + FIRST_N_IN_ORDER,e);
+      firstNInOrder = Integer.MAX_VALUE;
+    }
+    dataCollectMode = !props.getProperty(DATA_COLLECT_MODE, "false").equals("false");
+    collectAudio = !props.getProperty(COLLECT_AUDIO, COLLECT_AUDIO_DEFAULT).equals("false");
+    isUrdu = !props.getProperty(URDU, "false").equals("false");
+    biasTowardsUnanswered = !props.getProperty(BIAS_TOWARDS_UNANSWERED, "true").equals("false");
+    useOutsideResultCounts = !props.getProperty(USE_OUTSIDE_RESULT_COUNTS, "true").equals("false");
+    outsideFile = props.getProperty(OUTSIDE_FILE, OUTSIDE_FILE_DEFAULT);
+  }
+
+  private void readPropertiesFile() {
     String configFile = getServletContext().getInitParameter("configFile");
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
     String configFileFullPath = configDir + File.separator + configFile;
@@ -921,17 +964,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         logger.error("got " + e, e);
       }
     }
-    try {
-      firstNInOrder = Integer.parseInt(props.getProperty(FIRST_N_IN_ORDER, "" + Integer.MAX_VALUE));
-    } catch (NumberFormatException e) {
-      logger.error("Couldn't parse property " + FIRST_N_IN_ORDER,e);
-      firstNInOrder = Integer.MAX_VALUE;
-    }
-    dataCollectMode = !props.getProperty(DATA_COLLECT_MODE, "false").equals("false");
-    isUrdu = !props.getProperty(URDU, "false").equals("false");
-    biasTowardsUnanswered = !props.getProperty(BIAS_TOWARDS_UNANSWERED, "true").equals("false");
-    useOutsideResultCounts = !props.getProperty(USE_OUTSIDE_RESULT_COUNTS, "true").equals("false");
-    outsideFile = props.getProperty(OUTSIDE_FILE, OUTSIDE_FILE_DEFAULT);
   }
 
   private class DirAndName {
