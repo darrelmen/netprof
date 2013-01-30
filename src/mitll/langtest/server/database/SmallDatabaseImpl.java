@@ -1,6 +1,5 @@
 package mitll.langtest.server.database;
 
-import com.google.gwt.core.client.GWT;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
@@ -104,13 +103,13 @@ public class SmallDatabaseImpl implements Database {
       }
       logger.info("connecting to " + url);
 
-      GWT.log("connecting to " + url);
+     // GWT.log("connecting to " + url);
       File f = new java.io.File(h2DbName + ".h2.db");
       if (!f.exists()) {
         String s = "huh? no file at " + f.getAbsolutePath();
         logger.warn(s);
 
-        GWT.log(s);
+       // GWT.log(s);
       }
       Connection connection = DriverManager.getConnection(url + dbOptions);
       connection.setAutoCommit(false);

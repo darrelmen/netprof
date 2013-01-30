@@ -9,7 +9,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * Created with IntelliJ IDEA.
+ * Makes H2 Connections.
+ *
  * User: GO22670
  * Date: 12/31/12
  * Time: 5:00 PM
@@ -20,11 +21,7 @@ public class H2Connection implements DatabaseConnection {
 
   private Connection conn;
 
-  public H2Connection(String h2FilePath) {
-    connect(h2FilePath);
-  }
-
- public H2Connection(String configDir, String dbName) {
+  public H2Connection(String configDir, String dbName) {
     connect(configDir, dbName);
   }
 
@@ -89,9 +86,6 @@ public class H2Connection implements DatabaseConnection {
     }
   }
 
-  public Connection getConnection() {
-    return conn;
-  }
-
+  public Connection getConnection() { return conn; }
   public boolean isValid() { return conn != null; }
 }
