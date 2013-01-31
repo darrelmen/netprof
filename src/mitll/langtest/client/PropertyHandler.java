@@ -30,6 +30,7 @@ public class PropertyHandler {
   private static final String RECORD_TIMEOUT = "recordTimeout";
   private static final String TEACHER_VIEW = "teacherView";
   private static final String ADMIN_VIEW = "adminView";
+  private static final String MINIMAL_UI = "minimalUI";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -69,6 +70,7 @@ public class PropertyHandler {
   private boolean collectAudio = true;
   private boolean teacherView = false;
   private boolean adminView = true;
+  private boolean minimalUI = false;
   private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
   private float screenPortion;
@@ -99,6 +101,7 @@ public class PropertyHandler {
       else if (key.equals(RECORD_TIMEOUT)) recordTimeout = Integer.parseInt(value);
       else if (key.equals(COLLECT_AUDIO)) collectAudio = Boolean.parseBoolean(value);
       else if (key.equals(ADMIN_VIEW)) adminView = Boolean.parseBoolean(value);
+      else if (key.equals(MINIMAL_UI)) minimalUI = Boolean.parseBoolean(value);
     }
   }
 
@@ -236,6 +239,10 @@ public class PropertyHandler {
 
   public boolean isAdminView() {
     return adminView;
+  }
+
+  public boolean isMinimalUI() {
+    return minimalUI;
   }
 
   public String getReleaseDate() {
