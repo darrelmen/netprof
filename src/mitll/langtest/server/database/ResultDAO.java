@@ -453,7 +453,7 @@ public class ResultDAO extends DAO {
   void createResultTable(Connection connection) throws SQLException {
     createTable(connection);
     int numColumns = getNumColumns(connection, RESULTS);
-    logger.info("num columns = " + numColumns);
+   // logger.info("num columns = " + numColumns);
     if (numColumns == 8) {
       addColumnToTable(connection);
       enrichResults();

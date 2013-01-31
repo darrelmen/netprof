@@ -1307,7 +1307,7 @@ public class DatabaseImpl implements Database {
       if (r.durationInMillis > 0) {
         count++;
       }
-      else if (r.spoken || r.audioType.equals(Result.AUDIO_TYPE_UNSET)) {
+      else if (r.spoken /*|| r.audioType.equals(Result.AUDIO_TYPE_UNSET)*/) {
         badDur++;
         logger.info("got bad audio result " + r + " path " + r.answer);
       }
