@@ -35,16 +35,21 @@ public class UserDAO {
    * @param userID
    * @return newly inserted user id, or 0 if something goes horribly wrong
    */
-  public synchronized long addUser(int age, String gender, int experience, String ipAddr, String firstName, String lastName, String nativeLang, String dialect, String userID) {
+  public synchronized long addUser(int age, String gender, int experience, String ipAddr, String firstName,
+                                   String lastName, String nativeLang, String dialect, String userID) {
     try {
       // there are much better ways of doing this...
       long max = 0;
       for (User u : getUsers()) if (u.id > max) max = u.id;
-      logger.info("addUser : max is " + max);
+      logger.info("addUser : max is " + max + " new user '" + userID + "' age " +age +
+          " gender " + gender + " '" + firstName + " " + lastName +"'");
+
       Connection connection = database.getConnection();
       PreparedStatement statement;
 
-      statement = connection.prepareStatement("INSERT INTO users(id,age,gender,experience,ipaddr,firstName,lastName,nativeLang,dialect, userID) VALUES(?,?,?,?,?,?,?,?,?,?);");
+      statement = connection.prepareStatement(
+          "INSERT INTO users(id,age,gender,experience,ipaddr,firstName,lastName,nativeLang,dialect, userID) " +
+          "VALUES(?,?,?,?,?,?,?,?,?,?);");
       int i = 1;
       long newID = max + 1;
       statement.setLong(i++, newID);
