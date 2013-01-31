@@ -64,13 +64,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int FOOTER_HEIGHT = 40;
   private static final int EXERCISE_LIST_WIDTH = 210;
   private static final int EAST_WIDTH = 90;
-  private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
-  private static final boolean DEFAULT_GOODWAVE_MODE = false;
-  private static final boolean DEFAULT_ARABIC_TEXT_COLLECT = false;
-  private static final boolean DEFAULT_SHOW_TURK_TOKEN = false;
-  private static final int DEFAULT_SEGMENT_REPEATS = 2;
-  private static final String DEFAULT_EXERCISE = null;
-  private static final int DEFAULT_TIMEOUT = 45000;
+
   public static final String LANGTEST_IMAGES = "langtest/images/";
 
   private Panel currentExerciseVPanel = new VerticalPanel();
@@ -86,58 +80,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private String audioType = Result.AUDIO_TYPE_UNSET;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
-  private ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
   private int footerHeight = FOOTER_HEIGHT;
   private int eastWidth = EAST_WIDTH;
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
-  private float screenPortion;
-  private Map<String, String> props;
-
-  // properties -- todo rationalize properties, url params
-  private boolean grading = false;
-  private boolean englishOnlyMode = false;
-  private boolean goodwaveMode = DEFAULT_GOODWAVE_MODE;
-  private boolean arabicTextDataCollect = DEFAULT_ARABIC_TEXT_COLLECT;
-  private boolean showTurkToken = DEFAULT_SHOW_TURK_TOKEN;
-  private int segmentRepeats = DEFAULT_SEGMENT_REPEATS;
-  private boolean bkgColorForRef = false;
-  private String exercise_title;
-  private String appTitle = DLI_LANGUAGE_TESTING;
-  private boolean readFromFile;
-  private boolean autocrt;
-  private boolean demoMode;
-  private boolean dataCollectMode;
-  private boolean collectAudio = true;
-  private String releaseDate;
-  private int recordTimeout = DEFAULT_TIMEOUT;
-
-  // property file property names
-  private static final String GRADING_PROP = "grading";
-  private static final String ENGLISH_ONLY_MODE = "englishOnlyMode";
-  private static final String GOODWAVE_MODE = "goodwaveMode";
-  private static final String ARABIC_TEXT_DATA_COLLECT = "arabicTextDataCollect";
-  private static final String SHOW_TURK_TOKEN = "showTurkToken";
-  private static final String APP_TITLE = "appTitle";
-  private static final String SEGMENT_REPEATS = "segmentRepeats";
-  private static final String READ_FROM_FILE = "readFromFile";
-  private static final String RELEASE_DATE = "releaseDate";
-  private static final String BKG_COLOR_FOR_REF1 = "bkgColorForRef";
-  private static final String AUTO_CRT = "autocrt";
-  private static final String DEMO_MODE = "demo";
-  private static final String DATA_COLLECT_MODE = "dataCollect";
-  private static final String COLLECT_AUDIO= "collectAudio";
-  private static final String RECORD_TIMEOUT = "recordTimeout";
-
-  // URL parameters that can override above parameters
-  private static final String GRADING = "grading";
-  private static final String ENGLISH = "english";
-  private static final String GOODWAVE = "goodwave";
-  private static final String ARABIC_COLLECT = "arabicCollect";
-  private static final String TURK = "turk";
-  private static final String REPEATS = "repeats";
-  private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
-  private static final String EXERCISE_TITLE = "exercise_title";
+  private PropertyHandler props;
 
   /**
    * Make an exception handler that displays the exception.
@@ -146,34 +93,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // set uncaught exception handler
     GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
       public void onUncaughtException(Throwable throwable) {
-        String text = "Uncaught exception: ";
-        while (throwable != null) {
-          StackTraceElement[] stackTraceElements = throwable.getStackTrace();
-          text += throwable.toString() + "\n";
-          for (StackTraceElement stackTraceElement : stackTraceElements) {
-            text += "    at " + stackTraceElement + "\n";
-          }
-          throwable = throwable.getCause();
-          if (throwable != null) {
-            text += "Caused by: ";
-          }
-        }
-        if (browserCheck.isIE7() && text.contains("Unknown runtime error")) { // hack for IE 7
-          return;
-        }
-        DialogBox dialogBox = new DialogBox(true, false);
-        DOM.setStyleAttribute(dialogBox.getElement(), "backgroundColor", "#ABCDEF");
-        System.err.print(text);
-        text = text.replaceAll(" ", "&nbsp;");
-        dialogBox.setHTML("<pre>" + text + "</pre>");
-        dialogBox.center();
+        new ExceptionHandlerDialog(browserCheck,throwable);
       }
     });
 
     service.getProperties(new AsyncCallback<Map<String, String>>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Map<String, String> result) {
-        props = result;
+        props = new PropertyHandler(result);
         onModuleLoad2();
       }
     });
@@ -186,7 +113,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Initially the flash record player is put in the center of the DockLayout
    */
   public void onModuleLoad2() {
-    useProps();
     // Load the visualization api, passing the onLoadCallback to be called
     // when loading is done.
     VisualizationUtils.loadVisualizationApi(new Runnable() {
@@ -196,14 +122,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     userManager = new UserManager(this,service, isCollectAudio());
     resultManager = new ResultManager(service, this);
-    boolean isGrading = checkParams();
-    monitoringManager = new MonitoringManager(service, this, readFromFile);
-    boolean usualLayout = exercise_title == null;
+    boolean isGrading = props.isGrading();
+    monitoringManager = new MonitoringManager(service, this, props.isReadFromFile());
+    boolean usualLayout = props.getExercise_title() == null;
     final DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
     if (usualLayout) {
       RootPanel.get().add(widgets);
     }
-    if (goodwaveMode) {
+    if (props.isGoodwaveMode()) {
       footerHeight = 5;
     }
 
@@ -213,7 +139,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // header/title line
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
-    HTML title = new HTML("<h1>" + appTitle + "</h1>");
+    HTML title = new HTML("<h1>" + props.getAppTitle() + "</h1>");
     browserCheck.getBrowserAndVersion();
     hp.addEast(getLogout(), eastWidth);
     hp.add(title);
@@ -237,7 +163,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       currentExerciseVPanel.addStyleName("noMargin");
       RootPanel.get().add(currentExerciseVPanel);
     }
-    if (!arabicTextDataCollect && collectAudio) {
+    if (!props.isArabicTextDataCollect() && props.isCollectAudio()) {
       makeFlashContainer();
       currentExerciseVPanel.add(flashRecordPanel);
     }
@@ -257,29 +183,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     soundManager.initialize();
     Element elementById = DOM.getElementById("title-tag");   // set the page title to be consistent
     if (elementById != null) {
-      elementById.setInnerText(appTitle);
-    }
-  }
-
-  private void useProps() {
-    for (Map.Entry<String, String> kv : props.entrySet()) {
-      String key = kv.getKey();
-      String value = kv.getValue();
-      if (key.equals(GRADING_PROP)) grading = Boolean.parseBoolean(value);
-      else if (key.equals(ENGLISH_ONLY_MODE)) englishOnlyMode = Boolean.parseBoolean(value);
-      else if (key.equals(GOODWAVE_MODE)) goodwaveMode = Boolean.parseBoolean(value);
-      else if (key.equals(ARABIC_TEXT_DATA_COLLECT)) arabicTextDataCollect = Boolean.parseBoolean(value);
-      else if (key.equals(SHOW_TURK_TOKEN)) showTurkToken = Boolean.parseBoolean(value);
-      else if (key.equals(APP_TITLE)) appTitle = value;
-      else if (key.equals(SEGMENT_REPEATS)) segmentRepeats = Integer.parseInt(value);
-      else if (key.equals(READ_FROM_FILE)) readFromFile = Boolean.parseBoolean(value);
-      else if (key.equals(RELEASE_DATE)) releaseDate = value;
-      else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = Boolean.parseBoolean(value);
-      else if (key.equals(AUTO_CRT)) autocrt = Boolean.parseBoolean(value);
-      else if (key.equals(DEMO_MODE)) demoMode = Boolean.parseBoolean(value);
-      else if (key.equals(DATA_COLLECT_MODE)) dataCollectMode = Boolean.parseBoolean(value);
-      else if (key.equals(RECORD_TIMEOUT)) recordTimeout = Integer.parseInt(value);
-      else if (key.equals(COLLECT_AUDIO)) collectAudio = Boolean.parseBoolean(value);
+      elementById.setInnerText(props.getAppTitle());
     }
   }
 
@@ -299,7 +203,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public float getScreenPortion() {
-    return screenPortion;
+    return props.getScreenPortion();
   }
 
   /**
@@ -310,22 +214,23 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void makeExerciseList(Panel exerciseListPanel, boolean isGrading) {
     final UserFeedback feedback = (UserFeedback) this;
-    //final boolean usePagingExerciseList = goodwaveMode || dataCollectMode;
+
     if (isGrading) {
+      ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
       this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback, factory, isArabicTextDataCollect());
     }
     else {
-      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, factory, readFromFile,
-          isArabicTextDataCollect(), showTurkToken, isAutoCRTMode()) {
+      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, null, props.isReadFromFile(),
+          isArabicTextDataCollect(), props.isShowTurkToken(), isAutoCRTMode()) {
         @Override
         protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
       };
     }
 
     if (showOnlyOneExercise()) {
-      exerciseList.setExercise_title(exercise_title);
+      exerciseList.setExercise_title(props.getExercise_title());
     }
-    if (exercise_title == null) {
+    if (props.getExercise_title() == null) {
       setExerciseListSize();
     }
     HTML child = new HTML("<h2>Items</h2>");
@@ -335,11 +240,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public boolean showOnlyOneExercise() {
-    return exercise_title != null;
+    return props.getExercise_title() != null;
   }
 
   private void setMainWindowSize(DockLayoutPanel widgets) {
-    int widthToUse = Window.getClientWidth() - (goodwaveMode ? 15 : eastWidth);
+    int widthToUse = Window.getClientWidth() - (props.isGoodwaveMode() ? 15 : eastWidth);
     widgets.setSize(Math.max(widthToUse, 50) + "px", Math.max((Window.getClientHeight()-footerHeight-15),50) + "px");
     //widgets.setSize("100%","100%");
     //widgets.setSize(Math.max((Window.getClientWidth() - EAST_WIDTH), 50) + "px","100%");
@@ -353,88 +258,22 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Check the URL parameters for special modes.
    */
   private void modeSelect() {
-    boolean isGrading = checkParams();
-    //System.out.println("modeSelect : english " +englishOnlyMode + " grading " +isGrading + " is auto crt " + isAutoCRTMode());
+    boolean isGrading = props.isGrading();
+    //System.out.println("modeSelect : english " +props.isEnglishOnlyMode() + " grading " +isGrading + " is auto crt " + isAutoCRTMode());
 
-    logout.setVisible(!goodwaveMode);
-    users.setVisible(isGrading || dataCollectMode);
-    showResults.setVisible(isGrading || dataCollectMode);
+    logout.setVisible(!props.isGoodwaveMode());
+    users.setVisible(isGrading || props.isAdminView());
+    showResults.setVisible(isGrading || props.isAdminView());
 
-    if (goodwaveMode || isAutoCRTMode()) {
+    if (props.isGoodwaveMode() || isAutoCRTMode()) {
       gotUser(-1);
     }
-    else if (englishOnlyMode || isGrading) {
+    else if (props.isEnglishOnlyMode() || isGrading) {
       userManager.graderLogin();
     }
     else {
       login();
     }
-  }
-
-  /**
-   * Override config.properties settings with URL parameters, if provided.
-   * <br></br>
-   * exercise_title=nl0002_lms&transform_score_c1=68.51101&transform_score_c2=2.67174
-   * @return
-   */
-  private boolean checkParams() {
-    String isGrading = Window.Location.getParameter(GRADING);
-    String isEnglish = Window.Location.getParameter(ENGLISH);
-    String goodwave = Window.Location.getParameter(GOODWAVE);
-    String repeats = Window.Location.getParameter(REPEATS);
-    String arabicCollect = Window.Location.getParameter(ARABIC_COLLECT);
-    String turk = Window.Location.getParameter(TURK);
-    String bkgColorForRefParam = Window.Location.getParameter(BKG_COLOR_FOR_REF);
-    String demoParam = Window.Location.getParameter(DEMO_MODE);
-
-    String exercise_title = Window.Location.getParameter(EXERCISE_TITLE);
-    if (exercise_title != null) {
-     //if (goodwave == null) goodwave = "true";
-      this.exercise_title = exercise_title;
-    }
-    else {
-      this.exercise_title = DEFAULT_EXERCISE;
-    }
-    String screenPortionParam =  Window.Location.getParameter("screenPortion");
-    screenPortion = 1.0f;
-    if (screenPortionParam != null) {
-      try {
-        screenPortion = Float.parseFloat(screenPortionParam);
-      } catch (NumberFormatException e) {
-        e.printStackTrace();
-      }
-    }
-    // System.out.println("param grading " + isGrading);
-    englishOnlyMode = englishOnlyMode || (isEnglish != null && !isEnglish.equals("false"));
-    goodwaveMode    = goodwaveMode || (goodwave != null && !goodwave.equals("false"));
-    if (goodwave != null && goodwave.equals("false")) goodwaveMode = false;
-    //GWT.log("goodwave mode = " + goodwaveMode + "/" +goodwave);
-    boolean grading = this.grading || (isGrading != null && !isGrading.equals("false")) || englishOnlyMode;
-
-    // get audio repeats
-    if (repeats != null) {
-      try {
-        segmentRepeats = Integer.parseInt(repeats)-1;
-      } catch (NumberFormatException e) {
-        e.printStackTrace();
-      }
-    }
-    if (arabicCollect != null) {
-      arabicTextDataCollect = !arabicCollect.equals("false");
-    }
-    if (turk != null) {
-      showTurkToken = !turk.equals("false");
-    }
-    if (bkgColorForRefParam != null) {
-      bkgColorForRef = !bkgColorForRefParam.equals("false");
-    }
-    if (demoParam != null) {
-      demoMode = !demoParam.equals("false");
-    }
-    if (Window.Location.getParameter(DATA_COLLECT_MODE) != null) {
-      dataCollectMode = !Window.Location.getParameter(DATA_COLLECT_MODE).equals("false");
-    }
-    return grading;
   }
 
   /**
@@ -450,7 +289,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void gotPermission() {
         System.out.println(new Date() + " : got permission!");
         flashRecordPanel.hide();
-        flashRecordPanel.hide2();
+       // flashRecordPanel.hide2();
 
         exerciseList.getExercises(lastUser);
       }
@@ -467,16 +306,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param g
    */
   public void setGrading(boolean g) {
-    this.grading = g;
+    this.props.setGrading(g);
 
-    if (goodwaveMode) {
+    setFactory();
+  }
+
+  private void setFactory() {
+    if (props.isGoodwaveMode()) {
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this), userManager, 1);
     }
-    else if (grading) {
-      exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, englishOnlyMode ? 2 : 1);
+    else if (props.isGrading()) {
+      exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, props.isEnglishOnlyMode() ? 2 : 1);
       lastUser = -1; // no user
     }
-    else if (dataCollectMode && collectAudio) {
+    else if (props.isDataCollectMode() && props.isCollectAudio()) {
       exerciseList.setFactory(new WaveformExercisePanelFactory(service, this, this), userManager, 1);
     }
     else {
@@ -529,7 +372,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Anchor logout;
   private Anchor users;
-  private Anchor showResults,mointoring;
+  private Anchor showResults, monitoring;
   /**
    * Has both a logout and a users link and a results link
    * @return
@@ -553,7 +396,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     });
     vp.add(users);
-    users.setVisible(!isArabicTextDataCollect());
+    users.setVisible(props.isAdminView());
 
     showResults = new Anchor("Results");
     showResults.addClickHandler(new ClickHandler() {
@@ -562,20 +405,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     });
     vp.add(showResults);
-    showResults.setVisible(!isArabicTextDataCollect());
+    showResults.setVisible(props.isAdminView());
 
-    mointoring = new Anchor("Monitoring");
-    mointoring.addClickHandler(new ClickHandler() {
+    monitoring = new Anchor("Monitoring");
+    monitoring.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         monitoringManager.showResults();
       }
     });
-    vp.add(mointoring);
-    mointoring.setVisible(!isArabicTextDataCollect());
+    vp.add(monitoring);
+    monitoring.setVisible(props.isAdminView());
 
     // no click handler for this for now
     HTML statusLine = new HTML("<span><font size=-2>"+browserCheck.browser + " " +browserCheck.ver +" " +
-        releaseDate+"</font></span>");
+        props.getReleaseDate()+"</font></span>");
     vp.add(statusLine);
 
     return vp;
@@ -594,7 +437,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #modeSelect()
    */
   public void login() {
-    if (dataCollectMode) userManager.teacherLogin();
+    if (props.isDataCollectMode()) userManager.teacherLogin();
     else userManager.login();
   }
 
@@ -609,19 +452,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
-  //  System.out.println("gotUser " + userID + " vs " + lastUser);
-
-    grading = false;
-    setGrading(grading);
-    if (!arabicTextDataCollect && collectAudio) {
+    setGrading(false);
+    if (!props.isArabicTextDataCollect() && props.isCollectAudio()) {
       flashRecordPanel.initFlash();
     }
 
     if (userID != lastUser) {
       System.out.println("gotUser " + userID + " vs " + lastUser);
-      if ((arabicTextDataCollect || !collectAudio) || flashRecordPanel.gotPermission()) {
-     //   System.out.println("\tgetExercises for " + userID);
-
+      if ((props.isArabicTextDataCollect() || !props.isCollectAudio()) || flashRecordPanel.gotPermission()) {
         exerciseList.getExercises(userID);
       }
       lastUser = userID;
@@ -645,15 +483,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public int getUser() { return userManager.getUser(); }
   public String getGrader() { return userManager.getGrader(); }
-  public boolean getEnglishOnly() { return englishOnlyMode; }
-  public int getSegmentRepeats() { return segmentRepeats; }
-  public boolean isArabicTextDataCollect() {  return arabicTextDataCollect; }
-  public boolean useBkgColorForRef() {  return bkgColorForRef; }
-  public boolean isDemoMode() {  return demoMode; }
-  public boolean isAutoCRTMode() {  return autocrt; }
-  public int getRecordTimeout() {  return recordTimeout; }
-  public boolean isDataCollectMode() {  return dataCollectMode; }
-  public boolean isCollectAudio() {  return collectAudio; }
+  public boolean getEnglishOnly() { return props.isEnglishOnlyMode(); }
+  public int getSegmentRepeats() { return props.getSegmentRepeats(); }
+  public boolean isArabicTextDataCollect() {  return props.isArabicTextDataCollect(); }
+  public boolean useBkgColorForRef() {  return props.isBkgColorForRef(); }
+  public boolean isDemoMode() {  return props.isDemoMode(); }
+  public boolean isAutoCRTMode() {  return props.isAutocrt(); }
+  public int getRecordTimeout() {  return props.getRecordTimeout(); }
+  public boolean isDataCollectMode() {  return props.isDataCollectMode(); }
+  public boolean isCollectAudio() {  return props.isCollectAudio(); }
 
   // recording methods...
   /**
