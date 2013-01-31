@@ -235,8 +235,9 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     if (useKeyHandler) prev.setTitle(LEFT_ARROW_TOOLTIP);
 
     buttonRow.add(prev);
+    prev.setVisible(!controller.isMinimalUI());
 
-    this.next = new Button("Next");
+      this.next = new Button("Next");
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
       next.setEnabled(false);
     }
@@ -304,14 +305,67 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
    * @param controller
    * @param e
    */
-  private void clickNext(LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller, Exercise e) {
+  private void clickNext(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
+                         final ExerciseController controller, final Exercise e) {
     if (next.isEnabled() && next.isVisible()) {
+      if (controller.isMinimalUI()) {
+        showConfirmNextDialog(service, userFeedback, controller, e);
+      }
       //System.out.println("clickNext " +keyHandler+ " click on next " + next);
-      postAnswers(service, userFeedback, controller, e);
+      else {
+        postAnswers(service, userFeedback, controller, e);
+      }
     }
     else {
       System.out.println("clickNext " +keyHandler+ " ignoring next");
     }
+  }
+
+  /**
+   * Paul wanted a dialog that asks the user to confirm they want to move on to the next item.
+   * @param service
+   * @param userFeedback
+   * @param controller
+   * @param e
+   */
+  private void showConfirmNextDialog(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
+                                     final ExerciseController controller, final Exercise e) {
+    final DialogBox dialogBox;
+    Button yesButton;
+
+    dialogBox = new DialogBox();
+    //DOM.setStyleAttribute(dialogBox.getElement(), "backgroundColor", "#ABCDEF");
+    dialogBox.setText("Please confirm");
+
+    yesButton = new Button("Yes");
+    yesButton.getElement().setId("yesButton");
+    yesButton.setFocus(true);
+
+    VerticalPanel dialogVPanel = new VerticalPanel();
+    dialogVPanel.addStyleName("dialogVPanel");
+    dialogVPanel.add(new Label("Are you ready to move on to the next item?"));
+
+    dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
+    HorizontalPanel hp = new HorizontalPanel();
+    hp.setSpacing(5);
+    dialogVPanel.add(hp);
+    hp.add(yesButton);
+    Button no = new Button("No");
+    no.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        dialogBox.hide();
+      }
+    });
+    hp.add(no);
+    dialogBox.setWidget(dialogVPanel);
+
+    yesButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        postAnswers(service, userFeedback, controller, e);
+        dialogBox.hide();
+      }
+    });
+    dialogBox.center();
   }
 
   private void clickPrev(ExerciseController controller, Exercise e) {
