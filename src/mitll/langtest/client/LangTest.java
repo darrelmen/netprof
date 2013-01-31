@@ -149,7 +149,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     widgets.addNorth(hp, HEADER_HEIGHT);
     widgets.addSouth(status = new Label(), footerHeight);
     widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH/* +10*/);
-
+    if (props.isMinimalUI() && !props.isAdminView()) {
+      exerciseListPanel.setVisible(false);
+    }
     // set up center panel, initially with flash record panel
 
     if (usualLayout) {
@@ -458,8 +460,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
 
     if (userID != lastUser) {
-      System.out.println("gotUser " + userID + " vs " + lastUser);
-      if ((props.isArabicTextDataCollect() || !props.isCollectAudio()) || flashRecordPanel.gotPermission()) {
+      System.out.println("gotUser : " + userID + " vs " + lastUser);
+      if (props.isArabicTextDataCollect() || !props.isCollectAudio() || flashRecordPanel.gotPermission()) {
         exerciseList.getExercises(userID);
       }
       lastUser = userID;
@@ -492,6 +494,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public int getRecordTimeout() {  return props.getRecordTimeout(); }
   public boolean isDataCollectMode() {  return props.isDataCollectMode(); }
   public boolean isCollectAudio() {  return props.isCollectAudio(); }
+  public boolean isMinimalUI() {  return props.isMinimalUI(); }
 
   // recording methods...
   /**
