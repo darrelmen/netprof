@@ -40,5 +40,6 @@ public interface ExerciseController {
   int getRecordTimeout();
   boolean isDataCollectMode();
   boolean isCollectAudio();
+  boolean isMinimalUI();
   String getAudioType();
 }
