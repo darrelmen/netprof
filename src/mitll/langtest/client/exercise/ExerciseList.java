@@ -106,7 +106,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       getExercisesInOrder();
     }
     else {
-      System.out.println("for " + userID + " usefile " + readFromFile + " arabic " + arabicDataCollect);
+      //System.out.println("getExercises for " + userID + " usefile " + readFromFile + " arabic " + arabicDataCollect);
       service.getExerciseIds(userID, readFromFile, arabicDataCollect, new SetExercisesCallback());
     }
   }
@@ -142,7 +142,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
 
     public void onSuccess(List<ExerciseShell> result) {
-      System.out.println("SetExercisesCallback Got " +result.size() + " results");
+      //System.out.println("SetExercisesCallback Got " +result.size() + " results");
       currentExercises = result; // remember current exercises
       idToExercise = new HashMap<String, ExerciseShell>();
       clear();
