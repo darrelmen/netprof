@@ -51,6 +51,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   public void hide() {
     setSize("8px", "8px");
+    hide2();
   }
 
   /**
