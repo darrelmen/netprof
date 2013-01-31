@@ -96,7 +96,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public List<ExerciseShell> getExerciseIds(long userID, boolean useFile, boolean arabicDataCollect) {
-    logger.debug("getting exercise ids for User id=" + userID + " use file " + useFile);
+    logger.debug("getting exercise ids for User id=" + userID + " use file " + useFile + " config " + relativeConfigDir);
     List<Exercise> exercises = getExercises(userID, useFile, arabicDataCollect);
     List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
     for (Exercise e : exercises) {
@@ -415,7 +415,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       String sp = (String)prop;
       kv.put(sp,props.getProperty(sp).trim());
     }
-    System.out.println("prop file has " + kv.size() + " properties : " + props.keySet());
+    logger.debug("for config " + relativeConfigDir + " prop file has " + kv.size() + " properties : " + props.keySet());
     return kv;
   }
 
@@ -676,8 +676,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.addUser(age, gender, experience, ip);
   }
 
+  /**
+   *
+   * @param age
+   * @param gender
+   * @param experience
+   * @param firstName
+   * @param lastName
+   * @param nativeLang
+   * @param dialect
+   * @param userID
+   * @return
+   */
   @Override
-  public long addUser(int age, String gender, int experience, String firstName, String lastName, String nativeLang, String dialect, String userID) {
+  public long addUser(int age, String gender, int experience,
+                      String firstName, String lastName, String nativeLang, String dialect, String userID) {
+    logger.info("Adding user " + userID + " " + firstName +" " +lastName);
     HttpServletRequest request = getThreadLocalRequest();
     // String header = request.getHeader("X-FORWARDED-FOR");
     String header = request.getHeader("User-Agent");
