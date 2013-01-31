@@ -200,7 +200,11 @@ public class DatabaseImpl implements Database {
     if (useFile) {
       ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, lessonPlanFile);
     }
-    return exerciseDAO.getRawExercises();
+    List<Exercise> rawExercises = exerciseDAO.getRawExercises();
+    if (rawExercises.isEmpty()) {
+      logger.warn("no exercises for useFile = " + useFile + " and " + lessonPlanFile + " at " + installPath);
+    }
+    return rawExercises;
   }
 
   /**
@@ -760,7 +764,8 @@ public class DatabaseImpl implements Database {
     return userDAO.addUser(age, gender, experience, ipAddr, "", "", "", "", "");
   }
 
-  public long addUser(int age, String gender, int experience, String ipAddr, String firstName, String lastName, String nativeLang,String dialect, String userID) {
+  public long addUser(int age, String gender, int experience, String ipAddr, String firstName, String lastName,
+                      String nativeLang,String dialect, String userID) {
     return userDAO.addUser(age, gender, experience, ipAddr, firstName, lastName, nativeLang, dialect, userID);
   }
 

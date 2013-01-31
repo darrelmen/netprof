@@ -26,7 +26,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
 
   private final Database database;
   private final String mediaDir;
-
+  private static final boolean DEBUG = false;
   /**
    * @see DatabaseImpl#makeExerciseDAO(boolean)
    * @param database
@@ -85,7 +85,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
     if (exercises.isEmpty()) {
       logger.warn("no exercises found in database?");
     } else {
-      logger.debug("getRawExercises : found " + exercises.size() + " exercises.");
+      if (DEBUG) logger.debug("getRawExercises : found " + exercises.size() + " exercises.");
     }
     return exercises;
   }
