@@ -72,7 +72,7 @@ public class UserManager {
    * @see #addTeacher
    */
   private void storeUser(long sessionID) {
-    System.out.println("user now " + sessionID);
+    System.out.println("storeUser : user now " + sessionID);
     final long DURATION = 1000 * 60 * 60 * EXPIRATION_HOURS; //duration remembering login
     Date expires = new Date(System.currentTimeMillis() + DURATION);
     if (useCookie) {
