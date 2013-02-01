@@ -398,8 +398,17 @@ public class UserManager {
     reg.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         //System.out.println("register got click " + event);
-        if (user.getText().length() > 0 && password.getText().length() > 0) {
-          boolean valid = checkPassword(password);
+        boolean valid = user.getText().length() > 0;
+        if (!valid) {
+          Window.alert("Please enter a userid.");
+        } else {
+          valid = password.getText().length() > 0;
+          if (!valid) {
+            Window.alert("Please enter a password.");
+          }
+        }
+        if (valid) {
+          valid = checkPassword(password);
           if (!valid) {
             Window.alert("Please use password from the email sent to you.");
             valid = false;
