@@ -190,6 +190,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           else if (lessonPlanFile.contains("urdu")) outsideFileOverride = configDir + File.separator + "urdu.txt";
           else if (lessonPlanFile.contains("sudanese")) outsideFileOverride = configDir + File.separator + "sudanese.txt";
           exercises = db.getExercisesBiasTowardsUnanswered(useFile, userID, outsideFileOverride);
+          db.setOutsideFile(outsideFileOverride);
         }
         else {
           exercises = db.getExercisesBiasTowardsUnanswered(useFile, userID);
@@ -792,8 +793,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getResultByHourOfDay();
   }
 
+  /**
+   * Map of overall, male, female to list of counts (ex 0 had 7, ex 1, had 5, etc.)
+   * @param useFile
+   * @return
+   */
   public Map<String, List<Integer>> getResultPerExercise(boolean useFile) {
     return db.getResultPerExercise(useFile);
+  }
+
+  @Override
+  public Map<String, Map<Integer, Integer>> getResultCountsByGender(boolean useFile) {
+    return db.getResultCountsByGender(useFile);
   }
 
   @Override
@@ -948,7 +959,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     String h2DatabaseFile = props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT);
     db = new DatabaseImpl(configDir, h2DatabaseFile);
-    logger.debug("Db now " + db);
+    //logger.debug("Db now " + db);
 
     try {
       firstNInOrder = Integer.parseInt(props.getProperty(FIRST_N_IN_ORDER, "" + Integer.MAX_VALUE));
