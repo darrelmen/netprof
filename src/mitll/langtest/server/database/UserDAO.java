@@ -7,7 +7,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UserDAO {
   private static Logger logger = Logger.getLogger(UserDAO.class);
@@ -168,5 +170,28 @@ public class UserDAO {
       ee.printStackTrace();
     }
     return new ArrayList<User>();
+  }
+
+  public boolean isUserMale(long userID) {
+    List<User> users = getUsers();
+    User thisUser = null;
+    for (User u : users) {
+      if (u.id == userID) {
+        thisUser = u;
+        break;
+      }
+    }
+    return thisUser != null && thisUser.isMale();
+  }
+
+  public Map<Long, User> getUserMap(boolean getMale) {
+    List<User> users = getUsers();
+    Map<Long,User> idToUser = new HashMap<Long, User>();
+    for (User u : users) {
+      if (u.isMale() && getMale || (!u.isMale() && !getMale)) {
+        idToUser.put(u.id, u);
+      }
+    }
+    return idToUser;
   }
 }
