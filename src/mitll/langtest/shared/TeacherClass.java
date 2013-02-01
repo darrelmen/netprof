@@ -15,7 +15,8 @@ import java.util.List;
 public class TeacherClass implements IsSerializable {
   public List<Lesson> lessonList = new ArrayList<Lesson>();
   public User userRef;
+  public String name;
 
   public TeacherClass() {}
-  public TeacherClass(User userRef) { this.userRef = userRef; }
+  public TeacherClass(User userRef, String name) { this.userRef = userRef; this.name = name;}
 }

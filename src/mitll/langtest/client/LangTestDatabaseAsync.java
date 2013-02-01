@@ -82,4 +82,6 @@ public interface LangTestDatabaseAsync {
   void getHoursToCompletion(boolean useFile, AsyncCallback<Map<Integer, Float>> async);
 
   void getResultStats(AsyncCallback<Map<String, Number>> async);
+
+  void getResultCountsByGender(boolean useFile, AsyncCallback<Map<String, Map<Integer, Integer>>> async);
 }
