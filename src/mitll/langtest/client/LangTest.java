@@ -149,12 +149,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     widgets.addNorth(hp, HEADER_HEIGHT);
     widgets.addSouth(status = new Label(), footerHeight);
     widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH/* +10*/);
-    if (props.isMinimalUI() && !props.isAdminView()) {
+    if (props.isMinimalUI() && !props.isAdminView() || props.isTeacherView()) {
       exerciseListPanel.setVisible(false);
     }
     // set up center panel, initially with flash record panel
 
-    if (usualLayout) {
+    if (props.isTeacherView()) {
+
+    }
+    else if (usualLayout) {
       ScrollPanel sp = new ScrollPanel();
       sp.add(currentExerciseVPanel);
       widgets.add(sp);
@@ -165,7 +168,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       currentExerciseVPanel.addStyleName("noMargin");
       RootPanel.get().add(currentExerciseVPanel);
     }
-    if (!props.isArabicTextDataCollect() && props.isCollectAudio()) {
+
+    // don't do flash if we're doing text only collection
+    if (!props.isTeacherView() && !props.isArabicTextDataCollect() && props.isCollectAudio()) {
       makeFlashContainer();
       currentExerciseVPanel.add(flashRecordPanel);
     }
@@ -180,13 +185,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     browserCheck.checkForCompatibleBrowser();
 
-    soundManager = new SoundManagerStatic();
-    soundManager.exportStaticMethods();
-    soundManager.initialize();
+    setupSoundManager();
     Element elementById = DOM.getElementById("title-tag");   // set the page title to be consistent
     if (elementById != null) {
       elementById.setInnerText(props.getAppTitle());
     }
+  }
+
+  private void setupSoundManager() {
+    soundManager = new SoundManagerStatic();
+    soundManager.exportStaticMethods();
+    soundManager.initialize();
   }
 
   /**
@@ -258,6 +267,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * Check the URL parameters for special modes.
+   *
+   * If in goodwave (pronunciation scoring) mode or auto crt mode, skip the user login.
    */
   private void modeSelect() {
     boolean isGrading = props.isGrading();
@@ -291,7 +302,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void gotPermission() {
         System.out.println(new Date() + " : got permission!");
         flashRecordPanel.hide();
-       // flashRecordPanel.hide2();
+        flashRecordPanel.hide2(); // must be a separate call!
 
         exerciseList.getExercises(lastUser);
       }
