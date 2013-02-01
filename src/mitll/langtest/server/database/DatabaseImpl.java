@@ -52,11 +52,7 @@ import java.util.TreeSet;
  */
 public class DatabaseImpl implements Database {
   private static final int KB = (1024);
-  private static final int MB = (KB * KB);
-  private static final int SESSION_GAP = 10 * 60 * 1000;
-  private static final int HOUR_IN_MILLIS = (60 * 60 * 1000);
   private static Logger logger = Logger.getLogger(DatabaseImpl.class);
- // private static final boolean TESTING = false;
 
   private static final boolean DROP_USER = false;
   private static final boolean DROP_RESULT = false;
@@ -70,6 +66,7 @@ public class DatabaseImpl implements Database {
   private final GradeDAO gradeDAO = new GradeDAO(this);
   private final GraderDAO graderDAO = new GraderDAO(this);
   private DatabaseConnection connection = null;
+  private MonitoringSupport monitoringSupport;
 
   /**
    * TODO : consider making proper v2 database!
@@ -100,6 +97,7 @@ public class DatabaseImpl implements Database {
       return;
     }
     initializeDAOs();
+    monitoringSupport = getMonitoringSupport();
   }
 
   private void initializeDAOs() {
@@ -114,19 +112,12 @@ public class DatabaseImpl implements Database {
     if (DROP_RESULT) {
       logger.info("------------ dropping results table");
       resultDAO.dropResults(this);
-  /*    try {
-        resultDAO.createResultTable(getConnection());
-      } catch (Exception e) {
-        logger.error("got " + e, e);
-      }*/
     }
-    //else {
     try {
       resultDAO.createResultTable(getConnection());
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
-    //   }
 
     try {
       // gradeDAO.dropGrades();
@@ -147,6 +138,10 @@ public class DatabaseImpl implements Database {
 
   public Export getExport() {
     return new Export(exerciseDAO,resultDAO,gradeDAO);
+  }
+
+  public MonitoringSupport getMonitoringSupport() {
+    return new MonitoringSupport(userDAO, resultDAO);
   }
 
   /**
@@ -175,8 +170,7 @@ public class DatabaseImpl implements Database {
     //resultDAO.enrichResultDurations(installPath);
   }
 
-  String outsideFile;
-  public void setOutsideFile(String outsideFile) { this.outsideFile = outsideFile; }
+  public void setOutsideFile(String outsideFile) { monitoringSupport.setOutsideFile(outsideFile); }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(boolean)
@@ -334,7 +328,8 @@ public class DatabaseImpl implements Database {
    * @param userID
    * @param useFile
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long, boolean, boolean)
+   * @deprecated we should move away from using schedules to determine exercise order, etc.
    */
   public List<Exercise> getExercises(long userID, boolean useFile) {
     logger.info("getExercises : for user  " + userID);
@@ -383,7 +378,7 @@ public class DatabaseImpl implements Database {
     populateInitialExerciseIDToCount(useFile, idToExercise, idToCount);
 
     // only find answers that are for the gender
-    getExerciseIDToResultCount(isUserMale(userID), idToCount);
+    getExerciseIDToResultCount(userDAO.isUserMale(userID), idToCount);
 
     Map<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
     return getResultsRandomizedPerUser(userID, idToExercise, countToIds);
@@ -405,9 +400,10 @@ public class DatabaseImpl implements Database {
     populateInitialExerciseIDToCount(useFile, idToExercise, idToCount);
     //logger.info("initial map of online counts is size = " + idToCount.size() +" " + idToCount.values().size());
 
-    boolean isMale = isUserMale(userID);
+    boolean isMale = userDAO.isUserMale(userID);
 
-    Map<String, Integer> idToCountOutside = getExerciseIDToOutsideCount(useFile, isMale, outsideFile);
+    Map<String, Integer> idToCountOutside =
+        new OutsideCount().getExerciseIDToOutsideCount(isMale, outsideFile,getExercises(useFile));
 
     //  logger.info("map of outside counts is size = " + idToCountOutside.size() +" " + idToCountOutside.values().size());
     for (Map.Entry<String, Integer> pair : idToCountOutside.entrySet()) {
@@ -417,153 +413,12 @@ public class DatabaseImpl implements Database {
     }
 
     // only find answers that are for the gender
-    getExerciseIDToResultCount(isUserMale(userID), idToCount);
+    getExerciseIDToResultCount(userDAO.isUserMale(userID), idToCount);
 
     // now make a map of count at this number to exercise ids for these numbers
     Map<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
 
     return getResultsRandomizedPerUser(userID, idToExercise, countToIds);
-  }
-
-  private Map<String, Integer> getExerciseIDToOutsideCount(boolean useFile, boolean isMale, String outsideFile) {
-    List<Exercise> rawExercises = getExercises(useFile);
-    return getExerciseIDToOutsideCount(isMale, outsideFile, rawExercises);
-  }
-
-  private Map<String, Integer> getExerciseIDToOutsideCount(boolean isMale, String outsideFile, List<Exercise> rawExercises){//},                                 boolean useQuestionID) {
-    Map<String, Exercise> phraseToExercise = new HashMap<String, Exercise>();
-    Map<String,Integer> idToCount = new HashMap<String, Integer>();
-
-    //int c= 0;
-    logger.info("plan file " +lessonPlanFile + " outside " + outsideFile);
-    for (Exercise e : rawExercises) {
-      idToCount.put(e.getID(), 0);
-      String trim = e.getTooltip().trim();
-      phraseToExercise.put(trim, e);
-     // if (c++ < 20) logger.warn("phrase '" +trim+ "'");
-    }
-
-    Map<Boolean, Map<String, Integer>> counts = getCounts(outsideFile);
-    Map<String, Integer> phraseToCount = counts != null ? counts.get(isMale) : new HashMap<String,Integer>();
-
-    int count = 0;
-    for (Map.Entry<String,Integer> pair : phraseToCount.entrySet()) {
-      String phrase = pair.getKey();
-      Exercise exercise = phraseToExercise.get(phrase);
-      if (exercise == null) {
-        if (count++ < 20) logger.warn("huh? couldn't find phrase '" + phrase +  "' in map of size " +phraseToExercise.size());
-      }
-      else {
-        Integer current = idToCount.get(exercise.getID());
-        if (current != null) {
-          if (current > 0) {
-            logger.warn("We've already seen " + exercise.getID() + " for " + phrase);
-            idToCount.put(exercise.getID(), current + pair.getValue());
-          }
-          else {
-            idToCount.put(exercise.getID(), pair.getValue());
-          }
-        }
-        else {
-          logger.error("huh? we didn't know about ex " + exercise.getID());
-          idToCount.put(exercise.getID(), pair.getValue());
-        }
-      }
-    }
-    if (count > 0) logger.warn("there were " +count + " missing phrases ");
-    return idToCount;
-  }
-
-  /**
-   * Parse the external count file from Wade.
-   * This should only be a one off if people are consistently using the website.
-   *
-   * @see #getExercisesBiasTowardsUnanswered(boolean, long, String)
-   * @param overrideCountsFile
-   * @return map of gender to phrase to count of answers for that phrase
-   */
-  private Map<Boolean,Map<String,Integer>> getCounts(String overrideCountsFile) {
-    if (overrideCountsFile == null) return null;
-    try {
-      File file = new File(overrideCountsFile);
-      if (!file.exists()) {
-        logger.error("can't find '" + file +"'");
-        return null;
-      }
-      else {
-        // logger.debug("found file at " + file.getAbsolutePath());
-      }
-      FileInputStream resourceAsStream = new FileInputStream(file);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,FileExerciseDAO.ENCODING));
-      String line2;
-      int count = 0;
-      Map<Boolean,Map<String,Integer>> genderToPhraseToCount = new HashMap<Boolean, Map<String, Integer>>();
-      genderToPhraseToCount.put(true, new HashMap<String, Integer>());
-      genderToPhraseToCount.put(false, new HashMap<String, Integer>());
-      line2 = reader.readLine();
-      int totalMales =0;
-      int dups = 0;
-
-      //Writer w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file.getName() + "_dups.txt"), "UTF-8"));
-      //Writer w2 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file.getName() + "_all.txt"), "UTF-8"));
-
-      int totalFemales =0;
-      Map<String, Integer> males = genderToPhraseToCount.get(true);
-      Map<String, Integer> females = genderToPhraseToCount.get(false);
-      while ((line2 = reader.readLine()) != null) {
-        count++;
-        String[] split = line2.split("\\s+");
-        if (split.length < 3) {
-          logger.warn(" Couldn't parse " + line2);
-          continue;
-        }
-        String male = split[1].trim();
-        String female = split[2].trim();
-        String phrase = line2.split("--")[1].trim();
-        //if (count < 20) logger.info("Got "+line2 + " male '" + male + "' female '" + female + "' phrase '" + phrase + "'");
-        try {
-          int maleCount = (int) Double.parseDouble(male);
-          totalMales += maleCount;
-       //   w2.write(phrase+"\n");
-
-          if (males.containsKey(phrase)) {
-        //    logger.warn("line # " + count+" : male huh? we've seen phrase " + phrase + " before?");
-         //   w.write(phrase+"\n");
-            males.put(phrase, males.get(phrase) + maleCount);
-            dups++;
-          } else {
-            males.put(phrase, maleCount);
-          }
-        } catch (NumberFormatException e) {
-          if (count < 20) logger.warn("male Couldn't parse " + line2 + " got " + e);
-        }
-
-        try {
-          int femaleCount = (int) Double.parseDouble(female);
-          totalFemales += femaleCount;
-
-          if (females.containsKey(phrase)) {
-            //logger.warn("female huh? we've seen phrase " + phrase + " before?");
-            females.put(phrase, females.get(phrase) + femaleCount);
-          } else {
-            females.put(phrase, femaleCount);
-          }
-        } catch (NumberFormatException e) {
-          if (count < 20) logger.warn("female Couldn't parse " + line2 + " got " +e);
-        }
-      }
-      logger.info("m " + totalMales + " f " + totalFemales + " dups " + dups);
-      reader.close();
-      //w.close();
-     // w2.close();
-
-      logger.info("map is " + genderToPhraseToCount.keySet() + " size males " + males.size() +
-          " females " + females.size());
-      return  genderToPhraseToCount;
-    } catch (Exception e) {
-      logger.error("got " +e,e);
-    }
-    return null;
   }
 
   /**
@@ -613,8 +468,7 @@ public class DatabaseImpl implements Database {
   }
 
   private void getExerciseIDToResultCount(boolean userMale, Map<String, Integer> idToCount) {
-  //  boolean userMale = isUserMale(userID);
-    Map<Long, User> userMap = getUserMap(userMale);
+    Map<Long, User> userMap = userDAO.getUserMap(userMale);
     List<Result> results = getResults();
     for (Result r: results ) {
       Integer current = idToCount.get(r.id);
@@ -624,18 +478,6 @@ public class DatabaseImpl implements Database {
         }
       }
     }
-  }
-
-  private boolean isUserMale(long userID) {
-    List<User> users = userDAO.getUsers();
-    User thisUser = null;
-    for (User u : users) {
-      if (u.id == userID) {
-        thisUser = u;
-        break;
-      }
-    }
-    return thisUser != null && thisUser.isMale();
   }
 
   private Random random = new Random();
@@ -993,132 +835,15 @@ public class DatabaseImpl implements Database {
    * TODO : worry about duplicate userid?
    * @return map of user to number of answers the user entered
    */
-  public Map<User, Integer> getUserToResultCount() {
-    List<User> users = getUsers();
-    List<Result> results = getResults();
-
-    Map<User,Integer> idToCount = new HashMap<User, Integer>();
-    Map<Long,User> idToUser = new HashMap<Long, User>();
-    for (User u : users) {
-      idToUser.put(u.id,u);
-      idToCount.put(u,0);
-    }
-    for (Result r : results) {
-      User user = idToUser.get(r.userid);
-      Integer c = idToCount.get(user);
-      if (c != null) {
-        idToCount.put(user, c + 1);
-      }
-    }
-    return idToCount;
-  }
-
-
-
-/*  public Map<Exercise, Integer> getResultIdToCount(boolean useFile, boolean getMale) {
-    List<Result> results = getResults();
-    List<Exercise> exercises = getExercises(useFile);
-    Map<String,Exercise> idToEx = new HashMap<String, Exercise>();
-    for (Exercise e: exercises) idToEx.put(e.getID(),e);
-    boolean isInt = false;
-    try {
-      String id = exercises.iterator().next().getID();
-      Integer.parseInt(id);
-      isInt = true;
-    } catch (NumberFormatException e) {
-    }
-
-    final boolean fint = isInt;
-    Map<Exercise,Integer> idToCount = new TreeMap<Exercise, Integer>(new Comparator<Exercise>() {
-      @Override
-      public int compare(Exercise o1, Exercise o2) {
-        String fid = o1.getID();
-        String sid = o2.getID();
-        if (fint) {
-          Integer fint = Integer.parseInt(fid);
-          Integer sint = Integer.parseInt(sid);
-          return fint.compareTo(sint);
-        }
-        else {
-          return fid.compareTo(sid);
-        }
-      }
-    });
-    Map<Long, User> idToUser = getUserMap(getMale);
-    for (Result r : results) {
-      User user = idToUser.get(r.userid);
-      if (user != null) {
-        Exercise exercise = idToEx.get(r.id);
-        if (exercise != null) {
-          Integer c = idToCount.get(exercise);
-          if (c != null) {
-            idToCount.put(exercise, c + 1);
-          } else {
-            idToCount.put(exercise, 1);
-          }
-        }
-      }
-    }
-    return idToCount;
-  }*/
+  public Map<User, Integer> getUserToResultCount() { return monitoringSupport.getUserToResultCount(); }
 
   /**
-   * Map of user id to user
-   * @param getMale
-   * @return
-   */
-  private Map<Long, User> getUserMap(boolean getMale) {
-    List<User> users = getUsers();
-    Map<Long,User> idToUser = new HashMap<Long, User>();
-    for (User u : users) {
-      if (u.isMale() && getMale || (!u.isMale() && !getMale)) {
-        idToUser.put(u.id, u);
-      }
-    }
-    return idToUser;
-  }
-
-  /**
-   * Determine sessions per user.  If two consecutive items are more than {@link #SESSION_GAP} seconds
+   * Determine sessions per user.  If two consecutive items are more than {@link MonitoringSupport#SESSION_GAP} seconds
    * apart, then we've reached a session boundary.
    * Remove all sessions that have just one answer - must be test sessions.
    * @return list of duration and numAnswer pairs
    */
-  public List<Session> getSessions() {
-    List<Result> results = getResults();
-
-    Map<Long,List<Result>> userToAnswers = new HashMap<Long, List<Result>>();
-    for (Result r : results) {
-      List<Result> results1 = userToAnswers.get(r.userid);
-      if (results1 == null) userToAnswers.put(r.userid, results1 = new ArrayList<Result>());
-      results1.add(r);
-    }
-    List<Session> sessions = new ArrayList<Session>();
-    for (List<Result> resultList : userToAnswers.values()) {
-      Collections.sort(resultList, new Comparator<Result>() {
-        @Override
-        public int compare(Result o1, Result o2) {
-          return o1.timestamp < o2.timestamp ? -1 : o1.timestamp > o2.timestamp ? +1 : 0;
-        }
-      });
-      Session s = null;
-      long last = 0;
-      for (Result r : resultList) {
-        if (s == null || r.timestamp - last > SESSION_GAP) {
-          s = new Session();
-          sessions.add(s);
-        } else {
-          s.duration += r.timestamp - last;
-        }
-        s.numAnswers++;
-        last = r.timestamp;
-      }
-    }
-    Iterator<Session> iter = sessions.iterator();
-    while(iter.hasNext()) if (iter.next().numAnswers < 2) iter.remove();
-    return sessions;
-  }
-
+  public List<Session> getSessions() { return monitoringSupport.getSessions(); }
   /**
    * Given the observed rate of responses and the number of exercises to get
    * responses for, make a map of number of responses->hours
@@ -1126,229 +851,26 @@ public class DatabaseImpl implements Database {
    * @param useFile
    * @return # responses->hours to get that number
    */
-  public Map<Integer,Float> getHoursToCompletion(boolean useFile) {
-    long totalTime = 0;
-    long total = 0;
-    for (Session s: getSessions()) {
-      totalTime += s.duration;
-      total += s.numAnswers;
-    }
-    if (total == 0) return new HashMap<Integer,Float>();
-
-    long rateInMillis = totalTime / total;
-
-    Map<String, Integer> exToCount = getExToCount(useFile);
-
-
-
-    List<Integer> overall = getCountArray(exToCount);
-    int totalAnswers = 0;
-    for (Integer c : overall) totalAnswers += c;
-    double numItems = (double) overall.size();
-    double ratio = ((double) totalAnswers)/ numItems;
-    double next = Math.ceil(ratio);
-    double remainingForNext = (next-ratio)* numItems;
-    double dRate = (double) rateInMillis;
-    double millisForNext = dRate *remainingForNext;
-    double hoursForNext = millisForNext/ HOUR_IN_MILLIS;
-
-    Map<Integer,Float> estToItems = new HashMap<Integer, Float>();
-    estToItems.put((int) next, (float) hoursForNext);
-    double millisForFollowing = numItems * dRate;
-    double hoursPerFollowing = millisForFollowing / HOUR_IN_MILLIS;
-    for (double i = 1d; i < 10d; i += 1.0d) {
-      estToItems.put((int) (next + i), ((float) (hoursForNext + (i*hoursPerFollowing))));
-    }
-
-   // logger.info("Est time to completion " +estToItems);
-    return estToItems;
-  }
-
-  /**
+  public Map<Integer,Float> getHoursToCompletion(boolean useFile) {   return  monitoringSupport.getHoursToCompletion(getExercises(useFile)); }
+ /**
    * TODO : worry about duplicate userid?
    * @return
    */
-  public Map<Integer, Integer> getResultCountToCount(boolean useFile) {
-    Map<String, Integer> idToCount = getExToCount(useFile);
-    Map<Integer,Integer> resCountToCount = new HashMap<Integer, Integer>();
-
-    for (Integer c : idToCount.values()) {
-      Integer rc = resCountToCount.get(c);
-      if (rc == null) resCountToCount.put(c, 1);
-      else resCountToCount.put(c, rc + 1);
-    }
-    return resCountToCount;
-  }
-
-  /**
-   * @see #getHoursToCompletion(boolean)
-   * @see #getResultCountToCount(boolean)
-   * @see #getResultPerExercise(boolean)
-   * @param useFile
-   * @return
-   */
-  private Map<String, Integer> getExToCount(boolean useFile) {
-    Map<String, Integer> idToCount = getInitialIdToCount(useFile);
-
-    List<Result> results = getResults();
-    for (Result r : results) {
-      String key = r.id + "/" + r.qid;
-      Integer c = idToCount.get(key);
-      if (c == null) {
-        idToCount.put(key, 1);
-      }
-      else idToCount.put(key, c + 1);
-    }
-
-    if (outsideFile != null) {
-      Map<String, Integer> idToCountOutsideMale = getExerciseIDToOutsideCount(useFile, true, outsideFile);
-      Map<String, Integer> idToCountOutsideFemale = getExerciseIDToOutsideCount(useFile, false, outsideFile);
-
-      //  logger.info("map of outside counts is size = " + idToCountOutside.size() +" " + idToCountOutside.values().size());
-      for (Map.Entry<String, Integer> pair : idToCountOutsideMale.entrySet()) {
-        String key = pair.getKey() + "/0";
-        Integer count = idToCount.get(key);
-        if (count == null) logger.warn("missing exercise id " + key);
-        else idToCount.put(key,count+pair.getValue());
-      }
-      for (Map.Entry<String, Integer> pair : idToCountOutsideFemale.entrySet()) {
-        String key = pair.getKey() + "/0";
-        Integer count = idToCount.get(key);
-        if (count == null) logger.warn("missing exercise id " + key);
-        else idToCount.put(key,count+pair.getValue());
-      }
-    }
-    return idToCount;
-  }
-
-  /**
-   * Get results for only male or only female users.
-   * @param useFile
-   * @param isMale
-   * @return
-   */
-  private Map<String, Integer> getExToCountMaleOrFemale(boolean useFile,boolean isMale) {
-    Map<String, Integer> idToCount = getInitialIdToCount(useFile);
-
-    Map<Long, User> userMap = getUserMap(isMale);
-
-    List<Result> results = getResults();
-    for (Result r : results) {
-      if (userMap.containsKey(r.userid)) {
-        String key = r.id + "/" + r.qid;
-        Integer c = idToCount.get(key);
-        if (c == null) {
-          idToCount.put(key, 1);
-        } else idToCount.put(key, c + 1);
-      }
-    }
-
-  //  int total = 0;
-    Map<String, Integer> idToCountOutsideMale = getExerciseIDToOutsideCount(useFile, isMale, outsideFile);
-    for (Map.Entry<String, Integer> pair : idToCountOutsideMale.entrySet()) {
-      String key = pair.getKey() + "/0";
-      Integer count = idToCount.get(key);
-      if (count == null) logger.warn("missing exercise id " + key);
-      else {
-        int value = count + pair.getValue();
-        idToCount.put(key, value);
-      }
-    }
-
-   // for (Integer counts : idToCount.values()) total += counts;
-   // logger.info("ismale " +isMale + " total " +total);
-
-    return idToCount;
-  }
-
-  /**
-   * Make a map of exerciseid->0
-   * @param useFile
-   * @return
-   */
-  private Map<String, Integer> getInitialIdToCount(boolean useFile) {
-    List<Exercise> exercises = getExercises(useFile);
-    Map<String,Integer> idToCount = new HashMap<String, Integer>();
-    for (Exercise e : exercises) {
-      if (e.getNumQuestions() == 0) {
-        String key = e.getID() + "/0";
-        idToCount.put(key,0);
-      }
-      else {
-        for (int i = 0; i < e.getNumQuestions(); i++) {
-          String key = e.getID() + "/" + i;
-          idToCount.put(key,0);
-        }
-      }
-    }
-    return idToCount;
-  }
-
-  /**
-   * Sort first by exercise id then by question within the exercise
-   */
-  private static class CompoundKey implements Comparable<CompoundKey> {
-    public final int first,second;
-
-    public CompoundKey(int first, int second) {
-      this.first = first;
-      this.second = second;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      CompoundKey other =(CompoundKey) obj;
-      return compareTo(other) == 0;
-    }
-
-    @Override
-    public int compareTo(CompoundKey o) {
-      return first < o.first ? -1 : first > o.first ? +1 : second < o.second ? -1 : second > o.second ? +1 : 0;
-    }
-
-    public String toString() { return first +"/"+second; }
-  }
+  public Map<Integer, Integer> getResultCountToCount(boolean useFile) { return  monitoringSupport.getResultCountToCount(getExercises(useFile)); }
 
   /**
    * Get counts of answers by date
    * TODO : worry about duplicate userid?
+   *
    * @return
    */
-  public Map<String, Integer> getResultByDay() {
-    List<Result> results = getResults();
-    SimpleDateFormat df = new SimpleDateFormat("MM-dd-yy");
-    Map<String,Integer> dayToCount = new HashMap<String, Integer>();
-    for (Result r : results) {
-      Date date = new Date(r.timestamp);
-      String day = df.format(date);
-      Integer c = dayToCount.get(day);
-      if (c == null) {
-        dayToCount.put(day, 1);
-      }
-      else dayToCount.put(day, c + 1);
-    }
-    return dayToCount;
-  }
+  public Map<String, Integer> getResultByDay() { return monitoringSupport.getResultByDay(); }
 
   /**
    * get counts of answers by hours of the day
    * @return
    */
-  public Map<String, Integer> getResultByHourOfDay() {
-    List<Result> results = getResults();
-    SimpleDateFormat df = new SimpleDateFormat("HH");
-    Map<String,Integer> dayToCount = new HashMap<String, Integer>();
-    for (Result r : results) {
-      Date date = new Date(r.timestamp);
-      String day = df.format(date);
-      Integer c = dayToCount.get(day);
-      if (c == null) {
-        dayToCount.put(day, 1);
-      }
-      else dayToCount.put(day, c + 1);
-    }
-    return dayToCount;
-  }
+  public Map<String, Integer> getResultByHourOfDay() {return monitoringSupport.getResultByHourOfDay(); }
 
   /**
    * Split exid->count by gender.
@@ -1356,130 +878,13 @@ public class DatabaseImpl implements Database {
    * @param useFile
    * @return
    */
-  public Map<String,List<Integer>> getResultPerExercise(boolean useFile) {
-    Map<String, Integer> exToCount = getExToCount(useFile);
-    List<Integer> overall = getCountArray(exToCount);
-    List<Integer> male = getCountArray(getExToCountMaleOrFemale(useFile,true));
-    List<Integer> female = getCountArray(getExToCountMaleOrFemale(useFile,false));
-
-
-    Map<String,List<Integer>> typeToList = new HashMap<String, List<Integer>>();
-    typeToList.put("overall",overall);
-    typeToList.put("male",male);
-    typeToList.put("female",female);
-
-    return typeToList;
-  }
-
-  public Map<String,Map<Integer,Integer>> getResultCountsByGender(boolean useFile) {
-    Map<String,Map<Integer,Integer>> typeToNumAnswerToCount = new HashMap<String, Map<Integer, Integer>>();
-
-    List<Integer> male = getCountArray(getExToCountMaleOrFemale(useFile,true));
-    List<Integer> female = getCountArray(getExToCountMaleOrFemale(useFile,false));
-
-    Map<Integer,Integer> maleAnswerToCount = new HashMap<Integer,Integer>();
-    Map<Integer,Integer> femaleAnswerToCount = new HashMap<Integer,Integer>();
-
-    for (int i =0; i< 10; i++) {
-      maleAnswerToCount.put(i,0);
-      femaleAnswerToCount.put(i,0);
-    }
-
-    for (Integer countAtExercise : male) {
-      Integer count = maleAnswerToCount.get(countAtExercise);
-      if (count == null) maleAnswerToCount.put(countAtExercise,1);
-      else maleAnswerToCount.put(countAtExercise,count+1);
-    }
-
-    for (Integer countAtExercise : female) {
-      Integer count = femaleAnswerToCount.get(countAtExercise);
-      if (count == null) femaleAnswerToCount.put(countAtExercise,1);
-      else femaleAnswerToCount.put(countAtExercise,count+1);
-    }
-
-
-
-    typeToNumAnswerToCount.put("maleCount",maleAnswerToCount);
-    typeToNumAnswerToCount.put("femaleCount",femaleAnswerToCount);
-    return typeToNumAnswerToCount;
-
-  }
-
-  /**
-   * Get list of counts of answers for each exercise, in order.
-   * If the exercise ids are numbers, sort them as numbers, not as strings.
-   * We don't want 11 to be between 109 and 110.
-   * @param exToCount
-   * @return list of counts of answers per exercise
-   */
-  private List<Integer> getCountArray(Map<String, Integer> exToCount) {
-    List<Integer> countArray = new ArrayList<Integer>(exToCount.size());
-    String next = exToCount.keySet().iterator().next();
-    boolean isInt = false;
-    try {
-      String left = next.split("/")[0];
-      Integer.parseInt(left);
-      isInt = true;
-    } catch (NumberFormatException e) {
-    }
-    if (isInt) {
-      Map<CompoundKey, Integer> keyToCount = new TreeMap<CompoundKey, Integer>();
-      for (Map.Entry<String, Integer> pair : exToCount.entrySet()) {
-        try {
-          String[] split = pair.getKey().split("/");
-          String left = split[0];
-          int exid = Integer.parseInt(left);
-          String right = split[0];
-          int qid = Integer.parseInt(right);
-
-          keyToCount.put(new CompoundKey(exid, qid), pair.getValue());
-        } catch (NumberFormatException e) {
-          e.printStackTrace();
-        }
-      }
-      countArray.addAll(keyToCount.values());
-      return countArray;
-    } else {
-      for (Map.Entry<String, Integer> pair : exToCount.entrySet()) {
-        countArray.add(pair.getValue());
-      }
-      return countArray;
-    }
-  }
-
-  private static final int MIN = (60 * 1000);
-  private static final int HOUR = (60 * MIN);
-
-  /**
+  public Map<String,List<Integer>> getResultPerExercise(boolean useFile) { return monitoringSupport.getResultPerExercise(getExercises(useFile)); }
+  public Map<String,Map<Integer,Integer>> getResultCountsByGender(boolean useFile) {  return monitoringSupport.getResultCountsByGender(getExercises(useFile)); }
+   /**
    * Return some statistics related to the hours of audio that have been collected
    * @return
    */
-  public Map<String,Number> getResultStats() {
-    List<Result> results = getResults();
-    double total = 0;
-    int count = 0;
-    int badDur = 0;
-
-    for (Result r : results) {
-      total += r.durationInMillis;
-      if (r.durationInMillis > 0) {
-        count++;
-      }
-      else if (r.spoken /*|| r.audioType.equals(Result.AUDIO_TYPE_UNSET)*/) {
-        badDur++;
-        logger.info("got bad audio result " + r + " path " + r.answer);
-      }
-    }
-    Map<String,Number> typeToStat = new HashMap<String,Number>();
-    Number aDouble = total / ((double)HOUR);
-    typeToStat.put("totalHrs", aDouble);
-    double value = total / ((double)count);
-    typeToStat.put("avgSecs", value/1000);
-    typeToStat.put("totalAudioAnswers", count);
-    typeToStat.put("badRecordings", badDur);
-    logger.debug("audio dur stats " + typeToStat);
-    return typeToStat;
-  }
+  public Map<String,Number> getResultStats() { return monitoringSupport.getResultStats(); }
 
   public void destroy() {
     try {
