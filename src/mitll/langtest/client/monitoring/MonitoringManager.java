@@ -175,11 +175,15 @@ public class MonitoringManager {
              // vp.add(new HTML("<b>Audio yield collected/spent = " +(totalHours/dhoursSpent) + " ratio</b>"));
               vp.add(new HTML("<b>Audio yield (collected/spent) = " +Math.round((totalHours/dhoursSpent)*100) + "%</b>"));
             }
-            vp.add(new HTML("<b>Answers = " +total+ "</b>"));
-            vp.add(new HTML("<b>Avg Answers/session = " +total/valid+ "</b>"));
-            vp.add(new HTML("<b>Avg time spent/session = " +(totalTime/valid)/MIN + " mins"+ "</b>"));
-            long rateInMillis = totalTime / total;
-            vp.add(new HTML("<b>Avg time spent/item = " + (rateInMillis/1000) + " sec"+ "</b>"));
+            vp.add(new HTML("<b>Answers = " + total + "</b>"));
+            if (valid > 0) {
+              vp.add(new HTML("<b>Avg Answers/session = " + total / valid + "</b>"));
+              vp.add(new HTML("<b>Avg time spent/session = " + (totalTime / valid) / MIN + " mins" + "</b>"));
+            }
+            if (total > 0) {
+              long rateInMillis = totalTime / total;
+              vp.add(new HTML("<b>Avg time spent/item = " + (rateInMillis / 1000) + " sec" + "</b>"));
+            }
             vp.add(new HTML("<b>Avg audio collected/item = " + roundToHundredth(avgSecs) + " sec"+ "</b>"));
 
             getRateChart(rateToCount, vp);
@@ -575,7 +579,7 @@ public class MonitoringManager {
       User user = pair.getKey();
       String slotToUse = user.dialect.toLowerCase();
       Integer c = langToCount.get(slotToUse);
-      if (count > 0) {
+      if (count > 1) {
         if (c == null) langToCount.put(slotToUse, count);
         else langToCount.put(slotToUse, c + count);
       }
