@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.DataTable;
+import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
@@ -26,8 +27,10 @@ import mitll.langtest.shared.User;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -84,6 +87,7 @@ public class MonitoringManager {
 
     doSessionQuery(getVPanel(vp));
     doResultQuery(getVPanel(vp));
+    doGenderQuery(getVPanel(vp));
     doTimeUntilItems(getSPanel(vp));
     doResultLineQuery(getVPanel(vp));
     doResultByDayQuery(getSPanel(vp));
@@ -234,7 +238,6 @@ public class MonitoringManager {
       data.setValue(r, 0, age);
       Integer value = rateToCount.get(age);
       data.setValue(r++, 1, value);
-      //System.out.println("age " + age + " rate " + value);
     }
 
     vp.add(new ColumnChart(data,options));
@@ -244,6 +247,10 @@ public class MonitoringManager {
     service.getResultPerExercise(useFile, new AsyncCallback<Map<String,List<Integer>>>() {
       public void onFailure(Throwable caught) {}
 
+      /**
+       *
+       * @param result map or overall,male,female to counts
+       */
       @Override
       public void onSuccess(Map<String, List<Integer>> result) {
         String title = "Answers per Exercise";
@@ -261,18 +268,25 @@ public class MonitoringManager {
           for (Map.Entry<String, List<Integer>> pair : result.entrySet()) {
             typeToList.put(pair.getKey(), pair.getValue().subList(i, Math.min(size, i + chartSamples)));
           }
-          LineChart lineChart = getLineChart(typeToList, title + " (" + i + "-" + (i + chartSamples) + ")", i == 0);
+          LineChart lineChart = getLineChart(typeToList, title + " (" + i + "-" + (i + chartSamples) + ")", i == 0, i);
           vp.add(lineChart);
         }
-/*
-        AnnotatedTimeLine.Options options = AnnotatedTimeLine.Options.create();
-        AnnotatedTimeLine lineChart = new AnnotatedTimeLine(data, options, width, height);
-*/
+
+        int maleTotal = 0;
+        int femaleTotal = 0;
+
+        for (Integer c: result.get("male")) {
+          maleTotal += c;
+        }
+        for (Integer c: result.get("female")) {
+          femaleTotal += c;
+        }
+        vp.add(getGenderChart(maleTotal,femaleTotal));
       }
     });
   }
 
-  private LineChart getLineChart(Map<String,List<Integer>> typeToList, String title, boolean goBig) {
+  private LineChart getLineChart(Map<String, List<Integer>> typeToList, String title, boolean goBig, int offset) {
     Options options = Options.create();
     options.setTitle(title);
 
@@ -284,7 +298,7 @@ public class MonitoringManager {
     int size = typeToList.values().iterator().next().size();
     data.addRows(size);
     for (int i = 0; i < size; i++) {
-      data.setValue(i, 0, i);
+      data.setValue(i, 0, offset+i);
     }
     int colCount = 1;
     for (String key : typeToList.keySet()) {
@@ -306,7 +320,7 @@ public class MonitoringManager {
         int total = 0;
         for (int v : userToCount.values()) total += v;
         Integer unanswered = userToCount.get(0);
-        float ratio = ((float) unanswered) / ((float) total);
+        float ratio = total > 0 ? ((float) unanswered) / ((float) total) : 0;
         int percent = (int) (ratio*100f);
         vp.add(new HTML("<b><font color='red'>Number unanswered = " + unanswered +" or " + percent +
             "%</font></b>") );
@@ -314,6 +328,19 @@ public class MonitoringManager {
         vp.add(new HTML("<b>Number answered = " + numAnswered +" or " + (100-percent) +"%</b>") );
         vp.add(new HTML("<b>Number with one answer = " +userToCount.get(1)+"</b>"));
         vp.add(getResultCountChart(userToCount));
+      }
+    });
+  }
+
+
+  private void doGenderQuery(final Panel vp) {
+    service.getResultCountsByGender(useFile, new AsyncCallback<Map<String, Map<Integer, Integer>>>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+
+      @Override
+      public void onSuccess(Map<String, Map<Integer, Integer>> result) {
+        vp.add(getGenderCounts(result.get("maleCount"), result.get("femaleCount")));
       }
     });
   }
@@ -341,7 +368,6 @@ public class MonitoringManager {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Map<User, Integer> userToCount) {
         vp.add(getPerUserChart(userToCount));
-        vp.add(getGenderChart(userToCount));
         vp.add(getAgeChart(userToCount));
         vp.add(getLangChart(userToCount));
         vp.add(getDialectChart(userToCount));
@@ -351,19 +377,16 @@ public class MonitoringManager {
     });
   }
 
-  private ColumnChart getGenderChart(Map<User, Integer> userToCount) {
+  private ColumnChart getGenderChart(int m, int f) {
     Options options = Options.create();
     options.setTitle("Answers by Gender");
+    AxisOptions options1 = AxisOptions.create();
+    options1.setMinValue(0);
+    options.setVAxisOptions(options1);
 
     DataTable data = DataTable.create();
     data.addColumn(AbstractDataTable.ColumnType.STRING, "Gender");
     data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Items");
-
-    int m = 0, f = 0;
-    for (Map.Entry<User,Integer> pair : userToCount.entrySet()) {
-      Integer count = pair.getValue();
-      if (pair.getKey().gender == 0) m += count; else f += count;
-    }
 
     data.addRows(2);
     data.setValue(0, 0, "Male");
@@ -622,6 +645,48 @@ public class MonitoringManager {
       data.setValue(r, 0, age);
       data.setValue(r++, 1, slotToCount.get(age));
     }
+
+    return new ColumnChart(data, options);
+  }
+
+  private ColumnChart getGenderCounts(Map<Integer, Integer> maleNumAnswerToCount,
+                                      Map<Integer, Integer> femaleNumAnswerToCount) {
+    Options options = Options.create();
+    options.setTitle("Count of answers by gender");
+
+    Set<Integer> slots = new HashSet<Integer>(maleNumAnswerToCount.keySet());
+    slots.addAll(femaleNumAnswerToCount.keySet());
+    List<Integer> slotValues = new ArrayList<Integer>(slots);
+    Collections.sort(slotValues);
+
+    DataTable data = DataTable.create();
+    data.addColumn(AbstractDataTable.ColumnType.STRING, "Answers");
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Male");
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Female");
+    int r = 0;
+    int maleAbove = 0;
+    int femaleAbove = 0;
+    for (Integer age : slotValues) {
+      Integer male = maleNumAnswerToCount.get(age);
+      int maleCount = male != null ? male : 0;
+      Integer female = femaleNumAnswerToCount.get(age);
+      int femaleCount = female != null ? female : 0;
+      if (age > 30) {
+        maleAbove += maleCount;
+        femaleAbove += femaleCount;
+      } else {
+        data.addRow();
+        data.setValue(r, 0, "" + age);
+        data.setValue(r, 1, maleCount);
+        data.setValue(r, 2, femaleCount);
+        r++;
+      }
+    }
+
+    data.addRow();
+    data.setValue(r, 0, ">30");
+    data.setValue(r, 1, maleAbove);
+    data.setValue(r, 2, femaleAbove);
 
     return new ColumnChart(data, options);
   }
