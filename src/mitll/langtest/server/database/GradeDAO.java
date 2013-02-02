@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Grade;
+import org.apache.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
@@ -10,6 +11,8 @@ import java.util.*;
  * Stored and retrieves grades from the database.
  */
 public class GradeDAO extends DAO {
+  private static Logger logger = Logger.getLogger(GradeDAO.class);
+
   private static final String GRADES = "grades";
   //private final Database database;
   private boolean debug = false;
@@ -55,6 +58,7 @@ public class GradeDAO extends DAO {
   /**
    * If a grade already exists, update the value.
    *
+   *
    * @param resultID
    * @param exerciseID
    * @param grade
@@ -65,7 +69,7 @@ public class GradeDAO extends DAO {
    * @return
    * @see DatabaseImpl#addGrade(String, mitll.langtest.shared.Grade)
    */
-  public CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader, String gradeType) {
+  public CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, int grader, String gradeType) {
     long id = 0;
     try {
       Connection connection = database.getConnection();
@@ -82,7 +86,7 @@ public class GradeDAO extends DAO {
       statement.setString(i++, exerciseID);
       statement.setInt(i++, grade);
       statement.setBoolean(i++, correct);
-      statement.setString(i++, grader);
+      statement.setString(i++, ""+grader);
       statement.setString(i++, gradeType);
       int j = statement.executeUpdate();
 
@@ -176,9 +180,16 @@ public class GradeDAO extends DAO {
         int resultID = rs.getInt(i++);
         int grade = rs.getInt(i++);
         String grader = rs.getString(i++);
+        int graderID = 0;
+        try {
+          graderID = Integer.parseInt(grader);
+        } catch (NumberFormatException e) {
+          logger.warn("couldn't parse grader '" +grader+
+              "'");
+        }
         String type = rs.getString(i++);
         if (type == null) type = "";
-        Grade g = new Grade(id, exerciseID, resultID, grade, grader, type);
+        Grade g = new Grade(id, exerciseID, resultID, grade, graderID, type);
        // System.out.println("made " +g);
         grades.add(g);
         ids.add(resultID);
@@ -225,7 +236,7 @@ public class GradeDAO extends DAO {
   }
 
   /**
-   * @see DatabaseImpl#DatabaseImpl(javax.servlet.http.HttpServlet)
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs()
    * @param connection
    * @throws SQLException
    */

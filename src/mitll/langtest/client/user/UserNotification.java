@@ -11,7 +11,5 @@ import mitll.langtest.shared.Result;
  */
 public interface UserNotification {
   void gotUser(long userID);
-  void setGrading(boolean g);
-
   void rememberAudioType(String audioType);
 }
