@@ -29,13 +29,8 @@ public interface LangTestDatabase extends RemoteService {
   ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
 
   // gradeDAO
- // CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct, String grader, String gradeType);
   CountAndGradeID addGrade(String exerciseID, Grade grade);
   void changeGrade(Grade toChange);
-
-  // grader DAO
-  void addGrader(String login);
-  boolean graderExists(String login);
 
   // user DAO
   long addUser(int age, String gender, int experience);
