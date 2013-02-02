@@ -22,26 +22,26 @@ public class Grade implements IsSerializable {
   public String exerciseID;
   public int resultID;
   public int grade;
-  public String grader;
+  public int grader;
   public String gradeType;
 
   public Grade() {}
 
   /**
-   * @see mitll.langtest.client.grading.GradingResultManager#getGradingColumn(java.util.Collection, String, int, boolean)
+   * @see mitll.langtest.client.grading.GradingResultManager#getGradingColumn
    * @param resultID
    * @param grade
    * @param grader
    * @param gradeType
    */
-  public Grade(int resultID, int grade, String grader, String gradeType) {
+  public Grade(int resultID, int grade, int grader, String gradeType) {
     this(UNASSIGNED, "", resultID,grade,grader,gradeType);
   }
     /**
     * @see mitll.langtest.server.database.GradeDAO#getGradesForSQL(String)
     *
     */
-  public Grade(int id, String exerciseID, int resultID, int grade, String grader, String gradeType) {
+  public Grade(int id, String exerciseID, int resultID, int grade, int grader, String gradeType) {
     this.id = id;
     this.exerciseID = exerciseID;
     this.resultID = resultID;
@@ -62,6 +62,8 @@ public class Grade implements IsSerializable {
 
   @Override
   public String toString() {
-    return "ID = " + id +"\t: exercise "+exerciseID +"\t: result " + resultID + "\t= " + grade + " by " + grader + " type " +gradeType ;
+    String idToShow = id == UNASSIGNED ? "UNASSIGNED" : ""+id;
+    return "ID = " + idToShow +"\t: exercise "+exerciseID +"\t: result " + resultID + "\t= " + grade +
+        " by user id = " + grader + " type " +gradeType ;
   }
 }
