@@ -144,7 +144,7 @@ public class PropertyHandler {
     if (goodwave != null && goodwave.equals("false")) goodwaveMode = false;
     //GWT.log("goodwave mode = " + goodwaveMode + "/" +goodwave);
     boolean grading = this.isGrading() || (isGrading != null && !isGrading.equals("false")) || isEnglishOnlyMode();
-
+    setGrading(grading);
     // get audio repeats
     if (repeats != null) {
       try {
@@ -179,6 +179,13 @@ public class PropertyHandler {
     return arabicTextDataCollect;
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#modeSelect()
+   * @see mitll.langtest.client.LangTest#onModuleLoad2()
+   * @see mitll.langtest.client.LangTest#setFactory()
+   *
+   * @return
+   */
   public boolean isGrading() {
     return grading;
   }
