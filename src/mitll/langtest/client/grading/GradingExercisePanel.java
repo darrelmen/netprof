@@ -113,7 +113,7 @@ public class GradingExercisePanel extends ExercisePanel {
       public void onSuccess(ResultsAndGrades resultsAndGrades) {
         List<Boolean> spoken = Arrays.asList(true, false);
         List<Boolean> foreignOrEnglish = Arrays.asList(true, false);
-
+        boolean anyAnswers = false;
         int count = countDistinctTypes(resultsAndGrades);
         boolean bigPage = count == 1 || englishOnly;
         for (boolean isSpoken : spoken) {
@@ -123,12 +123,14 @@ public class GradingExercisePanel extends ExercisePanel {
               if (englishOnly && isForeign) continue; // skip non-english
               List<Result> results = langToResult.get(isForeign);
               if (results != null) {
+                anyAnswers = true;
                 String prompt = getPrompt(isSpoken, isForeign, outer);
                 vp.add(addAnswerGroup(resultsAndGrades.grades, results, bigPage, prompt, outer, service, n, index));
               }
             }
           }
         }
+        if (!anyAnswers) vp.add(new HTML("<b><i>No answers yet.</i></b>"));
         // if (result.isEmpty()) recordCompleted(outer);
       }
     });
@@ -153,7 +155,7 @@ public class GradingExercisePanel extends ExercisePanel {
     vp.add(spacer);
 
     vp.add(showResults(results, grades, service, outer, n > 1, index,
-        oneQuestionPageSize, twoQuestionPageSize, controller.getGrader()));
+        oneQuestionPageSize, twoQuestionPageSize, controller.getUser()));
     return vp;
   }
 
@@ -196,7 +198,7 @@ public class GradingExercisePanel extends ExercisePanel {
    */
   private Widget showResults(Collection<Result> results, Collection<Grade> grades,
                              LangTestDatabaseAsync service, GradingExercisePanel outer,
-                             boolean moreThanOneQuestion, int index, int pageSize, int twoQPageSize, String grader) {
+                             boolean moreThanOneQuestion, int index, int pageSize, int twoQPageSize, int grader) {
     ResultManager rm = new GradingResultManager(service, userFeedback);
     rm.setFeedback(outer);
     rm.setPageSize(pageSize);
@@ -225,5 +227,10 @@ public class GradingExercisePanel extends ExercisePanel {
   @Override
   protected void postAnswers(LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller, Exercise completedExercise) {
     controller.loadNextExercise(completedExercise);
+  }
+
+  @Override
+  protected String getNextButtonText() {
+    return "Next Ungraded";
   }
 }
