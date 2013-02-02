@@ -40,7 +40,6 @@ public class PagingExerciseList extends ExerciseList {
   private static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
   private ListDataProvider<ExerciseShell> dataProvider;
   private CellTable<ExerciseShell> table;
-  private ExerciseShell clickedOn = null;
 
   public interface TableResources extends CellTable.Resources {
     /**
@@ -59,15 +58,14 @@ public class PagingExerciseList extends ExerciseList {
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
-   * @param factory
    * @param readFromFile
    * @param arabicDataCollect
    * @param showTurkToken
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            ExercisePanelFactory factory, boolean readFromFile, boolean arabicDataCollect,
-                            boolean showTurkToken, boolean autoCRT) {
-    super(currentExerciseVPanel, service, feedback, factory, readFromFile, arabicDataCollect, showTurkToken, autoCRT);
+                            boolean readFromFile, boolean arabicDataCollect,
+                            boolean showTurkToken, boolean showInOrder) {
+    super(currentExerciseVPanel, service, feedback, null, readFromFile, arabicDataCollect, showTurkToken, showInOrder);
     CellTable.Resources o = GWT.create(TableResources.class);
     this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
@@ -96,7 +94,6 @@ public class PagingExerciseList extends ExerciseList {
         super.onBrowserEvent(context, elem, object, event);
         if ("click".equals(event.getType())) {
           final ExerciseShell e = object;
-          clickedOn = e;
           if (isExercisePanelBusy()) {
             Window.alert("Exercise busy.");
             markCurrentExercise(currentExercise);
@@ -152,7 +149,7 @@ public class PagingExerciseList extends ExerciseList {
     selectFirst();
   }
 
-  private void selectFirst() {
+  protected void selectFirst() {
     table.getSelectionModel().setSelected(currentExercises.get(0), true);
     table.redraw();
   }
@@ -176,7 +173,6 @@ public class PagingExerciseList extends ExerciseList {
   protected void addExerciseToList(ExerciseShell exercise) {
     List<ExerciseShell> list = dataProvider.getList();
     list.add(exercise);
-
   }
 
   /**
