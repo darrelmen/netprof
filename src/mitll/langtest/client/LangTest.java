@@ -149,7 +149,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     widgets.addNorth(hp, HEADER_HEIGHT);
     widgets.addSouth(status = new Label(), footerHeight);
     widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH/* +10*/);
-    if (props.isMinimalUI() && !props.isAdminView() || props.isTeacherView()) {
+    if ((props.isMinimalUI()&& !props.isGrading()) && !props.isAdminView() || props.isTeacherView()) {
       exerciseListPanel.setVisible(false);
     }
     // set up center panel, initially with flash record panel
@@ -227,11 +227,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     final UserFeedback feedback = (UserFeedback) this;
 
     if (isGrading) {
-      ExercisePanelFactory factory = new ExercisePanelFactory(service, this, this);
-      this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback, factory, isArabicTextDataCollect());
+      this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback, props.isReadFromFile(),
+          true);
     }
     else {
-      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, null, props.isReadFromFile(),
+      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, props.isReadFromFile(),
           isArabicTextDataCollect(), props.isShowTurkToken(), isAutoCRTMode()) {
         @Override
         protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
@@ -277,12 +277,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     logout.setVisible(!props.isGoodwaveMode());
     users.setVisible(isGrading || props.isAdminView());
     showResults.setVisible(isGrading || props.isAdminView());
+    monitoring.setVisible(isGrading || props.isAdminView());
 
-    if (props.isGoodwaveMode() || isAutoCRTMode()) {
+    if (props.isGoodwaveMode() || isAutoCRTMode()) {   // no login for pron mode
       gotUser(-1);
-    }
-    else if (props.isEnglishOnlyMode() || isGrading) {
-      userManager.graderLogin();
     }
     else {
       login();
@@ -314,23 +312,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
   }
 
-  /**
-   * @see UserManager#displayGraderLogin()
-   * @param g
-   */
-  public void setGrading(boolean g) {
-    this.props.setGrading(g);
-
-    setFactory();
-  }
-
   private void setFactory() {
     if (props.isGoodwaveMode()) {
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this), userManager, 1);
     }
     else if (props.isGrading()) {
       exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, props.isEnglishOnlyMode() ? 2 : 1);
-      lastUser = -1; // no user
     }
     else if (props.isDataCollectMode() && props.isCollectAudio()) {
       exerciseList.setFactory(new WaveformExercisePanelFactory(service, this, this), userManager, 1);
@@ -465,7 +452,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
-    setGrading(false);
+    setFactory();
+
     if (!props.isArabicTextDataCollect() && props.isCollectAudio()) {
       flashRecordPanel.initFlash();
     }
@@ -495,7 +483,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   public int getUser() { return userManager.getUser(); }
-  public String getGrader() { return userManager.getGrader(); }
   public boolean getEnglishOnly() { return props.isEnglishOnlyMode(); }
   public int getSegmentRepeats() { return props.getSegmentRepeats(); }
   public boolean isArabicTextDataCollect() {  return props.isArabicTextDataCollect(); }
@@ -506,6 +493,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isDataCollectMode() {  return props.isDataCollectMode(); }
   public boolean isCollectAudio() {  return props.isCollectAudio(); }
   public boolean isMinimalUI() {  return props.isMinimalUI(); }
+  public boolean isGrading() {  return props.isGrading(); }
 
   // recording methods...
   /**
