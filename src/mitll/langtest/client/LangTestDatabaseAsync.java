@@ -29,10 +29,6 @@ public interface LangTestDatabaseAsync {
 
   void checkoutExerciseID(String user,String id, AsyncCallback<Void> async);
 
-  void addGrader(String login, AsyncCallback<Void> async);
-
-  void graderExists(String login, AsyncCallback<Boolean> async);
-
   void getResultsForExercise(String exid, boolean arabicTextDataCollect, AsyncCallback<ResultsAndGrades> async);
 
   void addGrade(String exerciseID, Grade grade, AsyncCallback<CountAndGradeID> async);

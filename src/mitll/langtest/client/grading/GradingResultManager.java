@@ -36,7 +36,7 @@ public class GradingResultManager extends ResultManager {
   private static final List<String> GRADING_OPTIONS = Arrays.asList(UNGRADED, "1", "2", "3", "4", "5", SKIP);
 
   /**
-   * @see mitll.langtest.client.grading.GradingExercisePanel#showResults(java.util.Collection, java.util.Collection, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.grading.GradingExercisePanel, boolean, int, int, int, String)
+   * @see mitll.langtest.client.grading.GradingExercisePanel#showResults
    * @param s
    * @param feedback
    */
@@ -45,7 +45,7 @@ public class GradingResultManager extends ResultManager {
   }
 
   /**
-   * @see #getTable(java.util.Collection, boolean, boolean, java.util.Collection, String, int)
+   * @see mitll.langtest.client.ResultManager#getTable
    * @param table
    * @return
    */
@@ -55,14 +55,14 @@ public class GradingResultManager extends ResultManager {
   }
 
   /**
-   * @see #getTable(java.util.Collection, boolean, boolean, java.util.Collection, String, int)
+   * @see mitll.langtest.client.ResultManager#getTable
    * @param grades
    * @param grader
    * @param numGrades
    * @param table
    */
   @Override
-  protected void addResultColumn(Collection<Grade> grades, String grader, int numGrades, CellTable<Result> table) {
+  protected void addResultColumn(Collection<Grade> grades, int grader, int numGrades, CellTable<Result> table) {
     for (int i = 0; i < numGrades; i++) {
       Column<Result, String> col = getGradingColumn(grades, grader, i, i == numGrades - 1);
       String columnHeader = numGrades > 1 ? "Grade #" + (i + 1) : "Grade";
@@ -84,7 +84,7 @@ public class GradingResultManager extends ResultManager {
    * @return
    */
   private Column<Result, String> getGradingColumn(Collection<Grade> grades,
-                                                  final String grader, final int gradingColumnIndex,
+                                                  final int grader, final int gradingColumnIndex,
                                                   final boolean editable) {
     final Map<Integer, Grade> resultToGrade = getResultToGrade(grades, gradingColumnIndex);
 
