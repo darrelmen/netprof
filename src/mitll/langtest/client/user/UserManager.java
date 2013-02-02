@@ -9,7 +9,16 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PasswordTextBox;
+import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.shared.Result;
 
@@ -94,7 +103,6 @@ public class UserManager {
    */
   public void login() {
     int user = getUser();
-    //Thread.dumpStack();
     if (user != NO_USER_SET) {
       System.out.println("login user : " + user);
       langTest.gotUser(user);
@@ -104,9 +112,9 @@ public class UserManager {
   }
 
   void logout() {
-    Cookies.setCookie("grader", "");
+   // Cookies.setCookie("grader", "");
 
-    System.out.println("logout : grader now " + getGrader());
+   // System.out.println("logout : grader now " + getGrader());
   }
 
   /**
@@ -125,10 +133,6 @@ public class UserManager {
     }
   }
 
-  public String getGrader() {
-    return Cookies.getCookie("grader");
-  }
-
   /**
    * @see mitll.langtest.client.LangTest#getLogout()
    */
@@ -142,78 +146,6 @@ public class UserManager {
     }
   }
 
-  /**
-   * We don't use this anymore
-   *
-   * @deprecated
-   */
-  private void displayChoiceBox() {
-
-    final DialogBox dialogBox = new DialogBox();
-    // Enable glass background.
-    dialogBox.setGlassEnabled(true);
-    VerticalPanel dialogVPanel = new VerticalPanel();
-    dialogVPanel.addStyleName("dialogVPanel");
-    dialogVPanel.addStyleName("center");
-    dialogVPanel.add(new HTML("<b>Please choose to </b><br>"));
-    //dialogVPanel.add(new HTML(""));
-
-    SimplePanel spacer = new SimplePanel();
-    spacer.setSize("20px", "20px");
-    dialogVPanel.add(spacer);
-
-    Anchor w = new Anchor("Take a test");
-    w.addStyleName("paddedHorizontalPanel");
-    w.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-        //langTest.setGrading(false);
-
-        displayLoginBox();
-      }
-    });
-    dialogVPanel.add(w);
-    HTML w2 = new HTML("<br><i>&nbsp;&nbsp;&nbsp;Or</i><br>");
-    w2.addStyleName("paddedHorizontalPanel");
-
-    spacer = new SimplePanel();
-    spacer.addStyleName("paddedHorizontalPanel");
-    spacer.setSize("20px", "20px");
-    spacer.add(w2);
-    dialogVPanel.add(spacer);
-
-    spacer = new SimplePanel();
-    spacer.setSize("20px", "20px");
-    dialogVPanel.add(spacer);
-    spacer = new SimplePanel();
-    spacer.setSize("20px", "20px");
-    dialogVPanel.add(spacer);
-
-    Anchor w1 = new Anchor("Grade tests");
-    dialogVPanel.add(w1);
-    w1.addStyleName("paddedHorizontalPanel");
-
-    w1.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-        graderLogin();
-      }
-    });
-
-    dialogBox.setWidget(dialogVPanel);
-    show(dialogBox);
-  }
-
-  public void graderLogin() {
-    String sid = getGrader();
-    if (sid == null || sid.length() == 0) {
-      displayGraderLogin();
-    } else {
-      System.out.println("grader cookie " + getGrader());
-      langTest.setGrading(true);
-    }
-  }
-
   public void teacherLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
@@ -222,96 +154,6 @@ public class UserManager {
     } else {
       displayTeacherLogin();
     }
-  }
-
-  private void displayGraderLogin() {
-    final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText("Grader Login");
-    dialogBox.setAnimationEnabled(true);
-
-    // Enable glass background.
-    dialogBox.setGlassEnabled(true);
-
-    final TextBox user = new TextBox();
-    final TextBox password = new PasswordTextBox();
-
-    final Button closeButton = new Button("Login");
-    final Button reg = new Button("Register");
-
-
-    closeButton.setEnabled(false);
-
-    // We can set the id of a widget by accessing its Element
-    closeButton.getElement().setId("closeButton");
-
-
-    KeyUpHandler keyHandler = new GraderMyKeyUpHandler(user, closeButton, reg, password, true);
-    user.addKeyUpHandler(keyHandler);
-    password.addKeyUpHandler(keyHandler);
-
-
-    VerticalPanel dialogVPanel = new VerticalPanel();
-    dialogVPanel.addStyleName("dialogVPanel");
-    dialogVPanel.add(new HTML("<b>User ID</b>"));
-    dialogVPanel.add(user);
-    dialogVPanel.add(new HTML("<b>Password</b>"));
-    dialogVPanel.add(password);
-    dialogVPanel.add(new HTML("<i>(New users : choose an id and click register.)</i>"));
-
-    reg.setEnabled(false);
-    reg.getElement().setId("registerButton");
-
-    reg.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        if (user.getText().length() > 0 && password.getText().length() > 0) {
-          service.graderExists(user.getText(), new AsyncCallback<Boolean>() {
-            public void onFailure(Throwable caught) {
-            }
-
-            public void onSuccess(Boolean result) {
-              if (result) {
-                closeButton.setEnabled(false);
-              } else {
-                service.addGrader(user.getText(), new AsyncCallback<Void>() {
-                  public void onFailure(Throwable caught) {
-                  }
-
-                  public void onSuccess(Void result) {
-                    setGraderCookie(user.getText());
-                    boolean passwordMatch = checkPassword(password);
-                    closeButton.setEnabled(passwordMatch);
-                    closeButton.click();
-                  }
-                });
-              }
-            }
-          });
-        }
-      }
-    });
-    //w1.addStyleName("paddedHorizontalPanel");
-
-    dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
-    HorizontalPanel hp = new HorizontalPanel();
-    hp.add(reg);
-
-    SimplePanel spacer = new SimplePanel();
-    spacer.setSize("20px", "20px");
-
-    hp.add(spacer);
-    hp.add(closeButton);
-
-    dialogVPanel.add(hp);
-    dialogBox.setWidget(dialogVPanel);
-
-    closeButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-        setGraderCookie(user.getText());
-        langTest.setGrading(true);
-      }
-    });
-    show(dialogBox);
   }
 
   private void displayTeacherLogin() {
@@ -717,59 +559,34 @@ public class UserManager {
 
   private class GraderMyKeyUpHandler implements KeyUpHandler {
     private final TextBox user;
-    private final Button closeButton, regButton;
     private final TextBox password;
-    private final boolean isGrader;
 
     public GraderMyKeyUpHandler(TextBox user, Button closeButton, Button regButton, TextBox password, boolean isGrader) {
       this.user = user;
-      this.closeButton = closeButton;
       this.password = password;
-      this.regButton = regButton;
-      this.isGrader = isGrader;
     }
 
     public void onKeyUp(KeyUpEvent event) {
       String text = user.getText();
       if (text.length() == 0) {
-        // closeButton.setEnabled(false);
         return;
       }
 
-      if (isGrader) {
-        service.graderExists(text, new AsyncCallback<Boolean>() {
-          public void onFailure(Throwable caught) {
-          }
+      service.userExists(text, new AsyncCallback<Integer>() {
+        public void onFailure(Throwable caught) {
+        }
 
-          public void onSuccess(Boolean result) {
-            //System.out.println("user '" + user.getText() + "' exists " + result);
-            boolean passwordMatch = checkPassword(password);
-
-            if (passwordMatch) {
-              closeButton.setEnabled(result);
-              regButton.setEnabled(!result);
-            } else {
-              closeButton.setEnabled(false);
-              regButton.setEnabled(false);
+        public void onSuccess(Integer result) {
+          // System.out.println("user '" + user.getText() + "' exists " + result);
+          boolean passwordMatch = checkPassword(password);
+          rememberedUser = -1;
+          if (passwordMatch) {
+            if (result != -1) {
+              rememberedUser = result;
             }
           }
-        });
-      } else {
-        service.userExists(text, new AsyncCallback<Integer>() {
-          public void onFailure(Throwable caught) {}
-
-          public void onSuccess(Integer result) {
-            // System.out.println("user '" + user.getText() + "' exists " + result);
-            boolean passwordMatch = checkPassword(password);
-            rememberedUser = -1;
-            if (passwordMatch) {
-              if (result != -1) {
-                rememberedUser = result;
-              }
-            }
-          }
-        });
-      }
+        }
+      });
     }
   }
 }

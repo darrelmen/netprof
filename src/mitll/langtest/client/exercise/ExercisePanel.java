@@ -12,7 +12,20 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ProvidesResize;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
@@ -94,12 +107,9 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     add(buttonRow);
   }
 
-  protected Widget getQuestionContent(Exercise e) {
-    return new HTML(e.getContent());
-  }
+  private Widget getQuestionContent(Exercise e) { return new HTML(e.getContent()); }
 
   public void onResize() {}
-
   public boolean isBusy() { return false; }
 
   /**
@@ -113,34 +123,34 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
    * @param e
    * @param service
    * @param controller used in subclasses for audio control
-   * @param i
+   * @param questionNumber
    */
-  private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int i) {
+  private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber) {
     List<Exercise.QAPair> englishQuestions = e.getEnglishQuestions();
     List<Exercise.QAPair> flQuestions = e.getForeignLanguageQuestions();
     int n = englishQuestions.size();
     //System.out.println("eng q " + englishQuestions);
     for (Exercise.QAPair pair : e.getQuestions()) {
       // add question header
-      Exercise.QAPair engQAPair = i - 1 < n ? englishQuestions.get(i - 1) : null;
+      Exercise.QAPair engQAPair = questionNumber - 1 < n ? englishQuestions.get(questionNumber - 1) : null;
 
       if (engQAPair != null) {
-        getQuestionHeader(i, n, engQAPair, shouldShowAnswer(),!controller.isDemoMode());
+        getQuestionHeader(questionNumber, n, engQAPair, shouldShowAnswer(),!controller.isDemoMode());
       }
       else {
         add(new HTML("<br></br>"));
       }
       if (controller.isDemoMode()) {
-        Exercise.QAPair flQAPair  = flQuestions.get(i - 1);
-        getQuestionHeader(i, n, flQAPair, pair, shouldShowAnswer());
+        Exercise.QAPair flQAPair  = flQuestions.get(questionNumber - 1);
+        getQuestionHeader(questionNumber, n, flQAPair, pair, shouldShowAnswer());
       }
-      i++;
+      questionNumber++;
       // add question prompt
       VerticalPanel vp = new VerticalPanel();
       addQuestionPrompt(vp, e);
 
       // add answer widget
-      Widget answerWidget = getAnswerWidget(e, service, controller, i-1);
+      Widget answerWidget = getAnswerWidget(e, service, controller, questionNumber -1);
       vp.add(answerWidget);
       answers.add(answerWidget);
 
@@ -237,7 +247,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     buttonRow.add(prev);
     prev.setVisible(!controller.isMinimalUI());
 
-      this.next = new Button("Next");
+    this.next = new Button(getNextButtonText());
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
       next.setEnabled(false);
     }
@@ -257,6 +267,10 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     addKeyHandler(e, service, userFeedback, controller, useKeyHandler);
 
     return buttonRow;
+  }
+
+  protected String getNextButtonText() {
+    return "Next";
   }
 
   private void addKeyHandler(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
@@ -308,11 +322,9 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   private void clickNext(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                          final ExerciseController controller, final Exercise e) {
     if (next.isEnabled() && next.isVisible()) {
-      if (controller.isMinimalUI()) {
+      if (controller.isMinimalUI() && !controller.isGrading()) {
         showConfirmNextDialog(service, userFeedback, controller, e);
-      }
-      //System.out.println("clickNext " +keyHandler+ " click on next " + next);
-      else {
+      } else {
         postAnswers(service, userFeedback, controller, e);
       }
     }
@@ -566,7 +578,6 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
       sinkEvents(Event.ONPASTE);
     }
     public void onBrowserEvent(Event event) {
-    //  GWT.log("Text box got " + event);
       super.onBrowserEvent(event);
 
       if (event.getTypeInt() == Event.ONPASTE) {
