@@ -109,7 +109,7 @@ public class ResultManager {
       dialogVPanel.remove(closeButton);
     }
 
-    Widget table = getAsyncTable(numResults, false, true, new ArrayList<Grade>(), "", 1);
+    Widget table = getAsyncTable(numResults, false, true, new ArrayList<Grade>(),-1, 1);
     dialogVPanel.add(table);
     dialogVPanel.add(closeButton);
 
@@ -129,7 +129,7 @@ public class ResultManager {
    * @return
    */
   public Widget getTable(Collection<Result> result, final boolean gradingView, boolean showQuestionColumn,
-                         Collection<Grade> grades, final String grader, int numGrades) {
+                         Collection<Grade> grades, final int grader, int numGrades) {
     CellTable<Result> table = new CellTable<Result>();
     TextColumn<Result> id = addColumnsToTable(gradingView, showQuestionColumn, grades, grader, numGrades, table);
 
@@ -161,7 +161,7 @@ public class ResultManager {
   }
 
   private Widget getAsyncTable(int numResults, final boolean gradingView, boolean showQuestionColumn,
-                         Collection<Grade> grades, final String grader, int numGrades) {
+                         Collection<Grade> grades, final int grader, int numGrades) {
     CellTable<Result> table = new CellTable<Result>();
     TextColumn<Result> id = addColumnsToTable(gradingView, showQuestionColumn, grades, grader, numGrades, table);
     table.setRowCount(numResults, true);
@@ -181,7 +181,7 @@ public class ResultManager {
   }
 
   private TextColumn<Result> addColumnsToTable(boolean gradingView, boolean showQuestionColumn, Collection<Grade> grades,
-                                               String grader, int numGrades, CellTable<Result> table) {
+                                               int grader, int numGrades, CellTable<Result> table) {
     String gradingWidth = GRADING_WIDTH + "px";
     if (!gradingView) {
       int i = (int)(Window.getClientWidth()*0.8f);
@@ -230,7 +230,6 @@ public class ResultManager {
   }
 
   private AsyncDataProvider<Result> createProvider(final int numResults, CellTable<Result> table) {
-    // ListDataProvider<Result> dataProvider = new ListDataProvider<Result>();
     AsyncDataProvider<Result> dataProvider = new AsyncDataProvider<Result>() {
       @Override
       protected void onRangeChanged(HasData<Result> display) {
@@ -285,7 +284,7 @@ public class ResultManager {
     return id;
   }
 
-  protected void addResultColumn(Collection<Grade> grades, String grader, int numGrades, CellTable<Result> table) {
+  protected void addResultColumn(Collection<Grade> grades, int grader, int numGrades, CellTable<Result> table) {
       TextColumn<Result> date = new TextColumn<Result>() {
         @Override
         public String getValue(Result answer) {

@@ -19,7 +19,6 @@ public interface ExerciseController {
   boolean onFirst(Exercise current);
 
   int getUser();
-  String getGrader();
 
   void startRecording();
   void stopRecording();
@@ -41,5 +40,6 @@ public interface ExerciseController {
   boolean isDataCollectMode();
   boolean isCollectAudio();
   boolean isMinimalUI();
+  boolean isGrading();
   String getAudioType();
 }
