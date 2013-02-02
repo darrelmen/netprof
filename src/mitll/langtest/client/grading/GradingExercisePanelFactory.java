@@ -16,7 +16,7 @@ import mitll.langtest.shared.Exercise;
  */
 public class GradingExercisePanelFactory extends ExercisePanelFactory {
   /**
-   * @see mitll.langtest.client.LangTest#setGrading(boolean)
+   * @see mitll.langtest.client.LangTest
    * @param service
    * @param userFeedback
    * @param controller
@@ -26,6 +26,11 @@ public class GradingExercisePanelFactory extends ExercisePanelFactory {
     super(service, userFeedback, controller);
   }
 
+  /**
+   * @see mitll.langtest.client.exercise.ExerciseList#useExercise
+   * @param e
+   * @return
+   */
   @Override
   public Panel getExercisePanel(Exercise e) {
      return new GradingExercisePanel(e, service, userFeedback, controller);
