@@ -54,7 +54,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected final boolean showTurkToken;
   private boolean useUserID = false;
   private long userID;
-  private final boolean autoCRT;
+  private final boolean showInOrder;
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -65,10 +65,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param readFromFile
    * @param arabicDataCollect
    * @param showTurkToken
-   * @param autoCRT
+   * @param showInOrder
    */
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                      ExercisePanelFactory factory, boolean readFromFile, boolean arabicDataCollect, boolean showTurkToken, boolean autoCRT) {
+                      ExercisePanelFactory factory, boolean readFromFile, boolean arabicDataCollect,
+                      boolean showTurkToken, boolean showInOrder) {
     this.currentExerciseVPanel = currentExerciseVPanel;
     this.service = service;
     this.feedback = feedback;
@@ -76,11 +77,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.readFromFile = readFromFile;
     this.arabicDataCollect = arabicDataCollect;
     this.showTurkToken = showTurkToken;
-    this.autoCRT = autoCRT;
+    this.showInOrder = showInOrder;
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#setGrading
+   * @see mitll.langtest.client.LangTest#setFactory()
    * @param factory
    * @param user
    * @paramx doGrading
@@ -99,10 +100,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     * @param userID
    */
   public void getExercises(long userID) {
-    //System.out.println("getting exercises for " + userID);
     useUserID = true;
     this.userID = userID;
-    if (autoCRT) {
+    if (showInOrder) {
+      //System.out.println("getExercises : getting exercises in order for " + userID);
       getExercisesInOrder();
     }
     else {
@@ -142,7 +143,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
 
     public void onSuccess(List<ExerciseShell> result) {
-      //System.out.println("SetExercisesCallback Got " +result.size() + " results");
+     // System.out.println("SetExercisesCallback Got " +result.size() + " results");
       currentExercises = result; // remember current exercises
       idToExercise = new HashMap<String, ExerciseShell>();
       clear();
@@ -202,11 +203,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param exerciseShell
    */
   protected void loadExercise(ExerciseShell exerciseShell) {
+    //System.out.println("loadExercise : " + exerciseShell);
+
     checkBeforeLoad(exerciseShell);
 
     removeCurrentExercise();
 
-    //System.out.println("loadExercise : " + exerciseShell);
     if (useUserID) {
       service.getExercise(exerciseShell.getID(), userID, readFromFile, arabicDataCollect, new ExerciseAsyncCallback(exerciseShell));
     } else {
@@ -230,6 +232,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
+  /**
+   * @see ExerciseAsyncCallback#onSuccess(mitll.langtest.shared.Exercise)
+   * @param result
+   * @param e
+   */
   private void useExercise(Exercise result, ExerciseShell e) {
     //System.out.println("useExercise using " + e);
     currentExerciseVPanel.add(current = factory.getExercisePanel(result));
@@ -239,6 +246,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       System.err.println("can't find " + e + " in list of " + currentExercises.size() + " exercises.");
       return;
     }
+    //System.out.println("useExercise marking " + i);
+
     markCurrentExercise(i);
     currentExercise = i;
   }
@@ -283,7 +292,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   @Override
   public void clear() {
-    System.out.println("ExerciseList : Clearing list.");
+    //System.out.println("ExerciseList : Clearing list.");
     super.clear();
     progressMarkers.clear();
   }
@@ -309,6 +318,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   @Override
   public boolean loadNextExercise(ExerciseShell current) {
+    //System.out.println("loadNextExercise " +current);
     int i = getIndex(current);
 
     boolean onLast = i == currentExercises.size() - 1;
@@ -330,7 +340,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   private void showTurkToken(ExerciseShell current) {
     String code = user.getUser() + "_" + current.getID();
-    // feedback.showErrorMessage("Copy the token below", "To receive credit, copy and paste this token : " + code.hashCode());
 
     // Create a basic popup widget
     final DecoratedPopupPanel simplePopup = new DecoratedPopupPanel(true);
