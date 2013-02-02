@@ -85,6 +85,7 @@ public class Result implements IsSerializable {
   @Override
   public String toString() {
     return "Result #" + uniqueID + "\t\tby user " + userid + "\texid " + id + " " +
-        (flq ? "flq" : "english") + " " + (spoken ? "spoken" : "written") + " " + audioType + " valid " + valid;
+        (flq ? "flq" : "english") + " " + (spoken ? "spoken" : "written") + " audioType : " + audioType +
+        " valid " + valid;
   }
 }
