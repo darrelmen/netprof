@@ -114,6 +114,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.debug("heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
   }
 
+  /**
+   * @see mitll.langtest.client.exercise.ExerciseList#getExercisesInOrder()
+   * @param useFile
+   * @return
+   */
   public List<ExerciseShell> getExerciseIds(boolean useFile) {
     List<Exercise> exercises = getExercises(useFile);
     List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
@@ -255,14 +260,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       ConcurrentMap<String,String> stringStringConcurrentMap = userToExerciseID.asMap();
       Collection<String> values = stringStringConcurrentMap.values();
       String currentExerciseForUser = userToExerciseID.getIfPresent(user);
-      //System.out.println("for " + user + " current " + currentExerciseForUser);
+      logger.debug("for " + user + " current " + currentExerciseForUser);
 
       Collection<String> currentActiveExercises = new HashSet<String>(values);
 
       if (currentExerciseForUser != null) {
         currentActiveExercises.remove(currentExerciseForUser); // it's OK to include the one the user is working on now...
       }
-      //System.out.println("current set minus " + user + " is " + currentActiveExercises);
+      logger.debug("current set minus " + user + " is " + currentActiveExercises);
 
       return db.getNextUngradedExercise(currentActiveExercises, expectedGrades,
           filterForArabicTextOnly, filterForArabicTextOnly, !filterForArabicTextOnly);
@@ -272,7 +277,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public void checkoutExerciseID(String user, String id) {
     synchronized (this) {
       userToExerciseID.put(user, id);
-      logger.debug("after adding " + user + "->" + id + " active exercise map now " + userToExerciseID.asMap());
+      logger.debug("checkoutExerciseID : after adding " + user + "->" + id +
+          " active exercise map now " + userToExerciseID.asMap());
     }
   }
 
@@ -642,21 +648,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public void changeGrade(Grade toChange) {
     db.changeGrade(toChange);
-  }
-
-  // Graders ---------------------
-
-  public void addGrader(String login) {
-    db.addGrader(login);
-  }
-
-  /**
-   * @see mitll.langtest.client.user.UserManager#displayGraderLogin()
-   * @param login
-   * @return
-   */
-  public boolean graderExists(String login) {
-    return db.graderExists(login);
   }
 
   @Override
