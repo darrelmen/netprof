@@ -80,4 +80,6 @@ public interface LangTestDatabaseAsync {
   void getResultStats(AsyncCallback<Map<String, Number>> async);
 
   void getResultCountsByGender(boolean useFile, AsyncCallback<Map<String, Map<Integer, Integer>>> async);
+
+  void getDesiredCounts(boolean useFile, AsyncCallback<Map<String, Map<Integer, Map<Integer, Integer>>>> async);
 }
