@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -25,16 +26,24 @@ import java.util.TreeMap;
  * To change this template use File | Settings | File Templates.
  */
 public class MonitoringSupport {
+  private static final int MIN_DESIRED = 2;
   private static Logger logger = Logger.getLogger(MonitoringSupport.class);
 
-  private static final int KB = (1024);
-  private static final int MB = (KB * KB);
+  //private static final int KB = (1024);
+  //private static final int MB = (KB * KB);
   private static final int SESSION_GAP = 10 * 60 * 1000;
-  private static final int HOUR_IN_MILLIS = (60 * 60 * 1000);
+  private static final int MINUTE_MILLIS = 60 * 1000;
+  private static final int HOUR_IN_MILLIS = (60 * MINUTE_MILLIS);
+  //private static final float HOUR_IN_MILLIS_FLOAT = (float)HOUR_IN_MILLIS;
+  private static final float MINUTE_MILLIS_FLOAT = (float)MINUTE_MILLIS;
 
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
-  String outsideFile;
+  private String outsideFile;
+
+  public MonitoringSupport() {
+    this(null,null);
+  }
 
   public MonitoringSupport(UserDAO userDAO, ResultDAO resultDAO) {
     this.userDAO = userDAO;
@@ -108,6 +117,16 @@ public class MonitoringSupport {
     return sessions;
   }
 
+  private long getRateInMillis(Collection<Session> sessionCollection) {
+    long totalTime = 0;
+    long total = 0;
+    for (Session s: sessionCollection) {
+        totalTime += s.duration;
+        total += s.numAnswers;
+    }
+    return totalTime/total;
+  }
+
   /**
    * Given the observed rate of responses and the number of exercises to get
    * responses for, make a map of number of responses->hours
@@ -160,6 +179,10 @@ public class MonitoringSupport {
   public Map<Integer, Integer> getResultCountToCount(List<Exercise> exercises) {
     Map<String, Integer> idToCount = getExToCount(exercises);
     Map<Integer,Integer> resCountToCount = new HashMap<Integer, Integer>();
+
+    for (int i =0; i< 10; i++) {
+      resCountToCount.put(i,0);
+    }
 
     for (Integer c : idToCount.values()) {
       Integer rc = resCountToCount.get(c);
@@ -384,12 +407,91 @@ public class MonitoringSupport {
       else femaleAnswerToCount.put(countAtExercise,count+1);
     }
 
-
-
     typeToNumAnswerToCount.put("maleCount",maleAnswerToCount);
     typeToNumAnswerToCount.put("femaleCount",femaleAnswerToCount);
     return typeToNumAnswerToCount;
+  }
 
+  public Map<String,Map<Integer, Map<Integer, Integer>>> getDesiredCounts(List<Exercise> exercises) {
+    Map<String,Map<Integer, Map<Integer, Integer>>> typeToNumAnswerToCount = new HashMap<String, Map<Integer, Map<Integer, Integer>>>();
+
+    List<Integer> male = getCountArray(getExToCountMaleOrFemale(exercises,true));
+    List<Integer> female = getCountArray(getExToCountMaleOrFemale(exercises,false));
+
+    Map<Integer,Integer> maleAnswerToCount = new HashMap<Integer,Integer>();
+    Map<Integer,Integer> femaleAnswerToCount = new HashMap<Integer,Integer>();
+
+    for (int i =0; i< 10; i++) {
+      maleAnswerToCount.put(i,0);
+      femaleAnswerToCount.put(i,0);
+    }
+
+    for (Integer countAtExercise : male) {
+      Integer count = maleAnswerToCount.get(countAtExercise);
+      if (count == null) maleAnswerToCount.put(countAtExercise,1);
+      else maleAnswerToCount.put(countAtExercise,count+1);
+    }
+
+    for (Integer countAtExercise : female) {
+      Integer count = femaleAnswerToCount.get(countAtExercise);
+      if (count == null) femaleAnswerToCount.put(countAtExercise,1);
+      else femaleAnswerToCount.put(countAtExercise,count+1);
+    }
+
+    Map<Integer, Map<Integer, Integer>> maleDesiredToPeopleToNumPer   = getResourceCounts(maleAnswerToCount);
+    Map<Integer, Map<Integer, Integer>> femaleDesiredToPeopleToNumPer = getResourceCounts(femaleAnswerToCount);
+    typeToNumAnswerToCount.put("desiredToMale",maleDesiredToPeopleToNumPer);
+    typeToNumAnswerToCount.put("desiredToFemale",femaleDesiredToPeopleToNumPer);
+  //  logger.info("got " + maleDesiredToPeopleToNumPer);
+    long rateInMillis = getRateInMillis(getSessions());// logger.info("total at");
+    float rateInHours =((float)rateInMillis)/MINUTE_MILLIS_FLOAT;
+
+    Map<Integer, Map<Integer, Integer>> maleDesiredToPeopleToHours   = getResourceCounts(maleAnswerToCount,rateInHours);
+    Map<Integer, Map<Integer, Integer>> femaleDesiredToPeopleToHours= getResourceCounts(femaleAnswerToCount,rateInHours);
+    typeToNumAnswerToCount.put("desiredToMaleHours",maleDesiredToPeopleToHours);
+    typeToNumAnswerToCount.put("desiredToFemaleHours",femaleDesiredToPeopleToHours);
+
+    return typeToNumAnswerToCount;
+  }
+
+  public Map<Integer, Map<Integer, Integer>> getResourceCounts(Map<Integer, Integer> maleAnswerToCount) {
+    return getResourceCounts(maleAnswerToCount, 1f);
+  }
+
+  public Map<Integer, Map<Integer, Integer>> getResourceCounts(Map<Integer, Integer> maleAnswerToCount, float rateInMinutes) {
+    int minPeople = 1;
+    int maxPeople = 7;
+    int maxDesired = 7;
+    Map<Integer,Map<Integer,Integer>> desiredToNumPeopleToPerPerson = new HashMap<Integer, Map<Integer, Integer>>();
+    Map<Integer,Integer> numDesiredToTotal = new HashMap<Integer, Integer>();
+    for (int numDesiredPer = MIN_DESIRED; numDesiredPer < maxDesired; numDesiredPer++) {
+      int total = 0;
+      Map<Integer, Integer> peopleToPerPerson = new HashMap<Integer, Integer>();
+      desiredToNumPeopleToPerPerson.put(numDesiredPer, peopleToPerPerson);
+
+      for (int numAnswers = 0; numAnswers < numDesiredPer; numAnswers++) {
+        Integer count = maleAnswerToCount.get(numAnswers);
+        int numPer = (numDesiredPer-numAnswers) * count;
+        total += numPer;
+      }
+      total = Math.round((float)total*rateInMinutes);
+      for (int people = Math.max(minPeople, numDesiredPer); people < maxPeople; people++) {
+        float numPerPerson = (float) total/(float) people;
+      /*  for (int numAnswers = 0; numAnswers < numDesiredPer; numAnswers++) {
+          Integer count = maleAnswerToCount.get(numAnswers);
+          int numPer = (numDesiredPer-numAnswers) * count;
+         // total += numPer;
+          numPerPerson += (float)numPer / (float)people;
+        }*/
+        peopleToPerPerson.put(people, Math.round(numPerPerson));
+      }
+      numDesiredToTotal.put(numDesiredPer,total);
+    }
+   // System.out.println("total " + numDesiredToTotal);
+  //  System.out.println("desired to people " + desiredToNumPeopleToPerPerson);
+
+    return desiredToNumPeopleToPerPerson;
+    //typeToNumAnswerToCount.put("maleResources",desiredToNumPeopleToPerPerson);
   }
 
   /**
@@ -483,5 +585,33 @@ public class MonitoringSupport {
     return resultDAO.getResults();
   }
 
+   public static void main(String [] arg) {
+   //  DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\DLITest\\","farsi2");
+   //  langTestDatabase.setInstallPath("C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu","C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu\\5000-no-english.unvow.farsi.txt","",false);
 
+     MonitoringSupport monitoringSupport = new MonitoringSupport();
+     Map<Integer,Integer> answerToCount = new HashMap<Integer, Integer>();
+     answerToCount.put(0,16);
+     answerToCount.put(1,8);
+     answerToCount.put(2,4);
+     answerToCount.put(3,2);
+     answerToCount.put(4,1);
+     answerToCount.put(5,0);
+     monitoringSupport.getResourceCounts(answerToCount);
+
+     long rateInMillis = 15*1000;
+     float rateInMinutes = (float) rateInMillis/MINUTE_MILLIS_FLOAT;
+     monitoringSupport.getResourceCounts(answerToCount,rateInMinutes);
+
+     Map<Integer,Integer> answerToCount2 = new HashMap<Integer, Integer>();
+     answerToCount2.put(0,100);
+     answerToCount2.put(1,50);
+     answerToCount2.put(2,0);
+     answerToCount2.put(3,0);
+     answerToCount2.put(4,0);
+     answerToCount2.put(5,0);
+     monitoringSupport.getResourceCounts(answerToCount2);
+     monitoringSupport.getResourceCounts(answerToCount2,rateInMinutes);
+
+   }
 }
