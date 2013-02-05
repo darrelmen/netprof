@@ -798,6 +798,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getResultCountsByGender(useFile);
   }
 
+  public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts(boolean useFile) {
+    return db.getDesiredCounts(useFile);
+  }
+
   @Override
   public Map<Integer, Float> getHoursToCompletion(boolean useFile) {
     return db.getHoursToCompletion(useFile);
