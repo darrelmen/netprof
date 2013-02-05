@@ -1,5 +1,7 @@
 package mitll.langtest.client.monitoring;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -7,6 +9,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -85,10 +89,11 @@ public class MonitoringManager {
     sp.add(vp);
     dialogVPanel.add(sp);
 
+    doDesiredQuery(getVPanel(vp));
     doSessionQuery(getVPanel(vp));
     doResultQuery(getVPanel(vp));
     doGenderQuery(getVPanel(vp));
-    doTimeUntilItems(getSPanel(vp));
+   // doTimeUntilItems(getSPanel(vp));
     doResultLineQuery(getVPanel(vp));
     doResultByDayQuery(getSPanel(vp));
     doResultByHourOfDayQuery(getSPanel(vp));
@@ -134,6 +139,107 @@ public class MonitoringManager {
   }
 
 
+  private void doDesiredQuery(final Panel vp) {
+    service.getDesiredCounts(useFile,new AsyncCallback<Map<String, Map<Integer, Map<Integer, Integer>>>>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+
+      @Override
+      public void onSuccess(Map<String, Map<Integer, Map<Integer, Integer>>> result) {
+        vp.add(new HTML("<h2>Time to completion calculator</h2>"));
+           for (String key : result.keySet()) {
+             //System.out.println("got " + key);
+             if (key.equals("desiredToMale")) {
+               HorizontalPanel hp = getItemCalculator(result, key, "&nbsp;&nbsp;Male");
+               vp.add(hp);
+             }
+             else if (key.equals("desiredToFemale")) {
+               HorizontalPanel hp = getItemCalculator(result, key, "Female");
+               vp.add(hp);
+             }
+           }
+      }
+
+      private HorizontalPanel getItemCalculator(Map<String, Map<Integer, Map<Integer, Integer>>> result, String key,String gender) {
+        final Map<Integer, Map<Integer, Integer>> desiredToPeopleToItemsPerPerson = result.get(key);
+        final Map<Integer, Map<Integer, Integer>> desiredToPeopleToMinutesPerPerson = result.get(key+"Hours");
+        final ListBox desiredItemsBox = new ListBox();
+        final ListBox peopleToNumPerBox = new ListBox();
+        final HTML numPerPerson = new HTML();
+        final Set<Integer> desiredSet = desiredToPeopleToItemsPerPerson.keySet();
+        final List<Integer> desiredList = getBoxForSet(desiredItemsBox, desiredSet);
+        desiredItemsBox.addChangeHandler(new ChangeHandler() {
+          @Override
+          public void onChange(ChangeEvent event) {
+            int selectedIndex = desiredItemsBox.getSelectedIndex();
+            Integer numDesired = desiredList.get(selectedIndex);
+            Map<Integer, Integer> peopleToNumPerForDesired = desiredToPeopleToItemsPerPerson.get(numDesired);
+         //   System.out.println("desired " + numDesired + " people to num per " + peopleToNumPerForDesired);
+            peopleToNumPerBox.clear();
+            List<Integer> peopleList = getBoxForSet(peopleToNumPerBox, peopleToNumPerForDesired.keySet());
+
+           // System.out.println("desired " + numDesired + " people list " + peopleList);
+
+            Integer firstPerson = peopleList.get(0);
+            Integer minutesPerPerson = desiredToPeopleToMinutesPerPerson.get(numDesired).get(firstPerson);
+            setPerPerson(peopleToNumPerForDesired.get(firstPerson), minutesPerPerson, numPerPerson);
+          }
+        });
+
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.add(new HTML("<b>" +
+            gender +
+            " Recorders Needed : at</b>&nbsp;"));
+        hp.add(desiredItemsBox);
+        hp.add(new HTML("<b>&nbsp;answers/item with&nbsp;</b>"));
+
+        Map<Integer, Integer> peopleToNumPer = desiredToPeopleToItemsPerPerson.get(desiredList.get(0));
+
+        hp.add(peopleToNumPerBox);
+        List<Integer> peopleList = getBoxForSet(peopleToNumPerBox, peopleToNumPer.keySet());
+        peopleToNumPerBox.addChangeHandler(new ChangeHandler() {
+          @Override
+          public void onChange(ChangeEvent event) {
+            int selectedIndex = desiredItemsBox.getSelectedIndex();
+            Integer numDesired = desiredList.get(selectedIndex);
+            Map<Integer, Integer> peopleToNumPerForDesired = desiredToPeopleToItemsPerPerson.get(numDesired);
+            int selectedIndex2 = peopleToNumPerBox.getSelectedIndex();
+            String value = peopleToNumPerBox.getItemText(selectedIndex2);
+            int numPeople = Integer.parseInt(value);
+            Integer perPerson = peopleToNumPerForDesired.get(numPeople);
+            Integer minutesPerPerson = desiredToPeopleToMinutesPerPerson.get(numDesired).get(numPeople);
+            setPerPerson(perPerson, minutesPerPerson, numPerPerson);
+          }
+        });
+
+        hp.add(new HTML("<b>&nbsp;people leaves&nbsp;</b>"));
+        setPerPerson(peopleToNumPer.get(peopleList.get(0)), desiredToPeopleToMinutesPerPerson.get(desiredList.get(0)).get(peopleList.get(0)), numPerPerson);
+
+        hp.add(numPerPerson);
+        return hp;
+      }
+
+      private void setPerPerson(Integer itemsPerPerson, Integer minutesPerPerson, HTML numPerPerson) {
+        String timeReport = (minutesPerPerson > 180)? (minutesPerPerson/60) + " hours " : minutesPerPerson + " minutes ";
+        numPerPerson.setHTML("<b>" + itemsPerPerson + "&nbsp;items or " +
+            timeReport +
+            " per person (at current rate) remaining to record</b>");
+      }
+    });
+  }
+
+  private List<Integer> getBoxForSet(ListBox box, Set<Integer> desiredSet) {
+    List<Integer> desiredList = getSortedList(desiredSet);
+    for (Integer desired : desiredList) box.addItem(""+desired);
+    return desiredList;
+  }
+
+  private List<Integer> getSortedList(Set<Integer> desiredSet) {
+    List<Integer> desiredList =new ArrayList<Integer>(desiredSet);
+    Collections.sort(desiredList);
+    return desiredList;
+  }
+
   private void doSessionQuery(final Panel vp) {
     service.getResultStats(new AsyncCallback<Map<String, Number>>() {
       @Override
@@ -146,6 +252,7 @@ public class MonitoringManager {
         final double totalHours = total.doubleValue();
         final double avgSecs = result.get("avgSecs").doubleValue();
         final int badRecordings = result.get("badRecordings").intValue();
+        vp.add(new HTML("<h2>Session Info</h2>"));
 
         service.getSessions(new AsyncCallback<List<Session>>() {
           @Override
@@ -213,8 +320,7 @@ public class MonitoringManager {
     data.addRows(rateToCount.size());
 
     int r = 0;
-    List<Integer> ages = new ArrayList<Integer>(rateToCount.keySet());
-    Collections.sort(ages);
+    List<Integer> ages = getSortedList(rateToCount.keySet());
     for (Integer age : ages) {
       data.addRow();
       data.setValue(r, 0, age);
@@ -270,7 +376,10 @@ public class MonitoringManager {
         for (int i = 0; i < size; i += chartSamples) {
           Map<String, List<Integer>> typeToList = new HashMap<String, List<Integer>>();
           for (Map.Entry<String, List<Integer>> pair : result.entrySet()) {
-            typeToList.put(pair.getKey(), pair.getValue().subList(i, Math.min(size, i + chartSamples)));
+            int endIndex = Math.min(size, i + chartSamples);
+            List<Integer> countsPerExercise = pair.getValue();
+            endIndex = Math.min(countsPerExercise.size(),endIndex);
+            typeToList.put(pair.getKey(), countsPerExercise.subList(i, endIndex));
           }
           LineChart lineChart = getLineChart(typeToList, title + " (" + i + "-" + (i + chartSamples) + ")", i == 0, i);
           vp.add(lineChart);
@@ -326,6 +435,7 @@ public class MonitoringManager {
         Integer unanswered = userToCount.get(0);
         float ratio = total > 0 ? ((float) unanswered) / ((float) total) : 0;
         int percent = (int) (ratio*100f);
+        vp.add(new HTML("<h2>Collection progress</h2>"));
         vp.add(new HTML("<b><font color='red'>Number unanswered = " + unanswered +" or " + percent +
             "%</font></b>") );
         int numAnswered = total - unanswered;
@@ -420,8 +530,7 @@ public class MonitoringManager {
     }
 
     int r = 0;
-    List<Integer> ages = new ArrayList<Integer>(ageToCount.keySet());
-    Collections.sort(ages);
+    List<Integer> ages = getSortedList(ageToCount.keySet());
     for (Integer age : ages) {
       data.addRow();
       data.setValue(r, 0, (age -5)+"-"+ (age-1));
@@ -448,8 +557,7 @@ public class MonitoringManager {
     }
 
     int r = 0;
-    List<Integer> ages = new ArrayList<Integer>(ageToCount.keySet());
-    Collections.sort(ages);
+    List<Integer> ages = getSortedList(ageToCount.keySet());
     for (Integer age : ages) {
       data.addRow();
       data.setValue(r, 0, age >= 100 ? age +"-"+(age+99): (age >= 10 ? age +"-" +(age+9) : ""+age));
@@ -481,8 +589,7 @@ public class MonitoringManager {
     }
 
     int r = 0;
-    List<Integer> ages = new ArrayList<Integer>(ageToCount.keySet());
-    Collections.sort(ages);
+    List<Integer> ages = getSortedList(ageToCount.keySet());
     for (Integer age : ages) {
       if (age > 1) {
         data.addRow();
@@ -557,7 +664,7 @@ public class MonitoringManager {
       User user = pair.getKey();
       String nativeLang = user.nativeLang.toLowerCase();
       Integer c = langToCount.get(nativeLang);
-      if (count > 0) {
+      if (count > 2) {
         if (c == null) langToCount.put(nativeLang, count);
         else langToCount.put(nativeLang, c + count);
       }
@@ -579,7 +686,7 @@ public class MonitoringManager {
       User user = pair.getKey();
       String slotToUse = user.dialect.toLowerCase();
       Integer c = langToCount.get(slotToUse);
-      if (count > 1) {
+      if (count > 2) {
         if (c == null) langToCount.put(slotToUse, count);
         else langToCount.put(slotToUse, c + count);
       }
@@ -637,8 +744,7 @@ public class MonitoringManager {
       }
     }
 
-    List<Integer> slotValues = new ArrayList<Integer>(slotToCount.keySet());
-    Collections.sort(slotValues);
+    List<Integer> slotValues = getSortedList(slotToCount.keySet());
 
     DataTable data = DataTable.create();
     data.addColumn(AbstractDataTable.ColumnType.NUMBER, slot);
@@ -656,17 +762,19 @@ public class MonitoringManager {
   private ColumnChart getGenderCounts(Map<Integer, Integer> maleNumAnswerToCount,
                                       Map<Integer, Integer> femaleNumAnswerToCount) {
     Options options = Options.create();
-    options.setTitle("Count of answers by gender");
+    options.setTitle("Count of num items with this many answers, by gender");
+   // AxisOptions options1 = AxisOptions.create();
+   // options1.setTitle("# of items with this many answers");
+  //  options.setHAxisOptions(options1);
 
     Set<Integer> slots = new HashSet<Integer>(maleNumAnswerToCount.keySet());
     slots.addAll(femaleNumAnswerToCount.keySet());
-    List<Integer> slotValues = new ArrayList<Integer>(slots);
-    Collections.sort(slotValues);
+    List<Integer> slotValues = getSortedList(slots);
 
     DataTable data = DataTable.create();
     data.addColumn(AbstractDataTable.ColumnType.STRING, "Answers");
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Male");
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Female");
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "# of items with this many answers by Males");
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "# of items with this many answers by Females");
     int r = 0;
     int maleAbove = 0;
     int femaleAbove = 0;
