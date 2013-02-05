@@ -880,6 +880,7 @@ public class DatabaseImpl implements Database {
    */
   public Map<String,List<Integer>> getResultPerExercise(boolean useFile) { return monitoringSupport.getResultPerExercise(getExercises(useFile)); }
   public Map<String,Map<Integer,Integer>> getResultCountsByGender(boolean useFile) {  return monitoringSupport.getResultCountsByGender(getExercises(useFile)); }
+  public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts(boolean useFile) {  return monitoringSupport.getDesiredCounts(getExercises(useFile)); }
    /**
    * Return some statistics related to the hours of audio that have been collected
    * @return
