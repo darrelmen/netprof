@@ -93,4 +93,5 @@ public interface LangTestDatabase extends RemoteService {
   Map<String,Number> getResultStats();
 
   Map<String, Map<Integer, Integer>> getResultCountsByGender(boolean useFile);
+  Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts(boolean useFile);
 }
