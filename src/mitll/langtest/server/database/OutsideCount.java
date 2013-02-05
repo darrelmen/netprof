@@ -88,7 +88,7 @@ public class OutsideCount {
     try {
       File file = new File(overrideCountsFile);
       if (!file.exists()) {
-        logger.error("can't find '" + file +"'");
+        logger.debug("can't find '" + file +"'");
         return null;
       }
       else {
@@ -153,13 +153,13 @@ public class OutsideCount {
           if (count < 20) logger.warn("female Couldn't parse " + line2 + " got " +e);
         }
       }
-      logger.info("m " + totalMales + " f " + totalFemales + " dups " + dups);
+      //logger.info("m " + totalMales + " f " + totalFemales + " dups " + dups);
       reader.close();
       //w.close();
       // w2.close();
 
-      logger.info("map is " + genderToPhraseToCount.keySet() + " size males " + males.size() +
-          " females " + females.size());
+/*      logger.info("map is " + genderToPhraseToCount.keySet() + " size males " + males.size() +
+          " females " + females.size());*/
       return  genderToPhraseToCount;
     } catch (Exception e) {
       logger.error("got " +e,e);
