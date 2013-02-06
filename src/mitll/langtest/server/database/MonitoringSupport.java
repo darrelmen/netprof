@@ -29,6 +29,7 @@ import java.util.TreeMap;
  */
 public class MonitoringSupport {
   private static final int MIN_DESIRED = 2;
+  public static final int MAX_PEOPLE = 21;
   private static Logger logger = Logger.getLogger(MonitoringSupport.class);
 
   //private static final int KB = (1024);
@@ -478,7 +479,7 @@ public class MonitoringSupport {
 
   public Map<Integer, Map<Integer, Integer>> getResourceCounts(Map<Integer, Integer> maleAnswerToCount, float rateInMinutes) {
     //int minPeople = 1;
-    int maxPeople = 7;
+    int maxPeople = MAX_PEOPLE;
     int maxDesired = 7;
     Map<Integer,Map<Integer,Integer>> desiredToNumPeopleToPerPerson = new HashMap<Integer, Map<Integer, Integer>>();
     Map<Integer,Integer> numDesiredToTotal = new HashMap<Integer, Integer>();
@@ -512,12 +513,14 @@ public class MonitoringSupport {
          // total += numPer;
           numPerPerson += (float)numPer / (float)people;
         }*/
-        peopleToPerPerson.put(people, Math.round(numPerPerson));
+        int itemsOrMinutes = (int) Math.round(numPerPerson);
+        peopleToPerPerson.put(people, itemsOrMinutes);
+        if (rateInMinutes != 1f && itemsOrMinutes == 1 || itemsOrMinutes == 0) break;
       }
       numDesiredToTotal.put(numDesiredPer,total);
     }
     //System.out.println("total " + numDesiredToTotal);
-    //System.out.println("desired to people " + desiredToNumPeopleToPerPerson);
+  //  System.out.println("desired to people " + desiredToNumPeopleToPerPerson);
 
     return desiredToNumPeopleToPerPerson;
   }
@@ -630,7 +633,7 @@ public class MonitoringSupport {
      answerToCount.put(4,1);
      answerToCount.put(5,0);
      monitoringSupport.getResourceCounts(answerToCount);
- //    monitoringSupport.getResourceCounts(answerToCount,rateInMinutes);
+     monitoringSupport.getResourceCounts(answerToCount,rateInMinutes);
 
      Map<Integer,Integer> answerToCount2 = new HashMap<Integer, Integer>();
      answerToCount2.put(0,100);
@@ -640,7 +643,7 @@ public class MonitoringSupport {
      answerToCount2.put(4,0);
      answerToCount2.put(5,0);
      monitoringSupport.getResourceCounts(answerToCount2);
-   //  monitoringSupport.getResourceCounts(answerToCount2,rateInMinutes);
+     monitoringSupport.getResourceCounts(answerToCount2,rateInMinutes);
 
      Map<Integer,Integer> answerToCount3 = new HashMap<Integer, Integer>();
      answerToCount3.put(0,0);
@@ -649,8 +652,8 @@ public class MonitoringSupport {
      answerToCount3.put(3,0);
      answerToCount3.put(4,0);
      answerToCount3.put(5,0);
-     monitoringSupport.getResourceCounts(answerToCount3);
-   //  monitoringSupport.getResourceCounts(answerToCount3,rateInMinutes);
+    monitoringSupport.getResourceCounts(answerToCount3);
+     monitoringSupport.getResourceCounts(answerToCount3,rateInMinutes);
 
      Map<Integer,Integer> answerToCount4 = new HashMap<Integer, Integer>();
      answerToCount4.put(0,0);
