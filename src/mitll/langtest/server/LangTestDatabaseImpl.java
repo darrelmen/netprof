@@ -174,12 +174,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.exercise.ExerciseList#getExercises(long)
    */
   public List<Exercise> getExercises(long userID, boolean useFile, boolean arabicDataCollect) {
-    String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
-    //logger.warn("use file " + useFile + " collect audio " + collectAudio);
-    if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
-
-    //logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
-    db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, isUrdu);
+    String lessonPlanFile = setInstallPath(useFile);
     synchronized (this) {
       if (autoCRT == null) {
         autoCRT = new AutoCRT(db.getExport(), this, getInstallPath(), relativeConfigDir);
@@ -223,6 +218,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return exercises;
   }
 
+  private String setInstallPath(boolean useFile) {
+    String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
+    //logger.warn("use file " + useFile + " collect audio " + collectAudio);
+    if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
+
+    //logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
+    synchronized (this) {
+      db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, isUrdu);
+    }
+    return lessonPlanFile;
+  }
+
   /**
    * Called from the client.
    * @see mitll.langtest.client.exercise.ExerciseList#getExercisesInOrder()
@@ -230,8 +237,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param useFile
    */
   public List<Exercise> getExercises(boolean useFile) {
-    String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
-    db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, isUrdu);
+/*    String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
+    db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, isUrdu);*/
+
+    setInstallPath(useFile);
     List<Exercise> exercises = db.getExercises(useFile);
     if (makeFullURLs) convertRefAudioURLs(exercises);
     return exercises;
@@ -773,6 +782,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public Map<Integer, Integer> getResultCountToCount(boolean useFile) {
+    setInstallPath(useFile);
     return db.getResultCountToCount(useFile);
   }
   @Override
@@ -790,20 +800,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public Map<String, List<Integer>> getResultPerExercise(boolean useFile) {
+    setInstallPath(useFile);
     return db.getResultPerExercise(useFile);
   }
 
   @Override
   public Map<String, Map<Integer, Integer>> getResultCountsByGender(boolean useFile) {
+    setInstallPath(useFile);
     return db.getResultCountsByGender(useFile);
   }
 
   public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts(boolean useFile) {
+    setInstallPath(useFile);
     return db.getDesiredCounts(useFile);
   }
 
   @Override
   public Map<Integer, Float> getHoursToCompletion(boolean useFile) {
+    setInstallPath(useFile);
     return db.getHoursToCompletion(useFile);
   }
 
