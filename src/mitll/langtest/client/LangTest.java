@@ -123,7 +123,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     userManager = new UserManager(this,service, isCollectAudio());
     resultManager = new ResultManager(service, this);
     boolean isGrading = props.isGrading();
-    monitoringManager = new MonitoringManager(service, this, props.isReadFromFile());
+    monitoringManager = new MonitoringManager(service, props);
     boolean usualLayout = props.getExercise_title() == null;
     final DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
     if (usualLayout) {
