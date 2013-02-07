@@ -3,13 +3,13 @@ package mitll.langtest.shared.scoring;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
- * Created with IntelliJ IDEA.
+ * The types of images we can generate and show.
  * User: go22670
  * Date: 9/10/12
  * Time: 12:54 PM
  * To change this template use File | Settings | File Templates.
  */
 public enum NetPronImageType implements IsSerializable {
-  WAVEFORM, SPECTROGRAM, WORD_TRANSCRIPT, SPEECH_TRANSCRIPT, PHONE_TRANSCRIPT, PROGRESS
+  WAVEFORM, SPECTROGRAM, WORD_TRANSCRIPT, /*SPEECH_TRANSCRIPT,*/ PHONE_TRANSCRIPT
 
 }
