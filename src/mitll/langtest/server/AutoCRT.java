@@ -51,7 +51,7 @@ public class AutoCRT {
   /**
    * Get an auto crt score given an audio answer.
    *
-   * @see LangTestDatabaseImpl#writeAudioFile(String, String, String, String, String, boolean, int)
+   * @see LangTestDatabaseImpl#writeAudioFile
    * @param exercise
    * @param e
    * @param reqid
@@ -61,15 +61,15 @@ public class AutoCRT {
    * @param url
    * @return
    */
-  public AudioAnswer getAutoCRTAnswer(String exercise, Exercise e, int reqid, File file, AudioAnswer.Validity validity, int questionID, String url) {
+  public AudioAnswer getAutoCRTAnswer(String exercise, Exercise e, int reqid, File file, AudioAnswer.Validity validity,
+                                      int questionID, String url) {
     List<String> exportedAnswers = getExportedAnswers(exercise, questionID);
     //for (Exercise.QAPair pair : e.getForeignLanguageQuestions()) exportedAnswers.add(pair.getQuestion());
     logger.info("got answers " + new HashSet<String>(exportedAnswers));
 
     List<String> background = getBackgroundText(e);
-    List<String> vocab = getVocab(background);
 
-    PretestScore asrScoreForAudio = db.getASRScoreForAudio(file, exportedAnswers, background, vocab);
+    PretestScore asrScoreForAudio = db.getASRScoreForAudio(file, exportedAnswers, background);
 
     String recoSentence = asrScoreForAudio.getRecoSentence();
     logger.info("reco sentence was '" + recoSentence + "'");
@@ -180,61 +180,6 @@ public class AutoCRT {
     return background;
   }
 
-  /**
-   * Get the vocabulary to use when generating a language model. <br></br>
-   * Very important to limit the vocabulary (less than 300 words) or else the small vocab dcodr will run out of
-   * memory and segfault! <br></br>
-   * Remember to add special tokens like silence, pause, and unk
-   * @see #MAX_AUTO_CRT_VOCAB
-   * @param background sentences
-   * @return most frequent vocabulary words
-   */
-  private List<String> getVocab(List<String> background) {
-    List<String> all = new ArrayList<String>();
-    all.addAll(Arrays.asList("-pau-", "</s>", "<s>", "<unk>"));
-
-    final Map<String,Integer> sc = new HashMap<String, Integer>();
-    for (String l : background) {
-      for (String t : l.split("\\s")) {
-        String tt = t.replaceAll("\\p{P}","");
-        if (tt.trim().length() > 0) {
-          Integer c = sc.get(t);
-          if (c == null) sc.put(t,1);
-          else sc.put(t,c+1);
-        }
-      }
-    }
-    List<String> vocab = new ArrayList<String>();
-    try {
-/*      System.out.println("map : " +sc);
-
-      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("map"), FileExerciseDAO.ENCODING));
-      for (Map.Entry<String, Integer> kv : sc.entrySet()) writer.write(kv.getKey() +"\t"+kv.getValue()+"\n");
-      writer.close();*/
-
-      vocab = new ArrayList<String>(sc.keySet());
-      Collections.sort(vocab, new Comparator<String>() {
-        public int compare(String s, String s2) {
-          Integer first = sc.get(s);
-          Integer second = sc.get(s2);
-          return first < second ? +1 : first > second ? -1 : 0;
-        }
-      });
-
- /*     writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("vocab"), FileExerciseDAO.ENCODING));
-      for (String v : vocab) writer.write(v+"\n");
-      writer.close();*/
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    //System.out.println("map : " +sc);
-
-    all.addAll(vocab.subList(0,Math.min(vocab.size(), MAX_AUTO_CRT_VOCAB)));
-    //  System.out.println("vocab " + new HashSet<String>(all));
-    return all;
-  }
-
   private Set<String> getTokenSet(List<String> exportedAnswers) {
     Set<String> tokens = new HashSet<String>();
     for (String l : exportedAnswers) {
@@ -281,7 +226,6 @@ public class AutoCRT {
   private Classifier<AutoGradeExperiment.Event> getClassifier() {
     if (classifier != null) return classifier;
     allAnswers = new HashSet<String>();
-    //  Export exporter = new Export(exerciseDAO,resultDAO,gradeDAO);
     List<Export.ExerciseExport> export = exporter.getExport(true, false);
     exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
     for (Export.ExerciseExport exp : export) {
