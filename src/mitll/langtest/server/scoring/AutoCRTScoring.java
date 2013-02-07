@@ -13,6 +13,5 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public interface AutoCRTScoring {
-  PretestScore getASRScoreForAudio(File testAudioFile, List<String> lmSentences,
-                                   List<String> background, List<String> vocab);
+  PretestScore getASRScoreForAudio(File testAudioFile, List<String> lmSentences, List<String> background);
 }
