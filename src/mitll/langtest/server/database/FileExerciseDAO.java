@@ -152,7 +152,7 @@ public class FileExerciseDAO implements ExerciseDAO {
           boolean simpleFile = length == 2 && line2.split("\\(")[1].trim().endsWith(")");
           exercise = simpleFile ?
               getSimpleExerciseForLine(line2) :
-              getExerciseForLine(installPath, line2);
+              getExerciseForLine(line2);
         }
 
        // if (count < 10) logger.info("Got " + exercise);
@@ -207,12 +207,12 @@ public class FileExerciseDAO implements ExerciseDAO {
    * <br></br>
    * pronz.MultiRefRepeatExercise$: nl0001_ams, nl0001_ams | reference, nl0001_ams | Female_01, nl0001_ams | Male_01, nl0001_ams | REF_MALE, nl0001_ams | STE-004M, nl0001_ams | STE-006F -> nl0001_ams -> FOREIGN_LANGUAGE_SENTENCE -> marHaba -> Hello.
    *
-   * @param installPath
+   * @paramx installPath
    * @paramx xaudioConversion
    * @param line2
    * @return
    */
-  private Exercise getExerciseForLine(String installPath, String line2) {
+  private Exercise getExerciseForLine(String line2) {
     String[] split = line2.split("\\|");
     String lastCol = split[6];
     String[] split1 = lastCol.split("->");
@@ -230,18 +230,20 @@ public class FileExerciseDAO implements ExerciseDAO {
         ensureForwardSlashes(fastAudioRef), ensureForwardSlashes(slowAudioRef), arabic, english);
   }
 
-  private String getContent(String arabic, String translit, String english) {
+  public String getContent(String arabic, String translit, String english) {
     return getArabic(arabic) +
+        (translit.length() > 0?
         "<div class=\"Instruction\">\n" +
         "<span class=\"Instruction-title\">Transliteration:</span>\n" +
         "<span class=\"Instruction-data\"> " + translit +
         "</span>\n" +
-        "</div>\n" +
+        "</div>\n" : "")+
+        (english.length() > 0 ?
         "<div class=\"Instruction\">\n" +
         "<span class=\"Instruction-title\">Translation:</span>\n" +
         "<span class=\"Instruction-data\"> " + english +
         "</span>\n" +
-        "</div>";
+        "</div>" : "");
   }
 
   private String getArabic(String arabic) {
