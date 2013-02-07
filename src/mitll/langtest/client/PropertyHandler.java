@@ -33,6 +33,7 @@ public class PropertyHandler {
   private static final String MINIMAL_UI = "minimalUI";
   private static final String NAME_FOR_ITEM = "nameForItem";
   private static final String NAME_FOR_ANSWER = "nameForAnswer";
+  private static final String NAME_FOR_RECORDER = "nameForRecorder";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -75,6 +76,9 @@ public class PropertyHandler {
   private boolean minimalUI = false;
   private String nameForItem = "Item";
   private String nameForAnswer = "Recording";
+  private String nameForRecorder = "Speaker";
+  private String teacherClass = "Speaker";
+  private String lesson = "Speaker";
   private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
   private float screenPortion;
@@ -108,6 +112,7 @@ public class PropertyHandler {
       else if (key.equals(MINIMAL_UI)) minimalUI = Boolean.parseBoolean(value);
       else if (key.equals(NAME_FOR_ITEM)) nameForItem = value;
       else if (key.equals(NAME_FOR_ANSWER)) nameForAnswer = value;
+      else if (key.equals(NAME_FOR_RECORDER)) nameForRecorder = value;
     }
   }
 
@@ -272,4 +277,5 @@ public class PropertyHandler {
 
   public String getNameForItem() { return nameForItem; }
   public String getNameForAnswer() { return nameForAnswer; }
+  public String getNameForRecorder() { return nameForRecorder; }
 }
