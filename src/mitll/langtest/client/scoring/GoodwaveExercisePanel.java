@@ -99,7 +99,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    *  <li>an answer widget (either a simple text box, an flash audio record and playback widget, or a list of the answers, when grading </li>
    * </ul>     <br></br>
    * Remember the answer widgets so we can notice which have been answered, and then know when to enable the next button.
-   * @param e
    * @param service
    * @param controller used in subclasses for audio control
    * @param i
@@ -162,6 +161,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   /**
    * soundmanager plays mp3 files -- make sure there is a copy of the wav file as an mp3 on the server.
+   * @see #getQuestionContent(mitll.langtest.shared.Exercise)
    * @param e
    * @param path
    * @param vp
@@ -169,6 +169,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private void ensureMP3(Exercise e, String path, final VerticalPanel vp) {
     final String fpath = path;
     final Exercise fe = e;
+    //System.out.println("ensuring mp3 exists for " +path);
     service.ensureMP3(path,new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -177,7 +178,23 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       @Override
       public void onSuccess(Void result) {
-        vp.add(getScoringAudioPanel(fe, fpath));
+        if (fe.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
+          //System.out.println("ensuring mp3 exists for slow audio path " +fe.getSlowAudioRef());
+
+          service.ensureMP3(fe.getSlowAudioRef(), new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              System.err.println("huh? couldn't write an MP3 for " + fe.getSlowAudioRef() + "?");
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+              vp.add(getScoringAudioPanel(fe, fpath));
+            }
+          });
+        } else {
+          vp.add(getScoringAudioPanel(fe, fpath));
+        }
       }
     });
   }

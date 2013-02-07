@@ -153,9 +153,9 @@ public abstract class ScoringAudioPanel extends AudioPanel {
     else {
       phoneTranscript.image.setUrl(IMAGES_REDX_PNG);
     }
-    if (result.getsTypeToImage().get(NetPronImageType.SPEECH_TRANSCRIPT) != null) {
+/*    if (result.getsTypeToImage().get(NetPronImageType.SPEECH_TRANSCRIPT) != null) {
       showImageAndCheck(result.getsTypeToImage().get(NetPronImageType.SPEECH_TRANSCRIPT), speechTranscript);
-    }
+    }*/
     if (!scoredBefore && scoreListener != null) {
       System.out.println("new score returned " + result);
       scoreListener.gotScore(result);

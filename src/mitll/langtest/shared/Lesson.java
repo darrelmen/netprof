@@ -14,6 +14,7 @@ import java.util.List;
  */
 public class Lesson implements IsSerializable {
   private List<Exercise> exerciseList = new ArrayList<Exercise>();
+  public long timestamp;
 
   public Lesson(){}
   public void addExercise(Exercise e) { exerciseList.add(e); }
