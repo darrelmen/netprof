@@ -297,6 +297,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param wavFile
    */
   public void ensureMP3(String wavFile) {
+    logger.debug("ensure mp3 for " +wavFile);
     new AudioConversion().ensureWriteMP3(wavFile, getInstallPath());
   }
 
@@ -448,20 +449,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg) {
       return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-          Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+          Collections.EMPTY_LIST, Collections.EMPTY_LIST);
   }
 
   /**
    * Get score when doing autoCRT on an audio file.
+   * @see AutoCRT#getAutoCRTAnswer(String, mitll.langtest.shared.Exercise, int, java.io.File, mitll.langtest.shared.AudioAnswer.Validity, int, String)
    * @param testAudioFile
    * @param lmSentences
    * @param background
-   * @param vocab
+   * @paramx vocab
    * @return PretestScore for audio
    */
   public PretestScore getASRScoreForAudio(File testAudioFile, List<String> lmSentences,
-                                          List<String> background, List<String> vocab) {
-     return getASRScoreForAudio(0, testAudioFile.getPath(), "", 128, 128, false, lmSentences, background, vocab);
+                                          List<String> background) {
+     return getASRScoreForAudio(0, testAudioFile.getPath(), "", 128, 128, false, lmSentences, background);
   }
 
   /**
@@ -485,7 +487,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg,
                                           List<String> lmSentences,
-                                          List<String> background, List<String> vocab) {
+                                          List<String> background) {
     logger.info("getASRScoreForAudio scoring " + testAudioFile + " with " + sentence + " req# " + reqid);
 
     assert(testAudioFile != null && sentence != null);
@@ -505,7 +507,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence,
-        getImageOutDir(), width, height, useScoreToColorBkg, lmSentences, background, vocab);
+        getImageOutDir(), width, height, useScoreToColorBkg, lmSentences, background);
     pretestScore.setReqid(reqid);
 
     if (makeFullURLs) {
