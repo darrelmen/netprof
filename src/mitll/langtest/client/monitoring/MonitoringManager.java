@@ -49,6 +49,7 @@ import java.util.Set;
 public class MonitoringManager {
   private static final int MIN = (60 * 1000);
   private static final int HOUR = (60 * MIN);
+  //public static final String RECORDER = "recorder";
   protected LangTestDatabaseAsync service;
   private final boolean useFile;
   private String item = "Item";
@@ -69,6 +70,8 @@ public class MonitoringManager {
     this.item = props.getNameForItem();
     this.answer = props.getNameForAnswer();
     this.answers = props.getNameForAnswer() + "s";
+    this.user = props.getNameForRecorder();
+    this.users = props.getNameForRecorder() + "s";
   }
 
   public void showResults() {
@@ -153,6 +156,10 @@ public class MonitoringManager {
     });
   }*/
 
+  /**
+   *
+   * @param vp
+   */
   private void doDesiredQuery(final Panel vp) {
     service.getDesiredCounts(useFile,new AsyncCallback<Map<String, Map<Integer, Map<Integer, Integer>>>>() {
       @Override
@@ -161,19 +168,28 @@ public class MonitoringManager {
       @Override
       public void onSuccess(Map<String, Map<Integer, Map<Integer, Integer>>> result) {
         vp.add(new HTML("<h2>Time to completion calculator</h2>"));
-        for (String key : result.keySet()) {
-          //System.out.println("got " + key);
-          if (key.equals("desiredToMale")) {
-            Panel hp = getItemCalculator(result, key, "Male");
-            vp.add(hp);
-            SimplePanel child = new SimplePanel();
-            child.setHeight("5px");
-            vp.add(child);
-          } else if (key.equals("desiredToFemale")) {
-            Panel hp = getItemCalculator(result, key, "Female");
-            vp.add(hp);
-          }
-        }
+        vp.add(new HTML("The options below let you work in either of two typical situations :"));
+        vp.add(new HTML("1) If you have a fixed size team, choose a number of " + users.toLowerCase() +
+            ", and you will see the minutes or hours of each person's time to request."));
+        vp.add(new HTML("2) If you have a limit on how much time you can request of a " + user.toLowerCase() +
+            ", set the minutes below to that number and you will see the required team size."));
+        vp.add(new HTML("Depending on the type of collection, you may want a varying number of " + answers + " per " + item + ", which can be set with the first choice."));
+        SimplePanel child1 = new SimplePanel();
+        child1.setHeight("5px");
+        child1.setWidth("5px");
+        vp.add(child1);
+
+        Panel hp = getItemCalculator(result, "desiredToMale", "Male");
+        vp.add(hp);
+
+        SimplePanel child = new SimplePanel();
+        child.setHeight("5px");
+        child.setWidth("5px");
+
+        vp.add(child);
+
+        Panel hp2 = getItemCalculator(result, "desiredToFemale", "Female");
+        vp.add(hp2);
       }
 
       private Panel getItemCalculator(Map<String, Map<Integer, Map<Integer, Integer>>> result, String key,String gender) {
@@ -183,22 +199,17 @@ public class MonitoringManager {
         final ListBox numPeopleBox = new ListBox();
         final ListBox minutesBox = new ListBox();
         final HTML hoursBox = new HTML("");
-      //  final HTML numPerPerson = new HTML();
         final Set<Integer> desiredSet = desiredToPeopleToItemsPerPerson.keySet();
         final List<Integer> desiredList = getBoxForSet(desiredItemsBox, desiredSet);
         final Grid g = new Grid(4,3);
-       // g.getCellFormatter().getHeight(0, 1);
         desiredItemsBox.addChangeHandler(new ChangeHandler() {
           @Override
           public void onChange(ChangeEvent event) {
             Integer numDesired = getNumDesired(desiredItemsBox, desiredList);
             Map<Integer, Integer> peopleToNumPerForDesired = desiredToPeopleToItemsPerPerson.get(numDesired);
-            //   System.out.println("desired " + numDesired + " people to num per " + peopleToNumPerForDesired);
             List<Integer> peopleList = getBoxForSet(numPeopleBox, peopleToNumPerForDesired.keySet());
 
             Integer firstPerson = peopleList.get(0);
-            System.out.println("desired " + numDesired + " people list " + peopleList + " first " + firstPerson);
-
             setMinutesBox(numDesired, firstPerson, desiredToPeopleToMinutesPerPerson, minutesBox, hoursBox);
             setItemPerPerson(peopleToNumPerForDesired, firstPerson, g);
           }
@@ -206,12 +217,13 @@ public class MonitoringManager {
 
         vp.add(new HTML("<b>" +
             gender +
-            " Recorders Needed</b>&nbsp;"));
+            " " +users+
+            " Needed</b>&nbsp;"));
         g.setText(0,0,"Desired " +answers + " per "+ item);
         g.setWidget(0, 1, desiredItemsBox);
 
         Map<Integer, Integer> peopleToNumPer = desiredToPeopleToItemsPerPerson.get(desiredList.get(0));
-        g.setText(1,0,"Number of recorders");
+        g.setText(1,0, "Number of " + users);
         g.setWidget(1, 1, numPeopleBox);
         List<Integer> peopleList = getBoxForSet(numPeopleBox, peopleToNumPer.keySet());
         numPeopleBox.addChangeHandler(new ChangeHandler() {
@@ -252,30 +264,22 @@ public class MonitoringManager {
             }
 
             int hours = (int)Math.ceil((float)minSelected/60f);
-          //  System.out.println("for " + minSelected + " minutes " + hours + " hours");
             hoursBox.setHTML(" minutes or " + hours + " hours.");
-
             Map<Integer, Integer> peopleToNumPerForDesired = desiredToPeopleToItemsPerPerson.get(numDesired);
-
             setItemPerPerson(peopleToNumPerForDesired, people, g);
           }
         });
 
-        g.setText(3,0,items + " per recorder");
+        g.setText(3,0,items + " per " + user);
         Integer firstPerson = peopleList.get(0);
-    //    Integer perPerson = peopleToNumPer.get(firstPerson);
         setItemPerPerson(peopleToNumPer, firstPerson, g);
 
-        g.setText(2,0,"Time per recorder");
+        g.setText(2,0, "Time per " + user);
         setMinutesBox(desiredList.get(0), firstPerson, desiredToPeopleToMinutesPerPerson, minutesBox, hoursBox);
         g.setWidget(2, 1, minutesBox);
         g.setWidget(2,2, hoursBox);
         return g;
       }
-
-/*      private void setItemsPerPerson(Grid g, Integer perPerson ) {
-        g.setText(3,1,""+ perPerson);
-      }*/
 
       private void setMinutesBox(Integer numDesired, int numPeople, Map<Integer, Map<Integer, Integer>> desiredToPeopleToMinutesPerPerson, ListBox minutesBox, HTML hoursBox) {
         Map<Integer, Integer> peopleToMinutesPer = desiredToPeopleToMinutesPerPerson.get(numDesired);
@@ -327,8 +331,7 @@ public class MonitoringManager {
   private void doSessionQuery(final Panel vp) {
     service.getResultStats(new AsyncCallback<Map<String, Number>>() {
       @Override
-      public void onFailure(Throwable caught) {
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Map<String, Number> result) {
@@ -408,11 +411,7 @@ public class MonitoringManager {
     return ((float)((Math.round(totalHours*100))))/100f;
   }
 
- /* private float roundToHundredth(double totalHours) {
-    return ((float)((int)totalHours*100))/100f;
-  }*/
-
-  private ColumnChart getNumToHoursChart(Map<Integer, Float> rateToCount) {
+/*  private ColumnChart getNumToHoursChart(Map<Integer, Float> rateToCount) {
     Options options = Options.create();
     options.setTitle("Hours until " +
         answers +
@@ -436,7 +435,7 @@ public class MonitoringManager {
     }
 
     return new ColumnChart(data, options);
-  }
+  }*/
 
   private void getRateChart(Map<Long, Integer> rateToCount, Panel vp) {
     Options options = Options.create();
@@ -454,10 +453,12 @@ public class MonitoringManager {
     List<Long> ages = new ArrayList<Long>(rateToCount.keySet());
     Collections.sort(ages);
     for (Long age : ages) {
-      data.addRow();
-      data.setValue(r, 0, age);
       Integer value = rateToCount.get(age);
-      data.setValue(r++, 1, value);
+   //   if (value < 90) {
+        data.addRow();
+        data.setValue(r, 0, age);
+        data.setValue(r++, 1, value);
+     // }
     }
 
     vp.add(new ColumnChart(data,options));
@@ -565,17 +566,17 @@ public class MonitoringManager {
         float ratio = total > 0 ? ((float) unanswered) / ((float) total) : 0;
         int percent = (int) (ratio*100f);
         vp.add(new HTML("<h2>Collection progress</h2>"));
-        vp.add(new HTML("<b><font color='red'>Number un" +
-            answers +
-            "ed = " + unanswered +" or " + percent +
-            "%</font></b>") );
+        FlexTable flex = new FlexTable();
+        flex.setHTML(0, 0, "<font color='red'>Number without a " +
+            answer +
+            "</font>");
+        flex.setHTML(0, 1, unanswered + " or " + percent + "%");
+
         int numAnswered = total - unanswered;
-        vp.add(new HTML("<b>Number " +
-            answer +
-            "ed = " + numAnswered +" or " + (100-percent) +"%</b>") );
-        vp.add(new HTML("<b>Number with one " +
-            answer +
-            " = " +userToCount.get(1)+"</b>"));
+        flex.setHTML(1, 0, "Number with a male or female " +
+            answer);
+        flex.setHTML(1, 1, numAnswered + " or " + (100 - percent) + "%");
+        vp.add(flex);
         vp.add(getResultCountChart(userToCount));
       }
     });
@@ -642,7 +643,7 @@ public class MonitoringManager {
 
     DataTable data = DataTable.create();
     data.addColumn(AbstractDataTable.ColumnType.STRING, "Gender");
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, items);
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, answers);
 
     data.addRows(2);
     data.setValue(0, 0, "Male");
@@ -726,7 +727,6 @@ public class MonitoringManager {
         "",//answers,//answers+"/" + item + ")"
         "# " + items);
 
-
     DataTable data = DataTable.create();
     data.addColumn(AbstractDataTable.ColumnType.STRING, "Num " +
         answers);
@@ -756,7 +756,7 @@ public class MonitoringManager {
     int r = 0;
     List<Integer> ages = getSortedList(ageToCount.keySet());
     for (Integer age : ages) {
-      if (age > 1) {
+     // if (age > 1) {
         data.addRow();
         //     data.setValue(r, 0, age);
      //   data.setValue(r, 0, age > 30 ?  "> 30" : "" + age);
@@ -770,7 +770,7 @@ public class MonitoringManager {
             (age >= 10 ? age +"-"+(age+4) :
                 "" + age)));
         data.setValue(r++, 1, ageToCount.get(age));
-      }
+    // }
     }
 
     return new ColumnChart(data, options);
@@ -895,7 +895,7 @@ public class MonitoringManager {
     Options options = getOptions(slot);
 
     Map<String,Integer> nameToCount = new HashMap<String, Integer>();
-
+    Set<String> males = new HashSet<String>();
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer doneByUser = pair.getValue();
       User user = pair.getKey();
@@ -904,6 +904,7 @@ public class MonitoringManager {
       Integer count = nameToCount.get(name);
       if (count == null) nameToCount.put(name,doneByUser);
       else nameToCount.put(name,doneByUser+count);
+      if (user.isMale()) males.add(name);
     }
 
     Map<Integer,List<String>> countToUser = new HashMap<Integer, List<String>>();
@@ -926,15 +927,23 @@ public class MonitoringManager {
 
     DataTable data = DataTable.create();
     data.addColumn(AbstractDataTable.ColumnType.STRING, slot);
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, answers);
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Female "+ answers);
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Male "+ answers);
     int r = 0;
 
     for (Integer c : counts) {
       List<String> users = countToUser.get(c);
       for (String u : users) {
         data.addRow();
-        data.setValue(r, 0, u);//.userID + "(" + u.firstName + " " + u.lastName + ")");
-        data.setValue(r++, 1, c);
+        data.setValue(r, 0, u);
+        if (!males.contains(u)) {
+          data.setValue(r, 1, c);
+          data.setValue(r++, 2, 0);
+        }
+        else{
+          data.setValue(r, 1, 0);
+          data.setValue(r++, 2, c);
+        }
       }
     }
 
@@ -971,7 +980,7 @@ public class MonitoringManager {
 
     DataTable data = DataTable.create();
     data.addColumn(AbstractDataTable.ColumnType.NUMBER, slot);
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, items);
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, answers);
     int r = 0;
     for (Integer age : slotValues) {
       data.addRow();
