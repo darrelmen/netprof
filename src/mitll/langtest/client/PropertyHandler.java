@@ -44,6 +44,8 @@ public class PropertyHandler {
   private static final String REPEATS = "repeats";
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
   private static final String EXERCISE_TITLE = "exercise_title";
+  private static final String TEACHER_CLASS = "class";
+  private static final String LESSON = "lesson";
   private static final String TEACHER_PARAM = TEACHER_VIEW;
   private static final String ADMIN_PARAM = "admin";
 
@@ -77,8 +79,8 @@ public class PropertyHandler {
   private String nameForItem = "Item";
   private String nameForAnswer = "Recording";
   private String nameForRecorder = "Speaker";
-  private String teacherClass = "Speaker";
-  private String lesson = "Speaker";
+  private String teacherClass = "class";
+  private String lesson = "lesson";
   private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
   private float screenPortion;
@@ -134,12 +136,28 @@ public class PropertyHandler {
 
     String exercise_title = Window.Location.getParameter(EXERCISE_TITLE);
     if (exercise_title != null) {
-      //if (goodwave == null) goodwave = "true";
       this.exercise_title = exercise_title;
     }
     else {
       this.exercise_title = DEFAULT_EXERCISE;
     }
+
+    String tClass = Window.Location.getParameter(TEACHER_CLASS);
+    if (tClass != null) {
+      this.teacherClass = tClass;
+    }
+    else {
+     // this.exercise_title = DEFAULT_EXERCISE;
+    }
+
+    String lessonParam = Window.Location.getParameter(LESSON);
+    if (lessonParam != null) {
+      this.lesson = lessonParam;
+    }
+    else {
+      // this.exercise_title = DEFAULT_EXERCISE;
+    }
+
     String screenPortionParam =  Window.Location.getParameter("screenPortion");
     screenPortion = 1.0f;
     if (screenPortionParam != null) {
@@ -278,4 +296,7 @@ public class PropertyHandler {
   public String getNameForItem() { return nameForItem; }
   public String getNameForAnswer() { return nameForAnswer; }
   public String getNameForRecorder() { return nameForRecorder; }
+
+  public String getTeacherClass() { return teacherClass; }
+  public String getLesson() { return lesson; }
 }

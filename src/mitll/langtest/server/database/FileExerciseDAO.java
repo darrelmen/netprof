@@ -95,7 +95,6 @@ public class FileExerciseDAO implements ExerciseDAO {
         if (!file.exists()) {
           if (count++ < 5) logger.debug("can't find audio file " + file.getAbsolutePath());
         } else {
-          audioConversion.ensureWriteMP3(audioRef,installPath);
           Exercise exercise = new Exercise("repeat", displayName, content, ensureForwardSlashes(audioRef), arabic, english);
           exercises.add(exercise);
         }
@@ -226,19 +225,6 @@ public class FileExerciseDAO implements ExerciseDAO {
     String content = getContent(arabic, translit, english);
     String fastAudioRef = mediaDir + File.separator+"media"+File.separator+name+File.separator+ FAST + ".wav";
     String slowAudioRef = mediaDir + File.separator+"media"+File.separator+name+File.separator+ SLOW + ".wav";
-    AudioConversion audioConversion = new AudioConversion();
-
-    for (String audioRef : new String[]{fastAudioRef,slowAudioRef}) {
-/*      File file = new File(audioRef);
-      if (!file.exists()) {
-        file = new File(installPath,audioRef);
-      }
-      if (!file.exists()) {
-       // if (count++ < 5) logger.debug("can't find audio file " + file.getAbsolutePath());
-      } else {*/
-        audioConversion.ensureWriteMP3(audioRef,installPath);
-  //    }
-    }
 
     return new Exercise("repeat", displayName, content,
         ensureForwardSlashes(fastAudioRef), ensureForwardSlashes(slowAudioRef), arabic, english);
