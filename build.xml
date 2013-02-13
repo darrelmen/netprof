@@ -41,6 +41,12 @@
         <pathelement location="war/WEB-INF/lib/javamelody-1.42.0.jar"/>
         <pathelement location="war/WEB-INF/lib/jrobin-1.5.9.jar"/>
         <pathelement location="war/WEB-INF/lib/gwt-visualization.jar"/>
+        <pathelement location="war/WEB-INF/lib/poi-3.9-20121203.jar"/>
+        <pathelement location="war/WEB-INF/lib/poi-ooxml-3.9-20121203.jar"/>
+        <pathelement location="war/WEB-INF/lib/poi-ooxml-schemas-3.9-20121203.jar"/>
+        <pathelement location="war/WEB-INF/lib/stax-api-1.0.1.jar"/>
+        <pathelement location="war/WEB-INF/lib/xmlbeans-2.3.0.jar"/>
+        <pathelement location="war/WEB-INF/lib/dom4j-1.6.1.jar"/>
     </path>
     <target name="init" depends="clean">
         <mkdir dir="war/WEB-INF/classes"/>
