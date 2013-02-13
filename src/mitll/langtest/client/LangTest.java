@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -25,6 +26,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
@@ -66,6 +68,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int EAST_WIDTH = 90;
 
   public static final String LANGTEST_IMAGES = "langtest/images/";
+  private DataCollectAdmin dataCollectAdmin;
 
   private Panel currentExerciseVPanel = new VerticalPanel();
   private ListInterface exerciseList;
@@ -113,6 +116,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Initially the flash record player is put in the center of the DockLayout
    */
   public void onModuleLoad2() {
+    if (props.isDataCollectAdminView()) {
+      doDataCollectAdminView();
+      return;
+    }
     // Load the visualization api, passing the onLoadCallback to be called
     // when loading is done.
     VisualizationUtils.loadVisualizationApi(new Runnable() {
@@ -122,7 +129,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     userManager = new UserManager(this,service, isCollectAudio());
     resultManager = new ResultManager(service, this);
-    boolean isGrading = props.isGrading();
     monitoringManager = new MonitoringManager(service, props);
     boolean usualLayout = props.getExercise_title() == null;
     final DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
@@ -140,7 +146,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // header/title line
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
     HTML title = new HTML("<h1>" + props.getAppTitle() + "</h1>");
-    browserCheck.getBrowserAndVersion();
+   // browserCheck.getBrowserAndVersion();
     hp.addEast(getLogout(), eastWidth);
     hp.add(title);
 
@@ -154,10 +160,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     // set up center panel, initially with flash record panel
 
-    if (props.isTeacherView()) {
-
-    }
-    else if (usualLayout) {
+    if (usualLayout) {
       ScrollPanel sp = new ScrollPanel();
       sp.add(currentExerciseVPanel);
       widgets.add(sp);
@@ -179,18 +182,67 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
 
     // set up left side exercise list
-    makeExerciseList(exerciseListPanel, isGrading);
+    makeExerciseList(exerciseListPanel, props.isGrading());
+
+    setPageTitle();
+    browserCheck.checkForCompatibleBrowser();
+    setupSoundManager();
 
     modeSelect();
+  }
 
-    browserCheck.checkForCompatibleBrowser();
-
-    setupSoundManager();
+  private void setPageTitle() {
     Element elementById = DOM.getElementById("title-tag");   // set the page title to be consistent
     if (elementById != null) {
       elementById.setInnerText(props.getAppTitle());
     }
   }
+
+  private void doDataCollectAdminView() {
+    //ScrollPanel sp = new ScrollPanel();
+    VerticalPanel vp = new VerticalPanel();
+    vp.addStyleName("grayColor");
+    HTML title = new HTML("<h2>" + props.getAppTitle() + "</h2>");
+    title.addStyleName("darkerBlueColor");
+    title.addStyleName("grayColor");
+    vp.add(title);
+//    sp.add(title);
+    //vp.add(sp);
+    //sp.setWidth(Window.getClientWidth() -50 + "px");
+    //sp.setHeight(Window.getClientHeight() -50 + "px");
+    //sp.add(currentExerciseVPanel);
+    vp.add(currentExerciseVPanel);
+    userManager = new UserManager(this,service, false);
+    dataCollectAdmin = new DataCollectAdmin(userManager,service);
+    dataCollectAdmin.makeDataCollectNewSiteForm(currentExerciseVPanel);
+
+
+    FlowPanel fp = new FlowPanel();
+    fp.getElement().getStyle().setFloat(Style.Float.LEFT);
+    SimplePanel w = new SimplePanel();
+    w.setWidth("50px");
+    w.setHeight("50px");
+    fp.add(w);
+    fp.add(vp);
+    SimplePanel w2 = new SimplePanel();
+    w2.setWidth("50px");
+    w2.setHeight("50px");
+    fp.add(w2);
+    RootPanel.get().add(fp);
+
+    browserCheck.checkForCompatibleBrowser();
+    userManager.teacherLogin();
+  }
+/*
+
+  private void makeDataCollectNewSiteForm(Panel currentExerciseVPanel) {
+
+
+    // form.setAction("url");
+
+    dataCollectAdmin.makeDataCollectNewSiteForm(currentExerciseVPanel);
+  }
+*/
 
   private void setupSoundManager() {
     soundManager = new SoundManagerStatic();
@@ -437,7 +489,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #modeSelect()
    */
   public void login() {
-    if (props.isDataCollectMode()) userManager.teacherLogin();
+    if (props.isDataCollectMode() || props.isTeacherView()) userManager.teacherLogin();
     else userManager.login();
   }
 
@@ -452,18 +504,22 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
-    setFactory();
+    if (props.isDataCollectAdminView()) {
+      // go get list of current deployed sites
+    } else {
+      setFactory();
 
-    if (!props.isArabicTextDataCollect() && props.isCollectAudio()) {
-      flashRecordPanel.initFlash();
-    }
-
-    if (userID != lastUser) {
-      System.out.println("gotUser : " + userID + " vs " + lastUser);
-      if (props.isArabicTextDataCollect() || !props.isCollectAudio() || flashRecordPanel.gotPermission()) {
-        exerciseList.getExercises(userID);
+      if (!props.isArabicTextDataCollect() && props.isCollectAudio()) {
+        flashRecordPanel.initFlash();
       }
-      lastUser = userID;
+
+      if (userID != lastUser) {
+        System.out.println("gotUser : " + userID + " vs " + lastUser);
+        if (props.isArabicTextDataCollect() || !props.isCollectAudio() || flashRecordPanel.gotPermission()) {
+          exerciseList.getExercises(userID);
+        }
+        lastUser = userID;
+      }
     }
   }
 
