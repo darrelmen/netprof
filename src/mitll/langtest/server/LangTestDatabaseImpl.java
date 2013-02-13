@@ -4,9 +4,12 @@ import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.ExcelImport;
+import mitll.langtest.server.database.SiteDAO;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.DTWScoring;
@@ -19,13 +22,23 @@ import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultsAndGrades;
 import mitll.langtest.shared.Session;
+import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -87,6 +100,100 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       .concurrencyLevel(4)
       .maximumSize(10000)
       .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();
+
+  @Override
+  protected void service(HttpServletRequest request,
+                         HttpServletResponse response) throws ServletException, IOException {
+    boolean isMultipart = ServletFileUpload.isMultipartContent(new ServletRequestContext(request));
+    if (isMultipart) {
+      Site site = getFileItem(request);
+      if (site == null) {
+        super.service(request, response);
+        return;
+      }
+
+      response.setContentType("text/plain");
+      if (!site.getExercises().isEmpty()) {
+        Site site1 = db.addSite(site);
+        if (site1 != null) {
+          response.getWriter().write("" + site1.id);
+        } else {
+          response.getWriter().write("Invalid file");
+        }
+      } else {
+        response.getWriter().write("Invalid file");
+      }
+   //   response.flushBuffer();
+    } else {
+      super.service(request, response);
+    }
+  }
+
+  private Site getFileItem(HttpServletRequest request) {
+    FileItemFactory factory = new DiskFileItemFactory();
+    ServletFileUpload upload = new ServletFileUpload(factory);
+    upload.setSizeMax(10000000);
+
+    try {
+      List<FileItem> items = upload.parseRequest(request);
+      Site site = new Site();
+      for (FileItem item : items) {
+        if (!item.isFormField()
+            && "upload".equals(item.getFieldName())) {
+
+          ExcelImport importer = new ExcelImport();
+          logger.info("got upload " +item);
+          List<Exercise> exercises = importer.readExercises(item.getInputStream());
+          site.setExercises(exercises);
+          site.setFeedback("Collection contains " +exercises.size() + " exercises and " + importer.getLessons().size()+ " lessons.");
+          site.exerciseFile = item.getName();
+          File dest = new File(configDir + File.separator + "uploads" + File.separator + System.currentTimeMillis() + "_" + site.exerciseFile);
+          boolean b = ((DiskFileItem) item).getStoreLocation().renameTo(dest);
+          if (!b) logger.error("couldn't rename tmp file " + ((DiskFileItem) item).getStoreLocation());
+          else {
+            logger.info("copied file to " + dest.getAbsolutePath());
+          }
+        }
+        else {
+          logger.info("got " + item);
+          String name = item.getFieldName();
+          if (name != null) {
+            if (name.endsWith("Name")) {
+              logger.info("name " + item.getString());
+              site.name = item.getString().trim();
+            } else if (name.endsWith("Language")) {
+              logger.info("Language " + item.getString());
+              site.language = item.getString().trim();
+            } else if (name.endsWith("Notes")) {
+              logger.info("Notes " + item.getString());
+              site.notes = item.getString().trim();
+            } else if (name.toLowerCase().endsWith("user")) {
+              logger.info("User " + item.getString());
+              site.creatorID = Long.parseLong(item.getString().trim());
+            }
+            else {
+              logger.info("Got " + item);
+            }
+          }
+        }
+      }
+      logger.info("made " +site);
+      return site;
+    } catch (Exception e) {
+      logger.error("Got " +e,e);
+      return null;
+    }
+  }
+
+  public Site getSiteByID(long id) {
+    return db.getSiteByID(id);
+  }
+
+  @Override
+  public boolean deploySite(long id) {
+    Site siteByID = db.getSiteByID(id);
+    return true;
+  }
 
   /**
    * @see mitll.langtest.client.exercise.ExerciseList#getExercises
@@ -478,10 +585,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param height  image dim
    * @param useScoreToColorBkg
    * @param background
-   * @param vocab
    * @param lmSentences
    * @param background
-   * @param vocab
    * @return PretestScore
    **/
   private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
