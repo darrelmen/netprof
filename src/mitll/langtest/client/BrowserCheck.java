@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BrowserCheck {
- // private final LangTest langTest;
   public String browser = "Unknown";
   public int ver = 0;
   public String version = "";
@@ -21,6 +20,7 @@ public class BrowserCheck {
   }
 
   public void checkForCompatibleBrowser() {
+    if (browser.equals("Unknown")) getBrowserAndVersion();
     Integer min = browserToVersion.get(browser);
     if (browser.equals("IE")) {
       //Window.alert("Your browser is " + browser + ".<br></br>We recommend using either Firefox, Safari, or Chrome.");
