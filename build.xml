@@ -98,6 +98,11 @@
       </jar>
     </target>
 
+    <target depends="build" name="warFarsi2">
+      <jar destfile="npFarsiData2.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,answers/**,audioimages/**,scoring/**,config/first/**,config/autoCRT/**,config/msa/**,config/english/**,config/levantine/**,config/pilot/**,config/dari/**,config/sudanese/**,config/egyptian/**,config/urdu/**,config/farsi/**">
+      </jar>
+    </target>
+
     <target depends="build" name="warArabicVLL">
         <jar destfile="npArabicVLL2.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,answers/**,audioimages/**,scoring/**,config/first/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
         </jar>
