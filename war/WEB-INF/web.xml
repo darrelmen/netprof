@@ -70,7 +70,8 @@
       <param-value>autocrt</param-value>
 -->
 <!--      <param-value>urdu</param-value>-->
-<param-value>english</param-value>
+<!--<param-value>english</param-value>-->
+<param-value>farsi2</param-value>
 <!--
       <param-value>levantine</param-value>
 -->
