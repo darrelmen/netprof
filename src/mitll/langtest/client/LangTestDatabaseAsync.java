@@ -82,4 +82,8 @@ public interface LangTestDatabaseAsync {
   void getResultCountsByGender(boolean useFile, AsyncCallback<Map<String, Map<Integer, Integer>>> async);
 
   void getDesiredCounts(boolean useFile, AsyncCallback<Map<String, Map<Integer, Map<Integer, Integer>>>> async);
+
+  void getSiteByID(long id, AsyncCallback<Site> async);
+
+  void deploySite(long id, AsyncCallback<Boolean> async);
 }
