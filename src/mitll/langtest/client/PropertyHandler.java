@@ -30,6 +30,7 @@ public class PropertyHandler {
   private static final String RECORD_TIMEOUT = "recordTimeout";
   private static final String TEACHER_VIEW = "teacherView";
   private static final String ADMIN_VIEW = "adminView";
+  private static final String DATA_COLLECT_ADMIN_VIEW = "dataCollectAdminView";
   private static final String MINIMAL_UI = "minimalUI";
   private static final String NAME_FOR_ITEM = "nameForItem";
   private static final String NAME_FOR_ANSWER = "nameForAnswer";
@@ -74,6 +75,7 @@ public class PropertyHandler {
   private boolean dataCollectMode;
   private boolean collectAudio = true;
   private boolean teacherView = false;
+  private boolean dataCollectAdminView = false;
   private boolean adminView = true;
   private boolean minimalUI = false;
   private String nameForItem = "Item";
@@ -95,27 +97,33 @@ public class PropertyHandler {
     for (Map.Entry<String, String> kv : props.entrySet()) {
       String key = kv.getKey();
       String value = kv.getValue();
-      if (key.equals(GRADING_PROP)) grading = Boolean.parseBoolean(value);
-      else if (key.equals(ENGLISH_ONLY_MODE)) englishOnlyMode = Boolean.parseBoolean(value);
-      else if (key.equals(GOODWAVE_MODE)) goodwaveMode = Boolean.parseBoolean(value);
-      else if (key.equals(ARABIC_TEXT_DATA_COLLECT)) arabicTextDataCollect = Boolean.parseBoolean(value);
-      else if (key.equals(SHOW_TURK_TOKEN)) showTurkToken = Boolean.parseBoolean(value);
+      if (key.equals(GRADING_PROP)) grading = getBoolean(value);
+      else if (key.equals(ENGLISH_ONLY_MODE)) englishOnlyMode = getBoolean(value);
+      else if (key.equals(GOODWAVE_MODE)) goodwaveMode = getBoolean(value);
+      else if (key.equals(ARABIC_TEXT_DATA_COLLECT)) arabicTextDataCollect = getBoolean(value);
+      else if (key.equals(SHOW_TURK_TOKEN)) showTurkToken = getBoolean(value);
       else if (key.equals(APP_TITLE)) appTitle = value;
       else if (key.equals(SEGMENT_REPEATS)) segmentRepeats = Integer.parseInt(value);
-      else if (key.equals(READ_FROM_FILE)) readFromFile = Boolean.parseBoolean(value);
+      else if (key.equals(READ_FROM_FILE)) readFromFile = getBoolean(value);
       else if (key.equals(RELEASE_DATE)) releaseDate = value;
-      else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = Boolean.parseBoolean(value);
-      else if (key.equals(AUTO_CRT)) autocrt = Boolean.parseBoolean(value);
-      else if (key.equals(DEMO_MODE)) demoMode = Boolean.parseBoolean(value);
-      else if (key.equals(DATA_COLLECT_MODE)) dataCollectMode = Boolean.parseBoolean(value);
+      else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = getBoolean(value);
+      else if (key.equals(AUTO_CRT)) autocrt = getBoolean(value);
+      else if (key.equals(DEMO_MODE)) demoMode = getBoolean(value);
+      else if (key.equals(DATA_COLLECT_MODE)) dataCollectMode = getBoolean(value);
       else if (key.equals(RECORD_TIMEOUT)) recordTimeout = Integer.parseInt(value);
-      else if (key.equals(COLLECT_AUDIO)) collectAudio = Boolean.parseBoolean(value);
-      else if (key.equals(ADMIN_VIEW)) adminView = Boolean.parseBoolean(value);
-      else if (key.equals(MINIMAL_UI)) minimalUI = Boolean.parseBoolean(value);
+      else if (key.equals(COLLECT_AUDIO)) collectAudio = getBoolean(value);
+      else if (key.equals(ADMIN_VIEW)) adminView = getBoolean(value);
+      else if (key.equals(MINIMAL_UI)) minimalUI = getBoolean(value);
       else if (key.equals(NAME_FOR_ITEM)) nameForItem = value;
       else if (key.equals(NAME_FOR_ANSWER)) nameForAnswer = value;
       else if (key.equals(NAME_FOR_RECORDER)) nameForRecorder = value;
+      else if (key.equals(TEACHER_VIEW)) teacherView = getBoolean(value);
+      else if (key.equals(DATA_COLLECT_ADMIN_VIEW)) dataCollectAdminView = getBoolean(value);
     }
+  }
+
+  private boolean getBoolean(String value) {
+    return Boolean.parseBoolean(value);
   }
 
   /**
@@ -299,4 +307,8 @@ public class PropertyHandler {
 
   public String getTeacherClass() { return teacherClass; }
   public String getLesson() { return lesson; }
+
+  public boolean isDataCollectAdminView() {
+    return dataCollectAdminView;
+  }
 }
