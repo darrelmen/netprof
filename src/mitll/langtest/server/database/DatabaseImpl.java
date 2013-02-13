@@ -6,6 +6,7 @@ import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultsAndGrades;
 import mitll.langtest.shared.Session;
+import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
@@ -65,6 +66,8 @@ public class DatabaseImpl implements Database {
   public final AnswerDAO answerDAO = new AnswerDAO(this);
   private final GradeDAO gradeDAO = new GradeDAO(this);
   private final GraderDAO graderDAO = new GraderDAO(this);
+  private final SiteDAO siteDAO = new SiteDAO(this);
+
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
 
@@ -126,6 +129,7 @@ public class DatabaseImpl implements Database {
       //userDAO.dropUserTable(this);
 
       userDAO.createUserTable(this);
+      siteDAO.createTable(getConnection());
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
@@ -596,6 +600,10 @@ public class DatabaseImpl implements Database {
     return newList;
   }
 
+  public Site addSite(Site site) {
+    return siteDAO.addSite(site);
+  }
+
   private static class ResultAndGrade implements Comparable<ResultAndGrade> {
     private Result result;
     private List<Grade> grades = new ArrayList<Grade>();
@@ -810,18 +818,18 @@ public class DatabaseImpl implements Database {
     gradeDAO.changeGrade(toChange);
   }
 
-  public void addGrader(String login) {
+/*  public void addGrader(String login) {
     graderDAO.addGrader(login);
-  }
+  }*/
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#graderExists(String)
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#graderExists(String)
    * @param login
    * @return
    */
-  public boolean graderExists(String login) {
+/*  public boolean graderExists(String login) {
     return graderDAO.graderExists(login);
-  }
+  }*/
 
   public int userExists(String login) {
     return userDAO.userExists(login);
@@ -830,6 +838,8 @@ public class DatabaseImpl implements Database {
   public boolean isAnswerValid(int userID, Exercise exercise, int questionID, Database database) {
     return answerDAO.isAnswerValid(userID, exercise, questionID, database);
   }
+
+  public Site getSiteByID(long id) { return siteDAO.getSiteByID(id); }
 
   /**
    * TODO : worry about duplicate userid?
