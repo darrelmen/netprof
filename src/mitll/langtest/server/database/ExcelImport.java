@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -37,7 +38,16 @@ public class ExcelImport {
   public List<Exercise> readExercises(File file) {
     try {
       InputStream inp = new FileInputStream(file);//"Farsi_Curriculum_Glossary_vowelized_2013_02_04.xlsx");
+      return readExercises(inp);
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+    return new ArrayList<Exercise>();
+  }
 
+  public List<Exercise> readExercises(InputStream inp) {
+    try {
+      logger.info("reading from " +inp);
       Workbook wb = WorkbookFactory.create(inp);
       Sheet sheet = wb.getSheetAt(0);
      // System.out.println("sheet " +sheet.getSheetName());
@@ -81,7 +91,7 @@ public class ExcelImport {
             String week = getCell(next, 5);
             if (lesson == null || !lesson.chapter.equals(chapter)) {
               lesson = new Lesson(unit,chapter,week);
-              lessons.add(lesson);
+              getLessons().add(lesson);
             }
             String content = dao.getContent(arabic, translit, english);
             Exercise imported = new Exercise("import", "" + id++, content, false, true, english);
@@ -97,7 +107,7 @@ public class ExcelImport {
     } catch (InvalidFormatException e) {
       e.printStackTrace();
     }
-    for (Lesson l : lessons) {
+    for (Lesson l : getLessons()) {
       logger.debug("lesson " + l);
     }
     return exercises;
@@ -119,5 +129,9 @@ public class ExcelImport {
 
   public static void main(String [] arg) {
     new ExcelImport().readExercises(new File("Farsi_Curriculum_Glossary_vowelized_2013_02_04.xlsx"));
+  }
+
+  public List<Lesson> getLessons() {
+    return lessons;
   }
 }

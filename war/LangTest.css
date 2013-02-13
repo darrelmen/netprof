@@ -150,8 +150,12 @@ fieldset > legend {
 }
 
 .RecordPopup{
-  background-color: white;
+    background-color: white;
 }
+
+.backgroundWhite {
+     background-color: white;
+ }
 
 .Instruction {
     text-align: left;
@@ -166,6 +170,18 @@ fieldset > legend {
     color: #CC6600;
     font-size: 18px;
     font-weight: bold;
+}
+
+.blueColor {
+    color: #6192bb;
+}
+
+.darkerBlueColor {
+    color: #669dc6;
+}
+
+.grayColor {
+    background-color: #d4d1cc;
 }
 
 .correct {
@@ -319,4 +335,20 @@ fieldset > legend {
 
 #sm2-container.high_performance.swf_timedout {
     z-index: 99; /* try to stay on top */
+}
+
+.table-center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.demo-FormPanel {
+    background-color: #d6d3ce;
+    /*
+        border: 3px solid #999999;
+    */
+    padding: 5px;
+    /*
+        width: 150px;
+    */
 }

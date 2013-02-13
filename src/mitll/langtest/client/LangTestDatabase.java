@@ -73,6 +73,9 @@ public interface LangTestDatabase extends RemoteService {
 
   int userExists(String login);
 
+  Site getSiteByID(long id);
+  boolean deploySite(long id);
+
   // monitoring support
 
   Map<User, Integer> getUserToResultCount();
@@ -94,4 +97,5 @@ public interface LangTestDatabase extends RemoteService {
 
   Map<String, Map<Integer, Integer>> getResultCountsByGender(boolean useFile);
   Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts(boolean useFile);
+
 }
