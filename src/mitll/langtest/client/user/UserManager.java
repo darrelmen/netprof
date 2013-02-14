@@ -548,7 +548,7 @@ public class UserManager {
         }
         try {
           int age = Integer.parseInt(text);
-          //closeButton.setEnabled ((age > MIN_AGE && age < MAX_AGE) || age == TEST_AGE);
+          closeButton.setEnabled ((age > MIN_AGE && age < MAX_AGE) || age == TEST_AGE);
         } catch (NumberFormatException e) {
           closeButton.setEnabled(false);
         }
