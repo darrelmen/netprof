@@ -468,6 +468,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     vp.add(monitoring);
     monitoring.setVisible(props.isAdminView());
 
+    browserCheck.getBrowserAndVersion();
     // no click handler for this for now
     HTML statusLine = new HTML("<span><font size=-2>"+browserCheck.browser + " " +browserCheck.ver +" " +
         props.getReleaseDate()+"</font></span>");
