@@ -1,0 +1,2 @@
+serviceClass: mitll.langtest.client.LangTestDatabase
+path: BBEE26AE82789C2A01D08E8CAF7ACD3C.gwt.rpc
