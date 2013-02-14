@@ -29,13 +29,13 @@ public class SiteDAO extends DAO {
   }
 
   public Site addSite(Site site) {
-    return addSite(site.creatorID,site.name,site.language,site.notes,site.exerciseFile);
+    return addSite(site.creatorID,site.name,site.language,site.notes,site.exerciseFile,site.savedExerciseFile);
   }
-  public Site addSite(long creatorID, String name, String language, String notes, String file) {
+  public Site addSite(long creatorID, String name, String language, String notes, String file, String filePath) {
     long id = 0;
     try {
       Connection connection = database.getConnection();
-      String sql = "INSERT INTO site(creatorID,name,language,notes,file) VALUES(?,?,?,?,?)";
+      String sql = "INSERT INTO site(creatorID,name,language,notes,file,filepath) VALUES(?,?,?,?,?,?)";
 
 
       PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -45,6 +45,7 @@ public class SiteDAO extends DAO {
       statement.setString(i++, language);
       statement.setString(i++, notes);
       statement.setString(i++, file);
+      statement.setString(i++, filePath);
       int j = statement.executeUpdate();
 
       if (j != 1)
@@ -56,7 +57,7 @@ public class SiteDAO extends DAO {
       } else {
         System.err.println("huh? no key was generated?");
       }
-      Site site = new Site(id, creatorID, name, language, notes, file);
+      Site site = new Site(id, creatorID, name, language, notes, file,filePath);
       statement.close();
       database.closeConnection(connection);
 
@@ -89,7 +90,8 @@ public class SiteDAO extends DAO {
           String language = rs.getString(i++);
           String notes = rs.getString(i++);
           String file = rs.getString(i++);
-          sites.add(new Site(id, creatorID, name,language, notes,file));
+          String filePath = rs.getString(i++);
+          sites.add(new Site(id, creatorID, name,language, notes,file,filePath));
         }
         rs.close();
         statement.close();
@@ -104,7 +106,7 @@ public class SiteDAO extends DAO {
 
   public Site getSiteByID(long id) {
     for (Site s : getSites()) {
-      logger.info("checking " + s + " against " + id);
+      //logger.info("checking " + s + " against " + id);
       if (s.id == id) return s;
     }
     logger.error("couldn't find site with id " +id);
@@ -124,7 +126,8 @@ public class SiteDAO extends DAO {
         "name VARCHAR, " +
         "language VARCHAR, " +
         "notes VARCHAR, " +
-        "file VARCHAR" +
+        "file VARCHAR, " +
+        "filepath VARCHAR" +
         ")");
     boolean execute = statement.execute();
 //    if (!execute) logger.error("huh? didn't do create table?");

@@ -28,19 +28,26 @@ import java.util.List;
  * Time: 8:07 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExcelImport {
+public class ExcelImport implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(ExcelImport.class);
 
   private List<Exercise> exercises = new ArrayList<Exercise>();
   private List<Lesson> lessons = new ArrayList<Lesson>();
   private TeacherClass teacherClass;
+  private final String file;
 
+  public ExcelImport() { this.file = null;}
+  public ExcelImport(String file) { this.file = file;}
+  public List<Exercise> getRawExercises() {
+    if (exercises.isEmpty()) readExercises(new File(file));
+    return exercises;
+  }
   public List<Exercise> readExercises(File file) {
     try {
-      InputStream inp = new FileInputStream(file);//"Farsi_Curriculum_Glossary_vowelized_2013_02_04.xlsx");
+      InputStream inp = new FileInputStream(file);
       return readExercises(inp);
     } catch (FileNotFoundException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      logger.error("got "+e,e);
     }
     return new ArrayList<Exercise>();
   }
@@ -127,9 +134,9 @@ public class ExcelImport {
     return exercises;
   }
 
-  public static void main(String [] arg) {
+/*  public static void main(String [] arg) {
     new ExcelImport().readExercises(new File("Farsi_Curriculum_Glossary_vowelized_2013_02_04.xlsx"));
-  }
+  }*/
 
   public List<Lesson> getLessons() {
     return lessons;
