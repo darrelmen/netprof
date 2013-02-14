@@ -6,28 +6,19 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.FileUpload;
-import com.google.gwt.user.client.ui.FormHandler;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.FormSubmitCompleteEvent;
-import com.google.gwt.user.client.ui.FormSubmitEvent;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PasswordTextBox;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Site;
 
 public class DataCollectAdmin {
-  UserManager userManager;
-  LangTestDatabaseAsync service;
-  long siteID;
+  private UserManager userManager;
+  private LangTestDatabaseAsync service;
+  private long siteID;
   public DataCollectAdmin(UserManager userManager, LangTestDatabaseAsync service) {
     this.userManager = userManager;
     this.service = service;
@@ -167,7 +158,7 @@ public class DataCollectAdmin {
                     result.getFeedback() + "</h4>");
                  //   ", example exercise content :</h4>");
                 //w7.setHTML(result.example.getContent());
-                long siteID = result.id;
+                siteID = result.id;
               }
             });
           } catch (NumberFormatException e) {
@@ -192,7 +183,7 @@ public class DataCollectAdmin {
 
           @Override
           public void onSuccess(Boolean result) {
-            //To change body of implemented methods use File | Settings | File Templates.
+            Window.alert("Site deployed!");
           }
         });
       }
