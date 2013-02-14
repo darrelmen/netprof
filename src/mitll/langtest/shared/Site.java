@@ -25,13 +25,14 @@ public class Site implements IsSerializable {
   private String feedback; //  don't write to db
 
   public Site() {}
-  public Site(long id, long creatorID, String name, String language, String notes, String exerciseFile) {
+  public Site(long id, long creatorID, String name, String language, String notes, String exerciseFile, String filePath) {
     this.id = id;
     this.creatorID = creatorID;
     this.name = name;
     this.language = language;
     this.notes = notes;
     this.exerciseFile = exerciseFile;
+    this.savedExerciseFile = filePath;
   }
 
   public Collection<Exercise> getExercises() { return exercises; }
@@ -44,5 +45,7 @@ public class Site implements IsSerializable {
   public void setFeedback(String feedback) {
     this.feedback = feedback;
   }
-  public String toString() { return "id " + id + " name " +name + " lang " +language + " creatorID " +creatorID + " notes " +notes + " file " +exerciseFile;}
+
+  public String toString() { return "id " + id + " name " +name + " lang " +language + " creatorID " +creatorID +
+      " notes " +notes + " file " +exerciseFile + " path "+ savedExerciseFile;}
 }
