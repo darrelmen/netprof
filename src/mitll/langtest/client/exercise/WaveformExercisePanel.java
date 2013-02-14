@@ -61,6 +61,11 @@ public class WaveformExercisePanel extends ExercisePanel {
     audioPanel.onResize();
   }
 
+  /**
+   * @see ExercisePanel#addQuestionPrompt(com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.Exercise)
+   * @param promptInEnglish
+   * @return
+   */
   @Override
   protected String getQuestionPrompt(boolean promptInEnglish) {
     return getSpokenPrompt(promptInEnglish);
