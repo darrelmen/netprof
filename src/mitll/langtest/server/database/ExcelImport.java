@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class ExcelImport implements ExerciseDAO {
+  private static final List<String> EMPTY_LIST = Collections.emptyList();
   private static Logger logger = Logger.getLogger(ExcelImport.class);
 
   private List<Exercise> exercises = new ArrayList<Exercise>();
@@ -102,6 +104,8 @@ public class ExcelImport implements ExerciseDAO {
             }
             String content = dao.getContent(arabic, translit, english);
             Exercise imported = new Exercise("import", "" + id++, content, false, true, english);
+            imported.addQuestion(Exercise.FL, "Please record the sentence above.","", EMPTY_LIST);
+
             exercises.add(imported);
             lesson.addExercise(imported);
           }
