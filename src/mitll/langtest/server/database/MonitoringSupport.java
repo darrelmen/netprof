@@ -127,6 +127,7 @@ public class MonitoringSupport {
         totalTime += s.duration;
         total += s.numAnswers;
     }
+    if (total == 0) return 0l;
     return totalTime/total;
   }
 
