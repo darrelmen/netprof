@@ -229,6 +229,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       copy.setProperty("releaseDate",df.format(new Date()));
       copy.setProperty("lessonPlanFile",siteByID.exerciseFile);
       copy.setProperty("readFromFile","true");
+      copy.setProperty("dataCollect","true");
       copy.setProperty("dataCollectAdminView","false");
       copy.setProperty("h2Database","template");
       copy.store(new FileWriter(propFile),"");
@@ -343,6 +344,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     //logger.debug("usefile = " + useFile + " arabic data collect " + arabicDataCollect);
     List<Exercise> exercises;
     if (dataCollectMode) {
+      logger.debug("in data collect mode");
       if (biasTowardsUnanswered) {
         if (useOutsideResultCounts) {
           String outsideFileOverride = outsideFile;
@@ -359,6 +361,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         exercises = db.getExercisesFirstNInOrder(userID, useFile, firstNInOrder);
       }
       if (!collectAudio) {
+        logger.debug("*not* collecting audio, just text");
+
         for (Exercise e : exercises) {
           e.setRecordAnswer(false);
           e.setPromptInEnglish(false);
