@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+              http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5"
+         xmlns="http://java.sun.com/xml/ns/javaee">
+
+  <!-- Default page to serve -->
+  <welcome-file-list>
+    <welcome-file>LangTest.html</welcome-file>
+  </welcome-file-list>
+
+    <!-- setup java melody -->
+    <filter>
+        <filter-name>monitoring</filter-name>
+        <filter-class>net.bull.javamelody.MonitoringFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>monitoring</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <listener>
+        <listener-class>net.bull.javamelody.SessionListener</listener-class>
+    </listener>
+
+    <!-- setup security for java melody -->
+    <login-config>
+        <auth-method>BASIC</auth-method>
+        <realm-name>Monitoring</realm-name>
+    </login-config>
+    <security-role>
+        <role-name>access</role-name>
+    </security-role>
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Monitoring</web-resource-name>
+            <url-pattern>/monitoring/*</url-pattern>   <!-- note ending star to make it work on mtex -->
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>access</role-name>
+        </auth-constraint>
+        <!-- if SSL enabled (SSL and certificate must then be configured in the server)
+        <user-data-constraint>
+                <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+        -->
+    </security-constraint>
+
+  <servlet>
+    <servlet-name>databaseServlet</servlet-name>
+    <servlet-class>mitll.langtest.server.LangTestDatabaseImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>databaseServlet</servlet-name>
+    <url-pattern>/langtest/langtestdatabase</url-pattern>
+  </servlet-mapping>
+
+  <context-param>
+    <param-name>tomcatWriteDirectoryFullPath</param-name>
+    <param-value>answers</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>config</param-name>
+    <param-value>template</param-value>
+  </context-param>
+</web-app>
