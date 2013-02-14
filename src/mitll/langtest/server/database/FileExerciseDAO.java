@@ -39,6 +39,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   private static final String FAST = "fast";
   private static final String SLOW = "slow";
   private static final boolean TESTING = false;
+  private static final int MAX_ERRORS = 100;
 
   private List<Exercise> exercises;
   private final String mediaDir;
@@ -135,6 +136,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       logger.debug("using install path " + installPath + " lesson " + lessonPlanFile + " isurdu " +isUrdu);
       exercises = new ArrayList<Exercise>();
       Pattern pattern = Pattern.compile("^\\d+\\.(.+)");
+      int errors = 0;
       while ((line2 = reader.readLine()) != null) {
         count++;
        if (TESTING && count > 200) break;
@@ -142,21 +144,30 @@ public class FileExerciseDAO implements ExerciseDAO {
         Matcher matcher = pattern.matcher(line2.trim());
         boolean wordListOnly = matcher.matches();
 
-        Exercise exercise;
-        if (wordListOnly) {
-          String group = matcher.group(1);
-          exercise = getWordListExercise(group,""+count);//line2.trim());
-        }
-        else {
-          int length = line2.split("\\(").length;
-          boolean simpleFile = length == 2 && line2.split("\\(")[1].trim().endsWith(")");
-          exercise = simpleFile ?
-              getSimpleExerciseForLine(line2) :
-              getExerciseForLine(line2);
-        }
+        try {
+          Exercise exercise;
+          if (wordListOnly) {
+            String group = matcher.group(1);
+            exercise = getWordListExercise(group,""+count);
+          }
+          else {
+            int length = line2.split("\\(").length;
+            boolean simpleFile = length == 2 && line2.split("\\(")[1].trim().endsWith(")");
+            exercise = simpleFile ?
+                getSimpleExerciseForLine(line2) :
+                getExerciseForLine(line2);
+          }
 
-       // if (count < 10) logger.info("Got " + exercise);
-        exercises.add(exercise);
+          // if (count < 10) logger.info("Got " + exercise);
+          exercises.add(exercise);
+        } catch (Exception e) {
+          logger.error("Skipping line -- couldn't parse line #"+count + " : " +line2);
+          errors++;
+          if (errors > MAX_ERRORS) {
+            logger.error("too many errors, giving up...");
+            break;
+          }
+        }
       }
      // w.close();
       reader.close();
@@ -207,8 +218,6 @@ public class FileExerciseDAO implements ExerciseDAO {
    * <br></br>
    * pronz.MultiRefRepeatExercise$: nl0001_ams, nl0001_ams | reference, nl0001_ams | Female_01, nl0001_ams | Male_01, nl0001_ams | REF_MALE, nl0001_ams | STE-004M, nl0001_ams | STE-006F -> nl0001_ams -> FOREIGN_LANGUAGE_SENTENCE -> marHaba -> Hello.
    *
-   * @paramx installPath
-   * @paramx xaudioConversion
    * @param line2
    * @return
    */

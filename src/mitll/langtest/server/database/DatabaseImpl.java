@@ -199,11 +199,17 @@ public class DatabaseImpl implements Database {
       logger.error("huh? lesson plan file is null???", new Exception());
       return Collections.emptyList();
     }
-    if (exerciseDAO == null || useFile && exerciseDAO instanceof SQLExerciseDAO || !useFile && exerciseDAO instanceof FileExerciseDAO) {
-      this.exerciseDAO = makeExerciseDAO(useFile);
+    boolean isExcel = lessonPlanFile.endsWith(".xlsx");
+    if (exerciseDAO == null) {// || useFile && exerciseDAO instanceof SQLExerciseDAO || !useFile && exerciseDAO instanceof FileExerciseDAO) {
+      if (useFile && isExcel) {
+        this.exerciseDAO = new ExcelImport(lessonPlanFile);
+      }
+      else {
+        this.exerciseDAO = makeExerciseDAO(useFile);
+      }
     }
 
-    if (useFile) {
+    if (useFile && !isExcel) {
       ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, lessonPlanFile);
     }
     List<Exercise> rawExercises = exerciseDAO.getRawExercises();
