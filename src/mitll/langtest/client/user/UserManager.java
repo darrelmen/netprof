@@ -6,11 +6,16 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ListBox;
@@ -214,27 +219,46 @@ public class UserManager {
     SimplePanel spacer = new SimplePanel();
     spacer.setSize("20px", "5px");
     dialogVPanel.add(spacer);
-    dialogVPanel.add(new HTML("<i>(New users : fill in the fields below and click <b>register</b>.)</i>"));
+    dialogVPanel.add(new HTML("<i>New users : click on Registration below and fill in the fields.</i>"));
     SimplePanel spacer2 = new SimplePanel();
     spacer2.setSize("20px", "5px");
     dialogVPanel.add(spacer2);
 
-    dialogVPanel.add(new HTML("<b>First Name</b>"));
-    dialogVPanel.add(first);
-    dialogVPanel.add(new HTML("<b>Last Name</b>"));
-    dialogVPanel.add(last);
-    dialogVPanel.add(new HTML("<b>Native Lang (L1)</b>"));
-    dialogVPanel.add(nativeLang);
-    dialogVPanel.add(new HTML("<b>Dialect</b>"));
-    dialogVPanel.add(dialect);
-    dialogVPanel.add(new HTML("<b>Your age</b>"));
-    dialogVPanel.add(ageEntryBox);
-    dialogVPanel.add(new HTML("<br><b>Select gender</b>"));
-    dialogVPanel.add(genderPanel);
-    dialogVPanel.add(new HTML("<br><b>Select months of experience in this language</b>"));
-    dialogVPanel.add(experiencePanel);
+    VerticalPanel register = new VerticalPanel();
+    DisclosurePanel dp = new DisclosurePanel("Registration");
+    dp.setContent(register);
+    dp.setAnimationEnabled(true);
+    dp.addOpenHandler(new OpenHandler<DisclosurePanel>() {
+      @Override
+      public void onOpen(OpenEvent<DisclosurePanel> event) {
+        reg.setVisible(true);
+      }
+    });
+    dp.addCloseHandler(new CloseHandler<DisclosurePanel>() {
+      @Override
+      public void onClose(CloseEvent<DisclosurePanel> event) {
+        reg.setVisible(false);
+      }
+    });
+    dialogVPanel.add(dp);
+    register.add(new HTML("<b>First Name</b>"));
+    register.add(first);
+    register.add(new HTML("<b>Last Name</b>"));
+    register.add(last);
+    register.add(new HTML("<b>Native Lang (L1)</b>"));
+    register.add(nativeLang);
+    register.add(new HTML("<b>Dialect</b>"));
+    register.add(dialect);
+    register.add(new HTML("<b>Your age</b>"));
+    register.add(ageEntryBox);
+    register.add(new HTML("<b>Select gender</b>"));
+    register.add(genderPanel);
+    register.add(new HTML("<b>Select months of experience</b>"));
+    register.add(new HTML("<b>in this language</b>"));
+    register.add(experiencePanel);
 
     reg.setEnabled(true);
+    reg.setVisible(false);
     reg.getElement().setId("registerButton");
 
     reg.addClickHandler(new ClickHandler() {
