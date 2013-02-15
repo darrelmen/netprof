@@ -75,6 +75,7 @@ public interface LangTestDatabase extends RemoteService {
 
   Site getSiteByID(long id);
   boolean deploySite(long id);
+  List<Site> getSites();
 
   // monitoring support
 
