@@ -105,7 +105,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                          HttpServletResponse response) throws ServletException, IOException {
     boolean isMultipart = ServletFileUpload.isMultipartContent(new ServletRequestContext(request));
     if (isMultipart) {
-      Site site = getSite(request);
+      Site site = new SiteDeployer().getSite(request, configDir);
       if (site == null) {
         super.service(request, response);
         return;
@@ -128,63 +128,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  private Site getSite(HttpServletRequest request) {
-    FileItemFactory factory = new DiskFileItemFactory();
-    ServletFileUpload upload = new ServletFileUpload(factory);
-    upload.setSizeMax(10000000);
-
-    try {
-      List<FileItem> items = upload.parseRequest(request);
-      Site site = new Site();
-      for (FileItem item : items) {
-        if (!item.isFormField()
-            && "upload".equals(item.getFieldName())) {
-
-          ExcelImport importer = new ExcelImport();
-          logger.info("got upload " +item);
-          List<Exercise> exercises = importer.readExercises(item.getInputStream());
-          site.setExercises(exercises);
-          site.setFeedback("Collection contains " +exercises.size() + " exercises and " + importer.getLessons().size()+ " lessons.");
-          site.exerciseFile = item.getName();
-          File dest = new File(configDir + File.separator + "uploads" + File.separator + System.currentTimeMillis() + "_" + site.exerciseFile);
-          boolean b = ((DiskFileItem) item).getStoreLocation().renameTo(dest);
-          if (!b) logger.error("couldn't rename tmp file " + ((DiskFileItem) item).getStoreLocation());
-          else {
-            logger.info("copied file to " + dest.getAbsolutePath());
-            site.savedExerciseFile = dest.getAbsolutePath();
-          }
-        }
-        else {
-          logger.info("got " + item);
-          String name = item.getFieldName();
-          if (name != null) {
-            if (name.endsWith("Name")) {
-              logger.info("name " + item.getString());
-              site.name = item.getString().trim();
-            } else if (name.endsWith("Language")) {
-              logger.info("Language " + item.getString());
-              site.language = item.getString().trim();
-            } else if (name.endsWith("Notes")) {
-              logger.info("Notes " + item.getString());
-              site.notes = item.getString().trim();
-            } else if (name.toLowerCase().endsWith("user")) {
-              logger.info("User " + item.getString());
-              site.creatorID = Long.parseLong(item.getString().trim());
-            }
-            else {
-              logger.info("Got " + item);
-            }
-          }
-        }
-      }
-      logger.info("made " +site);
-      return site;
-    } catch (Exception e) {
-      logger.error("Got " +e,e);
-      return null;
-    }
-  }
-
   public Site getSiteByID(long id) {
     return db.getSiteByID(id);
   }
@@ -202,51 +145,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public boolean deploySite(long id) {
+ public boolean deploySite(long id) {
     Site siteByID = db.getSiteByID(id);
 
-    try {
-      File destDir = new File(configDir + File.separator + siteByID.name);
-      logger.info("sandbox loc for new site " +destDir);
-      FileUtils.copyDirectory(new File(configDir +File.separator +"template"), destDir);
-
-      File realPath = new File(siteByID.savedExerciseFile);
-      File destFile = new File(configDir + File.separator + siteByID.name + File.separator + "config" + File.separator + "template" + File.separator + siteByID.exerciseFile);
-      logger.info("sandbox loc for new file " +destFile);
-      FileUtils.copyFile(realPath, destFile);
-
-      Properties copy = new Properties();
-      File propFile = new File(configDir + File.separator + siteByID.name + File.separator + "config" + File.separator + "template" + File.separator + "config.properties");
-      FileInputStream inStream = new FileInputStream(propFile);
-      copy.load(inStream);
-      inStream.close();
-
-      for (String key : props.stringPropertyNames()) {
-          copy.setProperty(key,props.getProperty(key));
-      }
-      copy.setProperty("appTitle",siteByID.name);
-      SimpleDateFormat df = new SimpleDateFormat("MM/dd");
-      copy.setProperty("releaseDate",df.format(new Date()));
-      copy.setProperty("lessonPlanFile",siteByID.exerciseFile);
-      copy.setProperty("readFromFile","true");
-      copy.setProperty("dataCollect","true");
-      copy.setProperty("dataCollectAdminView","false");
-      copy.setProperty("h2Database","template");
-      copy.store(new FileWriter(propFile),"");
-      logger.info("copied prop file " + propFile);
-
-      String newSiteLoc = new File(getInstallPath()).getParent()+File.separator+siteByID.name;
-      File installLoc = new File(newSiteLoc);
-      logger.info("copying to install dir " + installLoc);
-
-      FileUtils.copyDirectory(destDir, installLoc);
-      logger.info("copied to install dir " + installLoc);
-    } catch (Exception e) {
-      logger.error("Got "+e,e);
-      return false;
-    }
-
-    return true;
+    return new SiteDeployer().deploySite(siteByID,configDir,getInstallPath());
   }
 
   /**
