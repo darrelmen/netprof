@@ -846,6 +846,8 @@ public class DatabaseImpl implements Database {
   }
 
   public Site getSiteByID(long id) { return siteDAO.getSiteByID(id); }
+  public List<Site> getDeployedSites() { return siteDAO.getDeployedSites(); }
+  public void deploy(Site site) { siteDAO.deploy(site); }
 
   /**
    * TODO : worry about duplicate userid?
