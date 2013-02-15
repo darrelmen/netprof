@@ -132,6 +132,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getSiteByID(id);
   }
 
+  @Override
+  public List<Site> getSites() {
+    return db.getDeployedSites();
+  }
+
   /**
    * Copy template to something named by site name
    * copy exercise file from media to site/config/template
@@ -148,7 +153,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
  public boolean deploySite(long id) {
     Site siteByID = db.getSiteByID(id);
 
-    return new SiteDeployer().deploySite(siteByID,configDir,getInstallPath());
+    boolean b = new SiteDeployer().deploySite(siteByID, configDir, getInstallPath());
+    if (b) {
+      db.deploy(siteByID);
+    }
+    else {
+      logger.warn("didn't deploy " + siteByID);
+    }
+    return b;
   }
 
   /**
