@@ -14,7 +14,6 @@ import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -22,7 +21,6 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
