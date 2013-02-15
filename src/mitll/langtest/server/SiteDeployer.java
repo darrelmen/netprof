@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -102,11 +103,13 @@ public class SiteDeployer {
    *
    *    then copy to install path/../name
    * @paramx xid
+   * @see LangTestDatabaseImpl#deploySite(long)
    * @return
    */
   public boolean deploySite( Site siteByID, String configDir, String installPath) {
     logger.info("deploying " + siteByID + " given config " + configDir + " and install path " + installPath);
     try {
+      long then = System.currentTimeMillis();
       File destDir = new File(configDir + File.separator + siteByID.name);
       destDir.mkdir();
       File destConfigDir = new File(destDir, "config");
@@ -127,7 +130,18 @@ public class SiteDeployer {
         else {
           File destLoc = new File(destDir, dir);
           if (file.isDirectory()) {
-            copyDir(file, destLoc);
+            if (dir.equals("WEB-INF")) {
+              FileUtils.copyDirectory(file, destLoc, new FileFilter() {
+                @Override
+                public boolean accept(File pathname) {
+                  return !pathname.getName().equals("pronz.jar");
+                }
+              });
+
+            }
+            else {
+              copyDir(file, destLoc);
+            }
           }
           else {
             copyFile(file, destLoc);
@@ -159,8 +173,12 @@ public class SiteDeployer {
       File installLoc = new File(newSiteLoc);
       logger.info("copying to install dir " + installLoc);
 
-      copyDir(destDir, installLoc);
-      logger.info("copied to install dir " + installLoc);
+      //copyDir(destDir, installLoc);
+      if (!destDir.renameTo(installLoc)) {
+        copyDir(destDir, installLoc);
+      }
+      long now = System.currentTimeMillis();
+      logger.info("copied to install dir " + installLoc + " took " + (now-then) + " millis.");
     } catch (Exception e) {
       logger.error("Got "+e,e);
       return false;
