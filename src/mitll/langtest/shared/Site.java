@@ -22,10 +22,27 @@ public class Site implements IsSerializable {
 
   public transient Collection<Exercise> exercises; // i.e. don't serialize
   public Exercise example; //  don't write to db
-  private String feedback; //  don't write to db
+  private String feedback;
+  private boolean deployed;
+  private long  creationDate;
 
   public Site() {}
-  public Site(long id, long creatorID, String name, String language, String notes, String exerciseFile, String filePath) {
+
+  /**
+   * @see mitll.langtest.server.database.SiteDAO#addSite
+   * @see mitll.langtest.server.database.SiteDAO#getSites()
+   * @param id
+   * @param creatorID
+   * @param name
+   * @param language
+   * @param notes
+   * @param exerciseFile
+   * @param filePath
+   * @param feedback
+   * @param deployed
+   * @param timestamp
+   */
+  public Site(long id, long creatorID, String name, String language, String notes, String exerciseFile, String filePath, String feedback, boolean deployed, long timestamp) {
     this.id = id;
     this.creatorID = creatorID;
     this.name = name;
@@ -33,6 +50,9 @@ public class Site implements IsSerializable {
     this.notes = notes;
     this.exerciseFile = exerciseFile;
     this.savedExerciseFile = filePath;
+    this.feedback = feedback;
+    this.deployed = deployed;
+    this.creationDate = timestamp;
   }
 
   public Collection<Exercise> getExercises() { return exercises; }
@@ -48,4 +68,12 @@ public class Site implements IsSerializable {
 
   public String toString() { return "id " + id + " name " +name + " lang " +language + " creatorID " +creatorID +
       " notes " +notes + " file " +exerciseFile + " path "+ savedExerciseFile;}
+
+  public boolean isDeployed() {
+    return deployed;
+  }
+
+/*  public void setDeployed(boolean deployed) {
+    this.deployed = deployed;
+  }*/
 }
