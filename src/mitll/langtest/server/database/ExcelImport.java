@@ -40,8 +40,11 @@ public class ExcelImport implements ExerciseDAO {
 
   public ExcelImport() { this.file = null;}
   public ExcelImport(String file) { this.file = file;}
+
   public List<Exercise> getRawExercises() {
-    if (exercises.isEmpty()) readExercises(new File(file));
+    synchronized (this) {
+      if (exercises.isEmpty()) readExercises(new File(file));
+    }
     return exercises;
   }
   public List<Exercise> readExercises(File file) {
