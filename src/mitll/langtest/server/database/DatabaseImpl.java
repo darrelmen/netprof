@@ -1,41 +1,11 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.CountAndGradeID;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Grade;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.ResultsAndGrades;
-import mitll.langtest.shared.Session;
-import mitll.langtest.shared.Site;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
 import org.apache.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Note with H2 that :  <br></br>
