@@ -7,7 +7,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.ExcelImport;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.DTWScoring;
@@ -24,13 +23,8 @@ import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.disk.DiskFileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
@@ -39,7 +33,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -105,14 +98,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                          HttpServletResponse response) throws ServletException, IOException {
     boolean isMultipart = ServletFileUpload.isMultipartContent(new ServletRequestContext(request));
     if (isMultipart) {
-      Site site = new SiteDeployer().getSite(request, configDir);
+      SiteDeployer siteDeployer = new SiteDeployer();
+      Site site = siteDeployer.getSite(request, configDir);
       if (site == null) {
         super.service(request, response);
         return;
       }
 
       response.setContentType("text/plain");
-      if (!site.getExercises().isEmpty()) {
+      if (!siteDeployer.checkName(site) || db.siteExists(site)) {
+        response.getWriter().write("Name in use or invalid.");
+      }
+      else if (!site.getExercises().isEmpty()) {
         Site site1 = db.addSite(site);
         if (site1 != null) {
           response.getWriter().write("" + site1.id);
@@ -146,14 +143,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *    - lesson plan file
    *
    *    then copy to install path/../name
+   *
    * @param id
+   * @param name
+   * @param language
+   * @param notes
    * @return
    */
   @Override
- public boolean deploySite(long id) {
+ public boolean deploySite(long id, String name, String language, String notes) {
     Site siteByID = db.getSiteByID(id);
 
-    boolean b = new SiteDeployer().deploySite(siteByID, configDir, getInstallPath());
+    SiteDeployer siteDeployer = new SiteDeployer();
+
+    siteByID  = db.updateSite(siteByID,name,language,notes);
+    if (!siteDeployer.isValidName(siteByID,getInstallPath())) {
+      return false;
+    }
+    boolean b = siteDeployer.deploySite(siteByID, configDir, getInstallPath());
     if (b) {
       db.deploy(siteByID);
     }
@@ -942,7 +949,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     HttpServletRequest threadLocalRequest = getThreadLocalRequest();
     if (threadLocalRequest == null) {
-      logger.error("null local req");
+      logger.error("getInstallPath null local req");
       return "";
     }
     String realContextPath = context.getRealPath(threadLocalRequest.getContextPath());

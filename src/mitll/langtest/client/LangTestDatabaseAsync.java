@@ -85,7 +85,7 @@ public interface LangTestDatabaseAsync {
 
   void getSiteByID(long id, AsyncCallback<Site> async);
 
-  void deploySite(long id, AsyncCallback<Boolean> async);
+  void deploySite(long id, String name, String language, String notes, AsyncCallback<Boolean> async);
 
   void getSites(AsyncCallback<List<Site>> async);
 }
