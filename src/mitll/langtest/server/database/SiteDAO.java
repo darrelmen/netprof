@@ -22,6 +22,7 @@ import java.util.List;
  */
 public class SiteDAO extends DAO {
   private static Logger logger = Logger.getLogger(SiteDAO.class);
+  private static final boolean DROP_TABLE = true;
 
   private boolean debug = false;
 
@@ -125,11 +126,31 @@ public class SiteDAO extends DAO {
     return null;
   }
 
+  public Site getSiteWithName(String name) {
+    for (Site s : getDeployedSites()) {
+      if (s.name.equals(name)) return s;
+    }
+    logger.debug("couldn't find site with name " + name);
+    return null;
+  }
+
+  public Site updateSite(Site site, String name, String lang, String notes) {
+    if (site.name.equals(name) && site.language.equals(lang) && site.notes.equals(notes)) return site;
+    else {
+      site.name = name;
+      site.language = lang;
+      site.notes = notes;
+      if (getSiteWithName(name) != null) return null;
+
+      updateSiteInDB(site,name,lang,notes);
+      return site;
+    }
+  }
+
   public List<Site> getDeployedSites() {
     List<Site> sites = new ArrayList<Site>();
 
     for (Site s : getSites()) {
-      //logger.info("checking " + s + " against " + id);
       if (s.isDeployed()) sites.add(s);
     }
     //logger.info("deployed num = " +sites.size());
@@ -161,6 +182,35 @@ public class SiteDAO extends DAO {
     }
   }
 
+  private void updateSiteInDB(Site toChange, String name, String lang, String notes) {
+    try {
+      Connection connection = database.getConnection();
+      PreparedStatement statement;
+
+      String sql = "UPDATE site " +
+          "SET " +
+          "name='" + name+ "' " +
+          "language='" + lang+ "' " +
+          "notes='" + notes+ "' " +
+          "WHERE id=" + toChange.id;
+      logger.debug("update " + toChange );
+      statement = connection.prepareStatement(sql);
+
+      int i = statement.executeUpdate();
+
+      logger.debug("UPDATE " + i + " with " + sql);
+      if (i == 0) {
+        logger.error("huh? didn't update " + toChange);
+      }
+
+      statement.close();
+      database.closeConnection(connection);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+
   /**
    *       String sql = "INSERT INTO site(creatorID,name,language,notes,file) VALUES(?,?,?,?,?)";
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs()
@@ -168,7 +218,7 @@ public class SiteDAO extends DAO {
    * @throws SQLException
    */
   public void createTable(Connection connection) throws SQLException {
-   // drop(connection);
+    if (DROP_TABLE) drop(connection);
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
         "site (id IDENTITY, " +
         "creatorID INT, " +
