@@ -132,7 +132,7 @@ public class SiteDAO extends DAO {
       //logger.info("checking " + s + " against " + id);
       if (s.isDeployed()) sites.add(s);
     }
-    logger.info("deployed num = " +sites.size());
+    //logger.info("deployed num = " +sites.size());
     return sites;
   }
 
@@ -159,7 +159,6 @@ public class SiteDAO extends DAO {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    //return new CountAndGradeID(getCount(), id);
   }
 
   /**
@@ -169,7 +168,7 @@ public class SiteDAO extends DAO {
    * @throws SQLException
    */
   public void createTable(Connection connection) throws SQLException {
-    //drop(connection);
+   // drop(connection);
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
         "site (id IDENTITY, " +
         "creatorID INT, " +
@@ -183,9 +182,6 @@ public class SiteDAO extends DAO {
         "creationDate TIMESTAMP " +
         ")");
     boolean execute = statement.execute();
-
-
-//    if (!execute) logger.error("huh? didn't do create table?");
     statement.close();
 
     int numColumns = getNumColumns(connection, "site");
