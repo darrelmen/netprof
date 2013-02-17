@@ -74,7 +74,7 @@ public interface LangTestDatabase extends RemoteService {
   int userExists(String login);
 
   Site getSiteByID(long id);
-  boolean deploySite(long id);
+  boolean deploySite(long id, String name, String language, String notes);
   List<Site> getSites();
 
   // monitoring support
