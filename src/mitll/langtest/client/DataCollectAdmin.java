@@ -12,6 +12,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -420,6 +421,7 @@ public class DataCollectAdmin extends PagerTable {
           @Override
           public void onSuccess(Boolean result) {
             if (!result) Window.alert("Please choose another name : " +siteName.getText() + " exists or is invalid.");
+
             pleaseWait.hide();
             deployButton.setEnabled(true);
             dialogBox.hide();
