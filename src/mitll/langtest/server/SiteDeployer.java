@@ -175,6 +175,7 @@ public class SiteDeployer {
 
       //copyDir(destDir, installLoc);
       if (!destDir.renameTo(installLoc)) {
+        logger.debug("had to do copy dir to " +installLoc);
         copyDir(destDir, installLoc);
       }
       long now = System.currentTimeMillis();
