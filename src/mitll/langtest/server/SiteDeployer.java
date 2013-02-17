@@ -17,6 +17,7 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -215,6 +216,7 @@ public class SiteDeployer {
         copyDir(destDir, installLoc);
       }
       long now = System.currentTimeMillis();
+
       logger.info("copied to install dir " + installLoc + " took " + (now-then) + " millis.");
     } catch (Exception e) {
       logger.error("Got "+e,e);
