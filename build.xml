@@ -47,6 +47,7 @@
         <pathelement location="war/WEB-INF/lib/stax-api-1.0.1.jar"/>
         <pathelement location="war/WEB-INF/lib/xmlbeans-2.3.0.jar"/>
         <pathelement location="war/WEB-INF/lib/dom4j-1.6.1.jar"/>
+        <pathelement location="war/WEB-INF/lib/commons-fileupload-1.2.2.jar"/>
     </path>
     <target name="init" depends="clean">
         <mkdir dir="war/WEB-INF/classes"/>
@@ -95,6 +96,11 @@
 
     <target depends="build" name="warArabicVLL">
         <jar destfile="npArabicVLL2.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,answers/**,audioimages/**,scoring/**,config/first/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+        </jar>
+    </target>
+
+    <target depends="build" name="dataCollectAdmin">
+        <jar destfile="dataCollectAdmin.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,WEB-INF/lib/mira.jar,media/**,config/dataCollectAdmin/uploads/**,config/pilot/**,answers/**,fastAndSlowRef/**,audioimages/**,scoring/**,config/first/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
         </jar>
     </target>
 
