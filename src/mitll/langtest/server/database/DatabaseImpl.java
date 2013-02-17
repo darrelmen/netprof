@@ -576,9 +576,6 @@ public class DatabaseImpl implements Database {
     return newList;
   }
 
-  public Site addSite(Site site) {
-    return siteDAO.addSite(site);
-  }
 
   private static class ResultAndGrade implements Comparable<ResultAndGrade> {
     private Result result;
@@ -815,9 +812,18 @@ public class DatabaseImpl implements Database {
     return answerDAO.isAnswerValid(userID, exercise, questionID, database);
   }
 
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @param site
+   * @return
+   */
+  public Site addSite(Site site) { return siteDAO.addSite(site);  }
+  public boolean siteExists(Site site) { return siteDAO.getSiteWithName(site.name) != null;  }
   public Site getSiteByID(long id) { return siteDAO.getSiteByID(id); }
   public List<Site> getDeployedSites() { return siteDAO.getDeployedSites(); }
   public void deploy(Site site) { siteDAO.deploy(site); }
+  public Site updateSite(Site site, String name, String lang, String notes) { return siteDAO.updateSite(site,name,lang,notes); }
 
   /**
    * TODO : worry about duplicate userid?

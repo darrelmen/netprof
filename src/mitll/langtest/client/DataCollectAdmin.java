@@ -1,26 +1,17 @@
 package mitll.langtest.client;
 
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.LoadEvent;
-import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -29,24 +20,16 @@ import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.AbstractDataProvider;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.Grade;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.Site;
 
-import java.util.Collection;
 import java.util.List;
 
 public class DataCollectAdmin extends PagerTable {
@@ -123,7 +106,7 @@ public class DataCollectAdmin extends PagerTable {
       @Override
       public SafeHtml getValue(Site answer) {
         SafeHtmlBuilder sb = new SafeHtmlBuilder();
-        sb.appendHtmlConstant("<a href='" + Window.Location.getProtocol() + "//"+Window.Location.getHost() +"/"+answer.name +
+        sb.appendHtmlConstant(getLinkPrefix(answer) +
             "' target='_blank'>");
         sb.appendEscaped(answer.name);
         sb.appendHtmlConstant("</a>");
@@ -132,6 +115,23 @@ public class DataCollectAdmin extends PagerTable {
     };
 
     table.addColumn(url, "Site URL");
+
+
+    Column<Site, SafeHtml> url2 = new Column<Site, SafeHtml>(
+        new ClickableSafeHtmlCell()) {
+      @Override
+      public SafeHtml getValue(Site answer) {
+        SafeHtmlBuilder sb = new SafeHtmlBuilder();
+        sb.appendHtmlConstant(getLinkPrefix(answer) + "?admin"+
+            "' target='_blank'>");
+        sb.appendEscaped(answer.name);
+        sb.appendHtmlConstant("</a>");
+        return sb.toSafeHtml();
+      }
+    };
+
+    table.addColumn(url2, "Site Monitoring URL");
+
     table.getColumnSortList().push(name);
 
     final ListDataProvider<Site> provider = createProvider(table);
@@ -145,6 +145,10 @@ public class DataCollectAdmin extends PagerTable {
     this.provider = provider;
     this.table = table;
     return pagerAndTable;
+  }
+
+  private String getLinkPrefix(Site answer) {
+    return "<a href='" + Window.Location.getProtocol() + "//" + Window.Location.getHost() + "/" + answer.name;
   }
 
   private class ClickableSafeHtmlCell extends AbstractCell<SafeHtml> {
@@ -260,15 +264,16 @@ public class DataCollectAdmin extends PagerTable {
     languageBox.addStyleName("blueColor");
 */
 
-    final TextBox tb3 = new TextBox();
-    tb3.setName("siteNotes");
+    final TextBox notesBox = new TextBox();
+    notesBox.setVisibleLength(50);
+    notesBox.setName("siteNotes");
     HTML w3 = new HTML("<h3>Step 3: Add any notes for this upload.</h3>");
     w3.addStyleName("blueColor");
 
     panel.add(w3);
-    panel.add(tb3);
+    panel.add(notesBox);
 /*
-    tb3.addStyleName("blueColor");
+    notesBox.addStyleName("blueColor");
 */
      // Create a FileUpload widget.
     final FileUpload upload = new FileUpload();
@@ -341,10 +346,12 @@ public class DataCollectAdmin extends PagerTable {
         // we can get the result text here (see the FormPanel documentation for
         // further explanation).
         deployButton.setEnabled(false);
-        submit.setEnabled(false);
 
         String results = event.getResults();
-        if (results.contains("Invalid")) {
+        if (results.contains("Invalid") || results.contains("invalid")) {
+          if (results.startsWith("<")) {
+            results = results.split(">")[1].split("<")[0];
+          }
           Window.alert(results);
         } else {
           if (results.startsWith("<")) {
@@ -353,6 +360,9 @@ public class DataCollectAdmin extends PagerTable {
           try {
             long id = 0;
             id = Long.parseLong(results.trim());
+
+            submit.setEnabled(false);
+
             service.getSiteByID(id,new AsyncCallback<Site>() {
               @Override
               public void onFailure(Throwable caught) {
@@ -400,7 +410,7 @@ public class DataCollectAdmin extends PagerTable {
         pleaseWait.add(new HTML("Please wait while site deploys..."));
         // this causes the image to be loaded into the DOM
         pleaseWait.center();
-        service.deploySite(siteID, new AsyncCallback<Boolean>() {
+        service.deploySite(siteID, siteName.getText(), languageBox.getText(), notesBox.getText() , new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
             deployButton.setEnabled(true);
@@ -409,6 +419,7 @@ public class DataCollectAdmin extends PagerTable {
 
           @Override
           public void onSuccess(Boolean result) {
+            if (!result) Window.alert("Please choose another name : " +siteName.getText() + " exists or is invalid.");
             pleaseWait.hide();
             deployButton.setEnabled(true);
             dialogBox.hide();
