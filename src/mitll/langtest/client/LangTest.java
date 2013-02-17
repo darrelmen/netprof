@@ -199,7 +199,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void doDataCollectAdminView() {
-    //ScrollPanel sp = new ScrollPanel();
+    setPageTitle();
+
     VerticalPanel vp = new VerticalPanel();
     vp.addStyleName("grayColor");
     HTML title = new HTML("<h2>" + props.getAppTitle() + "</h2>");
