@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class SiteDAO extends DAO {
   private static Logger logger = Logger.getLogger(SiteDAO.class);
-  private static final boolean DROP_TABLE = true;
+  private static final boolean DROP_TABLE = false;
 
   private boolean debug = false;
 
