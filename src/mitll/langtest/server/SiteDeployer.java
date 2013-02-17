@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 /**
  * Copies website as needed.
@@ -32,6 +33,39 @@ import java.util.Properties;
 public class SiteDeployer {
   private static Logger logger = Logger.getLogger(SiteDeployer.class);
 
+  /**
+   * @see LangTestDatabaseImpl#deploySite(long, String, String, String)
+   * @param site
+   * @param installPath
+   * @return
+   */
+  public boolean isValidName(Site site, String installPath) {
+    boolean valid = checkName(site);
+    if (!valid) {
+      logger.warn("Site name " + site.name + " not good in a url");
+      return valid;
+    }
+    File installDir = new File(installPath);
+
+    String newSiteLoc = installDir.getParent()+File.separator+site.name;
+    boolean exists = new File(newSiteLoc).exists();
+    if (exists) logger.warn("site " + newSiteLoc + " exists already.");
+    else logger.info("OK " +newSiteLoc + " doesn't exist.");
+    return !exists;
+  }
+
+  public boolean checkName(Site site) {
+    String validPattern = "\\w+";
+
+    return Pattern.matches(validPattern, site.name);
+  }
+
+  /**
+   * @see LangTestDatabaseImpl#service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @param request
+   * @param configDir
+   * @return
+   */
   public Site getSite(HttpServletRequest request, String configDir) {
     logger.debug("Getting site given config dir " + configDir);
     FileItemFactory factory = new DiskFileItemFactory();
@@ -86,6 +120,8 @@ public class SiteDeployer {
         }
       }
       logger.info("made " +site);
+
+
       return site;
     } catch (Exception e) {
       logger.error("Got " +e,e);
@@ -102,23 +138,24 @@ public class SiteDeployer {
    *    - lesson plan file
    *
    *    then copy to install path/../name
-   * @paramx xid
-   * @see LangTestDatabaseImpl#deploySite(long)
-   * @return
+   * @param toDeploy
+   * @param configDir
+   * @param installPath
+   * @see LangTestDatabaseImpl#deploySite
+   * @return true if successful
    */
-  public boolean deploySite( Site siteByID, String configDir, String installPath) {
-    logger.info("deploying " + siteByID + " given config " + configDir + " and install path " + installPath);
+  public boolean deploySite( Site toDeploy, String configDir, String installPath) {
+    logger.info("deploying " + toDeploy + " given config " + configDir + " and install path " + installPath);
     try {
       long then = System.currentTimeMillis();
-      File destDir = new File(configDir + File.separator + siteByID.name);
+      File destDir = new File(configDir + File.separator + toDeploy.name);
       destDir.mkdir();
       File destConfigDir = new File(destDir, "config");
       logger.info("sandbox loc for new site " +destDir);
       File srcTemplateConfigDir = new File(configDir + File.separator + "template" + File.separator + "config");
-     // logger.info("Copying from " +srcTemplateConfigDir + " to " +destConfigDir);
       copyDir(srcTemplateConfigDir,destConfigDir);
-      File realPath = new File(siteByID.savedExerciseFile);
-      File destFile = new File(destConfigDir, "template" + File.separator + siteByID.exerciseFile);
+      File realPath = new File(toDeploy.savedExerciseFile);
+      File destFile = new File(destConfigDir, "template" + File.separator + toDeploy.exerciseFile);
       logger.info("sandbox loc for new file " +destFile);
       copyFile(realPath, destFile);
       File installDir = new File(installPath);
@@ -158,10 +195,10 @@ public class SiteDeployer {
       copy.load(inStream);
       inStream.close();
 
-      copy.setProperty("appTitle",siteByID.name);
+      copy.setProperty("appTitle",toDeploy.name);
       SimpleDateFormat df = new SimpleDateFormat("MM/dd");
-      copy.setProperty("releaseDate",df.format(new Date()));
-      copy.setProperty("lessonPlanFile",siteByID.exerciseFile);
+      copy.setProperty("releaseDate", df.format(new Date()));
+      copy.setProperty("lessonPlanFile",toDeploy.exerciseFile);
       copy.setProperty("readFromFile","true");
       copy.setProperty("dataCollect","true");
       copy.setProperty("dataCollectAdminView","false");
@@ -169,11 +206,10 @@ public class SiteDeployer {
       copy.store(new FileWriter(propFile), "");
       logger.info("copied prop file " + propFile);
 
-      String newSiteLoc = installDir.getParent()+File.separator+siteByID.name;
+      String newSiteLoc = installDir.getParent()+File.separator+toDeploy.name;
       File installLoc = new File(newSiteLoc);
       logger.info("copying to install dir " + installLoc);
 
-      //copyDir(destDir, installLoc);
       if (!destDir.renameTo(installLoc)) {
         logger.debug("had to do copy dir to " +installLoc);
         copyDir(destDir, installLoc);
