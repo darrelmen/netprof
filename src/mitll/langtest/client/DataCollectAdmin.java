@@ -1,15 +1,26 @@
 package mitll.langtest.client;
 
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -42,6 +53,10 @@ public class DataCollectAdmin extends PagerTable {
   private UserManager userManager;
   private LangTestDatabaseAsync service;
   private long siteID;
+
+
+  private ListDataProvider<Site> provider;
+  private CellTable<Site> table;
 
   /**
    * @see mitll.langtest.client.LangTest#doDataCollectAdminView()
@@ -103,16 +118,20 @@ public class DataCollectAdmin extends PagerTable {
     exerciseFile.setSortable(true);
     table.addColumn(exerciseFile, "File");
 
-    TextColumn<Site> url = new TextColumn<Site>() {
+    Column<Site, SafeHtml> url = new Column<Site, SafeHtml>(
+        new ClickableSafeHtmlCell()) {
       @Override
-      public String getValue(Site answer) { return "<a href='" +GWT.getModuleBaseURL() +"/"+answer.name+
-          "'>" +answer.name+
-          "</>"; }
+      public SafeHtml getValue(Site answer) {
+        SafeHtmlBuilder sb = new SafeHtmlBuilder();
+        sb.appendHtmlConstant("<a href='" + Window.Location.getProtocol() + "//"+Window.Location.getHost() +"/"+answer.name +
+            "' target='_blank'>");
+        sb.appendEscaped(answer.name);
+        sb.appendHtmlConstant("</a>");
+        return sb.toSafeHtml();
+      }
     };
-    url.setSortable(true);
+
     table.addColumn(url, "Site URL");
-
-
     table.getColumnSortList().push(name);
 
     final ListDataProvider<Site> provider = createProvider(table);
@@ -128,22 +147,49 @@ public class DataCollectAdmin extends PagerTable {
     return pagerAndTable;
   }
 
-  private ListDataProvider<Site> provider;
-  private CellTable<Site> table;
+  private class ClickableSafeHtmlCell extends AbstractCell<SafeHtml> {
+    /**
+     * Construct a new ClickableSafeHtmlCell.
+     */
+    public ClickableSafeHtmlCell() {
+      super("click", "keydown");
+    }
+
+    @Override
+    public void onBrowserEvent(Context context, com.google.gwt.dom.client.Element parent, SafeHtml value, NativeEvent event, ValueUpdater<SafeHtml> valueUpdater) {
+      super.onBrowserEvent(context, parent, value, event, valueUpdater);
+      if ("click".equals(event.getType())) {
+        onEnterKeyDown(context, parent, value, event, valueUpdater);
+      }
+    }
+
+    @Override
+    public void render(Context context, SafeHtml value, SafeHtmlBuilder sb) {
+      if (value != null) {
+        sb.append(value);
+      }
+    }
+
+    @Override
+    protected void onEnterKeyDown(Context context, com.google.gwt.dom.client.Element parent, SafeHtml value, NativeEvent event, ValueUpdater<SafeHtml> valueUpdater) {
+      if (valueUpdater != null) {
+        valueUpdater.update(value);
+      }
+    }
+  }
 
   private void refresh() {
     refresh(table, provider);
   }
 
   private void refresh(final CellTable<Site> table, final ListDataProvider<Site> provider) {
-    System.out.println("getting sites!");
     service.getSites(new AsyncCallback<List<Site>>() {
       @Override
       public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(List<Site> result) {
-        System.out.println("got sites num = " + result.size());
+       // System.out.println("got sites num = " + result.size());
 
         provider.setList(result);
         table.setRowCount(result.size());
@@ -151,7 +197,7 @@ public class DataCollectAdmin extends PagerTable {
     });
   }
 
-  private ListDataProvider<Site> createProvider(/*final int numResults,*/ CellTable<Site> table) {
+  private ListDataProvider<Site> createProvider(CellTable<Site> table) {
     ListDataProvider<Site> dataProvider = new ListDataProvider<Site>();
     dataProvider.addDataDisplay(table);
 
@@ -189,8 +235,8 @@ public class DataCollectAdmin extends PagerTable {
     form.setWidget(panel);
 
     // Create a TextBox, giving it a name so that it will be submitted.
-    final TextBox tb = new TextBox();
-    tb.setName("siteName");
+    final TextBox siteName = new TextBox();
+    siteName.setName("siteName");
     HTML w = new HTML("<h2>Create a new data collection site</h2>");
     w.addStyleName("blueColor");
 
@@ -199,19 +245,19 @@ public class DataCollectAdmin extends PagerTable {
     w1.addStyleName("blueColor");
 
     panel.add(w1);
-    panel.add(tb);
-/*    tb.addStyleName("blueColor");
-    tb.addStyleName("backgroundWhite");*/
+    panel.add(siteName);
+/*    siteName.addStyleName("blueColor");
+    siteName.addStyleName("backgroundWhite");*/
 
-    final TextBox tb2 = new TextBox();
-    tb2.setName("siteLanguage");
+    final TextBox languageBox = new TextBox();
+    languageBox.setName("siteLanguage");
     HTML w2 = new HTML("<h3>Step 2: Choose a language</h3>");
     w2.addStyleName("blueColor");
 
     panel.add(w2);
-    panel.add(tb2);
+    panel.add(languageBox);
 /*
-    tb2.addStyleName("blueColor");
+    languageBox.addStyleName("blueColor");
 */
 
     final TextBox tb3 = new TextBox();
@@ -225,7 +271,7 @@ public class DataCollectAdmin extends PagerTable {
     tb3.addStyleName("blueColor");
 */
      // Create a FileUpload widget.
-    FileUpload upload = new FileUpload();
+    final FileUpload upload = new FileUpload();
     upload.setName("upload");
     HTML w4 = new HTML("<h3>Step 4: Upload an excel spreadsheet wordlist.</h3>");
     w4.addStyleName("blueColor");
@@ -253,12 +299,14 @@ public class DataCollectAdmin extends PagerTable {
     panel.add(w7);
 
     // Add a 'submit' button.
-    panel.add(new Button("Submit", new ClickHandler() {
+    final Button submit = new Button("Submit");
+    submit.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        user.setText(""+userManager.getUser());
+        user.setText("" + userManager.getUser());
         form.submit();
       }
-    }));
+    });
+    panel.add(submit);
 
     HTML w8 = new HTML("<h3>Step 6: Deploy new site.</h3>");
     w8.addStyleName("blueColor");
@@ -270,18 +318,31 @@ public class DataCollectAdmin extends PagerTable {
       public void onSubmit(FormPanel.SubmitEvent event) {
         // This event is fired just before the form is submitted. We can take
         // this opportunity to perform validation.
-        if (tb.getText().length() == 0) {
-          Window.alert("The text box must not be empty");
+        if (siteName.getText().length() == 0) {
+          Window.alert("Site name must not be empty");
+          event.cancel();
+        }
+        else if (languageBox.getText().length() == 0) {
+          Window.alert("Language must not be empty");
+          event.cancel();
+        }
+        else if (upload.getFilename().length() == 0) {
+          Window.alert("Please choose a word list file.");
           event.cancel();
         }
       }
     });
+    final Button deployButton = new Button("Deploy!");
+    deployButton.setEnabled(false);
     form.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
       public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
         // When the form submission is successfully completed, this event is
         // fired. Assuming the service returned a response of type text/html,
         // we can get the result text here (see the FormPanel documentation for
         // further explanation).
+        deployButton.setEnabled(false);
+        submit.setEnabled(false);
+
         String results = event.getResults();
         if (results.contains("Invalid")) {
           Window.alert(results);
@@ -294,26 +355,26 @@ public class DataCollectAdmin extends PagerTable {
             id = Long.parseLong(results.trim());
             service.getSiteByID(id,new AsyncCallback<Site>() {
               @Override
-              public void onFailure(Throwable caught) {}
+              public void onFailure(Throwable caught) {
+                submit.setEnabled(true);
+              }
 
               @Override
               public void onSuccess(Site result) {
+                submit.setEnabled(true);
+                deployButton.setEnabled(true);
                 w6.setHTML("<h4>" + result.getFeedback() + "</h4>");
-                 //   ", example exercise content :</h4>");
-                //w7.setHTML(result.example.getContent());
                 siteID = result.id;
               }
             });
           } catch (NumberFormatException e) {
             Window.alert("couldn't understand response " + results);
           }
-
         }
       }
     });
 
     currentExerciseVPanel.add(form);
-    final Button deployButton = new Button("Deploy!");
 
     FlowPanel hp = new FlowPanel();
     hp.getElement().getStyle().setFloat(Style.Float.RIGHT);
