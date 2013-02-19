@@ -158,7 +158,7 @@ public class Exercise extends ExerciseShell  {
   public String getRefSentence() { return refSentence; }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getExercises(long, boolean)
+   * @see mitll.langtest.server.database.DatabaseImpl#getExercises(long)
    * @param b
    */
   public void setPromptInEnglish(boolean b) {
