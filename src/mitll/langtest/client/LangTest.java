@@ -62,7 +62,7 @@ import java.util.Map;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   // TODO : consider putting these in the .css file?
   private static final int HEADER_HEIGHT = 90;
-  private static final int FOOTER_HEIGHT = 40;
+  private static final int FOOTER_HEIGHT = 20;
   private static final int EXERCISE_LIST_WIDTH = 210;
   private static final int EAST_WIDTH = 90;
 
@@ -245,7 +245,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void addResizeHandler(final DockLayoutPanel widgets) {
     Window.addResizeHandler(new ResizeHandler() {
       public void onResize(ResizeEvent event) {
-//        System.out.println("updating width since got event " +event + " w = " + Window.getClientWidth());
+        //System.out.println("updating width since got event " +event + " w = " + Window.getClientWidth());
         setMainWindowSize(widgets);
         setExerciseListSize();
         exerciseList.onResize();
@@ -267,11 +267,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     final UserFeedback feedback = (UserFeedback) this;
 
     if (isGrading) {
-      this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback, props.isReadFromFile(),
+      this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback,
           true, props.isEnglishOnlyMode());
     }
     else {
-      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, props.isReadFromFile(),
+      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback,
           isArabicTextDataCollect(), props.isShowTurkToken(), isAutoCRTMode()) {
         @Override
         protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
