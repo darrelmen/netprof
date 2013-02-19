@@ -21,11 +21,11 @@ public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
   // exerciseDAO
-  List<ExerciseShell> getExerciseIds(long userID, boolean useFile, boolean arabicDataCollect);
-  List<ExerciseShell> getExerciseIds(boolean useFile);
+  List<ExerciseShell> getExerciseIds(long userID, boolean arabicDataCollect);
+  List<ExerciseShell> getExerciseIds();
 
-  List<Exercise> getExercises(long userID, boolean useFile, boolean arabicDataCollect);
-  List<Exercise> getExercises(boolean useFile);
+  List<Exercise> getExercises(long userID, boolean arabicDataCollect);
+  List<Exercise> getExercises();
   ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
 
   // gradeDAO
@@ -67,36 +67,36 @@ public interface LangTestDatabase extends RemoteService {
 
   Map<String,String> getProperties();
 
-  Exercise getExercise(String id, boolean useFile);
+  Exercise getExercise(String id);
 
-  Exercise getExercise(String id, long userID, boolean useFile, boolean arabicDataCollect);
+  Exercise getExercise(String id, long userID, boolean arabicDataCollect);
 
   int userExists(String login);
 
   Site getSiteByID(long id);
-  boolean deploySite(long id);
+  boolean deploySite(long id, String name, String language, String notes);
   List<Site> getSites();
 
   // monitoring support
 
   Map<User, Integer> getUserToResultCount();
 
-  Map<Integer, Integer> getResultCountToCount(boolean useFile);
+  Map<Integer, Integer> getResultCountToCount();
 
   Map<String,Integer> getResultByDay();
   Map<String,Integer> getResultByHourOfDay();
 
-  Map<String, List<Integer>> getResultPerExercise(boolean useFile);
+  Map<String, List<Integer>> getResultPerExercise();
   List<Session> getSessions();
 
   int getNumResults();
 
   List<Result> getResults(int start, int end);
 
-  Map<Integer, Float> getHoursToCompletion(boolean useFile);
+//  Map<Integer, Float> getHoursToCompletion(boolean useFile);
   Map<String,Number> getResultStats();
 
-  Map<String, Map<Integer, Integer>> getResultCountsByGender(boolean useFile);
-  Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts(boolean useFile);
+  Map<String, Map<Integer, Integer>> getResultCountsByGender();
+  Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts();
 
 }
