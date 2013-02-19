@@ -49,7 +49,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected int expectedGrades = 1;
   protected UserManager user;
   private String exercise_title;
-  private boolean readFromFile;
   protected final boolean arabicDataCollect;
   protected final boolean showTurkToken;
   private boolean useUserID = false;
@@ -62,19 +61,17 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param service
    * @param feedback
    * @param factory
-   * @param readFromFile
    * @param arabicDataCollect
    * @param showTurkToken
    * @param showInOrder
    */
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                      ExercisePanelFactory factory, boolean readFromFile, boolean arabicDataCollect,
+                      ExercisePanelFactory factory, boolean arabicDataCollect,
                       boolean showTurkToken, boolean showInOrder) {
     this.currentExerciseVPanel = currentExerciseVPanel;
     this.service = service;
     this.feedback = feedback;
     this.factory = factory;
-    this.readFromFile = readFromFile;
     this.arabicDataCollect = arabicDataCollect;
     this.showTurkToken = showTurkToken;
     this.showInOrder = showInOrder;
