@@ -47,6 +47,7 @@ public class DatabaseImpl implements Database {
   private String lessonPlanFile;
   private String mediaDir;
   private boolean isUrdu;
+  private boolean useFile;
 
   /**
    * @param configDir
@@ -134,12 +135,13 @@ public class DatabaseImpl implements Database {
    * @param mediaDir
    * @param isUrdu
    */
-  public void setInstallPath(String installPath, String lessonPlanFile, String mediaDir, boolean isUrdu) {
+  public void setInstallPath(String installPath, String lessonPlanFile, String mediaDir, boolean isUrdu, boolean useFile) {
     //logger.debug("got install path " + i + " media " + mediaDir + " is urdu " +isUrdu);
     this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
     this.mediaDir = mediaDir;
     this.isUrdu = isUrdu;
+    this.useFile = useFile;
 
     //resultDAO.enrichResultDurations(installPath);
   }
@@ -147,11 +149,10 @@ public class DatabaseImpl implements Database {
   public void setOutsideFile(String outsideFile) { monitoringSupport.setOutsideFile(outsideFile); }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(boolean)
-   * @param useFile
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
    * @return
    */
-  public List<Exercise> getExercises(boolean useFile) {
+  public List<Exercise> getExercises() {
     return getExercises(useFile, lessonPlanFile);
   }
 
@@ -161,8 +162,8 @@ public class DatabaseImpl implements Database {
    * @param useFile
    * @param lessonPlanFile
    * @return
-   * @see #getExercises(boolean)
-   * @see #getExercises(long, boolean)
+   * @see #getExercises()
+   * @see #getExercises(long)
    */
   private List<Exercise> getExercises(boolean useFile, String lessonPlanFile) {
     if (lessonPlanFile == null) {
@@ -218,7 +219,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
    */
   private Exercise getNextUngradedExerciseSlow(Collection<String> activeExercises, int expectedCount) {
-    List<Exercise> rawExercises = getExercises(false);
+    List<Exercise> rawExercises = getExercises();
     logger.info("getNextUngradedExercise : checking " + rawExercises.size() + " exercises.");
     for (Exercise e : rawExercises) {
       if (!activeExercises.contains(e.getID()) && // no one is working on it
@@ -243,7 +244,7 @@ public class DatabaseImpl implements Database {
    */
   private Exercise getNextUngradedExerciseQuick(Collection<String> activeExercises, int expectedCount,
                                                 boolean filterResults, boolean useFLQ, boolean useSpoken) {
-    List<Exercise> rawExercises = getExercises(false);
+    List<Exercise> rawExercises = getExercises();
     Collection<Result> resultExcludingExercises = resultDAO.getResultExcludingExercises(activeExercises);
 
     GradeDAO.GradesAndIDs allGradesExcluding = gradeDAO.getAllGradesExcluding(activeExercises);
@@ -305,13 +306,13 @@ public class DatabaseImpl implements Database {
 
   /**
    *
+   *
    * @param userID
-   * @param useFile
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long, boolean, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long, boolean)
    * @deprecated we should move away from using schedules to determine exercise order, etc.
    */
-  public List<Exercise> getExercises(long userID, boolean useFile) {
+  public List<Exercise> getExercises(long userID) {
     logger.info("getExercises : for user  " + userID);
 
     if (userToSchedule == null) {
@@ -325,7 +326,7 @@ public class DatabaseImpl implements Database {
     }
     List<Exercise> exercises = new ArrayList<Exercise>();
 
-    List<Exercise> rawExercises = getExercises(useFile);
+    List<Exercise> rawExercises = getExercises();
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
     for (Exercise e : rawExercises) {
       idToExercise.put(e.getID(), e);
@@ -346,16 +347,15 @@ public class DatabaseImpl implements Database {
   /**
    * Show unanswered questions first, then ones with 1, then 2, then 3,... answers
    * Also be aware of the user's gender -- if you're female, show questions that have no female answers first.
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long, boolean, boolean)
-   * @param useFile
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long, boolean)
    * @param userID
    * @return
    */
-  public List<Exercise> getExercisesBiasTowardsUnanswered(boolean useFile, long userID) {
+  public List<Exercise> getExercisesBiasTowardsUnanswered(long userID) {
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
 
-    populateInitialExerciseIDToCount(useFile, idToExercise, idToCount);
+    populateInitialExerciseIDToCount(idToExercise, idToCount);
 
     // only find answers that are for the gender
     getExerciseIDToResultCount(userDAO.isUserMale(userID), idToCount);
@@ -367,23 +367,22 @@ public class DatabaseImpl implements Database {
   /**
    * Merge the online counts with counts from an external file.
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long, boolean, boolean)
-   * @param useFile
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long, boolean)
    * @param userID
    * @param outsideFile
    * @return
    */
-  public List<Exercise> getExercisesBiasTowardsUnanswered(boolean useFile, long userID, String outsideFile) {
+  public List<Exercise> getExercisesBiasTowardsUnanswered(long userID, String outsideFile) {
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
 
-    populateInitialExerciseIDToCount(useFile, idToExercise, idToCount);
+    populateInitialExerciseIDToCount(idToExercise, idToCount);
     //logger.info("initial map of online counts is size = " + idToCount.size() +" " + idToCount.values().size());
 
     boolean isMale = userDAO.isUserMale(userID);
 
     Map<String, Integer> idToCountOutside =
-        new OutsideCount().getExerciseIDToOutsideCount(isMale, outsideFile,getExercises(useFile));
+        new OutsideCount().getExerciseIDToOutsideCount(isMale, outsideFile,getExercises());
 
     //  logger.info("map of outside counts is size = " + idToCountOutside.size() +" " + idToCountOutside.values().size());
     for (Map.Entry<String, Integer> pair : idToCountOutside.entrySet()) {
@@ -405,8 +404,8 @@ public class DatabaseImpl implements Database {
    * Given a map of answer counts to exercise ids at those counts, randomize the order based on the
    * user id, then return a list of Exercises with those ids.
    *
-   * @see #getExercisesBiasTowardsUnanswered(boolean, long)
-   * @see #getExercisesBiasTowardsUnanswered(boolean, long, String)
+   * @see #getExercisesBiasTowardsUnanswered(long)
+   * @see #getExercisesBiasTowardsUnanswered(long, String)
    * @param userID for this user
    * @param idToExercise so we can go from id to exercise
    * @param countToIds statistics about answers for each exercise
@@ -439,8 +438,8 @@ public class DatabaseImpl implements Database {
     return countToIds;
   }
 
-  private void populateInitialExerciseIDToCount(boolean useFile, Map<String, Exercise> idToExercise, Map<String, Integer> idToCount) {
-    List<Exercise> rawExercises = getExercises(useFile);
+  private void populateInitialExerciseIDToCount(Map<String, Exercise> idToExercise, Map<String, Integer> idToCount) {
+    List<Exercise> rawExercises = getExercises();
     for (Exercise e : rawExercises) {
       idToCount.put(e.getID(), 0);
       idToExercise.put(e.getID(), e);
@@ -462,7 +461,7 @@ public class DatabaseImpl implements Database {
 
   private Random random = new Random();
   public List<Exercise> getRandomBalancedList() {
-    List<Exercise> exercisesGradeBalancing = getExercisesGradeBalancing(false);
+    List<Exercise> exercisesGradeBalancing = getExercisesGradeBalancing();
     List<Exercise> randomList = new ArrayList<Exercise>();
    // int focusGroupSize = exercisesGradeBalancing.size()/8;
   //  Set<Integer> chosen = new HashSet<Integer>();
@@ -484,8 +483,8 @@ public class DatabaseImpl implements Database {
     // random.nextInt(exercisesGradeBalancing.size());
   }
 
-  private List<Exercise> getExercisesGradeBalancing(boolean useFile) {
-    return getExercisesGradeBalancing(useFile, true, false);
+  private List<Exercise> getExercisesGradeBalancing() {
+    return getExercisesGradeBalancing(true, false);
   }
 
     /**
@@ -496,13 +495,13 @@ public class DatabaseImpl implements Database {
      * Remember there can be multiple questions per exercise, so we need to average over the grades for all
      * answers for all questions for an exercise.
      *
-     * @param useFile
+     *
      * @param useFLQ
      * @param useSpoken
      * @return
      */
-  private List<Exercise> getExercisesGradeBalancing(boolean useFile, boolean useFLQ, boolean useSpoken) {
-    List<Exercise> rawExercises = getExercises(useFile);
+  private List<Exercise> getExercisesGradeBalancing(boolean useFLQ, boolean useSpoken) {
+    List<Exercise> rawExercises = getExercises();
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
     for (Exercise e : rawExercises) {
       idToExercise.put(e.getID(), e);
@@ -542,8 +541,8 @@ public class DatabaseImpl implements Database {
     return ret;
   }
 
-  public List<Exercise> getExercisesFirstNInOrder(long userID, boolean useFile, int firstNInOrder) {
-    List<Exercise> rawExercises = getExercises(useFile);
+  public List<Exercise> getExercisesFirstNInOrder(long userID, int firstNInOrder) {
+    List<Exercise> rawExercises = getExercises();
     int numInOrder = Math.min(firstNInOrder, rawExercises.size());
     List<Exercise> newList = new ArrayList<Exercise>(rawExercises.subList(0, numInOrder));
 
@@ -842,15 +841,14 @@ public class DatabaseImpl implements Database {
    * Given the observed rate of responses and the number of exercises to get
    * responses for, make a map of number of responses->hours
    * required to get that number of responses.
-   * @param useFile
    * @return # responses->hours to get that number
    */
-  public Map<Integer,Float> getHoursToCompletion(boolean useFile) {   return  monitoringSupport.getHoursToCompletion(getExercises(useFile)); }
+  public Map<Integer,Float> getHoursToCompletion() {   return  monitoringSupport.getHoursToCompletion(getExercises()); }
  /**
    * TODO : worry about duplicate userid?
    * @return
    */
-  public Map<Integer, Integer> getResultCountToCount(boolean useFile) { return  monitoringSupport.getResultCountToCount(getExercises(useFile)); }
+  public Map<Integer, Integer> getResultCountToCount() { return  monitoringSupport.getResultCountToCount(getExercises()); }
 
   /**
    * Get counts of answers by date
@@ -869,12 +867,11 @@ public class DatabaseImpl implements Database {
   /**
    * Split exid->count by gender.
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise(boolean)
-   * @param useFile
    * @return
    */
-  public Map<String,List<Integer>> getResultPerExercise(boolean useFile) { return monitoringSupport.getResultPerExercise(getExercises(useFile)); }
-  public Map<String,Map<Integer,Integer>> getResultCountsByGender(boolean useFile) {  return monitoringSupport.getResultCountsByGender(getExercises(useFile)); }
-  public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts(boolean useFile) {  return monitoringSupport.getDesiredCounts(getExercises(useFile)); }
+  public Map<String,List<Integer>> getResultPerExercise() { return monitoringSupport.getResultPerExercise(getExercises()); }
+  public Map<String,Map<Integer,Integer>> getResultCountsByGender() {  return monitoringSupport.getResultCountsByGender(getExercises()); }
+  public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts() {  return monitoringSupport.getDesiredCounts(getExercises()); }
    /**
    * Return some statistics related to the hours of audio that have been collected
    * @return
@@ -918,7 +915,7 @@ public class DatabaseImpl implements Database {
     }*/
 
     DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\DLITest\\","farsi2");
-    langTestDatabase.setInstallPath("C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu","C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu\\5000-no-english.unvow.farsi.txt","",false);
+    //langTestDatabase.setInstallPath("C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu","C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu\\5000-no-english.unvow.farsi.txt","",false);
 /*
     List<Session> sessions = langTestDatabase.getSessions();
     long total = 0;
