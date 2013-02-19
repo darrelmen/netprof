@@ -13,9 +13,9 @@ import java.util.Map;
  */
 public interface LangTestDatabaseAsync {
   @Deprecated
-  void getExercises(long userID, boolean useFile, boolean arabicDataCollect, AsyncCallback<List<Exercise>> async);
+  void getExercises(long userID, boolean arabicDataCollect, AsyncCallback<List<Exercise>> async);
   @Deprecated
-  void getExercises(boolean useFile, AsyncCallback<List<Exercise>> async);
+  void getExercises(AsyncCallback<List<Exercise>> async);
 
   void addTextAnswer(int usedID, Exercise exercise, int questionID, String answer, AsyncCallback<Void> async);
   void addUser(int age, String gender, int experience, AsyncCallback<Long> async);
@@ -45,13 +45,13 @@ public interface LangTestDatabaseAsync {
 
   void ensureMP3(String wavFile, AsyncCallback<Void> async);
 
-  void getExerciseIds(long userID, boolean useFile, boolean arabicDataCollect, AsyncCallback<List<ExerciseShell>> async);
+  void getExerciseIds(long userID, boolean arabicDataCollect, AsyncCallback<List<ExerciseShell>> async);
 
-  void getExerciseIds(boolean useFile, AsyncCallback<List<ExerciseShell>> async);
+  void getExerciseIds(AsyncCallback<List<ExerciseShell>> async);
 
-  void getExercise(String id, boolean useFile, AsyncCallback<Exercise> async);
+  void getExercise(String id, AsyncCallback<Exercise> async);
 
-  void getExercise(String id, long userID, boolean useFile, boolean arabicDataCollect, AsyncCallback<Exercise> async);
+  void getExercise(String id, long userID, boolean arabicDataCollect, AsyncCallback<Exercise> async);
 
   void getScoreForAnswer(Exercise e, int questionID, String answer, AsyncCallback<Double> async);
 
@@ -61,13 +61,13 @@ public interface LangTestDatabaseAsync {
 
   void getUserToResultCount(AsyncCallback<Map<User, Integer>> async);
 
-  void getResultCountToCount(boolean useFile, AsyncCallback<Map<Integer, Integer>> async);
+  void getResultCountToCount(AsyncCallback<Map<Integer, Integer>> async);
 
   void getResultByDay(AsyncCallback<Map<String, Integer>> async);
 
   void getResultByHourOfDay(AsyncCallback<Map<String, Integer>> async);
 
-  void getResultPerExercise(boolean useFile, AsyncCallback<Map<String, List<Integer>>> async);
+  void getResultPerExercise(AsyncCallback<Map<String, List<Integer>>> async);
 
   void getSessions(AsyncCallback<List<Session>> async);
 
@@ -75,17 +75,17 @@ public interface LangTestDatabaseAsync {
 
   void getResults(int start, int end, AsyncCallback<List<Result>> async);
 
-  void getHoursToCompletion(boolean useFile, AsyncCallback<Map<Integer, Float>> async);
+//  void getHoursToCompletion(boolean useFile, AsyncCallback<Map<Integer, Float>> async);
 
   void getResultStats(AsyncCallback<Map<String, Number>> async);
 
-  void getResultCountsByGender(boolean useFile, AsyncCallback<Map<String, Map<Integer, Integer>>> async);
+  void getResultCountsByGender(AsyncCallback<Map<String, Map<Integer, Integer>>> async);
 
-  void getDesiredCounts(boolean useFile, AsyncCallback<Map<String, Map<Integer, Map<Integer, Integer>>>> async);
+  void getDesiredCounts(AsyncCallback<Map<String, Map<Integer, Map<Integer, Integer>>>> async);
 
   void getSiteByID(long id, AsyncCallback<Site> async);
 
-  void deploySite(long id, AsyncCallback<Boolean> async);
+  void deploySite(long id, String name, String language, String notes, AsyncCallback<Boolean> async);
 
   void getSites(AsyncCallback<List<Site>> async);
 }
