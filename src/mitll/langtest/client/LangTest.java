@@ -199,18 +199,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void doDataCollectAdminView() {
-    //ScrollPanel sp = new ScrollPanel();
+    setPageTitle();
+
     VerticalPanel vp = new VerticalPanel();
     vp.addStyleName("grayColor");
     HTML title = new HTML("<h2>" + props.getAppTitle() + "</h2>");
     title.addStyleName("darkerBlueColor");
     title.addStyleName("grayColor");
     vp.add(title);
-//    sp.add(title);
-    //vp.add(sp);
-    //sp.setWidth(Window.getClientWidth() -50 + "px");
-    //sp.setHeight(Window.getClientHeight() -50 + "px");
-    //sp.add(currentExerciseVPanel);
+
     vp.add(currentExerciseVPanel);
     userManager = new UserManager(this,service, false);
     dataCollectAdmin = new DataCollectAdmin(userManager,service);
@@ -219,15 +216,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     FlowPanel fp = new FlowPanel();
     fp.getElement().getStyle().setFloat(Style.Float.LEFT);
-    SimplePanel w = new SimplePanel();
-    w.setWidth("50px");
-    w.setHeight("50px");
-    fp.add(w);
     fp.add(vp);
-    SimplePanel w2 = new SimplePanel();
-    w2.setWidth("50px");
-    w2.setHeight("50px");
-    fp.add(w2);
     RootPanel.get().add(fp);
 
     browserCheck.checkForCompatibleBrowser();
