@@ -139,7 +139,7 @@ public class UserManager {
     else if (stockStore != null) {
       String sid = stockStore.getItem("userID");
       int i = (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
-      System.out.println("getUser : user = " + i);
+      //System.out.println("getUser : user = " + i);
       return i;
     }
     else {
