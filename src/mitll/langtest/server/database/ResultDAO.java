@@ -237,7 +237,7 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see DatabaseImpl#getExercisesFirstNInOrder(long, boolean, int)
+   * @see DatabaseImpl#getExercisesFirstNInOrder(long, int)
    * @param userid
    * @return
    */
