@@ -35,6 +35,7 @@ public class PropertyHandler {
   private static final String NAME_FOR_ITEM = "nameForItem";
   private static final String NAME_FOR_ANSWER = "nameForAnswer";
   private static final String NAME_FOR_RECORDER = "nameForRecorder";
+  private static final String NUM_GRADES_TO_COLLECT = "numGradesToCollect";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -49,6 +50,7 @@ public class PropertyHandler {
   private static final String LESSON = "lesson";
   private static final String TEACHER_PARAM = TEACHER_VIEW;
   private static final String ADMIN_PARAM = "admin";
+  private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
 
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
   private static final boolean DEFAULT_GOODWAVE_MODE = false;
@@ -57,6 +59,7 @@ public class PropertyHandler {
   private static final int DEFAULT_SEGMENT_REPEATS = 2;
   private static final int DEFAULT_TIMEOUT = 45000;
   private static final String DEFAULT_EXERCISE = null;
+  private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
 
   private Map<String, String> props;
 
@@ -78,6 +81,7 @@ public class PropertyHandler {
   private boolean dataCollectAdminView = false;
   private boolean adminView = true;
   private boolean minimalUI = false;
+  private int numGradesToCollect = NUM_GRADES_TO_COLLECT_DEFAULT;
   private String nameForItem = "Item";
   private String nameForAnswer = "Recording";
   private String nameForRecorder = "Speaker";
@@ -103,14 +107,14 @@ public class PropertyHandler {
       else if (key.equals(ARABIC_TEXT_DATA_COLLECT)) arabicTextDataCollect = getBoolean(value);
       else if (key.equals(SHOW_TURK_TOKEN)) showTurkToken = getBoolean(value);
       else if (key.equals(APP_TITLE)) appTitle = value;
-      else if (key.equals(SEGMENT_REPEATS)) segmentRepeats = Integer.parseInt(value);
+      else if (key.equals(SEGMENT_REPEATS)) segmentRepeats = getInt(value,0,SEGMENT_REPEATS)-1;
       else if (key.equals(READ_FROM_FILE)) readFromFile = getBoolean(value);
       else if (key.equals(RELEASE_DATE)) releaseDate = value;
       else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = getBoolean(value);
       else if (key.equals(AUTO_CRT)) autocrt = getBoolean(value);
       else if (key.equals(DEMO_MODE)) demoMode = getBoolean(value);
       else if (key.equals(DATA_COLLECT_MODE)) dataCollectMode = getBoolean(value);
-      else if (key.equals(RECORD_TIMEOUT)) recordTimeout = Integer.parseInt(value);
+      else if (key.equals(RECORD_TIMEOUT)) recordTimeout = getInt(value,DEFAULT_TIMEOUT,RECORD_TIMEOUT);
       else if (key.equals(COLLECT_AUDIO)) collectAudio = getBoolean(value);
       else if (key.equals(ADMIN_VIEW)) adminView = getBoolean(value);
       else if (key.equals(MINIMAL_UI)) minimalUI = getBoolean(value);
@@ -119,7 +123,20 @@ public class PropertyHandler {
       else if (key.equals(NAME_FOR_RECORDER)) nameForRecorder = value;
       else if (key.equals(TEACHER_VIEW)) teacherView = getBoolean(value);
       else if (key.equals(DATA_COLLECT_ADMIN_VIEW)) dataCollectAdminView = getBoolean(value);
+      else if (key.equals(NUM_GRADES_TO_COLLECT)) numGradesToCollect = getInt(value,NUM_GRADES_TO_COLLECT_DEFAULT,NUM_GRADES_TO_COLLECT);
     }
+  }
+
+  private int getInt(String value, int defValue, String propName) {
+    try {
+      if (value == null) return defValue;
+      int i = Integer.parseInt(value);
+      System.out.println("value for " + propName +"=" +i + " vs default = " +defValue);
+      return i;
+    } catch (NumberFormatException e) {
+      System.err.println("couldn't parse " + value + "using " + defValue +" for " + propName);
+    }
+    return defValue;
   }
 
   private boolean getBoolean(String value) {
@@ -135,6 +152,7 @@ public class PropertyHandler {
   private boolean checkParams() {
     String isGrading = Window.Location.getParameter(GRADING);
     String isEnglish = Window.Location.getParameter(ENGLISH);
+    String numGrades = Window.Location.getParameter(NUM_GRADES_TO_COLLECT_PARAM);
     String goodwave = Window.Location.getParameter(GOODWAVE);
     String repeats = Window.Location.getParameter(REPEATS);
     String arabicCollect = Window.Location.getParameter(ARABIC_COLLECT);
@@ -183,13 +201,9 @@ public class PropertyHandler {
     boolean grading = this.isGrading() || (isGrading != null && !isGrading.equals("false")) || isEnglishOnlyMode();
     setGrading(grading);
     // get audio repeats
-    if (repeats != null) {
-      try {
-        segmentRepeats = Integer.parseInt(repeats)-1;
-      } catch (NumberFormatException e) {
-        e.printStackTrace();
-      }
-    }
+    segmentRepeats = getInt(repeats, DEFAULT_SEGMENT_REPEATS,REPEATS) -1;
+    numGradesToCollect = getInt(numGrades, NUM_GRADES_TO_COLLECT_DEFAULT, NUM_GRADES_TO_COLLECT);
+    if (numGrades != null)
     if (arabicCollect != null) {
       arabicTextDataCollect = !arabicCollect.equals("false");
     }
@@ -310,5 +324,9 @@ public class PropertyHandler {
 
   public boolean isDataCollectAdminView() {
     return dataCollectAdminView;
+  }
+
+  public int getNumGradesToCollect() {
+    return numGradesToCollect;
   }
 }
