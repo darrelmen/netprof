@@ -14,6 +14,7 @@ import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -34,9 +35,13 @@ import java.util.Set;
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingExerciseList extends ExerciseList {
+public class PagingExerciseList extends ExerciseList implements RequiresResize {
   private static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
   private ListDataProvider<ExerciseShell> dataProvider;
+  public static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 390;
+  private static final float MAX_PAGES = 2f;
+  private static final int MIN_PAGE_SIZE = 3;
+  private static final float DEFAULT_PATH_SIZE = 15f;
   private CellTable<ExerciseShell> table;
 
   public interface TableResources extends CellTable.Resources {
@@ -56,12 +61,11 @@ public class PagingExerciseList extends ExerciseList {
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
-   * @param readFromFile
    * @param arabicDataCollect
    * @param showTurkToken
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            boolean readFromFile, boolean arabicDataCollect,
+                            boolean arabicDataCollect,
                             boolean showTurkToken, boolean showInOrder) {
     super(currentExerciseVPanel, service, feedback, null, arabicDataCollect, showTurkToken, showInOrder);
     CellTable.Resources o = GWT.create(TableResources.class);
@@ -69,6 +73,7 @@ public class PagingExerciseList extends ExerciseList {
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
 
     table.setWidth("100%", true);
+    table.setHeight("auto");
 
     // Add a selection model to handle user selection.
     final SingleSelectionModel<ExerciseShell> selectionModel = new SingleSelectionModel<ExerciseShell>();
@@ -150,6 +155,7 @@ public class PagingExerciseList extends ExerciseList {
   protected void selectFirst() {
     table.getSelectionModel().setSelected(currentExercises.get(0), true);
     table.redraw();
+    onResize();
   }
 
   public void clear() {
@@ -171,6 +177,27 @@ public class PagingExerciseList extends ExerciseList {
   protected void addExerciseToList(ExerciseShell exercise) {
     List<ExerciseShell> list = dataProvider.getList();
     list.add(exercise);
+  }
+
+  @Override
+  public void onResize() {
+    super.onResize();
+/*    System.out.println("Got on resize " + Window.getClientHeight() + " " +
+        getOffsetHeight() + " bodyheight = " + table.getBodyHeight() + " table offset height " + table.getOffsetHeight() + " parent height " + getParent().getOffsetHeight());*/
+      int header = 625 - HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
+      int leftOver = Window.getClientHeight()-header;
+      float rawRatio = ((float) leftOver) / (float)HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
+      float tableRatio = Math.min(MAX_PAGES, rawRatio);
+     // System.out.println("left over " + leftOver + " raw " + rawRatio + " table ratio " + tableRatio);
+
+      float ratio = DEFAULT_PATH_SIZE * tableRatio;
+      int numRows = Math.max(MIN_PAGE_SIZE, Math.round(ratio));
+      if (table.getPageSize() != numRows) {
+       // System.out.println("num rows now " + numRows);
+        table.setPageSize(numRows);
+        table.redraw();
+        markCurrentExercise(currentExercise);
+      }
   }
 
   /**
