@@ -108,7 +108,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
     else {
       //System.out.println("getExercises for " + userID + " usefile " + readFromFile + " arabic " + arabicDataCollect);
-      service.getExerciseIds(userID, readFromFile, arabicDataCollect, new SetExercisesCallback());
+      service.getExerciseIds(userID, arabicDataCollect, new SetExercisesCallback());
     }
   }
 
@@ -116,7 +116,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see GradedExerciseList#setFactory(ExercisePanelFactory, mitll.langtest.client.user.UserManager, int)
    */
   public void getExercisesInOrder() {
-    service.getExerciseIds(readFromFile, new SetExercisesCallback());
+    service.getExerciseIds(new SetExercisesCallback());
   }
 
   public void onResize() {
@@ -210,9 +210,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     removeCurrentExercise();
 
     if (useUserID) {
-      service.getExercise(exerciseShell.getID(), userID, readFromFile, arabicDataCollect, new ExerciseAsyncCallback(exerciseShell));
+      service.getExercise(exerciseShell.getID(), userID, arabicDataCollect, new ExerciseAsyncCallback(exerciseShell));
     } else {
-      service.getExercise(exerciseShell.getID(), readFromFile, new ExerciseAsyncCallback(exerciseShell));
+      service.getExercise(exerciseShell.getID(), new ExerciseAsyncCallback(exerciseShell));
     }
   }
 
