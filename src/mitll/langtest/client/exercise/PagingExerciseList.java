@@ -63,7 +63,7 @@ public class PagingExerciseList extends ExerciseList {
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                             boolean readFromFile, boolean arabicDataCollect,
                             boolean showTurkToken, boolean showInOrder) {
-    super(currentExerciseVPanel, service, feedback, null, readFromFile, arabicDataCollect, showTurkToken, showInOrder);
+    super(currentExerciseVPanel, service, feedback, null, arabicDataCollect, showTurkToken, showInOrder);
     CellTable.Resources o = GWT.create(TableResources.class);
     this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
@@ -188,12 +188,12 @@ public class PagingExerciseList extends ExerciseList {
 
     if (i < table.getPageStart()) {
       int newStart = Math.max(0, table.getPageStart() - table.getPageSize());
-      // System.out.println("new start of prev page " +newStart + " vs current " + table.getVisibleRange());
+    //   System.out.println("new start of prev page " +newStart + " vs current " + table.getVisibleRange());
       table.setVisibleRange(newStart, table.getPageSize());
     } else {
       if (i >= pageEnd) {
         int newStart = Math.min(table.getRowCount() - table.getPageSize(), pageEnd);
-        // System.out.println("new start of next page " +newStart + " vs current " + table.getVisibleRange());
+      //  System.out.println("new start of next page " +newStart + " vs current " + table.getVisibleRange());
         table.setVisibleRange(newStart, table.getPageSize());
       }
     }
