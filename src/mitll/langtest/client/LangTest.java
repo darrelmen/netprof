@@ -26,7 +26,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
@@ -269,7 +268,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     if (isGrading) {
       this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback, props.isReadFromFile(),
-          true);
+          true, props.isEnglishOnlyMode());
     }
     else {
       this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, props.isReadFromFile(),
@@ -313,8 +312,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void modeSelect() {
     boolean isGrading = props.isGrading();
-    //System.out.println("modeSelect : english " +props.isEnglishOnlyMode() + " grading " +isGrading + " is auto crt " + isAutoCRTMode());
-
     logout.setVisible(!props.isGoodwaveMode());
     users.setVisible(isGrading || props.isAdminView());
     showResults.setVisible(isGrading || props.isAdminView());
@@ -358,7 +355,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this), userManager, 1);
     }
     else if (props.isGrading()) {
-      exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, props.isEnglishOnlyMode() ? 2 : 1);
+      exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, props.getNumGradesToCollect());
     }
     else if (props.isDataCollectMode() && props.isCollectAudio()) {
       exerciseList.setFactory(new WaveformExercisePanelFactory(service, this, this), userManager, 1);
@@ -494,6 +491,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
+//    System.out.println("got user " +userID);
     if (props.isDataCollectAdminView()) {
       // go get list of current deployed sites
     } else {
@@ -530,6 +528,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public int getUser() { return userManager.getUser(); }
   public boolean getEnglishOnly() { return props.isEnglishOnlyMode(); }
+  public int getNumGradesToCollect() { return props.getNumGradesToCollect(); }
   public int getSegmentRepeats() { return props.getSegmentRepeats(); }
   public boolean isArabicTextDataCollect() {  return props.isArabicTextDataCollect(); }
   public boolean useBkgColorForRef() {  return props.isBkgColorForRef(); }
