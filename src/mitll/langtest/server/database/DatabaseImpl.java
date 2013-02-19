@@ -192,18 +192,21 @@ public class DatabaseImpl implements Database {
 
   /**
    *
+   *
    * @param activeExercises
    * @param expectedCount
    * @param filterResults
    * @param useFLQ
    * @param useSpoken @return
+   * @param englishOnly
    * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
    */
-  public Exercise getNextUngradedExercise(Collection<String> activeExercises, int expectedCount, boolean filterResults, boolean useFLQ, boolean useSpoken) {
+  public Exercise getNextUngradedExercise(Collection<String> activeExercises, int expectedCount, boolean filterResults,
+                                          boolean useFLQ, boolean useSpoken, boolean englishOnly) {
     if (expectedCount == 1) {
       return getNextUngradedExerciseQuick(activeExercises, expectedCount, filterResults, useFLQ, useSpoken);
     } else {
-      return getNextUngradedExerciseSlow(activeExercises, expectedCount);
+      return getNextUngradedExerciseSlow(activeExercises, expectedCount, englishOnly);
     }
   }
 
@@ -218,12 +221,12 @@ public class DatabaseImpl implements Database {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
    */
-  private Exercise getNextUngradedExerciseSlow(Collection<String> activeExercises, int expectedCount) {
+  private Exercise getNextUngradedExerciseSlow(Collection<String> activeExercises, int expectedCount, boolean englishOnly) {
     List<Exercise> rawExercises = getExercises();
-    logger.info("getNextUngradedExercise : checking " + rawExercises.size() + " exercises.");
+    logger.info("getNextUngradedExerciseSlow : checking " + rawExercises.size() + " exercises.");
     for (Exercise e : rawExercises) {
       if (!activeExercises.contains(e.getID()) && // no one is working on it
-          resultDAO.areAnyResultsLeftToGradeFor(e, expectedCount)) {
+          resultDAO.areAnyResultsLeftToGradeFor(e, expectedCount, englishOnly)) {
         //logger.info("Exercise " +e + " needs grading.");
 
         return e;
@@ -253,7 +256,7 @@ public class DatabaseImpl implements Database {
       if (!idToCount.containsKey(g.resultID)) idToCount.put(g.resultID, 1);
       else idToCount.put(g.resultID, 2);
     }
-    logger.info("getNextUngradedExercise found " + resultExcludingExercises.size() + " results, " +
+    logger.info("getNextUngradedExerciseQuick found " + resultExcludingExercises.size() + " results, " +
         "expected " + expectedCount + ", " + allGradesExcluding.resultIDs.size() + " graded results");
 
     // remove results that have grades...
