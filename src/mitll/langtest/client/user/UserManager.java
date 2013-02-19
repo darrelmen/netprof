@@ -10,6 +10,7 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -65,6 +66,7 @@ public class UserManager {
   private long userID = NO_USER_SET;
   private int rememberedUser = -1;
   boolean isCollectAudio;
+  private Storage stockStore = null;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
@@ -75,6 +77,8 @@ public class UserManager {
     this.langTest = lt;
     this.service = service;
     this.isCollectAudio = isCollectAudio;
+    stockStore = Storage.getLocalStorageIfSupported();
+
   }
 
   // user tracking
@@ -91,9 +95,13 @@ public class UserManager {
     Date expires = new Date(System.currentTimeMillis() + DURATION);
     if (useCookie) {
       Cookies.setCookie("sid", "" + sessionID, expires);
+    } else if (stockStore != null) {
+      stockStore.setItem("userID", "" + sessionID);
+      System.out.println("storeUser : user now " + sessionID + " / " + getUser());
     } else {
       userID = sessionID;
     }
+
     langTest.gotUser(sessionID);
   }
 
@@ -116,12 +124,6 @@ public class UserManager {
     }
   }
 
-  void logout() {
-   // Cookies.setCookie("grader", "");
-
-   // System.out.println("logout : grader now " + getGrader());
-  }
-
   /**
    * @return id of user
    * @see mitll.langtest.client.LangTest#getUser
@@ -133,7 +135,14 @@ public class UserManager {
         return NO_USER_SET;
       }
       return Integer.parseInt(sid);
-    } else {
+    }
+    else if (stockStore != null) {
+      String sid = stockStore.getItem("userID");
+      int i = (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
+      System.out.println("getUser : user = " + i);
+      return i;
+    }
+    else {
       return (int) userID;
     }
   }
@@ -145,7 +154,9 @@ public class UserManager {
     rememberedUser = -1;
     if (useCookie) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
-      logout();
+    } else if (stockStore != null) {
+      stockStore.removeItem("userID");
+      System.out.println("user now " + getUser());
     } else {
       userID = NO_USER_SET;
     }
@@ -572,7 +583,7 @@ public class UserManager {
         }
         try {
           int age = Integer.parseInt(text);
-          closeButton.setEnabled ((age > MIN_AGE && age < MAX_AGE) || age == TEST_AGE);
+          closeButton.setEnabled((age > MIN_AGE && age < MAX_AGE) || age == TEST_AGE);
         } catch (NumberFormatException e) {
           closeButton.setEnabled(false);
         }
