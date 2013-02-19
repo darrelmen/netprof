@@ -137,10 +137,11 @@ public class ResultDAO extends DAO {
    * @see DatabaseImpl#getNextUngradedExerciseSlow
    * @param e
    * @param expected
+   * @param englishOnly
    * @return
    */
-  public boolean areAnyResultsLeftToGradeFor(Exercise e, int expected) {
-    return !getResultsForExercise(e.getID(),expected).isEmpty();
+  public boolean areAnyResultsLeftToGradeFor(Exercise e, int expected, boolean englishOnly) {
+    return !getResultsForExercise(e.getID(),expected, englishOnly).isEmpty();
   }
 
   /**
@@ -148,11 +149,12 @@ public class ResultDAO extends DAO {
    *
    * @see DatabaseImpl#getResultsForExercise(String)
    * @param exerciseID
+   * @param englishOnly
    * @return results that haven't been graded yet
    */
-  private List<Result> getResultsForExercise(String exerciseID, int expected) {
+  private List<Result> getResultsForExercise(String exerciseID, int expected, boolean englishOnly) {
     GradeDAO.GradesAndIDs resultIDsForExercise = gradeDAO.getResultIDsForExercise(exerciseID);
-    return getResultsForExercise(exerciseID, resultIDsForExercise.grades, expected);
+    return getResultsForExercise(exerciseID, resultIDsForExercise.grades, expected, englishOnly);
   }
 
   /**
@@ -160,20 +162,19 @@ public class ResultDAO extends DAO {
    * I.e. those that require some additional grading
    * Does some fancy filtering for english --
    * TODO : Add proper filtering
-   * @see #getResultsForExercise(String, int)
+   * @see #getResultsForExercise(String, int, boolean)
    * @param exerciseID
    * @param gradedResults
    * @param expected if > 1 remove flq results (hack!), if = 2 assumes english-only
-   * @return
+   * @param useEnglishGrades
+   * @return ungraded answers
    */
-  private List<Result> getResultsForExercise(String exerciseID, Collection<Grade> gradedResults, int expected) {
+  private List<Result> getResultsForExercise(String exerciseID, Collection<Grade> gradedResults, int expected, boolean useEnglishGrades) {
     try {
       List<Result> resultsForQuery = getAllResultsForExercise(exerciseID);
       //enrichResults(resultsForQuery,exerciseID);
-      if (debug) System.out.println("for " + exerciseID + " expected " + expected +
+      if (debug) logger.debug("for " + exerciseID + " expected " + expected +
           " before " + resultsForQuery.size() + " results, and " + gradedResults.size() + " grades");
-
-      boolean useEnglishGrades = expected == 2;
 
       // conditionally narrow down to only english results
       // hack!
@@ -184,7 +185,7 @@ public class ResultDAO extends DAO {
         }
       }
 
-      if (debug) System.out.println("\tafter removing flq " + resultsForQuery.size());
+      if (debug) logger.debug("\tafter removing flq " + resultsForQuery.size());
 
       // count the number of grades for each result
       Map<Integer,Integer> idToCount = new HashMap<Integer, Integer>();
@@ -193,10 +194,10 @@ public class ResultDAO extends DAO {
       for (Grade g : gradedResults) {
         Integer countForResult = idToCount.get(g.resultID);
         if (g.grade == Grade.UNASSIGNED) {
-          if (debug) System.out.println("\tgetResultsForExercise : skipping grade " + g); // TODO make sure it skips only ungraded items and that we see ungraded items when we look for the next ungraded exercise
+          if (debug) logger.debug("\tgetResultsForExercise : skipping grade " + g); // TODO make sure it skips only ungraded items and that we see ungraded items when we look for the next ungraded exercise
         }
         else {
-          if (debug) System.out.println("\tgetResultsForExercise : including grade " + g);
+          if (debug) logger.debug("\tgetResultsForExercise : including grade " + g);
 
           if (countForResult == null) idToCount.put(g.resultID, 1);
           else {
@@ -217,9 +218,9 @@ public class ResultDAO extends DAO {
         if (count != null && count >= expected || (useEnglishGrades && englishResultsWithGrades.contains(next.uniqueID))) {
           if (debug) {
             if (count != null && count >= expected)
-              System.out.println("\tremoving graded item for result " + next + " since count = " + count + " vs " + expected);
+              logger.debug("\tremoving graded item for result " + next + " since count = " + count + " vs " + expected);
             else
-              System.out.println("\tremoving graded item for result " + next + " since is english grade");
+              logger.debug("\tremoving graded item for result " + next + " since is english grade");
           }
           iter.remove();
         }
@@ -227,7 +228,8 @@ public class ResultDAO extends DAO {
           //System.out.println("NOT removing graded item for result " + next + " count = " + count);
         }
       }
-      if (debug) System.out.println("\tafter removing graded items count = " + resultsForQuery.size());
+      if (debug || !resultsForQuery.isEmpty()) logger.debug("\tExercise #" + exerciseID + " : " +
+          "after removing graded items count = " + resultsForQuery.size());
 
       return resultsForQuery;
     } catch (Exception ee) {

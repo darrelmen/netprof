@@ -45,7 +45,7 @@ public interface LangTestDatabase extends RemoteService {
                              boolean doAutoCRT, int reqid, boolean flq, String audioType);
   double getScoreForAnswer(Exercise e, int questionID, String answer);
 
-  Exercise getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly);
+  Exercise getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly, boolean englishOnly);
 
   void checkoutExerciseID(String user,String id);
 
