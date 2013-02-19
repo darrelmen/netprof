@@ -253,11 +253,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public Exercise getExercise(String id) {
-    //logger.warn("getExercise Getting exercise "+ id);
     List<Exercise> exercises = getExercises();
     for (Exercise e : exercises) {
       if (id.equals(e.getID())) {
-        //logger.warn("Found exercise "+ e);
         return e;
       }
     }
@@ -265,12 +263,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public Exercise getExercise(String id, long userID, boolean arabicDataCollect) {
-   // logger.warn("getExercise Getting exercise "+ id + " for user " +userID + " use file " + useFile);
-
     List<Exercise> exercises = getExercises(userID, arabicDataCollect);
     for (Exercise e : exercises) {
       if (id.equals(e.getID())) {
-     //   logger.warn("Found exercise "+ e);
         return e;
       }
     }
@@ -303,9 +298,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         autoCRT = new AutoCRT(db.getExport(), this, getInstallPath(), relativeConfigDir);
       }
     }
-    boolean useFile = !props.getProperty(READ_FROM_FILE, "false").equals("false");
-
-    //logger.debug("usefile = " + useFile + " arabic data collect " + arabicDataCollect);
     List<Exercise> exercises;
     if (dataCollectMode) {
       logger.debug("in data collect mode");
@@ -346,17 +338,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return exercises;
   }
 
-  private String setInstallPath(boolean useFile) {
-    String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
-    //logger.warn("use file " + useFile + " collect audio " + collectAudio);
-    if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
-
-    //logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
-    db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, isUrdu, useFile);
-
-    return lessonPlanFile;
-  }
-
   /**
    * Called from the client.
    * @see mitll.langtest.client.exercise.ExerciseList#getExercisesInOrder()
@@ -384,24 +365,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param user
    * @param expectedGrades
    * @param filterForArabicTextOnly
+   * @param englishOnly
    * @return next ungraded exercise
    */
-  public Exercise getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly) {
+  public Exercise getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly, boolean englishOnly) {
     synchronized (this) {
       ConcurrentMap<String,String> stringStringConcurrentMap = userToExerciseID.asMap();
       Collection<String> values = stringStringConcurrentMap.values();
       String currentExerciseForUser = userToExerciseID.getIfPresent(user);
-      logger.debug("for " + user + " current " + currentExerciseForUser);
+      logger.debug("getNextUngradedExercise for " + user + " current " + currentExerciseForUser + " expected " + expectedGrades);
 
       Collection<String> currentActiveExercises = new HashSet<String>(values);
 
       if (currentExerciseForUser != null) {
         currentActiveExercises.remove(currentExerciseForUser); // it's OK to include the one the user is working on now...
       }
-      logger.debug("current set minus " + user + " is " + currentActiveExercises);
+      logger.debug("getNextUngradedExercise current set minus " + user + " is " + currentActiveExercises);
 
       return db.getNextUngradedExercise(currentActiveExercises, expectedGrades,
-          filterForArabicTextOnly, filterForArabicTextOnly, !filterForArabicTextOnly);
+          filterForArabicTextOnly, filterForArabicTextOnly, !filterForArabicTextOnly, englishOnly);
     }
   }
 
@@ -548,7 +530,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public Map<String, String> getProperties() {
-   // if (props == null) readProperties(getServletContext());
     Map<String,String> kv = new HashMap<String, String>();
     for (Object prop : props.keySet()) {
       String sp = (String)prop;
@@ -1071,12 +1052,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     setInstallPath(useFile);
   }
 
+  private String setInstallPath(boolean useFile) {
+    String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
+    if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
+
+    //logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
+    db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, isUrdu, useFile);
+
+    return lessonPlanFile;
+  }
+
   /**
    * The config web.xml file.
    * As a final step, creates the DatabaseImpl!<br></br>
    *
    * Note that this will only ever be called once.
-   * @see #getProperties()
+   * @see #init()
    * @param servletContext
    */
   private void readProperties(ServletContext servletContext) {
@@ -1089,7 +1080,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     String h2DatabaseFile = props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT);
     db = new DatabaseImpl(configDir, h2DatabaseFile);
-    //logger.debug("Db now " + db);
 
     try {
       firstNInOrder = Integer.parseInt(props.getProperty(FIRST_N_IN_ORDER, "" + Integer.MAX_VALUE));
