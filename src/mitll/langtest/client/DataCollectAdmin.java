@@ -34,8 +34,8 @@ import mitll.langtest.shared.Site;
 import java.util.List;
 
 public class DataCollectAdmin extends PagerTable {
-  private UserManager userManager;
-  private LangTestDatabaseAsync service;
+  private final UserManager userManager;
+  private final LangTestDatabaseAsync service;
   private long siteID;
 
 
@@ -81,6 +81,20 @@ public class DataCollectAdmin extends PagerTable {
     name.setSortable(true);
     table.addColumn(name, "Site Name");
 
+    TextColumn<Site> createdBy = new TextColumn<Site>() {
+      @Override
+      public String getValue(Site answer) { return answer.getCreator(); }
+    };
+    createdBy.setSortable(true);
+    table.addColumn(createdBy, "Created By");
+
+    TextColumn<Site> createdOn = new TextColumn<Site>() {
+      @Override
+      public String getValue(Site answer) { return answer.creationDateReadable; }
+    };
+    createdOn.setSortable(true);
+    table.addColumn(createdOn, "Date");
+
     TextColumn<Site> language = new TextColumn<Site>() {
       @Override
       public String getValue(Site answer) { return answer.language; }
@@ -95,12 +109,25 @@ public class DataCollectAdmin extends PagerTable {
     notes.setSortable(true);
     table.addColumn(notes, "Notes");
 
-    TextColumn<Site> exerciseFile = new TextColumn<Site>() {
+    Column<Site, SafeHtml> fileRef = new Column<Site, SafeHtml>(
+        new ClickableSafeHtmlCell()) {
       @Override
-      public String getValue(Site answer) { return answer.exerciseFile; }
+      public SafeHtml getValue(Site answer) {
+        SafeHtmlBuilder sb = new SafeHtmlBuilder();
+        String name = answer.savedExerciseFileName;
+        sb.appendHtmlConstant("<a href='" +
+            "config/dataCollectAdmin/uploads/" +
+            name +
+            "'" +
+            ">");
+        sb.appendEscaped(answer.exerciseFile);
+        sb.appendHtmlConstant("</a>");
+        return sb.toSafeHtml();
+      }
     };
-    exerciseFile.setSortable(true);
-    table.addColumn(exerciseFile, "File");
+
+    fileRef.setSortable(true);
+    table.addColumn(fileRef, "File");
 
     Column<Site, SafeHtml> url = new Column<Site, SafeHtml>(
         new ClickableSafeHtmlCell()) {
@@ -116,7 +143,6 @@ public class DataCollectAdmin extends PagerTable {
     };
 
     table.addColumn(url, "Site URL");
-
 
     Column<Site, SafeHtml> url2 = new Column<Site, SafeHtml>(
         new ClickableSafeHtmlCell()) {
@@ -209,7 +235,7 @@ public class DataCollectAdmin extends PagerTable {
     return dataProvider;
   }
 
-  public void showDialog() {
+  private void showDialog() {
     DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setTitle("Make new data collection site");
    // DOM.setStyleAttribute(dialogBox.getElement(), "backgroundColor", "#ABCDEF");
@@ -222,8 +248,7 @@ public class DataCollectAdmin extends PagerTable {
      * @see mitll.langtest.client.LangTest#doDataCollectAdminView()
      * @param currentExerciseVPanel
      */
-  void makeDataCollectNewSiteForm2(Panel currentExerciseVPanel, final DialogBox dialogBox) {
-
+  private void makeDataCollectNewSiteForm2(Panel currentExerciseVPanel, final DialogBox dialogBox) {
     // Create a FormPanel and point it at a service.
     final FormPanel form = new FormPanel();
     form.addStyleName("table-center");
@@ -293,7 +318,7 @@ public class DataCollectAdmin extends PagerTable {
     final TextBox user = new TextBox();
     user.setName("user");
     user.setVisible(false);
-    user.setText(""+userManager.getUser());
+    user.setText("" + userManager.getUser());
     panel.add(user);
 
     final HTML w6 = new HTML("");
@@ -359,8 +384,7 @@ public class DataCollectAdmin extends PagerTable {
             results = results.split(">")[1].split("<")[0];
           }
           try {
-            long id = 0;
-            id = Long.parseLong(results.trim());
+            long id = Long.parseLong(results.trim());
 
             submit.setEnabled(false);
 
@@ -420,12 +444,14 @@ public class DataCollectAdmin extends PagerTable {
 
           @Override
           public void onSuccess(Boolean result) {
-            if (!result) Window.alert("Please choose another name : " +siteName.getText() + " exists or is invalid.");
-
-            pleaseWait.hide();
-            deployButton.setEnabled(true);
-            dialogBox.hide();
-            refresh();
+            if (!result) {
+              Window.alert("Please choose another name : " + siteName.getText() + " exists or is invalid.");
+            } else {
+              pleaseWait.hide();
+              deployButton.setEnabled(true);
+              dialogBox.hide();
+              refresh();
+            }
           }
         });
       }
