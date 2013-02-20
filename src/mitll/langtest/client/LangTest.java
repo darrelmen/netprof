@@ -126,7 +126,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void run() {}
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
 
-    userManager = new UserManager(this,service, isCollectAudio());
+    userManager = new UserManager(this,service, isCollectAudio(), false);
     resultManager = new ResultManager(service, this);
     monitoringManager = new MonitoringManager(service, props);
     boolean usualLayout = props.getExercise_title() == null;
@@ -201,17 +201,35 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setPageTitle();
 
     VerticalPanel vp = new VerticalPanel();
+    FlowPanel fp1 = new FlowPanel();
+
     vp.addStyleName("grayColor");
     HTML title = new HTML("<h2>" + props.getAppTitle() + "</h2>");
     title.addStyleName("darkerBlueColor");
     title.addStyleName("grayColor");
-    vp.add(title);
+
+    fp1.getElement().getStyle().setFloat(Style.Float.LEFT);
+    fp1.add(title);
+    logout = new Anchor("Logout");
+    logout.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        userManager.clearUser();
+        lastUser = -1;
+        userManager.teacherLogin();
+      }
+    });
+    fp1.add(logout);
+    browserCheck.getBrowserAndVersion();
+
+    HTML statusLine = new HTML("<span><font size=-2>"+browserCheck.browser + " " +browserCheck.ver +" " +
+        props.getReleaseDate()+"</font></span>");
+    fp1.add(statusLine);
+    vp.add(fp1);
 
     vp.add(currentExerciseVPanel);
-    userManager = new UserManager(this,service, false);
+    userManager = new UserManager(this,service, false, props.isDataCollectAdminView());
     dataCollectAdmin = new DataCollectAdmin(userManager,service);
     dataCollectAdmin.makeDataCollectNewSiteForm(currentExerciseVPanel);
-
 
     FlowPanel fp = new FlowPanel();
     fp.getElement().getStyle().setFloat(Style.Float.LEFT);
@@ -221,16 +239,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     browserCheck.checkForCompatibleBrowser();
     userManager.teacherLogin();
   }
-/*
-
-  private void makeDataCollectNewSiteForm(Panel currentExerciseVPanel) {
-
-
-    // form.setAction("url");
-
-    dataCollectAdmin.makeDataCollectNewSiteForm(currentExerciseVPanel);
-  }
-*/
 
   private void setupSoundManager() {
     soundManager = new SoundManagerStatic();
