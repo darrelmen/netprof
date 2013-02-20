@@ -194,4 +194,13 @@ public class UserDAO {
     }
     return idToUser;
   }
+
+  public Map<Long, User> getUserMap() {
+    List<User> users = getUsers();
+    Map<Long, User> idToUser = new HashMap<Long, User>();
+    for (User u : users) {
+      idToUser.put(u.id, u);
+    }
+    return idToUser;
+  }
 }
