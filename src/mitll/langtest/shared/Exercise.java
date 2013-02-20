@@ -19,8 +19,10 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class Exercise extends ExerciseShell  {
+  private static final ArrayList<String> EMPTY_LIST = new ArrayList<String>();
+
   public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE, REPEAT, REPEAT_FAST_SLOW, MULTI_REF }
-  public static final String EN = "en";
+  private static final String EN = "en";
   public static final String FL = "fl";
   private static final boolean DEBUG = false;
   private String plan;
@@ -31,6 +33,7 @@ public class Exercise extends ExerciseShell  {
   private String refAudio;
   private String slowAudioRef;
   private String refSentence;
+  private transient List<String> slots = new ArrayList<String>();
 
   public static class QAPair implements IsSerializable {
     private String question;
@@ -130,13 +133,17 @@ public class Exercise extends ExerciseShell  {
     this.type = EXERCISE_TYPE.REPEAT_FAST_SLOW;
   }
 
-    /**
-    * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
-     * @param lang
-     * @param question
-     * @param answer
-     * @param alternateAnswers
-     */
+  public void addQuestion() {
+    addQuestion(FL, "Please record the sentence above.", "", EMPTY_LIST);
+  }
+
+  /**
+   * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
+   * @param lang
+   * @param question
+   * @param answer
+   * @param alternateAnswers
+   */
   public void addQuestion(String lang, String question, String answer, List<String> alternateAnswers) {
     if (langToQuestion == null) langToQuestion = new HashMap<String, List<QAPair>>();
     List<QAPair> qaPairs = langToQuestion.get(lang);
@@ -192,6 +199,9 @@ public class Exercise extends ExerciseShell  {
     if (en == null) return 0; // should never happen
     return en.size();
   }
+
+  public void addSlot(String s) { if (slots == null) slots= new ArrayList<String>();slots.add(s);}
+  public List<String> getSlots() { return slots; }
 
   public String toString() {
     if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
