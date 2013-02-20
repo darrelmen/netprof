@@ -61,58 +61,10 @@ public class ExcelImport implements ExerciseDAO {
     try {
       logger.info("reading from " +inp);
       Workbook wb = WorkbookFactory.create(inp);
-      Sheet sheet = wb.getSheetAt(0);
-     // System.out.println("sheet " +sheet.getSheetName());
-      Iterator<Row> iter = sheet.rowIterator();
-      int c= 0;
-      int id = 0;
-      boolean gotHeader = false;
-      FileExerciseDAO dao = new FileExerciseDAO(null,false);
-
-      teacherClass = new TeacherClass(-1);
-      Lesson lesson = null;
-
-      int numColumns = 0;
-      for (; iter.hasNext(); ) {
-        Row next = iter.next();
-        //System.out.println("Row #" + next.getRowNum() + " : ");
-      //  if (c++ > 4) break;
-        List<String> columns = new ArrayList<String>();
-        if (!gotHeader) {
-          Iterator<Cell> cellIterator = next.cellIterator();
-          while (cellIterator.hasNext()) {
-            Cell next1 = cellIterator.next();
-            //next1.getCell
-            columns.add(next1.toString().trim());
-          }
-        }
-
-        if (!gotHeader && columns.get(0).toLowerCase().startsWith("Word".toLowerCase())) {
-          gotHeader = true;
-      //    System.out.println("got header line " + columns);
-          numColumns = columns.size();
-        }
-        else {
-          String english = getCell(next, 0);
-          if (gotHeader && english.trim().length() > 0) {
-           // System.out.println("got entry line " +columns);
-            String arabic = getCell(next, 1);
-            String translit = getCell(next, 2);
-            String unit = getCell(next, 3);
-            String chapter = getCell(next, 4);
-            String week = getCell(next, 5);
-            if (lesson == null || !lesson.chapter.equals(chapter)) {
-              lesson = new Lesson(unit,chapter,week);
-              getLessons().add(lesson);
-            }
-            String content = dao.getContent(arabic, translit, english);
-            Exercise imported = new Exercise("import", "" + id++, content, false, true, english);
-            imported.addQuestion(Exercise.FL, "Please record the sentence above.","", EMPTY_LIST);
-
-            exercises.add(imported);
-            lesson.addExercise(imported);
-          }
-        }
+      for (int i = 0; i < wb.getNumberOfSheets(); i++) {
+        Sheet sheet = wb.getSheetAt(i);
+        logger.info("reading sheet " + sheet.getSheetName());
+        readFromSheet(sheet);
       }
 
       inp.close();
@@ -125,6 +77,67 @@ public class ExcelImport implements ExerciseDAO {
       logger.debug("lesson " + l);
     }
     return exercises;
+  }
+
+  private void readFromSheet(Sheet sheet) {
+    // System.out.println("sheet " +sheet.getSheetName());
+    Iterator<Row> iter = sheet.rowIterator();
+    int c= 0;
+    int id = 0;
+    boolean gotHeader = false;
+    FileExerciseDAO dao = new FileExerciseDAO(null,false);
+
+    teacherClass = new TeacherClass(-1);
+    Lesson lesson = null;
+    int colIndexOffset = 0;
+   // int numColumns = 0;
+    for (; iter.hasNext(); ) {
+      Row next = iter.next();
+      //System.out.println("Row #" + next.getRowNum() + " : ");
+    //  if (c++ > 4) break;
+      List<String> columns = new ArrayList<String>();
+      if (!gotHeader) {
+        Iterator<Cell> cellIterator = next.cellIterator();
+        while (cellIterator.hasNext()) {
+          Cell next1 = cellIterator.next();
+          //next1.getCell
+          columns.add(next1.toString().trim());
+        }
+      }
+
+      if (!gotHeader) {
+        for (String col : columns) {
+          if (col.toLowerCase().startsWith("Word".toLowerCase())) {
+            gotHeader = true;
+            colIndexOffset = columns.indexOf(col);
+            System.out.println("got header line " + columns + " col " + col.toLowerCase() + " at " + colIndexOffset);
+            //numColumns = columns.size();
+          }
+        }
+      }
+      else {
+        int colIndex = colIndexOffset;
+        String english = getCell(next, colIndex);
+        if (gotHeader && english.trim().length() > 0) {
+         // System.out.println("got entry line " +columns);
+          String arabic = getCell(next, colIndex++);
+          String translit = getCell(next, colIndex++);
+          String unit = getCell(next, colIndex++);
+          String chapter = getCell(next, colIndex++);
+          String week = getCell(next, colIndex++);
+          if (lesson == null || !lesson.chapter.equals(chapter)) {
+            lesson = new Lesson(unit,chapter,week);
+            getLessons().add(lesson);
+          }
+          String content = dao.getContent(arabic, translit, english);
+          Exercise imported = new Exercise("import", "" + id++, content, false, true, english);
+          imported.addQuestion(Exercise.FL, "Please record the sentence above.","", EMPTY_LIST);
+
+          exercises.add(imported);
+          lesson.addExercise(imported);
+        }
+      }
+    }
   }
 
   private String getCell(Row next, int col) {
