@@ -67,18 +67,20 @@ public class UserManager {
   private int rememberedUser = -1;
   boolean isCollectAudio;
   private Storage stockStore = null;
+  private final boolean isDataCollectAdmin;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    * @param lt
    * @param service
+   * @param isDataCollectAdmin
    */
-  public UserManager(UserNotification lt, LangTestDatabaseAsync service, boolean isCollectAudio) {
+  public UserManager(UserNotification lt, LangTestDatabaseAsync service, boolean isCollectAudio, boolean isDataCollectAdmin) {
     this.langTest = lt;
     this.service = service;
     this.isCollectAudio = isCollectAudio;
     stockStore = Storage.getLocalStorageIfSupported();
-
+    this.isDataCollectAdmin = isDataCollectAdmin;
   }
 
   // user tracking
@@ -256,17 +258,20 @@ public class UserManager {
     register.add(first);
     register.add(new HTML("<b>Last Name</b>"));
     register.add(last);
-    register.add(new HTML("<b>Native Lang (L1)</b>"));
-    register.add(nativeLang);
-    register.add(new HTML("<b>Dialect</b>"));
-    register.add(dialect);
-    register.add(new HTML("<b>Your age</b>"));
-    register.add(ageEntryBox);
-    register.add(new HTML("<b>Select gender</b>"));
-    register.add(genderPanel);
-    register.add(new HTML("<b>Select months of experience</b>"));
-    register.add(new HTML("<b>in this language</b>"));
-    register.add(experiencePanel);
+
+    if (!isDataCollectAdmin) {
+      register.add(new HTML("<b>Native Lang (L1)</b>"));
+      register.add(nativeLang);
+      register.add(new HTML("<b>Dialect</b>"));
+      register.add(dialect);
+      register.add(new HTML("<b>Your age</b>"));
+      register.add(ageEntryBox);
+      register.add(new HTML("<b>Select gender</b>"));
+      register.add(genderPanel);
+      register.add(new HTML("<b>Select months of experience</b>"));
+      register.add(new HTML("<b>in this language</b>"));
+      register.add(experiencePanel);
+    }
 
     reg.setEnabled(true);
     reg.setVisible(false);
@@ -290,7 +295,7 @@ public class UserManager {
             Window.alert("Please use password from the email sent to you.");
             valid = false;
           }
-          else if (checkAudioSelection(regular, fastThenSlow)) {
+          else if (!isDataCollectAdmin && checkAudioSelection(regular, fastThenSlow)) {
             Window.alert("Please choose either regular or regular then slow audio recording.");
             valid = false;
           }
@@ -302,23 +307,23 @@ public class UserManager {
             Window.alert("Last name is empty");
             valid = false;
           }
-          else if (nativeLang.getText().isEmpty()) {
+          else if (!isDataCollectAdmin && nativeLang.getText().isEmpty()) {
             Window.alert("Language is empty");
             valid = false;
           }
-          else if (dialect.getText().isEmpty()) {
+          else if (!isDataCollectAdmin && dialect.getText().isEmpty()) {
             Window.alert("Dialect is empty");
             valid = false;
           }
-          else if (user.getText().isEmpty()) {
+   /*       else if (user.getText().isEmpty()) {
             Window.alert("User id is empty");
             valid = false;
-          }
+          }*/
 
           if (valid) {
             try {
-              int age = Integer.parseInt(ageEntryBox.getText());
-              if ((age < MIN_AGE) || (age > MAX_AGE && age != TEST_AGE)) {
+              int age = getAge(ageEntryBox);
+              if (!isDataCollectAdmin && (age < MIN_AGE) || (age > MAX_AGE && age != TEST_AGE)) {
                 valid = false;
                 Window.alert("age '" + age + "' is too young or old.");
               }
@@ -328,7 +333,7 @@ public class UserManager {
             }
           }
           if (valid) {
-            int enteredAge = Integer.parseInt(ageEntryBox.getText());
+            int enteredAge = getAge(ageEntryBox);
             checkUserOrCreate(enteredAge, user, experienceBox, genderBox, first, last, nativeLang, dialect, dialogBox,
                 login, fastThenSlow.getValue());
           } else {
@@ -367,6 +372,10 @@ public class UserManager {
       }
     });
     show(dialogBox);
+  }
+
+  private int getAge(TextBox ageEntryBox) {
+    return isDataCollectAdmin ? 99: Integer.parseInt(ageEntryBox.getText());
   }
 
   private boolean checkAudioSelection(RadioButton regular, RadioButton fastThenSlow) {
@@ -439,13 +448,6 @@ public class UserManager {
     return trim.equalsIgnoreCase(GRADING) || trim.equalsIgnoreCase(TESTING);
   }
 
-  private void setGraderCookie(String user) {
-    System.out.println("added " + user);
-    final long DURATION = 1000 * 60 * 60 * EXPIRATION_HOURS; //duration remembering login
-    Date expires = new Date(System.currentTimeMillis() + DURATION);
-    Cookies.setCookie("grader", "" + user, expires);
-  }
-
   /**
    * @see #login()
    */
@@ -508,7 +510,7 @@ public class UserManager {
         if (experienceBox.getSelectedIndex() == EXPERIENCE_CHOICES.size() - 1) {
           monthsOfExperience = 20 * 12;
         }
-        service.addUser(Integer.parseInt(ageEntryBox.getText()),
+        service.addUser(getAge(ageEntryBox),
             genderBox.getValue(genderBox.getSelectedIndex()),
             monthsOfExperience, new AsyncCallback<Long>() {
           public void onFailure(Throwable caught) {
