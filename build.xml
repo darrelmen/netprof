@@ -11,6 +11,10 @@
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
 
+    <tstamp>
+        <format property="current.time" pattern="MM/dd_HH"/>
+    </tstamp>
+
     <!-- Arguments to gwtc and devmode targets -->
     <property name="gwt.args" value="" />
     <property name="gwt.lib" value="gwt/lib"/>
@@ -69,8 +73,11 @@
     <target depends="build-subprojects,gwtc" name="build"/>
 
     <target depends="build" name="war">
-        <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**" >      
-    	</jar>
+        <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**" >
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
     </target>
 
     <target depends="build" name="warArabic">
@@ -80,6 +87,9 @@
 
     <target depends="build" name="warLevantine">
         <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**,config/first/**,config/autocrt/**,config/dari/**,config/pilot/**,config/msa/**,config/pashto/**,config/urdu/**,scoring/models.dli-dari/**,scoring/models.wsj01-16/**,scoring/models.dli-ara/**,scoring/models.dli-ara.old/**" >
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
         </jar>
     </target>
 
@@ -91,16 +101,25 @@
     <!-- Makes data collection target -->
     <target depends="build" name="warUrdu">
         <jar destfile="npUrduData.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,answers/**,audioimages/**,scoring/**,config/first/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
         </jar>
     </target>
 
     <target depends="build" name="warArabicVLL">
         <jar destfile="npArabicVLL2.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,answers/**,audioimages/**,scoring/**,config/first/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
         </jar>
     </target>
 
     <target depends="build" name="dataCollectAdmin">
         <jar destfile="dataCollectAdmin.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,WEB-INF/lib/mira.jar,media/**,config/dataCollectAdmin/uploads/**,config/pilot/**,answers/**,fastAndSlowRef/**,audioimages/**,scoring/**,config/first/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
         </jar>
     </target>
 
@@ -113,7 +132,14 @@
 
     <!-- Makes a jar of just the .class files and the javascript, so you can overlay it on an active webapp -->
     <target depends="build" name="patch">
-        <jar destfile="npPatch.war" basedir="war" excludes="WEB-INF/web.xml,WEB-INF/lib/pronz.jar,WEB-INF/lib/poi*.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+
+
+        <jar destfile="npPatch.war" basedir="war"
+             excludes="WEB-INF/web.xml,WEB-INF/lib/pronz.jar,WEB-INF/lib/poi*.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
         </jar>
     </target>
 

@@ -36,7 +36,7 @@ public class DatabaseImpl implements Database {
   public final AnswerDAO answerDAO = new AnswerDAO(this);
   private final GradeDAO gradeDAO = new GradeDAO(this);
   private final GraderDAO graderDAO = new GraderDAO(this);
-  private final SiteDAO siteDAO = new SiteDAO(this);
+  private final SiteDAO siteDAO = new SiteDAO(this, userDAO);
 
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;

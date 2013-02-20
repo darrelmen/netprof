@@ -1,17 +1,22 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -23,11 +28,13 @@ import java.util.List;
 public class SiteDAO extends DAO {
   private static Logger logger = Logger.getLogger(SiteDAO.class);
   private static final boolean DROP_TABLE = false;
+  UserDAO userDAO;
 
   private boolean debug = false;
 
-  public SiteDAO(Database database) {
+  public SiteDAO(Database database, UserDAO userDAO) {
     super(database);
+    this.userDAO = userDAO;
   }
 
   /**
@@ -42,7 +49,9 @@ public class SiteDAO extends DAO {
     long id = 0;
     try {
       Connection connection = database.getConnection();
-      String sql = "INSERT INTO site(creatorID,name,language,notes,file,filepath,feedback,deployed,creationDate) VALUES(?,?,?,?,?,?,?,?,?)";
+      String sql = "INSERT INTO " +
+          "site(creatorID,name,language,notes,file,filepath,feedback,deployed,creationDate) " +
+          "VALUES(?,?,?,?,?,?,?,?,?)";
 
       PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
       int i = 1;
@@ -54,7 +63,8 @@ public class SiteDAO extends DAO {
       statement.setString(i++, filePath);
       statement.setString(i++, feedback);
       statement.setBoolean(i++, deployed);
-      statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
+      long now = System.currentTimeMillis();
+      statement.setTimestamp(i++, new Timestamp(now));
       int j = statement.executeUpdate();
 
       if (j != 1)
@@ -66,7 +76,10 @@ public class SiteDAO extends DAO {
       } else {
         System.err.println("huh? no key was generated?");
       }
-      Site site = new Site(id, creatorID, name, language, notes, file,filePath, feedback, false, System.currentTimeMillis());
+      Map<Long,User> userMap = userDAO.getUserMap();
+      Site site = new Site(id, creatorID, name, language, notes, file, filePath, new File(filePath).getName(), feedback, false, now,
+          getFormat(now));
+      site.setCreator(userMap.get(creatorID).userID);
       statement.close();
       database.closeConnection(connection);
 
@@ -80,6 +93,10 @@ public class SiteDAO extends DAO {
     return null;
   }
 
+  private SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm");
+  private String getFormat(long time) {
+    return sdf.format(new Date(time));
+  }
 
   /**
    *       String sql = "INSERT INTO site(creatorID,name,language,notes,file) VALUES(?,?,?,?,?)";
@@ -89,6 +106,7 @@ public class SiteDAO extends DAO {
       try {
         Connection connection = database.getConnection();
         PreparedStatement statement = connection.prepareStatement("select * from site");
+        Map<Long,User> userMap = userDAO.getUserMap();
 
         ResultSet rs = statement.executeQuery();
         List<Site> sites = new ArrayList<Site>();
@@ -104,7 +122,13 @@ public class SiteDAO extends DAO {
           String feedback = rs.getString(i++);
           boolean deployed = rs.getBoolean(i++);
           long timestamp = rs.getTimestamp(i++).getTime();
-          sites.add(new Site(id, creatorID, name,language, notes,file,filePath, feedback, deployed,timestamp));
+          String name1 = new File(filePath).getName();
+        //  logger.info("name " +name1 + " file path " +filePath + " exists = " + new File(filePath).exists());
+          Site site = new Site(id, creatorID, name, language, notes, file, filePath, name1, feedback, deployed, timestamp,
+              getFormat(timestamp));
+          site.setCreator(userMap.get(creatorID).userID);
+
+          sites.add(site);
         }
         rs.close();
         statement.close();
@@ -122,7 +146,7 @@ public class SiteDAO extends DAO {
       //logger.info("checking " + s + " against " + id);
       if (s.id == id) return s;
     }
-    logger.error("couldn't find site with id " +id);
+    logger.error("couldn't find site with id " + id);
     return null;
   }
 
