@@ -48,6 +48,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 /**
  * Supports all the database interactions.
@@ -95,6 +97,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       .maximumSize(10000)
       .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();
 
+  /**
+   * This allows us to upload an exercise file and create a new {@link Site}.
+   * @see mitll.langtest.client.DataCollectAdmin#makeDataCollectNewSiteForm2
+   * @see SiteDeployer
+   * @param request
+   * @param response
+   * @throws ServletException
+   * @throws IOException
+   */
   @Override
   protected void service(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
@@ -107,21 +118,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         return;
       }
 
-      response.setContentType("text/plain");
-      if (!siteDeployer.checkName(site) || db.siteExists(site)) {
-        response.getWriter().write("Name in use or invalid.");
-      }
-      else if (!site.getExercises().isEmpty()) {
-        Site site1 = db.addSite(site);
-        if (site1 != null) {
-          response.getWriter().write("" + site1.id);
-        } else {
-          response.getWriter().write("Invalid file");
-        }
-      } else {
-        response.getWriter().write("Invalid file");
-      }
-   //   response.flushBuffer();
+      siteDeployer.doSiteResponse(db,response, siteDeployer, site);
     } else {
       super.service(request, response);
     }
@@ -1075,7 +1072,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     this.relativeConfigDir = "config" + File.separator + config;
     this.configDir = getInstallPath() + File.separator + relativeConfigDir;
 
-    //logger.info("rel config dir " + relativeConfigDir);
     readPropertiesFile();
 
     String h2DatabaseFile = props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT);
@@ -1093,6 +1089,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     biasTowardsUnanswered = !props.getProperty(BIAS_TOWARDS_UNANSWERED, "true").equals("false");
     useOutsideResultCounts = !props.getProperty(USE_OUTSIDE_RESULT_COUNTS, "true").equals("false");
     outsideFile = props.getProperty(OUTSIDE_FILE, OUTSIDE_FILE_DEFAULT);
+    String dateFromManifest = getDateFromManifest(servletContext);
+    if (dateFromManifest != null && dateFromManifest.length() > 0) {
+      logger.debug("Date from manifest " + dateFromManifest);
+      props.setProperty("releaseDate",dateFromManifest);
+    }
+  }
+
+  private String getDateFromManifest(ServletContext servletContext) {
+    InputStream inputStream = servletContext.getResourceAsStream("/META-INF/MANIFEST.MF");
+
+    try {
+      Manifest manifest = new Manifest(inputStream);
+      Attributes attributes = manifest.getMainAttributes();
+      return attributes.getValue("Built-Date");
+    }
+    catch(Exception ex) {
+//      logger.warn("Error while reading version: " + ex.getMessage());
+    }
+    return "";
   }
 
   private void readPropertiesFile() {
