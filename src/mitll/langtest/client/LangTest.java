@@ -67,7 +67,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int EAST_WIDTH = 90;
 
   public static final String LANGTEST_IMAGES = "langtest/images/";
-  private DataCollectAdmin dataCollectAdmin;
 
   private Panel currentExerciseVPanel = new VerticalPanel();
   private ListInterface exerciseList;
@@ -214,7 +213,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     users = new Anchor("Users");
     users.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        userTable.showUsers(service, userManager.getUser());
+        userTable.showUsers(service, userManager.getUser(), true);
       }
     });
     fp1.add(users);
@@ -238,7 +237,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     vp.add(currentExerciseVPanel);
     userManager = new UserManager(this,service, false, props.isDataCollectAdminView());
-    dataCollectAdmin = new DataCollectAdmin(userManager,service);
+    DataCollectAdmin dataCollectAdmin = new DataCollectAdmin(userManager, service);
     dataCollectAdmin.makeDataCollectNewSiteForm(currentExerciseVPanel);
 
     FlowPanel fp = new FlowPanel();
@@ -462,7 +461,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     users = new Anchor("Users");
     users.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        userTable.showUsers(service,userManager.getUser());
+        userTable.showUsers(service,userManager.getUser(),false);
       }
     });
     vp.add(users);
