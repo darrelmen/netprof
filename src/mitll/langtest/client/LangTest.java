@@ -201,7 +201,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setPageTitle();
 
     VerticalPanel vp = new VerticalPanel();
-    FlowPanel fp1 = new FlowPanel();
+    VerticalPanel fp1 = new VerticalPanel();
 
     vp.addStyleName("grayColor");
     HTML title = new HTML("<h2>" + props.getAppTitle() + "</h2>");
@@ -210,6 +210,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     fp1.getElement().getStyle().setFloat(Style.Float.LEFT);
     fp1.add(title);
+
+    users = new Anchor("Users");
+    users.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        userTable.showUsers(service, userManager.getUser());
+      }
+    });
+    fp1.add(users);
+    userManager = new UserManager(this,service, isCollectAudio(), false);
+
     logout = new Anchor("Logout");
     logout.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
@@ -238,6 +248,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     browserCheck.checkForCompatibleBrowser();
     userManager.teacherLogin();
+  }
+
+  private void checkForAdminUser() {
+    service.isAdminUser(userManager.getUser(), new AsyncCallback<Boolean>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        Window.alert("Can't contact server");
+      }
+
+      @Override
+      public void onSuccess(Boolean result) {
+        users.setVisible(result);
+      }
+    });
   }
 
   private void setupSoundManager() {
@@ -438,7 +462,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     users = new Anchor("Users");
     users.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        userTable.showUsers(service);
+        userTable.showUsers(service,userManager.getUser());
       }
     });
     vp.add(users);
@@ -501,7 +525,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void gotUser(long userID) {
 //    System.out.println("got user " +userID);
     if (props.isDataCollectAdminView()) {
-      // go get list of current deployed sites
+      checkForAdminUser();
     } else {
       setFactory();
 
