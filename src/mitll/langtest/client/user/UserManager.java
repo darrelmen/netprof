@@ -28,10 +28,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.shared.Result;
 
-import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -49,7 +45,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class UserManager {
-  private static final int EXPIRATION_HOURS = 240;
+  private static final int EXPIRATION_HOURS = 24*7;
   private static final int MIN_AGE = 6;
   private static final int MAX_AGE = 90;
   private static final int TEST_AGE = 100;
@@ -68,8 +64,7 @@ public class UserManager {
   private final UserNotification langTest;
   private final boolean useCookie = false;
   private long userID = NO_USER_SET;
-  private int rememberedUser = -1;
-  boolean isCollectAudio;
+  private boolean isCollectAudio;
   private Storage stockStore = null;
   private final boolean isDataCollectAdmin;
 
@@ -98,12 +93,15 @@ public class UserManager {
   private void storeUser(long sessionID) {
     System.out.println("storeUser : user now " + sessionID);
     final long DURATION = 1000 * 60 * 60 * EXPIRATION_HOURS; //duration remembering login
-    Date expires = new Date(System.currentTimeMillis() + DURATION);
+    long now = System.currentTimeMillis();
+    long futureMoment = now + DURATION;
     if (useCookie) {
+      Date expires = new Date(futureMoment);
       Cookies.setCookie("sid", "" + sessionID, expires);
     } else if (stockStore != null) {
       stockStore.setItem("userID", "" + sessionID);
-      System.out.println("storeUser : user now " + sessionID + " / " + getUser());
+      stockStore.setItem("expires", "" + futureMoment);
+      System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " expires in " + (DURATION/1000) + " seconds");
     } else {
       userID = sessionID;
     }
@@ -144,12 +142,32 @@ public class UserManager {
     }
     else if (stockStore != null) {
       String sid = stockStore.getItem("userID");
-      int i = (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
-      //System.out.println("getUser : user = " + i);
-      return i;
+      if (sid != null && !sid.equals("" + NO_USER_SET)) {
+        checkExpiration(sid);
+        sid = stockStore.getItem("userID");
+      }
+      return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
     }
     else {
       return (int) userID;
+    }
+  }
+
+  private void checkExpiration(String sid) {
+    String expires = stockStore.getItem("expires");
+    if (expires == null) {
+      System.out.println("no expires item");
+    }
+    else {
+      try {
+        long expirationDate = Long.parseLong(expires);
+        if (expirationDate < System.currentTimeMillis()) {
+          System.out.println(sid + " has expired.");
+          clearUser();
+        }
+      } catch (NumberFormatException e) {
+        e.printStackTrace();
+      }
     }
   }
 
@@ -157,7 +175,6 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#getLogout()
    */
   public void clearUser() {
-    rememberedUser = -1;
     if (useCookie) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
     } else if (stockStore != null) {
@@ -210,10 +227,6 @@ public class UserManager {
 
     // We can set the id of a widget by accessing its Element
     login.getElement().setId("login");
-
-    KeyUpHandler keyHandler = new GraderMyKeyUpHandler(user, login, reg, password, false);
-    user.addKeyUpHandler(keyHandler);
-    password.addKeyUpHandler(keyHandler);
 
     VerticalPanel dialogVPanel = new VerticalPanel();
     dialogVPanel.addStyleName("dialogVPanel");
@@ -319,10 +332,6 @@ public class UserManager {
             Window.alert("Dialect is empty");
             valid = false;
           }
-   /*       else if (user.getText().isEmpty()) {
-            Window.alert("User id is empty");
-            valid = false;
-          }*/
 
           if (valid) {
             try {
@@ -357,22 +366,32 @@ public class UserManager {
     login.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         // System.out.println("login button got click " + event);
-        if (rememberedUser == -1) {
-          if (checkPassword(password)) {
-            Window.alert("please register -- " + user.getText() + " has not registered");
-          } else {
-            Window.alert("please use password from the email");
+
+        service.userExists(user.getText(), new AsyncCallback<Integer>() {
+          public void onFailure(Throwable caught) {
+            Window.alert("Couldn't contact server");
           }
-        } else {
-          if (checkAudioSelection(regular, fastThenSlow)) {
-            Window.alert("Please choose either regular or regular then slow audio recording.");
+
+          public void onSuccess(Integer result) {
+            boolean exists = result != -1;
+            if (exists) {
+              if (checkAudioSelection(regular, fastThenSlow)) {
+                Window.alert("Please choose either regular or regular then slow audio recording.");
+              } else {
+                dialogBox.hide();
+                storeAudioType(fastThenSlow.getValue() ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR);
+                storeUser(result);
+              }
+            } else {
+              System.out.println(user.getText() + " doesn't exist");
+              if (checkPassword(password)) {
+                Window.alert("Please register -- " + user.getText() + " has not registered");
+              } else {
+                Window.alert("Please use password from the email");
+              }
+            }
           }
-          else {
-            dialogBox.hide();
-            storeAudioType(fastThenSlow.getValue() ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR);
-            storeUser(rememberedUser);
-          }
-        }
+        });
       }
     });
     show(dialogBox);
@@ -386,6 +405,20 @@ public class UserManager {
     return isCollectAudio && !regular.getValue() && !fastThenSlow.getValue();
   }
 
+  /**
+   * @see #displayTeacherLogin()
+   * @param enteredAge
+   * @param user
+   * @param experienceBox
+   * @param genderBox
+   * @param first
+   * @param last
+   * @param nativeLang
+   * @param dialect
+   * @param dialogBox
+   * @param closeButton
+   * @param isFastAndSlow
+   */
   private void checkUserOrCreate(final int enteredAge, final TextBox user, final ListBox experienceBox,
                                  final ListBox genderBox,
                                  final TextBox first, final TextBox last,
@@ -397,14 +430,12 @@ public class UserManager {
 
       public void onSuccess(Integer result) {
         System.out.println("user '" + user.getText() + "' exists " + result);
-        rememberedUser = -1;
-        if (result != -1) {
-          rememberedUser = result;
-          Window.alert("User " + user.getText() + " already registered, click login.");
-        }
-        else {
+        if (result == -1) {
           addTeacher(enteredAge,
               experienceBox, genderBox, first, last, nativeLang, dialect, user, dialogBox, closeButton, isFastAndSlow);
+        }
+        else {
+          Window.alert("User " + user.getText() + " already registered, click login.");
         }
       }
     });
@@ -437,12 +468,10 @@ public class UserManager {
           }
 
           public void onSuccess(Long result) {
-            System.out.println("server result is " + result);
-            long result1 = result;
-            rememberedUser = (int) result1;
+            System.out.println("addUser : server result is " + result);
             dialogBox.hide();
             storeAudioType(isFastAndSlow ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR);
-            storeUser(rememberedUser);
+            storeUser(result);
           }
         });
   }
@@ -519,13 +548,13 @@ public class UserManager {
             monthsOfExperience, new AsyncCallback<Long>() {
           public void onFailure(Throwable caught) {
             // Show the RPC error message to the user
-            dialogBox.setText("Remote Procedure Call - Failure");
+            dialogBox.setText("Couldn't contact server.");
             dialogBox.center();
             closeButton.setFocus(true);
           }
 
           public void onSuccess(Long result) {
-            System.out.println("server result is " + result);
+            System.out.println("addUser : server result is " + result);
             storeUser(result);
           }
         });
@@ -596,38 +625,5 @@ public class UserManager {
       }
     });
     return closeButton;
-  }
-
-  private class GraderMyKeyUpHandler implements KeyUpHandler {
-    private final TextBox user;
-    private final TextBox password;
-
-    public GraderMyKeyUpHandler(TextBox user, Button closeButton, Button regButton, TextBox password, boolean isGrader) {
-      this.user = user;
-      this.password = password;
-    }
-
-    public void onKeyUp(KeyUpEvent event) {
-      String text = user.getText();
-      if (text.length() == 0) {
-        return;
-      }
-
-      service.userExists(text, new AsyncCallback<Integer>() {
-        public void onFailure(Throwable caught) {
-        }
-
-        public void onSuccess(Integer result) {
-          // System.out.println("user '" + user.getText() + "' exists " + result);
-          boolean passwordMatch = checkPassword(password);
-          rememberedUser = -1;
-          if (passwordMatch) {
-            if (result != -1) {
-              rememberedUser = result;
-            }
-          }
-        }
-      });
-    }
   }
 }
