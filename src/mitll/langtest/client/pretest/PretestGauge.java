@@ -24,9 +24,31 @@ public class PretestGauge extends HTML{
 	private PopupPanel tooltip;
 	private HTML tooltipLabel;
 
-	float[][] colormap = {{255f, 0f, 0f}, {255f, 32f, 0f}, {255f, 64f, 0f}, {255f, 128f, 0f}, {255f, 192f, 0f}, {255f, 255f, 0f},             
+/*	float[][] colormap = {{255f, 0f, 0f}, {255f, 32f, 0f}, {255f, 64f, 0f}, {255f, 128f, 0f}, {255f, 192f, 0f}, {255f, 255f, 0f},
 		{192f, 255f, 0f}, {128f, 255f, 0f}, {64f, 255f, 0f}, {32f, 255f, 0f}, {32f, 255f, 0f}, {32f, 255f, 0f}, {32f, 255f, 0f},
-		{0f, 255f, 0f}, {0f, 255f, 0f}, {0f, 255f, 0f}};
+		{0f, 255f, 0f}, {0f, 255f, 0f}, {0f, 255f, 0f}};*/
+
+  String [] colors = {
+    "#FF1600","#FF2D00",
+ "#FF4600",
+ "#FF7300",
+"#FFA000",
+ "#FFCD00",
+ "#FFF900",
+ "#D9FF00",
+ "#ADFF00",
+ "#80FF00",
+ "#53FF00",
+ "#33FF00",
+ "#20FF00",
+ "#20FF00",
+ "#20FF00",
+ "#20FF00",
+ "#20FF00",
+ "#0DFF00",
+ "#00FF00",
+ "#00FF00"
+  };
 
 	public PretestGauge(String id, String instructions){
 		this.id = id;
@@ -41,7 +63,6 @@ public class PretestGauge extends HTML{
 		tooltipLabel.setStyleName("Tooltip");
 
 		tooltip.setWidget(tooltipLabel);
-		
 
 		addMouseOverHandler(new PretestGaugeMouseOverHandler());
 		addMouseOutHandler(new PretestGaugeMouseOutHandler());
@@ -187,7 +208,7 @@ public class PretestGauge extends HTML{
 		}
 	}
 
-	public String getColor(float score){ 
+/*	public String getColor(float score){
 		float nf = Math.max(score, 0.0f) * (float) (colormap.length - 2);
 		int idx = (int) Math.floor(nf);
 		int[] color = {0, 0, 0};
@@ -196,9 +217,9 @@ public class PretestGauge extends HTML{
 		}
 
 		return "#" + getHexNumber(color[0]) + getHexNumber(color[1]) + getHexNumber(color[2]);
-	}
+	}*/
 
-	public String getHexNumber(int number){
+/*	public String getHexNumber(int number){
 		String hexString = Integer.toHexString(number).toUpperCase();
 
 		if(hexString.length() == 0){
@@ -210,5 +231,5 @@ public class PretestGauge extends HTML{
 		else{
 			return hexString;
 		}
-	}
+	}*/
 }
