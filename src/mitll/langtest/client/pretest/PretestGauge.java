@@ -28,28 +28,34 @@ public class PretestGauge extends HTML{
 		{192f, 255f, 0f}, {128f, 255f, 0f}, {64f, 255f, 0f}, {32f, 255f, 0f}, {32f, 255f, 0f}, {32f, 255f, 0f}, {32f, 255f, 0f},
 		{0f, 255f, 0f}, {0f, 255f, 0f}, {0f, 255f, 0f}};*/
 
-  String [] colors = {
-    "#FF1600","#FF2D00",
- "#FF4600",
- "#FF7300",
-"#FFA000",
- "#FFCD00",
- "#FFF900",
- "#D9FF00",
- "#ADFF00",
- "#80FF00",
- "#53FF00",
- "#33FF00",
- "#20FF00",
- "#20FF00",
- "#20FF00",
- "#20FF00",
- "#20FF00",
- "#0DFF00",
- "#00FF00",
- "#00FF00"
+  private String[] colors = {
+      "#FF1600",
+      "#FF2D00",
+      "#FF4600",
+      "#FF7300",
+      "#FFA000",
+      "#FFCD00",
+      "#FFF900",
+      "#D9FF00",
+      "#ADFF00",
+      "#80FF00",
+      "#53FF00",
+      "#33FF00",
+      "#20FF00",
+      "#20FF00",
+      "#20FF00",
+      "#20FF00",
+      "#20FF00",
+      "#0DFF00",
+      "#00FF00",
+      "#00FF00"
   };
 
+  /**
+   * @see mitll.langtest.client.gauge.ASRScorePanel
+   * @param id
+   * @param instructions
+   */
 	public PretestGauge(String id, String instructions){
 		this.id = id;
 
@@ -67,6 +73,22 @@ public class PretestGauge extends HTML{
 		addMouseOverHandler(new PretestGaugeMouseOverHandler());
 		addMouseOutHandler(new PretestGaugeMouseOutHandler());
 	}
+
+  public String getColor(float score){
+    if (score > 1.0f) {
+      Window.alert("ERROR: getColor: score > 1");
+      return "#000000";
+    }
+    float nf = Math.max(score, 0.0f) * (float) (colors.length-1);
+    int idx = (int) Math.floor(nf);
+   // System.out.println("score " + score + " colors " + colors.length + " " + idx);
+    if (idx > colors.length-1) {
+      System.out.println("huh? score " + score + " colors " + colors.length + " " + idx + " had to make sure it didn't go over");
+
+      idx = colors.length-1;
+    }
+    return colors[idx];
+  }
 
 	public native void createCanvasElement() /*-{
         var wrapper = $doc.getElementById(this.@mitll.langtest.client.pretest.PretestGauge::id + "Container");
@@ -207,29 +229,4 @@ public class PretestGauge extends HTML{
 			tooltip.hide();
 		}
 	}
-
-/*	public String getColor(float score){
-		float nf = Math.max(score, 0.0f) * (float) (colormap.length - 2);
-		int idx = (int) Math.floor(nf);
-		int[] color = {0, 0, 0};
-		for (int cc = 0; cc < 3; cc++){
-			color[cc] = Math.round((colormap[idx + 1][cc] - colormap[idx][cc]) * (nf - (float) idx) + colormap[idx][cc]);
-		}
-
-		return "#" + getHexNumber(color[0]) + getHexNumber(color[1]) + getHexNumber(color[2]);
-	}*/
-
-/*	public String getHexNumber(int number){
-		String hexString = Integer.toHexString(number).toUpperCase();
-
-		if(hexString.length() == 0){
-			return "00";
-		}
-		else if(hexString.length() == 1){
-			return "0" + hexString;
-		}
-		else{
-			return hexString;
-		}
-	}*/
 }
