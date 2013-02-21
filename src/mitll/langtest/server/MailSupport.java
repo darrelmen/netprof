@@ -13,6 +13,7 @@ import java.util.Properties;
 
 public class MailSupport {
   private static final String SWADE = "swade@ll.mit.edu";
+  private static final String RECIPIENT_NAME = "Gordon Vidaver";
   private static Logger logger = Logger.getLogger(MailSupport.class);
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final boolean DEBUG_MAIL = false;
@@ -50,7 +51,7 @@ public class MailSupport {
 
 
   public void email(String subject, String message) {
-    normalEmail("Gordon Vidaver", EMAIL, new ArrayList<String>(),subject, message,"localhost");
+    normalEmail(RECIPIENT_NAME, EMAIL, new ArrayList<String>(),subject, message,"localhost");
   }
 
   public void email(String recipientName, String recipientEmail, String subject, String message) {

@@ -51,8 +51,8 @@ public class UserDAO extends DAO {
       PreparedStatement statement;
 
       statement = connection.prepareStatement(
-          "INSERT INTO users(id,age,gender,experience,ipaddr,firstName,lastName,nativeLang,dialect, userID) " +
-          "VALUES(?,?,?,?,?,?,?,?,?,?);");
+          "INSERT INTO users(id,age,gender,experience,ipaddr,firstName,lastName,nativeLang,dialect, userID,enabled) " +
+          "VALUES(?,?,?,?,?,?,?,?,?,?,?);");
       int i = 1;
       long newID = max + 1;
       statement.setLong(i++, newID);
@@ -149,7 +149,7 @@ public class UserDAO extends DAO {
     database.closeConnection(connection);
 
     int numColumns = getNumColumns(connection, "users");
-    if (numColumns < 14) {
+    if (numColumns < 13) {
       statement = connection.prepareStatement("ALTER TABLE users ADD enabled BOOLEAN");
       statement.execute();
       statement.close();
