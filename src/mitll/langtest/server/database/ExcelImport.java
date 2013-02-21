@@ -40,7 +40,7 @@ import java.util.TreeMap;
 public class ExcelImport implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(ExcelImport.class);
 
-  private List<Exercise> exercises = new ArrayList<Exercise>();
+  private List<Exercise> exercises = null;
   private List<Lesson> lessons = new ArrayList<Lesson>();
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
 
@@ -53,7 +53,7 @@ public class ExcelImport implements ExerciseDAO {
 
   public List<Exercise> getRawExercises() {
     synchronized (this) {
-      if (exercises.isEmpty()) {
+      if (exercises == null) {
         exercises = readExercises(new File(file));
       }
     }
@@ -78,23 +78,37 @@ public class ExcelImport implements ExerciseDAO {
   public List<Exercise> readExercises(InputStream inp) {
     List<Exercise> exercises = new ArrayList<Exercise>();
     try {
-      logger.info("reading from " +inp);
+      //logger.info("reading from " +inp);
       teacherClass = new TeacherClass(-1);
       Workbook wb = WorkbookFactory.create(inp);
 
       for (int i = 0; i < wb.getNumberOfSheets(); i++) {
         Sheet sheet = wb.getSheetAt(i);
         if (sheet.getPhysicalNumberOfRows() > 0) {
-          //logger.info("------------ reading sheet " + sheet.getSheetName() + " ------------------");
+          logger.info("------------ reading sheet " + sheet.getSheetName() + " ------------------");
           Collection<Exercise> exercises1 = readFromSheet(sheet);
           exercises.addAll(exercises1);
-          //logger.info("sheet " + sheet.getSheetName() + " had " + exercises1.size() + " items.");
+          logger.info("sheet " + sheet.getSheetName() + " had " + exercises1.size() + " items.");
           //for (Exercise e: exercises1) logger.info("ex " +e.getID() + " " +e.getSlots());
         }
       }
+
       if (!errors.isEmpty()) {
-        logger.warn("there were " + errors.size() + " errors.");
+        logger.warn("there were " + errors.size() + " errors");
+        for (String error : errors) {
+          logger.warn(error);
+        }
       }
+      for (String key : typeToUnitToLesson.keySet()) {
+        Map<String, Lesson> categoryToLesson = typeToUnitToLesson.get(key);
+        lessons.addAll(categoryToLesson.values());
+        Set<String> sections = categoryToLesson.keySet();
+        if (!sections.isEmpty()) logger.debug(key+ " : " + sections);
+      }
+
+/*      if (!errors.isEmpty()) {
+        logger.warn("there were " + errors.size() + " errors : " + errors);
+      }*/
 
       inp.close();
     } catch (IOException e) {
@@ -171,7 +185,7 @@ public class ExcelImport implements ExerciseDAO {
       else {
         int colIndex = colIndexOffset;
         String english = getCell(next, colIndex++).trim();
-        String foreignLanguagePhrase = getCell(next, colIndex);
+        String foreignLanguagePhrase = getCell(next, colIndex).trim();
         //logger.info("for row " + next.getRowNum() + " english = " + english + " in merged " + inMergedRow + " last row " + lastRowValues.size());
 
         if (inMergedRow && !lastRowValues.isEmpty()) {
@@ -190,7 +204,8 @@ public class ExcelImport implements ExerciseDAO {
           }
           if (foreignLanguagePhrase.length() == 0) {
             //logger.warn("Got empty foreign language phrase row #" + next.getRowNum() +" for " + english);
-            errors.add("On row #" +next.getRowNum() + " foreign language phrase was blank.");
+            errors.add(sheet.getSheetName()+"/"+
+                "row #" +(next.getRowNum()+1) + " phrase was blank.");
           } else {
             String translit = getCell(next, transliterationIndex);
 
@@ -220,16 +235,10 @@ public class ExcelImport implements ExerciseDAO {
             }
           }
         } else if (gotHeader && foreignLanguagePhrase.length() > 0) {
-          errors.add("On " +sheet.getSheetName()+"/"+
-              "row #" +next.getRowNum() + " Word/Expression was blank but phrase was " +foreignLanguagePhrase);
+          errors.add(sheet.getSheetName()+"/"+
+              "row #" +(next.getRowNum()+1) + " Word/Expression was blank");// but phrase was " +foreignLanguagePhrase);
         }
       }
-    }
-    logger.warn("errors " +errors.subList(0,Math.min(errors.size(),10)));
-    for (String key : typeToUnitToLesson.keySet()) {
-      Map<String, Lesson> categoryToLesson = typeToUnitToLesson.get(key);
-      lessons.addAll(categoryToLesson.values());
-      logger.debug(key+ " : " + categoryToLesson.keySet());
     }
 
     return exercises;
