@@ -56,7 +56,7 @@ public class PropertyHandler {
   private static final boolean DEFAULT_GOODWAVE_MODE = false;
   private static final boolean DEFAULT_ARABIC_TEXT_COLLECT = false;
   private static final boolean DEFAULT_SHOW_TURK_TOKEN = false;
-  private static final int DEFAULT_SEGMENT_REPEATS = 2;
+  private static final int DEFAULT_SEGMENT_REPEATS = 1;
   private static final int DEFAULT_TIMEOUT = 45000;
   private static final String DEFAULT_EXERCISE = null;
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
@@ -107,7 +107,7 @@ public class PropertyHandler {
       else if (key.equals(ARABIC_TEXT_DATA_COLLECT)) arabicTextDataCollect = getBoolean(value);
       else if (key.equals(SHOW_TURK_TOKEN)) showTurkToken = getBoolean(value);
       else if (key.equals(APP_TITLE)) appTitle = value;
-      else if (key.equals(SEGMENT_REPEATS)) segmentRepeats = getInt(value,0,SEGMENT_REPEATS)-1;
+      else if (key.equals(SEGMENT_REPEATS)) segmentRepeats = getInt(value,DEFAULT_SEGMENT_REPEATS,SEGMENT_REPEATS)-1;
       else if (key.equals(READ_FROM_FILE)) readFromFile = getBoolean(value);
       else if (key.equals(RELEASE_DATE)) releaseDate = value;
       else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = getBoolean(value);
