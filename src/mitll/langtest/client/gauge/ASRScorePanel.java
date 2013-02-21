@@ -48,9 +48,9 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   //private final GChart phoneAccuracyChart;
   private final List<Float> scores = new ArrayList<Float>();
 
-  private final float[][] colormap = RYB_COLOR_MAP;
+  //private final float[][] colormap = RYB_COLOR_MAP;
 
-  private static final float[][] RYB_COLOR_MAP = {{255f, 0f, 0f}, // red
+/*  private static final float[][] RYB_COLOR_MAP = {{255f, 0f, 0f}, // red
       {255f, 32f, 0f},
       {255f, 64f, 0f},
       {255f, 128f, 0f},
@@ -60,7 +60,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
       {128f, 255f, 0f},
       {64f, 255f, 0f},
       {32f, 255f, 0f},
-      {0f, 255f, 0f}};  // green
+      {0f, 255f, 0f}};  // green*/
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
@@ -342,6 +342,10 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
 
   private String getColor(float score){
+    return ASRGauge.getColor(score);
+	}
+    /*
+  private String oldGetColor(float score){
 	  if (score > 1.0) {
 	    Window.alert("ERROR: getColor: score > 1");
 	    return "#000000";
@@ -354,7 +358,8 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 		}
 
 		return "#" + getHexNumber(color[0]) + getHexNumber(color[1]) + getHexNumber(color[2]);
-	}
+  }
+
 
 	private String getHexNumber(int number){
 		String hexString = Integer.toHexString(number).toUpperCase();
@@ -368,5 +373,5 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 		else{
 			return hexString;
 		}
-	}
+	}*/
 }
