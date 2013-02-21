@@ -12,7 +12,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -67,7 +66,23 @@ public class DataCollectAdmin extends PagerTable {
     child.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        showDialog();
+        long user = userManager.getUser();
+        service.isEnabledUser(user, new AsyncCallback<Boolean>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            Window.alert("Can't contact server.");
+          }
+
+          @Override
+          public void onSuccess(Boolean result) {
+            if (result) {
+              showDialog();
+            } else {
+              Window.alert("Please wait to be allowed access.");
+            }
+          }
+        });
+
       }
     });
   }

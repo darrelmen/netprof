@@ -99,4 +99,9 @@ public interface LangTestDatabase extends RemoteService {
   Map<String, Map<Integer, Integer>> getResultCountsByGender();
   Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts();
 
+  boolean isAdminUser(long id);
+
+  void setUserEnabled(long id, boolean enabled);
+
+  boolean isEnabledUser(long id);
 }
