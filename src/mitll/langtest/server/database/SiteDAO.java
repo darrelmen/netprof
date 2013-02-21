@@ -83,9 +83,9 @@ public class SiteDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
 
-      for (Site s: getSites()) {
+/*      for (Site s: getSites()) {
         logger.info("now " +s);
-      }
+      }*/
       return site;
     } catch (Exception e) {
       logger.error("addSite: got " +e,e);
@@ -126,7 +126,9 @@ public class SiteDAO extends DAO {
         //  logger.info("name " +name1 + " file path " +filePath + " exists = " + new File(filePath).exists());
           Site site = new Site(id, creatorID, name, language, notes, file, filePath, name1, feedback, deployed, timestamp,
               getFormat(timestamp));
-          site.setCreator(userMap.get(creatorID).userID);
+          User user = userMap.get(creatorID);
+
+          site.setCreator(user == null ? ("unknown#"+creatorID) : user.userID);
 
           sites.add(site);
         }
