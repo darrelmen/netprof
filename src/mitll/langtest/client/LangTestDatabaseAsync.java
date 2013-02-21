@@ -88,4 +88,10 @@ public interface LangTestDatabaseAsync {
   void deploySite(long id, String name, String language, String notes, AsyncCallback<Boolean> async);
 
   void getSites(AsyncCallback<List<Site>> async);
+
+  void isAdminUser(long id, AsyncCallback<Boolean> async);
+
+  void setUserEnabled(long id, boolean enabled, AsyncCallback<Void> async);
+
+  void isEnabledUser(long id, AsyncCallback<Boolean> async);
 }
