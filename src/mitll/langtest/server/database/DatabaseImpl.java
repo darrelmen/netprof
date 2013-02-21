@@ -578,6 +578,20 @@ public class DatabaseImpl implements Database {
     return newList;
   }
 
+  public boolean isAdminUser(long id) {
+    User user = userDAO.getUserMap().get(id);
+    return user != null && user.admin;
+  }
+
+  public void setUserEnabled(long id, boolean enabled) {
+    userDAO.enableUser(id,enabled);
+  }
+
+  public boolean isEnabledUser(long id) {
+    User user = userDAO.getUserMap().get(id);
+    return user != null && user.enabled;
+  }
+
 
   private static class ResultAndGrade implements Comparable<ResultAndGrade> {
     private Result result;
@@ -665,12 +679,12 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public long addUser(int age, String gender, int experience, String ipAddr) {
-    return userDAO.addUser(age, gender, experience, ipAddr, "", "", "", "", "");
+    return userDAO.addUser(age, gender, experience, ipAddr, "", "", "", "", "", false);
   }
 
   public long addUser(int age, String gender, int experience, String ipAddr, String firstName, String lastName,
                       String nativeLang,String dialect, String userID) {
-    return userDAO.addUser(age, gender, experience, ipAddr, firstName, lastName, nativeLang, dialect, userID);
+    return userDAO.addUser(age, gender, experience, ipAddr, firstName, lastName, nativeLang, dialect, userID, false);
   }
 
 
