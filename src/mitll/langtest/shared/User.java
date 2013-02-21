@@ -20,6 +20,8 @@ public class User implements IsSerializable {
   public long timestamp;
   public String firstName,lastName,nativeLang,dialect;
   public String userID;
+  public boolean enabled;
+  public boolean admin;
 
   public User() {} // for serialization
 
@@ -33,9 +35,11 @@ public class User implements IsSerializable {
    * @param password
    * @param userID
    * @param timestamp
+   * @param enabled
+   * @param isAdmin
    */
   public User(long id, int age, int gender, int experience, String ipaddr, String password,
-              String first, String last, String nativeLang, String dialect, String userID, long timestamp) {
+              String first, String last, String nativeLang, String dialect, String userID, long timestamp, boolean enabled, boolean isAdmin) {
      this.id = id;
     this.age = age;
     this.gender = gender;
@@ -48,6 +52,9 @@ public class User implements IsSerializable {
     this.nativeLang = nativeLang;
     this.dialect = dialect;
     this.userID = userID;
+    this.enabled = enabled;
+    this.admin = isAdmin;
+
   }
 
   public boolean isMale() { return gender == 0; }
@@ -62,6 +69,7 @@ public class User implements IsSerializable {
   }
 
   public String toString() {
-    return "user " + id + " age " + age + " gender " + gender + " name " + firstName + " " + lastName + " native " + nativeLang + " dialect " + dialect;
+    return "user " + id + " age " + age + " gender " + gender +
+        " name " + firstName + " " + lastName + " native " + nativeLang + " dialect " + dialect;
   }
 }
