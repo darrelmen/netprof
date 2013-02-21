@@ -27,6 +27,9 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.log4j.Logger;
 
+import javax.mail.Message;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -91,6 +94,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String outsideFile;
   private boolean isUrdu;
   private int firstNInOrder;
+  private boolean isDataCollectAdminView;
+
 
   private Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
       .concurrencyLevel(4)
@@ -150,13 +155,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
- public boolean deploySite(long id, String name, String language, String notes) {
+  public boolean deploySite(long id, String name, String language, String notes) {
     Site siteByID = db.getSiteByID(id);
 
     SiteDeployer siteDeployer = new SiteDeployer();
 
-    siteByID  = db.updateSite(siteByID,name,language,notes);
-    if (!siteDeployer.isValidName(siteByID,getInstallPath())) {
+    siteByID = db.updateSite(siteByID, name, language, notes);
+    if (!siteDeployer.isValidName(siteByID, getInstallPath())) {
       return false;
     }
     boolean b = siteDeployer.deploySite(siteByID, configDir, getInstallPath());
@@ -167,12 +172,35 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     if (!b) return b;
+    waitUntilDeployed(siteByID);
+
+    String firstName = "Unknown user #" + siteByID.creatorID;
+    String lastName = "Unk.";
+    for (User user : db.getUsers())
+      if (user.id == siteByID.creatorID) {
+        firstName = user.firstName;
+        lastName = user.lastName;
+      }
+
+    String subject = "Site " + name + " deployed";
+    String message = "Hi,\n" +
+        "At site " + getBaseUrl() + "" +
+        " User '" + firstName + " " + lastName + "' deployed site " + name + ".\n" +
+        "Thought you might want to know.\n" +
+        "Thanks,\n" +
+        "Your friendly web admin.";
+    new MailSupport(props).email(subject, message);
+
+    return true;
+  }
+
+  private void waitUntilDeployed(Site siteByID) {
     int tries = 3;
     boolean valid = false;     // todo improve
     while (tries-- > 0) {
       String baseUrl = "";
       try {
-         baseUrl = getBaseUrl(siteByID.name);
+        baseUrl = getBaseUrl(siteByID.name);
         URL oracle = new URL(baseUrl);
         URLConnection yc = oracle.openConnection();
         BufferedReader in = new BufferedReader(new InputStreamReader(
@@ -181,7 +209,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
         valid = true;
       } catch (Exception e) {
-        logger.info("reading " +baseUrl + " got " + e);
+        logger.info("reading " + baseUrl + " got " + e);
       }
       if (!valid) {
         try {
@@ -191,16 +219,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
       }
     }
-
-    return true;
   }
 
-  private String getBaseUrl( String name) {
+  private String getBaseUrl() {
+    HttpServletRequest request = getThreadLocalRequest();
+    return getBaseUrl(request.getContextPath());
+  }
+
+  private String getBaseUrl(String name) {
 
     HttpServletRequest request = getThreadLocalRequest();
 
-    if ( ( request.getServerPort() == 80 ) ||
-        ( request.getServerPort() == 443 ) ) {
+    if ((request.getServerPort() == 80) ||
+        (request.getServerPort() == 443)) {
       return request.getScheme() + "://" +
           request.getServerName() + "/" + name;
     } else {
@@ -799,7 +830,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     SimpleDateFormat sdf = new SimpleDateFormat();
     String format = sdf.format(new Date());
     String ip = request.getRemoteHost() +/*"/"+ request.getRemoteAddr()+*/(header != null ? "/" + header : "") + " at " + format;
-    return db.addUser(age, gender, experience, ip, firstName, lastName, nativeLang, dialect, userID);
+    long l = db.addUser(age, gender, experience, ip, firstName, lastName, nativeLang, dialect, userID);
+
+    if (l != 0 && isDataCollectAdminView) {
+      String subject = "User " + lastName + " registered";
+      String message = "Hi,\n" +
+          "At site " + getBaseUrl() + "\n" +
+          " got new user " + firstName + " " + lastName + ".\n" +
+          "Should this person be enabled?\n" +
+          "Thanks,\n" +
+          "Your friendly web admin.";
+      new MailSupport(props).email(subject, message);
+    }
+
+    return l;
   }
 
   public List<User> getUsers() {
@@ -1095,6 +1139,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     isUrdu = !props.getProperty(URDU, "false").equals("false");
     biasTowardsUnanswered = !props.getProperty(BIAS_TOWARDS_UNANSWERED, "true").equals("false");
     useOutsideResultCounts = !props.getProperty(USE_OUTSIDE_RESULT_COUNTS, "true").equals("false");
+    isDataCollectAdminView = !props.getProperty("dataCollectAdminView", "false").equals("false");
     outsideFile = props.getProperty(OUTSIDE_FILE, OUTSIDE_FILE_DEFAULT);
     String dateFromManifest = getDateFromManifest(servletContext);
     if (dateFromManifest != null && dateFromManifest.length() > 0) {
