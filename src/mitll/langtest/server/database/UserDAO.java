@@ -115,6 +115,7 @@ public class UserDAO extends DAO {
       if (rs.next()) {
         val = rs.getInt(1);
       }
+  //    logger.debug("user exists " + id + " = " + val);
       rs.close();
       statement.close();
       database.closeConnection(connection);
