@@ -806,6 +806,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getUsers();
   }
 
+  @Override
+  public boolean isAdminUser(long id) { return db.isAdminUser(id); }
+  @Override
+  public boolean isEnabledUser(long id) { return db.isEnabledUser(id); }
+  @Override
+  public void setUserEnabled(long id, boolean enabled) { db.setUserEnabled(id, enabled); }
+
   // Results ---------------------
 
   /**

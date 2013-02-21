@@ -163,9 +163,12 @@ public class SiteDeployer {
         builder.append(section1.keySet().size()).append(" ").append(section).append("s, ");
       }
     }
-    //importer.getLessons()
-    site.setFeedback("Read " +exercises.size() + " expressions in " + builder.toString() +
-        " and found " +importer.getErrors().size() + " errors.");
+    String sectionInfo = builder.toString();
+    if (sectionInfo.endsWith(", ")) sectionInfo = sectionInfo.substring(0,sectionInfo.length()-2);
+
+    List<String> errors = importer.getErrors();
+    site.setFeedback("Read " + exercises.size() + " expressions in " + sectionInfo +
+        (errors.isEmpty() ? "" :"<br></br> and found " + errors.size() + " errors, e.g. : " + errors.iterator().next()));
     site.exerciseFile = item.getName();
   }
 
