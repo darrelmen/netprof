@@ -5,7 +5,6 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -25,7 +24,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public class UserTable {
-  public static final int PAGE_SIZE = 5;
+  private static final int PAGE_SIZE = 5;
   private Widget lastTable = null;
   private Button closeButton;
   private boolean showEnabled = false;
@@ -33,18 +32,22 @@ public class UserTable {
   /**
    * @see mitll.langtest.client.LangTest#getLogout()
    */
-  public void showUsers(final LangTestDatabaseAsync service, int userid) {
-    service.isAdminUser(userid, new AsyncCallback<Boolean>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
+  public void showUsers(final LangTestDatabaseAsync service, int userid, boolean isDataCollectAdminView) {
+    if (isDataCollectAdminView) {
+      service.isAdminUser(userid, new AsyncCallback<Boolean>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
 
-      @Override
-      public void onSuccess(Boolean result) {
-        showEnabled = result;
-        showDialog(service);
-      }
-    });
+        @Override
+        public void onSuccess(Boolean result) {
+          showEnabled = result;
+          showDialog(service);
+        }
+      });
+    } else {
+      showDialog(service);
+    }
   }
 
   private void showDialog(final LangTestDatabaseAsync service) {

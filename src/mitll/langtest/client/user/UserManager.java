@@ -28,6 +28,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.shared.Result;
 
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -375,7 +379,7 @@ public class UserManager {
   }
 
   private int getAge(TextBox ageEntryBox) {
-    return isDataCollectAdmin ? 99: Integer.parseInt(ageEntryBox.getText());
+    return isDataCollectAdmin ? 89: Integer.parseInt(ageEntryBox.getText());
   }
 
   private boolean checkAudioSelection(RadioButton regular, RadioButton fastThenSlow) {
