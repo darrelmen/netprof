@@ -1,7 +1,17 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.CountAndGradeID;
+import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.ImageResponse;
+import mitll.langtest.shared.Result;
+import mitll.langtest.shared.ResultsAndGrades;
+import mitll.langtest.shared.Session;
+import mitll.langtest.shared.Site;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Collection;
@@ -75,8 +85,6 @@ public interface LangTestDatabaseAsync {
 
   void getResults(int start, int end, AsyncCallback<List<Result>> async);
 
-//  void getHoursToCompletion(boolean useFile, AsyncCallback<Map<Integer, Float>> async);
-
   void getResultStats(AsyncCallback<Map<String, Number>> async);
 
   void getResultCountsByGender(AsyncCallback<Map<String, Map<Integer, Integer>>> async);
@@ -94,4 +102,6 @@ public interface LangTestDatabaseAsync {
   void setUserEnabled(long id, boolean enabled, AsyncCallback<Void> async);
 
   void isEnabledUser(long id, AsyncCallback<Boolean> async);
+
+  void logMessage(String message, AsyncCallback<Void> async);
 }
