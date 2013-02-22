@@ -383,7 +383,7 @@ public class MonitoringSupport {
 
   /**
    * Split exid->count by gender.
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise(boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise
    * @return
    */
   public Map<String,List<Integer>> getResultPerExercise(List<Exercise> exercises) {
