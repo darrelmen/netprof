@@ -26,7 +26,7 @@ output: tmp/levantine.out
 output-index: 1
 
 [Processing Stages]
-decprocess: 1 = 0   :> decode.Splitter -> fe.SPFE -> decode.Align[dictionary="TEMP_DIR/dict-with-sp"] -> decode.ResegmentDecoderOutput -> decode.Reco2Meta -> fe.NNBatch -> decode.HybridAlign[align-transcript="",dictionary="TEMP_DIR/dict-wo-sp"] -> pron.NNScore
+decprocess: 1 = 0   :> fe.SPFE -> decode.Align[dictionary="TEMP_DIR/dict-with-sp", align-transcript="TEMP_DIR/trans" ] -> decode.ResegmentDecoderOutput -> decode.Reco2Meta -> decode.SegmentedFeatureFile2SegmentedFile -> fe.SPFE -> fe.NNBatch -> decode.HybridAlign[align-transcript="TEMP_DIR/reseg.trans", dictionary="TEMP_DIR/dict-wo-sp"] -> pron.NNScore
 
 [E-mail Experiment Options]
 name: 
@@ -51,7 +51,6 @@ lpcorder: 12
 
 [decode.Align]
 models: MODELS_DIR/HLDA_DIR
-align-transcript: /data/archive/jray/dli/levantine/trans.lev.test  
 output-type: words+sil
 
 [decode.ResegmentDecoderOutput]
@@ -61,12 +60,13 @@ split-threshold: 0.50
 sil-padding: 0.25
 
 [decode.Reco2Meta]
-write-transcript: 
+write-transcript: reseg
 write-format: reseg
+outdir: TEMP_DIR
 
 [fe.NNBatch]
 n-output: N_OUTPUT
-n-hidden: N_HIDDEN
+n-hidden: 2500
 mlp: MODELS_DIR/nn-weights
 frame-window: 7
 
