@@ -97,12 +97,31 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         new ExceptionHandlerDialog(browserCheck,throwable);
       }
     });
+    final long then = System.currentTimeMillis();
 
     service.getProperties(new AsyncCallback<Map<String, String>>() {
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+        long now = System.currentTimeMillis();
+        System.out.println("onModuleLoad.getProperties : (failure) took " + (now-then) + " millis");
+        Window.alert("Couldn't contact server.  Please check your network connection.");
+      }
+
       public void onSuccess(Map<String, String> result) {
+        long now = System.currentTimeMillis();
+//        System.out.println("onModuleLoad.getProperties : (success) took " + (now - then) + " millis");
+
         props = new PropertyHandler(result);
         onModuleLoad2();
+        if (isLogClientMessages()) {
+          service.logMessage("onModuleLoad.getProperties : (success) took " + (now - then) + " millis",
+            new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {}
+
+            @Override
+            public void onSuccess(Void result) {}
+          });
+        }
       }
     });
   }
@@ -570,6 +589,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isCollectAudio() {  return props.isCollectAudio(); }
   public boolean isMinimalUI() {  return props.isMinimalUI(); }
   public boolean isGrading() {  return props.isGrading(); }
+  public boolean isLogClientMessages() {  return props.isLogClientMessages(); }
 
   // recording methods...
   /**

@@ -42,5 +42,6 @@ public interface ExerciseController {
   boolean isCollectAudio();
   boolean isMinimalUI();
   boolean isGrading();
+  boolean isLogClientMessages();
   String getAudioType();
 }
