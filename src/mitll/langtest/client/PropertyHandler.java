@@ -36,6 +36,7 @@ public class PropertyHandler {
   private static final String NAME_FOR_ANSWER = "nameForAnswer";
   private static final String NAME_FOR_RECORDER = "nameForRecorder";
   private static final String NUM_GRADES_TO_COLLECT = "numGradesToCollect";
+  private static final String LOG_CLIENT_MESSAGES = "logClient";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -79,7 +80,8 @@ public class PropertyHandler {
   private boolean collectAudio = true;
   private boolean teacherView = false;
   private boolean dataCollectAdminView = false;
-  private boolean adminView = true;
+  private boolean adminView = false;
+  private boolean logClientMessages = false;
   private boolean minimalUI = false;
   private int numGradesToCollect = NUM_GRADES_TO_COLLECT_DEFAULT;
   private String nameForItem = "Item";
@@ -124,6 +126,7 @@ public class PropertyHandler {
       else if (key.equals(TEACHER_VIEW)) teacherView = getBoolean(value);
       else if (key.equals(DATA_COLLECT_ADMIN_VIEW)) dataCollectAdminView = getBoolean(value);
       else if (key.equals(NUM_GRADES_TO_COLLECT)) numGradesToCollect = getInt(value,NUM_GRADES_TO_COLLECT_DEFAULT,NUM_GRADES_TO_COLLECT);
+      else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
     }
   }
 
@@ -328,5 +331,9 @@ public class PropertyHandler {
 
   public int getNumGradesToCollect() {
     return numGradesToCollect;
+  }
+
+  public boolean isLogClientMessages() {
+    return logClientMessages;
   }
 }
