@@ -104,4 +104,6 @@ public interface LangTestDatabase extends RemoteService {
   void setUserEnabled(long id, boolean enabled);
 
   boolean isEnabledUser(long id);
+
+  void logMessage(String message);
 }
