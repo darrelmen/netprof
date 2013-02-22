@@ -64,6 +64,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private final boolean debug = false;
   private float screenPortion = 1.0f;
   private int rightMarginToUse;
+  private final boolean logMessages;
 
   /**
    * @see mitll.langtest.client.exercise.WaveformExercisePanel.RecordAudioPanel#RecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int)
@@ -71,13 +72,15 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param service
    * @param useFullWidth
    * @param useKeyboard
+   * @param logMessages
    */
   public AudioPanel(String path, LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth,
-                    boolean useKeyboard) {
+                    boolean useKeyboard, boolean logMessages) {
     this.soundManager = soundManager;
     this.service = service;
     rightMarginToUse = useFullWidth ? RIGHT_MARGIN :  ASRScorePanel.X_CHART_SIZE+400;
     this.useKeyboard = useKeyboard;
+    this.logMessages = logMessages;
     addWidgets(path);
   }
 
@@ -171,7 +174,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       image = new Image();
       image.setVisible(false);
     }
-    public boolean isVisible() { return image.isVisible(); }
     public void setVisible(boolean visible) { image.setVisible(visible); }
     public void setUrl(String url) { image.setUrl(url); }
   }
@@ -280,15 +282,22 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private void getImageURLForAudio(String path, final String type,int width, final ImageAndCheck imageAndCheck) {
     int toUse = Math.max(MIN_WIDTH, width);
     float heightForType = type.equals(WAVEFORM) ? WAVEFORM_HEIGHT : SPECTROGRAM_HEIGHT;
-    int height = (int) (((float)Window.getClientHeight())/1200f * heightForType);
+    int height = Math.max(10,(int) (((float)Window.getClientHeight())/1200f * heightForType));
     if (path != null) {
       int reqid = getReqID(type);
+      final long then = System.currentTimeMillis();
 
       System.out.println("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
       service.getImageForAudioFile(reqid, path, type, toUse, height, new AsyncCallback<ImageResponse>() {
-        public void onFailure(Throwable caught) {}
+        public void onFailure(Throwable caught) {
+          long now = System.currentTimeMillis();
+          System.out.println("getImageURLForAudio : (failure) took " +(now-then) + " millis");
+          Window.alert("Couldn't contact server. Please check network connection.");
+        }
         public void onSuccess(ImageResponse result) {
-          System.out.println("getImageURLForAudio : onSuccess " + result);
+          long now = System.currentTimeMillis();
+          long roundtrip = now - then;
+
           if (!result.successful) {
             System.err.println("got error for request for type " + type);
           }
@@ -309,12 +318,31 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
           else {
             System.out.println("getImageURLForAudio : ignoring out of sync response " + result.req + " for " + type);
           }
+          if (logMessages) {
+            logMessage(result, roundtrip);
+          }
         }
       });
     }
     else {
       System.out.println("getImageURLForAudio : no audio path for " + type);
     }
+  }
+
+  private void logMessage(ImageResponse result, long roundtrip) {
+    String message = "getImageURLForAudio : (success) " + result + " took " + roundtrip + " millis, audio dur " +
+      (result.durationInSeconds * 1000f) + " millis, " +
+      " " + ((float) roundtrip / (float) (result.durationInSeconds * 1000f)) + " roundtrip/audio duration ratio.";
+   // System.out.println(message);
+    service.logMessage(message, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+      }
+    });
   }
 
   protected int getReqID(String type) {

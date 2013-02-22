@@ -158,7 +158,7 @@ public class UserTable {
       table.addColumn(checkColumn, "Enabled");
       table.setColumnWidth(checkColumn, 40, Style.Unit.PX);
     }
-    TextColumn<User> firstName = new TextColumn<User>() {
+/*    TextColumn<User> firstName = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
         return "" + contact.firstName;
@@ -174,7 +174,7 @@ public class UserTable {
       }
     };
     lastName.setSortable(true);
-    table.addColumn(lastName, "Last");
+    table.addColumn(lastName, "Last");*/
 
     TextColumn<User> lang = new TextColumn<User>() {
       @Override
