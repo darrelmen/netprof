@@ -899,7 +899,7 @@ public class MonitoringManager {
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer doneByUser = pair.getValue();
       User user = pair.getKey();
-      String name = user.firstName + " " +user.lastName;
+      String name = user.userID;
       name = name.trim();
       Integer count = nameToCount.get(name);
       if (count == null) nameToCount.put(name,doneByUser);
