@@ -178,16 +178,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     String firstName = "Unknown user #" + siteByID.creatorID;
     String lastName = "Unk.";
+    String userid = "";
     for (User user : db.getUsers())
       if (user.id == siteByID.creatorID) {
         firstName = user.firstName;
         lastName = user.lastName;
+        userid = user.userID;
       }
 
     String subject = "Site " + name + " deployed";
     String message = "Hi,\n" +
         "At site " + getBaseUrl() + "" +
-        " User '" + firstName + " " + lastName + "' deployed site " + name + ".\n" +
+        " User '" +
+        userid+
+        //firstName + " " + lastName +
+        "' deployed site " + name + ".\n" +
         "Thought you might want to know.\n" +
         "Thanks,\n" +
         "Your friendly web admin.";
@@ -587,7 +592,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Get score when doing autoCRT on an audio file.
-   * @see AutoCRT#getAutoCRTAnswer(String, mitll.langtest.shared.Exercise, int, java.io.File, mitll.langtest.shared.AudioAnswer.Validity, int, String)
+   * @see AutoCRT#getAutoCRTAnswer(String, mitll.langtest.shared.Exercise, int, java.io.File, mitll.langtest.shared.AudioAnswer.Validity, int, String, int)
    * @param testAudioFile
    * @param lmSentences
    * @param background
@@ -921,10 +926,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     // logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
 
     if (doAutoCRT && isValid) {
-      return autoCRT.getAutoCRTAnswer(exercise, getExercise(exercise), reqid, file, validity.validity, questionID, url);
+      return autoCRT.getAutoCRTAnswer(exercise, getExercise(exercise), reqid, file, validity.validity, questionID, url,
+          validity.durationInMillis);
     }
     else {
-      return new AudioAnswer(url, validity.validity, reqid);
+      return new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
     }
   }
 
@@ -974,6 +980,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public Map<String,Number> getResultStats() {
     return db.getResultStats();
+  }
+
+  @Override
+  public void logMessage(String message) {
+    logger.debug("from client " + message);
   }
 
   private String optionallyMakeURL(String wavPathWithForwardSlashSeparators) {
