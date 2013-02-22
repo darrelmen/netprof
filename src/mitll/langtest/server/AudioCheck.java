@@ -43,7 +43,7 @@ public class AudioCheck {
   }
 
   /**
-   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise(String, String, String, String, String, int, int, boolean, java.util.List, java.util.List, java.util.List)
+   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
    * @param file
    * @return
    */
@@ -84,7 +84,7 @@ public class AudioCheck {
       double dur = getDurationInSeconds(ais);
 
       if (ais.getFrameLength() < MinRecordLength) {
-        System.err.println("INFO: audio recording too short (Length: " + ais.getFrameLength() + ") < min (" +MinRecordLength+ ") ");
+        logger.debug("INFO: audio recording too short (Length: " + ais.getFrameLength() + ") < min (" +MinRecordLength+ ") ");
         return new ValidityAndDur(AudioAnswer.Validity.TOO_SHORT, dur);
       }
       int fsize = ais.getFormat().getFrameSize();
@@ -117,7 +117,9 @@ public class AudioCheck {
         "mean power = " + mean + " (dB), std = " + Math.sqrt(var) + " valid = " + validAudio);*/
       ValidityAndDur validityAndDur = new ValidityAndDur(validAudio ? AudioAnswer.Validity.OK : AudioAnswer.Validity.TOO_QUIET, dur);
 
-      logger.info("validity " + validityAndDur);
+      if (validityAndDur.validity != AudioAnswer.Validity.OK) {
+        logger.info("validity " + validityAndDur);
+      }
       return validityAndDur;
     } catch (Exception e) {
       e.printStackTrace();
