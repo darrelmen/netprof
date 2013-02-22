@@ -18,7 +18,15 @@ public class User implements IsSerializable {
   public String ipaddr;
   public String  password;
   public long timestamp;
-  public String firstName,lastName,nativeLang,dialect;
+  /**
+   * @deprecated avoid COUHES issues
+   */
+  public String firstName;
+  /**
+   * @deprecated avoid COUHES issues
+   */
+  public String lastName;
+  public String nativeLang,dialect;
   public String userID;
   public boolean enabled;
   public boolean admin;
