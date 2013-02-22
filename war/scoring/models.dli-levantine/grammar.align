@@ -1,7 +1,7 @@
 Grammar hybrid
 StartWord <s>
 EndWord </s>
-Dictionary C:\Users\go22670\DLITest\clean\netPron2\war\\scoring\models.dli-levantine/phones.dict
+Dictionary /services/apache-tomcat-7.0.27/webapps/npHeadstart2/scoring/models.dli-levantine/phones.dict
 
 ########################################################
 # Model: tr
