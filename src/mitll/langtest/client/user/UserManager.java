@@ -67,6 +67,7 @@ public class UserManager {
   private boolean isCollectAudio;
   private Storage stockStore = null;
   private final boolean isDataCollectAdmin;
+  private static final boolean COLLECT_NAMES = false;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
@@ -91,7 +92,7 @@ public class UserManager {
    * @see #addTeacher
    */
   private void storeUser(long sessionID) {
-    System.out.println("storeUser : user now " + sessionID);
+    //System.out.println("storeUser : user now " + sessionID);
     final long DURATION = 1000 * 60 * 60 * EXPIRATION_HOURS; //duration remembering login
     long now = System.currentTimeMillis();
     long futureMoment = now + DURATION;
@@ -271,10 +272,13 @@ public class UserManager {
       }
     });
     dialogVPanel.add(dp);
-    register.add(new HTML("<b>First Name</b>"));
-    register.add(first);
-    register.add(new HTML("<b>Last Name</b>"));
-    register.add(last);
+
+    if (COLLECT_NAMES) {
+      register.add(new HTML("<b>First Name</b>"));
+      register.add(first);
+      register.add(new HTML("<b>Last Name</b>"));
+      register.add(last);
+    }
 
     if (!isDataCollectAdmin) {
       register.add(new HTML("<b>Native Lang (L1)</b>"));
@@ -316,11 +320,11 @@ public class UserManager {
             Window.alert("Please choose either regular or regular then slow audio recording.");
             valid = false;
           }
-          else if (first.getText().isEmpty()) {
+          else if (COLLECT_NAMES && first.getText().isEmpty()) {
             Window.alert("First name is empty");
             valid = false;
           }
-          else if (last.getText().isEmpty()) {
+          else if (COLLECT_NAMES && last.getText().isEmpty()) {
             Window.alert("Last name is empty");
             valid = false;
           }
