@@ -38,10 +38,11 @@ import java.util.Set;
 public class PagingExerciseList extends ExerciseList implements RequiresResize {
   private static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
   private ListDataProvider<ExerciseShell> dataProvider;
+  private static final int ID_LINE_WRAP_LENGTH = 20;
   public static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 390;
   private static final float MAX_PAGES = 2f;
   private static final int MIN_PAGE_SIZE = 3;
-  private static final float DEFAULT_PATH_SIZE = 15f;
+  private static final float DEFAULT_PAGE_SIZE = 15f;
   private CellTable<ExerciseShell> table;
 
   public interface TableResources extends CellTable.Resources {
@@ -184,20 +185,25 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     super.onResize();
 /*    System.out.println("Got on resize " + Window.getClientHeight() + " " +
         getOffsetHeight() + " bodyheight = " + table.getBodyHeight() + " table offset height " + table.getOffsetHeight() + " parent height " + getParent().getOffsetHeight());*/
-      int header = 625 - HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
-      int leftOver = Window.getClientHeight()-header;
-      float rawRatio = ((float) leftOver) / (float)HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
-      float tableRatio = Math.min(MAX_PAGES, rawRatio);
-     // System.out.println("left over " + leftOver + " raw " + rawRatio + " table ratio " + tableRatio);
+    int header = 625 - HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
+    int leftOver = Window.getClientHeight() - header;
+    float rawRatio = ((float) leftOver) / (float) HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
+    float tableRatio = Math.min(MAX_PAGES, rawRatio);
+    // System.out.println("left over " + leftOver + " raw " + rawRatio + " table ratio " + tableRatio);
 
-      float ratio = DEFAULT_PATH_SIZE * tableRatio;
-      int numRows = Math.max(MIN_PAGE_SIZE, Math.round(ratio));
-      if (table.getPageSize() != numRows) {
-       // System.out.println("num rows now " + numRows);
-        table.setPageSize(numRows);
-        table.redraw();
-        markCurrentExercise(currentExercise);
-      }
+    float ratio = DEFAULT_PAGE_SIZE * tableRatio;
+    ExerciseShell toLoad = currentExercises.get(0);
+
+    if (toLoad.getID().length() > ID_LINE_WRAP_LENGTH) {
+      ratio /= 2; // hack for long ids
+    }
+    int numRows = Math.max(MIN_PAGE_SIZE, Math.round(ratio));
+    if (table.getPageSize() != numRows) {
+      System.out.println("num rows now " + numRows);
+      table.setPageSize(numRows);
+      table.redraw();
+      markCurrentExercise(currentExercise);
+    }
   }
 
   /**
