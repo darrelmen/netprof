@@ -20,6 +20,7 @@ import mitll.langtest.client.pretest.PretestGauge;
 import mitll.langtest.client.scoring.ScoreListener;
 import mitll.langtest.shared.scoring.PretestScore;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -48,9 +49,10 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   //private final GChart phoneAccuracyChart;
   private final List<Float> scores = new ArrayList<Float>();
 
-  //private final float[][] colormap = RYB_COLOR_MAP;
+  private final float[][] colormap = RYB_COLOR_MAP;
 
-/*  private static final float[][] RYB_COLOR_MAP = {{255f, 0f, 0f}, // red
+  private static final float[][] RYB_COLOR_MAP = {
+      {255f, 0f, 0f}, // red
       {255f, 32f, 0f},
       {255f, 64f, 0f},
       {255f, 128f, 0f},
@@ -60,7 +62,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
       {128f, 255f, 0f},
       {64f, 255f, 0f},
       {32f, 255f, 0f},
-      {0f, 255f, 0f}};  // green*/
+      {0f, 255f, 0f}};  // green
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
@@ -340,11 +342,36 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     return p;
   }
 
-
   private String getColor(float score){
-    return ASRGauge.getColor(score);
+    return getColor2(score);
 	}
-    /*
+
+  /**
+   * This gives a smooth range red->yellow->green:
+   *  on green 0->255 over score 0->0.5, 255 for > 0.5 and
+   *  on red from 255->0 over 0.5->1 in score, 255 for < 0.5
+   *
+   *  NOTE : this is the same as in audio.image.TranscriptImage
+   * @param score
+   * @return color in # hex rgb format
+   */
+  private String getColor2(float score) {
+    if (score > 1.0) score = 1.0f;
+    if (score < 0f)  score = 0f;
+    int red   = (int)Math.max(0,(255f - (Math.max(0, score-0.5)*2f*255f)));
+    int green = (int)Math.min(255f, score*2f*255f);
+    int blue  = 0;
+    // System.out.println("s " +score + " red " + red + " green " + green + " b " +blue);
+    return "#" + getHexNumber(red) + getHexNumber(green) + getHexNumber(blue);
+    //return new Color(red, green, blue, BKG_ALPHA);
+  }
+
+  /**
+   * Does some interpolation, but it's buggy for now.
+   * @param score
+   * @return
+   * @deprecated
+   */
   private String oldGetColor(float score){
 	  if (score > 1.0) {
 	    Window.alert("ERROR: getColor: score > 1");
@@ -360,7 +387,6 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 		return "#" + getHexNumber(color[0]) + getHexNumber(color[1]) + getHexNumber(color[2]);
   }
 
-
 	private String getHexNumber(int number){
 		String hexString = Integer.toHexString(number).toUpperCase();
 
@@ -373,5 +399,5 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 		else{
 			return hexString;
 		}
-	}*/
+	}
 }
