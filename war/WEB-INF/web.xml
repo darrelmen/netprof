@@ -64,20 +64,15 @@
   <context-param>
     <param-name>config</param-name>
 
-<!--      <param-value>dari</param-value>-->
-
-<!--
-      <param-value>autocrt</param-value>
--->
-<!--      <param-value>urdu</param-value>-->
-<!--<param-value>english</param-value>-->
-<!--<param-value>farsi2</param-value>-->
-<!--
-      <param-value>levantine</param-value>
--->
-  <!--        <param-value>pilot</param-value> -->
-      <param-value>pashto</param-value>
-<!--     <param-value>msa</param-value>-->
+    <!--<param-value>dari</param-value>-->
+    <!--<param-value>autocrt</param-value>-->
+    <!--<param-value>urdu</param-value>-->
+    <!--<param-value>english</param-value>-->
+    <!--<param-value>farsi2</param-value>-->
+    <param-value>levantine</param-value>
+    <!--<param-value>pilot</param-value> -->
+    <!--<param-value>pashto</param-value>-->
+    <!--<param-value>msa</param-value>-->
   </context-param>
 
 <!--
