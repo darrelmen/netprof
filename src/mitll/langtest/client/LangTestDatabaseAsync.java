@@ -104,4 +104,8 @@ public interface LangTestDatabaseAsync {
   void isEnabledUser(long id, AsyncCallback<Boolean> async);
 
   void logMessage(String message, AsyncCallback<Void> async);
+
+  void getTypeToSection(AsyncCallback<Map<String, Collection<String>>> async);
+
+  void getExercisesForSection(String type, String section, AsyncCallback<List<ExerciseShell>> async);
 }
