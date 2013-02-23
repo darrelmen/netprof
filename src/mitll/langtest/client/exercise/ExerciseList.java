@@ -22,6 +22,7 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private boolean useUserID = false;
   private long userID;
   private final boolean showInOrder;
+  private Map<String, Collection<String>> typeToSections;
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -97,6 +99,21 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     * @param userID
    */
   public void getExercises(long userID) {
+
+    System.out.println("getExercises " +userID);
+
+    service.getTypeToSection(new AsyncCallback<Map<String, Collection<String>>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Map<String, Collection<String>> result) {
+        typeToSections = result;
+        System.out.println("got " +typeToSections);
+      }
+    });
+
     useUserID = true;
     this.userID = userID;
     if (showInOrder) {
