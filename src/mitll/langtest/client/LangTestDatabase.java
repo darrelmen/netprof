@@ -106,4 +106,8 @@ public interface LangTestDatabase extends RemoteService {
   boolean isEnabledUser(long id);
 
   void logMessage(String message);
+
+  Map<String, Collection<String>> getTypeToSection();
+
+  List<ExerciseShell> getExercisesForSection(String type, String section);
 }
