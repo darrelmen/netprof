@@ -48,6 +48,26 @@ public class ExcelImport implements ExerciseDAO {
   private TeacherClass teacherClass;
   private final String file;
 
+  @Override
+  public Map<String, Collection<String>> getTypeToSections() {
+    Map<String,Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
+    for (String key : typeToUnitToLesson.keySet()) {
+      typeToSection.put(key,typeToUnitToLesson.keySet());
+    }
+    return typeToSection;
+  }
+
+  @Override
+  public Collection<Exercise> getExercisesForSection(String type, String section) {
+    Map<String, Lesson> sectionToLesson = typeToUnitToLesson.get(type);
+    if (sectionToLesson == null) {
+      return Collections.emptyList();
+    }
+    else {
+      return sectionToLesson.get(section).getExercises();
+    }
+  }
+
   public ExcelImport() { this.file = null;}
   public ExcelImport(String file) { this.file = file;}
 
