@@ -148,6 +148,17 @@ public class DatabaseImpl implements Database {
 
   public void setOutsideFile(String outsideFile) { monitoringSupport.setOutsideFile(outsideFile); }
 
+  public Map<String, Collection<String>> getTypeToSection() {
+    getExercises();
+/*    boolean isExcel = lessonPlanFile.endsWith(".xlsx");
+    makeDAO(useFile, lessonPlanFile, isExcel);*/
+    return exerciseDAO.getTypeToSections();
+  }
+
+  public Collection<Exercise> getExercisesForSection(String type, String section) {
+    return exerciseDAO.getExercisesForSection(type, section);
+  }
+
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
    * @return
@@ -171,14 +182,7 @@ public class DatabaseImpl implements Database {
       return Collections.emptyList();
     }
     boolean isExcel = lessonPlanFile.endsWith(".xlsx");
-    if (exerciseDAO == null) {// || useFile && exerciseDAO instanceof SQLExerciseDAO || !useFile && exerciseDAO instanceof FileExerciseDAO) {
-      if (useFile && isExcel) {
-        this.exerciseDAO = new ExcelImport(lessonPlanFile);
-      }
-      else {
-        this.exerciseDAO = makeExerciseDAO(useFile);
-      }
-    }
+    makeDAO(useFile, lessonPlanFile, isExcel);
 
     if (useFile && !isExcel) {
       ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, lessonPlanFile);
@@ -188,6 +192,17 @@ public class DatabaseImpl implements Database {
       logger.warn("no exercises for useFile = " + useFile + " and " + lessonPlanFile + " at " + installPath);
     }
     return rawExercises;
+  }
+
+  private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel) {
+    if (exerciseDAO == null) {// || useFile && exerciseDAO instanceof SQLExerciseDAO || !useFile && exerciseDAO instanceof FileExerciseDAO) {
+      if (useFile && excel) {
+        this.exerciseDAO = new ExcelImport(lessonPlanFile);
+      }
+      else {
+        this.exerciseDAO = makeExerciseDAO(useFile);
+      }
+    }
   }
 
   /**
