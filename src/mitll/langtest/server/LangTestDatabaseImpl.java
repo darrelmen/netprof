@@ -257,12 +257,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public List<ExerciseShell> getExerciseIds(long userID, boolean arabicDataCollect) {
     logger.debug("getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
     List<Exercise> exercises = getExercises(userID, arabicDataCollect);
+    List<ExerciseShell> ids = getExerciseShells(exercises);
+    logMemory();
+    return ids;
+  }
+
+  private List<ExerciseShell> getExerciseShells(Collection<Exercise> exercises) {
     List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
     for (Exercise e : exercises) {
       ids.add(new ExerciseShell(e.getID(), e.getTooltip()));
     }
-    logMemory();
     return ids;
+  }
+
+  @Override
+  public Map<String, Collection<String>> getTypeToSection() { return db.getTypeToSection(); }
+  @Override
+  public List<ExerciseShell> getExercisesForSection(String type, String section) {
+    Collection<Exercise> exercisesForSection = db.getExercisesForSection(type, section);
+    return getExerciseShells(exercisesForSection);
   }
 
   private void logMemory() {
@@ -279,10 +292,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public List<ExerciseShell> getExerciseIds() {
     List<Exercise> exercises = getExercises();
-    List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
-    for (Exercise e : exercises) {
-      ids.add(new ExerciseShell(e.getID(), e.getTooltip()));
-    }
+    List<ExerciseShell> ids = getExerciseShells(exercises);
 
     return ids;
   }
