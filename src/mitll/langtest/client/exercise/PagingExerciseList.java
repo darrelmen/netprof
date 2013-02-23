@@ -13,6 +13,7 @@ import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
@@ -22,8 +23,10 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -69,6 +72,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
                             boolean arabicDataCollect,
                             boolean showTurkToken, boolean showInOrder) {
     super(currentExerciseVPanel, service, feedback, null, arabicDataCollect, showTurkToken, showInOrder);
+
     CellTable.Resources o = GWT.create(TableResources.class);
     this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
@@ -146,6 +150,8 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     add(pager);
     add(table);
   }
+
+
 
   @Override
   protected void loadFirstExercise() {
