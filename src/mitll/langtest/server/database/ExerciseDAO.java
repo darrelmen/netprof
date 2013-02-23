@@ -2,7 +2,9 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Exercise;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,4 +15,8 @@ import java.util.List;
  */
 public interface ExerciseDAO {
   List<Exercise> getRawExercises();
+
+  Map<String,Collection<String>> getTypeToSections();
+
+  Collection<Exercise> getExercisesForSection(String type, String section);
 }
