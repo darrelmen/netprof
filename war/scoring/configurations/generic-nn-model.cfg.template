@@ -66,9 +66,9 @@ outdir: TEMP_DIR
 
 [fe.NNBatch]
 n-output: N_OUTPUT
-n-hidden: 2500
+n-hidden: 1500,2000
 mlp: MODELS_DIR/nn-weights
-frame-window: 7
+frame-window: 13
 
 [decode.HybridAlign]
 grammar: MODELS_DIR/grammar.align
