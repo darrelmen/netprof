@@ -6,11 +6,17 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ListBox;
@@ -39,7 +45,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class UserManager {
-  private static final int EXPIRATION_HOURS = 240;
+  private static final int EXPIRATION_HOURS = 24*7;
   private static final int MIN_AGE = 6;
   private static final int MAX_AGE = 90;
   private static final int TEST_AGE = 100;
@@ -58,18 +64,23 @@ public class UserManager {
   private final UserNotification langTest;
   private final boolean useCookie = false;
   private long userID = NO_USER_SET;
-  private int rememberedUser = -1;
-  boolean isCollectAudio;
+  private boolean isCollectAudio;
+  private Storage stockStore = null;
+  private final boolean isDataCollectAdmin;
+  private static final boolean COLLECT_NAMES = false;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    * @param lt
    * @param service
+   * @param isDataCollectAdmin
    */
-  public UserManager(UserNotification lt, LangTestDatabaseAsync service, boolean isCollectAudio) {
+  public UserManager(UserNotification lt, LangTestDatabaseAsync service, boolean isCollectAudio, boolean isDataCollectAdmin) {
     this.langTest = lt;
     this.service = service;
     this.isCollectAudio = isCollectAudio;
+    stockStore = Storage.getLocalStorageIfSupported();
+    this.isDataCollectAdmin = isDataCollectAdmin;
   }
 
   // user tracking
@@ -81,14 +92,21 @@ public class UserManager {
    * @see #addTeacher
    */
   private void storeUser(long sessionID) {
-    System.out.println("storeUser : user now " + sessionID);
+    //System.out.println("storeUser : user now " + sessionID);
     final long DURATION = 1000 * 60 * 60 * EXPIRATION_HOURS; //duration remembering login
-    Date expires = new Date(System.currentTimeMillis() + DURATION);
+    long now = System.currentTimeMillis();
+    long futureMoment = now + DURATION;
     if (useCookie) {
+      Date expires = new Date(futureMoment);
       Cookies.setCookie("sid", "" + sessionID, expires);
+    } else if (stockStore != null) {
+      stockStore.setItem("userID", "" + sessionID);
+      stockStore.setItem("expires", "" + futureMoment);
+      System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " expires in " + (DURATION/1000) + " seconds");
     } else {
       userID = sessionID;
     }
+
     langTest.gotUser(sessionID);
   }
 
@@ -111,12 +129,6 @@ public class UserManager {
     }
   }
 
-  void logout() {
-   // Cookies.setCookie("grader", "");
-
-   // System.out.println("logout : grader now " + getGrader());
-  }
-
   /**
    * @return id of user
    * @see mitll.langtest.client.LangTest#getUser
@@ -128,8 +140,35 @@ public class UserManager {
         return NO_USER_SET;
       }
       return Integer.parseInt(sid);
-    } else {
+    }
+    else if (stockStore != null) {
+      String sid = stockStore.getItem("userID");
+      if (sid != null && !sid.equals("" + NO_USER_SET)) {
+        checkExpiration(sid);
+        sid = stockStore.getItem("userID");
+      }
+      return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
+    }
+    else {
       return (int) userID;
+    }
+  }
+
+  private void checkExpiration(String sid) {
+    String expires = stockStore.getItem("expires");
+    if (expires == null) {
+      System.out.println("no expires item");
+    }
+    else {
+      try {
+        long expirationDate = Long.parseLong(expires);
+        if (expirationDate < System.currentTimeMillis()) {
+          System.out.println(sid + " has expired.");
+          clearUser();
+        }
+      } catch (NumberFormatException e) {
+        e.printStackTrace();
+      }
     }
   }
 
@@ -137,10 +176,11 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#getLogout()
    */
   public void clearUser() {
-    rememberedUser = -1;
     if (useCookie) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
-      logout();
+    } else if (stockStore != null) {
+      stockStore.removeItem("userID");
+      System.out.println("user now " + getUser());
     } else {
       userID = NO_USER_SET;
     }
@@ -189,10 +229,6 @@ public class UserManager {
     // We can set the id of a widget by accessing its Element
     login.getElement().setId("login");
 
-    KeyUpHandler keyHandler = new GraderMyKeyUpHandler(user, login, reg, password, false);
-    user.addKeyUpHandler(keyHandler);
-    password.addKeyUpHandler(keyHandler);
-
     VerticalPanel dialogVPanel = new VerticalPanel();
     dialogVPanel.addStyleName("dialogVPanel");
     dialogVPanel.add(new HTML("<b>User ID</b>"));
@@ -214,27 +250,52 @@ public class UserManager {
     SimplePanel spacer = new SimplePanel();
     spacer.setSize("20px", "5px");
     dialogVPanel.add(spacer);
-    dialogVPanel.add(new HTML("<i>(New users : fill in the fields below and click <b>register</b>.)</i>"));
+    dialogVPanel.add(new HTML("<i>New users : click on Registration below and fill in the fields.</i>"));
     SimplePanel spacer2 = new SimplePanel();
     spacer2.setSize("20px", "5px");
     dialogVPanel.add(spacer2);
 
-    dialogVPanel.add(new HTML("<b>First Name</b>"));
-    dialogVPanel.add(first);
-    dialogVPanel.add(new HTML("<b>Last Name</b>"));
-    dialogVPanel.add(last);
-    dialogVPanel.add(new HTML("<b>Native Lang (L1)</b>"));
-    dialogVPanel.add(nativeLang);
-    dialogVPanel.add(new HTML("<b>Dialect</b>"));
-    dialogVPanel.add(dialect);
-    dialogVPanel.add(new HTML("<b>Your age</b>"));
-    dialogVPanel.add(ageEntryBox);
-    dialogVPanel.add(new HTML("<br><b>Select gender</b>"));
-    dialogVPanel.add(genderPanel);
-    dialogVPanel.add(new HTML("<br><b>Select months of experience in this language</b>"));
-    dialogVPanel.add(experiencePanel);
+    VerticalPanel register = new VerticalPanel();
+    DisclosurePanel dp = new DisclosurePanel("Registration");
+    dp.setContent(register);
+    dp.setAnimationEnabled(true);
+    dp.addOpenHandler(new OpenHandler<DisclosurePanel>() {
+      @Override
+      public void onOpen(OpenEvent<DisclosurePanel> event) {
+        reg.setVisible(true);
+      }
+    });
+    dp.addCloseHandler(new CloseHandler<DisclosurePanel>() {
+      @Override
+      public void onClose(CloseEvent<DisclosurePanel> event) {
+        reg.setVisible(false);
+      }
+    });
+    dialogVPanel.add(dp);
+
+    if (COLLECT_NAMES) {
+      register.add(new HTML("<b>First Name</b>"));
+      register.add(first);
+      register.add(new HTML("<b>Last Name</b>"));
+      register.add(last);
+    }
+
+    if (!isDataCollectAdmin) {
+      register.add(new HTML("<b>Native Lang (L1)</b>"));
+      register.add(nativeLang);
+      register.add(new HTML("<b>Dialect</b>"));
+      register.add(dialect);
+      register.add(new HTML("<b>Your age</b>"));
+      register.add(ageEntryBox);
+      register.add(new HTML("<b>Select gender</b>"));
+      register.add(genderPanel);
+      register.add(new HTML("<b>Select months of experience</b>"));
+      register.add(new HTML("<b>in this language</b>"));
+      register.add(experiencePanel);
+    }
 
     reg.setEnabled(true);
+    reg.setVisible(false);
     reg.getElement().setId("registerButton");
 
     reg.addClickHandler(new ClickHandler() {
@@ -255,35 +316,31 @@ public class UserManager {
             Window.alert("Please use password from the email sent to you.");
             valid = false;
           }
-          else if (checkAudioSelection(regular, fastThenSlow)) {
+          else if (!isDataCollectAdmin && checkAudioSelection(regular, fastThenSlow)) {
             Window.alert("Please choose either regular or regular then slow audio recording.");
             valid = false;
           }
-          else if (first.getText().isEmpty()) {
+          else if (COLLECT_NAMES && first.getText().isEmpty()) {
             Window.alert("First name is empty");
             valid = false;
           }
-          else if (last.getText().isEmpty()) {
+          else if (COLLECT_NAMES && last.getText().isEmpty()) {
             Window.alert("Last name is empty");
             valid = false;
           }
-          else if (nativeLang.getText().isEmpty()) {
+          else if (!isDataCollectAdmin && nativeLang.getText().isEmpty()) {
             Window.alert("Language is empty");
             valid = false;
           }
-          else if (dialect.getText().isEmpty()) {
+          else if (!isDataCollectAdmin && dialect.getText().isEmpty()) {
             Window.alert("Dialect is empty");
-            valid = false;
-          }
-          else if (user.getText().isEmpty()) {
-            Window.alert("User id is empty");
             valid = false;
           }
 
           if (valid) {
             try {
-              int age = Integer.parseInt(ageEntryBox.getText());
-              if ((age < MIN_AGE) || (age > MAX_AGE && age != TEST_AGE)) {
+              int age = getAge(ageEntryBox);
+              if (!isDataCollectAdmin && (age < MIN_AGE) || (age > MAX_AGE && age != TEST_AGE)) {
                 valid = false;
                 Window.alert("age '" + age + "' is too young or old.");
               }
@@ -293,7 +350,7 @@ public class UserManager {
             }
           }
           if (valid) {
-            int enteredAge = Integer.parseInt(ageEntryBox.getText());
+            int enteredAge = getAge(ageEntryBox);
             checkUserOrCreate(enteredAge, user, experienceBox, genderBox, first, last, nativeLang, dialect, dialogBox,
                 login, fastThenSlow.getValue());
           } else {
@@ -313,31 +370,59 @@ public class UserManager {
     login.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         // System.out.println("login button got click " + event);
-        if (rememberedUser == -1) {
-          if (checkPassword(password)) {
-            Window.alert("please register -- " + user.getText() + " has not registered");
-          } else {
-            Window.alert("please use password from the email");
+
+        service.userExists(user.getText(), new AsyncCallback<Integer>() {
+          public void onFailure(Throwable caught) {
+            Window.alert("Couldn't contact server");
           }
-        } else {
-          if (checkAudioSelection(regular, fastThenSlow)) {
-            Window.alert("Please choose either regular or regular then slow audio recording.");
+
+          public void onSuccess(Integer result) {
+            boolean exists = result != -1;
+            if (exists) {
+              if (checkAudioSelection(regular, fastThenSlow)) {
+                Window.alert("Please choose either regular or regular then slow audio recording.");
+              } else {
+                dialogBox.hide();
+                storeAudioType(fastThenSlow.getValue() ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR);
+                storeUser(result);
+              }
+            } else {
+              System.out.println(user.getText() + " doesn't exist");
+              if (checkPassword(password)) {
+                Window.alert("Please register -- " + user.getText() + " has not registered");
+              } else {
+                Window.alert("Please use password from the email");
+              }
+            }
           }
-          else {
-            dialogBox.hide();
-            storeAudioType(fastThenSlow.getValue() ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR);
-            storeUser(rememberedUser);
-          }
-        }
+        });
       }
     });
     show(dialogBox);
+  }
+
+  private int getAge(TextBox ageEntryBox) {
+    return isDataCollectAdmin ? 89: Integer.parseInt(ageEntryBox.getText());
   }
 
   private boolean checkAudioSelection(RadioButton regular, RadioButton fastThenSlow) {
     return isCollectAudio && !regular.getValue() && !fastThenSlow.getValue();
   }
 
+  /**
+   * @see #displayTeacherLogin()
+   * @param enteredAge
+   * @param user
+   * @param experienceBox
+   * @param genderBox
+   * @param first
+   * @param last
+   * @param nativeLang
+   * @param dialect
+   * @param dialogBox
+   * @param closeButton
+   * @param isFastAndSlow
+   */
   private void checkUserOrCreate(final int enteredAge, final TextBox user, final ListBox experienceBox,
                                  final ListBox genderBox,
                                  final TextBox first, final TextBox last,
@@ -349,14 +434,12 @@ public class UserManager {
 
       public void onSuccess(Integer result) {
         System.out.println("user '" + user.getText() + "' exists " + result);
-        rememberedUser = -1;
-        if (result != -1) {
-          rememberedUser = result;
-          Window.alert("User " + user.getText() + " already registered, click login.");
-        }
-        else {
+        if (result == -1) {
           addTeacher(enteredAge,
               experienceBox, genderBox, first, last, nativeLang, dialect, user, dialogBox, closeButton, isFastAndSlow);
+        }
+        else {
+          Window.alert("User " + user.getText() + " already registered, click login.");
         }
       }
     });
@@ -389,12 +472,10 @@ public class UserManager {
           }
 
           public void onSuccess(Long result) {
-            System.out.println("server result is " + result);
-            long result1 = result;
-            rememberedUser = (int) result1;
+            System.out.println("addUser : server result is " + result);
             dialogBox.hide();
             storeAudioType(isFastAndSlow ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR);
-            storeUser(rememberedUser);
+            storeUser(result);
           }
         });
   }
@@ -402,13 +483,6 @@ public class UserManager {
   private boolean checkPassword(TextBox password) {
     String trim = password.getText().trim();
     return trim.equalsIgnoreCase(GRADING) || trim.equalsIgnoreCase(TESTING);
-  }
-
-  private void setGraderCookie(String user) {
-    System.out.println("added " + user);
-    final long DURATION = 1000 * 60 * 60 * EXPIRATION_HOURS; //duration remembering login
-    Date expires = new Date(System.currentTimeMillis() + DURATION);
-    Cookies.setCookie("grader", "" + user, expires);
   }
 
   /**
@@ -473,18 +547,18 @@ public class UserManager {
         if (experienceBox.getSelectedIndex() == EXPERIENCE_CHOICES.size() - 1) {
           monthsOfExperience = 20 * 12;
         }
-        service.addUser(Integer.parseInt(ageEntryBox.getText()),
+        service.addUser(getAge(ageEntryBox),
             genderBox.getValue(genderBox.getSelectedIndex()),
             monthsOfExperience, new AsyncCallback<Long>() {
           public void onFailure(Throwable caught) {
             // Show the RPC error message to the user
-            dialogBox.setText("Remote Procedure Call - Failure");
+            dialogBox.setText("Couldn't contact server.");
             dialogBox.center();
             closeButton.setFocus(true);
           }
 
           public void onSuccess(Long result) {
-            System.out.println("server result is " + result);
+            System.out.println("addUser : server result is " + result);
             storeUser(result);
           }
         });
@@ -548,45 +622,12 @@ public class UserManager {
         }
         try {
           int age = Integer.parseInt(text);
-          //closeButton.setEnabled ((age > MIN_AGE && age < MAX_AGE) || age == TEST_AGE);
+          closeButton.setEnabled((age > MIN_AGE && age < MAX_AGE) || age == TEST_AGE);
         } catch (NumberFormatException e) {
           closeButton.setEnabled(false);
         }
       }
     });
     return closeButton;
-  }
-
-  private class GraderMyKeyUpHandler implements KeyUpHandler {
-    private final TextBox user;
-    private final TextBox password;
-
-    public GraderMyKeyUpHandler(TextBox user, Button closeButton, Button regButton, TextBox password, boolean isGrader) {
-      this.user = user;
-      this.password = password;
-    }
-
-    public void onKeyUp(KeyUpEvent event) {
-      String text = user.getText();
-      if (text.length() == 0) {
-        return;
-      }
-
-      service.userExists(text, new AsyncCallback<Integer>() {
-        public void onFailure(Throwable caught) {
-        }
-
-        public void onSuccess(Integer result) {
-          // System.out.println("user '" + user.getText() + "' exists " + result);
-          boolean passwordMatch = checkPassword(password);
-          rememberedUser = -1;
-          if (passwordMatch) {
-            if (result != -1) {
-              rememberedUser = result;
-            }
-          }
-        }
-      });
-    }
   }
 }
