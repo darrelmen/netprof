@@ -19,16 +19,26 @@ import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultsAndGrades;
 import mitll.langtest.shared.Session;
+import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +53,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 /**
  * Supports all the database interactions.
@@ -65,6 +77,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final String H2_DATABASE = "h2Database";
   private static final String H2_DATABASE_DEFAULT = "vlr-parle";
   private static final String URDU = "urdu";
+  private static final String READ_FROM_FILE = "readFromFile";
+
   private static final int MB = (1024 * 1024);
   public static final String ANSWERS = "answers";
   private static final int TIMEOUT = 30;
@@ -82,6 +96,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String outsideFile;
   private boolean isUrdu;
   private int firstNInOrder;
+  private boolean isDataCollectAdminView;
+
 
   private Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
       .concurrencyLevel(4)
@@ -89,21 +105,177 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();
 
   /**
+   * This allows us to upload an exercise file and create a new {@link Site}.
+   * @see mitll.langtest.client.DataCollectAdmin#makeDataCollectNewSiteForm2
+   * @see SiteDeployer
+   * @param request
+   * @param response
+   * @throws ServletException
+   * @throws IOException
+   */
+  @Override
+  protected void service(HttpServletRequest request,
+                         HttpServletResponse response) throws ServletException, IOException {
+    boolean isMultipart = ServletFileUpload.isMultipartContent(new ServletRequestContext(request));
+    if (isMultipart) {
+      SiteDeployer siteDeployer = new SiteDeployer();
+      Site site = siteDeployer.getSite(request, configDir);
+      if (site == null) {
+        super.service(request, response);
+        return;
+      }
+
+      siteDeployer.doSiteResponse(db,response, siteDeployer, site);
+    } else {
+      super.service(request, response);
+    }
+  }
+
+  public Site getSiteByID(long id) {
+    return db.getSiteByID(id);
+  }
+
+  @Override
+  public List<Site> getSites() {
+    return db.getDeployedSites();
+  }
+
+  /**
+   * Copy template to something named by site name
+   * copy exercise file from media to site/config/template
+   * set fields in config.properties
+   *   - apptitle
+   *   - release date
+   *    - lesson plan file
+   *
+   *    then copy to install path/../name
+   *
+   * @param id
+   * @param name
+   * @param language
+   * @param notes
+   * @return
+   */
+  @Override
+  public boolean deploySite(long id, String name, String language, String notes) {
+    Site siteByID = db.getSiteByID(id);
+
+    SiteDeployer siteDeployer = new SiteDeployer();
+
+    siteByID = db.updateSite(siteByID, name, language, notes);
+    if (!siteDeployer.isValidName(siteByID, getInstallPath())) {
+      return false;
+    }
+    boolean b = siteDeployer.deploySite(siteByID, configDir, getInstallPath());
+    if (b) {
+      db.deploy(siteByID);
+    } else {
+      logger.warn("didn't deploy " + siteByID);
+    }
+
+    if (!b) return b;
+    waitUntilDeployed(siteByID);
+
+    String firstName = "Unknown user #" + siteByID.creatorID;
+    String lastName = "Unk.";
+    String userid = "";
+    for (User user : db.getUsers())
+      if (user.id == siteByID.creatorID) {
+        firstName = user.firstName;
+        lastName = user.lastName;
+        userid = user.userID;
+      }
+
+    String subject = "Site " + name + " deployed";
+    String message = "Hi,\n" +
+        "At site " + getBaseUrl() + "" +
+        " User '" +
+        userid+
+        //firstName + " " + lastName +
+        "' deployed site " + name + ".\n" +
+        "Thought you might want to know.\n" +
+        "Thanks,\n" +
+        "Your friendly web admin.";
+    new MailSupport(props).email(subject, message);
+
+    return true;
+  }
+
+  private void waitUntilDeployed(Site siteByID) {
+    int tries = 3;
+    boolean valid = false;     // todo improve
+    while (tries-- > 0) {
+      String baseUrl = "";
+      try {
+        baseUrl = getBaseUrl(siteByID.name);
+        URL oracle = new URL(baseUrl);
+        URLConnection yc = oracle.openConnection();
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+            yc.getInputStream()));
+        in.close();
+
+        valid = true;
+      } catch (Exception e) {
+        logger.info("reading " + baseUrl + " got " + e);
+      }
+      if (!valid) {
+        try {
+          Thread.sleep(3000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
+
+  private String getBaseUrl() {
+    HttpServletRequest request = getThreadLocalRequest();
+    return getBaseUrl(request.getContextPath());
+  }
+
+  private String getBaseUrl(String name) {
+
+    HttpServletRequest request = getThreadLocalRequest();
+
+    if ((request.getServerPort() == 80) ||
+        (request.getServerPort() == 443)) {
+      return request.getScheme() + "://" +
+          request.getServerName() + "/" + name;
+    } else {
+      return request.getScheme() + "://" +
+          request.getServerName() + ":" + request.getServerPort() +
+          "/" + name;
+    }
+  }
+
+  /**
    * @see mitll.langtest.client.exercise.ExerciseList#getExercises
    * @param userID
-   * @param useFile
    * @param arabicDataCollect
    * @return
    */
-  public List<ExerciseShell> getExerciseIds(long userID, boolean useFile, boolean arabicDataCollect) {
-    logger.debug("getting exercise ids for User id=" + userID + " use file " + useFile + " config " + relativeConfigDir);
-    List<Exercise> exercises = getExercises(userID, useFile, arabicDataCollect);
+  public List<ExerciseShell> getExerciseIds(long userID, boolean arabicDataCollect) {
+    logger.debug("getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
+    List<Exercise> exercises = getExercises(userID, arabicDataCollect);
+    List<ExerciseShell> ids = getExerciseShells(exercises);
+    logMemory();
+    return ids;
+  }
+
+  private List<ExerciseShell> getExerciseShells(Collection<Exercise> exercises) {
     List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
     for (Exercise e : exercises) {
       ids.add(new ExerciseShell(e.getID(), e.getTooltip()));
     }
-    logMemory();
     return ids;
+  }
+
+  @Override
+  public Map<String, Collection<String>> getTypeToSection() { return db.getTypeToSection(); }
+  @Override
+  public List<ExerciseShell> getExercisesForSection(String type, String section) {
+    Collection<Exercise> exercisesForSection = db.getExercisesForSection(type, section);
+    return getExerciseShells(exercisesForSection);
   }
 
   private void logMemory() {
@@ -116,39 +288,29 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @see mitll.langtest.client.exercise.ExerciseList#getExercisesInOrder()
-   * @param useFile
    * @return
    */
-  public List<ExerciseShell> getExerciseIds(boolean useFile) {
-    List<Exercise> exercises = getExercises(useFile);
-    List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
-    for (Exercise e : exercises) {
-      ids.add(new ExerciseShell(e.getID(), e.getTooltip()));
-    }
+  public List<ExerciseShell> getExerciseIds() {
+    List<Exercise> exercises = getExercises();
+    List<ExerciseShell> ids = getExerciseShells(exercises);
 
     return ids;
   }
 
-  public Exercise getExercise(String id, boolean useFile) {
-    //logger.warn("getExercise Getting exercise "+ id);
-    List<Exercise> exercises = getExercises(useFile);
+  public Exercise getExercise(String id) {
+    List<Exercise> exercises = getExercises();
     for (Exercise e : exercises) {
       if (id.equals(e.getID())) {
-        //logger.warn("Found exercise "+ e);
-
         return e;
       }
     }
     return null;
   }
 
-  public Exercise getExercise(String id, long userID, boolean useFile, boolean arabicDataCollect) {
-   // logger.warn("getExercise Getting exercise "+ id + " for user " +userID + " use file " + useFile);
-
-    List<Exercise> exercises = getExercises(userID, useFile, arabicDataCollect);
+  public Exercise getExercise(String id, long userID, boolean arabicDataCollect) {
+    List<Exercise> exercises = getExercises(userID, arabicDataCollect);
     for (Exercise e : exercises) {
       if (id.equals(e.getID())) {
-     //   logger.warn("Found exercise "+ e);
         return e;
       }
     }
@@ -167,38 +329,41 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * <li>Or we can attempt to present items in an order that biases towards presenting items that were all graded "correct"  </li>
    * first and all graded "incorrect" last.
    * </ul>
+   *
    * @param userID
-   * @param useFile
    * @param arabicDataCollect
    * @return
    * @see mitll.langtest.client.exercise.ExerciseList#getExercises(long)
    */
-  public List<Exercise> getExercises(long userID, boolean useFile, boolean arabicDataCollect) {
-    String lessonPlanFile = setInstallPath(useFile);
+  public List<Exercise> getExercises(long userID, boolean arabicDataCollect) {
+    String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
+
     synchronized (this) {
       if (autoCRT == null) {
         autoCRT = new AutoCRT(db.getExport(), this, getInstallPath(), relativeConfigDir);
       }
     }
-    //logger.debug("usefile = " + useFile + " arabic data collect " + arabicDataCollect);
     List<Exercise> exercises;
     if (dataCollectMode) {
+      logger.debug("in data collect mode");
       if (biasTowardsUnanswered) {
         if (useOutsideResultCounts) {
           String outsideFileOverride = outsideFile;
           if (lessonPlanFile.contains("farsi")) outsideFileOverride = configDir + File.separator + "farsi.txt";
           else if (lessonPlanFile.contains("urdu")) outsideFileOverride = configDir + File.separator + "urdu.txt";
           else if (lessonPlanFile.contains("sudanese")) outsideFileOverride = configDir + File.separator + "sudanese.txt";
-          exercises = db.getExercisesBiasTowardsUnanswered(useFile, userID, outsideFileOverride);
+          exercises = db.getExercisesBiasTowardsUnanswered(userID, outsideFileOverride);
           db.setOutsideFile(outsideFileOverride);
         }
         else {
-          exercises = db.getExercisesBiasTowardsUnanswered(useFile, userID);
+          exercises = db.getExercisesBiasTowardsUnanswered(userID);
         }
       } else {
-        exercises = db.getExercisesFirstNInOrder(userID, useFile, firstNInOrder);
+        exercises = db.getExercisesFirstNInOrder(userID, firstNInOrder);
       }
       if (!collectAudio) {
+        logger.debug("*not* collecting audio, just text");
+
         for (Exercise e : exercises) {
           e.setRecordAnswer(false);
           e.setPromptInEnglish(false);
@@ -206,7 +371,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
     }
     else {
-      exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(userID, useFile);
+      exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(userID);
     }
 
     if (makeFullURLs) convertRefAudioURLs(exercises);
@@ -218,30 +383,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return exercises;
   }
 
-  private String setInstallPath(boolean useFile) {
-    String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
-    //logger.warn("use file " + useFile + " collect audio " + collectAudio);
-    if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
-
-    //logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
-    synchronized (this) {
-      db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, isUrdu);
-    }
-    return lessonPlanFile;
-  }
-
   /**
    * Called from the client.
    * @see mitll.langtest.client.exercise.ExerciseList#getExercisesInOrder()
    * @return
-   * @param useFile
    */
-  public List<Exercise> getExercises(boolean useFile) {
-/*    String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
-    db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, isUrdu);*/
-
-    setInstallPath(useFile);
-    List<Exercise> exercises = db.getExercises(useFile);
+  public List<Exercise> getExercises() {
+    List<Exercise> exercises = db.getExercises();
     if (makeFullURLs) convertRefAudioURLs(exercises);
     return exercises;
   }
@@ -262,24 +410,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param user
    * @param expectedGrades
    * @param filterForArabicTextOnly
+   * @param englishOnly
    * @return next ungraded exercise
    */
-  public Exercise getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly) {
+  public Exercise getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly, boolean englishOnly) {
     synchronized (this) {
       ConcurrentMap<String,String> stringStringConcurrentMap = userToExerciseID.asMap();
       Collection<String> values = stringStringConcurrentMap.values();
       String currentExerciseForUser = userToExerciseID.getIfPresent(user);
-      logger.debug("for " + user + " current " + currentExerciseForUser);
+      logger.debug("getNextUngradedExercise for " + user + " current " + currentExerciseForUser + " expected " + expectedGrades);
 
       Collection<String> currentActiveExercises = new HashSet<String>(values);
 
       if (currentExerciseForUser != null) {
         currentActiveExercises.remove(currentExerciseForUser); // it's OK to include the one the user is working on now...
       }
-      logger.debug("current set minus " + user + " is " + currentActiveExercises);
+      logger.debug("getNextUngradedExercise current set minus " + user + " is " + currentActiveExercises);
 
       return db.getNextUngradedExercise(currentActiveExercises, expectedGrades,
-          filterForArabicTextOnly, filterForArabicTextOnly, !filterForArabicTextOnly);
+          filterForArabicTextOnly, filterForArabicTextOnly, !filterForArabicTextOnly, englishOnly);
     }
   }
 
@@ -426,7 +575,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public Map<String, String> getProperties() {
-    if (props == null) readProperties(getServletContext());
     Map<String,String> kv = new HashMap<String, String>();
     for (Object prop : props.keySet()) {
       String sp = (String)prop;
@@ -454,7 +602,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Get score when doing autoCRT on an audio file.
-   * @see AutoCRT#getAutoCRTAnswer(String, mitll.langtest.shared.Exercise, int, java.io.File, mitll.langtest.shared.AudioAnswer.Validity, int, String)
+   * @see AutoCRT#getAutoCRTAnswer(String, mitll.langtest.shared.Exercise, int, java.io.File, mitll.langtest.shared.AudioAnswer.Validity, int, String, int)
    * @param testAudioFile
    * @param lmSentences
    * @param background
@@ -478,10 +626,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param height  image dim
    * @param useScoreToColorBkg
    * @param background
-   * @param vocab
    * @param lmSentences
    * @param background
-   * @param vocab
    * @return PretestScore
    **/
   private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
@@ -492,7 +638,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     assert(testAudioFile != null && sentence != null);
     if (asrScoring == null) {
-        asrScoring = new ASRScoring(getInstallPath(), getProperties()); // lazy eval since install path not ready at init() time.
+        asrScoring = new ASRScoring(getInstallPath(), getProperties()); // lazy eval since...?
     }
     testAudioFile = dealWithMP3Audio(testAudioFile);
 
@@ -694,19 +840,39 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public long addUser(int age, String gender, int experience,
                       String firstName, String lastName, String nativeLang, String dialect, String userID) {
-    logger.info("Adding user " + userID + " " + firstName +" " +lastName);
+    logger.info("Adding user " + userID + " " + firstName + " " + lastName);
     HttpServletRequest request = getThreadLocalRequest();
     // String header = request.getHeader("X-FORWARDED-FOR");
     String header = request.getHeader("User-Agent");
     SimpleDateFormat sdf = new SimpleDateFormat();
     String format = sdf.format(new Date());
     String ip = request.getRemoteHost() +/*"/"+ request.getRemoteAddr()+*/(header != null ? "/" + header : "") + " at " + format;
-    return db.addUser(age, gender, experience, ip, firstName, lastName, nativeLang, dialect, userID);
+    long l = db.addUser(age, gender, experience, ip, firstName, lastName, nativeLang, dialect, userID);
+
+    if (l != 0 && isDataCollectAdminView) {
+      String subject = "User " + lastName + " registered";
+      String message = "Hi,\n" +
+          "At site " + getBaseUrl() + "\n" +
+          " got new user " + firstName + " " + lastName + ".\n" +
+          "Should this person be enabled?\n" +
+          "Thanks,\n" +
+          "Your friendly web admin.";
+      new MailSupport(props).email(subject, message);
+    }
+
+    return l;
   }
 
   public List<User> getUsers() {
     return db.getUsers();
   }
+
+  @Override
+  public boolean isAdminUser(long id) { return db.isAdminUser(id); }
+  @Override
+  public boolean isEnabledUser(long id) { return db.isEnabledUser(id); }
+  @Override
+  public void setUserEnabled(long id, boolean enabled) { db.setUserEnabled(id, enabled); }
 
   // Results ---------------------
 
@@ -770,10 +936,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     // logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
 
     if (doAutoCRT && isValid) {
-      return autoCRT.getAutoCRTAnswer(exercise, getExercise(exercise, false), reqid, file, validity.validity, questionID, url);
+      return autoCRT.getAutoCRTAnswer(exercise, getExercise(exercise), reqid, file, validity.validity, questionID, url,
+          validity.durationInMillis);
     }
     else {
-      return new AudioAnswer(url, validity.validity, reqid);
+      return new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
     }
   }
 
@@ -783,9 +950,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public Map<Integer, Integer> getResultCountToCount(boolean useFile) {
-    setInstallPath(useFile);
-    return db.getResultCountToCount(useFile);
+  public Map<Integer, Integer> getResultCountToCount() {
+    return db.getResultCountToCount();
   }
   @Override
   public Map<String, Integer> getResultByDay() {
@@ -798,30 +964,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Map of overall, male, female to list of counts (ex 0 had 7, ex 1, had 5, etc.)
-   * @param useFile
    * @return
    */
-  public Map<String, List<Integer>> getResultPerExercise(boolean useFile) {
-    setInstallPath(useFile);
-    return db.getResultPerExercise(useFile);
+  public Map<String, List<Integer>> getResultPerExercise() {
+    return db.getResultPerExercise();
   }
 
   @Override
-  public Map<String, Map<Integer, Integer>> getResultCountsByGender(boolean useFile) {
-    setInstallPath(useFile);
-    return db.getResultCountsByGender(useFile);
+  public Map<String, Map<Integer, Integer>> getResultCountsByGender() {
+    return db.getResultCountsByGender();
   }
 
-  public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts(boolean useFile) {
-    setInstallPath(useFile);
-    return db.getDesiredCounts(useFile);
+  public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts() {
+    return db.getDesiredCounts();
   }
 
-  @Override
+/*  @Override
   public Map<Integer, Float> getHoursToCompletion(boolean useFile) {
-    setInstallPath(useFile);
-    return db.getHoursToCompletion(useFile);
-  }
+    return db.getHoursToCompletion();
+  }*/
 
   public List<Session> getSessions() {
     return db.getSessions();
@@ -829,6 +990,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public Map<String,Number> getResultStats() {
     return db.getResultStats();
+  }
+
+  @Override
+  public void logMessage(String message) {
+    logger.debug("from client " + message);
   }
 
   private String optionallyMakeURL(String wavPathWithForwardSlashSeparators) {
@@ -864,12 +1030,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       return "";
     }
 
-    HttpServletRequest threadLocalRequest = getThreadLocalRequest();
-    if (threadLocalRequest == null) {
-      logger.error("null local req");
-      return "";
-    }
-    String realContextPath = context.getRealPath(threadLocalRequest.getContextPath());
+    String realContextPath = getServletContext().getRealPath(getServletContext().getContextPath());
 
     List<String> pathElements = Arrays.asList(realContextPath.split(realContextPath.contains("\\") ? "\\\\" : "/"));
 
@@ -953,11 +1114,31 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.destroy();
   }
 
+  @Override
+
+  public void init() {
+    readProperties(getServletContext());
+    boolean useFile = !props.getProperty(READ_FROM_FILE, "false").equals("false");
+    logger.info("use file " + useFile);
+    setInstallPath(useFile);
+  }
+
+  private String setInstallPath(boolean useFile) {
+    String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
+    if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
+
+    //logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
+    db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, isUrdu, useFile);
+
+    return lessonPlanFile;
+  }
+
   /**
    * The config web.xml file.
    * As a final step, creates the DatabaseImpl!<br></br>
    *
    * Note that this will only ever be called once.
+   * @see #init()
    * @param servletContext
    */
   private void readProperties(ServletContext servletContext) {
@@ -965,12 +1146,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     this.relativeConfigDir = "config" + File.separator + config;
     this.configDir = getInstallPath() + File.separator + relativeConfigDir;
 
-    //logger.info("rel config dir " + relativeConfigDir);
     readPropertiesFile();
 
     String h2DatabaseFile = props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT);
     db = new DatabaseImpl(configDir, h2DatabaseFile);
-    //logger.debug("Db now " + db);
 
     try {
       firstNInOrder = Integer.parseInt(props.getProperty(FIRST_N_IN_ORDER, "" + Integer.MAX_VALUE));
@@ -983,7 +1162,27 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     isUrdu = !props.getProperty(URDU, "false").equals("false");
     biasTowardsUnanswered = !props.getProperty(BIAS_TOWARDS_UNANSWERED, "true").equals("false");
     useOutsideResultCounts = !props.getProperty(USE_OUTSIDE_RESULT_COUNTS, "true").equals("false");
+    isDataCollectAdminView = !props.getProperty("dataCollectAdminView", "false").equals("false");
     outsideFile = props.getProperty(OUTSIDE_FILE, OUTSIDE_FILE_DEFAULT);
+    String dateFromManifest = getDateFromManifest(servletContext);
+    if (dateFromManifest != null && dateFromManifest.length() > 0) {
+      logger.debug("Date from manifest " + dateFromManifest);
+      props.setProperty("releaseDate",dateFromManifest);
+    }
+  }
+
+  private String getDateFromManifest(ServletContext servletContext) {
+    InputStream inputStream = servletContext.getResourceAsStream("/META-INF/MANIFEST.MF");
+
+    try {
+      Manifest manifest = new Manifest(inputStream);
+      Attributes attributes = manifest.getMainAttributes();
+      return attributes.getValue("Built-Date");
+    }
+    catch(Exception ex) {
+//      logger.warn("Error while reading version: " + ex.getMessage());
+    }
+    return "";
   }
 
   private void readPropertiesFile() {
