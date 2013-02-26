@@ -6,6 +6,9 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
@@ -35,7 +38,8 @@ import java.util.Map;
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize {
+public abstract class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize,
+  ValueChangeHandler<String> {
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
   protected List<ExerciseShell> currentExercises = null;
   protected Map<String,ExerciseShell> idToExercise = null;
@@ -76,6 +80,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.arabicDataCollect = arabicDataCollect;
     this.showTurkToken = showTurkToken;
     this.showInOrder = showInOrder;
+
+    // Add history listener
+    History.addValueChangeHandler(this);
   }
 
   /**
@@ -139,23 +146,27 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.exercise_title = exercise_title;
   }
 
-  private class SetExercisesCallback implements AsyncCallback<List<ExerciseShell>> {
+  protected class SetExercisesCallback implements AsyncCallback<List<ExerciseShell>> {
     public void onFailure(Throwable caught) {
       feedback.showErrorMessage("Server error", "Server error - couldn't get exercises.");
     }
 
     public void onSuccess(List<ExerciseShell> result) {
      // System.out.println("SetExercisesCallback Got " +result.size() + " results");
-      currentExercises = result; // remember current exercises
-      idToExercise = new HashMap<String, ExerciseShell>();
-      clear();
-      for (final ExerciseShell es : result) {
-        idToExercise.put(es.getID(),es);
-        addExerciseToList(es);
-      }
-      flush();
+      rememberExercises(result);
       loadFirstExercise();
     }
+  }
+
+  protected void rememberExercises(List<ExerciseShell> result) {
+    currentExercises = result; // remember current exercises
+    idToExercise = new HashMap<String, ExerciseShell>();
+    clear();
+    for (final ExerciseShell es : result) {
+      idToExercise.put(es.getID(),es);
+      addExerciseToList(es);
+    }
+    flush();
   }
 
   protected void flush() {}
@@ -184,6 +195,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   protected void loadFirstExercise() {
+    System.out.println("load first exercise!");
+
     ExerciseShell toLoad = currentExercises.get(0);
     if (exercise_title != null) {
       ExerciseShell e = byID(exercise_title);
@@ -218,6 +231,25 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
+  public void onValueChange(ValueChangeEvent<String> event) {
+    // This method is called whenever the application's history changes. Set
+    // the label to reflect the current history token.
+   // lbl.setText("The current history token is: " + event.getValue());
+    loadByID(event.getValue());
+  }
+
+  protected boolean loadByID(String id) {
+    ExerciseShell exerciseShell = byID(id);
+    if (exerciseShell != null) {
+      System.out.println("loading history exercise " + id);
+      loadExercise(exerciseShell);
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
   private class ExerciseAsyncCallback implements AsyncCallback<Exercise> {
     private final ExerciseShell exerciseShell;
 
@@ -230,6 +262,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
     @Override
     public void onSuccess(Exercise result) {
+      //History.newItem(result.getID());
       useExercise(result, exerciseShell);
     }
   }
