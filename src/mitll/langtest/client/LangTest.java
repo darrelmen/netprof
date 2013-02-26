@@ -328,8 +328,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback,
           isArabicTextDataCollect(), props.isShowTurkToken(), isAutoCRTMode()) {
           @Override
-          protected void checkBeforeLoad(ExerciseShell e) {
-          } // don't try to login
+          protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
         };
       }
     }
@@ -372,6 +371,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     users.setVisible(isGrading || props.isAdminView());
     showResults.setVisible(isGrading || props.isAdminView());
     monitoring.setVisible(isGrading || props.isAdminView());
+
 
     if (props.isGoodwaveMode() || isAutoCRTMode()) {   // no login for pron mode
       gotUser(-1);
@@ -528,8 +528,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see ExerciseList#loadExercise
    * @see #modeSelect()
+   * @see ExerciseList#checkBeforeLoad(mitll.langtest.shared.ExerciseShell)
    */
   public void login() {
     if (props.isDataCollectMode() || props.isTeacherView()) userManager.teacherLogin();
@@ -547,7 +547,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
-//    System.out.println("got user " +userID);
+    System.out.println("gotUser : got user " +userID);
     if (props.isDataCollectAdminView()) {
       checkForAdminUser();
     } else {
