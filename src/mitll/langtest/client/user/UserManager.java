@@ -122,7 +122,7 @@ public class UserManager {
   public void login() {
     int user = getUser();
     if (user != NO_USER_SET) {
-      System.out.println("login user : " + user);
+      System.out.println("UserManager.login : user : " + user);
       langTest.gotUser(user);
     } else {
       displayLoginBox();
