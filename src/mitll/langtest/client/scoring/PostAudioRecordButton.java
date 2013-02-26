@@ -46,49 +46,76 @@ public class PostAudioRecordButton extends RecordButton {
   protected void stopRecording() {
     controller.stopRecording();
     reqid++;
+    final long then = System.currentTimeMillis();
     service.writeAudioFile(controller.getBase64EncodedWavFile(),
-        exercise.getPlan(),
-        exercise.getID(),
-        index,
-        controller.getUser(),
-        controller.isAutoCRTMode(),
-        reqid,
-        !exercise.promptInEnglish,
-        controller.getAudioType(),
-        new AsyncCallback<AudioAnswer>() {
-      public void onFailure(Throwable caught) {
-        showPopup(AudioAnswer.Validity.INVALID.getPrompt());
-      }
+      exercise.getPlan(),
+      exercise.getID(),
+      index,
+      controller.getUser(),
+      controller.isAutoCRTMode(),
+      reqid,
+      !exercise.promptInEnglish,
+      controller.getAudioType(),
+      new AsyncCallback<AudioAnswer>() {
+        public void onFailure(Throwable caught) {
+          long now = System.currentTimeMillis();
+          System.out.println("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
 
-      /**
-       * Feedback for when audio isn't valid for some reason.
-       * @param toShow
-       */
-      private void showPopup(String toShow) {
-        final PopupPanel popupImage = new PopupPanel(true);
-        popupImage.add(new HTML(toShow));
-        popupImage.showRelativeTo(getRecord());
-        Timer t = new Timer() {
-          @Override
-          public void run() {
-            popupImage.hide();
+          showPopup(AudioAnswer.Validity.INVALID.getPrompt());
+        }
+
+        /**
+         * Feedback for when audio isn't valid for some reason.
+         * @param toShow
+         */
+        private void showPopup(String toShow) {
+          final PopupPanel popupImage = new PopupPanel(true);
+          popupImage.add(new HTML(toShow));
+          popupImage.showRelativeTo(getRecord());
+          Timer t = new Timer() {
+            @Override
+            public void run() {
+              popupImage.hide();
+            }
+          };
+          t.schedule(3000);
+        }
+
+        public void onSuccess(AudioAnswer result) {
+          long now = System.currentTimeMillis();
+          long roundtrip = now - then;
+
+          //System.out.println("PostAudioRecordButton : Got audio answer " + result);
+          if (result.reqid != reqid) {
+            System.out.println("ignoring old response " + result);
+            return;
           }
-        };
-        t.schedule(3000);
+          if (result.validity == AudioAnswer.Validity.OK) {
+            useResult(result);
+          } else {
+            showPopup(result.validity.getPrompt());
+            useInvalidResult(result);
+          }
+          if (controller.isLogClientMessages()) {
+            logRoundtripTime(result, roundtrip);
+          }
+        }
+      });
+  }
+
+  private void logRoundtripTime(AudioAnswer result, long roundtrip) {
+    String message = "PostAudioRecordButton : (success) User #" + controller.getUser() +
+      " post audio took " + roundtrip + " millis, audio dur " +
+      result.durationInMillis + " millis, " +
+      " " + ((float) roundtrip / (float) result.durationInMillis) + " roundtrip/audio duration ratio.";
+    //System.out.println(message);
+    service.logMessage(message, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
       }
 
-      public void onSuccess(AudioAnswer result) {
-        //System.out.println("PostAudioRecordButton : Got audio answer " + result);
-        if (result.reqid != reqid) {
-          System.out.println("ignoring old response " + result);
-          return;
-        }
-        if (result.validity == AudioAnswer.Validity.OK) {
-          useResult(result);
-        } else {
-          showPopup(result.validity.getPrompt());
-          useInvalidResult(result);
-        }
+      @Override
+      public void onSuccess(Void result) {
       }
     });
   }
