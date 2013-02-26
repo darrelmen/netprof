@@ -127,6 +127,7 @@ public class MonitoringSupport {
         totalTime += s.duration;
         total += s.numAnswers;
     }
+    if (total == 0) return 0l;
     return totalTime/total;
   }
 
@@ -382,7 +383,7 @@ public class MonitoringSupport {
 
   /**
    * Split exid->count by gender.
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise(boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise
    * @return
    */
   public Map<String,List<Integer>> getResultPerExercise(List<Exercise> exercises) {
