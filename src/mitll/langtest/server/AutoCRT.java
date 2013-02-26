@@ -11,10 +11,7 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,7 +29,6 @@ import java.util.Set;
  */
 public class AutoCRT {
   private static Logger logger = Logger.getLogger(AutoCRT.class);
-  private static final int MAX_AUTO_CRT_VOCAB = 200;
   private Classifier<AutoGradeExperiment.Event> classifier = null;
   private Set<String> allAnswers = new HashSet<String>();
   private Map<String, Export.ExerciseExport> exerciseIDToExport;
@@ -59,10 +55,11 @@ public class AutoCRT {
    * @param validity
    * @param questionID
    * @param url
+   * @param durationInMillis
    * @return
    */
   public AudioAnswer getAutoCRTAnswer(String exercise, Exercise e, int reqid, File file, AudioAnswer.Validity validity,
-                                      int questionID, String url) {
+                                      int questionID, String url, int durationInMillis) {
     List<String> exportedAnswers = getExportedAnswers(exercise, questionID);
     //for (Exercise.QAPair pair : e.getForeignLanguageQuestions()) exportedAnswers.add(pair.getQuestion());
     logger.info("got answers " + new HashSet<String>(exportedAnswers));
@@ -77,7 +74,7 @@ public class AutoCRT {
     String annotatedResponse = getAnnotatedResponse(exercise, questionID, recoSentence);
 
     double scoreForAnswer = (recoSentence.length() > 0) ? getScoreForExercise(e, questionID, recoSentence) :0.0d;
-    return new AudioAnswer(url, validity, annotatedResponse, scoreForAnswer, reqid);
+    return new AudioAnswer(url, validity, annotatedResponse, scoreForAnswer, reqid, durationInMillis);
   }
 
   /**
@@ -193,7 +190,7 @@ public class AutoCRT {
   private Collection<String> getAllExportedAnswers() { return allAnswers; }
 
   /**
-   * @see #getAutoCRTAnswer(String, mitll.langtest.shared.Exercise, int, java.io.File, mitll.langtest.shared.AudioAnswer.Validity, int, String)
+   * @see #getAutoCRTAnswer(String, mitll.langtest.shared.Exercise, int, java.io.File, mitll.langtest.shared.AudioAnswer.Validity, int, String, int)
    * @param id
    * @param questionID
    * @return
