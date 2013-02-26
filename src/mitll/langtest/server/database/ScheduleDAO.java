@@ -3,8 +3,16 @@ package mitll.langtest.server.database;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+/**
+ * @deprecated we're moving away from using schedules
+ */
 public class ScheduleDAO {
   private final Database database;
 
@@ -19,15 +27,6 @@ public class ScheduleDAO {
   Map<Long, List<Schedule>> getSchedule() {
     Set<Long> objects = Collections.emptySet();
     return getScheduleForUserAndExercise(true, false, objects, "");
-  }
-
-  public Map<Long, List<Schedule>> getScheduleForUserAndExercise(Set<Long> users, String exid) {
-    return getScheduleForUserAndExercise(false, false, users, exid);
-  }
-
-  public Map<Long, List<Schedule>> getScheduleForUserAndExercise(String exid) {
-    Set<Long> users = Collections.emptySet();
-    return getScheduleForUserAndExercise(false, true, users, exid);
   }
 
   private Map<Long, List<Schedule>> getScheduleForUserAndExercise(boolean getAll, boolean ignoreUsers, Set<Long> users, String exid) {
