@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -61,7 +62,7 @@ import java.util.Map;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   // TODO : consider putting these in the .css file?
   private static final int HEADER_HEIGHT = 90;
-  private static final int FOOTER_HEIGHT = 40;
+  private static final int FOOTER_HEIGHT = 20;
   private static final int EXERCISE_LIST_WIDTH = 210;
   private static final int EAST_WIDTH = 90;
 
@@ -96,12 +97,31 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         new ExceptionHandlerDialog(browserCheck,throwable);
       }
     });
+    final long then = System.currentTimeMillis();
 
     service.getProperties(new AsyncCallback<Map<String, String>>() {
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+        long now = System.currentTimeMillis();
+        System.out.println("onModuleLoad.getProperties : (failure) took " + (now-then) + " millis");
+        Window.alert("Couldn't contact server.  Please check your network connection.");
+      }
+
       public void onSuccess(Map<String, String> result) {
+        long now = System.currentTimeMillis();
+//        System.out.println("onModuleLoad.getProperties : (success) took " + (now - then) + " millis");
+
         props = new PropertyHandler(result);
         onModuleLoad2();
+        if (isLogClientMessages()) {
+          service.logMessage("onModuleLoad.getProperties : (success) took " + (now - then) + " millis",
+            new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {}
+
+            @Override
+            public void onSuccess(Void result) {}
+          });
+        }
       }
     });
   }
@@ -113,6 +133,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Initially the flash record player is put in the center of the DockLayout
    */
   public void onModuleLoad2() {
+    if (props.isDataCollectAdminView()) {
+      doDataCollectAdminView();
+      return;
+    }
     // Load the visualization api, passing the onLoadCallback to be called
     // when loading is done.
     VisualizationUtils.loadVisualizationApi(new Runnable() {
@@ -120,9 +144,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void run() {}
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
 
-    userManager = new UserManager(this,service, isCollectAudio());
+    userManager = new UserManager(this,service, isCollectAudio(), false);
     resultManager = new ResultManager(service, this);
-    boolean isGrading = props.isGrading();
     monitoringManager = new MonitoringManager(service, props);
     boolean usualLayout = props.getExercise_title() == null;
     final DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
@@ -140,7 +163,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // header/title line
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
     HTML title = new HTML("<h1>" + props.getAppTitle() + "</h1>");
-    browserCheck.getBrowserAndVersion();
+   // browserCheck.getBrowserAndVersion();
     hp.addEast(getLogout(), eastWidth);
     hp.add(title);
 
@@ -154,10 +177,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     // set up center panel, initially with flash record panel
 
-    if (props.isTeacherView()) {
-
-    }
-    else if (usualLayout) {
+    if (usualLayout) {
       ScrollPanel sp = new ScrollPanel();
       sp.add(currentExerciseVPanel);
       widgets.add(sp);
@@ -179,17 +199,87 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
 
     // set up left side exercise list
-    makeExerciseList(exerciseListPanel, isGrading);
+    makeExerciseList(exerciseListPanel, props.isGrading());
+
+    setPageTitle();
+    browserCheck.checkForCompatibleBrowser();
+    setupSoundManager();
 
     modeSelect();
+  }
 
-    browserCheck.checkForCompatibleBrowser();
-
-    setupSoundManager();
+  private void setPageTitle() {
     Element elementById = DOM.getElementById("title-tag");   // set the page title to be consistent
     if (elementById != null) {
       elementById.setInnerText(props.getAppTitle());
     }
+  }
+
+  private void doDataCollectAdminView() {
+    setPageTitle();
+
+    VerticalPanel vp = new VerticalPanel();
+    VerticalPanel fp1 = new VerticalPanel();
+
+    vp.addStyleName("grayColor");
+    HTML title = new HTML("<h2>" + props.getAppTitle() + "</h2>");
+    title.addStyleName("darkerBlueColor");
+    title.addStyleName("grayColor");
+
+    fp1.getElement().getStyle().setFloat(Style.Float.LEFT);
+    fp1.add(title);
+
+    users = new Anchor("Users");
+    users.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        userTable.showUsers(service, userManager.getUser(), true);
+      }
+    });
+    fp1.add(users);
+    userManager = new UserManager(this,service, isCollectAudio(), false);
+
+    logout = new Anchor("Logout");
+    logout.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        userManager.clearUser();
+        lastUser = -1;
+        userManager.teacherLogin();
+      }
+    });
+    fp1.add(logout);
+    browserCheck.getBrowserAndVersion();
+
+    HTML statusLine = new HTML("<span><font size=-2>"+browserCheck.browser + " " +browserCheck.ver +" " +
+        props.getReleaseDate()+"</font></span>");
+    fp1.add(statusLine);
+    vp.add(fp1);
+
+    vp.add(currentExerciseVPanel);
+    userManager = new UserManager(this,service, false, props.isDataCollectAdminView());
+    DataCollectAdmin dataCollectAdmin = new DataCollectAdmin(userManager, service);
+    dataCollectAdmin.makeDataCollectNewSiteForm(currentExerciseVPanel);
+
+    FlowPanel fp = new FlowPanel();
+    fp.getElement().getStyle().setFloat(Style.Float.LEFT);
+    fp.add(vp);
+    RootPanel.get().add(fp);
+
+    browserCheck.checkForCompatibleBrowser();
+    userManager.teacherLogin();
+  }
+
+  private void checkForAdminUser() {
+    service.isAdminUser(userManager.getUser(), new AsyncCallback<Boolean>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        Window.alert("Can't contact server");
+      }
+
+      @Override
+      public void onSuccess(Boolean result) {
+        users.setVisible(result);
+      }
+    });
   }
 
   private void setupSoundManager() {
@@ -205,7 +295,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void addResizeHandler(final DockLayoutPanel widgets) {
     Window.addResizeHandler(new ResizeHandler() {
       public void onResize(ResizeEvent event) {
-//        System.out.println("updating width since got event " +event + " w = " + Window.getClientWidth());
+        //System.out.println("updating width since got event " +event + " w = " + Window.getClientWidth());
         setMainWindowSize(widgets);
         setExerciseListSize();
         exerciseList.onResize();
@@ -227,11 +317,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     final UserFeedback feedback = (UserFeedback) this;
 
     if (isGrading) {
-      this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback, props.isReadFromFile(),
-          true);
+      this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback,
+          true, props.isEnglishOnlyMode());
     }
     else {
-      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback, props.isReadFromFile(),
+      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback,
           isArabicTextDataCollect(), props.isShowTurkToken(), isAutoCRTMode()) {
         @Override
         protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
@@ -272,8 +362,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void modeSelect() {
     boolean isGrading = props.isGrading();
-    //System.out.println("modeSelect : english " +props.isEnglishOnlyMode() + " grading " +isGrading + " is auto crt " + isAutoCRTMode());
-
     logout.setVisible(!props.isGoodwaveMode());
     users.setVisible(isGrading || props.isAdminView());
     showResults.setVisible(isGrading || props.isAdminView());
@@ -317,7 +405,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this), userManager, 1);
     }
     else if (props.isGrading()) {
-      exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, props.isEnglishOnlyMode() ? 2 : 1);
+      exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, props.getNumGradesToCollect());
     }
     else if (props.isDataCollectMode() && props.isCollectAudio()) {
       exerciseList.setFactory(new WaveformExercisePanelFactory(service, this, this), userManager, 1);
@@ -392,7 +480,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     users = new Anchor("Users");
     users.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        userTable.showUsers(service);
+        userTable.showUsers(service,userManager.getUser(),false);
       }
     });
     vp.add(users);
@@ -416,6 +504,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     vp.add(monitoring);
     monitoring.setVisible(props.isAdminView());
 
+    browserCheck.getBrowserAndVersion();
     // no click handler for this for now
     HTML statusLine = new HTML("<span><font size=-2>"+browserCheck.browser + " " +browserCheck.ver +" " +
         props.getReleaseDate()+"</font></span>");
@@ -437,7 +526,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #modeSelect()
    */
   public void login() {
-    if (props.isDataCollectMode()) userManager.teacherLogin();
+    if (props.isDataCollectMode() || props.isTeacherView()) userManager.teacherLogin();
     else userManager.login();
   }
 
@@ -452,18 +541,23 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
-    setFactory();
+//    System.out.println("got user " +userID);
+    if (props.isDataCollectAdminView()) {
+      checkForAdminUser();
+    } else {
+      setFactory();
 
-    if (!props.isArabicTextDataCollect() && props.isCollectAudio()) {
-      flashRecordPanel.initFlash();
-    }
-
-    if (userID != lastUser) {
-      System.out.println("gotUser : " + userID + " vs " + lastUser);
-      if (props.isArabicTextDataCollect() || !props.isCollectAudio() || flashRecordPanel.gotPermission()) {
-        exerciseList.getExercises(userID);
+      if (!props.isArabicTextDataCollect() && props.isCollectAudio()) {
+        flashRecordPanel.initFlash();
       }
-      lastUser = userID;
+
+      if (userID != lastUser) {
+        System.out.println("gotUser : " + userID + " vs " + lastUser);
+        if (props.isArabicTextDataCollect() || !props.isCollectAudio() || flashRecordPanel.gotPermission()) {
+          exerciseList.getExercises(userID);
+        }
+        lastUser = userID;
+      }
     }
   }
 
@@ -484,6 +578,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public int getUser() { return userManager.getUser(); }
   public boolean getEnglishOnly() { return props.isEnglishOnlyMode(); }
+  public int getNumGradesToCollect() { return props.getNumGradesToCollect(); }
   public int getSegmentRepeats() { return props.getSegmentRepeats(); }
   public boolean isArabicTextDataCollect() {  return props.isArabicTextDataCollect(); }
   public boolean useBkgColorForRef() {  return props.isBkgColorForRef(); }
@@ -494,6 +589,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isCollectAudio() {  return props.isCollectAudio(); }
   public boolean isMinimalUI() {  return props.isMinimalUI(); }
   public boolean isGrading() {  return props.isGrading(); }
+  public boolean isLogClientMessages() {  return props.isLogClientMessages(); }
 
   // recording methods...
   /**
