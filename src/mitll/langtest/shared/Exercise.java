@@ -133,6 +133,8 @@ public class Exercise extends ExerciseShell  {
     this.type = EXERCISE_TYPE.REPEAT_FAST_SLOW;
   }
 
+  public ExerciseShell getShell() { return new ExerciseShell(getID(), getTooltip()); }
+
   public void addQuestion() {
     addQuestion(FL, "Please record the sentence above.", "", EMPTY_LIST);
   }
