@@ -55,7 +55,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private boolean useUserID = false;
   private long userID;
   private final boolean showInOrder;
-  private Map<String, Collection<String>> typeToSections;
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -102,17 +101,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
     System.out.println("getExercises " +userID);
 
-    service.getTypeToSection(new AsyncCallback<Map<String, Collection<String>>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Map<String, Collection<String>> result) {
-        typeToSections = result;
-        System.out.println("got " +typeToSections);
-      }
-    });
 
     useUserID = true;
     this.userID = userID;
