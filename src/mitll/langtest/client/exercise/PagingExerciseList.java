@@ -73,6 +73,10 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
                             boolean showTurkToken, boolean showInOrder) {
     super(currentExerciseVPanel, service, feedback, null, arabicDataCollect, showTurkToken, showInOrder);
 
+    addTableWithPager();
+  }
+
+  protected void addTableWithPager() {
     CellTable.Resources o = GWT.create(TableResources.class);
     this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
@@ -84,54 +88,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     final SingleSelectionModel<ExerciseShell> selectionModel = new SingleSelectionModel<ExerciseShell>();
     table.setSelectionModel(selectionModel);
 
-    Column<ExerciseShell, SafeHtml> id2 = new Column<ExerciseShell, SafeHtml>(new SafeHtmlCell() {
-      @Override
-      public Set<String> getConsumedEvents() {
-        Set<String> events = new HashSet<String>();
-        events.add("click");
-        return events;
-      }
-    }) {
-      @Override
-      public SafeHtml getValue(ExerciseShell object) {
-        return getColumnToolTip(object.getID(), object.getTooltip());
-      }
-
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, ExerciseShell object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        if ("click".equals(event.getType())) {
-          final ExerciseShell e = object;
-          if (isExercisePanelBusy()) {
-            Window.alert("Exercise busy.");
-            markCurrentExercise(currentExercise);
-          } else {
-            Timer timer = new Timer() {
-              @Override
-              public void run() {
-                loadExercise(e);
-              }
-            };
-            timer.schedule(100);
-          }
-        }
-      }
-
-      private SafeHtml getColumnToolTip(String columnText, String toolTipText) {
-        String htmlConstant = "<html>" + "<head><style>" +
-            "A.tip { TEXT-DECORATION: none; color:#1776B3}" +
-            "A.tip:hover  {CURSOR:default;}" +
-            "A.tip span   {DISPLAY:none}" +
-            "A.tip span p {background:#d30300;color:#fff;font-weight:500;border-radius:5px;padding:5px;font-size:12px}" +
-            "A.tip:hover span {border:1px solid #e6e3e5;DISPLAY: block;Z-INDEX: 1000; PADDING: 0px 10px 0px 10px;" +
-            //"POSITION:absolute;float:left;background:#ffffd1;   TEXT-DECORATION: none}" +
-            "POSITION:absolute;background:#ffffd1;   TEXT-DECORATION: none}" +
-            "</style></head>" +
-            "<body>" +
-            "<a href=\"#\" class=\"tip\">" + columnText + "<span>" + toolTipText + "</span></a>" + "</body>" + "</html>";
-        return new SafeHtmlBuilder().appendHtmlConstant(htmlConstant).toSafeHtml();
-      }
-    };
+    Column<ExerciseShell, SafeHtml> id2 = getExerciseIdColumn();
 
     table.addColumn(id2);
 
@@ -151,6 +108,56 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     add(table);
   }
 
+  private Column<ExerciseShell, SafeHtml> getExerciseIdColumn() {
+    return new Column<ExerciseShell, SafeHtml>(new SafeHtmlCell() {
+        @Override
+        public Set<String> getConsumedEvents() {
+          Set<String> events = new HashSet<String>();
+          events.add("click");
+          return events;
+        }
+      }) {
+        @Override
+        public SafeHtml getValue(ExerciseShell object) {
+          return getColumnToolTip(object.getID(), object.getTooltip());
+        }
+
+        @Override
+        public void onBrowserEvent(Cell.Context context, Element elem, ExerciseShell object, NativeEvent event) {
+          super.onBrowserEvent(context, elem, object, event);
+          if ("click".equals(event.getType())) {
+            final ExerciseShell e = object;
+            if (isExercisePanelBusy()) {
+              Window.alert("Exercise busy.");
+              markCurrentExercise(currentExercise);
+            } else {
+              Timer timer = new Timer() {
+                @Override
+                public void run() {
+                  loadExercise(e);
+                }
+              };
+              timer.schedule(100);
+            }
+          }
+        }
+
+        private SafeHtml getColumnToolTip(String columnText, String toolTipText) {
+          String htmlConstant = "<html>" + "<head><style>" +
+              "A.tip { TEXT-DECORATION: none; color:#1776B3}" +
+              "A.tip:hover  {CURSOR:default;}" +
+              "A.tip span   {DISPLAY:none}" +
+              "A.tip span p {background:#d30300;color:#fff;font-weight:500;border-radius:5px;padding:5px;font-size:12px}" +
+              "A.tip:hover span {border:1px solid #e6e3e5;DISPLAY: block;Z-INDEX: 1000; PADDING: 0px 10px 0px 10px;" +
+              //"POSITION:absolute;float:left;background:#ffffd1;   TEXT-DECORATION: none}" +
+              "POSITION:absolute;background:#ffffd1;   TEXT-DECORATION: none}" +
+              "</style></head>" +
+              "<body>" +
+              "<a href=\"#\" class=\"tip\">" + columnText + "<span>" + toolTipText + "</span></a>" + "</body>" + "</html>";
+          return new SafeHtmlBuilder().appendHtmlConstant(htmlConstant).toSafeHtml();
+        }
+      };
+  }
 
 
   @Override
