@@ -1,7 +1,6 @@
 package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -12,7 +11,6 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Result;
 
 /**
  * Created with IntelliJ IDEA.
@@ -61,6 +59,11 @@ public class WaveformExercisePanel extends ExercisePanel {
     audioPanel.onResize();
   }
 
+  /**
+   * @see ExercisePanel#addQuestionPrompt(com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.Exercise)
+   * @param promptInEnglish
+   * @return
+   */
   @Override
   protected String getQuestionPrompt(boolean promptInEnglish) {
     return getSpokenPrompt(promptInEnglish);
@@ -96,9 +99,9 @@ public class WaveformExercisePanel extends ExercisePanel {
      */
     public RecordAudioPanel(LangTestDatabaseAsync service, int index) {
       super(null, service, controller.getSoundManager(),
-          false, // use full screen width
-          true // use keyboard
-      );
+        false, // use full screen width
+        true, // use keyboard
+        controller.isLogClientMessages());
       this.index = index;
       setRightMargin(400);
     }
