@@ -3,6 +3,7 @@ package mitll.langtest.client.exercise;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -42,7 +43,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   private static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
   private ListDataProvider<ExerciseShell> dataProvider;
   private static final int ID_LINE_WRAP_LENGTH = 20;
-  public static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 390;
+  private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 390;
   private static final float MAX_PAGES = 2f;
   private static final int MIN_PAGE_SIZE = 3;
   private static final float DEFAULT_PAGE_SIZE = 15f;
@@ -52,8 +53,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     /**
      * The styles applied to the table.
      */
-    interface TableStyle extends CellTable.Style {
-    }
+    interface TableStyle extends CellTable.Style {}
 
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "ExerciseCellTableStyleSheet.css"})
@@ -113,7 +113,8 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
         @Override
         public Set<String> getConsumedEvents() {
           Set<String> events = new HashSet<String>();
-          events.add("click");
+          events.add(BrowserEvents.CLICK);
+          events.add(BrowserEvents.MOUSEOVER);
           return events;
         }
       }) {
@@ -125,26 +126,23 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
         @Override
         public void onBrowserEvent(Cell.Context context, Element elem, ExerciseShell object, NativeEvent event) {
           super.onBrowserEvent(context, elem, object, event);
-          if ("click".equals(event.getType())) {
+          if (BrowserEvents.CLICK.equals(event.getType())) {
             final ExerciseShell e = object;
             if (isExercisePanelBusy()) {
               Window.alert("Exercise busy.");
               markCurrentExercise(currentExercise);
             } else {
-              Timer timer = new Timer() {
-                @Override
-                public void run() {
-                  loadExercise(e);
-                }
-              };
-              timer.schedule(100);
+              gotClickOnItem(e);
             }
+          }
+          else if (BrowserEvents.MOUSEOVER.equals(event.getType())) {
+            System.out.println("got mouseover on " + object.getID());
           }
         }
 
         private SafeHtml getColumnToolTip(String columnText, String toolTipText) {
           String htmlConstant = "<html>" + "<head><style>" +
-              "A.tip { TEXT-DECORATION: none; color:#1776B3}" +
+              "span.tip { TEXT-DECORATION: none; color:#1776B3}" +
               "A.tip:hover  {CURSOR:default;}" +
               "A.tip span   {DISPLAY:none}" +
               "A.tip span p {background:#d30300;color:#fff;font-weight:500;border-radius:5px;padding:5px;font-size:12px}" +
@@ -153,10 +151,28 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
               "POSITION:absolute;background:#ffffd1;   TEXT-DECORATION: none}" +
               "</style></head>" +
               "<body>" +
-              "<a href=\"#\" class=\"tip\">" + columnText + "<span>" + toolTipText + "</span></a>" + "</body>" + "</html>";
+              "<a href=\"" +
+            getHistoryTokenForLink(columnText) +
+            "\" class=\"tip\">" + columnText +
+            "<span>" + toolTipText + "</span>" +
+            "</a>" + "</body>" + "</html>";
           return new SafeHtmlBuilder().appendHtmlConstant(htmlConstant).toSafeHtml();
         }
       };
+  }
+
+  protected String getHistoryTokenForLink(String columnText) {
+    return "#";
+  }
+
+  protected void gotClickOnItem(final ExerciseShell e) {
+    Timer timer = new Timer() {
+      @Override
+      public void run() {
+        loadExercise(e);
+      }
+    };
+    timer.schedule(100);
   }
 
 
@@ -198,7 +214,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     super.onResize();
 /*    System.out.println("Got on resize " + Window.getClientHeight() + " " +
         getOffsetHeight() + " bodyheight = " + table.getBodyHeight() + " table offset height " + table.getOffsetHeight() + " parent height " + getParent().getOffsetHeight());*/
-    int header = 625 - HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
+    int header = getTableHeaderHeight();
     int leftOver = Window.getClientHeight() - header;
     float rawRatio = ((float) leftOver) / (float) HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
     float tableRatio = Math.min(MAX_PAGES, rawRatio);
@@ -217,6 +233,10 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
       table.redraw();
       markCurrentExercise(currentExercise);
     }
+  }
+
+  protected int getTableHeaderHeight() {
+    return 625 - HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
   }
 
   /**
