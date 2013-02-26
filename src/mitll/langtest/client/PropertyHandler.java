@@ -30,10 +30,14 @@ public class PropertyHandler {
   private static final String RECORD_TIMEOUT = "recordTimeout";
   private static final String TEACHER_VIEW = "teacherView";
   private static final String ADMIN_VIEW = "adminView";
+  private static final String DATA_COLLECT_ADMIN_VIEW = "dataCollectAdminView";
   private static final String MINIMAL_UI = "minimalUI";
   private static final String NAME_FOR_ITEM = "nameForItem";
   private static final String NAME_FOR_ANSWER = "nameForAnswer";
   private static final String NAME_FOR_RECORDER = "nameForRecorder";
+  private static final String NUM_GRADES_TO_COLLECT = "numGradesToCollect";
+  private static final String LOG_CLIENT_MESSAGES = "logClient";
+  private static final String SHOW_SECTIONS = "showSections";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -48,14 +52,16 @@ public class PropertyHandler {
   private static final String LESSON = "lesson";
   private static final String TEACHER_PARAM = TEACHER_VIEW;
   private static final String ADMIN_PARAM = "admin";
+  private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
 
   private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
   private static final boolean DEFAULT_GOODWAVE_MODE = false;
   private static final boolean DEFAULT_ARABIC_TEXT_COLLECT = false;
   private static final boolean DEFAULT_SHOW_TURK_TOKEN = false;
-  private static final int DEFAULT_SEGMENT_REPEATS = 2;
+  private static final int DEFAULT_SEGMENT_REPEATS = 1;
   private static final int DEFAULT_TIMEOUT = 45000;
   private static final String DEFAULT_EXERCISE = null;
+  private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
 
   private Map<String, String> props;
 
@@ -74,13 +80,17 @@ public class PropertyHandler {
   private boolean dataCollectMode;
   private boolean collectAudio = true;
   private boolean teacherView = false;
-  private boolean adminView = true;
+  private boolean dataCollectAdminView = false;
+  private boolean adminView = false;
+  private boolean logClientMessages = false;
   private boolean minimalUI = false;
+  private int numGradesToCollect = NUM_GRADES_TO_COLLECT_DEFAULT;
   private String nameForItem = "Item";
   private String nameForAnswer = "Recording";
   private String nameForRecorder = "Speaker";
   private String teacherClass = "class";
   private String lesson = "lesson";
+  private boolean showSections = true;
   private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
   private float screenPortion;
@@ -95,27 +105,48 @@ public class PropertyHandler {
     for (Map.Entry<String, String> kv : props.entrySet()) {
       String key = kv.getKey();
       String value = kv.getValue();
-      if (key.equals(GRADING_PROP)) grading = Boolean.parseBoolean(value);
-      else if (key.equals(ENGLISH_ONLY_MODE)) englishOnlyMode = Boolean.parseBoolean(value);
-      else if (key.equals(GOODWAVE_MODE)) goodwaveMode = Boolean.parseBoolean(value);
-      else if (key.equals(ARABIC_TEXT_DATA_COLLECT)) arabicTextDataCollect = Boolean.parseBoolean(value);
-      else if (key.equals(SHOW_TURK_TOKEN)) showTurkToken = Boolean.parseBoolean(value);
+      if (key.equals(GRADING_PROP)) grading = getBoolean(value);
+      else if (key.equals(ENGLISH_ONLY_MODE)) englishOnlyMode = getBoolean(value);
+      else if (key.equals(GOODWAVE_MODE)) goodwaveMode = getBoolean(value);
+      else if (key.equals(ARABIC_TEXT_DATA_COLLECT)) arabicTextDataCollect = getBoolean(value);
+      else if (key.equals(SHOW_TURK_TOKEN)) showTurkToken = getBoolean(value);
       else if (key.equals(APP_TITLE)) appTitle = value;
-      else if (key.equals(SEGMENT_REPEATS)) segmentRepeats = Integer.parseInt(value);
-      else if (key.equals(READ_FROM_FILE)) readFromFile = Boolean.parseBoolean(value);
+      else if (key.equals(SEGMENT_REPEATS)) segmentRepeats = getInt(value,DEFAULT_SEGMENT_REPEATS,SEGMENT_REPEATS)-1;
+      else if (key.equals(READ_FROM_FILE)) readFromFile = getBoolean(value);
       else if (key.equals(RELEASE_DATE)) releaseDate = value;
-      else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = Boolean.parseBoolean(value);
-      else if (key.equals(AUTO_CRT)) autocrt = Boolean.parseBoolean(value);
-      else if (key.equals(DEMO_MODE)) demoMode = Boolean.parseBoolean(value);
-      else if (key.equals(DATA_COLLECT_MODE)) dataCollectMode = Boolean.parseBoolean(value);
-      else if (key.equals(RECORD_TIMEOUT)) recordTimeout = Integer.parseInt(value);
-      else if (key.equals(COLLECT_AUDIO)) collectAudio = Boolean.parseBoolean(value);
-      else if (key.equals(ADMIN_VIEW)) adminView = Boolean.parseBoolean(value);
-      else if (key.equals(MINIMAL_UI)) minimalUI = Boolean.parseBoolean(value);
+      else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = getBoolean(value);
+      else if (key.equals(AUTO_CRT)) autocrt = getBoolean(value);
+      else if (key.equals(DEMO_MODE)) demoMode = getBoolean(value);
+      else if (key.equals(DATA_COLLECT_MODE)) dataCollectMode = getBoolean(value);
+      else if (key.equals(RECORD_TIMEOUT)) recordTimeout = getInt(value,DEFAULT_TIMEOUT,RECORD_TIMEOUT);
+      else if (key.equals(COLLECT_AUDIO)) collectAudio = getBoolean(value);
+      else if (key.equals(ADMIN_VIEW)) adminView = getBoolean(value);
+      else if (key.equals(MINIMAL_UI)) minimalUI = getBoolean(value);
       else if (key.equals(NAME_FOR_ITEM)) nameForItem = value;
       else if (key.equals(NAME_FOR_ANSWER)) nameForAnswer = value;
       else if (key.equals(NAME_FOR_RECORDER)) nameForRecorder = value;
+      else if (key.equals(TEACHER_VIEW)) teacherView = getBoolean(value);
+      else if (key.equals(DATA_COLLECT_ADMIN_VIEW)) dataCollectAdminView = getBoolean(value);
+      else if (key.equals(NUM_GRADES_TO_COLLECT)) numGradesToCollect = getInt(value,NUM_GRADES_TO_COLLECT_DEFAULT,NUM_GRADES_TO_COLLECT);
+      else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
+      else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
     }
+  }
+
+  private int getInt(String value, int defValue, String propName) {
+    try {
+      if (value == null) return defValue;
+      int i = Integer.parseInt(value);
+      System.out.println("value for " + propName +"=" +i + " vs default = " +defValue);
+      return i;
+    } catch (NumberFormatException e) {
+      System.err.println("couldn't parse " + value + "using " + defValue +" for " + propName);
+    }
+    return defValue;
+  }
+
+  private boolean getBoolean(String value) {
+    return Boolean.parseBoolean(value);
   }
 
   /**
@@ -127,6 +158,7 @@ public class PropertyHandler {
   private boolean checkParams() {
     String isGrading = Window.Location.getParameter(GRADING);
     String isEnglish = Window.Location.getParameter(ENGLISH);
+    String numGrades = Window.Location.getParameter(NUM_GRADES_TO_COLLECT_PARAM);
     String goodwave = Window.Location.getParameter(GOODWAVE);
     String repeats = Window.Location.getParameter(REPEATS);
     String arabicCollect = Window.Location.getParameter(ARABIC_COLLECT);
@@ -175,13 +207,9 @@ public class PropertyHandler {
     boolean grading = this.isGrading() || (isGrading != null && !isGrading.equals("false")) || isEnglishOnlyMode();
     setGrading(grading);
     // get audio repeats
-    if (repeats != null) {
-      try {
-        segmentRepeats = Integer.parseInt(repeats)-1;
-      } catch (NumberFormatException e) {
-        e.printStackTrace();
-      }
-    }
+    segmentRepeats = getInt(repeats, DEFAULT_SEGMENT_REPEATS,REPEATS) -1;
+    numGradesToCollect = getInt(numGrades, NUM_GRADES_TO_COLLECT_DEFAULT, NUM_GRADES_TO_COLLECT);
+    if (numGrades != null)
     if (arabicCollect != null) {
       arabicTextDataCollect = !arabicCollect.equals("false");
     }
@@ -299,4 +327,20 @@ public class PropertyHandler {
 
   public String getTeacherClass() { return teacherClass; }
   public String getLesson() { return lesson; }
+
+  public boolean isDataCollectAdminView() {
+    return dataCollectAdminView;
+  }
+
+  public int getNumGradesToCollect() {
+    return numGradesToCollect;
+  }
+
+  public boolean isLogClientMessages() {
+    return logClientMessages;
+  }
+
+  public boolean isShowSections() {
+    return showSections;
+  }
 }
