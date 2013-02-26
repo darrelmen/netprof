@@ -38,8 +38,14 @@ public class AudioAnswer implements IsSerializable {
    * @param path
    * @param validity
    * @param reqid
+   * @param duration
    */
-  public AudioAnswer(String path, Validity validity, int reqid) { this.path = path; this.validity = validity; this.reqid = reqid;}
+  public AudioAnswer(String path, Validity validity, int reqid, int duration) {
+    this.path = path;
+    this.validity = validity;
+    this.reqid = reqid;
+    this.durationInMillis = duration;
+  }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
@@ -49,8 +55,8 @@ public class AudioAnswer implements IsSerializable {
    * @param score
    * @param reqid
    */
-  public AudioAnswer(String path, Validity validity, String decodeOutput, double score, int reqid) {
-    this(path, validity, reqid);
+  public AudioAnswer(String path, Validity validity, String decodeOutput, double score, int reqid, int duration) {
+    this(path, validity, reqid, duration);
     this.decodeOutput = decodeOutput;
     this.score = score;
   }
