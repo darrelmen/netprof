@@ -58,15 +58,16 @@ public class FileExerciseDAO implements ExerciseDAO {
     this.mediaDir = mediaDir;
     this.isUrdu = isUrdu;
     //logger.debug("is urdu " + isUrdu);
-    Map<String, Lesson> value = new HashMap<String, Lesson>();
-    typeToUnitToLesson.put("unit", value);
+/*    Map<String, Lesson> value = new HashMap<String, Lesson>();
+    typeToUnitToLesson.put("unit", value);*/
   }
 
   @Override
   public Map<String, Collection<String>> getTypeToSections() {
     Map<String,Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
     for (String key : typeToUnitToLesson.keySet()) {
-      typeToSection.put(key, new ArrayList<String>(typeToUnitToLesson.keySet()));
+      Map<String, Lesson> stringLessonMap = typeToUnitToLesson.get(key);
+      typeToSection.put(key, new ArrayList<String>(stringLessonMap.keySet()));
     }
     return typeToSection;
   }
@@ -183,18 +184,19 @@ public class FileExerciseDAO implements ExerciseDAO {
                 getExerciseForLine(line2);
           }
 
-          Map<String, Lesson> unit = typeToUnitToLesson.get("unit");
-          if (unit == null) typeToUnitToLesson.put("unit", unit = new HashMap<String, Lesson>());
+          // testing unit/chapter/week stuff
+          Map<String, Lesson> unit = getSectionToLesson("unit");
           if (count % 2 == 0) {
-            Lesson even = unit.get("even");
-            if (even == null) unit.put("even", even = new Lesson("even","",""));
-            even.addExercise(exercise);
+            addExerciseToLesson(exercise, unit, "even");
           }
           else {
-            Lesson odd = unit.get("odd");
-            if (odd == null) unit.put("odd", odd = new Lesson("odd","",""));
-            odd.addExercise(exercise);
+            addExerciseToLesson(exercise, unit, "odd");
           }
+
+          String id = "" +count;
+          Map<String, Lesson> chapter = getSectionToLesson("chapter");
+          addExerciseToLesson(exercise,chapter,"Chapter "+id.substring(id.length()-1));
+
           // if (count < 10) logger.info("Got " + exercise);
           exercises.add(exercise);
         } catch (Exception e) {
@@ -207,6 +209,8 @@ public class FileExerciseDAO implements ExerciseDAO {
         }
       }
      // w.close();
+
+      logger.debug("sections " + typeToUnitToLesson);
       reader.close();
     } catch (IOException e) {
       e.printStackTrace();
@@ -217,6 +221,18 @@ public class FileExerciseDAO implements ExerciseDAO {
     else {
       logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
+  }
+
+  private Map<String, Lesson> getSectionToLesson( String section) {
+    Map<String, Lesson> unit = typeToUnitToLesson.get(section);
+    if (unit == null) typeToUnitToLesson.put(section, unit = new HashMap<String, Lesson>());
+    return unit;
+  }
+
+  private void addExerciseToLesson(Exercise exercise, Map<String, Lesson> unit, String unitName) {
+    Lesson even = unit.get(unitName);
+    if (even == null) unit.put(unitName, even = new Lesson(unitName,"",""));
+    even.addExercise(exercise);
   }
 
   private Exercise getWordListExercise(String arabic, String id) {
