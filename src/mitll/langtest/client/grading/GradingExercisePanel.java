@@ -115,7 +115,7 @@ public class GradingExercisePanel extends ExercisePanel {
         List<Boolean> foreignOrEnglish = Arrays.asList(true, false);
         boolean anyAnswers = false;
         int count = countDistinctTypes(resultsAndGrades);
-        boolean bigPage = count == 1 || englishOnly;
+        boolean bigPage = count == 1 || englishOnly || controller.getNumGradesToCollect() > 1;
         for (boolean isSpoken : spoken) {
           Map<Boolean, List<Result>> langToResult = resultsAndGrades.spokenToLangToResult.get(isSpoken);
           if (langToResult != null) { // there might not be any written types
@@ -209,8 +209,7 @@ public class GradingExercisePanel extends ExercisePanel {
       rm.setPageSize(twoQPageSize);
     }
 
-    int numGrades = controller.getEnglishOnly() ? 2 : 1;
-    return rm.getTable(results, true, false, grades, grader, numGrades);
+    return rm.getTable(results, true, false, grades, grader, controller.getNumGradesToCollect());
   }
 
   @Override
