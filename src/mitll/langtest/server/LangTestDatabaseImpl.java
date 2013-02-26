@@ -265,7 +265,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private List<ExerciseShell> getExerciseShells(Collection<Exercise> exercises) {
     List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
     for (Exercise e : exercises) {
-      ids.add(new ExerciseShell(e.getID(), e.getTooltip()));
+      ids.add(e.getShell());
     }
     return ids;
   }
