@@ -26,10 +26,11 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param useFullWidth
    * @param numRepeats
    * @param useKeyboard
+   * @param logMessages
    */
   public ASRScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth,
-                              int numRepeats, boolean useKeyboard) {
-    super(service, soundManager, useFullWidth, numRepeats, useKeyboard);
+                              int numRepeats, boolean useKeyboard, boolean logMessages) {
+    super(service, soundManager, useFullWidth, numRepeats, useKeyboard, logMessages);
   }
 
   /**
@@ -43,7 +44,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
   public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                               ExerciseController controller, boolean useKeyboard) {
     super(path, refSentence, service, controller.getSoundManager(), controller.showOnlyOneExercise(),
-        controller.getSegmentRepeats(), useKeyboard);
+        controller.getSegmentRepeats(), useKeyboard, controller.isLogClientMessages());
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
