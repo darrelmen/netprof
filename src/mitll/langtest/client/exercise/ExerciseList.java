@@ -22,6 +22,7 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,12 +50,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected int expectedGrades = 1;
   protected UserManager user;
   private String exercise_title;
-  private boolean readFromFile;
   protected final boolean arabicDataCollect;
   protected final boolean showTurkToken;
   private boolean useUserID = false;
   private long userID;
   private final boolean showInOrder;
+  private Map<String, Collection<String>> typeToSections;
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -62,19 +63,17 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param service
    * @param feedback
    * @param factory
-   * @param readFromFile
    * @param arabicDataCollect
    * @param showTurkToken
    * @param showInOrder
    */
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                      ExercisePanelFactory factory, boolean readFromFile, boolean arabicDataCollect,
+                      ExercisePanelFactory factory, boolean arabicDataCollect,
                       boolean showTurkToken, boolean showInOrder) {
     this.currentExerciseVPanel = currentExerciseVPanel;
     this.service = service;
     this.feedback = feedback;
     this.factory = factory;
-    this.readFromFile = readFromFile;
     this.arabicDataCollect = arabicDataCollect;
     this.showTurkToken = showTurkToken;
     this.showInOrder = showInOrder;
@@ -100,6 +99,21 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     * @param userID
    */
   public void getExercises(long userID) {
+
+    System.out.println("getExercises " +userID);
+
+    service.getTypeToSection(new AsyncCallback<Map<String, Collection<String>>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Map<String, Collection<String>> result) {
+        typeToSections = result;
+        System.out.println("got " +typeToSections);
+      }
+    });
+
     useUserID = true;
     this.userID = userID;
     if (showInOrder) {
@@ -108,7 +122,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
     else {
       //System.out.println("getExercises for " + userID + " usefile " + readFromFile + " arabic " + arabicDataCollect);
-      service.getExerciseIds(userID, readFromFile, arabicDataCollect, new SetExercisesCallback());
+      service.getExerciseIds(userID, arabicDataCollect, new SetExercisesCallback());
     }
   }
 
@@ -116,7 +130,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see GradedExerciseList#setFactory(ExercisePanelFactory, mitll.langtest.client.user.UserManager, int)
    */
   public void getExercisesInOrder() {
-    service.getExerciseIds(readFromFile, new SetExercisesCallback());
+    service.getExerciseIds(new SetExercisesCallback());
   }
 
   public void onResize() {
@@ -210,9 +224,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     removeCurrentExercise();
 
     if (useUserID) {
-      service.getExercise(exerciseShell.getID(), userID, readFromFile, arabicDataCollect, new ExerciseAsyncCallback(exerciseShell));
+      service.getExercise(exerciseShell.getID(), userID, arabicDataCollect, new ExerciseAsyncCallback(exerciseShell));
     } else {
-      service.getExercise(exerciseShell.getID(), readFromFile, new ExerciseAsyncCallback(exerciseShell));
+      service.getExercise(exerciseShell.getID(), new ExerciseAsyncCallback(exerciseShell));
     }
   }
 
