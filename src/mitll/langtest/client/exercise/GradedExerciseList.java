@@ -18,16 +18,20 @@ import mitll.langtest.shared.ExerciseShell;
  * Time: 5:59 PM
  */
 public class GradedExerciseList extends PagingExerciseList {
+  private final boolean englishOnly;
+
   /**
    * @see mitll.langtest.client.LangTest#makeExerciseList
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
    * @param showInOrder
+   * @param englishOnly
    */
   public GradedExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            boolean readFromFile, boolean showInOrder) {
-    super(currentExerciseVPanel, service, feedback, readFromFile, false, false, showInOrder);
+                            boolean showInOrder, boolean englishOnly) {
+    super(currentExerciseVPanel, service, feedback, false, false, showInOrder);
+    this.englishOnly = englishOnly;
   }
 
   /**
@@ -35,8 +39,6 @@ public class GradedExerciseList extends PagingExerciseList {
    */
   @Override
   protected void loadFirstExercise() {
-    //System.out.println("loadFirstExercise : ");
-
     getNextUngraded(true);
     selectFirst();
   }
@@ -47,8 +49,6 @@ public class GradedExerciseList extends PagingExerciseList {
    */
   @Override
   protected void checkBeforeLoad(final ExerciseShell e) {
-    //System.out.println("checkBeforeLoad : " + e);
-
     service.checkoutExerciseID(""+user.getUser(), e.getID(), new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) { Window.alert("couldn't checkout " + e.getID());}
       public void onSuccess(Void result) {}
@@ -61,12 +61,12 @@ public class GradedExerciseList extends PagingExerciseList {
    */
   @Override
   protected void getNextExercise(ExerciseShell current) {
-    //System.out.println("getNextExercise : " + current);
     getNextUngraded(false);
   }
 
   private void getNextUngraded(final boolean showFirstIfNoneToGrade) {
-    service.getNextUngradedExercise(""+user.getUser(), expectedGrades, arabicDataCollect, new AsyncCallback<Exercise>() {
+    //System.out.println("show first if none to grade " + showFirstIfNoneToGrade + " num " + expectedGrades);
+    service.getNextUngradedExercise(""+user.getUser(), expectedGrades, arabicDataCollect, englishOnly, new AsyncCallback<Exercise>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Exercise result) {
         if (result != null) {
