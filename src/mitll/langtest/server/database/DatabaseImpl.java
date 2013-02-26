@@ -332,8 +332,10 @@ public class DatabaseImpl implements Database {
    */
   public List<Exercise> getExercises(long userID) {
     logger.info("getExercises : for user  " + userID);
-    if (userID == -1) {
-      return getExercises(useFile, lessonPlanFile);
+    if (userID == -1 || true) {
+      List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
+      return Collections.unmodifiableList(exercises);
+     // return exercises;
     }
 
     if (userToSchedule == null) {
