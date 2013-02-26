@@ -13,8 +13,9 @@ import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.view.client.CellPreviewEvent;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -22,9 +23,10 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -36,9 +38,14 @@ import java.util.Set;
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingExerciseList extends ExerciseList {
+public class PagingExerciseList extends ExerciseList implements RequiresResize {
   private static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
   private ListDataProvider<ExerciseShell> dataProvider;
+  private static final int ID_LINE_WRAP_LENGTH = 20;
+  public static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 390;
+  private static final float MAX_PAGES = 2f;
+  private static final int MIN_PAGE_SIZE = 3;
+  private static final float DEFAULT_PAGE_SIZE = 15f;
   private CellTable<ExerciseShell> table;
 
   public interface TableResources extends CellTable.Resources {
@@ -58,19 +65,20 @@ public class PagingExerciseList extends ExerciseList {
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
-   * @param readFromFile
    * @param arabicDataCollect
    * @param showTurkToken
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            boolean readFromFile, boolean arabicDataCollect,
+                            boolean arabicDataCollect,
                             boolean showTurkToken, boolean showInOrder) {
-    super(currentExerciseVPanel, service, feedback, null, readFromFile, arabicDataCollect, showTurkToken, showInOrder);
+    super(currentExerciseVPanel, service, feedback, null, arabicDataCollect, showTurkToken, showInOrder);
+
     CellTable.Resources o = GWT.create(TableResources.class);
     this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
 
     table.setWidth("100%", true);
+    table.setHeight("auto");
 
     // Add a selection model to handle user selection.
     final SingleSelectionModel<ExerciseShell> selectionModel = new SingleSelectionModel<ExerciseShell>();
@@ -143,6 +151,8 @@ public class PagingExerciseList extends ExerciseList {
     add(table);
   }
 
+
+
   @Override
   protected void loadFirstExercise() {
     super.loadFirstExercise();
@@ -152,6 +162,7 @@ public class PagingExerciseList extends ExerciseList {
   protected void selectFirst() {
     table.getSelectionModel().setSelected(currentExercises.get(0), true);
     table.redraw();
+    onResize();
   }
 
   public void clear() {
@@ -175,6 +186,32 @@ public class PagingExerciseList extends ExerciseList {
     list.add(exercise);
   }
 
+  @Override
+  public void onResize() {
+    super.onResize();
+/*    System.out.println("Got on resize " + Window.getClientHeight() + " " +
+        getOffsetHeight() + " bodyheight = " + table.getBodyHeight() + " table offset height " + table.getOffsetHeight() + " parent height " + getParent().getOffsetHeight());*/
+    int header = 625 - HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
+    int leftOver = Window.getClientHeight() - header;
+    float rawRatio = ((float) leftOver) / (float) HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
+    float tableRatio = Math.min(MAX_PAGES, rawRatio);
+    // System.out.println("left over " + leftOver + " raw " + rawRatio + " table ratio " + tableRatio);
+
+    float ratio = DEFAULT_PAGE_SIZE * tableRatio;
+    ExerciseShell toLoad = currentExercises.get(0);
+
+    if (toLoad.getID().length() > ID_LINE_WRAP_LENGTH) {
+      ratio /= 2; // hack for long ids
+    }
+    int numRows = Math.max(MIN_PAGE_SIZE, Math.round(ratio));
+    if (table.getPageSize() != numRows) {
+      System.out.println("num rows now " + numRows);
+      table.setPageSize(numRows);
+      table.redraw();
+      markCurrentExercise(currentExercise);
+    }
+  }
+
   /**
    * @see ExerciseList#useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
    * @param i
@@ -190,12 +227,12 @@ public class PagingExerciseList extends ExerciseList {
 
     if (i < table.getPageStart()) {
       int newStart = Math.max(0, table.getPageStart() - table.getPageSize());
-      // System.out.println("new start of prev page " +newStart + " vs current " + table.getVisibleRange());
+    //   System.out.println("new start of prev page " +newStart + " vs current " + table.getVisibleRange());
       table.setVisibleRange(newStart, table.getPageSize());
     } else {
       if (i >= pageEnd) {
         int newStart = Math.min(table.getRowCount() - table.getPageSize(), pageEnd);
-        // System.out.println("new start of next page " +newStart + " vs current " + table.getVisibleRange());
+      //  System.out.println("new start of next page " +newStart + " vs current " + table.getVisibleRange());
         table.setVisibleRange(newStart, table.getPageSize());
       }
     }
