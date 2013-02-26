@@ -269,13 +269,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     /**
      * @see GoodwaveExercisePanel#getAnswerWidget
      * @param service
-     * @paramx controller
      * @param index
      */
     public ASRRecordAudioPanel(LangTestDatabaseAsync service, int index) {
       super(service, controller.getSoundManager(), controller.showOnlyOneExercise(), controller.getSegmentRepeats(),
-          false // no keyboard
-      );
+        false, // no keyboard
+        controller.isLogClientMessages());
       this.index = index;
     }
 
