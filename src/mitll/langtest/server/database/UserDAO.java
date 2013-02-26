@@ -150,7 +150,8 @@ public class UserDAO extends DAO {
     database.closeConnection(connection);
 
     int numColumns = getNumColumns(connection, "users");
-    if (numColumns < 13) {
+    logger.debug("found " + numColumns + " in users table");
+    if (numColumns < 13 && numColumns != 7) {
       statement = connection.prepareStatement("ALTER TABLE users ADD enabled BOOLEAN");
       statement.execute();
       statement.close();
