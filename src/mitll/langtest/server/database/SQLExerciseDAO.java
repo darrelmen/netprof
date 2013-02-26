@@ -16,7 +16,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class SQLExerciseDAO implements ExerciseDAO {
@@ -35,6 +37,16 @@ public class SQLExerciseDAO implements ExerciseDAO {
   public SQLExerciseDAO(Database database, String mediaDir) {
     this.database = database;
     this.mediaDir = mediaDir;
+  }
+
+  @Override
+  public Map<String, Collection<String>> getTypeToSections() {
+    return Collections.emptyMap();
+  }
+
+  @Override
+  public Collection<Exercise> getExercisesForSection(String type, String section) {
+    return Collections.emptyList();
   }
 
   /**
