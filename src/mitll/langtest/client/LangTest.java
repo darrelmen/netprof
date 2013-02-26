@@ -37,6 +37,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
+import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.monitoring.MonitoringManager;
@@ -319,13 +320,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (isGrading) {
       this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback,
           true, props.isEnglishOnlyMode());
-    }
-    else {
-      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback,
+    } else {
+      if (props.isShowSections()) {
+        this.exerciseList = new SectionExerciseList(currentExerciseVPanel, service, feedback,
+          isArabicTextDataCollect(), props.isShowTurkToken(), isAutoCRTMode());
+     } else {
+        this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback,
           isArabicTextDataCollect(), props.isShowTurkToken(), isAutoCRTMode()) {
-        @Override
-        protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
-      };
+          @Override
+          protected void checkBeforeLoad(ExerciseShell e) {
+          } // don't try to login
+        };
+      }
     }
 
     if (showOnlyOneExercise()) {
