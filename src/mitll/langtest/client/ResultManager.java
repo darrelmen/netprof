@@ -20,8 +20,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.HasRows;
 import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.grading.GradingExercisePanel;
+import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
@@ -40,7 +42,7 @@ import java.util.List;
  * Time: 5:43 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ResultManager {
+public class ResultManager extends PagerTable {
   private static final int PAGE_SIZE = 12;
   protected static final String UNGRADED = "Ungraded";
   protected static final String SKIP = "Skip";
@@ -141,7 +143,7 @@ public class ResultManager {
     addSorter(table, id, list);
 
     // Create a SimplePager.
-    return getPager(table);
+    return getPagerAndTable(table);
   }
 
   private List<Result> createProvider(Collection<Result> result, CellTable<Result> table) {
@@ -177,7 +179,7 @@ public class ResultManager {
     table.getColumnSortList().push(id);
 
     // Create a SimplePager.
-    return getPager(table);
+    return getPagerAndTable(table);
   }
 
   private TextColumn<Result> addColumnsToTable(boolean gradingView, boolean showQuestionColumn, Collection<Grade> grades,
@@ -329,18 +331,8 @@ public class ResultManager {
     return ((float)((Math.round(totalHours*100))))/100f;
   }
 
-  private VerticalPanel getPager(CellTable<Result> table) {
-    SimplePager.Resources DEFAULT_RESOURCES = GWT.create(SimplePager.Resources.class);
-    SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, true, 1000, true);
-
-    // Set the cellList as the display.
-    pager.setDisplay(table);
-    pager.setPageSize(pageSize);
-    // Add the pager and list to the page.
-    VerticalPanel vPanel = new VerticalPanel();
-    vPanel.add(pager);
-    vPanel.add(table);
-    return vPanel;
+  private Panel getPagerAndTable(CellTable<Result> table) {
+     return getPagerAndTable(table, table, pageSize, 1000);
   }
 
   private void addSorter(CellTable<Result> table, TextColumn<Result> id, List<Result> list) {
