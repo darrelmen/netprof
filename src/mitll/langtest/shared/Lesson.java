@@ -3,6 +3,7 @@ package mitll.langtest.shared;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -22,6 +23,10 @@ public class Lesson implements IsSerializable {
   public Lesson(){}
   public Lesson(String unit, String chapter, String week) { this.unit = unit; this.chapter = chapter; this.week = week; }
   public void addExercise(Exercise e) { exerciseList.add(e); }
+
+  public Collection<Exercise> getExercises() {
+    return exerciseList;  //To change body of created methods use File | Settings | File Templates.
+  }
 
   public String toString() {
     return "Lesson '" + unit + "/" + chapter + "/" + week + "' " + exerciseList.size() + " exercises" +
