@@ -31,16 +31,17 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private PretestScore result;
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.sound.SoundManagerAPI, boolean, int, boolean)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.sound.SoundManagerAPI, boolean, int, boolean, boolean)
    * @param service
    * @param soundManager
    * @param useFullWidth
    * @param numRepeats
    * @param useKeyboard
+   * @param logMessages
    */
   public ScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth,
-                           int numRepeats, boolean useKeyboard) {
-    this(null, null, service, soundManager, useFullWidth, numRepeats, useKeyboard);
+                           int numRepeats, boolean useKeyboard, boolean logMessages) {
+    this(null, null, service, soundManager, useFullWidth, numRepeats, useKeyboard, logMessages);
   }
 
   /**
@@ -52,10 +53,11 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param useFullWidth
    * @param numRepeats
    * @param useKeyboard
+   * @param logMessages
    */
   public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service, SoundManagerAPI soundManager,
-                           boolean useFullWidth, int numRepeats, boolean useKeyboard) {
-    super(path, service, soundManager, useFullWidth, useKeyboard);
+                           boolean useFullWidth, int numRepeats, boolean useKeyboard, boolean logMessages) {
+    super(path, service, soundManager, useFullWidth, useKeyboard, logMessages);
     this.refSentence = refSentence;
     addClickHandlers(numRepeats);
   }
