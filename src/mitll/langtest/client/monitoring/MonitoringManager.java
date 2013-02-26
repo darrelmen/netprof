@@ -161,7 +161,7 @@ public class MonitoringManager {
    * @param vp
    */
   private void doDesiredQuery(final Panel vp) {
-    service.getDesiredCounts(useFile,new AsyncCallback<Map<String, Map<Integer, Map<Integer, Integer>>>>() {
+    service.getDesiredCounts(new AsyncCallback<Map<String, Map<Integer, Map<Integer, Integer>>>>() {
       @Override
       public void onFailure(Throwable caught) {}
 
@@ -477,7 +477,7 @@ public class MonitoringManager {
   }
 
   private void doResultLineQuery(final Panel vp) {
-    service.getResultPerExercise(useFile, new AsyncCallback<Map<String,List<Integer>>>() {
+    service.getResultPerExercise(new AsyncCallback<Map<String,List<Integer>>>() {
       public void onFailure(Throwable caught) {}
 
       /**
@@ -557,7 +557,7 @@ public class MonitoringManager {
   }
 
   private void doResultQuery(final Panel vp) {
-    service.getResultCountToCount(useFile, new AsyncCallback<Map<Integer, Integer>>() {
+    service.getResultCountToCount(new AsyncCallback<Map<Integer, Integer>>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Map<Integer, Integer> userToCount) {
         int total = 0;
@@ -584,7 +584,7 @@ public class MonitoringManager {
 
 
   private void doGenderQuery(final Panel vp) {
-    service.getResultCountsByGender(useFile, new AsyncCallback<Map<String, Map<Integer, Integer>>>() {
+    service.getResultCountsByGender(new AsyncCallback<Map<String, Map<Integer, Integer>>>() {
       @Override
       public void onFailure(Throwable caught) {}
 
@@ -899,7 +899,7 @@ public class MonitoringManager {
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer doneByUser = pair.getValue();
       User user = pair.getKey();
-      String name = user.firstName + " " +user.lastName;
+      String name = user.userID;
       name = name.trim();
       Integer count = nameToCount.get(name);
       if (count == null) nameToCount.put(name,doneByUser);

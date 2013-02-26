@@ -25,6 +25,7 @@ public interface ExerciseController {
   String getBase64EncodedWavFile();
 
   boolean getEnglishOnly();
+  int getNumGradesToCollect();
 
   SoundManagerAPI getSoundManager();
 
@@ -41,5 +42,6 @@ public interface ExerciseController {
   boolean isCollectAudio();
   boolean isMinimalUI();
   boolean isGrading();
+  boolean isLogClientMessages();
   String getAudioType();
 }
