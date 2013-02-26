@@ -7,6 +7,9 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * @deprecated there are no graders, just users
+ */
 public class GraderDAO {
   private final Database database;
 
