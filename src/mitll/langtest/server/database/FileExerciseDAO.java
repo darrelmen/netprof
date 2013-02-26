@@ -2,8 +2,8 @@ package mitll.langtest.server.database;
 
 import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
-import mitll.langtest.server.AudioConversion;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Lesson;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.AudioFormat;
@@ -17,8 +17,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,10 +42,12 @@ public class FileExerciseDAO implements ExerciseDAO {
   private static final String FAST = "fast";
   private static final String SLOW = "slow";
   private static final boolean TESTING = false;
+  private static final int MAX_ERRORS = 100;
 
   private List<Exercise> exercises;
   private final String mediaDir;
   private final boolean isUrdu;
+  private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
@@ -53,6 +58,28 @@ public class FileExerciseDAO implements ExerciseDAO {
     this.mediaDir = mediaDir;
     this.isUrdu = isUrdu;
     //logger.debug("is urdu " + isUrdu);
+    Map<String, Lesson> value = new HashMap<String, Lesson>();
+    typeToUnitToLesson.put("unit", value);
+  }
+
+  @Override
+  public Map<String, Collection<String>> getTypeToSections() {
+    Map<String,Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
+    for (String key : typeToUnitToLesson.keySet()) {
+      typeToSection.put(key, new ArrayList<String>(typeToUnitToLesson.keySet()));
+    }
+    return typeToSection;
+  }
+
+  @Override
+  public Collection<Exercise> getExercisesForSection(String type, String section) {
+    Map<String, Lesson> sectionToLesson = typeToUnitToLesson.get(type);
+    if (sectionToLesson == null) {
+      return Collections.emptyList();
+    }
+    else {
+      return sectionToLesson.get(section).getExercises();
+    }
   }
 
   /**
@@ -68,7 +95,6 @@ public class FileExerciseDAO implements ExerciseDAO {
     if (resourceAsStream == null) return;
 
     try {
-      AudioConversion audioConversion = new AudioConversion();
       exercises = new ArrayList<Exercise>();
       BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
       String line2;
@@ -135,6 +161,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       logger.debug("using install path " + installPath + " lesson " + lessonPlanFile + " isurdu " +isUrdu);
       exercises = new ArrayList<Exercise>();
       Pattern pattern = Pattern.compile("^\\d+\\.(.+)");
+      int errors = 0;
       while ((line2 = reader.readLine()) != null) {
         count++;
        if (TESTING && count > 200) break;
@@ -142,21 +169,42 @@ public class FileExerciseDAO implements ExerciseDAO {
         Matcher matcher = pattern.matcher(line2.trim());
         boolean wordListOnly = matcher.matches();
 
-        Exercise exercise;
-        if (wordListOnly) {
-          String group = matcher.group(1);
-          exercise = getWordListExercise(group,""+count);//line2.trim());
-        }
-        else {
-          int length = line2.split("\\(").length;
-          boolean simpleFile = length == 2 && line2.split("\\(")[1].trim().endsWith(")");
-          exercise = simpleFile ?
-              getSimpleExerciseForLine(line2) :
-              getExerciseForLine(line2);
-        }
+        try {
+          Exercise exercise;
+          if (wordListOnly) {
+            String group = matcher.group(1);
+            exercise = getWordListExercise(group,""+count);
+          }
+          else {
+            int length = line2.split("\\(").length;
+            boolean simpleFile = length == 2 && line2.split("\\(")[1].trim().endsWith(")");
+            exercise = simpleFile ?
+                getSimpleExerciseForLine(line2) :
+                getExerciseForLine(line2);
+          }
 
-       // if (count < 10) logger.info("Got " + exercise);
-        exercises.add(exercise);
+          Map<String, Lesson> unit = typeToUnitToLesson.get("unit");
+          if (unit == null) typeToUnitToLesson.put("unit", unit = new HashMap<String, Lesson>());
+          if (count % 2 == 0) {
+            Lesson even = unit.get("even");
+            if (even == null) unit.put("even", even = new Lesson("even","",""));
+            even.addExercise(exercise);
+          }
+          else {
+            Lesson odd = unit.get("odd");
+            if (odd == null) unit.put("odd", odd = new Lesson("odd","",""));
+            odd.addExercise(exercise);
+          }
+          // if (count < 10) logger.info("Got " + exercise);
+          exercises.add(exercise);
+        } catch (Exception e) {
+          logger.error("Skipping line -- couldn't parse line #"+count + " : " +line2);
+          errors++;
+          if (errors > MAX_ERRORS) {
+            logger.error("too many errors, giving up...");
+            break;
+          }
+        }
       }
      // w.close();
       reader.close();
@@ -207,8 +255,6 @@ public class FileExerciseDAO implements ExerciseDAO {
    * <br></br>
    * pronz.MultiRefRepeatExercise$: nl0001_ams, nl0001_ams | reference, nl0001_ams | Female_01, nl0001_ams | Male_01, nl0001_ams | REF_MALE, nl0001_ams | STE-004M, nl0001_ams | STE-006F -> nl0001_ams -> FOREIGN_LANGUAGE_SENTENCE -> marHaba -> Hello.
    *
-   * @paramx installPath
-   * @paramx xaudioConversion
    * @param line2
    * @return
    */
