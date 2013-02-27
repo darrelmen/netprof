@@ -9,6 +9,8 @@ import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
@@ -72,6 +74,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Panel currentExerciseVPanel = new VerticalPanel();
   private ListInterface exerciseList;
   private Label status;
+  //private HTML lineBelowTitle;
   private UserManager userManager;
   private final UserTable userTable = new UserTable();
   private ResultManager resultManager;
@@ -163,7 +166,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // header/title line
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
-    HTML title = new HTML("<h1>" + props.getAppTitle() + "</h1>");
+    Widget title = getTitleWidget();
    // browserCheck.getBrowserAndVersion();
     hp.addEast(getLogout(), eastWidth);
     hp.add(title);
@@ -207,6 +210,73 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setupSoundManager();
 
     modeSelect();
+  }
+
+  private Widget getTitleWidget() {
+    //if (props.isShowSections()) {
+    HTML title = new HTML("<h1>" + props.getAppTitle() + "</h1>");
+   // VerticalPanel vp = new VerticalPanel();
+    DockLayoutPanel vp = new DockLayoutPanel(Style.Unit.PX);
+  //  lineBelowTitle = new HTML("");
+   // vp.addSouth(lineBelowTitle, 20);
+    vp.add(title);
+    vp.setWidth("100%");
+    return vp;
+    //}
+  }
+
+
+  @Override
+  public void setMailtoWithHistory(String type, String section, String historyToken) {
+    String url = GWT.getModuleBaseURL() + "#"+historyToken;
+    setMailto("Mail this lesson.",type + " " + section,"Hi,"+
+    "Here is a link to the lesson " +type +" " +section + " : " +
+      url
+    );
+     System.out.println("set mail to " + type + " " + section + " " + historyToken);
+
+ /*   SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    String name = answer.savedExerciseFileName;
+    sb.appendHtmlConstant("<a href='" +
+      "config/dataCollectAdmin/uploads/" +
+      name +
+      "'" +
+      ">");
+    sb.appendEscaped(answer.exerciseFile);
+    sb.appendHtmlConstant("</a>");
+    return sb.toSafeHtml();*/
+
+  }
+/*  public void setMailto(String subject,String body) {
+    setMailto("Mail this lesson.",subject,body);
+  }*/
+  public void setMailto(String linkTitle,String subject,String body) {
+    //String linkTitle = "mail link";
+    String toList = "recipients@mail.mil";
+   // String subject = "subject";
+   // String body = "";
+    String s = "<a href=\"mailto:" + toList + "?" +
+      "subject=" + subject + "&" +
+      "cc=cc@example.com" +
+      "&body=" + body +
+      "\">" +
+      linkTitle +
+      "</a>";
+
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+   // String name = answer.savedExerciseFileName;
+    sb.appendHtmlConstant("<h3><a href=\"mailto:" + toList + "?" +
+      "subject=" + subject + "&" +
+      "cc=cc@example.com" +
+      "&body=" + body +
+      "\">");
+    sb.appendEscaped(linkTitle);
+    sb.appendHtmlConstant("</a></h3>");
+    SafeHtml safeHtml = sb.toSafeHtml();
+   // return safeHtml;
+
+ //   lineBelowTitle.setHTML(safeHtml);
+   // return s;
   }
 
   private void setPageTitle() {
