@@ -599,7 +599,7 @@ public class DatabaseImpl implements Database {
   }
 
   public boolean isAdminUser(long id) {
-    User user = userDAO.getUserMap().get(id);
+    User user = getUser(id);
     return user != null && user.admin;
   }
 
@@ -608,8 +608,12 @@ public class DatabaseImpl implements Database {
   }
 
   public boolean isEnabledUser(long id) {
-    User user = userDAO.getUserMap().get(id);
+    User user = getUser(id);
     return user != null && user.enabled;
+  }
+
+  public User getUser(long id) {
+    return userDAO.getUserMap().get(id);
   }
 
 

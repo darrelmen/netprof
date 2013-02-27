@@ -81,6 +81,25 @@ public class MailSupport {
     }
   }
 
+  public void normalFullEmail(
+
+                               String senderName,
+                               String senderEmail,
+                               List<String> recipientEmails,
+
+                               String subject, String message) {
+    try {
+      Properties props = new Properties();
+      props.put("mail.smtp.host", "localhost");
+      props.put("mail.debug", ""+DEBUG_MAIL);
+      Session session = Session.getDefaultInstance(props, null);
+      Message msg = makeFullMessage(session, senderName, senderEmail, recipientEmails, subject, message);
+      Transport.send(msg);
+    } catch (Exception e) {
+      logger.error("Couldn't send email to " +recipientEmails+". Got " +e,e);
+    }
+  }
+
   public void secureEmail(String recipientName, String recipientEmail, List<String> ccEmails,
                            String subject, String message, String email_transport, String email_server,
                            String email_username, String email_password) throws Exception {
@@ -96,7 +115,9 @@ public class MailSupport {
     transport.close();
   }
 
-  private Message makeMessage(Session session, String recipientName, String recipientEmail, List<String> ccEmails,
+  private Message makeMessage(Session session,
+                              String recipientName, String recipientEmail,
+                              List<String> ccEmails,
                               String subject, String message) throws Exception {
     Message msg = new MimeMessage(session);
     msg.setFrom(new InternetAddress(EMAIL, "Data Collect Webmaster"));
@@ -104,6 +125,22 @@ public class MailSupport {
     for (String ccEmail : ccEmails) {
       msg.addRecipient(Message.RecipientType.CC, new InternetAddress(ccEmail));
     }
+    msg.setSubject(subject);
+    msg.setText(message);
+
+    return msg;
+  }
+
+  private Message makeFullMessage(Session session,
+                              String senderName,
+                              String senderEmail,
+                              List<String> recipientEmails,
+                              String subject, String message) throws Exception {
+    Message msg = new MimeMessage(session);
+    msg.setFrom(new InternetAddress(senderEmail, senderName));
+    for (String receiver : recipientEmails)
+      msg.addRecipient(Message.RecipientType.TO, new InternetAddress(receiver));
+
     msg.setSubject(subject);
     msg.setText(message);
 
