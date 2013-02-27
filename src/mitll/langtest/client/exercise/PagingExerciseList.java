@@ -221,10 +221,12 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     // System.out.println("left over " + leftOver + " raw " + rawRatio + " table ratio " + tableRatio);
 
     float ratio = DEFAULT_PAGE_SIZE * tableRatio;
-    ExerciseShell toLoad = currentExercises.get(0);
+    if (currentExercises != null) {
+      ExerciseShell toLoad = currentExercises.get(0);
 
-    if (toLoad.getID().length() > ID_LINE_WRAP_LENGTH) {
-      ratio /= 2; // hack for long ids
+      if (toLoad.getID().length() > ID_LINE_WRAP_LENGTH) {
+        ratio /= 2; // hack for long ids
+      }
     }
     int numRows = Math.max(MIN_PAGE_SIZE, Math.round(ratio));
     if (table.getPageSize() != numRows) {
