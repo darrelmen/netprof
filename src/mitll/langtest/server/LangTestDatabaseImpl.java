@@ -279,6 +279,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return getExerciseShells(exercisesForSection);
   }
 
+  @Override
+  public Collection<String> getSubsectionsForTypeAndSection(String type, String section) { return db.getSubsectionsForTypeAndSection(type,section); }
+
   private void logMemory() {
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory();
