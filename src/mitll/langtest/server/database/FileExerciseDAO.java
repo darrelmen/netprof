@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,6 +50,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   private final String mediaDir;
   private final boolean isUrdu;
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
+  private Map<String,Map<String,Set<String>>> typeToSectionToSubSection = new HashMap<String, Map<String,Set<String>>>();
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
@@ -62,7 +65,15 @@ public class FileExerciseDAO implements ExerciseDAO {
     typeToUnitToLesson.put("unit", value);*/
   }
 
-  @Override
+  public Collection<String> getSubsectionsForTypeAndSection(String type, String section) {
+    Map<String, Set<String>> sectionToSub = typeToSectionToSubSection.get(type);
+    if (sectionToSub == null) return Collections.emptyList();
+    Set<String> strings = sectionToSub.get(section);
+    if (strings == null) return Collections.emptyList();
+    return new ArrayList<String>(strings);
+  }
+
+    @Override
   public Map<String, Collection<String>> getTypeToSections() {
     Map<String,Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
     for (String key : typeToUnitToLesson.keySet()) {
@@ -192,21 +203,24 @@ public class FileExerciseDAO implements ExerciseDAO {
 
           // testing unit/chapter/week stuff
           Map<String, Lesson> unit = getSectionToLesson("unit");
+          Set<String> subSections;
           if (count % 2 == 0) {
-            addExerciseToLesson(exercise, unit, "even");
+            subSections = addExerciseToLesson(exercise, unit, "unit", "even");
           }
           else {
-            addExerciseToLesson(exercise, unit, "odd");
+            subSections = addExerciseToLesson(exercise, unit, "unit", "odd");
           }
 
           String id = "" +count;
           Map<String, Lesson> chapter = getSectionToLesson("chapter");
-          addExerciseToLesson(exercise,chapter,"Chapter "+id.substring(id.length()-1));
+          String chapterName = "Chapter " + id.substring(id.length() - 1);
+          Set<String> chapter1 = addExerciseToLesson(exercise, chapter, "chapter", chapterName);
+          subSections.add(chapterName);
 
           // if (count < 10) logger.info("Got " + exercise);
           exercises.add(exercise);
         } catch (Exception e) {
-          logger.error("Skipping line -- couldn't parse line #"+count + " : " +line2);
+          logger.error("Got " + e + ".Skipping line -- couldn't parse line #"+count + " : " +line2,e);
           errors++;
           if (errors > MAX_ERRORS) {
             logger.error("too many errors, giving up...");
@@ -235,10 +249,21 @@ public class FileExerciseDAO implements ExerciseDAO {
     return unit;
   }
 
-  private void addExerciseToLesson(Exercise exercise, Map<String, Lesson> unit, String unitName) {
+  private Set<String> addExerciseToLesson(Exercise exercise, Map<String, Lesson> unit, String type, String unitName) {
     Lesson even = unit.get(unitName);
-    if (even == null) unit.put(unitName, even = new Lesson(unitName,"",""));
+    if (even == null) unit.put(unitName, even = new Lesson(unitName, "", ""));
     even.addExercise(exercise);
+
+    Map<String, Set<String>> sectionToSubSection = typeToSectionToSubSection.get(type);
+    if (sectionToSubSection == null) {
+      typeToSectionToSubSection.put(type, sectionToSubSection = new HashMap<String, Set<String>>());
+    }
+    Set<String> subsections = sectionToSubSection.get(unitName);
+    if (subsections == null) {
+      //  ArrayList<String> subsections = new ArrayList<String>();
+      sectionToSubSection.put(unitName, subsections = new HashSet<String>());
+    }
+    return subsections;
   }
 
   private Exercise getWordListExercise(String arabic, String id) {
