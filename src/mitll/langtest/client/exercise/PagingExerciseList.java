@@ -228,7 +228,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     }
     int numRows = Math.max(MIN_PAGE_SIZE, Math.round(ratio));
     if (table.getPageSize() != numRows) {
-      System.out.println("num rows now " + numRows);
+      //System.out.println("num rows now " + numRows);
       table.setPageSize(numRows);
       table.redraw();
       markCurrentExercise(currentExercise);
