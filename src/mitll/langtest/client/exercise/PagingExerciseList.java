@@ -114,7 +114,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
         public Set<String> getConsumedEvents() {
           Set<String> events = new HashSet<String>();
           events.add(BrowserEvents.CLICK);
-          events.add(BrowserEvents.MOUSEOVER);
+        //  events.add(BrowserEvents.MOUSEOVER);
           return events;
         }
       }) {
@@ -135,9 +135,9 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
               gotClickOnItem(e);
             }
           }
-          else if (BrowserEvents.MOUSEOVER.equals(event.getType())) {
+ /*         else if (BrowserEvents.MOUSEOVER.equals(event.getType())) {
             System.out.println("got mouseover on " + object.getID());
-          }
+          }*/
         }
 
         private SafeHtml getColumnToolTip(String columnText, String toolTipText) {
