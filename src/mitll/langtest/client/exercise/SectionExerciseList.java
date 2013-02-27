@@ -6,6 +6,7 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -143,14 +144,8 @@ public class SectionExerciseList extends PagingExerciseList {
     widget.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-
-/*
-        feedback.setEmailMessage("");
-        feedback.setEmailToken(History.getToken());
-        feedback.setEmailSubject("Share Lesson " + type + " : " + section);*/
         Triple triple = getTriple(History.getToken());
-
-        feedback.showEmail("Share Lesson " + triple.type + " : " + triple.section, "", History.getToken());
+        feedback.showEmail("Lesson " + triple.type + " : " + triple.section, "", History.getToken());
       }
     });
 
@@ -158,8 +153,6 @@ public class SectionExerciseList extends PagingExerciseList {
     widgets.add(g);
     return widgets;
   }
-
-
 
   private void pushFirstSelection(String first) {
     String initToken = History.getToken();
@@ -207,10 +200,6 @@ public class SectionExerciseList extends PagingExerciseList {
 
   private void loadExercises(final String type, final String section, final String item) {
     System.out.println("loadExercises " + type + " " + section + " item " +item);
-   // feedback.setMailtoWithHistory(type,section,History.getToken());
-/*    feedback.setEmailMessage("");
-    feedback.setEmailToken(History.getToken());
-    feedback.setEmailSubject("Share Lesson " + type + " : " + section);*/
     service.getExercisesForSection(type, section, new SetExercisesCallback() {
       @Override
       public void onSuccess(List<ExerciseShell> result) {
@@ -235,12 +224,6 @@ public class SectionExerciseList extends PagingExerciseList {
 
   @Override
   protected void gotClickOnItem(ExerciseShell e) {
-//    String historyToken = getHistoryToken(e.getID());
-//    System.out.println("------------ push history " + historyToken+ " -------------- ");
-
-    //History.newItem(historyToken, false);
-
-    //super.gotClickOnItem(e);
   }
 
   @Override
@@ -265,6 +248,7 @@ public class SectionExerciseList extends PagingExerciseList {
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
     String token = event.getValue();
+    token = token.replaceAll("%3D","=").replaceAll("%3B",";").replaceAll("%2"," ").replaceAll("\\+"," ");
     System.out.println("onValueChange " + token);
     if (token.startsWith("type")) {
       try {
