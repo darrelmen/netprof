@@ -16,7 +16,7 @@ public class MailSupport {
   private static final String RECIPIENT_NAME = "Gordon Vidaver";
   private static Logger logger = Logger.getLogger(MailSupport.class);
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
-  private static final boolean DEBUG_MAIL = false;
+  private static final boolean DEBUG_MAIL = true;
   private Properties props;
   //private final LangTestDatabaseImpl langTestDatabaseImpl;
 //  email = props.getProperty("email", EMAIL);
@@ -137,10 +137,14 @@ public class MailSupport {
                               List<String> recipientEmails,
                               String subject, String message) throws Exception {
     Message msg = new MimeMessage(session);
-    msg.setFrom(new InternetAddress(senderEmail, senderName));
-    for (String receiver : recipientEmails)
-      msg.addRecipient(Message.RecipientType.TO, new InternetAddress(receiver));
 
+    logger.info("Sending from " + senderEmail + " " + senderName + " to " +recipientEmails + " sub " +subject + " " +message);
+    msg.setFrom(new InternetAddress(senderEmail, senderName));
+    for (String receiver : recipientEmails) {
+      logger.info("Sending  to " +receiver);
+
+      msg.addRecipient(Message.RecipientType.TO, new InternetAddress(receiver));
+    }
     msg.setSubject(subject);
     msg.setText(message);
 
