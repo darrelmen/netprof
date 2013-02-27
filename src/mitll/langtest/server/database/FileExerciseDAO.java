@@ -79,7 +79,13 @@ public class FileExerciseDAO implements ExerciseDAO {
       return Collections.emptyList();
     }
     else {
-      return sectionToLesson.get(section).getExercises();
+      Lesson lesson = sectionToLesson.get(section);
+      if (lesson == null) {
+        logger.error("Couldn't find section " + section);
+        return Collections.emptyList();
+      } else {
+        return lesson.getExercises();
+      }
     }
   }
 
