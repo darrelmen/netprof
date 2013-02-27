@@ -195,8 +195,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   protected void loadFirstExercise() {
-    System.out.println("load first exercise!");
-
     ExerciseShell toLoad = currentExercises.get(0);
     if (exercise_title != null) {
       ExerciseShell e = byID(exercise_title);
@@ -218,8 +216,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param exerciseShell
    */
   protected void loadExercise(ExerciseShell exerciseShell) {
-    //System.out.println("loadExercise : " + exerciseShell);
-
     checkBeforeLoad(exerciseShell);
 
     removeCurrentExercise();
@@ -262,7 +258,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
     @Override
     public void onSuccess(Exercise result) {
-      //History.newItem(result.getID());
       useExercise(result, exerciseShell);
     }
   }
@@ -281,7 +276,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       System.err.println("can't find " + e + " in list of " + currentExercises.size() + " exercises.");
       return;
     }
-    //System.out.println("useExercise marking " + i);
 
     markCurrentExercise(i);
     currentExercise = i;
@@ -327,7 +321,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   @Override
   public void clear() {
-    //System.out.println("ExerciseList : Clearing list.");
     super.clear();
     progressMarkers.clear();
   }
