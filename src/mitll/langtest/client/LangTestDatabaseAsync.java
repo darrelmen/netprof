@@ -108,4 +108,6 @@ public interface LangTestDatabaseAsync {
   void getTypeToSection(AsyncCallback<Map<String, Collection<String>>> async);
 
   void getExercisesForSection(String type, String section, AsyncCallback<List<ExerciseShell>> async);
+
+  void sendEmail(int userID, String from, String to, String subject, String message, AsyncCallback<Void> async);
 }
