@@ -1,16 +1,26 @@
 package mitll.langtest.client.exercise;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
@@ -63,7 +73,7 @@ public class SectionExerciseList extends PagingExerciseList {
         typeToSections = result;
         sectionPanel.clear();
 
-        final Grid g = new Grid(typeToSections.keySet().size(),3);
+        final Grid g = new Grid(typeToSections.keySet().size()+1,2);
         String first = null;
         int row = 0;
         for (final String type : result.keySet()) {
@@ -100,26 +110,149 @@ public class SectionExerciseList extends PagingExerciseList {
 
           g.setWidget(row++,col++,listBox);
         }
+        Anchor widget = new Anchor("E-MAIL");
+        g.setText(row,0, "");
+        g.setWidget(row,1, widget);
+        widget.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            showEmail();
+          }
+        });
         sectionPanel.add(g);
 
         if (first != null) {
-          String initToken = History.getToken();
-          if (initToken.length() == 0) {
-            ListBox listBox = typeToBox.get(first);
-            String itemText = listBox.getItemText(listBox.getSelectedIndex());
-            System.out.println("push first " + first + " select " + itemText);
-
-            pushNewSectionHistoryToken(first, itemText);
-          } else {
-            System.out.println("fire history ");
-            History.fireCurrentHistoryState();
-          }
+          pushFirstSelection(first);
         }
         else {
           noSectionsGetExercises(userID);
         }
       }
     });
+  }
+
+  public void showEmail() {
+    // Create the popup dialog box
+    final DialogBox dialogBox = new DialogBox();
+    final Triple triple = getTriple(History.getToken());
+
+    dialogBox.setText("E-MAIL " + triple.type + " " + triple.section);
+
+    // Enable glass background.
+    dialogBox.setGlassEnabled(true);
+
+    Button closeButton = new Button("Cancel");
+    closeButton.setEnabled(true);
+    closeButton.getElement().setId("closeButton");
+    FlowPanel hp = new FlowPanel();
+    hp.getElement().getStyle().setFloat(Style.Float.LEFT);
+    Button sendButton;
+    hp.add(sendButton = new Button("Send"));
+   /* sendButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+       service.sendEmail(user.getUser(),fromEmail.getText());
+      }
+    });*/
+    hp.add(closeButton);
+    final VerticalPanel dialogVPanel = new VerticalPanel();
+
+
+   // Grid grid = new Grid(4,2);
+    FlexTable grid = new FlexTable();
+    grid.setStyleName("body");
+    int row = 0;
+    grid.setText(row, 0, "From");
+    final TextBox fromEmail = new TextBox();
+    final TextBox toEmail = new TextBox();
+    grid.setWidget(row++, 1, fromEmail);
+
+    grid.setText(row, 0, "To");
+    grid.setWidget(row++, 1, toEmail);
+
+    grid.setText(row++, 0, "Message");
+    final TextArea widget = new TextArea();
+    widget.setCharacterWidth(50);
+    widget.setVisibleLines(3);
+    grid.setWidget(row, 0, widget);
+    grid.getFlexCellFormatter().setColSpan(row, 0, 2);
+    String url = GWT.getModuleBaseURL() + "#"+History.getToken();
+
+    widget.setText("Hi,\n" +
+      " Here's a link to " +triple.type + " " + triple.section + " :\n" +url +"\n");
+
+/*    int left = (Window.getClientWidth()) / 20;
+    int top  = (Window.getClientHeight()) / 20;
+    dialogBox.setPopupPosition(left, top);*/
+
+/*    service.getNumResults(new AsyncCallback<Integer>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+      @Override
+      public void onSuccess(Integer result) {
+        populateTable(result, dialogVPanel, dialogBox);
+      }
+    });*/
+
+
+    sendButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+
+        if (fromEmail.getText().length() == 0 || !fromEmail.getText().contains("@")) {
+          Window.alert("Please enter valid from email.");
+        } else if (toEmail.getText().length() == 0 || !toEmail.getText().contains("@")) {
+          Window.alert("Please enter valid to email.");
+        }
+        service.sendEmail(user.getUser(),
+          fromEmail.getText(),
+          toEmail.getText(),
+          triple.type + " " + triple.section,
+          widget.getText(),
+          new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              Window.alert("Couldn't contact server.");
+              dialogBox.hide();
+
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+              Window.alert("Message sent.");
+              dialogBox.hide();
+
+            }
+          }
+        );
+      }
+    });
+
+    dialogVPanel.add(grid);
+    dialogVPanel.add(hp);
+    dialogBox.setWidget(dialogVPanel);
+
+    // Add a handler to send the name to the server
+    closeButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        dialogBox.hide();
+      }
+    });
+    dialogBox.center();
+  }
+
+  private void pushFirstSelection(String first) {
+    String initToken = History.getToken();
+    if (initToken.length() == 0) {
+      ListBox listBox = typeToBox.get(first);
+      String itemText = listBox.getItemText(listBox.getSelectedIndex());
+      System.out.println("push first " + first + " select " + itemText);
+
+      pushNewSectionHistoryToken(first, itemText);
+    } else {
+      System.out.println("fire history ");
+      History.fireCurrentHistoryState();
+    }
   }
 
   private List<String> getSections(Map<String, Collection<String>> result, String type) {
@@ -154,6 +287,7 @@ public class SectionExerciseList extends PagingExerciseList {
 
   private void loadExercises(final String type, final String section, final String item) {
     System.out.println("loadExercises " + type + " " + section + " item " +item);
+    feedback.setMailtoWithHistory(type,section,History.getToken());
     service.getExercisesForSection(type, section, new SetExercisesCallback() {
       @Override
       public void onSuccess(List<ExerciseShell> result) {
@@ -212,20 +346,12 @@ public class SectionExerciseList extends PagingExerciseList {
     System.out.println("onValueChange " + token);
     if (token.startsWith("type")) {
       try {
-        String[] parts = token.split(";");
-        String typePart = parts[0];
-        String sectionPart = parts[1];
-        String type = typePart.split("=")[1].trim();
-        String section = sectionPart.split("=")[1].trim();
-        String item = null;
-        if (parts.length == 3) {
-          item = parts[2].split("=")[1].trim();
-        }
+        Triple triple = getTriple(token);
 
-        restoreRadioButtonState(type);
-        restoreListBoxState(type, section);
+        restoreRadioButtonState(triple.type);
+        restoreListBoxState(triple.type, triple.section);
 
-        loadExercises(type, section, item);
+        loadExercises(triple.type, triple.section, triple.item);
       } catch (Exception e) {
         System.out.println("onValueChange " + token + " badly formed.");
       }
@@ -233,6 +359,25 @@ public class SectionExerciseList extends PagingExerciseList {
     else {
       super.onValueChange(event);
     }
+  }
+
+  private Triple getTriple(String token) {
+    String[] parts = token.split(";");
+    String typePart = parts[0];
+    String sectionPart = parts[1];
+    String type = typePart.split("=")[1].trim();
+    String section = sectionPart.split("=")[1].trim();
+    String item = null;
+    if (parts.length == 3) {
+      item = parts[2].split("=")[1].trim();
+    }
+    return new Triple(type, section, item);
+  }
+
+  private static class Triple {
+    String type, section, item;
+
+    public Triple(String type, String section, String item) { this.type = type; this.section = section; this.item = item;}
   }
 
   private void restoreRadioButtonState(String type) {
@@ -263,7 +408,7 @@ public class SectionExerciseList extends PagingExerciseList {
   }
 
 
-  private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 390 + 65;
+  private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 390 - 20-65;
 
   protected int getTableHeaderHeight() {
     return 625 - HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
