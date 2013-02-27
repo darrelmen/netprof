@@ -1,6 +1,5 @@
 package mitll.langtest.client.exercise;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -176,29 +175,14 @@ public class SectionExerciseList extends PagingExerciseList {
     widget.setVisibleLines(3);
     grid.setWidget(row, 0, widget);
     grid.getFlexCellFormatter().setColSpan(row, 0, 2);
-    String url = GWT.getModuleBaseURL() + "#"+History.getToken();
+    //String url = GWT.getHostPageBaseURL() + "#"+History.getToken();
 
     widget.setText("Hi,\n" +
-      " Here's a link to " +triple.type + " " + triple.section + " :\n" +url +"\n");
-
-/*    int left = (Window.getClientWidth()) / 20;
-    int top  = (Window.getClientHeight()) / 20;
-    dialogBox.setPopupPosition(left, top);*/
-
-/*    service.getNumResults(new AsyncCallback<Integer>() {
-      @Override
-      public void onFailure(Throwable caught) {}
-      @Override
-      public void onSuccess(Integer result) {
-        populateTable(result, dialogVPanel, dialogBox);
-      }
-    });*/
-
+      " Here's a link to : " + triple.section + ".\n");
 
     sendButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-
         if (fromEmail.getText().length() == 0 || !fromEmail.getText().contains("@")) {
           Window.alert("Please enter valid from email.");
         } else if (toEmail.getText().length() == 0 || !toEmail.getText().contains("@")) {
@@ -207,14 +191,14 @@ public class SectionExerciseList extends PagingExerciseList {
         service.sendEmail(user.getUser(),
           fromEmail.getText(),
           toEmail.getText(),
-          triple.type + " " + triple.section,
+          /*triple.type + " " +*/ triple.section,
           widget.getText(),
-          new AsyncCallback<Void>() {
+          History.getToken(),
+          triple.section, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
               Window.alert("Couldn't contact server.");
               dialogBox.hide();
-
             }
 
             @Override
