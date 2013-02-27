@@ -4,7 +4,9 @@ import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sun.jndi.toolkit.url.Uri;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.scoring.ASRScoring;
@@ -37,8 +39,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -998,10 +1002,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public void sendEmail(int userID, String from, String to, String subject, String message) {
+  public void sendEmail(int userID, String from, String to, String subject, String message, String token, String linkTitle) {
     User user = db.getUser(userID);
     String name = (user != null) ? user.userID : from;
-    List<String> split = Arrays.asList(to.split(","));
+    List<String> split = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<String>();
+    if (split.isEmpty()) split.add(to);
+
+ //  URI uri = new URI();
+    message +=  "\nHere's a link <a href='" + getBaseUrl() +"#"+ URLEncoder.encode(token)+
+      "'>" + linkTitle + "</a>.\n";
     new MailSupport(props).normalFullEmail(name, from, split, subject, message);
   }
 
