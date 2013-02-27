@@ -176,13 +176,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (!b) return b;
     waitUntilDeployed(siteByID);
 
-    String firstName = "Unknown user #" + siteByID.creatorID;
-    String lastName = "Unk.";
+   // String firstName = "Unknown user #" + siteByID.creatorID;
+   // String lastName = "Unk.";
     String userid = "";
     for (User user : db.getUsers())
       if (user.id == siteByID.creatorID) {
-        firstName = user.firstName;
-        lastName = user.lastName;
+    //    firstName = user.firstName;
+    //    lastName = user.lastName;
         userid = user.userID;
       }
 
@@ -995,6 +995,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public void logMessage(String message) {
     logger.debug("from client " + message);
+  }
+
+  @Override
+  public void sendEmail(int userID, String from, String to, String subject, String message) {
+    User user = db.getUser(userID);
+    String name = (user != null) ? user.userID : from;
+    List<String> split = Arrays.asList(to.split(","));
+    new MailSupport(props).normalFullEmail(name, from, split, subject, message);
   }
 
   private String optionallyMakeURL(String wavPathWithForwardSlashSeparators) {
