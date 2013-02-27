@@ -11,4 +11,6 @@ public interface UserFeedback {
   void showErrorMessage(String title, String msg);
   void showStatus(String msg);
   void login();
+
+  void setMailtoWithHistory(String type, String section, String historyToken);
 }
