@@ -54,7 +54,7 @@ public class PropertyHandler {
   private static final String ADMIN_PARAM = "admin";
   private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
 
-  private static final String DLI_LANGUAGE_TESTING = "NetPron 2";
+  private static final String DLI_LANGUAGE_TESTING = "NetProF";
   private static final boolean DEFAULT_GOODWAVE_MODE = false;
   private static final boolean DEFAULT_ARABIC_TEXT_COLLECT = false;
   private static final boolean DEFAULT_SHOW_TURK_TOKEN = false;
