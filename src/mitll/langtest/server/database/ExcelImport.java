@@ -44,9 +44,16 @@ public class ExcelImport implements ExerciseDAO {
   private List<Lesson> lessons = new ArrayList<Lesson>();
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
 
+
   private List<String> errors = new ArrayList<String>();
   private TeacherClass teacherClass;
   private final String file;
+
+
+  @Override
+  public Collection<String> getSubsectionsForTypeAndSection(String type, String section) {
+    return null;  //To change body of implemented methods use File | Settings | File Templates.
+  }
 
   @Override
   public Map<String, Collection<String>> getTypeToSections() {
