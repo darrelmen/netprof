@@ -15,12 +15,15 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
@@ -72,7 +75,7 @@ public class SectionExerciseList extends PagingExerciseList {
         typeToSections = result;
         sectionPanel.clear();
 
-        final Grid g = new Grid(typeToSections.keySet().size()+1,2);
+        final FlexTable g = new FlexTable(/*typeToSections.keySet().size()+1,2*/);
         String first = null;
         int row = 0;
         for (final String type : result.keySet()) {
@@ -109,15 +112,10 @@ public class SectionExerciseList extends PagingExerciseList {
 
           g.setWidget(row++,col++,listBox);
         }
-        Anchor widget = new Anchor("E-MAIL");
-        g.setText(row,0, "");
-        g.setWidget(row,1, widget);
-        widget.addClickHandler(new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            showEmail();
-          }
-        });
+
+        g.setWidget(row, 0, getEmailWidget());
+        g.getFlexCellFormatter().setColSpan(row, 0, 2);
+
         sectionPanel.add(g);
 
         if (first != null) {
@@ -130,100 +128,38 @@ public class SectionExerciseList extends PagingExerciseList {
     });
   }
 
-  public void showEmail() {
-    // Create the popup dialog box
-    final DialogBox dialogBox = new DialogBox();
-    final Triple triple = getTriple(History.getToken());
-
-    dialogBox.setText("E-MAIL " + triple.type + " " + triple.section);
-
-    // Enable glass background.
-    dialogBox.setGlassEnabled(true);
-
-    Button closeButton = new Button("Cancel");
-    closeButton.setEnabled(true);
-    closeButton.getElement().setId("closeButton");
-    FlowPanel hp = new FlowPanel();
-    hp.getElement().getStyle().setFloat(Style.Float.LEFT);
-    Button sendButton;
-    hp.add(sendButton = new Button("Send"));
-   /* sendButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-       service.sendEmail(user.getUser(),fromEmail.getText());
-      }
-    });*/
-    hp.add(closeButton);
-    final VerticalPanel dialogVPanel = new VerticalPanel();
-
-
-   // Grid grid = new Grid(4,2);
-    FlexTable grid = new FlexTable();
-    grid.setStyleName("body");
+  private Widget getEmailWidget() {
+    FlexTable g = new FlexTable();
+    Anchor widget = new Anchor("E-MAIL");
+    //HTMLPanel container = new HTMLPanel("h3",widget.getHTML());
     int row = 0;
-    grid.setText(row, 0, "From");
-    final TextBox fromEmail = new TextBox();
-    final TextBox toEmail = new TextBox();
-    grid.setWidget(row++, 1, fromEmail);
-
-    grid.setText(row, 0, "To");
-    grid.setWidget(row++, 1, toEmail);
-
-    grid.setText(row++, 0, "Message");
-    final TextArea widget = new TextArea();
-    widget.setCharacterWidth(50);
-    widget.setVisibleLines(3);
-    grid.setWidget(row, 0, widget);
-    grid.getFlexCellFormatter().setColSpan(row, 0, 2);
-    //String url = GWT.getHostPageBaseURL() + "#"+History.getToken();
-
-    widget.setText("Hi,\n" +
-      " Here's a link to : " + triple.section + ".\n");
-
-    sendButton.addClickHandler(new ClickHandler() {
+    //g.setText(row,0, "");
+    g.setWidget(row, 0, new HTML("Share via "));
+   // g.getFlexCellFormatter().setColSpan(row, 0, 2);
+    //row++;
+    //g.setText(row,0, "");
+    g.setWidget(row,1, widget);
+    //g.setWidget(row,2, widget);
+    widget.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        if (fromEmail.getText().length() == 0 || !fromEmail.getText().contains("@")) {
-          Window.alert("Please enter valid from email.");
-        } else if (toEmail.getText().length() == 0 || !toEmail.getText().contains("@")) {
-          Window.alert("Please enter valid to email.");
-        }
-        service.sendEmail(user.getUser(),
-          fromEmail.getText(),
-          toEmail.getText(),
-          /*triple.type + " " +*/ triple.section,
-          widget.getText(),
-          History.getToken(),
-          triple.section, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              Window.alert("Couldn't contact server.");
-              dialogBox.hide();
-            }
 
-            @Override
-            public void onSuccess(Void result) {
-              Window.alert("Message sent.");
-              dialogBox.hide();
+/*
+        feedback.setEmailMessage("");
+        feedback.setEmailToken(History.getToken());
+        feedback.setEmailSubject("Share Lesson " + type + " : " + section);*/
+        Triple triple = getTriple(History.getToken());
 
-            }
-          }
-        );
+        feedback.showEmail("Share Lesson " + triple.type + " : " + triple.section, "", History.getToken());
       }
     });
 
-    dialogVPanel.add(grid);
-    dialogVPanel.add(hp);
-    dialogBox.setWidget(dialogVPanel);
-
-    // Add a handler to send the name to the server
-    closeButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-      }
-    });
-    dialogBox.center();
+    FlowPanel widgets = new FlowPanel();
+    widgets.add(g);
+    return widgets;
   }
+
+
 
   private void pushFirstSelection(String first) {
     String initToken = History.getToken();
@@ -271,7 +207,10 @@ public class SectionExerciseList extends PagingExerciseList {
 
   private void loadExercises(final String type, final String section, final String item) {
     System.out.println("loadExercises " + type + " " + section + " item " +item);
-    feedback.setMailtoWithHistory(type,section,History.getToken());
+   // feedback.setMailtoWithHistory(type,section,History.getToken());
+/*    feedback.setEmailMessage("");
+    feedback.setEmailToken(History.getToken());
+    feedback.setEmailSubject("Share Lesson " + type + " : " + section);*/
     service.getExercisesForSection(type, section, new SetExercisesCallback() {
       @Override
       public void onSuccess(List<ExerciseShell> result) {
@@ -281,8 +220,7 @@ public class SectionExerciseList extends PagingExerciseList {
             if (!loadByID(item)) {
               loadFirstExercise();
             }
-          }
-          else {
+          } else {
             super.onSuccess(result);
           }
         }
