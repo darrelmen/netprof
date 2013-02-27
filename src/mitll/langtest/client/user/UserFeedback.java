@@ -12,5 +12,13 @@ public interface UserFeedback {
   void showStatus(String msg);
   void login();
 
-  void setMailtoWithHistory(String type, String section, String historyToken);
+  void setEmailSubject(String emailSubject);
+
+  void setEmailMessage(String emailMessage);
+
+  void setEmailToken(String e);
+
+  void showEmail(String subject, String linkTitle, String token);
+
+  //void setMailtoWithHistory(String type, String section, String historyToken);
 }
