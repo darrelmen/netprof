@@ -205,7 +205,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   private ExerciseShell byID(String name) {
-    return idToExercise.get(name);
+    return idToExercise == null ? null : idToExercise.get(name);
   }
 
   /**
