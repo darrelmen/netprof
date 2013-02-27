@@ -155,6 +155,8 @@ public class DatabaseImpl implements Database {
     return exerciseDAO.getTypeToSections();
   }
 
+  public Collection<String> getSubsectionsForTypeAndSection(String type, String section) { return exerciseDAO.getSubsectionsForTypeAndSection(type, section); }
+
   public Collection<Exercise> getExercisesForSection(String type, String section) {
     return exerciseDAO.getExercisesForSection(type, section);
   }
