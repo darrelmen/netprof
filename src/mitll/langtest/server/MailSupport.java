@@ -16,13 +16,14 @@ public class MailSupport {
   private static final String RECIPIENT_NAME = "Gordon Vidaver";
   private static Logger logger = Logger.getLogger(MailSupport.class);
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
-  private static final boolean DEBUG_MAIL = true;
+  boolean debugEmail;
   private Properties props;
   //private final LangTestDatabaseImpl langTestDatabaseImpl;
 //  email = props.getProperty("email", EMAIL);
 
   public MailSupport(Properties props) {
     this.props = props;
+    debugEmail = props.get("debugEmail") != null && !props.get("debugEmail").toString().equals("false");
   }
 
 /*  public void sendEmail(String recipientName, String recipientEmail, List<String> ccEmails, String subject, String message, boolean includeSiteURL) {
@@ -72,7 +73,7 @@ public class MailSupport {
     try {
       Properties props = new Properties();
       props.put("mail.smtp.host", email_server);
-      props.put("mail.debug", ""+DEBUG_MAIL);
+      props.put("mail.debug", ""+debugEmail);
       Session session = Session.getDefaultInstance(props, null);
       Message msg = makeMessage(session, recipientName, recipientEmail, ccEmails, subject, message);
       Transport.send(msg);
@@ -81,6 +82,14 @@ public class MailSupport {
     }
   }
 
+  /**
+   * @see LangTestDatabaseImpl#sendEmail(int, String, String, String, String, String)
+   * @param senderName
+   * @param senderEmail
+   * @param recipientEmails
+   * @param subject
+   * @param message
+   */
   public void normalFullEmail(
 
                                String senderName,
@@ -91,7 +100,7 @@ public class MailSupport {
     try {
       Properties props = new Properties();
       props.put("mail.smtp.host", "localhost");
-      props.put("mail.debug", ""+DEBUG_MAIL);
+      props.put("mail.debug", ""+debugEmail);
       Session session = Session.getDefaultInstance(props, null);
       Message msg = makeFullMessage(session, senderName, senderEmail, recipientEmails, subject, message);
       Transport.send(msg);
@@ -147,7 +156,7 @@ public class MailSupport {
     }
     msg.setSubject(subject);
     msg.setText(message);
-
+              msg.addHeader("Content-Type", "text/html");
     return msg;
   }
 }
