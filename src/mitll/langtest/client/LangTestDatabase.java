@@ -111,5 +111,5 @@ public interface LangTestDatabase extends RemoteService {
 
   List<ExerciseShell> getExercisesForSection(String type, String section);
 
-  void sendEmail(int userID, String from, String to, String subject, String message);
+  void sendEmail(int userID, String from, String to, String subject, String message, String token, String linkTitle);
 }
