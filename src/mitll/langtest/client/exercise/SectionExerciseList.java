@@ -36,10 +36,11 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class SectionExerciseList extends PagingExerciseList {
-  private Map<String, Collection<String>> typeToSections;
+  public static final String UNIT = "unit";
+  public static final String CHAPTER = "chapter";
+  //private Map<String, Collection<String>> typeToSections;
   private Panel sectionPanel;
   private Map<String,ListBox> typeToBox = new HashMap<String, ListBox>();
-  //private List<RadioButton> radios = new ArrayList<RadioButton>();
 
   public SectionExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                              UserFeedback feedback,
@@ -58,22 +59,20 @@ public class SectionExerciseList extends PagingExerciseList {
 
   @Override
   public void getExercises(final long userID) {
-    //service.getSubsections();
     service.getTypeToSection(new AsyncCallback<Map<String, Collection<String>>>() {
       @Override
       public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Map<String, Collection<String>> result) {
-        typeToSections = result;
+       //typeToSections = result;
         sectionPanel.clear();
 
-        final FlexTable g = new FlexTable(/*typeToSections.keySet().size()+1,2*/);
+        final FlexTable g = new FlexTable();
         String first = null;
         int row = 0;
         Set<String> types = result.keySet();
 
-        System.out.println("types are " + types);
         for (final String type : types) {
           final ListBox listBox = new ListBox();
           typeToBox.put(type,listBox);
@@ -88,26 +87,11 @@ public class SectionExerciseList extends PagingExerciseList {
             }
           });
           int col = 0;
-    /*
-          final RadioButton radio = new RadioButton("SectionType", type);
-          radios.add(radio);
-          radio.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-              for (RadioButton rb : radios) {
-                typeToBox.get(rb.getText()).setEnabled(rb == radio);
-              }
-            }
-          });
-          g.setWidget(row, col++, radio);
-          radio.setValue(row == 0);
-          listBox.setEnabled(row == 0);*/
+
           g.setWidget(row, col++, new HTML(type));
-
-          g.setWidget(row++,col++,listBox);
+          g.setWidget(row++,col,listBox);
         }
-        setChapterBox(typeToBox.get("chapter"), "unit", typeToBox.get("unit").getItemText(0));
-
+        doNestedSections();
         g.setWidget(row, 0, getEmailWidget());
         g.getFlexCellFormatter().setColSpan(row, 0, 2);
 
@@ -123,17 +107,29 @@ public class SectionExerciseList extends PagingExerciseList {
     });
   }
 
+  private void doNestedSections() {
+    ListBox chapter = typeToBox.get(CHAPTER);
+    ListBox unit = typeToBox.get(UNIT);
+    if (chapter != null && unit != null) {
+      setChapterBox(chapter, UNIT, unit.getItemText(0));
+    }
+  }
+
   private void getListBoxOnClick(final ListBox listBox, final String type) {
     final String itemText = listBox.getItemText(listBox.getSelectedIndex());
 
     System.out.println("box " + type + " select " + itemText);
-    //pushNewSectionHistoryToken(type, itemText);
 
-    if (type.equals("unit")) {
-      ListBox chapter = typeToBox.get("chapter");
-      setChapterBox(chapter, type, itemText);
+    if (type.equals(UNIT)) {
+      ListBox chapter = typeToBox.get(CHAPTER);
+      if (chapter != null) {
+        setChapterBox(chapter, type, itemText);
+      }
+      else {
+        pushNewSectionHistoryToken();
+      }
     } else {
-      pushNewSectionHistoryToken(/*type, itemText*/);
+      pushNewSectionHistoryToken();
     }
   }
 
@@ -150,7 +146,6 @@ public class SectionExerciseList extends PagingExerciseList {
           pushNewSectionHistoryToken(type, itemText);
         } else {*/
           // hack!
-          //ListBox chapter = typeToBox.get("chapter");
         if (!result.isEmpty()) {
           chapter.clear();
           populateListBox(chapter, result);
@@ -171,24 +166,16 @@ public class SectionExerciseList extends PagingExerciseList {
   private Widget getEmailWidget() {
     FlexTable g = new FlexTable();
     Anchor widget = new Anchor("E-MAIL");
-    //HTMLPanel container = new HTMLPanel("h3",widget.getHTML());
     int row = 0;
-    //g.setText(row,0, "");
     g.setWidget(row, 0, new HTML("Share via "));
-   // g.getFlexCellFormatter().setColSpan(row, 0, 2);
-    //row++;
-    //g.setText(row,0, "");
     g.setWidget(row,1, widget);
-    //g.setWidget(row,2, widget);
     widget.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        Triple triple = getTriple(History.getToken());
-
-        feedback.showEmail("Lesson " +
-          triple
-          //triple.type + " : " + triple.section
-          , "", History.getToken());
+        String token = History.getToken();
+        if (token.trim().isEmpty()) token = getDefaultToken();
+        Triple triple = getTriple(token);
+        feedback.showEmail("Lesson " + triple, "", token);
       }
     });
 
@@ -204,7 +191,7 @@ public class SectionExerciseList extends PagingExerciseList {
       String itemText = listBox.getItemText(listBox.getSelectedIndex());
       System.out.println("push first " + first + " select " + itemText);
 
-      pushNewSectionHistoryToken(/*first, itemText*/);
+      pushNewSectionHistoryToken();
     } else {
       System.out.println("fire history ");
       History.fireCurrentHistoryState();
@@ -245,8 +232,15 @@ public class SectionExerciseList extends PagingExerciseList {
     super.getExercises(userID);
   }
 
+  /**
+   * When we get a history token push, select the exercise type, section, and optionally item.
+   * @param type
+   * @param section
+   * @param item null is OK
+   * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
+   */
   private void loadExercises(final String type, final String section, final String item) {
-    System.out.println("loadExercises " + type + " " + section + " item " +item);
+    System.out.println("loadExercises " + type + " " + section + " item '" +item +"'");
     service.getExercisesForSection(type, section, new SetExercisesCallback() {
       @Override
       public void onSuccess(List<ExerciseShell> result) {
@@ -264,52 +258,38 @@ public class SectionExerciseList extends PagingExerciseList {
     });
   }
 
-  private void pushNewSectionHistoryToken(/*String type, String section*/) {
+  private void pushNewSectionHistoryToken() {
     String historyToken = getHistoryToken(null);
     System.out.println("------------ push history " + historyToken + " -------------- ");
-    History.newItem(historyToken);//"type=" + type + ";section=" + section);
+    History.newItem(historyToken);
   }
 
   @Override
-  protected void gotClickOnItem(ExerciseShell e) {
-  }
-
-  @Override
-  protected String getHistoryTokenForLink(String id) {
-    return "#"+getHistoryToken(id);
-  }
-
-/*  protected String getHistoryToken(String id) {
-    for (RadioButton rb : radios) {
-      if (rb.getValue()) {
-        String type = rb.getText();
-        ListBox listBox = typeToBox.get(type);
-        String section = listBox.getItemText(listBox.getSelectedIndex());
-        // System.out.println("------------ push history " + type +"/"+ section + "/" +id+ " -------------- ");
-
-        return "type=" + type + ";section=" + section + ";item=" + id;
-      }
-    }
-    return "";
-  }*/
+  protected void gotClickOnItem(ExerciseShell e) {}
 
   protected String getHistoryToken(String id) {
     StringBuilder builder = new StringBuilder();
     for (String type : typeToBox.keySet()) {
-    //  if (rb.getValue()) {
-    //    String type = rb.getText();
-        ListBox listBox = typeToBox.get(type);
-        String section = listBox.getItemText(listBox.getSelectedIndex());
-        // System.out.println("------------ push history " + type +"/"+ section + "/" +id+ " -------------- ");
-
-      // return "type=" + type + ";section=" + section + ";item=" + id;
+      ListBox listBox = typeToBox.get(type);
+      String section = listBox.getItemText(listBox.getSelectedIndex());
       builder.append(type + "=" + section + ";");
-
-      //}
     }
     if (id != null) {
-      builder.append("item=" + id);
+      builder.append(super.getHistoryToken(id));
     }
+    return builder.toString();
+  }
+
+  private String getDefaultToken() {
+    StringBuilder builder = new StringBuilder();
+    for (String type : typeToBox.keySet()) {
+      ListBox listBox = typeToBox.get(type);
+      String section = listBox.getItemText(0);
+      // System.out.println("------------ push history " + type +"/"+ section + "/" +id+ " -------------- ");
+
+      builder.append(type + "=" + section + ";");
+    }
+
     return builder.toString();
   }
 
@@ -317,24 +297,26 @@ public class SectionExerciseList extends PagingExerciseList {
   public void onValueChange(ValueChangeEvent<String> event) {
     String token = event.getValue();
     token = token.replaceAll("%3D","=").replaceAll("%3B",";").replaceAll("%2"," ").replaceAll("\\+"," ");
+    if (!token.contains("=")) token = getDefaultToken();
     System.out.println("onValueChange " + token);
-    if (token.contains("=")) {
       try {
         Triple triple = getTriple(token);
 
-        //restoreRadioButtonState(triple.type);
         restoreListBoxState(triple);
-        String type =  triple.typeToSection.containsKey("chapter") ? "chapter" : "week"; // cheesy hack
-        String section = triple.typeToSection.containsKey("chapter") ? triple.typeToSection.get("chapter") :  triple.typeToSection.get("week"); // cheesy hack
+        Map<String, String> typeToSection = triple.typeToSection;
+        String type = typeToSection.containsKey(CHAPTER) ? CHAPTER : "week"; // cheesy hack
+        String section = typeToSection.containsKey(CHAPTER) ? typeToSection.get(CHAPTER) :  typeToSection.get("week"); // cheesy hack
+        if (section == null) {
+          // OK we need to deal with types that are neither unit, chapter or week
+          type = typeToSection.keySet().iterator().next();
+          section = typeToSection.get(type);
+        }
         loadExercises(type, section, triple.item);
       } catch (Exception e) {
         System.out.println("onValueChange " + token + " badly formed. Got " +e);
         e.printStackTrace();
       }
-    }
-    else {
-      super.onValueChange(event);
-    }
+
   }
 
   private Triple getTriple(String token) {
@@ -342,43 +324,38 @@ public class SectionExerciseList extends PagingExerciseList {
     String[] parts = token.split(";");
 
     for (String part : parts) {
-      System.out.println("part " + part);
-      String[] segments = part.split("=");
-      String type = segments[0].trim();
-      String section = segments[1].trim();
-      triple.add(type,section);
-    }
+      if (part.contains("=")) {
+        String[] segments = part.split("=");
+        String type = segments[0].trim();
+        String section = segments[1].trim();
 
-   // String item = null;
+        triple.add(type, section);
+//        System.out.println("part " + part + " : " + type + "->" +section + " : " + triple);
+      }
+      else {
+        System.err.println("skipping part '" + part+ "'");
+      }
+    }
 
     if (token.contains("item")) {
       int item1 = token.indexOf("item=");
-      String itemValue = token.substring(item1);
+      String itemValue = token.substring(item1+"item=".length());
       System.out.println("got " + itemValue);
       triple.setItem(itemValue);
     }
 
-    System.out.println("triple " +triple);
+    System.out.println("triple from " +token + " = " +triple);
 
-/*    String typePart = parts[0];
-    String sectionPart = parts[1];
-    String type = typePart.split("=")[1].trim();
-    String section = sectionPart.split("=")[1].trim();*/
-/*    if (parts.length == 3) {
-      item = parts[2].split("=")[1].trim();
-    }*/
     return triple;
   }
 
   private static class Triple {
-    private String /*type, section,*/ item;
+    private String item;
     public Map<String, String> typeToSection = new HashMap<String, String>();
 
     public void add(String type, String section) {
       typeToSection.put(type, section);
     }
-
-    // public Triple(/*String type, String section,*/ String item) {/* this.type = type; this.section = section;*/ this.setItem(item);}
 
     public void setItem(String item) {
       this.item = item;
@@ -386,35 +363,30 @@ public class SectionExerciseList extends PagingExerciseList {
 
     public String toString() {
       StringBuilder builder = new StringBuilder();
-      for (String section : typeToSection.values()) builder.append(section).append(", ");
+     // System.out.println("values " + typeToSection.values());
+      for (String section : typeToSection.values()) {
+        builder.append(section).append(", ");
+      }
       String s = builder.toString();
-      return s.substring(s.length() - 2);
+      return s.substring(0, s.length() - 2);
     }
   }
 
-  /*private void restoreRadioButtonState(String type) {
-    boolean found = false;
-    for (RadioButton rb : radios) {
-      boolean foundMatch = rb.getText().equals(type);
-      if (foundMatch) found = true;
-      rb.setValue(foundMatch);
-    }
-    if (!found && !radios.isEmpty()) { // so if we get a bad type, something is selected
-      radios.get(0).setValue(true);
-    }
-  }*/
-
+  /**
+   * Given a triple state, make sure the list boxes are consistent with it.
+   * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
+   * @param triple
+   */
   private void restoreListBoxState(Triple triple) {
     for (Map.Entry<String, String> pair : triple.typeToSection.entrySet()) {
       String type = pair.getKey();
       String section = pair.getValue();
- /*     for (ListBox lb : typeToBox.values()) {
-        lb.setEnabled(false);
-      }*/
       ListBox listBox = typeToBox.get(type);
-      if (listBox == null) System.err.println("huh? bad type " + type);
-        //  listBox.setEnabled(true);
-      else {
+      if (listBox == null) {
+        if (!type.equals("item")) {
+          System.err.println("huh? bad type " + type);
+        }
+      } else {
         for (int i = 0; i < listBox.getItemCount(); i++) {
           String itemText = listBox.getItemText(i);
           if (itemText.equals(section)) {
