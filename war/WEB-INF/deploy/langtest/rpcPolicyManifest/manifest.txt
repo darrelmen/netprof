@@ -1,0 +1,3 @@
+# Module langtest
+# RPC service class, partial path of RPC policy file
+mitll.langtest.client.LangTestDatabase, 79D11C9794EAA794A145AB609F4C2D28.gwt.rpc
