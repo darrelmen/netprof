@@ -59,6 +59,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private boolean useUserID = false;
   private long userID;
   private final boolean showInOrder;
+  private int countSincePrompt = 0;
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -227,17 +228,21 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
+  /**
+   * This method is called whenever the application's history changes.
+   * @seex #
+   * @param event
+   */
   public void onValueChange(ValueChangeEvent<String> event) {
     // This method is called whenever the application's history changes. Set
     // the label to reflect the current history token.
-   // lbl.setText("The current history token is: " + event.getValue());
     loadByID(event.getValue());
   }
 
   protected boolean loadByID(String id) {
     ExerciseShell exerciseShell = byID(id);
     if (exerciseShell != null) {
-      System.out.println("loading history exercise " + id);
+      System.out.println("loading exercise " + id);
       loadExercise(exerciseShell);
       return true;
     }
@@ -248,18 +253,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   private class ExerciseAsyncCallback implements AsyncCallback<Exercise> {
     private final ExerciseShell exerciseShell;
-
-    public ExerciseAsyncCallback(ExerciseShell exerciseShell) {
-      this.exerciseShell = exerciseShell;
-    }
+    public ExerciseAsyncCallback(ExerciseShell exerciseShell) { this.exerciseShell = exerciseShell; }
 
     @Override
-    public void onFailure(Throwable caught) {}
-
+    public void onFailure(Throwable caught) { Window.alert("Can't connect to server."); }
     @Override
-    public void onSuccess(Exercise result) {
-      useExercise(result, exerciseShell);
-    }
+    public void onSuccess(Exercise result)  { useExercise(result, exerciseShell); }
   }
 
   /**
@@ -336,8 +335,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     HTML html = progressMarkers.get(currentExercise);
     html.setStyleDependentName("highlighted", false);
   }
-
-  private int countSincePrompt = 0;
 
   /**
    * @see mitll.langtest.client.LangTest#loadNextExercise
