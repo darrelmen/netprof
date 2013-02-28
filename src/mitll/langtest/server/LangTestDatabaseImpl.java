@@ -1001,22 +1001,31 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.debug("from client " + message);
   }
 
+  /**
+   * @see mitll.langtest.client.mail.MailDialog.SendClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
+   * @param userID
+   * @param to
+   * @param replyTo
+   * @param subject
+   * @param message
+   * @param token
+   */
   @Override
-  public void sendEmail(int userID, String to, String subject, String message, String token, String linkTitle) {
-    //User user = db.getUser(userID);
-   // String name = (user != null) ? user.userID : from;
-    List<String> split = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<String>();
-    if (split.isEmpty()) split.add(to);
-                                 logger.debug("server info " +getServletContext().getServerInfo());
- //  URI uri = new URI();
-    HttpServletRequest request = getThreadLocalRequest();
-    logger.info("server name " +request.getServerName());
-
+  public void sendEmail(int userID, String to, String replyTo, String subject, String message, String token) {
+    List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<String>();
+    if (toAddresses.isEmpty()) {
+      toAddresses.add(to);
+    }
+//    logger.debug("server info " + getServletContext().getServerInfo());
+    //  URI uri = new URI();
+    String serverName = getThreadLocalRequest().getServerName();
+    logger.info("server name " + serverName);
+/*
     String link = "\nHere's a link <a href='" + getBaseUrl() + "#" + URLEncoder.encode(token) +
       "'>" + linkTitle + "</a>.\n";
     //message += link;
 
-    logger.info("link " +link);
+    logger.info("link " +link);*/
 
     String link2 = getBaseUrl() + "#" + URLEncoder.encode(token);
     String body = "<html>" +
@@ -1039,7 +1048,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       "      <h1 style='margin-top:0in;margin-right:0in;margin-bottom:3.0pt;\n" + "      margin-left:0in'>" +
       "<span style='font-size:12.5pt;font-family:\"Georgia\",\"serif\";\n" +  "      font-weight:normal'>" +
       "<a\n" + "      href=\"" +
-      // "http://p.nytimes.com/email/re?location=InCMR7g4BCJ+o1OpSn8MzblqDmgBARGh&amp;user_id=b4e44c62d96e069ec04122e8eb403110&amp;email_type=eta&amp;task_id=1361979179178614" +
       link2 +
       "\">" +
       "<span\n" + "      style='color:#004276'>" +
@@ -1074,7 +1082,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       "</body>" +
       "</html>";
 
-    new MailSupport(props).normalFullEmail("email@"+request.getServerName(), "email@"+request.getServerName(), split,
+    String fromEmail = "email@" + serverName;
+    new MailSupport(props).normalFullEmail(fromEmail, fromEmail, replyTo, toAddresses,
       subject,
       body);
   }
