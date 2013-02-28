@@ -2,6 +2,7 @@ package mitll.langtest.server;
 
 import org.apache.log4j.Logger;
 
+import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -102,7 +103,7 @@ public class MailSupport {
       props.put("mail.smtp.host", "localhost");
       props.put("mail.debug", ""+debugEmail);
       Session session = Session.getDefaultInstance(props, null);
-      Message msg = makeFullMessage(session, senderName, senderEmail, recipientEmails, subject, message);
+      Message msg = makeHTMLMessage(session, senderName, senderEmail, recipientEmails, subject, message);
       Transport.send(msg);
     } catch (Exception e) {
       logger.error("Couldn't send email to " +recipientEmails+". Got " +e,e);
@@ -140,11 +141,11 @@ public class MailSupport {
     return msg;
   }
 
-  private Message makeFullMessage(Session session,
-                              String senderName,
-                              String senderEmail,
-                              List<String> recipientEmails,
-                              String subject, String message) throws Exception {
+  private Message makeHTMLMessage(Session session,
+                                  String senderName,
+                                  String senderEmail,
+                                  List<String> recipientEmails,
+                                  String subject, String message) throws Exception {
     Message msg = new MimeMessage(session);
 
     logger.info("Sending from " + senderEmail + " " + senderName + " to " +recipientEmails + " sub " +subject + " " +message);
@@ -156,7 +157,11 @@ public class MailSupport {
     }
     msg.setSubject(subject);
     msg.setText(message);
-              msg.addHeader("Content-Type", "text/html");
+    msg.addHeader("Content-Type", "text/html");
+    InternetAddress internetAddress = new InternetAddress("gordon.vidaver@ll.mit.edu");  // TODO : change this!!!
+    Address[] replies = new Address[1];
+    replies[0] = internetAddress;
+    msg.setReplyTo(replies);
     return msg;
   }
 }
