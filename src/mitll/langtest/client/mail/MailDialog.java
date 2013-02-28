@@ -14,14 +14,19 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBoxBase;
+import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserManager;
 
 public class MailDialog {
+  public static final String TYPE_AN_EMAIL_ADDRESS = "Type an email address";
+  public static final String TYPE_AN_OPTIONAL_MESSAGE = "Type an optional message.";
+  public static final String TYPE_AN_OPTIONAL_REPLY_TO_EMAIL = "Type an optional reply-to email.";
   private final LangTestDatabaseAsync service;
   private final UserManager userManager;
 
@@ -46,13 +51,7 @@ public class MailDialog {
 
     Button closeButton = new Button("Cancel");
     Button sendButton = new Button("<b>Send</b>");
-    sendButton.addStyleName("sendButtonBlue");
-    closeButton.setEnabled(true);
-    closeButton.getElement().setId("closeButton");
-    FlowPanel hp = new FlowPanel();
-    hp.getElement().getStyle().setFloat(Style.Float.LEFT);
-    hp.add(sendButton);
-    hp.add(closeButton);
+    Panel hp = makeButtonRow(closeButton, sendButton);
     final VerticalPanel dialogVPanel = new VerticalPanel();
 
     FormPanel form = new FormPanel();
@@ -61,28 +60,16 @@ public class MailDialog {
     grid.setStyleName("body");
     int row = 0;
 
-    String href = /*GWT.getModuleBaseURL() +*/ "#" + token;
+    String href = "#" + token;
     System.out.println("href = " + href);
-    Anchor title = new Anchor("<h5>" + subject + "</h5>", true, href, "_blank");
+    Anchor title = new Anchor("<h2>" + subject + "</h2>", true, href, "_blank");
     title.setStyleName("bigLink");
     System.out.println("link element = " + title.getElement());
-    //  HTMLPanel htmlPanel = new HTMLPanel("h2",title.getHTML());
-//    title.setStyleName();
-    // HTML html = new HTML("<h2></h2>");
-    // html.getElement().appendChild(title.getElement());
     grid.setWidget(row++, 0, title);
     grid.getFlexCellFormatter().setColSpan(row, 0, 2);
     grid.setHTML(row++, 0, "<b>To</b>");
 
-    final TextArea toEmail = new TextArea();
-    toEmail.setCharacterWidth(50);
-    toEmail.setText("Type an email address");
-
-    toEmail.setStyleName("grayText");
-    addGrayStateKeyHandler(toEmail);
-
-    //  grid.setHTML(row++, 0, "<font size='-1' style='grayText'>Separate multiple addresses with commas</font>");
-//    grid.getFlexCellFormatter().setColSpan(row, 0, 2);
+    final TextArea toEmail = getEmailArea();
 
     VerticalPanel vp = new VerticalPanel();
     vp.add(toEmail);
@@ -92,86 +79,30 @@ public class MailDialog {
 
     grid.setHTML(row++, 0, "");
 
+    grid.setHTML(row++, 0, "<b>Reply To</b>");
+
+    final TextArea replyEmail = getEmailArea(TYPE_AN_OPTIONAL_REPLY_TO_EMAIL);
+
+    VerticalPanel vp2 = new VerticalPanel();
+    vp2.add(replyEmail);
+    vp2.add(new HTML("<font size='-1' style='grayText'>This is who would receive a reply to this email.</font>"));
+    grid.setWidget(row++, 0, vp2);
+
     grid.setHTML(row++, 0, "<b>Message</b>");
-    final TextArea messageBox = new TextArea();
-    messageBox.setCharacterWidth(50);
-    messageBox.setVisibleLines(3);
+    final TextArea messageBox = getMessageBox();
     grid.setWidget(row, 0, messageBox);
     grid.getFlexCellFormatter().setColSpan(row, 0, 2);
-    //String url = GWT.getHostPageBaseURL() + "#"+History.getToken();
 
-    messageBox.setText("Type an optional message.");
-    messageBox.setStyleName("grayText");
-    addGrayStateKeyHandler(messageBox);
-
-    messageBox.addKeyDownHandler(new KeyDownHandler() {
-      @Override
-      public void onKeyDown(KeyDownEvent event) {
-        if (messageBox.getStyleName().equals("grayText")) {
-          messageBox.setText("");
-          messageBox.setStyleName("normalText");
-        }
-      }
-    });
-
-    final VerticalPanel ackPanel = new VerticalPanel();
+    final Panel ackPanel = new FlowPanel();
     final HTML ack = new HTML("");
 
-    sendButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-      /*  if (fromEmail.getText().length() == 0 || !fromEmail.getText().contains("@")) {
-          Window.alert("Please enter valid from email.");
-        } else*/
-        String toEmailContents = toEmail.getText();
-        if (toEmailContents.equals("Type an email address")) {
-          toEmailContents = "";
-        }
-        final String realToEmail = toEmailContents;
-        String messageBoxText = messageBox.getText();
-        if (messageBoxText.equals("Type an optional message.")) messageBoxText = "";
-        if (toEmailContents.length() == 0 || !toEmailContents.contains("@")) {
-          Window.alert("Please enter valid to email.");
-        } else {
-          service.sendEmail(userManager.getUser(),
-            //      fromEmail.getText(),
-            toEmailContents,
-          /*triple.type + " " +*/ subject,
-            messageBoxText,
-            token,
-            linkTitle, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              Window.alert("Couldn't contact server.");
-              dialogBox.hide();
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-              int offsetHeight = dialogVPanel.getOffsetHeight();
-              dialogVPanel.setVisible(false);
-              ack.setHTML(getAck(realToEmail));
-              ackPanel.setHeight(offsetHeight + "px");
-              ackPanel.setVisible(true);
-            }
-          }
-          );
-        }
-      }
-    });
+    sendButton.addClickHandler(new SendClickHandler(toEmail, replyEmail, messageBox,
+      subject, token, dialogBox, dialogVPanel, ack, ackPanel));
 
     dialogVPanel.add(form);
     dialogVPanel.add(hp);
 
-    ackPanel.add(ack);
-    Button close = new Button("Close");
-    ackPanel.add(close);
-    close.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-      }
-    });
+    makeAckPanel(dialogBox, ackPanel, ack);
 
     ackPanel.setVisible(false);
 
@@ -189,6 +120,63 @@ public class MailDialog {
     dialogBox.center();
   }
 
+  private FlowPanel makeButtonRow(Button closeButton, Button sendButton) {
+    sendButton.addStyleName("sendButtonBlue");
+    closeButton.setEnabled(true);
+    closeButton.getElement().setId("closeButton");
+    FlowPanel hp = new FlowPanel();
+    hp.getElement().getStyle().setFloat(Style.Float.LEFT);
+    hp.add(sendButton);
+    hp.add(closeButton);
+    return hp;
+  }
+
+  private void makeAckPanel(final DialogBox dialogBox, Panel ackPanel, HTML ack) {
+    ackPanel.add(ack);
+    Button close = new Button("Close");
+    ackPanel.add(new HTML("<br></br>"));
+    ackPanel.add(close);
+    close.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        dialogBox.hide();
+      }
+    });
+  }
+
+  private void showAck(Panel dialogVPanel, HTML ack, String realToEmail, Panel ackPanel) {
+    int offsetHeight = dialogVPanel.getOffsetHeight();
+    dialogVPanel.setVisible(false);
+    ack.setHTML(getAck(realToEmail));
+    ackPanel.setHeight(offsetHeight + "px");
+    ackPanel.setVisible(true);
+  }
+
+  private TextArea getMessageBox() {
+    final TextArea messageBox = new TextArea();
+    messageBox.setCharacterWidth(50);
+    messageBox.setVisibleLines(3);
+    messageBox.setText(TYPE_AN_OPTIONAL_MESSAGE);
+    messageBox.setStyleName("grayText");
+    addGrayStateKeyHandler(messageBox);
+    return messageBox;
+  }
+
+  private TextArea getEmailArea() {
+    String initialPrompt = TYPE_AN_EMAIL_ADDRESS;
+    return getEmailArea(initialPrompt);
+  }
+
+  private TextArea getEmailArea(String initialPrompt) {
+    final TextArea toEmail = new TextArea();
+    toEmail.setCharacterWidth(50);
+    toEmail.setText(initialPrompt);
+
+    toEmail.setStyleName("grayText");
+    addGrayStateKeyHandler(toEmail);
+    return toEmail;
+  }
+
   private String getAck(String destEmail) {
     return "<b>Thank You!</b><br></br>You've sent this lesson to <b>" + destEmail + "</b>&nbsp;";
   }
@@ -203,6 +191,76 @@ public class MailDialog {
         }
       }
     });
+  }
+
+  private class SendClickHandler implements ClickHandler {
+    private final ValueBoxBase toEmail;
+    private final ValueBoxBase replyEmail;
+    private final ValueBoxBase messageBox;
+    private final String subject;
+    private final String token;
+    //private final String linkTitle;
+    private final DialogBox dialogBox;
+    private final Panel dialogVPanel;
+    private final HTML ack;
+    private final Panel ackPanel;
+
+    public SendClickHandler(ValueBoxBase toEmail, ValueBoxBase replyEmail, ValueBoxBase messageBox,
+                            String subject, String token,
+                          //  String linkTitle,
+                            DialogBox dialogBox, Panel dialogVPanel,
+                            HTML ack, Panel ackPanel) {
+      this.toEmail = toEmail;
+      this.replyEmail = replyEmail;
+      this.messageBox = messageBox;
+      this.subject = subject;
+      this.token = token;
+    //  this.linkTitle = linkTitle;
+      this.dialogBox = dialogBox;
+      this.dialogVPanel = dialogVPanel;
+      this.ack = ack;
+      this.ackPanel = ackPanel;
+    }
+
+    @Override
+    public void onClick(ClickEvent event) {
+    /*  if (fromEmail.getText().length() == 0 || !fromEmail.getText().contains("@")) {
+        Window.alert("Please enter valid from email.");
+      } else*/
+      String toEmailContents = toEmail.getText();
+      if (toEmailContents.equals(TYPE_AN_EMAIL_ADDRESS)) {
+        toEmailContents = "";
+      }
+      final String realToEmail = toEmailContents;
+      String messageBoxText = messageBox.getText();
+      String replyToText = replyEmail.getText();
+      if (messageBoxText.equals(TYPE_AN_OPTIONAL_MESSAGE)) messageBoxText = "";
+      if (replyToText.equals(TYPE_AN_OPTIONAL_REPLY_TO_EMAIL)) replyToText = "";
+      if (toEmailContents.length() == 0 || !toEmailContents.contains("@")) {
+        Window.alert("Please enter valid to email.");
+      } else {
+        service.sendEmail(
+          userManager.getUser(),
+          toEmailContents,
+          replyToText,
+          subject,
+          messageBoxText,
+          token,
+          new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            Window.alert("Couldn't contact server.");
+            dialogBox.hide();
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+            showAck(dialogVPanel, ack, realToEmail, ackPanel);
+          }
+        }
+        );
+      }
+    }
   }
 
 
