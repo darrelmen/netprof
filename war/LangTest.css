@@ -22,6 +22,30 @@ h1 {
 
 }
 
+.bigLink {
+    font-size: 1em;
+    font-weight: bold;
+    text-align: center;
+    color: #668CD9;
+}
+
+.grayText {
+    color: #d3d3d3;
+}
+
+.normalText {
+    color: #333333;
+}
+
+.sendButtonBlue {
+    background-color: #6192bb;
+    color: #FFFFFF;
+}
+
+.formRow {
+    border-bottom: 1px solid #FFFFFF;
+}
+
 .center {
     text-align: center;
 }
