@@ -84,26 +84,27 @@ public class MailSupport {
   }
 
   /**
-   * @see LangTestDatabaseImpl#sendEmail(int, String, String, String, String, String)
+   * @see LangTestDatabaseImpl#sendEmail
    * @param senderName
    * @param senderEmail
    * @param recipientEmails
    * @param subject
    * @param message
    */
-  public void normalFullEmail(
+  public void normalFullEmail(String senderName,
+                              String senderEmail,
+                              String replyToEmail,
+                              List<String> recipientEmails,
 
-                               String senderName,
-                               String senderEmail,
-                               List<String> recipientEmails,
-
-                               String subject, String message) {
+                              String subject, String message) {
     try {
       Properties props = new Properties();
       props.put("mail.smtp.host", "localhost");
       props.put("mail.debug", ""+debugEmail);
       Session session = Session.getDefaultInstance(props, null);
-      Message msg = makeHTMLMessage(session, senderName, senderEmail, recipientEmails, subject, message);
+      Message msg = makeHTMLMessage(session,
+        senderName, senderEmail, replyToEmail, recipientEmails,
+        subject, message);
       Transport.send(msg);
     } catch (Exception e) {
       logger.error("Couldn't send email to " +recipientEmails+". Got " +e,e);
@@ -144,6 +145,7 @@ public class MailSupport {
   private Message makeHTMLMessage(Session session,
                                   String senderName,
                                   String senderEmail,
+                                  String replyToEmail,
                                   List<String> recipientEmails,
                                   String subject, String message) throws Exception {
     Message msg = new MimeMessage(session);
@@ -158,7 +160,8 @@ public class MailSupport {
     msg.setSubject(subject);
     msg.setText(message);
     msg.addHeader("Content-Type", "text/html");
-    InternetAddress internetAddress = new InternetAddress("gordon.vidaver@ll.mit.edu");  // TODO : change this!!!
+   // String replyToEmail = "gordon.vidaver@ll.mit.edu";
+    InternetAddress internetAddress = new InternetAddress(replyToEmail);
     Address[] replies = new Address[1];
     replies[0] = internetAddress;
     msg.setReplyTo(replies);
