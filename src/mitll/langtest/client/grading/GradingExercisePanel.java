@@ -31,6 +31,7 @@ public class GradingExercisePanel extends ExercisePanel {
 
   private static final int BIG_ONE_QUESTION_PAGE_SIZE = 8;
   private static final int BIG_TWO_QUESTION_PAGE_SIZE = BIG_ONE_QUESTION_PAGE_SIZE/2;
+  private static final List<Boolean> BOOLEANS = Arrays.asList(true, false);
   private UserFeedback userFeedback;
 
   /**
@@ -101,7 +102,7 @@ public class GradingExercisePanel extends ExercisePanel {
    * @return
    */
   @Override
-  protected Widget getAnswerWidget(Exercise exercise, final LangTestDatabaseAsync service,
+  protected Widget getAnswerWidget(final Exercise exercise, final LangTestDatabaseAsync service,
                                    final ExerciseController controller, final int index) {
     final VerticalPanel vp = new VerticalPanel();
     final int n = exercise.getNumQuestions();
@@ -111,20 +112,22 @@ public class GradingExercisePanel extends ExercisePanel {
       public void onFailure(Throwable caught) {}
 
       public void onSuccess(ResultsAndGrades resultsAndGrades) {
-        List<Boolean> spoken = Arrays.asList(true, false);
-        List<Boolean> foreignOrEnglish = Arrays.asList(true, false);
+        System.out.println("getResultsForExercise (success) : " + exercise.getID() + " : " + resultsAndGrades);
+
         boolean anyAnswers = false;
         int count = countDistinctTypes(resultsAndGrades);
         boolean bigPage = count == 1 || englishOnly || controller.getNumGradesToCollect() > 1;
-        for (boolean isSpoken : spoken) {
+        for (boolean isSpoken : BOOLEANS) {
           Map<Boolean, List<Result>> langToResult = resultsAndGrades.spokenToLangToResult.get(isSpoken);
           if (langToResult != null) { // there might not be any written types
-            for (boolean isForeign : foreignOrEnglish) {
+            for (boolean isForeign : BOOLEANS) {
               if (englishOnly && isForeign) continue; // skip non-english
               List<Result> results = langToResult.get(isForeign);
               if (results != null) {
                 anyAnswers = true;
                 String prompt = getPrompt(isSpoken, isForeign, outer);
+                System.out.println("\tgetResultsForExercise add answer group for results (index = " + index+ ")" + results);
+
                 vp.add(addAnswerGroup(resultsAndGrades.grades, results, bigPage, prompt, outer, service, n, index));
               }
             }
@@ -142,6 +145,18 @@ public class GradingExercisePanel extends ExercisePanel {
     return isSpoken ? outer.getSpokenPrompt(isEnglish) : outer.getWrittenPrompt(isEnglish);
   }
 
+  /**
+   * @see #getAnswerWidget
+   * @param grades
+   * @param results
+   * @param bigPage
+   * @param prompt
+   * @param outer
+   * @param service
+   * @param n
+   * @param index
+   * @return
+   */
   private Widget addAnswerGroup(Collection<Grade> grades,
                                 List<Result> results, boolean bigPage, String prompt,
                                 GradingExercisePanel outer, LangTestDatabaseAsync service, int n, int index) {
@@ -162,17 +177,16 @@ public class GradingExercisePanel extends ExercisePanel {
   /**
    * How many distinct types there are - combinations of spoken/written & flq/english q.
    *
+   * @see #getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @param resultsAndGrades
    * @return 1-3
    */
   private int countDistinctTypes(ResultsAndGrades resultsAndGrades) {
-    List<Boolean> spoken = Arrays.asList(true, false);
-    List<Boolean> foreignOrEnglish = Arrays.asList(true, false);
     int count = 0;
-    for (boolean s : spoken) {
+    for (boolean s : BOOLEANS) {
       Map<Boolean, List<Result>> langToResult = resultsAndGrades.spokenToLangToResult.get(s);
       if (langToResult != null) { // there might not be any written types
-        for (boolean l : foreignOrEnglish) {
+        for (boolean l : BOOLEANS) {
           List<Result> results = langToResult.get(l);
           if (results != null) {
              count++;
@@ -199,7 +213,7 @@ public class GradingExercisePanel extends ExercisePanel {
   private Widget showResults(Collection<Result> results, Collection<Grade> grades,
                              LangTestDatabaseAsync service, GradingExercisePanel outer,
                              boolean moreThanOneQuestion, int index, int pageSize, int twoQPageSize, int grader) {
-    ResultManager rm = new GradingResultManager(service, userFeedback);
+    ResultManager rm = new GradingResultManager(service, userFeedback, false);
     rm.setFeedback(outer);
     rm.setPageSize(pageSize);
     if (moreThanOneQuestion) {
