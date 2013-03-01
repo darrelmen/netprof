@@ -162,7 +162,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   private String getHistoryTokenForLink(String columnText) {
-    return "#"+getHistoryToken(columnText);
+    return "#item="+columnText;
   }
 
   protected String getHistoryToken(String id) { return "item=" +id; }
