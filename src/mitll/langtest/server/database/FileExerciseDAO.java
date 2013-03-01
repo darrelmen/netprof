@@ -49,28 +49,33 @@ public class FileExerciseDAO implements ExerciseDAO {
   private List<Exercise> exercises;
   private final String mediaDir;
   private final boolean isUrdu;
+  private final boolean showSections;
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
-  private Map<String,Map<String,Set<String>>> typeToSectionToSubSection = new HashMap<String, Map<String,Set<String>>>();
+  // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
+  private Map<String,Map<String,Map<String,Set<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String,Map<String,Set<String>>>>();
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
    * @param mediaDir
    * @param isUrdu
    */
-  public FileExerciseDAO(String mediaDir, boolean isUrdu) {
+  public FileExerciseDAO(String mediaDir, boolean isUrdu, boolean showSections) {
     this.mediaDir = mediaDir;
     this.isUrdu = isUrdu;
+    this.showSections = showSections;
     //logger.debug("is urdu " + isUrdu);
-/*    Map<String, Lesson> value = new HashMap<String, Lesson>();
-    typeToUnitToLesson.put("unit", value);*/
   }
 
-  public Collection<String> getSubsectionsForTypeAndSection(String type, String section) {
-    Map<String, Set<String>> sectionToSub = typeToSectionToSubSection.get(type);
-    if (sectionToSub == null) return Collections.emptyList();
-    Set<String> strings = sectionToSub.get(section);
-    if (strings == null) return Collections.emptyList();
-    return new ArrayList<String>(strings);
+  public Map<String,List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
+    Map<String, Map<String, Set<String>>> sectionToSub = typeToSectionToTypeToSections.get(type);
+    if (sectionToSub == null) return Collections.emptyMap();
+    Map<String, Set<String>> typeToSections = sectionToSub.get(section);
+    if (typeToSections == null) return Collections.emptyMap();
+    Map<String,List<String>> retval = new HashMap<String, List<String>>();
+    for (Map.Entry<String,Set<String>> pair : typeToSections.entrySet()) {
+      retval.put(pair.getKey(),new ArrayList<String>(pair.getValue()));
+    }
+    return retval;
   }
 
     @Override
@@ -200,22 +205,9 @@ public class FileExerciseDAO implements ExerciseDAO {
                 getSimpleExerciseForLine(line2) :
                 getExerciseForLine(line2);
           }
-
-          // testing unit/chapter/week stuff
-          Map<String, Lesson> unit = getSectionToLesson("unit");
-          Set<String> subSections;
-          if (count % 2 == 0) {
-            subSections = addExerciseToLesson(exercise, unit, "unit", "even");
+          if (showSections) {
+            addSectionTest(count, exercise);
           }
-          else {
-            subSections = addExerciseToLesson(exercise, unit, "unit", "odd");
-          }
-
-          String id = "" +count;
-          Map<String, Lesson> chapter = getSectionToLesson("chapter");
-          String chapterName = "Chapter " + id.substring(id.length() - 1);
-          Set<String> chapter1 = addExerciseToLesson(exercise, chapter, "chapter", chapterName);
-          subSections.add(chapterName);
 
           // if (count < 10) logger.info("Got " + exercise);
           exercises.add(exercise);
@@ -243,27 +235,94 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
   }
 
+  private void addSectionTest(int count, Exercise exercise) {
+    // testing unit/chapter/week stuff
+    String unitType = "unit";
+    String chapterType = "chapter";
+    String weekType = "week";
+    String unitSection = (count % 2 == 0) ? "even" : "odd";
+    List<Pair> pairs = new ArrayList<Pair>();
+    pairs.add(addExerciseToLesson(exercise, unitType, unitSection));
+
+    String id = "" +count;
+    //Map<String, Lesson> chapter = getSectionToLesson(chapterType);
+    String digit = id.substring(id.length() - 1);
+    String chapterName = "Chapter " + digit;
+          /*Set<String> chapter1 = */
+    pairs.add(addExerciseToLesson(exercise, chapterType, chapterName));
+    // subSections.add(chapterName);
+/*          pairs.add(addAssociation(unitType,unitSection,chapterType,chapterName));
+          addAssociation(chapterType,chapterName,unitType,unitSection);*/
+
+    Integer chapterID = Integer.parseInt(digit);
+    if (chapterID < 3) {
+      pairs.add(addExerciseToLesson(exercise, weekType, "Week 1"));
+/*
+      addAssociation(chapterType, chapterName, unitType, unitSection);
+      addAssociation(unitType,unitSection,chapterType,chapterName);
+      addAssociation(weekType,"Week 1",chapterType,chapterName);
+      addAssociation(weekType,"Week 1",chapterType,chapterName);
+*/
+
+    } else if (chapterID < 6) {
+      pairs.add(addExerciseToLesson(exercise, weekType, "Week 2"));
+    }
+    addAssociations(pairs);
+  }
+
   private Map<String, Lesson> getSectionToLesson( String section) {
     Map<String, Lesson> unit = typeToUnitToLesson.get(section);
     if (unit == null) typeToUnitToLesson.put(section, unit = new HashMap<String, Lesson>());
     return unit;
   }
 
-  private Set<String> addExerciseToLesson(Exercise exercise, Map<String, Lesson> unit, String type, String unitName) {
+  private Pair addExerciseToLesson(Exercise exercise, String type, String unitName) {
+
+    Map<String, Lesson> unit = getSectionToLesson(type);
+
     Lesson even = unit.get(unitName);
     if (even == null) unit.put(unitName, even = new Lesson(unitName, "", ""));
     even.addExercise(exercise);
 
-    Map<String, Set<String>> sectionToSubSection = typeToSectionToSubSection.get(type);
-    if (sectionToSubSection == null) {
-      typeToSectionToSubSection.put(type, sectionToSubSection = new HashMap<String, Set<String>>());
+   return new Pair(type,unitName);
+  }
+
+  private static class Pair {
+    String type; String section;
+
+    public Pair(String type, String section) {
+      this.type = type;
+      this.section = section;
     }
-    Set<String> subsections = sectionToSubSection.get(unitName);
+  }
+
+  private void addAssociations(List<Pair> pairs) {
+    for (Pair p : pairs) {
+      List<Pair> others = new ArrayList<Pair>(pairs);
+      others.remove(p);
+      for (Pair o : others) {
+        addAssociation(p, o);
+       // addAssociation(o, p);
+      }
+    }
+  }
+
+  private void addAssociation(Pair first, Pair second) {
+    addAssociation(first.type, first.section, second.type, second.section);
+  }
+
+  private void addAssociation(String type, String unitName, String otherType, String otherSection) {
+    Map<String, Map<String, Set<String>>> sectionToTypeToSections = typeToSectionToTypeToSections.get(type);
+    if (sectionToTypeToSections == null) {
+      typeToSectionToTypeToSections.put(type, sectionToTypeToSections = new HashMap<String, Map<String, Set<String>>>());
+    }
+    Map<String, Set<String>> subsections = sectionToTypeToSections.get(unitName);
     if (subsections == null) {
-      //  ArrayList<String> subsections = new ArrayList<String>();
-      sectionToSubSection.put(unitName, subsections = new HashSet<String>());
+      sectionToTypeToSections.put(unitName, subsections = new HashMap<String, Set<String>>());
     }
-    return subsections;
+    Set<String> sections = subsections.get(otherType);
+    if (sections == null) subsections.put(otherType, sections = new HashSet<String>());
+    sections.add(otherSection);
   }
 
   private Exercise getWordListExercise(String arabic, String id) {
