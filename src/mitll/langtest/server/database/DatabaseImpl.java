@@ -35,7 +35,7 @@ public class DatabaseImpl implements Database {
   private final ResultDAO resultDAO = new ResultDAO(this);
   public final AnswerDAO answerDAO = new AnswerDAO(this);
   private final GradeDAO gradeDAO = new GradeDAO(this);
-  private final GraderDAO graderDAO = new GraderDAO(this);
+ // private final GraderDAO graderDAO = new GraderDAO(this);
   private final SiteDAO siteDAO = new SiteDAO(this, userDAO);
 
   private DatabaseConnection connection = null;
@@ -48,17 +48,20 @@ public class DatabaseImpl implements Database {
   private String mediaDir;
   private boolean isUrdu;
   private boolean useFile;
+  private final boolean showSections;
 
   /**
+   * Just for testing
    * @param configDir
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    */
   public DatabaseImpl(String configDir) {
-    this(configDir, "vlr-parle");
+    this(configDir, "vlr-parle", false);
   }
 
-  public DatabaseImpl(String configDir, String dbName) {
+  public DatabaseImpl(String configDir, String dbName, boolean showSections) {
     connection = new H2Connection(configDir, dbName);
+    this.showSections = showSections;
     try {
       boolean open = getConnection() != null;
       if (!open) {
@@ -96,7 +99,7 @@ public class DatabaseImpl implements Database {
     try {
       // gradeDAO.dropGrades();
       gradeDAO.createGradesTable(getConnection());
-      graderDAO.createGraderTable(getConnection());
+      //graderDAO.createGraderTable(getConnection());
       //userDAO.dropUserTable(this);
 
       userDAO.createUserTable(this);
@@ -125,7 +128,7 @@ public class DatabaseImpl implements Database {
    * @return
    */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    return useFile ? new FileExerciseDAO(mediaDir, isUrdu) : new SQLExerciseDAO(this, mediaDir);
+    return useFile ? new FileExerciseDAO(mediaDir, isUrdu, showSections) : new SQLExerciseDAO(this, mediaDir);
   }
 
   /**
@@ -150,12 +153,12 @@ public class DatabaseImpl implements Database {
 
   public Map<String, Collection<String>> getTypeToSection() {
     getExercises();
-/*    boolean isExcel = lessonPlanFile.endsWith(".xlsx");
-    makeDAO(useFile, lessonPlanFile, isExcel);*/
     return exerciseDAO.getTypeToSections();
   }
 
-  public Collection<String> getSubsectionsForTypeAndSection(String type, String section) { return exerciseDAO.getSubsectionsForTypeAndSection(type, section); }
+  public Map<String, List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
+    return exerciseDAO.getTypeToSectionsForTypeAndSection(type, section);
+  }
 
   public Collection<Exercise> getExercisesForSection(String type, String section) {
     return exerciseDAO.getExercisesForSection(type, section);
@@ -833,19 +836,6 @@ public class DatabaseImpl implements Database {
     gradeDAO.changeGrade(toChange);
   }
 
-/*  public void addGrader(String login) {
-    graderDAO.addGrader(login);
-  }*/
-
-  /**
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#graderExists(String)
-   * @param login
-   * @return
-   */
-/*  public boolean graderExists(String login) {
-    return graderDAO.graderExists(login);
-  }*/
-
   public int userExists(String login) {
     return userDAO.userExists(login);
   }
@@ -909,7 +899,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * Split exid->count by gender.
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise(boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise
    * @return
    */
   public Map<String,List<Integer>> getResultPerExercise() { return monitoringSupport.getResultPerExercise(getExercises()); }
@@ -930,6 +920,8 @@ public class DatabaseImpl implements Database {
   }
 
   public void closeConnection(Connection connection) throws SQLException {}
+
+/*
   private void logMemory() {
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory();
@@ -937,95 +929,5 @@ public class DatabaseImpl implements Database {
     long max = rt.maxMemory();
     logger.debug("heap info free " + free / KB + "K used " + used / KB + "K max " + max / KB + "K total " + rt.totalMemory()/KB + " K ");
   }
-
-  public static void main(String[] arg) {
-/*    DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\mt_repo\\jdewitt\\pilot\\vlr-parle");
-    langTestDatabase.mediaDir = "C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\autocrt\\";
-     langTestDatabase.getExercises(false);
-     langTestDatabase.getClassifier();
-    double score = langTestDatabase.getScoreForExercise("bc-R10-k227",1,"bueller");
-    System.out.println("Score was " + score);
-    if (true) {
-*//*      List<ExerciseExport> exerciseNames = langTestDatabase.getExport(true, false);
-
-      System.out.println("names " + exerciseNames.size() + " e.g. " + exerciseNames.get(0));
-      for (ExerciseExport ee : exerciseNames) {
-        System.out.println("ee " + ee);
-      }*//*
-    } else {
-      //List<Exercise> exercises = langTestDatabase.getRandomBalancedList();
-
-    }*/
-
-    DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\DLITest\\","farsi2");
-    //langTestDatabase.setInstallPath("C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu","C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu\\5000-no-english.unvow.farsi.txt","",false);
-/*
-    List<Session> sessions = langTestDatabase.getSessions();
-    long total = 0;
-    for (Session s : sessions) {
-      System.out.println(s);
-      total += s.numAnswers;
-    }
-    System.out.println("total " + total);*/
-    System.gc();
-
-    langTestDatabase.logMemory();
-
-    for (int i = 0; i < 10000; i++) {
-      String whole = makeString();
-      langTestDatabase.answerDAO.addAnswer(langTestDatabase, 12, whole.substring(0,10), whole.substring(10,20), 0, "", "/path/to/file",
-          true, true, true, Result.AUDIO_TYPE_REGULAR, 5000);
-      if (i % 100 == 0) System.gc();
-      if (i % 100 == 0) langTestDatabase.logMemory();
-    }
-     System.gc();
-    langTestDatabase.logMemory();
-    try {
-      Thread.sleep(1000000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-    // langTestDatabase.
-    /*Map<Exercise, Integer> idToCount = langTestDatabase.getResultIdToCount(true,true);
-    writeMap(idToCount, "farsiMaleCounts.csv");
-    Map<Exercise, Integer> idToCount2 = langTestDatabase.getResultIdToCount(true,false);
-    writeMap(idToCount2,"farsiFemaleCounts.csv");
-
-    langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\DLITest\\","urdu");
-    langTestDatabase.setInstallPath("","C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu\\urdu-3684-no-english.txt","",false);
-    idToCount = langTestDatabase.getResultIdToCount(true,true);
-    writeMap(idToCount,"urduMaleCounts.csv");
-    idToCount2 = langTestDatabase.getResultIdToCount(true,false);
-    writeMap(idToCount2,"urduFemaleCounts.csv");
 */
-//    langTestDatabase.getUserToResultCount();
-   // System.out.println("map " + langTestDatabase.getResultCountToCount());
-  }
-
-  private static String makeString() {
-    StringBuilder b = new StringBuilder(10000000);
-    char[] array = new char[10];
-    for (int i = 0; i < 10; i++) {
-      String s = "" + i;
-      array[i] = s.charAt(0);
-
-    }
-    for (int i = 0; i < 10000000; i++) {
-      char str = array[i%10];
-      b.append(str);
-    }
-    //System.err.print("string len " + b.length());
-    return b.toString();
-  }
-
-/*  private static void writeMap(Map<Exercise, Integer> idToCount2, String fileName) {
-    try {
-      Writer w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), "UTF-8"));
-      for (Map.Entry<Exercise, Integer> pair : idToCount2.entrySet())
-        w.write(pair.getKey().getID() + "," + pair.getValue() + "," + pair.getKey().getTooltip().trim()+ "\n");
-      w.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }*/
 }
