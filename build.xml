@@ -86,7 +86,7 @@
     </target>
 
     <target depends="build" name="warLevantine">
-        <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**,config/first/**,config/autocrt/**,config/dari/**,config/pilot/**,config/msa/**,config/pashto/**,config/urdu/**,scoring/models.dli-dari/**,scoring/models.wsj01-16/**,scoring/models.dli-ara/**,scoring/models.dli-ara.old/**" >
+        <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**,config/first/**,config/autocrt/**,config/dari/**,config/pilot/**,config/msa/**,config/pashto/**,config/urdu/**,scoring/models.dli-dari/**,scoring/models.wsj01-16/**,scoring/models.dli-ara/**,scoring/models.dli-ara.old/**,scoring/models.wsj01-16/**,scoring/models.dli-pashto/**,scoring/models.dli-ara/**" >
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
             </manifest>
@@ -94,7 +94,7 @@
     </target>
 
     <target depends="build" name="warDari">
-        <jar destfile="npDari.war" basedir="war" excludes="answers/**,audioimages/**,config/autoCRT/**,config/pashto/**,config/egyptian/**,config/english/**,config/farsi/**,config/farsi2/**,config/first/**,config/levantine/**,config/msa/**,config/pilot/**,config/sudanese/**,config/urdu/**,scoring/tmp/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,scoring/models.dli-ara/**,scoring/models.dli-pashto/**">
+        <jar destfile="npDari.war" basedir="war" excludes="answers/**,audioimages/**,config/autoCRT/**,config/pashto/**,config/egyptian/**,config/english/**,config/farsi/**,config/farsi2/**,config/first/**,config/levantine/**,config/msa/**,config/pilot/**,config/sudanese/**,config/urdu/**,config/autoCRT/**,scoring/tmp/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,scoring/models.dli-ara/**,scoring/models.dli-pashto/**">
         </jar>
     </target>
 
