@@ -153,7 +153,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
 
     userManager = new UserManager(this,service, isCollectAudio(), false);
-    resultManager = new ResultManager(service, this);
+    resultManager = new ResultManager(service, this, props.getNameForAnswer());
     monitoringManager = new MonitoringManager(service, props);
     boolean usualLayout = props.getExercise_title() == null;
     final DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
