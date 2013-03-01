@@ -7,6 +7,7 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.ResultManager;
@@ -33,15 +34,21 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class GradingResultManager extends ResultManager {
+  private static final String ENGLISH_ONLY = "english-only";
+  private static final String GRADE_TYPE_ANY = "any";
+
   private static final List<String> GRADING_OPTIONS = Arrays.asList(UNGRADED, "1", "2", "3", "4", "5", SKIP);
+  private final boolean englishOnlyMode;
 
   /**
    * @see mitll.langtest.client.grading.GradingExercisePanel#showResults
    * @param s
    * @param feedback
+   * @param englishOnlyMode
    */
-  public GradingResultManager(LangTestDatabaseAsync s, UserFeedback feedback) {
-    super(s,feedback);
+  public GradingResultManager(LangTestDatabaseAsync s, UserFeedback feedback, boolean englishOnlyMode) {
+    super(s,feedback, "Answer");
+    this.englishOnlyMode = englishOnlyMode;
   }
 
   /**
@@ -108,7 +115,7 @@ public class GradingResultManager extends ResultManager {
         int grade = getGrade(value);
         Grade choice = resultToGrade.get(result.uniqueID);
         if (choice == null) {
-          String gradeType = gradingColumnIndex == 0 ? "any" : "english-only";
+          String gradeType = englishOnlyMode ? gradingColumnIndex == 0 ? GRADE_TYPE_ANY : ENGLISH_ONLY : GRADE_TYPE_ANY;
           choice = new Grade(result.uniqueID,grade,grader,gradeType);
           System.out.println("getGradingColumn making new grade " + choice + " for " + result);
           addGrade(result.id, choice, result.uniqueID, resultToGrade);
@@ -140,7 +147,7 @@ public class GradingResultManager extends ResultManager {
       try {
         grade = Integer.parseInt(value);
       } catch (NumberFormatException e) {
-        System.err.println("setFieldUpdater : couldn't parse " + value +"??");
+        System.err.println("setFieldUpdater : couldn't parse " + value + "??");
       }
     }
     return grade;
@@ -148,6 +155,7 @@ public class GradingResultManager extends ResultManager {
 
   /**
    * Make a map of result id -> grade to display for that result
+   * @see #getGradingColumn(java.util.Collection, int, int, boolean)
    * @param grades
    * @param gradingColumnIndex controls whether to show "any" or "english-only" grades.
    * @return
@@ -160,38 +168,49 @@ public class GradingResultManager extends ResultManager {
 
     for (Map.Entry<Integer, List<Grade>> idToGrades : resultToGrade.entrySet()) {
       Integer resultID = idToGrades.getKey();
-      List<Grade> gradesForResult = idToGrades.getValue();
-      Collections.sort(gradesForResult, new Comparator<Grade>() {
-        public int compare(Grade o1, Grade o2) {
-          return o1.id < o2.id ? -1 : o1.id > o2.id ? +1 : 0;
-        }
-      });
-      if (gradesForResult.size() == 2) {
+      List<Grade> gradesForResult = getGradesSortedById(idToGrades);
+      if (!englishOnlyMode) {
         if (gradingColumnIndex < gradesForResult.size()) {
           Grade choice = gradesForResult.get(gradingColumnIndex);
-          if (choice == null) {
-            System.err.println("no grade at index " + gradingColumnIndex + "?");
-          } else {
-            resultToGradeForColumn.put(resultID, choice);
-          }
+          resultToGradeForColumn.put(resultID, choice);
         }
-      } else if (!gradesForResult.isEmpty()) {
-        Grade choice = gradesForResult.get(0);
-        if (choice == null) {
-          System.err.println("no grade at index " + 0 + "?");
-        } else {
-          if (gradingColumnIndex == 1) {
-            if (choice.gradeType.equals("english-only")) {
+      } else {
+        if (gradesForResult.size() == 2) {
+          if (gradingColumnIndex < gradesForResult.size()) {
+            Grade choice = gradesForResult.get(gradingColumnIndex);
+            if (choice == null) {
+              System.err.println("no grade at index " + gradingColumnIndex + "?");
+            } else {
               resultToGradeForColumn.put(resultID, choice);
             }
           }
-          else {
-            resultToGradeForColumn.put(resultID, choice);
+        } else if (!gradesForResult.isEmpty()) {
+          Grade choice = gradesForResult.get(0);
+          if (choice == null) {
+            System.err.println("no grade at index " + 0 + "?");
+          } else {
+            if (gradingColumnIndex == 1) {
+              if (choice.gradeType.equals(ENGLISH_ONLY)) {
+                resultToGradeForColumn.put(resultID, choice);
+              }
+            } else {
+              resultToGradeForColumn.put(resultID, choice);
+            }
           }
         }
       }
     }
     return resultToGradeForColumn;
+  }
+
+  private List<Grade> getGradesSortedById(Map.Entry<Integer, List<Grade>> idToGrades) {
+    List<Grade> gradesForResult = idToGrades.getValue();
+    Collections.sort(gradesForResult, new Comparator<Grade>() {
+      public int compare(Grade o1, Grade o2) {
+        return o1.id < o2.id ? -1 : o1.id > o2.id ? +1 : 0;
+      }
+    });
+    return gradesForResult;
   }
 
   /**
@@ -201,23 +220,25 @@ public class GradingResultManager extends ResultManager {
    * @return
    */
   private Map<Integer, List<Grade>> getResultToGradeList(Collection<Grade> grades, int gradingColumnIndex) {
-    final Map<Integer,List<Grade>> resultToGrade = new HashMap<Integer, List<Grade>>();
+    final Map<Integer, List<Grade>> resultToGrade = new HashMap<Integer, List<Grade>>();
     for (Grade g : grades) {
       List<Grade> gradesForResult = resultToGrade.get(g.resultID);
       if (gradesForResult == null) {
         resultToGrade.put(g.resultID, gradesForResult = new ArrayList<Grade>());
       }
 
-      //System.out.println("Col " + gradingColumnIndex + " Examining " + g);
-      String gradeType = g.gradeType;
-      if (gradingColumnIndex == 0 && (gradeType.equals("any") || gradeType.length() == 0)) { // for first column, don't include "english-only"
+      if (!englishOnlyMode) {
         gradesForResult.add(g);
-      }
-      else if (gradingColumnIndex == 1 && (gradeType.equals("english-only") || gradeType.length() == 0)) { // for second column, don't include "any"
-        gradesForResult.add(g);
-      }
-      else {
-        //System.out.println("\tCol " + gradingColumnIndex + " Skipping " + g);
+      } else {
+        //System.out.println("Col " + gradingColumnIndex + " Examining " + g);
+        String gradeType = g.gradeType;
+        if (gradingColumnIndex == 0 && (gradeType.equals(GRADE_TYPE_ANY) || gradeType.length() == 0)) { // for first column, don't include "english-only"
+          gradesForResult.add(g);
+        } else if (gradingColumnIndex == 1 && (gradeType.equals(ENGLISH_ONLY) || gradeType.length() == 0)) { // for second column, don't include "any"
+          gradesForResult.add(g);
+        } else {
+          //System.out.println("\tCol " + gradingColumnIndex + " Skipping " + g);
+        }
       }
     }
     return resultToGrade;
@@ -225,21 +246,27 @@ public class GradingResultManager extends ResultManager {
 
   /**
    * Add a new grade -- note that the Grade object that is sent doesn't have a unique id until the response returns.
+   * @see #getGradingColumn(java.util.Collection, int, int, boolean)
    * @param exerciseID
    * @param toAdd
    * @param resultID
    * @param resultToGrade
    */
-  private void addGrade(String exerciseID, final Grade toAdd,final int resultID ,final Map<Integer, Grade> resultToGrade) {
-    System.out.println("addGrade grade " + toAdd + " at " + new Date() + " result->grade has " + resultToGrade.size());
+  private void addGrade(String exerciseID, final Grade toAdd, final int resultID, final Map<Integer, Grade> resultToGrade) {
+    System.out.println("addGrade for exercise " + exerciseID + " : grade " + toAdd + " at " + new Date() +
+      " result->grade has " + resultToGrade.size());
 
     service.addGrade(exerciseID, toAdd, new AsyncCallback<CountAndGradeID>() {
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+        Window.alert("Couldn't contact server.");
+      }
+
       public void onSuccess(CountAndGradeID result) {
         feedback.showStatus("Now " + result.count + " graded answers.");
         toAdd.id = (int) result.gradeID;
         resultToGrade.put(resultID, toAdd);
-        System.out.println("grade added at " + new Date() + " adding " + resultID + " -> " + toAdd + " now " + resultToGrade.size());
+        System.out.println("\tgrade added at " + new Date() + " adding result " + resultID + " -> grade " + toAdd +
+          ", now " + resultToGrade.size() + " grades for result");
       }
 
       /*
@@ -256,12 +283,15 @@ public class GradingResultManager extends ResultManager {
    * @param toChange
    */
   private void changeGrade(final Grade toChange) {
-    service.changeGrade(toChange,new AsyncCallback<Void>() {
-      public void onFailure(Throwable caught) {}
+    service.changeGrade(toChange, new AsyncCallback<Void>() {
+      public void onFailure(Throwable caught) {
+        Window.alert("Couldn't contact server.");
+      }
+
       public void onSuccess(Void result) {
         feedback.showStatus("Grade changed to " + getStringForGrade(toChange.grade));
 
-       // System.out.println("changeGrade " + toChange);
+        // System.out.println("changeGrade " + toChange);
       }
     }
     );
