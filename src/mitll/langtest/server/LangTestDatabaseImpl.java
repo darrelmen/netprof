@@ -889,7 +889,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public List<Result> getResults(int start, int end) {
-    List<Result> results = db.getResults();
+    List<Result> results = db.getResultsWithGrades();
     Collections.sort(results, new Comparator<Result>() {
       @Override
       public int compare(Result o1, Result o2) {
@@ -898,6 +898,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     });
     List<Result> resultList = results.subList(start, end);
     List<Result> copy = new ArrayList<Result>(resultList);
+ /*   for (Result r:copy) {
+      if (r == null)
+        logger.error("getResults got " + r);
+    }*/
+
     return copy;
   }
 
