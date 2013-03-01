@@ -410,7 +410,7 @@ public class DatabaseImpl implements Database {
     boolean isMale = userDAO.isUserMale(userID);
 
     Map<String, Integer> idToCountOutside =
-        new OutsideCount().getExerciseIDToOutsideCount(isMale, outsideFile,getExercises());
+        new OutsideCount().getExerciseIDToOutsideCount(isMale, outsideFile, getExercises());
 
     //  logger.info("map of outside counts is size = " + idToCountOutside.size() +" " + idToCountOutside.values().size());
     for (Map.Entry<String, Integer> pair : idToCountOutside.entrySet()) {
@@ -730,6 +730,18 @@ public class DatabaseImpl implements Database {
    */
   public List<Result> getResults() {
     return resultDAO.getResults();
+  }
+
+  public List<Result> getResultsWithGrades() {
+    List<Result> results = resultDAO.getResults();
+   // for (Result r:results) logger.debug("getResultsWithGrades got " + r);
+    Map<Integer,Result> idToResult = new HashMap<Integer, Result>();
+    for (Result r : results) idToResult.put(r.uniqueID, r);
+    for (Grade g : gradeDAO.getGrades()) {
+      Result result = idToResult.get(g.resultID);
+      result.addGrade(g);
+    }
+    return results;
   }
 
   public int getNumResults() { return resultDAO.getNumResults(); }
