@@ -49,12 +49,6 @@ public class ExcelImport implements ExerciseDAO {
   private TeacherClass teacherClass;
   private final String file;
 
-
-  @Override
-  public Collection<String> getSubsectionsForTypeAndSection(String type, String section) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
-  }
-
   @Override
   public Map<String, Collection<String>> getTypeToSections() {
     Map<String,Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
@@ -62,6 +56,11 @@ public class ExcelImport implements ExerciseDAO {
       typeToSection.put(key,typeToUnitToLesson.keySet());
     }
     return typeToSection;
+  }
+
+  @Override
+  public Map<String, List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
+    return null;
   }
 
   @Override
@@ -166,7 +165,7 @@ public class ExcelImport implements ExerciseDAO {
     }
     int id = 0;
     boolean gotHeader = false;
-    FileExerciseDAO dao = new FileExerciseDAO(null,false);
+    FileExerciseDAO dao = new FileExerciseDAO(null,false,false);
 
     int colIndexOffset = 0;
 
