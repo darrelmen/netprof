@@ -7,6 +7,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.DTWScoring;
@@ -280,7 +281,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public Collection<String> getSubsectionsForTypeAndSection(String type, String section) { return db.getSubsectionsForTypeAndSection(type,section); }
+  public Map<String, List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
+    return db.getTypeToSectionsForTypeAndSection(type, section);
+  }
 
   private void logMemory() {
     Runtime rt = Runtime.getRuntime();
@@ -1240,7 +1243,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     readPropertiesFile();
 
     String h2DatabaseFile = props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT);
-    db = new DatabaseImpl(configDir, h2DatabaseFile);
+    db = new DatabaseImpl(configDir, h2DatabaseFile,!props.getProperty("showSections", "false").equals("false"));
 
     try {
       firstNInOrder = Integer.parseInt(props.getProperty(FIRST_N_IN_ORDER, "" + Integer.MAX_VALUE));
