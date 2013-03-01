@@ -45,7 +45,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   private Panel currentExerciseVPanel;
   protected LangTestDatabaseAsync service;
-  private UserFeedback feedback;
+  protected UserFeedback feedback;
   private ExercisePanelFactory factory;
   protected int expectedGrades = 1;
   protected UserManager user;
