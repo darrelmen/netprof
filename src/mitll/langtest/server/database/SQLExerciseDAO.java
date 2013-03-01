@@ -40,12 +40,12 @@ public class SQLExerciseDAO implements ExerciseDAO {
   }
 
   @Override
-  public Collection<String> getSubsectionsForTypeAndSection(String type, String section) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+  public Map<String, Collection<String>> getTypeToSections() {
+    return Collections.emptyMap();
   }
 
   @Override
-  public Map<String, Collection<String>> getTypeToSections() {
+  public Map<String, List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
     return Collections.emptyMap();
   }
 
