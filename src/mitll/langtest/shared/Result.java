@@ -31,6 +31,7 @@ public class Result implements IsSerializable {
   public boolean spoken;
   //private AudioType audioType; // so having another object in here seemed to slow down serialization a lot
   public String audioType;
+  public String gradeInfo = "";
   public int durationInMillis;
 
   public static final String AUDIO_TYPE_UNSET = "unset";
@@ -81,6 +82,10 @@ public class Result implements IsSerializable {
   public void setSpoken(boolean v) { this.spoken = v; }
  // public boolean isRegularAudio() { return audioType == null || audioType.equals(AUDIO_TYPE_UNSET) || audioType.equals(AUDIO_TYPE_REGULAR); }
   public boolean isFastAndSlowAudio() { return audioType != null && audioType.equals(AUDIO_TYPE_FAST_AND_SLOW); }
+
+  public void addGrade(Grade g) {
+    gradeInfo += g.grade +",";
+  }
 
   @Override
   public String toString() {
