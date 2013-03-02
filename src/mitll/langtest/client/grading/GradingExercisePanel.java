@@ -120,10 +120,12 @@ public class GradingExercisePanel extends ExercisePanel {
         for (boolean isSpoken : BOOLEANS) {
           Map<Boolean, List<Result>> langToResult = resultsAndGrades.spokenToLangToResult.get(isSpoken);
           if (langToResult != null) { // there might not be any written types
+            System.out.println("spoken : " +isSpoken + " has " +langToResult.size() + " results");
             for (boolean isForeign : BOOLEANS) {
               if (englishOnly && isForeign) continue; // skip non-english
               List<Result> results = langToResult.get(isForeign);
               if (results != null) {
+                System.out.println("\tspoken : " +isSpoken + " isFLQ " + isForeign +" has " +results.size() + " results");
                 anyAnswers = true;
                 String prompt = getPrompt(isSpoken, isForeign, outer);
                 System.out.println("\tgetResultsForExercise add answer group for results (index = " + index+ ")" + results);
