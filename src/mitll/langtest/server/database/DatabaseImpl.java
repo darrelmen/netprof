@@ -784,6 +784,12 @@ public class DatabaseImpl implements Database {
         boolean spoken = r.spoken;
         boolean flq = r.flq;
 
+        if (!spoken && r.answer.endsWith(".wav")) { // recover from badly marked results
+          spoken = true;
+          if (r.audioType.equals(Result.AUDIO_TYPE_UNSET)) {
+            flq = true;
+          }
+        }
         Map<Boolean, List<Result>> langToResult = spokenToLangToResult.get(spoken);
         if (langToResult == null)
           spokenToLangToResult.put(spoken, langToResult = new HashMap<Boolean, List<Result>>());
