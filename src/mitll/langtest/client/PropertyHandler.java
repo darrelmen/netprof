@@ -91,7 +91,7 @@ public class PropertyHandler {
   private String nameForRecorder = "Speaker";
   private String teacherClass = "class";
   private String lesson = "lesson";
-  private boolean showSections = true;
+  private boolean showSections = false;
   private boolean debugEmail = true;
   private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
