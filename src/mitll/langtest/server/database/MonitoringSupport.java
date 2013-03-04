@@ -258,7 +258,7 @@ public class MonitoringSupport {
     List<Result> results = getResults();
     for (Result r : results) {
       if (userMap.containsKey(r.userid)) {
-        String key = r.id + "/" + r.qid;
+        String key = r.getID();
         Set<Long> usersForResult = keyToUsers.get(key);
 
         if (usersForResult == null) {
@@ -272,6 +272,7 @@ public class MonitoringSupport {
           } else idToCount.put(key, c + 1);
         }
       }
+      // else these are by a female
     }
 
     //  int total = 0;
@@ -426,6 +427,8 @@ public class MonitoringSupport {
       if (count == null) femaleAnswerToCount.put(countAtExercise,1);
       else femaleAnswerToCount.put(countAtExercise,count+1);
     }
+
+    logger.debug("getResultCountsByGender : male " + maleAnswerToCount);
 
     typeToNumAnswerToCount.put("maleCount",maleAnswerToCount);
     typeToNumAnswerToCount.put("femaleCount",femaleAnswerToCount);
