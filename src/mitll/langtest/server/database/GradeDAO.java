@@ -186,7 +186,7 @@ public class GradeDAO extends DAO {
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(sql);
-
+      logger.debug("getGradesForSQL : sql " + sql);
       ResultSet rs = statement.executeQuery();
       Set<Grade> grades = new HashSet<Grade>();
       Set<Integer> ids = new HashSet<Integer>();
@@ -201,8 +201,7 @@ public class GradeDAO extends DAO {
         try {
           graderID = Integer.parseInt(grader);
         } catch (NumberFormatException e) {
-          logger.warn("couldn't parse grader '" +grader+
-              "'");
+          logger.warn("couldn't parse grader '" +grader+ "'");
         }
         String type = rs.getString(i++);
         if (type == null) type = "";
