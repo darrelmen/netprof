@@ -78,6 +78,14 @@ public class Result implements IsSerializable {
     this.durationInMillis = durationInMillis;
   }
 
+  /**
+   * Compound key of exercise id and question id within that exercise.
+   * @return
+   */
+  public String getID() {
+    return id + "/" +qid;
+  }
+
   public void setFLQ(boolean flq)  { this.flq = flq; }
   public void setSpoken(boolean v) { this.spoken = v; }
  // public boolean isRegularAudio() { return audioType == null || audioType.equals(AUDIO_TYPE_UNSET) || audioType.equals(AUDIO_TYPE_REGULAR); }
