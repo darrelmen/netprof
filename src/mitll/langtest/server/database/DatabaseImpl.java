@@ -386,9 +386,9 @@ public class DatabaseImpl implements Database {
     populateInitialExerciseIDToCount(idToExercise, idToCount);
 
     // only find answers that are for the gender
-    getExerciseIDToResultCount(userDAO.isUserMale(userID), idToCount);
+    Collection<String> alreadyAnswered = getExerciseIDToResultCount(userID, idToCount);
 
-    Map<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
+    SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
     return getResultsRandomizedPerUser(userID, idToExercise, countToIds);
   }
 
@@ -420,10 +420,10 @@ public class DatabaseImpl implements Database {
     }
 
     // only find answers that are for the gender
-    getExerciseIDToResultCount(userDAO.isUserMale(userID), idToCount);
+    getExerciseIDToResultCount(userID, idToCount);
 
     // now make a map of count at this number to exercise ids for these numbers
-    Map<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
+    SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
 
     return getResultsRandomizedPerUser(userID, idToExercise, countToIds);
   }
@@ -439,11 +439,15 @@ public class DatabaseImpl implements Database {
    * @param countToIds statistics about answers for each exercise
    * @return List of exercises in order from least answers to most
    */
-  private List<Exercise> getResultsRandomizedPerUser(long userID, Map<String, Exercise> idToExercise, Map<Integer, List<String>> countToIds) {
+  private List<Exercise> getResultsRandomizedPerUser(long userID, Map<String, Exercise> idToExercise,
+                                                     SortedMap<Integer, List<String>> countToIds) {
     List<Exercise> result = new ArrayList<Exercise>();
     Random rnd = new Random(userID);
 
-    for (List<String> itemsAtCount : countToIds.values()) {
+    for (Map.Entry<Integer, List<String>> pair : countToIds.entrySet()) {
+      Integer count = pair.getKey();
+      List<String> itemsAtCount = pair.getValue();
+      //logger.debug("for count = " + count + " " +itemsAtCount.size() + " items");
       Collections.shuffle(itemsAtCount, rnd);
       for (String id : itemsAtCount) {
         Exercise e = idToExercise.get(id);
@@ -454,15 +458,19 @@ public class DatabaseImpl implements Database {
     return result;
   }
 
-  private Map<Integer, List<String>> getCountToExerciseIDs(Map<String, Integer> idToCount) {
-    Map<Integer,List<String>> countToIds = new TreeMap<Integer, List<String>>();
+  /**
+   * Reverse the map -- make a map of result count->list of ids at that count
+   * @param idToCount
+   * @return
+   */
+  private SortedMap<Integer, List<String>> getCountToExerciseIDs(Map<String, Integer> idToCount) {
+    SortedMap<Integer,List<String>> countToIds = new TreeMap<Integer, List<String>>();
     for (Map.Entry<String,Integer> pair : idToCount.entrySet()) {
-      List<String> idsAtCount = countToIds.get(pair.getValue());
-      if (idsAtCount == null) { countToIds.put(pair.getValue(), idsAtCount = new ArrayList<String>()); }
+      Integer countAtID = pair.getValue();
+      List<String> idsAtCount = countToIds.get(countAtID);
+      if (idsAtCount == null) { countToIds.put(countAtID, idsAtCount = new ArrayList<String>()); }
       idsAtCount.add(pair.getKey());
     }
-    //logger.info("map is " +countToIds);
-    //for (Integer c: countToIds.keySet()) logger.info("count = " +c + " : " + countToIds.get(c).size() );
     return countToIds;
   }
 
@@ -474,17 +482,50 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  private void getExerciseIDToResultCount(boolean userMale, Map<String, Integer> idToCount) {
+  /**
+   * multiple responses by the same user count as one in count->id map.
+   *
+   * @see #getExercisesBiasTowardsUnanswered(long)
+   * @see #getExercisesBiasTowardsUnanswered(long,String)
+   * @param userID
+   * @paramx userMale
+   * @param idToCount exercise id->count
+   */
+  private Collection<String> getExerciseIDToResultCount(long userID, Map<String, Integer> idToCount) {
+    boolean userMale = userDAO.isUserMale(userID);
     Map<Long, User> userMap = userDAO.getUserMap(userMale);
     List<Result> results = getResults();
-    for (Result r: results ) {
+    List<String> alreadyAnsweredByThisUser = new ArrayList<String>();
+    Map<String, Set<Long>> keyToUsers = new HashMap<String, Set<Long>>();
+
+    for (Result r : results) {
       Integer current = idToCount.get(r.id);
-      if (current != null) {
-        if (userMap.containsKey(r.userid)) {
-          idToCount.put(r.id,current+1);
+      if (current != null) {  // unlikely not null
+        if (userMap.containsKey(r.userid)) { // only get male or female results
+          String key = r.id;
+          Set<Long> usersForResult = keyToUsers.get(key);
+
+          if (usersForResult == null) {
+            keyToUsers.put(key, usersForResult = new HashSet<Long>());
+          }
+          if (!usersForResult.contains(r.userid)) {   // ignore re-recordings
+            usersForResult.add(r.userid);
+            Integer c = idToCount.get(key);
+            if (c == null) {
+              logger.warn("huh? key " + key + " not found?");
+              idToCount.put(key, 1);
+            } else {
+              idToCount.put(key, c + 1);
+            }
+          }
+        }
+        if (r.userid == userID) {
+          alreadyAnsweredByThisUser.add(r.id);
+          logger.debug("user " + userID + " has already answered exercise " + r.id + " at result " + r.uniqueID);
         }
       }
     }
+    return alreadyAnsweredByThisUser;
   }
 
   private Random random = new Random();
@@ -833,7 +874,7 @@ public class DatabaseImpl implements Database {
                              boolean valid, boolean flq, boolean spoken,
                              String audioType, int durationInMillis) {
     answerDAO.addAnswer(this, userID, plan, exerciseID, questionID, "", audioFile, valid, flq, spoken, audioType,
-        durationInMillis);
+      durationInMillis);
   }
 
   /**
@@ -873,7 +914,7 @@ public class DatabaseImpl implements Database {
   public Site getSiteByID(long id) { return siteDAO.getSiteByID(id); }
   public List<Site> getDeployedSites() { return siteDAO.getDeployedSites(); }
   public void deploy(Site site) { siteDAO.deploy(site); }
-  public Site updateSite(Site site, String name, String lang, String notes) { return siteDAO.updateSite(site,name,lang,notes); }
+  public Site updateSite(Site site, String name, String lang, String notes) { return siteDAO.updateSite(site, name, lang, notes); }
 
   /**
    * TODO : worry about duplicate userid?
