@@ -12,9 +12,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.SimplePager;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
@@ -24,10 +22,9 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -42,6 +39,7 @@ import java.util.Set;
 public class PagingExerciseList extends ExerciseList implements RequiresResize {
   private static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
   private ListDataProvider<ExerciseShell> dataProvider;
+  private static final boolean DEBUG = false;
   private static final int ID_LINE_WRAP_LENGTH = 20;
   private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 390;
   private static final float MAX_PAGES = 2f;
@@ -168,13 +166,13 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   protected String getHistoryToken(String id) { return "item=" +id; }
 
   protected void gotClickOnItem(final ExerciseShell e) {
-    Timer timer = new Timer() {
+/*    Timer timer = new Timer() {
       @Override
       public void run() {
         loadExercise(e);
       }
     };
-    timer.schedule(100);
+    timer.schedule(100);*/
   }
 
 
@@ -250,20 +248,26 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   @Override
   protected void markCurrentExercise(int i) {
     ExerciseShell itemToSelect = currentExercises.get(i);
-   // System.out.println(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect + " with clicked on " + clickedOn);
+    if (DEBUG)  System.out.println(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID());
     table.getSelectionModel().setSelected(itemToSelect, true);
-    int pageEnd = table.getPageStart() + table.getPageSize();
-/*    System.out.println("marking " +i +" out of " +table.getRowCount() + " page start " +table.getPageStart() +
-        " end " + pageEnd);*/
+    if (DEBUG) {
+      int pageEnd = table.getPageStart() + table.getPageSize();
+      System.out.println("marking " +i +" out of " +table.getRowCount() + " page start " +table.getPageStart() +
+        " end " + pageEnd);
+    }
 
+    int pageNum = i / table.getPageSize();
+    int newIndex = pageNum *table.getPageSize();
     if (i < table.getPageStart()) {
-      int newStart = Math.max(0, table.getPageStart() - table.getPageSize());
-    //   System.out.println("new start of prev page " +newStart + " vs current " + table.getVisibleRange());
+      int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
+      if (DEBUG) System.out.println("new start of prev page " +newStart + " vs current " + table.getVisibleRange());
       table.setVisibleRange(newStart, table.getPageSize());
     } else {
+      int pageEnd = table.getPageStart() + table.getPageSize();
       if (i >= pageEnd) {
-        int newStart = Math.min(table.getRowCount() - table.getPageSize(), pageEnd);
-      //  System.out.println("new start of next page " +newStart + " vs current " + table.getVisibleRange());
+        int newStart = Math.min(table.getRowCount() - table.getPageSize(), newIndex);
+        if (DEBUG) System.out.println("new start of next newIndex " +newStart + "/" +newIndex +"/page = " + pageNum+
+          " vs current " + table.getVisibleRange());
         table.setVisibleRange(newStart, table.getPageSize());
       }
     }
