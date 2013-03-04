@@ -13,9 +13,12 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.SimpleLayoutPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -45,9 +48,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected Map<String,ExerciseShell> idToExercise = null;
   protected int currentExercise = 0;
   private List<HTML> progressMarkers = new ArrayList<HTML>();
-  private Panel current = null;
 
-  private Panel currentExerciseVPanel;
+  private SimplePanel innerContainer;
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
   private ExercisePanelFactory factory;
@@ -74,7 +76,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                       ExercisePanelFactory factory, boolean arabicDataCollect,
                       boolean showTurkToken, boolean showInOrder) {
-    this.currentExerciseVPanel = currentExerciseVPanel;
+    this.innerContainer = new SimplePanel();
+    this.innerContainer.setWidth("100%");
+    this.innerContainer.setHeight("100%");
+    currentExerciseVPanel.add(innerContainer);
     this.service = service;
     this.feedback = feedback;
     this.factory = factory;
@@ -100,15 +105,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-    * Get exercises for this user.
-    * @see mitll.langtest.client.LangTest#gotUser(long)
-    * @see mitll.langtest.client.LangTest#makeFlashContainer
-    * @param userID
+   * Get exercises for this user.
+   * @see mitll.langtest.client.LangTest#gotUser(long)
+   * @see mitll.langtest.client.LangTest#makeFlashContainer
+   * @param userID
    */
   public void getExercises(long userID) {
-
     System.out.println("getExercises " +userID);
-
 
     useUserID = true;
     this.userID = userID;
@@ -122,6 +125,21 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
+  private void pushFirstSelection(String first) {
+    String initToken = History.getToken();
+    if (initToken.length() == 0) {
+      pushNewItem(first);
+    } else {
+      System.out.println("fire history for " +initToken);
+      History.fireCurrentHistoryState();
+    }
+  }
+
+  private void pushNewItem(String first) {
+    System.out.println("------------ push history " + first + " -------------- ");
+    History.newItem("#item=" + first);
+  }
+
   /**
    * @see GradedExerciseList#setFactory(ExercisePanelFactory, mitll.langtest.client.user.UserManager, int)
    */
@@ -130,6 +148,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   public void onResize() {
+    Widget current = innerContainer.getWidget();
     if (current != null) {
       if (current instanceof RequiresResize) {
         ((RequiresResize) current).onResize();
@@ -147,13 +166,18 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.exercise_title = exercise_title;
   }
 
+  protected String unencodeToken(String token) {
+    token = token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ").replaceAll("\\+", " ");
+    return token;
+  }
+
   protected class SetExercisesCallback implements AsyncCallback<List<ExerciseShell>> {
     public void onFailure(Throwable caught) {
       feedback.showErrorMessage("Server error", "Server error - couldn't get exercises.");
     }
 
     public void onSuccess(List<ExerciseShell> result) {
-     // System.out.println("SetExercisesCallback Got " +result.size() + " results");
+      // System.out.println("SetExercisesCallback Got " +result.size() + " results");
       rememberExercises(result);
       loadFirstExercise();
     }
@@ -202,7 +226,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       if (e != null) toLoad = e;
     }
 
-    loadExercise(toLoad);
+    pushFirstSelection(toLoad.getID());
   }
 
   private ExerciseShell byID(String name) {
@@ -217,10 +241,19 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param exerciseShell
    */
   protected void loadExercise(ExerciseShell exerciseShell) {
-    checkBeforeLoad(exerciseShell);
+    String token = History.getToken();
+    String id = getIDFromToken(unencodeToken(token));
+    System.out.println("loadExercise " + token + " -> " +id);
 
-    removeCurrentExercise();
+    if (id.equals(exerciseShell.getID())) {
+      System.out.println("skipping current token " + token);
+    } else {
+      System.out.println("loadExercise " + exerciseShell.getID() + " vs " +id);
+      pushNewItem(exerciseShell.getID());
+    }
+  }
 
+  private void askServerForExercise(ExerciseShell exerciseShell) {
     if (useUserID) {
       service.getExercise(exerciseShell.getID(), userID, arabicDataCollect, new ExerciseAsyncCallback(exerciseShell));
     } else {
@@ -236,7 +269,41 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public void onValueChange(ValueChangeEvent<String> event) {
     // This method is called whenever the application's history changes. Set
     // the label to reflect the current history token.
-    loadByID(event.getValue());
+    String value = event.getValue();
+    String token = getTokenFromEvent(event);
+    String id = getIDFromToken(token);
+    System.out.println("onValueChange got " + event.getAssociatedType() + " "+ value + " token " + token + " id " + id);
+
+    if (id.length() > 0) {
+      loadByIDFromToken(id);
+    } else {
+      System.out.println("got invalid event " + event + " value " + token);
+    }
+  }
+
+  private void loadByIDFromToken(String id) {
+    ExerciseShell exerciseShell = byID(id);
+    if (exerciseShell != null) {
+      checkBeforeLoad(exerciseShell);
+      askServerForExercise(exerciseShell);
+    }
+    else {
+      Window.alert("unknown item " + id);
+    }
+  }
+
+  private String getTokenFromEvent(ValueChangeEvent<String> event) {
+    String token = event.getValue();
+    token = unencodeToken(token);
+    return token;
+  }
+
+  protected String getIDFromToken(String token) {
+    if (token.startsWith("#item=") || token.startsWith("item=")) {
+      String[] split = token.split("=");
+      return split[1].trim();
+    }
+    return "";
   }
 
   protected boolean loadByID(String id) {
@@ -267,10 +334,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param e
    */
   private void useExercise(Exercise result, ExerciseShell e) {
-    //System.out.println("useExercise using " + e);
-    currentExerciseVPanel.add(current = factory.getExercisePanel(result));
+    Panel exercisePanel = factory.getExercisePanel(result);
+    innerContainer.setWidget(exercisePanel);
 
     int i = getIndex(e);
+    System.out.println("useExercise : " +e.getID() + " index " +i);
     if (i == -1) {
       System.err.println("can't find " + e + " in list of " + currentExercises.size() + " exercises.");
       return;
@@ -280,7 +348,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     currentExercise = i;
   }
 
-  protected boolean isExercisePanelBusy() { return current != null && ((BusyPanel) current).isBusy(); }
+  protected boolean isExercisePanelBusy() {
+    Widget current = innerContainer.getWidget();
+    return current != null && ((BusyPanel) current).isBusy();
+  }
 
   /**
    * @see #loadExercise
@@ -312,9 +383,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   @Override
   public void removeCurrentExercise() {
+    Widget current = innerContainer.getWidget();
     if (current != null) {
-      currentExerciseVPanel.remove(current);
-      current = null;
+      System.out.println("Remove current widget");
+      if (!innerContainer.remove(current)) {
+        System.out.println("\tdidn't remove current widget");
+      }
     }
   }
 
