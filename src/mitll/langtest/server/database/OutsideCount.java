@@ -88,7 +88,7 @@ public class OutsideCount {
     try {
       File file = new File(overrideCountsFile);
       if (!file.exists()) {
-        logger.debug("can't find '" + file +"'");
+        //logger.debug("can't find '" + file +"'");
         return null;
       }
       else {
