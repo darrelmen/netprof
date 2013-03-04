@@ -116,23 +116,36 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     useUserID = true;
     this.userID = userID;
     if (showInOrder) {
-      //System.out.println("getExercises : getting exercises in order for " + userID);
       getExercisesInOrder();
     }
     else {
-      //System.out.println("getExercises for " + userID + " usefile " + readFromFile + " arabic " + arabicDataCollect);
       service.getExerciseIds(userID, arabicDataCollect, new SetExercisesCallback());
     }
   }
 
+
+  /**
+   * So we have a catch-22 -
+   *
+   * If we fire the current history, we override the initial selection associated
+   * with a user logging in for the first time.
+   *
+   * If we don't, when we click on a link from an email, the item=NNN value will be ignored.
+   *
+   * I gotta go with the latter.
+   *
+   * @param first
+   */
   private void pushFirstSelection(String first) {
-    String initToken = History.getToken();
+/*    String initToken = History.getToken();
     if (initToken.length() == 0) {
       pushNewItem(first);
     } else {
       System.out.println("fire history for " +initToken);
       History.fireCurrentHistoryState();
-    }
+    }*/
+    pushNewItem(first);
+
   }
 
   private void pushNewItem(String first) {
