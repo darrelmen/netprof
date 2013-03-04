@@ -60,6 +60,8 @@ public class UserManager {
       "13-16 months (Semester 3)",
       "16+ months",
       "Native speaker");
+  private static final String USER_ID = "userID";
+  private static final String AUDIO_TYPE = "audioType";
   private final LangTestDatabaseAsync service;
   private final UserNotification langTest;
   private final boolean useCookie = false;
@@ -86,12 +88,14 @@ public class UserManager {
   // user tracking
 
   /**
+   *
    * @param sessionID from database
+   * @param audioType
    * @see #displayLoginBox()
    * @see #displayTeacherLogin()
    * @see #addTeacher
    */
-  private void storeUser(long sessionID) {
+  private void storeUser(long sessionID, String audioType) {
     //System.out.println("storeUser : user now " + sessionID);
     final long DURATION = 1000 * 60 * 60 * EXPIRATION_HOURS; //duration remembering login
     long now = System.currentTimeMillis();
@@ -100,8 +104,9 @@ public class UserManager {
       Date expires = new Date(futureMoment);
       Cookies.setCookie("sid", "" + sessionID, expires);
     } else if (stockStore != null) {
-      stockStore.setItem("userID", "" + sessionID);
+      stockStore.setItem(USER_ID, "" + sessionID);
       stockStore.setItem("expires", "" + futureMoment);
+      stockStore.setItem(AUDIO_TYPE, "" + audioType);
       System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " expires in " + (DURATION/1000) + " seconds");
     } else {
       userID = sessionID;
@@ -123,9 +128,20 @@ public class UserManager {
     int user = getUser();
     if (user != NO_USER_SET) {
       System.out.println("UserManager.login : user : " + user);
+      rememberAudioType();
       langTest.gotUser(user);
     } else {
       displayLoginBox();
+    }
+  }
+
+  private void rememberAudioType() {
+    if (stockStore != null) {
+      String audioType = stockStore.getItem(AUDIO_TYPE);
+      if (audioType == null) {
+        audioType = Result.AUDIO_TYPE_FAST_AND_SLOW;
+      }
+      langTest.rememberAudioType(audioType);
     }
   }
 
@@ -142,10 +158,10 @@ public class UserManager {
       return Integer.parseInt(sid);
     }
     else if (stockStore != null) {
-      String sid = stockStore.getItem("userID");
+      String sid = stockStore.getItem(USER_ID);
       if (sid != null && !sid.equals("" + NO_USER_SET)) {
         checkExpiration(sid);
-        sid = stockStore.getItem("userID");
+        sid = stockStore.getItem(USER_ID);
       }
       return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
     }
@@ -179,7 +195,7 @@ public class UserManager {
     if (useCookie) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
     } else if (stockStore != null) {
-      stockStore.removeItem("userID");
+      stockStore.removeItem(USER_ID);
       System.out.println("user now " + getUser());
     } else {
       userID = NO_USER_SET;
@@ -190,6 +206,7 @@ public class UserManager {
     int user = getUser();
     if (user != NO_USER_SET) {
       System.out.println("login user : " + user);
+      rememberAudioType();
       langTest.gotUser(user);
     } else {
       displayTeacherLogin();
@@ -383,8 +400,9 @@ public class UserManager {
                 Window.alert("Please choose either regular or regular then slow audio recording.");
               } else {
                 dialogBox.hide();
-                storeAudioType(fastThenSlow.getValue() ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR);
-                storeUser(result);
+                String audioType = fastThenSlow.getValue() ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
+                storeAudioType(audioType);
+                storeUser(result, audioType);
               }
             } else {
               System.out.println(user.getText() + " doesn't exist");
@@ -474,8 +492,9 @@ public class UserManager {
           public void onSuccess(Long result) {
             System.out.println("addUser : server result is " + result);
             dialogBox.hide();
-            storeAudioType(isFastAndSlow ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR);
-            storeUser(result);
+            String audioType = isFastAndSlow ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
+            storeAudioType(audioType);
+            storeUser(result, audioType);
           }
         });
   }
@@ -559,7 +578,7 @@ public class UserManager {
 
           public void onSuccess(Long result) {
             System.out.println("addUser : server result is " + result);
-            storeUser(result);
+            storeUser(result, "");
           }
         });
       }
