@@ -352,7 +352,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     List<Exercise> exercises;
     if (dataCollectMode) {
-      logger.debug("in data collect mode");
+     // logger.debug("in data collect mode");
       if (biasTowardsUnanswered) {
         if (useOutsideResultCounts) {
           String outsideFileOverride = outsideFile;
