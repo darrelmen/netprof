@@ -342,7 +342,7 @@ public class SectionExerciseList extends PagingExerciseList {
       setListBox("", ANY);
       noSectionsGetExercises(userID);
     } else {
-      token = token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ").replaceAll("\\+", " ");
+      token = unencodeToken(token);
       if (!token.contains("=")) token = getDefaultToken();
       System.out.println("onValueChange after " + token);
       try {
