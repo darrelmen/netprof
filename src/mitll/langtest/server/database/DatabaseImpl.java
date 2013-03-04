@@ -521,7 +521,7 @@ public class DatabaseImpl implements Database {
         }
         if (r.userid == userID) {
           alreadyAnsweredByThisUser.add(r.id);
-          logger.debug("user " + userID + " has already answered exercise " + r.id + " at result " + r.uniqueID);
+          //logger.debug("user " + userID + " has already answered exercise " + r.id + " at result " + r.uniqueID);
         }
       }
     }
