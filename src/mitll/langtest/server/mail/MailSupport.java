@@ -9,7 +9,9 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -23,6 +25,83 @@ public class MailSupport {
 
   public MailSupport(Properties props) {
     debugEmail = props.get("debugEmail") != null && !props.get("debugEmail").toString().equals("false");
+  }
+
+  public void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message, String token) {
+    List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<String>();
+    if (toAddresses.isEmpty()) {
+      toAddresses.add(to);
+    }
+//    logger.debug("server info " + getServletContext().getServerInfo());
+    //  URI uri = new URI();
+    //String serverName = getThreadLocalRequest().getServerName();
+    logger.info("server name " + serverName);
+/*
+    String link = "\nHere's a link <a href='" + getBaseUrl() + "#" + URLEncoder.encode(token) +
+      "'>" + linkTitle + "</a>.\n";
+    //message += link;
+
+    logger.info("link " +link);*/
+
+    String link2 = baseURL + "#" + URLEncoder.encode(token);
+    String body = "<html>" +
+      "<head>" +
+      "</head>" +
+      "<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>" +
+      "<div align=center>" +
+      "<table>" +
+      (message.length() > 0 ?
+        "<tr>" +
+          "    <td colspan=2 style='padding:.75pt .75pt .75pt .75pt'>\n" +
+          "    <p ><span style='font-size:13.0pt;font-family:\"Georgia\",\"serif\";\n" +
+          "    color:#333333'>" +
+          message +
+          "<p></p></span></p>\n" +
+          "    </td>" +
+          "</tr>" : "") +
+      "     <tr >\n" +
+      "      <td style='border:none;padding:10.5pt 10.5pt 10.5pt 10.5pt'>\n" +
+      "      <h1 style='margin-top:0in;margin-right:0in;margin-bottom:3.0pt;\n" + "      margin-left:0in'>" +
+      "<span style='font-size:12.5pt;font-family:\"Georgia\",\"serif\";\n" +  "      font-weight:normal'>" +
+      "<a\n" + "      href=\"" +
+      link2 +
+      "\">" +
+      "<span\n" + "      style='color:#004276'>" +
+      subject +
+      "</span>" +
+      "</a><p></p>" +
+      "</span>" +
+      "</h1>\n" +
+      "      </td>\n" +
+      "     </tr>" +
+
+      "   <tr>\n" +
+      "    <td style='padding:0in 0in 0in 0in'>\n" +
+      "    <p>" +
+      "<span style='font-size:8.5pt;font-family:\"Arial\",\"sans-serif\";\n" +
+      "    color:#333333'>Or, copy and paste this URL into your browser: <a\n" +
+      "    href=\"" +
+      link2 +
+      "\"><b>" +
+      "<span\n" +
+      "    style='color:#004276'>" +
+      link2 +
+      "</span></b></a>" +
+      "<p></p></span>" +
+      "</p>\n" +
+      "    </td>\n" +
+      //     "    <td style='padding:.75pt .75pt .75pt .75pt'></td>\n" +
+      "   </tr>"+
+
+      "</table>" +
+      "</div>" +
+      "</body>" +
+      "</html>";
+
+    String fromEmail = "email@" + serverName;
+    normalFullEmail(fromEmail, fromEmail, replyTo, toAddresses,
+      subject,
+      body);
   }
 
   public void email(String subject, String message) {
