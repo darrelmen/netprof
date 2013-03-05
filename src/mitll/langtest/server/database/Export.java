@@ -33,15 +33,16 @@ public class Export implements Database {
   public Export(String dburl) {
     this.h2DbName = dburl;
     this.url = "jdbc:h2:" + h2DbName + ";IFEXISTS=TRUE;QUERY_CACHE_SIZE=0;";
+    UserDAO userDAO = new UserDAO(this);
     try {
       getConnection();
-      resultDAO = new ResultDAO(this);
+      resultDAO = new ResultDAO(this,userDAO);
       resultDAO.createResultTable(getConnection());
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
     exerciseDAO = new SQLExerciseDAO(this, "");
-    gradeDAO = new GradeDAO(this);
+    gradeDAO = new GradeDAO(this,userDAO);
   }
 
   public Export(ExerciseDAO exerciseDAO, ResultDAO resultDAO, GradeDAO gradeDAO) {
