@@ -29,4 +29,9 @@ public class ResultsAndGrades implements IsSerializable {
     this.grades  = grades;
     this.spokenToLangToResult = spokenToLangToResult;
   }
+
+
+  public String toString() {
+    return "ResultsAndGrades : " + results.size() + " results, " + grades.size() + " grades, spoken->lang->result " + spokenToLangToResult;
+  }
 }
