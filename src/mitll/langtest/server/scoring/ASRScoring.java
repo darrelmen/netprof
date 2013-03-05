@@ -450,7 +450,7 @@ public class ASRScoring extends Scoring {
       kv.put(LM_TO_USE, tmpDir +File.separator + File.separator + SMALL_LM_SLF); // hack! TODO hack replace
      // new FileCopier().copy(modelsDir+File.separator+"phones.dict",tmpDir+File.separator +"dict");   // Audio.hscore in pron sets dictionary=this value
     }
-    logger.info("using config from template " + cfgTemplate);
+    //logger.info("using config from template " + cfgTemplate);
 
     kv.put(TEMP_DIR,tmpDir);
     kv.put(MODELS_DIR_VARIABLE, modelsDir);
