@@ -258,12 +258,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     String id = getIDFromToken(unencodeToken(token));
     System.out.println("loadExercise " + token + " -> " +id);
 
-    if (id.equals(exerciseShell.getID())) {
+/*    if (id.equals(exerciseShell.getID())) {
       System.out.println("skipping current token " + token);
-    } else {
-      System.out.println("loadExercise " + exerciseShell.getID() + " vs " +id);
+    } else {*/
+      //System.out.println("loadExercise " + exerciseShell.getID() + " vs " +id);
       pushNewItem(exerciseShell.getID());
-    }
+  //  }
   }
 
   private void askServerForExercise(ExerciseShell exerciseShell) {
