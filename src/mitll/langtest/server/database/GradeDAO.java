@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -11,13 +12,16 @@ import java.util.*;
  * Stored and retrieves grades from the database.
  */
 public class GradeDAO extends DAO {
-  private static Logger logger = Logger.getLogger(GradeDAO.class);
+  private static final String SELECT_PREFIX = "SELECT id, exerciseID, resultID, grade, grader, gradeType, gradeIndex from grades where exerciseID";
+  private static final Logger logger = Logger.getLogger(GradeDAO.class);
 
   private static final String GRADES = "grades";
-  private boolean debug = false;
+  private final boolean debug = false;
+  private final UserDAO userDAO;
 
-  public GradeDAO(Database database) {
+  public GradeDAO(Database database,UserDAO userDAO) {
     super(database);
+    this.userDAO = userDAO;
   }
 
   /**
@@ -32,7 +36,7 @@ public class GradeDAO extends DAO {
       String sql = "UPDATE grades " +
           "SET grade='" + toChange.grade + "' " +
           "WHERE id=" + toChange.id;
-      if (debug || true) {
+      if (debug) {
         logger.debug("changeGrade " + toChange);
       }
       statement = connection.prepareStatement(sql);
@@ -58,7 +62,7 @@ public class GradeDAO extends DAO {
    * @return
    */
   public CountAndGradeID addGradeEasy(String exerciseID, Grade toAdd) {
-    return addGrade(toAdd.resultID, exerciseID, toAdd.grade, toAdd.id, true, toAdd.grader, toAdd.gradeType);
+    return addGrade(toAdd.resultID, exerciseID, toAdd.grade, toAdd.id, true, toAdd.grader, toAdd.gradeType, toAdd.gradeIndex);
   }
 
   /**
@@ -76,15 +80,15 @@ public class GradeDAO extends DAO {
    * @see DatabaseImpl#addGrade(String, mitll.langtest.shared.Grade)
    */
   private CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct,
-                                   int grader, String gradeType) {
+                                   int grader, String gradeType, int gradeIndex) {
     long id = 0;
     try {
       Connection connection = database.getConnection();
       //logger.debug("addGrade " + grade + " grade for " + resultID + " and " +grader + " ex id " + exerciseID+ " and " +gradeID);
 
-      String sql = "INSERT INTO grades(resultID,exerciseID,grade,correct,grader,gradeType) VALUES(?,?,?,?,?,?)";
+      String sql = "INSERT INTO grades(resultID,exerciseID,grade,correct,grader,gradeType,gradeIndex) VALUES(?,?,?,?,?,?,?)";
 
-      if (debug || true)
+      if (debug)
         logger.debug("INSERT " + grade + " grade for exercise " + exerciseID + " and result " +resultID +
           " grader = " + grader + ", grade id " + gradeID + ", type = " + gradeType);
 
@@ -96,6 +100,8 @@ public class GradeDAO extends DAO {
       statement.setBoolean(i++, correct);
       statement.setString(i++, ""+grader);
       statement.setString(i++, gradeType);
+      statement.setInt(i++, gradeIndex);
+
       int j = statement.executeUpdate();
 
       if (j != 1)
@@ -152,7 +158,8 @@ public class GradeDAO extends DAO {
    * @return
    */
   public GradesAndIDs getResultIDsForExercise(String exerciseID) {
-    String sql = "SELECT id, exerciseID, resultID, grade, grader, gradeType from grades where exerciseID='" + exerciseID + "'";
+    String sql = SELECT_PREFIX +
+      "='" + exerciseID + "'";
 
     return getGradesForSQL(sql);
   }
@@ -177,7 +184,7 @@ public class GradeDAO extends DAO {
     String list = b.toString();
     list = list.substring(0,Math.max(0,list.length()-1));
 
-    String sql = "SELECT id, exerciseID, resultID, grade, grader, gradeType from grades where exerciseID not in (" + list + ")";
+    String sql = SELECT_PREFIX +" not in (" + list + ")";
 
     return getGradesForSQL(sql);
   }
@@ -186,10 +193,14 @@ public class GradeDAO extends DAO {
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(sql);
-      logger.debug("getGradesForSQL : sql " + sql);
+      //logger.debug("getGradesForSQL : sql " + sql);
       ResultSet rs = statement.executeQuery();
       Set<Grade> grades = new HashSet<Grade>();
       Set<Integer> ids = new HashSet<Integer>();
+      List<User> users = userDAO.getUsers();
+      Map<String,User> idToUser = new HashMap<String, User>();
+      for (User u : users) idToUser.put(u.userID,u);
+      int count = 0;
       while (rs.next()) {
         int i = 1;
         int id = rs.getInt(i++);
@@ -201,11 +212,20 @@ public class GradeDAO extends DAO {
         try {
           graderID = Integer.parseInt(grader);
         } catch (NumberFormatException e) {
-          logger.warn("couldn't parse grader '" +grader+ "'");
+          User user = idToUser.get(grader);
+          if (user != null) {
+            graderID = (int) user.id;
+          } else {
+            if (count++ < 20) {
+              logger.warn("couldn't parse grader '" + grader + "' or find user by that id in " + idToUser.keySet());
+            }
+          }
         }
         String type = rs.getString(i++);
         if (type == null) type = "";
-        Grade g = new Grade(id, exerciseID, resultID, grade, graderID, type);
+        int gradeIndex = rs.getInt(i++);
+
+        Grade g = new Grade(id, exerciseID, resultID, grade, graderID, type, gradeIndex);
        // logger.debug("made " +g);
         grades.add(g);
         ids.add(resultID);
@@ -227,8 +247,8 @@ public class GradeDAO extends DAO {
    *
    */
   public static class GradesAndIDs {
-    Collection<Grade> grades;
-    Collection<Integer> resultIDs;
+    final Collection<Grade> grades;
+    final Collection<Integer> resultIDs;
     public GradesAndIDs(Collection<Grade> grades, Collection<Integer> ids) {
       this.grades = grades;
       this.resultIDs = ids;
@@ -236,7 +256,7 @@ public class GradeDAO extends DAO {
   }
 
   /**
-   * @see #addGrade(int, String, int, long, boolean, int, String)
+   * @see #addGrade
    * @return
    */
   private int getCount() {
@@ -269,12 +289,23 @@ public class GradeDAO extends DAO {
     }
     if (numColumns < 7) {
       addColumnToTable2(connection);
+    } else if (numColumns < 8) {
+      addColumnToTable3(connection);
     }
   }
 
   private void createTable(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
-      "grades (id IDENTITY, exerciseID VARCHAR, resultID INT, grade INT, correct BOOLEAN, grader VARCHAR, gradeType VARCHAR)");
+      "grades (id IDENTITY, " +
+      "exerciseID VARCHAR, " +
+      "resultID INT, " +
+      "grade INT, " +
+      "correct BOOLEAN, " +
+      "grader VARCHAR, " +
+      "gradeType VARCHAR, " +
+      "gradeIndex INT " +
+
+      ")");
     statement.execute();
     statement.close();
   }
@@ -291,6 +322,12 @@ public class GradeDAO extends DAO {
 
   private void addColumnToTable2(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE grades ADD gradeType VARCHAR");
+    statement.execute();
+    statement.close();
+  }
+
+  private void addColumnToTable3(Connection connection) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE grades ADD gradeIndex INT");
     statement.execute();
     statement.close();
   }
