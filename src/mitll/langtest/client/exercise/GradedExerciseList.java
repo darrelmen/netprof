@@ -51,7 +51,9 @@ public class GradedExerciseList extends PagingExerciseList {
   protected void checkBeforeLoad(final ExerciseShell e) {
     service.checkoutExerciseID(""+user.getUser(), e.getID(), new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) { Window.alert("couldn't checkout " + e.getID());}
-      public void onSuccess(Void result) {}
+      public void onSuccess(Void result) {
+        feedback.showStatus("");
+      }
     });
   }
 
