@@ -23,6 +23,7 @@ public class Grade implements IsSerializable {
   public int resultID;
   public int grade;
   public int grader;
+  public int gradeIndex;
   public String gradeType;
 
   public Grade() {}
@@ -34,20 +35,21 @@ public class Grade implements IsSerializable {
    * @param grader
    * @param gradeType
    */
-  public Grade(int resultID, int grade, int grader, String gradeType) {
-    this(UNASSIGNED, "", resultID,grade,grader,gradeType);
+  public Grade(int resultID, int grade, int grader, String gradeType, int gradeIndex) {
+    this(UNASSIGNED, "", resultID,grade,grader,gradeType,gradeIndex);
   }
     /**
     * @see mitll.langtest.server.database.GradeDAO#getGradesForSQL(String)
     *
     */
-  public Grade(int id, String exerciseID, int resultID, int grade, int grader, String gradeType) {
+  public Grade(int id, String exerciseID, int resultID, int grade, int grader, String gradeType, int gradeIndex) {
     this.id = id;
     this.exerciseID = exerciseID;
     this.resultID = resultID;
     this.grade  = grade;
     this.grader  = grader;
     this.gradeType = gradeType;
+    this.gradeIndex = gradeIndex;
   }
 
   @Override
@@ -64,6 +66,6 @@ public class Grade implements IsSerializable {
   public String toString() {
     String idToShow = id == UNASSIGNED ? "UNASSIGNED" : ""+id;
     return "ID = " + idToShow +"\t: exercise "+exerciseID +"\t: result " + resultID + "\t= " + grade +
-        " by user id = " + grader + " type " +gradeType ;
+        " by user id = " + grader + " type " +gradeType + " index " +gradeIndex;
   }
 }
