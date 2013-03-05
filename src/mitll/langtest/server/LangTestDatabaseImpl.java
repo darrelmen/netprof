@@ -76,7 +76,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private ASRScoring asrScoring;
   private AutoCRT autoCRT;
   private boolean makeFullURLs = false;
-  private Properties props = null;
   private String relativeConfigDir;
   private String configDir;
   private ServerProperties serverProps = new ServerProperties();
@@ -141,7 +140,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public boolean deploySite(long id, String name, String language, String notes) {
     SiteDeployer siteDeployer = new SiteDeployer();
-    return siteDeployer.deploySite(db,new MailSupport(props),getThreadLocalRequest(),configDir,getInstallPath(),id,name,language,notes);
+    return siteDeployer.deploySite(db, getMailSupport(),getThreadLocalRequest(),configDir,getInstallPath(),id,name,language,notes);
   }
 
   /**
@@ -237,7 +236,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.exercise.ExerciseList#getExercises(long)
    */
   public List<Exercise> getExercises(long userID, boolean arabicDataCollect) {
-    String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
+    String lessonPlanFile = getLessonPlan();
 
     synchronized (this) {
       if (autoCRT == null) {
@@ -731,7 +730,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     long l = db.addUser(getThreadLocalRequest(),age, gender, experience, firstName, lastName, nativeLang, dialect, userID);
 
     if (l != 0 && serverProps.isDataCollectAdminView) {
-      new SiteDeployer().sendNewUserEmail(new MailSupport(props), getThreadLocalRequest(), userID);
+      new SiteDeployer().sendNewUserEmail(getMailSupport(), getThreadLocalRequest(), userID);
     }
 
     return l;
@@ -878,8 +877,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public void sendEmail(int userID, String to, String replyTo, String subject, String message, String token) {
     HttpServletRequest threadLocalRequest = getThreadLocalRequest();
-    new MailSupport(props).sendEmail(threadLocalRequest.getServerName(),new SiteDeployer().getBaseUrl(threadLocalRequest),
-      to,replyTo,subject,message,token);
+    getMailSupport().sendEmail(threadLocalRequest.getServerName(), new SiteDeployer().getBaseUrl(threadLocalRequest),
+      to, replyTo, subject, message, token);
+  }
+
+  private MailSupport getMailSupport() {
+    return new MailSupport(serverProps.isDebugEMail());
   }
 
   private String optionallyMakeURL(String wavPathWithForwardSlashSeparators) {
@@ -1002,18 +1005,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
 
   public void init() {
-    serverProps.readProperties(getServletContext());
+    readProperties(getServletContext());
     setInstallPath(serverProps.getUseFile());
   }
 
   private String setInstallPath(boolean useFile) {
-    String lessonPlanFile = configDir + File.separator + props.get("lessonPlanFile");
+    String lessonPlanFile = getLessonPlan();
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
     //logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
     db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, serverProps.isUrdu, useFile);
 
     return lessonPlanFile;
+  }
+
+  private String getLessonPlan() {
+    return configDir + File.separator + serverProps.getLessonPlan();
   }
 
   /**
@@ -1032,7 +1039,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     serverProps.readPropertiesFile(servletContext, configDir);
 
     String h2DatabaseFile = serverProps.getH2Database();
-    db = new DatabaseImpl(configDir, h2DatabaseFile,!props.getProperty("showSections", "false").equals("false"));
+    db = new DatabaseImpl(configDir, h2DatabaseFile,serverProps.isShowSections());
   }
 
   private class DirAndName {
