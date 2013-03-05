@@ -37,8 +37,10 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
+import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
+import mitll.langtest.client.mail.MailDialog;
 import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
@@ -71,6 +73,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Panel currentExerciseVPanel = new VerticalPanel();
   private ListInterface exerciseList;
   private Label status;
+  //private HTML lineBelowTitle;
   private UserManager userManager;
   private final UserTable userTable = new UserTable();
   private ResultManager resultManager;
@@ -86,6 +89,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
   private PropertyHandler props;
+/*
+  private String emailSubject;
+  private String emailMessage;
+  private String emailToken;
+*/
 
   /**
    * Make an exception handler that displays the exception.
@@ -145,7 +153,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
 
     userManager = new UserManager(this,service, isCollectAudio(), false);
-    resultManager = new ResultManager(service, this);
+    resultManager = new ResultManager(service, this, props.getNameForAnswer());
     monitoringManager = new MonitoringManager(service, props);
     boolean usualLayout = props.getExercise_title() == null;
     final DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
@@ -162,7 +170,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // header/title line
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
-    HTML title = new HTML("<h1>" + props.getAppTitle() + "</h1>");
+    Widget title = getTitleWidget();
    // browserCheck.getBrowserAndVersion();
     hp.addEast(getLogout(), eastWidth);
     hp.add(title);
@@ -206,6 +214,30 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setupSoundManager();
 
     modeSelect();
+  }
+
+  /**
+   * @see mitll.langtest.client.exercise.SectionExerciseList#getEmailWidget()
+   * @param subject
+   * @param linkTitle
+   * @param token
+   */
+  @Override
+  public void showEmail(final String subject, final String linkTitle, final String token) {
+    new MailDialog(service, userManager).showEmail(subject, linkTitle, token);
+  }
+
+  private Widget getTitleWidget() {
+    //if (props.isShowSections()) {
+    HTML title = new HTML("<h1>" + props.getAppTitle() + "</h1>");
+   // VerticalPanel vp = new VerticalPanel();
+    DockLayoutPanel vp = new DockLayoutPanel(Style.Unit.PX);
+  //  lineBelowTitle = new HTML("");
+   // vp.addSouth(lineBelowTitle, 20);
+    vp.add(title);
+    vp.setWidth("100%");
+    return vp;
+    //}
   }
 
   private void setPageTitle() {
@@ -319,13 +351,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (isGrading) {
       this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback,
           true, props.isEnglishOnlyMode());
-    }
-    else {
-      this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback,
+    } else {
+      if (props.isShowSections()) {
+        this.exerciseList = new SectionExerciseList(currentExerciseVPanel, service, feedback,
+          isArabicTextDataCollect(), props.isShowTurkToken(), isAutoCRTMode());
+     } else {
+        this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback,
           isArabicTextDataCollect(), props.isShowTurkToken(), isAutoCRTMode()) {
-        @Override
-        protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
-      };
+          @Override
+          protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
+        };
+      }
     }
 
     if (showOnlyOneExercise()) {
@@ -366,6 +402,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     users.setVisible(isGrading || props.isAdminView());
     showResults.setVisible(isGrading || props.isAdminView());
     monitoring.setVisible(isGrading || props.isAdminView());
+
 
     if (props.isGoodwaveMode() || isAutoCRTMode()) {   // no login for pron mode
       gotUser(-1);
@@ -522,8 +559,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see ExerciseList#loadExercise
    * @see #modeSelect()
+   * @see ExerciseList#checkBeforeLoad(mitll.langtest.shared.ExerciseShell)
    */
   public void login() {
     if (props.isDataCollectMode() || props.isTeacherView()) userManager.teacherLogin();
@@ -541,7 +578,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
-//    System.out.println("got user " +userID);
+    System.out.println("gotUser : got user " +userID);
     if (props.isDataCollectAdminView()) {
       checkForAdminUser();
     } else {
@@ -649,4 +686,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean loadNextExercise(Exercise current) { return exerciseList.loadNextExercise(current);  }
   public boolean loadPreviousExercise(Exercise current) { return exerciseList.loadPreviousExercise(current);  }
   public boolean onFirst(Exercise current) { return exerciseList.onFirst(current); }
+
+/*  @Override
+  public void setEmailSubject(String emailSubject) {
+    this.emailSubject = emailSubject;
+  }
+
+  @Override
+  public void setEmailMessage(String emailMessage) {
+    this.emailMessage = emailMessage;
+  }
+
+  @Override
+  public void setEmailToken(String e) {
+     emailToken =e;
+  }*/
 }
