@@ -116,7 +116,7 @@ public class GradingResultManager extends ResultManager {
         Grade choice = resultToGrade.get(result.uniqueID);
         if (choice == null) {
           String gradeType = englishOnlyMode ? gradingColumnIndex == 0 ? GRADE_TYPE_ANY : ENGLISH_ONLY : GRADE_TYPE_ANY;
-          choice = new Grade(result.uniqueID,grade,grader,gradeType);
+          choice = new Grade(result.uniqueID,grade,grader,gradeType,gradingColumnIndex);
           System.out.println("getGradingColumn making new grade " + choice + " for " + result);
           addGrade(result.id, choice, result.uniqueID, resultToGrade);
         }
@@ -170,9 +170,11 @@ public class GradingResultManager extends ResultManager {
       Integer resultID = idToGrades.getKey();
       List<Grade> gradesForResult = getGradesSortedById(idToGrades);
       if (!englishOnlyMode) {
-        if (gradingColumnIndex < gradesForResult.size()) {
-          Grade choice = gradesForResult.get(gradingColumnIndex);
-          resultToGradeForColumn.put(resultID, choice);
+
+        for (Grade choice : gradesForResult) {
+          if (choice.gradeIndex == gradingColumnIndex) {
+            resultToGradeForColumn.put(resultID, choice);
+          }
         }
       } else {
         if (gradesForResult.size() == 2) {
@@ -253,14 +255,11 @@ public class GradingResultManager extends ResultManager {
    * @param resultToGrade
    */
   private void addGrade(String exerciseID, final Grade toAdd, final int resultID, final Map<Integer, Grade> resultToGrade) {
-    System.out.println("addGrade for exercise " + exerciseID + " : grade " + toAdd + " at " + new Date() +
-      " result->grade has " + resultToGrade.size());
+/*    System.out.println("addGrade for exercise " + exerciseID + " : grade " + toAdd + " at " + new Date() +
+      " result->grade has " + resultToGrade.size());*/
 
     service.addGrade(exerciseID, toAdd, new AsyncCallback<CountAndGradeID>() {
-      public void onFailure(Throwable caught) {
-        Window.alert("Couldn't contact server.");
-      }
-
+      public void onFailure(Throwable caught) { Window.alert("Couldn't contact server."); }
       public void onSuccess(CountAndGradeID result) {
         feedback.showStatus("Now " + result.count + " graded answers.");
         toAdd.id = (int) result.gradeID;
@@ -268,13 +267,6 @@ public class GradingResultManager extends ResultManager {
         System.out.println("\tgrade added at " + new Date() + " adding result " + resultID + " -> grade " + toAdd +
           ", now " + resultToGrade.size() + " grades for result");
       }
-
-      /*
-        remainingResults.remove(answerToGrade.uniqueID);
-        if (remainingResults.isEmpty()) {
-         // panel.recordCompleted(panel);
-        }
-      */
     });
   }
 
@@ -284,14 +276,9 @@ public class GradingResultManager extends ResultManager {
    */
   private void changeGrade(final Grade toChange) {
     service.changeGrade(toChange, new AsyncCallback<Void>() {
-      public void onFailure(Throwable caught) {
-        Window.alert("Couldn't contact server.");
-      }
-
+      public void onFailure(Throwable caught) {  Window.alert("Couldn't contact server."); }
       public void onSuccess(Void result) {
         feedback.showStatus("Grade changed to " + getStringForGrade(toChange.grade));
-
-        // System.out.println("changeGrade " + toChange);
       }
     }
     );

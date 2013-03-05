@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -41,10 +42,10 @@ public class ResultDAO extends DAO {
   private ScheduleDAO scheduleDAO ;
   private boolean debug = false;
 
-  public ResultDAO(Database database) {
+  public ResultDAO(Database database, UserDAO userDAO) {
     super(database);
 
-    gradeDAO = new GradeDAO(database);
+    gradeDAO = new GradeDAO(database, userDAO);
     scheduleDAO = new ScheduleDAO(database);
   }
 
@@ -171,27 +172,34 @@ public class ResultDAO extends DAO {
    */
   private List<Result> getResultsForExercise(String exerciseID, Collection<Grade> gradedResults, int expected, boolean useEnglishGrades) {
     try {
-      List<Result> resultsForQuery = getAllResultsForExercise(exerciseID);
-      //enrichResults(resultsForQuery,exerciseID);
-      if (debug) logger.debug("for " + exerciseID + " expected " + expected +
-          " before " + resultsForQuery.size() + " results, and " + gradedResults.size() + " grades");
+      List<Result> resultsForExercise = getAllResultsForExercise(exerciseID);
+      //enrichResults(resultsForExercise,exerciseID);
+      if (debug && !resultsForExercise.isEmpty()) logger.debug("for " + exerciseID + " expected " + expected +
+          " before " + resultsForExercise.size() + " results, and " + gradedResults.size() + " grades");
+      if (resultsForExercise.isEmpty()) {
+        return resultsForExercise;
+      }
 
       // conditionally narrow down to only english results
       // hack!
-      for (Iterator<Result> iter = resultsForQuery.iterator(); iter.hasNext(); ) {
+      for (Iterator<Result> iter = resultsForExercise.iterator(); iter.hasNext(); ) {
         Result next = iter.next();
         if (useEnglishGrades && next.flq || next.userid == -1) {
           iter.remove();
         }
       }
 
-      if (debug) logger.debug("\tafter removing flq " + resultsForQuery.size());
+      if (debug && false) logger.debug("\tafter removing flq " + resultsForExercise.size());
 
       // count the number of grades for each result
       Map<Integer,Integer> idToCount = new HashMap<Integer, Integer>();
       Set<Integer> englishResultsWithGrades = new HashSet<Integer>();
 
+      int countAtIndex = 0;
       for (Grade g : gradedResults) {
+        if (g.gradeIndex == expected-1 && g.grade != Grade.UNASSIGNED) {
+          countAtIndex++;
+        }
         Integer countForResult = idToCount.get(g.resultID);
         if (g.grade == Grade.UNASSIGNED) {
           if (debug) logger.debug("\tgetResultsForExercise : skipping grade " + g); // TODO make sure it skips only ungraded items and that we see ungraded items when we look for the next ungraded exercise
@@ -199,6 +207,7 @@ public class ResultDAO extends DAO {
         else {
           if (debug) logger.debug("\tgetResultsForExercise : including grade " + g);
 
+          if (g.gradeIndex == 0)
           if (countForResult == null) idToCount.put(g.resultID, 1);
           else {
             idToCount.put(g.resultID, countForResult + 1);
@@ -208,11 +217,21 @@ public class ResultDAO extends DAO {
           }
         }
       }
+      if (countAtIndex == resultsForExercise.size()) {
+        if (countAtIndex > 0) {
+          logger.debug("found " +countAtIndex + " at index " + expected + " for " + exerciseID);
+        }
+        return Collections.emptyList();
+      }
+      else {
+        logger.debug("continuing, found " +countAtIndex + " at index " + expected + " for " + exerciseID +
+          " given " + resultsForExercise.size() + " results");
+      }
       if (debug) System.out.println("\t map of result->count for result "+ idToCount.size());
 
       // now go back through the list of results and remove all those that have the number of grades we require
       // for this grading -- i.e. for english only grading we expect to have two...
-      for (Iterator<Result> iter = resultsForQuery.iterator(); iter.hasNext();) {
+      for (Iterator<Result> iter = resultsForExercise.iterator(); iter.hasNext();) {
         Result next = iter.next();
         Integer count = idToCount.get(next.uniqueID);
         if (count != null && count >= expected || (useEnglishGrades && englishResultsWithGrades.contains(next.uniqueID))) {
@@ -228,10 +247,12 @@ public class ResultDAO extends DAO {
           //System.out.println("NOT removing graded item for result " + next + " count = " + count);
         }
       }
-      if (debug || !resultsForQuery.isEmpty()) logger.debug("\tExercise #" + exerciseID + " : " +
-          "after removing graded items count = " + resultsForQuery.size());
+      if (debug && !resultsForExercise.isEmpty()) {
+        logger.debug("\tExercise #" + exerciseID + " : " +
+          "after removing graded items count = " + resultsForExercise.size());
+      }
 
-      return resultsForQuery;
+      return resultsForExercise;
     } catch (Exception ee) {
       ee.printStackTrace();
     }
