@@ -1,11 +1,34 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.CountAndGradeID;
+import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.Result;
+import mitll.langtest.shared.ResultsAndGrades;
+import mitll.langtest.shared.Session;
+import mitll.langtest.shared.Site;
+import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Note with H2 that :  <br></br>
@@ -22,20 +45,17 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class DatabaseImpl implements Database {
-  private static final int KB = (1024);
   private static Logger logger = Logger.getLogger(DatabaseImpl.class);
 
   private static final boolean DROP_USER = false;
   private static final boolean DROP_RESULT = false;
-  private Map<Long, List<Schedule>> userToSchedule;
 
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
   private final UserDAO userDAO = new UserDAO(this);
-  private final ResultDAO resultDAO = new ResultDAO(this);
-  public final AnswerDAO answerDAO = new AnswerDAO(this);
-  private final GradeDAO gradeDAO = new GradeDAO(this);
-  private final GraderDAO graderDAO = new GraderDAO(this);
+  private final ResultDAO resultDAO = new ResultDAO(this,userDAO);
+  private final AnswerDAO answerDAO = new AnswerDAO(this);
+  private final GradeDAO gradeDAO = new GradeDAO(this,userDAO);
   private final SiteDAO siteDAO = new SiteDAO(this, userDAO);
 
   private DatabaseConnection connection = null;
@@ -48,17 +68,20 @@ public class DatabaseImpl implements Database {
   private String mediaDir;
   private boolean isUrdu;
   private boolean useFile;
+  private final boolean showSections;
 
   /**
+   * Just for testing
    * @param configDir
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    */
   public DatabaseImpl(String configDir) {
-    this(configDir, "vlr-parle");
+    this(configDir, "vlr-parle", false);
   }
 
-  public DatabaseImpl(String configDir, String dbName) {
+  public DatabaseImpl(String configDir, String dbName, boolean showSections) {
     connection = new H2Connection(configDir, dbName);
+    this.showSections = showSections;
     try {
       boolean open = getConnection() != null;
       if (!open) {
@@ -74,6 +97,9 @@ public class DatabaseImpl implements Database {
     monitoringSupport = getMonitoringSupport();
   }
 
+  /**
+   * Create or alter tables as needed.
+   */
   private void initializeDAOs() {
     if (DROP_USER) {
       try {
@@ -96,7 +122,7 @@ public class DatabaseImpl implements Database {
     try {
       // gradeDAO.dropGrades();
       gradeDAO.createGradesTable(getConnection());
-      graderDAO.createGraderTable(getConnection());
+      //graderDAO.createGraderTable(getConnection());
       //userDAO.dropUserTable(this);
 
       userDAO.createUserTable(this);
@@ -110,6 +136,8 @@ public class DatabaseImpl implements Database {
   public Connection getConnection() throws Exception {
     return connection.getConnection();
   }
+
+  public void closeConnection(Connection connection) throws SQLException {}
 
   public Export getExport() {
     return new Export(exerciseDAO,resultDAO,gradeDAO);
@@ -125,7 +153,7 @@ public class DatabaseImpl implements Database {
    * @return
    */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    return useFile ? new FileExerciseDAO(mediaDir, isUrdu) : new SQLExerciseDAO(this, mediaDir);
+    return useFile ? new FileExerciseDAO(mediaDir, isUrdu, showSections) : new SQLExerciseDAO(this, mediaDir);
   }
 
   /**
@@ -150,9 +178,11 @@ public class DatabaseImpl implements Database {
 
   public Map<String, Collection<String>> getTypeToSection() {
     getExercises();
-/*    boolean isExcel = lessonPlanFile.endsWith(".xlsx");
-    makeDAO(useFile, lessonPlanFile, isExcel);*/
     return exerciseDAO.getTypeToSections();
+  }
+
+  public Map<String, List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
+    return exerciseDAO.getTypeToSectionsForTypeAndSection(type, section);
   }
 
   public Collection<Exercise> getExercisesForSection(String type, String section) {
@@ -163,9 +193,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
    * @return
    */
-  public List<Exercise> getExercises() {
-    return getExercises(useFile, lessonPlanFile);
-  }
+  public List<Exercise> getExercises() { return getExercises(useFile, lessonPlanFile); }
 
   /**
    *
@@ -195,7 +223,7 @@ public class DatabaseImpl implements Database {
   }
 
   private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel) {
-    if (exerciseDAO == null) {// || useFile && exerciseDAO instanceof SQLExerciseDAO || !useFile && exerciseDAO instanceof FileExerciseDAO) {
+    if (exerciseDAO == null) {
       if (useFile && excel) {
         this.exerciseDAO = new ExcelImport(lessonPlanFile);
       }
@@ -206,7 +234,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   *
+   * TODO : consider how to make this faster, not have split between 1 and more than 1 case
    *
    * @param activeExercises
    * @param expectedCount
@@ -257,8 +285,9 @@ public class DatabaseImpl implements Database {
    * @param activeExercises
    * @param expectedCount
    * @param filterResults
-   *@param useFLQ
-   * @param useSpoken @return next exercise containing ungraded results
+   * @param useFLQ
+   * @param useSpoken
+   * @return next exercise containing ungraded results
    */
   private Exercise getNextUngradedExerciseQuick(Collection<String> activeExercises, int expectedCount,
                                                 boolean filterResults, boolean useFLQ, boolean useSpoken) {
@@ -266,14 +295,10 @@ public class DatabaseImpl implements Database {
     Collection<Result> resultExcludingExercises = resultDAO.getResultExcludingExercises(activeExercises);
 
     GradeDAO.GradesAndIDs allGradesExcluding = gradeDAO.getAllGradesExcluding(activeExercises);
-    Map<Integer, Integer> idToCount = new HashMap<Integer, Integer>();
-    for (Grade g : allGradesExcluding.grades) {
-      if (!idToCount.containsKey(g.resultID)) idToCount.put(g.resultID, 1);
-      else idToCount.put(g.resultID, 2);
-    }
+    Map<Integer, Integer> idToCount = getResultIdToGradeCount(expectedCount, allGradesExcluding);
     logger.info("getNextUngradedExerciseQuick found " + resultExcludingExercises.size() + " results, " +
         "expected " + expectedCount + ", " + allGradesExcluding.resultIDs.size() + " graded results");
-
+    //logger.debug("idToCount = " + idToCount);
     // remove results that have grades...
     Iterator<Result> iterator = resultExcludingExercises.iterator();
     while (iterator.hasNext()) {
@@ -289,7 +314,9 @@ public class DatabaseImpl implements Database {
         //logger.debug("getNextUngradedExercise excluding " + result + " since no match for flq = " + useFLQ + " and spoken = " +useSpoken);
         iterator.remove();
       }
-      else if (numGrades != null) System.out.println("\tfound grade " + numGrades + " for " +result +"?");
+      else if (numGrades != null) {
+        logger.warn("\tfound grade " + numGrades + " for " +result +"?");
+      }
     }
 
     logger.debug("getNextUngradedExercise after removing graded, there were " + resultExcludingExercises.size() + " results");
@@ -297,15 +324,12 @@ public class DatabaseImpl implements Database {
     // whatever remains, find first exercise
 
     SortedSet<String> exids = new TreeSet<String>();
-    //int n = 0;
     for (Result r : resultExcludingExercises) {
-      //if (n++ < 10) System.out.println("ungraded include " + r + " and grade " + idToCount.get(r.uniqueID));
       exids.add(r.id);
     }
     if (exids.isEmpty()) return null;
     else {
       //System.out.println("getNextUngradedExercise candidates are   " + exids);
-
       String first = exids.first();
       for (Exercise e : rawExercises) {
         if (e.getID().equals(first)) {
@@ -322,6 +346,20 @@ public class DatabaseImpl implements Database {
     return null;
   }
 
+  private Map<Integer, Integer> getResultIdToGradeCount(int expectedCount, GradeDAO.GradesAndIDs allGradesExcluding) {
+    Map<Integer, Integer> idToCount = new HashMap<Integer, Integer>();
+    for (Grade g : allGradesExcluding.grades) {
+      if (g.gradeIndex == expectedCount - 1) {
+        if (!idToCount.containsKey(g.resultID)) {
+          idToCount.put(g.resultID, 1);
+        } else {
+          idToCount.put(g.resultID, idToCount.get(g.resultID) + 1);
+        }
+      }
+    }
+    return idToCount;
+  }
+
   /**
    *
    *
@@ -332,37 +370,8 @@ public class DatabaseImpl implements Database {
    */
   public List<Exercise> getExercises(long userID) {
     logger.info("getExercises : for user  " + userID);
-    if (userID == -1) {
-      return getExercises(useFile, lessonPlanFile);
-    }
-
-    if (userToSchedule == null) {
-      ScheduleDAO scheduleDAO = new ScheduleDAO(this);
-      this.userToSchedule = scheduleDAO.getSchedule();
-    }
-    List<Schedule> forUser = userToSchedule.get(userID);
-    if (forUser == null) {
-      logger.warn("no schedule for user " + userID);
-      return getExercises(useFile, lessonPlanFile);
-    }
-    List<Exercise> exercises = new ArrayList<Exercise>();
-
-    List<Exercise> rawExercises = getExercises();
-    Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
-    for (Exercise e : rawExercises) {
-      idToExercise.put(e.getID(), e);
-    }
-    for (Schedule s : forUser) {
-      Exercise exercise = idToExercise.get(s.exid);
-      if (exercise == null) {
-        logger.warn("no exercise for id " + s.exid + "? Foreign key constraint violated???");
-        continue;
-      }
-      exercise.setPromptInEnglish(!s.flQ);
-      exercise.setRecordAnswer(s.spoken);
-      exercises.add(exercise);
-    }
-    return exercises;
+    List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
+    return Collections.unmodifiableList(exercises);
   }
 
   /**
@@ -379,9 +388,9 @@ public class DatabaseImpl implements Database {
     populateInitialExerciseIDToCount(idToExercise, idToCount);
 
     // only find answers that are for the gender
-    getExerciseIDToResultCount(userDAO.isUserMale(userID), idToCount);
+    Collection<String> alreadyAnswered = getExerciseIDToResultCount(userID, idToCount);
 
-    Map<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
+    SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
     return getResultsRandomizedPerUser(userID, idToExercise, countToIds);
   }
 
@@ -403,7 +412,7 @@ public class DatabaseImpl implements Database {
     boolean isMale = userDAO.isUserMale(userID);
 
     Map<String, Integer> idToCountOutside =
-        new OutsideCount().getExerciseIDToOutsideCount(isMale, outsideFile,getExercises());
+        new OutsideCount().getExerciseIDToOutsideCount(isMale, outsideFile, getExercises());
 
     //  logger.info("map of outside counts is size = " + idToCountOutside.size() +" " + idToCountOutside.values().size());
     for (Map.Entry<String, Integer> pair : idToCountOutside.entrySet()) {
@@ -413,10 +422,10 @@ public class DatabaseImpl implements Database {
     }
 
     // only find answers that are for the gender
-    getExerciseIDToResultCount(userDAO.isUserMale(userID), idToCount);
+    getExerciseIDToResultCount(userID, idToCount);
 
     // now make a map of count at this number to exercise ids for these numbers
-    Map<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
+    SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
 
     return getResultsRandomizedPerUser(userID, idToExercise, countToIds);
   }
@@ -432,11 +441,15 @@ public class DatabaseImpl implements Database {
    * @param countToIds statistics about answers for each exercise
    * @return List of exercises in order from least answers to most
    */
-  private List<Exercise> getResultsRandomizedPerUser(long userID, Map<String, Exercise> idToExercise, Map<Integer, List<String>> countToIds) {
+  private List<Exercise> getResultsRandomizedPerUser(long userID, Map<String, Exercise> idToExercise,
+                                                     SortedMap<Integer, List<String>> countToIds) {
     List<Exercise> result = new ArrayList<Exercise>();
     Random rnd = new Random(userID);
 
-    for (List<String> itemsAtCount : countToIds.values()) {
+    for (Map.Entry<Integer, List<String>> pair : countToIds.entrySet()) {
+      Integer count = pair.getKey();
+      List<String> itemsAtCount = pair.getValue();
+      //logger.debug("for count = " + count + " " +itemsAtCount.size() + " items");
       Collections.shuffle(itemsAtCount, rnd);
       for (String id : itemsAtCount) {
         Exercise e = idToExercise.get(id);
@@ -447,15 +460,19 @@ public class DatabaseImpl implements Database {
     return result;
   }
 
-  private Map<Integer, List<String>> getCountToExerciseIDs(Map<String, Integer> idToCount) {
-    Map<Integer,List<String>> countToIds = new TreeMap<Integer, List<String>>();
+  /**
+   * Reverse the map -- make a map of result count->list of ids at that count
+   * @param idToCount
+   * @return
+   */
+  private SortedMap<Integer, List<String>> getCountToExerciseIDs(Map<String, Integer> idToCount) {
+    SortedMap<Integer,List<String>> countToIds = new TreeMap<Integer, List<String>>();
     for (Map.Entry<String,Integer> pair : idToCount.entrySet()) {
-      List<String> idsAtCount = countToIds.get(pair.getValue());
-      if (idsAtCount == null) { countToIds.put(pair.getValue(), idsAtCount = new ArrayList<String>()); }
+      Integer countAtID = pair.getValue();
+      List<String> idsAtCount = countToIds.get(countAtID);
+      if (idsAtCount == null) { countToIds.put(countAtID, idsAtCount = new ArrayList<String>()); }
       idsAtCount.add(pair.getKey());
     }
-    //logger.info("map is " +countToIds);
-    //for (Integer c: countToIds.keySet()) logger.info("count = " +c + " : " + countToIds.get(c).size() );
     return countToIds;
   }
 
@@ -467,17 +484,50 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  private void getExerciseIDToResultCount(boolean userMale, Map<String, Integer> idToCount) {
+  /**
+   * multiple responses by the same user count as one in count->id map.
+   *
+   * @see #getExercisesBiasTowardsUnanswered(long)
+   * @see #getExercisesBiasTowardsUnanswered(long,String)
+   * @param userID
+   * @paramx userMale
+   * @param idToCount exercise id->count
+   */
+  private Collection<String> getExerciseIDToResultCount(long userID, Map<String, Integer> idToCount) {
+    boolean userMale = userDAO.isUserMale(userID);
     Map<Long, User> userMap = userDAO.getUserMap(userMale);
     List<Result> results = getResults();
-    for (Result r: results ) {
+    List<String> alreadyAnsweredByThisUser = new ArrayList<String>();
+    Map<String, Set<Long>> keyToUsers = new HashMap<String, Set<Long>>();
+
+    for (Result r : results) {
       Integer current = idToCount.get(r.id);
-      if (current != null) {
-        if (userMap.containsKey(r.userid)) {
-          idToCount.put(r.id,current+1);
+      if (current != null) {  // unlikely not null
+        if (userMap.containsKey(r.userid)) { // only get male or female results
+          String key = r.id;
+          Set<Long> usersForResult = keyToUsers.get(key);
+
+          if (usersForResult == null) {
+            keyToUsers.put(key, usersForResult = new HashSet<Long>());
+          }
+          if (!usersForResult.contains(r.userid)) {   // ignore re-recordings
+            usersForResult.add(r.userid);
+            Integer c = idToCount.get(key);
+            if (c == null) {
+              logger.warn("huh? key " + key + " not found?");
+              idToCount.put(key, 1);
+            } else {
+              idToCount.put(key, c + 1);
+            }
+          }
+        }
+        if (r.userid == userID) {
+          alreadyAnsweredByThisUser.add(r.id);
+          //logger.debug("user " + userID + " has already answered exercise " + r.id + " at result " + r.uniqueID);
         }
       }
     }
+    return alreadyAnsweredByThisUser;
   }
 
   private Random random = new Random();
@@ -597,7 +647,7 @@ public class DatabaseImpl implements Database {
   }
 
   public boolean isAdminUser(long id) {
-    User user = userDAO.getUserMap().get(id);
+    User user = getUser(id);
     return user != null && user.admin;
   }
 
@@ -606,8 +656,12 @@ public class DatabaseImpl implements Database {
   }
 
   public boolean isEnabledUser(long id) {
-    User user = userDAO.getUserMap().get(id);
+    User user = getUser(id);
     return user != null && user.enabled;
+  }
+
+  public User getUser(long id) {
+    return userDAO.getUserMap().get(id);
   }
 
 
@@ -620,9 +674,9 @@ public class DatabaseImpl implements Database {
       this.grades = grades;
     }
 
-    public void addGrade(Grade g) {
+/*    public void addGrade(Grade g) {
       grades.add(g);
-    }
+    }*/
 
     public void addGrades(List<Grade> grades) {
       this.grades.addAll(grades);
@@ -684,32 +738,48 @@ public class DatabaseImpl implements Database {
     }
   }
 
+  public long addUser(HttpServletRequest request, int age, String gender, int experience) {
+    // String header = request.getHeader("X-FORWARDED-FOR");
+    String ip = getIPInfo(request);
+    return addUser(age, gender, experience, ip);
+  }
+
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(int, String, int)
    * @param age
    * @param gender
    * @param experience
    * @param ipAddr
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(int, String, int)
    */
-  public long addUser(int age, String gender, int experience, String ipAddr) {
+  private long addUser(int age, String gender, int experience, String ipAddr) {
     return userDAO.addUser(age, gender, experience, ipAddr, "", "", "", "", "", false);
   }
 
-  public long addUser(int age, String gender, int experience, String ipAddr, String firstName, String lastName,
-                      String nativeLang,String dialect, String userID) {
+  public long addUser(HttpServletRequest request,
+                      int age, String gender, int experience, String firstName, String lastName,
+                      String nativeLang, String dialect, String userID) {
+    String ip = getIPInfo(request);
+    return addUser(age, gender, experience, ip, firstName, lastName, nativeLang, dialect, userID);
+  }
+
+  private String getIPInfo(HttpServletRequest request) {
+    String header = request.getHeader("User-Agent");
+    SimpleDateFormat sdf = new SimpleDateFormat();
+    String format = sdf.format(new Date());
+    return request.getRemoteHost() +/*"/"+ request.getRemoteAddr()+*/(header != null ? "/" + header : "") + " at " + format;
+  }
+
+  private long addUser(int age, String gender, int experience, String ipAddr, String firstName, String lastName,
+                      String nativeLang, String dialect, String userID) {
     return userDAO.addUser(age, gender, experience, ipAddr, firstName, lastName, nativeLang, dialect, userID, false);
   }
 
-
-  public List<User> getUsers() {
-    return userDAO.getUsers();
-  }
-
+  public List<User> getUsers() { return userDAO.getUsers(); }
 
   /**
    * Pulls the list of results out of the database.
@@ -717,8 +787,18 @@ public class DatabaseImpl implements Database {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(int, int)
    */
-  public List<Result> getResults() {
-    return resultDAO.getResults();
+  public List<Result> getResults() { return resultDAO.getResults(); }
+
+  public List<Result> getResultsWithGrades() {
+    List<Result> results = resultDAO.getResults();
+   // for (Result r:results) logger.debug("getResultsWithGrades got " + r);
+    Map<Integer,Result> idToResult = new HashMap<Integer, Result>();
+    for (Result r : results) idToResult.put(r.uniqueID, r);
+    for (Grade g : gradeDAO.getGrades()) {
+      Result result = idToResult.get(g.resultID);
+      result.addGrade(g);
+    }
+    return results;
   }
 
   public int getNumResults() { return resultDAO.getNumResults(); }
@@ -761,6 +841,12 @@ public class DatabaseImpl implements Database {
         boolean spoken = r.spoken;
         boolean flq = r.flq;
 
+        if (!spoken && r.answer.endsWith(".wav")) { // recover from badly marked results
+          spoken = true;
+          if (r.audioType.equals(Result.AUDIO_TYPE_UNSET)) {
+            flq = true;
+          }
+        }
         Map<Boolean, List<Result>> langToResult = spokenToLangToResult.get(spoken);
         if (langToResult == null)
           spokenToLangToResult.put(spoken, langToResult = new HashMap<Boolean, List<Result>>());
@@ -804,7 +890,7 @@ public class DatabaseImpl implements Database {
                              boolean valid, boolean flq, boolean spoken,
                              String audioType, int durationInMillis) {
     answerDAO.addAnswer(this, userID, plan, exerciseID, questionID, "", audioFile, valid, flq, spoken, audioType,
-        durationInMillis);
+      durationInMillis);
   }
 
   /**
@@ -825,19 +911,6 @@ public class DatabaseImpl implements Database {
     gradeDAO.changeGrade(toChange);
   }
 
-/*  public void addGrader(String login) {
-    graderDAO.addGrader(login);
-  }*/
-
-  /**
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#graderExists(String)
-   * @param login
-   * @return
-   */
-/*  public boolean graderExists(String login) {
-    return graderDAO.graderExists(login);
-  }*/
-
   public int userExists(String login) {
     return userDAO.userExists(login);
   }
@@ -857,7 +930,7 @@ public class DatabaseImpl implements Database {
   public Site getSiteByID(long id) { return siteDAO.getSiteByID(id); }
   public List<Site> getDeployedSites() { return siteDAO.getDeployedSites(); }
   public void deploy(Site site) { siteDAO.deploy(site); }
-  public Site updateSite(Site site, String name, String lang, String notes) { return siteDAO.updateSite(site,name,lang,notes); }
+  public Site updateSite(Site site, String name, String lang, String notes) { return siteDAO.updateSite(site, name, lang, notes); }
 
   /**
    * TODO : worry about duplicate userid?
@@ -901,7 +974,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * Split exid->count by gender.
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise(boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise
    * @return
    */
   public Map<String,List<Integer>> getResultPerExercise() { return monitoringSupport.getResultPerExercise(getExercises()); }
@@ -920,104 +993,4 @@ public class DatabaseImpl implements Database {
       logger.error("got " + e, e);
     }
   }
-
-  public void closeConnection(Connection connection) throws SQLException {}
-  private void logMemory() {
-    Runtime rt = Runtime.getRuntime();
-    long free = rt.freeMemory();
-    long used = rt.totalMemory()-free;
-    long max = rt.maxMemory();
-    logger.debug("heap info free " + free / KB + "K used " + used / KB + "K max " + max / KB + "K total " + rt.totalMemory()/KB + " K ");
-  }
-
-  public static void main(String[] arg) {
-/*    DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\mt_repo\\jdewitt\\pilot\\vlr-parle");
-    langTestDatabase.mediaDir = "C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\autocrt\\";
-     langTestDatabase.getExercises(false);
-     langTestDatabase.getClassifier();
-    double score = langTestDatabase.getScoreForExercise("bc-R10-k227",1,"bueller");
-    System.out.println("Score was " + score);
-    if (true) {
-*//*      List<ExerciseExport> exerciseNames = langTestDatabase.getExport(true, false);
-
-      System.out.println("names " + exerciseNames.size() + " e.g. " + exerciseNames.get(0));
-      for (ExerciseExport ee : exerciseNames) {
-        System.out.println("ee " + ee);
-      }*//*
-    } else {
-      //List<Exercise> exercises = langTestDatabase.getRandomBalancedList();
-
-    }*/
-
-    DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\DLITest\\","farsi2");
-    //langTestDatabase.setInstallPath("C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu","C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu\\5000-no-english.unvow.farsi.txt","",false);
-/*
-    List<Session> sessions = langTestDatabase.getSessions();
-    long total = 0;
-    for (Session s : sessions) {
-      System.out.println(s);
-      total += s.numAnswers;
-    }
-    System.out.println("total " + total);*/
-    System.gc();
-
-    langTestDatabase.logMemory();
-
-    for (int i = 0; i < 10000; i++) {
-      String whole = makeString();
-      langTestDatabase.answerDAO.addAnswer(langTestDatabase, 12, whole.substring(0,10), whole.substring(10,20), 0, "", "/path/to/file",
-          true, true, true, Result.AUDIO_TYPE_REGULAR, 5000);
-      if (i % 100 == 0) System.gc();
-      if (i % 100 == 0) langTestDatabase.logMemory();
-    }
-     System.gc();
-    langTestDatabase.logMemory();
-    try {
-      Thread.sleep(1000000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-    // langTestDatabase.
-    /*Map<Exercise, Integer> idToCount = langTestDatabase.getResultIdToCount(true,true);
-    writeMap(idToCount, "farsiMaleCounts.csv");
-    Map<Exercise, Integer> idToCount2 = langTestDatabase.getResultIdToCount(true,false);
-    writeMap(idToCount2,"farsiFemaleCounts.csv");
-
-    langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\DLITest\\","urdu");
-    langTestDatabase.setInstallPath("","C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu\\urdu-3684-no-english.txt","",false);
-    idToCount = langTestDatabase.getResultIdToCount(true,true);
-    writeMap(idToCount,"urduMaleCounts.csv");
-    idToCount2 = langTestDatabase.getResultIdToCount(true,false);
-    writeMap(idToCount2,"urduFemaleCounts.csv");
-*/
-//    langTestDatabase.getUserToResultCount();
-   // System.out.println("map " + langTestDatabase.getResultCountToCount());
-  }
-
-  private static String makeString() {
-    StringBuilder b = new StringBuilder(10000000);
-    char[] array = new char[10];
-    for (int i = 0; i < 10; i++) {
-      String s = "" + i;
-      array[i] = s.charAt(0);
-
-    }
-    for (int i = 0; i < 10000000; i++) {
-      char str = array[i%10];
-      b.append(str);
-    }
-    //System.err.print("string len " + b.length());
-    return b.toString();
-  }
-
-/*  private static void writeMap(Map<Exercise, Integer> idToCount2, String fileName) {
-    try {
-      Writer w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), "UTF-8"));
-      for (Map.Entry<Exercise, Integer> pair : idToCount2.entrySet())
-        w.write(pair.getKey().getID() + "," + pair.getValue() + "," + pair.getKey().getTooltip().trim()+ "\n");
-      w.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }*/
 }
