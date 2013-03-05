@@ -51,15 +51,18 @@ public class ResultManager extends PagerTable {
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
   private final AudioTag audioTag = new AudioTag();
+  private String nameForAnswer;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2
    * @param s
    * @param feedback
+   * @param nameForAnswer
    */
-  public ResultManager(LangTestDatabaseAsync s, UserFeedback feedback) {
+  public ResultManager(LangTestDatabaseAsync s, UserFeedback feedback, String nameForAnswer) {
     this.service = s;
     this.feedback = feedback;
+    this.nameForAnswer = nameForAnswer;
   }
 
   public void setFeedback(GradingExercisePanel panel) {}
@@ -71,7 +74,7 @@ public class ResultManager extends PagerTable {
   public void showResults() {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText("Answers");
+    dialogBox.setText(nameForAnswer+"s");
 
     // Enable glass background.
     dialogBox.setGlassEnabled(true);
@@ -224,7 +227,7 @@ public class ResultManager extends PagerTable {
     };
     audioFile.setSortable(true);
 
-    table.addColumn(audioFile, "Answer");
+    table.addColumn(audioFile, nameForAnswer);
 
     addResultColumn(grades, grader, numGrades, table);
     // Create a data provider.
@@ -238,11 +241,17 @@ public class ResultManager extends PagerTable {
         final int start = display.getVisibleRange().getStart();
         int end = start + display.getVisibleRange().getLength();
         end = end >= numResults ? numResults : end;
+        System.out.println("asking for " + start +"->" + end);
+        final int fend = end;
         service.getResults(start, end, new AsyncCallback<List<Result>>() {
           @Override
-          public void onFailure(Throwable caught) {}
+          public void onFailure(Throwable caught) {
+            Window.alert("Can't contact server.");
+          }
           @Override
           public void onSuccess(List<Result> result) {
+            System.out.println("createProvider : onSuccess for " + start +"->" + fend + " got " + result.size());
+
             updateRowData(start, result);
           }
         });
@@ -260,7 +269,13 @@ public class ResultManager extends PagerTable {
     TextColumn<Result> id = new TextColumn<Result>() {
       @Override
       public String getValue(Result answer) {
-        return "" + answer.userid;
+        if (answer == null) {
+          System.err.println("huh? answer is null??");
+          return "";
+        }
+        else {
+          return "" + answer.userid;
+        }
       }
     };
     id.setSortable(true);
@@ -324,6 +339,20 @@ public class ResultManager extends PagerTable {
     };
     valid.setSortable(true);
     table.addColumn(valid, "Valid");
+
+    TextColumn<Result> gradeInfo = new TextColumn<Result>() {
+      @Override
+      public String getValue(Result answer) {
+        if (answer.gradeInfo.endsWith(",")) {
+          return answer.gradeInfo.substring(0, answer.gradeInfo.length() - 1);
+        }
+        else {
+          return answer.gradeInfo;
+        }
+      }
+    };
+    valid.setSortable(true);
+    table.addColumn(gradeInfo, "Grades");
   }
 
 
