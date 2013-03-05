@@ -45,6 +45,11 @@ public class SQLExerciseDAO implements ExerciseDAO {
   }
 
   @Override
+  public Map<String, List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
+    return Collections.emptyMap();
+  }
+
+  @Override
   public Collection<Exercise> getExercisesForSection(String type, String section) {
     return Collections.emptyList();
   }
