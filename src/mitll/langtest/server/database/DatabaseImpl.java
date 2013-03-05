@@ -1,11 +1,31 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.CountAndGradeID;
+import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.Result;
+import mitll.langtest.shared.ResultsAndGrades;
+import mitll.langtest.shared.Session;
+import mitll.langtest.shared.Site;
+import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Note with H2 that :  <br></br>
@@ -22,20 +42,17 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class DatabaseImpl implements Database {
-  private static final int KB = (1024);
   private static Logger logger = Logger.getLogger(DatabaseImpl.class);
 
   private static final boolean DROP_USER = false;
   private static final boolean DROP_RESULT = false;
-  private Map<Long, List<Schedule>> userToSchedule;
 
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
   private final UserDAO userDAO = new UserDAO(this);
-  private final ResultDAO resultDAO = new ResultDAO(this);
-  public final AnswerDAO answerDAO = new AnswerDAO(this);
-  private final GradeDAO gradeDAO = new GradeDAO(this);
- // private final GraderDAO graderDAO = new GraderDAO(this);
+  private final ResultDAO resultDAO = new ResultDAO(this,userDAO);
+  private final AnswerDAO answerDAO = new AnswerDAO(this);
+  private final GradeDAO gradeDAO = new GradeDAO(this,userDAO);
   private final SiteDAO siteDAO = new SiteDAO(this, userDAO);
 
   private DatabaseConnection connection = null;
@@ -77,6 +94,9 @@ public class DatabaseImpl implements Database {
     monitoringSupport = getMonitoringSupport();
   }
 
+  /**
+   * Create or alter tables as needed.
+   */
   private void initializeDAOs() {
     if (DROP_USER) {
       try {
@@ -113,6 +133,8 @@ public class DatabaseImpl implements Database {
   public Connection getConnection() throws Exception {
     return connection.getConnection();
   }
+
+  public void closeConnection(Connection connection) throws SQLException {}
 
   public Export getExport() {
     return new Export(exerciseDAO,resultDAO,gradeDAO);
@@ -168,9 +190,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
    * @return
    */
-  public List<Exercise> getExercises() {
-    return getExercises(useFile, lessonPlanFile);
-  }
+  public List<Exercise> getExercises() { return getExercises(useFile, lessonPlanFile); }
 
   /**
    *
@@ -200,7 +220,7 @@ public class DatabaseImpl implements Database {
   }
 
   private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel) {
-    if (exerciseDAO == null) {// || useFile && exerciseDAO instanceof SQLExerciseDAO || !useFile && exerciseDAO instanceof FileExerciseDAO) {
+    if (exerciseDAO == null) {
       if (useFile && excel) {
         this.exerciseDAO = new ExcelImport(lessonPlanFile);
       }
@@ -211,7 +231,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   *
+   * TODO : consider how to make this faster, not have split between 1 and more than 1 case
    *
    * @param activeExercises
    * @param expectedCount
@@ -262,8 +282,9 @@ public class DatabaseImpl implements Database {
    * @param activeExercises
    * @param expectedCount
    * @param filterResults
-   *@param useFLQ
-   * @param useSpoken @return next exercise containing ungraded results
+   * @param useFLQ
+   * @param useSpoken
+   * @return next exercise containing ungraded results
    */
   private Exercise getNextUngradedExerciseQuick(Collection<String> activeExercises, int expectedCount,
                                                 boolean filterResults, boolean useFLQ, boolean useSpoken) {
@@ -271,14 +292,10 @@ public class DatabaseImpl implements Database {
     Collection<Result> resultExcludingExercises = resultDAO.getResultExcludingExercises(activeExercises);
 
     GradeDAO.GradesAndIDs allGradesExcluding = gradeDAO.getAllGradesExcluding(activeExercises);
-    Map<Integer, Integer> idToCount = new HashMap<Integer, Integer>();
-    for (Grade g : allGradesExcluding.grades) {
-      if (!idToCount.containsKey(g.resultID)) idToCount.put(g.resultID, 1);
-      else idToCount.put(g.resultID, 2);
-    }
+    Map<Integer, Integer> idToCount = getResultIdToGradeCount(expectedCount, allGradesExcluding);
     logger.info("getNextUngradedExerciseQuick found " + resultExcludingExercises.size() + " results, " +
         "expected " + expectedCount + ", " + allGradesExcluding.resultIDs.size() + " graded results");
-
+    //logger.debug("idToCount = " + idToCount);
     // remove results that have grades...
     Iterator<Result> iterator = resultExcludingExercises.iterator();
     while (iterator.hasNext()) {
@@ -294,7 +311,9 @@ public class DatabaseImpl implements Database {
         //logger.debug("getNextUngradedExercise excluding " + result + " since no match for flq = " + useFLQ + " and spoken = " +useSpoken);
         iterator.remove();
       }
-      else if (numGrades != null) System.out.println("\tfound grade " + numGrades + " for " +result +"?");
+      else if (numGrades != null) {
+        logger.warn("\tfound grade " + numGrades + " for " +result +"?");
+      }
     }
 
     logger.debug("getNextUngradedExercise after removing graded, there were " + resultExcludingExercises.size() + " results");
@@ -302,15 +321,12 @@ public class DatabaseImpl implements Database {
     // whatever remains, find first exercise
 
     SortedSet<String> exids = new TreeSet<String>();
-    //int n = 0;
     for (Result r : resultExcludingExercises) {
-      //if (n++ < 10) System.out.println("ungraded include " + r + " and grade " + idToCount.get(r.uniqueID));
       exids.add(r.id);
     }
     if (exids.isEmpty()) return null;
     else {
       //System.out.println("getNextUngradedExercise candidates are   " + exids);
-
       String first = exids.first();
       for (Exercise e : rawExercises) {
         if (e.getID().equals(first)) {
@@ -327,6 +343,20 @@ public class DatabaseImpl implements Database {
     return null;
   }
 
+  private Map<Integer, Integer> getResultIdToGradeCount(int expectedCount, GradeDAO.GradesAndIDs allGradesExcluding) {
+    Map<Integer, Integer> idToCount = new HashMap<Integer, Integer>();
+    for (Grade g : allGradesExcluding.grades) {
+      if (g.gradeIndex == expectedCount - 1) {
+        if (!idToCount.containsKey(g.resultID)) {
+          idToCount.put(g.resultID, 1);
+        } else {
+          idToCount.put(g.resultID, idToCount.get(g.resultID) + 1);
+        }
+      }
+    }
+    return idToCount;
+  }
+
   /**
    *
    *
@@ -337,39 +367,8 @@ public class DatabaseImpl implements Database {
    */
   public List<Exercise> getExercises(long userID) {
     logger.info("getExercises : for user  " + userID);
-    if (userID == -1 || true) {
-      List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
-      return Collections.unmodifiableList(exercises);
-     // return exercises;
-    }
-
-    if (userToSchedule == null) {
-      ScheduleDAO scheduleDAO = new ScheduleDAO(this);
-      this.userToSchedule = scheduleDAO.getSchedule();
-    }
-    List<Schedule> forUser = userToSchedule.get(userID);
-    if (forUser == null) {
-      logger.warn("no schedule for user " + userID);
-      return getExercises(useFile, lessonPlanFile);
-    }
-    List<Exercise> exercises = new ArrayList<Exercise>();
-
-    List<Exercise> rawExercises = getExercises();
-    Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
-    for (Exercise e : rawExercises) {
-      idToExercise.put(e.getID(), e);
-    }
-    for (Schedule s : forUser) {
-      Exercise exercise = idToExercise.get(s.exid);
-      if (exercise == null) {
-        logger.warn("no exercise for id " + s.exid + "? Foreign key constraint violated???");
-        continue;
-      }
-      exercise.setPromptInEnglish(!s.flQ);
-      exercise.setRecordAnswer(s.spoken);
-      exercises.add(exercise);
-    }
-    return exercises;
+    List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
+    return Collections.unmodifiableList(exercises);
   }
 
   /**
@@ -977,16 +976,4 @@ public class DatabaseImpl implements Database {
       logger.error("got " + e, e);
     }
   }
-
-  public void closeConnection(Connection connection) throws SQLException {}
-
-/*
-  private void logMemory() {
-    Runtime rt = Runtime.getRuntime();
-    long free = rt.freeMemory();
-    long used = rt.totalMemory()-free;
-    long max = rt.maxMemory();
-    logger.debug("heap info free " + free / KB + "K used " + used / KB + "K max " + max / KB + "K total " + rt.totalMemory()/KB + " K ");
-  }
-*/
 }
