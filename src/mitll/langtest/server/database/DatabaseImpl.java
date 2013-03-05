@@ -10,11 +10,14 @@ import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -671,9 +674,9 @@ public class DatabaseImpl implements Database {
       this.grades = grades;
     }
 
-    public void addGrade(Grade g) {
+/*    public void addGrade(Grade g) {
       grades.add(g);
-    }
+    }*/
 
     public void addGrades(List<Grade> grades) {
       this.grades.addAll(grades);
@@ -735,32 +738,48 @@ public class DatabaseImpl implements Database {
     }
   }
 
+  public long addUser(HttpServletRequest request, int age, String gender, int experience) {
+    // String header = request.getHeader("X-FORWARDED-FOR");
+    String ip = getIPInfo(request);
+    return addUser(age, gender, experience, ip);
+  }
+
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(int, String, int)
    * @param age
    * @param gender
    * @param experience
    * @param ipAddr
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(int, String, int)
    */
-  public long addUser(int age, String gender, int experience, String ipAddr) {
+  private long addUser(int age, String gender, int experience, String ipAddr) {
     return userDAO.addUser(age, gender, experience, ipAddr, "", "", "", "", "", false);
   }
 
-  public long addUser(int age, String gender, int experience, String ipAddr, String firstName, String lastName,
-                      String nativeLang,String dialect, String userID) {
+  public long addUser(HttpServletRequest request,
+                      int age, String gender, int experience, String firstName, String lastName,
+                      String nativeLang, String dialect, String userID) {
+    String ip = getIPInfo(request);
+    return addUser(age, gender, experience, ip, firstName, lastName, nativeLang, dialect, userID);
+  }
+
+  private String getIPInfo(HttpServletRequest request) {
+    String header = request.getHeader("User-Agent");
+    SimpleDateFormat sdf = new SimpleDateFormat();
+    String format = sdf.format(new Date());
+    return request.getRemoteHost() +/*"/"+ request.getRemoteAddr()+*/(header != null ? "/" + header : "") + " at " + format;
+  }
+
+  private long addUser(int age, String gender, int experience, String ipAddr, String firstName, String lastName,
+                      String nativeLang, String dialect, String userID) {
     return userDAO.addUser(age, gender, experience, ipAddr, firstName, lastName, nativeLang, dialect, userID, false);
   }
 
-
-  public List<User> getUsers() {
-    return userDAO.getUsers();
-  }
-
+  public List<User> getUsers() { return userDAO.getUsers(); }
 
   /**
    * Pulls the list of results out of the database.
@@ -768,9 +787,7 @@ public class DatabaseImpl implements Database {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(int, int)
    */
-  public List<Result> getResults() {
-    return resultDAO.getResults();
-  }
+  public List<Result> getResults() { return resultDAO.getResults(); }
 
   public List<Result> getResultsWithGrades() {
     List<Result> results = resultDAO.getResults();
