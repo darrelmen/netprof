@@ -221,6 +221,9 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     else if (controller.getAudioType().equals(Result.AUDIO_TYPE_REGULAR)) {
       instructions = prefix +REPEAT_ONCE;
     }
+    else {
+      System.out.println("audio type " + controller.getAudioType());
+    }
     String studentPrompt = SPEAK_AND_RECORD_YOUR_ANSWER_IN + (promptInEnglish ? ENGLISH : THE_FOREIGN_LANGUAGE) + " ";
     String teacherPrompt = TEACHER_PROMPT;
     return THREE_SPACES + (controller.isDataCollectMode() ? teacherPrompt : studentPrompt) + instructions;
