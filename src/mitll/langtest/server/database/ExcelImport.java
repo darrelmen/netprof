@@ -11,8 +11,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
-import scala.actors.threadpool.Arrays;
-import scala.collection.parallel.mutable.ParArray;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,6 +42,7 @@ public class ExcelImport implements ExerciseDAO {
   private List<Lesson> lessons = new ArrayList<Lesson>();
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
 
+
   private List<String> errors = new ArrayList<String>();
   private TeacherClass teacherClass;
   private final String file;
@@ -55,6 +54,11 @@ public class ExcelImport implements ExerciseDAO {
       typeToSection.put(key,typeToUnitToLesson.keySet());
     }
     return typeToSection;
+  }
+
+  @Override
+  public Map<String, List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
+    return null;
   }
 
   @Override
@@ -159,7 +163,7 @@ public class ExcelImport implements ExerciseDAO {
     }
     int id = 0;
     boolean gotHeader = false;
-    FileExerciseDAO dao = new FileExerciseDAO(null,false);
+    FileExerciseDAO dao = new FileExerciseDAO(null,false,false);
 
     int colIndexOffset = 0;
 
