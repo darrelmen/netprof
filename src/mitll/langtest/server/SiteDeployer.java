@@ -2,9 +2,11 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.ExcelImport;
+import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Lesson;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.User;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItem;
@@ -15,11 +17,15 @@ import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -38,6 +44,107 @@ public class SiteDeployer {
   public static final int MAX_FILE_SIZE = 10000000;
   public static final String UPLOAD_FORM_NAME = "upload";
   private static Logger logger = Logger.getLogger(SiteDeployer.class);
+
+  public boolean deploySite(DatabaseImpl db, MailSupport mailSupport,
+                            HttpServletRequest request, String configDir, String installPath,
+                            long siteID, String name, String language, String notes) {
+    Site siteByID = db.getSiteByID(siteID);
+
+    SiteDeployer siteDeployer = new SiteDeployer();
+
+    siteByID = db.updateSite(siteByID, name, language, notes);
+    if (!siteDeployer.isValidName(siteByID, installPath)) {
+      return false;
+    }
+    boolean b = siteDeployer.deploySite(siteByID, configDir, installPath);
+    if (b) {
+      db.deploy(siteByID);
+    } else {
+      logger.warn("didn't deploy " + siteByID);
+    }
+
+    if (!b) return b;
+    waitUntilDeployed(request,siteByID);
+
+    // String firstName = "Unknown user #" + siteByID.creatorID;
+    // String lastName = "Unk.";
+    String userid = "";
+    for (User user : db.getUsers())
+      if (user.id == siteByID.creatorID) {
+        //    firstName = user.firstName;
+        //    lastName = user.lastName;
+        userid = user.userID;
+      }
+
+    String subject = "Site " + name + " deployed";
+    String message = "Hi,\n" +
+      "At site " + getBaseUrl(request) + "" +
+      " User '" +
+      userid+
+      //firstName + " " + lastName +
+      "' deployed site " + name + ".\n" +
+      "Thought you might want to know.\n" +
+      "Thanks,\n" +
+      "Your friendly web admin.";
+   // MailSupport mailSupport = new MailSupport(props);
+    mailSupport.email(subject, message);
+
+    return true;
+  }
+
+  private void waitUntilDeployed(HttpServletRequest request, Site siteByID) {
+    int tries = 3;
+    boolean valid = false;     // todo improve
+    while (tries-- > 0) {
+      String baseUrl = "";
+      try {
+        baseUrl = getBaseUrl(request,siteByID.name);
+        URL oracle = new URL(baseUrl);
+        URLConnection yc = oracle.openConnection();
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+          yc.getInputStream()));
+        in.close();
+
+        valid = true;
+      } catch (Exception e) {
+        logger.info("reading " + baseUrl + " got " + e);
+      }
+      if (!valid) {
+        try {
+          Thread.sleep(3000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
+
+  public String getBaseUrl(HttpServletRequest request) {
+    return getBaseUrl(request, request.getContextPath());
+  }
+
+  private String getBaseUrl(HttpServletRequest request, String name) {
+    if ((request.getServerPort() == 80) ||
+      (request.getServerPort() == 443)) {
+      return request.getScheme() + "://" +
+        request.getServerName() + "/" + name;
+    } else {
+      return request.getScheme() + "://" +
+        request.getServerName() + ":" + request.getServerPort() +
+        "/" + name;
+    }
+  }
+
+  public void sendNewUserEmail(MailSupport mailSupport, HttpServletRequest request,  String userID) {
+    String subject = "User " + userID + " registered";
+    String message = "Hi,\n" +
+      "At site " + getBaseUrl(request) + "\n" +
+      " got new user " + userID + ".\n" +
+      "Should this person be enabled?\n" +
+      "Thanks,\n" +
+      "Your friendly web admin.";
+    mailSupport.email(subject, message);
+  }
 
   /**
    * @see LangTestDatabaseImpl#deploySite(long, String, String, String)
