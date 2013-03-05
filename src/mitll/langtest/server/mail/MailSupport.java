@@ -23,8 +23,8 @@ public class MailSupport {
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
   private boolean debugEmail;
 
-  public MailSupport(Properties props) {
-    debugEmail = props.get("debugEmail") != null && !props.get("debugEmail").toString().equals("false");
+  public MailSupport(boolean debugEmail) {
+    this.debugEmail = debugEmail;
   }
 
   public void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message, String token) {
