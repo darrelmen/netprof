@@ -22,6 +22,8 @@ import java.util.jar.Manifest;
  * To change this template use File | Settings | File Templates.
  */
 public class ServerProperties {
+  public static final String SHOW_SECTIONS = "showSections";
+  public static final String DEBUG_EMAIL = "debugEmail";
   private static Logger logger = Logger.getLogger(ServerProperties.class);
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
@@ -37,6 +39,7 @@ public class ServerProperties {
   private static final String H2_DATABASE_DEFAULT = "vlr-parle";
   private static final String URDU = "urdu";
   private static final String READ_FROM_FILE = "readFromFile";
+  private static final String FLASHCARD = "flashcard";
 
   private Properties props = null;
 
@@ -58,6 +61,7 @@ public class ServerProperties {
       try {
         props = new Properties();
         props.load(new FileInputStream(configFileFullPath));
+        readProperties(servletContext);
       } catch (IOException e) {
         logger.error("got " + e, e);
       }
@@ -69,6 +73,18 @@ public class ServerProperties {
   }
 
   public String getH2Database() { return props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT); }
+  public String getLessonPlan() { return props.getProperty("lessonPlanFile", "lesson.plan"); }
+
+  public boolean isShowSections() {
+    return !props.getProperty(SHOW_SECTIONS, "false").equals("false");
+  }
+
+  public boolean isDebugEMail() {
+    return !props.getProperty(DEBUG_EMAIL, "false").equals("false");
+  }
+  public boolean isFlashcard() {
+    return !props.getProperty(FLASHCARD, "false").equals("false");
+  }
 
   /**
    * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
@@ -92,7 +108,7 @@ public class ServerProperties {
    * @see
    * @param servletContext
    */
-  public void readProperties(ServletContext servletContext) {
+  private void readProperties(ServletContext servletContext) {
     try {
       firstNInOrder = Integer.parseInt(props.getProperty(FIRST_N_IN_ORDER, "" + Integer.MAX_VALUE));
     } catch (NumberFormatException e) {
