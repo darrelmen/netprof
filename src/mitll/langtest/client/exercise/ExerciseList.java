@@ -6,13 +6,19 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.SimpleLayoutPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -35,17 +41,17 @@ import java.util.Map;
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize {
+public abstract class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize,
+  ValueChangeHandler<String> {
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
   protected List<ExerciseShell> currentExercises = null;
   protected Map<String,ExerciseShell> idToExercise = null;
   protected int currentExercise = 0;
   private List<HTML> progressMarkers = new ArrayList<HTML>();
-  private Panel current = null;
 
-  private Panel currentExerciseVPanel;
+  private SimplePanel innerContainer;
   protected LangTestDatabaseAsync service;
-  private UserFeedback feedback;
+  protected UserFeedback feedback;
   private ExercisePanelFactory factory;
   protected int expectedGrades = 1;
   protected UserManager user;
@@ -55,7 +61,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private boolean useUserID = false;
   private long userID;
   private final boolean showInOrder;
-  private Map<String, Collection<String>> typeToSections;
+  private int countSincePrompt = 0;
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -70,13 +76,19 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                       ExercisePanelFactory factory, boolean arabicDataCollect,
                       boolean showTurkToken, boolean showInOrder) {
-    this.currentExerciseVPanel = currentExerciseVPanel;
+    this.innerContainer = new SimplePanel();
+    this.innerContainer.setWidth("100%");
+    this.innerContainer.setHeight("100%");
+    currentExerciseVPanel.add(innerContainer);
     this.service = service;
     this.feedback = feedback;
     this.factory = factory;
     this.arabicDataCollect = arabicDataCollect;
     this.showTurkToken = showTurkToken;
     this.showInOrder = showInOrder;
+
+    // Add history listener
+    History.addValueChangeHandler(this);
   }
 
   /**
@@ -93,37 +105,52 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-    * Get exercises for this user.
-    * @see mitll.langtest.client.LangTest#gotUser(long)
-    * @see mitll.langtest.client.LangTest#makeFlashContainer
-    * @param userID
+   * Get exercises for this user.
+   * @see mitll.langtest.client.LangTest#gotUser(long)
+   * @see mitll.langtest.client.LangTest#makeFlashContainer
+   * @param userID
    */
   public void getExercises(long userID) {
-
     System.out.println("getExercises " +userID);
-
-    service.getTypeToSection(new AsyncCallback<Map<String, Collection<String>>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Map<String, Collection<String>> result) {
-        typeToSections = result;
-        System.out.println("got " +typeToSections);
-      }
-    });
 
     useUserID = true;
     this.userID = userID;
     if (showInOrder) {
-      //System.out.println("getExercises : getting exercises in order for " + userID);
       getExercisesInOrder();
     }
     else {
-      //System.out.println("getExercises for " + userID + " usefile " + readFromFile + " arabic " + arabicDataCollect);
       service.getExerciseIds(userID, arabicDataCollect, new SetExercisesCallback());
     }
+  }
+
+
+  /**
+   * So we have a catch-22 -
+   *
+   * If we fire the current history, we override the initial selection associated
+   * with a user logging in for the first time.
+   *
+   * If we don't, when we click on a link from an email, the item=NNN value will be ignored.
+   *
+   * I gotta go with the latter.
+   *
+   * @param first
+   */
+  private void pushFirstSelection(String first) {
+/*    String initToken = History.getToken();
+    if (initToken.length() == 0) {
+      pushNewItem(first);
+    } else {
+      System.out.println("fire history for " +initToken);
+      History.fireCurrentHistoryState();
+    }*/
+    pushNewItem(first);
+
+  }
+
+  private void pushNewItem(String first) {
+    System.out.println("------------ push history " + first + " -------------- ");
+    History.newItem("#item=" + first);
   }
 
   /**
@@ -134,6 +161,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   public void onResize() {
+    Widget current = innerContainer.getWidget();
     if (current != null) {
       if (current instanceof RequiresResize) {
         ((RequiresResize) current).onResize();
@@ -151,23 +179,32 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.exercise_title = exercise_title;
   }
 
-  private class SetExercisesCallback implements AsyncCallback<List<ExerciseShell>> {
+  protected String unencodeToken(String token) {
+    token = token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ").replaceAll("\\+", " ");
+    return token;
+  }
+
+  protected class SetExercisesCallback implements AsyncCallback<List<ExerciseShell>> {
     public void onFailure(Throwable caught) {
       feedback.showErrorMessage("Server error", "Server error - couldn't get exercises.");
     }
 
     public void onSuccess(List<ExerciseShell> result) {
-     // System.out.println("SetExercisesCallback Got " +result.size() + " results");
-      currentExercises = result; // remember current exercises
-      idToExercise = new HashMap<String, ExerciseShell>();
-      clear();
-      for (final ExerciseShell es : result) {
-        idToExercise.put(es.getID(),es);
-        addExerciseToList(es);
-      }
-      flush();
+      // System.out.println("SetExercisesCallback Got " +result.size() + " results");
+      rememberExercises(result);
       loadFirstExercise();
     }
+  }
+
+  protected void rememberExercises(List<ExerciseShell> result) {
+    currentExercises = result; // remember current exercises
+    idToExercise = new HashMap<String, ExerciseShell>();
+    clear();
+    for (final ExerciseShell es : result) {
+      idToExercise.put(es.getID(),es);
+      addExerciseToList(es);
+    }
+    flush();
   }
 
   protected void flush() {}
@@ -202,11 +239,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       if (e != null) toLoad = e;
     }
 
-    loadExercise(toLoad);
+    pushFirstSelection(toLoad.getID());
   }
 
   private ExerciseShell byID(String name) {
-    return idToExercise.get(name);
+    return idToExercise == null ? null : idToExercise.get(name);
   }
 
   /**
@@ -217,12 +254,19 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param exerciseShell
    */
   protected void loadExercise(ExerciseShell exerciseShell) {
-    //System.out.println("loadExercise : " + exerciseShell);
+    String token = History.getToken();
+    String id = getIDFromToken(unencodeToken(token));
+    System.out.println("loadExercise " + token + " -> " +id);
 
-    checkBeforeLoad(exerciseShell);
+/*    if (id.equals(exerciseShell.getID())) {
+      System.out.println("skipping current token " + token);
+    } else {*/
+      //System.out.println("loadExercise " + exerciseShell.getID() + " vs " +id);
+      pushNewItem(exerciseShell.getID());
+  //  }
+  }
 
-    removeCurrentExercise();
-
+  private void askServerForExercise(ExerciseShell exerciseShell) {
     if (useUserID) {
       service.getExercise(exerciseShell.getID(), userID, arabicDataCollect, new ExerciseAsyncCallback(exerciseShell));
     } else {
@@ -230,20 +274,71 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
+  /**
+   * This method is called whenever the application's history changes.
+   * @seex #
+   * @param event
+   */
+  public void onValueChange(ValueChangeEvent<String> event) {
+    // This method is called whenever the application's history changes. Set
+    // the label to reflect the current history token.
+    String value = event.getValue();
+    String token = getTokenFromEvent(event);
+    String id = getIDFromToken(token);
+    System.out.println("onValueChange got " + event.getAssociatedType() + " "+ value + " token " + token + " id " + id);
+
+    if (id.length() > 0) {
+      loadByIDFromToken(id);
+    } else {
+      System.out.println("got invalid event " + event + " value " + token);
+    }
+  }
+
+  private void loadByIDFromToken(String id) {
+    ExerciseShell exerciseShell = byID(id);
+    if (exerciseShell != null) {
+      checkBeforeLoad(exerciseShell);
+      askServerForExercise(exerciseShell);
+    }
+    else {
+      Window.alert("unknown item " + id);
+    }
+  }
+
+  private String getTokenFromEvent(ValueChangeEvent<String> event) {
+    String token = event.getValue();
+    token = unencodeToken(token);
+    return token;
+  }
+
+  protected String getIDFromToken(String token) {
+    if (token.startsWith("#item=") || token.startsWith("item=")) {
+      String[] split = token.split("=");
+      return split[1].trim();
+    }
+    return "";
+  }
+
+  protected boolean loadByID(String id) {
+    ExerciseShell exerciseShell = byID(id);
+    if (exerciseShell != null) {
+      System.out.println("loading exercise " + id);
+      loadExercise(exerciseShell);
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
   private class ExerciseAsyncCallback implements AsyncCallback<Exercise> {
     private final ExerciseShell exerciseShell;
-
-    public ExerciseAsyncCallback(ExerciseShell exerciseShell) {
-      this.exerciseShell = exerciseShell;
-    }
+    public ExerciseAsyncCallback(ExerciseShell exerciseShell) { this.exerciseShell = exerciseShell; }
 
     @Override
-    public void onFailure(Throwable caught) {}
-
+    public void onFailure(Throwable caught) { Window.alert("Can't connect to server."); }
     @Override
-    public void onSuccess(Exercise result) {
-      useExercise(result, exerciseShell);
-    }
+    public void onSuccess(Exercise result)  { useExercise(result, exerciseShell); }
   }
 
   /**
@@ -252,21 +347,24 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param e
    */
   private void useExercise(Exercise result, ExerciseShell e) {
-    //System.out.println("useExercise using " + e);
-    currentExerciseVPanel.add(current = factory.getExercisePanel(result));
+    Panel exercisePanel = factory.getExercisePanel(result);
+    innerContainer.setWidget(exercisePanel);
 
     int i = getIndex(e);
+    System.out.println("useExercise : " +e.getID() + " index " +i);
     if (i == -1) {
       System.err.println("can't find " + e + " in list of " + currentExercises.size() + " exercises.");
       return;
     }
-    //System.out.println("useExercise marking " + i);
 
     markCurrentExercise(i);
     currentExercise = i;
   }
 
-  protected boolean isExercisePanelBusy() { return current != null && ((BusyPanel) current).isBusy(); }
+  protected boolean isExercisePanelBusy() {
+    Widget current = innerContainer.getWidget();
+    return current != null && ((BusyPanel) current).isBusy();
+  }
 
   /**
    * @see #loadExercise
@@ -298,15 +396,17 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   @Override
   public void removeCurrentExercise() {
+    Widget current = innerContainer.getWidget();
     if (current != null) {
-      currentExerciseVPanel.remove(current);
-      current = null;
+      System.out.println("Remove current widget");
+      if (!innerContainer.remove(current)) {
+        System.out.println("\tdidn't remove current widget");
+      }
     }
   }
 
   @Override
   public void clear() {
-    //System.out.println("ExerciseList : Clearing list.");
     super.clear();
     progressMarkers.clear();
   }
@@ -322,8 +422,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     HTML html = progressMarkers.get(currentExercise);
     html.setStyleDependentName("highlighted", false);
   }
-
-  private int countSincePrompt = 0;
 
   /**
    * @see mitll.langtest.client.LangTest#loadNextExercise
