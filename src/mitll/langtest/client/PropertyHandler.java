@@ -39,6 +39,7 @@ public class PropertyHandler {
   private static final String LOG_CLIENT_MESSAGES = "logClient";
   private static final String SHOW_SECTIONS = "showSections";
   private static final String DEBUG_EMAIL = "debugEmail";
+  private static final String FLASHCARD = "flashcard";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -93,6 +94,7 @@ public class PropertyHandler {
   private String lesson = "lesson";
   private boolean showSections = false;
   private boolean debugEmail = true;
+  private boolean flashCard = false;
   private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
   private float screenPortion;
@@ -133,6 +135,7 @@ public class PropertyHandler {
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
       else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
       else if (key.equals(DEBUG_EMAIL)) debugEmail = getBoolean(value);
+      else if (key.equals(FLASHCARD)) flashCard = getBoolean(value);
     }
   }
 
