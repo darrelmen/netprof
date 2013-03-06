@@ -360,6 +360,34 @@ public class DatabaseImpl implements Database {
     return idToCount;
   }
 
+  private final Map<Long,Object> userToState = new HashMap<Long,Object>();
+
+  /**
+   * TODO remember state for user so they can resume their flashcard exercise from that point.
+   * TODOx synchronize!
+   * @param userID
+   * @return
+   */
+  public Exercise getNextExercise(long userID) {
+    Random rand = new Random(userID);
+    List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
+    synchronized (userToState) {
+      int index = (userToState.containsKey(userID)) ? rand.nextInt(exercises.size()) : 1;
+      logger.info("getExercises : for user  " + userID + " index " + index);
+      if (!userToState.containsKey(userID)) {
+        userToState.put(userID, new Object());
+      }
+      return exercises.get(index);
+    }
+  }
+
+  public void updateFlashcardState(long userID, String exerciseID, boolean isCorrect) {
+    synchronized (userToState) {
+      Object o = userToState.get(userID);
+      logger.warn("update state for " +userID + " exid = " +exerciseID + " : " +isCorrect);
+    }
+  }
+
   /**
    *
    *
