@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.flashcard.UserState;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Grade;
@@ -360,31 +361,43 @@ public class DatabaseImpl implements Database {
     return idToCount;
   }
 
-  private final Map<Long,Object> userToState = new HashMap<Long,Object>();
+  private final Map<Long,UserState> userToState = new HashMap<Long,UserState>();
 
   /**
-   * TODO remember state for user so they can resume their flashcard exercise from that point.
-   * TODOx synchronize!
+   * remember state for user so they can resume their flashcard exercise from that point.
+   * synchronize!
    * @param userID
    * @return
    */
   public Exercise getNextExercise(long userID) {
-    Random rand = new Random(userID);
     List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
+    Map<String,Exercise> idToExercise = new HashMap<String, Exercise>();
+    for (Exercise e : exercises) idToExercise.put(e.getID(),e);
     synchronized (userToState) {
-      int index = (userToState.containsKey(userID)) ? rand.nextInt(exercises.size()) : 1;
-      logger.info("getExercises : for user  " + userID + " index " + index);
+      //int index = (userToState.containsKey(userID)) ? rand.nextInt(exercises.size()) : 1;
+      logger.info("getExercises : for user  " + userID);// + " index " + index);
       if (!userToState.containsKey(userID)) {
-        userToState.put(userID, new Object());
+        String[] strings = new String[exercises.size()];
+        int i = 0;
+        for (Exercise e:exercises) strings[i++] = e.getID();
+        UserState userState = new UserState(strings);
+        userToState.put(userID, userState);
+        userState.initialize();
       }
-      return exercises.get(index);
+      UserState userState = userToState.get(userID);
+      return idToExercise.get(userState.next());
     }
   }
 
   public void updateFlashcardState(long userID, String exerciseID, boolean isCorrect) {
     synchronized (userToState) {
-      Object o = userToState.get(userID);
-      logger.warn("update state for " +userID + " exid = " +exerciseID + " : " +isCorrect);
+      UserState state = userToState.get(userID);
+      if (state == null) {
+        logger.error("can't find state for " + userID);
+      } else {
+        state.update(exerciseID, isCorrect);
+        logger.warn("update state for " + userID + " exid = " + exerciseID + " : " + isCorrect);
+      }
     }
   }
 
