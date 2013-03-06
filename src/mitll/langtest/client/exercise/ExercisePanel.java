@@ -322,7 +322,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
    * @param controller
    * @param e
    */
-  private void clickNext(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
+  protected void clickNext(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                          final ExerciseController controller, final Exercise e) {
     if (next.isEnabled() && next.isVisible()) {
       if (controller.isMinimalUI() && !controller.isGrading()) {
