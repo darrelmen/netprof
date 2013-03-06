@@ -799,7 +799,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
                                     int user, boolean doAutoCRT, int reqid, boolean flq, String audioType) {
     String wavPath = getLocalPathToAnswer(plan, exercise, questionID, user);
-    logger.warn("got wave file " +wavPath);
+    //logger.warn("got wave file " +wavPath);
     File file = getAbsoluteFile(wavPath);
 
     AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
