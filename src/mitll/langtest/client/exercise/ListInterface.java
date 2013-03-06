@@ -14,24 +14,54 @@ import mitll.langtest.shared.ExerciseShell;
  * To change this template use File | Settings | File Templates.
  */
 public interface ListInterface extends RequiresResize {
+  /**
+   * @see mitll.langtest.client.LangTest#setFactory()
+   * @param factory
+   * @param user
+   * @param expectedGrades
+   */
   void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades);
 
+  /**
+   * @see mitll.langtest.client.LangTest#gotUser(long)
+   * @see mitll.langtest.client.LangTest#makeFlashContainer()
+   * @param userID
+   */
   void getExercises(long userID);
 
-  void getExercisesInOrder();
+  //void getExercisesInOrder();
 
+  /**
+   * @see mitll.langtest.client.LangTest#makeExerciseList(com.google.gwt.user.client.ui.Panel, boolean)
+   * @param exercise_title
+   */
   void setExercise_title(String exercise_title);
 
-  void clear();
 
+  /**
+   * @see mitll.langtest.client.LangTest#makeExerciseList(com.google.gwt.user.client.ui.Panel, boolean)
+   * @return
+   */
   Widget getWidget();
 
 
+  /**
+   * @see mitll.langtest.client.LangTest#loadNextExercise(mitll.langtest.shared.Exercise)
+   * @param current
+   * @return
+   */
   boolean loadNextExercise(ExerciseShell current);
 
   boolean loadPreviousExercise(ExerciseShell current);
 
   boolean onFirst(ExerciseShell current);
 
+  /**
+   * @see mitll.langtest.client.LangTest#resetState()
+   */
+  void clear();
+  /**
+   * @see mitll.langtest.client.LangTest#resetState()
+   */
   void removeCurrentExercise();
 }
