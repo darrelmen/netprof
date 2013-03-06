@@ -110,7 +110,7 @@ public abstract class RecordButton {
   }
 
   private void stop() {
-    long now = System.currentTimeMillis();
+   // long now = System.currentTimeMillis();
   //  System.out.println("stop recording at " + now + " " + (now-then));
     recording = false;
     showStopped();
