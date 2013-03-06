@@ -49,9 +49,9 @@ import java.util.Set;
 public class MonitoringManager {
   private static final int MIN = (60 * 1000);
   private static final int HOUR = (60 * MIN);
-  //public static final String RECORDER = "recorder";
+
   protected LangTestDatabaseAsync service;
-  private final boolean useFile;
+  //private final boolean useFile;
   private String item = "Item";
   private String items = item+"s";
   private String answer = "Answer";
@@ -66,7 +66,7 @@ public class MonitoringManager {
    */
   public MonitoringManager(LangTestDatabaseAsync s, PropertyHandler props) {
     this.service = s;
-    this.useFile = props.isReadFromFile();
+  //  this.useFile = props.isReadFromFile();
     this.item = props.getNameForItem();
     this.answer = props.getNameForAnswer();
     this.answers = props.getNameForAnswer() + "s";
