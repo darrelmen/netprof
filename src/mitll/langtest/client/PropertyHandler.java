@@ -38,7 +38,7 @@ public class PropertyHandler {
   private static final String NUM_GRADES_TO_COLLECT = "numGradesToCollect";
   private static final String LOG_CLIENT_MESSAGES = "logClient";
   private static final String SHOW_SECTIONS = "showSections";
-  private static final String DEBUG_EMAIL = "debugEmail";
+  //private static final String DEBUG_EMAIL = "debugEmail";
   private static final String FLASHCARD = "flashcard";
 
   // URL parameters that can override above parameters
@@ -93,7 +93,7 @@ public class PropertyHandler {
   private String teacherClass = "class";
   private String lesson = "lesson";
   private boolean showSections = false;
-  private boolean debugEmail = true;
+  //private boolean debugEmail = true;
   private boolean flashCard = false;
   private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
@@ -134,7 +134,7 @@ public class PropertyHandler {
       else if (key.equals(NUM_GRADES_TO_COLLECT)) numGradesToCollect = getInt(value,NUM_GRADES_TO_COLLECT_DEFAULT,NUM_GRADES_TO_COLLECT);
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
       else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
-      else if (key.equals(DEBUG_EMAIL)) debugEmail = getBoolean(value);
+    //  else if (key.equals(DEBUG_EMAIL)) debugEmail = getBoolean(value);
       else if (key.equals(FLASHCARD)) flashCard = getBoolean(value);
     }
   }
@@ -348,5 +348,9 @@ public class PropertyHandler {
 
   public boolean isShowSections() {
     return showSections;
+  }
+
+  public boolean isFlashCard() {
+    return flashCard;
   }
 }
