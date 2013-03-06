@@ -1,5 +1,13 @@
 package mitll.langtest.client;
 
+import com.github.gwtbootstrap.client.ui.Column;
+import com.github.gwtbootstrap.client.ui.Container;
+import com.github.gwtbootstrap.client.ui.FluidContainer;
+import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.PageHeader;
+import com.github.gwtbootstrap.client.ui.Row;
+import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -34,6 +42,7 @@ import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList;
 import mitll.langtest.client.flashcard.FlashcardExerciseList;
 import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
@@ -91,11 +100,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
   private PropertyHandler props;
-/*
-  private String emailSubject;
-  private String emailMessage;
-  private String emailToken;
-*/
 
   /**
    * Make an exception handler that displays the exception.
@@ -143,6 +147,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Initially the flash record player is put in the center of the DockLayout
    */
   public void onModuleLoad2() {
+    if (props.isFlashCard()) {
+      doFlashcard();
+      return;
+    }
     if (props.isDataCollectAdminView()) {
       doDataCollectAdminView();
       return;
@@ -186,6 +194,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       exerciseListPanel.setVisible(false);
     }
     // set up center panel, initially with flash record panel
+    currentExerciseVPanel = new VerticalPanel();
 
     if (usualLayout) {
       ScrollPanel sp = new ScrollPanel();
@@ -199,6 +208,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       RootPanel.get().add(currentExerciseVPanel);
     }
 
+
+    // set up left side exercise list
+    makeExerciseList(exerciseListPanel, props.isGrading());
+
     // don't do flash if we're doing text only collection
     if (!props.isTeacherView() && !props.isArabicTextDataCollect() && props.isCollectAudio()) {
       makeFlashContainer();
@@ -207,9 +220,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("currentExercisePanel");
     }
-
-    // set up left side exercise list
-    makeExerciseList(exerciseListPanel, props.isGrading());
 
     setPageTitle();
     browserCheck.checkForCompatibleBrowser();
@@ -247,6 +257,51 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (elementById != null) {
       elementById.setInnerText(props.getAppTitle());
     }
+  }
+
+  /**
+   * TODO : add help
+   * TODO : add correct/incorrect stats
+   * TODO : test without flash???
+   */
+  private void doFlashcard() {
+    FluidContainer container = new FluidContainer();
+    RootPanel.get().add(container);
+    currentExerciseVPanel = container;
+    Row row = new FluidRow();
+    container.add(row);
+    Row row2 = new FluidRow();
+    container.add(row2);
+
+    IconAnchor logout = new IconAnchor();
+    logout.setText("Logout");
+    logout.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        userManager.clearUser();
+        lastUser = -1;
+        login();
+      }
+    });
+
+
+    row2.add(new Column(2));
+    row2.add(new Column(1, logout));
+    userManager = new UserManager(this, service, isCollectAudio(), false);
+    this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager);
+
+    makeFlashContainer();
+    Column col = new Column(1, flashRecordPanel);
+    row.add(new Column(1, new Heading(2, props.getAppTitle())));
+    //row.add(col);
+
+    Row row3 = new FluidRow();
+    container.add(row3);
+    row3.add(col);
+
+
+    setupSoundManager();
+
+    login();
   }
 
   private void doDataCollectAdminView() {
@@ -599,6 +654,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       if (userID != lastUser) {
         System.out.println("gotUser : " + userID + " vs " + lastUser);
         if (props.isArabicTextDataCollect() || !props.isCollectAudio() || flashRecordPanel.gotPermission()) {
+          System.out.println("\tgotUser : " + userID + " get exercises");
+
           exerciseList.getExercises(userID);
         }
         lastUser = userID;
@@ -694,19 +751,4 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean loadNextExercise(Exercise current) { return exerciseList.loadNextExercise(current);  }
   public boolean loadPreviousExercise(Exercise current) { return exerciseList.loadPreviousExercise(current);  }
   public boolean onFirst(Exercise current) { return exerciseList.onFirst(current); }
-
-/*  @Override
-  public void setEmailSubject(String emailSubject) {
-    this.emailSubject = emailSubject;
-  }
-
-  @Override
-  public void setEmailMessage(String emailMessage) {
-    this.emailMessage = emailMessage;
-  }
-
-  @Override
-  public void setEmailToken(String e) {
-     emailToken =e;
-  }*/
 }
