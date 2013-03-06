@@ -85,24 +85,27 @@ public class SimpleRecordPanel extends RecordButtonPanel {
     setAudioTag(result.path);
 
     if (result.decodeOutput.length() > 0) {
-
       // i.e. autocrt -- revisit?
-      double score = result.score;
-      score *= 2.5;
-      score -= 1.25;
-      score = Math.max(0,score);
-      score = Math.min(1.0,score);
-      String percent = ((int) (score * 100)) + "%";
-      if (result.score > 0.6) {
-        resp.setHTML("Correct! Score for <font size=+1>" + result.decodeOutput + "</font> was " + percent);
-        resp.setStyleName("correct");
-      } else {
-        resp.setHTML("Try again - score for <font size=+1>" + result.decodeOutput + "</font> was " + percent);
-        resp.setStyleName("incorrect");
-      }
+      showAutoCRTFeedback(result);
     }
     else if (result.score != -1) {
       resp.setHTML("I couldn't understand that, please record again.");
+    }
+  }
+
+  private void showAutoCRTFeedback(AudioAnswer result) {
+    double score = result.score;
+    score *= 2.5;
+    score -= 1.25;
+    score = Math.max(0,score);
+    score = Math.min(1.0,score);
+    String percent = ((int) (score * 100)) + "%";
+    if (result.score > 0.6) {
+      resp.setHTML("Correct! Score for <font size=+1>" + result.decodeOutput + "</font> was " + percent);
+      resp.setStyleName("correct");
+    } else {
+      resp.setHTML("Try again - score for <font size=+1>" + result.decodeOutput + "</font> was " + percent);
+      resp.setStyleName("incorrect");
     }
   }
 
