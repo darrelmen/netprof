@@ -34,11 +34,13 @@ import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.flashcard.FlashcardExerciseList;
 import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
 import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
+import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.mail.MailDialog;
 import mitll.langtest.client.monitoring.MonitoringManager;
@@ -155,7 +157,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     userManager = new UserManager(this,service, isCollectAudio(), false);
     resultManager = new ResultManager(service, this, props.getNameForAnswer());
     monitoringManager = new MonitoringManager(service, props);
-    boolean usualLayout = props.getExercise_title() == null;
+    boolean usualLayout = !showOnlyOneExercise();
     final DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
     if (usualLayout) {
       RootPanel.get().add(widgets);
@@ -342,13 +344,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   /**
    * Supports different flavors of exercise list -- Paging, Grading, and vanilla.
    *
+   * @see #onModuleLoad2()
    * @param exerciseListPanel to add scroller to
    * @param isGrading true if grading, false if not
    */
   private void makeExerciseList(Panel exerciseListPanel, boolean isGrading) {
     final UserFeedback feedback = (UserFeedback) this;
 
-    if (isGrading) {
+    if (props.isFlashCard()) {
+      this.exerciseList = new FlashcardExerciseList(currentExerciseVPanel, service, feedback, userManager);
+    }
+    else if (isGrading) {
       this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback,
           true, props.isEnglishOnlyMode());
     } else {
@@ -367,7 +373,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (showOnlyOneExercise()) {
       exerciseList.setExercise_title(props.getExercise_title());
     }
-    if (props.getExercise_title() == null) {
+    else {
       setExerciseListSize();
     }
     HTML child = new HTML("<h2>Items</h2>");
@@ -377,7 +383,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public boolean showOnlyOneExercise() {
-    return props.getExercise_title() != null;
+    return props.getExercise_title() != null /*|| props.isFlashCard()*/;
   }
 
   private void setMainWindowSize(DockLayoutPanel widgets) {
@@ -440,14 +446,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void setFactory() {
     if (props.isGoodwaveMode()) {
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this), userManager, 1);
-    }
-    else if (props.isGrading()) {
+    } else if (props.isGrading()) {
       exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, props.getNumGradesToCollect());
-    }
-    else if (props.isDataCollectMode() && props.isCollectAudio()) {
+    } else if (props.isDataCollectMode() && props.isCollectAudio()) {
       exerciseList.setFactory(new WaveformExercisePanelFactory(service, this, this), userManager, 1);
-    }
-    else {
+    } else if (props.isFlashCard()) {
+      exerciseList.setFactory(new FlashcardExercisePanelFactory(service, this, this), userManager, 1);
+    } else {
       exerciseList.setFactory(new ExercisePanelFactory(service, this, this), userManager, 1);
     }
   }
@@ -550,6 +555,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return vp;
   }
 
+  /**
+   * @see #getLogout()
+   */
   private void resetState() {
     userManager.clearUser();
     exerciseList.removeCurrentExercise();
@@ -574,7 +582,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    *
    * @see #makeFlashContainer
    * @see UserManager#login
-   * @see UserManager#storeUser(long)
+   * @see UserManager#storeUser
    * @param userID
    */
   public void gotUser(long userID) {
