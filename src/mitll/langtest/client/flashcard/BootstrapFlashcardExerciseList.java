@@ -1,5 +1,10 @@
 package mitll.langtest.client.flashcard;
 
+import com.github.gwtbootstrap.client.ui.Column;
+import com.github.gwtbootstrap.client.ui.Container;
+import com.github.gwtbootstrap.client.ui.FluidRow;
+
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -20,19 +25,20 @@ import mitll.langtest.shared.ExerciseShell;
  * Time: 5:32 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FlashcardExerciseList implements ListInterface {
+public class BootstrapFlashcardExerciseList implements ListInterface {
+  private final Column column;
   private ExercisePanelFactory factory;
   private LangTestDatabaseAsync service;
-  private SimplePanel innerContainer;
   private UserManager user;
+  private FluidRow row;
 
-  public FlashcardExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback, UserManager user) {
+  public BootstrapFlashcardExerciseList(Container currentExerciseVPanel, LangTestDatabaseAsync service, /*UserFeedback feedback,*/ UserManager user) {
     this.service = service;
+    this.row = new FluidRow();
+    column = new Column(6);
+    row.add(column);
+    currentExerciseVPanel.add(row);
     this.user = user;
-    this.innerContainer = new SimplePanel();
-    this.innerContainer.setWidth("100%");
-    this.innerContainer.setHeight("100%");
-    currentExerciseVPanel.add(innerContainer);
   }
 
   @Override
@@ -58,7 +64,8 @@ public class FlashcardExerciseList implements ListInterface {
         System.out.println("Got next for " +result.getID());
 
         Panel exercisePanel = factory.getExercisePanel(result);
-        innerContainer.setWidget(exercisePanel);
+        column.clear();
+        column.add(exercisePanel);
       }
     });
   }
@@ -71,6 +78,11 @@ public class FlashcardExerciseList implements ListInterface {
     return new SimplePanel();
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#loadNextExercise
+   * @param current
+   * @return
+   */
   @Override
   public boolean loadNextExercise(ExerciseShell current) {
     getExercises(user.getUser());
@@ -89,12 +101,12 @@ public class FlashcardExerciseList implements ListInterface {
 
   @Override
   public void clear() {
-    innerContainer.clear();
+    column.clear();
   }
 
   @Override
   public void removeCurrentExercise() {
-    innerContainer.clear();
+    column.clear();
   }
 
   @Override
