@@ -1,13 +1,5 @@
 package mitll.langtest.client;
 
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.Container;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.PageHeader;
-import com.github.gwtbootstrap.client.ui.Row;
-import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -42,13 +34,12 @@ import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList;
-import mitll.langtest.client.flashcard.FlashcardExerciseList;
 import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
 import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
+import mitll.langtest.client.flashcard.FlashcardExerciseList;
 import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.mail.MailDialog;
@@ -148,7 +139,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void onModuleLoad2() {
     if (props.isFlashCard()) {
-      doFlashcard();
+      //doFlashcard();
       return;
     }
     if (props.isDataCollectAdminView()) {
@@ -257,51 +248,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (elementById != null) {
       elementById.setInnerText(props.getAppTitle());
     }
-  }
-
-  /**
-   * TODO : add help
-   * TODO : add correct/incorrect stats
-   * TODO : test without flash???
-   */
-  private void doFlashcard() {
-    FluidContainer container = new FluidContainer();
-    RootPanel.get().add(container);
-    currentExerciseVPanel = container;
-    Row row = new FluidRow();
-    container.add(row);
-    Row row2 = new FluidRow();
-    container.add(row2);
-
-    IconAnchor logout = new IconAnchor();
-    logout.setText("Logout");
-    logout.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        userManager.clearUser();
-        lastUser = -1;
-        login();
-      }
-    });
-
-
-    row2.add(new Column(2));
-    row2.add(new Column(1, logout));
-    userManager = new UserManager(this, service, isCollectAudio(), false);
-    this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager);
-
-    makeFlashContainer();
-    Column col = new Column(1, flashRecordPanel);
-    row.add(new Column(1, new Heading(2, props.getAppTitle())));
-    //row.add(col);
-
-    Row row3 = new FluidRow();
-    container.add(row3);
-    row3.add(col);
-
-
-    setupSoundManager();
-
-    login();
   }
 
   private void doDataCollectAdminView() {
