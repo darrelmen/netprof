@@ -40,7 +40,7 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    */
   @Override
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
-      return new SimpleRecordPanel(service, controller,exercise, this, index);
+      return new SimpleRecordPanel(service, controller,exercise, this, index).getPanel();
   }
 
   @Override
@@ -52,7 +52,7 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    * on the server, notice which audio posts have arrived, and take the latest ones...
    * <br></br>
    * Move on to next exercise...
-   *
+   * @see ExercisePanel#clickNext(LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
    * @param service
    * @param userFeedback
    * @param controller
