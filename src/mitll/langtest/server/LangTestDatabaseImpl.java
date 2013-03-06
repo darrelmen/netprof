@@ -271,7 +271,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
     }
     else {
-      exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(userID);
+/*      if (serverProps.isFlashcard()) {
+      //  exercises = db.getNextExercise(userID);
+      }
+      else {*/
+        exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(userID);
+  //    }
     }
 
     if (makeFullURLs) convertRefAudioURLs(exercises);
@@ -282,6 +287,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     return exercises;
   }
+
+  @Override
+  public Exercise getNextExercise(long userID) { return db.getNextExercise(userID); }
 
   /**
    * Called from the client.
@@ -791,7 +799,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
                                     int user, boolean doAutoCRT, int reqid, boolean flq, String audioType) {
     String wavPath = getLocalPathToAnswer(plan, exercise, questionID, user);
-
+    logger.warn("got wave file " +wavPath);
     File file = getAbsoluteFile(wavPath);
 
     AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
@@ -808,6 +816,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String url = optionallyMakeURL(wavPathWithForwardSlashSeparators);
     // logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
 
+    if (serverProps.isFlashcard()) {
+      // TODO do reco on audio, just correct or not
+      boolean isCorrect = true;
+      db.updateFlashcardState(user, exercise, isCorrect);
+    }
     if (doAutoCRT && isValid) {
       return autoCRT.getAutoCRTAnswer(exercise, getExercise(exercise), reqid, file, validity.validity, questionID, url,
           validity.durationInMillis);
