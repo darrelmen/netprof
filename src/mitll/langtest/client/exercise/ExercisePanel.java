@@ -86,7 +86,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     this.controller = controller;
     this.service = service;
     this.feedback = userFeedback;
-    add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
+    addItemHeader(e);
 
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
@@ -105,6 +105,10 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     boolean includeKeyHandler = /*!controller.isAutoCRTMode() ||*/ controller.isCollectAudio();
     Panel buttonRow = getNextAndPreviousButtons(e, service, userFeedback, controller, includeKeyHandler);
     add(buttonRow);
+  }
+
+  protected void addItemHeader(Exercise e) {
+    add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
   }
 
   private Widget getQuestionContent(Exercise e) { return new HTML(e.getContent()); }
