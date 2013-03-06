@@ -15,7 +15,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Result;
 
 /**
  * Just a single record button for the UI component.
@@ -29,14 +28,14 @@ import mitll.langtest.shared.Result;
  * Time: 4:34 PM
  * To change this template use File | Settings | File Templates.
  */
-public class RecordButtonPanel extends HorizontalPanel {
+public class RecordButtonPanel {
   private static final String RECORD_PNG = LangTest.LANGTEST_IMAGES +"record.png";
   private static final String STOP_PNG   = LangTest.LANGTEST_IMAGES +"stop.png";
   private static final String RECORD = "Record";
   private static final String STOP = "Stop";
   private final Image recordImage;
   private final Image stopImage;
-  private ImageAnchor recordButton;
+  protected ImageAnchor recordButton;
   private LangTestDatabaseAsync service;
   protected ExerciseController controller;
   private Exercise exercise;
@@ -44,6 +43,7 @@ public class RecordButtonPanel extends HorizontalPanel {
   private int index;
   private final RecordButton rb;
   private int reqid = 0;
+  protected Panel panel;
 
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
@@ -93,10 +93,29 @@ public class RecordButtonPanel extends HorizontalPanel {
         outer.showStopped();
       }
     };
+    layoutRecordButton();
+  }
+
+  protected void layoutRecordButton() {
     SimplePanel recordButtonContainer = new SimplePanel();
     recordButtonContainer.setWidth("75px");
     recordButtonContainer.add(recordButton);
-    add(recordButtonContainer);
+    HorizontalPanel hp = new HorizontalPanel() {
+      @Override
+      protected void onUnload() {
+        RecordButtonPanel.this.onUnload();
+      }
+    };
+    hp.add(recordButtonContainer);
+    this.panel = hp;
+  }
+
+  public void onUnload() {
+    rb.onUnload();
+  }
+
+  public Panel getPanel() {
+     return this.panel;
   }
 
   protected void startRecording() {
@@ -117,7 +136,7 @@ public class RecordButtonPanel extends HorizontalPanel {
    */
   protected void stopRecording() {
     controller.stopRecording();
-    final Panel outer = this;
+    final Panel outer = getPanel();
 
     reqid++;
     service.writeAudioFile(controller.getBase64EncodedWavFile(),
@@ -155,9 +174,9 @@ public class RecordButtonPanel extends HorizontalPanel {
     recordButton.setTitle(RECORD);
   }
 
-  protected Widget getRecordButton() { return recordButton; }
+  public Widget getRecordButton() { return recordButton; }
 
-  protected void receivedAudioAnswer(AudioAnswer result,  final ExerciseQuestionState questionState, final Panel outer) {}
+  protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {}
 
   private static class ImageAnchor extends Anchor {
     Image img = null;
@@ -169,10 +188,5 @@ public class RecordButtonPanel extends HorizontalPanel {
       this.img = img2;
       DOM.insertBefore(getElement(), img.getElement(), DOM.getFirstChild(getElement()));
     }
-  }
-
-  @Override
-  protected void onUnload() {
-    rb.onUnload();
   }
 }
