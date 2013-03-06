@@ -33,7 +33,7 @@ public class FlashcardExercisePanelFactory extends ExercisePanelFactory {
       return new SimpleRecordExercisePanel(e, service, userFeedback, controller) {
         @Override
         protected void clickNext(LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller, Exercise e) {
-          System.out.println("loading next ");
+          //System.out.println("loading next ");
           controller.loadNextExercise(e);
         }
       };
