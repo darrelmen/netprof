@@ -39,8 +39,10 @@ public class SimpleRecordPanel extends RecordButtonPanel {
 	public SimpleRecordPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
                            final Exercise exercise, final ExerciseQuestionState questionState, final int index){
     super(service, controller, exercise, questionState, index);
-
-    setSpacing(10);
+    Panel widget = getPanel();
+    if (widget instanceof HorizontalPanel) {
+      ((HorizontalPanel)widget).setSpacing(10);
+    }
 
     playback.setHeight("30px"); // for audio controls to show
 
@@ -50,11 +52,11 @@ public class SimpleRecordPanel extends RecordButtonPanel {
     // add playback html
     addPlayback();
 
-    add(resp);
+    widget.add(resp);
   }
 
   private void addPlayback() {
-    add(playback);
+    getPanel().add(playback);
   }
 
   protected void addValidityFeedback(int index) {
@@ -63,7 +65,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
     check.setAltText("Audio Saved");
     check.setVisible(false);
 
-    if (!controller.isAutoCRTMode()) add(check);
+    if (!controller.isAutoCRTMode()) getPanel().add(check);
   }
 
   @Override
@@ -128,7 +130,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
     playback.setWidget(new HTML(audioTag.getAudioTag(result)));
   }
 
-  private void showAudioValidity(AudioAnswer.Validity result, ExerciseQuestionState questionState, Panel outer) {
+  private void showAudioValidity(AudioAnswer.Validity result, ExerciseQuestionState questionState, Widget outer) {
     check.setVisible(false);
     if (result == AudioAnswer.Validity.OK) {
       if (!controller.isAutoCRTMode()) check.setUrl(IMAGES_CHECKMARK);
