@@ -30,7 +30,7 @@ public class FlashcardExercisePanelFactory extends ExercisePanelFactory {
 
   public Panel getExercisePanel(Exercise e) {
     if (e.getType() == Exercise.EXERCISE_TYPE.RECORD) {
-/*      return new SimpleRecordExercisePanel(e, service, userFeedback, controller) {
+      return new SimpleRecordExercisePanel(e, service, userFeedback, controller) {
         @Override
         protected void addItemHeader(Exercise e) {
           //super.addItemHeader(e);    //To change body of overridden methods use File | Settings | File Templates.
@@ -41,8 +41,7 @@ public class FlashcardExercisePanelFactory extends ExercisePanelFactory {
           //System.out.println("loading next ");
           controller.loadNextExercise(e);
         }
-      };*/
-      return new BootstrapExercisePanel(e, service, userFeedback, controller);
+      };
     } else {
       return new ExercisePanel(e, service, userFeedback, controller);
     }
