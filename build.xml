@@ -52,6 +52,8 @@
         <pathelement location="war/WEB-INF/lib/xmlbeans-2.3.0.jar"/>
         <pathelement location="war/WEB-INF/lib/dom4j-1.6.1.jar"/>
         <pathelement location="war/WEB-INF/lib/commons-fileupload-1.2.2.jar"/>
+        <pathelement location="war/WEB-INF/lib/flashcard.jar"/>
+        <pathelement location="war/WEB-INF/lib/gwt-bootstrap-2.2.1.0-SNAPSHOT.jar"/>
     </path>
     <target name="init" depends="clean">
         <mkdir dir="war/WEB-INF/classes"/>
@@ -132,6 +134,14 @@
 
     <target depends="build" name="warArabicVLL">
         <jar destfile="npArabicVLL2.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,answers/**,audioimages/**,scoring/**,config/first/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target depends="build" name="flashcard">
+        <jar destfile="npEnglishFlashcard.war" basedir="war" excludes="answers/**,audioimages/**,scoring/**,config/first/**,config/pashto/**,config/pilot/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
             </manifest>
