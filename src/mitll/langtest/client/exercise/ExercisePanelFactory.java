@@ -19,7 +19,7 @@ public class ExercisePanelFactory {
   protected ExerciseController controller;
 
   /**
-   * @see mitll.langtest.client.LangTest#setGrading(boolean)
+   * @see mitll.langtest.client.LangTest#setFactory()
    * @param service
    * @param userFeedback
    * @param controller
