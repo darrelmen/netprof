@@ -114,4 +114,6 @@ public interface LangTestDatabase extends RemoteService {
   void sendEmail(int userID, String to, String replyTo, String subject, String message, String token);
 
   Map<String, List<String>> getTypeToSectionsForTypeAndSection(String type, String section);
+
+  Exercise getNextExercise(long userID);
 }
