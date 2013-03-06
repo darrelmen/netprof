@@ -53,7 +53,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
   private ExercisePanelFactory factory;
-  protected int expectedGrades = 1;
   protected UserManager user;
   private String exercise_title;
   protected final boolean arabicDataCollect;
@@ -101,7 +100,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {
     this.factory = factory;
     this.user = user;
-    this.expectedGrades = expectedGrades;
   }
 
   /**
@@ -149,14 +147,14 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   private void pushNewItem(String first) {
-    System.out.println("------------ push history " + first + " -------------- ");
+    System.out.println("------------ pushNewItem : push history " + first + " -------------- ");
     History.newItem("#item=" + first);
   }
 
   /**
    * @see GradedExerciseList#setFactory(ExercisePanelFactory, mitll.langtest.client.user.UserManager, int)
    */
-  public void getExercisesInOrder() {
+  private void getExercisesInOrder() {
     service.getExerciseIds(new SetExercisesCallback());
   }
 
