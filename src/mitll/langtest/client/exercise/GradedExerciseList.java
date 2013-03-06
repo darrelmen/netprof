@@ -5,6 +5,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 
@@ -19,6 +20,7 @@ import mitll.langtest.shared.ExerciseShell;
  */
 public class GradedExerciseList extends PagingExerciseList {
   private final boolean englishOnly;
+  private int expectedGrades = 1;
 
   /**
    * @see mitll.langtest.client.LangTest#makeExerciseList
@@ -32,6 +34,11 @@ public class GradedExerciseList extends PagingExerciseList {
                             boolean showInOrder, boolean englishOnly) {
     super(currentExerciseVPanel, service, feedback, false, false, showInOrder);
     this.englishOnly = englishOnly;
+  }
+
+  public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {
+    super.setFactory(factory,user,0);
+    this.expectedGrades = expectedGrades;
   }
 
   /**
