@@ -1,11 +1,9 @@
 package mitll.langtest.client;
 
 import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.Container;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.PageHeader;
 import com.github.gwtbootstrap.client.ui.Row;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.google.gwt.core.client.EntryPoint;
@@ -42,7 +40,7 @@ import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList;
+import mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList;
 import mitll.langtest.client.flashcard.FlashcardExerciseList;
 import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
@@ -270,8 +268,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     currentExerciseVPanel = container;
     Row row = new FluidRow();
     container.add(row);
+
     Row row2 = new FluidRow();
-    container.add(row2);
 
     IconAnchor logout = new IconAnchor();
     logout.setText("Logout");
@@ -283,8 +281,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     });
 
-
-    row2.add(new Column(2));
+   // row2.add(new Column(2));
     row2.add(new Column(1, logout));
     userManager = new UserManager(this, service, isCollectAudio(), false);
     this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager);
@@ -293,6 +290,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Column col = new Column(1, flashRecordPanel);
     row.add(new Column(1, new Heading(2, props.getAppTitle())));
     //row.add(col);
+
+    container.add(row2);
 
     Row row3 = new FluidRow();
     container.add(row3);
@@ -655,7 +654,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         System.out.println("gotUser : " + userID + " vs " + lastUser);
         if (props.isArabicTextDataCollect() || !props.isCollectAudio() || flashRecordPanel.gotPermission()) {
           System.out.println("\tgotUser : " + userID + " get exercises");
-
           exerciseList.getExercises(userID);
         }
         lastUser = userID;
