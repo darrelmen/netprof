@@ -12,6 +12,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.FlashcardResponse;
 
 /**
  * Created with IntelliJ IDEA.
@@ -47,17 +48,17 @@ public class FlashcardExerciseList implements ListInterface {
   @Override
   public void getExercises(long userID) {
     System.out.println("Getting next for " +userID);
-    service.getNextExercise(userID, new AsyncCallback<Exercise>() {
+    service.getNextExercise(userID, new AsyncCallback<FlashcardResponse>() {
       @Override
       public void onFailure(Throwable caught) {
         Window.alert("Couldn't contact server.");
       }
 
       @Override
-      public void onSuccess(Exercise result) {
-        System.out.println("Got next for " +result.getID());
+      public void onSuccess(FlashcardResponse result) {
+        //System.out.println("Got next for " +result.getID());
 
-        Panel exercisePanel = factory.getExercisePanel(result);
+        Panel exercisePanel = factory.getExercisePanel(result.e);
         innerContainer.setWidget(exercisePanel);
       }
     });
