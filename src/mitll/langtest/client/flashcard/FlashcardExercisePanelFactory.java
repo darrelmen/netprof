@@ -42,7 +42,7 @@ public class FlashcardExercisePanelFactory extends ExercisePanelFactory {
           controller.loadNextExercise(e);
         }
       };*/
-      return new BootstrapExercisePanel(e, service, userFeedback, controller);
+      return new BootstrapExercisePanel(e, service, controller);
     } else {
       return new ExercisePanel(e, service, userFeedback, controller);
     }
