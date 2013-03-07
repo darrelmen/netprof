@@ -1,4 +1,4 @@
-package mitll.langtest.client.flashcard;
+package mitll.langtest.client.bootstrap;
 
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
@@ -25,10 +25,11 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class BootstrapExercisePanel extends FluidContainer {
-  private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
-  private static final String ENGLISH = "English";
+  public static final String CLICK_RECORD_TO_CHECK_YOUR_PRONUNCIATION = "Click record to check your pronunciation.";
+  // private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
+//  private static final String ENGLISH = "English";
   //private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
-  private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak your answer in ";
+ // private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak your answer in ";
   private List<MyRecordButtonPanel> answerWidgets = new ArrayList<MyRecordButtonPanel>();
 
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
@@ -62,7 +63,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       // add question prompt
       FluidRow row = new FluidRow();
       add(row);
-      row.add(new Column(12,new HTML(getQuestionPrompt(e.promptInEnglish))));
+      //row.add(new Column(12,new HTML(getQuestionPrompt(e.promptInEnglish))));
 
       // add answer widget
       MyRecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, questionNumber - 1);
@@ -72,7 +73,7 @@ public class BootstrapExercisePanel extends FluidContainer {
   }
 
   protected String getQuestionPrompt(boolean promptInEnglish) {
-    return "Click record to check your pronunciation.";//SPEAK_AND_RECORD_YOUR_ANSWER_IN + (promptInEnglish ? ENGLISH : THE_FOREIGN_LANGUAGE) + " ";
+    return CLICK_RECORD_TO_CHECK_YOUR_PRONUNCIATION;//SPEAK_AND_RECORD_YOUR_ANSWER_IN + (promptInEnglish ? ENGLISH : THE_FOREIGN_LANGUAGE) + " ";
   }
 
   //private List<MyRecordButtonPanel> answerWidgets
@@ -94,6 +95,7 @@ public class BootstrapExercisePanel extends FluidContainer {
 
     @Override
     protected void receivedAudioAnswer(AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
+      System.out.println("result score " + result.score);
       controller.loadNextExercise(exercise);
     }
   }
