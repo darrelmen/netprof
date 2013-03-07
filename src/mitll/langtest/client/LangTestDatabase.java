@@ -115,5 +115,5 @@ public interface LangTestDatabase extends RemoteService {
 
   Map<String, List<String>> getTypeToSectionsForTypeAndSection(String type, String section);
 
-  Exercise getNextExercise(long userID);
+  FlashcardResponse getNextExercise(long userID);
 }
