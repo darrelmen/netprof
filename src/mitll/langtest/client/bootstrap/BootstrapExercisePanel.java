@@ -3,6 +3,10 @@ package mitll.langtest.client.bootstrap;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Label;
+import com.github.gwtbootstrap.client.ui.PageHeader;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -15,6 +19,7 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -25,67 +30,66 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class BootstrapExercisePanel extends FluidContainer {
-  public static final String CLICK_RECORD_TO_CHECK_YOUR_PRONUNCIATION = "Click record to check your pronunciation.";
-  // private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
-//  private static final String ENGLISH = "English";
-  //private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
- // private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak your answer in ";
   private List<MyRecordButtonPanel> answerWidgets = new ArrayList<MyRecordButtonPanel>();
 
-  public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
+  public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller) {
     setStyleName("exerciseBackground");
 
     FluidRow fluidRow = new FluidRow();
     add(fluidRow);
-    fluidRow.add(new Column(12,getQuestionContent(e)));
+    fluidRow.add(new Column(12, getQuestionContent(e)));
     addQuestions(e, service, controller, 1);
   }
 
-  private Widget getQuestionContent(Exercise e) { return new HTML(e.getContent()); }
+  private Widget getQuestionContent(Exercise e) {
+    PageHeader widgets = new PageHeader();
+    widgets.addStyleName("correct");
+    widgets.setText(e.getTooltip());
+    return widgets;
+  }
+
   /**
    * For every question,
    * <ul>
-   *  <li>show the text of the question,  </li>
-   *  <li>the prompt to the test taker (e.g "Speak your response in English")  </li>
-   *  <li>an answer widget (either a simple text box, an flash audio record and playback widget, or a list of the answers, when grading </li>
+   * <li>show the text of the question,  </li>
+   * <li>the prompt to the test taker (e.g "Speak your response in English")  </li>
+   * <li>an answer widget (either a simple text box, an flash audio record and playback widget, or a list of the answers, when grading </li>
    * </ul>     <br></br>
    * Remember the answer widgets so we can notice which have been answered, and then know when to enable the next button.
+   *
    * @param e
    * @param service
-   * @param controller used in subclasses for audio control
+   * @param controller     used in subclasses for audio control
    * @param questionNumber
    */
   private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber) {
     //for (Exercise.QAPair pair : e.getQuestions()) {
-      // add question header
-      questionNumber++;
-      // add question prompt
-      FluidRow row = new FluidRow();
-      add(row);
-      //row.add(new Column(12,new HTML(getQuestionPrompt(e.promptInEnglish))));
+    // add question header
+    questionNumber++;
+    // add question prompt
+    FluidRow row = new FluidRow();
+    add(row);
+    //row.add(new Column(12,new HTML(getQuestionPrompt(e.promptInEnglish))));
 
-      // add answer widget
-      MyRecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, questionNumber - 1);
-      this.answerWidgets.add(answerWidget);
-      row.add(new Column(12, answerWidget.getRecordButton()));
-  //  }
+    // add answer widget
+    MyRecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, questionNumber - 1);
+    this.answerWidgets.add(answerWidget);
+    Widget recordButton = answerWidget.getRecordButton();
+    row.add(new Column(2, 5, recordButton));
+    //  }
   }
 
-  protected String getQuestionPrompt(boolean promptInEnglish) {
-    return CLICK_RECORD_TO_CHECK_YOUR_PRONUNCIATION;//SPEAK_AND_RECORD_YOUR_ANSWER_IN + (promptInEnglish ? ENGLISH : THE_FOREIGN_LANGUAGE) + " ";
-  }
-
-  //private List<MyRecordButtonPanel> answerWidgets
   protected MyRecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
-     return new MyRecordButtonPanel(service, controller, exercise, index);
+    return new MyRecordButtonPanel(service, controller, exercise, index, this);
   }
 
   private static class MyRecordButtonPanel extends RecordButtonPanel {
     private final Exercise exercise;
-
-    public MyRecordButtonPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, int index) {
+    private Panel outerPanel;
+    public MyRecordButtonPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, int index,Panel outerPanel) {
       super(service, controller, exercise, null, index);
+      this.outerPanel = outerPanel;
       this.exercise = exercise;
     }
 
@@ -95,8 +99,31 @@ public class BootstrapExercisePanel extends FluidContainer {
 
     @Override
     protected void receivedAudioAnswer(AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
-      System.out.println("result score " + result.score);
-      controller.loadNextExercise(exercise);
+      double score = result.score;
+     // setStyleRecurse(outerPanel,score);
+      outerPanel.addStyleName((score > 0.6) ? "correctCard" : "incorrectCard");
+
+      Timer t = new Timer() {
+        @Override
+        public void run() {
+          controller.loadNextExercise(exercise);
+        }
+      };
+
+      // Schedule the timer to run once in 1 seconds.
+      t.schedule(300);
+    }
+
+    private void setStyleRecurse(Panel outerPanel, double score) {
+      Iterator<Widget> iterator = outerPanel.iterator();
+      for (; iterator.hasNext(); ) {
+        Widget next = iterator.next();
+
+        next.addStyleName((score > 0.6) ? "correctCard" : "incorrectCard");
+        if (next instanceof Panel) {
+          setStyleRecurse((Panel)next,score);
+        }
+      }
     }
   }
 
