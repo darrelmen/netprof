@@ -15,6 +15,7 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.FlashcardResponse;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
@@ -32,31 +33,19 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 /**
  * Supports all the database interactions.
@@ -289,7 +278,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public Exercise getNextExercise(long userID) { return db.getNextExercise(userID); }
+  public FlashcardResponse getNextExercise(long userID) { return db.getNextExercise(userID); }
 
   /**
    * Called from the client.
@@ -820,8 +809,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       // TODO do reco on audio, just correct or not
       boolean isCorrect = true;
       db.updateFlashcardState(user, exercise, isCorrect);
+      AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
+      audioAnswer.score = 1; // correct
+      return audioAnswer;
     }
-    if (doAutoCRT && isValid) {
+    else if (doAutoCRT && isValid) {
       return autoCRT.getAutoCRTAnswer(exercise, getExercise(exercise), reqid, file, validity.validity, questionID, url,
           validity.durationInMillis);
     }
