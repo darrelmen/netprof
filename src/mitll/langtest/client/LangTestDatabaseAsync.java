@@ -5,6 +5,7 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.FlashcardResponse;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
@@ -113,5 +114,5 @@ public interface LangTestDatabaseAsync {
 
   void getTypeToSectionsForTypeAndSection(String type, String section, AsyncCallback<Map<String, List<String>>> async);
 
-  void getNextExercise(long userID, AsyncCallback<Exercise> async);
+  void getNextExercise(long userID, AsyncCallback<FlashcardResponse> async);
 }
