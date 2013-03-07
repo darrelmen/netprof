@@ -3,6 +3,7 @@ package mitll.langtest.server.database;
 import mitll.flashcard.UserState;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.FlashcardResponse;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultsAndGrades;
@@ -30,6 +31,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Note with H2 that :  <br></br>
@@ -361,7 +363,12 @@ public class DatabaseImpl implements Database {
     return idToCount;
   }
 
-  private final Map<Long,UserState> userToState = new HashMap<Long,UserState>();
+  private final Map<Long,UserStateWrapper> userToState = new HashMap<Long,UserStateWrapper>();
+  private static class UserStateWrapper {
+    public UserState state;
+    private AutoDiscardingDeque<Boolean> scores = new AutoDiscardingDeque<Boolean>(100);   // last 100 scores
+    public UserStateWrapper(UserState state) {this.state = state;}
+  }
 
   /**
    * remember state for user so they can resume their flashcard exercise from that point.
@@ -369,33 +376,55 @@ public class DatabaseImpl implements Database {
    * @param userID
    * @return
    */
-  public Exercise getNextExercise(long userID) {
+  public FlashcardResponse getNextExercise(long userID) {
     List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
     Map<String,Exercise> idToExercise = new HashMap<String, Exercise>();
     for (Exercise e : exercises) idToExercise.put(e.getID(),e);
     synchronized (userToState) {
-      //int index = (userToState.containsKey(userID)) ? rand.nextInt(exercises.size()) : 1;
-      logger.info("getExercises : for user  " + userID);// + " index " + index);
+     // logger.info("getExercises : for user  " + userID);// + " index " + index);
       if (!userToState.containsKey(userID)) {
         String[] strings = new String[exercises.size()];
         int i = 0;
-        for (Exercise e:exercises) strings[i++] = e.getID();
+        for (Exercise e : exercises) strings[i++] = e.getID();
         UserState userState = new UserState(strings);
-        userToState.put(userID, userState);
+        userToState.put(userID, new UserStateWrapper(userState));
         userState.initialize();
       }
-      UserState userState = userToState.get(userID);
-      return idToExercise.get(userState.next());
+      UserStateWrapper userState = userToState.get(userID);
+      Exercise exercise = idToExercise.get(userState.state.next());
+
+      int correct = 0, incorrect = 0;
+      for (Boolean score : userState.scores) {
+        if (score) correct++;
+        else incorrect++;
+      }
+      return new FlashcardResponse(exercise,
+        correct,
+        incorrect);
+    }
+  }
+
+  public static class AutoDiscardingDeque<E> extends LinkedBlockingDeque<E> {
+    public AutoDiscardingDeque(int capacity) {  super(capacity);  }
+
+    @Override
+    public synchronized boolean offerFirst(E e) {
+      if (remainingCapacity() == 0) {
+        removeLast();
+      }
+      super.offerFirst(e);
+      return true;
     }
   }
 
   public void updateFlashcardState(long userID, String exerciseID, boolean isCorrect) {
     synchronized (userToState) {
-      UserState state = userToState.get(userID);
+      UserStateWrapper state = userToState.get(userID);
       if (state == null) {
         logger.error("can't find state for " + userID);
       } else {
-        state.update(exerciseID, isCorrect);
+        state.state.update(exerciseID, isCorrect);
+        state.scores.offerFirst(isCorrect);
         logger.warn("update state for " + userID + " exid = " + exerciseID + " : " + isCorrect);
       }
     }
