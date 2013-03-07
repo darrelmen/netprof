@@ -366,7 +366,8 @@ public class DatabaseImpl implements Database {
   private final Map<Long,UserStateWrapper> userToState = new HashMap<Long,UserStateWrapper>();
   private static class UserStateWrapper {
     public UserState state;
-    private AutoDiscardingDeque<Boolean> scores = new AutoDiscardingDeque<Boolean>(100);   // last 100 scores
+    //private AutoDiscardingDeque<Boolean> scores = new AutoDiscardingDeque<Boolean>(100);   // last 100 scores
+    int correct = 0, incorrect = 0;
     public UserStateWrapper(UserState state) {this.state = state;}
   }
 
@@ -393,18 +394,18 @@ public class DatabaseImpl implements Database {
       UserStateWrapper userState = userToState.get(userID);
       Exercise exercise = idToExercise.get(userState.state.next());
 
-      int correct = 0, incorrect = 0;
+     /* int correct = 0, incorrect = 0;
       for (Boolean score : userState.scores) {
         if (score) correct++;
         else incorrect++;
-      }
+      }*/
       return new FlashcardResponse(exercise,
-        correct,
-        incorrect);
+        userState.correct,
+        userState.incorrect);
     }
   }
 
-  public static class AutoDiscardingDeque<E> extends LinkedBlockingDeque<E> {
+/*  public static class AutoDiscardingDeque<E> extends LinkedBlockingDeque<E> {
     public AutoDiscardingDeque(int capacity) {  super(capacity);  }
 
     @Override
@@ -415,7 +416,7 @@ public class DatabaseImpl implements Database {
       super.offerFirst(e);
       return true;
     }
-  }
+  }*/
 
   public void updateFlashcardState(long userID, String exerciseID, boolean isCorrect) {
     synchronized (userToState) {
@@ -424,7 +425,9 @@ public class DatabaseImpl implements Database {
         logger.error("can't find state for " + userID);
       } else {
         state.state.update(exerciseID, isCorrect);
-        state.scores.offerFirst(isCorrect);
+       // state.scores.offerFirst(isCorrect);
+        if (isCorrect) state.correct++;
+        else state.incorrect++;
         logger.warn("update state for " + userID + " exid = " + exerciseID + " : " + isCorrect);
       }
     }
