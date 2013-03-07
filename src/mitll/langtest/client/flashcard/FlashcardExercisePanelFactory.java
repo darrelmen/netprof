@@ -2,7 +2,7 @@ package mitll.langtest.client.flashcard;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.SimpleRecordExercisePanel;
+import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanel;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
