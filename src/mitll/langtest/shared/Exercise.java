@@ -165,6 +165,7 @@ public class Exercise extends ExerciseShell  {
   public String getSlowAudioRef() { return slowAudioRef; }
   public void setRefAudio(String s) { this.refAudio = s; }
   public String getRefSentence() { return refSentence; }
+  public void setRefSentence(String ref) { this.refSentence = ref; }
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getExercises(long)

@@ -80,22 +80,33 @@ public class AutoCRT {
   public AudioAnswer getFlashcardAnswer(String exercise, Exercise e, int reqid, File file, AudioAnswer.Validity validity,
                                       int questionID, String url, int durationInMillis,
                                       List<Exercise> otherExercises) {
+    String foregroundSentence = getRefSentence(e);
+
     List<String> sentences = new ArrayList<String>();
     for (Exercise other : otherExercises) {
-      if (!other.getID().equals(exercise)) sentences.add(other.getTooltip().trim().toUpperCase());
+      if (!other.getID().equals(exercise)) {
+        String e1 = getRefSentence(other);
+        sentences.add(e1);
+      }
     }
     List<String> background = getBackgroundSentences(sentences);
     List<String> foreground = new ArrayList<String>();
-    foreground.add(e.getTooltip().trim().toUpperCase());
+    foreground.add(foregroundSentence);
 
     logger.debug("foreground " + foreground + " back " + background.subList(0,10) +"...");
     PretestScore asrScoreForAudio = db.getASRScoreForAudio(file, foreground, background);
 
-    String recoSentence = asrScoreForAudio.getRecoSentence();
-    logger.info("reco sentence was '" + recoSentence + "'");
+    String recoSentence = asrScoreForAudio.getRecoSentence().toLowerCase().trim();
+    logger.info("reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentence +"'");
 
-    double scoreForAnswer = recoSentence != null && recoSentence.equals(e.getTooltip()) ? 1.0d :0.0d;
+    double scoreForAnswer = recoSentence != null && recoSentence.equalsIgnoreCase(foregroundSentence) ? 1.0d :0.0d;
     return new AudioAnswer(url, validity, recoSentence, scoreForAnswer, reqid, durationInMillis);
+  }
+
+  private String getRefSentence(Exercise other) {
+    String e1 = other.getRefSentence().trim().toUpperCase();
+    if (e1.contains(";")) e1 = e1.split(";")[0];
+    return e1.trim();
   }
 
 
