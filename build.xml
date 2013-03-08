@@ -140,8 +140,8 @@
         </jar>
     </target>
 
-    <target depends="build" name="flashcard">
-        <jar destfile="npEnglishFlashcard.war" basedir="war" excludes="answers/**,audioimages/**,scoring/**,config/first/**,config/pashto/**,config/pilot/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+    <target depends="" name="flashcard">
+        <jar destfile="npEnglishFlashcard.war" basedir="war" excludes="answers/**,audioimages/**,config/first/**,config/dataCollectAdmin/**,config/egyptian/**,config/pashto/**,config/pilot/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.dli-pashto/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
             </manifest>
