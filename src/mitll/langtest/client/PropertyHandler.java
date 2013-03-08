@@ -40,6 +40,7 @@ public class PropertyHandler {
   private static final String SHOW_SECTIONS = "showSections";
   //private static final String DEBUG_EMAIL = "debugEmail";
   private static final String FLASHCARD = "flashcard";
+  private static final String LANGUAGE = "language";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -92,6 +93,7 @@ public class PropertyHandler {
   private String nameForRecorder = "Speaker";
   private String teacherClass = "class";
   private String lesson = "lesson";
+  private String language = "";
   private boolean showSections = false;
   //private boolean debugEmail = true;
   private boolean flashCard = false;
@@ -136,6 +138,7 @@ public class PropertyHandler {
       else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
     //  else if (key.equals(DEBUG_EMAIL)) debugEmail = getBoolean(value);
       else if (key.equals(FLASHCARD)) flashCard = getBoolean(value);
+      else if (key.equals(LANGUAGE)) language = value;
     }
   }
 
@@ -352,5 +355,9 @@ public class PropertyHandler {
 
   public boolean isFlashCard() {
     return flashCard;
+  }
+
+  public String getLanguage() {
+    return language;
   }
 }
