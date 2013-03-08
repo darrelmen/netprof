@@ -55,6 +55,7 @@ import java.util.concurrent.TimeUnit;
  */
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring {
+  private static final List<String> EMPTY_LIST = Collections.emptyList();
   private static Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
 
   private static final int MB = (1024 * 1024);
@@ -227,11 +228,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public List<Exercise> getExercises(long userID, boolean arabicDataCollect) {
     String lessonPlanFile = getLessonPlan();
 
-    synchronized (this) {
-      if (autoCRT == null) {
-        autoCRT = new AutoCRT(db.getExport(), this, getInstallPath(), relativeConfigDir);
-      }
-    }
+    makeAutoCRT();
     List<Exercise> exercises;
     if (serverProps.dataCollectMode) {
      // logger.debug("in data collect mode");
@@ -275,6 +272,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     //logMemory();
 
     return exercises;
+  }
+
+  private void makeAutoCRT() {
+    synchronized (this) {
+      if (autoCRT == null) {
+        autoCRT = new AutoCRT(db.getExport(), this, getInstallPath(), relativeConfigDir);
+      }
+    }
   }
 
   @Override
@@ -486,7 +491,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg) {
       return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-          Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+        EMPTY_LIST, EMPTY_LIST);
   }
 
   /**
@@ -806,12 +811,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     // logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
 
     if (serverProps.isFlashcard()) {
-      // TODO do reco on audio, just correct or not
-      boolean isCorrect = true;
+      makeAutoCRT();
+
+      AudioAnswer flashcardAnswer = autoCRT.getFlashcardAnswer(exercise, getExercise(exercise), reqid, file, validity.validity, questionID, url,
+        validity.durationInMillis, getExercises());
+      boolean isCorrect = flashcardAnswer.score > 0.8d;
       db.updateFlashcardState(user, exercise, isCorrect);
-      AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
-      audioAnswer.score = 1; // correct
-      return audioAnswer;
+     // AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
+     // audioAnswer.score = 1; // correct
+      return flashcardAnswer;
     }
     else if (doAutoCRT && isValid) {
       return autoCRT.getAutoCRTAnswer(exercise, getExercise(exercise), reqid, file, validity.validity, questionID, url,
