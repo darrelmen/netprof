@@ -59,6 +59,7 @@ public class ASRScoring extends Scoring {
   private static final String OPT_SIL = "OPT_SIL";
   private static final String OPT_SIL_DEFAULT = "true";   // rsi-sctm-hlda
   private static final String HLDA_DIR = "HLDA_DIR";
+  private static final String DICTIONARY = "DICTIONARY";
   private static final String LM_TO_USE = "LM_TO_USE";
 
   private static final String HLDA_DIR_DEFAULT = "rsi-sctm-hlda";
@@ -375,7 +376,9 @@ public class ASRScoring extends Scoring {
     // do some sanity checking
     boolean configExists = new File(configFile).exists();
     String hldaDir = getProp(HLDA_DIR, HLDA_DIR_DEFAULT);
-    String dictFile = modelsDir + File.separator + hldaDir +File.separator+ DICT_WO_SP;
+    String dictOverride = getProp(DICTIONARY, "");
+    String dictFile = dictOverride.length() > 0 ?  modelsDir + File.separator + dictOverride :
+      modelsDir + File.separator + hldaDir +File.separator+ DICT_WO_SP;
     boolean dictExists   = new File(dictFile).exists();
     if (!configExists || !dictExists) {
       if (!configExists) logger.error("computeRepeatExerciseScores : Can't find config file at " + configFile);
