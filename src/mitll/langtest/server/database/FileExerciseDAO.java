@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
  * To change this template use File | Settings | File Templates.
  */
 public class FileExerciseDAO implements ExerciseDAO {
+  public static final List<String> EMPTY_LIST = Collections.emptyList();
   private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
   public static final String ENCODING = "UTF8";
   private static final String LESSON_FILE = "lesson-737.csv";
@@ -325,11 +326,18 @@ public class FileExerciseDAO implements ExerciseDAO {
     sections.add(otherSection);
   }
 
-  private Exercise getWordListExercise(String arabic, String id) {
-    String content = getArabic(arabic);
+  /**
+   * @see #readFastAndSlowExercises(String, String)
+   * @param contentSentence
+   * @param id
+   * @return
+   */
+  private Exercise getWordListExercise(String contentSentence, String id) {
+    String content = getArabic(contentSentence);
 
-    Exercise exercise = new Exercise("repeat", id, content, false, true, arabic);
-    exercise.addQuestion(Exercise.FL, "Please record the sentence above.","", Collections.EMPTY_LIST);
+    Exercise exercise = new Exercise("repeat", id, content, false, true, contentSentence);
+    exercise.setRefSentence(contentSentence);
+    exercise.addQuestion(Exercise.FL, "Please record the sentence above.","", EMPTY_LIST);
     return exercise;
   }
   /**
