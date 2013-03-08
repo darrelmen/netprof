@@ -3,23 +3,24 @@ package mitll.langtest.client.bootstrap;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Label;
+import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.PageHeader;
+import com.github.gwtbootstrap.client.ui.base.IconAnchor;
+import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.client.recorder.RecordButtonPanel;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -31,6 +32,7 @@ import java.util.List;
  */
 public class BootstrapExercisePanel extends FluidContainer {
   private List<MyRecordButtonPanel> answerWidgets = new ArrayList<MyRecordButtonPanel>();
+  private Image image = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress.gif"));
 
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller) {
@@ -45,8 +47,14 @@ public class BootstrapExercisePanel extends FluidContainer {
   private Widget getQuestionContent(Exercise e) {
     PageHeader widgets = new PageHeader();
     widgets.addStyleName("correct");
-    widgets.setText(e.getTooltip());
+    widgets.setText(getRefSentence(e));
     return widgets;
+  }
+
+  private String getRefSentence(Exercise other) {
+    String e1 = other.getRefSentence().trim();
+    if (e1.contains(";")) e1 = e1.split(";")[0];
+    return e1;
   }
 
   /**
@@ -76,7 +84,8 @@ public class BootstrapExercisePanel extends FluidContainer {
     MyRecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, questionNumber - 1);
     this.answerWidgets.add(answerWidget);
     Widget recordButton = answerWidget.getRecordButton();
-    row.add(new Column(2, 5, recordButton));
+    row.add(new Column(2, 5, recordButton,image));
+    image.setVisible(false);
     //  }
   }
 
@@ -84,23 +93,39 @@ public class BootstrapExercisePanel extends FluidContainer {
     return new MyRecordButtonPanel(service, controller, exercise, index, this);
   }
 
-  private static class MyRecordButtonPanel extends RecordButtonPanel {
+  private class MyRecordButtonPanel extends RecordButtonPanel {
     private final Exercise exercise;
     private Panel outerPanel;
     public MyRecordButtonPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, int index,Panel outerPanel) {
       super(service, controller, exercise, null, index);
       this.outerPanel = outerPanel;
       this.exercise = exercise;
+      recordImage.setHeight("32px");
+      stopImage.setHeight("32px");
     }
 
     @Override
-    protected void layoutRecordButton() {
+    protected void layoutRecordButton() {}
+
+    @Override
+    protected void stopRecording() {
+      recordButton.hide();
+      image.setVisible(true);
+      super.stopRecording();
     }
 
+    /**
+     * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
+     * @param result
+     * @param questionState
+     * @param outer
+     */
     @Override
     protected void receivedAudioAnswer(AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
+      image.setVisible(false);
+      recordImage.setUrl(RECORD_PNG);
+
       double score = result.score;
-     // setStyleRecurse(outerPanel,score);
       outerPanel.addStyleName((score > 0.6) ? "correctCard" : "incorrectCard");
 
       Timer t = new Timer() {
@@ -114,16 +139,10 @@ public class BootstrapExercisePanel extends FluidContainer {
       t.schedule(300);
     }
 
-    private void setStyleRecurse(Panel outerPanel, double score) {
-      Iterator<Widget> iterator = outerPanel.iterator();
-      for (; iterator.hasNext(); ) {
-        Widget next = iterator.next();
-
-        next.addStyleName((score > 0.6) ? "correctCard" : "incorrectCard");
-        if (next instanceof Panel) {
-          setStyleRecurse((Panel)next,score);
-        }
-      }
+    @Override
+    protected void receivedAudioFailure() {
+      image.setVisible(false);
+      recordImage.setUrl(RECORD_PNG);
     }
   }
 
