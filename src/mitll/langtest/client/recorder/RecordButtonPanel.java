@@ -29,12 +29,12 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class RecordButtonPanel {
-  private static final String RECORD_PNG = LangTest.LANGTEST_IMAGES +"record.png";
+  protected static final String RECORD_PNG = LangTest.LANGTEST_IMAGES +"record.png";
   private static final String STOP_PNG   = LangTest.LANGTEST_IMAGES +"stop.png";
   private static final String RECORD = "Record";
   private static final String STOP = "Stop";
-  private final Image recordImage;
-  private final Image stopImage;
+  protected final Image recordImage;
+  protected final Image stopImage;
   protected ImageAnchor recordButton;
   private LangTestDatabaseAsync service;
   protected ExerciseController controller;
@@ -66,8 +66,7 @@ public class RecordButtonPanel {
     stopImage.setAltText(STOP);
 
     // add record button
-    recordButton = new ImageAnchor();
-    recordButton.setResource(recordImage);
+    makeRecordButton();
 
     recordButton.getElement().setId("record_button");
     recordButton.setTitle(RECORD);
@@ -94,6 +93,12 @@ public class RecordButtonPanel {
       }
     };
     layoutRecordButton();
+  }
+
+  protected Anchor makeRecordButton() {
+    recordButton = new ImageAnchor();
+    recordButton.setResource(recordImage);
+    return recordButton;
   }
 
   protected void layoutRecordButton() {
@@ -151,6 +156,7 @@ public class RecordButtonPanel {
         new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
             recordButton.setEnabled(true);
+            receivedAudioFailure();
             Window.alert("Server error : Couldn't post answers for exercise.");
           }
           public void onSuccess(AudioAnswer result) {
@@ -163,6 +169,7 @@ public class RecordButtonPanel {
           }
         });
   }
+
 
   protected void showRecording() {
     recordButton.setResource(stopImage);
@@ -177,10 +184,13 @@ public class RecordButtonPanel {
   public Widget getRecordButton() { return recordButton; }
 
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {}
+  protected void receivedAudioFailure() {}
 
-  private static class ImageAnchor extends Anchor {
-    Image img = null;
+  protected static class ImageAnchor extends Anchor {
+    private Image img = null;
     public ImageAnchor() {}
+    public void show() { setVisible(true); }
+    public void hide() { setVisible(false); }
     public void setResource(Image img2) {
       if (this.img != null) {
         DOM.removeChild(getElement(), this.img.getElement());
