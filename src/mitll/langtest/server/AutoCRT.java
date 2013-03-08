@@ -77,6 +77,28 @@ public class AutoCRT {
     return new AudioAnswer(url, validity, annotatedResponse, scoreForAnswer, reqid, durationInMillis);
   }
 
+  public AudioAnswer getFlashcardAnswer(String exercise, Exercise e, int reqid, File file, AudioAnswer.Validity validity,
+                                      int questionID, String url, int durationInMillis,
+                                      List<Exercise> otherExercises) {
+    List<String> sentences = new ArrayList<String>();
+    for (Exercise other : otherExercises) {
+      if (!other.getID().equals(exercise)) sentences.add(other.getTooltip().trim().toUpperCase());
+    }
+    List<String> background = getBackgroundSentences(sentences);
+    List<String> foreground = new ArrayList<String>();
+    foreground.add(e.getTooltip().trim().toUpperCase());
+
+    logger.debug("foreground " + foreground + " back " + background.subList(0,10) +"...");
+    PretestScore asrScoreForAudio = db.getASRScoreForAudio(file, foreground, background);
+
+    String recoSentence = asrScoreForAudio.getRecoSentence();
+    logger.info("reco sentence was '" + recoSentence + "'");
+
+    double scoreForAnswer = recoSentence != null && recoSentence.equals(e.getTooltip()) ? 1.0d :0.0d;
+    return new AudioAnswer(url, validity, recoSentence, scoreForAnswer, reqid, durationInMillis);
+  }
+
+
   /**
    * Mark words in the response as right or wrong depending on their overlap with answers marked
    * good or bad.
@@ -155,8 +177,17 @@ public class AutoCRT {
       background.add(pair.getQuestion());
     }
 
-    int c = 0;
-    for (String answer : getAllExportedAnswers()) {
+    Collection<String> sentences = getAllExportedAnswers();
+    background.addAll(getBackgroundSentences(sentences));
+
+    logger.info("background has " + background.size() + " lines");
+    return background;
+  }
+
+  private List<String> getBackgroundSentences(Collection<String> sentences) {
+    List<String> background = new ArrayList<String>();
+
+    for (String answer : sentences) {
       //  boolean allDigit = true;
       StringBuilder b = new StringBuilder();
       for (int i = 0; i < answer.length(); i++) {
@@ -171,9 +202,6 @@ public class AutoCRT {
       if (result.length() > 0) background.add(result);
       //if (c++ > MAX_EXPORTED_ANSWERS_BKG) break;
     }
-    // background.addAll(db.getAllExportedAnswers());
-
-    logger.info("background has " + background.size() + " lines");
     return background;
   }
 
