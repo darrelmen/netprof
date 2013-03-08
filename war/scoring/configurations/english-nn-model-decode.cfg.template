@@ -69,5 +69,6 @@ dictionary: MODELS_DIR/words-34k.dict
 lm: LM_TO_USE
 lm-weight: 4.0
 beam-threshold: 200.0
+letter-to-sound-class: corpus.EnglishLTS
 
 # End Configuration
