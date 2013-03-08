@@ -266,10 +266,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     FluidContainer container = new FluidContainer();
     RootPanel.get().add(container);
     currentExerciseVPanel = container;
+
+
     Row row = new FluidRow();
     container.add(row);
+    row.add(new Column(12, new Heading(2, props.getLanguage() + " Flashcard")));
 
-    Row row2 = new FluidRow();
+    Row rowUnder = new FluidRow();
+    rowUnder.add(new Column(12, new Heading(4, "", "Record yourself saying the word or phrase.")));
+    container.add(rowUnder);
 
     IconAnchor logout = new IconAnchor();
     logout.setText("Logout");
@@ -282,21 +287,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
 
    // row2.add(new Column(2));
-    row2.add(new Column(1, logout));
     userManager = new UserManager(this, service, isCollectAudio(), false);
     this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager);
 
     makeFlashContainer();
-    Column col = new Column(1, flashRecordPanel);
-    row.add(new Column(1, new Heading(2, props.getAppTitle())));
-    //row.add(col);
 
+
+    Row row2 = new FluidRow();
+    row2.add(new Column(1, logout));
     container.add(row2);
 
     Row row3 = new FluidRow();
     container.add(row3);
-    row3.add(col);
-
+    row3.add(new Column(1, flashRecordPanel));
 
     setupSoundManager();
 
