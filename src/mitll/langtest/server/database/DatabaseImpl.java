@@ -428,7 +428,7 @@ public class DatabaseImpl implements Database {
        // state.scores.offerFirst(isCorrect);
         if (isCorrect) state.correct++;
         else state.incorrect++;
-        logger.warn("update state for " + userID + " exid = " + exerciseID + " : " + isCorrect);
+       // logger.debug("update state for " + userID + " exid = " + exerciseID + " : " + isCorrect);
       }
     }
   }
