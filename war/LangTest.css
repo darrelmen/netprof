@@ -222,6 +222,14 @@ fieldset > legend {
     color:red
 }
 
+.incorrectCard {
+    background-color: #ffa07a;
+}
+
+.correctCard {
+    background-color: #90ee90;
+}
+
 .urdufont {
     color: #CC6600;
     font-family: 'Nafees Naskh',Nafees,sans-serif;
