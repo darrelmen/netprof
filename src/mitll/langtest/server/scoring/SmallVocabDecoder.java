@@ -182,20 +182,22 @@ public class SmallVocabDecoder {
   }
 
   /**
-   * ngram-count -text smallLM.txt -lm smallLmOut.srilm -write-vocab out.vocab -order 2 -cdiscount 0.0001 –unk
-   * HBuild -n smallLmOut.srilm -s '<s>' '</s>' out.vocab smallLM.slf
+   * Write LM sentences out, without punctuation.
    *
+   * @see #createSLFFile(java.util.List, java.util.List, String, String, String)
    * @param lmSentences
    * @param tmpDir
-   * @return
+   * @return smallLM file
    */
-
   private File writeLMToFile(List<String> lmSentences, String tmpDir) {
     try {
       File outFile = new File(tmpDir, "smallLM_" +lmSentences.size()+ ".txt");
       logger.info("wrote lm to " +outFile.getAbsolutePath());
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), FileExerciseDAO.ENCODING));
-      for (String s : lmSentences) writer.write(s.trim().replaceAll("\\p{P}","") + "\n");
+      for (String s : lmSentences) {
+        String punctRemoved = s.trim().replaceAll("\\p{P}", "");
+        writer.write(punctRemoved + "\n");
+      }
       writer.close();
       return outFile;
     } catch (IOException e) {
