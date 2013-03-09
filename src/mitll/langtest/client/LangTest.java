@@ -263,6 +263,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * TODO : test without flash???
    */
   private void doFlashcard() {
+    setPageTitle();
     FluidContainer container = new FluidContainer();
     RootPanel.get().add(container);
     currentExerciseVPanel = container;
