@@ -61,7 +61,6 @@ public class AutoCRT {
   public AudioAnswer getAutoCRTAnswer(String exercise, Exercise e, int reqid, File file, AudioAnswer.Validity validity,
                                       int questionID, String url, int durationInMillis) {
     List<String> exportedAnswers = getExportedAnswers(exercise, questionID);
-    //for (Exercise.QAPair pair : e.getForeignLanguageQuestions()) exportedAnswers.add(pair.getQuestion());
     logger.info("got answers " + new HashSet<String>(exportedAnswers));
 
     List<String> background = getBackgroundText(e);
@@ -78,7 +77,7 @@ public class AutoCRT {
   }
 
   public AudioAnswer getFlashcardAnswer(String exercise, Exercise e, int reqid, File file, AudioAnswer.Validity validity,
-                                      int questionID, String url, int durationInMillis,
+                                       String url, int durationInMillis,
                                       List<Exercise> otherExercises) {
     String foregroundSentence = getRefSentence(e);
 
@@ -99,8 +98,12 @@ public class AutoCRT {
     String recoSentence = asrScoreForAudio.getRecoSentence().toLowerCase().trim();
     logger.info("reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentence +"'");
 
-    double scoreForAnswer = recoSentence != null && recoSentence.equalsIgnoreCase(foregroundSentence) ? 1.0d :0.0d;
+    double scoreForAnswer = recoSentence != null && isCorrect(foregroundSentence, recoSentence) ? 1.0d :0.0d;
     return new AudioAnswer(url, validity, recoSentence, scoreForAnswer, reqid, durationInMillis);
+  }
+
+  private boolean isCorrect(String foregroundSentence, String recoSentence) {
+    return recoSentence.contains(foregroundSentence.replaceAll("-","").toLowerCase()) ;
   }
 
   private String getRefSentence(Exercise other) {
