@@ -813,12 +813,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (serverProps.isFlashcard()) {
       makeAutoCRT();
 
-      AudioAnswer flashcardAnswer = autoCRT.getFlashcardAnswer(exercise, getExercise(exercise), reqid, file, validity.validity, questionID, url,
+      AudioAnswer flashcardAnswer =
+        autoCRT.getFlashcardAnswer(exercise, getExercise(exercise), reqid, file, validity.validity, url,
         validity.durationInMillis, getExercises());
       boolean isCorrect = flashcardAnswer.score > 0.8d;
       db.updateFlashcardState(user, exercise, isCorrect);
-     // AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
-     // audioAnswer.score = 1; // correct
       return flashcardAnswer;
     }
     else if (doAutoCRT && isValid) {
