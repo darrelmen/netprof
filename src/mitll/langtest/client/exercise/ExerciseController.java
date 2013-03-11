@@ -39,6 +39,7 @@ public interface ExerciseController {
   boolean isAutoCRTMode();
   int getRecordTimeout();
   boolean isDataCollectMode();
+  boolean isCRTDataCollectMode();
   boolean isCollectAudio();
   boolean isMinimalUI();
   boolean isGrading();
