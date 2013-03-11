@@ -30,7 +30,8 @@ public class FlashcardExercisePanelFactory extends ExercisePanelFactory {
 
   public Panel getExercisePanel(Exercise e) {
     if (e.getType() == Exercise.EXERCISE_TYPE.RECORD) {
-/*      return new SimpleRecordExercisePanel(e, service, userFeedback, controller) {
+/*
+      return new SimpleRecordExercisePanel(e, service, userFeedback, controller) {
         @Override
         protected void addItemHeader(Exercise e) {
           //super.addItemHeader(e);    //To change body of overridden methods use File | Settings | File Templates.
