@@ -153,7 +153,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void run() {}
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
 
-    userManager = new UserManager(this,service, isCollectAudio(), false);
+    userManager = new UserManager(this,service, isCollectAudio(), false, isCRTDataCollectMode());
     resultManager = new ResultManager(service, this, props.getNameForAnswer());
     monitoringManager = new MonitoringManager(service, props);
     boolean usualLayout = !showOnlyOneExercise();
@@ -271,7 +271,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     });
     fp1.add(users);
-    userManager = new UserManager(this,service, isCollectAudio(), false);
+    userManager = new UserManager(this,service, isCollectAudio(), false, false);
 
     logout = new Anchor("Logout");
     logout.addClickHandler(new ClickHandler() {
@@ -290,7 +290,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     vp.add(fp1);
 
     vp.add(currentExerciseVPanel);
-    userManager = new UserManager(this,service, false, props.isDataCollectAdminView());
+    userManager = new UserManager(this,service, false, props.isDataCollectAdminView(), false);
     DataCollectAdmin dataCollectAdmin = new DataCollectAdmin(userManager, service);
     dataCollectAdmin.makeDataCollectNewSiteForm(currentExerciseVPanel);
 
@@ -449,7 +449,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this), userManager, 1);
     } else if (props.isGrading()) {
       exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, props.getNumGradesToCollect());
-    } else if (props.isDataCollectMode() && props.isCollectAudio()) {
+    } else if (props.isDataCollectMode() && props.isCollectAudio() && !props.isCRTDataCollectMode()) {
       exerciseList.setFactory(new WaveformExercisePanelFactory(service, this, this), userManager, 1);
     } else if (props.isFlashCard()) {
       exerciseList.setFactory(new FlashcardExercisePanelFactory(service, this, this), userManager, 1);
@@ -572,7 +572,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see ExerciseList#checkBeforeLoad(mitll.langtest.shared.ExerciseShell)
    */
   public void login() {
-    if (props.isDataCollectMode() || props.isTeacherView()) userManager.teacherLogin();
+    if ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView()) userManager.teacherLogin();
     else userManager.login();
   }
 
@@ -634,6 +634,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isAutoCRTMode() {  return props.isAutocrt(); }
   public int getRecordTimeout() {  return props.getRecordTimeout(); }
   public boolean isDataCollectMode() {  return props.isDataCollectMode(); }
+  public boolean isCRTDataCollectMode() {  return props.isCRTDataCollectMode(); }
   public boolean isCollectAudio() {  return props.isCollectAudio(); }
   public boolean isMinimalUI() {  return props.isMinimalUI(); }
   public boolean isGrading() {  return props.isGrading(); }
