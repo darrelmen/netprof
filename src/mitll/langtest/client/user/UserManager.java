@@ -46,6 +46,7 @@ import java.util.List;
  */
 public class UserManager {
   private static final int EXPIRATION_HOURS = 24*7;
+  private static final int SHORT_EXPIRATION_HOURS = 24*1;
   private static final int MIN_AGE = 6;
   private static final int MAX_AGE = 90;
   private static final int TEST_AGE = 100;
@@ -69,6 +70,7 @@ public class UserManager {
   private boolean isCollectAudio;
   private Storage stockStore = null;
   private final boolean isDataCollectAdmin;
+  private final boolean isCRTDataCollect;
   private static final boolean COLLECT_NAMES = false;
 
   /**
@@ -76,13 +78,16 @@ public class UserManager {
    * @param lt
    * @param service
    * @param isDataCollectAdmin
+   * @param isCRTDataCollect
    */
-  public UserManager(UserNotification lt, LangTestDatabaseAsync service, boolean isCollectAudio, boolean isDataCollectAdmin) {
+  public UserManager(UserNotification lt, LangTestDatabaseAsync service, boolean isCollectAudio,
+                     boolean isDataCollectAdmin, boolean isCRTDataCollect) {
     this.langTest = lt;
     this.service = service;
     this.isCollectAudio = isCollectAudio;
     stockStore = Storage.getLocalStorageIfSupported();
     this.isDataCollectAdmin = isDataCollectAdmin;
+    this.isCRTDataCollect = isCRTDataCollect;
   }
 
   // user tracking
@@ -97,7 +102,7 @@ public class UserManager {
    */
   private void storeUser(long sessionID, String audioType) {
     //System.out.println("storeUser : user now " + sessionID);
-    final long DURATION = 1000 * 60 * 60 * EXPIRATION_HOURS; //duration remembering login
+    final long DURATION = 1000 * 60 * 60 * (isCRTDataCollect ? SHORT_EXPIRATION_HOURS : EXPIRATION_HOURS); //duration remembering login
     long now = System.currentTimeMillis();
     long futureMoment = now + DURATION;
     if (useCookie) {
@@ -173,14 +178,17 @@ public class UserManager {
   private void checkExpiration(String sid) {
     String expires = stockStore.getItem("expires");
     if (expires == null) {
-      System.out.println("no expires item");
+      System.out.println("checkExpiration : no expires item?");
     }
     else {
       try {
         long expirationDate = Long.parseLong(expires);
         if (expirationDate < System.currentTimeMillis()) {
-          System.out.println(sid + " has expired.");
+          System.out.println("checkExpiration : " +sid + " has expired.");
           clearUser();
+        }
+        else {
+          System.out.println("checkExpiration : " +sid + " has expires on " + new Date(expirationDate) + " vs now " + new Date());
         }
       } catch (NumberFormatException e) {
         e.printStackTrace();
