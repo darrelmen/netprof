@@ -26,6 +26,7 @@ public class PropertyHandler {
   private static final String AUTO_CRT = "autocrt";
   private static final String DEMO_MODE = "demo";
   private static final String DATA_COLLECT_MODE = "dataCollect";
+  private static final String CRT_DATA_COLLECT_MODE = "crtDataCollect";
   private static final String COLLECT_AUDIO= "collectAudio";
   private static final String RECORD_TIMEOUT = "recordTimeout";
   private static final String TEACHER_VIEW = "teacherView";
@@ -100,6 +101,7 @@ public class PropertyHandler {
   private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
   private float screenPortion;
+  private boolean CRTDataCollectMode;
 
   public PropertyHandler(Map<String,String> props) {
     this.props = props;
@@ -124,6 +126,7 @@ public class PropertyHandler {
       else if (key.equals(AUTO_CRT)) autocrt = getBoolean(value);
       else if (key.equals(DEMO_MODE)) demoMode = getBoolean(value);
       else if (key.equals(DATA_COLLECT_MODE)) dataCollectMode = getBoolean(value);
+      else if (key.equals(CRT_DATA_COLLECT_MODE)) CRTDataCollectMode = getBoolean(value);
       else if (key.equals(RECORD_TIMEOUT)) recordTimeout = getInt(value,DEFAULT_TIMEOUT,RECORD_TIMEOUT);
       else if (key.equals(COLLECT_AUDIO)) collectAudio = getBoolean(value);
       else if (key.equals(ADMIN_VIEW)) adminView = getBoolean(value);
@@ -359,5 +362,8 @@ public class PropertyHandler {
 
   public String getLanguage() {
     return language;
+  }
+  public boolean isCRTDataCollectMode() {
+    return CRTDataCollectMode;
   }
 }
