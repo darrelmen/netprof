@@ -199,6 +199,7 @@ public class GradeDAO extends DAO {
       Set<Integer> ids = new HashSet<Integer>();
       List<User> users = userDAO.getUsers();
       Map<String,User> idToUser = new HashMap<String, User>();
+      boolean validIds = (idToUser.size() > 0 && !idToUser.keySet().iterator().next().equals("NOT_SET"));
       for (User u : users) idToUser.put(u.userID,u);
       int count = 0;
       while (rs.next()) {
@@ -216,7 +217,7 @@ public class GradeDAO extends DAO {
           if (user != null) {
             graderID = (int) user.id;
           } else {
-            if (count++ < 20) {
+            if (count++ < 20 && validIds) {
               logger.warn("couldn't parse grader '" + grader + "' or find user by that id in " + idToUser.keySet());
             }
           }
