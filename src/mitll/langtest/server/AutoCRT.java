@@ -95,7 +95,9 @@ public class AutoCRT {
     logger.debug("foreground " + foreground + " back " + background.subList(0,10) +"...");
     PretestScore asrScoreForAudio = db.getASRScoreForAudio(file, foreground, background);
 
-    String recoSentence = asrScoreForAudio.getRecoSentence().toLowerCase().trim();
+    String recoSentence =
+      asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
+        asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
     logger.info("reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentence +"'");
 
     double scoreForAnswer = recoSentence != null && isCorrect(foregroundSentence, recoSentence) ? 1.0d :0.0d;
