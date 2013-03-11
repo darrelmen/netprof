@@ -96,6 +96,7 @@ public class ResultDAO extends DAO {
   private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<Result> results = new ArrayList<Result>();
+    int columnCount = rs.getMetaData().getColumnCount();
     while (rs.next()) {
       int i = 1;
       int uniqueID = rs.getInt(i++);
@@ -108,8 +109,9 @@ public class ResultDAO extends DAO {
       boolean valid = rs.getBoolean(i++);
       boolean flq = rs.getBoolean(i++);
       boolean spoken = rs.getBoolean(i++);
-      String type = rs.getString(i++);
-      int dur = rs.getInt(i++);
+
+      String type = (columnCount >= i) ? rs.getString(i++) : null;
+      int dur = (columnCount >= i) ? rs.getInt(i++) : 0;
       Result e = new Result(uniqueID, userID, //id
           plan, // plan
           exid, // id
@@ -476,15 +478,17 @@ public class ResultDAO extends DAO {
   void createResultTable(Connection connection) throws SQLException {
     createTable(connection);
     int numColumns = getNumColumns(connection, RESULTS);
-   // logger.info("num columns = " + numColumns);
     if (numColumns == 8) {
+      logger.info(RESULTS + " table had num columns = " + numColumns);
       addColumnToTable(connection);
       enrichResults();
     }
-    else if (numColumns < 11) {//!columnExists(connection,RESULTS, AUDIO_TYPE)) {
+    if (numColumns < 11) {//!columnExists(connection,RESULTS, AUDIO_TYPE)) {
+      logger.info(RESULTS + " table had num columns = " + numColumns);
       addTypeColumnToTable(connection);
     }
     if (numColumns < 12) {
+      logger.info(RESULTS + " table had num columns = " + numColumns);
       addDurationColumnToTable(connection);
     }
    // removeTimeDefault(connection);
@@ -557,12 +561,16 @@ public class ResultDAO extends DAO {
   }
 
   private void addDurationColumnToTable(Connection connection) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-        DURATION +
-        " " +
-        "INT");
-    statement.execute();
-    statement.close();
+    try {
+      PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
+          DURATION +
+          " " +
+          "INT");
+      statement.execute();
+      statement.close();
+    } catch (SQLException e) {
+      logger.warn("addDurationColumnToTable : got " + e);
+    }
   }
 
   /**
