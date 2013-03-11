@@ -182,23 +182,39 @@ public class UserDAO extends DAO {
 
       ResultSet rs = statement.executeQuery();
       List<User> users = new ArrayList<User>();
-      while (rs.next()) {
-    	  i = 1;
-        String userid;
-        users.add(new User(rs.getLong(i++), //id
-          rs.getInt(i++), // age
-          rs.getInt(i++), //gender
-          rs.getInt(i++), // exp
-          rs.getString(i++), // ip
+      int columnCount = rs.getMetaData().getColumnCount();
+      if (columnCount == 7) {
+        while (rs.next()) {
+          i = 1;
+          users.add(new User(rs.getLong(i++), //id
+            rs.getInt(i++), // age
+            rs.getInt(i++), //gender
+            rs.getInt(i++), // exp
+            rs.getString(i++), // ip
             rs.getString(i++), // password
+            rs.getBoolean(i++)));
+        }
+      } else {
+        while (rs.next()) {
+          i = 1;
+          String userid;
+          users.add(new User(rs.getLong(i++), //id
+            rs.getInt(i++), // age
+            rs.getInt(i++), //gender
+            rs.getInt(i++), // exp
+            rs.getString(i++), // ip
+            rs.getString(i++), // password
+
             rs.getString(i++), // first
             rs.getString(i++), // last
             rs.getString(i++), // native
             rs.getString(i++), // dialect
             userid = rs.getString(i++), // userid
             rs.getTimestamp(i++).getTime(),
+
             rs.getBoolean(i++),
             userid.equals("gvidaver") | userid.equals("swade")));
+        }
       }
       rs.close();
       statement.close();
