@@ -33,6 +33,10 @@ public class User implements IsSerializable {
 
   public User() {} // for serialization
 
+  public User(long id, int age, int gender, int experience, String ipaddr, String password,
+               boolean enabled) {
+     this(id,age,gender,experience,ipaddr,password,"NOT_SET","NOT_SET","NOT_SET","NOT_SET","NOT_SET",0,enabled,false);
+  }
   /**
    * @see mitll.langtest.server.database.UserDAO#getUsers()
    * @param id
