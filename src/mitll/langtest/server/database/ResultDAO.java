@@ -31,6 +31,13 @@ import java.util.Set;
 public class ResultDAO extends DAO {
   private static Logger logger = Logger.getLogger(ResultDAO.class);
 
+  private static final String ID = "id";
+  private static final String USERID = "userid";
+  private static final String PLAN = "plan";
+  private static final String QID = "qid";
+  private static final String ANSWER = "answer";
+  private static final String VALID = "valid";
+
   private static final String RESULTS = "results";
 
   static final String FLQ = "flq";
@@ -96,20 +103,22 @@ public class ResultDAO extends DAO {
   private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<Result> results = new ArrayList<Result>();
+    int columnCount = rs.getMetaData().getColumnCount();
     while (rs.next()) {
       int i = 1;
-      int uniqueID = rs.getInt(i++);
-      long userID = rs.getLong(i++);
-      String plan = rs.getString(i++);
-      String exid = rs.getString(i++);
-      int qid = rs.getInt(i++);
-      Timestamp timestamp = rs.getTimestamp(i++);
-      String answer = rs.getString(i++);
-      boolean valid = rs.getBoolean(i++);
-      boolean flq = rs.getBoolean(i++);
-      boolean spoken = rs.getBoolean(i++);
-      String type = rs.getString(i++);
-      int dur = rs.getInt(i++);
+      int uniqueID = rs.getInt(ID);
+      long userID = rs.getLong(USERID);
+      String plan = rs.getString(PLAN);
+      String exid = rs.getString(Database.EXID);
+      int qid = rs.getInt(QID);
+      Timestamp timestamp = rs.getTimestamp(Database.TIME);
+      String answer = rs.getString(ANSWER);
+      boolean valid = rs.getBoolean(VALID);
+      boolean flq = rs.getBoolean(FLQ);
+      boolean spoken = rs.getBoolean(SPOKEN);
+
+      String type = (columnCount >= i) ? rs.getString(AUDIO_TYPE) : null;
+      int dur = (columnCount >= i) ? rs.getInt(DURATION) : 0;
       Result e = new Result(uniqueID, userID, //id
           plan, // plan
           exid, // id
@@ -476,15 +485,17 @@ public class ResultDAO extends DAO {
   void createResultTable(Connection connection) throws SQLException {
     createTable(connection);
     int numColumns = getNumColumns(connection, RESULTS);
-   // logger.info("num columns = " + numColumns);
     if (numColumns == 8) {
+      logger.info(RESULTS + " table had num columns = " + numColumns);
       addColumnToTable(connection);
       enrichResults();
     }
-    else if (numColumns < 11) {//!columnExists(connection,RESULTS, AUDIO_TYPE)) {
+    if (numColumns <= 11) {//!columnExists(connection,RESULTS, AUDIO_TYPE)) {
+      logger.info(RESULTS + " table had num columns = " + numColumns);
       addTypeColumnToTable(connection);
     }
     if (numColumns < 12) {
+      logger.info(RESULTS + " table had num columns = " + numColumns);
       addDurationColumnToTable(connection);
     }
    // removeTimeDefault(connection);
@@ -525,28 +536,41 @@ public class ResultDAO extends DAO {
   }
 
   private void addColumnToTable(Connection connection) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-        FLQ +
-        " BOOLEAN");
-    statement.execute();
-    statement.close();
+    PreparedStatement statement = null;
+    try {
+      statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
+          FLQ +
+          " BOOLEAN");
+      statement.execute();
+      statement.close();
+    } catch (SQLException e) {
+      logger.warn("addColumnToTable : flq got " + e);
+    }
 
-    statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-        SPOKEN +
-        " BOOLEAN");
-    statement.execute();
-    statement.close();
+    try {
+      statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
+          SPOKEN +
+          " BOOLEAN");
+      statement.execute();
+      statement.close();
+    } catch (SQLException e) {
+      logger.warn("addColumnToTable : spoken got " + e);
+    }
   }
 
   private void addTypeColumnToTable(Connection connection) throws SQLException {
     PreparedStatement statement;
 
-    statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-        AUDIO_TYPE +
-        " " +
-        "VARCHAR");
-    statement.execute();
-    statement.close();
+    try {
+      statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
+          AUDIO_TYPE +
+          " " +
+          "VARCHAR");
+      statement.execute();
+      statement.close();
+    } catch (SQLException e) {
+      logger.warn("addTypeColumnToTable : got " + e);
+    }
   }
 
   private void removeTimeDefault(Connection connection) throws SQLException {
@@ -557,12 +581,16 @@ public class ResultDAO extends DAO {
   }
 
   private void addDurationColumnToTable(Connection connection) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-        DURATION +
-        " " +
-        "INT");
-    statement.execute();
-    statement.close();
+    try {
+      PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
+          DURATION +
+          " " +
+          "INT");
+      statement.execute();
+      statement.close();
+    } catch (SQLException e) {
+      logger.warn("addDurationColumnToTable : got " + e);
+    }
   }
 
   /**
