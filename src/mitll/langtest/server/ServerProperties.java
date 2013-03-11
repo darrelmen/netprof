@@ -40,6 +40,7 @@ public class ServerProperties {
   private static final String URDU = "urdu";
   private static final String READ_FROM_FILE = "readFromFile";
   private static final String FLASHCARD = "flashcard";
+  private static final String CRTDATACOLLECT = "crtDataCollect";
 
   private Properties props = null;
 
@@ -84,6 +85,10 @@ public class ServerProperties {
   }
   public boolean isFlashcard() {
     return !props.getProperty(FLASHCARD, "false").equals("false");
+  }
+
+  public boolean isCRTDataCollect() {
+    return !props.getProperty(CRTDATACOLLECT, "false").equals("false");
   }
 
   /**
