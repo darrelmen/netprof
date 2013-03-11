@@ -13,7 +13,6 @@
   <inherits name='com.google.gwt.user.theme.clean.Clean'/>
   <inherits name='com.googlecode.gchart.GChart'/>
   <inherits name='com.google.gwt.visualization.Visualization'/>
-
   <inherits name ="com.github.gwtbootstrap.Bootstrap"/>
   <set-property name="bootstrap.responsiveDesign" value="true"/>
 
