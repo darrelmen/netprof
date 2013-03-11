@@ -437,9 +437,8 @@ public class DatabaseImpl implements Database {
    *
    *
    * @param userID for this user
-   * @return
+   * @return unmodifiable list of exercises
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long, boolean)
-   * @deprecated we should move away from using schedules to determine exercise order, etc.
    */
   public List<Exercise> getExercises(long userID) {
     logger.info("getExercises : for user  " + userID);
