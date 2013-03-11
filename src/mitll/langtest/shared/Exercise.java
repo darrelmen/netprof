@@ -203,8 +203,11 @@ public class Exercise extends ExerciseShell  {
     return en.size();
   }
 
-  public void addSlot(String s) { if (slots == null) slots= new ArrayList<String>();slots.add(s);}
-  public List<String> getSlots() { return slots; }
+  public void addSlot(String s) {
+    if (slots == null) slots = new ArrayList<String>();
+    slots.add(s);
+  }
+  //public List<String> getSlots() { return slots; }
 
   public String toString() {
     if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
