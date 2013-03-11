@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
@@ -55,22 +56,22 @@ import java.util.concurrent.TimeUnit;
  */
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring {
-  private static final List<String> EMPTY_LIST = Collections.emptyList();
   private static Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
 
   private static final int MB = (1024 * 1024);
   public static final String ANSWERS = "answers";
   private static final int TIMEOUT = 30;
   private static final String IMAGE_WRITER_IMAGES = "audioimages";
+  private static final List<String> EMPTY_LIST = Collections.emptyList();
   private DatabaseImpl db;
   private ASRScoring asrScoring;
   private AutoCRT autoCRT;
-  private boolean makeFullURLs = false;
+  private final boolean makeFullURLs = false;
   private String relativeConfigDir;
   private String configDir;
-  private ServerProperties serverProps = new ServerProperties();
+  private final ServerProperties serverProps = new ServerProperties();
 
-  private Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
+  private final Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
       .concurrencyLevel(4)
       .maximumSize(10000)
       .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();
@@ -130,7 +131,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public boolean deploySite(long id, String name, String language, String notes) {
     SiteDeployer siteDeployer = new SiteDeployer();
-    return siteDeployer.deploySite(db, getMailSupport(),getThreadLocalRequest(),configDir,getInstallPath(),id,name,language,notes);
+    return siteDeployer.deploySite(db, getMailSupport(), getThreadLocalRequest(), configDir, getInstallPath(), id, name, language, notes);
   }
 
   /**
@@ -201,6 +202,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<Exercise> exercises = getExercises(userID, arabicDataCollect);
     for (Exercise e : exercises) {
       if (id.equals(e.getID())) {
+        logger.info("getExercise for user " +userID + " exid " + id + " got " + e);
         return e;
       }
     }
@@ -218,6 +220,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * <li>Alternatively, we can present the first N items in order then random after that (based on the user). </li>
    * <li>Or we can attempt to present items in an order that biases towards presenting items that were all graded "correct"  </li>
    * first and all graded "incorrect" last.
+   * <li>if in crt data collect mode, we randomly choose between english or fl question, and if fl question, spoken or written response </li>
    * </ul>
    *
    * @param userID
@@ -231,17 +234,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     makeAutoCRT();
     List<Exercise> exercises;
     if (serverProps.dataCollectMode) {
-     // logger.debug("in data collect mode");
+      // logger.debug("in data collect mode");
       if (serverProps.biasTowardsUnanswered) {
         if (serverProps.useOutsideResultCounts) {
           String outsideFileOverride = serverProps.outsideFile;
           if (lessonPlanFile.contains("farsi")) outsideFileOverride = configDir + File.separator + "farsi.txt";
           else if (lessonPlanFile.contains("urdu")) outsideFileOverride = configDir + File.separator + "urdu.txt";
-          else if (lessonPlanFile.contains("sudanese")) outsideFileOverride = configDir + File.separator + "sudanese.txt";
+          else if (lessonPlanFile.contains("sudanese"))
+            outsideFileOverride = configDir + File.separator + "sudanese.txt";
           exercises = db.getExercisesBiasTowardsUnanswered(userID, outsideFileOverride);
           db.setOutsideFile(outsideFileOverride);
-        }
-        else {
+        } else {
           exercises = db.getExercisesBiasTowardsUnanswered(userID);
         }
       } else {
@@ -255,21 +258,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           e.setPromptInEnglish(false);
         }
       }
-    }
-    else {
-/*      if (serverProps.isFlashcard()) {
-      //  exercises = db.getNextExercise(userID);
-      }
-      else {*/
-        exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(userID);
-  //    }
+    } else {
+      exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(userID);
     }
 
+    if (serverProps.isCRTDataCollect()) {
+      setPromptAndRecordOnExercises(userID, exercises);
+    }
     if (makeFullURLs) convertRefAudioURLs(exercises);
-    if (!exercises.isEmpty())
-      logger.debug("for user #" + userID +" got " + exercises.size() + " exercises , first " + exercises.iterator().next());
+    //if (!exercises.isEmpty())
+   //   logger.debug("for user #" + userID +" got " + exercises.size() + " exercises , first " + exercises.iterator().next());
           //" ref sentence = '" + exercises.iterator().next().getRefSentence() + "'");
-    //logMemory();
 
     return exercises;
   }
@@ -278,6 +277,29 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     synchronized (this) {
       if (autoCRT == null) {
         autoCRT = new AutoCRT(db.getExport(), this, getInstallPath(), relativeConfigDir);
+      }
+    }
+  }
+
+  /**
+   * Set the prompt in english/foreign language and text/audio answer bits.
+   * <br></br>
+   * Note there is no english + text response combination.
+   *
+   * @param userID
+   * @param exercises
+   */
+  private void setPromptAndRecordOnExercises(long userID, List<Exercise> exercises) {
+    Random rand = new Random(userID);
+    for (Exercise e : exercises) {
+      boolean inEnglish = rand.nextBoolean();
+      e.setPromptInEnglish(inEnglish);
+
+      if (inEnglish) {
+        e.setRecordAnswer(true);
+      }
+      else {
+        e.setRecordAnswer(rand.nextBoolean());
       }
     }
   }
@@ -1055,8 +1077,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private class DirAndName {
-    private String testAudioFile;
-    private String installPath;
+    private final String testAudioFile;
+    private final String installPath;
     private String testAudioName;
     private String testAudioDir;
 
