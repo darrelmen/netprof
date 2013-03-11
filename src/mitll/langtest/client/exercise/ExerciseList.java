@@ -231,13 +231,18 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   protected void loadFirstExercise() {
-    ExerciseShell toLoad = currentExercises.get(0);
-    if (exercise_title != null) {
-      ExerciseShell e = byID(exercise_title);
-      if (e != null) toLoad = e;
-    }
+    if (currentExercises.isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
+      Window.alert("Server error : no exercises. Please contact administrator.");
+    } else {
+      ExerciseShell toLoad = currentExercises.get(0);
 
-    pushFirstSelection(toLoad.getID());
+      if (exercise_title != null) {
+        ExerciseShell e = byID(exercise_title);
+        if (e != null) toLoad = e;
+      }
+
+      pushFirstSelection(toLoad.getID());
+    }
   }
 
   private ExerciseShell byID(String name) {
