@@ -41,7 +41,7 @@ public class RecordButtonPanel {
   private Exercise exercise;
   private ExerciseQuestionState questionState;
   private int index;
-  private final RecordButton rb;
+  private RecordButton rb;
   private int reqid = 0;
   protected Panel panel;
 
@@ -71,7 +71,12 @@ public class RecordButtonPanel {
     recordButton.getElement().setId("record_button");
     recordButton.setTitle(RECORD);
 
-    this.rb = new RecordButton(recordButton, controller.getRecordTimeout()) {
+    this.rb = makeRecordButton(controller, outer);
+    layoutRecordButton();
+  }
+
+  protected RecordButton makeRecordButton(final ExerciseController controller, final RecordButtonPanel outer) {
+    return new RecordButton(recordButton, controller.getRecordTimeout()) {
       @Override
       protected void stopRecording() {
         outer.stopRecording();
@@ -92,7 +97,6 @@ public class RecordButtonPanel {
         outer.showStopped();
       }
     };
-    layoutRecordButton();
   }
 
   protected Anchor makeRecordButton() {
@@ -123,7 +127,7 @@ public class RecordButtonPanel {
      return this.panel;
   }
 
-  protected void startRecording() {
+  public void startRecording() {
     controller.startRecording();
   }
 
@@ -139,44 +143,44 @@ public class RecordButtonPanel {
    *   This is used to make the audio playback widget.
    * @see #RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int)
    */
-  protected void stopRecording() {
+  public void stopRecording() {
     controller.stopRecording();
     final Panel outer = getPanel();
 
     reqid++;
     service.writeAudioFile(controller.getBase64EncodedWavFile(),
-        exercise.getPlan(),
-        exercise.getID(),
-        index,
-        controller.getUser(),
-        controller.isAutoCRTMode(),
-        reqid,
-        !exercise.promptInEnglish,
-        controller.getAudioType(),
-        new AsyncCallback<AudioAnswer>() {
-          public void onFailure(Throwable caught) {
-            recordButton.setEnabled(true);
-            receivedAudioFailure();
-            Window.alert("Server error : Couldn't post answers for exercise.");
+      exercise.getPlan(),
+      exercise.getID(),
+      index,
+      controller.getUser(),
+      controller.isAutoCRTMode(),
+      reqid,
+      !exercise.promptInEnglish,
+      controller.getAudioType(),
+      new AsyncCallback<AudioAnswer>() {
+        public void onFailure(Throwable caught) {
+          recordButton.setEnabled(true);
+          receivedAudioFailure();
+          Window.alert("Server error : Couldn't post answers for exercise.");
+        }
+
+        public void onSuccess(AudioAnswer result) {
+          if (reqid != result.reqid) {
+            System.out.println("ignoring old answer " + result);
+            return;
           }
-          public void onSuccess(AudioAnswer result) {
-            if (reqid != result.reqid) {
-              System.out.println("ignoring old answer "+ result);
-              return;
-            }
-            recordButton.setEnabled(true);
-            receivedAudioAnswer(result, questionState, outer);
-          }
-        });
+          recordButton.setEnabled(true);
+          receivedAudioAnswer(result, questionState, outer);
+        }
+      });
   }
 
-
-  protected void showRecording() {
+  public void showRecording() {
     recordButton.setResource(stopImage);
     recordButton.setTitle(STOP);
   }
 
-  protected void showStopped() {
+  public void showStopped() {
     recordButton.setResource(recordImage);
     recordButton.setTitle(RECORD);
   }
@@ -189,8 +193,8 @@ public class RecordButtonPanel {
   protected static class ImageAnchor extends Anchor {
     private Image img = null;
     public ImageAnchor() {}
-    public void show() { setVisible(true); }
-    public void hide() { setVisible(false); }
+    //public void show() { setVisible(true); }
+    //public void hide() { setVisible(false); }
     public void setResource(Image img2) {
       if (this.img != null) {
         DOM.removeChild(getElement(), this.img.getElement());
