@@ -31,7 +31,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Note with H2 that :  <br></br>
@@ -386,10 +385,22 @@ public class DatabaseImpl implements Database {
       if (!userToState.containsKey(userID)) {
         String[] strings = new String[exercises.size()];
         int i = 0;
-        for (Exercise e : exercises) strings[i++] = e.getID();
+        for (Exercise e : exercises) {
+          strings[i++] = e.getID();
+        }
         UserState userState = new UserState(strings);
         userToState.put(userID, new UserStateWrapper(userState));
-        userState.initialize();
+     /*   //ArrayBuffer<String> buffer = new ArrayBuffer<String>(exercises.size());
+        Array<String> array = new Array<String>(exercises.size());
+        int j =0;
+       for (Exercise e : exercises) {
+         array.update(j++,e.getID());
+       }*/
+
+       // buffer.$plus$eq()
+      //  Array scalaArray = new Array
+        //ClassManifest<String> classManifest;
+       // userState.initialize(array);
       }
       UserStateWrapper userState = userToState.get(userID);
       Exercise exercise = idToExercise.get(userState.state.next());
