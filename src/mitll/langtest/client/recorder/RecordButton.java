@@ -25,14 +25,28 @@ import java.util.Date;
 public abstract class RecordButton {
   private boolean recording = false;
   private Timer recordTimer;
-  private final FocusWidget record;
+  private FocusWidget record = null;
   private int autoStopDelay;
   private HandlerRegistration keyHandler;
   private boolean hasFocus = false;
 
-  public RecordButton(FocusWidget recordButton, int delay) {
+  public RecordButton(int delay) {
     this.autoStopDelay = delay;
+    keyHandler = addKeyHandler();
+  }
+
+  /**
+   * @see RecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel)
+   * @param recordButton
+   * @param delay
+   */
+  public RecordButton(FocusWidget recordButton, int delay) {
+    this(delay);
     this.record = recordButton;
+    setupRecordButton(recordButton);
+  }
+
+  protected void setupRecordButton(FocusWidget recordButton) {
     recordButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         doClick();
@@ -53,37 +67,37 @@ public abstract class RecordButton {
       }
     });
     recordButton.setTitle("Press Enter to record/stop recording");
-
-    addKeyHandler();
   }
 
-  private void addKeyHandler() {
-    keyHandler = Event.addNativePreviewHandler(new
-                                                   Event.NativePreviewHandler() {
+  protected HandlerRegistration addKeyHandler() {
+    HandlerRegistration handlerRegistration = Event.addNativePreviewHandler(new
+                                                                              Event.NativePreviewHandler() {
 
-                                                     @Override
-                                                     public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                                                       NativeEvent ne = event.getNativeEvent();
+                                                                                @Override
+                                                                                public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                                                                                  NativeEvent ne = event.getNativeEvent();
 
-                                                       if (ne.getKeyCode() == KeyCodes.KEY_ENTER &&
-                                                           event.getTypeInt() == 512 &&
-                                                           "[object KeyboardEvent]".equals(ne.getString()) &&
-                                                           !hasFocus) {
-                                                         ne.preventDefault();
+                                                                                  if (ne.getKeyCode() == KeyCodes.KEY_ENTER &&
+                                                                                    event.getTypeInt() == 512 &&
+                                                                                    "[object KeyboardEvent]".equals(ne.getString()) &&
+                                                                                    !hasFocus) {
+                                                                                    ne.preventDefault();
 
 /*                                                         System.out.println(new Date() + " : Click handler : Got " + event + " type int " +
                                                              event.getTypeInt() + " assoc " + event.getAssociatedType() +
                                                              " native " + event.getNativeEvent() + " source " + event.getSource());*/
-                                                         new Timer() {
-                                                           @Override
-                                                           public void run() {
-                                                             doClick();
-                                                           }
-                                                         }.schedule(10);
-                                                       }
-                                                     }
-                                                   });
+                                                                                    new Timer() {
+                                                                                      @Override
+                                                                                      public void run() {
+                                                                                        doClick();
+                                                                                      }
+                                                                                    }.schedule(10);
+                                                                                  }
+                                                                                }
+                                                                              });
+    //keyHandler = handlerRegistration;
     //System.out.println("creating handler for recording " + keyHandler);
+    return handlerRegistration;
   }
 
   public void onUnload() {
@@ -93,13 +107,17 @@ public abstract class RecordButton {
 
   public void doClick() {
     if (record.isVisible() && record.isEnabled()) {
-      if (recording) {
-        cancelTimer();
-        stop();
-      } else {
-        start();
-        addRecordingMaxLengthTimeout();
-      }
+      startOrStopRecording();
+    }
+  }
+
+  protected void startOrStopRecording() {
+    if (recording) {
+      cancelTimer();
+      stop();
+    } else {
+      start();
+      addRecordingMaxLengthTimeout();
     }
   }
 
@@ -123,15 +141,6 @@ public abstract class RecordButton {
 
   /**
    * Add a timer to automatically stop recording after 20 seconds.
-   *
-   *
-   * @paramx record_button
-   * @paramx controller
-   * @paramx service
-   * @paramx exercise
-   * @paramx index
-   * @paramx questionState
-   * @paramx outer
    */
   private void addRecordingMaxLengthTimeout() {
     cancelTimer();
