@@ -69,7 +69,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
   }
 
   @Override
-  protected void startRecording() {
+  public void startRecording() {
     super.startRecording();
     playback.setWidget(new HTML(""));
     resp.setText("");
@@ -112,7 +112,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
   }
 
   @Override
-  protected void stopRecording() {
+  public void stopRecording() {
     super.stopRecording();
     if (controller.isAutoCRTMode())  {
       resp.removeStyleName("incorrect");
