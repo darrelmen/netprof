@@ -147,7 +147,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void onModuleLoad2() {
     if (props.isFlashCard()) {
-      //doFlashcard();
+      doFlashcard();
       return;
     }
     if (props.isDataCollectAdminView()) {
