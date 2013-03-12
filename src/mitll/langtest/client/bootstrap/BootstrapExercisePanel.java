@@ -3,8 +3,10 @@ package mitll.langtest.client.bootstrap;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.PageHeader;
+import com.github.gwtbootstrap.client.ui.Paragraph;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -26,6 +28,7 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,17 +39,18 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class BootstrapExercisePanel extends FluidContainer {
-  public static final int DELAY_MILLIS = 1000;
+  private static final int LONG_DELAY_MILLIS = 3500;
+  private static final int DELAY_MILLIS = 1000/2;
+  private static final int DELAY_MILLIS_LONG = 1500/2;
   private List<MyRecordButtonPanel> answerWidgets = new ArrayList<MyRecordButtonPanel>();
-  private Image waitingForInput = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record.png"));
-  private Image waitingForResponseImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress.gif"));
+
+  private Image waitingForResponseImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress48.gif"));
   private Image listeningImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "audio-input-microphone-3.png"));
-  private Image correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark.png"));
-  private Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx.png"));
-
-
-  //private HandlerRegistration keyHandler;
-  private boolean hasFocus = false;
+  private Image correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
+  private Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
+  private Image enterImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "enter48.png"));
+  private Heading recoOutput;
+  private boolean keyIsDown;
 
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller) {
@@ -60,14 +64,15 @@ public class BootstrapExercisePanel extends FluidContainer {
 
   private Widget getQuestionContent(Exercise e) {
     PageHeader widgets = new PageHeader();
-    widgets.addStyleName("correct");
     widgets.setText(getRefSentence(e));
     return widgets;
   }
 
   private String getRefSentence(Exercise other) {
     String e1 = other.getRefSentence().trim();
-    if (e1.contains(";")) e1 = e1.split(";")[0];
+    if (e1.contains(";")) {
+      e1 = e1.split(";")[0];
+    }
     return e1;
   }
 
@@ -98,46 +103,24 @@ public class BootstrapExercisePanel extends FluidContainer {
     MyRecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, questionNumber - 1);
     this.answerWidgets.add(answerWidget);
     Widget recordButton = answerWidget.getRecordButton();
-    row.add(new Column(2, 5, recordButton));
+    Paragraph paragraph = new Paragraph();
+    paragraph.addStyleName("alignCenter");
+    paragraph.add(recordButton);
+    recordButton.addStyleName("alignCenter");
+    row.add(new Column(12, paragraph));
 
-    // row.add(new Column(2, 5, recordButton,image));
-   // image.setVisible(false);
-    //  }
+    if (controller.isDemoMode()) {
+      FluidRow row2 = new FluidRow();
+      add(row2);
+      Paragraph paragraph2 = new Paragraph();
+      paragraph2.addStyleName("alignCenter");
+
+      row2.add(new Column(12, paragraph2));
+      recoOutput = new Heading(3);
+      paragraph2.add(recoOutput);
+
+    }
   }
-
-/*  private void addKeyHandler() {
-    keyHandler = Event.addNativePreviewHandler(new
-                                                 Event.NativePreviewHandler() {
-
-                                                   @Override
-                                                   public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                                                     NativeEvent ne = event.getNativeEvent();
-
-                                                     if (ne.getKeyCode() == KeyCodes.KEY_ENTER &&
-                                                       event.getTypeInt() == 512 &&
-                                                       "[object KeyboardEvent]".equals(ne.getString()) &&
-                                                       !hasFocus) {
-                                                       ne.preventDefault();
-
-*//*                                                         System.out.println(new Date() + " : Click handler : Got " + event + " type int " +
-                                                             event.getTypeInt() + " assoc " + event.getAssociatedType() +
-                                                             " native " + event.getNativeEvent() + " source " + event.getSource());*//*
-                                                       new Timer() {
-                                                         @Override
-                                                         public void run() {
-                                                           doClick();
-                                                         }
-                                                       }.schedule(10);
-                                                     }
-                                                   }
-                                                 });
-    //System.out.println("creating handler for recording " + keyHandler);
-  }*/
-
-/*  public void onUnload() {
-    //System.out.println("removing handler for recording " + keyHandler);
-    keyHandler.removeHandler();
-  }*/
 
   protected MyRecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
     return new MyRecordButtonPanel(service, controller, exercise, index, this);
@@ -145,18 +128,14 @@ public class BootstrapExercisePanel extends FluidContainer {
 
   private class MyRecordButtonPanel extends RecordButtonPanel {
     private final Exercise exercise;
-    //private Panel outerPanel;
     public MyRecordButtonPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, int index,Panel outerPanel) {
       super(service, controller, exercise, null, index);
-      //this.outerPanel = outerPanel;
       this.exercise = exercise;
-      //recordImage.setHeight("32px");
-      //stopImage.setHeight("32px");
     }
 
    @Override
     protected RecordButton makeRecordButton(ExerciseController controller, final RecordButtonPanel outer) {
-      return new RecordButton(recordButton, controller.getRecordTimeout()) {
+      return new RecordButton(controller.getRecordTimeout()) {
         @Override
         protected void stopRecording() {
           outer.stopRecording();
@@ -199,27 +178,20 @@ public class BootstrapExercisePanel extends FluidContainer {
                                                        int typeInt = event.getTypeInt();
                                                        boolean keyDown = typeInt == 128;
                                                        boolean keyUp = typeInt == 512;
-                                                       if (keyDown) doClick();
-                                                       else if (keyUp) doClick();
+
+                                               /*        System.out.println(new Date() + " : Click handler : Got " + event + " type int " +
+                                                         event.getTypeInt() + " assoc " + event.getAssociatedType() +
+                                                         " native " + event.getNativeEvent() + " source " + event.getSource());*/
+
+                                                       if (keyDown && !keyIsDown) {
+                                                         keyIsDown = true;
+                                                         doClick();
+                                                       }
+                                                       else if (keyUp && keyIsDown) {
+                                                         keyIsDown = false;
+                                                         doClick();
+                                                       }
                                                      }
-
-                                                          /* System.out.println("got " + ne + " " + ne.getKeyCode() + " " + typeInt + " assoc " +event.getAssociatedType());
-                                                           if (ne.getKeyCode() == KeyCodes.KEY_ENTER &&
-                                                             typeInt == 512 &&
-                                                             "[object KeyboardEvent]".equals(ne.getString()) &&
-                                                             !hasFocus) {
-                                                             ne.preventDefault();
-
-*//*                                                         System.out.println(new Date() + " : Click handler : Got " + event + " type int " +
-                                                             event.getTypeInt() + " assoc " + event.getAssociatedType() +
-                                                             " native " + event.getNativeEvent() + " source " + event.getSource());*//*
-                                                             new Timer() {
-                                                               @Override
-                                                               public void run() {
-                                                                 doClick();
-                                                               }
-                                                             }.schedule(10);
-                                                           }*/
                                                    }
                                                  });
         }
@@ -232,18 +204,11 @@ public class BootstrapExercisePanel extends FluidContainer {
     @Override
     protected Anchor makeRecordButton() {
       recordButton = new ImageAnchor();
-      recordButton.setResource(waitingForInput);
+      recordButton.setResource(enterImage);
+      recordButton.setHeight("48px");
+      //recordButton.setWidth("100%");
       return recordButton;
     }
-
-/*    @Override
-    public void stopRecording() {
-      //recordButton.hide();
-    //  image.setVisible(true);
-      recordButton.setResource(waitingForResponseImage);
-
-      super.stopRecording();
-    }*/
 
     @Override
     public void showRecording() {
@@ -253,6 +218,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     @Override
     public void showStopped() {
       recordButton.setResource(waitingForResponseImage);
+      onUnload();
     }
 
     /**
@@ -263,14 +229,12 @@ public class BootstrapExercisePanel extends FluidContainer {
      */
     @Override
     protected void receivedAudioAnswer(AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
-   //   image.setVisible(false);
-      //recordImage.setUrl(RECORD_PNG);
-      //recordButton.setResource(recordImage);
-
       double score = result.score;
-    //  outerPanel.addStyleName((score > 0.6) ? "correctCard" : "incorrectCard");
-      recordButton.setResource((score > 0.6) ? correctImage : incorrectImage);
-
+      boolean correct = score > 0.6;
+      recordButton.setResource(correct ? correctImage : incorrectImage);
+      if (recoOutput != null) {
+        recoOutput.setText("Heard: "+result.decodeOutput);
+      }
       Timer t = new Timer() {
         @Override
         public void run() {
@@ -279,14 +243,13 @@ public class BootstrapExercisePanel extends FluidContainer {
       };
 
       // Schedule the timer to run once in 1 seconds.
-      t.schedule(DELAY_MILLIS);
+      t.schedule(recoOutput != null ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : DELAY_MILLIS_LONG);
+
     }
 
     @Override
     protected void receivedAudioFailure() {
-   //   image.setVisible(false);
-      //recordImage.setUrl(RECORD_PNG);
-      recordButton.setResource(waitingForInput);
+      recordButton.setResource(enterImage);
     }
   }
 
