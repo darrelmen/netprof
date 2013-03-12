@@ -269,13 +269,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     RootPanel.get().add(container);
     currentExerciseVPanel = container;
 
-
     Row row = new FluidRow();
     container.add(row);
-    row.add(new Column(12, new Heading(2, props.getLanguage() + " Flashcard")));
+    Heading widgets = new Heading(3, props.getLanguage() + " Flashcard");
+    widgets.addStyleName("sendButtonBlue");
+    row.add(new Column(12, widgets));
 
     Row rowUnder = new FluidRow();
-    rowUnder.add(new Column(12, new Heading(4, "", "Record yourself saying the word or phrase.")));
+    rowUnder.add(new Column(12, new Heading(4, "", "Record yourself saying the word or phrase. Press and hold the ENTER key.")));
     container.add(rowUnder);
 
     IconAnchor logout = new IconAnchor();
@@ -305,7 +306,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     setupSoundManager();
 
-    login();
+    gotUser(-1);
   }
 
   private void doDataCollectAdminView() {
