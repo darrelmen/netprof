@@ -70,7 +70,7 @@ public abstract class RecordButton {
   }
 
   protected HandlerRegistration addKeyHandler() {
-    HandlerRegistration handlerRegistration = Event.addNativePreviewHandler(new
+    return Event.addNativePreviewHandler(new
                                                                               Event.NativePreviewHandler() {
 
                                                                                 @Override
@@ -95,18 +95,18 @@ public abstract class RecordButton {
                                                                                   }
                                                                                 }
                                                                               });
-    //keyHandler = handlerRegistration;
-    //System.out.println("creating handler for recording " + keyHandler);
-    return handlerRegistration;
   }
 
   public void onUnload() {
     //System.out.println("removing handler for recording " + keyHandler);
-    keyHandler.removeHandler();
+    if (keyHandler != null) {
+      keyHandler.removeHandler();
+      keyHandler = null;
+    }
   }
 
   public void doClick() {
-    if (record.isVisible() && record.isEnabled()) {
+    if (record == null || (record.isVisible() && record.isEnabled())) {
       startOrStopRecording();
     }
   }
@@ -122,14 +122,16 @@ public abstract class RecordButton {
   }
 
   private void start() {
+    long now = System.currentTimeMillis();
+    System.out.println("start recording at " + now);
     recording = true;
     startRecording();
     showRecording();
   }
 
   private void stop() {
-   // long now = System.currentTimeMillis();
-  //  System.out.println("stop recording at " + now + " " + (now-then));
+    long now = System.currentTimeMillis();
+   System.out.println("stop recording at " + now);// + " " + (now-then));
     recording = false;
     showStopped();
     stopRecording();

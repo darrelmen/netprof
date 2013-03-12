@@ -37,13 +37,12 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private ExercisePanelFactory factory;
   private LangTestDatabaseAsync service;
   private UserManager user;
-  private FluidRow row2;
-  Heading correct = new Heading(3);
+  private Heading correct = new Heading(3);
 
   public BootstrapFlashcardExerciseList(Container currentExerciseVPanel, LangTestDatabaseAsync service, UserManager user) {
     this.service = service;
     FluidRow row = new FluidRow();
-    this.row2 = new FluidRow();
+    FluidRow row2 = new FluidRow();
     column = new Column(SIZE);
     row.add(column);
     currentExerciseVPanel.add(row);
@@ -79,24 +78,6 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
         column.add(exercisePanel);
         correct.setText("Correct " +result.correct +"/"+(result.correct+result.incorrect));
-
-    /*    ProgressBar correct = new ProgressBar();
-        correct.setPercent(result.correct);
-        //correct.setText("Correct");
-        correct.setColor(ProgressBarBase.Color.SUCCESS);
-
-        Label w1 = new Label("Correct");//w1.setText("Correct");
-        row2.add(new Column(1, w1));
-        row2.add(new Column(5,correct));*/
-
-/*        ProgressBar incorrect = new ProgressBar();
-        incorrect.setPercent(result.incorrect);
-      //  incorrect.setText("Incorrect");
-        incorrect.setColor(ProgressBarBase.Color.WARNING);
-
-        Label w2 = new Label("Incorrect");//w2.setText("Incorrect");
-        row3.add(new Column(1,w2));
-        row3.add(new Column(5,incorrect));*/
       }
     });
   }
