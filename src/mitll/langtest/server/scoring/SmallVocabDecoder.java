@@ -30,9 +30,14 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class SmallVocabDecoder {
-  private static Logger logger = Logger.getLogger(ASRScoring.class);
+  private static final Logger logger = Logger.getLogger(ASRScoring.class);
 
   private static final String FINAL_BLEND_VOCAB = "finalBlend.vocab";
+  private static final String SMALL_LMOUT_SRILM = "smallLMOut.srilm";
+  private static final String LARGE_VOCAB_TXT = "largeVocab.txt";
+  private static final String BACKGROUND_LMOUT_SRILM = "backgroundLMOut.srilm";
+  private static final String COMBINED_SRILM = "combined.srilm";
+
   /**
    * How much weight to give the foreground vs the background lm.
    */
@@ -43,6 +48,7 @@ public class SmallVocabDecoder {
    * Limit on vocabulary size -- too big and dcodr will run out of memory and segfault
    */
   private static final int MAX_AUTO_CRT_VOCAB = 200;
+
   /**
    * Platform -- windows, mac, linux, etc.
    */
@@ -78,14 +84,14 @@ public class SmallVocabDecoder {
       String pathToBinDir = scoringDir + File.separator + "bin." + platform;
       //logger.info("platform  "+platform + " bins " + pathToBinDir);
       File foregroundLMSentenceFile = writeLMToFile(lmSentences, tmpDir);
-      File foreGroundSRILMFile = runNgramCount(tmpDir, "smallLMOut.srilm", foregroundLMSentenceFile, null, pathToBinDir, true);
+      File foreGroundSRILMFile = runNgramCount(tmpDir, SMALL_LMOUT_SRILM, foregroundLMSentenceFile, null, pathToBinDir, true);
 
       File backgroundLMSentenceFile = writeLMToFile(background, tmpDir);
-      String vocabFile = tmpDir + File.separator + "largeVocab.txt";
+      String vocabFile = tmpDir + File.separator + LARGE_VOCAB_TXT;
       writeVocab(vocabFile,vocab);
-      File backgroundSRILMFile = runNgramCount(tmpDir, "backgroundLMOut.srilm", backgroundLMSentenceFile, vocabFile, pathToBinDir, false);
+      File backgroundSRILMFile = runNgramCount(tmpDir, BACKGROUND_LMOUT_SRILM, backgroundLMSentenceFile, vocabFile, pathToBinDir, false);
 
-      File combinedSRILM =runNgram(tmpDir,"combined.srilm",foreGroundSRILMFile,backgroundSRILMFile,pathToBinDir);
+      File combinedSRILM =runNgram(tmpDir, COMBINED_SRILM,foreGroundSRILMFile,backgroundSRILMFile,pathToBinDir);
 
       //String slfFile = runHBuild(tmpDir,foreGroundSRILMFile,pathToBinDir); // only use foreground model
       String slfFile = runHBuild(tmpDir,combinedSRILM,pathToBinDir);
@@ -101,6 +107,7 @@ public class SmallVocabDecoder {
    * Very important to limit the vocabulary (less than 300 words) or else the small vocab dcodr will run out of
    * memory and segfault! <br></br>
    * Remember to add special tokens like silence, pause, and unk
+   * @see #createSLFFile(java.util.List, java.util.List, String, String, String)
    * @see #MAX_AUTO_CRT_VOCAB
    * @param background sentences
    * @return most frequent vocabulary words
@@ -151,23 +158,38 @@ public class SmallVocabDecoder {
     return all;
   }
 
+  /**
+   * So for some reason the slf file generated from HBuild is in octal, so we have to convert it to UTF-8.
+   *
+   * @see #createSLFFile(java.util.List, java.util.List, String, String, String)
+   * @param slfFile that is in octal
+   * @param convertedFile that will be in UTF-8
+   */
   private void doOctalConversion(String slfFile, String convertedFile) {
     try {
-      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(slfFile), FileExerciseDAO.ENCODING));
-      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(convertedFile), FileExerciseDAO.ENCODING));
-      String line2;
-      while ((line2 = reader.readLine()) != null) {
-        writer.write(package$.MODULE$.oct2string(line2).trim());
-        writer.write("\n");
+      if (!new File(slfFile).exists()) {
+        if (platform.equals("win32")) {
+          logger.debug("slf file " + slfFile + " doesn't exist, skipping octal conversion.");
+        } else {
+          logger.error("slf file " + slfFile + " doesn't exist, skipping octal conversion.");
+        }
+      } else {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(slfFile), FileExerciseDAO.ENCODING));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(convertedFile), FileExerciseDAO.ENCODING));
+        String line2;
+        while ((line2 = reader.readLine()) != null) {
+          writer.write(package$.MODULE$.oct2string(line2).trim());
+          writer.write("\n");
+        }
+        reader.close();
+        writer.close();
       }
-      reader.close();
-      writer.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  public void writeVocab(String vocabFile, List<String> vocab) {
+  private void writeVocab(String vocabFile, List<String> vocab) {
     try {
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(vocabFile), FileExerciseDAO.ENCODING));
 
