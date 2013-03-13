@@ -519,6 +519,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Get score when doing autoCRT on an audio file.
    * @see AutoCRT#getAutoCRTAnswer(String, mitll.langtest.shared.Exercise, int, java.io.File, mitll.langtest.shared.AudioAnswer.Validity, int, String, int)
+   * @see AutoCRT#getFlashcardAnswer(String, mitll.langtest.shared.Exercise, int, java.io.File, mitll.langtest.shared.AudioAnswer.Validity, String, int, java.util.List)
    * @param testAudioFile
    * @param lmSentences
    * @param background
@@ -537,7 +538,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param testAudioFile
-   * @param sentence
+   * @param sentence empty string when using lmSentences non empty and vice-versa
    * @param width image dim
    * @param height  image dim
    * @param useScoreToColorBkg
@@ -553,6 +554,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.info("getASRScoreForAudio scoring " + testAudioFile + " with " + sentence + " req# " + reqid);
 
     assert(testAudioFile != null && sentence != null);
+    if(sentence.length() == 0 && lmSentences.isEmpty() || sentence.length() > 0 && !lmSentences.isEmpty()) { // precondition
+      logger.error("huh? either sentence must be set to do alignment or lmSentences must be set to do decoding.");
+    }
     if (asrScoring == null) {
         asrScoring = new ASRScoring(getInstallPath(), getProperties()); // lazy eval since...?
     }
