@@ -180,7 +180,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // header/title line
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
     Widget title = getTitleWidget();
-   // browserCheck.getBrowserAndVersion();
     hp.addEast(getLogout(), eastWidth);
     hp.add(title);
 
@@ -279,6 +278,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     rowUnder.add(new Column(12, new Heading(4, "", "Record yourself saying the word or phrase. Press and hold the ENTER key.")));
     container.add(rowUnder);
 
+/*
     IconAnchor logout = new IconAnchor();
     logout.setText("Logout");
     logout.addClickHandler(new ClickHandler() {
@@ -288,6 +288,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         login();
       }
     });
+*/
 
    // row2.add(new Column(2));
     userManager = new UserManager(this, service, isCollectAudio(), false, isCRTDataCollectMode());
@@ -297,7 +298,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
 
     Row row2 = new FluidRow();
-    row2.add(new Column(1, logout));
+    HTML statusLine = getReleaseStatus();
+
+    row2.add(new Column(1, statusLine));
     container.add(row2);
 
     Row row3 = new FluidRow();
@@ -341,10 +344,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     });
     fp1.add(logout);
-    browserCheck.getBrowserAndVersion();
 
-    HTML statusLine = new HTML("<span><font size=-2>"+browserCheck.browser + " " +browserCheck.ver +" " +
-        props.getReleaseDate()+"</font></span>");
+    HTML statusLine = getReleaseStatus();
     fp1.add(statusLine);
     vp.add(fp1);
 
@@ -360,6 +361,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     browserCheck.checkForCompatibleBrowser();
     userManager.teacherLogin();
+  }
+
+  private HTML getReleaseStatus() {
+    browserCheck.getBrowserAndVersion();
+
+    return new HTML("<span><font size=-2>"+browserCheck.browser + " " +browserCheck.ver +" " +
+          props.getReleaseDate()+"</font></span>");
   }
 
   private void checkForAdminUser() {
@@ -606,10 +614,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     vp.add(monitoring);
     monitoring.setVisible(props.isAdminView());
 
-    browserCheck.getBrowserAndVersion();
     // no click handler for this for now
-    HTML statusLine = new HTML("<span><font size=-2>"+browserCheck.browser + " " +browserCheck.ver +" " +
-        props.getReleaseDate()+"</font></span>");
+    HTML statusLine = getReleaseStatus();
     vp.add(statusLine);
 
     return vp;
