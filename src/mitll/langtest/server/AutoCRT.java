@@ -88,30 +88,31 @@ public class AutoCRT {
         sentences.add(e1);
       }
     }
-    List<String> background = getBackgroundSentences(sentences);
     List<String> foreground = new ArrayList<String>();
-    foreground.add(foregroundSentence);
+    foreground.add(removePunct(foregroundSentence));
+    List<String> background = getBackgroundSentences(sentences);
 
-    logger.debug("foreground " + foreground + " back " + background.subList(0,10) +"...");
+    logger.debug("foreground " + foreground + " back " + background.subList(0,Math.min(10,background.size())) +"...");
     PretestScore asrScoreForAudio = db.getASRScoreForAudio(file, foreground, background);
 
     String recoSentence =
       asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
         asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
-    logger.info("reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentence +"'");
+    boolean isCorrect = recoSentence != null && isCorrect(foregroundSentence, recoSentence);
+    logger.info("reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentence +"' correct = " + isCorrect);
 
-    double scoreForAnswer = recoSentence != null && isCorrect(foregroundSentence, recoSentence) ? 1.0d :0.0d;
+    double scoreForAnswer = isCorrect ? 1.0d :0.0d;
     return new AudioAnswer(url, validity, recoSentence, scoreForAnswer, reqid, durationInMillis);
   }
 
   private boolean isCorrect(String foregroundSentence, String recoSentence) {
-    return recoSentence.contains(foregroundSentence.replaceAll("-","").toLowerCase()) ;
+    return recoSentence.contains(foregroundSentence.replaceAll("-", " ").toLowerCase()) ;
   }
 
   private String getRefSentence(Exercise other) {
     String e1 = other.getRefSentence().trim().toUpperCase();
     if (e1.contains(";")) e1 = e1.split(";")[0];
-    return e1.trim();
+    return e1.trim().replaceAll("-", " ");
   }
 
 
@@ -200,11 +201,16 @@ public class AutoCRT {
     return background;
   }
 
+  /**
+   * @see #getBackgroundText(mitll.langtest.shared.Exercise)
+   * @see #getFlashcardAnswer(String, mitll.langtest.shared.Exercise, int, java.io.File, mitll.langtest.shared.AudioAnswer.Validity, String, int, java.util.List)
+   * @param sentences
+   * @return
+   */
   private List<String> getBackgroundSentences(Collection<String> sentences) {
     List<String> background = new ArrayList<String>();
 
     for (String answer : sentences) {
-      //  boolean allDigit = true;
       StringBuilder b = new StringBuilder();
       for (int i = 0; i < answer.length(); i++) {
         if (!Character.isDigit(answer.charAt(i))) {
@@ -215,8 +221,9 @@ public class AutoCRT {
         }
       }
       String result = b.toString().trim();
-      if (result.length() > 0) background.add(result);
-      //if (c++ > MAX_EXPORTED_ANSWERS_BKG) break;
+      if (result.length() > 0) {
+        background.add(removePunct(result));
+      }
     }
     return background;
   }
@@ -225,12 +232,17 @@ public class AutoCRT {
     Set<String> tokens = new HashSet<String>();
     for (String l : exportedAnswers) {
       for (String t : l.split("\\s")) {
-        String tt = t.replaceAll("\\p{P}","");
+        String tt = removePunct(t);
         if (tt.trim().length() > 0) {
           tokens.add(tt.trim());
         }}}
     return tokens;
   }
+
+  private String removePunct(String t) {
+    return t.replaceAll("\\p{P}","");
+  }
+
   private Collection<String> getAllExportedAnswers() { return allAnswers; }
 
   /**
