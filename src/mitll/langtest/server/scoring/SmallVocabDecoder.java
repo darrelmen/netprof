@@ -70,10 +70,16 @@ public class SmallVocabDecoder {
    * @param scoringDir hydec location
    * @return SLF file that is created, might not exist if any of the steps fail (e.g. if bin exes are not marked executable)
    */
-  public String createSLFFile(List<String> lmSentences, List<String> background, String tmpDir,
+  private String createSLFFile(List<String> lmSentences, List<String> background, /*Set<String> dictWords, */String tmpDir,
                               String modelsDir, String scoringDir) {
+    List<String> vocab = getVocab(background/*,dictWords*/);
+
+    return createSLFFile(lmSentences, background, vocab, tmpDir, modelsDir, scoringDir);
+  }
+
+  public String createSLFFile(List<String> lmSentences, List<String> background, List<String> vocab, String tmpDir, String modelsDir,
+                              String scoringDir) {
     String convertedFile = tmpDir + File.separator + SMALL_LM_SLF;
-    List<String> vocab = getVocab(background);
     if (platform.startsWith("win")) {
       // hack -- get slf file from model dir
       String slfDefaultFile = modelsDir + File.separator + SMALL_LM_SLF;
@@ -112,19 +118,22 @@ public class SmallVocabDecoder {
    * @param background sentences
    * @return most frequent vocabulary words
    */
-  private List<String> getVocab(List<String> background) {
+  public List<String> getVocab(List<String> background/*,Set<String> dictWords*/) {
     List<String> all = new ArrayList<String>();
-    all.addAll(Arrays.asList("-pau-", "</s>", "<s>", "<unk>"));
-
-    final Map<String,Integer> sc = new HashMap<String, Integer>();
+    all.addAll(Arrays.asList("-pau-", "</s>", "<s>"/*, "<unk>"*/));
+    //boolean useDict = !dictWords.isEmpty();
+    final Map<String, Integer> sc = new HashMap<String, Integer>();
     for (String l : background) {
-      for (String t : l.split("\\s")) {
-        String tt = t.replaceAll("\\p{P}","");
-        if (tt.trim().length() > 0) {
-          Integer c = sc.get(t);
-          if (c == null) sc.put(t,1);
-          else sc.put(t,c+1);
-        }
+      for (String t : l.split("\\s")) { // split on spaces
+        String tt = t.replaceAll("\\p{P}", ""); // remove all punct
+        String token = tt.trim();
+        //if (useDict && dictWords.contains(token)) {
+          if (token.length() > 0) {
+            Integer c = sc.get(t);
+            if (c == null) sc.put(t, 1);
+            else sc.put(t, c + 1);
+          }
+        //}
       }
     }
     List<String> vocab = new ArrayList<String>();
@@ -155,6 +164,8 @@ public class SmallVocabDecoder {
 
     all.addAll(vocab.subList(0,Math.min(vocab.size(), MAX_AUTO_CRT_VOCAB)));
     //  System.out.println("vocab " + new HashSet<String>(all));
+
+    logger.debug("vocab is " + all);
     return all;
   }
 
@@ -248,8 +259,8 @@ public class SmallVocabDecoder {
         "-order",
         "2",
         "-cdiscount",
-        "0.0001",
-        "-unk"
+        "0.0001"/*,
+        "-unk"*/
     ) : new ProcessBuilder(pathToBinDir +File.separator+"ngram-count",
         "-text",
         lmFile.getAbsolutePath(),
@@ -264,8 +275,8 @@ public class SmallVocabDecoder {
         "-order",
         "2",
         "-kndiscount",
-        "-interpolate",
-        "-unk"
+        "-interpolate"/*,
+        "-unk"*/
     );
 
     logger.info("ran " +pathToBinDir +File.separator+"ngram-count"+" "+
@@ -280,8 +291,8 @@ public class SmallVocabDecoder {
         "-order"+" "+
         "2"+" "+
         "-kndiscount"+" "+
-        "-interpolate"+" "+
-        "-unk");
+        "-interpolate"/*+" "+
+        "-unk"*/);
 
     try {
       new ProcessRunner().runProcess(soxFirst);
@@ -304,8 +315,8 @@ public class SmallVocabDecoder {
             "-order",
             "2",
             "-cdiscount",
-            "0.0001",
-            "-unk");
+            "0.0001"/*,
+            "-unk"*/);
 
         try {
           new ProcessRunner().runProcess(soxFirst2);
@@ -344,7 +355,7 @@ public class SmallVocabDecoder {
         backgroundLM.getAbsolutePath(),
         "-order",
         "2",
-        "-unk",
+       /* "-unk",*/
         "-write-lm",
         srilm,
         "-write-vocab",
