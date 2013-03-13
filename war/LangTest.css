@@ -29,6 +29,10 @@ h1 {
     color: #668CD9;
 }
 
+.alignCenter {
+    text-align: center;
+}
+
 .grayText {
     color: #d3d3d3;
 }
