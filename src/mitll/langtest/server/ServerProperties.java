@@ -41,6 +41,7 @@ public class ServerProperties {
   private static final String READ_FROM_FILE = "readFromFile";
   private static final String FLASHCARD = "flashcard";
   private static final String CRTDATACOLLECT = "crtDataCollect";
+  private static final String LANGUAGE = "language";
 
   private Properties props = null;
 
@@ -89,6 +90,10 @@ public class ServerProperties {
 
   public boolean isCRTDataCollect() {
     return !props.getProperty(CRTDATACOLLECT, "false").equals("false");
+  }
+
+  public String getLanguage() {
+    return props.getProperty(LANGUAGE, "Arabic");
   }
 
   /**
