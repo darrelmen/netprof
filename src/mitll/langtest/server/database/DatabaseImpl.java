@@ -433,7 +433,7 @@ public class DatabaseImpl implements Database {
     synchronized (userToState) {
       UserStateWrapper state = userToState.get(userID);
       if (state == null) {
-        logger.error("can't find state for " + userID);
+        logger.error("can't find state for user id " + userID);
       } else {
         state.state.update(exerciseID, isCorrect);
        // state.scores.offerFirst(isCorrect);
