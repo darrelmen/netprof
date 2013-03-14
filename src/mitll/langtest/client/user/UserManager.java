@@ -47,6 +47,8 @@ import java.util.List;
 public class UserManager {
   private static final int EXPIRATION_HOURS = 24*7;
   private static final int SHORT_EXPIRATION_HOURS = 24*1;
+  private static final int FOREVER_HOURS = 24*365;
+
   private static final int MIN_AGE = 6;
   private static final int MAX_AGE = 90;
   private static final int TEST_AGE = 100;
@@ -72,6 +74,7 @@ public class UserManager {
   private final boolean isDataCollectAdmin;
   private final boolean isCRTDataCollect;
   private static final boolean COLLECT_NAMES = false;
+  private final boolean isFlashcard;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
@@ -79,15 +82,17 @@ public class UserManager {
    * @param service
    * @param isDataCollectAdmin
    * @param isCRTDataCollect
+   * @param isFlashcard
    */
   public UserManager(UserNotification lt, LangTestDatabaseAsync service, boolean isCollectAudio,
-                     boolean isDataCollectAdmin, boolean isCRTDataCollect) {
+                     boolean isDataCollectAdmin, boolean isCRTDataCollect, boolean isFlashcard) {
     this.langTest = lt;
     this.service = service;
     this.isCollectAudio = isCollectAudio;
     stockStore = Storage.getLocalStorageIfSupported();
     this.isDataCollectAdmin = isDataCollectAdmin;
     this.isCRTDataCollect = isCRTDataCollect;
+    this.isFlashcard = isFlashcard;
   }
 
   // user tracking
@@ -102,7 +107,8 @@ public class UserManager {
    */
   private void storeUser(long sessionID, String audioType) {
     //System.out.println("storeUser : user now " + sessionID);
-    final long DURATION = 1000 * 60 * 60 * (isCRTDataCollect ? SHORT_EXPIRATION_HOURS : EXPIRATION_HOURS); //duration remembering login
+    final long DURATION = 1000 * 60 * 60 * (
+      isFlashcard ? FOREVER_HOURS : (isCRTDataCollect ? SHORT_EXPIRATION_HOURS : EXPIRATION_HOURS)); //duration remembering login
     long now = System.currentTimeMillis();
     long futureMoment = now + DURATION;
     if (useCookie) {
@@ -135,7 +141,11 @@ public class UserManager {
       System.out.println("UserManager.login : user : " + user);
       rememberAudioType();
       langTest.gotUser(user);
-    } else {
+    }
+    else if (isFlashcard) {
+      addUser(89,"male",0);
+    }
+    else {
       displayLoginBox();
     }
   }
@@ -574,21 +584,7 @@ public class UserManager {
         if (experienceBox.getSelectedIndex() == EXPERIENCE_CHOICES.size() - 1) {
           monthsOfExperience = 20 * 12;
         }
-        service.addUser(getAge(ageEntryBox),
-            genderBox.getValue(genderBox.getSelectedIndex()),
-            monthsOfExperience, new AsyncCallback<Long>() {
-          public void onFailure(Throwable caught) {
-            // Show the RPC error message to the user
-            dialogBox.setText("Couldn't contact server.");
-            dialogBox.center();
-            closeButton.setFocus(true);
-          }
-
-          public void onSuccess(Long result) {
-            System.out.println("addUser : server result is " + result);
-            storeUser(result, "");
-          }
-        });
+        addUser(monthsOfExperience, ageEntryBox, genderBox, dialogBox, closeButton);
       }
     }
 
@@ -598,6 +594,42 @@ public class UserManager {
     closeButton.addKeyUpHandler(handler);
 
     show(dialogBox);
+  }
+
+  private void addUser(int monthsOfExperience, TextBox ageEntryBox, ListBox genderBox) {
+    addUser(monthsOfExperience, ageEntryBox, genderBox, null, null);
+  }
+
+  private void addUser(int monthsOfExperience, TextBox ageEntryBox, ListBox genderBox, final DialogBox dialogBox, final Button closeButton) {
+    int age = getAge(ageEntryBox);
+    String gender = genderBox.getValue(genderBox.getSelectedIndex());
+    addUser(age, gender, monthsOfExperience, dialogBox, closeButton);
+  }
+
+  private void addUser(int age, String gender, int monthsOfExperience) {
+    addUser(age, gender, monthsOfExperience, null, null);
+  }
+
+  private void addUser(int age, String gender, int monthsOfExperience, final DialogBox dialogBox, final Button closeButton) {
+    service.addUser(age,
+      gender,
+      monthsOfExperience, new AsyncCallback<Long>() {
+      public void onFailure(Throwable caught) {
+        if (dialogBox == null) {
+          Window.alert("Couldn't contact server.");
+        } else {
+          // Show the RPC error message to the user
+          dialogBox.setText("Couldn't contact server.");
+          dialogBox.center();
+          closeButton.setFocus(true);
+        }
+      }
+
+      public void onSuccess(Long result) {
+        System.out.println("addUser : server result is " + result);
+        storeUser(result, "");
+      }
+    });
   }
 
   private ListBox getExperienceBox() {
