@@ -7,13 +7,16 @@ import audio.imagewriter.ImageWriter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
+import corpus.ArabicLTS;
+import corpus.EnglishLTS;
+import corpus.HTKDictionary;
+import corpus.LTS;
 import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 import pronz.dirs.Dirs;
-import pronz.speech.ASRParameters;
 import pronz.speech.Audio;
 import pronz.speech.Audio$;
 import scala.Tuple2;
@@ -27,8 +30,10 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Does ASR scoring using hydec.  Results in either alignment or decoding, depending on the mode.
@@ -42,7 +47,6 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoring extends Scoring {
-  //private static final List<String> EMPTY_LIST = new ArrayList<String>();
   private static Logger logger = Logger.getLogger(ASRScoring.class);
 
   private static final String DICT_WO_SP = "dict-wo-sp";
@@ -59,7 +63,6 @@ public class ASRScoring extends Scoring {
   private static final String OPT_SIL = "OPT_SIL";
   private static final String OPT_SIL_DEFAULT = "true";   // rsi-sctm-hlda
   private static final String HLDA_DIR = "HLDA_DIR";
-  private static final String DICTIONARY = "DICTIONARY";
   private static final String LM_TO_USE = "LM_TO_USE";
 
   private static final String HLDA_DIR_DEFAULT = "rsi-sctm-hlda";
@@ -78,7 +81,8 @@ public class ASRScoring extends Scoring {
   /**
    * By keeping these here, we ensure that we only ever read the dictionary once
    */
-  private ASRParameters cachedParams;
+  private HTKDictionary htkDictionary;
+  private final LTS letterToSoundClass;
   private final Cache<String, Scores> audioToScore;
   private final Map<String, String> properties;
   private final String platform = Utils.package$.MODULE$.platform();
@@ -95,14 +99,7 @@ public class ASRScoring extends Scoring {
 
     this.properties = properties;
     this.language = properties.get("language");
-    // not for now... later if dict gets too big
-/*    ASRParameters arabic = ASRParameters.jload("Arabic", configFullPath);
-    if (arabic == null) {
-      logger.error("can't find Arabic parameters at " + configFullPath);
-    } else {
-      languageLookUp.put("Arabic", arabic);
-    }*/
-    //readDict();
+    this.letterToSoundClass = language.equals("English") ? new EnglishLTS() : new ArabicLTS();
   }
 
 /*  private Set<String> wordsInDict = new HashSet<String>();
@@ -142,18 +139,6 @@ public class ASRScoring extends Scoring {
    * @param imageHeight
    * @param useScoreForBkgColor
    * @return PretestScore object
-   */
-/*  public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-                                  String sentence, String imageOutDir,
-                                  int imageWidth, int imageHeight, boolean useScoreForBkgColor) {
-    return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,
-        sentence,
-        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor, EMPTY_LIST, EMPTY_LIST);
-  }*/
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(int, String, String, int, int, boolean, java.util.List, java.util.List)
-   * @return
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
                                   String sentence, String imageOutDir,
@@ -279,17 +264,17 @@ public class ASRScoring extends Scoring {
                                   List<String> lmSentences, List<String> background) {
     Scores scores;
     boolean decode = !lmSentences.isEmpty();
-    String tmpDir = Files.createTempDir().getAbsolutePath();
     if (decode && sentence.length() > 0) { // precondition
       logger.warn("not expecting ref sentence with decoding - only with align - got " + sentence);
     }
     synchronized (this) {  // TODO : needed???  throughput issue?
+      String tmpDir = Files.createTempDir().getAbsolutePath();
+      //logger.debug("tmp dir " + tmpDir);
       if (decode) {
-        List<String> vocab = svDecoderHelper.getVocab(background);
-        StringBuilder builder = new StringBuilder();
-        for (String token : vocab) builder.append(token).append(" ");
-        sentence = builder.toString();
-        String slfFile = svDecoderHelper.createSLFFile(lmSentences, background, vocab, tmpDir, getModelsDir(), scoringDir);
+        List<String> backgroundVocab = svDecoderHelper.getVocab(background,  50);
+        sentence = getUniqueTokensInLM(lmSentences, backgroundVocab);
+
+        String slfFile = svDecoderHelper.createSLFFile(lmSentences, background, backgroundVocab, tmpDir, getModelsDir(), scoringDir);
         if (! new File(slfFile).exists()) {
           logger.error("couldn't make slf file?");
           return null;
@@ -297,10 +282,13 @@ public class ASRScoring extends Scoring {
       }
 
       Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
+      //logger.debug("dirs is " + dirs + " tmp " + dirs.tmp());
 
       Audio testAudio = Audio$.MODULE$.apply(
           testAudioDir, testAudioFileNoSuffix,
           false /* notForScoring */, dirs);
+
+      logger.debug("testAudio is " + testAudio + " dir " + testAudio.dir());
 
       scores = audioToScore.getIfPresent(testAudioDir + File.separator + testAudioFileNoSuffix);
 
@@ -312,6 +300,34 @@ public class ASRScoring extends Scoring {
       }
     }
     return scores;
+  }
+
+  /**
+   * Get the unique set of tokens to use to filter against our full dictionary.
+   * We check all these words for existence in the dictionary.
+   *
+   * Any OOV words have letter-to-sound called to create word->phoneme mappings.
+   * This happens in {@see pronz.speech.Audio#hscore}
+   *
+   * @param lmSentences
+   * @param backgroundVocab
+   * @return
+   */
+  private String getUniqueTokensInLM(List<String> lmSentences, List<String> backgroundVocab) {
+    String sentence;Set<String> backSet = new HashSet<String>(backgroundVocab);
+    List<String> mergedVocab = new ArrayList<String>(backgroundVocab);
+    List<String> foregroundVocab = svDecoderHelper.getVocab(lmSentences, 30);
+    for (String foregroundToken : foregroundVocab) {
+      if (!backSet.contains(foregroundToken)) {
+        mergedVocab.add(foregroundToken);
+      }
+    }
+    StringBuilder builder = new StringBuilder();
+
+    for (String token : mergedVocab) builder.append(token).append(" ");
+
+    sentence = builder.toString();
+    return sentence;
   }
 
   /**
@@ -359,8 +375,11 @@ public class ASRScoring extends Scoring {
         for (Float timeStamp : timeToEvent.keySet()) {
           String event = timeToEvent.get(timeStamp).event;
           if (!event.equals("<s>") && !event.equals("</s>")) {
-            b.append(event);
-            b.append(" ");
+            String trim = event.trim();
+            if (trim.length() > 0) {
+              b.append(trim);
+              b.append(" ");
+            }
           }
         }
       }
@@ -404,6 +423,7 @@ public class ASRScoring extends Scoring {
      */
   private Scores computeRepeatExerciseScores(Audio testAudio, String sentence, String tmpDir, boolean decode,
                                              String language) {
+    //logger.debug("tmp dir " + tmpDir);
     String modelsDir = getModelsDir();
 
     // Make sure that we have an absolute path to the config and dict files.
@@ -417,15 +437,8 @@ public class ASRScoring extends Scoring {
 
     // do some sanity checking
     boolean configExists = new File(configFile).exists();
-    String hldaDir = getProp(HLDA_DIR, HLDA_DIR_DEFAULT);
-    // String dictOverride = getProp(DICTIONARY, "");
-    String dictFile = //dictOverride.length() > 0 ?  modelsDir + File.separator + dictOverride :
-      modelsDir + File.separator + hldaDir + File.separator + DICT_WO_SP;
+    String dictFile = getDictFile(modelsDir);
     boolean dictExists = new File(dictFile).exists();
-    if (!dictExists) {
-      dictFile = modelsDir + File.separator + DICT_WO_SP;
-      dictExists = new File(dictFile).exists();
-    }
     if (!configExists || !dictExists) {
       if (!configExists) logger.error("computeRepeatExerciseScores : Can't find config file at " + configFile);
       if (!dictExists)   logger.error("computeRepeatExerciseScores : Can't find dict file at " + dictFile);
@@ -436,37 +449,48 @@ public class ASRScoring extends Scoring {
     boolean isArabicScript = !(language.equalsIgnoreCase("English"));
     if (!isArabicScript) logger.debug("using english LTS sound class since language is " + language);
 
-    ASRParameters asrparametersFullPaths = getASRParameters(platform, configFile, isArabicScript, dictFile);
-
-    long then = System.currentTimeMillis();
-    int size = asrparametersFullPaths.dictionary().size(); // force read from lazy val
-    if (size == 0) {
-      logger.warn("dict " +dictFile + " is empty?");
-    }
-    else {
+    if (htkDictionary == null) {
+      long then = System.currentTimeMillis();
+      htkDictionary = new HTKDictionary(dictFile);
       long now = System.currentTimeMillis();
+      int size = htkDictionary.size(); // force read from lazy val
       logger.debug("read dict of size " +size + " in " + (now-then) + " millis");
     }
 
-    //logger.debug("using 'dict without sp' file " + dictFile);
+    return getScoresFromHydec(testAudio, sentence, configFile);
+  }
+
+  private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
-    then = System.currentTimeMillis();
+    long then = System.currentTimeMillis();
     try {
-      jscoreOut = testAudio.jscore(sentence, asrparametersFullPaths, new String[] {});
+      jscoreOut = testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
       float hydec_score = jscoreOut._1;
-      logger.info("got score " + hydec_score +" and took " + (System.currentTimeMillis()-then) + " millis");
+      long timeToRunHydec = System.currentTimeMillis() - then;
+      logger.info("got score " + hydec_score +" and took " + timeToRunHydec + " millis");
 
       return new Scores(hydec_score, jscoreOut._2);
     } catch (AssertionError e) {
       logger.error("Got assertion error " + e,e);
       return new Scores();
     } catch (Exception ee) {
-      if (!decode) logger.warn("Got " + ee, ee);  // TODO make pronz not throw exception when decoding
+      logger.warn("Running on align/decode on " + sentence +" Got " + ee, ee);
     }
 
-    logger.info("got score and took " + (System.currentTimeMillis()-then) + " millis");
+    long timeToRunHydec = System.currentTimeMillis() - then;
+    logger.warn("got bad score and took " + timeToRunHydec + " millis");
 
     return new Scores();
+  }
+
+  private String getDictFile(String modelsDir) {
+    String hldaDir = getProp(HLDA_DIR, HLDA_DIR_DEFAULT);
+    String dictFile = modelsDir + File.separator + hldaDir + File.separator + DICT_WO_SP;
+    boolean dictExists = new File(dictFile).exists();
+    if (!dictExists) {
+      dictFile = modelsDir + File.separator + DICT_WO_SP;
+    }
+    return dictFile;
   }
 
   /**
@@ -507,7 +531,7 @@ public class ASRScoring extends Scoring {
 
     if (decode) {
       cfgTemplate = getProp(DECODE_CFG_TEMPLATE_PROP, DECODE_CFG_TEMPLATE_DEFAULT);
-      kv.put(LM_TO_USE, tmpDir +File.separator + File.separator + SMALL_LM_SLF); // hack! TODO hack replace
+      kv.put(LM_TO_USE, tmpDir +File.separator + SMALL_LM_SLF); // hack! TODO hack replace
      // new FileCopier().copy(modelsDir+File.separator+"phones.dict",tmpDir+File.separator +"dict");   // Audio.hscore in pron sets dictionary=this value
     }
     //logger.info("using config from template " + cfgTemplate);
@@ -524,6 +548,7 @@ public class ASRScoring extends Scoring {
     String modelCfg = cfgTemplate.substring(0, cfgTemplate.length() - ".template".length());
 
     String configFile = tmpDir+ File.separator+ modelCfg;
+    //logger.debug("getHydecConfigFile : tmpDir is " + tmpDir);
 
     String pathToConfigTemplate = scoringDir + File.separator + "configurations" + File.separator + cfgTemplate;
     logger.debug("template config is at " + pathToConfigTemplate + " map is " + kv);
@@ -545,18 +570,6 @@ public class ASRScoring extends Scoring {
 
   private String getProp(String var, String defaultValue) {
     return properties.containsKey(var) ? properties.get(var) : defaultValue;
-  }
-
-  private ASRParameters getASRParameters(String platform, String configFile, boolean isArabic, String dictFile) {
-    if (cachedParams == null) {
-      return cachedParams = new ASRParameters(
-        configFile,
-        dictFile,
-        isArabic ? "corpus.ArabicLTS" : "corpus.EnglishLTS",
-        platform);
-    } else {
-      return cachedParams;
-    }
   }
 
   private void doTemplateReplace(String infile, String outfile, Map<String,String> replaceMap) {
@@ -586,18 +599,5 @@ public class ASRScoring extends Scoring {
   private Scores getEmptyScores() {
     Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
     return new Scores(0f, eventScores);
-  }
-
-  public static void main(String [] arg) {
- /*   String deployPath1 = "C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\scoring";
-    ASRScoring scoring = new ASRScoring(deployPath1, properties);
-    Map<String,String> kv = new HashMap<String, String>();
-    kv.put("TEMP_DIR","C:\\Users\\go22670\\AppData\\Local\\Temp\\1351790200971-0");
-    kv.put("MODELS_DIR","models_dir_to_use");
-    scoring.doTemplateReplace(deployPath1 + File.separator + "configurations" + File.separator +"levantine-nn-model.cfg.template",
-        deployPath1 + File.separator + "configurations" + File.separator +"new-levantine-nn-model.cfg",kv);*/
-    //String testAudioDir = "C:\\Users\\go22670\\DLITest\\LangTest\\war\\media\\ac-L0P-001";
-    //PretestScore pretestScore = scoring.scoreRepeat(testAudioDir, "ad0035_ems", *//*testAudioDir, "ad0035_ems",*//* "This is a test.", "out", 1024, 100);
-   // System.out.println("score " + pretestScore);
   }
 }
