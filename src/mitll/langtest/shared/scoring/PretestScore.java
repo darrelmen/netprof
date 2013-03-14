@@ -26,6 +26,8 @@ public class PretestScore implements IsSerializable {
 
   public PretestScore(){} // required for serialization
 
+  public PretestScore(float score) { this.hydecScore = score; }
+
   /**
    * @see mitll.langtest.server.scoring.DTWScoring#score
    * @paramx reqid
