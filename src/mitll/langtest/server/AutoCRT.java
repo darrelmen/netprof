@@ -76,6 +76,18 @@ public class AutoCRT {
     return new AudioAnswer(url, validity, annotatedResponse, scoreForAnswer, reqid, durationInMillis);
   }
 
+  /**
+   * @see LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, boolean, int, boolean, String)
+   * @param exercise
+   * @param e
+   * @param reqid
+   * @param file
+   * @param validity
+   * @param url
+   * @param durationInMillis
+   * @param otherExercises
+   * @return
+   */
   public AudioAnswer getFlashcardAnswer(String exercise, Exercise e, int reqid, File file, AudioAnswer.Validity validity,
                                        String url, int durationInMillis,
                                       List<Exercise> otherExercises) {
@@ -109,12 +121,15 @@ public class AutoCRT {
     return recoSentence.contains(foregroundSentence.replaceAll("-", " ").toLowerCase()) ;
   }
 
-  private String getRefSentence(Exercise other) {
-    String e1 = other.getRefSentence().trim().toUpperCase();
-    if (e1.contains(";")) e1 = e1.split(";")[0];
-    return e1.trim().replaceAll("-", " ");
-  }
+  /**
+   * Deal with data where it looks like :  put ; put ; put out
+   * @param other
+   * @return
+   */
 
+  private String getRefSentence(Exercise other) {
+    return other.getRefSentence().trim().toUpperCase();
+  }
 
   /**
    * Mark words in the response as right or wrong depending on their overlap with answers marked
