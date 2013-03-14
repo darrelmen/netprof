@@ -333,6 +333,7 @@ public class FileExerciseDAO implements ExerciseDAO {
    * @return
    */
   private Exercise getWordListExercise(String contentSentence, String id) {
+    contentSentence = getRefSentence(contentSentence);
     String content = getArabic(contentSentence);
 
     Exercise exercise = new Exercise("repeat", id, content, false, true, contentSentence);
@@ -340,6 +341,33 @@ public class FileExerciseDAO implements ExerciseDAO {
     exercise.addQuestion(Exercise.FL, "Please record the sentence above.","", EMPTY_LIST);
     return exercise;
   }
+
+  /**
+   * Deal with data where it looks like :  put ; put ; put out
+   * @param contentSentence
+   * @return
+   */
+  private String getRefSentence(String contentSentence) {
+    String e1 = contentSentence.trim();
+    if (e1.contains(";")) {
+      String[] split = e1.split(";");
+
+      String firstPhrase = split[0];
+      String lastPhrase = split[split.length - 1];
+      if (lastPhrase.contains(firstPhrase)) {
+        e1 = lastPhrase;
+      }
+      else {
+        e1 = firstPhrase;
+      }
+   /*   if (e1.endsWith("-") && split.length > 1) {
+        e1 = split[split.length-2];
+      }*/
+    }
+    return e1.trim().replaceAll("-", " ");
+  }
+
+
   /**
    * Assumes a file that looks like:
    * <br></br>
