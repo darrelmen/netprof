@@ -5,7 +5,6 @@ import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Row;
-import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -47,7 +46,6 @@ import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
 import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
-import mitll.langtest.client.flashcard.FlashcardExerciseList;
 import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.mail.MailDialog;
@@ -161,7 +159,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void run() {}
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
 
-    userManager = new UserManager(this,service, isCollectAudio(), false, isCRTDataCollectMode());
+    userManager = new UserManager(this,service, isCollectAudio(), false, isCRTDataCollectMode(), false);
     resultManager = new ResultManager(service, this, props.getNameForAnswer());
     monitoringManager = new MonitoringManager(service, props);
     boolean usualLayout = !showOnlyOneExercise();
@@ -278,24 +276,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     rowUnder.add(new Column(12, new Heading(4, "", "Record yourself saying the word or phrase. Press and hold the ENTER key.")));
     container.add(rowUnder);
 
-/*
-    IconAnchor logout = new IconAnchor();
-    logout.setText("Logout");
-    logout.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        userManager.clearUser();
-        lastUser = -1;
-        login();
-      }
-    });
-*/
-
-   // row2.add(new Column(2));
-    userManager = new UserManager(this, service, isCollectAudio(), false, isCRTDataCollectMode());
+    userManager = new UserManager(this, service, isCollectAudio(), false, isCRTDataCollectMode(), true);
     this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager);
 
     makeFlashContainer();
-
 
     Row row2 = new FluidRow();
     HTML statusLine = getReleaseStatus();
@@ -309,7 +293,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     setupSoundManager();
 
-    gotUser(-1);
+    login();
   }
 
   private void doDataCollectAdminView() {
@@ -333,7 +317,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     });
     fp1.add(users);
-    userManager = new UserManager(this,service, isCollectAudio(), false, false);
+    userManager = new UserManager(this,service, isCollectAudio(), false, false, false);
 
     logout = new Anchor("Logout");
     logout.addClickHandler(new ClickHandler() {
@@ -350,7 +334,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     vp.add(fp1);
 
     vp.add(currentExerciseVPanel);
-    userManager = new UserManager(this,service, false, props.isDataCollectAdminView(), false);
+    userManager = new UserManager(this,service, false, props.isDataCollectAdminView(), false, false);
     DataCollectAdmin dataCollectAdmin = new DataCollectAdmin(userManager, service);
     dataCollectAdmin.makeDataCollectNewSiteForm(currentExerciseVPanel);
 
@@ -366,8 +350,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private HTML getReleaseStatus() {
     browserCheck.getBrowserAndVersion();
 
-    return new HTML("<span><font size=-2>"+browserCheck.browser + " " +browserCheck.ver +" " +
-          props.getReleaseDate()+"</font></span>");
+    String releaseDate = props.getReleaseDate() != null ? " " +
+      props.getReleaseDate() : "";
+    return new HTML("<span><font size=-2>" + browserCheck.browser + " " + browserCheck.ver + releaseDate + "</font></span>");
   }
 
   private void checkForAdminUser() {
