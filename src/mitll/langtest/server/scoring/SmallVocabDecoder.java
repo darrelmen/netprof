@@ -47,7 +47,8 @@ public class SmallVocabDecoder {
   /**
    * Limit on vocabulary size -- too big and dcodr will run out of memory and segfault
    */
-  private static final int MAX_AUTO_CRT_VOCAB = 200;
+  //private static final int MAX_AUTO_CRT_VOCAB = 200;
+  private static final String MAX_ORDER = "2";  // NOTE 3 does NOT work
 
   /**
    * Platform -- windows, mac, linux, etc.
@@ -70,13 +71,6 @@ public class SmallVocabDecoder {
    * @param scoringDir hydec location
    * @return SLF file that is created, might not exist if any of the steps fail (e.g. if bin exes are not marked executable)
    */
-  private String createSLFFile(List<String> lmSentences, List<String> background, /*Set<String> dictWords, */String tmpDir,
-                              String modelsDir, String scoringDir) {
-    List<String> vocab = getVocab(background/*,dictWords*/);
-
-    return createSLFFile(lmSentences, background, vocab, tmpDir, modelsDir, scoringDir);
-  }
-
   public String createSLFFile(List<String> lmSentences, List<String> background, List<String> vocab, String tmpDir, String modelsDir,
                               String scoringDir) {
     String convertedFile = tmpDir + File.separator + SMALL_LM_SLF;
@@ -113,12 +107,12 @@ public class SmallVocabDecoder {
    * Very important to limit the vocabulary (less than 300 words) or else the small vocab dcodr will run out of
    * memory and segfault! <br></br>
    * Remember to add special tokens like silence, pause, and unk
-   * @see #createSLFFile(java.util.List, java.util.List, String, String, String)
-   * @see #MAX_AUTO_CRT_VOCAB
+   * @see ASRScoring#getScoreForAudio(String, String, String, String, java.util.List, java.util.List)
+   * @seex #MAX_AUTO_CRT_VOCAB
    * @param background sentences
    * @return most frequent vocabulary words
    */
-  public List<String> getVocab(List<String> background/*,Set<String> dictWords*/) {
+  public List<String> getVocab(List<String> background, int vocabSizeLimit) {
     List<String> all = new ArrayList<String>();
     all.addAll(Arrays.asList("-pau-", "</s>", "<s>"/*, "<unk>"*/));
     //boolean useDict = !dictWords.isEmpty();
@@ -136,15 +130,7 @@ public class SmallVocabDecoder {
         //}
       }
     }
-    List<String> vocab = new ArrayList<String>();
-    try {
-/*      System.out.println("map : " +sc);
-
-      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("map"), FileExerciseDAO.ENCODING));
-      for (Map.Entry<String, Integer> kv : sc.entrySet()) writer.write(kv.getKey() +"\t"+kv.getValue()+"\n");
-      writer.close();*/
-
-      vocab = new ArrayList<String>(sc.keySet());
+    List<String> vocab = new ArrayList<String>(sc.keySet());
       Collections.sort(vocab, new Comparator<String>() {
         public int compare(String s, String s2) {
           Integer first = sc.get(s);
@@ -153,17 +139,7 @@ public class SmallVocabDecoder {
         }
       });
 
- /*     writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("vocab"), FileExerciseDAO.ENCODING));
-      for (String v : vocab) writer.write(v+"\n");
-      writer.close();*/
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    //System.out.println("map : " +sc);
-
-    all.addAll(vocab.subList(0,Math.min(vocab.size(), MAX_AUTO_CRT_VOCAB)));
-    //  System.out.println("vocab " + new HashSet<String>(all));
+    all.addAll(vocab.subList(0,Math.min(vocab.size(), vocabSizeLimit)));
 
     logger.debug("vocab is " + all);
     return all;
@@ -172,7 +148,7 @@ public class SmallVocabDecoder {
   /**
    * So for some reason the slf file generated from HBuild is in octal, so we have to convert it to UTF-8.
    *
-   * @see #createSLFFile(java.util.List, java.util.List, String, String, String)
+   * @see #createSLFFile
    * @param slfFile that is in octal
    * @param convertedFile that will be in UTF-8
    */
@@ -206,7 +182,6 @@ public class SmallVocabDecoder {
 
       for (String v : vocab) {
         writer.write(v +"\n");
-        //   writer.write("\n");
       }
       writer.close();
     } catch (IOException e) {
@@ -217,7 +192,7 @@ public class SmallVocabDecoder {
   /**
    * Write LM sentences out, without punctuation.
    *
-   * @see #createSLFFile(java.util.List, java.util.List, String, String, String)
+   * @see #createSLFFile
    * @param lmSentences
    * @param tmpDir
    * @return smallLM file
@@ -225,7 +200,7 @@ public class SmallVocabDecoder {
   private File writeLMToFile(List<String> lmSentences, String tmpDir) {
     try {
       File outFile = new File(tmpDir, "smallLM_" +lmSentences.size()+ ".txt");
-      logger.info("wrote lm to " +outFile.getAbsolutePath());
+      logger.info("wrote lm with " + lmSentences.size() + " sentences to " +outFile.getAbsolutePath());
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), FileExerciseDAO.ENCODING));
       for (String s : lmSentences) {
         String punctRemoved = s.trim().replaceAll("\\p{P}", "");
@@ -257,7 +232,7 @@ public class SmallVocabDecoder {
         "-write-vocab",
         tmpDir + File.separator + "small_out.vocab",
         "-order",
-        "2",
+      MAX_ORDER,
         "-cdiscount",
         "0.0001"/*,
         "-unk"*/
@@ -273,7 +248,7 @@ public class SmallVocabDecoder {
         "-write-vocab",
         tmpDir + File.separator + "large_out.vocab",
         "-order",
-        "2",
+      MAX_ORDER,
         "-kndiscount",
         "-interpolate"/*,
         "-unk"*/
@@ -289,7 +264,7 @@ public class SmallVocabDecoder {
         "-write-vocab"+" "+
         tmpDir + File.separator + "large_out.vocab"+" "+
         "-order"+" "+
-        "2"+" "+
+      MAX_ORDER +" "+
         "-kndiscount"+" "+
         "-interpolate"/*+" "+
         "-unk"*/);
@@ -313,7 +288,7 @@ public class SmallVocabDecoder {
             "-write-vocab",
             tmpDir + File.separator + "large_out.vocab",
             "-order",
-            "2",
+          MAX_ORDER,
             "-cdiscount",
             "0.0001"/*,
             "-unk"*/);
@@ -345,16 +320,15 @@ public class SmallVocabDecoder {
    */
   private File runNgram(String tmpDir, String srilmOut, File foregroundLM, File backgroundLM, String pathToBinDir) {
     String srilm = tmpDir + File.separator + srilmOut;
-    float weightForForeground = BLEND_FOREGROUND_BACKGROUND;
     ProcessBuilder ngram = new ProcessBuilder(pathToBinDir +File.separator+"ngram",
         "-lm",
         foregroundLM.getAbsolutePath(),
         "-lambda",
-        ""+weightForForeground,
+        ""+BLEND_FOREGROUND_BACKGROUND,
         "-mix-lm",
         backgroundLM.getAbsolutePath(),
         "-order",
-        "2",
+      MAX_ORDER,
        /* "-unk",*/
         "-write-lm",
         srilm,
