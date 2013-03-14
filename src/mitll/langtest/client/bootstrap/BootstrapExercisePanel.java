@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Hero;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.PageHeader;
 import com.github.gwtbootstrap.client.ui.Paragraph;
@@ -16,6 +17,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
@@ -63,17 +65,10 @@ public class BootstrapExercisePanel extends FluidContainer {
   }
 
   private Widget getQuestionContent(Exercise e) {
-    PageHeader widgets = new PageHeader();
-    widgets.setText(getRefSentence(e));
-    return widgets;
-  }
-
-  private String getRefSentence(Exercise other) {
-    String e1 = other.getRefSentence().trim();
-    if (e1.contains(";")) {
-      e1 = e1.split(";")[0];
-    }
-    return e1;
+    PageHeader hero = new PageHeader();
+    hero.addStyleName("hero-unit");
+    hero.setText(e.getRefSentence());
+    return hero;
   }
 
   /**
@@ -118,7 +113,6 @@ public class BootstrapExercisePanel extends FluidContainer {
       row2.add(new Column(12, paragraph2));
       recoOutput = new Heading(3);
       paragraph2.add(recoOutput);
-
     }
   }
 
