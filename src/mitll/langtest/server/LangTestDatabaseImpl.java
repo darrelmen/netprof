@@ -568,7 +568,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String testAudioName = testDirAndName.getName();
     String testAudioDir = testDirAndName.getDir();
 
-    logger.debug("getASRScoreForAudio scoring " + testAudioName + " in dir " + testAudioDir);
+    //logger.debug("getASRScoreForAudio scoring " + testAudioName + " in dir " + testAudioDir);
     PretestScore pretestScore;
     pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
@@ -1077,7 +1077,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     serverProps.readPropertiesFile(servletContext, configDir);
 
     String h2DatabaseFile = serverProps.getH2Database();
-    db = new DatabaseImpl(configDir, h2DatabaseFile,serverProps.isShowSections());
+    boolean wordPairs = serverProps.isWordPairs();
+    logger.debug("word pairs " + wordPairs);
+    db = new DatabaseImpl(configDir, h2DatabaseFile,serverProps.isShowSections(), wordPairs,serverProps.getLanguage());
   }
 
   private class DirAndName {

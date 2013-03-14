@@ -69,8 +69,10 @@ public class DatabaseImpl implements Database {
   private String lessonPlanFile;
   private String mediaDir;
   private boolean isUrdu;
+  private boolean isWordPairs;
   private boolean useFile;
   private final boolean showSections;
+  private String language;
 
   /**
    * Just for testing
@@ -78,10 +80,16 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    */
   public DatabaseImpl(String configDir) {
-    this(configDir, "vlr-parle", false);
+    this(configDir, "vlr-parle", false,false,"");
   }
 
-  public DatabaseImpl(String configDir, String dbName, boolean showSections) {
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
+   * @param configDir
+   * @param dbName
+   * @param showSections
+   */
+  public DatabaseImpl(String configDir, String dbName, boolean showSections,boolean isWordPairs, String language) {
     connection = new H2Connection(configDir, dbName);
     this.showSections = showSections;
     try {
@@ -97,6 +105,8 @@ public class DatabaseImpl implements Database {
     }
     initializeDAOs();
     monitoringSupport = getMonitoringSupport();
+    this.isWordPairs = isWordPairs;
+    this.language = language;
   }
 
   /**
@@ -215,7 +225,12 @@ public class DatabaseImpl implements Database {
     makeDAO(useFile, lessonPlanFile, isExcel);
 
     if (useFile && !isExcel) {
-      ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, lessonPlanFile);
+      if (isWordPairs) {
+        ((FileExerciseDAO) exerciseDAO).readWordPairs(lessonPlanFile, language);
+      }
+      else {
+        ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, lessonPlanFile);
+      }
     }
     List<Exercise> rawExercises = exerciseDAO.getRawExercises();
     if (rawExercises.isEmpty()) {
