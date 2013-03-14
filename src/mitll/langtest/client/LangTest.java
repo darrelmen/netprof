@@ -268,7 +268,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     Row row = new FluidRow();
     container.add(row);
-    Heading widgets = new Heading(3, props.getLanguage() + " Flashcard");
+    Heading widgets = new Heading(3, props.getSplash());
     widgets.addStyleName("sendButtonBlue");
     row.add(new Column(12, widgets));
 
