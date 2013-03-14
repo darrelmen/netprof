@@ -218,7 +218,6 @@ public class ASRScoring extends Scoring {
     Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
     Map<NetPronImageType, List<Float>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo, duration);
     String recoSentence = getRecoSentence(eventAndFileInfo);
-    recoSentence = recoSentence.replaceAll("sil","").trim();
 
     PretestScore pretestScore =
         new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence);
@@ -362,6 +361,8 @@ public class ASRScoring extends Scoring {
   }
 
   /**
+   * Take the events (originally from a .lab file generated in pronz) for WORDS and string them together into a
+   * sentence.
    * @see #scoreRepeatExercise
    * @param eventAndFileInfo
    * @return
@@ -374,9 +375,10 @@ public class ASRScoring extends Scoring {
         Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
         for (Float timeStamp : timeToEvent.keySet()) {
           String event = timeToEvent.get(timeStamp).event;
-          if (!event.equals("<s>") && !event.equals("</s>")) {
+          if (!event.equals("<s>") && !event.equals("</s>") && !event.equals("sil")) {
             String trim = event.trim();
             if (trim.length() > 0) {
+              //logger.debug("Got " + event + " trim '" +trim+ "'");
               b.append(trim);
               b.append(" ");
             }
@@ -384,6 +386,7 @@ public class ASRScoring extends Scoring {
         }
       }
     }
+
     return b.toString().trim();
   }
 
