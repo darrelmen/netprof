@@ -4,22 +4,21 @@ import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Hero;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.PageHeader;
 import com.github.gwtbootstrap.client.ui.Paragraph;
-import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.media.client.Audio;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.DOM;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -30,7 +29,6 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,9 +40,14 @@ import java.util.List;
  */
 public class BootstrapExercisePanel extends FluidContainer {
   private static final int LONG_DELAY_MILLIS = 3500;
-  private static final int DELAY_MILLIS = 1000/2;
-  private static final int DELAY_MILLIS_LONG = 1500/2;
+  private static final int DELAY_MILLIS = 1000/4;
+  private static final int DELAY_MILLIS_LONG = 1500;
+  private static final double CORRECT_THRESHOLD = 0.6;
+  private static final String TIMES_HELP_SHOWN = "TimesHelpShown";
+  private static final String FEEDBACK_TIMES_SHOWN = "FeedbackTimesShown";
   private List<MyRecordButtonPanel> answerWidgets = new ArrayList<MyRecordButtonPanel>();
+  private Audio mistakeAudio;
+  private Storage stockStore = null;
 
   private Image waitingForResponseImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress48.gif"));
   private Image listeningImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "audio-input-microphone-3.png"));
@@ -53,21 +56,51 @@ public class BootstrapExercisePanel extends FluidContainer {
   private Image enterImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "enter48.png"));
   private Heading recoOutput;
   private boolean keyIsDown;
+  private boolean isDemoMode;
+  private BrowserCheck browserCheck = new BrowserCheck().checkForCompatibleBrowser();
+  private int feedback = 0;
 
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller) {
     setStyleName("exerciseBackground");
+    stockStore = Storage.getLocalStorageIfSupported();
+    int times = 0;
+    if (stockStore != null) {
+      times = getCookieValue(TIMES_HELP_SHOWN);
+      feedback = getCookieValue(FEEDBACK_TIMES_SHOWN);
+    }
 
     FluidRow fluidRow = new FluidRow();
     add(fluidRow);
     fluidRow.add(new Column(12, getQuestionContent(e)));
-    addQuestions(e, service, controller, 1);
+    addQuestions(e, service, controller, 1, times == 0);
+  }
+
+  private int getCookieValue(String key) {
+    int times = 0;
+    String timesHelpShown = stockStore.getItem(key);
+    if (timesHelpShown == null) {
+      stockStore.setItem(key,"1");
+    }
+    else {
+      try {
+        times = Integer.parseInt(timesHelpShown);
+      } catch (NumberFormatException e1) {
+        times = 10;
+      }
+    }
+    return times;
+  }
+
+  private void incrCookie(String key) {
+    int cookieValue = getCookieValue(key);
+    stockStore.setItem(key,""+(cookieValue+1));
   }
 
   private Widget getQuestionContent(Exercise e) {
     PageHeader hero = new PageHeader();
     hero.addStyleName("hero-unit");
-    hero.setText(e.getRefSentence());
+    hero.setText(e.getContent());
     return hero;
   }
 
@@ -84,8 +117,9 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param service
    * @param controller     used in subclasses for audio control
    * @param questionNumber
+   * @param showHelp
    */
-  private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber) {
+  private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber, boolean showHelp) {
     //for (Exercise.QAPair pair : e.getQuestions()) {
     // add question header
     questionNumber++;
@@ -104,7 +138,8 @@ public class BootstrapExercisePanel extends FluidContainer {
     recordButton.addStyleName("alignCenter");
     row.add(new Column(12, paragraph));
 
-    if (controller.isDemoMode()) {
+    isDemoMode = controller.isDemoMode();
+    //if (/*controller.isDemoMode() ||*/ true) {
       FluidRow row2 = new FluidRow();
       add(row2);
       Paragraph paragraph2 = new Paragraph();
@@ -113,16 +148,17 @@ public class BootstrapExercisePanel extends FluidContainer {
       row2.add(new Column(12, paragraph2));
       recoOutput = new Heading(3);
       paragraph2.add(recoOutput);
-    }
+    if (showHelp) recoOutput.setText("Press and HOLD the Enter key to record. Release to stop recording.");
+    // }
   }
 
   protected MyRecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
-    return new MyRecordButtonPanel(service, controller, exercise, index, this);
+    return new MyRecordButtonPanel(service, controller, exercise, index);
   }
 
   private class MyRecordButtonPanel extends RecordButtonPanel {
     private final Exercise exercise;
-    public MyRecordButtonPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, int index,Panel outerPanel) {
+    public MyRecordButtonPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, int index) {
       super(service, controller, exercise, null, index);
       this.exercise = exercise;
     }
@@ -200,7 +236,6 @@ public class BootstrapExercisePanel extends FluidContainer {
       recordButton = new ImageAnchor();
       recordButton.setResource(enterImage);
       recordButton.setHeight("48px");
-      //recordButton.setWidth("100%");
       return recordButton;
     }
 
@@ -223,22 +258,32 @@ public class BootstrapExercisePanel extends FluidContainer {
      */
     @Override
     protected void receivedAudioAnswer(AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
-      double score = result.score;
-      boolean correct = score > 0.6;
+      boolean correct = result.score > CORRECT_THRESHOLD;
       recordButton.setResource(correct ? correctImage : incorrectImage);
-      if (recoOutput != null) {
-        recoOutput.setText("Heard: "+result.decodeOutput);
+
+      if (correct) {
+        playCorrect();
+        if (feedback < 3) {
+          String correctPrompt = "Correct! It's: " + exercise.getRefSentence();
+          recoOutput.setText(correctPrompt);
+          incrCookie(FEEDBACK_TIMES_SHOWN);
+        }
+      } else {
+        playIncorrect();
+        String correctPrompt = "Correct Answer: " + exercise.getRefSentence();
+        if (isDemoMode) {
+          correctPrompt = "Heard: "+result.decodeOutput + "<p>" +correctPrompt;
+        }
+        recoOutput.setText(correctPrompt);
       }
+      // Schedule the timer to run once in 1 seconds.
       Timer t = new Timer() {
         @Override
         public void run() {
           controller.loadNextExercise(exercise);
         }
       };
-
-      // Schedule the timer to run once in 1 seconds.
-      t.schedule(recoOutput != null ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : DELAY_MILLIS_LONG);
-
+      t.schedule(isDemoMode ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : DELAY_MILLIS_LONG);
     }
 
     @Override
@@ -253,4 +298,27 @@ public class BootstrapExercisePanel extends FluidContainer {
       answers.onUnload();
     }
   }
+
+  private void playCorrect() {
+    play("langtest/sounds/correct4.wav","langtest/sounds/correct4.mp3");
+  }
+
+  private void playIncorrect() {
+    play("langtest/sounds/incorrect1.wav","langtest/sounds/incorrect1.mp3");
+  }
+
+  private void play(String openAudio,String mp3Audio) {
+    mistakeAudio = Audio.createIfSupported();
+    playAudio(openAudio,mp3Audio);
+    mistakeAudio.play();
+  }
+
+  private void playAudio(String openAudio,String mp3Audio) {
+    if (browserCheck.isFirefox()) {
+      mistakeAudio.setSrc(openAudio);
+    } else {
+      mistakeAudio.setSrc(mp3Audio);
+    }
+  }
+
 }
