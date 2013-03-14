@@ -32,7 +32,7 @@ public class Exercise extends ExerciseShell  {
   private Map<String,List<QAPair>> langToQuestion = null;
   private String refAudio;
   private String slowAudioRef;
-  private String refSentence;
+  private List<String> refSentences = new ArrayList<String>();
   private transient List<String> slots = new ArrayList<String>();
 
   public static class QAPair implements IsSerializable {
@@ -113,8 +113,17 @@ public class Exercise extends ExerciseShell  {
     this.plan = plan;
     this.content = content;
     this.refAudio = audioRef;
-    this.refSentence = sentenceRef;
+    this.refSentences.add(sentenceRef);
     this.type = EXERCISE_TYPE.REPEAT;
+  }
+
+  public Exercise(String plan, String id, String content, List<String> sentenceRefs, String tooltip) {
+    super(id,tooltip);
+
+    this.plan = plan;
+    this.content = content;
+    this.refSentences = sentenceRefs;
+    this.type = EXERCISE_TYPE.RECORD;
   }
 
   /**
@@ -164,8 +173,13 @@ public class Exercise extends ExerciseShell  {
   public String getRefAudio() { return refAudio; }
   public String getSlowAudioRef() { return slowAudioRef; }
   public void setRefAudio(String s) { this.refAudio = s; }
-  public String getRefSentence() { return refSentence; }
-  public void setRefSentence(String ref) { this.refSentence = ref; }
+  public String getRefSentence() { return refSentences.get(0); }
+  public List<String> getRefSentences() { return refSentences; }
+
+  public void setRefSentence(String ref) {
+    refSentences.clear();
+    refSentences.add(ref);
+  }
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getExercises(long)
@@ -212,7 +226,7 @@ public class Exercise extends ExerciseShell  {
   public String toString() {
     if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
       return "Exercise " + type + " " +plan+"/"+ id + "/" + " content bytes = " + content.length() +
-          " ref sentence " + refSentence +" audio " + refAudio;
+          " ref sentence '" + getRefSentence() +"' audio " + refAudio;
     }
     else {
       String questions = "";
