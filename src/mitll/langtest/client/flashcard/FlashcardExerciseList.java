@@ -47,7 +47,7 @@ public class FlashcardExerciseList implements ListInterface {
    */
   @Override
   public void getExercises(long userID) {
-    System.out.println("Getting next for " +userID);
+    //System.out.println("Getting next for " +userID);
     service.getNextExercise(userID, new AsyncCallback<FlashcardResponse>() {
       @Override
       public void onFailure(Throwable caught) {
