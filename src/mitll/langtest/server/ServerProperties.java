@@ -42,6 +42,7 @@ public class ServerProperties {
   private static final String FLASHCARD = "flashcard";
   private static final String CRTDATACOLLECT = "crtDataCollect";
   private static final String LANGUAGE = "language";
+  private static final String WORDPAIRS = "wordPairs";
 
   private Properties props = null;
 
@@ -50,6 +51,7 @@ public class ServerProperties {
   public boolean biasTowardsUnanswered, useOutsideResultCounts;
   public String outsideFile;
   public boolean isUrdu;
+  public boolean isWordPairs;
   public int firstNInOrder;
   public boolean isDataCollectAdminView;
 
@@ -92,8 +94,12 @@ public class ServerProperties {
     return !props.getProperty(CRTDATACOLLECT, "false").equals("false");
   }
 
+  public boolean isWordPairs() {
+    return !props.getProperty(WORDPAIRS, "false").equals("false");
+  }
+
   public String getLanguage() {
-    return props.getProperty(LANGUAGE, "Arabic");
+    return props.getProperty(LANGUAGE, "English");
   }
 
   /**
