@@ -19,6 +19,7 @@ public class PropertyHandler {
   private static final String ARABIC_TEXT_DATA_COLLECT = "arabicTextDataCollect";
   private static final String SHOW_TURK_TOKEN = "showTurkToken";
   private static final String APP_TITLE = "appTitle";
+  private static final String SPLASH_TITLE = "splashTitle";
   private static final String SEGMENT_REPEATS = "segmentRepeats";
   private static final String READ_FROM_FILE = "readFromFile";
   private static final String RELEASE_DATE = "releaseDate";
@@ -102,6 +103,7 @@ public class PropertyHandler {
   private int recordTimeout = DEFAULT_TIMEOUT;
   private float screenPortion;
   private boolean CRTDataCollectMode;
+  private String splashTitle;
 
   public PropertyHandler(Map<String,String> props) {
     this.props = props;
@@ -142,6 +144,7 @@ public class PropertyHandler {
     //  else if (key.equals(DEBUG_EMAIL)) debugEmail = getBoolean(value);
       else if (key.equals(FLASHCARD)) flashCard = getBoolean(value);
       else if (key.equals(LANGUAGE)) language = value;
+      else if (key.equals(SPLASH_TITLE)) splashTitle = value;
     }
   }
 
@@ -363,6 +366,11 @@ public class PropertyHandler {
   public String getLanguage() {
     return language;
   }
+
+  public String getSplash() {
+    return splashTitle;
+  }
+
   public boolean isCRTDataCollectMode() {
     return CRTDataCollectMode;
   }
