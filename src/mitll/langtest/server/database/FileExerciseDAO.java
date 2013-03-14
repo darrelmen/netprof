@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -161,6 +162,53 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
   }
 
+  public void readWordPairs(String lessonPlanFile, String language) {
+    if (exercises != null) return;
+
+    try {
+      File file = new File(lessonPlanFile);
+      if (!file.exists()) {
+        logger.error("can't find '" + file + "'");
+        return;
+      } else {
+        // logger.debug("found file at " + file.getAbsolutePath());
+      }
+      BufferedReader reader = getReader(lessonPlanFile);
+
+      String line;
+      int id = 1;
+      exercises = new ArrayList<Exercise>();
+
+      while ((line = reader.readLine()) != null) {
+        String[] split = line.split(",");
+        String foreign = split[0];
+        List<String> translations = new ArrayList<String>();
+        for (int i = 1; i < split.length; i++) {
+          translations.add(split[i]);
+        }
+
+        if (translations.isEmpty()) {
+          logger.error("huh? no translations with '" + line + "' and foreign : " + foreign);
+        }
+        else {
+          Exercise repeat = new Exercise("flashcard", "" + (id++), getFlashcard(foreign, language), translations, translations.get(0));
+          repeat.addQuestion(Exercise.FL, "Please record the sentence above.","", EMPTY_LIST);
+
+          exercises.add(repeat);
+        }
+      }
+      reader.close();
+
+    } catch (Exception e) {
+      logger.error("reading " + lessonPlanFile + " got " + e, e);
+    }
+    if (exercises.isEmpty()) {
+      logger.error("no exercises found in " + lessonPlanFile + "?");
+    } else {
+      logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
+    }
+  }
+
   /**
    * @see DatabaseImpl#getExercises
    * @param installPath
@@ -178,8 +226,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       else {
        // logger.debug("found file at " + file.getAbsolutePath());
       }
-      FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
+      BufferedReader reader = getReader(lessonPlanFile);
       String line2;
       int count = 0;
       logger.debug("using install path " + installPath + " lesson " + lessonPlanFile + " isurdu " +isUrdu);
@@ -226,7 +273,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       logger.debug("sections " + typeToUnitToLesson);
       reader.close();
     } catch (IOException e) {
-      e.printStackTrace();
+     logger.error("reading " +lessonPlanFile+ " got " +e,e);
     }
     if (exercises.isEmpty()) {
       logger.error("no exercises found in " + lessonPlanFile +"?");
@@ -234,6 +281,11 @@ public class FileExerciseDAO implements ExerciseDAO {
     else {
       logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
+  }
+
+  private BufferedReader getReader(String lessonPlanFile) throws FileNotFoundException, UnsupportedEncodingException {
+    FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
+    return new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
   }
 
   private void addSectionTest(int count, Exercise exercise) {
@@ -442,6 +494,19 @@ public class FileExerciseDAO implements ExerciseDAO {
         "\"> " + arabic +
         "</span>\n" +
         "</div>\n";
+  }
+
+  private String getFlashcard(String flPhrase, String language) {
+    return flPhrase;
+    /*return "Repeat in " +language
+    return "<div class=\"Instruction\">\n" +
+      "<span class=\"Instruction-title\">Repeat in " +language +
+      ":</span>\n" +
+      "<span class=\"" +
+      (isUrdu ? "urdufont" : "Instruction-data") +
+      "\"> " + flPhrase +
+      "</span>\n" +
+      "</div>\n";*/
   }
 
   private InputStream getExerciseListStream(String exerciseFile) {
