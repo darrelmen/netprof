@@ -122,16 +122,16 @@ public abstract class RecordButton {
   }
 
   private void start() {
-    long now = System.currentTimeMillis();
-    System.out.println("start recording at " + now);
+    //long now = System.currentTimeMillis();
+    //System.out.println("start recording at " + now);
     recording = true;
     startRecording();
     showRecording();
   }
 
   private void stop() {
-    long now = System.currentTimeMillis();
-   System.out.println("stop recording at " + now);// + " " + (now-then));
+    //long now = System.currentTimeMillis();
+   // System.out.println("stop recording at " + now);// + " " + (now-then));
     recording = false;
     showStopped();
     stopRecording();
@@ -169,7 +169,5 @@ public abstract class RecordButton {
   }
   protected abstract void stopRecording();
 
-  public FocusWidget getRecord() {
-    return record;
-  }
+  public FocusWidget getRecord() {  return record; }
 }
