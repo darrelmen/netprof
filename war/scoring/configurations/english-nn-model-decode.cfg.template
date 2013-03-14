@@ -40,7 +40,7 @@ swap-bytes: false
 frame-rate: 100.0
 preemphasis: 0.0
 delta3: true
-lofreq: 80
+lofreq: 65
 delta: true
 numcep: 12
 hifreq: 7000
@@ -66,7 +66,6 @@ frame-window: 13
 word-penalty: 1.0
 process-dictionary: false
 grammar: MODELS_DIR/grammar
-dictionary: MODELS_DIR/dict-wo-sp
 lm: LM_TO_USE
 lm-weight: 4.0
 beam-threshold: 200.0
