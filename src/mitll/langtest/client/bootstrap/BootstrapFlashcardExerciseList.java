@@ -32,7 +32,7 @@ import mitll.langtest.shared.FlashcardResponse;
  * To change this template use File | Settings | File Templates.
  */
 public class BootstrapFlashcardExerciseList implements ListInterface {
-  public static final int SIZE = 12;
+  private static final int SIZE = 12;
   private final Column column;
   private ExercisePanelFactory factory;
   private LangTestDatabaseAsync service;
@@ -64,7 +64,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
    */
   @Override
   public void getExercises(long userID) {
-    System.out.println("Getting next for " +userID);
+    //System.out.println("Getting next for " +userID);
     service.getNextExercise(userID, new AsyncCallback<FlashcardResponse>() {
       @Override
       public void onFailure(Throwable caught) {
