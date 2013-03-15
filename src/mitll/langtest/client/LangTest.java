@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Paragraph;
 import com.github.gwtbootstrap.client.ui.Row;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -14,6 +15,7 @@ import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
@@ -63,7 +65,10 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
 
+import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -272,9 +277,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     widgets.addStyleName("sendButtonBlue");
     row.add(new Column(12, widgets));
 
-    Row rowUnder = new FluidRow();
-    rowUnder.add(new Column(12, new Heading(4, "", "Record yourself saying the word or phrase. Press and hold the ENTER key.")));
-    container.add(rowUnder);
+    //Row rowUnder = new FluidRow();
+    //rowUnder.add(new Column(12, new Heading(4, "", "Record yourself saying the word or phrase. Press and hold the ENTER key.")));
+    //container.add(rowUnder);
 
     userManager = new UserManager(this, service, isCollectAudio(), false, isCRTDataCollectMode(), true);
     this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager);
@@ -282,10 +287,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     makeFlashContainer();
 
     Row row2 = new FluidRow();
-    HTML statusLine = getReleaseStatus();
-
-    row2.add(new Column(1, statusLine));
     container.add(row2);
+
+    //HTML statusLine = getReleaseStatus();
+    //row2.add(new Column(1, statusLine));
+    Image image = new Image("langtest/images/help-3.png");
+    image.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        showFlashHelp();
+      }
+    });
+    row2.add(new Column(1, image));
 
     Row row3 = new FluidRow();
     container.add(row3);
@@ -294,6 +307,29 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setupSoundManager();
 
     login();
+
+
+    stockStore = Storage.getLocalStorageIfSupported();
+    boolean showedHelpAlready = false;
+    if (stockStore != null) {
+      showedHelpAlready = stockStore.getItem("showedHelp") != null;
+      stockStore.setItem("showedHelp", "showedHelp");
+    }
+
+    if (!showedHelpAlready) {
+      showFlashHelp();
+    }
+  }
+
+  private Storage stockStore = null;
+
+
+  private void showFlashHelp() {
+    List<String> msgs = new ArrayList<String>();
+    msgs.add("Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.");
+    msgs.add("Press and hold the ENTER key to record.");
+    msgs.add("Release to stop recording.");
+    showErrorMessage("Help",msgs);
   }
 
   private void doDataCollectAdminView() {
@@ -715,11 +751,23 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return soundManager;
   }
 
-  public void showErrorMessage(String title, String msg) {
+  public void showErrorMessage(String title,String msg) {
+    List<String> msgs = new ArrayList<String>();
+    msgs.add(msg);
+    showErrorMessage(title, msgs);
+  }
+
+  /**
+   * Note : depends on bootstrap
+   * @param title
+   * @param msgs
+   */
+  public void showErrorMessage(String title, List<String> msgs) {
     final DialogBox dialogBox;
     Button closeButton;
 
     dialogBox = new DialogBox();
+    dialogBox.setGlassEnabled(true);
     dialogBox.setText(title);
 
     closeButton = new Button("Close");
@@ -728,7 +776,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     VerticalPanel dialogVPanel = new VerticalPanel();
     dialogVPanel.addStyleName("dialogVPanel");
-    dialogVPanel.add(new Label(msg));
+
+    FluidContainer container = new FluidContainer();
+    dialogVPanel.add(container);
+
+    for (String msg : msgs) {
+      FluidRow row = new FluidRow();
+      Column column = new Column(12);
+      row.add(column);
+      Heading para = new Heading(4);
+      para.setText(msg);
+
+      column.add(para);
+      container.add(row);
+    }
 
     dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
     dialogVPanel.add(closeButton);
