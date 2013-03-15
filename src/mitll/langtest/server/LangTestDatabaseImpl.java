@@ -304,6 +304,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  /**
+   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList#getExercises(long)
+   * @param userID
+   * @return
+   */
   @Override
   public FlashcardResponse getNextExercise(long userID) { return db.getNextExercise(userID); }
 
