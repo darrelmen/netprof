@@ -45,12 +45,15 @@ public class BootstrapExercisePanel extends FluidContainer {
   private static final double CORRECT_THRESHOLD = 0.6;
   private static final String TIMES_HELP_SHOWN = "TimesHelpShown";
   private static final String FEEDBACK_TIMES_SHOWN = "FeedbackTimesShown";
+  private static final int PERIOD_MILLIS = 500;
   private List<MyRecordButtonPanel> answerWidgets = new ArrayList<MyRecordButtonPanel>();
   private Audio mistakeAudio;
   private Storage stockStore = null;
 
   private Image waitingForResponseImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress48.gif"));
-  private Image listeningImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "audio-input-microphone-3.png"));
+  //private Image listeningImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "audio-input-microphone-3.png"));
+  private Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
+  private Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
   private Image correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
   private Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
   private Image enterImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "enter48.png"));
@@ -59,12 +62,13 @@ public class BootstrapExercisePanel extends FluidContainer {
   private boolean isDemoMode;
   private BrowserCheck browserCheck = new BrowserCheck().checkForCompatibleBrowser();
   private int feedback = 0;
+  private Timer t;
 
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller) {
     setStyleName("exerciseBackground");
-    stockStore = Storage.getLocalStorageIfSupported();
     int times = 0;
+    stockStore = Storage.getLocalStorageIfSupported();
     if (stockStore != null) {
       times = getCookieValue(TIMES_HELP_SHOWN);
       feedback = getCookieValue(FEEDBACK_TIMES_SHOWN);
@@ -139,17 +143,14 @@ public class BootstrapExercisePanel extends FluidContainer {
     row.add(new Column(12, paragraph));
 
     isDemoMode = controller.isDemoMode();
-    //if (/*controller.isDemoMode() ||*/ true) {
-      FluidRow row2 = new FluidRow();
-      add(row2);
-      Paragraph paragraph2 = new Paragraph();
-      paragraph2.addStyleName("alignCenter");
+    FluidRow row2 = new FluidRow();
+    add(row2);
+    Paragraph paragraph2 = new Paragraph();
+    paragraph2.addStyleName("alignCenter");
 
-      row2.add(new Column(12, paragraph2));
-      recoOutput = new Heading(3);
-      paragraph2.add(recoOutput);
-    if (showHelp) recoOutput.setText("Press and HOLD the Enter key to record. Release to stop recording.");
-    // }
+    row2.add(new Column(12, paragraph2));
+    recoOutput = new Heading(3);
+    paragraph2.add(recoOutput);
   }
 
   protected MyRecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
@@ -200,9 +201,7 @@ public class BootstrapExercisePanel extends FluidContainer {
                                                    public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
                                                      NativeEvent ne = event.getNativeEvent();
 
-
                                                      if (ne.getKeyCode() == KeyCodes.KEY_ENTER &&
-                                                       //typeInt == 512 &&
                                                        "[object KeyboardEvent]".equals(ne.getString())) {
 
                                                        int typeInt = event.getTypeInt();
@@ -239,13 +238,28 @@ public class BootstrapExercisePanel extends FluidContainer {
       return recordButton;
     }
 
+    private boolean first = true;
     @Override
     public void showRecording() {
-      recordButton.setResource(listeningImage);
+      recordButton.setResource(recordImage1);
+
+      flipImage();
+    }
+
+    private void flipImage() {
+      t = new Timer() {
+        @Override
+        public void run() {
+          recordButton.setResource(first ? recordImage2 : recordImage1);
+          first = !first;
+        }
+      };
+      t.scheduleRepeating(PERIOD_MILLIS);
     }
 
     @Override
     public void showStopped() {
+      t.cancel();
       recordButton.setResource(waitingForResponseImage);
       onUnload();
     }
@@ -320,5 +334,4 @@ public class BootstrapExercisePanel extends FluidContainer {
       mistakeAudio.setSrc(mp3Audio);
     }
   }
-
 }
