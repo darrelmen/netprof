@@ -129,10 +129,10 @@ public class AutoCRT {
   }
 
   private boolean isCorrect(String answerSentence, String recoSentence) {
-    SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
-
     String converted = answerSentence.replaceAll("-", " ").replaceAll("\\.", "").toLowerCase();
     logger.debug("converted is " +converted);
+    return converted.equalsIgnoreCase(recoSentence);
+/*    SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
     List<String> fvocab = svDecoderHelper.getSimpleVocab(Collections.singletonList(converted), 50);
     if (fvocab.isEmpty()) logger.error("huh? foreground is empty for " +answerSentence);
 
@@ -141,7 +141,7 @@ public class AutoCRT {
 
     boolean b = rvocab.containsAll(fvocab);
     if (!b) logger.info("isCorrect - no match : reco " + rvocab + " vs answer " +fvocab);
-    return b;
+    return b;*/
   }
 
   /**
