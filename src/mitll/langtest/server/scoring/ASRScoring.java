@@ -327,7 +327,7 @@ public class ASRScoring extends Scoring {
   private String getUniqueTokensInLM(List<String> lmSentences, List<String> backgroundVocab) {
     String sentence;Set<String> backSet = new HashSet<String>(backgroundVocab);
     List<String> mergedVocab = new ArrayList<String>(backgroundVocab);
-    List<String> foregroundVocab = svDecoderHelper.getVocab(lmSentences, 30);
+    List<String> foregroundVocab = svDecoderHelper.getSimpleVocab(lmSentences, 30);
     for (String foregroundToken : foregroundVocab) {
       if (!backSet.contains(foregroundToken)) {
         mergedVocab.add(foregroundToken);
