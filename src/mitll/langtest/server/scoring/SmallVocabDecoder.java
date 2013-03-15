@@ -114,8 +114,10 @@ public class SmallVocabDecoder {
    */
   public List<String> getVocab(List<String> background, int vocabSizeLimit) {
     List<String> all = new ArrayList<String>();
-    all.addAll(Arrays.asList("-pau-", "</s>", "<s>"/*, "<unk>"*/));
-    //boolean useDict = !dictWords.isEmpty();
+    all.add("-pau-");  // include?
+    all.add("<s>");
+    all.add("</s>");
+    /*, "<unk>"*/
     all.addAll(getSimpleVocab(background, vocabSizeLimit));
     return all;
   }
