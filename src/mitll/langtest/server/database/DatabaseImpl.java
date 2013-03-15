@@ -398,6 +398,8 @@ public class DatabaseImpl implements Database {
   /**
    * remember state for user so they can resume their flashcard exercise from that point.
    * synchronize!
+   *
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getNextExercise(long)
    * @param userID
    * @return
    */
@@ -420,7 +422,14 @@ public class DatabaseImpl implements Database {
         userToState.put(userID, new UserStateWrapper(userState));
       }
       UserStateWrapper userState = userToState.get(userID);
-      Exercise exercise = idToExercise.get(userState.state.next());
+      Exercise exercise = null;
+      try {
+        exercise = idToExercise.get(userState.state.next());
+      } catch (Exception e) {
+        return new FlashcardResponse(true,
+          userState.correct,
+          userState.incorrect);
+      }
 
       return new FlashcardResponse(exercise,
         userState.correct,
