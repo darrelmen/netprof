@@ -101,6 +101,7 @@ public class ASRScoring extends Scoring {
     this.properties = properties;
     this.language = properties.get("language");
     this.letterToSoundClass = language.equals("English") ? new EnglishLTS() : new ArabicLTS();
+    readDictionary();
   }
 
 /*  private Set<String> wordsInDict = new HashSet<String>();
@@ -240,6 +241,23 @@ public class ASRScoring extends Scoring {
         EMPTY_LIST, EMPTY_LIST);
   }*/
 
+
+  private Scores getScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
+                                  String sentence,
+                                  String scoringDir,
+
+                                  List<String> lmSentences, List<String> background) {
+    String key = testAudioDir + File.separator + testAudioFileNoSuffix;
+    Scores scores = audioToScore.getIfPresent(key);
+    if (scores == null) {
+      scores = calcScoreForAudio(testAudioDir,testAudioFileNoSuffix,sentence,scoringDir,lmSentences,background);
+      audioToScore.put(key, scores);
+    }
+    else {
+      logger.debug("found cached score for file '" + key + "'");
+    }
+    return scores;
+  }
   /**
    * There are two modes you can use to score the audio : align mode and decode mode
    * In align mode, the decoder figures out where the words and phonemes in the sentence occur in the audio.
@@ -258,49 +276,41 @@ public class ASRScoring extends Scoring {
    * @param background only for decode
    * @return Scores which is the overall score and the event scores
    */
-  private Scores getScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
-                                  String sentence,
-                                  String scoringDir,
+  private Scores calcScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
+                                   String sentence,
+                                   String scoringDir,
 
-                                  List<String> lmSentences, List<String> background) {
-    Scores scores;
+                                   List<String> lmSentences, List<String> background) {
     boolean decode = !lmSentences.isEmpty();
     if (decode && sentence.length() > 0) { // precondition
       logger.warn("not expecting ref sentence with decoding - only with align - got " + sentence);
     }
-    synchronized (this) {  // TODO : needed???  throughput issue?
-      String tmpDir = Files.createTempDir().getAbsolutePath();
-      //logger.debug("tmp dir " + tmpDir);
-      if (decode) {
-        List<String> backgroundVocab = svDecoderHelper.getVocab(background,  50);
-        sentence = getUniqueTokensInLM(lmSentences, backgroundVocab);
+    String tmpDir = Files.createTempDir().getAbsolutePath();
+    //logger.debug("tmp dir " + tmpDir);
+    if (decode) {
+      List<String> backgroundVocab = svDecoderHelper.getVocab(background, 50);
+      sentence = getUniqueTokensInLM(lmSentences, backgroundVocab);
 
-        String slfFile = svDecoderHelper.createSLFFile(lmSentences, background, backgroundVocab, tmpDir, getModelsDir(), scoringDir);
-        if (! new File(slfFile).exists()) {
-          logger.error("couldn't make slf file?");
-          return null;
-        }
-      }
-
-      Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
-      //logger.debug("dirs is " + dirs + " tmp " + dirs.tmp());
-
-      Audio testAudio = Audio$.MODULE$.apply(
-          testAudioDir, testAudioFileNoSuffix,
-          false /* notForScoring */, dirs);
-
-      logger.debug("testAudio is " + testAudio + " dir " + testAudio.dir());
-
-      scores = audioToScore.getIfPresent(testAudioDir + File.separator + testAudioFileNoSuffix);
-
-      if (scores == null) {
-        scores = computeRepeatExerciseScores(testAudio, sentence, tmpDir, decode, language);
-        audioToScore.put(testAudioDir + File.separator + testAudioFileNoSuffix, scores);
-      } else {
-        logger.info("found cached score for file '" + testAudioDir + File.separator + testAudioFileNoSuffix + "'");
+      long then = System.currentTimeMillis();
+      String slfFile = svDecoderHelper.createSLFFile(lmSentences, background, backgroundVocab, tmpDir, getModelsDir(), scoringDir);
+      long now = System.currentTimeMillis();
+      logger.debug("create slf file took " + (now - then) + " millis");
+      if (!new File(slfFile).exists()) {
+        logger.error("couldn't make slf file?");
+        return new Scores();
       }
     }
-    return scores;
+
+    Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
+    //logger.debug("dirs is " + dirs + " tmp " + dirs.tmp());
+
+    Audio testAudio = Audio$.MODULE$.apply(
+      testAudioDir, testAudioFileNoSuffix,
+      false /* notForScoring */, dirs);
+
+    //logger.debug("testAudio is " + testAudio + " dir " + testAudio.dir());
+
+    return computeRepeatExerciseScores(testAudio, sentence, tmpDir, decode, language);
   }
 
   /**
@@ -438,15 +448,12 @@ public class ASRScoring extends Scoring {
     String configFile = getHydecConfigFile(tmpDir, modelsDir, decode);
 
     // do template replace on grammar file
-    createGrammarFile(modelsDir);
+    //createGrammarFile(modelsDir);
 
     // do some sanity checking
     boolean configExists = new File(configFile).exists();
-    String dictFile = getDictFile(modelsDir);
-    boolean dictExists = new File(dictFile).exists();
-    if (!configExists || !dictExists) {
-      if (!configExists) logger.error("computeRepeatExerciseScores : Can't find config file at " + configFile);
-      if (!dictExists)   logger.error("computeRepeatExerciseScores : Can't find dict file at " + dictFile);
+    if (!configExists) {
+      logger.error("computeRepeatExerciseScores : Can't find config file at " + configFile);
       return getEmptyScores();
     }
 
@@ -454,15 +461,19 @@ public class ASRScoring extends Scoring {
     boolean isArabicScript = !(language.equalsIgnoreCase("English"));
     if (!isArabicScript) logger.debug("using english LTS sound class since language is " + language);
 
-    if (htkDictionary == null) {
-      long then = System.currentTimeMillis();
-      htkDictionary = new HTKDictionary(dictFile);
-      long now = System.currentTimeMillis();
-      int size = htkDictionary.size(); // force read from lazy val
-      logger.debug("read dict of size " +size + " in " + (now-then) + " millis");
-    }
-
     return getScoresFromHydec(testAudio, sentence, configFile);
+  }
+
+  private void readDictionary() {
+    String dictFile = getDictFile(getModelsDir());
+    boolean dictExists = new File(dictFile).exists();
+    if (!dictExists)   logger.error("readDictionary : Can't find dict file at " + dictFile);
+
+    long then = System.currentTimeMillis();
+    htkDictionary = new HTKDictionary(dictFile);
+    long now = System.currentTimeMillis();
+    int size = htkDictionary.size(); // force read from lazy val
+    logger.debug("read dict of size " +size + " in " + (now-then) + " millis");
   }
 
   private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
@@ -502,6 +513,7 @@ public class ASRScoring extends Scoring {
    * Creates a grammar file from the template file
    * TODO : this isn't required anymore - remove it
    * @param modelsDir
+   * @deprecated shouldn't be called anymore
    */
   private void createGrammarFile(String modelsDir) {
     String grammarAlignTemplate = modelsDir + File.separator + GRAMMAR_ALIGN_TEMPLATE;
