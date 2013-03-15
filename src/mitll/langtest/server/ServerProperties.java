@@ -24,6 +24,7 @@ import java.util.jar.Manifest;
 public class ServerProperties {
   public static final String SHOW_SECTIONS = "showSections";
   public static final String DEBUG_EMAIL = "debugEmail";
+  private static final String DOIMAGES = "doimages";
   private static Logger logger = Logger.getLogger(ServerProperties.class);
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
@@ -73,29 +74,29 @@ public class ServerProperties {
   }
 
   public boolean getUseFile() {
-    return !props.getProperty(READ_FROM_FILE, "false").equals("false");
+    return getDefaultFalse(READ_FROM_FILE);
   }
 
   public String getH2Database() { return props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT); }
   public String getLessonPlan() { return props.getProperty("lessonPlanFile", "lesson.plan"); }
 
   public boolean isShowSections() {
-    return !props.getProperty(SHOW_SECTIONS, "false").equals("false");
+    return getDefaultFalse(SHOW_SECTIONS);
   }
 
   public boolean isDebugEMail() {
-    return !props.getProperty(DEBUG_EMAIL, "false").equals("false");
+    return getDefaultFalse(DEBUG_EMAIL);
   }
   public boolean isFlashcard() {
-    return !props.getProperty(FLASHCARD, "false").equals("false");
+    return getDefaultFalse(FLASHCARD);
   }
 
   public boolean isCRTDataCollect() {
-    return !props.getProperty(CRTDATACOLLECT, "false").equals("false");
+    return getDefaultFalse(CRTDATACOLLECT);
   }
 
   public boolean isWordPairs() {
-    return !props.getProperty(WORDPAIRS, "false").equals("false");
+    return getDefaultFalse(WORDPAIRS);
   }
 
   public String getLanguage() {
@@ -131,18 +132,26 @@ public class ServerProperties {
       logger.error("Couldn't parse property " + FIRST_N_IN_ORDER,e);
       firstNInOrder = Integer.MAX_VALUE;
     }
-    dataCollectMode = !props.getProperty(DATA_COLLECT_MODE, "false").equals("false");
+    dataCollectMode = getDefaultFalse(DATA_COLLECT_MODE);
     collectAudio = !props.getProperty(COLLECT_AUDIO, COLLECT_AUDIO_DEFAULT).equals("false");
-    isUrdu = !props.getProperty(URDU, "false").equals("false");
-    biasTowardsUnanswered = !props.getProperty(BIAS_TOWARDS_UNANSWERED, "true").equals("false");
-    useOutsideResultCounts = !props.getProperty(USE_OUTSIDE_RESULT_COUNTS, "true").equals("false");
-    isDataCollectAdminView = !props.getProperty("dataCollectAdminView", "false").equals("false");
+    isUrdu = getDefaultFalse(URDU);
+    biasTowardsUnanswered = getDefaultTrue(BIAS_TOWARDS_UNANSWERED);
+    useOutsideResultCounts = getDefaultTrue(USE_OUTSIDE_RESULT_COUNTS);
+    isDataCollectAdminView = getDefaultFalse("dataCollectAdminView");
     outsideFile = props.getProperty(OUTSIDE_FILE, OUTSIDE_FILE_DEFAULT);
     String dateFromManifest = getDateFromManifest(servletContext);
     if (dateFromManifest != null && dateFromManifest.length() > 0) {
       logger.debug("Date from manifest " + dateFromManifest);
       props.setProperty("releaseDate",dateFromManifest);
     }
+  }
+
+  private boolean getDefaultFalse(String param) {
+    return !props.getProperty(param, "false").equals("false");
+  }
+
+  private boolean getDefaultTrue(String param) {
+    return !props.getProperty(param, "true").equals("false");
   }
 
   private String getDateFromManifest(ServletContext servletContext) {
@@ -159,4 +168,7 @@ public class ServerProperties {
     return "";
   }
 
+  public boolean doImages() {
+    return getDefaultFalse(DOIMAGES);
+  }
 }
