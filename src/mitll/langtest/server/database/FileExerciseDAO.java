@@ -65,7 +65,6 @@ public class FileExerciseDAO implements ExerciseDAO {
     this.mediaDir = mediaDir;
     this.isUrdu = isUrdu;
     this.showSections = showSections;
-    //logger.debug("is urdu " + isUrdu);
   }
 
   public Map<String,List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
@@ -162,7 +161,14 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
   }
 
-  public void readWordPairs(String lessonPlanFile, String language) {
+  /**
+   *
+   * @see DatabaseImpl#getExercises(boolean, String)
+   * @param lessonPlanFile
+   * @param language
+   * @param doImages
+   */
+  public void readWordPairs(String lessonPlanFile, String language, boolean doImages, String configDir) {
     if (exercises != null) return;
 
     try {
@@ -187,11 +193,13 @@ public class FileExerciseDAO implements ExerciseDAO {
           translations.add(split[i]);
         }
 
-        if (translations.isEmpty()) {
+        if (translations.isEmpty() && !doImages) {
           logger.error("huh? no translations with '" + line + "' and foreign : " + foreign);
         }
         else {
-          Exercise repeat = new Exercise("flashcard", "" + (id++), getFlashcard(foreign, language), translations, translations.get(0));
+          String flashcard = doImages ? getImageContent(foreign, language, configDir) : getFlashcard(foreign, language);
+          String tooltip = doImages ? foreign : translations.get(0);
+          Exercise repeat = new Exercise("flashcard", "" + (id++), flashcard, translations, tooltip);
           repeat.addQuestion(Exercise.FL, "Please record the sentence above.","", EMPTY_LIST);
 
           exercises.add(repeat);
@@ -496,7 +504,14 @@ public class FileExerciseDAO implements ExerciseDAO {
         "</div>\n";
   }
 
-  private String getFlashcard(String flPhrase, String language) {
+  private String getImageContent(String flPhrase, String language, String configDir) {
+    String filePath = configDir + "/media/" + flPhrase + ".png";
+    return "<img src='" +
+      ensureForwardSlashes(filePath) +
+      "'/>";
+      //media\\/bc-R0P-001\\/ac-R0P-001-potatoes.png\\\ ""
+  }
+    private String getFlashcard(String flPhrase, String language) {
     return flPhrase;
     /*return "Repeat in " +language
     return "<div class=\"Instruction\">\n" +
