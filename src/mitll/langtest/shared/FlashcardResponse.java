@@ -12,7 +12,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class FlashcardResponse implements IsSerializable {
   public Exercise e;
   public int correct, incorrect;
-
+  public boolean finished = false;
   public FlashcardResponse() {}
   public FlashcardResponse(Exercise e, int correct, int incorrect) {this.e = e; this.correct =correct; this.incorrect = incorrect;}
+  public FlashcardResponse(boolean finished, int correct, int incorrect) {this.finished = finished; this.correct =correct; this.incorrect = incorrect;}
 }
