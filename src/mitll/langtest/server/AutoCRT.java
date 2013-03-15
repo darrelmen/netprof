@@ -97,8 +97,7 @@ public class AutoCRT {
     if (otherExercises.isEmpty()) logger.error("getFlashcardAnswer : huh? no background sentences?");
 
     List<String> background = getBackground(exercise, otherExercises);
-    if (background.isEmpty()) logger.error("huh? background is empty despite having " + otherExercises.size() +
-      " ?");
+    if (background.isEmpty()) logger.error("huh? background is empty despite having " + otherExercises.size() + " ?");
 
     List<String> foreground = new ArrayList<String>();
     foreground.add(removePunct(foregroundSentence));
@@ -110,7 +109,9 @@ public class AutoCRT {
       asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
         asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
     boolean isCorrect = recoSentence != null && isCorrect(foregroundSentence, recoSentence);
-    logger.info("reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentence +"' correct = " + isCorrect);
+   // if (!isCorrect) {
+      logger.info("reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentence +"' correct = " + isCorrect);
+    //}
 
     double scoreForAnswer = isCorrect ? 1.0d :0.0d;
     return new AudioAnswer(url, validity, recoSentence, scoreForAnswer, reqid, durationInMillis);
@@ -127,15 +128,19 @@ public class AutoCRT {
     return getBackgroundSentences(sentences);
   }
 
-  private boolean isCorrect(String foregroundSentence, String recoSentence) {
+  private boolean isCorrect(String answerSentence, String recoSentence) {
     SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
 
-    String converted = foregroundSentence.replaceAll("-", " ").toLowerCase();
-    List<String> fvocab = svDecoderHelper.getVocab(Collections.singletonList(converted), 50);
-    List<String> rvocab = svDecoderHelper.getVocab(Collections.singletonList(recoSentence), 50);
+    String converted = answerSentence.replaceAll("-", " ").replaceAll("\\.", "").toLowerCase();
+    logger.debug("converted is " +converted);
+    List<String> fvocab = svDecoderHelper.getSimpleVocab(Collections.singletonList(converted), 50);
+    if (fvocab.isEmpty()) logger.error("huh? foreground is empty for " +answerSentence);
+
+    List<String> rvocab = svDecoderHelper.getSimpleVocab(Collections.singletonList(recoSentence), 50);
+    if (rvocab.isEmpty()) logger.warn("recoSentence is empty for " +recoSentence);
 
     boolean b = rvocab.containsAll(fvocab);
-    if (!b) logger.info("reco " + rvocab + " vs answer " +fvocab);
+    if (!b) logger.info("isCorrect - no match : reco " + rvocab + " vs answer " +fvocab);
     return b;
   }
 
