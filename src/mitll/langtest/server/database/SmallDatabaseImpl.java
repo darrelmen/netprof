@@ -153,7 +153,7 @@ public class SmallDatabaseImpl implements Database {
     // System.err.println("Closing " + connection + " " + connection.isClosed());
   }
 
-  public static void main(String[] arg) {
+/*  public static void main(String[] arg) {
     DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\mt_repo\\jdewitt\\pilot\\vlr-parle");
-  }
+  }*/
 }
