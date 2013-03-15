@@ -64,7 +64,6 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
    */
   @Override
   public void getExercises(long userID) {
-    //System.out.println("Getting next for " +userID);
     service.getNextExercise(userID, new AsyncCallback<FlashcardResponse>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -73,11 +72,15 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
       @Override
       public void onSuccess(FlashcardResponse result) {
-        Panel exercisePanel = factory.getExercisePanel(result.e);
-        column.clear();
+        if (result.finished) {
+          Window.alert("Flashcards Complete!");
+        } else {
+          Panel exercisePanel = factory.getExercisePanel(result.e);
+          column.clear();
 
-        column.add(exercisePanel);
-        correct.setText("Correct " +result.correct +"/"+(result.correct+result.incorrect));
+          column.add(exercisePanel);
+          correct.setText("Correct " + result.correct + "/" + (result.correct + result.incorrect));
+        }
       }
     });
   }
