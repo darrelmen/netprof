@@ -404,27 +404,14 @@ public class DatabaseImpl implements Database {
           strings[i++] = e.getID();
         }
         UserState userState = new UserState(strings);
+        if (userState.finished()) {
+          logger.info("user "+userID + " is finished.");
+        }
         userToState.put(userID, new UserStateWrapper(userState));
-     /*   //ArrayBuffer<String> buffer = new ArrayBuffer<String>(exercises.size());
-        Array<String> array = new Array<String>(exercises.size());
-        int j =0;
-       for (Exercise e : exercises) {
-         array.update(j++,e.getID());
-       }*/
-
-       // buffer.$plus$eq()
-      //  Array scalaArray = new Array
-        //ClassManifest<String> classManifest;
-       // userState.initialize(array);
       }
       UserStateWrapper userState = userToState.get(userID);
       Exercise exercise = idToExercise.get(userState.state.next());
 
-     /* int correct = 0, incorrect = 0;
-      for (Boolean score : userState.scores) {
-        if (score) correct++;
-        else incorrect++;
-      }*/
       return new FlashcardResponse(exercise,
         userState.correct,
         userState.incorrect);
