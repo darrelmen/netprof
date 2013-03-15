@@ -73,25 +73,36 @@ public class DatabaseImpl implements Database {
   private boolean useFile;
   private final boolean showSections;
   private String language;
+  private boolean doImages;
+  private final String configDir;
 
   /**
    * Just for testing
    * @param configDir
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    */
+/*
   public DatabaseImpl(String configDir) {
-    this(configDir, "vlr-parle", false,false,"");
+    this(configDir, "vlr-parle", false,false,"", false);
   }
+*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    * @param configDir
    * @param dbName
    * @param showSections
+   * @param doImages
    */
-  public DatabaseImpl(String configDir, String dbName, boolean showSections,boolean isWordPairs, String language) {
+  public DatabaseImpl(String configDir, String dbName, boolean showSections, boolean isWordPairs,
+                      String language, boolean doImages, String relativeConfigDir) {
     connection = new H2Connection(configDir, dbName);
     this.showSections = showSections;
+    this.isWordPairs = isWordPairs;
+    this.doImages = doImages;
+    this.language = language;
+    this.configDir = relativeConfigDir;
+
     try {
       boolean open = getConnection() != null;
       if (!open) {
@@ -105,8 +116,7 @@ public class DatabaseImpl implements Database {
     }
     initializeDAOs();
     monitoringSupport = getMonitoringSupport();
-    this.isWordPairs = isWordPairs;
-    this.language = language;
+
   }
 
   /**
@@ -226,7 +236,7 @@ public class DatabaseImpl implements Database {
 
     if (useFile && !isExcel) {
       if (isWordPairs) {
-        ((FileExerciseDAO) exerciseDAO).readWordPairs(lessonPlanFile, language);
+        ((FileExerciseDAO) exerciseDAO).readWordPairs(lessonPlanFile, language, doImages, configDir);
       }
       else {
         ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, lessonPlanFile);
@@ -431,6 +441,12 @@ public class DatabaseImpl implements Database {
     }
   }*/
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, boolean, int, boolean, String)
+   * @param userID
+   * @param exerciseID
+   * @param isCorrect
+   */
   public void updateFlashcardState(long userID, String exerciseID, boolean isCorrect) {
     synchronized (userToState) {
       UserStateWrapper state = userToState.get(userID);
