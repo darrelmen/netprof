@@ -22,6 +22,10 @@ h1 {
 
 }
 
+.noPadding {
+    padding-top: 5px;
+}
+
 .bigLink {
     font-size: 1em;
     font-weight: bold;
