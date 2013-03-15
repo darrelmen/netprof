@@ -82,11 +82,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int EAST_WIDTH = 90;
 
   public static final String LANGTEST_IMAGES = "langtest/images/";
+  private static final String HELP_IMAGE = LANGTEST_IMAGES + "/help-3.png";
 
   private Panel currentExerciseVPanel = new VerticalPanel();
   private ListInterface exerciseList;
   private Label status;
-  //private HTML lineBelowTitle;
+
   private UserManager userManager;
   private final UserTable userTable = new UserTable();
   private ResultManager resultManager;
@@ -261,14 +262,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * TODO : add help
-   * TODO : add correct/incorrect stats
    * TODO : test without flash???
    */
   private void doFlashcard() {
     setPageTitle();
     FluidContainer container = new FluidContainer();
     RootPanel.get().add(container);
+    RootPanel.get().addStyleName("noPadding");
     currentExerciseVPanel = container;
 
     Row row = new FluidRow();
@@ -276,10 +276,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Heading widgets = new Heading(3, props.getSplash());
     widgets.addStyleName("sendButtonBlue");
     row.add(new Column(12, widgets));
-
-    //Row rowUnder = new FluidRow();
-    //rowUnder.add(new Column(12, new Heading(4, "", "Record yourself saying the word or phrase. Press and hold the ENTER key.")));
-    //container.add(rowUnder);
 
     userManager = new UserManager(this, service, isCollectAudio(), false, isCRTDataCollectMode(), true);
     this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager);
@@ -291,7 +287,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     //HTML statusLine = getReleaseStatus();
     //row2.add(new Column(1, statusLine));
-    Image image = new Image("langtest/images/help-3.png");
+    Image image = new Image(HELP_IMAGE);
     image.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -308,8 +304,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     login();
 
+    showHelpNewUser();
+  }
 
-    stockStore = Storage.getLocalStorageIfSupported();
+  private void showHelpNewUser() {
+    Storage stockStore = Storage.getLocalStorageIfSupported();
     boolean showedHelpAlready = false;
     if (stockStore != null) {
       showedHelpAlready = stockStore.getItem("showedHelp") != null;
@@ -320,9 +319,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       showFlashHelp();
     }
   }
-
-  private Storage stockStore = null;
-
 
   private void showFlashHelp() {
     List<String> msgs = new ArrayList<String>();
