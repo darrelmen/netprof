@@ -116,6 +116,13 @@ public class SmallVocabDecoder {
     List<String> all = new ArrayList<String>();
     all.addAll(Arrays.asList("-pau-", "</s>", "<s>"/*, "<unk>"*/));
     //boolean useDict = !dictWords.isEmpty();
+    all.addAll(getSimpleVocab(background, vocabSizeLimit));
+    return all;
+  }
+
+  public List<String> getSimpleVocab(List<String> background, int vocabSizeLimit) {
+    List<String> all = new ArrayList<String>();
+
     final Map<String, Integer> sc = new HashMap<String, Integer>();
     for (String l : background) {
       for (String t : l.split("\\s")) { // split on spaces
@@ -131,13 +138,13 @@ public class SmallVocabDecoder {
       }
     }
     List<String> vocab = new ArrayList<String>(sc.keySet());
-      Collections.sort(vocab, new Comparator<String>() {
-        public int compare(String s, String s2) {
-          Integer first = sc.get(s);
-          Integer second = sc.get(s2);
-          return first < second ? +1 : first > second ? -1 : 0;
-        }
-      });
+    Collections.sort(vocab, new Comparator<String>() {
+      public int compare(String s, String s2) {
+        Integer first = sc.get(s);
+        Integer second = sc.get(s2);
+        return first < second ? +1 : first > second ? -1 : 0;
+      }
+    });
 
     all.addAll(vocab.subList(0,Math.min(vocab.size(), vocabSizeLimit)));
 
