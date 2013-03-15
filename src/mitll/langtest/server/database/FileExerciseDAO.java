@@ -187,7 +187,7 @@ public class FileExerciseDAO implements ExerciseDAO {
 
       while ((line = reader.readLine()) != null) {
         String[] split = line.split(",");
-        String foreign = split[0];
+        String foreign = split[0].trim();
         List<String> translations = new ArrayList<String>();
         for (int i = 1; i < split.length; i++) {
           translations.add(split[i]);
@@ -196,9 +196,10 @@ public class FileExerciseDAO implements ExerciseDAO {
         if (translations.isEmpty() && !doImages) {
           logger.error("huh? no translations with '" + line + "' and foreign : " + foreign);
         }
-        else {
+        else if (foreign.length() > 0) {
           String flashcard = doImages ? getImageContent(foreign, language, configDir) : getFlashcard(foreign, language);
           String tooltip = doImages ? foreign : translations.get(0);
+          if (doImages) translations.add(foreign);
           Exercise repeat = new Exercise("flashcard", "" + (id++), flashcard, translations, tooltip);
           repeat.addQuestion(Exercise.FL, "Please record the sentence above.","", EMPTY_LIST);
 
@@ -506,8 +507,10 @@ public class FileExerciseDAO implements ExerciseDAO {
 
   private String getImageContent(String flPhrase, String language, String configDir) {
     String filePath = configDir + "/media/" + flPhrase + ".png";
+    String s = ensureForwardSlashes(filePath);
+    logger.debug("path is " +s);
     return "<img src='" +
-      ensureForwardSlashes(filePath) +
+      s +
       "'/>";
       //media\\/bc-R0P-001\\/ac-R0P-001-potatoes.png\\\ ""
   }
