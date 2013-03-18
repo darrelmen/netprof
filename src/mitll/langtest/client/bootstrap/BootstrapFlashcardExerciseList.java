@@ -3,24 +3,21 @@ package mitll.langtest.client.bootstrap;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.Container;
 import com.github.gwtbootstrap.client.ui.FluidRow;
-
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Label;
-import com.github.gwtbootstrap.client.ui.Paragraph;
-import com.github.gwtbootstrap.client.ui.ProgressBar;
-import com.github.gwtbootstrap.client.ui.TextArea;
-import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
+import com.github.gwtbootstrap.client.ui.Image;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.ListInterface;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.FlashcardResponse;
 
@@ -38,17 +35,37 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private LangTestDatabaseAsync service;
   private UserManager user;
   private Heading correct = new Heading(3);
+  private static final String HELP_IMAGE = LangTest.LANGTEST_IMAGES + "/help-4.png";
 
-  public BootstrapFlashcardExerciseList(Container currentExerciseVPanel, LangTestDatabaseAsync service, UserManager user) {
+  /**
+   * @see mitll.langtest.client.LangTest#doFlashcard()
+   * @param currentExerciseVPanel
+   * @param service
+   * @param user
+   * @param controller
+   */
+  public BootstrapFlashcardExerciseList(Container currentExerciseVPanel, LangTestDatabaseAsync service,
+                                        UserManager user, final ExerciseController controller) {
     this.service = service;
     FluidRow row = new FluidRow();
+    currentExerciseVPanel.add(row);
     FluidRow row2 = new FluidRow();
+    currentExerciseVPanel.add(row2);
+
     column = new Column(SIZE);
     row.add(column);
-    currentExerciseVPanel.add(row);
+
     correct.addStyleName("darkerBlueColor");
-    row2.add(new Column(SIZE, correct));
-    currentExerciseVPanel.add(row2);
+    row2.add(new Column(11, correct));
+
+    Image image = new Image(HELP_IMAGE);
+    image.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.showFlashHelp();
+      }
+    });
+    row2.add(new Column(1,image));
 
     this.user = user;
   }
