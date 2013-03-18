@@ -45,4 +45,6 @@ public interface ExerciseController {
   boolean isGrading();
   boolean isLogClientMessages();
   String getAudioType();
+
+  void showFlashHelp();
 }
