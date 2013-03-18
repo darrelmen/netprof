@@ -16,7 +16,10 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.LangTest;
@@ -43,7 +46,7 @@ public class BootstrapExercisePanel extends FluidContainer {
   private static final int DELAY_MILLIS = 1000/4;
   private static final int DELAY_MILLIS_LONG = 1500;
   private static final double CORRECT_THRESHOLD = 0.6;
-  private static final String TIMES_HELP_SHOWN = "TimesHelpShown";
+ // private static final String TIMES_HELP_SHOWN = "TimesHelpShown";
   private static final String FEEDBACK_TIMES_SHOWN = "FeedbackTimesShown";
   private static final int PERIOD_MILLIS = 500;
   private List<MyRecordButtonPanel> answerWidgets = new ArrayList<MyRecordButtonPanel>();
@@ -51,12 +54,11 @@ public class BootstrapExercisePanel extends FluidContainer {
   private Storage stockStore = null;
 
   private Image waitingForResponseImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress48.gif"));
-  //private Image listeningImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "audio-input-microphone-3.png"));
   private Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
   private Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
   private Image correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
   private Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
-  private Image enterImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "enter48.png"));
+  private Image enterImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "space.png"));
   private Heading recoOutput;
   private boolean keyIsDown;
   private boolean isDemoMode;
@@ -67,17 +69,17 @@ public class BootstrapExercisePanel extends FluidContainer {
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller) {
     setStyleName("exerciseBackground");
-    int times = 0;
+   // int times = 0;
     stockStore = Storage.getLocalStorageIfSupported();
     if (stockStore != null) {
-      times = getCookieValue(TIMES_HELP_SHOWN);
+     // times = getCookieValue(TIMES_HELP_SHOWN);
       feedback = getCookieValue(FEEDBACK_TIMES_SHOWN);
     }
 
     FluidRow fluidRow = new FluidRow();
     add(fluidRow);
     fluidRow.add(new Column(12, getQuestionContent(e)));
-    addQuestions(e, service, controller, 1, times == 0);
+    addQuestions(e, service, controller, 1/*, times == 0*/);
   }
 
   private int getCookieValue(String key) {
@@ -121,9 +123,9 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param service
    * @param controller     used in subclasses for audio control
    * @param questionNumber
-   * @param showHelp
+   * @paramx showHelp
    */
-  private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber, boolean showHelp) {
+  private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber/*, boolean showHelp*/) {
     //for (Exercise.QAPair pair : e.getQuestions()) {
     // add question header
     questionNumber++;
@@ -201,22 +203,23 @@ public class BootstrapExercisePanel extends FluidContainer {
                                                    public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
                                                      NativeEvent ne = event.getNativeEvent();
 
-                                                     if (ne.getKeyCode() == KeyCodes.KEY_ENTER &&
+                                                     if (//ne.getKeyCode() == KeyCodes.KEY_ENTER &&
                                                        "[object KeyboardEvent]".equals(ne.getString())) {
 
-                                                       int typeInt = event.getTypeInt();
-                                                       boolean keyDown = typeInt == 128;
-                                                       boolean keyUp = typeInt == 512;
-
-                                               /*        System.out.println(new Date() + " : Click handler : Got " + event + " type int " +
+                          /*                             System.out.println(new java.util.Date() + " : key handler : Got " + event + " type int " +
                                                          event.getTypeInt() + " assoc " + event.getAssociatedType() +
-                                                         " native " + event.getNativeEvent() + " source " + event.getSource());*/
+                                                         " native " + event.getNativeEvent() + " source " + event.getSource() + " " + ne.getCharCode());
+*/
+                                                       int typeInt = event.getTypeInt();
+                                                       //        boolean keyDown = typeInt == 128;
+                                                       boolean keyPress = typeInt == 256;
+                                                       boolean keyUp = typeInt == 512;
+                                                       boolean isSpace = ne.getCharCode() == 32;
 
-                                                       if (keyDown && !keyIsDown) {
+                                                       if (keyPress && !keyIsDown && isSpace) {
                                                          keyIsDown = true;
                                                          doClick();
-                                                       }
-                                                       else if (keyUp && keyIsDown) {
+                                                       } else if (keyUp && keyIsDown) {
                                                          keyIsDown = false;
                                                          doClick();
                                                        }
@@ -274,8 +277,13 @@ public class BootstrapExercisePanel extends FluidContainer {
     protected void receivedAudioAnswer(AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
       boolean correct = result.score > CORRECT_THRESHOLD;
       recordButton.setResource(correct ? correctImage : incorrectImage);
-
-      if (correct) {
+      if (result.validity == AudioAnswer.Validity.TOO_SHORT) {
+        showPopup("Audio was too short. Please record again.");
+      }
+      else if (result.validity == AudioAnswer.Validity.TOO_QUIET) {
+        showPopup("Audio was too quiet. Please check your mic and record again.");
+      }
+      else if (correct) {
         playCorrect();
         if (feedback < 3) {
           String correctPrompt = "Correct! It's: " + exercise.getRefSentence();
@@ -304,6 +312,21 @@ public class BootstrapExercisePanel extends FluidContainer {
     protected void receivedAudioFailure() {
       recordButton.setResource(enterImage);
     }
+  }
+
+  private void showPopup(String html) {
+    final PopupPanel pleaseWait = new DecoratedPopupPanel();
+    pleaseWait.setAutoHideEnabled(true);
+    pleaseWait.add(new HTML(html));
+    pleaseWait.center();
+
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        pleaseWait.hide();
+      }
+    };
+    t.schedule(2000);
   }
 
   @Override
