@@ -44,8 +44,8 @@ public class SectionExerciseList extends PagingExerciseList {
 
   public SectionExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                              UserFeedback feedback,
-                             boolean arabicDataCollect, boolean showTurkToken, boolean showInOrder) {
-    super(currentExerciseVPanel, service, feedback, arabicDataCollect, showTurkToken, showInOrder);
+                             boolean showTurkToken, boolean showInOrder) {
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder);
   }
 
   @Override
