@@ -63,13 +63,11 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
-   * @param arabicDataCollect
    * @param showTurkToken
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            boolean arabicDataCollect,
                             boolean showTurkToken, boolean showInOrder) {
-    super(currentExerciseVPanel, service, feedback, null, arabicDataCollect, showTurkToken, showInOrder);
+    super(currentExerciseVPanel, service, feedback, null, showTurkToken, showInOrder);
 
     addTableWithPager();
   }
