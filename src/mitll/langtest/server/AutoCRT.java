@@ -4,7 +4,6 @@ import ag.experiment.AutoGradeExperiment;
 import mira.classifier.Classifier;
 import mitll.langtest.server.database.Export;
 import mitll.langtest.server.scoring.AutoCRTScoring;
-import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -13,7 +12,6 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -93,14 +91,16 @@ public class AutoCRT {
   public AudioAnswer getFlashcardAnswer(String exercise, Exercise e, int reqid, File file, AudioAnswer.Validity validity,
                                        String url, int durationInMillis,
                                       List<Exercise> otherExercises) {
-    String foregroundSentence = getRefSentence(e);
+    List<String> foregroundSentences = getRefSentences(e);
     if (otherExercises.isEmpty()) logger.error("getFlashcardAnswer : huh? no background sentences?");
 
     List<String> background = getBackground(exercise, otherExercises);
     if (background.isEmpty()) logger.error("huh? background is empty despite having " + otherExercises.size() + " ?");
 
     List<String> foreground = new ArrayList<String>();
-    foreground.add(removePunct(foregroundSentence));
+    for (String ref : foregroundSentences) {
+      foreground.add(removePunct(ref));
+    }
 
     logger.debug("foreground " + foreground + " back " + background.subList(0,Math.min(10,background.size())) +"...");
     PretestScore asrScoreForAudio = db.getASRScoreForAudio(file, foreground, background);
@@ -108,10 +108,10 @@ public class AutoCRT {
     String recoSentence =
       asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
         asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
-    boolean isCorrect = recoSentence != null && isCorrect(foregroundSentence, recoSentence);
-   // if (!isCorrect) {
-      logger.info("reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentence +"' correct = " + isCorrect);
-    //}
+    boolean isCorrect = recoSentence != null && isCorrect(foregroundSentences, recoSentence);
+    if (!isCorrect) {
+      logger.info("reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentences +"' correct = " + isCorrect);
+    }
 
     double scoreForAnswer = isCorrect ? 1.0d :0.0d;
     return new AudioAnswer(url, validity, recoSentence, scoreForAnswer, reqid, durationInMillis);
@@ -121,17 +121,19 @@ public class AutoCRT {
     List<String> sentences = new ArrayList<String>();
     for (Exercise other : otherExercises) {
       if (!other.getID().equals(exercise)) {
-        String e1 = getRefSentence(other);
-        sentences.add(e1);
+        sentences.addAll(getRefSentences(other));
       }
     }
     return getBackgroundSentences(sentences);
   }
 
-  private boolean isCorrect(String answerSentence, String recoSentence) {
-    String converted = answerSentence.replaceAll("-", " ").replaceAll("\\.", "").toLowerCase();
-    logger.debug("converted is " +converted);
-    return converted.equalsIgnoreCase(recoSentence);
+  private boolean isCorrect(List<String> answerSentences, String recoSentence) {
+    for (String answer : answerSentences) {
+      String converted = answer.replaceAll("-", " ").replaceAll("\\.", "").toLowerCase();
+      logger.debug("converted is " + converted);
+      if (converted.equalsIgnoreCase(recoSentence)) return true;
+    }
+    return false;
 /*    SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
     List<String> fvocab = svDecoderHelper.getSimpleVocab(Collections.singletonList(converted), 50);
     if (fvocab.isEmpty()) logger.error("huh? foreground is empty for " +answerSentence);
@@ -148,8 +150,12 @@ public class AutoCRT {
    * @param other
    * @return
    */
-  private String getRefSentence(Exercise other) {
-    return other.getRefSentence().trim().toUpperCase();
+  private List<String> getRefSentences(Exercise other) {
+    List<String> refs = new ArrayList<String>();
+    for (String ref : other.getRefSentences()) {
+      refs.add(ref.trim().toUpperCase());
+    }
+    return refs;
   }
 
   /**
