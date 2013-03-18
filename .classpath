@@ -21,6 +21,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/stax-api-1.0.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/xmlbeans-2.3.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-fileupload-1.2.2.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/flashcard.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/imagewriter"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
