@@ -14,16 +14,18 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.shared.User;
 
 import java.util.Comparator;
 import java.util.List;
 
-public class UserTable {
+public class UserTable extends PagerTable {
   private static final int PAGE_SIZE = 5;
   private Widget lastTable = null;
   private Button closeButton;
@@ -221,6 +223,15 @@ public class UserTable {
     experience.setSortable(true);
     table.addColumn(experience, "Experience");
 
+    TextColumn<User> items = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return "" + contact.getNumResults();
+      }
+    };
+    items.setSortable(true);
+    table.addColumn(items, "Num Results");
+
     TextColumn<User> ipaddr = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
@@ -287,15 +298,6 @@ public class UserTable {
     table.getColumnSortList().push(id);
 
     // Create a SimplePager.
-    SimplePager pager = new SimplePager();
-
-    // Set the cellList as the display.
-    pager.setDisplay(table);
-
-    // Add the pager and list to the page.
-    VerticalPanel vPanel = new VerticalPanel();
-    vPanel.add(pager);
-    vPanel.add(table);
-    return vPanel;
+    return getPagerAndTable(table, table, 10, 10);
   }
 }
