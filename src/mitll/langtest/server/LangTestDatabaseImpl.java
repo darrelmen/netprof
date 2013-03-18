@@ -815,14 +815,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param exercise exercise within the plan
    * @param questionID question within the exercise
    * @param user answering the question
-   * @param doAutoCRT if true the act of posting an audio file triggers ASR and scoring of the returned reco sentence
    * @param reqid request id from the client, so it can potentially throw away out of order responses
    * @param flq was the prompt a foreign language query
    * @param audioType regular or fast then slow audio recording
    * @return URL to audio on server and if audio is valid (not too short, etc.)
    */
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
-                                    int user, boolean doAutoCRT, int reqid, boolean flq, String audioType) {
+                                    int user, int reqid, boolean flq, String audioType) {
     String wavPath = getLocalPathToAnswer(plan, exercise, questionID, user);
     //logger.warn("got wave file " +wavPath);
     File file = getAbsoluteFile(wavPath);
@@ -841,19 +840,29 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String url = optionallyMakeURL(wavPathWithForwardSlashSeparators);
     // logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
 
+    if (isValid) {
+      return getAudioAnswer(exercise, questionID, user, reqid, file, validity, url);
+    }
+    else {
+      return new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
+    }
+  }
+
+  private AudioAnswer getAudioAnswer(String exercise, int questionID, int user, int reqid,
+                                     File file, AudioCheck.ValidityAndDur validity, String url) {
     if (serverProps.isFlashcard()) {
       makeAutoCRT();
 
       AudioAnswer flashcardAnswer =
         autoCRT.getFlashcardAnswer(exercise, getExercise(exercise), reqid, file, validity.validity, url,
-        validity.durationInMillis, getExercises());
+          validity.durationInMillis, getExercises());
       boolean isCorrect = flashcardAnswer.score > 0.8d;
       db.updateFlashcardState(user, exercise, isCorrect);
       return flashcardAnswer;
     }
-    else if (doAutoCRT && isValid) {
+    else if (serverProps.isAutoCRT()) {
       return autoCRT.getAutoCRTAnswer(exercise, getExercise(exercise), reqid, file, validity.validity, questionID, url,
-          validity.durationInMillis);
+        validity.durationInMillis);
     }
     else {
       return new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
