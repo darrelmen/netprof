@@ -589,7 +589,7 @@ public class DatabaseImpl implements Database {
         randomList.add(remove);
        // System.out.println("v " + v + " s " + shift + " scale " + index + "/"+ inRemaining+ " of " + remaining +" ex " + remove);
     }
-    logger.info("Returning " + randomList.size() + " orig " + orig);
+    logger.info("getRandomBalancedList : returning " + randomList.size() + " items, orig size " + orig);
     return randomList;
     // random.nextInt(exercisesGradeBalancing.size());
   }
