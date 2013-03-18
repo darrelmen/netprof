@@ -52,7 +52,6 @@ public class PostAudioRecordButton extends RecordButton {
       exercise.getID(),
       index,
       controller.getUser(),
-      controller.isAutoCRTMode(),
       reqid,
       !exercise.promptInEnglish,
       controller.getAudioType(),
