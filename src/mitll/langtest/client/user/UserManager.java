@@ -62,11 +62,13 @@ public class UserManager {
       "16+ months",
       "Native speaker");
   private static final String USER_ID = "userID";
+  private static final String USER_CHOSEN_ID = "userChosenID";
   private static final String AUDIO_TYPE = "audioType";
   private final LangTestDatabaseAsync service;
   private final UserNotification langTest;
   private final boolean useCookie = false;
   private long userID = NO_USER_SET;
+  private String userChosenID = "";
   private boolean isCollectAudio;
   private Storage stockStore = null;
   private final boolean isDataCollectAdmin;
@@ -94,13 +96,15 @@ public class UserManager {
 
   /**
    *
+   *
    * @param sessionID from database
    * @param audioType
+   * @param userChosenID
    * @see #displayLoginBox()
    * @see #displayTeacherLogin()
    * @see #addTeacher
    */
-  private void storeUser(long sessionID, String audioType) {
+  private void storeUser(long sessionID, String audioType, String userChosenID) {
     //System.out.println("storeUser : user now " + sessionID);
     final long DURATION = 1000 * 60 * 60 * (isCRTDataCollect ? SHORT_EXPIRATION_HOURS : EXPIRATION_HOURS); //duration remembering login
     long now = System.currentTimeMillis();
@@ -110,11 +114,13 @@ public class UserManager {
       Cookies.setCookie("sid", "" + sessionID, expires);
     } else if (stockStore != null) {
       stockStore.setItem(USER_ID, "" + sessionID);
+      stockStore.setItem(USER_CHOSEN_ID, "" + userChosenID);
       stockStore.setItem("expires", "" + futureMoment);
       stockStore.setItem(AUDIO_TYPE, "" + audioType);
       System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " expires in " + (DURATION/1000) + " seconds");
     } else {
       userID = sessionID;
+      this.userChosenID = userChosenID;
     }
 
     langTest.gotUser(sessionID);
@@ -138,6 +144,12 @@ public class UserManager {
     } else {
       displayLoginBox();
     }
+  }
+
+  public String getUserID() {
+    if (stockStore != null)
+      return stockStore.getItem(USER_CHOSEN_ID);
+    else return userChosenID;
   }
 
   private void rememberAudioType() {
@@ -210,6 +222,9 @@ public class UserManager {
     }
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#doDataCollectAdminView
+   */
   public void teacherLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
@@ -410,7 +425,7 @@ public class UserManager {
                 dialogBox.hide();
                 String audioType = fastThenSlow.getValue() ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
                 storeAudioType(audioType);
-                storeUser(result, audioType);
+                storeUser(result, audioType, user.getText());
               }
             } else {
               System.out.println(user.getText() + " doesn't exist");
@@ -456,15 +471,15 @@ public class UserManager {
                                  final DialogBox dialogBox, final Button closeButton,
                                  final boolean isFastAndSlow) {
     service.userExists(user.getText(), new AsyncCallback<Integer>() {
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       public void onSuccess(Integer result) {
         System.out.println("user '" + user.getText() + "' exists " + result);
         if (result == -1) {
           addTeacher(enteredAge,
-              experienceBox, genderBox, first, last, nativeLang, dialect, user, dialogBox, closeButton, isFastAndSlow);
-        }
-        else {
+            experienceBox, genderBox, first, last, nativeLang, dialect, user, dialogBox, closeButton, isFastAndSlow);
+        } else {
           Window.alert("User " + user.getText() + " already registered, click login.");
         }
       }
@@ -473,7 +488,7 @@ public class UserManager {
 
   private void addTeacher(int age, ListBox experienceBox, ListBox genderBox,
                           TextBox first, TextBox last, TextBox nativeLang,
-                          TextBox dialect, TextBox user, final DialogBox dialogBox, final Button closeButton,
+                          TextBox dialect, final TextBox user, final DialogBox dialogBox, final Button closeButton,
                           final boolean isFastAndSlow) {
     int monthsOfExperience = experienceBox.getSelectedIndex() * 3;
     if (experienceBox.getSelectedIndex() == EXPERIENCE_CHOICES.size() - 1) {
@@ -481,30 +496,30 @@ public class UserManager {
     }
 
     service.addUser(age,
-        genderBox.getValue(genderBox.getSelectedIndex()),
-        monthsOfExperience,
-        first.getText(),
-        last.getText(),
-        nativeLang.getText(),
-        dialect.getText(),
-        user.getText(),
+      genderBox.getValue(genderBox.getSelectedIndex()),
+      monthsOfExperience,
+      first.getText(),
+      last.getText(),
+      nativeLang.getText(),
+      dialect.getText(),
+      user.getText(),
 
-        new AsyncCallback<Long>() {
-          public void onFailure(Throwable caught) {
-            // Show the RPC error message to the user
-            dialogBox.setText("Remote Procedure Call - Failure");
-            dialogBox.center();
-            closeButton.setFocus(true);
-          }
+      new AsyncCallback<Long>() {
+        public void onFailure(Throwable caught) {
+          // Show the RPC error message to the user
+          dialogBox.setText("Remote Procedure Call - Failure");
+          dialogBox.center();
+          closeButton.setFocus(true);
+        }
 
-          public void onSuccess(Long result) {
-            System.out.println("addUser : server result is " + result);
-            dialogBox.hide();
-            String audioType = isFastAndSlow ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
-            storeAudioType(audioType);
-            storeUser(result, audioType);
-          }
-        });
+        public void onSuccess(Long result) {
+          System.out.println("addUser : server result is " + result);
+          dialogBox.hide();
+          String audioType = isFastAndSlow ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
+          storeAudioType(audioType);
+          storeUser(result, audioType, user.getText());
+        }
+      });
   }
 
   private boolean checkPassword(TextBox password) {
@@ -586,7 +601,7 @@ public class UserManager {
 
           public void onSuccess(Long result) {
             System.out.println("addUser : server result is " + result);
-            storeUser(result, "");
+            storeUser(result, "", ""+result);
           }
         });
       }
