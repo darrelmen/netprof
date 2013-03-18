@@ -44,6 +44,7 @@ public class ServerProperties {
   private static final String CRTDATACOLLECT = "crtDataCollect";
   private static final String LANGUAGE = "language";
   private static final String WORDPAIRS = "wordPairs";
+  private static final String AUTOCRT = "autocrt";
 
   private Properties props = null;
 
@@ -97,6 +98,14 @@ public class ServerProperties {
 
   public boolean isWordPairs() {
     return getDefaultFalse(WORDPAIRS);
+  }
+
+  public boolean doImages() {
+    return getDefaultFalse(DOIMAGES);
+  }
+
+  public boolean isAutoCRT() {
+    return getDefaultFalse(AUTOCRT);
   }
 
   public String getLanguage() {
@@ -166,9 +175,5 @@ public class ServerProperties {
 //      logger.warn("Error while reading version: " + ex.getMessage());
     }
     return "";
-  }
-
-  public boolean doImages() {
-    return getDefaultFalse(DOIMAGES);
   }
 }
