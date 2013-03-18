@@ -36,4 +36,6 @@ public class Grader implements IsSerializable {
     this.password = password;
     this.timestamp = timestamp;
   }
+
+  public String toString() { return "ID#" + id + " : " + name; }
 }
