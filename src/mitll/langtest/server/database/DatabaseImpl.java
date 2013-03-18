@@ -819,7 +819,27 @@ public class DatabaseImpl implements Database {
     return userDAO.addUser(age, gender, experience, ipAddr, firstName, lastName, nativeLang, dialect, userID, false);
   }
 
-  public List<User> getUsers() { return userDAO.getUsers(); }
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getUsers()
+   * @return
+   */
+  public List<User> getUsers() {
+    List<User> users = userDAO.getUsers();
+    Map<Long,Integer> idToCount = new HashMap<Long, Integer>();
+
+    for (Result r : resultDAO.getResults()) {
+      Integer count = idToCount.get(r.userid);
+      if (count == null) idToCount.put(r.userid, 1);
+      else idToCount.put(r.userid, count+1);
+    }
+    for (User u : users) {
+      Integer numResults = idToCount.get(u.id);
+      if (numResults != null) {
+        u.setNumResults(numResults);
+      }
+    }
+    return users;
+  }
 
   /**
    * Pulls the list of results out of the database.
