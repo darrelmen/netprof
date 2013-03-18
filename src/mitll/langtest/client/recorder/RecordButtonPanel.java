@@ -153,7 +153,6 @@ public class RecordButtonPanel {
       exercise.getID(),
       index,
       controller.getUser(),
-      controller.isAutoCRTMode(),
       reqid,
       !exercise.promptInEnglish,
       controller.getAudioType(),
