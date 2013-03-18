@@ -13,11 +13,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -28,7 +26,6 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +52,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private ExercisePanelFactory factory;
   protected UserManager user;
   private String exercise_title;
-  protected final boolean arabicDataCollect;
   protected final boolean showTurkToken;
   private boolean useUserID = false;
   private long userID;
@@ -68,12 +64,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param service
    * @param feedback
    * @param factory
-   * @param arabicDataCollect
    * @param showTurkToken
    * @param showInOrder
    */
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                      ExercisePanelFactory factory, boolean arabicDataCollect,
+                      ExercisePanelFactory factory,
                       boolean showTurkToken, boolean showInOrder) {
     this.innerContainer = new SimplePanel();
     this.innerContainer.setWidth("100%");
@@ -82,7 +77,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.service = service;
     this.feedback = feedback;
     this.factory = factory;
-    this.arabicDataCollect = arabicDataCollect;
     this.showTurkToken = showTurkToken;
     this.showInOrder = showInOrder;
 
@@ -117,7 +111,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       getExercisesInOrder();
     }
     else {
-      service.getExerciseIds(userID, arabicDataCollect, new SetExercisesCallback());
+      service.getExerciseIds(userID, new SetExercisesCallback());
     }
   }
 
@@ -271,7 +265,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   private void askServerForExercise(ExerciseShell exerciseShell) {
     if (useUserID) {
-      service.getExercise(exerciseShell.getID(), userID, arabicDataCollect, new ExerciseAsyncCallback(exerciseShell));
+      service.getExercise(exerciseShell.getID(), userID, new ExerciseAsyncCallback(exerciseShell));
     } else {
       service.getExercise(exerciseShell.getID(), new ExerciseAsyncCallback(exerciseShell));
     }
