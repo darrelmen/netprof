@@ -91,7 +91,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
   private PropertyHandler props;
-
+  private HTML userline;
   /**
    * Make an exception handler that displays the exception.
    */
@@ -153,7 +153,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void run() {}
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
 
-    userManager = new UserManager(this,service, isCollectAudio(), false, isCRTDataCollectMode());
+    userManager = new UserManager(this,service, isCollectAudio(), false, isCRTDataCollectMode() || isArabicTextDataCollect());
     resultManager = new ResultManager(service, this, props.getNameForAnswer());
     monitoringManager = new MonitoringManager(service, props);
     boolean usualLayout = !showOnlyOneExercise();
@@ -361,10 +361,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else {
       if (props.isShowSections()) {
         this.exerciseList = new SectionExerciseList(currentExerciseVPanel, service, feedback,
-          isArabicTextDataCollect(), props.isShowTurkToken(), isAutoCRTMode());
+          props.isShowTurkToken(), isAutoCRTMode());
      } else {
         this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback,
-          isArabicTextDataCollect(), props.isShowTurkToken(), isAutoCRTMode()) {
+          props.isShowTurkToken(), isAutoCRTMode()) {
           @Override
           protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
         };
@@ -389,7 +389,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void setMainWindowSize(DockLayoutPanel widgets) {
     int widthToUse = Window.getClientWidth() - (props.isGoodwaveMode() ? 15 : eastWidth);
-    widgets.setSize(Math.max(widthToUse, 50) + "px", Math.max((Window.getClientHeight()-footerHeight-15),50) + "px");
+    widgets.setSize(Math.max(widthToUse, 50) + "px", Math.max((Window.getClientHeight() - footerHeight - 15), 50) + "px");
     //widgets.setSize("100%","100%");
     //widgets.setSize(Math.max((Window.getClientWidth() - EAST_WIDTH), 50) + "px","100%");
   }
@@ -512,6 +512,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     VerticalPanel vp = new VerticalPanel();
 
     // add logout link
+
+    this.userline = new HTML(getUserText());
+    vp.add(userline);
+
     logout = new Anchor("Logout");
     vp.add(logout);
     logout.addClickHandler(new ClickHandler() {
@@ -523,7 +527,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     users = new Anchor("Users");
     users.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        userTable.showUsers(service,userManager.getUser(),false);
+        userTable.showUsers(service, userManager.getUser(), false);
       }
     });
     vp.add(users);
@@ -556,6 +560,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return vp;
   }
 
+  private String getUserText() {
+    return "<span><font size=-2>"+"Hello "+userManager.getUserID()+"</font></span>";
+  }
+
   /**
    * @see #getLogout()
    */
@@ -572,7 +580,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see ExerciseList#checkBeforeLoad(mitll.langtest.shared.ExerciseShell)
    */
   public void login() {
-    if ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView()) userManager.teacherLogin();
+    if ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView() || props.isGrading()) userManager.teacherLogin();
     else userManager.login();
   }
 
@@ -588,6 +596,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void gotUser(long userID) {
     System.out.println("gotUser : got user " +userID);
+    userline.setHTML(getUserText());
     if (props.isDataCollectAdminView()) {
       checkForAdminUser();
     } else {
