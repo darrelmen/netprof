@@ -82,7 +82,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int EAST_WIDTH = 90;
 
   public static final String LANGTEST_IMAGES = "langtest/images/";
-  private static final String HELP_IMAGE = LANGTEST_IMAGES + "/help-3.png";
+  private static final String RECORDING_KEY = "SPACE BAR";
 
   private Panel currentExerciseVPanel = new VerticalPanel();
   private ListInterface exerciseList;
@@ -278,23 +278,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     row.add(new Column(12, widgets));
 
     userManager = new UserManager(this, service, isCollectAudio(), false, isCRTDataCollectMode(), true);
-    this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager);
+    this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager, this);
 
     makeFlashContainer();
 
     Row row2 = new FluidRow();
     container.add(row2);
-
-    //HTML statusLine = getReleaseStatus();
-    //row2.add(new Column(1, statusLine));
-    Image image = new Image(HELP_IMAGE);
-    image.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        showFlashHelp();
-      }
-    });
-    row2.add(new Column(1, image));
 
     Row row3 = new FluidRow();
     container.add(row3);
@@ -320,10 +309,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  private void showFlashHelp() {
+  @Override
+  public void showFlashHelp() {
     List<String> msgs = new ArrayList<String>();
     msgs.add("Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.");
-    msgs.add("Press and hold the ENTER key to record.");
+    msgs.add("Press and hold the " + RECORDING_KEY + " to record.");
     msgs.add("Release to stop recording.");
     showErrorMessage("Help",msgs);
   }
