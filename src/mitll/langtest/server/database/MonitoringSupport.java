@@ -583,7 +583,7 @@ public class MonitoringSupport {
     double total = 0;
     int count = 0;
     int badDur = 0;
-
+    int maxWarns = 0;
     for (Result r : results) {
       total += r.durationInMillis;
       if (r.durationInMillis > 0) {
@@ -591,7 +591,9 @@ public class MonitoringSupport {
       }
       else if (r.spoken /*|| r.audioType.equals(Result.AUDIO_TYPE_UNSET)*/) {
         badDur++;
-        logger.info("got bad audio result " + r + " path " + r.answer);
+        if (maxWarns++ < 10){
+          logger.info("got bad audio result " + r + " path " + r.answer);
+        }
       }
     }
     Map<String,Number> typeToStat = new HashMap<String,Number>();
