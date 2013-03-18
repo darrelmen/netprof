@@ -33,6 +33,7 @@ public class Exercise extends ExerciseShell  {
   private String refAudio;
   private String slowAudioRef;
   private String refSentence;
+  private double weight;
   private transient List<String> slots = new ArrayList<String>();
 
   public static class QAPair implements IsSerializable {
@@ -200,6 +201,14 @@ public class Exercise extends ExerciseShell  {
     List<QAPair> en = langToQuestion == null ? new ArrayList<QAPair>() : langToQuestion.get("en");
     if (en == null) return 0; // should never happen
     return en.size();
+  }
+
+  public double getWeight() {
+    return weight;
+  }
+
+  public void setWeight(double weight) {
+    this.weight = weight;
   }
 
   public void addSlot(String s) {
