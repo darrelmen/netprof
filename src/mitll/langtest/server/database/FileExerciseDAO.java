@@ -170,20 +170,20 @@ public class FileExerciseDAO implements ExerciseDAO {
    */
   public void readWordPairs(String lessonPlanFile, String language, boolean doImages, String configDir) {
     if (exercises != null) return;
+    exercises = new ArrayList<Exercise>();
 
     try {
       File file = new File(lessonPlanFile);
       if (!file.exists()) {
         logger.error("can't find '" + file + "'");
         return;
-      } else {
+      } /*else {
         // logger.debug("found file at " + file.getAbsolutePath());
-      }
+      }*/
       BufferedReader reader = getReader(lessonPlanFile);
 
       String line;
       int id = 1;
-      exercises = new ArrayList<Exercise>();
 
       while ((line = reader.readLine()) != null) {
         String[] split = line.split(",");
@@ -508,7 +508,6 @@ public class FileExerciseDAO implements ExerciseDAO {
   private String getImageContent(String flPhrase, String language, String configDir) {
     String filePath = configDir + "/media/" + flPhrase + ".png";
     String s = ensureForwardSlashes(filePath);
-    logger.debug("path is " +s);
     return "<img src='" +
       s +
       "'/>";
