@@ -30,6 +30,7 @@ public class User implements IsSerializable {
   public String userID;
   public boolean enabled;
   public boolean admin;
+  private int numResults;
 
   public User() {} // for serialization
 
@@ -78,6 +79,14 @@ public class User implements IsSerializable {
       return ipaddr.substring(i);
     }
     else return "";
+  }
+
+  public int getNumResults() {
+    return numResults;
+  }
+
+  public void setNumResults(int numResults) {
+    this.numResults = numResults;
   }
 
   public String toString() {
