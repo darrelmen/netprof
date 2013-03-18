@@ -146,7 +146,7 @@ public class AudioCheck {
       this.validity = validity;
       this.durationInMillis = (int) (1000d * dur);
     }
-    public String toString() { return " valid " + validity + " dur " + durationInMillis; }
+    public String toString() { return "valid " + validity + " dur " + durationInMillis; }
   }
 
   public static void main(String []a ) {
