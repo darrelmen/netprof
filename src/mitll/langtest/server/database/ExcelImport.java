@@ -113,6 +113,10 @@ public class ExcelImport implements ExerciseDAO {
           Collection<Exercise> exercises1 = readFromSheet(sheet);
           exercises.addAll(exercises1);
           logger.info("sheet " + sheet.getSheetName() + " had " + exercises1.size() + " items.");
+          if (!exercises1.isEmpty()) {
+            Exercise first = exercises1.iterator().next();
+            logger.debug("e.g. " + first + " content  " + first.getContent() + " weight " + first.getWeight());
+          }
           //for (Exercise e: exercises1) logger.info("ex " +e.getID() + " " +e.getSlots());
         }
       }
@@ -171,6 +175,7 @@ public class ExcelImport implements ExerciseDAO {
     int unitIndex = 0;
     int chapterIndex = 0;
     int weekIndex = 0;
+    int weightIndex = -1;
     List<String> lastRowValues = new ArrayList<String>();
     for (String type : new String[]{"unit", "chapter", "week"}) {
       typeToUnitToLesson.put(type, new TreeMap<String, Lesson>());
@@ -203,6 +208,8 @@ public class ExcelImport implements ExerciseDAO {
             chapterIndex = columns.indexOf(col);
           } else if (colNormalized.contains("week")) {
             weekIndex = columns.indexOf(col);
+          } else if (colNormalized.contains("weight")) {
+            weightIndex = columns.indexOf(col);
           }
         }
       }
@@ -240,8 +247,12 @@ public class ExcelImport implements ExerciseDAO {
               }
             }
 
+
             Exercise imported = getExercise(id++, dao, english, foreignLanguagePhrase, translit);
             exercises.add(imported);
+            if (weightIndex != -1) {
+              imported.setWeight(getNumericCell(next, weightIndex));
+            }
             recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported);
 /*            if (false)
               logger.debug("read '" + english + "' '" + foreignLanguagePhrase +
@@ -324,6 +335,20 @@ public class ExcelImport implements ExerciseDAO {
     }
   }
 
+  private double getNumericCell(Row next, int col) {
+    Cell cell = next.getCell(col);
+    if (cell == null) return -1;
+/*    if (cell.getArrayFormulaRange().getFirstRow() != cell.getArrayFormulaRange().getFirstRow()) {
+      logger.warn("got multi row cell " + cell);
+    }*/
+    if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+      return cell.getNumericCellValue();
+    }
+    else {
+      return -1;
+    }
+  }
+
   public List<Exercise> getExercises() {
     return exercises;
   }
@@ -339,7 +364,8 @@ public class ExcelImport implements ExerciseDAO {
 
   public static void main(String[] arg) {
     //new ExcelImport().readExercises(new File("Farsi_Curriculum_Glossary_vowelized_2013_02_04.xlsx"));
-    new ExcelImport().readExercises(new File("2013_02_13_Dari_List_ZR_Path.xlsx"));
+    //new ExcelImport().readExercises(new File("2013_02_13_Dari_List_ZR_Path.xlsx"));
+    new ExcelImport().readExercises(new File("final6240.xlsx"));
   }
 
   public List<String> getErrors() {
