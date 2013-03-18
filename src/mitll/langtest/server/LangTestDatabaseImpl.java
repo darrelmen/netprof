@@ -136,12 +136,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see mitll.langtest.client.exercise.ExerciseList#getExercises
    * @param userID
-   * @param arabicDataCollect
    * @return
    */
-  public List<ExerciseShell> getExerciseIds(long userID, boolean arabicDataCollect) {
+  public List<ExerciseShell> getExerciseIds(long userID) {
     logger.debug("getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
-    List<Exercise> exercises = getExercises(userID, arabicDataCollect);
+    List<Exercise> exercises = getExercises(userID);
     List<ExerciseShell> ids = getExerciseShells(exercises);
     logMemory();
     return ids;
@@ -197,8 +196,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return null;
   }
 
-  public Exercise getExercise(String id, long userID, boolean arabicDataCollect) {
-    List<Exercise> exercises = getExercises(userID, arabicDataCollect);
+  public Exercise getExercise(String id, long userID) {
+    List<Exercise> exercises = getExercises(userID);
     for (Exercise e : exercises) {
       if (id.equals(e.getID())) {
         logger.info("getExercise for user " +userID + " exid " + id + " got " + e);
@@ -222,12 +221,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * <li>if in crt data collect mode, we randomly choose between english or fl question, and if fl question, spoken or written response </li>
    * </ul>
    *
+   *
    * @param userID
-   * @param arabicDataCollect
-   * @return
+   * @return exercises for user id
    * @see mitll.langtest.client.exercise.ExerciseList#getExercises(long)
    */
-  public List<Exercise> getExercises(long userID, boolean arabicDataCollect) {
+  public List<Exercise> getExercises(long userID) {
     String lessonPlanFile = getLessonPlan();
 
     synchronized (this) {
@@ -262,7 +261,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
       }
     } else {
-      exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(userID);
+      exercises = serverProps.isArabicTextDataCollect() ? db.getRandomBalancedList() : db.getExercises(userID);
     }
 
     if (serverProps.isCRTDataCollect()) {
@@ -328,11 +327,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.exercise.GradedExerciseList#getNextUngraded
    * @param user
    * @param expectedGrades
-   * @param filterForArabicTextOnly
    * @param englishOnly
    * @return next ungraded exercise
    */
-  public Exercise getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly, boolean englishOnly) {
+  public Exercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly) {
     synchronized (this) {
       ConcurrentMap<String,String> stringStringConcurrentMap = userToExerciseID.asMap();
       Collection<String> values = stringStringConcurrentMap.values();
@@ -345,7 +343,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         currentActiveExercises.remove(currentExerciseForUser); // it's OK to include the one the user is working on now...
       }
       logger.debug("getNextUngradedExercise current set minus " + user + " is " + currentActiveExercises);
-
+      boolean filterForArabicTextOnly = serverProps.isArabicTextDataCollect();
       return db.getNextUngradedExercise(currentActiveExercises, expectedGrades,
           filterForArabicTextOnly, filterForArabicTextOnly, !filterForArabicTextOnly, englishOnly);
     }
