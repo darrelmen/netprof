@@ -34,7 +34,7 @@ public interface LangTestDatabaseAsync {
   void getUsers(AsyncCallback<List<User>> async);
 
   void writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
-                      boolean doAutoCRT, int reqid, boolean flq, String audioType, AsyncCallback<AudioAnswer> async);
+                      int reqid, boolean flq, String audioType, AsyncCallback<AudioAnswer> async);
 
   void getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly, boolean englishOnly, AsyncCallback<Exercise> async);
 
