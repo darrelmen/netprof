@@ -1,7 +1,10 @@
-Word/Expression	Arabic	Transliteration	Unit	Chapter	Week	Weight
+Word/Expression	Arabic	Transliteration	RefAudio	Unit	Chapter	Week	Weight
+Hello	مرحبا۔	marHaba	hello.mp3
+How are you?	 كيفَك؟	keefak?	howAreYou.mp3
+Nice to meet you.	 تشرّفنا۔	 tshar-rafna	niceToMeetYou.wav
+Welcome.	 أهلا وسهلا فيك۔	  ahla wasahla feek	welcome.wav
 cat	 قطّة	 qiTTa	
 dog	 كلب	  kalb
-cow	 بقرة	 baqara 
 horse	  حصان	 HiSaan 
 duck	بطة	 baTT
 house	  بيت	 bayt 
