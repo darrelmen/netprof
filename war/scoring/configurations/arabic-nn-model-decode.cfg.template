@@ -26,7 +26,7 @@ output: tmp/levantine.out
 output-index: 1
 
 [Processing Stages]
-decprocess: 1 = 0   :> decode.Splitter -> fe.CepFE -> fe.Norm -> fe.NNBatch -> decode.HybridDecode
+decprocess: 1 = 0   :> decode.Splitter -> fe.CepFE -> fe.Norm -> fe.NNBatch -> decode.HybridDecode[dictionary="TEMP_DIR/dict-wo-sp"]
 
 [E-mail Experiment Options]
 name: 
@@ -51,6 +51,19 @@ nmfb: 24
 window: 25.0
 delta2: true
 lpcorder: 20
+
+[fe.SPFE]
+sample-rate: 16000.0
+frame-rate: 100.0
+lofreq: 120
+hifreq: 8000
+max-delta: 3
+numcep: 13
+ctype: PLP
+lifter: 0
+nmfb: 24
+window: 25.0
+lpcorder: 12
 
 [fe.Norm]
 gaussianize: false
@@ -83,6 +96,7 @@ phone-index: MODELS_DIR/label-map
 phone-normalizer: MODELS_DIR/phones.normalizer
 
 [decode.HybridDecode]
+process-dictionary: false
 word-penalty: 1.0
 grammar: MODELS_DIR/grammar
 dictionary: MODELS_DIR/HLDA_DIR/dict-wo-sp

@@ -4,6 +4,7 @@ import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -11,6 +12,9 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.DTWScoring;
+import mitll.langtest.server.scoring.Scores;
+import mitll.langtest.server.scoring.Scoring;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
@@ -526,13 +530,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg) {
       return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-        EMPTY_LIST, EMPTY_LIST);
+        false, Files.createTempDir().getAbsolutePath());
   }
 
   /**
    * Get score when doing autoCRT on an audio file.
    * @see AutoCRT#getAutoCRTAnswer(String, mitll.langtest.shared.Exercise, int, java.io.File, mitll.langtest.shared.AudioAnswer.Validity, int, String, int)
-   * @see AutoCRT#getFlashcardAnswer(String, mitll.langtest.shared.Exercise, int, java.io.File, mitll.langtest.shared.AudioAnswer.Validity, String, int, java.util.List)
+   * @see AutoCRT#getFlashcardAnswer
    * @param testAudioFile
    * @param lmSentences
    * @param background
@@ -541,7 +545,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public PretestScore getASRScoreForAudio(File testAudioFile, List<String> lmSentences,
                                           List<String> background) {
-     return getASRScoreForAudio(0, testAudioFile.getPath(), "", 128, 128, false, lmSentences, background);
+    String tmpDir = Files.createTempDir().getAbsolutePath();
+    String slfFile = createSLFFile(lmSentences, background, tmpDir);
+    if (!new File(slfFile).exists()) {
+      logger.error("couldn't make slf file?");
+      return new PretestScore();
+    } else {
+      makeASRScoring();
+      String sentence = asrScoring.getUsedTokens(lmSentences, background);
+      return getASRScoreForAudio(0, testAudioFile.getPath(), sentence, 128, 128, false, true, tmpDir);
+    }
+  }
+
+  private String createSLFFile(List<String> lmSentences, List<String> background, String tmpDir) {
+    SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
+    long then = System.currentTimeMillis();
+    String slfFile = svDecoderHelper.createSLFFile(lmSentences, background, tmpDir, Scoring.getScoringDir(getInstallPath()));
+    long now = System.currentTimeMillis();
+    logger.debug("create slf file took " + (now - then) + " millis");
+    return slfFile;
   }
 
   /**
@@ -555,24 +577,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param width image dim
    * @param height  image dim
    * @param useScoreToColorBkg
-   * @param background
-   * @param lmSentences
-   * @param background
+   * @param decode
+   * @param tmpDir
    * @return PretestScore
    **/
   private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg,
-                                          List<String> lmSentences,
-                                          List<String> background) {
+                                          boolean decode, String tmpDir) {
     logger.info("getASRScoreForAudio scoring " + testAudioFile + " with " + sentence + " req# " + reqid);
 
     assert(testAudioFile != null && sentence != null);
-    if(sentence.length() == 0 && lmSentences.isEmpty() || sentence.length() > 0 && !lmSentences.isEmpty()) { // precondition
-      logger.error("huh? either sentence must be set to do alignment or lmSentences must be set to do decoding.");
-    }
-    if (asrScoring == null) {
-        asrScoring = new ASRScoring(getInstallPath(), getProperties()); // lazy eval since...?
-    }
+    makeASRScoring();
     testAudioFile = dealWithMP3Audio(testAudioFile);
 
     String installPath = getInstallPath();
@@ -586,7 +601,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence,
-        getImageOutDir(), width, height, useScoreToColorBkg, lmSentences, background);
+        getImageOutDir(), width, height, useScoreToColorBkg,decode,tmpDir);
     pretestScore.setReqid(reqid);
 
     if (makeFullURLs) {
@@ -598,6 +613,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       pretestScore.setsTypeToImage(typeToURL);
     }
     return pretestScore;
+  }
+
+  private void makeASRScoring() {
+    if (asrScoring == null) {
+        asrScoring = new ASRScoring(getInstallPath(), getProperties()); // lazy eval since...?
+    }
   }
 
   /**
@@ -862,7 +883,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       makeAutoCRT();
 
       AudioAnswer flashcardAnswer =
-        autoCRT.getFlashcardAnswer(exercise, getExercise(exercise), reqid, file, validity.validity, url,
+        autoCRT.getFlashcardAnswer(getExercise(exercise), reqid, file, validity.validity, url,
           validity.durationInMillis, getExercises());
       boolean isCorrect = flashcardAnswer.score > 0.8d;
       db.updateFlashcardState(user, exercise, isCorrect);
