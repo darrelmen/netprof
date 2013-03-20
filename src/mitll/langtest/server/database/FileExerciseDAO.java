@@ -47,9 +47,10 @@ public class FileExerciseDAO implements ExerciseDAO {
   private static final String SLOW = "slow";
   private static final boolean TESTING = false;
   private static final int MAX_ERRORS = 100;
+  private final String mediaDir;
 
   private List<Exercise> exercises;
-  private final String mediaDir;
+  private final String relativeConfigDir;
   private final boolean isUrdu;
   private final boolean showSections;
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
@@ -58,13 +59,15 @@ public class FileExerciseDAO implements ExerciseDAO {
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
-   * @param mediaDir
+   * @param relativeConfigDir
    * @param isUrdu
+   * @param mediaDir
    */
-  public FileExerciseDAO(String mediaDir, boolean isUrdu, boolean showSections) {
-    this.mediaDir = mediaDir;
+  public FileExerciseDAO(String relativeConfigDir, boolean isUrdu, boolean showSections, String mediaDir) {
+    this.relativeConfigDir = relativeConfigDir;
     this.isUrdu = isUrdu;
     this.showSections = showSections;
+    this.mediaDir = mediaDir;
   }
 
   public Map<String,List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
@@ -171,7 +174,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   public void readWordPairs(String lessonPlanFile, String language, boolean doImages, String configDir) {
     if (exercises != null) return;
     exercises = new ArrayList<Exercise>();
-
+    boolean isTSV =  (lessonPlanFile.endsWith(".tsv"));
     try {
       File file = new File(lessonPlanFile);
       if (!file.exists()) {
@@ -184,26 +187,19 @@ public class FileExerciseDAO implements ExerciseDAO {
 
       String line;
       int id = 1;
+      boolean gotHeader = false;
+
 
       while ((line = reader.readLine()) != null) {
-        String[] split = line.split(",");
-        String foreign = split[0].trim();
-        List<String> translations = new ArrayList<String>();
-        for (int i = 1; i < split.length; i++) {
-          translations.add(split[i]);
-        }
-
-        if (translations.isEmpty() && !doImages) {
-          logger.error("huh? no translations with '" + line + "' and foreign : " + foreign);
-        }
-        else if (foreign.length() > 0) {
-          String flashcard = doImages ? getImageContent(foreign, language, configDir) : getFlashcard(foreign, language);
-          String tooltip = doImages ? foreign : translations.get(0);
-          if (doImages) translations.add(foreign);
-          Exercise repeat = new Exercise("flashcard", "" + (id++), flashcard, translations, tooltip);
-          repeat.addQuestion(Exercise.FL, "Please record the sentence above.","", EMPTY_LIST);
-
-          exercises.add(repeat);
+        if (!gotHeader && line.trim().startsWith("Word")) {
+          logger.info("for " + lessonPlanFile + " got header " + line);
+          gotHeader = true;
+        } else {
+          if (isTSV) {
+            id = readTSVLine(language, doImages, line, id);
+          } else {
+            id = readLine(language, doImages, line, id);
+          }
         }
       }
       reader.close();
@@ -216,6 +212,68 @@ public class FileExerciseDAO implements ExerciseDAO {
     } else {
       logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
+  }
+
+  private int readTSVLine(String language, boolean doImages, String line, int id) {
+    if (line.trim().length() == 0) {
+      logger.debug("skipping empty line");
+      return id;
+    }
+    String[] split = line.split("\\t");
+    int len = split.length;
+    String english = split[0].trim();
+
+    String foreign = len > 1 ? split[1].trim() : "";
+    String translit = len > 2 ? split[2].trim() : "";
+
+    List<String> translations = new ArrayList<String>();
+  /*  for (int i = 1; i < split.length; i++) {
+      translations.add(split[i]);
+    }*/
+    if (foreign.length() > 0) {
+      translations.add(foreign);
+    }
+
+    if (translations.isEmpty() && !doImages) {
+      logger.error("huh? no translations with '" + line + "' and foreign : " + foreign);
+    }
+    else if (foreign.length() > 0) {
+      String flashcardStimulus = doImages ? getImageContent(foreign, language) : english;
+      String tooltip = doImages ? foreign : translations.get(0);
+      if (doImages) translations.add(foreign);
+      Exercise repeat = new Exercise("flashcardStimulus", "" + (id++), flashcardStimulus, translations, tooltip);
+      repeat.setTranslitSentence(translit);
+      String audioRef = mediaDir + "/" + english + ".mp3";
+      logger.debug("audio ref = " + audioRef);
+      repeat.setRefAudio(audioRef); // TODO confirm file exists.
+      //repeat.addQuestion(Exercise.FL, "Please record the sentence above.","", EMPTY_LIST);
+
+      exercises.add(repeat);
+    }
+    return id;
+  }
+
+  private int readLine(String language, boolean doImages, String line, int id) {
+    String[] split = line.split(",");
+    String foreign = split[0].trim();
+    List<String> translations = new ArrayList<String>();
+    for (int i = 1; i < split.length; i++) {
+      translations.add(split[i]);
+    }
+
+    if (translations.isEmpty() && !doImages) {
+      logger.error("huh? no translations with '" + line + "' and foreign : " + foreign);
+    }
+    else if (foreign.length() > 0) {
+      String flashcard = doImages ? getImageContent(foreign, language) : getFlashcard(foreign, language);
+      String tooltip = doImages ? foreign : translations.get(0);
+      if (doImages) translations.add(foreign);
+      Exercise repeat = new Exercise("flashcard", "" + (id++), flashcard, translations, tooltip);
+      repeat.addQuestion(Exercise.FL, "Please record the sentence above.","", EMPTY_LIST);
+
+      exercises.add(repeat);
+    }
+    return id;
   }
 
   /**
@@ -446,7 +504,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     String arabic = split[0].trim();
     arabic = arabic.replaceAll("<s>","").replaceAll("</s>","").trim();
     String content = getArabic(arabic);
-    String audioRef = mediaDir + File.separator+"media"+File.separator+name+".wav";
+    String audioRef = mediaDir+File.separator+name+".wav";
 
     Exercise repeat = new Exercise("repeat", displayName, content, ensureForwardSlashes(audioRef), arabic, arabic);
     //logger.debug("got " +repeat);
@@ -472,8 +530,8 @@ public class FileExerciseDAO implements ExerciseDAO {
     String english = split1[4];
 
     String content = getContent(arabic, translit, english);
-    String fastAudioRef = mediaDir + File.separator+"media"+File.separator+name+File.separator+ FAST + ".wav";
-    String slowAudioRef = mediaDir + File.separator+"media"+File.separator+name+File.separator+ SLOW + ".wav";
+    String fastAudioRef = mediaDir+File.separator+name+File.separator+ FAST + ".wav";
+    String slowAudioRef = mediaDir+File.separator+name+File.separator+ SLOW + ".wav";
 
     return new Exercise("repeat", displayName, content,
         ensureForwardSlashes(fastAudioRef), ensureForwardSlashes(slowAudioRef), arabic, english);
@@ -505,8 +563,8 @@ public class FileExerciseDAO implements ExerciseDAO {
         "</div>\n";
   }
 
-  private String getImageContent(String flPhrase, String language, String configDir) {
-    String filePath = configDir + "/media/" + flPhrase + ".png";
+  private String getImageContent(String flPhrase, String language) {
+    String filePath = mediaDir + "/" + flPhrase + ".png";
     String s = ensureForwardSlashes(filePath);
     return "<img src='" +
       s +
@@ -612,7 +670,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     System.out.println(matcher.matches());
   //  System.out.println(" group " + matcher.find());
     System.out.println(" match " + matcher.group(1));
-    //new FileExerciseDAO(mediaDir).convertPlan();
+    //new FileExerciseDAO(relativeConfigDir).convertPlan();
     /*List<Exercise> rawExercises = new FileExerciseDAO(*//**//*"war"*//**//*).getRawExercises();
     System.out.println("first is " + rawExercises.iterator().next());*/
   }
