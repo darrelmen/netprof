@@ -277,6 +277,8 @@ public class BootstrapExercisePanel extends FluidContainer {
     protected void receivedAudioAnswer(AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
       boolean correct = result.score > CORRECT_THRESHOLD;
       recordButton.setResource(correct ? correctImage : incorrectImage);
+      boolean hasRefAudio = exercise.getRefAudio() != null;
+
       if (result.validity == AudioAnswer.Validity.TOO_SHORT) {
         showPopup("Audio was too short. Please record again.");
       }
@@ -291,41 +293,58 @@ public class BootstrapExercisePanel extends FluidContainer {
           incrCookie(FEEDBACK_TIMES_SHOWN);
         }
       } else {
-        if (exercise.getRefAudio() != null) {
-          //playIncorrect();
-          // Schedule the timer to run once in 1 seconds.
-      /*    Timer t = new Timer() {
-            @Override
-            public void run() {
-              controller.loadNextExercise(exercise);
-            }
-          };
-          t.schedule(DELAY_MILLIS : DELAY_MILLIS_LONG);*/
-
-
-          play(exercise.getRefAudio(), exercise.getRefAudio());
+        if (hasRefAudio) {
+          play(exercise.getRefAudio());
         }
         else {
           playIncorrect();
         }
         String correctPrompt = "Correct Answer: " + exercise.getRefSentence() +
-          (exercise.getTranslitSentence().length() > 0 ? "(" + exercise.getTranslitSentence() + ")" : "");
+          (exercise.getTranslitSentence().length() > 0 ? " (" + exercise.getTranslitSentence() + ")" : "");
 
         if (isDemoMode) {
           correctPrompt = "Heard: " + result.decodeOutput + "<p>" + correctPrompt;
         }
         recoOutput.setText(correctPrompt);
+
+        if (hasRefAudio) {
+          waitForAudioToFinish();
+        }
       }
+      if (correct || !hasRefAudio) {
+        // Schedule the timer to run once in 1 seconds.
+        Timer t = new Timer() {
+          @Override
+          public void run() {
+            controller.loadNextExercise(exercise);
+          }
+        };
+        t.schedule(isDemoMode ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : DELAY_MILLIS_LONG);
+      }
+    }
+
+    private void waitForAudioToFinish() {
       // Schedule the timer to run once in 1 seconds.
       Timer t = new Timer() {
         @Override
         public void run() {
-          controller.loadNextExercise(exercise);
+          if (mistakeAudio.hasEnded()) {
+            // Schedule the timer to run once in 1 seconds.
+            Timer t = new Timer() {
+              @Override
+              public void run() {
+                controller.loadNextExercise(exercise);
+              }
+            };
+            t.schedule(isDemoMode ? LONG_DELAY_MILLIS : DELAY_MILLIS);
+          }
+          else {
+            waitForAudioToFinish();
+          }
         }
       };
-      t.schedule(isDemoMode ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : DELAY_MILLIS_LONG);
+      t.schedule(500);
     }
-
     @Override
     protected void receivedAudioFailure() {
       recordButton.setResource(enterImage);
@@ -360,6 +379,10 @@ public class BootstrapExercisePanel extends FluidContainer {
 
   private void playIncorrect() {
     play("langtest/sounds/incorrect1.wav","langtest/sounds/incorrect1.mp3");
+  }
+
+  private void play(String mp3Audio) {
+    play(mp3Audio.replace(".mp3",".wav"),mp3Audio);
   }
 
   private void play(String openAudio,String mp3Audio) {
