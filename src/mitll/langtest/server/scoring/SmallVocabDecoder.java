@@ -32,6 +32,7 @@ import java.util.Map;
 public class SmallVocabDecoder {
   private static final Logger logger = Logger.getLogger(ASRScoring.class);
 
+  private static final int VOCAB_SIZE_LIMIT = 50;
   private static final String FINAL_BLEND_VOCAB = "finalBlend.vocab";
   private static final String SMALL_LMOUT_SRILM = "smallLMOut.srilm";
   private static final String LARGE_VOCAB_TXT = "largeVocab.txt";
@@ -56,6 +57,22 @@ public class SmallVocabDecoder {
   private final String platform = Utils.package$.MODULE$.platform();
 
   /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#createSLFFile(java.util.List, java.util.List, String)
+   * @param lmSentences
+   * @param background
+   * @param tmpDir
+   * @param scoringDir
+   * @return absolute path slf file, if it was made successfully
+   */
+  public String createSLFFile(List<String> lmSentences, List<String> background, String tmpDir,
+                              String scoringDir) {
+    SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
+
+    List<String> backgroundVocab = svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT);
+    return createSLFFile(lmSentences, background, backgroundVocab, tmpDir, null, scoringDir);
+  }
+
+  /**
    * Get the foreground and background sentences. <br></br>
    * Create an srilm file using ngram-count <br></br>
    * Create an slf file using HBuild <br></br>
@@ -63,7 +80,7 @@ public class SmallVocabDecoder {
    *
    * This only works properly on the mac and linux, sorta emulated on win32
    *
-   * @see ASRScoring#getScoreForAudio(String, String, String, String, java.util.List, java.util.List)
+   * @see ASRScoring#calcScoreForAudio
    * @param lmSentences foreground sentences
    * @param background background sentences
    * @param tmpDir where everything is written
@@ -107,8 +124,8 @@ public class SmallVocabDecoder {
    * Very important to limit the vocabulary (less than 300 words) or else the small vocab dcodr will run out of
    * memory and segfault! <br></br>
    * Remember to add special tokens like silence, pause, and unk
-   * @see ASRScoring#getScoreForAudio(String, String, String, String, java.util.List, java.util.List)
-   * @seex #MAX_AUTO_CRT_VOCAB
+   * @see ASRScoring#getUsedTokens(java.util.List, java.util.List)
+   * @see SmallVocabDecoder#createSLFFile(java.util.List, java.util.List, String, String)
    * @param background sentences
    * @return most frequent vocabulary words
    */
