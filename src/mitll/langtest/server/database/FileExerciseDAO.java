@@ -256,7 +256,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       repeat.setTranslitSentence(translit);
 
       String audioRef = (refAudio.length() == 0) ? mediaDir + "/" + english + ".mp3" : mediaDir + "/" + refAudio;
-      logger.debug("audio ref = " + audioRef);
+    //  logger.debug("audio ref = " + audioRef);
       repeat.setRefAudio(audioRef); // TODO confirm file exists.
 
       exercises.add(repeat);
