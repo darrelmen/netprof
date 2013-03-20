@@ -1066,7 +1066,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
     //logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
-    db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, serverProps.isUrdu, useFile);
+    db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, serverProps.isUrdu, useFile,
+      relativeConfigDir+File.separator+serverProps.getMediaDir());
 
     return lessonPlanFile;
   }
