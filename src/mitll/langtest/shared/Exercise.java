@@ -33,6 +33,7 @@ public class Exercise extends ExerciseShell  {
   private String refAudio;
   private String slowAudioRef;
   private List<String> refSentences = new ArrayList<String>();
+  private List<String> translitSentences = new ArrayList<String>();
   private transient List<String> slots = new ArrayList<String>();
 
   public static class QAPair implements IsSerializable {
@@ -173,12 +174,19 @@ public class Exercise extends ExerciseShell  {
   public String getRefAudio() { return refAudio; }
   public String getSlowAudioRef() { return slowAudioRef; }
   public void setRefAudio(String s) { this.refAudio = s; }
-  public String getRefSentence() { return refSentences.get(0); }
+  public String getRefSentence() { return refSentences.isEmpty() ? "" : refSentences.get(0); }
+  public String getTranslitSentence() { return translitSentences.isEmpty() ? "" : translitSentences.get(0); }
   public List<String> getRefSentences() { return refSentences; }
+  public List<String> getTranslitSentences() { return translitSentences; }
 
   public void setRefSentence(String ref) {
     refSentences.clear();
     refSentences.add(ref);
+  }
+
+  public void setTranslitSentence(String translitSentence) {
+    translitSentences.clear();
+    translitSentences.add(translitSentence);
   }
 
   /**
