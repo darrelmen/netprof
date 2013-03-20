@@ -310,7 +310,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public FlashcardResponse getNextExercise(long userID) { return db.getNextExercise(userID); }
+  public FlashcardResponse getNextExercise(long userID) {
+    FlashcardResponse nextExercise = db.getNextExercise(userID);
+    String refAudio = nextExercise.e.getRefAudio();
+    if (refAudio.length() > 0) {
+      getWavAudioFile(refAudio);
+      ensureMP3(refAudio);
+    }
+    return nextExercise;
+  }
 
   /**
    * Called from the client.
@@ -375,7 +383,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param wavFile
    */
   public void ensureMP3(String wavFile) {
-    logger.debug("ensure mp3 for " +wavFile);
+    //logger.debug("ensure mp3 for " +wavFile);
     new AudioConversion().ensureWriteMP3(wavFile, getInstallPath());
   }
 
