@@ -163,7 +163,7 @@ public class ExcelImport implements ExerciseDAO {
     }
     int id = 0;
     boolean gotHeader = false;
-    FileExerciseDAO dao = new FileExerciseDAO(null,false,false);
+    FileExerciseDAO dao = new FileExerciseDAO(null,false,false, "");
 
     int colIndexOffset = 0;
 
