@@ -50,7 +50,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   private final String mediaDir;
 
   private List<Exercise> exercises;
-  private final String relativeConfigDir;
+  //private final String relativeConfigDir;
   private final boolean isUrdu;
   private final boolean showSections;
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
@@ -64,7 +64,7 @@ public class FileExerciseDAO implements ExerciseDAO {
    * @param mediaDir
    */
   public FileExerciseDAO(String relativeConfigDir, boolean isUrdu, boolean showSections, String mediaDir) {
-    this.relativeConfigDir = relativeConfigDir;
+   // this.relativeConfigDir = relativeConfigDir;
     this.isUrdu = isUrdu;
     this.showSections = showSections;
     this.mediaDir = mediaDir;
@@ -214,6 +214,16 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
   }
 
+  /**
+   * Expects the columns to be like this:
+   * Word/Expression	Arabic	Transliteration	RefAudio	Unit	Chapter	Week	Weight
+   *
+   * @param language
+   * @param doImages
+   * @param line
+   * @param id
+   * @return
+   */
   private int readTSVLine(String language, boolean doImages, String line, int id) {
     if (line.trim().length() == 0) {
       logger.debug("skipping empty line");
@@ -225,6 +235,7 @@ public class FileExerciseDAO implements ExerciseDAO {
 
     String foreign = len > 1 ? split[1].trim() : "";
     String translit = len > 2 ? split[2].trim() : "";
+    String refAudio = len > 3 ? split[3].trim() : "";
 
     List<String> translations = new ArrayList<String>();
   /*  for (int i = 1; i < split.length; i++) {
@@ -243,10 +254,10 @@ public class FileExerciseDAO implements ExerciseDAO {
       if (doImages) translations.add(foreign);
       Exercise repeat = new Exercise("flashcardStimulus", "" + (id++), flashcardStimulus, translations, tooltip);
       repeat.setTranslitSentence(translit);
-      String audioRef = mediaDir + "/" + english + ".mp3";
+
+      String audioRef = (refAudio.length() == 0) ? mediaDir + "/" + english + ".mp3" : mediaDir + "/" + refAudio;
       logger.debug("audio ref = " + audioRef);
       repeat.setRefAudio(audioRef); // TODO confirm file exists.
-      //repeat.addQuestion(Exercise.FL, "Please record the sentence above.","", EMPTY_LIST);
 
       exercises.add(repeat);
     }
