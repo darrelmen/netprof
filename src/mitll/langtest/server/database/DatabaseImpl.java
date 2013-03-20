@@ -406,7 +406,7 @@ public class DatabaseImpl implements Database {
    *
    * @param userID for this user
    * @return unmodifiable list of exercises
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long)
    */
   public List<Exercise> getExercises(long userID) {
     logger.info("getExercises : for user  " + userID);
@@ -417,7 +417,7 @@ public class DatabaseImpl implements Database {
   /**
    * Show unanswered questions first, then ones with 1, then 2, then 3,... answers
    * Also be aware of the user's gender -- if you're female, show questions that have no female answers first.
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long)
    * @param userID
    * @return
    */
@@ -437,7 +437,7 @@ public class DatabaseImpl implements Database {
   /**
    * Merge the online counts with counts from an external file.
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long)
    * @param userID
    * @param outsideFile
    * @return
@@ -487,7 +487,7 @@ public class DatabaseImpl implements Database {
     Random rnd = new Random(userID);
 
     for (Map.Entry<Integer, List<String>> pair : countToIds.entrySet()) {
-      Integer count = pair.getKey();
+     // Integer count = pair.getKey();
       List<String> itemsAtCount = pair.getValue();
       //logger.debug("for count = " + count + " " +itemsAtCount.size() + " items");
       Collections.shuffle(itemsAtCount, rnd);
