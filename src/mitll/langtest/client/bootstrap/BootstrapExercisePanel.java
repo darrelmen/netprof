@@ -291,10 +291,28 @@ public class BootstrapExercisePanel extends FluidContainer {
           incrCookie(FEEDBACK_TIMES_SHOWN);
         }
       } else {
-        playIncorrect();
-        String correctPrompt = "Correct Answer: " + exercise.getRefSentence();
+        if (exercise.getRefAudio() != null) {
+          //playIncorrect();
+          // Schedule the timer to run once in 1 seconds.
+      /*    Timer t = new Timer() {
+            @Override
+            public void run() {
+              controller.loadNextExercise(exercise);
+            }
+          };
+          t.schedule(DELAY_MILLIS : DELAY_MILLIS_LONG);*/
+
+
+          play(exercise.getRefAudio(), exercise.getRefAudio());
+        }
+        else {
+          playIncorrect();
+        }
+        String correctPrompt = "Correct Answer: " + exercise.getRefSentence() +
+          (exercise.getTranslitSentence().length() > 0 ? "(" + exercise.getTranslitSentence() + ")" : "");
+
         if (isDemoMode) {
-          correctPrompt = "Heard: "+result.decodeOutput + "<p>" +correctPrompt;
+          correctPrompt = "Heard: " + result.decodeOutput + "<p>" + correctPrompt;
         }
         recoOutput.setText(correctPrompt);
       }
