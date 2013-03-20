@@ -67,7 +67,7 @@ public class DatabaseImpl implements Database {
    * TODO : consider making proper v2 database!
    */
   private String lessonPlanFile;
-  private String mediaDir;
+  private String relativeConfigDir;
   private boolean isUrdu;
   private boolean isWordPairs;
   private boolean useFile;
@@ -75,6 +75,7 @@ public class DatabaseImpl implements Database {
   private String language;
   private boolean doImages;
   private final String configDir;
+  private String mediaDir;
 
   /**
    * Just for testing
@@ -175,23 +176,27 @@ public class DatabaseImpl implements Database {
    * @return
    */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    return useFile ? new FileExerciseDAO(mediaDir, isUrdu, showSections) : new SQLExerciseDAO(this, mediaDir);
+    return useFile ?
+      new FileExerciseDAO(relativeConfigDir, isUrdu, showSections, mediaDir) :
+      new SQLExerciseDAO(this, relativeConfigDir);
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
+   * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath(boolean)
    * @param installPath
    * @param lessonPlanFile
-   * @param mediaDir
+   * @param relativeConfigDir
    * @param isUrdu
    */
-  public void setInstallPath(String installPath, String lessonPlanFile, String mediaDir, boolean isUrdu, boolean useFile) {
-    //logger.debug("got install path " + i + " media " + mediaDir + " is urdu " +isUrdu);
+  public void setInstallPath(String installPath, String lessonPlanFile, String relativeConfigDir,
+                             boolean isUrdu, boolean useFile, String mediaDir) {
+    //logger.debug("got install path " + i + " media " + relativeConfigDir + " is urdu " +isUrdu);
     this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
-    this.mediaDir = mediaDir;
+    this.relativeConfigDir = relativeConfigDir;
     this.isUrdu = isUrdu;
     this.useFile = useFile;
+    this.mediaDir = mediaDir;
 
     //resultDAO.enrichResultDurations(installPath);
   }
