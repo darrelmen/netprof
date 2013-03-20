@@ -77,25 +77,24 @@ public class AutoCRT {
   }
 
   /**
-   * @see LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, boolean, int, boolean, String)
-   * @param exercise
+   * @see LangTestDatabaseImpl#writeAudioFile
    * @param e
    * @param reqid
    * @param file
    * @param validity
    * @param url
    * @param durationInMillis
-   * @param otherExercises
+   * @param allExercises
    * @return
    */
-  public AudioAnswer getFlashcardAnswer(String exercise, Exercise e, int reqid, File file, AudioAnswer.Validity validity,
+  public AudioAnswer getFlashcardAnswer(Exercise e, int reqid, File file, AudioAnswer.Validity validity,
                                        String url, int durationInMillis,
-                                      List<Exercise> otherExercises) {
+                                      List<Exercise> allExercises) {
     List<String> foregroundSentences = getRefSentences(e);
-    if (otherExercises.isEmpty()) logger.error("getFlashcardAnswer : huh? no background sentences?");
+    if (allExercises.isEmpty()) logger.error("getFlashcardAnswer : huh? no background sentences?");
 
-    List<String> background = getBackground(exercise, otherExercises);
-    if (background.isEmpty()) logger.error("huh? background is empty despite having " + otherExercises.size() + " ?");
+    List<String> background = getBackground(e, allExercises);
+    if (background.isEmpty()) logger.error("huh? background is empty despite having " + allExercises.size() + " ?");
 
     List<String> foreground = new ArrayList<String>();
     for (String ref : foregroundSentences) {
@@ -117,9 +116,10 @@ public class AutoCRT {
     return new AudioAnswer(url, validity, recoSentence, scoreForAnswer, reqid, durationInMillis);
   }
 
-  private List<String> getBackground(String exercise, List<Exercise> otherExercises) {
+  private List<String> getBackground(Exercise exercise, List<Exercise> allExercises) {
     List<String> sentences = new ArrayList<String>();
-    for (Exercise other : otherExercises) {
+    String exerciseID = exercise.getID();
+    for (Exercise other : allExercises) {
       if (!other.getID().equals(exercise)) {
         sentences.addAll(getRefSentences(other));
       }
@@ -245,7 +245,7 @@ public class AutoCRT {
 
   /**
    * @see #getBackgroundText(mitll.langtest.shared.Exercise)
-   * @see #getFlashcardAnswer(String, mitll.langtest.shared.Exercise, int, java.io.File, mitll.langtest.shared.AudioAnswer.Validity, String, int, java.util.List)
+   * @see #getFlashcardAnswer
    * @param sentences
    * @return
    */
