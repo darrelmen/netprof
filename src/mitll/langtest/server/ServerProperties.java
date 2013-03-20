@@ -45,6 +45,7 @@ public class ServerProperties {
   private static final String LANGUAGE = "language";
   private static final String WORDPAIRS = "wordPairs";
   private static final String AUTOCRT = "autocrt";
+  private static final String MEDIA_DIR = "mediaDir";
 
   private Properties props = null;
 
@@ -110,6 +111,9 @@ public class ServerProperties {
 
   public String getLanguage() {
     return props.getProperty(LANGUAGE, "English");
+  }
+  public String getMediaDir() {
+    return props.getProperty(MEDIA_DIR, "media");
   }
 
   /**
