@@ -42,12 +42,14 @@ public class Scoring {
   protected Scoring(String deployPath) {
     this.deployPath = deployPath;
     this.os = getOS();
-    this.scoringDir = deployPath + File.separator + SCORING;
+    this.scoringDir = getScoringDir(deployPath);
     this.configFullPath = scoringDir + File.separator +
         (os.equals("win32") ?
         WINDOWS_CONFIGURATIONS :
         LINUX_CONFIGURATIONS);
   }
+
+  public static String getScoringDir(String deployPath) { return deployPath + File.separator + SCORING; }
 
   private String getOS() {
     String property = System.getProperty("os.name").toLowerCase();
@@ -153,4 +155,6 @@ public class Scoring {
     }
     return pathname;
   }
+
+  public String getScoringDir() { return scoringDir; }
 }
