@@ -48,6 +48,8 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoring extends Scoring {
+  private static final int FOREGROUND_VOCAB_LIMIT = 30;
+  private static final int VOCAB_SIZE_LIMIT = 50;
   private static Logger logger = Logger.getLogger(ASRScoring.class);
 
   private static final String DICT_WO_SP = "dict-wo-sp";
@@ -132,7 +134,7 @@ public class ASRScoring extends Scoring {
   }*/
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String)
    * @param testAudioDir
    * @param testAudioFileNoSuffix
    * @param sentence that should be what the test audio contains
@@ -144,10 +146,14 @@ public class ASRScoring extends Scoring {
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
                                   String sentence, String imageOutDir,
-                                  int imageWidth, int imageHeight, boolean useScoreForBkgColor, List<String> lmSentences, List<String> background) {
+                                  int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+                                  boolean decode, String tmpDir
+  ) {
     return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,
         sentence,
-        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor,lmSentences, background);
+        scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor,
+      decode, tmpDir
+    );
   }
 
   /**
@@ -170,8 +176,8 @@ public class ASRScoring extends Scoring {
    * @param imageWidth image width
    * @param imageHeight image height
    * @param useScoreForBkgColor true if we want to color the segments by score else all are gray
-   * @param lmSentences foreground sentences (expected replies)
-   * @param background sentences
+   * @paramx lmSentences foreground sentences (expected replies)
+   * @paramx background sentences
    * @return score info coming back from alignment/reco
    */
   private PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
@@ -180,7 +186,8 @@ public class ASRScoring extends Scoring {
 
                                            String imageOutDir,
                                            int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-                                           List<String> lmSentences, List<String> background) {
+                                           boolean decode, String tmpDir
+  ) {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
     File wavFile = new File(pathname);
@@ -211,7 +218,8 @@ public class ASRScoring extends Scoring {
       noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
     }
 
-    Scores scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, lmSentences, background);
+    Scores scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir,
+      decode, tmpDir);
     if (scores == null) {
       logger.warn("getScoreForAudio failed to generate scores.");
       Random rand = new Random();
@@ -241,16 +249,25 @@ public class ASRScoring extends Scoring {
         EMPTY_LIST, EMPTY_LIST);
   }*/
 
-
+  /**
+   * @see #scoreRepeatExercise
+   * @param testAudioDir
+   * @param testAudioFileNoSuffix
+   * @param sentence
+   * @param scoringDir
+   * @paramx lmSentences
+   * @paramx background
+   * @return
+   */
   private Scores getScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
                                   String sentence,
                                   String scoringDir,
-
-                                  List<String> lmSentences, List<String> background) {
+                                  boolean decode, String tmpDir) {
     String key = testAudioDir + File.separator + testAudioFileNoSuffix;
     Scores scores = audioToScore.getIfPresent(key);
     if (scores == null) {
-      scores = calcScoreForAudio(testAudioDir,testAudioFileNoSuffix,sentence,scoringDir,lmSentences,background);
+      scores = calcScoreForAudio(testAudioDir,testAudioFileNoSuffix,sentence,scoringDir,
+        decode,tmpDir);
       audioToScore.put(key, scores);
     }
     else {
@@ -267,40 +284,19 @@ public class ASRScoring extends Scoring {
    * The event scores returned are a map of event type to event name to score (e.g. "words"->"dog"->0.5)
    * The score per audio file is cached in {@link #audioToScore}
    *
-   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, java.util.List, java.util.List)
+   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String)
    * @param testAudioDir
    * @param testAudioFileNoSuffix
    * @param sentence  only for align
    * @param scoringDir
-   * @param lmSentences if empty, doing align, if not, doing decode!
-   * @param background only for decode
+   * @paramx lmSentences if empty, doing align, if not, doing decode!
+   * @paramx background only for decode
    * @return Scores which is the overall score and the event scores
    */
   private Scores calcScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
                                    String sentence,
                                    String scoringDir,
-
-                                   List<String> lmSentences, List<String> background) {
-    boolean decode = !lmSentences.isEmpty();
-    if (decode && sentence.length() > 0) { // precondition
-      logger.warn("not expecting ref sentence with decoding - only with align - got " + sentence);
-    }
-    String tmpDir = Files.createTempDir().getAbsolutePath();
-    //logger.debug("tmp dir " + tmpDir);
-    if (decode) {
-      List<String> backgroundVocab = svDecoderHelper.getVocab(background, 50);
-      sentence = getUniqueTokensInLM(lmSentences, backgroundVocab);
-
-      long then = System.currentTimeMillis();
-      String slfFile = svDecoderHelper.createSLFFile(lmSentences, background, backgroundVocab, tmpDir, getModelsDir(), scoringDir);
-      long now = System.currentTimeMillis();
-      logger.debug("create slf file took " + (now - then) + " millis");
-      if (!new File(slfFile).exists()) {
-        logger.error("couldn't make slf file?");
-        return new Scores();
-      }
-    }
-
+                                   boolean decode, String tmpDir) {
     Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
     //logger.debug("dirs is " + dirs + " tmp " + dirs.tmp());
 
@@ -311,6 +307,11 @@ public class ASRScoring extends Scoring {
     //logger.debug("testAudio is " + testAudio + " dir " + testAudio.dir());
 
     return computeRepeatExerciseScores(testAudio, sentence, tmpDir, decode, language);
+  }
+
+  public String getUsedTokens(List<String> lmSentences, List<String> background) {
+    List<String> backgroundVocab = svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT);
+    return getUniqueTokensInLM(lmSentences, backgroundVocab);
   }
 
   /**
@@ -324,10 +325,10 @@ public class ASRScoring extends Scoring {
    * @param backgroundVocab
    * @return
    */
-  private String getUniqueTokensInLM(List<String> lmSentences, List<String> backgroundVocab) {
+  public String getUniqueTokensInLM(List<String> lmSentences, List<String> backgroundVocab) {
     String sentence;Set<String> backSet = new HashSet<String>(backgroundVocab);
     List<String> mergedVocab = new ArrayList<String>(backgroundVocab);
-    List<String> foregroundVocab = svDecoderHelper.getSimpleVocab(lmSentences, 30);
+    List<String> foregroundVocab = svDecoderHelper.getSimpleVocab(lmSentences, FOREGROUND_VOCAB_LIMIT);
     for (String foregroundToken : foregroundVocab) {
       if (!backSet.contains(foregroundToken)) {
         mergedVocab.add(foregroundToken);
@@ -429,7 +430,7 @@ public class ASRScoring extends Scoring {
     /**
      * Assumes that testAudio was recorded through the UI, which should prevent audio that is too short or too long.
      *
-     * @see #getScoreForAudio(String, String, String, String, java.util.List, java.util.List)
+     * @see #getScoreForAudio
      * @param testAudio
      * @param sentence
      * @param decode
@@ -467,7 +468,7 @@ public class ASRScoring extends Scoring {
   private void readDictionary() {
     String dictFile = getDictFile(getModelsDir());
     boolean dictExists = new File(dictFile).exists();
-    if (!dictExists)   logger.error("readDictionary : Can't find dict file at " + dictFile);
+    if (!dictExists) logger.error("readDictionary : Can't find dict file at " + dictFile);
 
     long then = System.currentTimeMillis();
     htkDictionary = new HTKDictionary(dictFile);
