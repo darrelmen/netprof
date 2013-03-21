@@ -46,6 +46,7 @@ public class ServerProperties {
   private static final String WORDPAIRS = "wordPairs";
   private static final String AUTOCRT = "autocrt";
   private static final String MEDIA_DIR = "mediaDir";
+  private static final String RECO_TEST = "recoTest";
 
   private Properties props = null;
 
@@ -75,12 +76,16 @@ public class ServerProperties {
     }
   }
 
+  public String getH2Database() { return props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT); }
+  public String getLessonPlan() { return props.getProperty("lessonPlanFile", "lesson.plan"); }
+
   public boolean getUseFile() {
     return getDefaultFalse(READ_FROM_FILE);
   }
 
-  public String getH2Database() { return props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT); }
-  public String getLessonPlan() { return props.getProperty("lessonPlanFile", "lesson.plan"); }
+  public boolean doRecoTest() {
+    return getDefaultFalse(RECO_TEST);
+  }
 
   public boolean isShowSections() {
     return getDefaultFalse(SHOW_SECTIONS);
