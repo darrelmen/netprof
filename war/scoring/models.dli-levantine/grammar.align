@@ -1,22 +1,22 @@
 Grammar hybrid
 StartWord <s>
 EndWord </s>
-Dictionary /services/apache-tomcat-7.0.27/webapps/npHeadstart2/scoring/models.dli-levantine/phones.dict
+Dictionary models/phones.dict
 
 ########################################################
 # Model: tr
 ########################################################
 Model tr
 HybridState tr-0
-	Prior 0.0027231353
+	Prior 0.002661081
 	Index 4
 EndState tr-0
 HybridState tr-1
-	Prior 0.0027231353
+	Prior 0.002661081
 	Index 4
 EndState tr-1
 HybridState tr-2
-	Prior 0.0027231353
+	Prior 0.002661081
 	Index 4
 EndState tr-2
 Trans
@@ -29,15 +29,15 @@ Trans
 ########################################################
 Model ae
 HybridState ae-0
-	Prior 0.010339043
+	Prior 0.010103439
 	Index 33
 EndState ae-0
 HybridState ae-1
-	Prior 0.010339043
+	Prior 0.010103439
 	Index 33
 EndState ae-1
 HybridState ae-2
-	Prior 0.010339043
+	Prior 0.010103439
 	Index 33
 EndState ae-2
 Trans
@@ -50,15 +50,15 @@ Trans
 ########################################################
 Model hr
 HybridState hr-0
-	Prior 0.0056229304
+	Prior 0.0054947957
 	Index 21
 EndState hr-0
 HybridState hr-1
-	Prior 0.0056229304
+	Prior 0.0054947957
 	Index 21
 EndState hr-1
 HybridState hr-2
-	Prior 0.0056229304
+	Prior 0.0054947957
 	Index 21
 EndState hr-2
 Trans
@@ -71,15 +71,15 @@ Trans
 ########################################################
 Model f
 HybridState f-0
-	Prior 0.005822359
+	Prior 0.0056896806
 	Index 25
 EndState f-0
 HybridState f-1
-	Prior 0.005822359
+	Prior 0.0056896806
 	Index 25
 EndState f-1
 HybridState f-2
-	Prior 0.005822359
+	Prior 0.0056896806
 	Index 25
 EndState f-2
 Trans
@@ -92,15 +92,15 @@ Trans
 ########################################################
 Model aa
 HybridState aa-0
-	Prior 0.04588237
+	Prior 0.044836808
 	Index 34
 EndState aa-0
 HybridState aa-1
-	Prior 0.04588237
+	Prior 0.044836808
 	Index 34
 EndState aa-1
 HybridState aa-2
-	Prior 0.04588237
+	Prior 0.044836808
 	Index 34
 EndState aa-2
 Trans
@@ -113,15 +113,15 @@ Trans
 ########################################################
 Model gh
 HybridState gh-0
-	Prior 9.159986E-4
+	Prior 8.9512503E-4
 	Index 24
 EndState gh-0
 HybridState gh-1
-	Prior 9.159986E-4
+	Prior 8.9512503E-4
 	Index 24
 EndState gh-1
 HybridState gh-2
-	Prior 9.159986E-4
+	Prior 8.9512503E-4
 	Index 24
 EndState gh-2
 Trans
@@ -134,15 +134,15 @@ Trans
 ########################################################
 Model ih
 HybridState ih-0
-	Prior 0.022016322
+	Prior 0.021514617
 	Index 20
 EndState ih-0
 HybridState ih-1
-	Prior 0.022016322
+	Prior 0.021514617
 	Index 20
 EndState ih-1
 HybridState ih-2
-	Prior 0.022016322
+	Prior 0.021514617
 	Index 20
 EndState ih-2
 Trans
@@ -155,15 +155,15 @@ Trans
 ########################################################
 Model th
 HybridState th-0
-	Prior 1.400419E-4
+	Prior 1.3685065E-4
 	Index 5
 EndState th-0
 HybridState th-1
-	Prior 1.400419E-4
+	Prior 1.3685065E-4
 	Index 5
 EndState th-1
 HybridState th-2
-	Prior 1.400419E-4
+	Prior 1.3685065E-4
 	Index 5
 EndState th-2
 Trans
@@ -176,15 +176,15 @@ Trans
 ########################################################
 Model ghr
 HybridState ghr-0
-	Prior 0.00854053
+	Prior 0.00834591
 	Index 23
 EndState ghr-0
 HybridState ghr-1
-	Prior 0.00854053
+	Prior 0.00834591
 	Index 23
 EndState ghr-1
 HybridState ghr-2
-	Prior 0.00854053
+	Prior 0.00834591
 	Index 23
 EndState ghr-2
 Trans
@@ -197,15 +197,15 @@ Trans
 ########################################################
 Model uw
 HybridState uw-0
-	Prior 0.006557085
+	Prior 0.0064076637
 	Index 2
 EndState uw-0
 HybridState uw-1
-	Prior 0.006557085
+	Prior 0.0064076637
 	Index 2
 EndState uw-1
 HybridState uw-2
-	Prior 0.006557085
+	Prior 0.0064076637
 	Index 2
 EndState uw-2
 Trans
@@ -218,15 +218,15 @@ Trans
 ########################################################
 Model z
 HybridState z-0
-	Prior 0.0023332662
+	Prior 0.0022800963
 	Index 0
 EndState z-0
 HybridState z-1
-	Prior 0.0023332662
+	Prior 0.0022800963
 	Index 0
 EndState z-1
 HybridState z-2
-	Prior 0.0023332662
+	Prior 0.0022800963
 	Index 0
 EndState z-2
 Trans
@@ -239,15 +239,15 @@ Trans
 ########################################################
 Model aw
 HybridState aw-0
-	Prior 0.0021443097
+	Prior 0.0020954458
 	Index 32
 EndState aw-0
 HybridState aw-1
-	Prior 0.0021443097
+	Prior 0.0020954458
 	Index 32
 EndState aw-1
 HybridState aw-2
-	Prior 0.0021443097
+	Prior 0.0020954458
 	Index 32
 EndState aw-2
 Trans
@@ -260,15 +260,15 @@ Trans
 ########################################################
 Model ey
 HybridState ey-0
-	Prior 0.0029174855
+	Prior 0.0028510026
 	Index 26
 EndState ey-0
 HybridState ey-1
-	Prior 0.0029174855
+	Prior 0.0028510026
 	Index 26
 EndState ey-1
 HybridState ey-2
-	Prior 0.0029174855
+	Prior 0.0028510026
 	Index 26
 EndState ey-2
 Trans
@@ -281,15 +281,15 @@ Trans
 ########################################################
 Model sr
 HybridState sr-0
-	Prior 0.00173171
+	Prior 0.0016922482
 	Index 7
 EndState sr-0
 HybridState sr-1
-	Prior 0.00173171
+	Prior 0.0016922482
 	Index 7
 EndState sr-1
 HybridState sr-2
-	Prior 0.00173171
+	Prior 0.0016922482
 	Index 7
 EndState sr-2
 Trans
@@ -302,15 +302,15 @@ Trans
 ########################################################
 Model d
 HybridState d-0
-	Prior 0.0065894662
+	Prior 0.0064393072
 	Index 28
 EndState d-0
 HybridState d-1
-	Prior 0.0065894662
+	Prior 0.0064393072
 	Index 28
 EndState d-1
 HybridState d-2
-	Prior 0.0065894662
+	Prior 0.0064393072
 	Index 28
 EndState d-2
 Trans
@@ -323,15 +323,15 @@ Trans
 ########################################################
 Model n
 HybridState n-0
-	Prior 0.012667832
+	Prior 0.012379161
 	Index 14
 EndState n-0
 HybridState n-1
-	Prior 0.012667832
+	Prior 0.012379161
 	Index 14
 EndState n-1
 HybridState n-2
-	Prior 0.012667832
+	Prior 0.012379161
 	Index 14
 EndState n-2
 Trans
@@ -344,15 +344,15 @@ Trans
 ########################################################
 Model r
 HybridState r-0
-	Prior 0.009720595
+	Prior 0.009499083
 	Index 11
 EndState r-0
 HybridState r-1
-	Prior 0.009720595
+	Prior 0.009499083
 	Index 11
 EndState r-1
 HybridState r-2
-	Prior 0.009720595
+	Prior 0.009499083
 	Index 11
 EndState r-2
 Trans
@@ -365,15 +365,15 @@ Trans
 ########################################################
 Model w
 HybridState w-0
-	Prior 0.0030714357
+	Prior 0.0030014443
 	Index 1
 EndState w-0
 HybridState w-1
-	Prior 0.0030714357
+	Prior 0.0030014443
 	Index 1
 EndState w-1
 HybridState w-2
-	Prior 0.0030714357
+	Prior 0.0030014443
 	Index 1
 EndState w-2
 Trans
@@ -386,15 +386,15 @@ Trans
 ########################################################
 Model m
 HybridState m-0
-	Prior 0.010946802
+	Prior 0.010697347
 	Index 15
 EndState m-0
 HybridState m-1
-	Prior 0.010946802
+	Prior 0.010697347
 	Index 15
 EndState m-1
 HybridState m-2
-	Prior 0.010946802
+	Prior 0.010697347
 	Index 15
 EndState m-2
 Trans
@@ -407,15 +407,15 @@ Trans
 ########################################################
 Model sil
 HybridState sil-0
-	Prior 0.07973171
+	Prior 0.08551074
 	Index 8
 EndState sil-0
 HybridState sil-1
-	Prior 0.07973171
+	Prior 0.08551074
 	Index 8
 EndState sil-1
 HybridState sil-2
-	Prior 0.07973171
+	Prior 0.08551074
 	Index 8
 EndState sil-2
 Trans
@@ -428,15 +428,15 @@ Trans
 ########################################################
 Model t
 HybridState t-0
-	Prior 0.0116572045
+	Prior 0.011391562
 	Index 6
 EndState t-0
 HybridState t-1
-	Prior 0.0116572045
+	Prior 0.011391562
 	Index 6
 EndState t-1
 HybridState t-2
-	Prior 0.0116572045
+	Prior 0.011391562
 	Index 6
 EndState t-2
 Trans
@@ -449,15 +449,15 @@ Trans
 ########################################################
 Model oo
 HybridState oo-0
-	Prior 0.0024610397
+	Prior 0.0024049578
 	Index 13
 EndState oo-0
 HybridState oo-1
-	Prior 0.0024610397
+	Prior 0.0024049578
 	Index 13
 EndState oo-1
 HybridState oo-2
-	Prior 0.0024610397
+	Prior 0.0024049578
 	Index 13
 EndState oo-2
 Trans
@@ -470,15 +470,15 @@ Trans
 ########################################################
 Model ch
 HybridState ch-0
-	Prior 0.0026673414
+	Prior 0.0026065586
 	Index 29
 EndState ch-0
 HybridState ch-1
-	Prior 0.0026673414
+	Prior 0.0026065586
 	Index 29
 EndState ch-1
 HybridState ch-2
-	Prior 0.0026673414
+	Prior 0.0026065586
 	Index 29
 EndState ch-2
 Trans
@@ -491,15 +491,15 @@ Trans
 ########################################################
 Model sh
 HybridState sh-0
-	Prior 0.0071990807
+	Prior 0.0070350296
 	Index 9
 EndState sh-0
 HybridState sh-1
-	Prior 0.0071990807
+	Prior 0.0070350296
 	Index 9
 EndState sh-1
 HybridState sh-2
-	Prior 0.0071990807
+	Prior 0.0070350296
 	Index 9
 EndState sh-2
 Trans
@@ -512,15 +512,15 @@ Trans
 ########################################################
 Model hh
 HybridState hh-0
-	Prior 0.0038369263
+	Prior 0.0037494914
 	Index 22
 EndState hh-0
 HybridState hh-1
-	Prior 0.0038369263
+	Prior 0.0037494914
 	Index 22
 EndState hh-1
 HybridState hh-2
-	Prior 0.0038369263
+	Prior 0.0037494914
 	Index 22
 EndState hh-2
 Trans
@@ -533,15 +533,15 @@ Trans
 ########################################################
 Model iy
 HybridState iy-0
-	Prior 0.016919745
+	Prior 0.016534181
 	Index 19
 EndState iy-0
 HybridState iy-1
-	Prior 0.016919745
+	Prior 0.016534181
 	Index 19
 EndState iy-1
 HybridState iy-2
-	Prior 0.016919745
+	Prior 0.016534181
 	Index 19
 EndState iy-2
 Trans
@@ -554,15 +554,15 @@ Trans
 ########################################################
 Model s
 HybridState s-0
-	Prior 0.007510397
+	Prior 0.0073392517
 	Index 10
 EndState s-0
 HybridState s-1
-	Prior 0.007510397
+	Prior 0.0073392517
 	Index 10
 EndState s-1
 HybridState s-2
-	Prior 0.007510397
+	Prior 0.0073392517
 	Index 10
 EndState s-2
 Trans
@@ -575,15 +575,15 @@ Trans
 ########################################################
 Model jh
 HybridState jh-0
-	Prior 0.002823255
+	Prior 0.0027589193
 	Index 18
 EndState jh-0
 HybridState jh-1
-	Prior 0.002823255
+	Prior 0.0027589193
 	Index 18
 EndState jh-1
 HybridState jh-2
-	Prior 0.002823255
+	Prior 0.0027589193
 	Index 18
 EndState jh-2
 Trans
@@ -596,15 +596,15 @@ Trans
 ########################################################
 Model l
 HybridState l-0
-	Prior 0.013810128
+	Prior 0.013495426
 	Index 16
 EndState l-0
 HybridState l-1
-	Prior 0.013810128
+	Prior 0.013495426
 	Index 16
 EndState l-1
 HybridState l-2
-	Prior 0.013810128
+	Prior 0.013495426
 	Index 16
 EndState l-2
 Trans
@@ -617,15 +617,15 @@ Trans
 ########################################################
 Model q
 HybridState q-0
-	Prior 0.0015535475
+	Prior 0.0015181456
 	Index 12
 EndState q-0
 HybridState q-1
-	Prior 0.0015535475
+	Prior 0.0015181456
 	Index 12
 EndState q-1
 HybridState q-2
-	Prior 0.0015535475
+	Prior 0.0015181456
 	Index 12
 EndState q-2
 Trans
@@ -638,15 +638,15 @@ Trans
 ########################################################
 Model b
 HybridState b-0
-	Prior 0.0066737165
+	Prior 0.006521637
 	Index 30
 EndState b-0
 HybridState b-1
-	Prior 0.0066737165
+	Prior 0.006521637
 	Index 30
 EndState b-1
 HybridState b-2
-	Prior 0.0066737165
+	Prior 0.006521637
 	Index 30
 EndState b-2
 Trans
@@ -659,15 +659,15 @@ Trans
 ########################################################
 Model k
 HybridState k-0
-	Prior 0.00861613
+	Prior 0.0084197875
 	Index 17
 EndState k-0
 HybridState k-1
-	Prior 0.00861613
+	Prior 0.0084197875
 	Index 17
 EndState k-1
 HybridState k-2
-	Prior 0.00861613
+	Prior 0.0084197875
 	Index 17
 EndState k-2
 Trans
@@ -680,15 +680,15 @@ Trans
 ########################################################
 Model u
 HybridState u-0
-	Prior 0.0024595696
+	Prior 0.0024035212
 	Index 3
 EndState u-0
 HybridState u-1
-	Prior 0.0024595696
+	Prior 0.0024035212
 	Index 3
 EndState u-1
 HybridState u-2
-	Prior 0.0024595696
+	Prior 0.0024035212
 	Index 3
 EndState u-2
 Trans
@@ -701,15 +701,15 @@ Trans
 ########################################################
 Model ay
 HybridState ay-0
-	Prior 0.0036024826
+	Prior 0.00352039
 	Index 31
 EndState ay-0
 HybridState ay-1
-	Prior 0.0036024826
+	Prior 0.00352039
 	Index 31
 EndState ay-1
 HybridState ay-2
-	Prior 0.0036024826
+	Prior 0.00352039
 	Index 31
 EndState ay-2
 Trans
@@ -722,15 +722,15 @@ Trans
 ########################################################
 Model dr
 HybridState dr-0
-	Prior 0.0011283515
+	Prior 0.0011026389
 	Index 27
 EndState dr-0
 HybridState dr-1
-	Prior 0.0011283515
+	Prior 0.0011026389
 	Index 27
 EndState dr-1
 HybridState dr-2
-	Prior 0.0011283515
+	Prior 0.0011026389
 	Index 27
 EndState dr-2
 Trans
