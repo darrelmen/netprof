@@ -523,10 +523,15 @@ public class FileExerciseDAO implements ExerciseDAO {
 
     String audioFileName = split[1].trim();
     String english = "";
+    String translit = "";
     if (audioFileName.contains("\t")) {
       String[] split1 = audioFileName.split("\\t");
       audioFileName = split1[0].trim();
       english = split1[1].trim();
+      if (split1.length == 3) {
+        translit = split1[2].trim();
+
+      }
     }
     audioFileName = audioFileName.substring(0, audioFileName.length() - 1); // remove trailing )
     String audioRef = mediaDir + File.separator + audioFileName + ".wav";
@@ -539,7 +544,10 @@ public class FileExerciseDAO implements ExerciseDAO {
         //logger.debug(english + "->" + translations);
       }
       Exercise imported = new Exercise("flashcardStimulus", "" + id, english, translations, english);
-      // imported.setTranslitSentence(translit);
+      if (translit.length() > 0) {
+        imported.setTranslitSentence(translit);
+      }
+      else logger.warn("no transit for " + imported);
       imported.setRefAudio(ensureForwardSlashes(audioRef));
       //logger.debug("made flashcard " +imported);
       return imported;
