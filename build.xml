@@ -141,7 +141,17 @@
     </target>
 
     <target depends="build" name="flashcard">
-        <jar destfile="npEnglishFlashcard.war" basedir="war" excludes="answers/**,audioimages/**,config/first/**,config/dataCollectAdmin/**,config/egyptian/**,config/pashto/**,config/pilot/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.dli-pashto/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+        <jar destfile="npEnglishFlashcard.war" basedir="war"
+             excludes="answers/**,audioimages/**,config/first/**,config/dataCollectAdmin/**,config/egyptian/**,config/pashto/**,config/pilot/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.dli-pashto/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target depends="build" name="flashcardEnglishArabic">
+        <jar destfile="EnglishArabic.war" basedir="war"
+             excludes="answers/**,audioimages/**,config/first/**,config/dataCollectAdmin/**,config/egyptian/**,config/pashto/**,config/pilot/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.dli-pashto/**,,scoring/models.dli-dari/**,scoring/models.wsj01-16/**">
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
             </manifest>
