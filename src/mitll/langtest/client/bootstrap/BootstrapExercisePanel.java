@@ -43,12 +43,13 @@ import java.util.List;
  */
 public class BootstrapExercisePanel extends FluidContainer {
   private static final int LONG_DELAY_MILLIS = 3500;
-  private static final int DELAY_MILLIS = 1000/4;
-  private static final int DELAY_MILLIS_LONG = 1500;
+  private static final int DELAY_MILLIS = 750;
+  private static final int DELAY_MILLIS_LONG = 2500;
   private static final double CORRECT_THRESHOLD = 0.6;
  // private static final String TIMES_HELP_SHOWN = "TimesHelpShown";
   private static final String FEEDBACK_TIMES_SHOWN = "FeedbackTimesShown";
   private static final int PERIOD_MILLIS = 500;
+  public static final int MAX_INTRO_FEEBACK_COUNT = 5;
   private List<MyRecordButtonPanel> answerWidgets = new ArrayList<MyRecordButtonPanel>();
   private Audio mistakeAudio;
   private Storage stockStore = null;
@@ -289,7 +290,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       }
       else if (correct) {
         playCorrect();
-        if (feedback < 3) {
+        if (feedback < MAX_INTRO_FEEBACK_COUNT) {
           String correctPrompt = "Correct! It's: " + exercise.getRefSentence();
           recoOutput.setText(correctPrompt);
           incrCookie(FEEDBACK_TIMES_SHOWN);
