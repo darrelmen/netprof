@@ -48,7 +48,7 @@ import java.util.Set;
  */
 public class ASRScoring extends Scoring {
   private static final int FOREGROUND_VOCAB_LIMIT = 30;
-  private static final int VOCAB_SIZE_LIMIT = 50;
+  //private static final int VOCAB_SIZE_LIMIT = 50;
   private static Logger logger = Logger.getLogger(ASRScoring.class);
 
   private static final String DICT_WO_SP = "dict-wo-sp";
@@ -311,8 +311,14 @@ public class ASRScoring extends Scoring {
     return computeRepeatExerciseScores(testAudio, sentence, tmpDir, decode, language);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(java.io.File, java.util.List, java.util.List)
+   * @param lmSentences
+   * @param background
+   * @return
+   */
   public String getUsedTokens(List<String> lmSentences, List<String> background) {
-    List<String> backgroundVocab = svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT);
+    List<String> backgroundVocab = svDecoderHelper.getVocab(background, SmallVocabDecoder.VOCAB_SIZE_LIMIT);
     return getUniqueTokensInLM(lmSentences, backgroundVocab);
   }
 
@@ -323,11 +329,12 @@ public class ASRScoring extends Scoring {
    * Any OOV words have letter-to-sound called to create word->phoneme mappings.
    * This happens in {@see pronz.speech.Audio#hscore}
    *
+   * @see #getUsedTokens(java.util.List, java.util.List)
    * @param lmSentences
    * @param backgroundVocab
    * @return
    */
-  public String getUniqueTokensInLM(List<String> lmSentences, List<String> backgroundVocab) {
+  private String getUniqueTokensInLM(List<String> lmSentences, List<String> backgroundVocab) {
     String sentence;Set<String> backSet = new HashSet<String>(backgroundVocab);
     List<String> mergedVocab = new ArrayList<String>(backgroundVocab);
     List<String> foregroundVocab = svDecoderHelper.getSimpleVocab(lmSentences, FOREGROUND_VOCAB_LIMIT);
