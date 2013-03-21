@@ -536,12 +536,12 @@ public class FileExerciseDAO implements ExerciseDAO {
       List<String> translations = new ArrayList<String>();
       if (foreignLanguagePhrase.length() > 0) {
         translations.addAll(Arrays.asList(foreignLanguagePhrase.split(";")));
-        logger.debug(english + "->" + translations);
+        //logger.debug(english + "->" + translations);
       }
       Exercise imported = new Exercise("flashcardStimulus", "" + id, english, translations, english);
       // imported.setTranslitSentence(translit);
       imported.setRefAudio(ensureForwardSlashes(audioRef));
-      logger.debug("made flashcard " +imported);
+      //logger.debug("made flashcard " +imported);
       return imported;
     } else {
       Exercise exercise =
