@@ -534,7 +534,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg) {
       return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-        false, Files.createTempDir().getAbsolutePath());
+        false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache());
   }
 
   /**
@@ -557,14 +557,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } else {
       makeASRScoring();
       String sentence = asrScoring.getUsedTokens(lmSentences, background);
-      return getASRScoreForAudio(0, testAudioFile.getPath(), sentence, 128, 128, false, true, tmpDir);
+      return getASRScoreForAudio(0, testAudioFile.getPath(), sentence, 128, 128, false, true, tmpDir, serverProps.useScoreCache());
     }
   }
 
   private String createSLFFile(List<String> lmSentences, List<String> background, String tmpDir) {
     SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
     long then = System.currentTimeMillis();
-    String slfFile = svDecoderHelper.createSLFFile(lmSentences, background, tmpDir, Scoring.getScoringDir(getInstallPath()));
+    String slfFile = svDecoderHelper.createSLFFile(lmSentences, background, tmpDir,
+      Scoring.getScoringDir(getInstallPath()), serverProps.getForegroundBlend());
     long now = System.currentTimeMillis();
     logger.debug("create slf file took " + (now - then) + " millis");
     return slfFile;
@@ -583,11 +584,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param useScoreToColorBkg
    * @param decode
    * @param tmpDir
+   * @param useCache
    * @return PretestScore
    **/
   private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
-                                          int width, int height, boolean useScoreToColorBkg,
-                                          boolean decode, String tmpDir) {
+                                           int width, int height, boolean useScoreToColorBkg,
+                                           boolean decode, String tmpDir, boolean useCache) {
     logger.info("getASRScoreForAudio scoring " + testAudioFile + " with " + sentence + " req# " + reqid);
 
     assert(testAudioFile != null && sentence != null);
@@ -605,7 +607,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence,
-        getImageOutDir(), width, height, useScoreToColorBkg,decode,tmpDir);
+        getImageOutDir(), width, height, useScoreToColorBkg,decode,tmpDir, useCache);
     pretestScore.setReqid(reqid);
 
     if (makeFullURLs) {
@@ -1088,6 +1090,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (serverProps.doRecoTest()) {
       doRecoTest();
     }
+    if (serverProps.doRecoTest2()) {
+      doRecoTest2();
+    }
   }
 
   /**
@@ -1098,25 +1103,79 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<Exercise> exercises = getExercises();
     makeAutoCRT();
 
-    int incorrect =0;
-    for (Exercise exercise : exercises) {
-      File audioFile = new File(getInstallPath(), exercise.getRefAudio());
-      if (audioFile.exists()) {
-        AudioAnswer audioAnswer = new AudioAnswer();
-        autoCRT.getFlashcardAnswer(exercise, exercises, audioFile, audioAnswer);
-        if (audioAnswer.score == -1) {
-          logger.error("hydec bad config file, stopping...");
-          break;
+    int incorrect = 0;
+    try {
+      for (Exercise exercise : exercises) {
+        File audioFile = new File(getInstallPath(), exercise.getRefAudio());
+        if (audioFile.exists()) {
+          boolean isCorrect = isCorrect(exercise, exercises);
+          if (!isCorrect) incorrect++;
+        } else {
+          logger.warn("for " + exercise + " can't find ref audio " + audioFile.getAbsolutePath());
         }
-        boolean isCorrect = audioAnswer.score > 0.8d;
-        if (!isCorrect) incorrect++;
-        logger.debug("---> exercise #" + exercise.getID() + " reco " + audioAnswer.decodeOutput + " correct " + isCorrect + (isCorrect ? "" : " audio = "+exercise.getRefAudio()));
-      } else {
-        logger.warn("can't find " + audioFile.getAbsolutePath());
-
       }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-    logger.info("out of " +exercises.size() + " incorrect = " +incorrect);
+    logger.info("out of " + exercises.size() + " incorrect = " + incorrect);
+  }
+
+  private void doRecoTest2() {
+    List<Exercise> exercises = getExercises();
+    makeAutoCRT();
+
+    int incorrect = 0;
+    int total = 0;
+    try {
+      for (Exercise exercise : exercises) {
+        List<Exercise> others = new ArrayList<Exercise>(exercises);
+        others.remove(exercise);
+
+        for (Exercise other : others) {
+          File audioFile = new File(getInstallPath(), other.getRefAudio());
+          if (audioFile.exists()) {
+            boolean isMatch = isMatch(exercise, exercises, audioFile);
+            total++;
+            if (isMatch) {
+              logger.debug("for " + exercise.getID() + " falsely confused audio from " +other.getID() + " as correct match.");
+              incorrect++;
+            }
+          } else {
+            logger.warn("for " + exercise + " can't find ref audio " + audioFile.getAbsolutePath());
+          }
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    logger.info("out of " + total + " incorrect = " + incorrect + (100f * ((float) incorrect / (float) total)) + "%");
+  }
+
+  private boolean isCorrect(Exercise exercise, List<Exercise> exercises) throws Exception {
+    File audioFile2 = new File(getInstallPath(), exercise.getRefAudio());
+
+    return isMatch(exercise, exercises, audioFile2);
+  }
+
+  /**
+   * Does audioFile match the text in the ref sentence(s) in the exercise, given the other exercises
+   * @param exercise
+   * @param exercises
+   * @param audioFile2
+   * @return
+   * @throws Exception
+   */
+  private boolean isMatch(Exercise exercise, List<Exercise> exercises, File audioFile2) throws Exception {
+    AudioAnswer audioAnswer = new AudioAnswer();
+    autoCRT.getFlashcardAnswer(exercise, exercises, audioFile2, audioAnswer);
+    if (audioAnswer.score == -1) {
+      logger.error("hydec bad config file, stopping...");
+      throw new Exception("hydec bad config file, stopping...");
+    }
+    boolean isCorrect = audioAnswer.score > 0.8d;
+    logger.debug("---> exercise #" + exercise.getID() + " reco " + audioAnswer.decodeOutput +
+      " correct " + isCorrect + (isCorrect ? "" : " audio = " + audioFile2));
+    return isCorrect;
   }
 
   private String setInstallPath(boolean useFile) {
