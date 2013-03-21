@@ -32,7 +32,7 @@ import java.util.Map;
 public class SmallVocabDecoder {
   private static final Logger logger = Logger.getLogger(ASRScoring.class);
 
-  private static final int VOCAB_SIZE_LIMIT = 50;
+  public static final int VOCAB_SIZE_LIMIT = 200;
   private static final String FINAL_BLEND_VOCAB = "finalBlend.vocab";
   private static final String SMALL_LMOUT_SRILM = "smallLMOut.srilm";
   private static final String LARGE_VOCAB_TXT = "largeVocab.txt";
@@ -140,6 +140,12 @@ public class SmallVocabDecoder {
     return all;
   }
 
+  /**
+   * @see ASRScoring#getUniqueTokensInLM(java.util.List, java.util.List)
+   * @param background
+   * @param vocabSizeLimit
+   * @return
+   */
   public List<String> getSimpleVocab(List<String> background, int vocabSizeLimit) {
     List<String> all = new ArrayList<String>();
 
