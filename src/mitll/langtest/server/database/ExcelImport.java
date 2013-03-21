@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import java.util.TreeMap;
  */
 public class ExcelImport implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(ExcelImport.class);
+  private final boolean isFlashcard;
 
   private List<Exercise> exercises = null;
   private List<Lesson> lessons = new ArrayList<Lesson>();
@@ -46,6 +48,16 @@ public class ExcelImport implements ExerciseDAO {
   private List<String> errors = new ArrayList<String>();
   private TeacherClass teacherClass;
   private final String file;
+
+  public ExcelImport() {
+    this.file = null;
+    this.isFlashcard = false;
+  }
+
+  public ExcelImport(String file, boolean isFlashcard) {
+    this.file = file;
+    this.isFlashcard = isFlashcard;
+  }
 
   @Override
   public Map<String, Collection<String>> getTypeToSections() {
@@ -72,8 +84,6 @@ public class ExcelImport implements ExerciseDAO {
     }
   }
 
-  public ExcelImport() { this.file = null;}
-  public ExcelImport(String file) { this.file = file;}
 
   public List<Exercise> getRawExercises() {
     synchronized (this) {
@@ -240,7 +250,19 @@ public class ExcelImport implements ExerciseDAO {
               }
             }
 
-            Exercise imported = getExercise(id++, dao, english, foreignLanguagePhrase, translit);
+            Exercise imported;
+            if (isFlashcard) {
+              List<String> translations = new ArrayList<String>();
+              if (foreignLanguagePhrase.length() > 0) {
+                translations.addAll(Arrays.asList(foreignLanguagePhrase.split(";")));
+                logger.debug(english + "->" + translations);
+              }
+              imported = new Exercise("flashcardStimulus", "" + (id++), english, translations, english);
+              imported.setTranslitSentence(translit);
+            } else {
+              imported = getExercise(id++, dao, english, foreignLanguagePhrase, translit);
+            }
+
             exercises.add(imported);
             recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported);
 /*            if (false)
