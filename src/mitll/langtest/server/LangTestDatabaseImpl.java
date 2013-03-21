@@ -1082,15 +1082,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-
   public void init() {
     readProperties(getServletContext());
     setInstallPath(serverProps.getUseFile());
-    if (testReco) {
+    if (serverProps.doRecoTest()) {
       doRecoTest();
     }
   }
 
+  /**
+   * Run through all the exercises and test them against their ref audio.
+   * Ideally these should all or almost all correct.
+   */
   private void doRecoTest() {
     List<Exercise> exercises = getExercises();
     makeAutoCRT();
