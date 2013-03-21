@@ -26,31 +26,11 @@ output: tmp/levantine.out
 output-index: 1
 
 [Processing Stages]
-decprocess: 1 = 0   :> decode.Splitter -> fe.CepFE -> fe.Norm -> fe.NNBatch -> decode.HybridDecode[dictionary="TEMP_DIR/dict-wo-sp"]
+decprocess: 1 = 0   :> fe.SPFE  -> fe.NNBatch -> decode.HybridDecode[dictionary="TEMP_DIR/dict-wo-sp"]
 
 [E-mail Experiment Options]
 name: 
 desc: 
-
-[decode.Splitter]
-parts: 1
-
-[fe.CepFE]
-swap-bytes: false
-frame-rate: 100.0
-preemphasis: 0.0
-delta3: true
-lofreq: 80
-delta: true
-numcep: 12
-hifreq: 8000
-ctype: PLP
-rembias: true
-lifter: 0
-nmfb: 24
-window: 25.0
-delta2: true
-lpcorder: 20
 
 [fe.SPFE]
 sample-rate: 16000.0
@@ -65,31 +45,11 @@ nmfb: 24
 window: 25.0
 lpcorder: 12
 
-[fe.Norm]
-gaussianize: false
-
-
-[decode.Align]
-models: MODELS_DIR/HLDA_DIR
-align-transcript: /data/archive/jray/dli/levantine/trans.lev.test
-output-type: words+sil
-
-[decode.ResegmentDecoderOutput]
-resegment: true
-repad: true
-split-threshold: 0.50
-sil-padding: 0.25
-
-[decode.Reco2Meta]
-write-transcript:
-write-format: reseg
-
 [fe.NNBatch]
 n-output: N_OUTPUT
-n-hidden: 2500
+n-hidden: 2000,2000
 mlp: MODELS_DIR/nn-weights
-#frame-window: 13
-frame-window: 7
+frame-window: 13
 
 [pron.NNScore]
 phone-index: MODELS_DIR/label-map
