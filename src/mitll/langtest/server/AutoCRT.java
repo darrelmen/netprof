@@ -51,8 +51,8 @@ public class AutoCRT {
   }
 
   private void getOptionalBackground(String installPath, String backgroundFile) {
-
-    if (backgroundFile.length() > 0) {
+    File background = new File(backgroundFile);
+    if (background.exists() && background.isFile()) {
       FileExerciseDAO fileExerciseDAO = new FileExerciseDAO(true);
       fileExerciseDAO.readFastAndSlowExercises(installPath, backgroundFile);
       List<Exercise> rawExercises = fileExerciseDAO.getRawExercises();
