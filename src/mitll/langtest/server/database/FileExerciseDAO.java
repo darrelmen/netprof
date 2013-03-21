@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,21 +54,24 @@ public class FileExerciseDAO implements ExerciseDAO {
   //private final String relativeConfigDir;
   private final boolean isUrdu;
   private final boolean showSections;
+  private final boolean isFlashcard;
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
   private Map<String,Map<String,Map<String,Set<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String,Map<String,Set<String>>>>();
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
-   * @param relativeConfigDir
    * @param isUrdu
    * @param mediaDir
+   * @param isFlashcard
    */
-  public FileExerciseDAO(String relativeConfigDir, boolean isUrdu, boolean showSections, String mediaDir) {
+  public FileExerciseDAO(boolean isUrdu, boolean showSections, String mediaDir, boolean isFlashcard) {
    // this.relativeConfigDir = relativeConfigDir;
     this.isUrdu = isUrdu;
     this.showSections = showSections;
     this.mediaDir = mediaDir;
+    this.isFlashcard = isFlashcard;
+    logger.debug("is flashcard " +isFlashcard);
   }
 
   public Map<String,List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
@@ -311,6 +315,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       exercises = new ArrayList<Exercise>();
       Pattern pattern = Pattern.compile("^\\d+\\.(.+)");
       int errors = 0;
+      int id = 0;
       while ((line2 = reader.readLine()) != null) {
         count++;
        if (TESTING && count > 200) break;
@@ -326,9 +331,10 @@ public class FileExerciseDAO implements ExerciseDAO {
           }
           else {
             int length = line2.split("\\(").length;
-            boolean simpleFile = length == 2 && line2.split("\\(")[1].trim().endsWith(")");
+           // boolean simpleFile = length == 2 && line2.split("\\(")[1].trim().endsWith(")");
+            boolean simpleFile = length == 2 && line2.startsWith("<s>");
             exercise = simpleFile ?
-                getSimpleExerciseForLine(line2) :
+                getSimpleExerciseForLine(line2, id++) :
                 getExerciseForLine(line2);
           }
           if (showSections) {
@@ -504,22 +510,47 @@ public class FileExerciseDAO implements ExerciseDAO {
    *
    * <s> word word word </s> (audio_file_name_without_suffix)
    *
+   * @see #readFastAndSlowExercises(String, String)
    * @param line2
    * @return
    */
-  private Exercise getSimpleExerciseForLine(String line2) {
+  private Exercise getSimpleExerciseForLine(String line2, int id) {
     String[] split = line2.split("\\(");
-    String name = split[1].trim();
-    name = name.substring(0,name.length()-1); // remove trailing )
-    String displayName = name;
-    String arabic = split[0].trim();
-    arabic = arabic.replaceAll("<s>","").replaceAll("</s>","").trim();
-    String content = getArabic(arabic);
-    String audioRef = mediaDir+File.separator+name+".wav";
 
-    Exercise repeat = new Exercise("repeat", displayName, content, ensureForwardSlashes(audioRef), arabic, arabic);
-    //logger.debug("got " +repeat);
-    return repeat;
+    String foreignLanguagePhrase = split[0].trim();
+    foreignLanguagePhrase = foreignLanguagePhrase.replaceAll("<s>", "").replaceAll("</s>", "").trim();
+    String content = getArabic(foreignLanguagePhrase);
+
+    String audioFileName = split[1].trim();
+    String english = "";
+    if (audioFileName.contains("\t")) {
+      String[] split1 = audioFileName.split("\\t");
+      audioFileName = split1[0].trim();
+      english = split1[1].trim();
+    }
+    audioFileName = audioFileName.substring(0, audioFileName.length() - 1); // remove trailing )
+    String audioRef = mediaDir + File.separator + audioFileName + ".wav";
+
+    if (isFlashcard) {
+      if (english.length() == 0) logger.warn("huh? english is empty for " + line2);
+      List<String> translations = new ArrayList<String>();
+      if (foreignLanguagePhrase.length() > 0) {
+        translations.addAll(Arrays.asList(foreignLanguagePhrase.split(";")));
+        logger.debug(english + "->" + translations);
+      }
+      Exercise imported = new Exercise("flashcardStimulus", "" + id, english, translations, english);
+      // imported.setTranslitSentence(translit);
+      imported.setRefAudio(ensureForwardSlashes(audioRef));
+      logger.debug("made flashcard " +imported);
+      return imported;
+    } else {
+      Exercise exercise =
+        new Exercise("repeat", audioFileName, content, ensureForwardSlashes(audioRef),
+          foreignLanguagePhrase, foreignLanguagePhrase);
+      logger.debug("made " +exercise);
+
+      return exercise;
+    }
   }
 
   /**
@@ -535,7 +566,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     String lastCol = split[6];
     String[] split1 = lastCol.split("->");
     String name = split1[1].trim();
-    String displayName = name;
+    //String displayName = name;
     String arabic = split1[2];
     String translit = split1[3];
     String english = split1[4];
@@ -544,7 +575,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     String fastAudioRef = mediaDir+File.separator+name+File.separator+ FAST + ".wav";
     String slowAudioRef = mediaDir+File.separator+name+File.separator+ SLOW + ".wav";
 
-    return new Exercise("repeat", displayName, content,
+    return new Exercise("repeat", name, content,
         ensureForwardSlashes(fastAudioRef), ensureForwardSlashes(slowAudioRef), arabic, english);
   }
 
