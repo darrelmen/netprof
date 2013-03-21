@@ -281,9 +281,11 @@ public class BootstrapExercisePanel extends FluidContainer {
 
       if (result.validity == AudioAnswer.Validity.TOO_SHORT) {
         showPopup("Audio was too short. Please record again.");
+        nextAfterDelay(correct);
       }
       else if (result.validity == AudioAnswer.Validity.TOO_QUIET) {
         showPopup("Audio was too quiet. Please check your mic and record again.");
+        nextAfterDelay(correct);
       }
       else if (correct) {
         playCorrect();
@@ -312,15 +314,19 @@ public class BootstrapExercisePanel extends FluidContainer {
         }
       }
       if (correct || !hasRefAudio) {
-        // Schedule the timer to run once in 1 seconds.
-        Timer t = new Timer() {
-          @Override
-          public void run() {
-            controller.loadNextExercise(exercise);
-          }
-        };
-        t.schedule(isDemoMode ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : DELAY_MILLIS_LONG);
+        nextAfterDelay(correct);
       }
+    }
+
+    private void nextAfterDelay(boolean correct) {
+      // Schedule the timer to run once in 1 seconds.
+      Timer t = new Timer() {
+        @Override
+        public void run() {
+          controller.loadNextExercise(exercise);
+        }
+      };
+      t.schedule(isDemoMode ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : DELAY_MILLIS_LONG);
     }
 
     private void waitForAudioToFinish() {
