@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='langtest'>
+  <!-- Inherit the core Web Toolkit stuff.                        -->
+  <inherits name='com.google.gwt.user.User'/>
+
+<!--
+  <inherits name="com.google.gwt.logging.Logging"/>
+-->
+
+  <!-- Inherit the default GWT style sheet.  You can change       -->
+  <!-- the theme of your GWT application by uncommenting          -->
+  <!-- any one of the following lines.                            -->
+  <inherits name='com.google.gwt.user.theme.clean.Clean'/>
+  <inherits name='com.googlecode.gchart.GChart'/>
+  <inherits name='com.google.gwt.visualization.Visualization'/>
+  <!-- <inherits name='com.google.gwt.user.theme.standard.Standard'/> -->
+  <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
+  <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
+
+  <!-- Other module inherits                                      -->
+
+  <!-- Specify the app entry point class.                         -->
+  <entry-point class='mitll.langtest.client.LangTest'/>
+
+  <!-- Specify the paths for translatable code                    -->
+  <source path='client'/>
+  <source path='shared'/>
+
+  <public path='public'/>
+
+  <!-- TODO: Add this when it is an object -->
+  <!-- This script is so that Sound Manager 2 can be accessed through JSNI -->
+  <!-- <script src="soundmanager2.js"/>  -->
+
+  <!-- These 3 scripts are necessary so that Flash Recording can work -->
+  <script src="js/jquery-1.4.2.js"/>
+  <script src="js/swfobject.js"/>
+  <script src="js/recorder.js"/>
+
+  <script src="js/gauge.js"/>
+</module>
