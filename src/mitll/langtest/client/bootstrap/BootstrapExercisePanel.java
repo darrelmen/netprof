@@ -43,7 +43,7 @@ import java.util.List;
  */
 public class BootstrapExercisePanel extends FluidContainer {
   private static final int LONG_DELAY_MILLIS = 3500;
-  private static final int DELAY_MILLIS = 750;
+  private static final int DELAY_MILLIS = 1250;
   private static final int DELAY_MILLIS_LONG = 2500;
   private static final double CORRECT_THRESHOLD = 0.6;
  // private static final String TIMES_HELP_SHOWN = "TimesHelpShown";
