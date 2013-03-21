@@ -59,6 +59,9 @@ public class FileExerciseDAO implements ExerciseDAO {
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
   private Map<String,Map<String,Map<String,Set<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String,Map<String,Set<String>>>>();
 
+  public FileExerciseDAO(boolean isFlashcard) {
+    this(false,false,"",isFlashcard);
+  }
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
    * @param isUrdu
@@ -537,18 +540,10 @@ public class FileExerciseDAO implements ExerciseDAO {
     String audioRef = mediaDir + File.separator + audioFileName + ".wav";
 
     if (isFlashcard) {
-      if (english.length() == 0) logger.warn("huh? english is empty for " + line2);
-      List<String> translations = new ArrayList<String>();
-      if (foreignLanguagePhrase.length() > 0) {
-        translations.addAll(Arrays.asList(foreignLanguagePhrase.split(";")));
-        //logger.debug(english + "->" + translations);
+      if (english.length() == 0) {
+        //logger.warn("huh? english is empty for " + line2);
       }
-      Exercise imported = new Exercise("flashcardStimulus", "" + id, english, translations, english);
-      if (translit.length() > 0) {
-        imported.setTranslitSentence(translit);
-      }
-      else logger.warn("no transit for " + imported);
-      imported.setRefAudio(ensureForwardSlashes(audioRef));
+      Exercise imported = getFlashcardExercise(id, foreignLanguagePhrase, english, translit, audioRef);
       //logger.debug("made flashcard " +imported);
       return imported;
     } else {
@@ -559,6 +554,23 @@ public class FileExerciseDAO implements ExerciseDAO {
 
       return exercise;
     }
+  }
+
+  private Exercise getFlashcardExercise(int id, String foreignLanguagePhrase, String english, String translit, String audioRef) {
+    List<String> translations = new ArrayList<String>();
+    if (foreignLanguagePhrase.length() > 0) {
+      translations.addAll(Arrays.asList(foreignLanguagePhrase.split(";")));
+      //logger.debug(english + "->" + translations);
+    }
+    Exercise imported = new Exercise("flashcardStimulus", "" + id, english, translations, english);
+    if (translit.length() > 0) {
+      imported.setTranslitSentence(translit);
+    }
+    else {
+      //logger.warn("no translit for " + imported);
+    }
+    imported.setRefAudio(ensureForwardSlashes(audioRef));
+    return imported;
   }
 
   /**
