@@ -21,6 +21,11 @@ public class H2Connection implements DatabaseConnection {
 
   private Connection conn;
 
+  /**
+   * @see DatabaseImpl#DatabaseImpl(String, String, boolean, boolean, String, boolean, String, boolean)
+   * @param configDir
+   * @param dbName
+   */
   public H2Connection(String configDir, String dbName) {
     connect(configDir, dbName);
   }
