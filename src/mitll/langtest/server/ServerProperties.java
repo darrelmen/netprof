@@ -24,6 +24,8 @@ import java.util.jar.Manifest;
 public class ServerProperties {
   private static Logger logger = Logger.getLogger(ServerProperties.class);
 
+  private static final String BACKGROUND_FILE = "backgroundFile";
+
   public static final String SHOW_SECTIONS = "showSections";
   public static final String DEBUG_EMAIL = "debugEmail";
   private static final String DOIMAGES = "doimages";
@@ -64,6 +66,7 @@ public class ServerProperties {
   public int firstNInOrder;
   public boolean isDataCollectAdminView;
   private double foregroundBlend;
+  private String backgroundFile;
 
   public void readPropertiesFile(ServletContext servletContext, String configDir) {
    String configFile = servletContext.getInitParameter("configFile");
@@ -133,6 +136,15 @@ public class ServerProperties {
   }
   public String getMediaDir() {
     return props.getProperty(MEDIA_DIR, "media");
+  }
+
+
+  public double getForegroundBlend() {
+    return foregroundBlend;
+  }
+
+  public String getBackgroundFile() {
+    return props.getProperty(BACKGROUND_FILE,"");
   }
 
   /**
@@ -210,7 +222,4 @@ public class ServerProperties {
     return "";
   }
 
-  public double getForegroundBlend() {
-    return foregroundBlend;
-  }
 }
