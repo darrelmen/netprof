@@ -102,7 +102,7 @@ public class ASRScoring extends Scoring {
 
     this.properties = properties;
     this.language = properties.get("language");
-    this.letterToSoundClass = language.equals("English") ? new EnglishLTS() : new ArabicLTS();
+    this.letterToSoundClass = language != null && language.equals("English") ? new EnglishLTS() : new ArabicLTS();
     readDictionary();
   }
 
