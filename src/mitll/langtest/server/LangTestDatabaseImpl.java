@@ -280,7 +280,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private void makeAutoCRT() {
     synchronized (this) {
       if (autoCRT == null) {
-        autoCRT = new AutoCRT(db.getExport(), this, getInstallPath(), relativeConfigDir);
+        String backgroundFile = configDir + File.separator + serverProps.getBackgroundFile();
+        autoCRT = new AutoCRT(db.getExport(), this, getInstallPath(), relativeConfigDir, backgroundFile);
       }
     }
   }
@@ -316,9 +317,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public FlashcardResponse getNextExercise(long userID) {
     FlashcardResponse nextExercise = db.getNextExercise(userID);
-    if (nextExercise == null) {
+    if (nextExercise == null || nextExercise.e == null) {
       logger.error("huh? no next exercise for user " +userID);
-      return null;
+      return nextExercise;
     }
     String refAudio = nextExercise.e.getRefAudio();
     if (refAudio != null && refAudio.length() > 0) {
