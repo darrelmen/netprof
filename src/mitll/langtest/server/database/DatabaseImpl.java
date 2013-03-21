@@ -107,18 +107,17 @@ public class DatabaseImpl implements Database {
     this.isFlashcard = isFlashcard;
 
     try {
-      boolean open = getConnection() != null;
-      if (!open) {
-        logger.warn("couldn't open connection to database");
+      if (getConnection() == null) {
+        logger.warn("couldn't open connection to database at " + configDir + " : " + dbName);
         return;
       }
     } catch (Exception e) {
-      logger.warn("couldn't open connection to database, got " + e.getMessage());
-      logger.error("got " + e, e);
+      logger.error("couldn't open connection to database, got " + e.getMessage(),e);
       return;
     }
     initializeDAOs();
     monitoringSupport = getMonitoringSupport();
+
 
   }
 
