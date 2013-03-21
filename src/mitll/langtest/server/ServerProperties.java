@@ -22,10 +22,14 @@ import java.util.jar.Manifest;
  * To change this template use File | Settings | File Templates.
  */
 public class ServerProperties {
+  private static Logger logger = Logger.getLogger(ServerProperties.class);
+
   public static final String SHOW_SECTIONS = "showSections";
   public static final String DEBUG_EMAIL = "debugEmail";
   private static final String DOIMAGES = "doimages";
-  private static Logger logger = Logger.getLogger(ServerProperties.class);
+  public static final String FOREGROUND_BLEND = "foregroundBlend";
+  public static final String FOREGROUND_BLEND_DEFAULT = "0.8";
+  private static final String USE_SCORE_CACHE = "useScoreCache";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
   public static final String FIRST_N_IN_ORDER = "firstNInOrder";
@@ -47,6 +51,7 @@ public class ServerProperties {
   private static final String AUTOCRT = "autocrt";
   private static final String MEDIA_DIR = "mediaDir";
   private static final String RECO_TEST = "recoTest";
+  private static final String RECO_TEST2 = "recoTest2";
 
   private Properties props = null;
 
@@ -58,6 +63,7 @@ public class ServerProperties {
   public boolean isWordPairs;
   public int firstNInOrder;
   public boolean isDataCollectAdminView;
+  private double foregroundBlend;
 
   public void readPropertiesFile(ServletContext servletContext, String configDir) {
    String configFile = servletContext.getInitParameter("configFile");
@@ -85,6 +91,14 @@ public class ServerProperties {
 
   public boolean doRecoTest() {
     return getDefaultFalse(RECO_TEST);
+  }
+
+  public boolean doRecoTest2() {
+    return getDefaultFalse(RECO_TEST2);
+  }
+
+  public boolean useScoreCache() {
+    return getDefaultTrue(USE_SCORE_CACHE);
   }
 
   public boolean isShowSections() {
@@ -162,6 +176,16 @@ public class ServerProperties {
       logger.debug("Date from manifest " + dateFromManifest);
       props.setProperty("releaseDate",dateFromManifest);
     }
+    try {
+      foregroundBlend = Double.parseDouble(props.getProperty(FOREGROUND_BLEND, FOREGROUND_BLEND_DEFAULT));
+    } catch (NumberFormatException e) {
+      logger.error("Couldn't parse property " + FOREGROUND_BLEND, e);
+      try {
+        foregroundBlend = Double.parseDouble(FOREGROUND_BLEND_DEFAULT);
+      } catch (NumberFormatException e1) {
+        e1.printStackTrace();
+      }
+    }
   }
 
   private boolean getDefaultFalse(String param) {
@@ -184,5 +208,9 @@ public class ServerProperties {
 //      logger.warn("Error while reading version: " + ex.getMessage());
     }
     return "";
+  }
+
+  public double getForegroundBlend() {
+    return foregroundBlend;
   }
 }
