@@ -173,7 +173,7 @@ public class ExcelImport implements ExerciseDAO {
     }
     int id = 0;
     boolean gotHeader = false;
-    FileExerciseDAO dao = new FileExerciseDAO(null,false,false, "");
+    FileExerciseDAO dao = new FileExerciseDAO(false,false, "", isFlashcard);
 
     int colIndexOffset = 0;
 
