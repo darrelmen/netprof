@@ -42,7 +42,7 @@ public class SmallVocabDecoder {
   /**
    * How much weight to give the foreground vs the background lm.
    */
-  private static final float BLEND_FOREGROUND_BACKGROUND = 0.8f;
+ // private static final float BLEND_FOREGROUND_BACKGROUND = 0.8f;
 
   private static final String SMALL_LM_SLF = "smallLM.slf"; // just for testing on windows
   /**
@@ -55,6 +55,7 @@ public class SmallVocabDecoder {
    * Platform -- windows, mac, linux, etc.
    */
   private final String platform = Utils.package$.MODULE$.platform();
+  private double foregroundBackgroundBlend;
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#createSLFFile(java.util.List, java.util.List, String)
@@ -65,9 +66,9 @@ public class SmallVocabDecoder {
    * @return absolute path slf file, if it was made successfully
    */
   public String createSLFFile(List<String> lmSentences, List<String> background, String tmpDir,
-                              String scoringDir) {
+                              String scoringDir, double foregroundBackgroundBlend) {
     SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
-
+    this.foregroundBackgroundBlend = foregroundBackgroundBlend;
     List<String> backgroundVocab = svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT);
     return createSLFFile(lmSentences, background, backgroundVocab, tmpDir, null, scoringDir);
   }
@@ -125,7 +126,7 @@ public class SmallVocabDecoder {
    * memory and segfault! <br></br>
    * Remember to add special tokens like silence, pause, and unk
    * @see ASRScoring#getUsedTokens(java.util.List, java.util.List)
-   * @see SmallVocabDecoder#createSLFFile(java.util.List, java.util.List, String, String)
+   * @see #createSLFFile
    * @param background sentences
    * @return most frequent vocabulary words
    */
@@ -350,7 +351,7 @@ public class SmallVocabDecoder {
         "-lm",
         foregroundLM.getAbsolutePath(),
         "-lambda",
-        ""+BLEND_FOREGROUND_BACKGROUND,
+        ""+foregroundBackgroundBlend,
         "-mix-lm",
         backgroundLM.getAbsolutePath(),
         "-order",
