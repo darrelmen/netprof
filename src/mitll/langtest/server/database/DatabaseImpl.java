@@ -179,7 +179,7 @@ public class DatabaseImpl implements Database {
    */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
     return useFile ?
-      new FileExerciseDAO(relativeConfigDir, isUrdu, showSections, mediaDir) :
+      new FileExerciseDAO(isUrdu, showSections, mediaDir, isFlashcard) :
       new SQLExerciseDAO(this, relativeConfigDir);
   }
 
