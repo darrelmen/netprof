@@ -3,6 +3,7 @@ package mitll.langtest.server;
 import ag.experiment.AutoGradeExperiment;
 import mira.classifier.Classifier;
 import mitll.langtest.server.database.Export;
+import mitll.langtest.server.database.FileExerciseDAO;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
@@ -12,6 +13,7 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,12 +38,31 @@ public class AutoCRT {
   private String mediaDir;
   private final Export exporter;
   private AutoCRTScoring db;
+  private List<String> optionalBackgroundSentences = Collections.emptyList();
 
-  public AutoCRT(Export exporter, AutoCRTScoring db, String installPath, String mediaDir) {
+  public AutoCRT(Export exporter, AutoCRTScoring db, String installPath, String relativeConfigDir,
+                 String backgroundFile) {
     this.installPath = installPath;
-    this.mediaDir = mediaDir;
+    this.mediaDir = relativeConfigDir;
     this.exporter = exporter;
     this.db = db;
+
+    getOptionalBackground(installPath, backgroundFile);
+  }
+
+  private void getOptionalBackground(String installPath, String backgroundFile) {
+
+    if (backgroundFile.length() > 0) {
+      FileExerciseDAO fileExerciseDAO = new FileExerciseDAO(true);
+      fileExerciseDAO.readFastAndSlowExercises(installPath, backgroundFile);
+      List<Exercise> rawExercises = fileExerciseDAO.getRawExercises();
+
+      List<String> sentences = new ArrayList<String>();
+      for (Exercise other : rawExercises) {
+          sentences.addAll(getRefSentences(other));
+      }
+      this.optionalBackgroundSentences = getBackgroundSentences(sentences);
+    }
   }
 
   /**
@@ -90,14 +111,18 @@ public class AutoCRT {
     if (allExercises.isEmpty()) logger.error("getFlashcardAnswer : huh? no background sentences?");
 
     List<String> background = getBackground(e, allExercises);
+    background.addAll(optionalBackgroundSentences);
+
     if (background.isEmpty()) logger.error("huh? background is empty despite having " + allExercises.size() + " ?");
+    //else logger.debug("using " +background.size() + " words");
 
     List<String> foreground = new ArrayList<String>();
     for (String ref : foregroundSentences) {
       foreground.add(removePunct(ref));
     }
 
-    logger.debug("foreground " + foreground + " back " + background.subList(0,Math.min(10,background.size())) +"...");
+    logger.debug("foreground " + foreground + " back (" + background.size() + " words"+
+      ")" + background.subList(0,Math.min(10,background.size())) +"...");
     PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, foreground, background);
 
     String recoSentence =
@@ -118,7 +143,7 @@ public class AutoCRT {
     List<String> sentences = new ArrayList<String>();
     String exerciseID = exercise.getID();
     for (Exercise other : allExercises) {
-      if (!other.getID().equals(exercise)) {
+      if (!other.getID().equals(exerciseID)) {
         sentences.addAll(getRefSentences(other));
       }
     }
@@ -248,7 +273,7 @@ public class AutoCRT {
    * @return
    */
   private List<String> getBackgroundSentences(Collection<String> sentences) {
-    if (sentences.isEmpty()) logger.warn("getBackgroundSentences huh? no background sentences?");
+    //if (sentences.isEmpty()) logger.warn("getBackgroundSentences huh? no background sentences?");
     List<String> background = new ArrayList<String>();
 
     for (String answer : sentences) {
@@ -266,8 +291,10 @@ public class AutoCRT {
         background.add(removePunct(result));
       }
     }
-    if (background.isEmpty()) logger.warn("huh? getBackgroundSentences no background sentences despite " +sentences.size()+ " inputs"+
-      "?");
+    if (background.isEmpty()) {
+      logger.warn("huh? getBackgroundSentences no background sentences despite " +sentences.size()+ " inputs"+
+        "?");
+    }
 
     return background;
   }
@@ -290,7 +317,7 @@ public class AutoCRT {
   private Collection<String> getAllExportedAnswers() { return allAnswers; }
 
   /**
-   * @see #getAutoCRTAnswer(String, mitll.langtest.shared.Exercise, int, java.io.File, mitll.langtest.shared.AudioAnswer.Validity, int, String, int)
+   * @see #getAutoCRTDecodeOutput(String, int, mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
    * @param id
    * @param questionID
    * @return
