@@ -45,51 +45,47 @@ public class AutoCRT {
   }
 
   /**
-   * Get an auto crt score given an audio answer.
+   * Get an auto crt reco output and score given an audio answer.
    *
-   * @see LangTestDatabaseImpl#writeAudioFile
-   * @param exercise
+   * @see LangTestDatabaseImpl#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.AudioCheck.ValidityAndDur, String)
+   * @param exerciseID
    * @param e
-   * @param reqid
-   * @param file
-   * @param validity
+   * @param audioFile
    * @param questionID
-   * @param url
-   * @param durationInMillis
-   * @return
+   * @param answer
    */
-  public AudioAnswer getAutoCRTAnswer(String exercise, Exercise e, int reqid, File file, AudioAnswer.Validity validity,
-                                      int questionID, String url, int durationInMillis) {
-    List<String> exportedAnswers = getExportedAnswers(exercise, questionID);
+  public void getAutoCRTDecodeOutput(String exerciseID, int questionID, Exercise e, File audioFile,
+                                     AudioAnswer answer) {
+    List<String> exportedAnswers = getExportedAnswers(exerciseID, questionID);
     logger.info("got answers " + new HashSet<String>(exportedAnswers));
 
     List<String> background = getBackgroundText(e);
 
-    PretestScore asrScoreForAudio = db.getASRScoreForAudio(file, exportedAnswers, background);
+    PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, exportedAnswers, background);
 
     String recoSentence = asrScoreForAudio.getRecoSentence();
     logger.info("reco sentence was '" + recoSentence + "'");
 
-    String annotatedResponse = getAnnotatedResponse(exercise, questionID, recoSentence);
+    String annotatedResponse = getAnnotatedResponse(exerciseID, questionID, recoSentence);
 
     double scoreForAnswer = (recoSentence.length() > 0) ? getScoreForExercise(e, questionID, recoSentence) :0.0d;
-    return new AudioAnswer(url, validity, annotatedResponse, scoreForAnswer, reqid, durationInMillis);
+
+    answer.setDecodeOutput(annotatedResponse);
+    answer.setScore(scoreForAnswer);
   }
 
   /**
-   * @see LangTestDatabaseImpl#writeAudioFile
+   * @see LangTestDatabaseImpl#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.AudioCheck.ValidityAndDur, String)
+   *
    * @param e
-   * @param reqid
-   * @param file
-   * @param validity
-   * @param url
-   * @param durationInMillis
    * @param allExercises
-   * @return
+   * @param audioFile
+   * @param answer
    */
-  public AudioAnswer getFlashcardAnswer(Exercise e, int reqid, File file, AudioAnswer.Validity validity,
-                                       String url, int durationInMillis,
-                                      List<Exercise> allExercises) {
+  public void getFlashcardAnswer(Exercise e,
+                                 List<Exercise> allExercises,
+                                 File audioFile,
+                                 AudioAnswer answer) {
     List<String> foregroundSentences = getRefSentences(e);
     if (allExercises.isEmpty()) logger.error("getFlashcardAnswer : huh? no background sentences?");
 
@@ -102,18 +98,20 @@ public class AutoCRT {
     }
 
     logger.debug("foreground " + foreground + " back " + background.subList(0,Math.min(10,background.size())) +"...");
-    PretestScore asrScoreForAudio = db.getASRScoreForAudio(file, foreground, background);
+    PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, foreground, background);
 
     String recoSentence =
       asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
         asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
     boolean isCorrect = recoSentence != null && isCorrect(foregroundSentences, recoSentence);
     if (!isCorrect) {
-      logger.info("reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentences +"' correct = " + isCorrect);
+      logger.info("incorrect response for exercise #" +e.getID() +
+        " reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentences +"'");
     }
 
-    double scoreForAnswer = isCorrect ? 1.0d :0.0d;
-    return new AudioAnswer(url, validity, recoSentence, scoreForAnswer, reqid, durationInMillis);
+    double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : isCorrect ? 1.0d :0.0d;
+    answer.setDecodeOutput(recoSentence);
+    answer.setScore(scoreForAnswer);
   }
 
   private List<String> getBackground(Exercise exercise, List<Exercise> allExercises) {
@@ -130,7 +128,7 @@ public class AutoCRT {
   private boolean isCorrect(List<String> answerSentences, String recoSentence) {
     for (String answer : answerSentences) {
       String converted = answer.replaceAll("-", " ").replaceAll("\\.", "").toLowerCase();
-      logger.debug("converted is " + converted);
+     // logger.debug("converted is " + converted);
       if (converted.equalsIgnoreCase(recoSentence)) return true;
     }
     return false;
