@@ -491,13 +491,15 @@ public class ASRScoring extends Scoring {
       logger.error("Got assertion error " + e,e);
       return new Scores();
     } catch (Exception ee) {
-      logger.warn("Running on align/decode on " + sentence +" Got " + ee, ee);
+      logger.warn("Running align/decode on " + sentence +" Got " + ee, ee);
     }
 
     long timeToRunHydec = System.currentTimeMillis() - then;
     logger.warn("got bad score and took " + timeToRunHydec + " millis");
 
-    return new Scores();
+    Scores scores = new Scores();
+    scores.hydecScore = -1;
+    return scores;
   }
 
   private String getDictFile(String modelsDir) {
