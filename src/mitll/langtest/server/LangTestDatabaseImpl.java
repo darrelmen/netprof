@@ -12,7 +12,6 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.DTWScoring;
-import mitll.langtest.server.scoring.Scores;
 import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
@@ -66,7 +65,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public static final String ANSWERS = "answers";
   private static final int TIMEOUT = 30;
   private static final String IMAGE_WRITER_IMAGES = "audioimages";
-  private static final List<String> EMPTY_LIST = Collections.emptyList();
+  //private static final List<String> EMPTY_LIST = Collections.emptyList();
   private DatabaseImpl db;
   private ASRScoring asrScoring;
   private AutoCRT autoCRT;
@@ -79,6 +78,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       .concurrencyLevel(4)
       .maximumSize(10000)
       .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();
+  private boolean testReco = true;
 
   /**
    * This allows us to upload an exercise file and create a new {@link Site}.
@@ -316,6 +316,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public FlashcardResponse getNextExercise(long userID) {
     FlashcardResponse nextExercise = db.getNextExercise(userID);
+    if (nextExercise == null) {
+      logger.error("huh? no next exercise for user " +userID);
+      return null;
+    }
     String refAudio = nextExercise.e.getRefAudio();
     if (refAudio != null && refAudio.length() > 0) {
       getWavAudioFile(refAudio);
@@ -879,23 +883,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private AudioAnswer getAudioAnswer(String exercise, int questionID, int user, int reqid,
                                      File file, AudioCheck.ValidityAndDur validity, String url) {
+    AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
     if (serverProps.isFlashcard()) {
       makeAutoCRT();
-
-      AudioAnswer flashcardAnswer =
-        autoCRT.getFlashcardAnswer(getExercise(exercise), reqid, file, validity.validity, url,
-          validity.durationInMillis, getExercises());
-      boolean isCorrect = flashcardAnswer.score > 0.8d;
+      autoCRT.getFlashcardAnswer(getExercise(exercise), getExercises(), file, audioAnswer);
+      boolean isCorrect = audioAnswer.score > 0.8d;
       db.updateFlashcardState(user, exercise, isCorrect);
-      return flashcardAnswer;
+      return audioAnswer;
+    } else if (serverProps.isAutoCRT()) {
+      autoCRT.getAutoCRTDecodeOutput(exercise, questionID, getExercise(exercise), file, audioAnswer);
     }
-    else if (serverProps.isAutoCRT()) {
-      return autoCRT.getAutoCRTAnswer(exercise, getExercise(exercise), reqid, file, validity.validity, questionID, url,
-        validity.durationInMillis);
-    }
-    else {
-      return new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
-    }
+    return audioAnswer;
   }
 
   @Override
@@ -1088,6 +1086,34 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public void init() {
     readProperties(getServletContext());
     setInstallPath(serverProps.getUseFile());
+    if (testReco) {
+      doRecoTest();
+    }
+  }
+
+  private void doRecoTest() {
+    List<Exercise> exercises = getExercises();
+    makeAutoCRT();
+
+    int incorrect =0;
+    for (Exercise exercise : exercises) {
+      File audioFile = new File(getInstallPath(), exercise.getRefAudio());
+      if (audioFile.exists()) {
+        AudioAnswer audioAnswer = new AudioAnswer();
+        autoCRT.getFlashcardAnswer(exercise, exercises, audioFile, audioAnswer);
+        if (audioAnswer.score == -1) {
+          logger.error("hydec bad config file, stopping...");
+          break;
+        }
+        boolean isCorrect = audioAnswer.score > 0.8d;
+        if (!isCorrect) incorrect++;
+        logger.debug("---> exercise #" + exercise.getID() + " reco " + audioAnswer.decodeOutput + " correct " + isCorrect + (isCorrect ? "" : " audio = "+exercise.getRefAudio()));
+      } else {
+        logger.warn("can't find " + audioFile.getAbsolutePath());
+
+      }
+    }
+    logger.info("out of " +exercises.size() + " incorrect = " +incorrect);
   }
 
   private String setInstallPath(boolean useFile) {
