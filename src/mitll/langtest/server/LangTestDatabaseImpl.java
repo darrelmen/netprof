@@ -317,7 +317,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public FlashcardResponse getNextExercise(long userID) {
     FlashcardResponse nextExercise = db.getNextExercise(userID);
     String refAudio = nextExercise.e.getRefAudio();
-    if (refAudio.length() > 0) {
+    if (refAudio != null && refAudio.length() > 0) {
       getWavAudioFile(refAudio);
       ensureMP3(refAudio);
     }
@@ -1124,7 +1124,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     boolean wordPairs = serverProps.isWordPairs();
     logger.debug("word pairs " + wordPairs);
     db = new DatabaseImpl(configDir, h2DatabaseFile,serverProps.isShowSections(), wordPairs,
-      serverProps.getLanguage(), serverProps.doImages(), relativeConfigDir);
+      serverProps.getLanguage(), serverProps.doImages(), relativeConfigDir, serverProps.isFlashcard());
   }
 
   private class DirAndName {
