@@ -6,7 +6,6 @@ import audio.image.TranscriptEvent;
 import audio.imagewriter.ImageWriter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.io.Files;
 import corpus.ArabicLTS;
 import corpus.EnglishLTS;
 import corpus.HTKDictionary;
@@ -142,18 +141,19 @@ public class ASRScoring extends Scoring {
    * @param imageWidth
    * @param imageHeight
    * @param useScoreForBkgColor
+   * @param useCache
    * @return PretestScore object
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
                                   String sentence, String imageOutDir,
                                   int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-                                  boolean decode, String tmpDir
-  ) {
+                                  boolean decode, String tmpDir,
+                                  boolean useCache) {
     return scoreRepeatExercise(testAudioDir,testAudioFileNoSuffix,
         sentence,
         scoringDir,imageOutDir,imageWidth,imageHeight, useScoreForBkgColor,
-      decode, tmpDir
-    );
+      decode, tmpDir,
+      useCache);
   }
 
   /**
@@ -176,6 +176,7 @@ public class ASRScoring extends Scoring {
    * @param imageWidth image width
    * @param imageHeight image height
    * @param useScoreForBkgColor true if we want to color the segments by score else all are gray
+   * @param useCache
    * @paramx lmSentences foreground sentences (expected replies)
    * @paramx background sentences
    * @return score info coming back from alignment/reco
@@ -186,8 +187,8 @@ public class ASRScoring extends Scoring {
 
                                            String imageOutDir,
                                            int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-                                           boolean decode, String tmpDir
-  ) {
+                                           boolean decode, String tmpDir,
+                                           boolean useCache) {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
     File wavFile = new File(pathname);
@@ -219,7 +220,7 @@ public class ASRScoring extends Scoring {
     }
 
     Scores scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir,
-      decode, tmpDir);
+      decode, tmpDir, useCache);
     if (scores == null) {
       logger.warn("getScoreForAudio failed to generate scores.");
       Random rand = new Random();
@@ -255,6 +256,7 @@ public class ASRScoring extends Scoring {
    * @param testAudioFileNoSuffix
    * @param sentence
    * @param scoringDir
+   * @param useCache
    * @paramx lmSentences
    * @paramx background
    * @return
@@ -262,9 +264,9 @@ public class ASRScoring extends Scoring {
   private Scores getScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
                                   String sentence,
                                   String scoringDir,
-                                  boolean decode, String tmpDir) {
+                                  boolean decode, String tmpDir, boolean useCache) {
     String key = testAudioDir + File.separator + testAudioFileNoSuffix;
-    Scores scores = audioToScore.getIfPresent(key);
+    Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
     if (scores == null) {
       scores = calcScoreForAudio(testAudioDir,testAudioFileNoSuffix,sentence,scoringDir,
         decode,tmpDir);
@@ -284,7 +286,7 @@ public class ASRScoring extends Scoring {
    * The event scores returned are a map of event type to event name to score (e.g. "words"->"dog"->0.5)
    * The score per audio file is cached in {@link #audioToScore}
    *
-   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String)
+   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean)
    * @param testAudioDir
    * @param testAudioFileNoSuffix
    * @param sentence  only for align
