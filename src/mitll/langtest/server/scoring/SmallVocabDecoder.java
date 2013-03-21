@@ -174,7 +174,7 @@ public class SmallVocabDecoder {
 
     all.addAll(vocab.subList(0,Math.min(vocab.size(), vocabSizeLimit)));
 
-    logger.debug("vocab is " + all);
+    //logger.debug("vocab is " + all);
     return all;
   }
 
