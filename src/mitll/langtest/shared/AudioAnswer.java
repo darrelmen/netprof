@@ -61,5 +61,8 @@ public class AudioAnswer implements IsSerializable {
     this.score = score;
   }
 
+  public void setDecodeOutput(String decodeOutput) { this.decodeOutput = decodeOutput; }
+  public void setScore(double score) { this.score = score; }
+
   public String toString() { return "Path " + path + " id " +reqid + " validity " + validity; }
 }
