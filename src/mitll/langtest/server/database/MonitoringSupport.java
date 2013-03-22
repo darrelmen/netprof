@@ -633,7 +633,7 @@ public class MonitoringSupport {
     Map<String,Number> typeToStat = new HashMap<String,Number>();
     Number aDouble = total / ((double)HOUR);
     typeToStat.put("totalHrs", aDouble);
-    double value = total / ((double)count);
+    double value = count > 0 ? total / ((double)count) : 0;
     typeToStat.put("avgSecs", value/1000);
     typeToStat.put("totalAudioAnswers", count);
     typeToStat.put("badRecordings", badDur);
