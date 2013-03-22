@@ -865,6 +865,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getResultPerExercise();
   }
 
+  /**
+   * @see mitll.langtest.client.monitoring.MonitoringManager#doGenderQuery(com.google.gwt.user.client.ui.Panel)
+   * @return
+   */
   @Override
   public Map<String, Map<Integer, Integer>> getResultCountsByGender() {
     return db.getResultCountsByGender();
