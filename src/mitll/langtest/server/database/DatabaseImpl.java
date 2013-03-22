@@ -1092,6 +1092,11 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public Map<String,List<Integer>> getResultPerExercise() { return monitoringSupport.getResultPerExercise(getExercises()); }
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultCountsByGender()
+   * @return
+   */
   public Map<String,Map<Integer,Integer>> getResultCountsByGender() {  return monitoringSupport.getResultCountsByGender(getExercises()); }
   public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts() {  return monitoringSupport.getDesiredCounts(getExercises()); }
    /**
