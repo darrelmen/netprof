@@ -297,7 +297,7 @@ public class MonitoringSupport {
       Map<String, Integer> idToCountOutsideMale =
         new OutsideCount().getExerciseIDToOutsideCount(isMale, outsideFile, exercises);
       if (!idToCountOutsideMale.isEmpty()) {
-        logger.debug("using outside count file " + outsideFile + " of size " +idToCountOutsideMale);
+        logger.debug("using outside count file " + outsideFile + " of size " +idToCountOutsideMale.size());
       }
       for (Map.Entry<String, Integer> pair : idToCountOutsideMale.entrySet()) {
         String key = pair.getKey() + "/0";
