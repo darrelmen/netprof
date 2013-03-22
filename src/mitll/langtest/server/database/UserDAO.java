@@ -162,7 +162,7 @@ public class UserDAO extends DAO {
     Set<String> expected = new HashSet<String>();
     expected.addAll(Arrays.asList("id","age","gender","experience","firstname","lastname","ipaddr","nativelang","dialect","userid","timestamp","enabled"));
     boolean users = expected.removeAll(getColumns("users"));
-    logger.info("adding columns for " + expected);
+    if (!expected.isEmpty()) logger.info("adding columns for " + expected);
     for (String missing : expected) {
       if (missing.equalsIgnoreCase("firstName")) { addColumn(connection,"firstName","VARCHAR"); }
       if (missing.equalsIgnoreCase("lastName")) { addColumn(connection,"lastName","VARCHAR"); }
