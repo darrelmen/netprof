@@ -45,6 +45,7 @@ public class BrowserCheck {
   }
 
   public boolean isIE7() { return getBrowserAndVersion().equals("IE 7"); }
+  public boolean isIE() { return browser.equals("IE"); }
 
   public String getBrowserAndVersion() {
     String agent = getUserAgent();
