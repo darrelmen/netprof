@@ -288,6 +288,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         props.getReleaseDate()+"</font></span>");
     fp1.add(statusLine);
     vp.add(fp1);
+    this.userline = new HTML(getUserText());
+    vp.add(userline);
 
     vp.add(currentExerciseVPanel);
     userManager = new UserManager(this,service, false, props.isDataCollectAdminView(), false);
