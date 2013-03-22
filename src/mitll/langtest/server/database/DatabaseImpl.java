@@ -424,14 +424,37 @@ public class DatabaseImpl implements Database {
   public List<Exercise> getExercisesBiasTowardsUnanswered(long userID) {
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
+    Map<String,Double> idToWeight = new HashMap<String, Double>();
 
-    populateInitialExerciseIDToCount(idToExercise, idToCount);
+    populateInitialExerciseIDToCount(idToExercise, idToCount,idToWeight);
 
     // only find answers that are for the gender
-    Collection<String> alreadyAnswered = getExerciseIDToResultCount(userID, idToCount);
+    /*Collection<String> alreadyAnswered =*/ getExerciseIDToResultCount(userID, idToCount);
 
-    SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
-    return getResultsRandomizedPerUser(userID, idToExercise, countToIds);
+    Map<String, Integer> idToCountScaled = getScaledIdToCount(idToCount, idToWeight);
+    SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCountScaled);
+    return getResultsRandomizedPerUser(userID, idToExercise, countToIds, idToWeight);
+  }
+
+  /**
+   * Use the weight on each exercise to bias how many times they are presented.
+   * We divide the current raw count by log(weight).  An item with weight 100 will get recorded twice as often
+   * as one with weight 10...
+   * @param idToCount
+   * @param idToWeight
+   * @return map of scaled counts
+   */
+  private Map<String, Integer> getScaledIdToCount(Map<String, Integer> idToCount, Map<String, Double> idToWeight) {
+    Map<String,Integer> idToCountScaled = new HashMap<String, Integer>();
+
+    for (Map.Entry<String,Integer> idAndCount : idToCount.entrySet()) {
+      String id = idAndCount.getKey();
+      Double weight = idToWeight.get(id);
+      double doubleCount = (double) idAndCount.getValue();
+      int round = (int)Math.round(doubleCount / weight);
+      idToCountScaled.put(id, round);
+    }
+    return idToCountScaled;
   }
 
   /**
@@ -445,8 +468,9 @@ public class DatabaseImpl implements Database {
   public List<Exercise> getExercisesBiasTowardsUnanswered(long userID, String outsideFile) {
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
+    Map<String,Double> idToWeight = new HashMap<String, Double>();
 
-    populateInitialExerciseIDToCount(idToExercise, idToCount);
+    populateInitialExerciseIDToCount(idToExercise, idToCount,idToWeight);
     //logger.info("initial map of online counts is size = " + idToCount.size() +" " + idToCount.values().size());
 
     boolean isMale = userDAO.isUserMale(userID);
@@ -467,7 +491,7 @@ public class DatabaseImpl implements Database {
     // now make a map of count at this number to exercise ids for these numbers
     SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
 
-    return getResultsRandomizedPerUser(userID, idToExercise, countToIds);
+    return getResultsRandomizedPerUser(userID, idToExercise, countToIds,idToWeight);
   }
 
   /**
@@ -481,20 +505,39 @@ public class DatabaseImpl implements Database {
    * @param countToIds statistics about answers for each exercise
    * @return List of exercises in order from least answers to most
    */
-  private List<Exercise> getResultsRandomizedPerUser(long userID, Map<String, Exercise> idToExercise,
-                                                     SortedMap<Integer, List<String>> countToIds) {
+  private List<Exercise> getResultsRandomizedPerUser(long userID,
+                                                     Map<String, Exercise> idToExercise,
+                                                     SortedMap<Integer, List<String>> countToIds,
+                                                     Map<String, Double> idToWeight) {
     List<Exercise> result = new ArrayList<Exercise>();
     Random rnd = new Random(userID);
 
+    //int count2 = 0;
     for (Map.Entry<Integer, List<String>> pair : countToIds.entrySet()) {
-     // Integer count = pair.getKey();
+      Integer countOrig = pair.getKey();
       List<String> itemsAtCount = pair.getValue();
-      //logger.debug("for count = " + count + " " +itemsAtCount.size() + " items");
-      Collections.shuffle(itemsAtCount, rnd);
-      for (String id : itemsAtCount) {
-        Exercise e = idToExercise.get(id);
-        if (e == null) logger.error("huh? couldn't find exercise " + id);
-        else result.add(e);
+      //logger.debug("doing items at result count = " + countOrig + " : " + itemsAtCount.size());
+
+      // take each exercise and make a second map of exercise to int weight, reverse it, and shuffle each value
+      Map<String,Integer> exToWeight = new HashMap<String, Integer>();
+      for (String exid : itemsAtCount) {
+        int round = (int) Math.round(idToWeight.get(exid));
+       // if (count2++ < 20) logger.debug("weight for " +exid + " is " +round);
+        exToWeight.put(exid, round);
+      }
+      SortedMap<Integer, List<String>> countToIds2 = getCountToExerciseIDs(exToWeight);
+      List<Integer> counts = new ArrayList<Integer>(countToIds2.keySet());
+      Collections.reverse(counts); // 9,4,3,2,1 -> 1,2,3,4,9
+
+      for (Integer count : counts) {
+        List<String> itemsAtCount2 = countToIds2.get(count);
+       // logger.debug("doing items at weight count = " + count + " : " + itemsAtCount2.size());
+        Collections.shuffle(itemsAtCount2, rnd);
+        for (String id : itemsAtCount2) {
+          Exercise e = idToExercise.get(id);
+          if (e == null) logger.error("huh? couldn't find exercise " + id);
+          else result.add(e);
+        }
       }
     }
     return result;
@@ -502,6 +545,8 @@ public class DatabaseImpl implements Database {
 
   /**
    * Reverse the map -- make a map of result count->list of ids at that count
+   * @see #getExercisesBiasTowardsUnanswered(long)
+   * @see #getExercisesBiasTowardsUnanswered(long, String)
    * @param idToCount
    * @return
    */
@@ -516,10 +561,19 @@ public class DatabaseImpl implements Database {
     return countToIds;
   }
 
-  private void populateInitialExerciseIDToCount(Map<String, Exercise> idToExercise, Map<String, Integer> idToCount) {
+  /**
+   * @see #getExercisesBiasTowardsUnanswered(long)
+   * @see #getExercisesBiasTowardsUnanswered(long, String)
+   * @param idToExercise
+   * @param idToCount
+   */
+  private void populateInitialExerciseIDToCount(Map<String, Exercise> idToExercise, Map<String, Integer> idToCount,
+                                                Map<String,Double> idToWeight) {
     List<Exercise> rawExercises = getExercises();
     for (Exercise e : rawExercises) {
       idToCount.put(e.getID(), 0);
+      double weight = e.getWeight() == 0 ? 1 : Math.max(1, Math.log(e.getWeight())); // 1->n
+      idToWeight.put(e.getID(), weight);
       idToExercise.put(e.getID(), e);
     }
   }
