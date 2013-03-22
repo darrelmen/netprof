@@ -15,6 +15,7 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -389,13 +390,17 @@ public class BootstrapExercisePanel extends FluidContainer {
   }
 
   private void play(String mp3Audio) {
-    play(mp3Audio.replace(".mp3",".wav"),mp3Audio);
+    play(mp3Audio.replace(".mp3",".wav"),mp3Audio.replace(".wav",".mp3"));
   }
 
-  private void play(String openAudio,String mp3Audio) {
+  private void play(String openAudio, String mp3Audio) {
     mistakeAudio = Audio.createIfSupported();
-    playAudio(openAudio,mp3Audio);
-    mistakeAudio.play();
+    if (mistakeAudio == null) {
+      Window.alert("audio playback not supported.");
+    } else {
+      playAudio(openAudio, mp3Audio);
+      mistakeAudio.play();
+    }
   }
 
   private void playAudio(String openAudio,String mp3Audio) {
