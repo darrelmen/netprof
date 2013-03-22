@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Grader;
+import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,6 +17,8 @@ import java.util.Set;
  * @deprecated there are no graders, just users
  */
 public class GraderDAO {
+  private static Logger logger = Logger.getLogger(DatabaseImpl.class);
+
   private final Database database;
 
   public GraderDAO(Database database) {
@@ -223,7 +226,11 @@ public class GraderDAO {
       statement.close();
       database.closeConnection(connection);
     } catch (Exception e) {
-      e.printStackTrace();
+      if (e.getMessage().contains("not found")) {
+        logger.debug("note there is no grader table.");
+      } else {
+        logger.error("got " + e, e);
+      }
     }
     return graders;
   }
