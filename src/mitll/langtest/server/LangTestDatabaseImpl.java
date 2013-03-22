@@ -253,7 +253,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         exercises = db.getExercisesFirstNInOrder(userID, serverProps.firstNInOrder);
       }
       if (!serverProps.collectAudio) {
-        logger.debug("*not* collecting audio, just text");
+        //logger.debug("*not* collecting audio, just text");
 
         for (Exercise e : exercises) {
           e.setRecordAnswer(false);
