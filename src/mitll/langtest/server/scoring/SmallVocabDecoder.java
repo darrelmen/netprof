@@ -52,6 +52,7 @@ public class SmallVocabDecoder {
   //private static final int MAX_AUTO_CRT_VOCAB = 200;
   private static final String MAX_ORDER = "2";  // NOTE 3 does NOT work
   public static final String UNKNOWN_MODEL = "UNKNOWNMODEL";
+  private static final String UNKNOWN_MODEL_BIAS = "-1.20";
 
   /**
    * Platform -- windows, mac, linux, etc.
@@ -84,7 +85,7 @@ public class SmallVocabDecoder {
           String wordForThisNode = tokens.get(newNodeIndex);
           linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=" + next +
             " l=" +
-            (wordForThisNode.equals(UNKNOWN_MODEL) ? "-2.00" : "-1.00") +
+            (wordForThisNode.equals(UNKNOWN_MODEL) ? UNKNOWN_MODEL_BIAS : "-1.00") +
             "\n");
           nodesBuf.append("I=" +
             next +
