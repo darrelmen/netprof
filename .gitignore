@@ -15,3 +15,4 @@ war/config/*/media/*.lab
 war/config/*/media/*.raw
 war/media/ac*/*.wav
 war/media/ac*/*.raw
+war/langtest/*
