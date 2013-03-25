@@ -133,7 +133,7 @@ public class ASRScoring extends Scoring {
   }*/
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean)
    * @param testAudioDir
    * @param testAudioFileNoSuffix
    * @param sentence that should be what the test audio contains
@@ -560,7 +560,7 @@ public class ASRScoring extends Scoring {
 
     if (decode) {
       cfgTemplate = getProp(DECODE_CFG_TEMPLATE_PROP, DECODE_CFG_TEMPLATE_DEFAULT);
-      kv.put(LM_TO_USE, tmpDir +File.separator + SMALL_LM_SLF); // hack! TODO hack replace
+      kv.put(LM_TO_USE, tmpDir +File.separator +File.separator + SMALL_LM_SLF); // hack! TODO hack replace
      // new FileCopier().copy(modelsDir+File.separator+"phones.dict",tmpDir+File.separator +"dict");   // Audio.hscore in pron sets dictionary=this value
     }
     //logger.info("using config from template " + cfgTemplate);
