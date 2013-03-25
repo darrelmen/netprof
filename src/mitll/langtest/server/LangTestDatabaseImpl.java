@@ -540,7 +540,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Get score when doing autoCRT on an audio file.
-   * @see AutoCRT#getAutoCRTAnswer(String, mitll.langtest.shared.Exercise, int, java.io.File, mitll.langtest.shared.AudioAnswer.Validity, int, String, int)
+   * @see AutoCRT#getAutoCRTDecodeOutput(String, int, mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
    * @see AutoCRT#getFlashcardAnswer
    * @param testAudioFile
    * @param lmSentences
@@ -551,18 +551,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public PretestScore getASRScoreForAudio(File testAudioFile, List<String> lmSentences,
                                           List<String> background) {
     String tmpDir = Files.createTempDir().getAbsolutePath();
-    String slfFile = createSLFFile(lmSentences, background, tmpDir);
+    String slfFile = createSLFFile(lmSentences, tmpDir);
     if (!new File(slfFile).exists()) {
       logger.error("couldn't make slf file?");
       return new PretestScore();
     } else {
       makeASRScoring();
-      String sentence = asrScoring.getUsedTokens(lmSentences, background);
+      List<String> unk = new ArrayList<String>();
+      unk.add("UNKNOWNMODEL");
+      String sentence = asrScoring.getUsedTokens(lmSentences, unk);
       return getASRScoreForAudio(0, testAudioFile.getPath(), sentence, 128, 128, false, true, tmpDir, serverProps.useScoreCache());
     }
   }
 
-  private String createSLFFile(List<String> lmSentences, List<String> background, String tmpDir) {
+/*  private String createSLFFile(List<String> lmSentences, List<String> background, String tmpDir) {
     SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
     long then = System.currentTimeMillis();
     String slfFile = svDecoderHelper.createSLFFile(lmSentences, background, tmpDir,
@@ -570,12 +572,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     long now = System.currentTimeMillis();
     logger.debug("create slf file took " + (now - then) + " millis");
     return slfFile;
+  }*/
+
+  private String createSLFFile(List<String> lmSentences, String tmpDir) {
+    SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
+    long then = System.currentTimeMillis();
+    String slfFile = svDecoderHelper.createSimpleSLFFile(lmSentences, tmpDir);
+    long now = System.currentTimeMillis();
+    //logger.debug("simple create slf file took " + (now - then) + " millis");
+    return slfFile;
   }
 
   /**
    * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
    *
-   * @see #writeAudioFile
+   * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean)
+   * @see #getASRScoreForAudio(java.io.File, java.util.List, java.util.List)
    * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param testAudioFile
