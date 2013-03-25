@@ -551,7 +551,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public PretestScore getASRScoreForAudio(File testAudioFile, List<String> lmSentences,
                                           List<String> background) {
     String tmpDir = Files.createTempDir().getAbsolutePath();
-    String slfFile = createSLFFile(lmSentences, tmpDir);
+    List<String> both = new ArrayList<String>();
+    both.addAll(lmSentences);
+    String slfFile = createSLFFile(both, tmpDir);
     if (!new File(slfFile).exists()) {
       logger.error("couldn't make slf file?");
       return new PretestScore();
@@ -559,7 +561,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       makeASRScoring();
       List<String> unk = new ArrayList<String>();
       unk.add("UNKNOWNMODEL");
-      String sentence = asrScoring.getUsedTokens(lmSentences, unk);
+      String sentence = asrScoring.getUsedTokens(both, unk);
       return getASRScoreForAudio(0, testAudioFile.getPath(), sentence, 128, 128, false, true, tmpDir, serverProps.useScoreCache());
     }
   }
