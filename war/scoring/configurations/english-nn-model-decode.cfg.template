@@ -65,6 +65,7 @@ frame-window: 13
 [decode.HybridDecode]
 word-penalty: 1.0
 process-dictionary: false
+unkmodel: true
 grammar: MODELS_DIR/grammar
 lm: LM_TO_USE
 lm-weight: 4.0
