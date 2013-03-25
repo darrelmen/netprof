@@ -57,6 +57,7 @@ phone-normalizer: MODELS_DIR/phones.normalizer
 
 [decode.HybridDecode]
 process-dictionary: false
+unkmodel: true
 word-penalty: 1.0
 grammar: MODELS_DIR/grammar
 dictionary: MODELS_DIR/HLDA_DIR/dict-wo-sp
