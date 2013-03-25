@@ -1,5 +1,6 @@
 package mitll.langtest.server.scoring;
 
+import com.google.common.io.Files;
 import corpus.package$;
 import mitll.langtest.server.ProcessRunner;
 import mitll.langtest.server.database.FileExerciseDAO;
@@ -44,18 +45,69 @@ public class SmallVocabDecoder {
    */
  // private static final float BLEND_FOREGROUND_BACKGROUND = 0.8f;
 
-  private static final String SMALL_LM_SLF = "smallLM.slf"; // just for testing on windows
+  private static final String SMALL_LM_SLF = ASRScoring.SMALL_LM_SLF;
   /**
    * Limit on vocabulary size -- too big and dcodr will run out of memory and segfault
    */
   //private static final int MAX_AUTO_CRT_VOCAB = 200;
   private static final String MAX_ORDER = "2";  // NOTE 3 does NOT work
+  public static final String UNKNOWN_MODEL = "UNKNOWNMODEL";
 
   /**
    * Platform -- windows, mac, linux, etc.
    */
   private final String platform = Utils.package$.MODULE$.platform();
   private double foregroundBackgroundBlend;
+
+  public String createSimpleSLFFile(List<String> lmSentences, String tmpDir) {
+    String slfFile = tmpDir + File.separator + SMALL_LM_SLF;
+
+    try {
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(slfFile), FileExerciseDAO.ENCODING));
+      writer.write("VERSION=1.0\n");
+
+      int linkCount = 0;
+      StringBuilder nodesBuf = new StringBuilder();
+      nodesBuf.append("I=0 W=<s>\n");
+      nodesBuf.append("I=1 W=</s>\n");
+      int newNodes = 2;
+      StringBuilder linksBuf = new StringBuilder();
+      List<String> sentencesToUse = new ArrayList<String>(lmSentences);
+      sentencesToUse.add(UNKNOWN_MODEL);
+      for (String sentence : sentencesToUse) {
+        List<String> tokens = getTokens(sentence);
+        int numTokens = tokens.size();
+        int start = 0;
+
+        for (int newNodeIndex = 0; newNodeIndex < numTokens; newNodeIndex++) {
+          int next = newNodes++;
+          String wordForThisNode = tokens.get(newNodeIndex);
+          linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=" + next +
+            " l=" +
+            (wordForThisNode.equals(UNKNOWN_MODEL) ? "-2.00" : "-1.00") +
+            "\n");
+          nodesBuf.append("I=" +
+            next +
+            " W=" +
+            wordForThisNode +
+            "\n");
+
+          start = next;
+        }
+        linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=1" + " l=-1.00\n");
+      }
+      writer.write("N=" + newNodes + " L=" + linkCount + "\n");
+
+      writer.write(nodesBuf.toString());
+      writer.write(linksBuf.toString());
+
+      writer.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    logger.debug("wrote " + slfFile + " exists " + new File(slfFile).exists());
+    return slfFile;
+  }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#createSLFFile(java.util.List, java.util.List, String)
@@ -142,31 +194,28 @@ public class SmallVocabDecoder {
 
   /**
    * @see ASRScoring#getUniqueTokensInLM(java.util.List, java.util.List)
-   * @param background
+   * @param sentences
    * @param vocabSizeLimit
    * @return
    */
-  public List<String> getSimpleVocab(List<String> background, int vocabSizeLimit) {
+  public List<String> getSimpleVocab(List<String> sentences, int vocabSizeLimit) {
     List<String> all = new ArrayList<String>();
 
     final Map<String, Integer> sc = new HashMap<String, Integer>();
-    for (String l : background) {
-      for (String t : l.split("\\s")) { // split on spaces
-        String tt = t.replaceAll("\\p{P}", ""); // remove all punct
+    for (String sentence : sentences) {
+      for (String untrimedToken : sentence.split("\\s")) { // split on spaces
+        String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
         String token = tt.trim();
-        //if (useDict && dictWords.contains(token)) {
-          if (token.length() > 0) {
-            Integer c = sc.get(t);
-            if (c == null) sc.put(t, 1);
-            else sc.put(t, c + 1);
-          }
-        //}
+        if (token.length() > 0) {
+          Integer c = sc.get(token);
+          sc.put(token, (c == null) ? 1 : c + 1);
+        }
       }
     }
     List<String> vocab = new ArrayList<String>(sc.keySet());
     Collections.sort(vocab, new Comparator<String>() {
       public int compare(String s, String s2) {
-        Integer first = sc.get(s);
+        Integer first  = sc.get(s);
         Integer second = sc.get(s2);
         return first < second ? +1 : first > second ? -1 : 0;
       }
@@ -174,7 +223,20 @@ public class SmallVocabDecoder {
 
     all.addAll(vocab.subList(0,Math.min(vocab.size(), vocabSizeLimit)));
 
-    //logger.debug("vocab is " + all);
+    return all;
+  }
+
+  private List<String> getTokens(String sentence) {
+    List<String> all = new ArrayList<String>();
+
+    for (String untrimedToken : sentence.split("\\s")) { // split on spaces
+      String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
+      String token = tt.trim();
+      if (token.length() > 0) {
+        all.add(token);
+      }
+    }
+
     return all;
   }
 
@@ -383,7 +445,7 @@ public class SmallVocabDecoder {
   /**
    * HBuild -n smallLmOut.srilm -s '<s>' '</s>' out.vocab smallLM.slf
    * @param tmpDir
-   * @param srilmFile
+   * @param srilmFile                                                                       -
    * @param pathToBinDir
    */
   private String runHBuild(String tmpDir, File srilmFile, String pathToBinDir) {
@@ -409,4 +471,11 @@ public class SmallVocabDecoder {
     return slfOut;
   }
 
+  public static void main(String []arg) {
+    String tmpDir = Files.createTempDir().getAbsolutePath();
+    String simpleSLFFile = new SmallVocabDecoder().createSimpleSLFFile(Arrays.asList("fred", "barney","fred barney","ace barry charley"), tmpDir);
+    //String simpleSLFFile = new SmallVocabDecoder().createSimpleSLFFile(Arrays.asList("fred"), tmpDir);
+   // String simpleSLFFile = new SmallVocabDecoder().createSimpleSLFFile(Arrays.asList("fred","barney"), tmpDir);
+    System.out.println("wrote to " +simpleSLFFile);
+  }
 }
