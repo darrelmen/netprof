@@ -66,6 +66,7 @@ public class DatabaseImpl implements Database {
    * TODO : consider making proper v2 database!
    */
   private String lessonPlanFile;
+  private String configDir;
   private String mediaDir;
   private boolean isUrdu;
   private boolean useFile;
@@ -81,6 +82,7 @@ public class DatabaseImpl implements Database {
   }
 
   public DatabaseImpl(String configDir, String dbName, boolean showSections) {
+    this.configDir = configDir;
     connection = new H2Connection(configDir, dbName);
     this.showSections = showSections;
     try {
@@ -214,7 +216,7 @@ public class DatabaseImpl implements Database {
     makeDAO(useFile, lessonPlanFile, isExcel);
 
     if (useFile && !isExcel) {
-      ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, lessonPlanFile);
+      ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, configDir, lessonPlanFile);
     }
     List<Exercise> rawExercises = exerciseDAO.getRawExercises();
     if (rawExercises.isEmpty()) {
