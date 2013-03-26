@@ -22,7 +22,7 @@ public class Exercise extends ExerciseShell  {
   private static final ArrayList<String> EMPTY_LIST = new ArrayList<String>();
 
   public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE, REPEAT, REPEAT_FAST_SLOW, MULTI_REF }
-  private static final String EN = "en";
+  public static final String EN = "en";
   public static final String FL = "fl";
   private static final boolean DEBUG = false;
   private String plan;
@@ -119,7 +119,7 @@ public class Exercise extends ExerciseShell  {
   }
 
   /**
-   * @see mitll.langtest.server.database.FileExerciseDAO#readFastAndSlowExercises(String, String)
+   * @see mitll.langtest.server.database.FileExerciseDAO#readFastAndSlowExercises
    * @param plan
    * @param id
    * @param content
