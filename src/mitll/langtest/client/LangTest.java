@@ -148,10 +148,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     // Load the visualization api, passing the onLoadCallback to be called
     // when loading is done.
-    VisualizationUtils.loadVisualizationApi(new Runnable() {
-      @Override
-      public void run() {}
-    }, ColumnChart.PACKAGE, LineChart.PACKAGE);
+    if (props.isAdminView()) {
+      VisualizationUtils.loadVisualizationApi(new Runnable() {
+        @Override
+        public void run() {
+        }
+      }, ColumnChart.PACKAGE, LineChart.PACKAGE);
+    }
 
     userManager = new UserManager(this,service, isCollectAudio(), false, isCRTDataCollectMode() || isArabicTextDataCollect());
     resultManager = new ResultManager(service, this, props.getNameForAnswer());
@@ -204,9 +207,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     makeExerciseList(exerciseListPanel, props.isGrading());
 
     // don't do flash if we're doing text only collection
+    //System.out.println("teacher view " + props.isTeacherView() + " arabic text data " + props.isArabicTextDataCollect() + " collect audio " + props.isCollectAudio());
+
     if (!props.isTeacherView() && !props.isArabicTextDataCollect() && props.isCollectAudio()) {
       makeFlashContainer();
       currentExerciseVPanel.add(flashRecordPanel);
+    }
+    else {
+      System.out.println("*not* allowing recording of audio.");
     }
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("currentExercisePanel");
@@ -582,8 +590,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see ExerciseList#checkBeforeLoad(mitll.langtest.shared.ExerciseShell)
    */
   public void login() {
-    if ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView() || props.isGrading()) userManager.teacherLogin();
-    else userManager.login();
+    if ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView() || props.isGrading()) {
+      userManager.teacherLogin();
+    }
+    else {
+      userManager.login();
+    }
   }
 
   /**
