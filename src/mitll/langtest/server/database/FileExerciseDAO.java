@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -165,7 +166,7 @@ public class FileExerciseDAO implements ExerciseDAO {
    * @param installPath
    * @param lessonPlanFile
    */
-  public void readFastAndSlowExercises(final String installPath, String lessonPlanFile) {
+  public void readFastAndSlowExercises(final String installPath, String configDir, String lessonPlanFile) {
     if (exercises != null) return;
 
     try {
@@ -201,16 +202,19 @@ public class FileExerciseDAO implements ExerciseDAO {
           else {
             int length = line2.split("\\(").length;
             boolean simpleFile = length == 2 && line2.split("\\(")[1].trim().endsWith(")");
+            boolean isTSV = line2.contains("\t");
             exercise = simpleFile ?
                 getSimpleExerciseForLine(line2) :
-                getExerciseForLine(line2);
+              isTSV ? readTSVLine(configDir,line2) : getExerciseForLine(line2);
           }
-          if (showSections) {
-            addSectionTest(count, exercise);
-          }
+          if (exercise != null) {
+            if (showSections) {
+              addSectionTest(count, exercise);
+            }
 
-          // if (count < 10) logger.info("Got " + exercise);
-          exercises.add(exercise);
+            // if (count < 10) logger.info("Got " + exercise);
+            exercises.add(exercise);
+          }
         } catch (Exception e) {
           logger.error("Got " + e + ".Skipping line -- couldn't parse line #"+count + " : " +line2,e);
           errors++;
@@ -220,8 +224,6 @@ public class FileExerciseDAO implements ExerciseDAO {
           }
         }
       }
-     // w.close();
-
       logger.debug("sections " + typeToUnitToLesson);
       reader.close();
     } catch (IOException e) {
@@ -233,6 +235,63 @@ public class FileExerciseDAO implements ExerciseDAO {
     else {
       logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
+  }
+
+  private Exercise readTSVLine(String configDir, String line) {
+    if (line.trim().length() == 0) {
+      logger.debug("skipping empty line");
+      return null;
+    }
+    String[] split = line.split("\\t");
+    //int len = split.length;
+    int i =0;
+    String id = split[i++].trim();
+    String level = split[i++].trim();
+    String type = split[i++].trim();
+    String includeFile = split[i++].trim();
+
+    if (includeFile.startsWith("file://")) {
+      includeFile = includeFile.substring("file://".length());
+    }
+    File include = new File(configDir,includeFile);
+
+    boolean exists = include.exists();
+    if (!exists) {
+      logger.warn("couldn't open file " + include + " for line " + line);
+      return null;
+    }
+    else {
+      StringBuilder builder = new StringBuilder();
+      try {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(include), ENCODING));
+        String line2;
+        while ((line2 = reader.readLine()) != null) {
+          builder.append(line2);
+        }
+        reader.close();
+      } catch (IOException e) {
+        logger.error("got " + e, e);
+      }
+      String arabicQuestion = split[i++].trim();
+      String englishQuestion = split[i++].trim();
+      String arabicAnswers = split[i++].trim();
+      String englishAnswers = split[i++].trim();
+      String notes = split[i++].trim();
+
+      Exercise exercise = new Exercise("plan", id, builder.toString(), false, false, englishQuestion);
+
+      addQuestion(arabicQuestion, arabicAnswers, exercise,true);
+      addQuestion(englishQuestion, englishAnswers, exercise,false);
+      return exercise;
+    }
+
+  }
+
+  private void addQuestion(String arabicQuestion, String arabicAnswers, Exercise exercise, boolean isFLQ) {
+    List<String> alternateAnswers = Arrays.asList(arabicAnswers.split("\\|\\|"));
+    List<String> objects1 = Collections.emptyList();
+    List<String> objects = alternateAnswers.size() > 1 ? alternateAnswers.subList(1, alternateAnswers.size()) : objects1;
+    exercise.addQuestion(isFLQ ? Exercise.FL : Exercise.EN, arabicQuestion, alternateAnswers.get(0), new ArrayList<String>(objects));
   }
 
   private void addSectionTest(int count, Exercise exercise) {
