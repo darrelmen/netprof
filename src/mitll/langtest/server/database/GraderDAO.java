@@ -1,16 +1,24 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.shared.Grader;
+import org.apache.log4j.Logger;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
  * @deprecated there are no graders, just users
  */
 public class GraderDAO {
+  private static Logger logger = Logger.getLogger(DatabaseImpl.class);
+
   private final Database database;
 
   public GraderDAO(Database database) {
@@ -18,12 +26,6 @@ public class GraderDAO {
   }
 
   /**
-   * If a grade already exists, update the value.
-   * @see mitll.langtest.server.database.DatabaseImpl#addGrader(int, String, int, boolean)
-   * @param resultID
-   * @param exerciseID
-   * @param grade
-   * @param correct
    * @return
    */
   public int addGrader(String login) {
@@ -54,7 +56,7 @@ public class GraderDAO {
   }
 
   /**
-   * @see DatabaseImpl#graderExists(String)
+   * @seex DatabaseImpl#graderExists
    * @param id
    * @return
    */
@@ -123,7 +125,7 @@ public class GraderDAO {
   }*/
 
   /**
-   * @see mitll.langtest.server.database.ResultDAO#getResultsForExercise(String)
+   * @seex mitll.langtest.server.database.ResultDAO#getResultsForExercise(String)
    * @param exerciseID
    * @return
    */
@@ -210,8 +212,31 @@ public class GraderDAO {
     return 0;
   }
 
+  public Collection<Grader> getGraders() {
+    List<Grader> graders = new ArrayList<Grader>();
+    try {
+      Connection connection = database.getConnection();
+      PreparedStatement statement = connection.prepareStatement("SELECT * FROM grader ");
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        int i = 1;
+        graders.add(new Grader((long) rs.getInt(i++), rs.getString(i), "", 0));
+      }
+      rs.close();
+      statement.close();
+      database.closeConnection(connection);
+    } catch (Exception e) {
+      if (e.getMessage().contains("not found")) {
+        logger.debug("note there is no grader table.");
+      } else {
+        logger.error("got " + e, e);
+      }
+    }
+    return graders;
+  }
+
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#DatabaseImpl(javax.servlet.http.HttpServlet)
+   * @seex mitll.langtest.server.database.DatabaseImpl#DatabaseImpl(javax.servlet.http.HttpServlet)
    * @param connection
    * @throws java.sql.SQLException
    */
