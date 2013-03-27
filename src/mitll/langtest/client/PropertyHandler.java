@@ -42,6 +42,7 @@ public class PropertyHandler {
   private static final String SHOW_SECTIONS = "showSections";
   //private static final String DEBUG_EMAIL = "debugEmail";
   private static final String FLASHCARD = "flashcard";
+  private static final String TIMED_GAME = "timedGame";
   private static final String LANGUAGE = "language";
 
   // URL parameters that can override above parameters
@@ -99,6 +100,7 @@ public class PropertyHandler {
   private boolean showSections = false;
   //private boolean debugEmail = true;
   private boolean flashCard = false;
+  private boolean timedGame = false;
   private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
   private float screenPortion;
@@ -145,6 +147,7 @@ public class PropertyHandler {
       else if (key.equals(FLASHCARD)) flashCard = getBoolean(value);
       else if (key.equals(LANGUAGE)) language = value;
       else if (key.equals(SPLASH_TITLE)) splashTitle = value;
+      else if (key.equals(TIMED_GAME)) timedGame = getBoolean(value);
     }
   }
 
@@ -373,5 +376,9 @@ public class PropertyHandler {
 
   public boolean isCRTDataCollectMode() {
     return CRTDataCollectMode;
+  }
+
+  public boolean isTimedGame() {
+    return timedGame;
   }
 }
