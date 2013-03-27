@@ -103,7 +103,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
   private PropertyHandler props;
-
+  private HTML userline;
   /**
    * Make an exception handler that displays the exception.
    */
@@ -162,10 +162,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // when loading is done.
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
-      public void run() {}
+      public void run() {
+      }
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
 
-    userManager = new UserManager(this,service, isCollectAudio(), false, isCRTDataCollectMode(), false);
+    userManager = new UserManager(this,service, isCollectAudio(), false, isCRTDataCollectMode() || isArabicTextDataCollect(), props.getAppTitle(),false);
     resultManager = new ResultManager(service, this, props.getNameForAnswer());
     monitoringManager = new MonitoringManager(service, props);
     boolean usualLayout = !showOnlyOneExercise();
@@ -210,14 +211,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       RootPanel.get().add(currentExerciseVPanel);
     }
 
-
     // set up left side exercise list
     makeExerciseList(exerciseListPanel, props.isGrading());
 
     // don't do flash if we're doing text only collection
+    //System.out.println("teacher view " + props.isTeacherView() + " arabic text data " + props.isArabicTextDataCollect() + " collect audio " + props.isCollectAudio());
+
     if (!props.isTeacherView() && !props.isArabicTextDataCollect() && props.isCollectAudio()) {
       makeFlashContainer();
       currentExerciseVPanel.add(flashRecordPanel);
+    }
+    else {
+      System.out.println("*not* allowing recording of audio.");
     }
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("currentExercisePanel");
@@ -277,7 +282,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     widgets.addStyleName("sendButtonBlue");
     row.add(new Column(12, widgets));
 
-    userManager = new UserManager(this, service, isCollectAudio(), false, isCRTDataCollectMode(), true);
+    userManager = new UserManager(this, service, isCollectAudio(), false, isCRTDataCollectMode(), props.getAppTitle(), true);
     this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager, this);
 
     makeFlashContainer();
@@ -339,7 +344,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     });
     fp1.add(users);
-    userManager = new UserManager(this,service, isCollectAudio(), false, false, false);
+    userManager = new UserManager(this,service, isCollectAudio(), props.isDataCollectAdminView(), false, props.getAppTitle(),false);
 
     logout = new Anchor("Logout");
     logout.addClickHandler(new ClickHandler() {
@@ -354,9 +359,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     HTML statusLine = getReleaseStatus();
     fp1.add(statusLine);
     vp.add(fp1);
+    this.userline = new HTML(getUserText());
+    vp.add(userline);
 
     vp.add(currentExerciseVPanel);
-    userManager = new UserManager(this,service, false, props.isDataCollectAdminView(), false, false);
     DataCollectAdmin dataCollectAdmin = new DataCollectAdmin(userManager, service);
     dataCollectAdmin.makeDataCollectNewSiteForm(currentExerciseVPanel);
 
@@ -435,10 +441,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else {
       if (props.isShowSections()) {
         this.exerciseList = new SectionExerciseList(currentExerciseVPanel, service, feedback,
-          isArabicTextDataCollect(), props.isShowTurkToken(), isAutoCRTMode());
+          props.isShowTurkToken(), isAutoCRTMode());
      } else {
         this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback,
-          isArabicTextDataCollect(), props.isShowTurkToken(), isAutoCRTMode()) {
+          props.isShowTurkToken(), isAutoCRTMode()) {
           @Override
           protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
         };
@@ -463,7 +469,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void setMainWindowSize(DockLayoutPanel widgets) {
     int widthToUse = Window.getClientWidth() - (props.isGoodwaveMode() ? 15 : eastWidth);
-    widgets.setSize(Math.max(widthToUse, 50) + "px", Math.max((Window.getClientHeight()-footerHeight-15),50) + "px");
+    widgets.setSize(Math.max(widthToUse, 50) + "px", Math.max((Window.getClientHeight() - footerHeight - 15), 50) + "px");
     //widgets.setSize("100%","100%");
     //widgets.setSize(Math.max((Window.getClientWidth() - EAST_WIDTH), 50) + "px","100%");
   }
@@ -484,7 +490,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     showResults.setVisible(isGrading || props.isAdminView());
     monitoring.setVisible(isGrading || props.isAdminView());
 
-
+    System.out.println("goodwave mode "+ props.isGoodwaveMode() + " " + isAutoCRTMode());
     if (props.isGoodwaveMode() || isAutoCRTMode()) {   // no login for pron mode
       gotUser(-1);
     }
@@ -586,6 +592,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     VerticalPanel vp = new VerticalPanel();
 
     // add logout link
+
+    this.userline = new HTML(getUserText());
+    vp.add(userline);
+
     logout = new Anchor("Logout");
     vp.add(logout);
     logout.addClickHandler(new ClickHandler() {
@@ -597,7 +607,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     users = new Anchor("Users");
     users.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        userTable.showUsers(service,userManager.getUser(),false);
+        userTable.showUsers(service, userManager.getUser(), false);
       }
     });
     vp.add(users);
@@ -628,6 +638,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return vp;
   }
 
+  private String getUserText() {
+    String greeting = userManager.getUserID() == null ? "" : ("Hello " + userManager.getUserID());
+    return "<span><font size=-2>" + greeting + "</font></span>";
+  }
+
   /**
    * @see #getLogout()
    */
@@ -644,8 +659,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see ExerciseList#checkBeforeLoad(mitll.langtest.shared.ExerciseShell)
    */
   public void login() {
-    if ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView()) userManager.teacherLogin();
-    else userManager.login();
+    System.out.println("data collect mode " + props.isDataCollectMode() + " crt data collect " + props.isCRTDataCollectMode() + " teacher " + props.isTeacherView() + " grading " +props.isGrading());
+    if ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView() || props.isGrading()) {
+      System.out.println("doing teacher login");
+      userManager.teacherLogin();
+    }
+    else {
+      System.out.println("doing student login");
+
+      userManager.login();
+    }
   }
 
   /**
@@ -660,6 +683,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void gotUser(long userID) {
     System.out.println("gotUser : got user " +userID);
+    if (userline != null) userline.setHTML(getUserText());
     if (props.isDataCollectAdminView()) {
       checkForAdminUser();
     } else {
