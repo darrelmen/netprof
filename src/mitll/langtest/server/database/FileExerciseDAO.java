@@ -224,7 +224,9 @@ public class FileExerciseDAO implements ExerciseDAO {
           }
         }
       }
-      logger.debug("sections " + typeToUnitToLesson);
+      if (!typeToUnitToLesson.isEmpty()) {
+        logger.debug("sections " + typeToUnitToLesson);
+      }
       reader.close();
     } catch (IOException e) {
       e.printStackTrace();
@@ -280,18 +282,17 @@ public class FileExerciseDAO implements ExerciseDAO {
 
       Exercise exercise = new Exercise("plan", id, builder.toString(), false, false, englishQuestion);
 
-      addQuestion(arabicQuestion, arabicAnswers, exercise,true);
+      addQuestion(arabicQuestion,  arabicAnswers,  exercise,true);
       addQuestion(englishQuestion, englishAnswers, exercise,false);
       return exercise;
     }
-
   }
 
-  private void addQuestion(String arabicQuestion, String arabicAnswers, Exercise exercise, boolean isFLQ) {
-    List<String> alternateAnswers = Arrays.asList(arabicAnswers.split("\\|\\|"));
+  private void addQuestion(String question, String answers, Exercise exercise, boolean isFLQ) {
+    List<String> alternateAnswers = Arrays.asList(answers.split("\\|\\|"));
     List<String> objects1 = Collections.emptyList();
     List<String> objects = alternateAnswers.size() > 1 ? alternateAnswers.subList(1, alternateAnswers.size()) : objects1;
-    exercise.addQuestion(isFLQ ? Exercise.FL : Exercise.EN, arabicQuestion, alternateAnswers.get(0), new ArrayList<String>(objects));
+    exercise.addQuestion(isFLQ ? Exercise.FL : Exercise.EN, question, alternateAnswers.get(0), new ArrayList<String>(objects));
   }
 
   private void addSectionTest(int count, Exercise exercise) {
