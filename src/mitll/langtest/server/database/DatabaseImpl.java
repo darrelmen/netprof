@@ -396,9 +396,49 @@ public class DatabaseImpl implements Database {
   private final Map<Long,UserStateWrapper> userToState = new HashMap<Long,UserStateWrapper>();
   private static class UserStateWrapper {
     public UserState state;
-    //private AutoDiscardingDeque<Boolean> scores = new AutoDiscardingDeque<Boolean>(100);   // last 100 scores
-    int correct = 0, incorrect = 0;
-    public UserStateWrapper(UserState state) {this.state = state;}
+    private int correct = 0;
+    private int incorrect = 0;
+    private List<Integer> correctHistory = new ArrayList<Integer>();
+    private List<Exercise> exercises;
+    private Random random;
+
+    public UserStateWrapper(UserState state, long userID, List<Exercise> exercises) {
+      this.state = state;
+      this.random = new Random(userID);
+      this.exercises = new ArrayList<Exercise>(exercises);
+      Collections.shuffle(exercises, random);
+    }
+
+    public int getCorrect() {
+      return correct;
+    }
+
+    public void setCorrect(int correct) {
+      this.correct = correct;
+    }
+
+    public int getIncorrect() {
+      return incorrect;
+    }
+
+    public void setIncorrect(int incorrect) {
+      this.incorrect = incorrect;
+    }
+/*
+    public void setExercises() {
+      Collections.shuffle(exercises,random);
+    }*/
+
+    public boolean isComplete() { return correct+incorrect == exercises.size(); }
+
+    public void reset() {
+      correctHistory.add(correct);
+      correct = 0;
+      incorrect = 0;
+      Collections.shuffle(exercises,random);
+    }
+
+    public Exercise getNextExercise() { return exercises.get(correct+incorrect); }
   }
 
   /**
@@ -407,9 +447,10 @@ public class DatabaseImpl implements Database {
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#getNextExercise(long)
    * @param userID
+   * @param isTimedGame
    * @return
    */
-  public FlashcardResponse getNextExercise(long userID) {
+  public FlashcardResponse getNextExercise(long userID, boolean isTimedGame) {
     List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
     Map<String,Exercise> idToExercise = new HashMap<String, Exercise>();
     for (Exercise e : exercises) idToExercise.put(e.getID(),e);
@@ -423,38 +464,44 @@ public class DatabaseImpl implements Database {
         }
         UserState userState = new UserState(strings);
         if (userState.finished()) {
-          logger.info("user "+userID + " is finished.");
+          logger.info("-------------- user "+userID + " is finished ---------------- ");
         }
-        userToState.put(userID, new UserStateWrapper(userState));
+        userToState.put(userID, new UserStateWrapper(userState, userID, exercises));
       }
       UserStateWrapper userState = userToState.get(userID);
-      Exercise exercise = null;
-      try {
-        exercise = idToExercise.get(userState.state.next());
-      } catch (Exception e) {
-        return new FlashcardResponse(true,
-          userState.correct,
-          userState.incorrect);
+      if (isTimedGame) {
+         if (userState.isComplete()) {
+           FlashcardResponse flashcardResponse = new FlashcardResponse(true, userState.getCorrect(), userState.getIncorrect());
+           userState.reset();     // remember past state
+           return flashcardResponse;
+         } else {
+           return new FlashcardResponse(userState.getNextExercise(),
+             userState.getCorrect(),
+             userState.getIncorrect());
+         }
       }
-
-      return new FlashcardResponse(exercise,
-        userState.correct,
-        userState.incorrect);
+      return getFlashcardResponse(idToExercise, userState);
     }
   }
 
-/*  public static class AutoDiscardingDeque<E> extends LinkedBlockingDeque<E> {
-    public AutoDiscardingDeque(int capacity) {  super(capacity);  }
-
-    @Override
-    public synchronized boolean offerFirst(E e) {
-      if (remainingCapacity() == 0) {
-        removeLast();
+  private FlashcardResponse getFlashcardResponse(Map<String, Exercise> idToExercise, UserStateWrapper userState) {
+    try {
+      UserState state = userState.state;
+      if (state.finished()) {
+        return new FlashcardResponse(true, userState.getCorrect(), userState.getIncorrect());
       }
-      super.offerFirst(e);
-      return true;
+      else {
+        Exercise exercise = idToExercise.get(state.next());
+        return new FlashcardResponse(exercise,
+          userState.getCorrect(),
+          userState.getIncorrect());
+      }
+    } catch (Exception e) {
+      return new FlashcardResponse(true,
+        userState.getCorrect(),
+        userState.getIncorrect());
     }
-  }*/
+  }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
@@ -469,10 +516,12 @@ public class DatabaseImpl implements Database {
         logger.error("can't find state for user id " + userID);
       } else {
         state.state.update(exerciseID, isCorrect);
-       // state.scores.offerFirst(isCorrect);
-        if (isCorrect) state.correct++;
-        else state.incorrect++;
-       // logger.debug("update state for " + userID + " exid = " + exerciseID + " : " + isCorrect);
+        if (isCorrect) {
+          state.setCorrect(state.getCorrect() + 1);
+        }
+        else {
+          state.setIncorrect(state.getIncorrect() + 1);
+        }
       }
     }
   }
