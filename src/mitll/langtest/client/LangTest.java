@@ -75,7 +75,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Panel currentExerciseVPanel = new VerticalPanel();
   private ListInterface exerciseList;
   private Label status;
-  //private HTML lineBelowTitle;
+
   private UserManager userManager;
   private final UserTable userTable = new UserTable();
   private ResultManager resultManager;
@@ -148,15 +148,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     // Load the visualization api, passing the onLoadCallback to be called
     // when loading is done.
-    if (props.isAdminView()) {
-      VisualizationUtils.loadVisualizationApi(new Runnable() {
-        @Override
-        public void run() {
-        }
-      }, ColumnChart.PACKAGE, LineChart.PACKAGE);
-    }
+    VisualizationUtils.loadVisualizationApi(new Runnable() {
+      @Override
+      public void run() {
+      }
+    }, ColumnChart.PACKAGE, LineChart.PACKAGE);
 
-    userManager = new UserManager(this,service, isCollectAudio(), false, isCRTDataCollectMode() || isArabicTextDataCollect());
+    userManager = new UserManager(this, service, isCollectAudio(), false,
+      isCRTDataCollectMode() || isArabicTextDataCollect(), props.getAppTitle());
     resultManager = new ResultManager(service, this, props.getNameForAnswer());
     monitoringManager = new MonitoringManager(service, props);
     boolean usualLayout = !showOnlyOneExercise();
@@ -175,7 +174,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // header/title line
     DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
     Widget title = getTitleWidget();
-   // browserCheck.getBrowserAndVersion();
     hp.addEast(getLogout(), eastWidth);
     hp.add(title);
 
@@ -201,7 +199,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       currentExerciseVPanel.addStyleName("noMargin");
       RootPanel.get().add(currentExerciseVPanel);
     }
-
 
     // set up left side exercise list
     makeExerciseList(exerciseListPanel, props.isGrading());
@@ -279,7 +276,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     });
     fp1.add(users);
-    userManager = new UserManager(this,service, isCollectAudio(), false, false);
+    userManager = new UserManager(this,service, isCollectAudio(), props.isDataCollectAdminView(), false, props.getAppTitle());
 
     logout = new Anchor("Logout");
     logout.addClickHandler(new ClickHandler() {
@@ -300,7 +297,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     vp.add(userline);
 
     vp.add(currentExerciseVPanel);
-    userManager = new UserManager(this,service, false, props.isDataCollectAdminView(), false);
     DataCollectAdmin dataCollectAdmin = new DataCollectAdmin(userManager, service);
     dataCollectAdmin.makeDataCollectNewSiteForm(currentExerciseVPanel);
 
@@ -420,7 +416,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     showResults.setVisible(isGrading || props.isAdminView());
     monitoring.setVisible(isGrading || props.isAdminView());
 
-
+    System.out.println("goodwave mode "+ props.isGoodwaveMode() + " " + isAutoCRTMode());
     if (props.isGoodwaveMode() || isAutoCRTMode()) {   // no login for pron mode
       gotUser(-1);
     }
@@ -571,7 +567,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private String getUserText() {
-    return "<span><font size=-2>"+"Hello "+userManager.getUserID()+"</font></span>";
+    String greeting = userManager.getUserID() == null ? "" : ("Hello " + userManager.getUserID());
+    return "<span><font size=-2>" + greeting + "</font></span>";
   }
 
   /**
@@ -590,10 +587,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see ExerciseList#checkBeforeLoad(mitll.langtest.shared.ExerciseShell)
    */
   public void login() {
+    System.out.println("data collect mode " + props.isDataCollectMode() + " crt data collect " + props.isCRTDataCollectMode() + " teacher " + props.isTeacherView() + " grading " +props.isGrading());
     if ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView() || props.isGrading()) {
+      System.out.println("doing teacher login");
       userManager.teacherLogin();
     }
     else {
+      System.out.println("doing student login");
+
       userManager.login();
     }
   }
