@@ -18,7 +18,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Created with IntelliJ IDEA.
@@ -256,9 +258,12 @@ public class MonitoringSupport {
     Map<String, Set<Long>> keyToUsers = new HashMap<String, Set<Long>>();
 
     List<Result> results = getResults();
+   // logger.debug("results " + results.size() + ","+(isMale ? "male":"female") + " users num = " + userMap.size());
+    SortedSet<String> resultKeys = new TreeSet<String>();
     for (Result r : results) {
-      if (userMap.containsKey(r.userid)) {
+      if (userMap.containsKey(r.userid)) {   // filter for just results by males or females
         String key = r.getID();
+        resultKeys.add(key);
         Set<Long> usersForResult = keyToUsers.get(key);
 
         if (usersForResult == null) {
@@ -267,28 +272,43 @@ public class MonitoringSupport {
         if (!usersForResult.contains(r.userid)) {
           usersForResult.add(r.userid);
           Integer c = idToCount.get(key);
-          if (c == null) {
-            idToCount.put(key, 1);
-          } else idToCount.put(key, c + 1);
+          int value = (c == null) ? 1 : c+1;
+          idToCount.put(key, value);
         }
       }
-      // else these are by a female
     }
+   // logger.debug("keyToUsers " + keyToUsers.keySet().size() + " results : " +keyToUsers);
+    //logger.debug("idToCount size = " + idToCount.size() + " resultKeys " +idToCount.keySet());
+    //logger.debug("result id resultKeys = " + resultKeys);
 
-    //  int total = 0;
-    Map<String, Integer> idToCountOutsideMale = new OutsideCount().getExerciseIDToOutsideCount( isMale, outsideFile,exercises);
-    for (Map.Entry<String, Integer> pair : idToCountOutsideMale.entrySet()) {
-      String key = pair.getKey() + "/0";
-      Integer count = idToCount.get(key);
-      if (count == null) logger.warn("missing exercise id " + key);
-      else {
-        int value = count + pair.getValue();
-        idToCount.put(key, value);
+    // post condition -- the result exercise foreign keys should be a subset of the exercise keys (exid/qid)
+    if (resultKeys.size() > idToCount.keySet().size()) {
+      logger.error("huh? there are " + resultKeys.size() +
+        " result keys but only " + idToCount.keySet().size() + " exercise keys.");
+    }
+    else {
+      boolean b = resultKeys.removeAll(idToCount.keySet());
+      if (!resultKeys.isEmpty()) {
+        logger.error("some result keys are not in the exercise keys " + resultKeys);
       }
     }
 
-    // for (Integer counts : idToCount.values()) total += counts;
-    // logger.info("ismale " +isMale + " total " +total);
+    if (outsideFile != null) {
+      Map<String, Integer> idToCountOutsideMale =
+        new OutsideCount().getExerciseIDToOutsideCount(isMale, outsideFile, exercises);
+      if (!idToCountOutsideMale.isEmpty()) {
+        logger.debug("using outside count file " + outsideFile + " of size " +idToCountOutsideMale.size());
+      }
+      for (Map.Entry<String, Integer> pair : idToCountOutsideMale.entrySet()) {
+        String key = pair.getKey() + "/0";
+        Integer count = idToCount.get(key);
+        if (count == null) logger.warn("missing exercise id " + key);
+        else {
+          int value = count + pair.getValue();
+          idToCount.put(key, value);
+        }
+      }
+    }
 
     return idToCount;
   }
@@ -307,7 +327,7 @@ public class MonitoringSupport {
         idToCount.put(key,0);
       }
       else {
-        for (int i = 0; i < e.getNumQuestions(); i++) {
+        for (int i = 1; i < e.getNumQuestions()+1; i++) {   // for some reason we start from 1!
           String key = e.getID() + "/" + i;
           idToCount.put(key,0);
         }
@@ -402,24 +422,35 @@ public class MonitoringSupport {
     return typeToList;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getResultCountsByGender()
+   * @param exercises
+   * @return
+   */
   public Map<String,Map<Integer,Integer>> getResultCountsByGender(List<Exercise> exercises) {
+    //logger.debug("Examining " +exercises.size() + " exercises...");
     Map<String,Map<Integer,Integer>> typeToNumAnswerToCount = new HashMap<String, Map<Integer, Integer>>();
 
-    List<Integer> male = getCountArray(getExToCountMaleOrFemale(exercises,true));
+    Map<String, Integer> exToCountMaleOrFemale = getExToCountMaleOrFemale(exercises, true);
+    //logger.debug("male map " +exToCountMaleOrFemale);
+
+    List<Integer> male = getCountArray(exToCountMaleOrFemale);
     List<Integer> female = getCountArray(getExToCountMaleOrFemale(exercises,false));
+
+    //logger.debug("num male " +male.size() + " : " + male + " female " +female.size());
 
     Map<Integer,Integer> maleAnswerToCount = new HashMap<Integer,Integer>();
     Map<Integer,Integer> femaleAnswerToCount = new HashMap<Integer,Integer>();
 
-    for (int i =0; i< 10; i++) {
+    for (int i =0; i< 10; i++) {   // make sure we have zero entries for 0-9
       maleAnswerToCount.put(i,0);
       femaleAnswerToCount.put(i,0);
     }
 
     for (Integer countAtExercise : male) {
       Integer count = maleAnswerToCount.get(countAtExercise);
-      if (count == null) maleAnswerToCount.put(countAtExercise,1);
-      else maleAnswerToCount.put(countAtExercise,count+1);
+      int currentValue = (count == null) ? 1 : count+1;
+      maleAnswerToCount.put(countAtExercise, currentValue);
     }
 
     for (Integer countAtExercise : female) {
@@ -429,6 +460,7 @@ public class MonitoringSupport {
     }
 
     logger.debug("getResultCountsByGender : male " + maleAnswerToCount);
+    //logger.debug("getResultCountsByGender : female " + femaleAnswerToCount);
 
     typeToNumAnswerToCount.put("maleCount",maleAnswerToCount);
     typeToNumAnswerToCount.put("femaleCount",femaleAnswerToCount);
@@ -541,10 +573,12 @@ public class MonitoringSupport {
     String next = exToCount.keySet().iterator().next();
     boolean isInt = false;
     try {
-      String left = next.split("/")[0];
+      String[] split = next.split("/");
+      String left = split[0];
       Integer.parseInt(left);
       isInt = true;
     } catch (NumberFormatException e) {
+      //logger.debug("Couldn't parse " + left);
     }
     if (isInt) {
       Map<CompoundKey, Integer> keyToCount = new TreeMap<CompoundKey, Integer>();
@@ -553,7 +587,7 @@ public class MonitoringSupport {
           String[] split = pair.getKey().split("/");
           String left = split[0];
           int exid = Integer.parseInt(left);
-          String right = split[0];
+          String right = split[1];
           int qid = Integer.parseInt(right);
 
           keyToCount.put(new CompoundKey(exid, qid), pair.getValue());
@@ -583,7 +617,7 @@ public class MonitoringSupport {
     double total = 0;
     int count = 0;
     int badDur = 0;
-
+    int maxWarns = 0;
     for (Result r : results) {
       total += r.durationInMillis;
       if (r.durationInMillis > 0) {
@@ -591,13 +625,15 @@ public class MonitoringSupport {
       }
       else if (r.spoken /*|| r.audioType.equals(Result.AUDIO_TYPE_UNSET)*/) {
         badDur++;
-        logger.info("got bad audio result " + r + " path " + r.answer);
+        if (maxWarns++ < 10){
+          logger.info("got bad audio result " + r + " path " + r.answer);
+        }
       }
     }
     Map<String,Number> typeToStat = new HashMap<String,Number>();
     Number aDouble = total / ((double)HOUR);
     typeToStat.put("totalHrs", aDouble);
-    double value = total / ((double)count);
+    double value = count > 0 ? total / ((double)count) : 0;
     typeToStat.put("avgSecs", value/1000);
     typeToStat.put("totalAudioAnswers", count);
     typeToStat.put("badRecordings", badDur);
