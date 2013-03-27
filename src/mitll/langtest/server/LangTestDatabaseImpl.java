@@ -12,7 +12,6 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.DTWScoring;
-import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CountAndGradeID;
@@ -203,7 +202,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<Exercise> exercises = getExercises(userID);
     for (Exercise e : exercises) {
       if (id.equals(e.getID())) {
-        logger.info("getExercise for user " +userID + " exid " + id + " got " + e);
+        logger.info("getNextExercise for user " +userID + " exid " + id + " got " + e);
         return e;
       }
     }
@@ -315,7 +314,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public FlashcardResponse getNextExercise(long userID) {
-    FlashcardResponse nextExercise = db.getNextExercise(userID);
+    FlashcardResponse nextExercise = db.getNextExercise(userID, serverProps.isTimedGame());
     if (nextExercise == null || nextExercise.e == null) {
       logger.error("huh? no next exercise for user " +userID);
       return nextExercise;
@@ -789,7 +788,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   // Users ---------------------
 
   public long addUser(int age, String gender, int experience) {
-    return db.addUser( getThreadLocalRequest(), age, gender, experience);
+    return db.addUser(getThreadLocalRequest(), age, gender, experience);
   }
 
   /**
