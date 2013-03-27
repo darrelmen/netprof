@@ -170,9 +170,23 @@
         <jar destfile="npArabicVLL.war" basedir="war"
              includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pilot/**,soundmanager2.js"
              excludes="WEB=INF/lib/pronz.jar">
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
         </jar>
     </target>
 
+    <target depends="build" name="crtDari">
+        <jar destfile="crtDari.war" basedir="war"
+             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/crtDari/**,soundmanager2.js"
+             excludes="WEB=INF/lib/pronz.jar">
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
 
     <target depends="build" name="fullPatch">
         <jar destfile="npPatch.war" basedir="war"
