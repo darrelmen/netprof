@@ -42,11 +42,12 @@ public class ServerProperties {
   private static final String FLASHCARD = "flashcard";
   private static final String CRTDATACOLLECT = "crtDataCollect";
   private static final String ARABIC_TEXT_DATA_COLLECT = "arabicTextDataCollect";
+  private static final String COLLECT_ONLY_AUDIO = "collectAudioOnly";
 
   private Properties props = null;
 
   public boolean dataCollectMode;
-  public boolean collectAudio;
+  private boolean collectAudio;
   public boolean biasTowardsUnanswered, useOutsideResultCounts;
   public String outsideFile;
   public boolean isUrdu;
@@ -94,6 +95,14 @@ public class ServerProperties {
 
   public boolean isArabicTextDataCollect() {
     return !props.getProperty(ARABIC_TEXT_DATA_COLLECT, "false").equals("false");
+  }
+
+  public boolean isCollectOnlyAudio() {
+    return !props.getProperty(COLLECT_ONLY_AUDIO, "false").equals("false");
+  }
+
+  public boolean isCollectAudio() {
+    return collectAudio;
   }
 
   /**
@@ -152,5 +161,4 @@ public class ServerProperties {
     }
     return "";
   }
-
 }
