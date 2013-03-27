@@ -32,7 +32,7 @@ public class GradedExerciseList extends PagingExerciseList {
    */
   public GradedExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                             boolean showInOrder, boolean englishOnly) {
-    super(currentExerciseVPanel, service, feedback, false, false, showInOrder);
+    super(currentExerciseVPanel, service, feedback, false, showInOrder);
     this.englishOnly = englishOnly;
   }
 
@@ -74,8 +74,7 @@ public class GradedExerciseList extends PagingExerciseList {
   }
 
   private void getNextUngraded(final boolean showFirstIfNoneToGrade) {
-    //System.out.println("show first if none to grade " + showFirstIfNoneToGrade + " num " + expectedGrades);
-    service.getNextUngradedExercise(""+user.getUser(), expectedGrades, arabicDataCollect, englishOnly, new AsyncCallback<Exercise>() {
+    service.getNextUngradedExercise(""+user.getUser(), expectedGrades, englishOnly, new AsyncCallback<Exercise>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Exercise result) {
         if (result != null) {
