@@ -228,7 +228,7 @@ public class ResultDAO extends DAO {
       }
       if (countAtIndex == resultsForExercise.size()) {
         if (countAtIndex > 0) {
-          logger.debug("found " +countAtIndex + " at index " + expected + " for " + exerciseID);
+          //logger.debug("found " +countAtIndex + " at index " + expected + " for " + exerciseID);
         }
         return Collections.emptyList();
       }
