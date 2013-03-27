@@ -832,11 +832,14 @@ public class MonitoringManager {
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
       User user = pair.getKey();
-      String nativeLang = user.nativeLang.toLowerCase();
-      Integer c = langToCount.get(nativeLang);
-      if (count > 5) {
-        if (c == null) langToCount.put(nativeLang, count);
-        else langToCount.put(nativeLang, c + count);
+      String nativeLang1 = user.nativeLang;
+      if (nativeLang1 != null) {
+        String nativeLang = nativeLang1.toLowerCase();
+        Integer c = langToCount.get(nativeLang);
+        if (count > 5) {
+          if (c == null) langToCount.put(nativeLang, count);
+          else langToCount.put(nativeLang, c + count);
+        }
       }
     }
 
@@ -854,11 +857,14 @@ public class MonitoringManager {
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
       User user = pair.getKey();
-      String slotToUse = user.dialect.toLowerCase();
-      Integer c = langToCount.get(slotToUse);
-      if (count > 5) {
-        if (c == null) langToCount.put(slotToUse, count);
-        else langToCount.put(slotToUse, c + count);
+      String dialect = user.dialect;
+      if (dialect != null) {
+        String slotToUse = dialect.toLowerCase();
+        Integer c = langToCount.get(slotToUse);
+        if (count > 5) {
+          if (c == null) langToCount.put(slotToUse, count);
+          else langToCount.put(slotToUse, c + count);
+        }
       }
     }
 
