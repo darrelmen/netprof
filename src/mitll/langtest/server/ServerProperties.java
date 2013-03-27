@@ -54,11 +54,13 @@ public class ServerProperties {
   private static final String MEDIA_DIR = "mediaDir";
   private static final String RECO_TEST = "recoTest";
   private static final String RECO_TEST2 = "recoTest2";
+  private static final String ARABIC_TEXT_DATA_COLLECT = "arabicTextDataCollect";
+  private static final String COLLECT_ONLY_AUDIO = "collectAudioOnly";
 
   private Properties props = null;
 
   public boolean dataCollectMode;
-  public boolean collectAudio;
+  private boolean collectAudio;
   public boolean biasTowardsUnanswered, useOutsideResultCounts;
   public String outsideFile;
   public boolean isUrdu;
@@ -147,6 +149,18 @@ public class ServerProperties {
     return props.getProperty(BACKGROUND_FILE,"");
   }
 
+  public boolean isArabicTextDataCollect() {
+    return !props.getProperty(ARABIC_TEXT_DATA_COLLECT, "false").equals("false");
+  }
+
+  public boolean isCollectOnlyAudio() {
+    return !props.getProperty(COLLECT_ONLY_AUDIO, "false").equals("false");
+  }
+
+  public boolean isCollectAudio() {
+    return collectAudio;
+  }
+
   /**
    * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
    * @return
@@ -221,5 +235,4 @@ public class ServerProperties {
     }
     return "";
   }
-
 }
