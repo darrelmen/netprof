@@ -199,8 +199,9 @@ public class GradeDAO extends DAO {
       Set<Integer> ids = new HashSet<Integer>();
       List<User> users = userDAO.getUsers();
       Map<String,User> idToUser = new HashMap<String, User>();
-      boolean validIds = (idToUser.size() > 0 && !idToUser.keySet().iterator().next().equals("NOT_SET"));
       for (User u : users) idToUser.put(u.userID,u);
+
+      boolean validIds = (idToUser.size() > 0 && !idToUser.keySet().iterator().next().equals("NOT_SET"));
       int count = 0;
       while (rs.next()) {
         int i = 1;
