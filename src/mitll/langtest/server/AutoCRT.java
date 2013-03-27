@@ -50,11 +50,18 @@ public class AutoCRT {
     getOptionalBackground(installPath, backgroundFile);
   }
 
+  /**
+   * This was an experiment to improve reco performance, likely OBE.
+   *
+   * @deprecated this is probably a bad idea
+   * @param installPath
+   * @param backgroundFile
+   */
   private void getOptionalBackground(String installPath, String backgroundFile) {
     File background = new File(backgroundFile);
     if (background.exists() && background.isFile()) {
       FileExerciseDAO fileExerciseDAO = new FileExerciseDAO(true);
-      fileExerciseDAO.readFastAndSlowExercises(installPath, backgroundFile);
+      fileExerciseDAO.readFastAndSlowExercises(installPath, mediaDir, backgroundFile);  // TODO confirm this is the right thing
       List<Exercise> rawExercises = fileExerciseDAO.getRawExercises();
 
       List<String> sentences = new ArrayList<String>();
