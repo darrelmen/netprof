@@ -7,6 +7,7 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -36,6 +37,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private UserManager user;
   private Heading correct = new Heading(3);
   private static final String HELP_IMAGE = LangTest.LANGTEST_IMAGES + "/help-4.png";
+  boolean isTimedGame;
 
   /**
    * @see mitll.langtest.client.LangTest#doFlashcard()
@@ -45,7 +47,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
    * @param controller
    */
   public BootstrapFlashcardExerciseList(Container currentExerciseVPanel, LangTestDatabaseAsync service,
-                                        UserManager user, final ExerciseController controller) {
+                                        UserManager user, final ExerciseController controller,boolean isTimedGame) {
     this.service = service;
     FluidRow row = new FluidRow();
     currentExerciseVPanel.add(row);
@@ -68,6 +70,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     row2.add(new Column(1,image));
 
     this.user = user;
+    this.isTimedGame = isTimedGame;
   }
 
   @Override
@@ -75,12 +78,27 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     this.factory = factory;
   }
 
+  long start = -1;
+  Timer timer;
+  boolean expired = false;
   /**
    * @param userID
    * @see mitll.langtest.client.LangTest#gotUser(long)
    */
   @Override
   public void getExercises(long userID) {
+    if (start == -1) {
+      start = System.currentTimeMillis();
+      timer = new Timer() {
+        @Override
+        public void run() {
+          Window.alert("Time's up!");
+          expired = true;
+        }
+      };
+      timer.schedule(60000);
+    }
+
     service.getNextExercise(userID, new AsyncCallback<FlashcardResponse>() {
       @Override
       public void onFailure(Throwable caught) {
