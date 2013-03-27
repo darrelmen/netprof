@@ -56,6 +56,7 @@ public class ServerProperties {
   private static final String RECO_TEST2 = "recoTest2";
   private static final String ARABIC_TEXT_DATA_COLLECT = "arabicTextDataCollect";
   private static final String COLLECT_ONLY_AUDIO = "collectAudioOnly";
+  private static final String TIMED_GAME = "timedGame";
 
   private Properties props = null;
 
@@ -155,6 +156,10 @@ public class ServerProperties {
 
   public boolean isCollectOnlyAudio() {
     return !props.getProperty(COLLECT_ONLY_AUDIO, "false").equals("false");
+  }
+
+  public boolean isTimedGame() {
+    return !props.getProperty(TIMED_GAME, "false").equals("false");
   }
 
   public boolean isCollectAudio() {
