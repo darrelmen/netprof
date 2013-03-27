@@ -181,9 +181,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public List<ExerciseShell> getExerciseIds() {
     List<Exercise> exercises = getExercises();
-    List<ExerciseShell> ids = getExerciseShells(exercises);
-
-    return ids;
+    return getExerciseShells(exercises);
   }
 
   public Exercise getExercise(String id) {
@@ -234,6 +232,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         autoCRT = new AutoCRT(db.getExport(), this, getInstallPath(), relativeConfigDir);
       }
     }
+    List<Exercise> exercises = getExercisesInModeDependentOrder(userID, lessonPlanFile);
+
+    if (serverProps.isCRTDataCollect()) {
+      //logger.debug("isCRTDataCollect is true");
+
+      setPromptAndRecordOnExercises(userID, exercises);
+    }
+    if (makeFullURLs) convertRefAudioURLs(exercises);
+    //if (!exercises.isEmpty())
+   //   logger.debug("for user #" + userID +" got " + exercises.size() + " exercises , first " + exercises.iterator().next());
+          //" ref sentence = '" + exercises.iterator().next().getRefSentence() + "'");
+
+    return exercises;
+  }
+
+  private List<Exercise> getExercisesInModeDependentOrder(long userID, String lessonPlanFile) {
     List<Exercise> exercises;
     if (serverProps.dataCollectMode) {
       // logger.debug("in data collect mode");
@@ -252,26 +266,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       } else {
         exercises = db.getExercisesFirstNInOrder(userID, serverProps.firstNInOrder);
       }
-      if (!serverProps.collectAudio) {
-        //logger.debug("*not* collecting audio, just text");
-
-        for (Exercise e : exercises) {
-          e.setRecordAnswer(false);
-          e.setPromptInEnglish(false);
-        }
-      }
     } else {
       exercises = serverProps.isArabicTextDataCollect() ? db.getRandomBalancedList() : db.getExercises(userID);
     }
-
-    if (serverProps.isCRTDataCollect()) {
-      setPromptAndRecordOnExercises(userID, exercises);
-    }
-    if (makeFullURLs) convertRefAudioURLs(exercises);
-    //if (!exercises.isEmpty())
-   //   logger.debug("for user #" + userID +" got " + exercises.size() + " exercises , first " + exercises.iterator().next());
-          //" ref sentence = '" + exercises.iterator().next().getRefSentence() + "'");
-
     return exercises;
   }
 
@@ -280,20 +277,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * <br></br>
    * Note there is no english + text response combination.
    *
+   * set the text only flag if not collecting audio
    * @param userID
    * @param exercises
    */
   private void setPromptAndRecordOnExercises(long userID, List<Exercise> exercises) {
     Random rand = new Random(userID);
     for (Exercise e : exercises) {
-      boolean inEnglish = rand.nextBoolean();
-      e.setPromptInEnglish(inEnglish);
-
-      if (inEnglish) {
+      if (serverProps.isCollectOnlyAudio()) {
         e.setRecordAnswer(true);
-      }
-      else {
-        e.setRecordAnswer(rand.nextBoolean());
+        e.setPromptInEnglish(rand.nextBoolean());
+      } else if (!serverProps.isCollectAudio()) {
+        e.setTextOnly();
+      } else {
+        boolean inEnglish = rand.nextBoolean();
+        e.setPromptInEnglish(inEnglish);
+        e.setRecordAnswer(inEnglish || rand.nextBoolean());
       }
     }
   }
@@ -335,14 +334,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       ConcurrentMap<String,String> stringStringConcurrentMap = userToExerciseID.asMap();
       Collection<String> values = stringStringConcurrentMap.values();
       String currentExerciseForUser = userToExerciseID.getIfPresent(user);
-      logger.debug("getNextUngradedExercise for " + user + " current " + currentExerciseForUser + " expected " + expectedGrades);
+      //logger.debug("getNextUngradedExercise for " + user + " current " + currentExerciseForUser + " expected " + expectedGrades);
 
       Collection<String> currentActiveExercises = new HashSet<String>(values);
 
       if (currentExerciseForUser != null) {
         currentActiveExercises.remove(currentExerciseForUser); // it's OK to include the one the user is working on now...
       }
-      logger.debug("getNextUngradedExercise current set minus " + user + " is " + currentActiveExercises);
+      //logger.debug("getNextUngradedExercise current set minus " + user + " is " + currentActiveExercises);
       boolean filterForArabicTextOnly = serverProps.isArabicTextDataCollect();
       return db.getNextUngradedExercise(currentActiveExercises, expectedGrades,
           filterForArabicTextOnly, filterForArabicTextOnly, !filterForArabicTextOnly, englishOnly);
@@ -1038,8 +1037,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String setInstallPath(boolean useFile) {
     String lessonPlanFile = getLessonPlan();
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
-
-    //logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
     db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, serverProps.isUrdu, useFile);
 
     return lessonPlanFile;
