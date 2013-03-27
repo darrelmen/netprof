@@ -72,24 +72,27 @@ public class UserManager {
   private boolean isCollectAudio;
   private Storage stockStore = null;
   private final boolean isDataCollectAdmin;
-  private final boolean isCRTDataCollect;
+  private final boolean useShortExpiration;
   private static final boolean COLLECT_NAMES = false;
+  private String appTitle;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    * @param lt
    * @param service
    * @param isDataCollectAdmin
-   * @param isCRTDataCollect
+   * @param useShortExpiration
+   * @param appTitle
    */
   public UserManager(UserNotification lt, LangTestDatabaseAsync service, boolean isCollectAudio,
-                     boolean isDataCollectAdmin, boolean isCRTDataCollect) {
+                     boolean isDataCollectAdmin, boolean useShortExpiration, String appTitle) {
     this.langTest = lt;
     this.service = service;
     this.isCollectAudio = isCollectAudio;
     stockStore = Storage.getLocalStorageIfSupported();
     this.isDataCollectAdmin = isDataCollectAdmin;
-    this.isCRTDataCollect = isCRTDataCollect;
+    this.useShortExpiration = useShortExpiration;
+    this.appTitle = appTitle;
   }
 
   // user tracking
@@ -106,17 +109,17 @@ public class UserManager {
    */
   private void storeUser(long sessionID, String audioType, String userChosenID) {
     //System.out.println("storeUser : user now " + sessionID);
-    final long DURATION = 1000 * 60 * 60 * (isCRTDataCollect ? SHORT_EXPIRATION_HOURS : EXPIRATION_HOURS); //duration remembering login
+    final long DURATION = 1000 * 60 * 60 * (useShortExpiration ? SHORT_EXPIRATION_HOURS : EXPIRATION_HOURS); //duration remembering login
     long now = System.currentTimeMillis();
     long futureMoment = now + DURATION;
     if (useCookie) {
       Date expires = new Date(futureMoment);
       Cookies.setCookie("sid", "" + sessionID, expires);
     } else if (stockStore != null) {
-      stockStore.setItem(USER_ID, "" + sessionID);
-      stockStore.setItem(USER_CHOSEN_ID, "" + userChosenID);
-      stockStore.setItem("expires", "" + futureMoment);
-      stockStore.setItem(AUDIO_TYPE, "" + audioType);
+      stockStore.setItem(getUserIDCookie(), "" + sessionID);
+      stockStore.setItem(getUserChosenID(), "" + userChosenID);
+      stockStore.setItem(getExpires(), "" + futureMoment);
+      stockStore.setItem(getAudioType(), "" + audioType);
       System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " expires in " + (DURATION/1000) + " seconds");
     } else {
       userID = sessionID;
@@ -146,15 +149,22 @@ public class UserManager {
     }
   }
 
+  /**
+   * For display purposes
+   * @return
+   */
   public String getUserID() {
-    if (stockStore != null)
-      return stockStore.getItem(USER_CHOSEN_ID);
-    else return userChosenID;
+    if (stockStore != null) {
+      return stockStore.getItem(getUserChosenID());
+    }
+    else {
+      return userChosenID;
+    }
   }
 
   private void rememberAudioType() {
     if (stockStore != null) {
-      String audioType = stockStore.getItem(AUDIO_TYPE);
+      String audioType = stockStore.getItem(getAudioType());
       if (audioType == null) {
         audioType = Result.AUDIO_TYPE_FAST_AND_SLOW;
       }
@@ -175,10 +185,11 @@ public class UserManager {
       return Integer.parseInt(sid);
     }
     else if (stockStore != null) {
-      String sid = stockStore.getItem(USER_ID);
+      String sid = stockStore.getItem(getUserIDCookie());
+      System.out.println("user id cookie for " +getUserIDCookie() + " is " + sid);
       if (sid != null && !sid.equals("" + NO_USER_SET)) {
         checkExpiration(sid);
-        sid = stockStore.getItem(USER_ID);
+        sid = stockStore.getItem(getUserIDCookie());
       }
       return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
     }
@@ -187,8 +198,21 @@ public class UserManager {
     }
   }
 
+  private String getUserIDCookie() {
+    return appTitle + ":"+ USER_ID;
+  }
+  private String getUserChosenID() {
+    return appTitle + ":"+ USER_CHOSEN_ID;
+  }
+  private String getAudioType() {
+    return appTitle + ":"+ AUDIO_TYPE;
+  }
+  private String getExpires() {
+    return appTitle + ":"+ "expires";
+  }
+
   private void checkExpiration(String sid) {
-    String expires = stockStore.getItem("expires");
+    String expires = stockStore.getItem(getExpires());
     if (expires == null) {
       System.out.println("checkExpiration : no expires item?");
     }
@@ -212,11 +236,14 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#getLogout()
    */
   public void clearUser() {
+    langTest.rememberAudioType(Result.AUDIO_TYPE_UNSET);
     if (useCookie) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
     } else if (stockStore != null) {
-      stockStore.removeItem(USER_ID);
-      System.out.println("user now " + getUser());
+      stockStore.removeItem(getUserIDCookie());
+      stockStore.removeItem(getUserChosenID());
+      System.out.println("clearUser : removed item " + getUserID() +
+        " user now " + getUser());
     } else {
       userID = NO_USER_SET;
     }
