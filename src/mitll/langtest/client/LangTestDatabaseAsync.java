@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public interface LangTestDatabaseAsync {
   @Deprecated
-  void getExercises(long userID, boolean arabicDataCollect, AsyncCallback<List<Exercise>> async);
+  void getExercises(long userID, AsyncCallback<List<Exercise>> async);
   @Deprecated
   void getExercises(AsyncCallback<List<Exercise>> async);
 
@@ -36,7 +36,7 @@ public interface LangTestDatabaseAsync {
   void writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                       int reqid, boolean flq, String audioType, AsyncCallback<AudioAnswer> async);
 
-  void getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly, boolean englishOnly, AsyncCallback<Exercise> async);
+  void getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly, AsyncCallback<Exercise> async);
 
   void checkoutExerciseID(String user,String id, AsyncCallback<Void> async);
 
@@ -56,13 +56,13 @@ public interface LangTestDatabaseAsync {
 
   void ensureMP3(String wavFile, AsyncCallback<Void> async);
 
-  void getExerciseIds(long userID, boolean arabicDataCollect, AsyncCallback<List<ExerciseShell>> async);
+  void getExerciseIds(long userID, AsyncCallback<List<ExerciseShell>> async);
 
   void getExerciseIds(AsyncCallback<List<ExerciseShell>> async);
 
   void getExercise(String id, AsyncCallback<Exercise> async);
 
-  void getExercise(String id, long userID, boolean arabicDataCollect, AsyncCallback<Exercise> async);
+  void getExercise(String id, long userID, AsyncCallback<Exercise> async);
 
   void getScoreForAnswer(Exercise e, int questionID, String answer, AsyncCallback<Double> async);
 
