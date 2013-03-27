@@ -22,7 +22,7 @@ public class Exercise extends ExerciseShell  {
   private static final ArrayList<String> EMPTY_LIST = new ArrayList<String>();
 
   public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE, REPEAT, REPEAT_FAST_SLOW, MULTI_REF }
-  private static final String EN = "en";
+  public static final String EN = "en";
   public static final String FL = "fl";
   private static final boolean DEBUG = false;
   private String plan;
@@ -34,6 +34,7 @@ public class Exercise extends ExerciseShell  {
   private String slowAudioRef;
   private List<String> refSentences = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
+  private double weight;
   private transient List<String> slots = new ArrayList<String>();
 
   public static class QAPair implements IsSerializable {
@@ -128,7 +129,7 @@ public class Exercise extends ExerciseShell  {
   }
 
   /**
-   * @see mitll.langtest.server.database.FileExerciseDAO#readFastAndSlowExercises(String, String)
+   * @see mitll.langtest.server.database.FileExerciseDAO#readFastAndSlowExercises
    * @param plan
    * @param id
    * @param content
@@ -150,12 +151,21 @@ public class Exercise extends ExerciseShell  {
   }
 
   /**
-   * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
-   * @param lang
-   * @param question
-   * @param answer
-   * @param alternateAnswers
+   * when not collecting audio, we only collect text, and
+   * we only collect fl text (never english text only english audio)
    */
+  public void setTextOnly() {
+    setPromptInEnglish(false);
+    setRecordAnswer(false);
+  }
+
+    /**
+     * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
+     * @param lang
+     * @param question
+     * @param answer
+     * @param alternateAnswers
+     */
   public void addQuestion(String lang, String question, String answer, List<String> alternateAnswers) {
     if (langToQuestion == null) langToQuestion = new HashMap<String, List<QAPair>>();
     List<QAPair> qaPairs = langToQuestion.get(lang);
@@ -223,6 +233,14 @@ public class Exercise extends ExerciseShell  {
     List<QAPair> en = langToQuestion == null ? new ArrayList<QAPair>() : langToQuestion.get("en");
     if (en == null) return 0; // should never happen
     return en.size();
+  }
+
+  public double getWeight() {
+    return weight;
+  }
+
+  public void setWeight(double weight) {
+    this.weight = weight;
   }
 
   public void addSlot(String s) {
