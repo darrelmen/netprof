@@ -283,7 +283,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     row.add(new Column(12, widgets));
 
     userManager = new UserManager(this, service, isCollectAudio(), false, isCRTDataCollectMode(), props.getAppTitle(), true);
-    this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager, this);
+    this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager, this, props.isTimedGame());
 
     makeFlashContainer();
 
@@ -296,9 +296,26 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     setupSoundManager();
 
-    login();
 
-    showHelpNewUser();
+    if (props.isTimedGame()) {
+      List<String> msgs = new ArrayList<String>();
+      msgs.add("Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.");
+      msgs.add("See how many you can get right in 1 minute!");
+      msgs.add("Press and hold the " + RECORDING_KEY + " to record.");
+      msgs.add("Release to stop recording.");
+      msgs.add("");
+      msgs.add("Ready - set - ");
+      showErrorMessage("Beat the clock!",msgs, "Go!", new CloseListener() {
+        @Override
+        public void didClose() {
+          login();
+        }
+      });
+    }
+    else {
+      showHelpNewUser();
+      login();
+    }
   }
 
   private void showHelpNewUser() {
@@ -767,12 +784,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     showErrorMessage(title, msgs);
   }
 
-  /**
-   * Note : depends on bootstrap
-   * @param title
-   * @param msgs
-   */
   public void showErrorMessage(String title, List<String> msgs) {
+    showErrorMessage(title,msgs,"Close",null);
+  }
+    /**
+     * Note : depends on bootstrap
+     * @param title
+     * @param msgs
+     */
+  public void showErrorMessage(String title, List<String> msgs,String buttonName, final CloseListener listener) {
     final DialogBox dialogBox;
     Button closeButton;
 
@@ -780,7 +800,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     dialogBox.setGlassEnabled(true);
     dialogBox.setText(title);
 
-    closeButton = new Button("Close");
+    closeButton = new Button(buttonName);
     closeButton.getElement().setId("closeButton");
     closeButton.setFocus(true);
 
@@ -808,9 +828,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     closeButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         dialogBox.hide();
+        if (listener != null) listener.didClose();
       }
     });
     dialogBox.center();
+  }
+
+  public interface CloseListener {
+    void didClose();
   }
 
   public void showStatus(String msg) { status.setText(msg); }
