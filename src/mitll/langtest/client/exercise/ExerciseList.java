@@ -103,7 +103,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param userID
    */
   public void getExercises(long userID) {
-    System.out.println("getExercises " +userID);
+    System.out.println("getExercises for user " +userID);
 
     useUserID = true;
     this.userID = userID;
@@ -126,9 +126,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    *
    * I gotta go with the latter.
    *
-   * @param first
+   * @param exerciseID
    */
-  private void pushFirstSelection(String first) {
+  private void pushFirstSelection(String exerciseID) {
 /*    String initToken = History.getToken();
     if (initToken.length() == 0) {
       pushNewItem(first);
@@ -136,13 +136,21 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       System.out.println("fire history for " +initToken);
       History.fireCurrentHistoryState();
     }*/
-    pushNewItem(first);
 
+    String token = History.getToken();
+    System.out.println("current token " + token + " vs new " +exerciseID);
+    if (token != null && getIDFromToken(token).equals(exerciseID)) {
+      System.out.println("current token " + token + " same as new " +exerciseID);
+      loadByIDFromToken(exerciseID);
+    }
+    else {
+      pushNewItem(exerciseID);
+    }
   }
 
-  private void pushNewItem(String first) {
-    System.out.println("------------ pushNewItem : push history " + first + " -------------- ");
-    History.newItem("#item=" + first);
+  private void pushNewItem(String exerciseID) {
+    System.out.println("------------ pushNewItem : push history " + exerciseID + " -------------- ");
+    History.newItem("#item=" + exerciseID);
   }
 
   /**
@@ -189,6 +197,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   protected void rememberExercises(List<ExerciseShell> result) {
+    System.out.println("remembering " + result.size() + " exercises");
     currentExercises = result; // remember current exercises
     idToExercise = new HashMap<String, ExerciseShell>();
     clear();
@@ -235,6 +244,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         if (e != null) toLoad = e;
       }
 
+      System.out.println("loadFirstExercise " + toLoad.getID());
       pushFirstSelection(toLoad.getID());
     }
   }
