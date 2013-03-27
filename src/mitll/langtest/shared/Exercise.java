@@ -141,12 +141,21 @@ public class Exercise extends ExerciseShell  {
   }
 
   /**
-   * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
-   * @param lang
-   * @param question
-   * @param answer
-   * @param alternateAnswers
+   * when not collecting audio, we only collect text, and
+   * we only collect fl text (never english text only english audio)
    */
+  public void setTextOnly() {
+    setPromptInEnglish(false);
+    setRecordAnswer(false);
+  }
+
+    /**
+     * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
+     * @param lang
+     * @param question
+     * @param answer
+     * @param alternateAnswers
+     */
   public void addQuestion(String lang, String question, String answer, List<String> alternateAnswers) {
     if (langToQuestion == null) langToQuestion = new HashMap<String, List<QAPair>>();
     List<QAPair> qaPairs = langToQuestion.get(lang);
