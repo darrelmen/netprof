@@ -21,10 +21,10 @@ public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
   // exerciseDAO
-  List<ExerciseShell> getExerciseIds(long userID, boolean arabicDataCollect);
+  List<ExerciseShell> getExerciseIds(long userID);
   List<ExerciseShell> getExerciseIds();
 
-  List<Exercise> getExercises(long userID, boolean arabicDataCollect);
+  List<Exercise> getExercises(long userID);
   List<Exercise> getExercises();
   ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
 
@@ -45,7 +45,7 @@ public interface LangTestDatabase extends RemoteService {
                              int reqid, boolean flq, String audioType);
   double getScoreForAnswer(Exercise e, int questionID, String answer);
 
-  Exercise getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly, boolean englishOnly);
+  Exercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly);
 
   void checkoutExerciseID(String user,String id);
 
@@ -69,7 +69,7 @@ public interface LangTestDatabase extends RemoteService {
 
   Exercise getExercise(String id);
 
-  Exercise getExercise(String id, long userID, boolean arabicDataCollect);
+  Exercise getExercise(String id, long userID);
 
   int userExists(String login);
 
