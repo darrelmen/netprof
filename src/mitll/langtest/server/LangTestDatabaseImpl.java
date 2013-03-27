@@ -141,12 +141,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see mitll.langtest.client.exercise.ExerciseList#getExercises
    * @param userID
-   * @param arabicDataCollect
    * @return
    */
-  public List<ExerciseShell> getExerciseIds(long userID, boolean arabicDataCollect) {
+  public List<ExerciseShell> getExerciseIds(long userID) {
     logger.debug("getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
-    List<Exercise> exercises = getExercises(userID, arabicDataCollect);
+    List<Exercise> exercises = getExercises(userID);
     List<ExerciseShell> ids = getExerciseShells(exercises);
     logMemory();
     return ids;
@@ -187,9 +186,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public List<ExerciseShell> getExerciseIds() {
     List<Exercise> exercises = getExercises();
-    List<ExerciseShell> ids = getExerciseShells(exercises);
-
-    return ids;
+    return getExerciseShells(exercises);
   }
 
   public Exercise getExercise(String id) {
@@ -202,8 +199,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return null;
   }
 
-  public Exercise getExercise(String id, long userID, boolean arabicDataCollect) {
-    List<Exercise> exercises = getExercises(userID, arabicDataCollect);
+  public Exercise getExercise(String id, long userID) {
+    List<Exercise> exercises = getExercises(userID);
     for (Exercise e : exercises) {
       if (id.equals(e.getID())) {
         logger.info("getExercise for user " +userID + " exid " + id + " got " + e);
@@ -227,15 +224,32 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * <li>if in crt data collect mode, we randomly choose between english or fl question, and if fl question, spoken or written response </li>
    * </ul>
    *
+   *
    * @param userID
-   * @param arabicDataCollect
-   * @return
+   * @return exercises for user id
    * @see mitll.langtest.client.exercise.ExerciseList#getExercises(long)
    */
-  public List<Exercise> getExercises(long userID, boolean arabicDataCollect) {
+  public List<Exercise> getExercises(long userID) {
     String lessonPlanFile = getLessonPlan();
 
     makeAutoCRT();
+
+    List<Exercise> exercises = getExercisesInModeDependentOrder(userID, lessonPlanFile);
+
+    if (serverProps.isCRTDataCollect()) {
+      //logger.debug("isCRTDataCollect is true");
+
+      setPromptAndRecordOnExercises(userID, exercises);
+    }
+    if (makeFullURLs) convertRefAudioURLs(exercises);
+    //if (!exercises.isEmpty())
+   //   logger.debug("for user #" + userID +" got " + exercises.size() + " exercises , first " + exercises.iterator().next());
+          //" ref sentence = '" + exercises.iterator().next().getRefSentence() + "'");
+
+    return exercises;
+  }
+
+  private List<Exercise> getExercisesInModeDependentOrder(long userID, String lessonPlanFile) {
     List<Exercise> exercises;
     if (serverProps.dataCollectMode) {
       // logger.debug("in data collect mode");
@@ -254,26 +268,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       } else {
         exercises = db.getExercisesFirstNInOrder(userID, serverProps.firstNInOrder);
       }
-      if (!serverProps.collectAudio) {
-        logger.debug("*not* collecting audio, just text");
-
-        for (Exercise e : exercises) {
-          e.setRecordAnswer(false);
-          e.setPromptInEnglish(false);
-        }
-      }
     } else {
-      exercises = arabicDataCollect ? db.getRandomBalancedList() : db.getExercises(userID);
+      exercises = serverProps.isArabicTextDataCollect() ? db.getRandomBalancedList() : db.getExercises(userID);
     }
-
-    if (serverProps.isCRTDataCollect()) {
-      setPromptAndRecordOnExercises(userID, exercises);
-    }
-    if (makeFullURLs) convertRefAudioURLs(exercises);
-    //if (!exercises.isEmpty())
-   //   logger.debug("for user #" + userID +" got " + exercises.size() + " exercises , first " + exercises.iterator().next());
-          //" ref sentence = '" + exercises.iterator().next().getRefSentence() + "'");
-
     return exercises;
   }
 
@@ -291,20 +288,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * <br></br>
    * Note there is no english + text response combination.
    *
+   * set the text only flag if not collecting audio
    * @param userID
    * @param exercises
    */
   private void setPromptAndRecordOnExercises(long userID, List<Exercise> exercises) {
     Random rand = new Random(userID);
     for (Exercise e : exercises) {
-      boolean inEnglish = rand.nextBoolean();
-      e.setPromptInEnglish(inEnglish);
-
-      if (inEnglish) {
+      if (serverProps.isCollectOnlyAudio()) {
         e.setRecordAnswer(true);
-      }
-      else {
-        e.setRecordAnswer(rand.nextBoolean());
+        e.setPromptInEnglish(rand.nextBoolean());
+      } else if (!serverProps.isCollectAudio()) {
+        e.setTextOnly();
+      } else {
+        boolean inEnglish = rand.nextBoolean();
+        e.setPromptInEnglish(inEnglish);
+        e.setRecordAnswer(inEnglish || rand.nextBoolean());
       }
     }
   }
@@ -355,24 +354,23 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.exercise.GradedExerciseList#getNextUngraded
    * @param user
    * @param expectedGrades
-   * @param filterForArabicTextOnly
    * @param englishOnly
    * @return next ungraded exercise
    */
-  public Exercise getNextUngradedExercise(String user, int expectedGrades, boolean filterForArabicTextOnly, boolean englishOnly) {
+  public Exercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly) {
     synchronized (this) {
       ConcurrentMap<String,String> stringStringConcurrentMap = userToExerciseID.asMap();
       Collection<String> values = stringStringConcurrentMap.values();
       String currentExerciseForUser = userToExerciseID.getIfPresent(user);
-      logger.debug("getNextUngradedExercise for " + user + " current " + currentExerciseForUser + " expected " + expectedGrades);
+      //logger.debug("getNextUngradedExercise for " + user + " current " + currentExerciseForUser + " expected " + expectedGrades);
 
       Collection<String> currentActiveExercises = new HashSet<String>(values);
 
       if (currentExerciseForUser != null) {
         currentActiveExercises.remove(currentExerciseForUser); // it's OK to include the one the user is working on now...
       }
-      logger.debug("getNextUngradedExercise current set minus " + user + " is " + currentActiveExercises);
-
+      //logger.debug("getNextUngradedExercise current set minus " + user + " is " + currentActiveExercises);
+      boolean filterForArabicTextOnly = serverProps.isArabicTextDataCollect();
       return db.getNextUngradedExercise(currentActiveExercises, expectedGrades,
           filterForArabicTextOnly, filterForArabicTextOnly, !filterForArabicTextOnly, englishOnly);
     }
@@ -939,6 +937,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getResultPerExercise();
   }
 
+  /**
+   * @see mitll.langtest.client.monitoring.MonitoringManager#doGenderQuery(com.google.gwt.user.client.ui.Panel)
+   * @return
+   */
   @Override
   public Map<String, Map<Integer, Integer>> getResultCountsByGender() {
     return db.getResultCountsByGender();
