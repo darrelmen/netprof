@@ -299,9 +299,9 @@ public class DatabaseImpl implements Database {
 
     GradeDAO.GradesAndIDs allGradesExcluding = gradeDAO.getAllGradesExcluding(activeExercises);
     Map<Integer, Integer> idToCount = getResultIdToGradeCount(expectedCount, allGradesExcluding);
-    logger.info("getNextUngradedExerciseQuick found " + resultExcludingExercises.size() + " results, " +
-        "expected " + expectedCount + ", " + allGradesExcluding.resultIDs.size() + " graded results");
-    //logger.debug("idToCount = " + idToCount);
+/*    logger.info("getNextUngradedExerciseQuick found " + resultExcludingExercises.size() + " results, " +
+        "expected " + expectedCount + ", " + allGradesExcluding.resultIDs.size() + " graded results");*/
+
     // remove results that have grades...
     Iterator<Result> iterator = resultExcludingExercises.iterator();
     while (iterator.hasNext()) {
@@ -322,7 +322,7 @@ public class DatabaseImpl implements Database {
       }
     }
 
-    logger.debug("getNextUngradedExercise after removing graded, there were " + resultExcludingExercises.size() + " results");
+   // logger.debug("getNextUngradedExercise after removing graded, there were " + resultExcludingExercises.size() + " results");
 
     // whatever remains, find first exercise
 
@@ -336,7 +336,7 @@ public class DatabaseImpl implements Database {
       String first = exids.first();
       for (Exercise e : rawExercises) {
         if (e.getID().equals(first)) {
-          logger.info("getNextUngradedExercise  " + e);
+          //logger.info("getNextUngradedExercise  " + e);
 
           return e;
         }
@@ -626,6 +626,10 @@ public class DatabaseImpl implements Database {
     return alreadyAnsweredByThisUser;
   }
 
+  /**
+   * An attempt to bias collection so that items that have only been answered correctly are shown more often
+   * since we want an even distribution of correct and incorrect responses.
+   */
   private Random random = new Random();
   public List<Exercise> getRandomBalancedList() {
     List<Exercise> exercisesGradeBalancing = getExercisesGradeBalancing();
