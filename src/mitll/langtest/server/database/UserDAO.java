@@ -1,15 +1,21 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.shared.Grader;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class UserDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserDAO.class);
@@ -139,6 +145,7 @@ public class UserDAO extends DAO {
         "password VARCHAR, " +
         "firstName VARCHAR, " +
         "lastName VARCHAR, " +
+
         "nativeLang VARCHAR, " +
         "dialect VARCHAR, " +
         "userID VARCHAR, " +
@@ -151,11 +158,42 @@ public class UserDAO extends DAO {
 
     int numColumns = getNumColumns(connection, "users");
     logger.debug("found " + numColumns + " in users table");
-    if (numColumns < 13 && numColumns != 7) {
-      statement = connection.prepareStatement("ALTER TABLE users ADD enabled BOOLEAN");
-      statement.execute();
-      statement.close();
+
+    Set<String> expected = new HashSet<String>();
+    expected.addAll(Arrays.asList("id","age","gender","experience","firstname","lastname","ipaddr","nativelang","dialect","userid","timestamp","enabled"));
+    boolean users = expected.removeAll(getColumns("users"));
+    if (!expected.isEmpty()) logger.info("adding columns for " + expected);
+    for (String missing : expected) {
+      if (missing.equalsIgnoreCase("firstName")) { addColumn(connection,"firstName","VARCHAR"); }
+      if (missing.equalsIgnoreCase("lastName")) { addColumn(connection,"lastName","VARCHAR"); }
+
+      if (missing.equalsIgnoreCase("nativeLang")) { addColumn(connection,"nativeLang","VARCHAR"); }
+      if (missing.equalsIgnoreCase("dialect")) { addColumn(connection,"dialect","VARCHAR"); }
+      if (missing.equalsIgnoreCase("userID")) { addColumn(connection,"userID","VARCHAR"); }
+      if (missing.equalsIgnoreCase("timestamp")) { addColumn(connection,"timestamp","TIMESTAMP AS CURRENT_TIMESTAMP"); }
+      if (missing.equalsIgnoreCase("enabled")) { addColumn(connection,"enabled","BOOLEAN"); }
     }
+
+    convertGraders();
+  }
+
+  private void convertGraders() {
+    GraderDAO graderDAO = new GraderDAO(database);
+    Collection<Grader> graders = graderDAO.getGraders();
+    for (Grader u : graders) {
+      if (userExists(u.name) == -1) {
+        logger.info("adding grader " + u);
+        addUser(0, "male", 240, "", "", "", "", "", u.name, true);
+      }
+    }
+  }
+
+
+  private void addColumn(Connection connection, String column, String type) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE users ADD " +
+      column + " " + type);
+    statement.execute();
+    statement.close();
   }
 
   void dropUserTable(Database database) throws Exception {
@@ -198,22 +236,24 @@ public class UserDAO extends DAO {
         while (rs.next()) {
           i = 1;
           String userid;
-          users.add(new User(rs.getLong(i++), //id
-            rs.getInt(i++), // age
-            rs.getInt(i++), //gender
-            rs.getInt(i++), // exp
-            rs.getString(i++), // ip
-            rs.getString(i++), // password
+          User newUser = new User(rs.getLong("id"), //id
+            rs.getInt("age"), // age
+            rs.getInt("gender"), //gender
+            rs.getInt("experience"), // exp
+            rs.getString("ipaddr"), // ip
+            rs.getString("password"), // password
 
-            rs.getString(i++), // first
-            rs.getString(i++), // last
-            rs.getString(i++), // native
-            rs.getString(i++), // dialect
-            userid = rs.getString(i++), // userid
-            rs.getTimestamp(i++).getTime(),
+            rs.getString("firstName"), // first
+            rs.getString("lastName"), // last
+            rs.getString("nativeLang"), // native
+            rs.getString("dialect"), // dialect
+            userid = rs.getString("userid"), // userid
+            rs.getTimestamp("timestamp").getTime(),
 
-            rs.getBoolean(i++),
-            userid.equals("gvidaver") | userid.equals("swade")));
+            rs.getBoolean("enabled"),
+            userid != null && (userid.equals("gvidaver") | userid.equals("swade")));
+          users.add(newUser);
+          if (newUser.userID == null) newUser.userID = ""+newUser.id;
         }
       }
       rs.close();
