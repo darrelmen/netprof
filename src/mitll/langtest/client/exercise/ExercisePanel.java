@@ -132,11 +132,12 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber) {
     List<Exercise.QAPair> englishQuestions = e.getEnglishQuestions();
     List<Exercise.QAPair> flQuestions = e.getForeignLanguageQuestions();
+    List<Exercise.QAPair> questionsToShow = e.promptInEnglish ? englishQuestions : flQuestions;
     int n = englishQuestions.size();
     //System.out.println("eng q " + englishQuestions);
     for (Exercise.QAPair pair : e.getQuestions()) {
       // add question header
-      Exercise.QAPair engQAPair = questionNumber - 1 < n ? englishQuestions.get(questionNumber - 1) : null;
+      Exercise.QAPair engQAPair = questionNumber - 1 < n ? questionsToShow.get(questionNumber - 1) : null;
 
       if (engQAPair != null) {
         getQuestionHeader(questionNumber, n, engQAPair, shouldShowAnswer(),!controller.isDemoMode());
@@ -169,6 +170,16 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   protected void getQuestionHeader(int i, int total, Exercise.QAPair qaPair, Exercise.QAPair pair, boolean showAnswer) {
     getQuestionHeader(i,total,qaPair,showAnswer,true);
   }
+
+  /**
+   * @see #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
+   * @see #getQuestionHeader(int, int, mitll.langtest.shared.Exercise.QAPair, boolean, boolean)
+   * @param i
+   * @param total
+   * @param qaPair
+   * @param showAnswer
+   * @param addSpacerAfter
+   */
   private void getQuestionHeader(int i, int total, Exercise.QAPair qaPair, boolean showAnswer, boolean addSpacerAfter) {
     String question = qaPair.getQuestion();
     String prefix = "Question" +
@@ -201,6 +212,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   }
 
   private void addQuestionPrompt(Panel vp, Exercise e) {
+    System.out.println("question prompt " + e.promptInEnglish + " for " +e);
     vp.add(new HTML(getQuestionPrompt(e.promptInEnglish)));
     SimplePanel spacer = new SimplePanel();
     spacer.setSize("50px", getQuestionPromptSpacer() + "px");
