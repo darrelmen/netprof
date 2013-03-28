@@ -295,28 +295,32 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
 
     if (props.isTimedGame()) {
-      List<String> msgs = new ArrayList<String>();
-      msgs.add("Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.");
-      msgs.add("See how many you can get right in one minute!");
-      msgs.add("Press and hold the " + RECORDING_KEY + " to record.");
-      msgs.add("Release to stop recording.");
-      msgs.add("Ready to start the clock?");
-      dialogHelper.showErrorMessage("Beat the clock!", msgs, "Yes!", new DialogHelper.CloseListener() {
-        @Override
-        public void gotYes() {
-          login();
-        }
-
-        @Override
-        public void gotNo() {
-
-        }
-      });
+      showTimedGameHelp();
     }
     else {
       showHelpNewUser();
       login();
     }
+  }
+
+  private void showTimedGameHelp() {
+    List<String> msgs = new ArrayList<String>();
+    msgs.add("Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.");
+    msgs.add("See how many you can get right in one minute!");
+    msgs.add("Press and hold the " + RECORDING_KEY + " to record.");
+    msgs.add("Release to stop recording.");
+    msgs.add("Ready to start the clock?");
+    dialogHelper.showErrorMessage("Beat the clock!", msgs, "Yes!", new DialogHelper.CloseListener() {
+      @Override
+      public void gotYes() {
+        login();
+      }
+
+      @Override
+      public void gotNo() {
+
+      }
+    });
   }
 
   private void showHelpNewUser() {
@@ -334,11 +338,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   @Override
   public void showFlashHelp() {
-    List<String> msgs = new ArrayList<String>();
-    msgs.add("Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.");
-    msgs.add("Press and hold the " + RECORDING_KEY + " to record.");
-    msgs.add("Release to stop recording.");
-    dialogHelper.showErrorMessage("Help", msgs);
+    if (props.isTimedGame()) {
+      showTimedGameHelp();
+    } else {
+      List<String> msgs = new ArrayList<String>();
+      msgs.add("Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.");
+      msgs.add("Press and hold the " + RECORDING_KEY + " to record.");
+      msgs.add("Release to stop recording.");
+      dialogHelper.showErrorMessage("Help", msgs);
+    }
   }
 
   private void doDataCollectAdminView() {
