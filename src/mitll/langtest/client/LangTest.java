@@ -4,7 +4,6 @@ import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Paragraph;
 import com.github.gwtbootstrap.client.ui.Row;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -22,8 +21,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -38,16 +35,16 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
+import mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList;
-import mitll.langtest.client.flashcard.FlashcardExerciseList;
 import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
 import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
+import mitll.langtest.client.flashcard.FlashcardExerciseList;
 import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.mail.MailDialog;
@@ -65,7 +62,6 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -83,6 +79,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public static final String LANGTEST_IMAGES = "langtest/images/";
   private static final String RECORDING_KEY = "SPACE BAR";
+  private final DialogHelper dialogHelper = new DialogHelper(false);
 
   private Panel currentExerciseVPanel = new VerticalPanel();
   private ListInterface exerciseList;
@@ -300,15 +297,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (props.isTimedGame()) {
       List<String> msgs = new ArrayList<String>();
       msgs.add("Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.");
-      msgs.add("See how many you can get right in 1 minute!");
+      msgs.add("See how many you can get right in one minute!");
       msgs.add("Press and hold the " + RECORDING_KEY + " to record.");
       msgs.add("Release to stop recording.");
-      msgs.add("");
-      msgs.add("Ready - set - ");
-      showErrorMessage("Beat the clock!",msgs, "Go!", new CloseListener() {
+      msgs.add("Ready to start the clock?");
+      dialogHelper.showErrorMessage("Beat the clock!", msgs, "Yes!", new DialogHelper.CloseListener() {
         @Override
-        public void didClose() {
+        public void gotYes() {
           login();
+        }
+
+        @Override
+        public void gotNo() {
+
         }
       });
     }
@@ -337,7 +338,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     msgs.add("Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.");
     msgs.add("Press and hold the " + RECORDING_KEY + " to record.");
     msgs.add("Release to stop recording.");
-    showErrorMessage("Help",msgs);
+    dialogHelper.showErrorMessage("Help", msgs);
   }
 
   private void doDataCollectAdminView() {
@@ -779,63 +780,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public void showErrorMessage(String title,String msg) {
-    List<String> msgs = new ArrayList<String>();
-    msgs.add(msg);
-    showErrorMessage(title, msgs);
+    dialogHelper.showErrorMessage(title, msg);
   }
 
-  public void showErrorMessage(String title, List<String> msgs) {
-    showErrorMessage(title,msgs,"Close",null);
-  }
     /**
      * Note : depends on bootstrap
      * @param title
      * @param msgs
      */
-  public void showErrorMessage(String title, List<String> msgs,String buttonName, final CloseListener listener) {
-    final DialogBox dialogBox;
-    Button closeButton;
-
-    dialogBox = new DialogBox();
-    dialogBox.setGlassEnabled(true);
-    dialogBox.setText(title);
-
-    closeButton = new Button(buttonName);
-    closeButton.getElement().setId("closeButton");
-    closeButton.setFocus(true);
-
-    VerticalPanel dialogVPanel = new VerticalPanel();
-    dialogVPanel.addStyleName("dialogVPanel");
-
-    FluidContainer container = new FluidContainer();
-    dialogVPanel.add(container);
-
-    for (String msg : msgs) {
-      FluidRow row = new FluidRow();
-      Column column = new Column(12);
-      row.add(column);
-      Heading para = new Heading(4);
-      para.setText(msg);
-
-      column.add(para);
-      container.add(row);
-    }
-
-    dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
-    dialogVPanel.add(closeButton);
-    dialogBox.setWidget(dialogVPanel);
-
-    closeButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-        if (listener != null) listener.didClose();
-      }
-    });
-    dialogBox.center();
-  }
-
-  public interface CloseListener {
-    void didClose();
+  @Override
+  public void showErrorMessage(String title, List<String> msgs, String buttonName, final DialogHelper.CloseListener listener) {
+    dialogHelper.showErrorMessage(title, msgs, buttonName, listener);
   }
 
   public void showStatus(String msg) { status.setText(msg); }
