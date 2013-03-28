@@ -1,5 +1,10 @@
 package mitll.langtest.client.user;
 
+import mitll.langtest.client.DialogHelper;
+import mitll.langtest.client.LangTest;
+
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -13,4 +18,6 @@ public interface UserFeedback {
   void login();
 
   void showEmail(String subject, String linkTitle, String token);
+
+  void showErrorMessage(String title, List<String> msgs, String buttonName, DialogHelper.CloseListener listener);
 }
