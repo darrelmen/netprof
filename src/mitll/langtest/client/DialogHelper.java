@@ -52,7 +52,7 @@ public class DialogHelper {
     closeButton = new Button(buttonName);
     closeButton.setType(ButtonType.PRIMARY);
 
-    closeButton.getElement().setId("closeButton");
+   // closeButton.getElement().setId("closeButton");
     closeButton.setFocus(true);
 
     FluidContainer container = new FluidContainer();
@@ -74,6 +74,8 @@ public class DialogHelper {
       row.add(new Column(4,closeButton));
       row.add(new Column(4,new Heading(4)));
       Button noButton = new Button("No");
+      noButton.setType(ButtonType.INVERSE);
+
       row.add(new Column(4,noButton));
       noButton.addClickHandler(new ClickHandler() {
         public void onClick(ClickEvent event) {
@@ -86,6 +88,9 @@ public class DialogHelper {
       row.add(new Column(2,6,closeButton));
     }
     container.add(row);
+    FluidRow w = new FluidRow();
+    w.add(new Column(12,new Heading(6)));
+    container.add(w);
 
     closeButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
