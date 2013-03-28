@@ -327,6 +327,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return nextExercise;
   }
 
+  @Override
+  public void resetUserState(long userID) {
+    db.resetUserState(userID);
+  }
+
+  @Override
+  public void clearUserState(long userID) {
+    db.clearUserState(userID);
+  }
+
   /**
    * Called from the client.
    * @see mitll.langtest.client.exercise.ExerciseList#getExercisesInOrder()
