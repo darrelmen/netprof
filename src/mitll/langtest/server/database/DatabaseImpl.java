@@ -77,6 +77,7 @@ public class DatabaseImpl implements Database {
   private boolean doImages;
   private final String configDir;
   private String mediaDir;
+  private final Map<Long,UserStateWrapper> userToState = new HashMap<Long,UserStateWrapper>();
 
   /**
    * Just for testing
@@ -393,11 +394,11 @@ public class DatabaseImpl implements Database {
     return idToCount;
   }
 
-  private final Map<Long,UserStateWrapper> userToState = new HashMap<Long,UserStateWrapper>();
   private static class UserStateWrapper {
     public UserState state;
     private int correct = 0;
     private int incorrect = 0;
+    private int counter = 0;
     private List<Integer> correctHistory = new ArrayList<Integer>();
     private List<Exercise> exercises;
     private Random random;
@@ -424,21 +425,30 @@ public class DatabaseImpl implements Database {
     public void setIncorrect(int incorrect) {
       this.incorrect = incorrect;
     }
+
+    public List<Integer> getCorrectHistory() { return correctHistory; }
 /*
     public void setExercises() {
       Collections.shuffle(exercises,random);
     }*/
 
-    public boolean isComplete() { return correct+incorrect == exercises.size(); }
+    public boolean isComplete() { return counter == exercises.size(); }
 
     public void reset() {
       correctHistory.add(correct);
       correct = 0;
       incorrect = 0;
-      Collections.shuffle(exercises,random);
+      shuffle();
     }
 
-    public Exercise getNextExercise() { return exercises.get(correct+incorrect); }
+    public void shuffle() {
+      Collections.shuffle(exercises, random);
+      counter = 0;
+    }
+
+    public Exercise getNextExercise() {
+      return exercises.get(counter++ % exercises.size()); // defensive
+    }
   }
 
   /**
@@ -454,8 +464,10 @@ public class DatabaseImpl implements Database {
     List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
     Map<String,Exercise> idToExercise = new HashMap<String, Exercise>();
     for (Exercise e : exercises) idToExercise.put(e.getID(),e);
+    UserStateWrapper userStateWrapper;
+
     synchronized (userToState) {
-     // logger.info("getExercises : for user  " + userID);// + " index " + index);
+      // logger.info("getExercises : for user  " + userID);// + " index " + index);
       if (!userToState.containsKey(userID)) {
         String[] strings = new String[exercises.size()];
         int i = 0;
@@ -464,24 +476,27 @@ public class DatabaseImpl implements Database {
         }
         UserState userState = new UserState(strings);
         if (userState.finished()) {
-          logger.info("-------------- user "+userID + " is finished ---------------- ");
+          logger.info("-------------- user " + userID + " is finished ---------------- ");
         }
-        userToState.put(userID, new UserStateWrapper(userState, userID, exercises));
+        userStateWrapper = new UserStateWrapper(userState, userID, exercises);
+        userToState.put(userID, userStateWrapper);
       }
-      UserStateWrapper userState = userToState.get(userID);
-      if (isTimedGame) {
-         if (userState.isComplete()) {
-           FlashcardResponse flashcardResponse = new FlashcardResponse(true, userState.getCorrect(), userState.getIncorrect());
-           userState.reset();     // remember past state
-           return flashcardResponse;
-         } else {
-           return new FlashcardResponse(userState.getNextExercise(),
-             userState.getCorrect(),
-             userState.getIncorrect());
-         }
-      }
-      return getFlashcardResponse(idToExercise, userState);
+      userStateWrapper = userToState.get(userID);
     }
+
+    if (isTimedGame) {
+      FlashcardResponse flashcardResponse;
+      if (userStateWrapper.isComplete()) {
+        userStateWrapper.shuffle();
+      }
+        flashcardResponse =
+          new FlashcardResponse(userStateWrapper.getNextExercise(),
+          userStateWrapper.getCorrect(),
+          userStateWrapper.getIncorrect());
+       flashcardResponse.setCorrectHistory(userStateWrapper.getCorrectHistory());
+      return flashcardResponse;
+    }
+    return getFlashcardResponse(idToExercise, userStateWrapper);
   }
 
   private FlashcardResponse getFlashcardResponse(Map<String, Exercise> idToExercise, UserStateWrapper userState) {
@@ -523,6 +538,23 @@ public class DatabaseImpl implements Database {
           state.setIncorrect(state.getIncorrect() + 1);
         }
       }
+    }
+  }
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#resetUserState(long)
+   * @param userID
+   */
+  public void resetUserState(long userID) {
+    synchronized (userToState) {
+      UserStateWrapper userStateWrapper = userToState.get(userID);
+      userStateWrapper.reset();     // remember past state
+    }
+  }
+
+  public void clearUserState(long userID) {
+    synchronized (userToState) {
+      userToState.remove(userID);
     }
   }
 
