@@ -115,4 +115,8 @@ public interface LangTestDatabaseAsync {
   void getTypeToSectionsForTypeAndSection(String type, String section, AsyncCallback<Map<String, List<String>>> async);
 
   void getNextExercise(long userID, AsyncCallback<FlashcardResponse> async);
+
+  void resetUserState(long userID, AsyncCallback<Void> async);
+
+  void clearUserState(long userID, AsyncCallback<Void> async);
 }
