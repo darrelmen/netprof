@@ -67,14 +67,13 @@ public class SectionExerciseList extends PagingExerciseList {
 
       @Override
       public void onSuccess(Map<String, Collection<String>> result) {
-        //typeToSections = result;
         sectionPanel.clear();
 
         final FlexTable g = new FlexTable();
         String first = null;
         int row = 0;
         Set<String> types = result.keySet();
-        System.out.println("got types " + types);
+        System.out.println("getExercises for user = " + userID + " got types " + types);
         typeToBox.clear();
 
         for (final String type : types) {
@@ -83,6 +82,8 @@ public class SectionExerciseList extends PagingExerciseList {
           final ListBox listBox = new ListBox();
           typeToBox.put(type,listBox);
           List<String> sections = getSections(result, type);
+          System.out.println("\tgetExercises sections for " + type + " = " + sections);
+
           populateListBox(listBox, sections);
           listBox.addChangeHandler(new ChangeHandler() {
             @Override
@@ -103,7 +104,7 @@ public class SectionExerciseList extends PagingExerciseList {
 
         if (first != null) {
           typeToBox.get(first).setSelectedIndex(1); // not any
-          pushFirstSelection(first);
+          pushFirstListBoxSelection(first);
         }
         else {
           noSectionsGetExercises(userID);
@@ -228,7 +229,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @see #getExercises(long)
    * @param first
    */
-  private void pushFirstSelection(String first) {
+  private void pushFirstListBoxSelection(String first) {
     String initToken = History.getToken();
     if (initToken.length() == 0) {
       ListBox listBox = typeToBox.get(first);
@@ -303,13 +304,38 @@ public class SectionExerciseList extends PagingExerciseList {
   }
 
   /**
-   * @see #pushFirstSelection(String)
+   * @see #pushFirstListBoxSelection(String)
    * @see #setListBox(String, String)
    */
   private void pushNewSectionHistoryToken() {
     String historyToken = getHistoryToken(null);
-    System.out.println("------------ push history " + historyToken + " -------------- ");
-    History.newItem(historyToken);
+    String currentToken = History.getToken();
+    if (currentToken.equals(historyToken)) {
+      System.out.println("pushNewSectionHistoryToken : skipping same token " + historyToken);
+    } else {
+      System.out.println("------------ push history " + historyToken + " -------------- ");
+      History.newItem(historyToken);
+    }
+  }
+
+  protected void pushNewItem(String exerciseID) {
+    String historyToken = getHistoryToken(exerciseID);
+    System.out.println("------------ (section) pushNewItem : push history " + historyToken + " -------------- ");
+
+    String token = History.getToken();
+    System.out.println("pushNewItem : current token " + token + " vs new " + exerciseID);
+    if (token != null && historyToken.equals(token)) {
+      System.out.println("current token " + token + " same as new " + exerciseID);
+      loadByIDFromToken(exerciseID);
+    } else {
+      History.newItem(historyToken);
+    }
+  }
+
+  protected String getHistoryTokenForLink(String columnText) {
+    return "#"+getHistoryToken(columnText);
+
+   // return historyToken +";item="+columnText;
   }
 
   @Override
@@ -317,13 +343,13 @@ public class SectionExerciseList extends PagingExerciseList {
   }
 
   protected String getHistoryToken(String id) {
-    System.out.println("getHistoryToken for " + id + " examining " +typeToBox.size() + " boxes.");
+    //System.out.println("getHistoryToken for " + id + " examining " +typeToBox.size() + " boxes.");
     StringBuilder builder = new StringBuilder();
     for (String type : typeToBox.keySet()) {
       ListBox listBox = typeToBox.get(type);
       String section = listBox.getItemText(listBox.getSelectedIndex());
       if (section.equals(ANY)) {
-        System.out.println("Skipping box " + type);
+       // System.out.println("Skipping box " + type + " (ANY) ");
       } else {
         builder.append(type + "=" + section + ";");
       }
@@ -336,33 +362,50 @@ public class SectionExerciseList extends PagingExerciseList {
 
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
-    String token = event.getValue();
-    System.out.println("onValueChange " + token);
-    if (token.length() == 0) {
-      setListBox("", ANY);
-      noSectionsGetExercises(userID);
+    String rawToken = getTokenFromEvent(event);
+    System.out.println("onValueChange : token is " + rawToken);
+    String item = getTriple(rawToken).item;
+
+    if (item != null && item.length() > 0 && hasExercise(item)) {
+      System.out.println("onValueChange : loading item " + item);
+      loadByIDFromToken(item);
     } else {
-      token = unencodeToken(token);
-      if (!token.contains("=")) token = getDefaultToken();
-      System.out.println("onValueChange after " + token);
-      try {
-        Triple triple = getTriple(token);
+      String token = event.getValue();
+      System.out.println("onValueChange " + token);
+      if (token.length() == 0) {
+        setListBox("", ANY);
+        noSectionsGetExercises(userID);
+      } else {
+        token = unencodeToken(token);
+        if (!token.contains("=")) token = getDefaultToken();
+        System.out.println("onValueChange after " + token);
+        try {
+          Triple triple = getTriple(token);
 
-        restoreListBoxState(triple);
-        Map<String, String> typeToSection = triple.typeToSection;
-        String type = typeToSection.keySet().iterator().next();
-        String section = typeToSection.get(type);
-        setOtherListBoxes(type, section);
+          restoreListBoxState(triple);
+          Map<String, String> typeToSection = triple.typeToSection;
+          String type = typeToSection.keySet().iterator().next();
+          String section = typeToSection.get(type);
+          System.out.println("onValueChange first type " + type + "=" + section);
 
-        loadExercises(type, section, triple.item);
-      } catch (Exception e) {
-        System.out.println("onValueChange " + token + " badly formed. Got " + e);
-        e.printStackTrace();
+          setOtherListBoxes(type, section);
+
+          loadExercises(type, section, triple.item);
+        } catch (Exception e) {
+          System.out.println("onValueChange " + token + " badly formed. Got " + e);
+          e.printStackTrace();
+        }
       }
     }
   }
 
-  private void setOtherListBoxes(final String selectedType, String section) {
+  /**
+   * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
+   * @param selectedType
+   * @param section
+   */
+  private void setOtherListBoxes(final String selectedType, final String section) {
+    System.out.println("setOtherListBoxes " + selectedType + " " + section);
     service.getTypeToSectionsForTypeAndSection(selectedType, section, new AsyncCallback<Map<String, List<String>>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -375,17 +418,22 @@ public class SectionExerciseList extends PagingExerciseList {
        */
       @Override
       public void onSuccess(Map<String, List<String>> result) {
-        for (Map.Entry<String, List<String>> pair : result.entrySet()) {
-          String type = pair.getKey();
-          if (type.equals(selectedType)) {
-            System.out.println("setOtherListBoxes skipping " + type);
+        if (result == null) {
+          System.err.println("couldn't get result for " + selectedType + "="+section);
+          Window.alert("Sorry -- error on server.  Please report.");
+        }
+        else {
+          for (Map.Entry<String, List<String>> pair : result.entrySet()) {
+            String type = pair.getKey();
+            if (type.equals(selectedType)) {
+              System.out.println("setOtherListBoxes skipping " + type);
 
-          } else {
-            List<String> sections = pair.getValue();
-            populateListBox(type, sections);
+            } else {
+              List<String> sections = pair.getValue();
+              populateListBox(type, sections);
+            }
           }
         }
-        pushNewSectionHistoryToken();
       }
     });
   }
@@ -424,7 +472,7 @@ public class SectionExerciseList extends PagingExerciseList {
         String section = segments[1].trim();
 
         triple.add(type, section);
-        System.out.println("part " + part + " : " + type + "->" +section + " : " + triple);
+        System.out.println("getTriple : part " + part + " : " + type + "->" +section + " : " + triple);
       }
       else {
         System.err.println("getTriple skipping part '" + part+ "'");
@@ -434,11 +482,11 @@ public class SectionExerciseList extends PagingExerciseList {
     if (token.contains("item")) {
       int item1 = token.indexOf("item=");
       String itemValue = token.substring(item1+"item=".length());
-      System.out.println("got " + itemValue);
+      System.out.println("got item = '" + itemValue +"'");
       triple.setItem(itemValue);
     }
 
-    System.out.println("triple from token '" +token + "' = '" +triple + "'");
+    System.out.println("getTriple : triple from token '" +token + "' = '" +triple + "'");
 
     return triple;
   }
@@ -461,7 +509,7 @@ public class SectionExerciseList extends PagingExerciseList {
         builder.append(section).append(", ");
       }
       String s = builder.toString();
-      return s.substring(0, s.length() - 2);
+      return s.substring(0, Math.max(0,s.length() - 2));
     }
   }
 
@@ -477,7 +525,7 @@ public class SectionExerciseList extends PagingExerciseList {
       ListBox listBox = typeToBox.get(type);
       if (listBox == null) {
         if (!type.equals("item")) {
-          System.err.println("huh? bad type " + type);
+          System.err.println("restoreListBoxState for " +triple + " : huh? bad type " + type);
         }
       } else {
         for (int i = 0; i < listBox.getItemCount(); i++) {
