@@ -496,4 +496,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   @Override
   public boolean onFirst(ExerciseShell current) { return getIndex(current) == 0; }
+
+  @Override
+  public void reloadExercises() {
+
+  }
 }

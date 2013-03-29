@@ -96,7 +96,12 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }-*/;
 
   public void installFlash() {
-    installFlash(GWT.getModuleBaseURL(), id);
+    if (gotPermission()) {
+      micPermission.gotPermission();
+    }
+    else {
+      installFlash(GWT.getModuleBaseURL(), id);
+    }
   }
 
   public void removeFlash() {
