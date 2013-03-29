@@ -42,6 +42,7 @@ public class PropertyHandler {
   //private static final String DEBUG_EMAIL = "debugEmail";
   private static final String FLASHCARD = "flashcard";
   private static final String LANGUAGE = "language";
+  private static final String CONTINUE_PROMPT = "promptBeforeNextItem";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -102,6 +103,7 @@ public class PropertyHandler {
   private float screenPortion;
   private boolean CRTDataCollectMode;
   private String language;
+  private boolean promptBeforeNextItem = true;
 
   public PropertyHandler(Map<String,String> props) {
     this.props = props;
@@ -142,6 +144,7 @@ public class PropertyHandler {
     //  else if (key.equals(DEBUG_EMAIL)) debugEmail = getBoolean(value);
       else if (key.equals(FLASHCARD)) flashCard = getBoolean(value);
       else if (key.equals(LANGUAGE)) language = value;
+      else if (key.equals(CONTINUE_PROMPT)) promptBeforeNextItem = getBoolean(value);
     }
   }
 
@@ -366,5 +369,9 @@ public class PropertyHandler {
 
   public String getLanguage() {
     return language;
+  }
+
+  public boolean isPromptBeforeNextItem() {
+    return promptBeforeNextItem;
   }
 }
