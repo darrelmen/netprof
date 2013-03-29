@@ -665,6 +665,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isGrading() {  return props.isGrading(); }
   public boolean isLogClientMessages() {  return props.isLogClientMessages(); }
   public String getLanguage() {  return props.getLanguage(); }
+  public boolean isPromptBeforeNextItem() {  return props.isPromptBeforeNextItem(); }
 
   // recording methods...
   /**
