@@ -45,4 +45,5 @@ public interface ExerciseController {
   boolean isGrading();
   boolean isLogClientMessages();
   String getAudioType();
+  String getLanguage();
 }
