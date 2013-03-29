@@ -142,7 +142,19 @@
 
     <target depends="build" name="flashcard">
         <jar destfile="npEnglishFlashcard.war" basedir="war"
-             excludes="answers/**,audioimages/**,config/first/**,config/dataCollectAdmin/**,config/egyptian/**,config/pashto/**,config/pilot/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.dli-pashto/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+             excludes="answers/**,audioimages/**,config/first/**,config/crtDari/**,config/dataCollectAdmin/**,config/egyptian/**,config/pashto/**,config/pilot/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.dli-pashto/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target depends="build" name="frenchEnglishGame">
+        <jar destfile="FrenchEnglishGame.war" basedir="war"
+             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pilot/**,scoring/**,soundmanager2.js"
+             excludes="answers/**,audioimages/**,config/first/**,config/crtDari/**,config/dataCollectAdmin/**,config/egyptian/**,config/pashto/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.dli-pashto/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+        >
+
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
             </manifest>
