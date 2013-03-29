@@ -358,7 +358,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     innerContainer.setWidget(exercisePanel);
 
     int i = getIndex(e);
-    System.out.println("useExercise : " +e.getID() + " index " +i);
+    //System.out.println("useExercise : " +e.getID() + " index " +i);
     if (i == -1) {
       System.err.println("can't find " + e + " in list of " + currentExercises.size() + " exercises.");
       return;
