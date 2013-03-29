@@ -126,6 +126,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    *
    * I gotta go with the latter.
    *
+   * @see #loadFirstExercise()
    * @param exerciseID
    */
   private void pushFirstSelection(String exerciseID) {
@@ -138,7 +139,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }*/
 
     String token = History.getToken();
-    System.out.println("current token " + token + " vs new " +exerciseID);
+    System.out.println("pushFirstSelection : current token " + token + " vs new " +exerciseID);
     if (token != null && getIDFromToken(token).equals(exerciseID)) {
       System.out.println("current token " + token + " same as new " +exerciseID);
       loadByIDFromToken(exerciseID);
@@ -148,7 +149,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
-  private void pushNewItem(String exerciseID) {
+  /**
+   * @see #loadExercise(mitll.langtest.shared.ExerciseShell)
+   * @see #pushFirstSelection(String)
+   * @param exerciseID
+   */
+  protected void pushNewItem(String exerciseID) {
     System.out.println("------------ pushNewItem : push history " + exerciseID + " -------------- ");
     History.newItem("#item=" + exerciseID);
   }
@@ -190,7 +196,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
 
     public void onSuccess(List<ExerciseShell> result) {
-      // System.out.println("SetExercisesCallback Got " +result.size() + " results");
+      System.out.println("SetExercisesCallback Got " +result.size() + " results");
       rememberExercises(result);
       loadFirstExercise();
     }
@@ -244,7 +250,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         if (e != null) toLoad = e;
       }
 
-      System.out.println("loadFirstExercise " + toLoad.getID());
+      System.out.println("loadFirstExercise ex id =" + toLoad.getID());
       pushFirstSelection(toLoad.getID());
     }
   }
@@ -252,6 +258,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private ExerciseShell byID(String name) {
     return idToExercise == null ? null : idToExercise.get(name);
   }
+
+  protected boolean hasExercise(String id) { return byID(id) != null; }
 
   /**
    * @see #addExerciseToList(mitll.langtest.shared.ExerciseShell)
@@ -283,7 +291,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   /**
    * This method is called whenever the application's history changes.
-   * @seex #
+   * @see #pushNewItem(String)
    * @param event
    */
   public void onValueChange(ValueChangeEvent<String> event) {
@@ -301,7 +309,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
-  private void loadByIDFromToken(String id) {
+  protected void loadByIDFromToken(String id) {
     ExerciseShell exerciseShell = byID(id);
     if (exerciseShell != null) {
       checkBeforeLoad(exerciseShell);
@@ -309,10 +317,18 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
     else {
       Window.alert("unknown item " + id);
+      System.out.println("can't load " +id + " keys were " + idToExercise.keySet());
     }
   }
 
-  private String getTokenFromEvent(ValueChangeEvent<String> event) {
+/*
+  protected String getIDFromToken(ValueChangeEvent<String> event) {
+    String token = getTokenFromEvent(event);
+    return getIDFromToken(token);
+  }
+*/
+
+  protected String getTokenFromEvent(ValueChangeEvent<String> event) {
     String token = event.getValue();
     token = unencodeToken(token);
     return token;
