@@ -41,6 +41,7 @@ public class PropertyHandler {
   private static final String SHOW_SECTIONS = "showSections";
   //private static final String DEBUG_EMAIL = "debugEmail";
   private static final String FLASHCARD = "flashcard";
+  private static final String LANGUAGE = "language";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -100,6 +101,7 @@ public class PropertyHandler {
   private int recordTimeout = DEFAULT_TIMEOUT;
   private float screenPortion;
   private boolean CRTDataCollectMode;
+  private String language;
 
   public PropertyHandler(Map<String,String> props) {
     this.props = props;
@@ -139,6 +141,7 @@ public class PropertyHandler {
       else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
     //  else if (key.equals(DEBUG_EMAIL)) debugEmail = getBoolean(value);
       else if (key.equals(FLASHCARD)) flashCard = getBoolean(value);
+      else if (key.equals(LANGUAGE)) language = value;
     }
   }
 
@@ -359,5 +362,9 @@ public class PropertyHandler {
 
   public boolean isCRTDataCollectMode() {
     return CRTDataCollectMode;
+  }
+
+  public String getLanguage() {
+    return language;
   }
 }
