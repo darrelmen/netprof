@@ -37,6 +37,10 @@ public class FlashcardExerciseList implements ListInterface {
   }
 
   @Override
+  public void reloadExercises() {
+  }
+
+  @Override
   public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {
     this.factory = factory;
   }
