@@ -70,10 +70,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                       ExercisePanelFactory factory,
                       boolean showTurkToken, boolean showInOrder) {
-    this.innerContainer = new SimplePanel();
-    this.innerContainer.setWidth("100%");
-    this.innerContainer.setHeight("100%");
-    currentExerciseVPanel.add(innerContainer);
+    addWidgets(currentExerciseVPanel);
     this.service = service;
     this.feedback = feedback;
     this.factory = factory;
@@ -82,6 +79,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
     // Add history listener
     History.addValueChangeHandler(this);
+  }
+
+  protected void addWidgets(Panel currentExerciseVPanel) {
+    this.innerContainer = new SimplePanel();
+    this.innerContainer.setWidth("100%");
+    this.innerContainer.setHeight("100%");
+    currentExerciseVPanel.add(innerContainer);
   }
 
   /**
