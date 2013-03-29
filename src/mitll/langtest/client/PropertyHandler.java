@@ -43,6 +43,7 @@ public class PropertyHandler {
   //private static final String DEBUG_EMAIL = "debugEmail";
   private static final String FLASHCARD = "flashcard";
   private static final String TIMED_GAME = "timedGame";
+  private static final String GAME_TIME = "gameTimeSeconds";
   private static final String LANGUAGE = "language";
 
   // URL parameters that can override above parameters
@@ -66,6 +67,7 @@ public class PropertyHandler {
   private static final boolean DEFAULT_SHOW_TURK_TOKEN = false;
   private static final int DEFAULT_SEGMENT_REPEATS = 1;
   private static final int DEFAULT_TIMEOUT = 45000;
+  private static final int DEFAULT_GAME_TIME_SECONDS = 60;
   private static final String DEFAULT_EXERCISE = null;
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
 
@@ -103,6 +105,7 @@ public class PropertyHandler {
   private boolean timedGame = false;
   private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
+  private int gameTimeSeconds = DEFAULT_GAME_TIME_SECONDS;
   private float screenPortion;
   private boolean CRTDataCollectMode;
   private String splashTitle;
@@ -148,6 +151,7 @@ public class PropertyHandler {
       else if (key.equals(LANGUAGE)) language = value;
       else if (key.equals(SPLASH_TITLE)) splashTitle = value;
       else if (key.equals(TIMED_GAME)) timedGame = getBoolean(value);
+      else if (key.equals(GAME_TIME)) gameTimeSeconds = getInt(value,DEFAULT_GAME_TIME_SECONDS,GAME_TIME);
     }
   }
 
@@ -247,6 +251,8 @@ public class PropertyHandler {
     if (adminParam != null) {
       adminView = !adminParam.equals("false");
     }
+    gameTimeSeconds = getInt(Window.Location.getParameter(GAME_TIME), DEFAULT_GAME_TIME_SECONDS,REPEATS);
+
     return grading;
   }
 
@@ -380,5 +386,9 @@ public class PropertyHandler {
 
   public boolean isTimedGame() {
     return timedGame;
+  }
+
+  public int getGameTimeSeconds() {
+    return gameTimeSeconds;
   }
 }
