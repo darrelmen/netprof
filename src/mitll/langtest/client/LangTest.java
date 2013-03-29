@@ -181,9 +181,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     widgets.addNorth(hp, HEADER_HEIGHT);
     widgets.addSouth(status = new Label(), footerHeight);
-    widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH/* +10*/);
-    if ((props.isMinimalUI()&& !props.isGrading()) && !props.isAdminView() || props.isTeacherView()) {
+    if ((props.isMinimalUI() && !props.isGrading()) && !props.isAdminView() || props.isTeacherView()) {
       exerciseListPanel.setVisible(false);
+      widgets.addWest(exerciseListPanel, 10);
+    }
+    else {
+      widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH);
     }
     // set up center panel, initially with flash record panel
     currentExerciseVPanel = new VerticalPanel();
@@ -191,6 +194,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (usualLayout) {
       ScrollPanel sp = new ScrollPanel();
       sp.add(currentExerciseVPanel);
+      currentExerciseVPanel.addStyleName("currentExercisePanel");
       widgets.add(sp);
     }
     else {  // show fancy lace background image
@@ -212,9 +216,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     else {
       System.out.println("*not* allowing recording of audio.");
-    }
-    if (usualLayout) {
-      currentExerciseVPanel.addStyleName("currentExercisePanel");
     }
 
     setPageTitle();
@@ -663,6 +664,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isMinimalUI() {  return props.isMinimalUI(); }
   public boolean isGrading() {  return props.isGrading(); }
   public boolean isLogClientMessages() {  return props.isLogClientMessages(); }
+  public String getLanguage() {  return props.getLanguage(); }
 
   // recording methods...
   /**
