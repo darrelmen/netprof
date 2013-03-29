@@ -143,7 +143,7 @@ public class ServerProperties {
     outsideFile = props.getProperty(OUTSIDE_FILE, OUTSIDE_FILE_DEFAULT);
     String dateFromManifest = getDateFromManifest(servletContext);
     if (dateFromManifest != null && dateFromManifest.length() > 0) {
-      logger.debug("Date from manifest " + dateFromManifest);
+      //logger.debug("Date from manifest " + dateFromManifest);
       props.setProperty("releaseDate",dateFromManifest);
     }
   }
