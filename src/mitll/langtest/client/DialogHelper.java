@@ -46,7 +46,7 @@ public class DialogHelper {
     Button closeButton;
 
     dialogBox = new DialogBox();
-    dialogBox.setGlassEnabled(true);
+   // dialogBox.setGlassEnabled(true);
     dialogBox.setHTML("<b>" + title + "</b>");
 
     closeButton = new Button(buttonName);
@@ -98,8 +98,8 @@ public class DialogHelper {
         if (listener != null) listener.gotYes();
       }
     });
-    dialogBox.center();
 
     dialogBox.setWidget(container);
+    dialogBox.center();
   }
 }
