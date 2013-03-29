@@ -46,4 +46,5 @@ public interface ExerciseController {
   boolean isLogClientMessages();
   String getAudioType();
   String getLanguage();
+  boolean isPromptBeforeNextItem();
 }
