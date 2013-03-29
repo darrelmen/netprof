@@ -50,25 +50,30 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private Timer timer;
   private boolean expired = false;
   private boolean timerRunning = false;
-  long lastTextMessage = -1;
+  //long lastTextMessage = -1;
+  private long lastMessage = -1;
 
   private int lastCorrect = 0;
   private int prevCorrect = 0;
 
   private static final String HELP_IMAGE = LangTest.LANGTEST_IMAGES + "/help-4.png";
-  private static final int total = 20;
+  private final int gameTimeSeconds;
   private FluidRow bottomRow = new FluidRow();
 
   /**
+   *
    * @param currentExerciseVPanel
    * @param service
    * @param user
    * @param controller
+   * @param gameTimeSeconds
    * @see mitll.langtest.client.LangTest#doFlashcard()
    */
   public BootstrapFlashcardExerciseList(Container currentExerciseVPanel, LangTestDatabaseAsync service,
-                                        UserManager user, final ExerciseController controller, boolean isTimedGame) {
+                                        UserManager user, final ExerciseController controller,
+                                        boolean isTimedGame, int gameTimeSeconds) {
     this.service = service;
+    this.gameTimeSeconds = gameTimeSeconds;
 
     FluidRow row = new FluidRow();
     currentExerciseVPanel.add(row);
@@ -78,28 +83,14 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     FluidRow correctAndImageRow = new FluidRow();
     currentExerciseVPanel.add(correctAndImageRow);
 
-   // FluidRow correctAndImageRow = new FluidRow();
-
     correct.addStyleName("darkerBlueColor");
 
     if (isTimedGame) {
-      //FluidRow composite = new FluidRow();
-    //  bottomRow.add(new Column(3, correct));
-      //Heading widgets = new Heading(3);
-     // widgets.setText("Time Left :");
-     // bottomRow.add(new Column(2, widgets));
-      //Heading heading = new Heading(3);
-     // heading.add(bar);
       Column w = new Column(6, 3, bar);
-     // bar.addStyleName("magicCenter");
       bottomRow.add(w);
       bottomRow.setVisible(false);
       currentExerciseVPanel.add(bottomRow);
-      //   composite.add(new Column(3, timeFeedback));
-   //   correctAndImageRow.add(new Column(11, bottomRow));
-    }/* else {
-      correctAndImageRow.add(new Column(11, correct));
-    }*/
+    }
     correctAndImageRow.add(new Column(11, correct));
 
     // add help image on right side
@@ -120,14 +111,13 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     this.factory = factory;
   }
 
-  long lastMessage = -1;
   /**
    * @param userID
    * @see mitll.langtest.client.LangTest#gotUser(long)
    */
   @Override
   public void getExercises(final long userID) {
-    System.out.println("\n\n --------------- getExercises for " + userID + " expired " +expired);
+    System.out.println("\n\n --------------- getExercises for " + userID + " expired " +expired + " time running " + timerRunning);
 
     if (!expired) {
       if (!timerRunning) {
@@ -161,12 +151,14 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   }
 
   private void startTimer(final long userID) {
+    System.out.println("startTimer for " + userID);
+
     start = System.currentTimeMillis();
     lastMessage = start;
-    lastTextMessage = start;
+ //   lastTextMessage = start;
     bar.setPercent(100);
     bar.setColor(ProgressBarBase.Color.DEFAULT);
-    bar.setText(total + " seconds");
+    bar.setText(gameTimeSeconds + " seconds");
 
     timer = new Timer() {
       @Override
@@ -178,7 +170,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
           timerRunning = true;
           long now = System.currentTimeMillis();
           long diff = now-start;
-          int remaining = total - (int)(diff/1000);
+          int remaining = gameTimeSeconds - (int)(diff/1000);
 
           if (remaining < 0) {
             expired = true;
@@ -202,7 +194,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
               if (lastTenSeconds) {
                 bar.setColor(ProgressBarBase.Color.WARNING);
               }
-              float percent = 100f * ((float)remaining/(float)total);
+              float percent = 100f * ((float)remaining/(float)gameTimeSeconds);
               bar.setText("");
               bar.setPercent((int)percent);
               lastMessage = now;
@@ -279,9 +271,19 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
    */
   @Override
   public boolean loadNextExercise(ExerciseShell current) {
-    System.out.println("loadNextExercise -------- " + current);
+    System.out.println("-------------- loadNextExercise -------- " + current);
     getExercises(user.getUser());
     return true;
+  }
+
+  @Override
+  public void reloadExercises() {
+    System.out.println("-------------- reloadExercises -------- " + timerRunning);
+
+    if (!timerRunning) {
+      expired = false;
+      getExercises(user.getUser());
+    }
   }
 
   @Override
