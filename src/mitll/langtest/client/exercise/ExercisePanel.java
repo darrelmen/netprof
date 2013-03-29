@@ -224,10 +224,13 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   }
 
   protected String getWrittenPrompt(boolean promptInEnglish) {
-    String language = controller.getLanguage();
-    String theForeignLanguage = language == null ? THE_FOREIGN_LANGUAGE : language;
     return THREE_SPACES +
-        TYPE_YOUR_ANSWER_IN +(promptInEnglish ? ENGLISH : theForeignLanguage) +" :";
+        TYPE_YOUR_ANSWER_IN +(promptInEnglish ? ENGLISH : getLanguage()) +" :";
+  }
+
+  private String getLanguage() {
+    String language = controller.getLanguage();
+    return language == null ? THE_FOREIGN_LANGUAGE : language;
   }
 
   protected String getSpokenPrompt(boolean promptInEnglish) {
@@ -242,7 +245,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     else if (!controller.isCRTDataCollectMode()) {
       System.out.println("unknown audio type " + controller.getAudioType());
     }
-    String studentPrompt = SPEAK_AND_RECORD_YOUR_ANSWER_IN + (promptInEnglish ? ENGLISH : THE_FOREIGN_LANGUAGE) + " ";
+    String studentPrompt = SPEAK_AND_RECORD_YOUR_ANSWER_IN + (promptInEnglish ? ENGLISH : getLanguage()) + " ";
     String teacherPrompt = TEACHER_PROMPT;
     return THREE_SPACES + (controller.isDataCollectMode() && !controller.isCRTDataCollectMode() ? teacherPrompt : studentPrompt) + instructions;
   }
