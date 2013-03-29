@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Reads an excel spreadsheet from DLI.
@@ -40,36 +41,52 @@ public class ExcelImport implements ExerciseDAO {
 
   private List<Exercise> exercises = null;
   private List<Lesson> lessons = new ArrayList<Lesson>();
-  private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
+  //private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
 
 
   private List<String> errors = new ArrayList<String>();
   private TeacherClass teacherClass;
   private final String file;
+  SectionHelper sectionHelper = new SectionHelper();
 
   @Override
   public Map<String, Collection<String>> getTypeToSections() {
-    Map<String,Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
+    /*Map<String,Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
     for (String key : typeToUnitToLesson.keySet()) {
-      typeToSection.put(key,typeToUnitToLesson.keySet());
+      typeToSection.put(key,new TreeSet<String>(typeToUnitToLesson.keySet()));
     }
-    return typeToSection;
+    logger.debug("getTypeToSections : type->section " + typeToSection);
+    return typeToSection;*/
+    return sectionHelper.getTypeToSections();
   }
 
   @Override
   public Map<String, List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
-    return null;
+    return sectionHelper.getTypeToSectionsForTypeAndSection(type, section);
   }
 
   @Override
   public Collection<Exercise> getExercisesForSection(String type, String section) {
+    logger.debug("getExercisesForSection : " + type + "=" + section);
+
+    return sectionHelper.getExercisesForSection(type, section);
+/*
+    logger.debug("getExercisesForSection : " + type + "=" + section);
+
     Map<String, Lesson> sectionToLesson = typeToUnitToLesson.get(type);
     if (sectionToLesson == null) {
       return Collections.emptyList();
     }
     else {
-      return sectionToLesson.get(section).getExercises();
-    }
+      Lesson lesson = sectionToLesson.get(section);
+      if (lesson == null) {
+        logger.error("huh? no lesson for " + type + "="+section);
+        return Collections.emptyList();
+      }
+      else {
+        return lesson.getExercises();
+      }
+    }*/
   }
 
   public ExcelImport() { this.file = null;}
@@ -127,12 +144,15 @@ public class ExcelImport implements ExerciseDAO {
           logger.warn(error);
         }
       }
-      for (String key : typeToUnitToLesson.keySet()) {
+     /* for (String key : typeToUnitToLesson.keySet()) {
         Map<String, Lesson> categoryToLesson = typeToUnitToLesson.get(key);
         lessons.addAll(categoryToLesson.values());
         Set<String> sections = categoryToLesson.keySet();
-        if (!sections.isEmpty()) logger.debug(key+ " : " + sections);
-      }
+        if (!sections.isEmpty()) {
+          logger.debug("Section "+ key+ " : " + sections);
+        }
+      }*/
+      sectionHelper.report();
 
 /*      if (!errors.isEmpty()) {
         logger.warn("there were " + errors.size() + " errors : " + errors);
@@ -144,14 +164,19 @@ public class ExcelImport implements ExerciseDAO {
     } catch (InvalidFormatException e) {
       e.printStackTrace();
     }
-    if (false && logger.isDebugEnabled()) {
+/*    if (false && logger.isDebugEnabled()) {
       for (Lesson l : getLessons()) {
         logger.debug("lesson " + l);
       }
-    }
+    }*/
     return exercises;
   }
 
+  /**
+   * @see #readExercises(java.io.InputStream)
+   * @param sheet
+   * @return
+   */
   private Collection<Exercise> readFromSheet(Sheet sheet) {
     Iterator<Row> iter = sheet.rowIterator();
     List<Exercise> exercises = new ArrayList<Exercise>();
@@ -177,9 +202,9 @@ public class ExcelImport implements ExerciseDAO {
     int weekIndex = 0;
     int weightIndex = -1;
     List<String> lastRowValues = new ArrayList<String>();
-    for (String type : new String[]{"unit", "chapter", "week"}) {
+/*    for (String type : new String[]{"unit", "chapter", "week"}) {
       typeToUnitToLesson.put(type, new TreeMap<String, Lesson>());
-    }
+    }*/
     for (; iter.hasNext(); ) {
       Row next = iter.next();
   //    logger.warn("------------ Row # " + next.getRowNum() + " --------------- ");
@@ -286,12 +311,35 @@ public class ExcelImport implements ExerciseDAO {
     String unit = getCell(next, unitIndex);
     String chapter = getCell(next, chapterIndex);
     String week = getCell(next, weekIndex);
-    boolean val = rememberExercise(typeToUnitToLesson.get("unit"), unit.trim(), unit, chapter, week, imported);
+    List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
+/*    boolean val = rememberExercise(typeToUnitToLesson.get("unit"), unit.trim(), unit, chapter, week, imported);
     val |= rememberExercise(typeToUnitToLesson.get("chapter"), chapter.trim(), unit, chapter, week, imported);
-    val |= rememberExercise(typeToUnitToLesson.get("week"), week.trim(), unit, chapter, week, imported);
+    val |= rememberExercise(typeToUnitToLesson.get("week"), week.trim(), unit, chapter, week, imported);*/
 
-    return val;
+    if (unit.length() == 0 &&
+      chapter.length() == 0 &&
+      week.length() == 0
+      ) {
+      unit = "Blank";
+    }
+    if (unit.length() > 0) pairs.add(sectionHelper.addUnitToLesson(imported,unit));
+    if (chapter.length() > 0) pairs.add(sectionHelper.addChapterToLesson(imported,chapter));
+    if (week.length() > 0) pairs.add(sectionHelper.addWeekToLesson(imported,week));
+    sectionHelper.addAssociations(pairs);
+
+    return false;
   }
+
+/*  private boolean rememberExercise(Map<String, Lesson> unitToLesson, String key, String unit, String chapter, String week, Exercise imported) {
+    if (key.length() > 0) {
+      Lesson unitLesson = unitToLesson.get(key);
+      if (unitLesson == null) unitToLesson.put(key, unitLesson = new Lesson(unit, chapter, week));
+      unitLesson.addExercise(imported);
+      return true;
+    } else {
+      return false;
+    }
+  }*/
 
   private Exercise getExercise(int id, FileExerciseDAO dao, String english, String foreignLanguagePhrase, String translit) {
     String content = dao.getContent(foreignLanguagePhrase, translit, english);
@@ -306,17 +354,6 @@ public class ExcelImport implements ExerciseDAO {
     return imported;
   }
 
-  private boolean rememberExercise(Map<String, Lesson> unitToLesson, String key, String unit, String chapter, String week, Exercise imported) {
-    if (key.length() > 0) {
-      Lesson unitLesson = unitToLesson.get(key);
-      if (unitLesson == null) unitToLesson.put(key, unitLesson = new Lesson(unit, chapter, week));
-      unitLesson.addExercise(imported);
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   private String getCell(Row next, int col) {
     Cell cell = next.getCell(col);
     if (cell == null) return "";
@@ -328,10 +365,10 @@ public class ExcelImport implements ExerciseDAO {
       return "" + new Double(numericCellValue).intValue();
     }
     else if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
-      return cell.getStringCellValue();
+      return cell.getStringCellValue().trim();
     }
     else {
-      return cell.toString();
+      return cell.toString().trim();
     }
   }
 
@@ -353,13 +390,13 @@ public class ExcelImport implements ExerciseDAO {
     return exercises;
   }
 
-  public List<Lesson> getLessons() {
+/*  public List<Lesson> getLessons() {
     return lessons;
-  }
+  }*/
 
-  public Set<String> getSections() { return typeToUnitToLesson.keySet(); }
+  public Set<String> getSections() { return sectionHelper.getSections(); }
   public Map<String, Lesson> getSection(String type) {
-    return typeToUnitToLesson.get(type);
+    return sectionHelper.getSection(type);
   }
 
   public static void main(String[] arg) {
