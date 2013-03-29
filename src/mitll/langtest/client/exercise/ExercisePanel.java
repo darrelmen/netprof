@@ -212,7 +212,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   }
 
   private void addQuestionPrompt(Panel vp, Exercise e) {
-    System.out.println("question prompt " + e.promptInEnglish + " for " +e);
+    //System.out.println("question prompt " + e.promptInEnglish + " for " +e);
     vp.add(new HTML(getQuestionPrompt(e.promptInEnglish)));
     SimplePanel spacer = new SimplePanel();
     spacer.setSize("50px", getQuestionPromptSpacer() + "px");
@@ -224,8 +224,10 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   }
 
   protected String getWrittenPrompt(boolean promptInEnglish) {
+    String language = controller.getLanguage();
+    String theForeignLanguage = language == null ? THE_FOREIGN_LANGUAGE : language;
     return THREE_SPACES +
-        TYPE_YOUR_ANSWER_IN +(promptInEnglish ? ENGLISH : THE_FOREIGN_LANGUAGE) +" :";
+        TYPE_YOUR_ANSWER_IN +(promptInEnglish ? ENGLISH : theForeignLanguage) +" :";
   }
 
   protected String getSpokenPrompt(boolean promptInEnglish) {
