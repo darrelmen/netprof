@@ -4,6 +4,7 @@ import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Lesson;
+import mitll.langtest.shared.Section;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.AudioFormat;
@@ -58,6 +59,8 @@ public class FileExerciseDAO implements ExerciseDAO {
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
   private Map<String,Map<String,Map<String,Set<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String,Map<String,Set<String>>>>();
+  //private Map<String,List<Section>> typeToSection = new HashMap<String,Section>();
+
 
   public FileExerciseDAO(boolean isFlashcard) {
     this(false,false,"",isFlashcard);
