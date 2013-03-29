@@ -39,7 +39,7 @@ public class BrowserCheck {
                     ". We strongly recommend upgrading to version " + min + " or later.");
         }
     } else {
-      System.out.println("browser " +browser + " ver " + ver + " version " + version + " vs " + min);
+      //System.out.println("browser " +browser + " ver " + ver + " version " + version + " vs " + min);
     }
     return this;
   }
