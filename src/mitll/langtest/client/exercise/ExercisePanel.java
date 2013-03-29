@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -92,6 +93,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     HorizontalPanel hp = new HorizontalPanel();
     hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e));
+    System.out.println("content alignment guess is " + WordCountDirectionEstimator.get().estimateDirection(e.getContent()));
     add(hp);
 
     int i = 1;
@@ -269,7 +271,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     if (useKeyHandler) prev.setTitle(LEFT_ARROW_TOOLTIP);
 
     buttonRow.add(prev);
-    prev.setVisible(!controller.isMinimalUI());
+    prev.setVisible(!controller.isMinimalUI() && !controller.isPromptBeforeNextItem());
 
     this.next = new Button(getNextButtonText());
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
@@ -346,7 +348,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   protected void clickNext(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                          final ExerciseController controller, final Exercise e) {
     if (next.isEnabled() && next.isVisible()) {
-      if (controller.isMinimalUI() && !controller.isGrading()) {
+      if (controller.isMinimalUI() && !controller.isGrading() && controller.isPromptBeforeNextItem()) {
         showConfirmNextDialog(service, userFeedback, controller, e);
       } else {
         postAnswers(service, userFeedback, controller, e);
