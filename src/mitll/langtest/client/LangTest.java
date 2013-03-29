@@ -36,6 +36,7 @@ import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList;
+import mitll.langtest.client.bootstrap.BootstrapSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -479,7 +480,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           true, props.isEnglishOnlyMode());
     } else {
       if (props.isShowSections()) {
-        this.exerciseList = new SectionExerciseList(currentExerciseVPanel, service, feedback,
+        this.exerciseList = new BootstrapSectionExerciseList(currentExerciseVPanel, service, feedback,
           props.isShowTurkToken(), isAutoCRTMode());
      } else {
         this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback,
@@ -729,9 +730,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else {
       setFactory();
 
-     // checkInitFlash();
-
-      if (userID != lastUser) {
+      if (userID != lastUser || props.isGoodwaveMode()) {
         System.out.println("gotUser : user changed - new " + userID + " vs last " + lastUser);
         if (/*props.isArabicTextDataCollect() ||*/ !props.isCollectAudio() || flashRecordPanel.gotPermission()) {
           System.out.println("\tgotUser : " + userID + " get exercises");
