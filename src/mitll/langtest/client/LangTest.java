@@ -280,7 +280,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     row.add(new Column(12, widgets));
 
     userManager = new UserManager(this, service, isCollectAudio(), false, isCRTDataCollectMode(), props.getAppTitle(), true);
-    this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager, this, props.isTimedGame());
+    this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager, this,
+      props.isTimedGame(), props.getGameTimeSeconds());
 
     makeFlashContainer();
 
@@ -293,27 +294,39 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     setupSoundManager();
 
-
-    if (props.isTimedGame()) {
-      showTimedGameHelp();
-    }
-    else {
+    if (!props.isTimedGame()) {
       showHelpNewUser();
-      login();
     }
+
+    modeSelect();
   }
 
   private void showTimedGameHelp() {
     List<String> msgs = new ArrayList<String>();
     msgs.add("Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.");
-    msgs.add("See how many you can get right in one minute!");
+    String duration = "one " +
+      "minute";
+    int secs = props.getGameTimeSeconds();
+    if (secs < 60) {
+      duration = secs + " seconds";
+    }
+    else {
+      int min = secs/60;
+      boolean even = secs % 60 == 0;
+      duration = min + " minute" + (min > 1 ? "s" :"") + (even ? "" : (secs-(min*60)) + " secs");
+    }
+    msgs.add("See how many you can get right in " +
+      duration +
+      "!");
     msgs.add("Press and hold the " + RECORDING_KEY + " to record.");
     msgs.add("Release to stop recording.");
     msgs.add("Ready to start the clock?");
     dialogHelper.showErrorMessage("Beat the clock!", msgs, "Yes!", new DialogHelper.CloseListener() {
       @Override
       public void gotYes() {
+        //exerciseList.getExercises(userID);
         login();
+        //exerciseList.reloadExercises();
       }
 
       @Override
@@ -511,19 +524,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void modeSelect() {
     boolean isGrading = props.isGrading();
-    logout.setVisible(!props.isGoodwaveMode());
-    users.setVisible(isGrading || props.isAdminView());
-    showResults.setVisible(isGrading || props.isAdminView());
-    monitoring.setVisible(isGrading || props.isAdminView());
+    if (logout != null) logout.setVisible(!props.isGoodwaveMode());
+    if (users != null) users.setVisible(isGrading || props.isAdminView());
+    if (showResults != null) showResults.setVisible(isGrading || props.isAdminView());
+    if (monitoring != null) monitoring.setVisible(isGrading || props.isAdminView());
 
     System.out.println("goodwave mode "+ props.isGoodwaveMode() + " " + isAutoCRTMode());
-    if (props.isGoodwaveMode() || isAutoCRTMode()) {   // no login for pron mode
-      gotUser(-1);
-    }
-    else {
-      login();
-    }
+
+    checkInitFlash();
+    //checkLogin();
   }
+
 
   /**
    * Hookup feedback for events from Flash generated from the user's response to the Mic Access dialog
@@ -536,11 +547,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     FlashRecordPanelHeadless.setMicPermission(new MicPermission() {
       public void gotPermission() {
-        System.out.println(new Date() + " : got permission!");
+        System.out.println(new Date() + " : makeFlashContainer - got permission!");
         flashRecordPanel.hide();
         flashRecordPanel.hide2(); // must be a separate call!
 
-        exerciseList.getExercises(lastUser);
+         checkLogin();
+        //exerciseList.getExercises(lastUser);
       }
 
       public void gotDenial() {
@@ -685,7 +697,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see ExerciseList#checkBeforeLoad(mitll.langtest.shared.ExerciseShell)
    */
   public void login() {
-    System.out.println("data collect mode " + props.isDataCollectMode() + " crt data collect " + props.isCRTDataCollectMode() + " teacher " + props.isTeacherView() + " grading " +props.isGrading());
+    System.out.println("data collect mode " + props.isDataCollectMode() +
+      " crt data collect " + props.isCRTDataCollectMode() +
+      " teacher " + props.isTeacherView() + " grading " +props.isGrading());
     if ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView() || props.isGrading()) {
       System.out.println("doing teacher login");
       userManager.teacherLogin();
@@ -715,17 +729,41 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else {
       setFactory();
 
-      if (!props.isArabicTextDataCollect() && props.isCollectAudio()) {
-        flashRecordPanel.initFlash();
-      }
+     // checkInitFlash();
 
       if (userID != lastUser) {
-        System.out.println("gotUser : " + userID + " vs " + lastUser);
-        if (props.isArabicTextDataCollect() || !props.isCollectAudio() || flashRecordPanel.gotPermission()) {
+        System.out.println("gotUser : user changed - new " + userID + " vs last " + lastUser);
+        if (/*props.isArabicTextDataCollect() ||*/ !props.isCollectAudio() || flashRecordPanel.gotPermission()) {
           System.out.println("\tgotUser : " + userID + " get exercises");
           exerciseList.getExercises(userID);
         }
         lastUser = userID;
+      }
+      else if (props.isTimedGame()) {
+        exerciseList.reloadExercises();
+      }
+    }
+  }
+
+  private void checkInitFlash() {
+    if (/*!props.isArabicTextDataCollect() &&*/ (props.isCollectAudio() || props.isGoodwaveMode()) && !flashRecordPanel.gotPermission()) {
+      flashRecordPanel.initFlash();
+    }
+    else {
+      checkLogin();
+    }
+  }
+
+  private void checkLogin() {
+    if (props.isGoodwaveMode() || isAutoCRTMode()) {   // no login for pron mode
+      gotUser(-1);
+    }
+    else {
+      if (props.isTimedGame())  {
+         showTimedGameHelp();
+      }
+      else {
+        login();
       }
     }
   }
