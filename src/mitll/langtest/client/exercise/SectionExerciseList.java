@@ -178,9 +178,24 @@ public class SectionExerciseList extends PagingExerciseList {
    */
   private void populateListBox(String type, Collection<String> sections) {
     ListBox listBox = typeToBox.get(type);
+    int selectedIndex = listBox.getSelectedIndex();
+    String currentSelection = listBox.getItemText(selectedIndex);
+
+    //System.out.println("for list box " +type + " the items will be " + sections);
+    //System.out.println("for list box " +type + " previous selection was " + currentSelection);
+
     populateListBox(listBox, sections);
-    if (listBox.getItemCount() > 0) {
-      listBox.setSelectedIndex(0);
+    int itemCount = listBox.getItemCount();
+    if (itemCount > 0) {
+      boolean foundMatch = false;
+      for (int i = 0; i < itemCount; i++) {
+        if (listBox.getItemText(i).equals(currentSelection)) {
+          listBox.setSelectedIndex(i);
+          foundMatch = true;
+          break;
+        }
+      }
+      if (!foundMatch) listBox.setSelectedIndex(0);
     }
   }
 
@@ -194,7 +209,27 @@ public class SectionExerciseList extends PagingExerciseList {
     listBox.clear();
     listBox.addItem(ANY);
     List<String> items = new ArrayList<String>(sections);
-    Collections.sort(items);
+    boolean isInt = true;
+    for (String item : items) {
+      try {
+        Integer.parseInt(item);
+      } catch (NumberFormatException e) {
+        isInt = false;
+      }
+    }
+    if (isInt) {
+      Collections.sort(items, new Comparator<String>() {
+        @Override
+        public int compare(String o1, String o2) {
+          int first = Integer.parseInt(o1);
+          int second = Integer.parseInt(o2);
+          return first < second ? -1 : first > second ? +1 : 0;
+        }
+      });
+    }
+    else {
+      Collections.sort(items);
+    }
     for (String section : items) {
       listBox.addItem(section);
     }
@@ -215,8 +250,8 @@ public class SectionExerciseList extends PagingExerciseList {
       public void onClick(ClickEvent event) {
         String token = History.getToken();
         if (token.trim().isEmpty()) token = getDefaultToken();
-        Triple triple = getTriple(token);
-        feedback.showEmail("Lesson " + triple, "", token);
+        SelectionState selectionState = getSelectionState(token);
+        feedback.showEmail("Lesson " + selectionState, "", token);
       }
     });
 
@@ -279,28 +314,39 @@ public class SectionExerciseList extends PagingExerciseList {
 
   /**
    * When we get a history token push, select the exercise type, section, and optionally item.
-   * @param type
-   * @param section
+   * @param typeToSection
    * @param item null is OK
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
-  private void loadExercises(final String type, final String section, final String item) {
-    System.out.println("loadExercises " + type + " " + section + " item '" +item +"'");
-    service.getExercisesForSection(type, section, new SetExercisesCallback() {
-      @Override
-      public void onSuccess(List<ExerciseShell> result) {
-        if (!result.isEmpty()) {
-          if (item != null) {
-            rememberExercises(result);
-            if (!loadByID(item)) {
-              loadFirstExercise();
-            }
-          } else {
-            super.onSuccess(result);
+  //private void loadExercises(final String type, final String section, final String item) {
+  private void loadExercises(Map<String,String> typeToSection, final String item) {
+    System.out.println("loadExercises " + typeToSection + " and item '" +item +"'");
+    //service.getExercisesForSection(type, section, userID, new MySetExercisesCallback(item));
+    service.getExercisesForSelectionState(typeToSection, userID, new MySetExercisesCallback(item));
+  }
+
+  private class MySetExercisesCallback extends SetExercisesCallback {
+    private final String item;
+
+    public MySetExercisesCallback(String item) {
+      this.item = item;
+    }
+
+    @Override
+    public void onSuccess(List<ExerciseShell> result) {
+      System.out.println("loadExercises : onSuccess " + result.size() + " items.");
+
+      if (!result.isEmpty()) {
+        if (item != null) {
+          rememberExercises(result);
+          if (!loadByID(item)) {
+            loadFirstExercise();
           }
+        } else {
+          super.onSuccess(result);
         }
       }
-    });
+    }
   }
 
   /**
@@ -364,7 +410,7 @@ public class SectionExerciseList extends PagingExerciseList {
   public void onValueChange(ValueChangeEvent<String> event) {
     String rawToken = getTokenFromEvent(event);
     System.out.println("onValueChange : token is " + rawToken);
-    String item = getTriple(rawToken).item;
+    String item = getSelectionState(rawToken).item;
 
     if (item != null && item.length() > 0 && hasExercise(item)) {
       System.out.println("onValueChange : loading item " + item);
@@ -380,17 +426,17 @@ public class SectionExerciseList extends PagingExerciseList {
         if (!token.contains("=")) token = getDefaultToken();
         System.out.println("onValueChange after " + token);
         try {
-          Triple triple = getTriple(token);
+          SelectionState selectionState = getSelectionState(token);
 
-          restoreListBoxState(triple);
-          Map<String, String> typeToSection = triple.typeToSection;
+          restoreListBoxState(selectionState);
+          Map<String, String> typeToSection = selectionState.typeToSection;
           String type = typeToSection.keySet().iterator().next();
           String section = typeToSection.get(type);
           System.out.println("onValueChange first type " + type + "=" + section);
 
           setOtherListBoxes(type, section);
 
-          loadExercises(type, section, triple.item);
+          loadExercises(selectionState.typeToSection, selectionState.item);
         } catch (Exception e) {
           System.out.println("onValueChange " + token + " badly formed. Got " + e);
           e.printStackTrace();
@@ -461,8 +507,8 @@ public class SectionExerciseList extends PagingExerciseList {
     return builder.toString();
   }
 
-  private Triple getTriple(String token) {
-    Triple triple = new Triple();
+  private SelectionState getSelectionState(String token) {
+    SelectionState selectionState = new SelectionState();
     String[] parts = token.split(";");
 
     for (String part : parts) {
@@ -471,11 +517,11 @@ public class SectionExerciseList extends PagingExerciseList {
         String type = segments[0].trim();
         String section = segments[1].trim();
 
-        triple.add(type, section);
-        System.out.println("getTriple : part " + part + " : " + type + "->" +section + " : " + triple);
+        selectionState.add(type, section);
+        System.out.println("getSelectionState : part " + part + " : " + type + "->" +section + " : " + selectionState);
       }
       else {
-        System.err.println("getTriple skipping part '" + part+ "'");
+        System.err.println("getSelectionState skipping part '" + part+ "'");
       }
     }
 
@@ -483,15 +529,15 @@ public class SectionExerciseList extends PagingExerciseList {
       int item1 = token.indexOf("item=");
       String itemValue = token.substring(item1+"item=".length());
       System.out.println("got item = '" + itemValue +"'");
-      triple.setItem(itemValue);
+      selectionState.setItem(itemValue);
     }
 
-    System.out.println("getTriple : triple from token '" +token + "' = '" +triple + "'");
+    System.out.println("getSelectionState : selectionState from token '" +token + "' = '" + selectionState + "'");
 
-    return triple;
+    return selectionState;
   }
 
-  private static class Triple {
+  private static class SelectionState {
     private String item;
     public Map<String, String> typeToSection = new HashMap<String, String>();
 
@@ -514,18 +560,18 @@ public class SectionExerciseList extends PagingExerciseList {
   }
 
   /**
-   * Given a triple state, make sure the list boxes are consistent with it.
+   * Given a selectionState state, make sure the list boxes are consistent with it.
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
-   * @param triple
+   * @param selectionState
    */
-  private void restoreListBoxState(Triple triple) {
-    for (Map.Entry<String, String> pair : triple.typeToSection.entrySet()) {
+  private void restoreListBoxState(SelectionState selectionState) {
+    for (Map.Entry<String, String> pair : selectionState.typeToSection.entrySet()) {
       String type    = pair.getKey();
       String section = pair.getValue();
       ListBox listBox = typeToBox.get(type);
       if (listBox == null) {
         if (!type.equals("item")) {
-          System.err.println("restoreListBoxState for " +triple + " : huh? bad type " + type);
+          System.err.println("restoreListBoxState for " + selectionState + " : huh? bad type " + type);
         }
       } else {
         for (int i = 0; i < listBox.getItemCount(); i++) {
