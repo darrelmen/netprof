@@ -90,6 +90,11 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   @Override
+  public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
+    return null;  //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  @Override
   public Collection<Exercise> getExercisesForSection(String type, String section) {
     Map<String, Lesson> sectionToLesson = typeToUnitToLesson.get(type);
     if (sectionToLesson == null) {
@@ -263,18 +268,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       return null;
     }
     else {
-      StringBuilder builder = new StringBuilder();
-      try {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(include), ENCODING));
-        String line2;
-        while ((line2 = reader.readLine()) != null) {
-          line2 = line2.trim();
-          builder.append(line2);
-        }
-        reader.close();
-      } catch (IOException e) {
-        logger.error("got " + e, e);
-      }
+      StringBuilder builder = getContentFromIncludeFile(include);
       String arabicQuestion = split[i++].trim();
       String englishQuestion = split[i++].trim();
       String arabicAnswers = split[i++].trim();
@@ -289,11 +283,40 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
   }
 
+  private StringBuilder getContentFromIncludeFile(File include) {
+    StringBuilder builder = new StringBuilder();
+    try {
+      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(include), ENCODING));
+      String line2;
+      while ((line2 = reader.readLine()) != null) {
+        line2 = line2.trim();
+        builder.append(line2);
+      }
+      reader.close();
+    } catch (IOException e) {
+      logger.error("got " + e, e);
+    }
+    return builder;
+  }
+
   private void addQuestion(String question, String answers, Exercise exercise, boolean isFLQ) {
     List<String> alternateAnswers = Arrays.asList(answers.split("\\|\\|"));
     List<String> objects1 = Collections.emptyList();
     List<String> objects = alternateAnswers.size() > 1 ? alternateAnswers.subList(1, alternateAnswers.size()) : objects1;
     exercise.addQuestion(isFLQ ? Exercise.FL : Exercise.EN, question, alternateAnswers.get(0), new ArrayList<String>(objects));
+  }
+
+  private String getHTML5Audio() {
+    return "<h2>Listen to this audio and answer the question below</h2>\n"+
+    "<audio controls='controls'>"+
+    "<source type='audio/mp3' src='" +
+      "config/pilot/media/bc-L0P-k15/bc-L0P-k15_My_house_door.mp3" +
+      "'></source>"+
+    "<source type='audio/ogg' src='" +
+      "config/pilot/media/bc-L0P-k15/bc-L0P-k15_My_house_door.ogg" +
+      "'></source>"+
+    "  Your browser does not support the audio tag."+
+    "</audio>";
   }
 
   private void addSectionTest(int count, Exercise exercise) {

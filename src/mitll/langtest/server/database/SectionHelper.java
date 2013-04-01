@@ -52,6 +52,39 @@ public class SectionHelper {
     return typeToSection;
   }
 
+  /**
+   * Return an overlap of all the type=section exercise sets (think venn diagram overlap).
+   * @param typeToSection
+   * @return
+   */
+  public Collection<Exercise> getExercisesForSelectionState(Map<String,String> typeToSection) {
+    Collection<Exercise> currentList = null;
+    for (Map.Entry<String,String> pair : typeToSection.entrySet()) {
+      String type = pair.getKey();
+      if (isKnownType(type)) {
+      Collection<Exercise> exercisesForSection = new HashSet<Exercise>(getExercisesForSection(type, pair.getValue()));
+     // Set<Exercise> set = new HashSet<Exercise>(exercisesForSection);
+      logger.debug("For " + pair + " got " + exercisesForSection.size() + " items");
+      if (currentList == null) {
+        currentList = exercisesForSection;
+        logger.debug("\t current now " + currentList.size() + " items");
+
+      }
+      else {
+        logger.debug("\t retaining " + exercisesForSection.size() + " items from current " + currentList.size() + " items");
+
+        currentList.retainAll(exercisesForSection);
+        logger.debug("\t result " + currentList.size() + " items");
+      }
+      }
+    }
+    if (currentList == null) {
+      logger.error("couldn't find any valid types given " + typeToSection);
+      currentList = Collections.emptyList();
+    }
+    return currentList;
+  }
+
   public Collection<Exercise> getExercisesForSection(String type, String section) {
     Map<String, Lesson> sectionToLesson = typeToUnitToLesson.get(type);
     if (sectionToLesson == null) {
@@ -66,6 +99,10 @@ public class SectionHelper {
         return lesson.getExercises();
       }
     }
+  }
+
+  private boolean isKnownType(String type) {
+    return typeToUnitToLesson.containsKey(type);
   }
 
   public Pair addUnitToLesson(Exercise exercise, String unitName) { return addExerciseToLesson(exercise, unitType, unitName);}
