@@ -63,18 +63,16 @@ public class SectionHelper {
       String type = pair.getKey();
       if (isKnownType(type)) {
       Collection<Exercise> exercisesForSection = new HashSet<Exercise>(getExercisesForSection(type, pair.getValue()));
-     // Set<Exercise> set = new HashSet<Exercise>(exercisesForSection);
-      logger.debug("For " + pair + " got " + exercisesForSection.size() + " items");
+      //logger.debug("For " + pair + " got " + exercisesForSection.size() + " items");
       if (currentList == null) {
         currentList = exercisesForSection;
-        logger.debug("\t current now " + currentList.size() + " items");
-
+        //logger.debug("\t current now " + currentList.size() + " items");
       }
       else {
-        logger.debug("\t retaining " + exercisesForSection.size() + " items from current " + currentList.size() + " items");
+        //logger.debug("\t retaining " + exercisesForSection.size() + " items from current " + currentList.size() + " items");
 
         currentList.retainAll(exercisesForSection);
-        logger.debug("\t result " + currentList.size() + " items");
+        //logger.debug("\t result " + currentList.size() + " items");
       }
       }
     }
