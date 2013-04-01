@@ -47,4 +47,5 @@ public interface ExerciseController {
   String getAudioType();
   String getLanguage();
   boolean isPromptBeforeNextItem();
+  boolean isRightAlignContent();
 }
