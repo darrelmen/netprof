@@ -242,11 +242,41 @@ public class SectionExerciseList extends PagingExerciseList {
       });
     }
     else {
-      Collections.sort(items);
+      sortWithCompoundKeys(items);
     }
     for (String section : items) {
       listBox.addItem(section);
     }
+  }
+
+  private void sortWithCompoundKeys(List<String> items) {
+    Collections.sort(items, new Comparator<String>() {
+      @Override
+      public int compare(String o1, String o2) {
+        if (o1.contains("-") && o2.contains("-")) {
+          String left1 = o1.split("-")[0];
+          String right1 = o1.split("-")[1];
+
+          String left2 = o2.split("-")[0];
+          String right2 = o2.split("-")[1];
+
+          int leftCompare = left1.compareToIgnoreCase(left2);
+          if (leftCompare != 0) {
+            return leftCompare;
+          } else {
+            try {
+              int r1 = Integer.parseInt(right1);
+              int r2 = Integer.parseInt(right2);
+              return r1 < r2 ? -1 : r1 > r2 ? +1 : 0;
+            } catch (NumberFormatException e) {
+              return right1.compareTo(right2);
+            }
+          }
+        } else {
+          return o1.compareToIgnoreCase(o2);
+        }
+      }
+    });
   }
 
   /**
