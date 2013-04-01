@@ -56,6 +56,11 @@ public class SQLExerciseDAO implements ExerciseDAO {
     return sectionHelper.getExercisesForSection(type, section);
   }
 
+  @Override
+  public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
+    return null;  //To change body of implemented methods use File | Settings | File Templates.
+  }
+
   /**
    * Hit the database for the exercises
    * <p/>
@@ -148,10 +153,16 @@ public class SQLExerciseDAO implements ExerciseDAO {
     if (content == null) {
       logger.warn("no content key in " + obj.keySet());
     } else {
-      // prefix the media dir
-      String srcPattern = " src\\s*=\\s*\"";
-      content = content.replaceAll(srcPattern, " src=\"" + mediaDir.replaceAll("\\\\", "/") + "/");
+      content = getSrcHTML5WithMediaDir(content,mediaDir);
+
     }
+    return content;
+  }
+
+  public String getSrcHTML5WithMediaDir(String content, String mediaDir) {
+    // prefix the media dir
+    String srcPattern = " src\\s*=\\s*\"";
+    content = content.replaceAll(srcPattern, " src=\"" + mediaDir.replaceAll("\\\\", "/") + "/");
     return content;
   }
 
