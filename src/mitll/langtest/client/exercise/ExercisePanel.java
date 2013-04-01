@@ -91,9 +91,12 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
 
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
-    hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+    boolean rightAlignContent = controller.isRightAlignContent();
+    if (rightAlignContent) {
+      setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+    }
+    hp.setHorizontalAlignment(rightAlignContent ? HasHorizontalAlignment.ALIGN_RIGHT : HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e));
-    System.out.println("content alignment guess is " + WordCountDirectionEstimator.get().estimateDirection(e.getContent()));
     add(hp);
 
     int i = 1;
@@ -113,7 +116,23 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
   }
 
-  private Widget getQuestionContent(Exercise e) { return new HTML(e.getContent()); }
+  private Widget getQuestionContent(Exercise e) {
+    String content = e.getContent();
+    return getHTML(content);
+  }
+
+  private Widget getHTML(String content) {
+    boolean rightAlignContent = controller.isRightAlignContent();
+    HasDirection.Direction direction =
+      rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
+    //System.out.println("content alignment guess is " + direction);
+
+    HTML html = new HTML(content, direction);
+    if (/*direction.equals(HasDirection.Direction.RTL) || */rightAlignContent) {
+      html.addStyleName("rightAlign");
+    }
+    return html;
+  }
 
   public void onResize() {}
   public boolean isBusy() { return false; }
@@ -209,7 +228,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     }
     else {
       String questionHeader = prefix + question;
-      add(new HTML("<h4>" + questionHeader + "</h4>"));
+      add(getHTML("<h4>" + questionHeader + "</h4>"));
     }
   }
 
@@ -271,7 +290,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     if (useKeyHandler) prev.setTitle(LEFT_ARROW_TOOLTIP);
 
     buttonRow.add(prev);
-    prev.setVisible(!controller.isMinimalUI() && !controller.isPromptBeforeNextItem());
+    prev.setVisible(!controller.isMinimalUI() || !controller.isPromptBeforeNextItem());
 
     this.next = new Button(getNextButtonText());
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
