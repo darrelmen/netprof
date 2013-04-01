@@ -157,12 +157,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public Map<String, Collection<String>> getTypeToSection() { return db.getTypeToSection(); }
   @Override
-  public List<ExerciseShell> getExercisesForSection(String type, String section) {
+  public List<ExerciseShell> getExercisesForSection(String type, String section, long userID) {
     Collection<Exercise> exercisesForSection = db.getExercisesForSection(type, section);
-    return getExerciseShells(exercisesForSection);
+    List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection);
+    return getExerciseShells(exercisesBiasTowardsUnanswered);
   }
 
   @Override
+  public List<ExerciseShell> getExercisesForSelectionState(Map<String, String> typeToSection, long userID) {
+    Collection<Exercise> exercisesForSection = db.getExercisesForSelectionState(typeToSection);
+    List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection);
+    return getExerciseShells(exercisesBiasTowardsUnanswered);
+
+  }
+
+    @Override
   public Map<String, List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
     return db.getTypeToSectionsForTypeAndSection(type, section);
   }
