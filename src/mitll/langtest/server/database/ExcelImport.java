@@ -89,6 +89,11 @@ public class ExcelImport implements ExerciseDAO {
     }*/
   }
 
+  @Override
+  public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
+    return sectionHelper.getExercisesForSelectionState(typeToSection);
+  }
+
   public ExcelImport() { this.file = null;}
   public ExcelImport(String file) { this.file = file;}
 
