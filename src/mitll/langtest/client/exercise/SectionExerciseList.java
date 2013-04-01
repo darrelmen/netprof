@@ -21,6 +21,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -249,34 +250,65 @@ public class SectionExerciseList extends PagingExerciseList {
     }
   }
 
+  //Pattern pattern = Pattern.compile("(.+)(-|\\s)*(.+)");
   private void sortWithCompoundKeys(List<String> items) {
     Collections.sort(items, new Comparator<String>() {
       @Override
       public int compare(String o1, String o2) {
-        if (o1.contains("-") && o2.contains("-")) {
-          String left1 = o1.split("-")[0];
-          String right1 = o1.split("-")[1];
+        boolean firstHasSep = o1.contains("-");
+        boolean secondHasSep = o2.contains("-");
+        String left1 = o1;
+        String left2 = o2;
+        String right1 = "";
+        String right2 = "";
 
-          String left2 = o2.split("-")[0];
-          String right2 = o2.split("-")[1];
+        if (firstHasSep) {
+          String[] first = o1.split("-");
+          left1 = first[0];
+          right1 = first[1];
+        }
+        else if (o1.contains(" ")) {
+          firstHasSep = true;
+          String[] first = o1.split("\\s");
+          left1 = first[0];
+          right1 = first[1];
+        }
 
-          int leftCompare = left1.compareToIgnoreCase(left2);
+        if (secondHasSep) {
+          String[] second = o2.split("-");
+          left2 = second[0];
+          right2 = second[1];
+        }
+        else if (o2.contains(" ")) {
+          secondHasSep =true;
+          String[] second = o2.split("\\s");
+          left2 = second[0];
+          right2 = second[1];
+        }
+
+
+        if (firstHasSep || secondHasSep) {
+          int leftCompare = getIntCompare(left1, left2);
           if (leftCompare != 0) {
             return leftCompare;
           } else {
-            try {
-              int r1 = Integer.parseInt(right1);
-              int r2 = Integer.parseInt(right2);
-              return r1 < r2 ? -1 : r1 > r2 ? +1 : 0;
-            } catch (NumberFormatException e) {
-              return right1.compareTo(right2);
-            }
+            return getIntCompare(right1, right2);
           }
         } else {
-          return o1.compareToIgnoreCase(o2);
+          return getIntCompare(o1,o2);
         }
       }
     });
+  }
+
+  private int getIntCompare(String right1, String right2) {
+    try {
+      int r1 = Integer.parseInt(right1);
+      int r2 = Integer.parseInt(right2);
+      return r1 < r2 ? -1 : r1 > r2 ? +1 : 0;
+    } catch (NumberFormatException e) {
+      return right1.compareToIgnoreCase(right2);
+    }
   }
 
   /**
@@ -387,6 +419,7 @@ public class SectionExerciseList extends PagingExerciseList {
 
       if (!result.isEmpty()) {
         if (item != null) {
+          result = result.subList(0,3);
           rememberExercises(result);
           if (!loadByID(item)) {
             System.out.println("loadExercises : loading first exercise since couldn't load item=" +item);
@@ -654,4 +687,10 @@ public class SectionExerciseList extends PagingExerciseList {
   protected int getTableHeaderHeight() {
     return 625 - HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
   }
+/*
+  public static void main(String [] args) {
+    List<String> test = Arrays.asList("1","2","10","3","4","11","12","39 RC","39 LC","31 RC");
+    new SectionExerciseList(null,null,null,false,false).sortWithCompoundKeys(test);
+    System.out.println("Test " + test);
+  }*/
 }
