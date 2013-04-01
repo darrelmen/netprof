@@ -268,6 +268,7 @@ public class FileExerciseDAO implements ExerciseDAO {
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(include), ENCODING));
         String line2;
         while ((line2 = reader.readLine()) != null) {
+          line2 = line2.trim();
           builder.append(line2);
         }
         reader.close();
