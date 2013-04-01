@@ -121,7 +121,8 @@ public class SiteDAO extends DAO {
           String filePath = rs.getString(i++);
           String feedback = rs.getString(i++);
           boolean deployed = rs.getBoolean(i++);
-          long timestamp = rs.getTimestamp(i++).getTime();
+          Timestamp timestamp1 = rs.getTimestamp(i++);
+          long timestamp = timestamp1 != null ? timestamp1.getTime() : System.currentTimeMillis();
           String name1 = new File(filePath).getName();
         //  logger.info("name " +name1 + " file path " +filePath + " exists = " + new File(filePath).exists());
           Site site = new Site(id, creatorID, name, language, notes, file, filePath, name1, feedback, deployed, timestamp,
@@ -261,9 +262,13 @@ public class SiteDAO extends DAO {
     statement.close();
 
     int numColumns = getNumColumns(connection, "site");
+
+    logger.debug("numColumns " + numColumns + " site table columns = " + getColumns("site"));
+
     if (numColumns < 8) {
       addColumnToTable(connection);
-    } else if (numColumns < 10) {
+    }
+    if (numColumns < 10) {
       statement = connection.prepareStatement("ALTER TABLE site ADD deployed BOOLEAN");
       statement.execute();
       statement.close();
