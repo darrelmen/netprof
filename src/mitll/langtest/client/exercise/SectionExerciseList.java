@@ -41,7 +41,13 @@ public class SectionExerciseList extends PagingExerciseList {
   private Panel sectionPanel;
   private long userID;
   private Map<String,ListBox> typeToBox = new HashMap<String, ListBox>();
-
+  /**
+   * So the concern is that if we allow people to send bookmarks with items, we can allow them to skip
+   * forward in a list we're trying to present in a certain order.
+   * I.e. when a new user logs in, we want them to do all of their items in the order we've chosen
+   * for them (least answered/recorded first), and not let them skip forward in the list.
+   */
+  private boolean includeItemInBookmark = false;
   public SectionExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                              UserFeedback feedback,
                              boolean showTurkToken, boolean showInOrder) {
@@ -185,7 +191,13 @@ public class SectionExerciseList extends PagingExerciseList {
     //System.out.println("for list box " +type + " previous selection was " + currentSelection);
 
     populateListBox(listBox, sections);
+    retainCurrentSelectionState(listBox, currentSelection);
+  }
+
+  private void retainCurrentSelectionState(ListBox listBox, String currentSelection) {
     int itemCount = listBox.getItemCount();
+
+    // retain current selection state
     if (itemCount > 0) {
       boolean foundMatch = false;
       for (int i = 0; i < itemCount; i++) {
@@ -195,7 +207,9 @@ public class SectionExerciseList extends PagingExerciseList {
           break;
         }
       }
-      if (!foundMatch) listBox.setSelectedIndex(0);
+      if (!foundMatch) {
+        listBox.setSelectedIndex(0);
+      }
     }
   }
 
@@ -283,6 +297,11 @@ public class SectionExerciseList extends PagingExerciseList {
     return getSections(sections);
   }
 
+  /**
+   * Sort as integers if they are all ints.
+   * @param sections
+   * @return
+   */
   private List<String> getSections(List<String> sections) {
     boolean allInt = !sections.isEmpty();
     for (String s : sections) {
@@ -340,6 +359,7 @@ public class SectionExerciseList extends PagingExerciseList {
         if (item != null) {
           rememberExercises(result);
           if (!loadByID(item)) {
+            System.out.println("loadExercises : loading first exercise since couldn't load item=" +item);
             loadFirstExercise();
           }
         } else {
@@ -386,6 +406,10 @@ public class SectionExerciseList extends PagingExerciseList {
 
   @Override
   protected void gotClickOnItem(ExerciseShell e) {
+    System.out.println("----------- got click on " + e.getID() + " -------------- ");
+    if (!includeItemInBookmark) {
+      loadByID(e.getID());
+    }
   }
 
   protected String getHistoryToken(String id) {
@@ -400,8 +424,12 @@ public class SectionExerciseList extends PagingExerciseList {
         builder.append(type + "=" + section + ";");
       }
     }
-    if (id != null) {
-      builder.append(super.getHistoryToken(id));
+    if (id != null && includeItemInBookmark) {
+      String historyToken = super.getHistoryToken(id);
+      //System.out.println("getHistoryToken for " + id + " would add " +historyToken);
+
+
+      builder.append(historyToken);
     }
     return builder.toString();
   }
@@ -413,8 +441,13 @@ public class SectionExerciseList extends PagingExerciseList {
     String item = getSelectionState(rawToken).item;
 
     if (item != null && item.length() > 0 && hasExercise(item)) {
-      System.out.println("onValueChange : loading item " + item);
-      loadByIDFromToken(item);
+      if (includeItemInBookmark) {
+        System.out.println("onValueChange : loading item " + item);
+        loadByIDFromToken(item);
+      }
+      else {
+        System.out.println("onValueChange : skipping item " + item);
+      }
     } else {
       String token = event.getValue();
       System.out.println("onValueChange " + token);
@@ -464,6 +497,8 @@ public class SectionExerciseList extends PagingExerciseList {
        */
       @Override
       public void onSuccess(Map<String, List<String>> result) {
+        System.out.println("\tsetOtherListBoxes result is " + result);
+
         if (result == null) {
           System.err.println("couldn't get result for " + selectedType + "="+section);
           Window.alert("Sorry -- error on server.  Please report.");
@@ -471,9 +506,8 @@ public class SectionExerciseList extends PagingExerciseList {
         else {
           for (Map.Entry<String, List<String>> pair : result.entrySet()) {
             String type = pair.getKey();
-            if (type.equals(selectedType)) {
-              System.out.println("setOtherListBoxes skipping " + type);
-
+            if (type.equals(selectedType)) {        // this should never happen
+              System.err.println("\tsetOtherListBoxes skipping " + type);
             } else {
               List<String> sections = pair.getValue();
               populateListBox(type, sections);
@@ -528,7 +562,7 @@ public class SectionExerciseList extends PagingExerciseList {
     if (token.contains("item")) {
       int item1 = token.indexOf("item=");
       String itemValue = token.substring(item1+"item=".length());
-      System.out.println("got item = '" + itemValue +"'");
+      System.out.println("getSelectionState : got item = '" + itemValue +"'");
       selectionState.setItem(itemValue);
     }
 
