@@ -181,7 +181,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     widgets.addNorth(hp, HEADER_HEIGHT);
     widgets.addSouth(status = new Label(), footerHeight);
-    if ((props.isMinimalUI() && !props.isGrading()) && !props.isAdminView() || props.isTeacherView()) {
+    if ((props.isMinimalUI() && !props.isGrading()) && !props.isAdminView()) {
       exerciseListPanel.setVisible(false);
       widgets.addWest(exerciseListPanel, 10);
     }
@@ -210,7 +210,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // don't do flash if we're doing text only collection
     //System.out.println("teacher view " + props.isTeacherView() + " arabic text data " + props.isArabicTextDataCollect() + " collect audio " + props.isCollectAudio());
 
-    if (!props.isTeacherView() && !props.isArabicTextDataCollect() && props.isCollectAudio()) {
+    if (props.isCollectAudio()) {
       makeFlashContainer();
       currentExerciseVPanel.add(flashRecordPanel);
     }
