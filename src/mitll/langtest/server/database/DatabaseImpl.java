@@ -184,7 +184,7 @@ public class DatabaseImpl implements Database {
     return exerciseDAO.getTypeToSections();
   }
 
-  public Map<String, List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
+  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
     return exerciseDAO.getTypeToSectionsForTypeAndSection(type, section);
   }
 
