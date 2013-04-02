@@ -40,6 +40,8 @@ import java.util.regex.Pattern;
  */
 public class FileExerciseDAO implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
+
+  private static final boolean SKIP_MP3_LINES_IN_INCLUDES = true;
   public static final String ENCODING = "UTF8";
   private static final String LESSON_FILE = "lesson-737.csv";
   private static final String FAST = "fast";
@@ -290,7 +292,12 @@ public class FileExerciseDAO implements ExerciseDAO {
       String line2;
       while ((line2 = reader.readLine()) != null) {
         line2 = line2.trim();
-        builder.append(line2);
+        if (SKIP_MP3_LINES_IN_INCLUDES && line2.startsWith("File://") && line2.endsWith(".mp3")) {
+          //logger.debug("skipping mp3 include line for now...");
+        }
+        else {
+          builder.append(line2);
+        }
       }
       reader.close();
     } catch (IOException e) {
