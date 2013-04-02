@@ -16,7 +16,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,7 +46,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
   }
 
   @Override
-  public Map<String, List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
+  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
     return sectionHelper.getTypeToSectionsForTypeAndSection(type, section);
   }
 
