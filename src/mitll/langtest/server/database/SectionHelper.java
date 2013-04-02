@@ -31,12 +31,12 @@ public class SectionHelper {
   private Map<String,Map<String,Map<String,Set<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String,Map<String,Set<String>>>>();
 
 
-  public Map<String,List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
+  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
     Map<String, Map<String, Set<String>>> sectionToSub = typeToSectionToTypeToSections.get(type);
     if (sectionToSub == null) return Collections.emptyMap();
     Map<String, Set<String>> typeToSections = sectionToSub.get(section);
     if (typeToSections == null) return Collections.emptyMap();
-    Map<String,List<String>> retval = new HashMap<String, List<String>>();
+    Map<String,Collection<String>> retval = new HashMap<String, Collection<String>>();
     for (Map.Entry<String,Set<String>> pair : typeToSections.entrySet()) {
       retval.put(pair.getKey(),new ArrayList<String>(pair.getValue()));
     }
