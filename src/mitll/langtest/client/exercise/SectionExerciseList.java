@@ -1,5 +1,6 @@
 package mitll.langtest.client.exercise;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -48,10 +49,20 @@ public class SectionExerciseList extends PagingExerciseList {
    * for them (least answered/recorded first), and not let them skip forward in the list.
    */
   private boolean includeItemInBookmark = false;
+
+  /**
+   * @see mitll.langtest.client.LangTest#makeExerciseList(com.google.gwt.user.client.ui.Panel, boolean)
+   * @param currentExerciseVPanel
+   * @param service
+   * @param feedback
+   * @param showTurkToken
+   * @param showInOrder
+   * @param showListBoxes
+   */
   public SectionExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                              UserFeedback feedback,
-                             boolean showTurkToken, boolean showInOrder) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder);
+                             boolean showTurkToken, boolean showInOrder, boolean showListBoxes) {
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBoxes);
   }
 
   @Override
@@ -60,6 +71,11 @@ public class SectionExerciseList extends PagingExerciseList {
   @Override
   protected void addTableWithPager() {
     add(sectionPanel = new VerticalPanel());
+    System.out.println("show list boxes " + showListBoxes);
+    sectionPanel.setVisible(showListBoxes);
+    if (!showListBoxes) {
+      sectionPanel.setHeight("1px");
+    }
     super.addTableWithPager();
   }
 
@@ -112,7 +128,7 @@ public class SectionExerciseList extends PagingExerciseList {
     typeToBox.clear();
 
     for (final String type : types) {
-      Collection<String> sections = result.get(type);//getSections(result, type);
+      Collection<String> sections = result.get(type);
       System.out.println("\tgetExercises sections for " + type + " = " + sections);
 
       final ListBox listBox = makeListBox(type, sections);
@@ -123,6 +139,9 @@ public class SectionExerciseList extends PagingExerciseList {
       flexTable.setWidget(row++, col, listBox);
     }
     flexTable.setWidget(row, 0, getEmailWidget());
+    flexTable.getFlexCellFormatter().setColSpan(row, 0, 2);
+    row++;
+    flexTable.setWidget(row, 0, getHideBoxesWidget());
     flexTable.getFlexCellFormatter().setColSpan(row, 0, 2);
     return flexTable;
   }
@@ -337,29 +356,55 @@ public class SectionExerciseList extends PagingExerciseList {
   }
 
   /**
-   * @see #getExercises(long)
+   * @see #getWidgetsForTypes(java.util.Map, long)
    * @return
    */
   private Widget getEmailWidget() {
     FlexTable g = new FlexTable();
-    Anchor widget = new Anchor("E-MAIL");
     int row = 0;
     g.setWidget(row, 0, new HTML("Share via "));
-    g.setWidget(row,1, widget);
-    widget.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        String token = History.getToken();
-        if (token.trim().isEmpty()) token = getDefaultToken();
-        SelectionState selectionState = getSelectionState(token);
-        feedback.showEmail("Lesson " + selectionState, "", token);
-      }
-    });
+    g.setWidget(row, 1, getEmailLink());
 
     FlowPanel widgets = new FlowPanel();
     widgets.add(g);
     return widgets;
   }
+
+  Anchor studentLink;
+  private Widget getHideBoxesWidget() {
+/*
+    FlexTable g = new FlexTable();
+    int row = 0;
+    g.setWidget(row, 0, new HTML("For students"));
+    g.setWidget(row, 1, new Anchor("For Students", "#"+History.getToken()));
+
+    FlowPanel widgets = new FlowPanel();
+    widgets.add(g);
+    return widgets;
+*/
+
+   // String token = History.getToken();
+  //  System.out.println("getHideBoxesWidget token is " +token);
+    studentLink = new Anchor("Link for Students", "#?showSectionWidgets=false");
+    return studentLink;
+  }
+
+  private Widget getEmailLink() {
+    String linkLabel = "E-MAIL";
+    Anchor widget = new Anchor(linkLabel);
+    widget.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        String token = History.getToken();
+        if (token.trim().isEmpty()) token = getDefaultToken();
+
+        SelectionState selectionState = getSelectionState(token);
+        feedback.showEmail("Lesson " + selectionState, "", token);
+      }
+    });
+    return widget;
+  }
+
 
   /**
    * So if we have an existing history token, use it to set current selection.
@@ -431,10 +476,13 @@ public class SectionExerciseList extends PagingExerciseList {
   private void pushNewSectionHistoryToken() {
     String historyToken = getHistoryToken(null);
     String currentToken = History.getToken();
+
+    //GWT.getHostPageBaseURL();
+    studentLink.setHref(GWT.getHostPageBaseURL() +"?showSectionWidgets=false#" + historyToken);
     if (currentToken.equals(historyToken)) {
       System.out.println("pushNewSectionHistoryToken : skipping same token " + historyToken);
     } else {
-      System.out.println("------------ push history " + historyToken + " -------------- ");
+      System.out.println("------------ push history '" + historyToken + "' -------------- ");
       History.newItem(historyToken);
     }
   }
@@ -446,7 +494,7 @@ public class SectionExerciseList extends PagingExerciseList {
    */
   protected void pushNewItem(String exerciseID) {
     String historyToken = getHistoryToken(exerciseID);
-    System.out.println("------------ (section) pushNewItem : push history " + historyToken + " -------------- ");
+    System.out.println("------------ (section) pushNewItem : push history '" + historyToken + "' -------------- ");
 
     String token = History.getToken();
     System.out.println("pushNewItem : current token " + token + " vs new " + exerciseID);
