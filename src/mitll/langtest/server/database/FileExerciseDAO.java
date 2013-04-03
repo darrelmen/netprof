@@ -96,23 +96,6 @@ public class FileExerciseDAO implements ExerciseDAO {
     return null;  //To change body of implemented methods use File | Settings | File Templates.
   }
 
-  @Override
-  public Collection<Exercise> getExercisesForSection(String type, String section) {
-    Map<String, Lesson> sectionToLesson = typeToUnitToLesson.get(type);
-    if (sectionToLesson == null) {
-      return Collections.emptyList();
-    }
-    else {
-      Lesson lesson = sectionToLesson.get(section);
-      if (lesson == null) {
-        logger.error("Couldn't find section " + section);
-        return Collections.emptyList();
-      } else {
-        return lesson.getExercises();
-      }
-    }
-  }
-
   /**
    * TODO : write to h2
    * @see DatabaseImpl#getExercises(boolean, String)
