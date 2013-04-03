@@ -16,7 +16,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,10 +24,12 @@ public class SQLExerciseDAO implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(SQLExerciseDAO.class);
 
   private static final String ENCODING = "UTF8";
+  private static final boolean DEBUG = false;
 
   private final Database database;
   private final String mediaDir;
-  private static final boolean DEBUG = false;
+  private  SectionHelper sectionHelper = new SectionHelper();
+
   /**
    * @see DatabaseImpl#makeExerciseDAO(boolean)
    * @param database
@@ -41,17 +42,24 @@ public class SQLExerciseDAO implements ExerciseDAO {
 
   @Override
   public Map<String, Collection<String>> getTypeToSections() {
-    return Collections.emptyMap();
+    return sectionHelper.getTypeToSections();
   }
 
   @Override
-  public Map<String, List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
-    return Collections.emptyMap();
+  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
+    return sectionHelper.getTypeToSectionsForTypeAndSection(type, section);
   }
+/*
 
   @Override
   public Collection<Exercise> getExercisesForSection(String type, String section) {
-    return Collections.emptyList();
+    return sectionHelper.getExercisesForSection(type, section);
+  }
+*/
+
+  @Override
+  public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
+    return null;  //To change body of implemented methods use File | Settings | File Templates.
   }
 
   /**
@@ -146,10 +154,16 @@ public class SQLExerciseDAO implements ExerciseDAO {
     if (content == null) {
       logger.warn("no content key in " + obj.keySet());
     } else {
-      // prefix the media dir
-      String srcPattern = " src\\s*=\\s*\"";
-      content = content.replaceAll(srcPattern, " src=\"" + mediaDir.replaceAll("\\\\", "/") + "/");
+      content = getSrcHTML5WithMediaDir(content,mediaDir);
+
     }
+    return content;
+  }
+
+  public String getSrcHTML5WithMediaDir(String content, String mediaDir) {
+    // prefix the media dir
+    String srcPattern = " src\\s*=\\s*\"";
+    content = content.replaceAll(srcPattern, " src=\"" + mediaDir.replaceAll("\\\\", "/") + "/");
     return content;
   }
 
