@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,7 +26,7 @@ public class Lesson implements IsSerializable {
   public void addExercise(Exercise e) { exerciseList.add(e); }
 
   public Collection<Exercise> getExercises() {
-    return exerciseList;  //To change body of created methods use File | Settings | File Templates.
+    return Collections.unmodifiableList(exerciseList);  //To change body of created methods use File | Settings | File Templates.
   }
 
   public String toString() {
