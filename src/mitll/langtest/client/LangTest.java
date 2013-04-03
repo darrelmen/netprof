@@ -43,7 +43,6 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
-import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
 import mitll.langtest.client.flashcard.FlashcardExerciseList;
 import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
@@ -117,7 +116,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     service.getProperties(new AsyncCallback<Map<String, String>>() {
       public void onFailure(Throwable caught) {
         long now = System.currentTimeMillis();
-        System.out.println("onModuleLoad.getProperties : (failure) took " + (now-then) + " millis");
+        System.out.println("onModuleLoad.getProperties : (failure) took " + (now - then) + " millis");
         Window.alert("Couldn't contact server.  Please check your network connection.");
       }
 
@@ -130,12 +129,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         if (isLogClientMessages()) {
           service.logMessage("onModuleLoad.getProperties : (success) took " + (now - then) + " millis",
             new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {}
+              @Override
+              public void onFailure(Throwable caught) {
+              }
 
-            @Override
-            public void onSuccess(Void result) {}
-          });
+              @Override
+              public void onSuccess(Void result) {
+              }
+            });
         }
       }
     });
@@ -190,9 +191,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     widgets.addNorth(hp, HEADER_HEIGHT);
     widgets.addSouth(status = new Label(), footerHeight);
-    widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH/* +10*/);
-    if ((props.isMinimalUI()&& !props.isGrading()) && !props.isAdminView() || props.isTeacherView()) {
+    if ((props.isMinimalUI() && !props.isGrading()) && !props.isAdminView()) {
       exerciseListPanel.setVisible(false);
+      widgets.addWest(exerciseListPanel, 10);
+    }
+    else {
+      widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH);
     }
     // set up center panel, initially with flash record panel
     currentExerciseVPanel = new VerticalPanel();
@@ -200,6 +204,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (usualLayout) {
       ScrollPanel sp = new ScrollPanel();
       sp.add(currentExerciseVPanel);
+      currentExerciseVPanel.addStyleName("currentExercisePanel");
       widgets.add(sp);
     }
     else {  // show fancy lace background image
@@ -215,15 +220,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // don't do flash if we're doing text only collection
     //System.out.println("teacher view " + props.isTeacherView() + " arabic text data " + props.isArabicTextDataCollect() + " collect audio " + props.isCollectAudio());
 
-    if (!props.isTeacherView() && !props.isArabicTextDataCollect() && props.isCollectAudio()) {
+    if (props.isCollectAudio()) {
       makeFlashContainer();
       currentExerciseVPanel.add(flashRecordPanel);
     }
     else {
       System.out.println("*not* allowing recording of audio.");
-    }
-    if (usualLayout) {
-      currentExerciseVPanel.addStyleName("currentExercisePanel");
     }
 
     setPageTitle();
@@ -482,6 +484,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       if (props.isShowSections()) {
         this.exerciseList = new BootstrapSectionExerciseList(currentExerciseVPanel, service, feedback,
           props.isShowTurkToken(), isAutoCRTMode());
+
+/*
+        boolean showSectionWidgets = props.isShowSectionWidgets();
+        System.out.println("makeExerciseList show section widgets " + showSectionWidgets);
+
+        this.exerciseList = new SectionExerciseList(currentExerciseVPanel, service, feedback,
+          props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets);
+*/
      } else {
         this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback,
           props.isShowTurkToken(), isAutoCRTMode()) {
@@ -797,6 +807,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isMinimalUI() {  return props.isMinimalUI(); }
   public boolean isGrading() {  return props.isGrading(); }
   public boolean isLogClientMessages() {  return props.isLogClientMessages(); }
+  public String getLanguage() {  return props.getLanguage(); }
+  public boolean isPromptBeforeNextItem() {  return props.isPromptBeforeNextItem(); }
+  public boolean isRightAlignContent() {  return props.isRightAlignContent(); }
 
   // recording methods...
   /**
