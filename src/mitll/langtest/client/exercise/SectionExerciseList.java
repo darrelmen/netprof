@@ -41,6 +41,8 @@ public class SectionExerciseList extends PagingExerciseList {
   public static final String ANY = "Any";
   private Panel sectionPanel;
   private long userID;
+  protected boolean showListBoxes;
+
   private Map<String,ListBox> typeToBox = new HashMap<String, ListBox>();
   /**
    * So the concern is that if we allow people to send bookmarks with items, we can allow them to skip
@@ -63,6 +65,7 @@ public class SectionExerciseList extends PagingExerciseList {
                              UserFeedback feedback,
                              boolean showTurkToken, boolean showInOrder, boolean showListBoxes) {
     super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBoxes);
+    this.showListBoxes = showListBoxes;
   }
 
   @Override
@@ -71,11 +74,11 @@ public class SectionExerciseList extends PagingExerciseList {
   @Override
   protected void addTableWithPager() {
     add(sectionPanel = new VerticalPanel());
-    System.out.println("show list boxes " + showListBoxes);
-    sectionPanel.setVisible(showListBoxes);
+   // System.out.println("show list boxes " + showListBoxes);
+   /* sectionPanel.setVisible(showListBoxes);
     if (!showListBoxes) {
       sectionPanel.setHeight("1px");
-    }
+    }*/
     super.addTableWithPager();
   }
 
@@ -127,6 +130,9 @@ public class SectionExerciseList extends PagingExerciseList {
     System.out.println("getExercises (success) for user = " + userID + " got types " + types);
     typeToBox.clear();
 
+    String token = unencodeToken(History.getToken());
+    SelectionState selectionState = getSelectionState(token);
+
     for (final String type : types) {
       Collection<String> sections = result.get(type);
       System.out.println("\tgetExercises sections for " + type + " = " + sections);
@@ -135,14 +141,28 @@ public class SectionExerciseList extends PagingExerciseList {
       typeToBox.put(type, listBox);
       int col = 0;
 
-      flexTable.setWidget(row, col++, new HTML(type));
-      flexTable.setWidget(row++, col, listBox);
+      if (showListBoxes) {
+        flexTable.setWidget(row, col++, new HTML(type));
+        flexTable.setWidget(row++, col, listBox);
+      } else {
+        String typeValue = selectionState.typeToSection.get(type);
+        if (typeValue != null) {
+          flexTable.setWidget(row, col++, new HTML(type));
+          flexTable.setWidget(row++, col, new HTML("<b>" + typeValue + "</b>"));
+        }
+      }
     }
-    flexTable.setWidget(row, 0, getEmailWidget());
-    flexTable.getFlexCellFormatter().setColSpan(row, 0, 2);
-    row++;
-    flexTable.setWidget(row, 0, getHideBoxesWidget());
-    flexTable.getFlexCellFormatter().setColSpan(row, 0, 2);
+    if (showListBoxes) {
+      flexTable.setWidget(row, 0, getEmailWidget());
+      flexTable.getFlexCellFormatter().setColSpan(row, 0, 2);
+      row++;
+      flexTable.setWidget(row, 0, getHideBoxesWidget());
+      flexTable.getFlexCellFormatter().setColSpan(row, 0, 2);
+    }
+    else {
+      flexTable.setWidget(row, 0, new HTML("&nbsp;"));
+      flexTable.getFlexCellFormatter().setColSpan(row, 0, 2);
+    }
     return flexTable;
   }
 
@@ -345,13 +365,17 @@ public class SectionExerciseList extends PagingExerciseList {
     });
   }
 
-  private int getIntCompare(String right1, String right2) {
-    try {
-      int r1 = Integer.parseInt(right1);
-      int r2 = Integer.parseInt(right2);
-      return r1 < r2 ? -1 : r1 > r2 ? +1 : 0;
-    } catch (NumberFormatException e) {
-      return right1.compareToIgnoreCase(right2);
+  private int getIntCompare(String first, String second) {
+    if (first.length() > 0 && !Character.isDigit(first.charAt(0))) {
+      return first.compareToIgnoreCase(second);
+    } else {
+      try {
+        int r1 = Integer.parseInt(first);
+        int r2 = Integer.parseInt(second);
+        return r1 < r2 ? -1 : r1 > r2 ? +1 : 0;
+      } catch (NumberFormatException e) {
+        return first.compareToIgnoreCase(second);
+      }
     }
   }
 
@@ -370,21 +394,8 @@ public class SectionExerciseList extends PagingExerciseList {
     return widgets;
   }
 
-  Anchor studentLink;
+  private Anchor studentLink;
   private Widget getHideBoxesWidget() {
-/*
-    FlexTable g = new FlexTable();
-    int row = 0;
-    g.setWidget(row, 0, new HTML("For students"));
-    g.setWidget(row, 1, new Anchor("For Students", "#"+History.getToken()));
-
-    FlowPanel widgets = new FlowPanel();
-    widgets.add(g);
-    return widgets;
-*/
-
-   // String token = History.getToken();
-  //  System.out.println("getHideBoxesWidget token is " +token);
     studentLink = new Anchor("Link for Students", "#?showSectionWidgets=false");
     return studentLink;
   }
@@ -477,7 +488,6 @@ public class SectionExerciseList extends PagingExerciseList {
     String historyToken = getHistoryToken(null);
     String currentToken = History.getToken();
 
-    //GWT.getHostPageBaseURL();
     studentLink.setHref(GWT.getHostPageBaseURL() +"?showSectionWidgets=false#" + historyToken);
     if (currentToken.equals(historyToken)) {
       System.out.println("pushNewSectionHistoryToken : skipping same token " + historyToken);
