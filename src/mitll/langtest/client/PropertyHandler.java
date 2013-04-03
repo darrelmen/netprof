@@ -39,6 +39,7 @@ public class PropertyHandler {
   private static final String NUM_GRADES_TO_COLLECT = "numGradesToCollect";
   private static final String LOG_CLIENT_MESSAGES = "logClient";
   private static final String SHOW_SECTIONS = "showSections";
+  private static final String SHOW_SECTION_WIDGETS = "showSectionWidgets";
   //private static final String DEBUG_EMAIL = "debugEmail";
   private static final String FLASHCARD = "flashcard";
   private static final String LANGUAGE = "language";
@@ -64,7 +65,7 @@ public class PropertyHandler {
   private static final boolean DEFAULT_GOODWAVE_MODE = false;
   private static final boolean DEFAULT_ARABIC_TEXT_COLLECT = false;
   private static final boolean DEFAULT_SHOW_TURK_TOKEN = false;
-  private static final int DEFAULT_SEGMENT_REPEATS = 1;
+  private static final int DEFAULT_SEGMENT_REPEATS = 0;
   private static final int DEFAULT_TIMEOUT = 45000;
   private static final String DEFAULT_EXERCISE = null;
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
@@ -97,6 +98,7 @@ public class PropertyHandler {
   private String teacherClass = "class";
   private String lesson = "lesson";
   private boolean showSections = false;
+  private boolean showSectionWidgets = true;
   //private boolean debugEmail = true;
   private boolean flashCard = false;
   private String releaseDate;
@@ -143,6 +145,7 @@ public class PropertyHandler {
       else if (key.equals(NUM_GRADES_TO_COLLECT)) numGradesToCollect = getInt(value,NUM_GRADES_TO_COLLECT_DEFAULT,NUM_GRADES_TO_COLLECT);
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
       else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
+      else if (key.equals(SHOW_SECTION_WIDGETS)) showSectionWidgets = getBoolean(value);
     //  else if (key.equals(DEBUG_EMAIL)) debugEmail = getBoolean(value);
       else if (key.equals(FLASHCARD)) flashCard = getBoolean(value);
       else if (key.equals(LANGUAGE)) language = value;
@@ -247,6 +250,11 @@ public class PropertyHandler {
     if (adminParam != null) {
       adminView = !adminParam.equals("false");
     }
+
+    if (Window.Location.getParameter(SHOW_SECTION_WIDGETS) != null) {
+      showSectionWidgets = !Window.Location.getParameter(SHOW_SECTION_WIDGETS).equals("false");
+    }
+    System.out.println("show section widgets " + showSectionWidgets);
     return grading;
   }
 
@@ -360,6 +368,12 @@ public class PropertyHandler {
 
   public boolean isShowSections() {
     return showSections;
+  }
+
+  public boolean isShowSectionWidgets() {
+    System.out.println("isShowSectionWidgets show section widgets " + showSectionWidgets);
+
+    return showSectionWidgets;
   }
 
   public boolean isFlashCard() {
