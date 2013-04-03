@@ -157,7 +157,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
       };
   }
 
-  private String getHistoryTokenForLink(String columnText) {
+  protected String getHistoryTokenForLink(String columnText) {
     return "#item="+columnText;
   }
 
@@ -245,6 +245,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    */
   @Override
   protected void markCurrentExercise(int i) {
+    if (currentExercises == null) return;
     ExerciseShell itemToSelect = currentExercises.get(i);
     if (DEBUG)  System.out.println(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID());
     table.getSelectionModel().setSelected(itemToSelect, true);
