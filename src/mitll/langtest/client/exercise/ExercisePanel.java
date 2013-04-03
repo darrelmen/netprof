@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -90,7 +91,11 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
 
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
-    hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+    boolean rightAlignContent = controller.isRightAlignContent();
+    if (rightAlignContent) {
+      setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+    }
+    hp.setHorizontalAlignment(rightAlignContent ? HasHorizontalAlignment.ALIGN_RIGHT : HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e));
     add(hp);
 
@@ -111,7 +116,23 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
   }
 
-  private Widget getQuestionContent(Exercise e) { return new HTML(e.getContent()); }
+  private Widget getQuestionContent(Exercise e) {
+    String content = e.getContent();
+    return getHTML(content);
+  }
+
+  private Widget getHTML(String content) {
+    boolean rightAlignContent = controller.isRightAlignContent();
+    HasDirection.Direction direction =
+      rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
+    //System.out.println("content alignment guess is " + direction);
+
+    HTML html = new HTML(content, direction);
+    if (/*direction.equals(HasDirection.Direction.RTL) || */rightAlignContent) {
+      html.addStyleName("rightAlign");
+    }
+    return html;
+  }
 
   public void onResize() {}
   public boolean isBusy() { return false; }
@@ -207,12 +228,12 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     }
     else {
       String questionHeader = prefix + question;
-      add(new HTML("<h4>" + questionHeader + "</h4>"));
+      add(getHTML("<h4>" + questionHeader + "</h4>"));
     }
   }
 
   private void addQuestionPrompt(Panel vp, Exercise e) {
-    System.out.println("question prompt " + e.promptInEnglish + " for " +e);
+    //System.out.println("question prompt " + e.promptInEnglish + " for " +e);
     vp.add(new HTML(getQuestionPrompt(e.promptInEnglish)));
     SimplePanel spacer = new SimplePanel();
     spacer.setSize("50px", getQuestionPromptSpacer() + "px");
@@ -225,7 +246,12 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
 
   protected String getWrittenPrompt(boolean promptInEnglish) {
     return THREE_SPACES +
-        TYPE_YOUR_ANSWER_IN +(promptInEnglish ? ENGLISH : THE_FOREIGN_LANGUAGE) +" :";
+        TYPE_YOUR_ANSWER_IN +(promptInEnglish ? ENGLISH : getLanguage()) +" :";
+  }
+
+  private String getLanguage() {
+    String language = controller.getLanguage();
+    return language == null ? THE_FOREIGN_LANGUAGE : language;
   }
 
   protected String getSpokenPrompt(boolean promptInEnglish) {
@@ -240,7 +266,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     else if (!controller.isCRTDataCollectMode()) {
       System.out.println("unknown audio type " + controller.getAudioType());
     }
-    String studentPrompt = SPEAK_AND_RECORD_YOUR_ANSWER_IN + (promptInEnglish ? ENGLISH : THE_FOREIGN_LANGUAGE) + " ";
+    String studentPrompt = SPEAK_AND_RECORD_YOUR_ANSWER_IN + (promptInEnglish ? ENGLISH : getLanguage()) + " ";
     String teacherPrompt = TEACHER_PROMPT;
     return THREE_SPACES + (controller.isDataCollectMode() && !controller.isCRTDataCollectMode() ? teacherPrompt : studentPrompt) + instructions;
   }
@@ -264,7 +290,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     if (useKeyHandler) prev.setTitle(LEFT_ARROW_TOOLTIP);
 
     buttonRow.add(prev);
-    prev.setVisible(!controller.isMinimalUI());
+    prev.setVisible(!controller.isMinimalUI() || !controller.isPromptBeforeNextItem());
 
     this.next = new Button(getNextButtonText());
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
@@ -341,7 +367,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   protected void clickNext(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                          final ExerciseController controller, final Exercise e) {
     if (next.isEnabled() && next.isVisible()) {
-      if (controller.isMinimalUI() && !controller.isGrading()) {
+      if (controller.isMinimalUI() && !controller.isGrading() && controller.isPromptBeforeNextItem()) {
         showConfirmNextDialog(service, userFeedback, controller, e);
       } else {
         postAnswers(service, userFeedback, controller, e);
