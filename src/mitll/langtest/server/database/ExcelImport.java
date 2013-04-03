@@ -37,53 +37,25 @@ public class ExcelImport implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(ExcelImport.class);
 
   private List<Exercise> exercises = null;
-  private List<Lesson> lessons = new ArrayList<Lesson>();
-  //private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
-
-
   private List<String> errors = new ArrayList<String>();
   private TeacherClass teacherClass;
   private final String file;
-  SectionHelper sectionHelper = new SectionHelper();
+  private SectionHelper sectionHelper = new SectionHelper();
 
   @Override
   public Map<String, Collection<String>> getTypeToSections() {
-    /*Map<String,Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
-    for (String key : typeToUnitToLesson.keySet()) {
-      typeToSection.put(key,new TreeSet<String>(typeToUnitToLesson.keySet()));
-    }
-    logger.debug("getTypeToSections : type->section " + typeToSection);
-    return typeToSection;*/
     return sectionHelper.getTypeToSections();
   }
 
+  /**
+   * @see DatabaseImpl#getTypeToSectionsForTypeAndSection(String, String)
+   * @param type
+   * @param section
+   * @return
+   */
   @Override
   public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
     return sectionHelper.getTypeToSectionsForTypeAndSection(type, section);
-  }
-
-  @Override
-  public Collection<Exercise> getExercisesForSection(String type, String section) {
-    logger.debug("getExercisesForSection : " + type + "=" + section);
-
-    return sectionHelper.getExercisesForSection(type, section);
-/*
-    logger.debug("getExercisesForSection : " + type + "=" + section);
-
-    Map<String, Lesson> sectionToLesson = typeToUnitToLesson.get(type);
-    if (sectionToLesson == null) {
-      return Collections.emptyList();
-    }
-    else {
-      Lesson lesson = sectionToLesson.get(section);
-      if (lesson == null) {
-        logger.error("huh? no lesson for " + type + "="+section);
-        return Collections.emptyList();
-      }
-      else {
-        return lesson.getExercises();
-      }
-    }*/
   }
 
   @Override
