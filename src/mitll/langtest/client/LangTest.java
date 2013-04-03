@@ -367,11 +367,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           true, props.isEnglishOnlyMode());
     } else {
       if (props.isShowSections()) {
+        boolean showSectionWidgets = props.isShowSectionWidgets();
+        System.out.println("makeExerciseList show section widgets " + showSectionWidgets);
+
         this.exerciseList = new SectionExerciseList(currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), isAutoCRTMode());
+          props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets);
      } else {
         this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), isAutoCRTMode()) {
+          props.isShowTurkToken(), isAutoCRTMode(), false) {
           @Override
           protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
         };
