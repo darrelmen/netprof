@@ -30,12 +30,19 @@ public class SectionHelper {
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
   private Map<String,Map<String,Map<String,Set<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String,Map<String,Set<String>>>>();
 
-
+  /**
+   * @see ExcelImport#getTypeToSectionsForTypeAndSection(String, String)
+   * @param type
+   * @param section
+   * @return
+   */
   public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
     Map<String, Map<String, Set<String>>> sectionToSub = typeToSectionToTypeToSections.get(type);
     if (sectionToSub == null) return Collections.emptyMap();
     Map<String, Set<String>> typeToSections = sectionToSub.get(section);
     if (typeToSections == null) return Collections.emptyMap();
+
+
     Map<String,Collection<String>> retval = new HashMap<String, Collection<String>>();
     for (Map.Entry<String,Set<String>> pair : typeToSections.entrySet()) {
       retval.put(pair.getKey(),new ArrayList<String>(pair.getValue()));
@@ -57,23 +64,17 @@ public class SectionHelper {
    * @param typeToSection
    * @return
    */
-  public Collection<Exercise> getExercisesForSelectionState(Map<String,String> typeToSection) {
+  public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
     Collection<Exercise> currentList = null;
-    for (Map.Entry<String,String> pair : typeToSection.entrySet()) {
+    for (Map.Entry<String, String> pair : typeToSection.entrySet()) {
       String type = pair.getKey();
       if (isKnownType(type)) {
-      Collection<Exercise> exercisesForSection = new HashSet<Exercise>(getExercisesForSection(type, pair.getValue()));
-      //logger.debug("For " + pair + " got " + exercisesForSection.size() + " items");
-      if (currentList == null) {
-        currentList = exercisesForSection;
-        //logger.debug("\t current now " + currentList.size() + " items");
-      }
-      else {
-        //logger.debug("\t retaining " + exercisesForSection.size() + " items from current " + currentList.size() + " items");
-
-        currentList.retainAll(exercisesForSection);
-        //logger.debug("\t result " + currentList.size() + " items");
-      }
+        Collection<Exercise> exercisesForSection = new HashSet<Exercise>(getExercisesForSection(type, pair.getValue()));
+        if (currentList == null) {
+          currentList = exercisesForSection;
+        } else {
+          currentList.retainAll(exercisesForSection);
+        }
       }
     }
     if (currentList == null) {
@@ -81,6 +82,10 @@ public class SectionHelper {
       currentList = Collections.emptyList();
     }
     return currentList;
+  }
+
+  private boolean isKnownType(String type) {
+    return typeToUnitToLesson.containsKey(type);
   }
 
   public Collection<Exercise> getExercisesForSection(String type, String section) {
@@ -97,10 +102,6 @@ public class SectionHelper {
         return lesson.getExercises();
       }
     }
-  }
-
-  private boolean isKnownType(String type) {
-    return typeToUnitToLesson.containsKey(type);
   }
 
   public Pair addUnitToLesson(Exercise exercise, String unitName) { return addExerciseToLesson(exercise, unitType, unitName);}
