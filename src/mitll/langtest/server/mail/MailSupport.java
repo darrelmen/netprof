@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Properties;
 
 public class MailSupport {
-  private static final String SWADE = "swade@ll.mit.edu";
+  //private static final String SWADE = "swade@ll.mit.edu";
   private static final String RECIPIENT_NAME = "Gordon Vidaver";
   private static final String DATA_COLLECT_WEBMASTER = "Data Collect Webmaster";
   private static Logger logger = Logger.getLogger(MailSupport.class);
@@ -43,7 +43,7 @@ public class MailSupport {
 
     logger.info("link " +link);*/
 
-    String link2 = baseURL + "#" + URLEncoder.encode(token);
+    String link2 = baseURL + "?showSectionWidgets=false"+"#" + URLEncoder.encode(token);
     String body = "<html>" +
       "<head>" +
       "</head>" +
