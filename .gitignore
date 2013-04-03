@@ -16,3 +16,7 @@ war/config/*/media/*.raw
 war/media/ac*/*.wav
 war/media/ac*/*.raw
 war/langtest/*
+war/config/levantine/media/nl*/*.mp3
+war/config/msa/media/ID*.raw
+war/config/msa/media/ID*.mp3
+
