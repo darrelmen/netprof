@@ -200,6 +200,51 @@
         </jar>
     </target>
 
+
+    <target depends="build" name="crtPashto">
+        <jar destfile="crtPashto.war" basedir="war"
+             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/crtPashto/**,soundmanager2.js"
+             excludes="WEB=INF/lib/pronz.jar">
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target depends="build" name="testPashto">
+        <jar destfile="testPashto.war" basedir="war"
+             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pashto/**,soundmanager2.js"
+             excludes="WEB=INF/lib/pronz.jar">
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target depends="build" name="farsiSections">
+        <jar destfile="farsiSections.war" basedir="war"
+             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/farsi/**,soundmanager2.js"
+             excludes="WEB=INF/lib/pronz.jar">
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target depends="build" name="dataCollectAdmin2">
+        <jar destfile="farsiSections.war" basedir="war"
+             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dataCollectAdmin/**,soundmanager2.js"
+             excludes="WEB=INF/lib/pronz.jar">
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
     <target depends="build" name="fullPatch">
         <jar destfile="npPatch.war" basedir="war"
              excludes="WEB-INF/web.xml,WEB-INF/lib/poi*.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
