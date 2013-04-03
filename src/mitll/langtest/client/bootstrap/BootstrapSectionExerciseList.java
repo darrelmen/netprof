@@ -204,7 +204,7 @@ public class BootstrapSectionExerciseList extends PagingExerciseList {
         }
       });
     } else {
-      service.getTypeToSectionsForTypeAndSection(type, itemText, new AsyncCallback<Map<String, List<String>>>() {
+      service.getTypeToSectionsForTypeAndSection(type, itemText, new AsyncCallback<Map<String, Collection<String>>>() {
         @Override
         public void onFailure(Throwable caught) {
           Window.alert("Can't contact server.");
@@ -215,12 +215,12 @@ public class BootstrapSectionExerciseList extends PagingExerciseList {
          * @param result
          */
         @Override
-        public void onSuccess(Map<String, List<String>> result) {
+        public void onSuccess(Map<String, Collection<String>> result) {
           System.out.println("setListBox onSuccess " + type + "=" + itemText + " yielded " +result);
 
-          for (Map.Entry<String, List<String>> pair : result.entrySet()) {
+          for (Map.Entry<String, Collection<String>> pair : result.entrySet()) {
             String type = pair.getKey();
-            List<String> sections = pair.getValue();
+            Collection<String> sections = pair.getValue();
             populateListBox(type, sections);
           }
           pushNewSectionHistoryToken();
@@ -345,7 +345,7 @@ public class BootstrapSectionExerciseList extends PagingExerciseList {
    */
   private void loadExercises(final String type, final String section, final String item) {
     System.out.println("loadExercises " + type + " " + section + " item '" +item +"'");
-    service.getExercisesForSection(type, section, new SetExercisesCallback() {
+/*    service.getExercisesForSection(type, section, new SetExercisesCallback() {
       @Override
       public void onSuccess(List<ExerciseShell> result) {
         if (!result.isEmpty()) {
@@ -359,7 +359,7 @@ public class BootstrapSectionExerciseList extends PagingExerciseList {
           }
         }
       }
-    });
+    });*/
   }
 
   /**
@@ -425,7 +425,7 @@ public class BootstrapSectionExerciseList extends PagingExerciseList {
   private void setOtherListBoxes(final String selectedType, String section) {
     System.out.println("setOtherListBoxes type : " + selectedType + " section " + section);
 
-    service.getTypeToSectionsForTypeAndSection(selectedType, section, new AsyncCallback<Map<String, List<String>>>() {
+    service.getTypeToSectionsForTypeAndSection(selectedType, section, new AsyncCallback<Map<String, Collection<String>>>() {
       @Override
       public void onFailure(Throwable caught) {
         Window.alert("Can't contact server.");
@@ -436,14 +436,14 @@ public class BootstrapSectionExerciseList extends PagingExerciseList {
        * @param result
        */
       @Override
-      public void onSuccess(Map<String, List<String>> result) {
-        for (Map.Entry<String, List<String>> pair : result.entrySet()) {
+      public void onSuccess(Map<String, Collection<String>> result) {
+        for (Map.Entry<String, Collection<String>> pair : result.entrySet()) {
           String type = pair.getKey();
           if (type.equals(selectedType)) {
             System.out.println("setOtherListBoxes skipping " + type);
 
           } else {
-            List<String> sections = pair.getValue();
+            Collection<String> sections = pair.getValue();
             populateListBox(type, sections);
           }
         }
@@ -453,7 +453,7 @@ public class BootstrapSectionExerciseList extends PagingExerciseList {
   }
 
   /**
-   * @see #getEmailWidget()
+   * @seex #getEmailWidget()
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @return
    */
