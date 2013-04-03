@@ -184,13 +184,19 @@ public class DatabaseImpl implements Database {
     return exerciseDAO.getTypeToSections();
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getTypeToSectionsForTypeAndSection(String, String)
+   * @param type
+   * @param section
+   * @return
+   */
   public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
     return exerciseDAO.getTypeToSectionsForTypeAndSection(type, section);
   }
 
-  public Collection<Exercise> getExercisesForSection(String type, String section) {
+/*  public Collection<Exercise> getExercisesForSection(String type, String section) {
     return exerciseDAO.getExercisesForSection(type, section);
-  }
+  }*/
   public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
     return exerciseDAO.getExercisesForSelectionState(typeToSection);
   }
