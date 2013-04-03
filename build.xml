@@ -181,6 +181,17 @@
         </jar>
     </target>
 
+    <target depends="build" name="testPashto">
+        <jar destfile="testPashto.war" basedir="war"
+             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pashto/**,soundmanager2.js"
+             excludes="WEB=INF/lib/pronz.jar">
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
     <target depends="build" name="farsiSections">
         <jar destfile="farsiSections.war" basedir="war"
              includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/farsi/**,soundmanager2.js"
