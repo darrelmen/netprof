@@ -210,12 +210,21 @@ public class DatabaseImpl implements Database {
     return exerciseDAO.getTypeToSections();
   }
 
-  public Map<String, List<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getTypeToSectionsForTypeAndSection(String, String)
+   * @param type
+   * @param section
+   * @return
+   */
+  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
     return exerciseDAO.getTypeToSectionsForTypeAndSection(type, section);
   }
 
-  public Collection<Exercise> getExercisesForSection(String type, String section) {
+/*  public Collection<Exercise> getExercisesForSection(String type, String section) {
     return exerciseDAO.getExercisesForSection(type, section);
+  }*/
+  public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
+    return exerciseDAO.getExercisesForSelectionState(typeToSection);
   }
 
   /**
@@ -575,18 +584,24 @@ public class DatabaseImpl implements Database {
    * Show unanswered questions first, then ones with 1, then 2, then 3,... answers
    * Also be aware of the user's gender -- if you're female, show questions that have no female answers first.
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long)
-   * @param userID
-   * @return
+   * @param userID so we can show gender aware orderings (i.e. show entries with fewer female responses to females, etc.)
+   * @return ordered list of exercises
    */
   public List<Exercise> getExercisesBiasTowardsUnanswered(long userID) {
+    List<Exercise> rawExercises = getExercises();
+    return getExercisesBiasTowardsUnanswered(userID, rawExercises);
+  }
+
+  public List<Exercise> getExercisesBiasTowardsUnanswered(long userID, Collection<Exercise> rawExercises) {
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
     Map<String,Double> idToWeight = new HashMap<String, Double>();
 
-    populateInitialExerciseIDToCount(idToExercise, idToCount,idToWeight);
+    populateInitialExerciseIDToCount(rawExercises, idToExercise, idToCount,idToWeight);
 
     // only find answers that are for the gender
-    /*Collection<String> alreadyAnswered =*/ getExerciseIDToResultCount(userID, idToCount);
+    /*Collection<String> alreadyAnswered =*/
+    getExerciseIDToResultCount(userID, idToCount);
 
     Map<String, Integer> idToCountScaled = getScaledIdToCount(idToCount, idToWeight);
     SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCountScaled);
@@ -626,8 +641,9 @@ public class DatabaseImpl implements Database {
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
     Map<String,Double> idToWeight = new HashMap<String, Double>();
+    List<Exercise> rawExercises = getExercises();
 
-    populateInitialExerciseIDToCount(idToExercise, idToCount,idToWeight);
+    populateInitialExerciseIDToCount(rawExercises, idToExercise, idToCount,idToWeight);
     //logger.info("initial map of online counts is size = " + idToCount.size() +" " + idToCount.values().size());
 
     boolean isMale = userDAO.isUserMale(userID);
@@ -671,7 +687,7 @@ public class DatabaseImpl implements Database {
 
     //int count2 = 0;
     for (Map.Entry<Integer, List<String>> pair : countToIds.entrySet()) {
-      Integer countOrig = pair.getKey();
+      //Integer countOrig = pair.getKey();
       List<String> itemsAtCount = pair.getValue();
       //logger.debug("doing items at result count = " + countOrig + " : " + itemsAtCount.size());
 
@@ -724,9 +740,9 @@ public class DatabaseImpl implements Database {
    * @param idToExercise
    * @param idToCount
    */
-  private void populateInitialExerciseIDToCount(Map<String, Exercise> idToExercise, Map<String, Integer> idToCount,
-                                                Map<String,Double> idToWeight) {
-    List<Exercise> rawExercises = getExercises();
+  private void populateInitialExerciseIDToCount(Collection<Exercise> rawExercises,
+                                                Map<String, Exercise> idToExercise, Map<String, Integer> idToCount,
+                                                Map<String, Double> idToWeight) {
     for (Exercise e : rawExercises) {
       idToCount.put(e.getID(), 0);
       double weight = e.getWeight() == 0 ? 1 : Math.max(1, Math.log(e.getWeight())); // 1->n
@@ -748,6 +764,12 @@ public class DatabaseImpl implements Database {
     boolean userMale = userDAO.isUserMale(userID);
     Map<Long, User> userMap = userDAO.getUserMap(userMale);
     List<Result> results = getResults();
+    return getExerciseIDToResultCount(userID, userMap, results, idToCount);
+  }
+
+  private Collection<String> getExerciseIDToResultCount(long userID, Map<Long, User> userMap, List<Result> results,
+                                                        Map<String, Integer> idToCount // what gets populated
+  ) {
     List<String> alreadyAnsweredByThisUser = new ArrayList<String>();
     Map<String, Set<Long>> keyToUsers = new HashMap<String, Set<Long>>();
 

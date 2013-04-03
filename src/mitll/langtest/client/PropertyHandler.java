@@ -40,11 +40,15 @@ public class PropertyHandler {
   private static final String NUM_GRADES_TO_COLLECT = "numGradesToCollect";
   private static final String LOG_CLIENT_MESSAGES = "logClient";
   private static final String SHOW_SECTIONS = "showSections";
+  private static final String SHOW_SECTION_WIDGETS = "showSectionWidgets";
   //private static final String DEBUG_EMAIL = "debugEmail";
   private static final String FLASHCARD = "flashcard";
+
   private static final String TIMED_GAME = "timedGame";
   private static final String GAME_TIME = "gameTimeSeconds";
   private static final String LANGUAGE = "language";
+  private static final String CONTINUE_PROMPT = "promptBeforeNextItem";
+  private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -65,7 +69,7 @@ public class PropertyHandler {
   private static final boolean DEFAULT_GOODWAVE_MODE = false;
   private static final boolean DEFAULT_ARABIC_TEXT_COLLECT = false;
   private static final boolean DEFAULT_SHOW_TURK_TOKEN = false;
-  private static final int DEFAULT_SEGMENT_REPEATS = 1;
+  private static final int DEFAULT_SEGMENT_REPEATS = 0;
   private static final int DEFAULT_TIMEOUT = 45000;
   private static final int DEFAULT_GAME_TIME_SECONDS = 60;
   private static final String DEFAULT_EXERCISE = null;
@@ -100,6 +104,7 @@ public class PropertyHandler {
   private String lesson = "lesson";
   private String language = "";
   private boolean showSections = false;
+  private boolean showSectionWidgets = true;
   //private boolean debugEmail = true;
   private boolean flashCard = false;
   private boolean timedGame = false;
@@ -109,6 +114,8 @@ public class PropertyHandler {
   private float screenPortion;
   private boolean CRTDataCollectMode;
   private String splashTitle;
+  private boolean promptBeforeNextItem = true;
+  private boolean rightAlignContent;
 
   public PropertyHandler(Map<String,String> props) {
     this.props = props;
@@ -146,12 +153,15 @@ public class PropertyHandler {
       else if (key.equals(NUM_GRADES_TO_COLLECT)) numGradesToCollect = getInt(value,NUM_GRADES_TO_COLLECT_DEFAULT,NUM_GRADES_TO_COLLECT);
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
       else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
+      else if (key.equals(SHOW_SECTION_WIDGETS)) showSectionWidgets = getBoolean(value);
     //  else if (key.equals(DEBUG_EMAIL)) debugEmail = getBoolean(value);
       else if (key.equals(FLASHCARD)) flashCard = getBoolean(value);
       else if (key.equals(LANGUAGE)) language = value;
       else if (key.equals(SPLASH_TITLE)) splashTitle = value;
       else if (key.equals(TIMED_GAME)) timedGame = getBoolean(value);
       else if (key.equals(GAME_TIME)) gameTimeSeconds = getInt(value,DEFAULT_GAME_TIME_SECONDS,GAME_TIME);
+      else if (key.equals(CONTINUE_PROMPT)) promptBeforeNextItem = getBoolean(value);
+      else if (key.equals(RIGHT_ALIGN_CONTENT)) rightAlignContent = getBoolean(value);
     }
   }
 
@@ -253,6 +263,10 @@ public class PropertyHandler {
     }
     gameTimeSeconds = getInt(Window.Location.getParameter(GAME_TIME), DEFAULT_GAME_TIME_SECONDS,REPEATS);
 
+    if (Window.Location.getParameter(SHOW_SECTION_WIDGETS) != null) {
+      showSectionWidgets = !Window.Location.getParameter(SHOW_SECTION_WIDGETS).equals("false");
+    }
+    System.out.println("show section widgets " + showSectionWidgets);
     return grading;
   }
 
@@ -368,6 +382,12 @@ public class PropertyHandler {
     return showSections;
   }
 
+  public boolean isShowSectionWidgets() {
+    System.out.println("isShowSectionWidgets show section widgets " + showSectionWidgets);
+
+    return showSectionWidgets;
+  }
+
   public boolean isFlashCard() {
     return flashCard;
   }
@@ -390,5 +410,12 @@ public class PropertyHandler {
 
   public int getGameTimeSeconds() {
     return gameTimeSeconds;
+  }
+
+  public boolean isPromptBeforeNextItem() {
+    return promptBeforeNextItem;
+  }
+  public boolean isRightAlignContent() {
+    return rightAlignContent;
   }
 }
