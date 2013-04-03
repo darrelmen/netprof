@@ -46,6 +46,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   private static final int MIN_PAGE_SIZE = 3;
   private static final float DEFAULT_PAGE_SIZE = 15f;
   private CellTable<ExerciseShell> table;
+  protected boolean showListBoxes;
 
   public interface TableResources extends CellTable.Resources {
     /**
@@ -66,9 +67,10 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    * @param showTurkToken
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            boolean showTurkToken, boolean showInOrder) {
+                            boolean showTurkToken, boolean showInOrder, boolean showListBoxes) {
     super(currentExerciseVPanel, service, feedback, null, showTurkToken, showInOrder);
 
+    this.showListBoxes = showListBoxes;
     addTableWithPager();
   }
 
