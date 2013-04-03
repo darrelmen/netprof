@@ -107,16 +107,18 @@ public interface LangTestDatabaseAsync {
   void logMessage(String message, AsyncCallback<Void> async);
 
   void getTypeToSection(AsyncCallback<Map<String, Collection<String>>> async);
+  void getTypeToSectionsForTypeAndSection(String type, String section, AsyncCallback<Map<String, Collection<String>>> async);
 
-  void getExercisesForSection(String type, String section, AsyncCallback<List<ExerciseShell>> async);
+//  void getExercisesForSection(String type, String section, long userID, AsyncCallback<List<ExerciseShell>> async);
 
   void sendEmail(int userID, String to, String replyTo, String subject, String message, String token, AsyncCallback<Void> async);
 
-  void getTypeToSectionsForTypeAndSection(String type, String section, AsyncCallback<Map<String, List<String>>> async);
 
   void getNextExercise(long userID, AsyncCallback<FlashcardResponse> async);
 
   void resetUserState(long userID, AsyncCallback<Void> async);
 
   void clearUserState(long userID, AsyncCallback<Void> async);
+
+  void getExercisesForSelectionState(Map<String, String> typeToSection, long userID, AsyncCallback<List<ExerciseShell>> async);
 }
