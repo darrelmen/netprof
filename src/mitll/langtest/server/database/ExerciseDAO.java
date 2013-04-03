@@ -17,6 +17,6 @@ public interface ExerciseDAO {
   List<Exercise> getRawExercises();
 
   Map<String,Collection<String>> getTypeToSections();
-  Map<String,List<String>> getTypeToSectionsForTypeAndSection(String type, String section);
-  Collection<Exercise> getExercisesForSection(String type, String section);
+  Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section);
+  Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection);
 }
