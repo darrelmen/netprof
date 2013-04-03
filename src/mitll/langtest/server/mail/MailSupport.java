@@ -43,7 +43,7 @@ public class MailSupport {
 
     logger.info("link " +link);*/
 
-    String link2 = baseURL + "#" + URLEncoder.encode(token);
+    String link2 = baseURL + "?showSectionsWidgets=false"+"#" + URLEncoder.encode(token);
     String body = "<html>" +
       "<head>" +
       "</head>" +
