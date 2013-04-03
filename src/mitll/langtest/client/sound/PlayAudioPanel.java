@@ -121,7 +121,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
                                                        NativeEvent ne = event.getNativeEvent();
                                                        if (ne.getCharCode() == SPACE_BAR &&
                                                            "[object KeyboardEvent]".equals(ne.getString()) &&
-                                                           !hasFocus) {
+                                                           !hasFocus && playButton.isVisible()) {
                                                          ne.preventDefault();
 
                                                          System.out.println(new Date() + " : Play click handler : Got " + event + " type int " +
