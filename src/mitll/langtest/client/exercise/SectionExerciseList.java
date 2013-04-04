@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +43,8 @@ public class SectionExerciseList extends PagingExerciseList {
   protected long userID;
   protected boolean showListBoxes;
 
-  private Map<String,SectionWidget> typeToBox = new HashMap<String, SectionWidget>();
+  protected Map<String,SectionWidget> typeToBox = new HashMap<String, SectionWidget>();
+
   /**
    * So the concern is that if we allow people to send bookmarks with items, we can allow them to skip
    * forward in a list we're trying to present in a certain order.
@@ -86,30 +86,35 @@ public class SectionExerciseList extends PagingExerciseList {
   public void getExercises(final long userID) {
     System.out.println("Get exercises for user=" + userID);
     this.userID = userID;
-    service.getTypeToSection(new AsyncCallback<Map<String, Collection<String>>>() {
+    service.getTypeToSectionToCount(new AsyncCallback<Map<String, Map<String, Integer>>>() {
       @Override
       public void onFailure(Throwable caught) {
         Window.alert("Couldn't contact server.");
       }
 
       @Override
-      public void onSuccess(Map<String, Collection<String>> result) {
+      public void onSuccess(Map<String, Map<String, Integer>> result) {
         useInitialTypeToSectionMap(result, userID);
       }
     });
   }
 
-  protected void useInitialTypeToSectionMap(Map<String, Collection<String>> result, long userID) {
+  protected void useInitialTypeToSectionMap(Map<String, Map<String, Integer>> result, long userID) {
     sectionPanel.clear();
 
     Panel flexTable = getWidgetsForTypes(result, userID);
 
     sectionPanel.add(flexTable);
 
-    if (result.isEmpty()) {  // fallback to non-section option
+    Set<String> keys = result.keySet();
+    selectFirstItem(keys, userID);
+  }
+
+  private void selectFirstItem(Set<String> keys, long userID) {
+    if (keys.isEmpty()) {  // fallback to non-section option
       noSectionsGetExercises(userID);
     } else {
-      String first = result.keySet().iterator().next();
+      String first = keys.iterator().next();
       System.out.println("\tselecting first key of first type=" + first);
 
       selectFirst(first);
@@ -119,11 +124,12 @@ public class SectionExerciseList extends PagingExerciseList {
 
   /**
    * Add a list box for each type to the flex table, then an EMAIL link below them.
+   * @see #useInitialTypeToSectionMap(java.util.Map, long)
    * @param result
    * @param userID
    * @return panel with all the widgets
    */
-  private Panel getWidgetsForTypes(Map<String, Collection<String>> result, long userID) {
+  protected Panel getWidgetsForTypes(Map<String, Map<String, Integer>> result, long userID) {
     final FlexTable flexTable = new FlexTable();
     int row = 0;
     Set<String> types = result.keySet();
@@ -134,7 +140,7 @@ public class SectionExerciseList extends PagingExerciseList {
     SelectionState selectionState = getSelectionState(token);
 
     for (final String type : types) {
-      Collection<String> sections = result.get(type);
+      Map<String, Integer> sections = result.get(type);
       System.out.println("\tgetExercises sections for " + type + " = " + sections);
 
       final SectionWidget listBox = makeListBox(type);
@@ -230,12 +236,11 @@ public class SectionExerciseList extends PagingExerciseList {
     }
   }
 
-
   /**
    * @see SectionExerciseList.TypeToSectionsAsyncCallback#onSuccess(java.util.Map)
    * @see #setOtherListBoxes(String, String)
    */
-  private void populateListBox(Map<String, Collection<String>> result) {
+  protected void populateListBox(Map<String, Collection<String>> result) {
     for (Map.Entry<String, Collection<String>> pair : result.entrySet()) {
       String type = pair.getKey();
       Collection<String> sections = pair.getValue();
@@ -245,6 +250,7 @@ public class SectionExerciseList extends PagingExerciseList {
 
   /**
    * @see #populateListBox(java.util.Map)
+   * @deprecated fix this if we ever do drop down again
    * @param type
    * @param sections
    */
@@ -252,7 +258,7 @@ public class SectionExerciseList extends PagingExerciseList {
     System.out.println("populateListBox : " +type);
 
     SectionWidget listBox = typeToBox.get(type);
-    populateListBox(listBox, sections);
+    //populateListBox(listBox, sections);
 
     String currentSelection = getCurrentSelection(type);
     System.out.println("current selection is " +currentSelection);
@@ -284,11 +290,11 @@ public class SectionExerciseList extends PagingExerciseList {
    * @see #getExercises(long)
    * @see #populateListBox(String, java.util.Collection)
    * @param listBox
-   * @param sections
+   * @param sectionToCount
    */
-  private void populateListBox(SectionWidget listBox, Collection<String> sections) {
-    List<String> items = getSortedItems(sections);
-    listBox.populateTypeWidget(items);
+  protected void populateListBox(SectionWidget listBox,  Map<String, Integer>  sectionToCount) {
+    List<String> items = getSortedItems(sectionToCount.keySet());
+    listBox.populateTypeWidget(items, sectionToCount);
   }
 
   protected List<String> getSortedItems(Collection<String> sections) {
@@ -386,7 +392,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @see #getWidgetsForTypes(java.util.Map, long)
    * @return
    */
-  private Widget getEmailWidget() {
+  protected Widget getEmailWidget() {
     FlexTable g = new FlexTable();
     int row = 0;
     g.setWidget(row, 0, new HTML("Share via "));
@@ -398,7 +404,7 @@ public class SectionExerciseList extends PagingExerciseList {
   }
 
   private Anchor studentLink;
-  private Widget getHideBoxesWidget() {
+  protected Widget getHideBoxesWidget() {
     studentLink = new Anchor("Link for Students", "#?showSectionWidgets=false");
     return studentLink;
   }
@@ -637,7 +643,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param selectedType
    * @param section
    */
-  private void setOtherListBoxes(final String selectedType, final String section) {
+  protected void setOtherListBoxes(final String selectedType, final String section) {
     System.out.println("setOtherListBoxes type " + selectedType + "=" + section);
     service.getTypeToSectionsForTypeAndSection(selectedType, section,
       new AsyncCallback<Map<String, Collection<String>>>() {
@@ -688,7 +694,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param token
    * @return object representing type=value pairs from history token
    */
-  private SelectionState getSelectionState(String token) {
+  protected SelectionState getSelectionState(String token) {
     SelectionState selectionState = new SelectionState();
     String[] parts = token.split(";");
 
@@ -722,7 +728,7 @@ public class SectionExerciseList extends PagingExerciseList {
     return selectionState;
   }
 
-  private static class SelectionState {
+  protected static class SelectionState {
     private String item;
     public Map<String, String> typeToSection = new HashMap<String, String>();
 
