@@ -55,26 +55,9 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   @Override
-  public Map<String, Collection<String>> getTypeToSections() {
-    return sectionHelper.getTypeToSections();
+  public SectionHelper getSectionHelper() {
+    return sectionHelper;
   }
-
-  /**
-   * @see DatabaseImpl#getTypeToSectionsForTypeAndSection(String, String)
-   * @param type
-   * @param section
-   * @return
-   */
-  @Override
-  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
-    return sectionHelper.getTypeToSectionsForTypeAndSection(type, section);
-  }
-
-  @Override
-  public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
-    return sectionHelper.getExercisesForSelectionState(typeToSection);
-  }
-
 
   public List<Exercise> getRawExercises() {
     synchronized (this) {
