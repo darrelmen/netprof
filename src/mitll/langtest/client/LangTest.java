@@ -43,6 +43,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
+import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
 import mitll.langtest.client.flashcard.FlashcardExerciseList;
 import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
@@ -482,11 +483,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           true, props.isEnglishOnlyMode());
     } else {
       if (props.isShowSections()) {
+        boolean showSectionWidgets = props.isShowSectionWidgets();
         this.exerciseList = new BootstrapSectionExerciseList(currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), isAutoCRTMode());
+          props.isShowTurkToken(), isAutoCRTMode(),showSectionWidgets);
 
 /*
-        boolean showSectionWidgets = props.isShowSectionWidgets();
         System.out.println("makeExerciseList show section widgets " + showSectionWidgets);
 
         this.exerciseList = new SectionExerciseList(currentExerciseVPanel, service, feedback,

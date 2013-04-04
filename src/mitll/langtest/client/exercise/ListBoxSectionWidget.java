@@ -1,0 +1,78 @@
+package mitll.langtest.client.exercise;
+
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Widget;
+
+import java.util.Collection;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: GO22670
+ * Date: 4/3/13
+ * Time: 7:09 PM
+ * To change this template use File | Settings | File Templates.
+ */
+public class ListBoxSectionWidget extends ListBox implements SectionWidget {
+  public String getCurrentSelection() {
+    int selectedIndex = getSelectedIndex();
+    return getItemText(selectedIndex);
+  }
+
+  public String getFirstItem() {
+    return getItemText(0);  // first is Any
+  }
+
+  public void selectFirstAfterAny() {
+    setSelectedIndex(1); // not any, which is the first list item
+  }
+
+  public void selectItem(String section) {
+
+    for (int i = 0; i < getItemCount(); i++) {
+      String itemText = getItemText(i);
+      if (itemText.equals(section)) {
+        setSelectedIndex(i);
+        break;
+      }
+    }
+  }
+
+  /**
+   * Don't change the selection unless it's not available in this list box.
+   * @see SectionExerciseList#populateListBox(String, java.util.Collection)
+   * @param currentSelection
+   */
+  public void retainCurrentSelectionState( String currentSelection) {
+    int itemCount = getItemCount();
+
+    // retain current selection state
+    if (itemCount > 0) {
+      boolean foundMatch = false;
+      for (int i = 0; i < itemCount; i++) {
+        if (getItemText(i).equals(currentSelection)) {
+          setSelectedIndex(i);
+          foundMatch = true;
+          break;
+        }
+      }
+      if (!foundMatch) {
+        setSelectedIndex(0);
+      }
+    }
+  }
+
+
+  public void populateTypeWidget(Collection<String> items) {
+    clear();
+
+    addItem(SectionExerciseList.ANY);
+    for (String section : items) {
+      addItem(section);
+    }
+  }
+
+  @Override
+  public Widget getWidget() {
+    return this;
+  }
+}
