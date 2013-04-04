@@ -82,7 +82,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final String RECORDING_KEY = "SPACE BAR";
   private final DialogHelper dialogHelper = new DialogHelper(false);
 
-  private Panel currentExerciseVPanel = new VerticalPanel();
+  private Panel currentExerciseVPanel = new FluidContainer();
   private ListInterface exerciseList;
   private Label status;
 
@@ -200,7 +200,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH);
     }
     // set up center panel, initially with flash record panel
-    currentExerciseVPanel = new VerticalPanel();
+    currentExerciseVPanel = new FluidContainer();
 
     if (usualLayout) {
       ScrollPanel sp = new ScrollPanel();
