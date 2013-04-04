@@ -159,7 +159,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public Map<String, Collection<String>> getTypeToSection() { return db.getTypeToSection(); }
+  public Map<String, Collection<String>> getTypeToSection() { return db.getSectionHelper().getTypeToSection(); }
 /*  @Override
   public List<ExerciseShell> getExercisesForSection(String type, String section, long userID) {
     Collection<Exercise> exercisesForSection = db.getExercisesForSection(type, section);
@@ -169,7 +169,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public List<ExerciseShell> getExercisesForSelectionState(Map<String, String> typeToSection, long userID) {
-    Collection<Exercise> exercisesForSection = db.getExercisesForSelectionState(typeToSection);
+    Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection);
     return getExerciseShells(exercisesBiasTowardsUnanswered);
 
@@ -177,10 +177,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     @Override
   public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
-    return db.getTypeToSectionsForTypeAndSection(type, section);
+    return db.getSectionHelper().getTypeToSectionsForTypeAndSection(type, section);
   }
 
-  private void logMemory() {
+  @Override
+  public Map<String, Map<String,Integer>> getTypeToSectionToCount() {
+    return db.getSectionHelper().getTypeToSectionToCount();
+  }
+
+    private void logMemory() {
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory();
     long used = rt.totalMemory()-free;
