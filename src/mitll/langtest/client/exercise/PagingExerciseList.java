@@ -69,6 +69,10 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
                             boolean showTurkToken, boolean showInOrder) {
     super(currentExerciseVPanel, service, feedback, null, showTurkToken, showInOrder);
 
+    addComponents();
+  }
+
+  protected void addComponents() {
     addTableWithPager();
   }
 
