@@ -3,6 +3,7 @@ package mitll.langtest.client.exercise;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,6 +18,6 @@ public interface SectionWidget {
   void selectFirstAfterAny();
   void selectItem(String section);
   void retainCurrentSelectionState(String currentSelection);
-  void populateTypeWidget(Collection<String> items);
+  void populateTypeWidget(Collection<String> items, Map<String, Integer> sectionToCount);
   public Widget getWidget();
 }
