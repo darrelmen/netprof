@@ -23,14 +23,23 @@ import java.util.List;
 public class BarSectionWidget extends ButtonGroup implements SectionWidget {
   private static final String ANY = SectionExerciseList.ANY;
   private List<Button> buttons = new ArrayList<Button>();
+  ItemClickListener listener;
+  String type;
+
+  public BarSectionWidget(String type, ItemClickListener listener) {
+    this.type = type;
+    this.listener = listener;
+  }
+
   @Override
   public String getCurrentSelection() {
     for (Button b : buttons) {
       if (b.isActive()) {
+        //System.out.println("getCurrentSelection for " +type + "=" + b.getText());
         return b.getText().trim();
       }
     }
-    return ANY;  //To change body of implemented methods use File | Settings | File Templates.
+    return ANY;
   }
 
   @Override
@@ -58,7 +67,7 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
       }
     }
     for (Button b : buttons) {
-      if (b.getText().equals(section)) {
+      if (b.getText().trim().equals(section)) {
         b.setActive(true);
         break;
       }
@@ -75,7 +84,7 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
     }
     boolean found = false;
     for (Button b : buttons) {
-      if (b.getText().equals(currentSelection)) {
+      if (b.getText().trim().equals(currentSelection)) {
         b.setActive(true);
         found = true;
         break;
@@ -84,6 +93,10 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
     if (!found) buttons.iterator().next().setActive(true);
   }
 
+  /**
+   * @see SectionExerciseList#populateListBox(mitll.langtest.client.exercise.SectionWidget, java.util.Collection)
+   * @param items
+   */
   @Override
   public void populateTypeWidget(Collection<String> items) {
     System.out.println("populateTypeWidget : " +items.size());
@@ -100,6 +113,8 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
       @Override
       public void onClick(ClickEvent event) {
         System.out.println("got click on " + item);
+        selectItem(item);
+        listener.gotClick(type, item);
       }
     });
     add(widget);
