@@ -25,6 +25,13 @@ h1 {
 .noPadding {
     padding-top: 5px;
 }
+.floatLeft {
+    float: left;
+}
+
+.alignJustify {
+     align: justify;
+ }
 
 .bigLink {
     font-size: 1em;
