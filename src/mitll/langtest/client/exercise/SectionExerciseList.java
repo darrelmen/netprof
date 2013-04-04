@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -22,10 +21,12 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,11 +40,11 @@ import java.util.Set;
  */
 public class SectionExerciseList extends PagingExerciseList {
   public static final String ANY = "Any";
-  private Panel sectionPanel;
-  private long userID;
+  protected Panel sectionPanel;
+  protected long userID;
   protected boolean showListBoxes;
 
-  private Map<String,ListBox> typeToBox = new HashMap<String, ListBox>();
+  private Map<String,SectionWidget> typeToBox = new HashMap<String, SectionWidget>();
   /**
    * So the concern is that if we allow people to send bookmarks with items, we can allow them to skip
    * forward in a list we're trying to present in a certain order.
@@ -72,14 +73,9 @@ public class SectionExerciseList extends PagingExerciseList {
   protected void checkBeforeLoad(ExerciseShell e) {}
 
   @Override
-  protected void addTableWithPager() {
+  protected void addComponents() {
     add(sectionPanel = new VerticalPanel());
-   // System.out.println("show list boxes " + showListBoxes);
-   /* sectionPanel.setVisible(showListBoxes);
-    if (!showListBoxes) {
-      sectionPanel.setHeight("1px");
-    }*/
-    super.addTableWithPager();
+    addTableWithPager();
   }
 
   /**
@@ -98,23 +94,27 @@ public class SectionExerciseList extends PagingExerciseList {
 
       @Override
       public void onSuccess(Map<String, Collection<String>> result) {
-        sectionPanel.clear();
-
-        Panel flexTable = getWidgetsForTypes(result, userID);
-
-        sectionPanel.add(flexTable);
-
-        if (result.isEmpty()) {  // fallback to non-section option
-          noSectionsGetExercises(userID);
-        } else {
-          String first = result.keySet().iterator().next();
-          System.out.println("\tselecting first key of first type=" + first);
-
-          typeToBox.get(first).setSelectedIndex(1); // not any, which is the first list item
-          pushFirstListBoxSelection();
-        }
+        useInitialTypeToSectionMap(result, userID);
       }
     });
+  }
+
+  protected void useInitialTypeToSectionMap(Map<String, Collection<String>> result, long userID) {
+    sectionPanel.clear();
+
+    Panel flexTable = getWidgetsForTypes(result, userID);
+
+    sectionPanel.add(flexTable);
+
+    if (result.isEmpty()) {  // fallback to non-section option
+      noSectionsGetExercises(userID);
+    } else {
+      String first = result.keySet().iterator().next();
+      System.out.println("\tselecting first key of first type=" + first);
+
+      selectFirst(first);
+      pushFirstListBoxSelection();
+    }
   }
 
   /**
@@ -137,13 +137,14 @@ public class SectionExerciseList extends PagingExerciseList {
       Collection<String> sections = result.get(type);
       System.out.println("\tgetExercises sections for " + type + " = " + sections);
 
-      final ListBox listBox = makeListBox(type, sections);
+      final SectionWidget listBox = makeListBox(type);
       typeToBox.put(type, listBox);
+      populateListBox(listBox, sections);
       int col = 0;
 
       if (showListBoxes) {
         flexTable.setWidget(row, col++, new HTML(type));
-        flexTable.setWidget(row++, col, listBox);
+        flexTable.setWidget(row++, col, listBox.getWidget());
       } else {
         String typeValue = selectionState.typeToSection.get(type);
         if (typeValue != null) {
@@ -166,37 +167,36 @@ public class SectionExerciseList extends PagingExerciseList {
     return flexTable;
   }
 
-  private ListBox makeListBox(final String type, Collection<String> sections) {
-    final ListBox listBox = new ListBox();
-
-    populateListBox(listBox, sections);
+  protected SectionWidget makeListBox(final String type) {
+    final ListBoxSectionWidget listBox = new ListBoxSectionWidget();
     listBox.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {
-        getListBoxOnClick(listBox, type);
+        getListBoxOnClick(type);
       }
     });
+
     return listBox;
   }
 
   /**
    * @see #getExercises(long)
-   * @param listBox
+   * @paramx listBox
    * @param type
    */
-  private void getListBoxOnClick(final ListBox listBox, final String type) {
-    final String itemText = listBox.getItemText(listBox.getSelectedIndex());
+  private void getListBoxOnClick(final String type) {
+    final String itemText = getCurrentSelection(type);
     setListBox(type, itemText);
   }
 
   /**
-   * @see #getListBoxOnClick(com.google.gwt.user.client.ui.ListBox, String)
+   * @see #getListBoxOnClick
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @param type
    * @param itemText
    */
   private void setListBox(final String type, final String itemText) {
-    System.out.println("setListBox given " + type + "=" + itemText);
+    System.out.println("setListBox given '" + type + "' = '" + itemText +"'");
 
     if (itemText.equals(ANY)) {
       service.getTypeToSection(new TypeToSectionsAsyncCallback(type, itemText));
@@ -243,37 +243,31 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param sections
    */
   private void populateListBox(String type, Collection<String> sections) {
-    ListBox listBox = typeToBox.get(type);
-    int selectedIndex = listBox.getSelectedIndex();
-    String currentSelection = listBox.getItemText(selectedIndex);
+    String currentSelection = getCurrentSelection(type);
 
+    SectionWidget listBox = typeToBox.get(type);
     populateListBox(listBox, sections);
-    retainCurrentSelectionState(listBox, currentSelection);
+    listBox.retainCurrentSelectionState(currentSelection);
   }
 
-  /**
-   * Don't change the selection unless it's not available in this list box.
-   * @see #populateListBox(String, java.util.Collection)
-   * @param listBox
-   * @param currentSelection
-   */
-  private void retainCurrentSelectionState(ListBox listBox, String currentSelection) {
-    int itemCount = listBox.getItemCount();
+  private String getCurrentSelection(String type) {
+    SectionWidget listBox = typeToBox.get(type);
+    return listBox.getCurrentSelection();
+  }
 
-    // retain current selection state
-    if (itemCount > 0) {
-      boolean foundMatch = false;
-      for (int i = 0; i < itemCount; i++) {
-        if (listBox.getItemText(i).equals(currentSelection)) {
-          listBox.setSelectedIndex(i);
-          foundMatch = true;
-          break;
-        }
-      }
-      if (!foundMatch) {
-        listBox.setSelectedIndex(0);
-      }
-    }
+  private String getFirstItem(String type) {
+    SectionWidget listBox = typeToBox.get(type);
+    return listBox.getFirstItem();  // first is Any
+  }
+
+  private void selectFirst(String type) {
+    SectionWidget listBox = typeToBox.get(type);
+    listBox.selectFirstAfterAny(); // not any, which is the first list item
+  }
+
+  private void selectItem(String type, String section) {
+    SectionWidget listBox = typeToBox.get(type);
+    listBox.selectItem(section);
   }
 
   /**
@@ -283,9 +277,12 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param listBox
    * @param sections
    */
-  private void populateListBox(ListBox listBox, Collection<String> sections) {
-    listBox.clear();
-    listBox.addItem(ANY);
+  private void populateListBox(SectionWidget listBox, Collection<String> sections) {
+    List<String> items = getSortedItems(sections);
+    listBox.populateTypeWidget(items);
+  }
+
+  protected List<String> getSortedItems(Collection<String> sections) {
     List<String> items = new ArrayList<String>(sections);
     boolean isInt = true;
     for (String item : items) {
@@ -308,13 +305,11 @@ public class SectionExerciseList extends PagingExerciseList {
     else {
       sortWithCompoundKeys(items);
     }
-    for (String section : items) {
-      listBox.addItem(section);
-    }
+    return items;
   }
 
   /**
-   * @see #populateListBox(com.google.gwt.user.client.ui.ListBox, java.util.Collection)
+   * @see #getSortedItems(java.util.Collection)
    * @param items
    */
   private void sortWithCompoundKeys(List<String> items) {
@@ -349,7 +344,6 @@ public class SectionExerciseList extends PagingExerciseList {
           left2 = second[0];
           right2 = second[1];
         }
-
 
         if (firstHasSep || secondHasSep) {
           int leftCompare = getIntCompare(left1, left2);
@@ -416,7 +410,6 @@ public class SectionExerciseList extends PagingExerciseList {
     return widget;
   }
 
-
   /**
    * So if we have an existing history token, use it to set current selection.
    * If not, push the current state of the list boxes and act on it
@@ -430,17 +423,6 @@ public class SectionExerciseList extends PagingExerciseList {
       System.out.println("fire history for " +initToken);
       History.fireCurrentHistoryState();
     }
-  }
-
-  /**
-   * @see #getExercises(long)
-   * @see #setListBox(String, String)
-   * @param result
-   * @param type
-   * @return list of sections for this type, sorted
-   */
-  private List<String> getSections(Map<String, Collection<String>> result, String type) {
-    return new ArrayList<String>(result.get(type));
   }
 
   /**
@@ -492,6 +474,8 @@ public class SectionExerciseList extends PagingExerciseList {
     if (currentToken.equals(historyToken)) {
       System.out.println("pushNewSectionHistoryToken : skipping same token " + historyToken);
     } else {
+      System.out.println("pushNewSectionHistoryToken : currentToken " + currentToken);
+
       System.out.println("------------ push history '" + historyToken + "' -------------- ");
       History.newItem(historyToken);
     }
@@ -540,10 +524,9 @@ public class SectionExerciseList extends PagingExerciseList {
     //System.out.println("getHistoryToken for " + id + " examining " +typeToBox.size() + " boxes.");
     StringBuilder builder = new StringBuilder();
     for (String type : typeToBox.keySet()) {
-      ListBox listBox = typeToBox.get(type);
-      String section = listBox.getItemText(listBox.getSelectedIndex());
+      String section = getCurrentSelection(type);
       if (section.equals(ANY)) {
-       // System.out.println("Skipping box " + type + " (ANY) ");
+        //System.out.println("getHistoryToken : Skipping box " + type + " (ANY) ");
       } else {
         builder.append(type + "=" + section + ";");
       }
@@ -554,6 +537,10 @@ public class SectionExerciseList extends PagingExerciseList {
 
       builder.append(historyToken);
     }
+    if (builder.toString().length() > 0) {
+      System.out.println("getHistoryToken for " + id + " is " +builder);
+    }
+
     return builder.toString();
   }
 
@@ -665,8 +652,7 @@ public class SectionExerciseList extends PagingExerciseList {
   private String getDefaultToken() {
     StringBuilder builder = new StringBuilder();
     for (String type : typeToBox.keySet()) {
-      ListBox listBox = typeToBox.get(type);
-      String section = listBox.getItemText(0);  // first is Any
+      String section = getFirstItem(type);  // first is Any
       if (!section.equals(ANY)) {
         builder.append(type + "=" + section + ";");
       }
@@ -686,8 +672,12 @@ public class SectionExerciseList extends PagingExerciseList {
     String[] parts = token.split(";");
 
     for (String part : parts) {
+      System.out.println("getSelectionState : part " + part + " : " + Arrays.asList(parts));
+
       if (part.contains("=")) {
         String[] segments = part.split("=");
+        System.out.println("\tpart " + part + " : " + Arrays.asList(segments));
+
         String type = segments[0].trim();
         String section = segments[1].trim();
 
@@ -742,19 +732,12 @@ public class SectionExerciseList extends PagingExerciseList {
     for (Map.Entry<String, String> pair : selectionState.typeToSection.entrySet()) {
       String type    = pair.getKey();
       String section = pair.getValue();
-      ListBox listBox = typeToBox.get(type);
-      if (listBox == null) {
+      if (!typeToBox.containsKey(type)) {
         if (!type.equals("item")) {
           System.err.println("restoreListBoxState for " + selectionState + " : huh? bad type " + type);
         }
       } else {
-        for (int i = 0; i < listBox.getItemCount(); i++) {
-          String itemText = listBox.getItemText(i);
-          if (itemText.equals(section)) {
-            listBox.setSelectedIndex(i);
-            break;
-          }
-        }
+        selectItem(type, section);
       }
     }
   }
