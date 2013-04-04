@@ -58,6 +58,12 @@ public class FileExerciseDAO implements ExerciseDAO {
   private final boolean isUrdu;
   private final boolean showSections;
   private final boolean isFlashcard;
+
+  @Override
+  public SectionHelper getSectionHelper() {
+    return null;  //To change body of implemented methods use File | Settings | File Templates.
+  }
+
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
   private Map<String,Map<String,Map<String,Set<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String,Map<String,Set<String>>>>();
@@ -80,33 +86,6 @@ public class FileExerciseDAO implements ExerciseDAO {
     this.mediaDir = mediaDir;
     this.isFlashcard = isFlashcard;
     logger.debug("is flashcard " +isFlashcard);
-  }
-
-  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
-    Map<String, Map<String, Set<String>>> sectionToSub = typeToSectionToTypeToSections.get(type);
-    if (sectionToSub == null) return Collections.emptyMap();
-    Map<String, Set<String>> typeToSections = sectionToSub.get(section);
-    if (typeToSections == null) return Collections.emptyMap();
-    Map<String,Collection<String>> retval = new HashMap<String, Collection<String>>();
-    for (Map.Entry<String,Set<String>> pair : typeToSections.entrySet()) {
-      retval.put(pair.getKey(),new ArrayList<String>(pair.getValue()));
-    }
-    return retval;
-  }
-
-    @Override
-  public Map<String, Collection<String>> getTypeToSections() {
-    Map<String,Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
-    for (String key : typeToUnitToLesson.keySet()) {
-      Map<String, Lesson> stringLessonMap = typeToUnitToLesson.get(key);
-      typeToSection.put(key, new ArrayList<String>(stringLessonMap.keySet()));
-    }
-    return typeToSection;
-  }
-
-  @Override
-  public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
   }
 
   /**
