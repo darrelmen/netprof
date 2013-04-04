@@ -121,4 +121,6 @@ public interface LangTestDatabaseAsync {
   void clearUserState(long userID, AsyncCallback<Void> async);
 
   void getExercisesForSelectionState(Map<String, String> typeToSection, long userID, AsyncCallback<List<ExerciseShell>> async);
+
+  void getTypeToSectionToCount(AsyncCallback<Map<String, Map<String, Integer>>> async);
 }
