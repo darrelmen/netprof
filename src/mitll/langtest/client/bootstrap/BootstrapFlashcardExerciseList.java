@@ -59,7 +59,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private static final String HELP_IMAGE = LangTest.LANGTEST_IMAGES + "/help-4.png";
   private final int gameTimeSeconds;
   private FluidRow bottomRow = new FluidRow();
-
+  boolean isTimedGame = false;
   /**
    *
    * @param currentExerciseVPanel
@@ -85,6 +85,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
     correct.addStyleName("darkerBlueColor");
 
+    this.isTimedGame = isTimedGame;
     if (isTimedGame) {
       Column w = new Column(6, 3, bar);
       bottomRow.add(w);
@@ -121,7 +122,9 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
     if (!expired) {
       if (!timerRunning) {
-        startTimer(userID);
+        if (isTimedGame) {
+          startTimer(userID);
+        }
       }
 
       service.getNextExercise(userID, new AsyncCallback<FlashcardResponse>() {
@@ -143,7 +146,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
             correct.setText("Correct " + result.correct + "/" + (result.correct + result.incorrect));
             lastCorrect = result.correct;
             List<Integer> correctHistory = result.getCorrectHistory();
-            prevCorrect = correctHistory.isEmpty() ? -1 : correctHistory.get(correctHistory.size() - 1);
+            prevCorrect = correctHistory == null || correctHistory.isEmpty() ? -1 : correctHistory.get(correctHistory.size() - 1);
           }
         }
       });
