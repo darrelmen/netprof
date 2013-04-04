@@ -181,10 +181,9 @@ public class SectionExerciseList extends PagingExerciseList {
 
   /**
    * @see #getExercises(long)
-   * @paramx listBox
    * @param type
    */
-  private void getListBoxOnClick(final String type) {
+  protected void getListBoxOnClick(final String type) {
     final String itemText = getCurrentSelection(type);
     setListBox(type, itemText);
   }
@@ -195,7 +194,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param type
    * @param itemText
    */
-  private void setListBox(final String type, final String itemText) {
+  protected void setListBox(final String type, final String itemText) {
     System.out.println("setListBox given '" + type + "' = '" + itemText +"'");
 
     if (itemText.equals(ANY)) {
@@ -205,6 +204,9 @@ public class SectionExerciseList extends PagingExerciseList {
     }
   }
 
+  /**
+   * @see #setListBox(String, String)
+   */
   private class TypeToSectionsAsyncCallback implements AsyncCallback<Map<String, Collection<String>>> {
     private final String type;
     private final String itemText;
@@ -228,6 +230,11 @@ public class SectionExerciseList extends PagingExerciseList {
     }
   }
 
+
+  /**
+   * @see SectionExerciseList.TypeToSectionsAsyncCallback#onSuccess(java.util.Map)
+   * @see #setOtherListBoxes(String, String)
+   */
   private void populateListBox(Map<String, Collection<String>> result) {
     for (Map.Entry<String, Collection<String>> pair : result.entrySet()) {
       String type = pair.getKey();
@@ -237,16 +244,18 @@ public class SectionExerciseList extends PagingExerciseList {
   }
 
   /**
-   * @see #setListBox(String, String)
-   * @see #setOtherListBoxes(String, String)
+   * @see #populateListBox(java.util.Map)
    * @param type
    * @param sections
    */
   private void populateListBox(String type, Collection<String> sections) {
-    String currentSelection = getCurrentSelection(type);
+    System.out.println("populateListBox : " +type);
 
     SectionWidget listBox = typeToBox.get(type);
     populateListBox(listBox, sections);
+
+    String currentSelection = getCurrentSelection(type);
+    System.out.println("current selection is " +currentSelection);
     listBox.retainCurrentSelectionState(currentSelection);
   }
 
@@ -500,6 +509,11 @@ public class SectionExerciseList extends PagingExerciseList {
     }
   }
 
+  /**
+   * @see mitll.langtest.client.exercise.PagingExerciseList#getExerciseIdColumn()
+   * @param columnText
+   * @return
+   */
   protected String getHistoryTokenForLink(String columnText) {
     return "#"+getHistoryToken(columnText);
    // return historyToken +";item="+columnText;
@@ -512,6 +526,7 @@ public class SectionExerciseList extends PagingExerciseList {
       loadByID(e.getID());
     }
   }
+
 
   /**
    * @see #getHistoryTokenForLink(String)
@@ -537,17 +552,23 @@ public class SectionExerciseList extends PagingExerciseList {
 
       builder.append(historyToken);
     }
-    if (builder.toString().length() > 0) {
+    if (false && builder.toString().length() > 0) {
       System.out.println("getHistoryToken for " + id + " is " +builder);
     }
 
     return builder.toString();
   }
 
-  /**
-   * Respond to push a history token.
-   * @param event
-   */
+/*  protected String getIDFromToken(String token) {
+    String item = getSelectionState(token).item;
+    System.out.println("getIDFromToken : token is " + token + " -> " + item);
+
+    return item;
+  }*/
+    /**
+     * Respond to push a history token.
+     * @param event
+     */
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
     String rawToken = getTokenFromEvent(event);
