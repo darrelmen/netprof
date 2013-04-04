@@ -50,7 +50,11 @@ public class SectionHelper {
     return retval;
   }
 
-  public Map<String, Collection<String>> getTypeToSections() {
+  /**
+   * @see mitll.langtest.server.database.ExcelImport#getTypeToSections()
+   * @return
+   */
+  public Map<String, Collection<String>> getTypeToSection() {
     Map<String,Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
     for (String key : typeToUnitToLesson.keySet()) {
       Map<String, Lesson> stringLessonMap = typeToUnitToLesson.get(key);
@@ -59,11 +63,23 @@ public class SectionHelper {
     return typeToSection;
   }
 
-  /**
-   * Return an overlap of all the type=section exercise sets (think venn diagram overlap).
-   * @param typeToSection
-   * @return
-   */
+  public Map<String, Map<String,Integer>> getTypeToSectionToCount() {
+
+    Map<String,Map<String,Integer>> typeToSectionToCount = new HashMap<String, Map<String, Integer>>();
+    for (String key : typeToUnitToLesson.keySet()) {
+      Map<String, Lesson> stringLessonMap = typeToUnitToLesson.get(key);
+      Map<String, Integer> sectionToCount = new HashMap<String, Integer>();
+      typeToSectionToCount.put(key, sectionToCount);//new ArrayList<String>(stringLessonMap.keySet()));
+      for (Map.Entry<String,Lesson> pair : stringLessonMap.entrySet()) sectionToCount.put(pair.getKey(),pair.getValue().getExercises().size());
+    }
+    return typeToSectionToCount;
+  }
+
+    /**
+     * Return an overlap of all the type=section exercise sets (think venn diagram overlap).
+     * @param typeToSection
+     * @return
+     */
   public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
     Collection<Exercise> currentList = null;
     for (Map.Entry<String, String> pair : typeToSection.entrySet()) {
