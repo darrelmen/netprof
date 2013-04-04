@@ -4,6 +4,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -62,7 +63,7 @@ public class ListBoxSectionWidget extends ListBox implements SectionWidget {
   }
 
 
-  public void populateTypeWidget(Collection<String> items) {
+  public void populateTypeWidget(Collection<String> items, Map<String, Integer> sectionToCount) {
     clear();
 
     addItem(SectionExerciseList.ANY);

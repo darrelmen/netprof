@@ -41,24 +41,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
   }
 
   @Override
-  public Map<String, Collection<String>> getTypeToSections() {
-    return sectionHelper.getTypeToSections();
-  }
-
-  @Override
-  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
-    return sectionHelper.getTypeToSectionsForTypeAndSection(type, section);
-  }
-/*
-
-  @Override
-  public Collection<Exercise> getExercisesForSection(String type, String section) {
-    return sectionHelper.getExercisesForSection(type, section);
-  }
-*/
-
-  @Override
-  public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
+  public SectionHelper getSectionHelper() {
     return null;  //To change body of implemented methods use File | Settings | File Templates.
   }
 
