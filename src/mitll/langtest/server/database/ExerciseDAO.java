@@ -15,8 +15,9 @@ import java.util.Map;
  */
 public interface ExerciseDAO {
   List<Exercise> getRawExercises();
+  SectionHelper getSectionHelper();
 
-  Map<String,Collection<String>> getTypeToSections();
+/*  Map<String,Collection<String>> getTypeToSections();
   Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section);
-  Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection);
+  Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection);*/
 }
