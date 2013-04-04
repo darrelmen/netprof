@@ -1,11 +1,15 @@
 package mitll.langtest.client.bootstrap;
 
+import com.github.gwtbootstrap.client.ui.Bar;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ButtonGroup;
-import com.github.gwtbootstrap.client.ui.base.TextNode;
+import com.github.gwtbootstrap.client.ui.StackProgressBar;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.Constants;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.SectionWidget;
@@ -22,49 +26,56 @@ import java.util.Map;
  * Time: 7:23 PM
  * To change this template use File | Settings | File Templates.
  */
-public class BarSectionWidget extends ButtonGroup implements SectionWidget {
+public class StackedBarSectionWidget extends StackProgressBar implements SectionWidget {
   private static final String ANY = SectionExerciseList.ANY;
-  private List<Button> buttons = new ArrayList<Button>();
+  private List<Bar> buttons = new ArrayList<Bar>();
   private ItemClickListener listener;
   private String type;
+  String currentSelection;
+  List<String> items = new ArrayList<String>();
 
-  public BarSectionWidget(String type, ItemClickListener listener) {
+  public StackedBarSectionWidget(String type, ItemClickListener listener) {
     this.type = type;
     this.listener = listener;
   //  setWidth("80%");
-    addStyleName("floatLeft");
+    //setStyleName(Constants.BTN_GROUP);
+
   }
 
   @Override
   public String getCurrentSelection() {
-    for (Button b : buttons) {
+    return currentSelection;
+/*    for (Bar b : buttons) {
       if (b.isActive()) {
         //System.out.println("getCurrentSelection for " +type + "=" + b.getText());
         return b.getText().trim();
       }
     }
-    return ANY;
+    return ANY;*/
   }
 
   @Override
   public String getFirstItem() {
-    return buttons.iterator().next().getText().trim();
+    return items.get(0);
+   // return buttons.iterator().next().getText().trim();
   }
 
   @Override
   public void selectFirstAfterAny() {
-    for (Button b : buttons) {
+    currentSelection = items.get(1);
+/*    for (Button b : buttons) {
       if (b.isActive()) {
         b.setActive(false);
         break;
       }
     }
-    buttons.get(1).setActive(true);
+    buttons.get(1).setActive(true);*/
   }
 
   @Override
   public void selectItem(String section) {
-    for (Button b : buttons) {
+    currentSelection = section;
+/*    for (Button b : buttons) {
       if (b.isActive()) {
         b.setActive(false);
         break;
@@ -75,12 +86,12 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
         b.setActive(true);
         break;
       }
-    }
+    }*/
   }
 
   @Override
   public void retainCurrentSelectionState(String currentSelection) {
-    for (Button b : buttons) {
+/*    for (Button b : buttons) {
       if (b.isActive()) {
         b.setActive(false);
         break;
@@ -94,36 +105,43 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
         break;
       }
     }
-    if (!found) buttons.iterator().next().setActive(true);
+    if (!found) buttons.iterator().next().setActive(true);*/
   }
 
   /**
-   * @see SectionExerciseList#populateListBox(mitll.langtest.client.exercise.SectionWidget, java.util.Map)
+   * @see mitll.langtest.client.exercise.SectionExerciseList#populateListBox(mitll.langtest.client.exercise.SectionWidget, java.util.Map)
    * @param items
    * @param sectionToCount
    */
   @Override
   public void populateTypeWidget(Collection<String> items, Map<String, Integer> sectionToCount) {
     System.out.println("populateTypeWidget : type = " +type + " with " +items.size() +" items.");
-    buttons.clear();
+    this.items.clear();
+    this.items.add(ANY);
+    this.items.addAll(items);
+    selectFirstAfterAny();
     clear();
-    Button widgets = addButton(ANY);
+    Widget widgets = addButton(ANY);
     //widgets.setWidth("5%");
 
     int total = 0;
     for (Integer count : sectionToCount.values()) total += count;
     for (String item : items) {
       item = item.trim();
-      Button button = addButton(item);
+      Bar button = addButton(item);
       Integer count = sectionToCount.get(item);
       float ratio = (float) count / (float) total;
-      int i = Math.round (ratio * 100f);
-      button.setWidth(i + "%");
+      int percent = Math.round(ratio * 100f);
+      System.out.println("percent = " +percent);
+      button.setPercent(percent);
     }
   }
 
-  private Button addButton(final String item) {
-    Button widget = new Button(item, new ClickHandler() {
+  private Bar addButton(final String item) {
+    MyBar widget = new MyBar();
+    widget.setColor(Bar.Color.SUCCESS);
+    widget.setText(item);
+    widget.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         System.out.println("got click on " + item);
@@ -131,8 +149,9 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
         listener.gotClick(type, item);
       }
     });
+
     add(widget);
-    widget.setType(ButtonType.PRIMARY);
+    // widget.setType(ButtonType.PRIMARY);
     buttons.add(widget);
     return widget;
   }
@@ -140,5 +159,11 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
   @Override
   public Widget getWidget() {
     return this;
+  }
+
+  private class MyBar extends Bar {
+    public HandlerRegistration addClickHandler(ClickHandler handler) {
+      return addDomHandler(handler, ClickEvent.getType());
+    }
   }
 }
