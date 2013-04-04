@@ -119,4 +119,6 @@ public interface LangTestDatabase extends RemoteService {
   void clearUserState(long userID);
 
   void sendEmail(int userID, String to, String replyTo, String subject, String message, String token);
+
+  Map<String, Map<String,Integer>> getTypeToSectionToCount();
 }
