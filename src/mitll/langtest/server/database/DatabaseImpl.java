@@ -205,26 +205,31 @@ public class DatabaseImpl implements Database {
 
   public void setOutsideFile(String outsideFile) { monitoringSupport.setOutsideFile(outsideFile); }
 
-  public Map<String, Collection<String>> getTypeToSection() {
+/*  public Map<String, Collection<String>> getTypeToSection() {
     getExercises();
     return exerciseDAO.getTypeToSections();
-  }
+  }*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getTypeToSectionsForTypeAndSection(String, String)
-   * @param type
-   * @param section
+   * @paramx type
+   * @paramx section
    * @return
    */
-  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
+/*  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
     return exerciseDAO.getTypeToSectionsForTypeAndSection(type, section);
-  }
+  }*/
 
 /*  public Collection<Exercise> getExercisesForSection(String type, String section) {
     return exerciseDAO.getExercisesForSection(type, section);
   }*/
-  public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
+/*  public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
     return exerciseDAO.getExercisesForSelectionState(typeToSection);
+  }*/
+
+  public SectionHelper getSectionHelper() {
+    getExercises();
+    return exerciseDAO.getSectionHelper();
   }
 
   /**
