@@ -29,21 +29,6 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class BootstrapSectionExerciseList extends SectionExerciseList {
-/*  private static class SelList {
-    private int current = 0;
-    List<String> selections;
-    public SelList(List<String> selections) { this.selections = selections; }
-
-    public int getCurrent() {
-      return current;
-    }
-
-    public String getCurrentValue() { return selections.get(current); }
-
-    public void setCurrent(int current) {
-      this.current = current;
-    }
-  }*/
   public BootstrapSectionExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                              UserFeedback feedback,
                              boolean showTurkToken, boolean showInOrder, boolean showListBox) {
@@ -61,6 +46,12 @@ public class BootstrapSectionExerciseList extends SectionExerciseList {
     addTableWithPager();
   }
 
+  /**
+   * @see SectionExerciseList#useInitialTypeToSectionMap(java.util.Map, long)
+   * @param result
+   * @param userID
+   * @return
+   */
   protected Panel getWidgetsForTypes(Map<String, Map<String, Integer>> result, long userID) {
     //final FlexTable flexTable = new FlexTable();
     FluidContainer container = new FluidContainer();
