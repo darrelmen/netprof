@@ -37,6 +37,7 @@ import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList;
 import mitll.langtest.client.bootstrap.BootstrapSectionExerciseList;
+import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -484,7 +485,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else {
       if (props.isShowSections()) {
         boolean showSectionWidgets = props.isShowSectionWidgets();
-        this.exerciseList = new BootstrapSectionExerciseList(currentExerciseVPanel, service, feedback,
+        this.exerciseList = new FlexSectionExerciseList(currentExerciseVPanel, service, feedback,
           props.isShowTurkToken(), isAutoCRTMode(),showSectionWidgets);
 
 /*
