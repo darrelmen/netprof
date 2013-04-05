@@ -31,7 +31,7 @@ public class SectionHelper {
   private Map<String,Map<String,Map<String,Set<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String,Map<String,Set<String>>>>();
 
   /**
-   * @see ExcelImport#getTypeToSectionsForTypeAndSection(String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getTypeToSectionsForTypeAndSection(String, String)
    * @param type
    * @param section
    * @return
@@ -50,8 +50,10 @@ public class SectionHelper {
     return retval;
   }
 
+
+
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getTypeToSections()
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getTypeToSection()
    * @return
    */
   public Map<String, Collection<String>> getTypeToSection() {
@@ -64,7 +66,6 @@ public class SectionHelper {
   }
 
   public Map<String, Map<String,Integer>> getTypeToSectionToCount() {
-
     Map<String,Map<String,Integer>> typeToSectionToCount = new HashMap<String, Map<String, Integer>>();
     for (String key : typeToUnitToLesson.keySet()) {
       Map<String, Lesson> stringLessonMap = typeToUnitToLesson.get(key);
