@@ -69,6 +69,22 @@ h1 {
     text-align: left;
 }
 
+.inlineStyle {
+    display: inline-block;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+.lessPadding {
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+.addPadding{
+    border-width: 0;
+}
+
+
 .sendButton {
   display: block;
   font-size: 16pt;
