@@ -38,7 +38,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class SectionExerciseList extends PagingExerciseList {
-  public static final String ANY = "Any";
+  public static final String ANY = "Clear";
   protected Panel sectionPanel;
   protected long userID;
   protected boolean showListBoxes;
@@ -283,7 +283,9 @@ public class SectionExerciseList extends PagingExerciseList {
 
   private void selectFirst(String type) {
     SectionWidget listBox = typeToBox.get(type);
-    if (listBox != null) listBox.selectFirstAfterAny(); // not any, which is the first list item
+    if (listBox != null) {
+      listBox.selectFirstAfterAny(); // not any, which is the first list item
+    }
   }
 
   private void selectItem(String type, String section) {
