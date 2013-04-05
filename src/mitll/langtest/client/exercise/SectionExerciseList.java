@@ -99,6 +99,12 @@ public class SectionExerciseList extends PagingExerciseList {
     });
   }
 
+  /**
+   * Take a map of type-> section->count
+   * e.g. unit->[1,2,3,...]
+   * @param result
+   * @param userID
+   */
   protected void useInitialTypeToSectionMap(Map<String, Map<String, Integer>> result, long userID) {
     sectionPanel.clear();
 
@@ -106,8 +112,8 @@ public class SectionExerciseList extends PagingExerciseList {
 
     sectionPanel.add(flexTable);
 
-    Set<String> keys = result.keySet();
-    selectFirstItem(keys, userID);
+    Set<String> types = result.keySet();
+    selectFirstItem(types, userID);
   }
 
   private void selectFirstItem(Set<String> keys, long userID) {
@@ -277,7 +283,7 @@ public class SectionExerciseList extends PagingExerciseList {
 
   private void selectFirst(String type) {
     SectionWidget listBox = typeToBox.get(type);
-    listBox.selectFirstAfterAny(); // not any, which is the first list item
+    if (listBox != null) listBox.selectFirstAfterAny(); // not any, which is the first list item
   }
 
   private void selectItem(String type, String section) {
