@@ -37,6 +37,7 @@ import java.util.Set;
  */
 public class FlexSectionExerciseList extends SectionExerciseList {
   List<ButtonType> types = new ArrayList<ButtonType>();
+  Map<String,ButtonType> typeToButton = new HashMap<String, ButtonType>();
 
   public FlexSectionExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
@@ -71,22 +72,21 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   protected Panel getWidgetsForTypes(Map<String, Map<String, Integer>> result, long userID) {
     FluidContainer container = new FluidContainer();
     Set<String> types = result.keySet();
-    System.out.println("getExercises (success) for user = " + userID + " got types " + types);
+    System.out.println("getWidgetsForTypes (success) for user = " + userID + " got types " + types);
     typeToBox.clear();
-
+    typeToButton.clear();
   //  String token = unencodeToken(History.getToken());
  //   SelectionState selectionState = getSelectionState(token);
 
     String firstType = types.iterator().next(); // e.g. unit!
 
     FluidRow firstTypeRow = new FluidRow();
-    //Column labelColumn = new Column(1);
     container.add(firstTypeRow);
 
     Collection<String> sectionsInType = result.get(firstType).keySet();
     sectionsInType = getSortedItems(sectionsInType);
 
-    ButtonGroupSectionWidget buttonGroupSectionWidget = new ButtonGroupSectionWidget();
+    ButtonGroupSectionWidget buttonGroupSectionWidget = new ButtonGroupSectionWidget(firstType);
     typeToBox.put(firstType, buttonGroupSectionWidget);
 
     Container clearColumnContainer = addColumnButton(firstType,ANY,buttonGroupSectionWidget, true);
@@ -211,10 +211,11 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     return overallButton;
   }
 
-  private static class ButtonGroupSectionWidget implements SectionWidget {
+  private class ButtonGroupSectionWidget implements SectionWidget {
     private List<Button> buttons = new ArrayList<Button>();
     private Button clearButton;
-    public ButtonGroupSectionWidget() {}
+    private String type;
+    public ButtonGroupSectionWidget(String type) { this.type = type; }
 
     public void addButton(Button b) {
       this.buttons.add(b);
@@ -249,6 +250,20 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       return ANY;
     }
 
+    /**
+     * @see #selectItem(String)
+     * @param inSet
+     */
+    @Override
+    public void enableInSet(Collection<String> inSet) {
+      System.out.println("enableInSet for " + type + " : " + inSet);
+
+      for (Button b : buttons) {
+        String trim = b.getText().trim();
+        b.setEnabled(inSet.contains(trim));
+      }
+    }
+
     @Override
     public String getFirstItem() {
       return buttons.iterator().next().getText().trim();
@@ -257,17 +272,13 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     @Override
     public void selectFirstAfterAny() {
       System.out.println("selectFirstAfterAny called?? --------------");
-      for (Button b : buttons) {
-        if (b.isActive()) {
-          b.setActive(false);
-          break;
-        }
-      }
-      buttons.get(0).setActive(true);
+      selectItem(getFirstItem());
     }
 
     @Override
     public void selectItem(String section) {
+      System.out.println("selectItem " + type + "="+section);
+
       for (Button b : buttons) {
         if (b.isActive()) {
           b.setActive(false);
@@ -286,8 +297,26 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       }
       else {
         System.err.println("clear button is not set? ");
-
       }
+
+      final String section1 = section.equals(ANY) ? "" : section;
+      System.out.println("selectItem 2 " + type + "="+section1);
+
+      service.getTypeToSectionsForTypeAndSection(type, section1, new AsyncCallback<Map<String, Collection<String>>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
+
+        @Override
+        public void onSuccess(Map<String, Collection<String>> result) {
+          System.out.println("selectItem onSuccess " + type + "="+section1);
+
+          for (Map.Entry<String,Collection<String>> pair : result.entrySet()) {
+            SectionWidget sectionWidget = typeToBox.get(pair.getKey());
+            sectionWidget.enableInSet(pair.getValue());
+          }
+        }
+      });
     }
 
     @Override
@@ -311,28 +340,24 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     @Override
     public void populateTypeWidget(Collection<String> items, Map<String, Integer> sectionToCount) {
-      //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     public Widget getWidget() {
-      return null;  //To change body of implemented methods use File | Settings | File Templates.
+      return null;
     }
   }
 
-  Map<String,ButtonType> typeToButton = new HashMap<String, ButtonType>();
   private class TypeToSectionsAsyncCallback implements AsyncCallback<Map<String, Collection<String>>> {
     private final String type;
     private final String itemText;
     private Container columnContainer;
-    //private ButtonGroupSectionWidget buttonGroupSectionWidget;
     Container clearColumnContainer;
-    public TypeToSectionsAsyncCallback(String type, String itemText,  Container columnContainer,//ButtonGroupSectionWidget buttonGroupSectionWidget,
+    public TypeToSectionsAsyncCallback(String type, String itemText,  Container columnContainer,
                                        Container clearColumnContainer) {
       this.type = type;
       this.itemText = itemText;
       this.columnContainer = columnContainer;
-  //    this.buttonGroupSectionWidget = buttonGroupSectionWidget;
       this.clearColumnContainer = clearColumnContainer;
     }
 
@@ -343,41 +368,19 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     @Override
     public void onSuccess(Map<String, Collection<String>> result) {
-      System.out.println("TypeToSectionsAsyncCallback onSuccess " + type + "=" + itemText + " yielded " +result);
+      System.out.println("Flex  : TypeToSectionsAsyncCallback onSuccess " + type + "=" + itemText + " yielded " +result);
       FlexTable table = new FlexTable();
       int row = 0;
       for (Map.Entry<String,Collection<String>> pair : result.entrySet()) {
         String typeForOriginal = pair.getKey();
         System.out.println("type " + typeForOriginal + " : " +pair.getValue());
-     //   ButtonType buttonType = types.get(typeToBox.size() % types.size());
 
         SectionWidget sectionWidget = typeToBox.get(typeForOriginal);
         if (sectionWidget == null) {
           typeToButton.put(typeForOriginal, types.get(typeToBox.size() % types.size()));
-          typeToBox.put(typeForOriginal, sectionWidget = new ButtonGroupSectionWidget());
+          typeToBox.put(typeForOriginal, sectionWidget = new ButtonGroupSectionWidget(typeForOriginal));
           ButtonType buttonType = typeToButton.get(typeForOriginal);
           final SectionWidget sectionWidgetFinal = sectionWidget;
-
-       /*   FluidRow rowAgain = new FluidRow();
-          clearColumnContainer.add(rowAgain);
-
-          ButtonGroup group = new ButtonGroup();
-          group.setWidth("100%");
-
-          // add a button
-          Button clearButton = makeOverallButton(ANY);
-          group.add(clearButton);
-
-          clearButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-              setListBox(type, ANY);
-              sectionWidgetFinal.selectItem(ANY);
-            }
-          });
-
-          ((ButtonGroupSectionWidget)sectionWidget).addClearButton(clearButton);
-          rowAgain.add(group);*/
 
           FlexTable table2 = new FlexTable();
           ButtonGroup group2 = new ButtonGroup();
@@ -388,7 +391,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
           ((ButtonGroupSectionWidget)sectionWidget).addClearButton(sectionButton);
 
           clearColumnContainer.add(table2);
-
         }
 
         final SectionWidget sectionWidgetFinal = sectionWidget;
@@ -449,6 +451,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   }
 
   protected void populateListBox(Map<String, Collection<String>> result) {
-    System.out.println("populateListBox skipping! ");
+    //System.out.println("populateListBox skipping! ");
+    for (Map.Entry<String,Collection<String>> pair : result.entrySet()) {
+      typeToBox.get(pair.getKey()).enableInSet(pair.getValue());
+    }
   }
 }
