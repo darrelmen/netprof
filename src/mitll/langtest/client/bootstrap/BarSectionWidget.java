@@ -141,4 +141,9 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
   public Widget getWidget() {
     return this;
   }
+
+  @Override
+  public void enableInSet(Collection<String> inSet) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
 }
