@@ -20,4 +20,6 @@ public interface SectionWidget {
   void retainCurrentSelectionState(String currentSelection);
   void populateTypeWidget(Collection<String> items, Map<String, Integer> sectionToCount);
   public Widget getWidget();
+
+  void enableInSet(Collection<String> inSet);
 }
