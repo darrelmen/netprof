@@ -40,17 +40,28 @@ public class SectionHelper {
     Map<String, Map<String, Set<String>>> sectionToSub = typeToSectionToTypeToSections.get(type);
     if (sectionToSub == null) return Collections.emptyMap();
     Map<String, Set<String>> typeToSections = sectionToSub.get(section);
-    if (typeToSections == null) return Collections.emptyMap();
 
-
-    Map<String,Collection<String>> retval = new HashMap<String, Collection<String>>();
-    for (Map.Entry<String,Set<String>> pair : typeToSections.entrySet()) {
-      retval.put(pair.getKey(),new ArrayList<String>(pair.getValue()));
+    if (section == null || section.length() == 0) {
+      Collection<Map<String, Set<String>>> values = sectionToSub.values();
+      Map<String,Collection<String>> retval = new HashMap<String, Collection<String>>();
+      for (Map<String, Set<String>> value : values) {
+        for (Map.Entry<String,Set<String>> pair : value.entrySet()) {
+          retval.put(pair.getKey(),new ArrayList<String>(pair.getValue()));
+        }
+      }
+      return retval;
     }
-    return retval;
+    else {
+      if (typeToSections == null) return Collections.emptyMap();
+
+
+      Map<String,Collection<String>> retval = new HashMap<String, Collection<String>>();
+      for (Map.Entry<String,Set<String>> pair : typeToSections.entrySet()) {
+        retval.put(pair.getKey(),new ArrayList<String>(pair.getValue()));
+      }
+      return retval;
+    }
   }
-
-
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getTypeToSection()
