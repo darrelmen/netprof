@@ -108,6 +108,8 @@ public class SectionExerciseList extends PagingExerciseList {
   protected void useInitialTypeToSectionMap(Map<String, Map<String, Integer>> result, long userID) {
     sectionPanel.clear();
 
+    System.out.println("useInitialTypeToSectionMap for " + userID);
+
     Panel flexTable = getWidgetsForTypes(result, userID);
 
     sectionPanel.add(flexTable);
