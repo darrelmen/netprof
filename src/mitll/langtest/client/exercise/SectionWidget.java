@@ -22,4 +22,6 @@ public interface SectionWidget {
   public Widget getWidget();
 
   void enableInSet(Collection<String> inSet);
+
+  void enableAll();
 }
