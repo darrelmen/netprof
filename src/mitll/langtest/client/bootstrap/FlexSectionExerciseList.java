@@ -57,7 +57,10 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
   @Override
   protected void addWidgets(Panel currentExerciseVPanel) {
-    currentExerciseVPanel.add(sectionPanel = new FluidContainer());
+    Panel child = sectionPanel = new FluidContainer();
+    DOM.setStyleAttribute(sectionPanel.getElement(), "paddingLeft", "2px");
+    DOM.setStyleAttribute(sectionPanel.getElement(), "paddingRight", "2px");
+    currentExerciseVPanel.add(child);
     super.addWidgets(currentExerciseVPanel);
   }
 
@@ -77,10 +80,11 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   protected Panel getWidgetsForTypes(Map<String, Map<String, Integer>> result, long userID) {
     numExpectedTypes = result.keySet().size();
     FluidContainer container = new FluidContainer();
+    DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
+    DOM.setStyleAttribute(container.getElement(), "paddingRight", "2px");
+
     Set<String> types = result.keySet();
     if (showListBoxes) {
-      DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
-
       System.out.println("getWidgetsForTypes (success) for user = " + userID + " got types " + types);
       typeToBox.clear();
       typeToButton.clear();
@@ -101,7 +105,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
       labelContainer.addStyleName("inlineStyle");
       DOM.setStyleAttribute(labelContainer.getElement(), "paddingLeft", "2px");
-      DOM.setStyleAttribute(labelContainer.getElement(), "paddingRight", "10px");
+      DOM.setStyleAttribute(labelContainer.getElement(), "paddingRight", "2px");
 
       Heading widget = makeLabelWidget(firstType);
 
