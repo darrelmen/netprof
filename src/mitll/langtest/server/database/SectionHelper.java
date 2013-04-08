@@ -40,7 +40,7 @@ public class SectionHelper {
     Map<String, Map<String, Set<String>>> sectionToSub = typeToSectionToTypeToSections.get(type);
     if (sectionToSub == null) return Collections.emptyMap();
     Map<String, Set<String>> typeToSections = sectionToSub.get(section);
-
+/*
     if (section == null || section.length() == 0) {
       Collection<Map<String, Set<String>>> values = sectionToSub.values();
       Map<String,Collection<String>> retval = new HashMap<String, Collection<String>>();
@@ -51,16 +51,71 @@ public class SectionHelper {
       }
       return retval;
     }
-    else {
+    else {*/
       if (typeToSections == null) return Collections.emptyMap();
-
 
       Map<String,Collection<String>> retval = new HashMap<String, Collection<String>>();
       for (Map.Entry<String,Set<String>> pair : typeToSections.entrySet()) {
         retval.put(pair.getKey(),new ArrayList<String>(pair.getValue()));
       }
+      logger.debug("getTypeToSectionsForTypeAndSection type=" + type + " section="+section + " yields " + retval);
       return retval;
+  //  }
+  }
+
+  private Map<String,Set<String>> getTypeToSectionsForTypeAndSection2(String type, String section) {
+    Map<String, Map<String, Set<String>>> sectionToSub = typeToSectionToTypeToSections.get(type);
+    if (sectionToSub == null)
+      return Collections.emptyMap();
+    else
+      return sectionToSub.get(section);
+  }
+
+  public Map<String, Set<String>> getTypeToSectionsForTypeAndSection(Map<String, String> typeToSection) {
+    Map<String, Set<String>> resultMap = null;
+
+    for (Map.Entry<String, String> pair : typeToSection.entrySet()) {
+      String type = pair.getKey();
+      if (isKnownType(type)) {
+        String sectionForType = pair.getValue();
+        logger.debug("looking for matches to " + type +"=" +sectionForType);
+
+        Map<String, Set<String>> typeToSectionsForTypeAndSection2 = getTypeToSectionsForTypeAndSection2(type, sectionForType);
+        logger.debug("\t result is " + typeToSectionsForTypeAndSection2);
+
+        if (resultMap == null) {
+          resultMap = new HashMap<String,Set<String>>(typeToSectionsForTypeAndSection2);
+          logger.debug("\t resultMap now " + resultMap);
+        }
+        else {
+          for (String currentType : typeToSectionsForTypeAndSection2.keySet()) {
+            Set<String> copy;
+            if (resultMap.containsKey(currentType)) {
+              copy = new HashSet<String>(resultMap.get(currentType));
+              Set<String> c = typeToSectionsForTypeAndSection2.get(currentType);
+              if (c != null) {
+                copy.retainAll(c);
+              } else {
+                logger.debug("\tno result matches for " + currentType);
+
+              }
+            } else {
+              copy = new HashSet<String>(typeToSectionsForTypeAndSection2.get(currentType));
+            }
+            resultMap.put(currentType, copy);
+            logger.debug("\t resultMap now " + resultMap);
+          }
+        }
+      }
+      else {
+        logger.warn("huh? got unknown type " + type);
+      }
     }
+    if (resultMap == null) {
+      logger.error("couldn't find any valid types given " + typeToSection);
+      resultMap = Collections.emptyMap();
+    }
+    return resultMap;
   }
 
   /**
