@@ -2,7 +2,6 @@ package mitll.langtest.client.bootstrap;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ButtonGroup;
-import com.github.gwtbootstrap.client.ui.base.TextNode;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -63,7 +62,7 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
   }
 
   @Override
-  public void selectItem(String section) {
+  public void selectItem(String section, boolean doToggle) {
     for (Button b : buttons) {
       if (b.isActive()) {
         b.setActive(false);
@@ -127,7 +126,7 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
       @Override
       public void onClick(ClickEvent event) {
         System.out.println("got click on " + item);
-        selectItem(item);
+        selectItem(item, false);
         listener.gotClick(type, item);
       }
     });
