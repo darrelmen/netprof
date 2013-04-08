@@ -114,17 +114,6 @@ public class SectionExerciseList extends PagingExerciseList {
     Panel flexTable = getWidgetsForTypes(result, userID);
 
     sectionPanel.add(flexTable);
-
-    Set<String> types = result.keySet();
-    selectFirstItem(types, userID);
-  }
-
-  private void selectFirstItem(Set<String> keys, long userID) {
-    if (keys.isEmpty()) {  // fallback to non-section option
-      noSectionsGetExercises(userID);
-    } else {
-      pushFirstListBoxSelection();
-    }
   }
 
   /**
@@ -378,9 +367,11 @@ public class SectionExerciseList extends PagingExerciseList {
    * If not, push the current state of the list boxes and act on it
    * @see #getExercises(long)
    */
-  private void pushFirstListBoxSelection() {
+  protected void pushFirstListBoxSelection() {
     String initToken = History.getToken();
     if (initToken.length() == 0) {
+      System.out.println("pushFirstListBoxSelection : history token is blank");
+
       pushNewSectionHistoryToken();
     } else {
       System.out.println("fire history for " +initToken);
@@ -433,7 +424,9 @@ public class SectionExerciseList extends PagingExerciseList {
     String historyToken = getHistoryToken(null);
     String currentToken = History.getToken();
 
-    studentLink.setHref(GWT.getHostPageBaseURL() + "?showSectionWidgets=false#" + historyToken);
+    if (studentLink != null) {
+      studentLink.setHref(GWT.getHostPageBaseURL() + "?showSectionWidgets=false#" + historyToken);
+    }
     if (currentToken.equals(historyToken)) {
       if (firstTime) {
         noSectionsGetExercises(userID);
@@ -495,6 +488,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @return
    */
   protected String getHistoryToken(String id) {
+    if (typeToBox.isEmpty()) return History.getToken();
     //System.out.println("getHistoryToken for " + id + " examining " +typeToBox.size() + " boxes.");
     StringBuilder builder = new StringBuilder();
     for (String type : typeToBox.keySet()) {
@@ -520,12 +514,6 @@ public class SectionExerciseList extends PagingExerciseList {
     return builder.toString();
   }
 
-/*  protected String getIDFromToken(String token) {
-    String item = getSelectionState(token).item;
-    System.out.println("getIDFromToken : token is " + token + " -> " + item);
-
-    return item;
-  }*/
     /**
      * Respond to push a history token.
      * @param event
@@ -546,43 +534,31 @@ public class SectionExerciseList extends PagingExerciseList {
       }
     } else {
       String token = event.getValue();
-      System.out.println("onValueChange '" + token +"'");
-   /*   if (token.length() == 0) {
-        setListBox("", ANY);
-        noSectionsGetExercises(userID);
-      } else {*/
-        token = getCleanToken(token);
-        //System.out.println("onValueChange after " + token);
-        try {
-          SelectionState selectionState = getSelectionState(token);
-          System.out.println("onValueChange '" + token +"' yields state " + selectionState.typeToSection);
+      System.out.println("onValueChange '" + token + "'");
+      token = getCleanToken(token);
+      try {
+        SelectionState selectionState = getSelectionState(token);
+        System.out.println("onValueChange '" + token + "' yields state " + selectionState.typeToSection);
 
-          restoreListBoxState(selectionState);
-          Map<String, String> typeToSection = selectionState.typeToSection;
+        restoreListBoxState(selectionState);
+        Map<String, String> typeToSection = selectionState.typeToSection;
 
-         /* String type = typeToSection.keySet().iterator().next();
-          String section = typeToSection.get(type);*/
-          System.out.println("onValueChange type->section " + typeToSection);
+        System.out.println("onValueChange type->section " + typeToSection);
 
-          setOtherListBoxes(typeToSection);
+        setOtherListBoxes(typeToSection);
 
-          loadExercises(selectionState.typeToSection, selectionState.item);
-        } catch (Exception e) {
-          System.out.println("onValueChange " + token + " badly formed. Got " + e);
-          e.printStackTrace();
-        }
-     // }
+        loadExercises(selectionState.typeToSection, selectionState.item);
+      } catch (Exception e) {
+        System.out.println("onValueChange " + token + " badly formed. Got " + e);
+        e.printStackTrace();
+      }
     }
-    System.out.println("onValueChange : ------ end : token is '" + rawToken +"' ------------ ");
+    System.out.println("onValueChange : ------ end : token is '" + rawToken + "' ------------ ");
 
   }
 
   private String getCleanToken(String token) {
-    token = unencodeToken(token);
-/*    if (!token.contains("=")) {
-      token = getDefaultToken();
-    }*/
-    return token;
+    return unencodeToken(token);
   }
 
   /**
@@ -591,7 +567,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param item null is OK
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
-  private void loadExercises(Map<String, String> typeToSection, final String item) {
+  protected void loadExercises(Map<String, String> typeToSection, final String item) {
     System.out.println("loadExercises " + typeToSection + " and item '" + item + "'");
     if (typeToSection.isEmpty() && item == null) {
       noSectionsGetExercises(userID);
@@ -692,7 +668,7 @@ public class SectionExerciseList extends PagingExerciseList {
   }
 
   protected static class SelectionState {
-    private String item;
+    public String item;
     public Map<String, String> typeToSection = new HashMap<String, String>();
 
     public void add(String type, String section) {
@@ -724,7 +700,7 @@ public class SectionExerciseList extends PagingExerciseList {
       String section = pair.getValue();
       if (!typeToBox.containsKey(type)) {
         if (!type.equals("item")) {
-          System.err.println("restoreListBoxState for " + selectionState + " : huh? bad type " + type);
+          System.err.println("restoreListBoxState for " + selectionState + " : huh? bad type '" + type +"'");
         }
       } else {
         selectItem(type, section);
