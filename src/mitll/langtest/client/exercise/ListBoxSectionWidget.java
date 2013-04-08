@@ -27,7 +27,7 @@ public class ListBoxSectionWidget extends ListBox implements SectionWidget {
     setSelectedIndex(1); // not any, which is the first list item
   }
 
-  public void selectItem(String section) {
+  public void selectItem(String section, boolean doToggle) {
 
     for (int i = 0; i < getItemCount(); i++) {
       String itemText = getItemText(i);
