@@ -1,14 +1,9 @@
 package mitll.langtest.client.bootstrap;
 
 import com.github.gwtbootstrap.client.ui.Bar;
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.ButtonGroup;
 import com.github.gwtbootstrap.client.ui.StackProgressBar;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.constants.Constants;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.SectionExerciseList;
@@ -73,7 +68,7 @@ public class StackedBarSectionWidget extends StackProgressBar implements Section
   }
 
   @Override
-  public void selectItem(String section) {
+  public void selectItem(String section, boolean doToggle) {
     currentSelection = section;
 /*    for (Button b : buttons) {
       if (b.isActive()) {
@@ -145,7 +140,7 @@ public class StackedBarSectionWidget extends StackProgressBar implements Section
       @Override
       public void onClick(ClickEvent event) {
         System.out.println("got click on " + item);
-        selectItem(item);
+        selectItem(item, false);
         listener.gotClick(type, item);
       }
     });
