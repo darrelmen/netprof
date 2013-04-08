@@ -166,6 +166,11 @@ public class StackedBarSectionWidget extends StackProgressBar implements Section
     //To change body of implemented methods use File | Settings | File Templates.
   }
 
+  @Override
+  public void enableAll() {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
   private class MyBar extends Bar {
     public HandlerRegistration addClickHandler(ClickHandler handler) {
       return addDomHandler(handler, ClickEvent.getType());
