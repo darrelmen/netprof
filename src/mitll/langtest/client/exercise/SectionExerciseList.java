@@ -21,7 +21,6 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -53,6 +52,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * for them (least answered/recorded first), and not let them skip forward in the list.
    */
   private boolean includeItemInBookmark = false;
+  private boolean firstTime = true;
 
   /**
    * @see mitll.langtest.client.LangTest#makeExerciseList(com.google.gwt.user.client.ui.Panel, boolean)
@@ -69,12 +69,6 @@ public class SectionExerciseList extends PagingExerciseList {
     super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder);
     this.showListBoxes = showListBoxes;
   }
-
-
-  public SectionWidget getWidgetForType(String type) {
-    return typeToBox.get(type);
-  }
-
 
   @Override
   protected void checkBeforeLoad(ExerciseShell e) {}
@@ -115,7 +109,7 @@ public class SectionExerciseList extends PagingExerciseList {
   protected void useInitialTypeToSectionMap(Map<String, Map<String, Integer>> result, long userID) {
     sectionPanel.clear();
 
-    System.out.println("useInitialTypeToSectionMap for " + userID);
+    //System.out.println("useInitialTypeToSectionMap for " + userID);
 
     Panel flexTable = getWidgetsForTypes(result, userID);
 
@@ -129,10 +123,6 @@ public class SectionExerciseList extends PagingExerciseList {
     if (keys.isEmpty()) {  // fallback to non-section option
       noSectionsGetExercises(userID);
     } else {
-      String first = keys.iterator().next();
-      System.out.println("\tselecting first key of first type=" + first);
-
-      selectFirst(first);
       pushFirstListBoxSelection();
     }
   }
@@ -193,7 +183,6 @@ public class SectionExerciseList extends PagingExerciseList {
     listBox.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {
-        //getListBoxOnClick(type);
         pushNewSectionHistoryToken();
       }
     });
@@ -201,91 +190,22 @@ public class SectionExerciseList extends PagingExerciseList {
     return listBox;
   }
 
-  /**
-   * @see #getExercises(long)
-   * @param type
-   */
-/*  protected void getListBoxOnClick(final String type) {
-    final String itemText = getCurrentSelection(type);
-    setListBox(type, itemText);
-  }*/
-
-  /**
-   * @see #getListBoxOnClick
-   * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
-   * @param type
-   * @param itemText
-   */
-/*  protected void setListBox(final String type, final String itemText) {
-    System.out.println("setListBox given '" + type + "' = '" + itemText +"'");
-
-    if (itemText.equals(ANY)) {
-      service.getTypeToSection(new TypeToSectionsAsyncCallback(type, itemText));
-    } else {
-      service.getTypeToSectionsForTypeAndSection(type, itemText, new TypeToSectionsAsyncCallback(type, itemText));
-    }
-  }*/
-
-  /**
-   * @see #setListBox(String, String)
-   */
-/*
-  private class TypeToSectionsAsyncCallback implements AsyncCallback<Map<String, Collection<String>>> {
-    private final String type;
-    private final String itemText;
-
-    public TypeToSectionsAsyncCallback(String type, String itemText) {
-      this.type = type;
-      this.itemText = itemText;
-    }
-
-    @Override
-    public void onFailure(Throwable caught) {
-      Window.alert("Can't contact server.");
-    }
-
-    @Override
-    public void onSuccess(Map<String, Collection<String>> result) {
-      System.out.println("TypeToSectionsAsyncCallback onSuccess " + type + "=" + itemText + " yielded " +result);
-
-      populateListBox(result);
-      pushNewSectionHistoryToken();
-    }
-  }
-*/
-
-  /**
-   * @see SectionExerciseList.TypeToSectionsAsyncCallback#onSuccess
-   * @see #setOtherListBoxes
-   */
-  protected void populateListBox(Map<String, Collection<String>> result) {
-    for (Map.Entry<String, Collection<String>> pair : result.entrySet()) {
-      String type = pair.getKey();
-    //  Collection<String> sections = pair.getValue();
-      populateListBox(type/*, sections*/);
-    }
-  }
-
   protected void populateListBoxAfterSelection(Map<String, Set<String>> result) {
     for (Map.Entry<String, Set<String>> pair : result.entrySet()) {
       String type = pair.getKey();
- //     Collection<String> sections = pair.getValue();
-      populateListBox(type/*, sections*/);
+      populateListBox(type);
     }
   }
 
   /**
-   * @see #populateListBox(java.util.Map)
-   * @deprecated fix this if we ever do drop down again
+   * @seex #populateListBox(java.util.Map)
    * @param type
    * @paramx sections
    */
-  private void populateListBox(String type/*, Collection<String> sections*/) {
+  private void populateListBox(String type) {
     System.out.println("populateListBox : " +type);
 
     SectionWidget listBox = typeToBox.get(type);
-    //populateListBox(listBox, sections);
-
     String currentSelection = getCurrentSelection(type);
     System.out.println("current selection is " +currentSelection);
     listBox.retainCurrentSelectionState(currentSelection);
@@ -301,16 +221,16 @@ public class SectionExerciseList extends PagingExerciseList {
     return listBox.getFirstItem();  // first is Any
   }
 
-  private void selectFirst(String type) {
+/*  private void selectFirst(String type) {
     SectionWidget listBox = typeToBox.get(type);
     if (listBox != null) {
       listBox.selectFirstAfterAny(); // not any, which is the first list item
     }
-  }
+  }*/
 
   private void selectItem(String type, String section) {
     SectionWidget listBox = typeToBox.get(type);
-    listBox.selectItem(section);
+    listBox.selectItem(section, false);
   }
 
   /**
@@ -513,15 +433,20 @@ public class SectionExerciseList extends PagingExerciseList {
     String historyToken = getHistoryToken(null);
     String currentToken = History.getToken();
 
-    studentLink.setHref(GWT.getHostPageBaseURL() +"?showSectionWidgets=false#" + historyToken);
+    studentLink.setHref(GWT.getHostPageBaseURL() + "?showSectionWidgets=false#" + historyToken);
     if (currentToken.equals(historyToken)) {
-      System.out.println("pushNewSectionHistoryToken : skipping same token " + historyToken);
+      if (firstTime) {
+        noSectionsGetExercises(userID);
+      } else {
+        System.out.println("pushNewSectionHistoryToken : skipping same token " + historyToken);
+      }
     } else {
       System.out.println("pushNewSectionHistoryToken : currentToken " + currentToken);
 
       System.out.println("------------ push history '" + historyToken + "' -------------- ");
       History.newItem(historyToken);
     }
+    firstTime = false;
   }
 
   /**
@@ -531,7 +456,7 @@ public class SectionExerciseList extends PagingExerciseList {
    */
   protected void pushNewItem(String exerciseID) {
     String historyToken = getHistoryToken(exerciseID);
-    System.out.println("------------ (section) pushNewItem : push history '" + historyToken + "' -------------- ");
+    System.out.println(new Date() + "------------ (section) pushNewItem : push history '" + historyToken + "' -------------- ");
 
     String token = History.getToken();
     System.out.println("pushNewItem : current token " + token + " vs new " + exerciseID);
@@ -574,6 +499,7 @@ public class SectionExerciseList extends PagingExerciseList {
     StringBuilder builder = new StringBuilder();
     for (String type : typeToBox.keySet()) {
       String section = getCurrentSelection(type);
+      //System.out.println("\tgetHistoryToken for " + type + " section = " +section);
       if (section.equals(ANY)) {
         //System.out.println("getHistoryToken : Skipping box " + type + " (ANY) ");
       } else {
@@ -589,6 +515,7 @@ public class SectionExerciseList extends PagingExerciseList {
     if (false && builder.toString().length() > 0) {
       System.out.println("getHistoryToken for " + id + " is " +builder);
     }
+    //System.out.println("\tgetHistoryToken for " + id + " is " +builder.toString());
 
     return builder.toString();
   }
@@ -733,7 +660,7 @@ public class SectionExerciseList extends PagingExerciseList {
     String[] parts = token.split(";");
 
     for (String part : parts) {
-      System.out.println("getSelectionState : part " + part + " : " + Arrays.asList(parts));
+      //System.out.println("getSelectionState : part " + part + " : " + Arrays.asList(parts));
 
       if (part.contains("=")) {
         String[] segments = part.split("=");
@@ -753,7 +680,7 @@ public class SectionExerciseList extends PagingExerciseList {
     if (token.contains("item")) {
       int item1 = token.indexOf("item=");
       String itemValue = token.substring(item1+"item=".length());
-      System.out.println("getSelectionState : got item = '" + itemValue +"'");
+      //System.out.println("getSelectionState : got item = '" + itemValue +"'");
       selectionState.setItem(itemValue);
     }
 
