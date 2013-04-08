@@ -11,6 +11,7 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -39,8 +40,9 @@ import java.util.Set;
  */
 public class FlexSectionExerciseList extends SectionExerciseList {
   public static final int HEADING_FOR_LABEL = 4;
- private List<ButtonType> types = new ArrayList<ButtonType>();
+  private List<ButtonType> types = new ArrayList<ButtonType>();
   private Map<String,ButtonType> typeToButton = new HashMap<String, ButtonType>();
+  int numExpectedTypes = 0;
 
   public FlexSectionExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
@@ -73,120 +75,95 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @return
    */
   protected Panel getWidgetsForTypes(Map<String, Map<String, Integer>> result, long userID) {
+    numExpectedTypes = result.keySet().size();
     FluidContainer container = new FluidContainer();
-    DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
-
     Set<String> types = result.keySet();
-    System.out.println("getWidgetsForTypes (success) for user = " + userID + " got types " + types);
-    typeToBox.clear();
-    typeToButton.clear();
-  //  String token = unencodeToken(History.getToken());
- //   SelectionState selectionState = getSelectionState(token);
-
-    String firstType = types.iterator().next(); // e.g. unit!
-
-    FluidRow firstTypeRow = new FluidRow();
-    container.add(firstTypeRow);
-
-    Collection<String> sectionsInType = result.get(firstType).keySet();
-    sectionsInType = getSortedItems(sectionsInType);
-
-    ButtonGroupSectionWidget buttonGroupSectionWidget = new ButtonGroupSectionWidget(firstType);
-    typeToBox.put(firstType, buttonGroupSectionWidget);
-
-    Container labelContainer = new FluidContainer();
-    FluidRow rowAgain = new FluidRow();
-
-    labelContainer.addStyleName("inlineStyle");
-    DOM.setStyleAttribute(labelContainer.getElement(), "paddingLeft", "2px");
-    DOM.setStyleAttribute(labelContainer.getElement(), "paddingRight", "10px");
-
-    Heading widget = makeLabelWidget(firstType);
-
-    rowAgain.add(widget) ;
-    labelContainer.add(rowAgain);
-
-    firstTypeRow.add(labelContainer);
-
-    Container clearColumnContainer = addColumnButton(firstType,ANY,buttonGroupSectionWidget, true);
-    firstTypeRow.add(clearColumnContainer);
-
-    for (String sectionInFirstType : sectionsInType) {
-      Container columnContainer = addColumnButton(firstType,sectionInFirstType, buttonGroupSectionWidget, false);
-      firstTypeRow.add(columnContainer);
-
-      service.getTypeToSectionsForTypeAndSection(firstType, sectionInFirstType,
-        new TypeToSectionsAsyncCallback(firstType, sectionInFirstType, columnContainer,clearColumnContainer, labelContainer));
-    }
-
-    if (false) {
-    for (final String type : types) {
-      Map<String, Integer> sections = result.get(type);
-      System.out.println("\tgetExercises sections for " + type + " = " + sections);
-
-      final SectionWidget listBox = makeListBox(type);
-      typeToBox.put(type, listBox);
-      populateListBox(listBox, sections);
-     // int col = 0;
-      FluidRow leftRow = new FluidRow();
-  //    left.add(leftRow);
-      FluidRow rightRow = new FluidRow();
-   //   right.add(rightRow);
-
-      //HorizontalPanel fluidRow = new HorizontalPanel();
-      //FlowPanel fluidRow = new FlowPanel();
-     // fluidRow.setWidth("100%");
-
-      //container.add(fluidRow);
-
-      if (showListBoxes) {
-        HTML html = new HTML(type);
-        html.addStyleName("floatLeft");
-        leftRow.add(new Column(1,html));
-      //  fluidRow.add(html);
-        //fluidRow.add(new Column(1, html));
-      //  //Widget widget = listBox.getWidget();
-        //Column w = new Column(11, widget);
-        //w.setWidth("100%");
-    //    widget.setWidth("100%");
-//        fluidRow.add(widget);
-       //// rightRow.add(new Column(11,widget));
-      //  rightRow.add(widget);
-        //right.add(widget);
-
-      } else {
-    /*    String typeValue = selectionState.typeToSection.get(type);
-        if (typeValue != null) {
-          fluidRow.add(new Column(1,new HTML(type)));
-          fluidRow.add(new Column(11,new HTML("<b>" + typeValue + "</b>")));
-        }*/
-      }
-    }           }
-
-    FluidRow fluidRow1 = new FluidRow();
-    container.add(fluidRow1);
-    fluidRow1.add(new Column(7,3,new Heading(5,"Click on the buttons to select just what you want to see.")));
-   // fluidRow1.add(new Heading(4,"Click on the buttons to select just what you want to see."));
-
     if (showListBoxes) {
-/*      flexTable.setWidget(row, 0, getEmailWidget());
-      flexTable.getFlexCellFormatter().setColSpan(row, 0, 2);*/
+      DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
 
-      FluidRow fluidRow = new FluidRow();
-      container.add(fluidRow);
-      Widget emailWidget = getEmailWidget();
-      fluidRow.add(new Column(2, 3, emailWidget));
+      System.out.println("getWidgetsForTypes (success) for user = " + userID + " got types " + types);
+      typeToBox.clear();
+      typeToButton.clear();
 
-      //fluidRow = new FluidRow();
-    //  container.add(fluidRow);
-      Widget hideBoxesWidget = getHideBoxesWidget();
-      fluidRow.add(new Column(4, 2, hideBoxesWidget));
-    }
-    else {
-/*      flexTable.setWidget(row, 0, new HTML("&nbsp;"));
-      flexTable.getFlexCellFormatter().setColSpan(row, 0, 2);*/
+      String firstType = types.iterator().next(); // e.g. unit!
+
+      FluidRow firstTypeRow = new FluidRow();
+      container.add(firstTypeRow);
+
+      Collection<String> sectionsInType = result.get(firstType).keySet();
+      sectionsInType = getSortedItems(sectionsInType);
+
+      ButtonGroupSectionWidget buttonGroupSectionWidget = new ButtonGroupSectionWidget(firstType);
+      typeToBox.put(firstType, buttonGroupSectionWidget);
+
+      Container labelContainer = new FluidContainer();
+      FluidRow rowAgain = new FluidRow();
+
+      labelContainer.addStyleName("inlineStyle");
+      DOM.setStyleAttribute(labelContainer.getElement(), "paddingLeft", "2px");
+      DOM.setStyleAttribute(labelContainer.getElement(), "paddingRight", "10px");
+
+      Heading widget = makeLabelWidget(firstType);
+
+      rowAgain.add(widget);
+      labelContainer.add(rowAgain);
+
+      firstTypeRow.add(labelContainer);
+
+      Container clearColumnContainer = addColumnButton(firstType, ANY, buttonGroupSectionWidget, true);
+      firstTypeRow.add(clearColumnContainer);
+
+      for (String sectionInFirstType : sectionsInType) {
+        Container columnContainer = addColumnButton(firstType, sectionInFirstType, buttonGroupSectionWidget, false);
+        firstTypeRow.add(columnContainer);
+
+        service.getTypeToSectionsForTypeAndSection(firstType, sectionInFirstType,
+          new TypeToSectionsAsyncCallback(firstType, sectionInFirstType, columnContainer, clearColumnContainer, labelContainer));
+      }
+
+      addBottomText(container);
+    } else {
+      String token = unencodeToken(History.getToken());
+      SelectionState selectionState = getSelectionState(token);
+
+      for (final String type : types) {
+        String typeValue = selectionState.typeToSection.get(type);
+        if (typeValue != null) {
+          FluidRow fluidRow = new FluidRow();
+          container.add(fluidRow);
+
+          fluidRow.add(new Column(2, new Heading(4,type)));
+          fluidRow.add(new Column(1, new Heading(4,typeValue)));
+        }
+      }
     }
     return container;
+  }
+
+  @Override
+  protected void useInitialTypeToSectionMap(Map<String, Map<String, Integer>> result, long userID) {
+    super.useInitialTypeToSectionMap(result, userID);
+
+    System.out.println("useInitialTypeToSectionMap push history : " +History.getToken());
+
+    if (!showListBoxes) {
+      SelectionState selectionState = getSelectionState(History.getToken());
+      loadExercises(selectionState.typeToSection, selectionState.item);
+    }
+  }
+
+  private void addBottomText(FluidContainer container) {
+    FluidRow fluidRow1 = new FluidRow();
+    container.add(fluidRow1);
+    fluidRow1.add(new Column(7, 3, new Heading(5, "Click on the buttons to select just what you want to see.")));
+
+    FluidRow fluidRow = new FluidRow();
+    container.add(fluidRow);
+    Widget emailWidget = getEmailWidget();
+    fluidRow.add(new Column(2, 3, emailWidget));
+
+    Widget hideBoxesWidget = getHideBoxesWidget();
+    fluidRow.add(new Column(2, 1, hideBoxesWidget));
   }
 
   private Heading makeLabelWidget(String firstType) {
@@ -328,7 +305,10 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         }
         row++;
       }
-       columnContainer.add(table);
+      columnContainer.add(table);
+      if (typeToBox.size() == numExpectedTypes) {
+        pushFirstListBoxSelection();
+      }
     }
   }
 
@@ -387,13 +367,18 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   @Override
   protected void populateListBoxAfterSelection(Map<String, Set<String>> result) {
     Set<String> typesMentioned = new HashSet<String>(typeToBox.keySet());
-    for (Map.Entry<String,Set<String>> pair : result.entrySet()) {
-      typeToBox.get(pair.getKey()).enableInSet(pair.getValue());
+    for (Map.Entry<String, Set<String>> pair : result.entrySet()) {
+      SectionWidget sectionWidget = typeToBox.get(pair.getKey());
+      if (sectionWidget != null) {
+        sectionWidget.enableInSet(pair.getValue());
+      }
     }
     typesMentioned.removeAll(result.keySet());
     for (String remainingType : typesMentioned) {
-      typeToBox.get(remainingType).enableAll();
-
+      SectionWidget sectionWidget = typeToBox.get(remainingType);
+      if (sectionWidget != null) {
+        sectionWidget.enableAll();
+      }
     }
   }
 }
