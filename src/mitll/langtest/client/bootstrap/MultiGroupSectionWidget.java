@@ -147,4 +147,9 @@ public class MultiGroupSectionWidget extends FluidContainer implements SectionWi
   public void enableInSet(Collection<String> inSet) {
     //To change body of implemented methods use File | Settings | File Templates.
   }
+
+  @Override
+  public void enableAll() {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
 }
