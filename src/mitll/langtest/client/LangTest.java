@@ -202,7 +202,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     // set up center panel, initially with flash record panel
     currentExerciseVPanel = new FluidContainer();
-
+    DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "2px");
+    DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
     if (usualLayout) {
       ScrollPanel sp = new ScrollPanel();
       sp.add(currentExerciseVPanel);
@@ -521,7 +522,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void setMainWindowSize(DockLayoutPanel widgets) {
     int widthToUse = Window.getClientWidth() - (props.isGoodwaveMode() ? 15 : eastWidth);
-    widgets.setSize(Math.max(widthToUse, 50) + "px", Math.max((Window.getClientHeight() - footerHeight - 15), 50) + "px");
+    int max = Math.max(Window.getClientWidth(), 50);
+    //System.out.println("Setting width to " + max + " on " + widgets.getClass());
+    widgets.setSize(max + "px", Math.max((Window.getClientHeight() - footerHeight - 15), 50) + "px");
     //widgets.setSize("100%","100%");
     //widgets.setSize(Math.max((Window.getClientWidth() - EAST_WIDTH), 50) + "px","100%");
   }
