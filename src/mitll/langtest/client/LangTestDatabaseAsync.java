@@ -18,6 +18,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The async counterpart of <code>LangTestDatabase</code>.
@@ -123,4 +124,6 @@ public interface LangTestDatabaseAsync {
   void getExercisesForSelectionState(Map<String, String> typeToSection, long userID, AsyncCallback<List<ExerciseShell>> async);
 
   void getTypeToSectionToCount(AsyncCallback<Map<String, Map<String, Integer>>> async);
+
+  void getTypeToSectionsForTypeAndSection(Map<String, String> typeToSection, AsyncCallback<Map<String, Set<String>>> async);
 }
