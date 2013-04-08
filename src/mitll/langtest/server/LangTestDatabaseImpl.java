@@ -47,6 +47,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
@@ -175,9 +176,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   }
 
-    @Override
+  @Override
   public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
     return db.getSectionHelper().getTypeToSectionsForTypeAndSection(type, section);
+  }
+  @Override
+  public Map<String, Set<String>> getTypeToSectionsForTypeAndSection(Map<String,String> typeToSection) {
+    return db.getSectionHelper().getTypeToSectionsForTypeAndSection(typeToSection);
   }
 
   @Override
