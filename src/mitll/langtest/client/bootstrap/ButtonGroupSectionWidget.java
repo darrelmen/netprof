@@ -25,13 +25,9 @@ class ButtonGroupSectionWidget implements SectionWidget {
   private List<Button> buttons = new ArrayList<Button>();
   private Button clearButton;
   private String type;
-  private FlexSectionExerciseList widgets;
-  LangTestDatabaseAsync service;
 
-  public ButtonGroupSectionWidget(FlexSectionExerciseList widgets, LangTestDatabaseAsync service, String type) {
-    this.widgets = widgets;
+  public ButtonGroupSectionWidget(String type) {
     this.type = type;
-    this.service = service;
   }
 
   public void addButton(Button b) {
@@ -41,7 +37,6 @@ class ButtonGroupSectionWidget implements SectionWidget {
     clearButton = b;
     clearButton.setEnabled(true);
     //clearButton.setVisible(false);
-
 
     clearButton.addClickHandler(new ClickHandler() {
       @Override
@@ -125,31 +120,6 @@ class ButtonGroupSectionWidget implements SectionWidget {
     else {
       System.err.println("clear button is not set? ");
     }
-
-/*    final String section1 = section.equals(SectionExerciseList.ANY) ? "" : section;
-    System.out.println("\tselectItem 2 " + type + "="+section1);
-
-    service.getTypeToSectionsForTypeAndSection(type, section1, new AsyncCallback<Map<String, Collection<String>>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Map<String, Collection<String>> result) {
-        System.out.println("\tselectItem onSuccess " + type + "=" + section1);
-
-        for (Map.Entry<String, Collection<String>> pair : result.entrySet()) {
-
-          String returnedType = pair.getKey();
-          if (!type.equals(returnedType)) {
-
-            SectionWidget sectionWidget = widgets.getWidgetForType(returnedType);
-            sectionWidget.enableInSet(pair.getValue());
-
-          }
-        }
-      }
-    });*/
   }
 
   @Override
