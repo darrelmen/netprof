@@ -146,7 +146,8 @@ public class BootstrapSectionExerciseList extends SectionExerciseList {
     SectionWidget widgets = new BarSectionWidget(type, new ItemClickListener() {
       @Override
       public void gotClick(String type, String item) {
-        getListBoxOnClick(type);
+        //getListBoxOnClick(type);
+        pushNewSectionHistoryToken();
       }
     });
 

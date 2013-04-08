@@ -8,6 +8,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -121,4 +122,6 @@ public interface LangTestDatabase extends RemoteService {
   void sendEmail(int userID, String to, String replyTo, String subject, String message, String token);
 
   Map<String, Map<String,Integer>> getTypeToSectionToCount();
+
+  Map<String, Set<String>> getTypeToSectionsForTypeAndSection(Map<String, String> typeToSection);
 }
