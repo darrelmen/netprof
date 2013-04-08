@@ -16,7 +16,7 @@ public interface SectionWidget {
   String getCurrentSelection();
   String getFirstItem();
   void selectFirstAfterAny();
-  void selectItem(String section);
+  void selectItem(String section, boolean doToggle);
   void retainCurrentSelectionState(String currentSelection);
   void populateTypeWidget(Collection<String> items, Map<String, Integer> sectionToCount);
   public Widget getWidget();
