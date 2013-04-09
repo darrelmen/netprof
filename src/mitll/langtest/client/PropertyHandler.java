@@ -254,7 +254,10 @@ public class PropertyHandler {
     if (Window.Location.getParameter(SHOW_SECTION_WIDGETS) != null) {
       showSectionWidgets = !Window.Location.getParameter(SHOW_SECTION_WIDGETS).equals("false");
     }
-    System.out.println("show section widgets " + showSectionWidgets);
+
+    if (Window.Location.getParameter(SHOW_SECTIONS) != null) {
+      showSections = !Window.Location.getParameter(SHOW_SECTIONS).equals("false");
+    }
     return grading;
   }
 
