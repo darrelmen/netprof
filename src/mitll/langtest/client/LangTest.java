@@ -151,6 +151,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
       public void run() {
+        System.out.println("visualization has loaded.");
       }
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
 
