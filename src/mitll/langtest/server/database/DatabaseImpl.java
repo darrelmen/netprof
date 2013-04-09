@@ -160,21 +160,19 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
+   * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    * @param installPath
    * @param lessonPlanFile
    * @param mediaDir
    * @param isUrdu
    */
   public void setInstallPath(String installPath, String lessonPlanFile, String mediaDir, boolean isUrdu, boolean useFile) {
-    //logger.debug("got install path " + i + " media " + mediaDir + " is urdu " +isUrdu);
+   // logger.debug("got install path " + installPath + " media " + mediaDir + " is urdu " +isUrdu);
     this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
     this.mediaDir = mediaDir;
     this.isUrdu = isUrdu;
     this.useFile = useFile;
-
-    //resultDAO.enrichResultDurations(installPath);
   }
 
   public void setOutsideFile(String outsideFile) { monitoringSupport.setOutsideFile(outsideFile); }
@@ -194,9 +192,6 @@ public class DatabaseImpl implements Database {
     return exerciseDAO.getTypeToSectionsForTypeAndSection(type, section);
   }
 
-/*  public Collection<Exercise> getExercisesForSection(String type, String section) {
-    return exerciseDAO.getExercisesForSection(type, section);
-  }*/
   public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
     return exerciseDAO.getExercisesForSelectionState(typeToSection);
   }
