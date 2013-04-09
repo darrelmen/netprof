@@ -759,7 +759,7 @@ public class SectionExerciseList extends PagingExerciseList {
     }
   }
 
-  private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 390 - 20-65;
+  private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 390 - 90-65;
 
   protected int getTableHeaderHeight() {
     return 625 - HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
