@@ -195,7 +195,7 @@ public class FileExerciseDAO implements ExerciseDAO {
             boolean isTSV = line2.contains("\t");
             exercise = simpleFile ?
                 getSimpleExerciseForLine(line2) :
-              isTSV ? readTSVLine(configDir,line2) : getExerciseForLine(line2);
+              isTSV ? readTSVLine(installPath,configDir,line2) : getExerciseForLine(line2);
           }
           if (exercise != null) {
             if (showSections) {
@@ -229,7 +229,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
   }
 
-  private Exercise readTSVLine(String configDir, String line) {
+  private Exercise readTSVLine(String installPath, String configDir, String line) {
     if (line.trim().length() == 0) {
       logger.debug("skipping empty line");
       return null;
@@ -253,9 +253,9 @@ public class FileExerciseDAO implements ExerciseDAO {
       return null;
     } else {
       boolean listening = type.equalsIgnoreCase("listening");
-      String content = getContentFromIncludeFile(include, listening);
+      String content = getContentFromIncludeFile(installPath, include, listening);
       if (content.isEmpty()) {
-        logger.warn("no content for exercise " + id);
+        logger.warn("no content for exercise " + id + " type " + type);
         return null;
       } else {
         String arabicQuestion = split[i++].trim();
@@ -279,16 +279,21 @@ public class FileExerciseDAO implements ExerciseDAO {
    * @param isListening
    * @return
    */
-  private String getContentFromIncludeFile(File include, boolean isListening) {
+  private String getContentFromIncludeFile(String installPath, File include, boolean isListening) {
     StringBuilder builder = new StringBuilder();
     String audioFileEquivalent = include.getName().replace(".html", ".wav");
     try {
       if (isListening) {
         String audioPath = mediaDir + File.separator + "media" + File.separator + audioFileEquivalent;
 
-        boolean exists = new File(audioPath).exists();
+        File file = new File(audioPath);
+        boolean exists = file.exists();
         if (!exists) {
-          logger.warn("couldn't find audio file at " + new File(audioPath).getPath());
+          file = new File(installPath,audioPath);
+          exists = file.exists();
+        }
+        if (!exists) {
+          logger.warn("couldn't find audio file at " + file.getAbsolutePath());
         } else {
           builder.append(getHTML5Audio(audioPath));
         }
@@ -323,7 +328,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   /**
-   * @see #getContentFromIncludeFile(java.io.File, boolean)
+   * @see #getContentFromIncludeFile
    * @param audioPath
    * @return
    */
