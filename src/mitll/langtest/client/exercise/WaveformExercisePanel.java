@@ -1,5 +1,7 @@
 package mitll.langtest.client.exercise;
 
+import com.github.gwtbootstrap.client.ui.Image;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
@@ -13,7 +15,7 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
 /**
- * Created with IntelliJ IDEA.
+ * Does fancy flashing record bulb while recording.
  * User: GO22670
  * Date: 12/18/12
  * Time: 6:17 PM
@@ -24,6 +26,9 @@ public class WaveformExercisePanel extends ExercisePanel {
   private static final String MP3 = ".mp3";
   private boolean isBusy = false;
   private RecordAudioPanel audioPanel;
+  private Image recordImage1;
+  private Image recordImage2;
+  private static final int PERIOD_MILLIS = 500;
 
   /**
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
@@ -36,6 +41,8 @@ public class WaveformExercisePanel extends ExercisePanel {
                                    final ExerciseController controller) {
     super(e, service, userFeedback, controller);
   }
+
+  public void setBusy(boolean v) { this.isBusy = v;}
 
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
@@ -103,7 +110,6 @@ public class WaveformExercisePanel extends ExercisePanel {
         true, // use keyboard
         controller);
       this.index = index;
-      //setRightMargin(controller.getLeftColumnWidth());
     }
 
     @Override
@@ -113,10 +119,46 @@ public class WaveformExercisePanel extends ExercisePanel {
 
         @Override
         protected void startRecording() {
-          isBusy = true;
+        //  isBusy = true;
+
+          setBusy(true);
           super.startRecording();
           setButtonsEnabled(false);
           playAudioPanel.setPlayEnabled(false);
+        }
+
+        @Override
+        protected void showRecording() {
+          super.showRecording();
+          recordImage1.setVisible(true);
+          flipImage();
+        }
+        private boolean first = true;
+
+        private void flipImage() {
+          t = new Timer() {
+            @Override
+            public void run() {
+              if (first) {
+                recordImage1.setVisible(false);
+                recordImage2.setVisible(true);
+              }
+              else {
+                recordImage1.setVisible(true);
+                recordImage2.setVisible(false);
+              }
+              first = !first;
+            }
+          };
+          t.scheduleRepeating(PERIOD_MILLIS);
+        }
+
+        @Override
+        public void showStopped() {
+          super.showStopped();
+          recordImage1.setVisible(false);
+          recordImage2.setVisible(false);
+          t.cancel();
         }
 
         /**
@@ -133,7 +175,7 @@ public class WaveformExercisePanel extends ExercisePanel {
           super.stopRecording();
 
           playAudioPanel.setPlayEnabled(true);
-          isBusy = false;
+          setBusy(false);
         }
 
         @Override
@@ -154,24 +196,9 @@ public class WaveformExercisePanel extends ExercisePanel {
         }
       };
 
-      playAudioPanel = new PlayAudioPanel(soundManager, new PlayListener() {
-        public void playStarted() {
-          isBusy = true;
-          setButtonsEnabled(false);
-          postAudioRecordButton.getRecord().setEnabled(false);
-        }
-        public void playStopped() {
-          isBusy = false;
-          setButtonsEnabled(true);
-          postAudioRecordButton.getRecord().setEnabled(true);
-        }
-      }) {
-        @Override
-        protected void addButtons() {
-          add(postAudioRecordButton.getRecord());
-          super.addButtons();
-        }
-      };
+      recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
+      recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
+      playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, WaveformExercisePanel.this);
       return playAudioPanel;
     }
 
@@ -179,6 +206,34 @@ public class WaveformExercisePanel extends ExercisePanel {
     protected void onUnload() {
       super.onUnload();
       postAudioRecordButton.onUnload();
+    }
+
+    private class MyPlayAudioPanel extends PlayAudioPanel {
+      public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final WaveformExercisePanel panel) {
+        super(RecordAudioPanel.this.soundManager, new PlayListener() {
+          public void playStarted() {
+            panel.setBusy(true);
+            panel.setButtonsEnabled(false);
+            RecordAudioPanel.this.postAudioRecordButton.getRecord().setEnabled(false);
+          }
+
+          public void playStopped() {
+            panel.setBusy(false);
+            panel.setButtonsEnabled(true);
+            RecordAudioPanel.this.postAudioRecordButton.getRecord().setEnabled(true);
+          }
+        });
+        add(recordImage1);
+        recordImage1.setVisible(false);
+        add(recordImage2);
+        recordImage2.setVisible(false);
+      }
+
+      @Override
+      protected void addButtons() {
+        add(postAudioRecordButton.getRecord());
+        super.addButtons();
+      }
     }
   }
 
