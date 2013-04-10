@@ -42,7 +42,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   public static final int HEADING_FOR_LABEL = 4;
   private List<ButtonType> types = new ArrayList<ButtonType>();
   private Map<String,ButtonType> typeToButton = new HashMap<String, ButtonType>();
-  int numExpectedTypes = 0;
+  int numExpectedSections = 0;
 
   public FlexSectionExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
@@ -78,7 +78,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @return
    */
   protected Panel getWidgetsForTypes(Map<String, Map<String, Integer>> result, long userID) {
-    numExpectedTypes = result.keySet().size();
+    //numExpectedTypes = result.keySet().size();
     FluidContainer container = new FluidContainer();
     DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
     DOM.setStyleAttribute(container.getElement(), "paddingRight", "2px");
@@ -116,7 +116,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
       Container clearColumnContainer = addColumnButton(firstType, ANY, buttonGroupSectionWidget, true);
       firstTypeRow.add(clearColumnContainer);
-
+                                 numExpectedSections = sectionsInType.size();
       for (String sectionInFirstType : sectionsInType) {
         Container columnContainer = addColumnButton(firstType, sectionInFirstType, buttonGroupSectionWidget, false);
         firstTypeRow.add(columnContainer);
@@ -256,6 +256,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     @Override
     public void onFailure(Throwable caught) {
       Window.alert("Can't contact server.");
+      numExpectedSections--;
     }
 
     @Override
@@ -310,8 +311,13 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         row++;
       }
       columnContainer.add(table);
-      if (typeToBox.size() == numExpectedTypes) {
+      numExpectedSections--;
+
+      if (numExpectedSections == 0) {
         pushFirstListBoxSelection();
+      }
+      else {
+        System.out.println("num expected " + numExpectedSections);
       }
     }
   }
