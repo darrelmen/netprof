@@ -98,12 +98,12 @@ public class WaveformExercisePanel extends ExercisePanel {
      * @param index
      */
     public RecordAudioPanel(LangTestDatabaseAsync service, int index) {
-      super(null, service, controller.getSoundManager(),
+      super(null, service,
         false, // use full screen width
         true, // use keyboard
-        controller.isLogClientMessages());
+        controller);
       this.index = index;
-      setRightMargin(400);
+      //setRightMargin(controller.getLeftColumnWidth());
     }
 
     @Override
