@@ -126,4 +126,6 @@ public interface LangTestDatabaseAsync {
   void getTypeToSectionToCount(AsyncCallback<Map<String, Map<String, Integer>>> async);
 
   void getTypeToSectionsForTypeAndSection(Map<String, String> typeToSection, AsyncCallback<Map<String, Set<String>>> async);
+
+  void getTypeOrder(AsyncCallback<Collection<String>> async);
 }
