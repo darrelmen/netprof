@@ -71,21 +71,15 @@ import java.util.Map;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
-  // TODO : consider putting these in the .css file?
-  //private static final int HEADER_HEIGHT = 90;
-  //private static final int FOOTER_HEIGHT = 20;
- // private static final int EXERCISE_LIST_WIDTH = 210;
-  //private static final int EAST_WIDTH = 90;
-
   public static final String LANGTEST_IMAGES = "langtest/images/";
   private static final String RECORDING_KEY = "SPACE BAR";
   private static final int LEFT_SIDE_COLUMNS = 3;
-  private static final int RIGHT_SIDE_COLUMNS = 12-LEFT_SIDE_COLUMNS;
+//  private static final int RIGHT_SIDE_COLUMNS = 12-LEFT_SIDE_COLUMNS;
   private final DialogHelper dialogHelper = new DialogHelper(false);
 
   private Panel currentExerciseVPanel = new FluidContainer();
   private ListInterface exerciseList;
-  private Label status;
+  //private Label status;
 
   private UserManager userManager;
   private final UserTable userTable = new UserTable();
@@ -97,8 +91,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private String audioType = Result.AUDIO_TYPE_UNSET;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
- // private int footerHeight = FOOTER_HEIGHT;
-  //private int eastWidth = EAST_WIDTH;
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
   private PropertyHandler props;
@@ -144,7 +136,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
   }
 
-  FluidRow headerRow, secondRow;
+  private FluidRow headerRow, secondRow;
 
   /**
    * Use DockLayout to put a header at the top, exercise list on the left, and eventually
@@ -161,13 +153,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       doDataCollectAdminView();
       return;
     }
-    // Load the visualization api, passing the onLoadCallback to be called
-    // when loading is done.
-    VisualizationUtils.loadVisualizationApi(new Runnable() {
-      @Override
-      public void run() {
-      }
-    }, ColumnChart.PACKAGE, LineChart.PACKAGE);
 
     userManager = new UserManager(this,service, isCollectAudio(), false, isCRTDataCollectMode() || isArabicTextDataCollect(), props.getAppTitle(),false);
     resultManager = new ResultManager(service, this, props.getNameForAnswer());
@@ -200,14 +185,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // set up center panel, initially with flash record panel
     currentExerciseVPanel = new FluidContainer();
-    DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "2px");
+    DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "10px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
     makeExerciseList(secondRow, thirdRow, props.isGrading());
     if (usualLayout) {
-      ScrollPanel sp = new ScrollPanel();
-      sp.add(currentExerciseVPanel);
+  /*    ScrollPanel sp = new ScrollPanel() {
+
+      };*/
+      //DOM.setStyleAttribute(sp.getElement(), "overflow", "overflow-y");
+    //  sp.setWidth("100%");
+    //  sp.addStyleName("floatLeft");
+     // sp.add(currentExerciseVPanel);
       currentExerciseVPanel.addStyleName("currentExercisePanel");
-      thirdRow.add(sp);
+      thirdRow.add(currentExerciseVPanel);
     }
     else {  // show fancy lace background image
       currentExerciseVPanel.addStyleName("body");
@@ -440,11 +430,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Tell the exercise list when the browser window changes size
    * @paramx widgets
    */
-  private void addResizeHandler(/*final DockLayoutPanel widgets*/) {
+  private void addResizeHandler() {
     Window.addResizeHandler(new ResizeHandler() {
       public void onResize(ResizeEvent event) {
-        //System.out.println("updating width since got event " +event + " w = " + Window.getClientWidth());
-       // setExerciseListSize();
         exerciseList.onResize();
       }
     });
@@ -470,7 +458,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     else if (isGrading) {
       this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback,
-          true, props.isEnglishOnlyMode());
+          true, props.isEnglishOnlyMode(), this);
     } else {
       if (props.isShowSections()) {
         boolean showSectionWidgets = props.isShowSectionWidgets();
@@ -499,9 +487,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     if (showOnlyOneExercise()) {
       exerciseList.setExercise_title(props.getExercise_title());
-    }
-    else {
-      //setExerciseListSize();
     }
     addExerciseListOnLeftSide(thirdRow);
   }
@@ -548,7 +533,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     System.out.println("goodwave mode "+ props.isGoodwaveMode() + " " + isAutoCRTMode());
 
     checkInitFlash();
-    //checkLogin();
   }
 
 
@@ -568,7 +552,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         flashRecordPanel.hide2(); // must be a separate call!
 
          checkLogin();
-        //exerciseList.getExercises(lastUser);
       }
 
       public void gotDenial() {
@@ -856,7 +839,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     dialogHelper.showErrorMessage(title, msgs, buttonName, listener);
   }
 
-  public void showStatus(String msg) { status.setText(msg); }
+  public void showStatus(String msg) {
+    //status.setText(msg);
+  }
 
   public boolean loadNextExercise(Exercise current) { return exerciseList.loadNextExercise(current);  }
   public boolean loadPreviousExercise(Exercise current) { return exerciseList.loadPreviousExercise(current);  }
