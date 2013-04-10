@@ -5,7 +5,6 @@ import com.github.gwtbootstrap.client.ui.Container;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Hero;
 import com.github.gwtbootstrap.client.ui.Row;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -23,8 +22,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
@@ -147,6 +144,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
   }
 
+  FluidRow headerRow, secondRow;
+
   /**
    * Use DockLayout to put a header at the top, exercise list on the left, and eventually
    * the current exercise in the center.  There is also a status on line on the bottom.
@@ -174,53 +173,31 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     resultManager = new ResultManager(service, this, props.getNameForAnswer());
     monitoringManager = new MonitoringManager(service, props);
     boolean usualLayout = !showOnlyOneExercise();
-   // final DockLayoutPanel widgets = new DockLayoutPanel(Style.Unit.PX);
     Container widgets = new FluidContainer();
     if (usualLayout) {
       RootPanel.get().add(widgets);
       DOM.setStyleAttribute(RootPanel.get().getElement(), "paddingTop", "2px");
-
-    }
-    if (props.isGoodwaveMode()) {
-      //footerHeight = 5;
     }
 
-    // if you remove this line the layout doesn't work -- the dock layout appears blank!
-   // setMainWindowSize(widgets);
-    addResizeHandler(/*widgets*/);
+    addResizeHandler();
 
     // header/title line
-    //DockLayoutPanel hp = new DockLayoutPanel(Style.Unit.PX);
-
     // first row ---------------
 
-    FluidRow hp = new FluidRow();
+    headerRow = new FluidRow();
     Widget title = getTitleWidget();
-    hp.add(new Column(10,title));
-   // hp.addEast(getLogout(), eastWidth);
-    hp.add(new Column(2, getLogout()));
-    widgets.add(hp);
-    //hp.add(title);
+    headerRow.add(new Column(10, title));
+    headerRow.add(new Column(2, getLogout()));
+    widgets.add(headerRow);
+    // second row ---------------
 
-    //VerticalPanel exerciseListPanel = new VerticalPanel();
-
-    FluidRow secondRow = new FluidRow();
+    secondRow = new FluidRow();
     widgets.add(secondRow);
-    //FluidRow thirdRow = new FluidRow();
-    //FlexTable thirdRow = new FlexTable();
+    // third row ---------------
+
     FlowPanel thirdRow = new FlowPanel();
     widgets.add(thirdRow);
-    //thirdRow.addStyleName("inlineStyle");
 
-    //widgets.addNorth(hp, HEADER_HEIGHT);
-    //widgets.addSouth(status = new Label(), footerHeight);
-/*    if ((props.isMinimalUI() && !props.isGrading()) && !props.isAdminView()) {
-      exerciseListPanel.setVisible(false);
-      widgets.addWest(exerciseListPanel, 10);
-    }
-    else {
-      widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH);
-    }*/
     // set up center panel, initially with flash record panel
     currentExerciseVPanel = new FluidContainer();
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "2px");
@@ -228,14 +205,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     makeExerciseList(secondRow, thirdRow, props.isGrading());
     if (usualLayout) {
       ScrollPanel sp = new ScrollPanel();
-     // sp.setWidth("100%");
       sp.add(currentExerciseVPanel);
       currentExerciseVPanel.addStyleName("currentExercisePanel");
       thirdRow.add(sp);
-    //  sp.addStyleName("floatLeft");
-      //thirdRow.add(new Column(RIGHT_SIDE_COLUMNS,sp));
-      //thirdRow.setWidget(0, 1, sp);
-      //widgets.add(sp);
     }
     else {  // show fancy lace background image
       currentExerciseVPanel.addStyleName("body");
@@ -276,22 +248,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private Widget getTitleWidget() {
-    //if (props.isShowSections()) {
-/*    HTML title = new HTML("<h1>" + props.getAppTitle() + "</h1>");
-   // VerticalPanel vp = new VerticalPanel();
-    DockLayoutPanel vp = new DockLayoutPanel(Style.Unit.PX);
-  //  lineBelowTitle = new HTML("");
-   // vp.addSouth(lineBelowTitle, 20);
-    vp.add(title);
-    vp.setWidth("100%");
-    return vp;*/
-
-    //Hero widgets = new Hero();
     FluidRow widgets = new FluidRow();
     widgets.add(new Column(5,4,new Heading(2,props.getAppTitle())));
-    //widgets.add();
     return widgets;
-    //}
   }
 
   private void setPageTitle() {
@@ -299,8 +258,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (elementById != null) {
       elementById.setInnerText(props.getAppTitle());
     }
-    //Element elem = DOM.gete("title-tag");   // set the page title to be consistent
-
   }
 
   /**
@@ -344,8 +301,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void showTimedGameHelp() {
     List<String> msgs = new ArrayList<String>();
     msgs.add("Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.");
-    String duration = "one " +
-      "minute";
+    String duration;// = "one " + "minute";
     int secs = props.getGameTimeSeconds();
     if (secs < 60) {
       duration = secs + " seconds";
@@ -364,9 +320,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     dialogHelper.showErrorMessage("Beat the clock!", msgs, "Yes!", new DialogHelper.CloseListener() {
       @Override
       public void gotYes() {
-        //exerciseList.getExercises(userID);
         login();
-        //exerciseList.reloadExercises();
       }
 
       @Override
@@ -490,8 +444,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Window.addResizeHandler(new ResizeHandler() {
       public void onResize(ResizeEvent event) {
         //System.out.println("updating width since got event " +event + " w = " + Window.getClientWidth());
-        //setMainWindowSize(widgets);
-        setExerciseListSize();
+       // setExerciseListSize();
         exerciseList.onResize();
       }
     });
@@ -522,7 +475,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       if (props.isShowSections()) {
         boolean showSectionWidgets = props.isShowSectionWidgets();
         this.exerciseList = new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), isAutoCRTMode(),showSectionWidgets);
+          props.isShowTurkToken(), isAutoCRTMode(),showSectionWidgets, this);
 
 /*
         System.out.println("makeExerciseList show section widgets " + showSectionWidgets);
@@ -532,7 +485,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 */
      } else {
         this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), isAutoCRTMode()) {
+          props.isShowTurkToken(), isAutoCRTMode(), this) {
           @Override
           protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
         };
@@ -542,69 +495,42 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (hideExerciseList) {
       exerciseList.getWidget().setVisible(false);
       exerciseList.getWidget().setWidth("1px");
-     // widgets.addWest(exerciseListPanel, 10);
     }
 
     if (showOnlyOneExercise()) {
       exerciseList.setExercise_title(props.getExercise_title());
     }
     else {
-      setExerciseListSize();
+      //setExerciseListSize();
     }
-    //HTML child = new HTML("<h2>Items</h2>");
+    addExerciseListOnLeftSide(thirdRow);
+  }
+
+  private void addExerciseListOnLeftSide(FlowPanel thirdRow) {
     Heading items = new Heading(4,"Items");
+    items.addStyleName("center");
 
-   // items.addStyleName("center");
-
-    //FlexTable leftColumn = new FlexTable();
     FlowPanel leftColumn = new FlowPanel();
     leftColumn.addStyleName("floatLeft");
     thirdRow.add(leftColumn);
-    //thirdRow.setWidget(0,0,leftColumn);
-  //  FluidRow leftRow = new FluidRow();
     thirdRow.addStyleName("inlineStyle");
-    //thirdRow.add(new Column(LEFT_SIDE_COLUMNS, leftRow));
-    //FluidRow r2 = new FluidRow();
-    //r2.add(child);
-
-    //leftRow.add(r2);
-    //leftRow.add(new Column(12,child));
-    //leftRow.add(new Column(12,this.exerciseList.getWidget()));
-
-    //leftColumn.setWidget(0, 0, items);
-    //leftColumn.setWidget(1, 0, exerciseList.getWidget());
     leftColumn.add(items);
     leftColumn.add(exerciseList.getWidget());
-/*    FluidRow r3 = new FluidRow();
-    r3.add(this.exerciseList.getWidget());
-    leftRow.add(r3);
-    thirdRow.add(leftRow);*/
-   /* exerciseListPanel.add(child);
-    exerciseListPanel.add(this.exerciseList.getWidget());*/
+  }
+
+  public int getHeightOfTopRows() {
+    return headerRow.getOffsetHeight() + secondRow.getOffsetHeight();
   }
 
   @Override
   public int getLeftColumnWidth() {
     int offsetWidth = exerciseList.getWidget().getOffsetWidth();
-    System.out.println("left col width " +offsetWidth);
+  //  System.out.println("left col width " +offsetWidth);
     return offsetWidth;
   }
 
   public boolean showOnlyOneExercise() {
     return props.getExercise_title() != null /*|| props.isFlashCard()*/;
-  }
-
-/*  private void setMainWindowSize(DockLayoutPanel widgets) {
-    //int widthToUse = Window.getClientWidth() - (props.isGoodwaveMode() ? 15 : eastWidth);
-    int max = Math.max(Window.getClientWidth(), 50);
-    //System.out.println("Setting width to " + max + " on " + widgets.getClass());
-    widgets.setSize(max + "px", Math.max((Window.getClientHeight() - footerHeight - 15), 50) + "px");
-    //widgets.setSize("100%","100%");
-    //widgets.setSize(Math.max((Window.getClientWidth() - EAST_WIDTH), 50) + "px","100%");
-  }*/
-
-  private void setExerciseListSize() {
-   // int height = Math.max(60, Window.getClientHeight() - (2 * HEADER_HEIGHT) - footerHeight - 60);
   }
 
   /**
