@@ -24,6 +24,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
@@ -74,13 +75,15 @@ import java.util.Map;
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   // TODO : consider putting these in the .css file?
-  private static final int HEADER_HEIGHT = 90;
-  private static final int FOOTER_HEIGHT = 20;
-  private static final int EXERCISE_LIST_WIDTH = 210;
-  private static final int EAST_WIDTH = 90;
+  //private static final int HEADER_HEIGHT = 90;
+  //private static final int FOOTER_HEIGHT = 20;
+ // private static final int EXERCISE_LIST_WIDTH = 210;
+  //private static final int EAST_WIDTH = 90;
 
   public static final String LANGTEST_IMAGES = "langtest/images/";
   private static final String RECORDING_KEY = "SPACE BAR";
+  private static final int LEFT_SIDE_COLUMNS = 3;
+  private static final int RIGHT_SIDE_COLUMNS = 12-LEFT_SIDE_COLUMNS;
   private final DialogHelper dialogHelper = new DialogHelper(false);
 
   private Panel currentExerciseVPanel = new FluidContainer();
@@ -97,8 +100,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private String audioType = Result.AUDIO_TYPE_UNSET;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
-  private int footerHeight = FOOTER_HEIGHT;
-  private int eastWidth = EAST_WIDTH;
+ // private int footerHeight = FOOTER_HEIGHT;
+  //private int eastWidth = EAST_WIDTH;
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
   private PropertyHandler props;
@@ -179,7 +182,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     }
     if (props.isGoodwaveMode()) {
-      footerHeight = 5;
+      //footerHeight = 5;
     }
 
     // if you remove this line the layout doesn't work -- the dock layout appears blank!
@@ -203,8 +206,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     FluidRow secondRow = new FluidRow();
     widgets.add(secondRow);
-    FluidRow thirdRow = new FluidRow();
+    //FluidRow thirdRow = new FluidRow();
+    //FlexTable thirdRow = new FlexTable();
+    FlowPanel thirdRow = new FlowPanel();
     widgets.add(thirdRow);
+    //thirdRow.addStyleName("inlineStyle");
 
     //widgets.addNorth(hp, HEADER_HEIGHT);
     //widgets.addSouth(status = new Label(), footerHeight);
@@ -222,9 +228,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     makeExerciseList(secondRow, thirdRow, props.isGrading());
     if (usualLayout) {
       ScrollPanel sp = new ScrollPanel();
+     // sp.setWidth("100%");
       sp.add(currentExerciseVPanel);
       currentExerciseVPanel.addStyleName("currentExercisePanel");
-      thirdRow.add(new Column(9,sp));
+      thirdRow.add(sp);
+    //  sp.addStyleName("floatLeft");
+      //thirdRow.add(new Column(RIGHT_SIDE_COLUMNS,sp));
+      //thirdRow.setWidget(0, 1, sp);
       //widgets.add(sp);
     }
     else {  // show fancy lace background image
@@ -474,7 +484,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * Tell the exercise list when the browser window changes size
-   * @param widgets
+   * @paramx widgets
    */
   private void addResizeHandler(/*final DockLayoutPanel widgets*/) {
     Window.addResizeHandler(new ResizeHandler() {
@@ -495,10 +505,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Supports different flavors of exercise list -- Paging, Grading, and vanilla.
    *
    * @see #onModuleLoad2()
-   * @param exerciseListPanel to add scroller to
+   * @paramx exerciseListPanel to add scroller to
    * @param isGrading true if grading, false if not
    */
-  private void makeExerciseList(FluidRow secondRow,FluidRow thirdRow, boolean isGrading) {
+  private void makeExerciseList(FluidRow secondRow,FlowPanel thirdRow, boolean isGrading) {
     final UserFeedback feedback = (UserFeedback) this;
 
     boolean hideExerciseList = (props.isMinimalUI() && !props.isGrading()) && !props.isAdminView();
@@ -541,28 +551,57 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     else {
       setExerciseListSize();
     }
-    HTML child = new HTML("<h2>Items</h2>");
-    child.addStyleName("center");
-    FluidRow leftRow = new FluidRow();
-    thirdRow.add(new Column(2, leftRow));
-    leftRow.add(new Column(12,child));
-    leftRow.add(new Column(12,this.exerciseList.getWidget()));
+    //HTML child = new HTML("<h2>Items</h2>");
+    Heading items = new Heading(4,"Items");
+
+   // items.addStyleName("center");
+
+    //FlexTable leftColumn = new FlexTable();
+    FlowPanel leftColumn = new FlowPanel();
+    leftColumn.addStyleName("floatLeft");
+    thirdRow.add(leftColumn);
+    //thirdRow.setWidget(0,0,leftColumn);
+  //  FluidRow leftRow = new FluidRow();
+    thirdRow.addStyleName("inlineStyle");
+    //thirdRow.add(new Column(LEFT_SIDE_COLUMNS, leftRow));
+    //FluidRow r2 = new FluidRow();
+    //r2.add(child);
+
+    //leftRow.add(r2);
+    //leftRow.add(new Column(12,child));
+    //leftRow.add(new Column(12,this.exerciseList.getWidget()));
+
+    //leftColumn.setWidget(0, 0, items);
+    //leftColumn.setWidget(1, 0, exerciseList.getWidget());
+    leftColumn.add(items);
+    leftColumn.add(exerciseList.getWidget());
+/*    FluidRow r3 = new FluidRow();
+    r3.add(this.exerciseList.getWidget());
+    leftRow.add(r3);
+    thirdRow.add(leftRow);*/
    /* exerciseListPanel.add(child);
     exerciseListPanel.add(this.exerciseList.getWidget());*/
+  }
+
+  @Override
+  public int getLeftColumnWidth() {
+    int offsetWidth = exerciseList.getWidget().getOffsetWidth();
+    System.out.println("left col width " +offsetWidth);
+    return offsetWidth;
   }
 
   public boolean showOnlyOneExercise() {
     return props.getExercise_title() != null /*|| props.isFlashCard()*/;
   }
 
-  private void setMainWindowSize(DockLayoutPanel widgets) {
-    int widthToUse = Window.getClientWidth() - (props.isGoodwaveMode() ? 15 : eastWidth);
+/*  private void setMainWindowSize(DockLayoutPanel widgets) {
+    //int widthToUse = Window.getClientWidth() - (props.isGoodwaveMode() ? 15 : eastWidth);
     int max = Math.max(Window.getClientWidth(), 50);
     //System.out.println("Setting width to " + max + " on " + widgets.getClass());
     widgets.setSize(max + "px", Math.max((Window.getClientHeight() - footerHeight - 15), 50) + "px");
     //widgets.setSize("100%","100%");
     //widgets.setSize(Math.max((Window.getClientWidth() - EAST_WIDTH), 50) + "px","100%");
-  }
+  }*/
 
   private void setExerciseListSize() {
    // int height = Math.max(60, Window.getClientHeight() - (2 * HEADER_HEIGHT) - footerHeight - 60);
