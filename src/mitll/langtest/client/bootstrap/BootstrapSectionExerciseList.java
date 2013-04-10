@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.user.UserFeedback;
@@ -25,7 +26,7 @@ import java.util.Set;
 public class BootstrapSectionExerciseList extends SectionExerciseList {
   public BootstrapSectionExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                              UserFeedback feedback,
-                             boolean showTurkToken, boolean showInOrder, boolean showListBox) {
+                             boolean showTurkToken, boolean showInOrder, boolean showListBox, ExerciseController controller) {
     super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox, controller);
   }
 
