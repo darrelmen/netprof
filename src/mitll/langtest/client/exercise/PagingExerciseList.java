@@ -178,6 +178,9 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
 
+  /**
+   * @see SectionExerciseList.MySetExercisesCallback#onSuccess(java.util.List)
+   */
   @Override
   protected void loadFirstExercise() {
     super.loadFirstExercise();
