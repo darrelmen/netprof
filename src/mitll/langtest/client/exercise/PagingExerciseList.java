@@ -13,6 +13,8 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
@@ -81,7 +83,8 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
 
-    table.setWidth("100%", true);
+  //  table.setWidth("100%", true);
+    table.setWidth("100%");
     table.setHeight("auto");
 
     // Add a selection model to handle user selection.
@@ -104,8 +107,13 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     // Set the cellList as the display.
     pager.setDisplay(table);
 
-    add(pager);
-    add(table);
+    FlowPanel column = new FlowPanel();
+    //FlexTable column = new FlexTable();
+    add(column);
+    column.add(pager);
+  column.add(table);
+ //   column.setWidget(0,0,pager);
+   // column.setWidget(1,0,table);
   }
 
   private Column<ExerciseShell, SafeHtml> getExerciseIdColumn() {
