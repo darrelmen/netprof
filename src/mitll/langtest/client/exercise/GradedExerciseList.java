@@ -31,7 +31,7 @@ public class GradedExerciseList extends PagingExerciseList {
    * @param englishOnly
    */
   public GradedExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            boolean showInOrder, boolean englishOnly) {
+                            boolean showInOrder, boolean englishOnly, ExerciseController  controller) {
     super(currentExerciseVPanel, service, feedback, false, showInOrder, controller);
     this.englishOnly = englishOnly;
   }
