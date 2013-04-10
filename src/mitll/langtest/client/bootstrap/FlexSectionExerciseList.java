@@ -42,12 +42,20 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   public static final int HEADING_FOR_LABEL = 4;
   private List<ButtonType> types = new ArrayList<ButtonType>();
   private Map<String,ButtonType> typeToButton = new HashMap<String, ButtonType>();
-  int numExpectedSections = 0;
+  private int numExpectedSections = 0;
+  //private FluidRow secondRow;
 
-  public FlexSectionExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service,
+  public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
                                  boolean showTurkToken, boolean showInOrder, boolean showListBox) {
     super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox);
+
+   // this.secondRow = secondRow;
+
+    Panel child = sectionPanel = new FluidContainer();
+    DOM.setStyleAttribute(sectionPanel.getElement(), "paddingLeft", "2px");
+    DOM.setStyleAttribute(sectionPanel.getElement(), "paddingRight", "2px");
+    secondRow.add(new Column(12,child));
 
     types.add(ButtonType.PRIMARY);
     types.add(ButtonType.SUCCESS);
@@ -57,10 +65,8 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
   @Override
   protected void addWidgets(Panel currentExerciseVPanel) {
-    Panel child = sectionPanel = new FluidContainer();
-    DOM.setStyleAttribute(sectionPanel.getElement(), "paddingLeft", "2px");
-    DOM.setStyleAttribute(sectionPanel.getElement(), "paddingRight", "2px");
-    currentExerciseVPanel.add(child);
+
+   // secondRow.add(child);
     super.addWidgets(currentExerciseVPanel);
   }
 
