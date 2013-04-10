@@ -51,4 +51,5 @@ public interface ExerciseController {
   boolean isPromptBeforeNextItem();
   boolean isRightAlignContent();
   int getLeftColumnWidth();
+  int getHeightOfTopRows();
 }
