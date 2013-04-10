@@ -323,7 +323,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         pushFirstListBoxSelection();
       }
       else {
-        System.out.println("num expected " + numExpectedSections);
+        //System.out.println("num expected " + numExpectedSections);
       }
     }
   }
