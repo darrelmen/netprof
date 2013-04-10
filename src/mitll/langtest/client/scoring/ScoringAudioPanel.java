@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -31,17 +32,15 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private PretestScore result;
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.sound.SoundManagerAPI, boolean, int, boolean, boolean)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.sound.SoundManagerAPI, boolean, int, boolean, boolean,ExerciseController)
    * @param service
-   * @param soundManager
    * @param useFullWidth
    * @param numRepeats
    * @param useKeyboard
-   * @param logMessages
    */
-  public ScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth,
-                           int numRepeats, boolean useKeyboard, boolean logMessages) {
-    this(null, null, service, soundManager, useFullWidth, numRepeats, useKeyboard, logMessages);
+  public ScoringAudioPanel(LangTestDatabaseAsync service, boolean useFullWidth,
+                           int numRepeats, boolean useKeyboard, ExerciseController controller) {
+    this(null, null, service, useFullWidth, numRepeats, useKeyboard, controller);
   }
 
   /**
@@ -49,15 +48,13 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param path
    * @param refSentence
    * @param service
-   * @param soundManager
    * @param useFullWidth
    * @param numRepeats
    * @param useKeyboard
-   * @param logMessages
    */
-  public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service, SoundManagerAPI soundManager,
-                           boolean useFullWidth, int numRepeats, boolean useKeyboard, boolean logMessages) {
-    super(path, service, soundManager, useFullWidth, useKeyboard, logMessages);
+  public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
+                           boolean useFullWidth, int numRepeats, boolean useKeyboard, ExerciseController controller) {
+    super(path, service, useFullWidth, useKeyboard, controller);
     this.refSentence = refSentence;
     addClickHandlers(numRepeats);
   }
