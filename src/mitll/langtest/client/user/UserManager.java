@@ -1,15 +1,13 @@
 package mitll.langtest.client.user;
 
+import com.github.gwtbootstrap.client.ui.Controls;
+import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.logical.shared.OpenEvent;
-import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
@@ -21,7 +19,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PasswordTextBox;
-import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -282,12 +279,21 @@ public class UserManager {
     dialogBox.setGlassEnabled(true);
 
     final TextBox user = new TextBox();
+/*    user.addKeyDownHandler(new KeyDownHandler() {
+      @Override
+      public void onKeyDown(KeyDownEvent event) {
+        System.out.println ("key = "+event.getNativeKeyCode());
+      }
+    });*/
     final TextBox password = new PasswordTextBox();
     final RadioButton regular = new RadioButton("AudioType","Regular Audio Recording");
     final RadioButton fastThenSlow = new RadioButton("AudioType","Record Regular Speed then Slow");
-
-    final TextBox first = new TextBox();
-    final TextBox last = new TextBox();
+   // ControlGroup cg = new ControlGroup();
+    Controls controls = new Controls();
+    controls.add(regular);
+    controls.add(fastThenSlow);
+   // final TextBox first = new TextBox();
+ //   final TextBox last = new TextBox();
     final TextBox nativeLang = new TextBox();
     final TextBox dialect = new TextBox();
     final TextBox ageEntryBox = new TextBox();
@@ -320,8 +326,9 @@ public class UserManager {
     w.setTitle("Choose type of audio recording.");
     if (isCollectAudio) {
       dialogVPanel.add(ww);
-      dialogVPanel.add(regular);
-      dialogVPanel.add(fastThenSlow);
+      dialogVPanel.add(controls);
+/*      dialogVPanel.add(regular);
+      dialogVPanel.add(fastThenSlow);*/
     }
 
     SimplePanel spacer = new SimplePanel();
@@ -339,12 +346,14 @@ public class UserManager {
 
     dialogVPanel.add(dp);
 
+/*
     if (COLLECT_NAMES) {
       register.add(new HTML("<b>First Name</b>"));
       register.add(first);
       register.add(new HTML("<b>Last Name</b>"));
       register.add(last);
     }
+*/
 
     if (!isDataCollectAdmin) {
       register.add(new HTML("<b>Native Lang (L1)</b>"));
@@ -389,10 +398,14 @@ public class UserManager {
               }
             } else {
               System.out.println(user.getText() + " doesn't exist");
-              if (checkPassword(password)) {
-                doRegistration(user, password, regular, fastThenSlow, nativeLang, dialect, ageEntryBox, experienceBox, genderBox, first, last, dialogBox, login);
+              if (user.getText().length() == 0) {
+                Window.alert("Please enter a user id.");
               } else {
-                Window.alert("Please use password from the email");
+                if (checkPassword(password)) {
+                  doRegistration(user, password, regular, fastThenSlow, nativeLang, dialect, ageEntryBox, experienceBox, genderBox, /*first, last,*/ dialogBox, login);
+                } else {
+                  Window.alert("Please use password from the email");
+                }
               }
             }
           }
@@ -405,7 +418,9 @@ public class UserManager {
   private void doRegistration(TextBox user, TextBox password, RadioButton regular,
                               RadioButton fastThenSlow,
                               TextBox nativeLang, TextBox dialect, TextBox ageEntryBox,
-                              ListBox experienceBox, ListBox genderBox, TextBox first, TextBox last, DialogBox dialogBox, Button login) {
+                              ListBox experienceBox, ListBox genderBox,
+                              //TextBox first, TextBox last,
+                              DialogBox dialogBox, Button login) {
     boolean valid = user.getText().length() > 0;
     if (!valid) {
       Window.alert("Please enter a userid.");
@@ -448,7 +463,7 @@ public class UserManager {
       }
       if (valid) {
         int enteredAge = getAge(ageEntryBox);
-        checkUserOrCreate(enteredAge, user, experienceBox, genderBox, first, last, nativeLang, dialect, dialogBox,
+        checkUserOrCreate(enteredAge, user, experienceBox, genderBox, nativeLang, dialect, dialogBox,
             login, fastThenSlow.getValue());
       } else {
         System.out.println("not valid ------------ ?");
@@ -470,8 +485,8 @@ public class UserManager {
    * @param user
    * @param experienceBox
    * @param genderBox
-   * @param first
-   * @param last
+   * @paramx first
+   * @paramx last
    * @param nativeLang
    * @param dialect
    * @param dialogBox
@@ -480,7 +495,7 @@ public class UserManager {
    */
   private void checkUserOrCreate(final int enteredAge, final TextBox user, final ListBox experienceBox,
                                  final ListBox genderBox,
-                                 final TextBox first, final TextBox last,
+                          //       final TextBox first, final TextBox last,
                                  final TextBox nativeLang, final TextBox dialect,
                                  final DialogBox dialogBox, final Button closeButton,
                                  final boolean isFastAndSlow) {
@@ -492,7 +507,7 @@ public class UserManager {
         System.out.println("user '" + user.getText() + "' exists " + result);
         if (result == -1) {
           addTeacher(enteredAge,
-            experienceBox, genderBox, first, last, nativeLang, dialect, user, dialogBox, closeButton, isFastAndSlow);
+            experienceBox, genderBox, nativeLang, dialect, user, dialogBox, closeButton, isFastAndSlow);
         } else {
           Window.alert("User " + user.getText() + " already registered, click login.");
         }
@@ -501,7 +516,8 @@ public class UserManager {
   }
 
   private void addTeacher(int age, ListBox experienceBox, ListBox genderBox,
-                          TextBox first, TextBox last, TextBox nativeLang,
+                          //TextBox first, TextBox last,
+                          TextBox nativeLang,
                           TextBox dialect, final TextBox user, final DialogBox dialogBox, final Button closeButton,
                           final boolean isFastAndSlow) {
     int monthsOfExperience = experienceBox.getSelectedIndex() * 3;
@@ -512,8 +528,8 @@ public class UserManager {
     service.addUser(age,
       genderBox.getValue(genderBox.getSelectedIndex()),
       monthsOfExperience,
-      first.getText(),
-      last.getText(),
+      "",
+     "",
       nativeLang.getText(),
       dialect.getText(),
       user.getText(),
