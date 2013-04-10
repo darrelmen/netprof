@@ -15,10 +15,10 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.user.UserFeedback;
@@ -43,14 +43,12 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   private List<ButtonType> types = new ArrayList<ButtonType>();
   private Map<String,ButtonType> typeToButton = new HashMap<String, ButtonType>();
   private int numExpectedSections = 0;
-  //private FluidRow secondRow;
+  private int numSections = 0;
 
   public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
-                                 boolean showTurkToken, boolean showInOrder, boolean showListBox) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox);
-
-   // this.secondRow = secondRow;
+                                 boolean showTurkToken, boolean showInOrder, boolean showListBox, ExerciseController controller) {
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox, controller);
 
     Panel child = sectionPanel = new FluidContainer();
     DOM.setStyleAttribute(sectionPanel.getElement(), "paddingLeft", "2px");
@@ -61,13 +59,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     types.add(ButtonType.SUCCESS);
     types.add(ButtonType.INFO);
     types.add(ButtonType.WARNING);
-  }
-
-  @Override
-  protected void addWidgets(Panel currentExerciseVPanel) {
-
-   // secondRow.add(child);
-    super.addWidgets(currentExerciseVPanel);
   }
 
   @Override
@@ -84,7 +75,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @return
    */
   protected Panel getWidgetsForTypes(Map<String, Map<String, Integer>> result, long userID) {
-    //numExpectedTypes = result.keySet().size();
     FluidContainer container = new FluidContainer();
     DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
     DOM.setStyleAttribute(container.getElement(), "paddingRight", "2px");
@@ -112,6 +102,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       labelContainer.addStyleName("inlineStyle");
       DOM.setStyleAttribute(labelContainer.getElement(), "paddingLeft", "2px");
       DOM.setStyleAttribute(labelContainer.getElement(), "paddingRight", "2px");
+      //DOM.setStyleAttribute(firstTypeRow.getElement(), "marginBottom", "5px");
 
       Heading widget = makeLabelWidget(firstType);
 
@@ -122,9 +113,12 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
       Container clearColumnContainer = addColumnButton(firstType, ANY, buttonGroupSectionWidget, true);
       firstTypeRow.add(clearColumnContainer);
-                                 numExpectedSections = sectionsInType.size();
+      numExpectedSections = sectionsInType.size();
+      numSections = numExpectedSections;
+      System.out.println("num " + numExpectedSections);
       for (String sectionInFirstType : sectionsInType) {
         Container columnContainer = addColumnButton(firstType, sectionInFirstType, buttonGroupSectionWidget, false);
+        DOM.setStyleAttribute(columnContainer.getElement(), "marginBottom", "5px");
         firstTypeRow.add(columnContainer);
 
         service.getTypeToSectionsForTypeAndSection(firstType, sectionInFirstType,
@@ -272,7 +266,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       int row = 0;
       for (Map.Entry<String,Collection<String>> pair : result.entrySet()) {
         String typeForOriginal = pair.getKey();
-        System.out.println("\ttype " + typeForOriginal + " : " +pair.getValue());
+        //System.out.println("\ttype " + typeForOriginal + " : " +pair.getValue());
 
         SectionWidget sectionWidget = typeToBox.get(typeForOriginal);
         if (sectionWidget == null) {
@@ -338,12 +332,32 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     return table3;
   }
 
+  /**
+   * @see TypeToSectionsAsyncCallback#onSuccess(java.util.Map)
+   * @param sectionWidgetFinal
+   * @param type
+   * @param section
+   * @param buttonType
+   * @param isClear
+   * @return
+   */
   private Button makeSubgroupButton(final SectionWidget sectionWidgetFinal, final String type, final String section,
                                     ButtonType buttonType, boolean isClear) {
     //System.out.println("making button " + type + "=" + section);
     Button sectionButton = new Button(section);
+
     DOM.setStyleAttribute(sectionButton.getElement(), "borderWidth", "0");
+
+    boolean shrinkHorizontally = numSections > 5;
+  //  System.out.println("num " + numSections + " shrinkHorizontally " +shrinkHorizontally );
+
+    if (!isClear && shrinkHorizontally) { // squish buttons if we have lots of sections
+      DOM.setStyleAttribute(sectionButton.getElement(), "paddingLeft", "6px");
+      DOM.setStyleAttribute(sectionButton.getElement(), "paddingRight", "6px");
+    }
+
     sectionButton.setType(isClear ? ButtonType.DEFAULT : buttonType);
+   // if (isClear) sectionButton.addStyleName("bold");
     sectionButton.setEnabled(!isClear);
 
     sectionButton.addClickHandler(new ClickHandler() {
