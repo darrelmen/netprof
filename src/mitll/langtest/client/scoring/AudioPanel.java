@@ -1,7 +1,9 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -100,6 +102,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   private void addWidgets(String path) {
     imageContainer = new VerticalPanel();
+
     HorizontalPanel hp = new HorizontalPanel();
     hp.setVerticalAlignment(ALIGN_MIDDLE);
 
@@ -136,6 +139,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     hp.setWidth("100%");
 
     add(hp);
+
+    add(new Heading(6));
 
     add(imageContainer);
 
@@ -253,11 +258,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @see #onResize()
    */
   private void getImages() {
-    int leftColumnWidth = controller.getLeftColumnWidth();
+    int leftColumnWidth = Math.min(175,controller.getLeftColumnWidth()) + 50;
     //int rightMargin = screenPortion == 1.0f ? leftColumnWidth : (int)(screenPortion*((float)rightMarginToUse));
     int width = (int) ((screenPortion*((float)Window.getClientWidth())) - leftColumnWidth);
 
-    //System.out.println("getImages : rightMargin " + rightMargin + " width " + width + " window width " + Window.getClientWidth());
+    System.out.println("getImages : leftColumnWidth " + leftColumnWidth + " width " + width + " vs window width " + Window.getClientWidth());
 
     //int width = getOffsetWidth();
     int diff = Math.abs(Window.getClientWidth() - lastWidth);
