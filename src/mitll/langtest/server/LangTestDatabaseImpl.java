@@ -177,6 +177,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
+  public Collection<String> getTypeOrder() {
+    return db.getSectionHelper().getTypeOrder();
+  }
+
+  @Override
   public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
     return db.getSectionHelper().getTypeToSectionsForTypeAndSection(type, section);
   }
