@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.DataTable;
+import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
@@ -66,7 +67,7 @@ public class MonitoringManager {
    */
   public MonitoringManager(LangTestDatabaseAsync s, PropertyHandler props) {
     this.service = s;
-  //  this.useFile = props.isReadFromFile();
+    //  this.useFile = props.isReadFromFile();
     this.item = props.getNameForItem();
     this.answer = props.getNameForAnswer();
     this.answers = props.getNameForAnswer() + "s";
@@ -74,7 +75,25 @@ public class MonitoringManager {
     this.users = props.getNameForRecorder() + "s";
   }
 
+  private boolean didInit = false;
+
   public void showResults() {
+    if (didInit) {
+      showResults2();
+    } else {
+      System.out.println("loading VisualizationUtils...");
+      VisualizationUtils.loadVisualizationApi(new Runnable() {
+        @Override
+        public void run() {
+          System.out.println("\tloaded VisualizationUtils...");
+
+          didInit = true;
+          showResults2();
+        }
+      }, ColumnChart.PACKAGE, LineChart.PACKAGE);
+    }
+  }
+  public void showResults2() {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Monitoring");
