@@ -293,7 +293,7 @@ public class UserManager {
     final TextBox ageEntryBox = new TextBox();
 
     final Button login = new Button("Login");
-    final Button reg = new Button("Register");
+   // final Button reg = new Button("Register");
 
     final ListBox genderBox = getGenderBox();
     VerticalPanel genderPanel = getGenderPanel(genderBox);
@@ -336,18 +336,7 @@ public class UserManager {
     DisclosurePanel dp = new DisclosurePanel("Registration");
     dp.setContent(register);
     dp.setAnimationEnabled(true);
-    dp.addOpenHandler(new OpenHandler<DisclosurePanel>() {
-      @Override
-      public void onOpen(OpenEvent<DisclosurePanel> event) {
-        reg.setVisible(true);
-      }
-    });
-    dp.addCloseHandler(new CloseHandler<DisclosurePanel>() {
-      @Override
-      public void onClose(CloseEvent<DisclosurePanel> event) {
-        reg.setVisible(false);
-      }
-    });
+
     dialogVPanel.add(dp);
 
     if (COLLECT_NAMES) {
@@ -371,74 +360,8 @@ public class UserManager {
       register.add(experiencePanel);
     }
 
-    reg.setEnabled(true);
-    reg.setVisible(false);
-    reg.getElement().setId("registerButton");
-
-    reg.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        //System.out.println("register got click " + event);
-        boolean valid = user.getText().length() > 0;
-        if (!valid) {
-          Window.alert("Please enter a userid.");
-        } else {
-          valid = password.getText().length() > 0;
-          if (!valid) {
-            Window.alert("Please enter a password.");
-          }
-        }
-        if (valid) {
-          valid = checkPassword(password);
-          if (!valid) {
-            Window.alert("Please use password from the email sent to you.");
-            valid = false;
-          }
-          else if (!isDataCollectAdmin && checkAudioSelection(regular, fastThenSlow)) {
-            Window.alert("Please choose either regular or regular then slow audio recording.");
-            valid = false;
-          }
-          else if (COLLECT_NAMES && first.getText().isEmpty()) {
-            Window.alert("First name is empty");
-            valid = false;
-          }
-          else if (COLLECT_NAMES && last.getText().isEmpty()) {
-            Window.alert("Last name is empty");
-            valid = false;
-          }
-          else if (!isDataCollectAdmin && nativeLang.getText().isEmpty()) {
-            Window.alert("Language is empty");
-            valid = false;
-          }
-          else if (!isDataCollectAdmin && dialect.getText().isEmpty()) {
-            Window.alert("Dialect is empty");
-            valid = false;
-          }
-
-          if (valid) {
-            try {
-              int age = getAge(ageEntryBox);
-              if (!isDataCollectAdmin && (age < MIN_AGE) || (age > MAX_AGE && age != TEST_AGE)) {
-                valid = false;
-                Window.alert("age '" + age + "' is too young or old.");
-              }
-            } catch (NumberFormatException e) {
-              Window.alert("age '" + ageEntryBox.getText() + "' is invalid.");
-              valid = false;
-            }
-          }
-          if (valid) {
-            int enteredAge = getAge(ageEntryBox);
-            checkUserOrCreate(enteredAge, user, experienceBox, genderBox, first, last, nativeLang, dialect, dialogBox,
-                login, fastThenSlow.getValue());
-          } else {
-            System.out.println("not valid ------------ ?");
-          }
-        }
-      }
-    });
     FlowPanel hp = new FlowPanel();
     hp.getElement().getStyle().setFloat(Style.Float.RIGHT);
-    hp.add(reg);
     hp.add(login);
 
     dialogVPanel.add(hp);
@@ -467,7 +390,7 @@ public class UserManager {
             } else {
               System.out.println(user.getText() + " doesn't exist");
               if (checkPassword(password)) {
-                Window.alert("Please register -- " + user.getText() + " has not registered");
+                doRegistration(user, password, regular, fastThenSlow, nativeLang, dialect, ageEntryBox, experienceBox, genderBox, first, last, dialogBox, login);
               } else {
                 Window.alert("Please use password from the email");
               }
@@ -477,6 +400,60 @@ public class UserManager {
       }
     });
     show(dialogBox);
+  }
+
+  private void doRegistration(TextBox user, TextBox password, RadioButton regular,
+                              RadioButton fastThenSlow,
+                              TextBox nativeLang, TextBox dialect, TextBox ageEntryBox,
+                              ListBox experienceBox, ListBox genderBox, TextBox first, TextBox last, DialogBox dialogBox, Button login) {
+    boolean valid = user.getText().length() > 0;
+    if (!valid) {
+      Window.alert("Please enter a userid.");
+    } else {
+      valid = password.getText().length() > 0;
+      if (!valid) {
+        Window.alert("Please enter a password.");
+      }
+    }
+    if (valid) {
+      valid = checkPassword(password);
+      if (!valid) {
+        Window.alert("Please use password from the email sent to you.");
+        valid = false;
+      }
+      else if (!isDataCollectAdmin && checkAudioSelection(regular, fastThenSlow)) {
+        Window.alert("Please choose either regular or regular then slow audio recording.");
+        valid = false;
+      }
+      else if (!isDataCollectAdmin && nativeLang.getText().isEmpty()) {
+        Window.alert("Language is empty");
+        valid = false;
+      }
+      else if (!isDataCollectAdmin && dialect.getText().isEmpty()) {
+        Window.alert("Dialect is empty");
+        valid = false;
+      }
+
+      if (valid) {
+        try {
+          int age = getAge(ageEntryBox);
+          if (!isDataCollectAdmin && (age < MIN_AGE) || (age > MAX_AGE && age != TEST_AGE)) {
+            valid = false;
+            Window.alert("age '" + age + "' is too young or old.");
+          }
+        } catch (NumberFormatException e) {
+          Window.alert("age '" + ageEntryBox.getText() + "' is invalid.");
+          valid = false;
+        }
+      }
+      if (valid) {
+        int enteredAge = getAge(ageEntryBox);
+        checkUserOrCreate(enteredAge, user, experienceBox, genderBox, first, last, nativeLang, dialect, dialogBox,
+            login, fastThenSlow.getValue());
+      } else {
+        System.out.println("not valid ------------ ?");
+      }
+    }
   }
 
   private int getAge(TextBox ageEntryBox) {
