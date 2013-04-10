@@ -107,7 +107,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param userID
    */
   public void getExercises(long userID) {
-    System.out.println("getExercises for user " +userID);
+    //System.out.println("getExercises for user " +userID);
 
     useUserID = true;
     this.userID = userID;
@@ -181,7 +181,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   /**
    * So you an load a specific exercise
-   * @see mitll.langtest.client.LangTest#makeExerciseList(com.google.gwt.user.client.ui.Panel, boolean)
+   * @see mitll.langtest.client.LangTest#makeExerciseList
    * @param exercise_title
    */
   @Override
@@ -326,13 +326,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       System.out.println("can't load " +id + " keys were " + idToExercise.keySet());
     }
   }
-
-/*
-  protected String getIDFromToken(ValueChangeEvent<String> event) {
-    String token = getTokenFromEvent(event);
-    return getIDFromToken(token);
-  }
-*/
 
   protected String getTokenFromEvent(ValueChangeEvent<String> event) {
     String token = event.getValue();
@@ -507,9 +500,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   @Override
-  public Widget getWidget() {
-    return this;
-  }
+  public Widget getWidget() {   return this;  }
 
   /**
    * @see mitll.langtest.client.LangTest#onFirst(mitll.langtest.shared.Exercise)
@@ -520,7 +511,5 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public boolean onFirst(ExerciseShell current) { return getIndex(current) == 0; }
 
   @Override
-  public void reloadExercises() {
-
-  }
+  public void reloadExercises() {}
 }
