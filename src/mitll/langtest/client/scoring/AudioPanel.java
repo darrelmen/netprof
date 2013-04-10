@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.client.sound.PlayAudioPanel;
@@ -65,6 +66,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private float screenPortion = 1.0f;
   private int rightMarginToUse;
   private final boolean logMessages;
+  private ExerciseController controller;
 
   /**
    * @see mitll.langtest.client.exercise.WaveformExercisePanel.RecordAudioPanel#RecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int)
@@ -72,19 +74,20 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param service
    * @param useFullWidth
    * @param useKeyboard
-   * @param logMessages
    */
-  public AudioPanel(String path, LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth,
-                    boolean useKeyboard, boolean logMessages) {
-    this.soundManager = soundManager;
+  public AudioPanel(String path, LangTestDatabaseAsync service, boolean useFullWidth,
+                    boolean useKeyboard, ExerciseController controller) {
+    this.soundManager = controller.getSoundManager();
     this.service = service;
     rightMarginToUse = useFullWidth ? RIGHT_MARGIN :  ASRScorePanel.X_CHART_SIZE+400;
+    System.out.println("use full width " + useFullWidth + " right margin " + rightMarginToUse);
     this.useKeyboard = useKeyboard;
-    this.logMessages = logMessages;
+    this.logMessages = controller.isLogClientMessages();
+    this.controller = controller;
     addWidgets(path);
   }
 
-  protected void setRightMargin(int m) { this.rightMarginToUse = m; }
+  //protected void setRightMargin(int m) { this.rightMarginToUse = m; }
 
   public void onResize() {
     getImages();
@@ -250,14 +253,18 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @see #onResize()
    */
   private void getImages() {
-    int rightMargin = screenPortion == 1.0f ? rightMarginToUse : (int)(screenPortion*((float)rightMarginToUse));
-    int width = (int) ((screenPortion*((float)Window.getClientWidth())) - rightMargin);
+    int leftColumnWidth = controller.getLeftColumnWidth();
+    //int rightMargin = screenPortion == 1.0f ? leftColumnWidth : (int)(screenPortion*((float)rightMarginToUse));
+    int width = (int) ((screenPortion*((float)Window.getClientWidth())) - leftColumnWidth);
+
+    //System.out.println("getImages : rightMargin " + rightMargin + " width " + width + " window width " + Window.getClientWidth());
+
     //int width = getOffsetWidth();
     int diff = Math.abs(Window.getClientWidth() - lastWidth);
     if (lastWidth == 0 || diff > 100) {
       lastWidth = Window.getClientWidth();
 
-      //System.out.println("getImages : offset width " + getOffsetWidth() + " width " + width + " path " + audioPath);
+      System.out.println("getImages : offset width " + getOffsetWidth() + " width " + width + " path " + audioPath);
       getEachImage(width);
     }
     else {
