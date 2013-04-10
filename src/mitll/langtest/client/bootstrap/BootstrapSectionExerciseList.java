@@ -3,13 +3,8 @@ package mitll.langtest.client.bootstrap;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.SectionExerciseList;
@@ -17,7 +12,6 @@ import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.user.UserFeedback;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,7 +26,7 @@ public class BootstrapSectionExerciseList extends SectionExerciseList {
   public BootstrapSectionExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                              UserFeedback feedback,
                              boolean showTurkToken, boolean showInOrder, boolean showListBox) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox);
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox, controller);
   }
 
   @Override
