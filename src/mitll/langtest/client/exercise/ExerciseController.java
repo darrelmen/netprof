@@ -50,4 +50,5 @@ public interface ExerciseController {
   String getLanguage();
   boolean isPromptBeforeNextItem();
   boolean isRightAlignContent();
+  int getLeftColumnWidth();
 }
