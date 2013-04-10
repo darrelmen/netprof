@@ -189,7 +189,7 @@ public class RecordButtonPanel {
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {}
   protected void receivedAudioFailure() {}
 
-  protected static class ImageAnchor extends Anchor {
+  public static class ImageAnchor extends Anchor {
     private Image img = null;
     public ImageAnchor() {}
     //public void show() { setVisible(true); }
