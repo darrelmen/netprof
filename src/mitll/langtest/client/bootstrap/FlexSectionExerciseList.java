@@ -74,74 +74,91 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @param userID
    * @return
    */
-  protected Panel getWidgetsForTypes(Map<String, Map<String, Integer>> result, long userID) {
-    FluidContainer container = new FluidContainer();
+  protected Panel getWidgetsForTypes(final Map<String, Map<String, Integer>> result, final long userID) {
+    final FluidContainer container = new FluidContainer();
     DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
     DOM.setStyleAttribute(container.getElement(), "paddingRight", "2px");
 
-    Set<String> types = result.keySet();
-    if (showListBoxes) {
-      System.out.println("getWidgetsForTypes (success) for user = " + userID + " got types " + types);
-      typeToBox.clear();
-      typeToButton.clear();
-
-      String firstType = types.iterator().next(); // e.g. unit!
-
-      FluidRow firstTypeRow = new FluidRow();
-      container.add(firstTypeRow);
-
-      Collection<String> sectionsInType = result.get(firstType).keySet();
-      sectionsInType = getSortedItems(sectionsInType);
-
-      ButtonGroupSectionWidget buttonGroupSectionWidget = new ButtonGroupSectionWidget(firstType);
-      typeToBox.put(firstType, buttonGroupSectionWidget);
-
-      Container labelContainer = new FluidContainer();
-      FluidRow rowAgain = new FluidRow();
-
-      labelContainer.addStyleName("inlineStyle");
-      DOM.setStyleAttribute(labelContainer.getElement(), "paddingLeft", "2px");
-      DOM.setStyleAttribute(labelContainer.getElement(), "paddingRight", "2px");
-      //DOM.setStyleAttribute(firstTypeRow.getElement(), "marginBottom", "5px");
-
-      Heading widget = makeLabelWidget(firstType);
-
-      rowAgain.add(widget);
-      labelContainer.add(rowAgain);
-
-      firstTypeRow.add(labelContainer);
-
-      Container clearColumnContainer = addColumnButton(firstType, ANY, buttonGroupSectionWidget, true);
-      firstTypeRow.add(clearColumnContainer);
-      numExpectedSections = sectionsInType.size();
-      numSections = numExpectedSections;
-      System.out.println("num " + numExpectedSections);
-      for (String sectionInFirstType : sectionsInType) {
-        Container columnContainer = addColumnButton(firstType, sectionInFirstType, buttonGroupSectionWidget, false);
-        DOM.setStyleAttribute(columnContainer.getElement(), "marginBottom", "5px");
-        firstTypeRow.add(columnContainer);
-
-        service.getTypeToSectionsForTypeAndSection(firstType, sectionInFirstType,
-          new TypeToSectionsAsyncCallback(firstType, sectionInFirstType, columnContainer, clearColumnContainer, labelContainer));
-      }
-
-      addBottomText(container);
-    } else {
-      String token = unencodeToken(History.getToken());
-      SelectionState selectionState = getSelectionState(token);
-
-      for (final String type : types) {
-        String typeValue = selectionState.typeToSection.get(type);
-        if (typeValue != null) {
-          FluidRow fluidRow = new FluidRow();
-          container.add(fluidRow);
-
-          fluidRow.add(new Column(2, new Heading(4,type)));
-          fluidRow.add(new Column(1, new Heading(4,typeValue)));
+      service.getTypeOrder(new AsyncCallback<Collection<String>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          //To change body of implemented methods use File | Settings | File Templates.
         }
+
+        @Override
+        public void onSuccess(Collection<String> sortedTypes) {
+          if (showListBoxes) {
+            addButtonRow(result, userID, container, sortedTypes);
+          } else {
+            addStudentTypeAndSection(container, sortedTypes);
+          }
+        }
+      });
+
+    return container;
+  }
+
+  private void addStudentTypeAndSection(FluidContainer container,Collection<String> sortedTypes) {
+    String token = unencodeToken(History.getToken());
+    SelectionState selectionState = getSelectionState(token);
+
+    for (final String type : sortedTypes) {
+      String typeValue = selectionState.typeToSection.get(type);
+      if (typeValue != null) {
+        FluidRow fluidRow = new FluidRow();
+        container.add(fluidRow);
+
+        fluidRow.add(new Column(2, new Heading(4,type)));
+        fluidRow.add(new Column(1, new Heading(4,typeValue)));
       }
     }
-    return container;
+  }
+
+  private void addButtonRow(Map<String, Map<String, Integer>> result, long userID, FluidContainer container, Collection<String> types) {
+    System.out.println("getWidgetsForTypes (success) for user = " + userID + " got types " + types);
+    typeToBox.clear();
+    typeToButton.clear();
+
+    String firstType = types.iterator().next(); // e.g. unit!
+
+    FluidRow firstTypeRow = new FluidRow();
+    container.add(firstTypeRow);
+
+    Collection<String> sectionsInType = result.get(firstType).keySet();
+    sectionsInType = getSortedItems(sectionsInType);
+
+    ButtonGroupSectionWidget buttonGroupSectionWidget = new ButtonGroupSectionWidget(firstType);
+    typeToBox.put(firstType, buttonGroupSectionWidget);
+
+    Container labelContainer = new FluidContainer();
+    FluidRow rowAgain = new FluidRow();
+
+    labelContainer.addStyleName("inlineStyle");
+    DOM.setStyleAttribute(labelContainer.getElement(), "paddingLeft", "2px");
+    DOM.setStyleAttribute(labelContainer.getElement(), "paddingRight", "2px");
+
+    Heading widget = makeLabelWidget(firstType);
+
+    rowAgain.add(widget);
+    labelContainer.add(rowAgain);
+
+    firstTypeRow.add(labelContainer);
+
+    Container clearColumnContainer = addColumnButton(firstType, ANY, buttonGroupSectionWidget, true);
+    firstTypeRow.add(clearColumnContainer);
+    numExpectedSections = sectionsInType.size();
+    numSections = numExpectedSections;
+    System.out.println("num " + numExpectedSections);
+    for (String sectionInFirstType : sectionsInType) {
+      Container columnContainer = addColumnButton(firstType, sectionInFirstType, buttonGroupSectionWidget, false);
+      DOM.setStyleAttribute(columnContainer.getElement(), "marginBottom", "5px");
+      firstTypeRow.add(columnContainer);
+
+      service.getTypeToSectionsForTypeAndSection(firstType, sectionInFirstType,
+        new TypeToSectionsAsyncCallback(firstType, sectionInFirstType, columnContainer, clearColumnContainer, labelContainer));
+    }
+
+    addBottomText(container);
   }
 
   @Override
