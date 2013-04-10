@@ -143,9 +143,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }*/
 
     String token = History.getToken();
-    System.out.println("pushFirstSelection : current token " + token + " vs new " +exerciseID);
+    System.out.println("pushFirstSelection : current token '" + token + "' vs new " +exerciseID);
     if (token != null && getIDFromToken(token).equals(exerciseID)) {
-      System.out.println("current token " + token + " same as new " +exerciseID);
+      System.out.println("\tpushFirstSelection :current token " + token + " same as new " +exerciseID);
       loadByIDFromToken(exerciseID);
     }
     else {
@@ -287,8 +287,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   private void askServerForExercise(ExerciseShell exerciseShell) {
     if (useUserID) {
+      System.out.println("askServerForExercise user " + userID+ " id = " + exerciseShell.getID() );
       service.getExercise(exerciseShell.getID(), userID, new ExerciseAsyncCallback(exerciseShell));
     } else {
+      System.out.println("askServerForExercise id = " + exerciseShell.getID() );
       service.getExercise(exerciseShell.getID(), new ExerciseAsyncCallback(exerciseShell));
     }
   }
@@ -378,7 +380,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     innerContainer.setWidget(exercisePanel);
 
     int i = getIndex(e);
-    //System.out.println("useExercise : " +e.getID() + " index " +i);
+    System.out.println("useExercise : " +e.getID() + " index " +i);
     if (i == -1) {
       System.err.println("can't find " + e + " in list of " + currentExercises.size() + " exercises.");
       return;
@@ -457,7 +459,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   @Override
   public boolean loadNextExercise(ExerciseShell current) {
-    //System.out.println("loadNextExercise " +current);
+    System.out.println("loadNextExercise " +current);
     int i = getIndex(current);
 
     boolean onLast = i == currentExercises.size() - 1;
