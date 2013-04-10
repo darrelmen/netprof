@@ -29,6 +29,10 @@ h1 {
     float: left;
 }
 
+.blockStyle {
+    display: block;
+}
+
 .alignJustify {
      align: justify;
  }
