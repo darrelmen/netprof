@@ -394,6 +394,10 @@ public class SectionExerciseList extends PagingExerciseList {
   private class MySetExercisesCallback extends SetExercisesCallback {
     private final String item;
 
+    /**
+     * @see SectionExerciseList#loadExercises(java.util.Map, String)
+     * @param item
+     */
     public MySetExercisesCallback(String item) {
       this.item = item;
     }
@@ -428,18 +432,21 @@ public class SectionExerciseList extends PagingExerciseList {
       studentLink.setHref(GWT.getHostPageBaseURL() + "?showSectionWidgets=false#" + historyToken);
     }
     if (currentToken.equals(historyToken)) {
-      if (firstTime) {
-        noSectionsGetExercises(userID);
+      if (currentExercises == null || currentExercises.isEmpty()) {
+     //   if (firstTime) {
+          noSectionsGetExercises(userID);
+      //  }
       } else {
         System.out.println("pushNewSectionHistoryToken : skipping same token " + historyToken);
       }
+
     } else {
       System.out.println("pushNewSectionHistoryToken : currentToken " + currentToken);
 
       System.out.println("------------ push history '" + historyToken + "' -------------- ");
       History.newItem(historyToken);
     }
-    firstTime = false;
+    //firstTime = false;
   }
 
   /**
@@ -454,9 +461,10 @@ public class SectionExerciseList extends PagingExerciseList {
     String token = History.getToken();
     System.out.println("pushNewItem : current token " + token + " vs new " + exerciseID);
     if (token != null && historyToken.equals(token)) {
-      System.out.println("current token " + token + " same as new " + exerciseID);
+      System.out.println("\tcurrent token '" + token + "' same as new " + historyToken);
       loadByIDFromToken(exerciseID);
     } else {
+      System.out.println("\tcurrent token '" + token + "' different from new " + exerciseID);
       History.newItem(historyToken);
     }
   }
