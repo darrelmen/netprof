@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,13 +23,27 @@ import java.util.Set;
  */
 public class SectionHelper {
   private static Logger logger = Logger.getLogger(SectionHelper.class);
-  String unitType = "unit";
-  String chapterType = "chapter";
-  String weekType = "week";
+  private String unitType = "unit";
+  private String chapterType = "chapter";
+  private String weekType = "week";
 
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
   private Map<String,Map<String,Map<String,Set<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String,Map<String,Set<String>>>>();
+
+  public List<String> getTypeOrder() {
+    List<String> types = new ArrayList<String>();
+    types.addAll(typeToSectionToTypeToSections.keySet());
+    Collections.sort(types, new Comparator<String>() {
+      @Override
+      public int compare(String o1, String o2) {
+        int first = typeToSectionToTypeToSections.get(o1).size();
+        int second =  typeToSectionToTypeToSections.get(o2).size();
+        return first > second ? +1 : first < second ? -1 : 0;
+      }
+    });
+    return types;
+  }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getTypeToSectionsForTypeAndSection(String, String)
