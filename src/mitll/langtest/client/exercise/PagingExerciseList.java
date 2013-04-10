@@ -220,7 +220,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     int header = getTableHeaderHeight();
     int leftOver = Window.getClientHeight() - header - 100;
 
-    System.out.println("Got on resize " + Window.getClientHeight() + " " + header + " result = " + leftOver);
+    //System.out.println("Got on resize " + Window.getClientHeight() + " " + header + " result = " + leftOver);
 
     float rawRatio = ((float) leftOver) / (float) HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
     float tableRatio = Math.min(MAX_PAGES, rawRatio);
