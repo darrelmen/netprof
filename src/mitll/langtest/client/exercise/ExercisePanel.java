@@ -1,5 +1,6 @@
 package mitll.langtest.client.exercise;
 
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -113,7 +114,8 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   }
 
   protected void addItemHeader(Exercise e) {
-    add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
+    // add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
+     add(new Heading(4,"Item #" + e.getID()));
   }
 
   private Widget getQuestionContent(Exercise e) {
@@ -164,7 +166,8 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
         getQuestionHeader(questionNumber, n, engQAPair, shouldShowAnswer(),!controller.isDemoMode());
       }
       else {
-        add(new HTML("<br></br>"));
+        //add(new HTML("<br></br>"));
+        add(new Heading(6,""));
       }
       if (controller.isDemoMode()) {
         Exercise.QAPair flQAPair  = flQuestions.get(questionNumber - 1);
