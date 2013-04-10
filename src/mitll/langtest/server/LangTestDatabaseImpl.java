@@ -221,7 +221,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<Exercise> exercises = getExercises(userID);
     for (Exercise e : exercises) {
       if (id.equals(e.getID())) {
-        logger.info("getNextExercise for user " +userID + " exid " + id + " got " + e);
+        logger.info("getExercise for user " +userID + " exid " + id + " got " + e);
         return e;
       }
     }
