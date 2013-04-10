@@ -48,6 +48,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   private static final int MIN_PAGE_SIZE = 3;
   private static final float DEFAULT_PAGE_SIZE = 15f;
   private CellTable<ExerciseShell> table;
+  private ExerciseController controller;
 
   public interface TableResources extends CellTable.Resources {
     /**
@@ -66,11 +67,12 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    * @param service
    * @param feedback
    * @param showTurkToken
+   * @param controller
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            boolean showTurkToken, boolean showInOrder) {
+                            boolean showTurkToken, boolean showInOrder, ExerciseController controller) {
     super(currentExerciseVPanel, service, feedback, null, showTurkToken, showInOrder);
-
+    this.controller = controller;
     addComponents();
   }
 
@@ -108,12 +110,9 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     pager.setDisplay(table);
 
     FlowPanel column = new FlowPanel();
-    //FlexTable column = new FlexTable();
     add(column);
     column.add(pager);
-  column.add(table);
- //   column.setWidget(0,0,pager);
-   // column.setWidget(1,0,table);
+    column.add(table);
   }
 
   private Column<ExerciseShell, SafeHtml> getExerciseIdColumn() {
@@ -175,16 +174,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   protected String getHistoryToken(String id) { return "item=" +id; }
 
-  protected void gotClickOnItem(final ExerciseShell e) {
-/*    Timer timer = new Timer() {
-      @Override
-      public void run() {
-        loadExercise(e);
-      }
-    };
-    timer.schedule(100);*/
-  }
-
+  protected void gotClickOnItem(final ExerciseShell e) {}
 
   /**
    * @see SectionExerciseList.MySetExercisesCallback#onSuccess(java.util.List)
@@ -228,7 +218,10 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 /*    System.out.println("Got on resize " + Window.getClientHeight() + " " +
         getOffsetHeight() + " bodyheight = " + table.getBodyHeight() + " table offset height " + table.getOffsetHeight() + " parent height " + getParent().getOffsetHeight());*/
     int header = getTableHeaderHeight();
-    int leftOver = Window.getClientHeight() - header;
+    int leftOver = Window.getClientHeight() - header - 100;
+
+    System.out.println("Got on resize " + Window.getClientHeight() + " " + header + " result = " + leftOver);
+
     float rawRatio = ((float) leftOver) / (float) HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
     float tableRatio = Math.min(MAX_PAGES, rawRatio);
     // System.out.println("left over " + leftOver + " raw " + rawRatio + " table ratio " + tableRatio);
@@ -251,7 +244,9 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   protected int getTableHeaderHeight() {
-    return 625 - HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
+    int heightOfTopRows = controller.getHeightOfTopRows();
+
+    return heightOfTopRows;
   }
 
   /**
