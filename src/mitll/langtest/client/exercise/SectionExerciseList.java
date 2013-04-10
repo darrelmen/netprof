@@ -55,18 +55,19 @@ public class SectionExerciseList extends PagingExerciseList {
   private boolean firstTime = true;
 
   /**
-   * @see mitll.langtest.client.LangTest#makeExerciseList(com.google.gwt.user.client.ui.Panel, boolean)
+   * @see mitll.langtest.client.LangTest#makeExerciseList
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
    * @param showTurkToken
    * @param showInOrder
    * @param showListBoxes
+   * @param controller
    */
   public SectionExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                              UserFeedback feedback,
-                             boolean showTurkToken, boolean showInOrder, boolean showListBoxes) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder);
+                             boolean showTurkToken, boolean showInOrder, boolean showListBoxes, ExerciseController controller) {
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller);
     this.showListBoxes = showListBoxes;
   }
 
@@ -718,7 +719,7 @@ public class SectionExerciseList extends PagingExerciseList {
 
   private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 390 - 20-65;
 
-  protected int getTableHeaderHeight() {
+/*  protected int getTableHeaderHeight() {
     return 625 - HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
-  }
+  }*/
 }
