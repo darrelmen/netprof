@@ -33,6 +33,10 @@ h1 {
     display: block;
 }
 
+.bold {
+    font-weight: bold;
+}
+
 .alignJustify {
      align: justify;
  }
