@@ -200,7 +200,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
 
     public void onSuccess(List<ExerciseShell> result) {
-      System.out.println("SetExercisesCallback Got " +result.size() + " results");
+      //System.out.println("SetExercisesCallback Got " +result.size() + " results");
       rememberExercises(result);
       loadFirstExercise();
     }
