@@ -75,25 +75,7 @@ public class MonitoringManager {
     this.users = props.getNameForRecorder() + "s";
   }
 
-  private boolean didInit = false;
-
   public void showResults() {
-    if (didInit) {
-      showResults2();
-    } else {
-      System.out.println("loading VisualizationUtils...");
-      VisualizationUtils.loadVisualizationApi(new Runnable() {
-        @Override
-        public void run() {
-          System.out.println("\tloaded VisualizationUtils...");
-
-          didInit = true;
-          showResults2();
-        }
-      }, ColumnChart.PACKAGE, LineChart.PACKAGE);
-    }
-  }
-  public void showResults2() {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Monitoring");
