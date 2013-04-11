@@ -488,7 +488,9 @@ public class SectionExerciseList extends PagingExerciseList {
     String historyToken = getHistoryToken(null);
     String currentToken = History.getToken();
 
-    studentLink.setHref(GWT.getHostPageBaseURL() +"?showSectionWidgets=false#" + historyToken);
+    if (studentLink != null) {
+      studentLink.setHref(GWT.getHostPageBaseURL() +"?showSectionWidgets=false#" + historyToken);
+    }
     if (currentToken.equals(historyToken)) {
       System.out.println("pushNewSectionHistoryToken : skipping same token " + historyToken);
     } else {
