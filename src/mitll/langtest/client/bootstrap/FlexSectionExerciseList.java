@@ -317,11 +317,32 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         int col = 0;
         ButtonType buttonType = typeToButton.get(typeForOriginal);
 
+        boolean allSamePrefix = false;
+       String prefix = "";
+       /*    if (sortedItems.size() > 1) {
+          String f = sortedItems.get(0);
+
+          String[] split = f.split("-");
+          if (split.length > 1) {
+            prefix = split[0];
+            allSamePrefix = true;
+          }
+
+          if (prefix.length() > 0) {
+            for (String section : sortedItems) {
+              allSamePrefix = allSamePrefix && section.startsWith(prefix);
+            }
+          }
+        }
+        if (allSamePrefix) {
+          table.setWidget(row,col++,new Heading(6,prefix));
+        }*/
         for (final String section : sortedItems) {
           ButtonGroup group = new ButtonGroup();
+
           table.setWidget(row, col++, group);
 
-          Button sectionButton = makeSubgroupButton(sectionWidgetFinal, type, section,buttonType, false);
+          Button sectionButton = makeSubgroupButton(sectionWidgetFinal, type, allSamePrefix ? section.substring(prefix.length()+1): section,buttonType, false);
           group.add(sectionButton);
           ((ButtonGroupSectionWidget)sectionWidget).addButton(sectionButton);
         }
