@@ -94,7 +94,6 @@ public interface LangTestDatabase extends RemoteService {
 
   List<Result> getResults(int start, int end);
 
-//  Map<Integer, Float> getHoursToCompletion(boolean useFile);
   Map<String,Number> getResultStats();
 
   Map<String, Map<Integer, Integer>> getResultCountsByGender();
@@ -108,11 +107,11 @@ public interface LangTestDatabase extends RemoteService {
 
   void logMessage(String message);
 
-  Map<String, Collection<String>> getTypeToSection();
+ // Map<String, Collection<String>> getTypeToSection();
 
   Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section);
   Collection<String> getTypeOrder();
-  List<ExerciseShell> getExercisesForSelectionState(Map<String, String> typeToSection, long userID);
+  List<ExerciseShell> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection, long userID);
 
   FlashcardResponse getNextExercise(long userID);
 
@@ -123,5 +122,5 @@ public interface LangTestDatabase extends RemoteService {
 
   Map<String, Map<String,Integer>> getTypeToSectionToCount();
 
-  Map<String, Set<String>> getTypeToSectionsForTypeAndSection(Map<String, String> typeToSection);
+  Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(Map<String, Collection<String>> typeToSection);
 }
