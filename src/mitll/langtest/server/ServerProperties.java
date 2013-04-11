@@ -24,6 +24,7 @@ import java.util.jar.Manifest;
 public class ServerProperties {
   public static final String SHOW_SECTIONS = "showSections";
   public static final String DEBUG_EMAIL = "debugEmail";
+  private static final String USE_WEIGHTS = "useWeights";
   private static Logger logger = Logger.getLogger(ServerProperties.class);
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
@@ -53,6 +54,7 @@ public class ServerProperties {
   public boolean isUrdu;
   public int firstNInOrder;
   public boolean isDataCollectAdminView;
+  public boolean useWeights;
 
   public void readPropertiesFile(ServletContext servletContext, String configDir) {
    String configFile = servletContext.getInitParameter("configFile");
@@ -101,6 +103,10 @@ public class ServerProperties {
     return !props.getProperty(COLLECT_ONLY_AUDIO, "false").equals("false");
   }
 
+  public boolean shouldUseWeights() {
+    return !props.getProperty(USE_WEIGHTS, "false").equals("false");
+  }
+
   public boolean isCollectAudio() {
     return collectAudio;
   }
@@ -138,7 +144,7 @@ public class ServerProperties {
     collectAudio = !props.getProperty(COLLECT_AUDIO, COLLECT_AUDIO_DEFAULT).equals("false");
     isUrdu = !props.getProperty(URDU, "false").equals("false");
     biasTowardsUnanswered = !props.getProperty(BIAS_TOWARDS_UNANSWERED, "true").equals("false");
-    useOutsideResultCounts = !props.getProperty(USE_OUTSIDE_RESULT_COUNTS, "true").equals("false");
+    useOutsideResultCounts = !props.getProperty(USE_OUTSIDE_RESULT_COUNTS, "false").equals("false");
     isDataCollectAdminView = !props.getProperty("dataCollectAdminView", "false").equals("false");
     outsideFile = props.getProperty(OUTSIDE_FILE, OUTSIDE_FILE_DEFAULT);
     String dateFromManifest = getDateFromManifest(servletContext);
