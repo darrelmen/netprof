@@ -27,7 +27,7 @@ public class ListBoxSectionWidget extends ListBox implements SectionWidget {
     setSelectedIndex(1); // not any, which is the first list item
   }
 
-  public void selectItem(String section, boolean doToggle) {
+  public void selectItem(Collection<String> section, boolean doToggle) {
 
     for (int i = 0; i < getItemCount(); i++) {
       String itemText = getItemText(i);
@@ -43,7 +43,7 @@ public class ListBoxSectionWidget extends ListBox implements SectionWidget {
    * @see SectionExerciseList#populateListBox(String, java.util.Collection)
    * @param currentSelection
    */
-  public void retainCurrentSelectionState( String currentSelection) {
+  public void retainCurrentSelectionState( Collection<String> currentSelection) {
     int itemCount = getItemCount();
 
     // retain current selection state
