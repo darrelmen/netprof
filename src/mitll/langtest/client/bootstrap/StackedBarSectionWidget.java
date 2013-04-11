@@ -68,8 +68,8 @@ public class StackedBarSectionWidget extends StackProgressBar implements Section
   }
 
   @Override
-  public void selectItem(String section, boolean doToggle) {
-    currentSelection = section;
+  public void selectItem(Collection<String> section, boolean doToggle) {
+    //currentSelection = section;
 /*    for (Button b : buttons) {
       if (b.isActive()) {
         b.setActive(false);
@@ -85,7 +85,7 @@ public class StackedBarSectionWidget extends StackProgressBar implements Section
   }
 
   @Override
-  public void retainCurrentSelectionState(String currentSelection) {
+  public void retainCurrentSelectionState(Collection<String> currentSelection) {
 /*    for (Button b : buttons) {
       if (b.isActive()) {
         b.setActive(false);
@@ -140,7 +140,7 @@ public class StackedBarSectionWidget extends StackProgressBar implements Section
       @Override
       public void onClick(ClickEvent event) {
         System.out.println("got click on " + item);
-        selectItem(item, false);
+       // selectItem(item, false);
         listener.gotClick(type, item);
       }
     });
