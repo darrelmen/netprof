@@ -62,7 +62,7 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
   }
 
   @Override
-  public void selectItem(String section, boolean doToggle) {
+  public void selectItem(Collection<String> section, boolean doToggle) {
     for (Button b : buttons) {
       if (b.isActive()) {
         b.setActive(false);
@@ -78,7 +78,7 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
   }
 
   @Override
-  public void retainCurrentSelectionState(String currentSelection) {
+  public void retainCurrentSelectionState(Collection<String> currentSelection) {
     for (Button b : buttons) {
       if (b.isActive()) {
         b.setActive(false);
@@ -126,7 +126,7 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
       @Override
       public void onClick(ClickEvent event) {
         System.out.println("got click on " + item);
-        selectItem(item, false);
+       // selectItem(item, false);
         listener.gotClick(type, item);
       }
     });
