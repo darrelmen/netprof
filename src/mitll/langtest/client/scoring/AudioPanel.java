@@ -258,7 +258,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @see #onResize()
    */
   private void getImages() {
-    int leftColumnWidth = Math.min(175,controller.getLeftColumnWidth()) + 50;
+    int leftColumnWidth = Math.min(175,controller.getLeftColumnWidth()) + 70;
     //int rightMargin = screenPortion == 1.0f ? leftColumnWidth : (int)(screenPortion*((float)rightMarginToUse));
     int width = (int) ((screenPortion*((float)Window.getClientWidth())) - leftColumnWidth);
 
