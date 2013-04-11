@@ -103,13 +103,13 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     SelectionState selectionState = getSelectionState(token);
 
     for (final String type : sortedTypes) {
-      String typeValue = selectionState.typeToSection.get(type);
+      Collection<String> typeValue = selectionState.typeToSection.get(type);
       if (typeValue != null) {
         FluidRow fluidRow = new FluidRow();
         container.add(fluidRow);
 
         fluidRow.add(new Column(2, new Heading(4,type)));
-        fluidRow.add(new Column(1, new Heading(4,typeValue)));
+        fluidRow.add(new Column(1, new Heading(4,typeValue.toString())));
       }
     }
   }
@@ -121,6 +121,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     String firstType = types.iterator().next(); // e.g. unit!
 
+    container.add(getInstructionRow());
     FluidRow firstTypeRow = new FluidRow();
     container.add(firstTypeRow);
 
@@ -174,9 +175,8 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   }
 
   private void addBottomText(FluidContainer container) {
-    FluidRow fluidRow1 = new FluidRow();
-    container.add(fluidRow1);
-    fluidRow1.add(new Column(7, 3, new Heading(5, "Click on the buttons to select just what you want to see.")));
+/*    FluidRow fluidRow1 = getInstructionRow();
+    container.add(fluidRow1);*/
 
     FluidRow fluidRow = new FluidRow();
     container.add(fluidRow);
@@ -185,6 +185,12 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     Widget hideBoxesWidget = getHideBoxesWidget();
     fluidRow.add(new Column(2, 1, hideBoxesWidget));
+  }
+
+  private FluidRow getInstructionRow() {
+    FluidRow fluidRow1 = new FluidRow();
+    fluidRow1.add(new Column(7, 3, new Heading(5, "Click on the buttons to select just what you want to see.")));
+    return fluidRow1;
   }
 
   private Heading makeLabelWidget(String firstType) {
@@ -220,7 +226,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       public void onClick(ClickEvent event) {
         System.out.println("got click on button " + type + "=" + sectionInFirstType);
 
-        buttonGroupSectionWidget.selectItem(sectionInFirstType, true);
+        List<String> selections = new ArrayList<String>();
+        selections.add(sectionInFirstType);
+        buttonGroupSectionWidget.selectItem(selections, true);
         pushNewSectionHistoryToken();
       }
     });
@@ -403,8 +411,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       public void onClick(ClickEvent event) {
 
         System.out.println("got click on button " + type + "=" + section);
-
-        sectionWidgetFinal.selectItem(section, true);
+        List<String> selections = new ArrayList<String>();
+        selections.add(section);
+        sectionWidgetFinal.selectItem(selections, true);
         pushNewSectionHistoryToken();
       }
     });
@@ -433,9 +442,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @param result
    */
   @Override
-  protected void populateListBoxAfterSelection(Map<String, Set<String>> result) {
+  protected void populateListBoxAfterSelection(Map<String, Collection<String>> result) {
     Set<String> typesMentioned = new HashSet<String>(typeToBox.keySet());
-    for (Map.Entry<String, Set<String>> pair : result.entrySet()) {
+    for (Map.Entry<String, Collection<String>> pair : result.entrySet()) {
       SectionWidget sectionWidget = typeToBox.get(pair.getKey());
       if (sectionWidget != null) {
         sectionWidget.enableInSet(pair.getValue());
