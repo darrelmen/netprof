@@ -36,7 +36,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
     clearButton = b;
     clearButton.setEnabled(false);
     //clearButton.setVisible(false);
-
+/*
     clearButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -46,26 +46,43 @@ class ButtonGroupSectionWidget implements SectionWidget {
            // break;
           }
         }
-        System.out.println("disable clear button " +clearButton);
+        System.out.println("disable clear button for type " +type);
 
         clearButton.setEnabled(false);
       }
-    });
+    });*/
+  }
+
+  private void clearAll() {
+    for (Button b : buttons) {
+      if (b.isActive()) {
+        b.setActive(false);
+      }
+    }
+    System.out.println("disable clear button for type " +type);
+
+    clearButton.setEnabled(false);
   }
 
   @Override
   public String getCurrentSelection() {
     //System.out.println("getCurrentSelection for " +type + " checking " + buttons.size() + " buttons.");
-
+    StringBuilder builder = new StringBuilder();
     for (Button b : buttons) {
       if (b.isActive()) {
         //System.out.println("\tgetCurrentSelection for " +type + "=" + b.getText());
-        return b.getText().trim();
+        builder.append(b.getText().trim());
+        builder.append(",");
       }
+    }
+    if (builder.length() > 0) {
+      return builder.toString();
+    }
+    else {
+      return SectionExerciseList.ANY;
     }
     //System.out.println("\tgetCurrentSelection for " +type + " - none are selected");
 
-    return SectionExerciseList.ANY;
   }
 
   private boolean isAnythingSelected() {
@@ -99,50 +116,59 @@ class ButtonGroupSectionWidget implements SectionWidget {
     return buttons.iterator().next().getText().trim();
   }
 
+  /**
+   * @deprecated -- we don't do this right now
+   */
   @Override
   public void selectFirstAfterAny() {
     System.out.println("selectFirstAfterAny called?? --------------");
-    selectItem(getFirstItem(), false);
+
+    //selectItem(getFirstItem(), false);
   }
 
-  @Override
-  public void selectItem(String section, boolean doToggle) {
-    System.out.println("selectItem " + type + "="+section);
 
-    for (Button b : buttons) {
+  @Override
+  public void selectItem(Collection<String> sections, boolean doToggle) {
+    System.out.println("selectItem " + type + "="+sections);
+
+    if (sections.size() == 1 && sections.iterator().next().equals(SectionExerciseList.ANY)) {
+      clearAll();
+    } else {
+/*    for (Button b : buttons) {
       String trim = b.getText().trim();
 
-      if (b.isActive() && !trim.equals(section)) {
+      if (b.isActive() && !sections.contains(trim)) {
         b.setActive(false);
         break;
       }
-    }
+    }*/
 
-    boolean didSelect = false;
-    // flip state
-    for (Button b : buttons) {
-      String trim = b.getText().trim();
-      if (trim.equals(section)) {
-        //System.out.println("\tselectItem found button is active = " +b.isActive());
+      boolean didSelect = false;
+      // flip state
+      for (Button b : buttons) {
+        String trim = b.getText().trim();
+        if (sections.contains(trim)) {
+          //System.out.println("\tselectItem found button is active = " +b.isActive());
 
-        b.setActive(!doToggle || !b.isActive());
+          b.setActive(!doToggle || !b.isActive());
 
-        //System.out.println("\tselectItem after, button is active = " +b.isActive());
-        didSelect = b.isActive();
-        break;
+          //System.out.println("\tselectItem after, button is active = " +b.isActive());
+          didSelect = b.isActive();
+          break;
+        }
       }
-    }
-    boolean anythingSelected = isAnythingSelected();
-    if (didSelect && !anythingSelected) {
-      System.err.println("selectItem " + type + "="+section + " but nothing selected?");
-    }
+      boolean anythingSelected = isAnythingSelected();
+      if (didSelect && !anythingSelected) {
+        System.err.println(">>>> selectItem " + type + "=" + sections + " but nothing selected?");
+      }
 
-    setClearButtonState(section, anythingSelected);
+      setClearButtonState(sections, anythingSelected);
+    }
   }
 
-  private void setClearButtonState(String section, boolean anythingSelected) {
+  private void setClearButtonState(Collection<String> sections, boolean anythingSelected) {
     if (clearButton != null) {
-      System.out.println("\tselectItem for type " +type+"="+section + " set clear button.");
+      System.out.println("\tselectItem for type " +type+"="+sections + " set clear button.");
       clearButton.setEnabled(anythingSelected);
     }
     else {
@@ -150,23 +176,31 @@ class ButtonGroupSectionWidget implements SectionWidget {
     }
   }
 
+  /**
+   * @see SectionExerciseList#populateListBox(String)
+   * @param currentSelection
+   */
   @Override
-  public void retainCurrentSelectionState(String currentSelection) {
-    for (Button b : buttons) {
+  public void retainCurrentSelectionState(Collection<String> currentSelection) {
+/*    for (Button b : buttons) {
       if (b.isActive()) {
         b.setActive(false);
         break;
       }
     }
     boolean found = false;
+    int num = 0;
     for (Button b : buttons) {
-      if (b.getText().trim().equals(currentSelection)) {
+      String value = b.getText().trim();
+      if (currentSelection.contains(value)) {
         b.setActive(true);
         found = true;
-        break;
+       // break;
       }
     }
-    if (!found) buttons.iterator().next().setActive(true);
+    System.out.println("retainCurrentSelectionState for type " +type+", "+num + " selected.");
+
+    if (!found) buttons.iterator().next().setActive(true);*/
   }
 
   @Override
