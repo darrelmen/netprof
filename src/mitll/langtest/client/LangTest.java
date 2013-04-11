@@ -154,6 +154,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       return;
     }
 
+    if (props.isAdminView()) {
+      VisualizationUtils.loadVisualizationApi(new Runnable() {
+        @Override
+        public void run() {
+          System.out.println("\tloaded VisualizationUtils...");
+        }
+      }, ColumnChart.PACKAGE, LineChart.PACKAGE);
+    }
+
     userManager = new UserManager(this,service, isCollectAudio(), false, isCRTDataCollectMode() || isArabicTextDataCollect(), props.getAppTitle(),false);
     resultManager = new ResultManager(service, this, props.getNameForAnswer());
     monitoringManager = new MonitoringManager(service, props);
