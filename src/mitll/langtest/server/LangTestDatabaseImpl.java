@@ -166,7 +166,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public List<ExerciseShell> getExercisesForSelectionState(Map<String, String> typeToSection, long userID) {
     Collection<Exercise> exercisesForSection = db.getExercisesForSelectionState(typeToSection);
-    List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection);
+    List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection,serverProps.shouldUseWeights());
     return getExerciseShells(exercisesBiasTowardsUnanswered);
 
   }
@@ -259,23 +259,27 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private List<Exercise> getExercisesInModeDependentOrder(long userID, String lessonPlanFile) {
     List<Exercise> exercises;
     if (serverProps.dataCollectMode) {
-      // logger.debug("in data collect mode");
+       logger.debug("in data collect mode");
       if (serverProps.biasTowardsUnanswered) {
+        logger.debug("in biasTowardsUnanswered mode");
+
         if (serverProps.useOutsideResultCounts) {
           String outsideFileOverride = serverProps.outsideFile;
           if (lessonPlanFile.contains("farsi")) outsideFileOverride = configDir + File.separator + "farsi.txt";
           else if (lessonPlanFile.contains("urdu")) outsideFileOverride = configDir + File.separator + "urdu.txt";
           else if (lessonPlanFile.contains("sudanese"))
             outsideFileOverride = configDir + File.separator + "sudanese.txt";
-          exercises = db.getExercisesBiasTowardsUnanswered(userID, outsideFileOverride);
+          exercises = db.getExercisesBiasTowardsUnanswered(userID, outsideFileOverride, serverProps.shouldUseWeights());
           db.setOutsideFile(outsideFileOverride);
         } else {
-          exercises = db.getExercisesBiasTowardsUnanswered(userID);
+          exercises = db.getExercisesBiasTowardsUnanswered(userID,serverProps.shouldUseWeights());
         }
       } else {
         exercises = db.getExercisesFirstNInOrder(userID, serverProps.firstNInOrder);
       }
     } else {
+      logger.debug("*not* in data collect mode");
+
       exercises = serverProps.isArabicTextDataCollect() ? db.getRandomBalancedList() : db.getExercises(userID);
     }
     return exercises;
