@@ -107,7 +107,7 @@ public interface LangTestDatabaseAsync {
 
   void logMessage(String message, AsyncCallback<Void> async);
 
-  void getTypeToSection(AsyncCallback<Map<String, Collection<String>>> async);
+ // void getTypeToSection(AsyncCallback<Map<String, Collection<String>>> async);
   void getTypeToSectionsForTypeAndSection(String type, String section, AsyncCallback<Map<String, Collection<String>>> async);
 
 //  void getExercisesForSection(String type, String section, long userID, AsyncCallback<List<ExerciseShell>> async);
@@ -121,11 +121,11 @@ public interface LangTestDatabaseAsync {
 
   void clearUserState(long userID, AsyncCallback<Void> async);
 
-  void getExercisesForSelectionState(Map<String, String> typeToSection, long userID, AsyncCallback<List<ExerciseShell>> async);
+  void getExercisesForSelectionState(Map<String, Collection<String>> typeToSection, long userID, AsyncCallback<List<ExerciseShell>> async);
 
   void getTypeToSectionToCount(AsyncCallback<Map<String, Map<String, Integer>>> async);
 
-  void getTypeToSectionsForTypeAndSection(Map<String, String> typeToSection, AsyncCallback<Map<String, Set<String>>> async);
+  void getTypeToSectionsForTypeAndSection(Map<String, Collection<String>> typeToSection, AsyncCallback<Map<String, Collection<String>>> async);
 
   void getTypeOrder(AsyncCallback<Collection<String>> async);
 }
