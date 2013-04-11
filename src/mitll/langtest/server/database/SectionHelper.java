@@ -22,7 +22,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class SectionHelper {
-  public static final String SEMESTER = "semester";
+ // public static final String SEMESTER = "semester";
   private static Logger logger = Logger.getLogger(SectionHelper.class);
   private String unitType = "unit";
   private String chapterType = "chapter";
@@ -30,7 +30,7 @@ public class SectionHelper {
 
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
-  private Map<String,Map<String,Map<String,Set<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String,Map<String,Set<String>>>>();
+  private Map<String,Map<String,Map<String,Collection<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String,Map<String,Collection<String>>>>();
 
   public List<String> getTypeOrder() {
     List<String> types = new ArrayList<String>();
@@ -53,9 +53,9 @@ public class SectionHelper {
    * @return
    */
   public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
-    Map<String, Map<String, Set<String>>> sectionToSub = typeToSectionToTypeToSections.get(type);
+    Map<String, Map<String, Collection<String>>> sectionToSub = typeToSectionToTypeToSections.get(type);
     if (sectionToSub == null) return Collections.emptyMap();
-    Map<String, Set<String>> typeToSections = sectionToSub.get(section);
+    Map<String, Collection<String>> typeToSections = sectionToSub.get(section);
 /*
     if (section == null || section.length() == 0) {
       Collection<Map<String, Set<String>>> values = sectionToSub.values();
@@ -71,7 +71,7 @@ public class SectionHelper {
       if (typeToSections == null) return Collections.emptyMap();
 
       Map<String,Collection<String>> retval = new HashMap<String, Collection<String>>();
-      for (Map.Entry<String,Set<String>> pair : typeToSections.entrySet()) {
+      for (Map.Entry<String,Collection<String>> pair : typeToSections.entrySet()) {
         retval.put(pair.getKey(),new ArrayList<String>(pair.getValue()));
       }
       logger.debug("getTypeToSectionsForTypeAndSection type=" + type + " section="+section + " yields " + retval);
@@ -79,96 +79,203 @@ public class SectionHelper {
   //  }
   }
 
-  private Map<String,Set<String>> getTypeToSectionsForTypeAndSection2(String type, String section) {
-    Map<String, Map<String, Set<String>>> sectionToSub = typeToSectionToTypeToSections.get(type);
+  private Map<String,Collection<String>> getTypeToSectionsForTypeAndSection2(String type, String section) {
+    Map<String, Map<String, Collection<String>>> sectionToSub = typeToSectionToTypeToSections.get(type);
     if (sectionToSub == null)
       return Collections.emptyMap();
     else
       return sectionToSub.get(section);
   }
 
-  public Map<String, Set<String>> getTypeToSectionsForTypeAndSection(Map<String, String> typeToSection) {
-    Map<String, Set<String>> resultMap = null;
+  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(Map<String, Collection<String>> typeToSections) {
+    Map<String, Collection<String>> resultMap = null;
+    Map<String, Map<String, Collection<String>>> typeToTypeToSections = new HashMap<String, Map<String, Collection<String>>>();
 
-    for (Map.Entry<String, String> pair : typeToSection.entrySet()) {
+    for (Map.Entry<String, Collection<String>> pair : typeToSections.entrySet()) {
       String type = pair.getKey();
       if (isKnownType(type)) {
-        String sectionForType = pair.getValue();
-        logger.debug("looking for matches to " + type +"=" +sectionForType);
+        Map<String, Collection<String>> typeToSectionsForType = typeToTypeToSections.get(type);
 
-        Map<String, Set<String>> typeToSectionsForTypeAndSection2 = getTypeToSectionsForTypeAndSection2(type, sectionForType);
-        logger.debug("\t result is " + typeToSectionsForTypeAndSection2);
+        Collection<String> sectionsForType = pair.getValue();
+        logger.debug("looking for matches to user selections " + type + "=" + sectionsForType);
 
-        if (resultMap == null) {
-          resultMap = new HashMap<String,Set<String>>(typeToSectionsForTypeAndSection2);
-          logger.debug("\t resultMap now " + resultMap);
-        }
-        else {
-          for (String currentType : typeToSectionsForTypeAndSection2.keySet()) {
-            Set<String> copy;
-            if (resultMap.containsKey(currentType)) {
-              copy = new HashSet<String>(resultMap.get(currentType));
-              Set<String> c = typeToSectionsForTypeAndSection2.get(currentType);
-              if (c != null) {
-                copy.retainAll(c);
-              } else {
-                logger.debug("\tno result matches for " + currentType);
+        for (String sectionForType : sectionsForType) {   // user selections
+          Map<String, Collection<String>> typeToSectionsForTypeAndSection2 = getTypeToSectionsForTypeAndSection2(type, sectionForType);
+          //logger.debug("\tresult is " + typeToSectionsForTypeAndSection2);
 
-              }
-            } else {
-              copy = new HashSet<String>(typeToSectionsForTypeAndSection2.get(currentType));
-            }
-            resultMap.put(currentType, copy);
-            logger.debug("\t resultMap now " + resultMap);
+          if (typeToSectionsForType == null) {
+            typeToTypeToSections.put(type, typeToSectionsForType = new HashMap<String, Collection<String>>());
+            //resultMap = new HashMap<String, Set<String>>(typeToSectionsForTypeAndSection2);
+            typeToSectionsForType.putAll(typeToSectionsForTypeAndSection2);
+            logger.debug("\tinitial for " + type + "/" +sectionForType + " : "+typeToSectionsForType);
+          } else {
+            combineMapsTogether(typeToSectionsForType, typeToSectionsForTypeAndSection2, true);
+            logger.debug("\tcurrent for " + type + "/" +sectionForType + " : "+ typeToSectionsForType);
           }
+
+          //combineMapsTogether(typeToSectionsForType, typeToSections, false);
+      //    logger.debug("\tafter AND against selection for " + type + "/" +sectionForType + " : "+ typeToSectionsForType);
+
         }
+
+/*        for (String type2 : typeToSections.keySet()) {
+           if (!type2.equals(type))  {
+             Collection<String> currentFilterResults = typeToSectionsForType.get(type2);
+             Collection<String> userSelections = typeToSections.get(type2);
+             Set<String> copy = new HashSet<String>(userSelections);
+             copy.retainAll(currentFilterResults);
+             typeToSections.put(type2,copy);
+             logger.debug("\tafter AND against results for " + type + "/" +currentFilterResults + " : "+ typeToSections.get(type2));
+           }
+        }*/
+        //combineMapsTogether(typeToSections, typeToSections, false);
+        //    logger.debug("\tafter AND against selection for " + type + "/" +sectionForType + " : "+ typeToSectionsForType);
       }
       else {
         logger.warn("huh? got unknown type " + type);
       }
     }
+
+    for (Map<String, Collection<String>> values : typeToTypeToSections.values()) {
+      if (resultMap == null) {
+        resultMap = values;
+      }
+      else {
+        combineMapsTogether(resultMap,values,false);
+      }
+    }
+
+
+
     if (resultMap == null) {
-      logger.error("couldn't find any valid types given " + typeToSection);
+      logger.error("couldn't find any valid types given " + typeToSections);
       resultMap = Collections.emptyMap();
+    }
+    else {
+      logger.debug("initial result " + resultMap + ", now AND with user selections " + typeToSections);
+
+      Map<String, Collection<String>> copy = new HashMap<String, Collection<String>>();
+      for (String key : resultMap.keySet()) copy.put(key, new HashSet<String>(resultMap.get(key)));
+      // filter again to make sure result is consistent...
+      for (Map.Entry<String, Collection<String>> pair : resultMap.entrySet()) {
+        String resultType = pair.getKey();
+
+        Map<String,Collection<String>> mergedResult = new HashMap<String,Collection<String>>();
+
+        for (String section : pair.getValue()) {
+          Map<String, Collection<String>> typeToSectionsForTypeAndSection2 = getTypeToSectionsForTypeAndSection2(resultType, section);
+
+          for (Map.Entry<String, Collection<String>> otherTypeToSections : typeToSectionsForTypeAndSection2.entrySet()) {
+            String constrainedType = otherTypeToSections.getKey();
+            if (!constrainedType.equals(resultType)) {
+              Collection<String> matches = otherTypeToSections.getValue();
+              Collection<String> sectionsForType = mergedResult.get(constrainedType);
+              if (sectionsForType == null) mergedResult.put(constrainedType, sectionsForType = new HashSet<String>());
+              sectionsForType.addAll(matches);
+
+
+          /*    Collection<String> filteredSections = copy.get(constrainedType);
+              logger.debug("\tsection " + section + " type " + constrainedType + ", matches " + matches + " examining " + filteredSections);
+              if (filteredSections != null) {
+                filteredSections.retainAll(matches);
+                logger.debug("\tafter AND " + filteredSections);
+              }
+*/
+            }
+          }
+        }
+
+        logger.debug("mergedResult is " + mergedResult);
+
+        for (Map.Entry<String, Collection<String>> typeToSectionsAgain : copy.entrySet()) {
+          Collection<String> sections = mergedResult.get(typeToSectionsAgain.getKey());
+          if (sections != null) {
+            typeToSectionsAgain.getValue().retainAll(sections);
+          }
+        }
+
+      }
+
+      resultMap = copy;
+      logger.debug("result is " + resultMap);
+      // user selections override filtered results
+ /*     for (String type  : resultMap.keySet()) {
+       // String type = typeToSectionsResult.getKey();
+        if (typeToSections.containsKey(type)) {
+          resultMap.put(type,typeToSections.get(type));
+        }
+      }*/
+      //combineMapsTogether(resultMap,typeToSections,false);
+   //   logger.debug("result is " + resultMap);
+
     }
     return resultMap;
   }
 
+  private void combineMapsTogether(Map<String, Collection<String>> typeToSectionsForType,
+                                   Map<String, Collection<String>> typeToSectionsForTypeAndSection2, boolean doOr) {
+    for (String currentType : typeToSectionsForTypeAndSection2.keySet()) {
+      Set<String> copy;
+      Collection<String> setToAdd = typeToSectionsForTypeAndSection2.get(currentType);
+      if (typeToSectionsForType.containsKey(currentType)) {
+        copy = new HashSet<String>(typeToSectionsForType.get(currentType));
+        if (setToAdd != null) {
+          if (doOr) {
+            copy.addAll(setToAdd);
+          } else {
+            copy.retainAll(setToAdd);
+          }
+        } else {
+          logger.debug("\tno result matches for " + currentType);
+        }
+      } else {
+        copy = new HashSet<String>(setToAdd);
+      }
+      typeToSectionsForType.put(currentType, copy);
+      // logger.debug("\t resultMap now " + resultMap);
+    }
+  }
+
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getTypeToSection()
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#getTypeToSection
    * @return
    */
-  public Map<String, Collection<String>> getTypeToSection() {
+/*  public Map<String, Collection<String>> getTypeToSection() {
     Map<String,Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
     for (String key : typeToUnitToLesson.keySet()) {
       Map<String, Lesson> stringLessonMap = typeToUnitToLesson.get(key);
       typeToSection.put(key, new ArrayList<String>(stringLessonMap.keySet()));
     }
     return typeToSection;
-  }
+  }*/
 
   public Map<String, Map<String,Integer>> getTypeToSectionToCount() {
     Map<String,Map<String,Integer>> typeToSectionToCount = new HashMap<String, Map<String, Integer>>();
     for (String key : typeToUnitToLesson.keySet()) {
       Map<String, Lesson> stringLessonMap = typeToUnitToLesson.get(key);
       Map<String, Integer> sectionToCount = new HashMap<String, Integer>();
-      typeToSectionToCount.put(key, sectionToCount);//new ArrayList<String>(stringLessonMap.keySet()));
-      for (Map.Entry<String,Lesson> pair : stringLessonMap.entrySet()) sectionToCount.put(pair.getKey(),pair.getValue().getExercises().size());
+      typeToSectionToCount.put(key, sectionToCount);
+      for (Map.Entry<String, Lesson> pair : stringLessonMap.entrySet()) {
+        sectionToCount.put(pair.getKey(), pair.getValue().getExercises().size());
+      }
     }
     return typeToSectionToCount;
   }
 
     /**
      * Return an overlap of all the type=section exercise sets (think venn diagram overlap).
+     *
      * @param typeToSection
      * @return
      */
-  public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
+  public Collection<Exercise> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection) {
     Collection<Exercise> currentList = null;
-    for (Map.Entry<String, String> pair : typeToSection.entrySet()) {
+
+    for (Map.Entry<String, Collection<String>> pair : typeToSection.entrySet()) {
       String type = pair.getKey();
       if (isKnownType(type)) {
         Collection<Exercise> exercisesForSection = new HashSet<Exercise>(getExercisesForSection(type, pair.getValue()));
+
         if (currentList == null) {
           currentList = exercisesForSection;
         } else {
@@ -187,22 +294,31 @@ public class SectionHelper {
     return typeToUnitToLesson.containsKey(type);
   }
 
-  public Collection<Exercise> getExercisesForSection(String type, String section) {
+  /**
+   * @see #getExercisesForSelectionState(java.util.Map)
+   * @param type
+   * @param sections
+   * @return
+   */
+  private Collection<Exercise> getExercisesForSection(String type, Collection<String> sections) {
     Map<String, Lesson> sectionToLesson = typeToUnitToLesson.get(type);
     if (sectionToLesson == null) {
       return Collections.emptyList();
-    }
-    else {
-      Lesson lesson = sectionToLesson.get(section);
-      if (lesson == null) {
-        logger.error("Couldn't find section " + section);
-        return Collections.emptyList();
-      } else {
-        return lesson.getExercises();
+    } else {
+      List<Exercise> exercises = new ArrayList<Exercise>();
+      for (String section : sections) {
+        Lesson lesson = sectionToLesson.get(section);
+        if (lesson == null) {
+          logger.error("Couldn't find section " + section);
+          return Collections.emptyList();
+        } else {
+          exercises.addAll(lesson.getExercises());
+        }
       }
+      return exercises;
     }
   }
-
+/*
   public void checkIfSemesters() {
     if (typeToUnitToLesson.containsKey(unitType) && typeToUnitToLesson.containsKey(SEMESTER)) {
       int units = typeToUnitToLesson.get(unitType).size();
@@ -227,7 +343,7 @@ public class SectionHelper {
 
       }
     }
-  }
+  }*/
 
   public Pair addUnitToLesson(Exercise exercise, String unitName) { return addExerciseToLesson(exercise, unitType, unitName);}
   public Pair addChapterToLesson(Exercise exercise, String unitName) { return addExerciseToLesson(exercise, chapterType, unitName);}
@@ -274,15 +390,15 @@ public class SectionHelper {
   }
 
   private void addAssociation(String type, String unitName, String otherType, String otherSection) {
-    Map<String, Map<String, Set<String>>> sectionToTypeToSections = typeToSectionToTypeToSections.get(type);
+    Map<String, Map<String, Collection<String>>> sectionToTypeToSections = typeToSectionToTypeToSections.get(type);
     if (sectionToTypeToSections == null) {
-      typeToSectionToTypeToSections.put(type, sectionToTypeToSections = new HashMap<String, Map<String, Set<String>>>());
+      typeToSectionToTypeToSections.put(type, sectionToTypeToSections = new HashMap<String, Map<String, Collection<String>>>());
     }
-    Map<String, Set<String>> subsections = sectionToTypeToSections.get(unitName);
+    Map<String, Collection<String>> subsections = sectionToTypeToSections.get(unitName);
     if (subsections == null) {
-      sectionToTypeToSections.put(unitName, subsections = new HashMap<String, Set<String>>());
+      sectionToTypeToSections.put(unitName, subsections = new HashMap<String, Collection<String>>());
     }
-    Set<String> sections = subsections.get(otherType);
+    Collection<String> sections = subsections.get(otherType);
     if (sections == null) subsections.put(otherType, sections = new HashSet<String>());
     sections.add(otherSection);
   }
