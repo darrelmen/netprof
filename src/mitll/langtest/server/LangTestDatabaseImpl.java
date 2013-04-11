@@ -159,8 +159,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return ids;
   }
 
-  @Override
-  public Map<String, Collection<String>> getTypeToSection() { return db.getSectionHelper().getTypeToSection(); }
+/*  @Override
+  public Map<String, Collection<String>> getTypeToSection() { return db.getSectionHelper().getTypeToSection(); }*/
 /*  @Override
   public List<ExerciseShell> getExercisesForSection(String type, String section, long userID) {
     Collection<Exercise> exercisesForSection = db.getExercisesForSection(type, section);
@@ -169,7 +169,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }*/
 
   @Override
-  public List<ExerciseShell> getExercisesForSelectionState(Map<String, String> typeToSection, long userID) {
+  public List<ExerciseShell> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection, long userID) {
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection);
     return getExerciseShells(exercisesBiasTowardsUnanswered);
@@ -185,8 +185,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
     return db.getSectionHelper().getTypeToSectionsForTypeAndSection(type, section);
   }
+
+  /**
+   * @see mitll.langtest.client.exercise.SectionExerciseList#setOtherListBoxes(java.util.Map)
+   * @param typeToSection
+   * @return
+   */
   @Override
-  public Map<String, Set<String>> getTypeToSectionsForTypeAndSection(Map<String,String> typeToSection) {
+  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(Map<String, Collection<String>> typeToSection) {
     return db.getSectionHelper().getTypeToSectionsForTypeAndSection(typeToSection);
   }
 
