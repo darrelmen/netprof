@@ -49,6 +49,11 @@ public class ExcelImport implements ExerciseDAO {
     this.isFlashcard = false;
   }
 
+  /**
+   * @see DatabaseImpl#makeDAO(boolean, String, boolean)
+   * @param file
+   * @param isFlashcard
+   */
   public ExcelImport(String file, boolean isFlashcard) {
     this.file = file;
     this.isFlashcard = isFlashcard;
@@ -169,9 +174,7 @@ public class ExcelImport implements ExerciseDAO {
     int weekIndex = 0;
     int weightIndex = -1;
     List<String> lastRowValues = new ArrayList<String>();
-/*    for (String type : new String[]{"unit", "chapter", "week"}) {
-      typeToUnitToLesson.put(type, new TreeMap<String, Lesson>());
-    }*/
+
     for (; iter.hasNext(); ) {
       Row next = iter.next();
   //    logger.warn("------------ Row # " + next.getRowNum() + " --------------- ");
@@ -278,6 +281,7 @@ public class ExcelImport implements ExerciseDAO {
         }
       }
     }
+///    sectionHelper.checkIfSemesters();
 
     return exercises;
   }
@@ -300,7 +304,12 @@ public class ExcelImport implements ExerciseDAO {
       ) {
       unit = "Blank";
     }
-    if (unit.length() > 0) pairs.add(sectionHelper.addUnitToLesson(imported,unit));
+    if (unit.length() > 0) {
+/*      String[] split = unit.split("-");
+      pairs.add(sectionHelper.addExerciseToLesson(imported, "semester", split[0]));
+      pairs.add(sectionHelper.addUnitToLesson(imported, split.length > 1 ? split[1] : split[0]));*/
+      pairs.add(sectionHelper.addUnitToLesson(imported,unit));
+    }
     if (chapter.length() > 0) pairs.add(sectionHelper.addChapterToLesson(imported,chapter));
     if (week.length() > 0) pairs.add(sectionHelper.addWeekToLesson(imported,week));
     sectionHelper.addAssociations(pairs);
