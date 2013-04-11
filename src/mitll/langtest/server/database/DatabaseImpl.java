@@ -78,6 +78,7 @@ public class DatabaseImpl implements Database {
   private final String configDir;
   private String mediaDir;
   private final Map<Long,UserStateWrapper> userToState = new HashMap<Long,UserStateWrapper>();
+  private boolean showSemesters;
 
   /**
    * Just for testing
@@ -96,9 +97,10 @@ public class DatabaseImpl implements Database {
    * @param dbName
    * @param showSections
    * @param doImages
+   * @param showSemesters
    */
   public DatabaseImpl(String configDir, String dbName, boolean showSections, boolean isWordPairs,
-                      String language, boolean doImages, String relativeConfigDir, boolean isFlashcard) {
+                      String language, boolean doImages, String relativeConfigDir, boolean isFlashcard, boolean showSemesters) {
     connection = new H2Connection(configDir, dbName);
     this.showSections = showSections;
     this.isWordPairs = isWordPairs;
