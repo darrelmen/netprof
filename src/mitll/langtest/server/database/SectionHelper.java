@@ -22,6 +22,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class SectionHelper {
+  public static final String SEMESTER = "semester";
   private static Logger logger = Logger.getLogger(SectionHelper.class);
   private String unitType = "unit";
   private String chapterType = "chapter";
@@ -198,6 +199,32 @@ public class SectionHelper {
         return Collections.emptyList();
       } else {
         return lesson.getExercises();
+      }
+    }
+  }
+
+  public void checkIfSemesters() {
+    if (typeToUnitToLesson.containsKey(unitType) && typeToUnitToLesson.containsKey(SEMESTER)) {
+      int units = typeToUnitToLesson.get(unitType).size();
+      int semesters = typeToUnitToLesson.get(SEMESTER).size();
+      if (units == semesters) {
+        logger.debug("Removing semesters...") ;
+        typeToUnitToLesson.remove(SEMESTER);
+        typeToSectionToTypeToSections.remove(SEMESTER);
+        for (Map.Entry<String, Map<String, Map<String, Set<String>>>> pair : typeToSectionToTypeToSections.entrySet()) {
+          Map<String, Map<String, Set<String>>> sectionToTypeToSections = pair.getValue();
+          for (Map.Entry<String, Map<String, Set<String>>> pair2 : sectionToTypeToSections.entrySet()) {
+            Map<String, Set<String>> typeToSections = pair2.getValue();
+            typeToSections.remove(SEMESTER);
+          }
+        }
+        logger.debug("typeToUnitToLesson "+typeToUnitToLesson) ;
+        logger.debug("typeToSectionToTypeToSections "+typeToSectionToTypeToSections) ;
+
+      }
+      else {
+        logger.debug("not Removing semesters... " + units + " vs " + semesters) ;
+
       }
     }
   }
