@@ -28,6 +28,13 @@ h1 {
 .floatLeft {
     float: left;
 }
+.floatRight {
+    float: right;
+}
+.overflowStyle {
+    overflow: auto;
+    display: inline;
+}
 
 .blockStyle {
     display: block;
