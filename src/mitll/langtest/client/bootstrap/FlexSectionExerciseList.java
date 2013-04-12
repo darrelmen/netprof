@@ -10,13 +10,16 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -116,7 +119,8 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     }
   }
 
- // FlexTable firstTypeRow;
+ //FlexTable firstTypeRow;
+  Panel panelInsideScrollPanel;
   Panel scrollPanel;
   Panel lastColumn;
   Panel label, clear;
@@ -148,7 +152,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    // firstTypeRow.add(labelContainer);
     firstTypeRow.setWidget(0, 0, labelContainer);
 
-    Container clearColumnContainer = addColumnButton(firstType, ANY, buttonGroupSectionWidget, true);
+    Panel clearColumnContainer = addColumnButton(firstType, ANY, buttonGroupSectionWidget, true);
     //firstTypeRow.add(clearColumnContainer);
     //clearColumnContainer.addStyleName("floatLeft");
 
@@ -157,8 +161,19 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     //Container scrollPanel = new Container();
     //DivWidget scrollPanel = new DivWidget();
+    //HorizontalPanel panelInsideScrollPanel = new HorizontalPanel();
+    //panelInsideScrollPanel = new FlowPanel();
+    panelInsideScrollPanel = new HorizontalPanel();
+    //panelInsideScrollPanel.setWidth("100%");
+   // panelInsideScrollPanel.addStyleName("inlineStyle");
+
+   // this.scrollPanel = new ScrollPanel(panelInsideScrollPanel);
     this.scrollPanel = new FlowPanel();
-   // scrollPanel.addStyleName("overflowStyle");
+    this.scrollPanel.setWidth("90%");
+    scrollPanel.add(panelInsideScrollPanel);
+    //scrollPanel.addStyleName("overflowStyle");
+
+      // scrollPanel.addStyleName("overflowStyle");
 /*      scrollPanel.setHeight("100%");
     scrollPanel.setWidth("100%");*/
 
@@ -177,18 +192,18 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     sectionsInType = getSortedItems(sectionsInType);
     numExpectedSections = sectionsInType.size();
     numSections = numExpectedSections;
-    System.out.println("num " + numExpectedSections);
+   // System.out.println("num " + numExpectedSections);
 
     for (String sectionInFirstType : sectionsInType) {
-      Container columnContainer = addColumnButton(firstType, sectionInFirstType, buttonGroupSectionWidget, false);
+      Panel columnContainer = addColumnButton(firstType, sectionInFirstType, buttonGroupSectionWidget, false);
       DOM.setStyleAttribute(columnContainer.getElement(), "marginBottom", "5px");
-      scrollPanel.add(columnContainer);
+      panelInsideScrollPanel.add(columnContainer);
       lastColumn = columnContainer;
       service.getTypeToSectionsForTypeAndSection(firstType, sectionInFirstType,
         new TypeToSectionsAsyncCallback(firstType, sectionInFirstType, labelContainer, clearColumnContainer, columnContainer));
     }
 
-    addBottomText(container);
+    addBottomText(container,types);
   }
 
   private Container getLabelWidgetForRow(String firstType) {
@@ -227,14 +242,54 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     }
   }
 
-  private void addBottomText(FluidContainer container) {
+  @Override
+  public void onValueChange(ValueChangeEvent<String> event) {
+    super.onValueChange(event);
+
+    if (showListBoxes) {
+      String rawToken = getTokenFromEvent(event);
+
+      String token = getCleanToken(rawToken);
+
+      SelectionState selectionState = getSelectionState(token);
+      boolean anyValue = false;
+
+      for (Heading widget : typeToStatus.values()) {
+        widget.setText("");
+      }
+
+      for (Map.Entry<String, Collection<String>> part : selectionState.typeToSection.entrySet()) {
+        anyValue = true;
+        Heading heading = typeToStatus.get(part.getKey());
+        heading.setText(part.getKey() + " " + part.getValue().toString().replaceAll("\\[", "").replaceAll("\\]", ""));
+      }
+      if (!anyValue) {
+        typeToStatus.values().iterator().next().setText("Showing all entries");
+      }
+    }
+  }
+
+  private Map<String,Heading> typeToStatus = new HashMap<String, Heading>();
+  private void addBottomText(FluidContainer container, Collection<String> types) {
+    FluidRow status = new FluidRow();
+    status.addStyleName("alignCenter");
+    container.add(status);
+    //status.add(new Heading(5,"Showing "));
+
+    for (String type : types) {
+      Heading w = new Heading(4);
+      typeToStatus.put(type,w);
+      status.add(w);
+    }
+    typeToStatus.values().iterator().next().setText("Showing all entries");
+
     FluidRow fluidRow = new FluidRow();
     container.add(fluidRow);
-    Widget emailWidget = getEmailWidget();
-    fluidRow.add(new Column(2, 3, emailWidget));
+ //   Widget emailWidget = getEmailWidget();
+  //  fluidRow.add(new Column(2, /*3,*/ emailWidget));
 
     Widget hideBoxesWidget = getHideBoxesWidget();
-    fluidRow.add(new Column(2, 1, hideBoxesWidget));
+    fluidRow.add(new Column(2, /*9,*/ hideBoxesWidget));
   }
 
   private FluidRow getInstructionRow() {
@@ -244,9 +299,10 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   }
 
 
-  private Container addColumnButton(final String type, final String sectionInFirstType,
+  private Panel addColumnButton(final String type, final String sectionInFirstType,
                                     final ButtonGroupSectionWidget buttonGroupSectionWidget, boolean isClear) {
-    Container columnContainer = new FluidContainer();
+    Panel columnContainer = new FluidContainer();
+    //Panel columnContainer = new HorizontalPanel();
     columnContainer.addStyleName("inlineStyle");
     DOM.setStyleAttribute(columnContainer.getElement(), "paddingLeft", "2px");
     DOM.setStyleAttribute(columnContainer.getElement(), "paddingRight", "2px");
@@ -300,8 +356,8 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   private class TypeToSectionsAsyncCallback implements AsyncCallback<Map<String, Collection<String>>> {
     private final String type;
     private final String itemText;
-    private Container columnContainer;
-    private Container clearColumnContainer;
+    private Panel columnContainer;
+    private Panel clearColumnContainer;
     private Container labelContainer;
 
     /**
@@ -313,7 +369,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
      * @param columnContainer
      */
     public TypeToSectionsAsyncCallback(String type, String itemText,
-                                       Container labelContainer, Container clearColumnContainer, Container columnContainer) {
+                                       Container labelContainer, Panel clearColumnContainer, Panel columnContainer) {
       this.type = type;
       this.itemText = itemText;
       this.columnContainer = columnContainer;
@@ -388,11 +444,15 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       if (numExpectedSections == 0) {
         int offsetHeight = columnContainer.getOffsetHeight()+5;
     //    System.out.println("height is " + firstTypeRow.getOffsetHeight() + " vs " + offsetHeight);
-        scrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
+        //scrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
+       panelInsideScrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
+       // panelInsideScrollPanel.getParent().setHeight(Math.max(50, offsetHeight) + "px");
 
+        int width = Window.getClientWidth() - label.getOffsetWidth() - clear.getOffsetWidth()- 100;
 
-        //int width = Window.getClientWidth() - label.getOffsetWidth() - clear.getOffsetWidth();
-        //scrollPanel.setWidth(Math.max(300, width) + "px");
+        System.out.println("width is " + width);
+
+        scrollPanel.setWidth(Math.max(300, width) + "px");
 
         pushFirstListBoxSelection();
       }
@@ -406,8 +466,16 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   public void onResize() {
     super.onResize();
 
-    int offsetHeight = lastColumn.getOffsetHeight()+5;
-    System.out.println("onResize height is " + offsetHeight);
+   // int offsetHeight = lastColumn.getOffsetHeight()+5;
+   // System.out.println("onResize height is " + offsetHeight);
+
+    if (label != null) {
+      int width = Window.getClientWidth() - label.getOffsetWidth() - clear.getOffsetWidth() - 100;
+
+      System.out.println("width is " + width);
+
+      scrollPanel.setWidth(Math.max(300, width) + "px");
+    }
 
  /*   if (scrollPanel.getOffsetHeight() != offsetHeight) {
     scrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
