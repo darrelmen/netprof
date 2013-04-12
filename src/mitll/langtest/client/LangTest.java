@@ -73,13 +73,10 @@ import java.util.Map;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   public static final String LANGTEST_IMAGES = "langtest/images/";
   private static final String RECORDING_KEY = "SPACE BAR";
-  private static final int LEFT_SIDE_COLUMNS = 3;
-//  private static final int RIGHT_SIDE_COLUMNS = 12-LEFT_SIDE_COLUMNS;
   private final DialogHelper dialogHelper = new DialogHelper(false);
 
   private Panel currentExerciseVPanel = new FluidContainer();
   private ListInterface exerciseList;
-  //private Label status;
 
   private UserManager userManager;
   private final UserTable userTable = new UserTable();
@@ -168,6 +165,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     monitoringManager = new MonitoringManager(service, props);
     boolean usualLayout = !showOnlyOneExercise();
     Container widgets = new FluidContainer();
+   // widgets.ensureDebugId("rootContainer");
+
     if (usualLayout) {
       RootPanel.get().add(widgets);
       DOM.setStyleAttribute(RootPanel.get().getElement(), "paddingTop", "2px");
@@ -179,6 +178,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // first row ---------------
 
     headerRow = new FluidRow();
+   // headerRow.ensureDebugId("headerRow");
+
     Widget title = getTitleWidget();
     headerRow.add(new Column(10, title));
     headerRow.add(new Column(2, getLogout()));
@@ -186,15 +187,21 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // second row ---------------
 
     secondRow = new FluidRow();
+  //  secondRow.ensureDebugId("secondRow");
+
     widgets.add(secondRow);
     // third row ---------------
 
     FlowPanel thirdRow = new FlowPanel();
+    //thirdRow.ensureDebugId("thirdRow");
+
     widgets.add(thirdRow);
 
     // set up center panel, initially with flash record panel
     currentExerciseVPanel = new FluidContainer();
-    DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "10px");
+  ///  currentExerciseVPanel.ensureDebugId("currentExerciseVPanel");
+
+    DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "marginLeft", "10px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
     makeExerciseList(secondRow, thirdRow, props.isGrading());
     if (usualLayout) {
@@ -506,6 +513,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     FlowPanel leftColumn = new FlowPanel();
     leftColumn.addStyleName("floatLeft");
+//    leftColumn.ensureDebugId("leftColumn");
+    DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
+
     thirdRow.add(leftColumn);
     thirdRow.addStyleName("inlineStyle");
     leftColumn.add(items);
