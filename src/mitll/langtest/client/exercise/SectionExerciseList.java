@@ -568,7 +568,7 @@ public class SectionExerciseList extends PagingExerciseList {
 
   }
 
-  private String getCleanToken(String token) {
+  protected String getCleanToken(String token) {
     return unencodeToken(token);
   }
 
