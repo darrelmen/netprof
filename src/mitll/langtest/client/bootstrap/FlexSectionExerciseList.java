@@ -15,6 +15,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -76,24 +77,25 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    */
   protected Panel getWidgetsForTypes(final Map<String, Map<String, Integer>> result, final long userID) {
     final FluidContainer container = new FluidContainer();
+   // container.ensureDebugId("FluidContainer");
     DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
     DOM.setStyleAttribute(container.getElement(), "paddingRight", "2px");
 
-      service.getTypeOrder(new AsyncCallback<Collection<String>>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          //To change body of implemented methods use File | Settings | File Templates.
-        }
+    service.getTypeOrder(new AsyncCallback<Collection<String>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        //To change body of implemented methods use File | Settings | File Templates.
+      }
 
-        @Override
-        public void onSuccess(Collection<String> sortedTypes) {
-          if (showListBoxes) {
-            addButtonRow(result, userID, container, sortedTypes);
-          } else {
-            addStudentTypeAndSection(container, sortedTypes);
-          }
+      @Override
+      public void onSuccess(Collection<String> sortedTypes) {
+        if (showListBoxes) {
+          addButtonRow(result, userID, container, sortedTypes);
+        } else {
+          addStudentTypeAndSection(container, sortedTypes);
         }
-      });
+      }
+    });
 
     return container;
   }
@@ -114,6 +116,10 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     }
   }
 
+ // FlexTable firstTypeRow;
+  Panel scrollPanel;
+  Panel lastColumn;
+  Panel label, clear;
   private void addButtonRow(Map<String, Map<String, Integer>> result, long userID, FluidContainer container, Collection<String> types) {
     System.out.println("getWidgetsForTypes (success) for user = " + userID + " got types " + types);
     typeToBox.clear();
@@ -122,15 +128,70 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     String firstType = types.iterator().next(); // e.g. unit!
 
     container.add(getInstructionRow());
-    FluidRow firstTypeRow = new FluidRow();
+   // Row firstTypeRow = new FluidRow();
+    FlexTable firstTypeRow = new FlexTable();
+    //FlowPanel firstTypeRow = new FlowPanel();
+    //LayoutPanel firstTypeRow = new LayoutPanel();
+    //Panel firstTypeRow = new HorizontalPanel();
+    //firstTypeRow.ensureDebugId("firstTypeRow_FlexTable");
+
     container.add(firstTypeRow);
 
-    Collection<String> sectionsInType = result.get(firstType).keySet();
-    sectionsInType = getSortedItems(sectionsInType);
+
 
     ButtonGroupSectionWidget buttonGroupSectionWidget = new ButtonGroupSectionWidget(firstType);
     typeToBox.put(firstType, buttonGroupSectionWidget);
 
+    Container labelContainer = getLabelWidgetForRow(firstType);
+    label = labelContainer;
+    //labelContainer.addStyleName("floatLeft");
+   // firstTypeRow.add(labelContainer);
+    firstTypeRow.setWidget(0, 0, labelContainer);
+
+    Container clearColumnContainer = addColumnButton(firstType, ANY, buttonGroupSectionWidget, true);
+    //firstTypeRow.add(clearColumnContainer);
+    //clearColumnContainer.addStyleName("floatLeft");
+
+    firstTypeRow.setWidget(0, 1, clearColumnContainer);
+    clear = clearColumnContainer;
+
+    //Container scrollPanel = new Container();
+    //DivWidget scrollPanel = new DivWidget();
+    this.scrollPanel = new FlowPanel();
+   // scrollPanel.addStyleName("overflowStyle");
+/*      scrollPanel.setHeight("100%");
+    scrollPanel.setWidth("100%");*/
+
+    //ScrollPanel sp = new ScrollPanel(scrollPanel);
+   // sp.setHeight("100%");
+   // sp.setWidth("100%");
+    //sp.addStyleName("floatLeft");
+    //scrollPanel.addStyleName("floatRight");
+
+    //firstTypeRow.add(scrollPanel);
+    firstTypeRow.setWidget(0,2,scrollPanel);
+    scrollPanel.addStyleName("overflowStyle");
+
+    // add columns for each section within first type...
+    Collection<String> sectionsInType = result.get(firstType).keySet();
+    sectionsInType = getSortedItems(sectionsInType);
+    numExpectedSections = sectionsInType.size();
+    numSections = numExpectedSections;
+    System.out.println("num " + numExpectedSections);
+
+    for (String sectionInFirstType : sectionsInType) {
+      Container columnContainer = addColumnButton(firstType, sectionInFirstType, buttonGroupSectionWidget, false);
+      DOM.setStyleAttribute(columnContainer.getElement(), "marginBottom", "5px");
+      scrollPanel.add(columnContainer);
+      lastColumn = columnContainer;
+      service.getTypeToSectionsForTypeAndSection(firstType, sectionInFirstType,
+        new TypeToSectionsAsyncCallback(firstType, sectionInFirstType, labelContainer, clearColumnContainer, columnContainer));
+    }
+
+    addBottomText(container);
+  }
+
+  private Container getLabelWidgetForRow(String firstType) {
     Container labelContainer = new FluidContainer();
     FluidRow rowAgain = new FluidRow();
 
@@ -142,24 +203,16 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     rowAgain.add(widget);
     labelContainer.add(rowAgain);
+    return labelContainer;
+  }
 
-    firstTypeRow.add(labelContainer);
 
-    Container clearColumnContainer = addColumnButton(firstType, ANY, buttonGroupSectionWidget, true);
-    firstTypeRow.add(clearColumnContainer);
-    numExpectedSections = sectionsInType.size();
-    numSections = numExpectedSections;
-    System.out.println("num " + numExpectedSections);
-    for (String sectionInFirstType : sectionsInType) {
-      Container columnContainer = addColumnButton(firstType, sectionInFirstType, buttonGroupSectionWidget, false);
-      DOM.setStyleAttribute(columnContainer.getElement(), "marginBottom", "5px");
-      firstTypeRow.add(columnContainer);
-
-      service.getTypeToSectionsForTypeAndSection(firstType, sectionInFirstType,
-        new TypeToSectionsAsyncCallback(firstType, sectionInFirstType, columnContainer, clearColumnContainer, labelContainer));
-    }
-
-    addBottomText(container);
+  private Heading makeLabelWidget(String firstType) {
+    Heading widget = new Heading(HEADING_FOR_LABEL, firstType);
+    DOM.setStyleAttribute(widget.getElement(), "webkitMarginBefore", "0");
+    DOM.setStyleAttribute( widget.getElement(), "webkitMarginAfter", "0");
+    DOM.setStyleAttribute( widget.getElement(), "marginBottom", "0px");
+    return widget;
   }
 
   @Override
@@ -175,9 +228,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   }
 
   private void addBottomText(FluidContainer container) {
-/*    FluidRow fluidRow1 = getInstructionRow();
-    container.add(fluidRow1);*/
-
     FluidRow fluidRow = new FluidRow();
     container.add(fluidRow);
     Widget emailWidget = getEmailWidget();
@@ -193,13 +243,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     return fluidRow1;
   }
 
-  private Heading makeLabelWidget(String firstType) {
-    Heading widget = new Heading(HEADING_FOR_LABEL, firstType);
-    DOM.setStyleAttribute(widget.getElement(), "webkitMarginBefore", "0");
-    DOM.setStyleAttribute( widget.getElement(), "webkitMarginAfter", "0");
-    DOM.setStyleAttribute( widget.getElement(), "marginBottom", "0px");
-    return widget;
-  }
 
   private Container addColumnButton(final String type, final String sectionInFirstType,
                                     final ButtonGroupSectionWidget buttonGroupSectionWidget, boolean isClear) {
@@ -262,15 +305,15 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     private Container labelContainer;
 
     /**
-     * @see FlexSectionExerciseList#getWidgetsForTypes(java.util.Map, long)
+     * @see FlexSectionExerciseList#addButtonRow(java.util.Map, long, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
      * @param type
      * @param itemText
-     * @param columnContainer
-     * @param clearColumnContainer
      * @param labelContainer
+     * @param clearColumnContainer
+     * @param columnContainer
      */
-    public TypeToSectionsAsyncCallback(String type, String itemText, Container columnContainer,
-                                       Container clearColumnContainer, Container labelContainer) {
+    public TypeToSectionsAsyncCallback(String type, String itemText,
+                                       Container labelContainer, Container clearColumnContainer, Container columnContainer) {
       this.type = type;
       this.itemText = itemText;
       this.columnContainer = columnContainer;
@@ -325,32 +368,15 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         int col = 0;
         ButtonType buttonType = typeToButton.get(typeForOriginal);
 
-        boolean allSamePrefix = false;
-       String prefix = "";
-       /*    if (sortedItems.size() > 1) {
-          String f = sortedItems.get(0);
-
-          String[] split = f.split("-");
-          if (split.length > 1) {
-            prefix = split[0];
-            allSamePrefix = true;
-          }
-
-          if (prefix.length() > 0) {
-            for (String section : sortedItems) {
-              allSamePrefix = allSamePrefix && section.startsWith(prefix);
-            }
-          }
-        }
-        if (allSamePrefix) {
-          table.setWidget(row,col++,new Heading(6,prefix));
-        }*/
         for (final String section : sortedItems) {
           ButtonGroup group = new ButtonGroup();
 
           table.setWidget(row, col++, group);
 
-          Button sectionButton = makeSubgroupButton(sectionWidgetFinal, type, allSamePrefix ? section.substring(prefix.length()+1): section,buttonType, false);
+          Button sectionButton = makeSubgroupButton(sectionWidgetFinal, type,
+            //allSamePrefix ? section.substring(prefix.length()+1): section,
+            section,
+            buttonType, false);
           group.add(sectionButton);
           ((ButtonGroupSectionWidget)sectionWidget).addButton(sectionButton);
         }
@@ -360,12 +386,33 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       numExpectedSections--;
 
       if (numExpectedSections == 0) {
+        int offsetHeight = columnContainer.getOffsetHeight()+5;
+    //    System.out.println("height is " + firstTypeRow.getOffsetHeight() + " vs " + offsetHeight);
+        scrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
+
+
+        //int width = Window.getClientWidth() - label.getOffsetWidth() - clear.getOffsetWidth();
+        //scrollPanel.setWidth(Math.max(300, width) + "px");
+
         pushFirstListBoxSelection();
       }
-      else {
+/*      else {
         //System.out.println("num expected " + numExpectedSections);
-      }
+      }*/
     }
+  }
+
+  @Override
+  public void onResize() {
+    super.onResize();
+
+    int offsetHeight = lastColumn.getOffsetHeight()+5;
+    System.out.println("onResize height is " + offsetHeight);
+
+ /*   if (scrollPanel.getOffsetHeight() != offsetHeight) {
+    scrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
+    }
+*/
   }
 
   private Widget getLabelWidget(String typeForOriginal) {
@@ -374,7 +421,8 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     table3.setWidget(0, 0, widget);
     DOM.setStyleAttribute(widget.getElement(), "webkitMarginBefore", "10px");
     DOM.setStyleAttribute( widget.getElement(), "webkitMarginAfter", "10px");
-    DOM.setStyleAttribute( widget.getElement(), "marginBottom", "0px");
+    DOM.setStyleAttribute( widget.getElement(), "marginTop", "2px");
+    DOM.setStyleAttribute( widget.getElement(), "marginBottom", "10px");
     return table3;
   }
 
