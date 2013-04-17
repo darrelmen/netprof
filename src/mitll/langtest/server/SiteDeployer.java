@@ -257,7 +257,9 @@ public class SiteDeployer {
         Site siteByID = db.getSiteByID(site.id);
         if (siteByID != null) {
           logger.info("found existing " + siteByID);
+          String notes = site.notes;
           site = siteByID;
+          site.notes = notes;
         }
         else {
           logger.error("huh? couldn't find site with id = "+site.id);
