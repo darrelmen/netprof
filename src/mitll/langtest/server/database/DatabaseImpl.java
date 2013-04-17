@@ -1073,7 +1073,7 @@ public class DatabaseImpl implements Database {
 
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @see mitll.langtest.server.SiteDeployer#doSiteResponse(DatabaseImpl, javax.servlet.http.HttpServletResponse, mitll.langtest.server.SiteDeployer, mitll.langtest.shared.Site)
    * @param site
    * @return
    */
@@ -1082,7 +1082,22 @@ public class DatabaseImpl implements Database {
   public Site getSiteByID(long id) { return siteDAO.getSiteByID(id); }
   public List<Site> getDeployedSites() { return siteDAO.getDeployedSites(); }
   public void deploy(Site site) { siteDAO.deploy(site); }
+
+  /**
+   * @see mitll.langtest.server.SiteDeployer#deploySite(DatabaseImpl, mitll.langtest.server.mail.MailSupport, javax.servlet.http.HttpServletRequest, String, String, long, String, String, String)
+   * @param site
+   * @param name
+   * @param lang
+   * @param notes
+   * @return
+   */
   public Site updateSite(Site site, String name, String lang, String notes) { return siteDAO.updateSite(site, name, lang, notes); }
+
+  /**
+   * @see mitll.langtest.server.SiteDeployer#updateExerciseFile(mitll.langtest.shared.Site, String, DatabaseImpl)
+   * @param site
+   */
+  public void updateSiteFile(Site site) { siteDAO.updateSiteFileInDB(site); }
 
   /**
    * TODO : worry about duplicate userid?
