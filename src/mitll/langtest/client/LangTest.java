@@ -22,14 +22,15 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
@@ -72,8 +73,9 @@ import java.util.Map;
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   public static final String LANGTEST_IMAGES = "langtest/images/";
-  private static final String RECORDING_KEY = "SPACE BAR";
+  public static final String RECORDING_KEY = "SPACE BAR";
   private final DialogHelper dialogHelper = new DialogHelper(false);
+  private final TimedGame timedGame = new TimedGame(this);
 
   private Panel currentExerciseVPanel = new FluidContainer();
   private ListInterface exerciseList;
@@ -165,7 +167,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     monitoringManager = new MonitoringManager(service, props);
     boolean usualLayout = !showOnlyOneExercise();
     Container widgets = new FluidContainer();
-   // widgets.ensureDebugId("rootContainer");
 
     if (usualLayout) {
       RootPanel.get().add(widgets);
@@ -178,7 +179,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // first row ---------------
 
     headerRow = new FluidRow();
-   // headerRow.ensureDebugId("headerRow");
 
     Widget title = getTitleWidget();
     headerRow.add(new Column(10, title));
@@ -192,27 +192,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     widgets.add(secondRow);
     // third row ---------------
 
-    FlowPanel thirdRow = new FlowPanel();
-    //thirdRow.ensureDebugId("thirdRow");
-
+    Panel thirdRow = new HorizontalPanel();
+    Panel leftColumn = new SimplePanel();
+    thirdRow.add(leftColumn);
     widgets.add(thirdRow);
 
     // set up center panel, initially with flash record panel
     currentExerciseVPanel = new FluidContainer();
-  ///  currentExerciseVPanel.ensureDebugId("currentExerciseVPanel");
 
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "marginLeft", "10px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
-    makeExerciseList(secondRow, thirdRow, props.isGrading());
+    makeExerciseList(secondRow, leftColumn, props.isGrading());
     if (usualLayout) {
-  /*    ScrollPanel sp = new ScrollPanel() {
-
-      };*/
-      //DOM.setStyleAttribute(sp.getElement(), "overflow", "overflow-y");
-    //  sp.setWidth("100%");
-    //  sp.addStyleName("floatLeft");
-     // sp.add(currentExerciseVPanel);
-      currentExerciseVPanel.addStyleName("currentExercisePanel");
+      currentExerciseVPanel.addStyleName("floatLeft");
       thirdRow.add(currentExerciseVPanel);
     }
     else {  // show fancy lace background image
@@ -255,7 +247,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Widget getTitleWidget() {
     FluidRow widgets = new FluidRow();
-    widgets.add(new Column(5,4,new Heading(2,props.getAppTitle())));
+    widgets.add(new Column(5, 4, new Heading(2, props.getAppTitle())));
     return widgets;
   }
 
@@ -305,35 +297,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void showTimedGameHelp() {
-    List<String> msgs = new ArrayList<String>();
-    msgs.add("Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.");
-    String duration;// = "one " + "minute";
-    int secs = props.getGameTimeSeconds();
-    if (secs < 60) {
-      duration = secs + " seconds";
-    }
-    else {
-      int min = secs/60;
-      boolean even = secs % 60 == 0;
-      duration = min + " minute" + (min > 1 ? "s" :"") + (even ? "" : (secs-(min*60)) + " secs");
-    }
-    msgs.add("See how many you can get right in " +
-      duration +
-      "!");
-    msgs.add("Press and hold the " + RECORDING_KEY + " to record.");
-    msgs.add("Release to stop recording.");
-    msgs.add("Ready to start the clock?");
-    dialogHelper.showErrorMessage("Beat the clock!", msgs, "Yes!", new DialogHelper.CloseListener() {
-      @Override
-      public void gotYes() {
-        login();
-      }
-
-      @Override
-      public void gotNo() {
-
-      }
-    });
+    timedGame.showTimedGameHelp(props);
   }
 
   private void showHelpNewUser() {
@@ -465,7 +429,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @paramx exerciseListPanel to add scroller to
    * @param isGrading true if grading, false if not
    */
-  private void makeExerciseList(FluidRow secondRow,FlowPanel thirdRow, boolean isGrading) {
+  private void makeExerciseList(FluidRow secondRow,Panel leftColumn, boolean isGrading) {
     final UserFeedback feedback = (UserFeedback) this;
 
     boolean hideExerciseList = (props.isMinimalUI() && !props.isGrading()) && !props.isAdminView();
@@ -504,20 +468,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (showOnlyOneExercise()) {
       exerciseList.setExercise_title(props.getExercise_title());
     }
-    addExerciseListOnLeftSide(thirdRow);
+    addExerciseListOnLeftSide(leftColumn);
   }
 
-  private void addExerciseListOnLeftSide(FlowPanel thirdRow) {
+  private void addExerciseListOnLeftSide(Panel leftColumnContainer) {
     Heading items = new Heading(4,"Items");
     items.addStyleName("center");
 
     FlowPanel leftColumn = new FlowPanel();
     leftColumn.addStyleName("floatLeft");
-//    leftColumn.ensureDebugId("leftColumn");
     DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
 
-    thirdRow.add(leftColumn);
-    thirdRow.addStyleName("inlineStyle");
+    leftColumnContainer.add(leftColumn);
+    leftColumnContainer.addStyleName("inlineStyle");
     leftColumn.add(items);
     leftColumn.add(exerciseList.getWidget());
   }
@@ -776,7 +739,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     else {
       if (props.isTimedGame())  {
-         showTimedGameHelp();
+        showTimedGameHelp();
       }
       else {
         login();
