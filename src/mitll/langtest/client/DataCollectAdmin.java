@@ -1,6 +1,10 @@
 package mitll.langtest.client;
 
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.ButtonCell;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.ClickableTextCell;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
@@ -12,6 +16,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -52,13 +57,9 @@ public class DataCollectAdmin extends PagerTable {
   }
 
   void makeDataCollectNewSiteForm(Panel currentExerciseVPanel) {
-   // currentExerciseVPanel.setWidth((Window.getClientWidth())-50 +"px");
     HTML child1 = new HTML("<h2>Current deployed sites</h2>");
-    //child1.setWidth((Window.getClientWidth())-50 +"px");
-
     currentExerciseVPanel.add(child1);
     Widget table1 = getTable();
-   // table1.setWidth((Window.getClientWidth())-50 +"px");
     currentExerciseVPanel.add(table1);
     currentExerciseVPanel.add(new HTML("<br></br>"));
     Button child = new Button("Add new site");
@@ -129,13 +130,13 @@ public class DataCollectAdmin extends PagerTable {
       @Override
       public SafeHtml getValue(Site answer) {
         SafeHtmlBuilder sb = new SafeHtmlBuilder();
-        String name = answer.savedExerciseFileName;
+        String name = answer.getSavedExerciseFileName();
         sb.appendHtmlConstant("<a href='" +
             "config/dataCollectAdmin/uploads/" +
             name +
             "'" +
             ">");
-        sb.appendEscaped(answer.exerciseFile);
+        sb.appendEscaped(answer.getExerciseFile());
         sb.appendHtmlConstant("</a>");
         return sb.toSafeHtml();
       }
@@ -174,6 +175,48 @@ public class DataCollectAdmin extends PagerTable {
 
     table.addColumn(url2, "Site Monitoring URL");
 
+    ButtonCell buttonCell = new ButtonCell();
+    Column<Site, String> buttonColumn = new Column<Site, String>(buttonCell) {
+      @Override
+      public String getValue(Site object) {
+        // The value to display in the button.
+        return "Update";// +object.name;
+      }
+    };
+    table.addColumn(buttonColumn, "Update");
+
+    buttonColumn.setFieldUpdater(new FieldUpdater<Site, String>() {
+      public void update(int index, Site object, String value) {
+        // Value is the button value.  Object is the row object.
+      //  Window.alert("You clicked: " + object);
+        showUpdateDialog(object);
+      }
+    });
+
+    Column<Site, String> imageColumn =
+      new Column<Site, String>(
+        new ClickableTextCell()
+        {
+          public void render(Cell.Context context,
+                             SafeHtml value,
+                             SafeHtmlBuilder sb)
+          {
+            // <img class="synthese" title="Http hits per minute" alt="Http hits per minute" src="?width=200&height=50&graph=httpHitsRate">
+            sb.appendHtmlConstant("<img src=\""+value.asString() + "/monitoring?width=200&height=50&graph=httpHitsRate"+
+              //"' target='_blank'" +
+              "\">"
+            );
+            sb.appendHtmlConstant("</img>");
+          }
+        })
+      {
+        @Override
+        public String getValue(Site site) {
+          return getSiteURL(site);
+        }
+      };
+    table.addColumn(imageColumn, "Traffic");
+
     table.getColumnSortList().push(name);
 
     final ListDataProvider<Site> provider = createProvider(table);
@@ -181,7 +224,7 @@ public class DataCollectAdmin extends PagerTable {
     // We know that the data is sorted alphabetically by default.
 
     // Create a SimplePager.
-    Panel pagerAndTable = getPagerAndTable(table, table, 10, 10);
+    Panel pagerAndTable = getPagerAndTable(table, table, 4, 4);
 
     refresh(table, provider);
     this.provider = provider;
@@ -190,7 +233,11 @@ public class DataCollectAdmin extends PagerTable {
   }
 
   private String getLinkPrefix(Site answer) {
-    return "<a href='" + Window.Location.getProtocol() + "//" + Window.Location.getHost() + "/" + answer.name;
+    return "<a href='" + getSiteURL(answer);
+  }
+
+  private String getSiteURL(Site answer) {
+    return Window.Location.getProtocol() + "//" + Window.Location.getHost() + "/" + answer.name;
   }
 
   private class ClickableSafeHtmlCell extends AbstractCell<SafeHtml> {
@@ -224,6 +271,9 @@ public class DataCollectAdmin extends PagerTable {
     }
   }
 
+  /**
+   * @see #makeDataCollectNewSiteForm2(com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.DialogBox)
+   */
   private void refresh() {
     refresh(table, provider);
   }
@@ -239,6 +289,7 @@ public class DataCollectAdmin extends PagerTable {
 
         provider.setList(result);
         table.setRowCount(result.size());
+        table.redraw();
       }
     });
   }
@@ -250,6 +301,9 @@ public class DataCollectAdmin extends PagerTable {
     return dataProvider;
   }
 
+  /**
+   * @see #makeDataCollectNewSiteForm(com.google.gwt.user.client.ui.Panel)
+   */
   private void showDialog() {
     DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setTitle("Make new data collection site");
@@ -336,9 +390,9 @@ public class DataCollectAdmin extends PagerTable {
     user.setText("" + userManager.getUser());
     panel.add(user);
 
-    final HTML w6 = new HTML("");
-   // w6.addStyleName("blueColor");
-    panel.add(w6);
+    final HTML feedbackContainer = new HTML("");
+   // feedbackContainer.addStyleName("blueColor");
+    panel.add(feedbackContainer);
 
     final HTML w7 = new HTML("");
     w7.addStyleName("blueColor");
@@ -413,7 +467,7 @@ public class DataCollectAdmin extends PagerTable {
               public void onSuccess(Site result) {
                 submit.setEnabled(true);
                 deployButton.setEnabled(true);
-                w6.setHTML("<h4>" + result.getFeedback() + "</h4>");
+                feedbackContainer.setHTML("<h4>" + result.getFeedback() + "</h4>");
                 siteID = result.id;
               }
             });
@@ -472,4 +526,173 @@ public class DataCollectAdmin extends PagerTable {
       }
     });
   }
+
+
+  private void showUpdateDialog(Site toUpdate) {
+    DialogBox dialogBox = new DialogBox(false, true);
+    dialogBox.setTitle("Make new data collection site");
+    // DOM.setStyleAttribute(dialogBox.getElement(), "backgroundColor", "#ABCDEF");
+    VerticalPanel vp = new VerticalPanel();
+    makeDataCollectNewSiteForm3(vp, dialogBox, toUpdate);
+    dialogBox.add(vp);
+    dialogBox.center();
+  }
+  /**
+   * @see mitll.langtest.client.LangTest#doDataCollectAdminView()
+   * @param currentExerciseVPanel
+   */
+  private void makeDataCollectNewSiteForm3(Panel currentExerciseVPanel, final DialogBox dialogBox, Site toUpdate) {
+    // Create a FormPanel and point it at a service.
+    final FormPanel form = new FormPanel();
+    form.addStyleName("table-center");
+    form.addStyleName("demo-FormPanel");
+
+    form.setAction(GWT.getModuleBaseURL() + "langtestdatabase");
+    // Because we're going to add a FileUpload widget, we'll need to set the
+    // form to use the POST method, and multipart MIME encoding.
+    form.setEncoding(FormPanel.ENCODING_MULTIPART);
+    form.setMethod(FormPanel.METHOD_POST);
+
+    // Create a verticalPanell to hold all of the form widgets.
+    VerticalPanel verticalPanel = new VerticalPanel();
+    form.setWidget(verticalPanel);
+
+    HTML w = new HTML("<h2>Update an existing data collection site</h2>");
+    w.addStyleName("blueColor");
+    verticalPanel.add(w);
+
+    HTML w4 = new HTML("<h3>Upload an excel spreadsheet wordlist.</h3>");
+    w4.addStyleName("blueColor");
+    verticalPanel.add(w4);
+
+    // Create a FileUpload widget.
+    final FileUpload upload = new FileUpload();
+    upload.setName("upload");
+    upload.addStyleName("blueColor");
+    verticalPanel.add(upload);
+
+    // hidden field for user
+    final TextBox user = new TextBox();
+    user.setName("user");
+    user.setVisible(false);
+    user.setText("" + userManager.getUser());
+    verticalPanel.add(user);
+
+    final TextBox siteID = new TextBox();
+    siteID.setName("siteid");
+    siteID.setVisible(false);
+    siteID.setText("" + toUpdate.id);
+    verticalPanel.add(siteID);
+
+    // spacers...?
+    final HTML w6 = new HTML("");
+    verticalPanel.add(w6);
+
+    final HTML w7 = new HTML("");
+    w7.addStyleName("blueColor");
+    verticalPanel.add(w7);
+
+    // Add a 'submit' button.
+    final Button submit = new Button("Submit");
+    submit.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        user.setText("" + userManager.getUser());
+        form.submit();
+      }
+    });
+  //  verticalPanel.add(submit);
+
+    // Add an event handler to the form.
+    form.addSubmitHandler(new FormPanel.SubmitHandler() {
+      public void onSubmit(FormPanel.SubmitEvent event) {
+        // This event is fired just before the form is submitted. We can take
+        // this opportunity to perform validation.
+        if (upload.getFilename().length() == 0) {
+          Window.alert("Please choose a word list file.");
+          event.cancel();
+        }
+      }
+    });
+    form.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
+      public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+        // When the form submission is successfully completed, this event is
+        // fired. Assuming the service returned a response of type text/html,
+        // we can get the result text here (see the FormPanel documentation for
+        // further explanation).
+//        deployButton.setEnabled(false);
+
+        String results = event.getResults();
+        if (results.contains("Invalid") || results.contains("invalid")) {
+          if (results.startsWith("<")) {
+            results = results.split(">")[1].split("<")[0];
+          }
+          Window.alert(results);
+        } else {
+          if (results.startsWith("<")) {
+            results = results.split(">")[1].split("<")[0];
+          }
+          try {
+     /*       long id = Long.parseLong(results.trim());
+
+            submit.setEnabled(false);
+
+            service.getSiteByID(id,new AsyncCallback<Site>() {
+              @Override
+              public void onFailure(Throwable caught) {
+                submit.setEnabled(true);
+              }
+
+              @Override
+              public void onSuccess(Site result) {
+                submit.setEnabled(true);
+            //    deployButton.setEnabled(true);
+                w6.setHTML("<h4>" + result.getFeedback() + "</h4>");
+               // siteID = result.id;
+              }
+            });*/
+            final PopupPanel pleaseWait = new PopupPanel();
+            pleaseWait.setAutoHideEnabled(false);
+            pleaseWait.add(new HTML("Site updated successfully."));
+            // this causes the image to be loaded into the DOM
+            pleaseWait.center();
+
+            Timer t = new Timer() {
+              @Override
+              public void run() {
+                pleaseWait.hide();
+                submit.setEnabled(true);
+                dialogBox.hide();
+                refresh();
+               // table.redraw();
+              }
+            };
+
+            // Schedule the timer to run once in 1 seconds.
+            t.schedule(3000);
+          } catch (NumberFormatException e) {
+            Window.alert("couldn't understand response " + results);
+          }
+        }
+
+      }
+    });
+
+    currentExerciseVPanel.add(form);
+
+    FlowPanel buttonRow = new FlowPanel();
+    buttonRow.getElement().getStyle().setFloat(Style.Float.RIGHT);
+    Button cancel = new Button("Cancel");
+    buttonRow.add(submit);
+    buttonRow.add(cancel);
+
+    cancel.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        dialogBox.hide();
+      }
+    });
+
+    currentExerciseVPanel.add(buttonRow);
+
+ }
 }
