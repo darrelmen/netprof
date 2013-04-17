@@ -23,6 +23,7 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
@@ -45,6 +46,20 @@ public class SiteDeployer {
   public static final String UPLOAD_FORM_NAME = "upload";
   private static Logger logger = Logger.getLogger(SiteDeployer.class);
 
+  /**
+   *
+   * @see LangTestDatabaseImpl#deploySite(long, String, String, String)
+   * @param db
+   * @param mailSupport
+   * @param request
+   * @param configDir
+   * @param installPath
+   * @param siteID
+   * @param name
+   * @param language
+   * @param notes
+   * @return
+   */
   public boolean deploySite(DatabaseImpl db, MailSupport mailSupport,
                             HttpServletRequest request, String configDir, String installPath,
                             long siteID, String name, String language, String notes) {
@@ -171,12 +186,20 @@ public class SiteDeployer {
     return installDir.getParent()+ File.separator+site.name;
   }
 
-  public boolean checkName(Site site) {
+  private boolean checkName(Site site) {
     String validPattern = "\\w+";
 
     return Pattern.matches(validPattern, site.name);
   }
 
+  /**
+   * @see LangTestDatabaseImpl#service
+   * @param db
+   * @param response
+   * @param siteDeployer
+   * @param site
+   * @throws IOException
+   */
   public void doSiteResponse(DatabaseImpl db, HttpServletResponse response, SiteDeployer siteDeployer, Site site) throws IOException {
     response.setContentType("text/plain");
     if (!siteDeployer.checkName(site) || db.siteExists(site)) {
@@ -207,7 +230,7 @@ public class SiteDeployer {
    * @param configDir
    * @return  site
    */
-  public Site getSite(HttpServletRequest request, String configDir) {
+  public SiteInfo getSite(HttpServletRequest request, String configDir, DatabaseImpl db, String installPath) {
     logger.debug("Getting site given config dir " + configDir);
     FileItemFactory factory = new DiskFileItemFactory();
     ServletFileUpload upload = new ServletFileUpload(factory);
@@ -215,28 +238,61 @@ public class SiteDeployer {
 
     try {
       List<FileItem> items = upload.parseRequest(request);
+      logger.info("getSite : from http request, got " + items.size() + " items.");
+
+      DiskFileItem rememberedFileItem = null;
+
+      boolean isUpdate = false;
       Site site = new Site();
       for (FileItem item : items) {
         if (!item.isFormField() && UPLOAD_FORM_NAME.equals(item.getFieldName())) {
-          readExercises(site, item);
-          storeUploadedFile(configDir, site, (DiskFileItem) item);
+          rememberedFileItem = (DiskFileItem) item;
         }
         else {
-          readFormItemAndStoreInSite(site, item);
+          isUpdate |= readFormItemAndStoreInSite(site, item);
         }
       }
-      logger.info("made " +site);
 
+      if (isUpdate) {
+        Site siteByID = db.getSiteByID(site.id);
+        if (siteByID != null) {
+          logger.info("found existing " + siteByID);
+          site = siteByID;
+        }
+        else {
+          logger.error("huh? couldn't find site with id = "+site.id);
+        }
+      } else {
+        logger.info("made new " + site);
+      }
+      if (rememberedFileItem != null) {
+        readExercises(site, rememberedFileItem);
+        storeUploadedFile(configDir, site, rememberedFileItem);
+        logger.info("site now " + site);
+        if (isUpdate) {
+          logger.info("\t updating site " + site + " under " + installPath);
 
-      return site;
+          updateExerciseFile(site, installPath,db);
+        }
+      }
+
+      return new SiteInfo(site,isUpdate);
     } catch (Exception e) {
       logger.error("Got " +e,e);
       return null;
     }
   }
 
-  private void readFormItemAndStoreInSite(Site site, FileItem item) {
-    logger.info("got " + item);
+  public static class SiteInfo {
+    Site site;
+    boolean isUpdate = false;
+
+    public SiteInfo(Site site, boolean isUpdate) { this.site = site; this.isUpdate = isUpdate;}
+
+  }
+
+  private boolean readFormItemAndStoreInSite(Site site, FileItem item) {
+    logger.info("from http request, got " + item);
     String name = item.getFieldName();
     if (name != null) {
       if (name.endsWith("Name")) {
@@ -251,18 +307,40 @@ public class SiteDeployer {
       } else if (name.toLowerCase().endsWith("user")) {
         logger.info("User " + item.getString());
         site.creatorID = Long.parseLong(item.getString().trim());
+      } else if (name.toLowerCase().endsWith("siteid")) {
+        logger.info("-------------> got siteid <----------------\n\n");
+        site.id = Long.parseLong(item.getString().trim());
+        return true;
+        //  logger.info("User " + item.getString());
+       // site.creatorID = Long.parseLong(item.getString().trim());
       }
       else {
         logger.info("Got " + item);
       }
     }
+    return false;
   }
 
   private void readExercises(Site site, FileItem item) throws IOException {
-    ExcelImport importer = new ExcelImport();
     logger.info("got upload " +item);
-    List<Exercise> exercises = importer.readExercises(item.getInputStream());
+    String fileName = item.getName();
+    InputStream inputStream = item.getInputStream();
+    readExercisesPopulateSite(site, fileName, inputStream);
+  }
+
+  private void readExercisesPopulateSite(Site site, String fileName, InputStream inputStream) {
+    ExcelImport importer = new ExcelImport();
+    List<Exercise> exercises = importer.readExercises(inputStream);
     site.setExercises(exercises);
+    String sectionInfo = getSectionInfo(importer);
+
+    List<String> errors = importer.getErrors();
+    site.setFeedback("Read " + exercises.size() + " expressions in " + sectionInfo +
+        (errors.isEmpty() ? "" :"<br></br> and found " + errors.size() + " errors, e.g. : " + errors.iterator().next()));
+    site.setExerciseFile(fileName);
+  }
+
+  private String getSectionInfo(ExcelImport importer) {
     StringBuilder builder = new StringBuilder();
     for (String section : importer.getSections()) {
       Map<String,Lesson> section1 = importer.getSection(section);
@@ -272,25 +350,24 @@ public class SiteDeployer {
     }
     String sectionInfo = builder.toString();
     if (sectionInfo.endsWith(", ")) sectionInfo = sectionInfo.substring(0,sectionInfo.length()-2);
-
-    List<String> errors = importer.getErrors();
-    site.setFeedback("Read " + exercises.size() + " expressions in " + sectionInfo +
-        (errors.isEmpty() ? "" :"<br></br> and found " + errors.size() + " errors, e.g. : " + errors.iterator().next()));
-    site.exerciseFile = item.getName();
+    return sectionInfo;
   }
 
   private void storeUploadedFile(String configDir, Site site, DiskFileItem item) {
-    File uploadsDir = new File(configDir + File.separator + "uploads");
+    String uploadsDirPath = configDir + File.separator + "uploads";
+    File uploadsDir = new File(uploadsDirPath);
     if (!uploadsDir.exists()) uploadsDir.mkdir();
-    File dest = new File(configDir + File.separator + "uploads" + File.separator + System.currentTimeMillis() + "_" + site.exerciseFile);
+    File dest = new File(uploadsDirPath + File.separator + System.currentTimeMillis() + "_" + site.getExerciseFile());
     boolean b = item.getStoreLocation().renameTo(dest);
     if (!b) {
       logger.error("couldn't rename tmp file " + item.getStoreLocation());
     }
     else {
       logger.info("copied file to " + dest.getAbsolutePath());
-      site.savedExerciseFile = dest.getAbsolutePath();
-      if (!new File(site.savedExerciseFile).exists()) logger.error("huh? " +site.savedExerciseFile + " doesn't exist?");
+      site.setSavedExerciseFile(dest.getAbsolutePath());
+      if (!new File(site.getSavedExerciseFile()).exists()) {
+        logger.error("huh? " + site.getSavedExerciseFile() + " doesn't exist?");
+      }
     }
   }
 
@@ -318,22 +395,21 @@ public class SiteDeployer {
       File destConfigDir = new File(destDir, "config");
       logger.info("sandbox loc for new site " +destDir);
       // copy template config
-      File srcTemplateConfigDir = new File(configDir + File.separator + "template" + File.separator + "config");
+      String templateDir = configDir + File.separator + "template";
+      File srcTemplateConfigDir = new File(templateDir + File.separator + "config");
       copyDir(srcTemplateConfigDir,destConfigDir);
 
       // copy exercise file
-      File realPath = new File(toDeploy.savedExerciseFile);
-      File destFile = new File(destConfigDir, "template" + File.separator + toDeploy.exerciseFile);
-      logger.info("sandbox loc for new file " +destFile);
-      copyFile(realPath, destFile);
+      copyExerciseFile(toDeploy, destConfigDir);
 
       File installDir = new File(installPath);
 
       copyWebsiteComponents(destDir, installDir);
 
       // copy web.xml file from templates
-      File fromWeb = new File(configDir + File.separator + "template" + File.separator + "WEB-INF" + File.separator + "web.xml");
-      File toWeb = new File(destDir, "WEB-INF" + File.separator + "web.xml");
+      String webXMLPath = "WEB-INF" + File.separator + "web.xml";
+      File fromWeb = new File(templateDir, webXMLPath);
+      File toWeb   = new File(destDir, webXMLPath);
       copyFile(fromWeb, toWeb);
 
       // write the properties file
@@ -350,6 +426,36 @@ public class SiteDeployer {
     }
 
     return true;
+  }
+
+  private void updateExerciseFile(Site toDeploy, String installPath, DatabaseImpl db) throws IOException {
+    File installDir = new File(installPath);
+
+    String newSiteLoc = getWebappsInstallLoc(toDeploy, installDir);
+    File installConfigDir = new File(newSiteLoc, "config");
+    logger.info("copying to install dir " + installConfigDir);
+    copyExerciseFile(toDeploy, installConfigDir);
+
+    writeNewPropertyFile(toDeploy, installConfigDir);
+    String webXMLPath = "WEB-INF" + File.separator + "web.xml";
+
+    File toWeb = new File(newSiteLoc, webXMLPath);
+    if (!toWeb.setLastModified(System.currentTimeMillis())) logger.warn("huh? couldn't touch " + toWeb);
+
+    db.updateSiteFile(toDeploy);
+  }
+
+  /**
+   * Put exercise file under (config/)template
+   * @param toDeploy
+   * @param destConfigDir
+   * @throws IOException
+   */
+  private void copyExerciseFile(Site toDeploy, File destConfigDir) throws IOException {
+    File realPath = new File(toDeploy.getSavedExerciseFile());
+    File destFile = new File(destConfigDir, "template" + File.separator + toDeploy.getExerciseFile());
+    logger.info("copy from " +realPath + " to (sandbox) loc for new file " +destFile);
+    copyFile(realPath, destFile);
   }
 
   private void copyWebsiteComponents(File destDir, File installDir) throws IOException {
@@ -393,23 +499,32 @@ public class SiteDeployer {
   }
 
   private void writeNewPropertyFile(Site toDeploy, File destConfigDir) throws IOException {
-    Properties copy = new Properties();
     File propFile = new File(destConfigDir, "template" + File.separator + "config.properties");
-    FileInputStream inStream = new FileInputStream(propFile);
-    copy.load(inStream);
-    inStream.close();
+
+    Properties copy = readFromFile(propFile);
 
     copy.setProperty("appTitle", toDeploy.name);
     SimpleDateFormat df = new SimpleDateFormat("MM/dd");
     copy.setProperty("releaseDate", df.format(new Date()));
-    copy.setProperty("lessonPlanFile",toDeploy.exerciseFile);
+    copy.setProperty("lessonPlanFile", toDeploy.getExerciseFile());
     copy.setProperty("readFromFile","true");
     copy.setProperty("dataCollect","true");
     copy.setProperty("dataCollectAdminView","false");
     copy.setProperty("h2Database", "template");
     copy.setProperty("urdu", ""+toDeploy.language.equalsIgnoreCase("urdu"));
+
+
     copy.store(new FileWriter(propFile), "");
     logger.info("copied prop file " + propFile);
+  }
+
+  private Properties readFromFile(File propFile) throws IOException {
+    Properties copy = new Properties();
+
+    FileInputStream inStream = new FileInputStream(propFile);
+    copy.load(inStream);
+    inStream.close();
+    return copy;
   }
 
   private void copyDir(File srcDir, File destDir) throws IOException {
