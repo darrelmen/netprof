@@ -89,14 +89,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                          HttpServletResponse response) throws ServletException, IOException {
     boolean isMultipart = ServletFileUpload.isMultipartContent(new ServletRequestContext(request));
     if (isMultipart) {
+      logger.debug("Request " + request.getQueryString() + " path "  +request.getPathInfo());
       SiteDeployer siteDeployer = new SiteDeployer();
-      Site site = siteDeployer.getSite(request, configDir);
+      SiteDeployer.SiteInfo siteInfo = siteDeployer.getSite(request, configDir, db, getInstallPath());
+      Site site = siteInfo.site;
       if (site == null) {
         super.service(request, response);
         return;
       }
 
-      siteDeployer.doSiteResponse(db,response, siteDeployer, site);
+      if (siteInfo.isUpdate) {
+        response.setContentType("text/plain");
+        response.getWriter().write("Spreadsheet updated.");
+      } else {
+        siteDeployer.doSiteResponse(db, response, siteDeployer, site);
+      }
     } else {
       super.service(request, response);
     }
@@ -121,6 +128,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    *    then copy to install path/../name
    *
+   * @see mitll.langtest.client.DataCollectAdmin#makeDataCollectNewSiteForm2
    * @param id
    * @param name
    * @param language
@@ -129,6 +137,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public boolean deploySite(long id, String name, String language, String notes) {
+    logger.debug("deploy site id=" +id + " name " + name);
     SiteDeployer siteDeployer = new SiteDeployer();
     return siteDeployer.deploySite(db, getMailSupport(), getThreadLocalRequest(), configDir, getInstallPath(), id, name, language, notes);
   }
