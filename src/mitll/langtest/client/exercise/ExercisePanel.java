@@ -133,6 +133,8 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     if (/*direction.equals(HasDirection.Direction.RTL) || */rightAlignContent) {
       html.addStyleName("rightAlign");
     }
+
+    html.addStyleName("wrapword");
     return html;
   }
 
