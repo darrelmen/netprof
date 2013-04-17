@@ -77,7 +77,7 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
     }
   }
 
-  @Override
+/*  @Override
   public void retainCurrentSelectionState(Collection<String> currentSelection) {
     for (Button b : buttons) {
       if (b.isActive()) {
@@ -94,7 +94,7 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
       }
     }
     if (!found) buttons.iterator().next().setActive(true);
-  }
+  }*/
 
   /**
    * @see SectionExerciseList#populateListBox(mitll.langtest.client.exercise.SectionWidget, java.util.Map)
