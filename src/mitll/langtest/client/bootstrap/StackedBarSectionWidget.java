@@ -83,9 +83,11 @@ public class StackedBarSectionWidget extends StackProgressBar implements Section
       }
     }*/
   }
+/*
 
   @Override
   public void retainCurrentSelectionState(Collection<String> currentSelection) {
+*/
 /*    for (Button b : buttons) {
       if (b.isActive()) {
         b.setActive(false);
@@ -100,8 +102,10 @@ public class StackedBarSectionWidget extends StackProgressBar implements Section
         break;
       }
     }
-    if (!found) buttons.iterator().next().setActive(true);*/
+    if (!found) buttons.iterator().next().setActive(true);*//*
+
   }
+*/
 
   /**
    * @see mitll.langtest.client.exercise.SectionExerciseList#populateListBox(mitll.langtest.client.exercise.SectionWidget, java.util.Map)
