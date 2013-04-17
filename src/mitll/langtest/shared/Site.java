@@ -70,6 +70,10 @@ public class Site implements IsSerializable {
     return feedback;
   }
 
+  /**
+   * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(Site, String, java.io.InputStream)
+   * @param feedback
+   */
   public void setFeedback(String feedback) {
     this.feedback = feedback;
   }
