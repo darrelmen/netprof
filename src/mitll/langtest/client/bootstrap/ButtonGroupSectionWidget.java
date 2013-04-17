@@ -9,6 +9,7 @@ import mitll.langtest.client.exercise.SectionWidget;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,44 +24,29 @@ class ButtonGroupSectionWidget implements SectionWidget {
   private List<Button> buttons = new ArrayList<Button>();
   private Button clearButton;
   private String type;
+  private Map<String, Collection<Button>> nameToButton = new HashMap<String,Collection<Button>>();
 
   public ButtonGroupSectionWidget(String type) {
     this.type = type;
   }
 
+  /**
+   * @see FlexSectionExerciseList#addColumnButton(String, String, ButtonGroupSectionWidget, boolean)
+   * @see FlexSectionExerciseList.TypeToSectionsAsyncCallback#onSuccess(java.util.Map)
+   * @param b
+   */
   public void addButton(Button b) {
     this.buttons.add(b);
-  //  b.setActive(true);
+    String name = b.getText().trim();
+    Collection<Button> buttonsAtName = nameToButton.get(name);
+    if (buttonsAtName == null) {
+      nameToButton.put(name, buttonsAtName = new ArrayList<Button>());
+    }
+    buttonsAtName.add(b);
   }
+
   public void addClearButton(Button b) {
     clearButton = b;
-    clearButton.setEnabled(false);
-    //clearButton.setVisible(false);
-/*
-    clearButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        for (Button b : buttons) {
-          if (b.isActive()) {
-            b.setActive(false);
-           // break;
-          }
-        }
-        System.out.println("disable clear button for type " +type);
-
-        clearButton.setEnabled(false);
-      }
-    });*/
-  }
-
-  private void clearAll() {
-    for (Button b : buttons) {
-      if (b.isActive()) {
-        b.setActive(false);
-      }
-    }
-    System.out.println("disable clear button for type " +type);
-
     clearButton.setEnabled(false);
   }
 
@@ -85,10 +71,10 @@ class ButtonGroupSectionWidget implements SectionWidget {
 
   }
 
-  private boolean isAnythingSelected() {
+/*  private boolean isAnythingSelected() {
     for (Button b : buttons) if (b.isActive()) return true;
     return false;
-  }
+  }*/
 
   /**
    * @see FlexSectionExerciseList#populateListBoxAfterSelection(java.util.Map)
@@ -102,8 +88,23 @@ class ButtonGroupSectionWidget implements SectionWidget {
       String trim = b.getText().trim();
       b.setEnabled(inSet.contains(trim));
     }
+
+ /*   for (String toEnable : inSet) {
+      Collection<Button> buttonsAtName = nameToButton.get(toEnable);
+      if (buttonsAtName == null) {
+        System.err.println(">>>> enableInSet " + type + "=" + toEnable + " unknown button?");
+      }
+      else {
+        for (Button b : buttonsAtName) {
+          b.setEnabled(true);
+        }
+      }
+    }*/
   }
 
+  /**
+   * @see FlexSectionExerciseList#populateListBoxAfterSelection(java.util.Map)
+   */
   @Override
   public void enableAll() {
     for (Button b : buttons) {
@@ -143,6 +144,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
       }
     }*/
 
+/*
       boolean didSelect = false;
       // flip state
       for (Button b : buttons) {
@@ -157,13 +159,40 @@ class ButtonGroupSectionWidget implements SectionWidget {
           break;
         }
       }
-      boolean anythingSelected = isAnythingSelected();
-      if (didSelect && !anythingSelected) {
-        System.err.println(">>>> selectItem " + type + "=" + sections + " but nothing selected?");
+*/
+      boolean anythingSelected = false;
+      for (String toSelect : sections) {
+        Collection<Button> buttonsAtName = nameToButton.get(toSelect);
+        if (buttonsAtName == null) {
+          System.err.println(">>>> selectItem " + type + "=" + toSelect + " unknown button?");
+        }
+        else {
+          for (Button b : buttonsAtName) {
+            boolean active = !doToggle || !b.isActive();
+            b.setActive(active);
+            anythingSelected |= active;
+          }
+        }
       }
 
+   // boolean anythingSelected = isAnythingSelected();
+   /*     if (didSelect && !anythingSelected) {
+        System.err.println(">>>> selectItem " + type + "=" + sections + " but nothing selected?");
+      }
+*/
       setClearButtonState(sections, anythingSelected);
     }
+  }
+
+  private void clearAll() {
+    for (Button b : buttons) {
+      if (b.isActive()) {
+        b.setActive(false);
+      }
+    }
+    System.out.println("disable clear button for type " +type);
+
+    clearButton.setEnabled(false);
   }
 
   private void setClearButtonState(Collection<String> sections, boolean anythingSelected) {
@@ -176,39 +205,8 @@ class ButtonGroupSectionWidget implements SectionWidget {
     }
   }
 
-  /**
-   * @see SectionExerciseList#populateListBox(String)
-   * @param currentSelection
-   */
   @Override
-  public void retainCurrentSelectionState(Collection<String> currentSelection) {
-/*    for (Button b : buttons) {
-      if (b.isActive()) {
-        b.setActive(false);
-        break;
-      }
-    }
-    boolean found = false;
-    int num = 0;
-    for (Button b : buttons) {
-      String value = b.getText().trim();
-      if (currentSelection.contains(value)) {
-        b.setActive(true);
-        found = true;
-       // break;
-      }
-    }
-    System.out.println("retainCurrentSelectionState for type " +type+", "+num + " selected.");
-
-    if (!found) buttons.iterator().next().setActive(true);*/
-  }
-
+  public void populateTypeWidget(Collection<String> items, Map<String, Integer> sectionToCount) {}
   @Override
-  public void populateTypeWidget(Collection<String> items, Map<String, Integer> sectionToCount) {
-  }
-
-  @Override
-  public Widget getWidget() {
-    return null;
-  }
+  public Widget getWidget() {  return null; }
 }
