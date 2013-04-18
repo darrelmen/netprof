@@ -109,7 +109,7 @@ public interface LangTestDatabaseAsync {
   void logMessage(String message, AsyncCallback<Void> async);
 
  // void getTypeToSection(AsyncCallback<Map<String, Collection<String>>> async);
-  void getTypeToSectionsForTypeAndSection(String type, String section, AsyncCallback<Map<String, Collection<String>>> async);
+ // void getTypeToSectionsForTypeAndSection(String type, String section, AsyncCallback<Map<String, Collection<String>>> async);
 
 //  void getExercisesForSection(String type, String section, long userID, AsyncCallback<List<ExerciseShell>> async);
 
