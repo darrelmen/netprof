@@ -1,6 +1,7 @@
 package mitll.langtest.client.bootstrap;
 
 import com.github.gwtbootstrap.client.ui.Bar;
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.StackProgressBar;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -38,6 +39,16 @@ public class StackedBarSectionWidget extends StackProgressBar implements Section
   }
 
   @Override
+  public void addButton(Button b) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  @Override
+  public void addClearButton(Button b) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  @Override
   public String getCurrentSelection() {
     return currentSelection;
 /*    for (Bar b : buttons) {
@@ -55,17 +66,17 @@ public class StackedBarSectionWidget extends StackProgressBar implements Section
    // return buttons.iterator().next().getText().trim();
   }
 
-  @Override
+/*  @Override
   public void selectFirstAfterAny() {
     currentSelection = items.get(1);
-/*    for (Button b : buttons) {
+    for (Button b : buttons) {
       if (b.isActive()) {
         b.setActive(false);
         break;
       }
     }
-    buttons.get(1).setActive(true);*/
-  }
+    buttons.get(1).setActive(true);
+  }*/
 
   @Override
   public void selectItem(Collection<String> section, boolean doToggle) {
@@ -118,7 +129,7 @@ public class StackedBarSectionWidget extends StackProgressBar implements Section
     this.items.clear();
     this.items.add(ANY);
     this.items.addAll(items);
-    selectFirstAfterAny();
+    //selectFirstAfterAny();
     clear();
     Widget widgets = addButton(ANY);
     //widgets.setWidth("5%");
