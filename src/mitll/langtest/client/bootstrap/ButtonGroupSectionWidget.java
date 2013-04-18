@@ -10,11 +10,13 @@ import mitll.langtest.client.exercise.SectionWidget;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
-* Created with IntelliJ IDEA.
+* A group of buttons that need to maintain
 * User: GO22670
 * Date: 4/8/13
 * Time: 11:19 AM
@@ -25,50 +27,68 @@ class ButtonGroupSectionWidget implements SectionWidget {
   private Button clearButton;
   private String type;
   private Map<String, Collection<Button>> nameToButton = new HashMap<String,Collection<Button>>();
+  private String currentSelection = null;
 
   public ButtonGroupSectionWidget(String type) {
     this.type = type;
   }
 
   /**
-   * @see FlexSectionExerciseList#addColumnButton(String, String, ButtonGroupSectionWidget, boolean)
+   * @see FlexSectionExerciseList#addColumnButton
    * @see FlexSectionExerciseList.TypeToSectionsAsyncCallback#onSuccess(java.util.Map)
    * @param b
    */
+  @Override
   public void addButton(Button b) {
-    this.buttons.add(b);
     String name = b.getText().trim();
-    Collection<Button> buttonsAtName = nameToButton.get(name);
-    if (buttonsAtName == null) {
-      nameToButton.put(name, buttonsAtName = new ArrayList<Button>());
+    if (name.equals(SectionExerciseList.ANY)) {
+      addClearButton(b);
+    } else {
+      this.buttons.add(b);
+      Collection<Button> buttonsAtName = nameToButton.get(name);
+      if (buttonsAtName == null) {
+        nameToButton.put(name, buttonsAtName = new ArrayList<Button>());
+      }
+      buttonsAtName.add(b);
     }
-    buttonsAtName.add(b);
   }
 
-  public void addClearButton(Button b) {
+  private void addClearButton(Button b) {
     clearButton = b;
     clearButton.setEnabled(false);
   }
 
   @Override
   public String getCurrentSelection() {
-    //System.out.println("getCurrentSelection for " +type + " checking " + buttons.size() + " buttons.");
+    if (currentSelection == null) {
+      currentSelection = getCurrentSelectionInternal();
+    }
+    return currentSelection;
+  }
+
+  private String getCurrentSelectionInternal() {
+    System.out.println("getCurrentSelection for " + type + " checking " + buttons.size() + " buttons.");
     StringBuilder builder = new StringBuilder();
+    Set<String> unique = new HashSet<String>();
+    List<String> inOrder = new ArrayList<String>();
     for (Button b : buttons) {
       if (b.isActive()) {
-        //System.out.println("\tgetCurrentSelection for " +type + "=" + b.getText());
-        builder.append(b.getText().trim());
-        builder.append(",");
+        String name = b.getText().trim();
+        if (!unique.contains(name)) {
+          unique.add(name);
+          inOrder.add(name);
+        }
       }
+    }
+    for (String name : inOrder) {
+      builder.append(name);
+      builder.append(",");
     }
     if (builder.length() > 0) {
       return builder.toString();
-    }
-    else {
+    } else {
       return SectionExerciseList.ANY;
     }
-    //System.out.println("\tgetCurrentSelection for " +type + " - none are selected");
-
   }
 
 /*  private boolean isAnythingSelected() {
@@ -88,18 +108,6 @@ class ButtonGroupSectionWidget implements SectionWidget {
       String trim = b.getText().trim();
       b.setEnabled(inSet.contains(trim));
     }
-
- /*   for (String toEnable : inSet) {
-      Collection<Button> buttonsAtName = nameToButton.get(toEnable);
-      if (buttonsAtName == null) {
-        System.err.println(">>>> enableInSet " + type + "=" + toEnable + " unknown button?");
-      }
-      else {
-        for (Button b : buttonsAtName) {
-          b.setEnabled(true);
-        }
-      }
-    }*/
   }
 
   /**
@@ -107,6 +115,8 @@ class ButtonGroupSectionWidget implements SectionWidget {
    */
   @Override
   public void enableAll() {
+    System.out.println("enableAll for " + type);
+
     for (Button b : buttons) {
       b.setEnabled(true);
     }
@@ -117,17 +127,6 @@ class ButtonGroupSectionWidget implements SectionWidget {
     return buttons.iterator().next().getText().trim();
   }
 
-  /**
-   * @deprecated -- we don't do this right now
-   */
-  @Override
-  public void selectFirstAfterAny() {
-    System.out.println("selectFirstAfterAny called?? --------------");
-
-    //selectItem(getFirstItem(), false);
-  }
-
-
   @Override
   public void selectItem(Collection<String> sections, boolean doToggle) {
     System.out.println("selectItem " + type + "="+sections);
@@ -135,31 +134,6 @@ class ButtonGroupSectionWidget implements SectionWidget {
     if (sections.size() == 1 && sections.iterator().next().equals(SectionExerciseList.ANY)) {
       clearAll();
     } else {
-/*    for (Button b : buttons) {
-      String trim = b.getText().trim();
-
-      if (b.isActive() && !sections.contains(trim)) {
-        b.setActive(false);
-        break;
-      }
-    }*/
-
-/*
-      boolean didSelect = false;
-      // flip state
-      for (Button b : buttons) {
-        String trim = b.getText().trim();
-        if (sections.contains(trim)) {
-          //System.out.println("\tselectItem found button is active = " +b.isActive());
-
-          b.setActive(!doToggle || !b.isActive());
-
-          //System.out.println("\tselectItem after, button is active = " +b.isActive());
-          didSelect = b.isActive();
-          break;
-        }
-      }
-*/
       boolean anythingSelected = false;
       for (String toSelect : sections) {
         Collection<Button> buttonsAtName = nameToButton.get(toSelect);
@@ -174,6 +148,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
           }
         }
       }
+      currentSelection = null;
 
    // boolean anythingSelected = isAnythingSelected();
    /*     if (didSelect && !anythingSelected) {
@@ -190,7 +165,9 @@ class ButtonGroupSectionWidget implements SectionWidget {
         b.setActive(false);
       }
     }
-    System.out.println("disable clear button for type " +type);
+    currentSelection = null;
+
+    System.out.println("disable clear button for type " +type + " checking " +buttons.size() + " buttons");
 
     clearButton.setEnabled(false);
   }
