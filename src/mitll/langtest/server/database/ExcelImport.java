@@ -243,17 +243,21 @@ public class ExcelImport implements ExerciseDAO {
             }
 
             Exercise imported;
+            List<String> translations = new ArrayList<String>();
+            if (foreignLanguagePhrase.length() > 0) {
+              translations.addAll(Arrays.asList(foreignLanguagePhrase.split(";")));
+              //logger.debug(english + "->" + translations);
+            }
             if (isFlashcard) {
-              List<String> translations = new ArrayList<String>();
-              if (foreignLanguagePhrase.length() > 0) {
-                translations.addAll(Arrays.asList(foreignLanguagePhrase.split(";")));
-                logger.debug(english + "->" + translations);
-              }
               imported = new Exercise("flashcardStimulus", "" + (id++), english, translations, english);
-              imported.setTranslitSentence(translit);
+           //   logger.debug("Read " + imported);
             } else {
+              //    Exercise imported = new Exercise("import", "" + id, content, false, true, english);
               imported = getExercise(id++, dao, english, foreignLanguagePhrase, translit);
             }
+            imported.setEnglishSentence(english);
+            imported.setTranslitSentence(translit);
+            imported.setRefSentences(translations);
 
             exercises.add(imported);
             if (weightIndex != -1) {
