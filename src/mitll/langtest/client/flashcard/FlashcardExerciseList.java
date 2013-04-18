@@ -10,12 +10,11 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.FlashcardResponse;
 
 /**
- * Created with IntelliJ IDEA.
+ * @deprecated don't use this -- only bootstrap version
  * User: GO22670
  * Date: 3/5/13
  * Time: 5:32 PM
@@ -51,7 +50,6 @@ public class FlashcardExerciseList implements ListInterface {
    */
   @Override
   public void getExercises(long userID) {
-    //System.out.println("Getting next for " +userID);
     service.getNextExercise(userID, new AsyncCallback<FlashcardResponse>() {
       @Override
       public void onFailure(Throwable caught) {
