@@ -48,7 +48,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
@@ -340,6 +339,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * TODO remember exercise list between invokations
+   * @param userID
+   * @param typeToSection
+   * @return
+   */
+  @Override
+  public FlashcardResponse getNextExercise(long userID, Map<String, Collection<String>> typeToSection) {
+    logger.debug("req " + typeToSection);
+    Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
+    logger.debug("\texercisesForSection " + exercisesForSection);
+
+    FlashcardResponse nextExercise = db.getNextExercise(new ArrayList<Exercise>(exercisesForSection),userID, serverProps.isTimedGame());
+    logger.debug("\tnextExercise " + nextExercise);
+
+    return getFlashcardResponse(userID, nextExercise);
+  }
+
+  /**
    * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList#getExercises(long)
    * @param userID
    * @return
@@ -347,6 +364,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public FlashcardResponse getNextExercise(long userID) {
     FlashcardResponse nextExercise = db.getNextExercise(userID, serverProps.isTimedGame());
+    return getFlashcardResponse(userID, nextExercise);
+  }
+
+  private FlashcardResponse getFlashcardResponse(long userID, FlashcardResponse nextExercise) {
     if (nextExercise == null || nextExercise.e == null) {
       logger.error("huh? no next exercise for user " +userID);
       return nextExercise;
@@ -907,12 +928,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param reqid request id from the client, so it can potentially throw away out of order responses
    * @param flq was the prompt a foreign language query
    * @param audioType regular or fast then slow audio recording
+   * @param doFlashcard
    * @return URL to audio on server and if audio is valid (not too short, etc.)
    */
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
-                                    int user, int reqid, boolean flq, String audioType) {
+                                    int user, int reqid, boolean flq, String audioType, boolean doFlashcard) {
     String wavPath = getLocalPathToAnswer(plan, exercise, questionID, user);
-    //logger.warn("got wave file " +wavPath);
+    logger.debug("got wave file " + wavPath);
     File file = getAbsoluteFile(wavPath);
 
     AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
@@ -930,7 +952,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     // logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
 
     if (isValid) {
-      return getAudioAnswer(exercise, questionID, user, reqid, file, validity, url);
+      return getAudioAnswer(exercise, questionID, user, reqid, file, validity, url, doFlashcard);
     }
     else {
       return new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
@@ -938,9 +960,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private AudioAnswer getAudioAnswer(String exercise, int questionID, int user, int reqid,
-                                     File file, AudioCheck.ValidityAndDur validity, String url) {
+                                     File file, AudioCheck.ValidityAndDur validity, String url, boolean doFlashcard) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
-    if (serverProps.isFlashcard()) {
+    if (serverProps.isFlashcard()|| doFlashcard) {
       makeAutoCRT();
       autoCRT.getFlashcardAnswer(getExercise(exercise), getExercises(), file, audioAnswer);
       boolean isCorrect = audioAnswer.score > 0.8d;
