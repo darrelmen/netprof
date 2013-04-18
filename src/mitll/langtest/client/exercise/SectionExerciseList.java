@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.SectionNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
