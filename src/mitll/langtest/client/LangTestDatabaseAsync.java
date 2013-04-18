@@ -10,6 +10,7 @@ import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultsAndGrades;
+import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.Session;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
@@ -128,4 +129,6 @@ public interface LangTestDatabaseAsync {
   void getTypeToSectionsForTypeAndSection(Map<String, Collection<String>> typeToSection, AsyncCallback<Map<String, Collection<String>>> async);
 
   void getTypeOrder(AsyncCallback<Collection<String>> async);
+
+  void getSectionNodes(AsyncCallback<List<SectionNode>> async);
 }
