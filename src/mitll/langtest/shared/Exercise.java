@@ -32,6 +32,7 @@ public class Exercise extends ExerciseShell  {
   private Map<String,List<QAPair>> langToQuestion = null;
   private String refAudio;
   private String slowAudioRef;
+  private String englishSentence;
   private List<String> refSentences = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
   private double weight;
@@ -185,6 +186,10 @@ public class Exercise extends ExerciseShell  {
   public String getSlowAudioRef() { return slowAudioRef; }
   public void setRefAudio(String s) { this.refAudio = s; }
   public String getRefSentence() { return refSentences.isEmpty() ? "" : refSentences.get(0); }
+
+  public void setRefSentences(List<String> sentenceRefs) {
+    this.refSentences = sentenceRefs;
+  }
   public String getTranslitSentence() { return translitSentences.isEmpty() ? "" : translitSentences.get(0); }
   public List<String> getRefSentences() { return refSentences; }
   public List<String> getTranslitSentences() { return translitSentences; }
@@ -243,6 +248,14 @@ public class Exercise extends ExerciseShell  {
     this.weight = weight;
   }
 
+  public String getEnglishSentence() {
+    return englishSentence;
+  }
+
+  public void setEnglishSentence(String englishSentence) {
+    this.englishSentence = englishSentence;
+  }
+
   public void addSlot(String s) {
     if (slots == null) slots = new ArrayList<String>();
     slots.add(s);
@@ -268,6 +281,7 @@ public class Exercise extends ExerciseShell  {
       String moreAboutQuestions = DEBUG ? " : " + questions : "";
       return "Exercise " + getType() + " " +plan+"/"+ id + "/" + (promptInEnglish?"english":"foreign")+
           " : content bytes = " + content.length() + (DEBUG ? " content : " +content : "")+
+          " ref '" + getRefSentence() + "' translit '" + getTranslitSentence()+ "'"+
           (langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size() + moreAboutQuestions);
     }
   }
