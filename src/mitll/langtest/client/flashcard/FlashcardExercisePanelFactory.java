@@ -10,7 +10,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
 /**
- * Created with IntelliJ IDEA.
+ * Make Bootstrap exercise panels...
  * User: GO22670
  * Date: 7/9/12
  * Time: 6:18 PM
@@ -18,10 +18,10 @@ import mitll.langtest.shared.Exercise;
  */
 public class FlashcardExercisePanelFactory extends ExercisePanelFactory {
   /**
-   * @see mitll.langtest.client.LangTest#setFactory()
    * @param service
    * @param userFeedback
    * @param controller
+   * @see mitll.langtest.client.LangTest#setFactory()
    */
   public FlashcardExercisePanelFactory(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                                        final ExerciseController controller) {
@@ -29,10 +29,6 @@ public class FlashcardExercisePanelFactory extends ExercisePanelFactory {
   }
 
   public Panel getExercisePanel(Exercise e) {
-    if (e.getType() == Exercise.EXERCISE_TYPE.RECORD) {
-      return new BootstrapExercisePanel(e, service, controller);
-    } else {
-      return new ExercisePanel(e, service, userFeedback, controller);
-    }
+    return new BootstrapExercisePanel(e, service, controller);
   }
 }
