@@ -76,12 +76,12 @@ public class SectionHelper {
 
   private void addChildren(List<String> typeOrder, SectionNode parent, Map<String, Collection<String>> typeToSections) {
     List<String> remainingTypes = typeOrder.subList(1, typeOrder.size());
-    logger.warn("type order " + typeOrder + " remaining " + remainingTypes);
+   // logger.warn("type order " + typeOrder + " remaining " + remainingTypes);
 
     String nextType = typeOrder.iterator().next();
 
     Collection<String> children = typeToSections.get(nextType);
-    logger.warn("nextType " + nextType + " : " + children);
+  //  logger.warn("nextType " + nextType + " : " + children);
     for (String childSection : children) {
       SectionNode child = new SectionNode(nextType, childSection);
       parent.addChild(child);
