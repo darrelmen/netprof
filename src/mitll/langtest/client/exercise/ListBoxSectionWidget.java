@@ -25,11 +25,6 @@ public class ListBoxSectionWidget extends ListBox implements SectionWidget {
     //To change body of implemented methods use File | Settings | File Templates.
   }
 
-  @Override
-  public void addClearButton(Button b) {
-    //To change body of implemented methods use File | Settings | File Templates.
-  }
-
   public String getFirstItem() {
     return getItemText(0);  // first is Any
   }
