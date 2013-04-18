@@ -233,7 +233,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       if (doImages) translations.add(foreign);
       Exercise repeat = new Exercise("flashcardStimulus", "" + (id++), flashcardStimulus, translations, tooltip);
       repeat.setTranslitSentence(translit);
-
+      repeat.setEnglishSentence(english);
       String audioRef = (refAudio.length() == 0) ? mediaDir + "/" + english + ".mp3" : mediaDir + "/" + refAudio;
     //  logger.debug("audio ref = " + audioRef);
       repeat.setRefAudio(audioRef); // TODO confirm file exists.
@@ -617,6 +617,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       //logger.debug(english + "->" + translations);
     }
     Exercise imported = new Exercise("flashcardStimulus", "" + id, english, translations, english);
+    imported.setEnglishSentence(english);
     if (translit.length() > 0) {
       imported.setTranslitSentence(translit);
     }
