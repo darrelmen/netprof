@@ -267,6 +267,11 @@ public class PropertyHandler {
       showSectionWidgets = !Window.Location.getParameter(SHOW_SECTION_WIDGETS).equals("false");
     }
     System.out.println("show section widgets " + showSectionWidgets);
+
+    String flashcardParam = Window.Location.getParameter(FLASHCARD);
+    if (flashcardParam != null) {
+      flashCard = !flashcardParam.equals("false");
+    }
     return grading;
   }
 
@@ -388,6 +393,12 @@ public class PropertyHandler {
     return showSectionWidgets;
   }
 
+  /**
+   * @see LangTest#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, boolean)
+   * @see mitll.langtest.client.LangTest#onModuleLoad2()
+   * @see mitll.langtest.client.LangTest#setFactory()
+   * @return
+   */
   public boolean isFlashCard() {
     return flashCard;
   }
