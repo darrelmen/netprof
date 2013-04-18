@@ -8,7 +8,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -43,7 +42,7 @@ public interface LangTestDatabase extends RemoteService {
   void addTextAnswer(int userID, Exercise exercise, int questionID, String answer);
   boolean isAnswerValid(int userID, Exercise exercise, int questionID);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
-                             int reqid, boolean flq, String audioType);
+                             int reqid, boolean flq, String audioType, boolean doFlashcard);
   double getScoreForAnswer(Exercise e, int questionID, String answer);
 
   Exercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly);
@@ -118,6 +117,7 @@ public interface LangTestDatabase extends RemoteService {
   List<ExerciseShell> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection, long userID);
 
   FlashcardResponse getNextExercise(long userID);
+  FlashcardResponse getNextExercise(long userID,Map<String, Collection<String>> typeToSection);
 
   void resetUserState(long userID);
   void clearUserState(long userID);
