@@ -548,10 +548,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this), userManager, 1);
     } else if (props.isGrading()) {
       exerciseList.setFactory(new GradingExercisePanelFactory(service, this, this), userManager, props.getNumGradesToCollect());
-    } else if (props.isDataCollectMode() && props.isCollectAudio() && !props.isCRTDataCollectMode()) {
-      exerciseList.setFactory(new WaveformExercisePanelFactory(service, this, this), userManager, 1);
     } else if (props.isFlashCard()) {
       exerciseList.setFactory(new FlashcardExercisePanelFactory(service, this, this), userManager, 1);
+    } else if (props.isDataCollectMode() && props.isCollectAudio() && !props.isCRTDataCollectMode()) {
+      exerciseList.setFactory(new WaveformExercisePanelFactory(service, this, this), userManager, 1);
     } else {
       exerciseList.setFactory(new ExercisePanelFactory(service, this, this), userManager, 1);
     }
@@ -780,6 +780,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public String getLanguage() {  return props.getLanguage(); }
   public boolean isPromptBeforeNextItem() {  return props.isPromptBeforeNextItem(); }
   public boolean isRightAlignContent() {  return props.isRightAlignContent(); }
+  public boolean isFlashCard() {  return props.isFlashCard(); }
 
   // recording methods...
   /**
