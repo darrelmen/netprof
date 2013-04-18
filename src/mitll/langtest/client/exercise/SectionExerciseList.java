@@ -19,7 +19,6 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
-import mitll.langtest.shared.SectionNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,7 +53,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * for them (least answered/recorded first), and not let them skip forward in the list.
    */
   private boolean includeItemInBookmark = false;
-  private boolean firstTime = true;
+  //private boolean firstTime = true;
 
   /**
    * @see mitll.langtest.client.LangTest#makeExerciseList
@@ -133,8 +132,7 @@ public class SectionExerciseList extends PagingExerciseList {
     System.out.println("getExercises (success) for user = " + userID + " got types " + types);
     typeToBox.clear();
 
-    String token = unencodeToken(History.getToken());
-    SelectionState selectionState = getSelectionState(token);
+    SelectionState selectionState = getSelectionState(History.getToken());
 
     for (final String type : types) {
       Map<String, Integer> sections = result.get(type);
@@ -432,9 +430,7 @@ public class SectionExerciseList extends PagingExerciseList {
     String historyToken = getHistoryToken(null);
     String currentToken = History.getToken();
 
-    if (studentLink != null) {
-      studentLink.setHref(GWT.getHostPageBaseURL() + "?showSectionWidgets=false#" + historyToken);
-    }
+    setModeLinks(historyToken);
     if (currentToken.equals(historyToken)) {
       if (currentExercises == null || currentExercises.isEmpty()) {
      //   if (firstTime) {
@@ -451,6 +447,12 @@ public class SectionExerciseList extends PagingExerciseList {
       History.newItem(historyToken);
     }
     //firstTime = false;
+  }
+
+  protected void setModeLinks(String historyToken) {
+    if (studentLink != null) {
+      studentLink.setHref(GWT.getHostPageBaseURL() + "?showSectionWidgets=false#" + historyToken);
+    }
   }
 
   /**
@@ -547,7 +549,7 @@ public class SectionExerciseList extends PagingExerciseList {
     } else {
       String token = event.getValue();
       System.out.println("onValueChange '" + token + "'");
-      token = getCleanToken(token);
+      //token = getCleanToken(token);
       try {
         SelectionState selectionState = getSelectionState(token);
         System.out.println("onValueChange '" + token + "' yields state " + selectionState.typeToSection);
@@ -569,9 +571,9 @@ public class SectionExerciseList extends PagingExerciseList {
 
   }
 
-  protected String getCleanToken(String token) {
+/*  protected String getCleanToken(String token) {
     return unencodeToken(token);
-  }
+  }*/
 
   /**
    * When we get a history token push, select the exercise type, section, and optionally item.
@@ -644,68 +646,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @return object representing type=value pairs from history token
    */
   protected SelectionState getSelectionState(String token) {
-    SelectionState selectionState = new SelectionState();
-    String[] parts = token.split(";");
-
-    for (String part : parts) {
-      //System.out.println("getSelectionState : part " + part + " : " + Arrays.asList(parts));
-
-      if (part.contains("=")) {
-        String[] segments = part.split("=");
-        //System.out.println("\tpart " + part + " : " + Arrays.asList(segments));
-
-        String type = segments[0].trim();
-        String section = segments[1].trim();
-        String[] split = section.split(",");
-        List<String> sections = Arrays.asList(split);
-
-        if (sections.isEmpty()) {
-          System.err.println("\tpart " + part + " is badly formed ");
-        }
-        else {
-          selectionState.add(type, sections);
-        }
-        //System.out.println("getSelectionState : part " + part + " : " + type + "->" +section + " : " + selectionState);
-      }
-      else if (part.length() > 0) {
-        System.err.println("getSelectionState skipping part '" + part+ "'");
-      }
-    }
-
-    if (token.contains("item")) {
-      int item1 = token.indexOf("item=");
-      String itemValue = token.substring(item1+"item=".length());
-      //System.out.println("getSelectionState : got item = '" + itemValue +"'");
-      selectionState.setItem(itemValue);
-    }
-
-    System.out.println("getSelectionState : got " +
-      selectionState +
-      " from token '" +token + "'");
-
-    return selectionState;
-  }
-
-  protected static class SelectionState {
-    public String item;
-    public Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
-
-    public void add(String type, Collection<String> section) {
-      typeToSection.put(type, section);
-    }
-
-    public void setItem(String item) {
-      this.item = item;
-    }
-
-    public String toString() {
-      StringBuilder builder = new StringBuilder();
-      for (Collection<String> section : typeToSection.values()) {
-        builder.append(section).append(", ");
-      }
-      String s = builder.toString();
-      return s.substring(0, Math.max(0,s.length() - 2));
-    }
+    return new SelectionState(token);
   }
 
   /**
