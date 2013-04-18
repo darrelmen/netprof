@@ -21,6 +21,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.ListInterface;
+import mitll.langtest.client.exercise.SelectionState;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.FlashcardResponse;
@@ -118,7 +119,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
    */
   @Override
   public void getExercises(final long userID) {
-    System.out.println("\n\n --------------- getExercises for " + userID + " expired " +expired + " time running " + timerRunning);
+    System.out.println("--------------- getExercises for " + userID + " expired " +expired + " time running " + timerRunning);
 
     if (!expired) {
       if (!timerRunning) {
@@ -127,29 +128,14 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
         }
       }
 
-      service.getNextExercise(userID, new AsyncCallback<FlashcardResponse>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          Window.alert("Couldn't contact server.");
-        }
-
-        @Override
-        public void onSuccess(FlashcardResponse result) {
-          if (result.finished) {
-            Window.alert("Flashcards Complete!");
-          } else {
-            Panel exercisePanel = factory.getExercisePanel(result.e);
-            exercisePanelColumn.clear();
-
-            exercisePanelColumn.add(exercisePanel);
-            bottomRow.setVisible(true);
-            correct.setText("Correct " + result.correct + "/" + (result.correct + result.incorrect));
-            lastCorrect = result.correct;
-            List<Integer> correctHistory = result.getCorrectHistory();
-            prevCorrect = correctHistory == null || correctHistory.isEmpty() ? -1 : correctHistory.get(correctHistory.size() - 1);
-          }
-        }
-      });
+      SelectionState selectionState = new SelectionState();
+      if (selectionState.isEmpty()) {
+        service.getNextExercise(userID, new FlashcardResponseAsyncCallback());
+      }
+      else {
+        System.out.println("Getting next for " +userID + " selection state : " +selectionState);
+        service.getNextExercise(userID, selectionState.typeToSection, new FlashcardResponseAsyncCallback());
+      }
     }
   }
 
@@ -311,5 +297,29 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
   @Override
   public void onResize() {
+  }
+
+  private class FlashcardResponseAsyncCallback implements AsyncCallback<FlashcardResponse> {
+    @Override
+    public void onFailure(Throwable caught) {
+      Window.alert("Couldn't contact server.");
+    }
+
+    @Override
+    public void onSuccess(FlashcardResponse result) {
+      if (result.finished) {
+        Window.alert("Flashcards Complete!");
+      } else {
+        Panel exercisePanel = factory.getExercisePanel(result.e);
+        exercisePanelColumn.clear();
+
+        exercisePanelColumn.add(exercisePanel);
+        bottomRow.setVisible(true);
+        correct.setText("Correct " + result.correct + "/" + (result.correct + result.incorrect));
+        lastCorrect = result.correct;
+        List<Integer> correctHistory = result.getCorrectHistory();
+        prevCorrect = correctHistory == null || correctHistory.isEmpty() ? -1 : correctHistory.get(correctHistory.size() - 1);
+      }
+    }
   }
 }
