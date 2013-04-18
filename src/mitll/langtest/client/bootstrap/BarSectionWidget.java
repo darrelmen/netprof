@@ -156,8 +156,8 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
     //To change body of implemented methods use File | Settings | File Templates.
   }
 
-  @Override
+/*  @Override
   public void addClearButton(Button b) {
     //To change body of implemented methods use File | Settings | File Templates.
-  }
+  }*/
 }
