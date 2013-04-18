@@ -144,6 +144,7 @@ public class RecordButtonPanel {
    * @see #RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int)
    */
   public void stopRecording() {
+    System.out.println("stop recording... ");
     controller.stopRecording();
     final Panel outer = getPanel();
 
@@ -156,6 +157,7 @@ public class RecordButtonPanel {
       reqid,
       !exercise.promptInEnglish,
       controller.getAudioType(),
+      controller.isFlashCard(),
       new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
           recordButton.setEnabled(true);
