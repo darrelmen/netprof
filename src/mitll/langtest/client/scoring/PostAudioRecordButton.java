@@ -55,7 +55,7 @@ public class PostAudioRecordButton extends RecordButton {
       reqid,
       !exercise.promptInEnglish,
       controller.getAudioType(),
-      new AsyncCallback<AudioAnswer>() {
+      false, new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
           System.out.println("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
