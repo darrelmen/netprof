@@ -107,10 +107,14 @@ public interface LangTestDatabase extends RemoteService {
 
   void logMessage(String message);
 
- // Map<String, Collection<String>> getTypeToSection();
-
-  Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section);
   Collection<String> getTypeOrder();
+
+  /**
+   * @deprecated
+   * @param typeToSection
+   * @param userID
+   * @return
+   */
   List<ExerciseShell> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection, long userID);
 
   FlashcardResponse getNextExercise(long userID);
@@ -120,7 +124,17 @@ public interface LangTestDatabase extends RemoteService {
 
   void sendEmail(int userID, String to, String replyTo, String subject, String message, String token);
 
+  /**
+   * @deprecated
+   * @return
+   */
   Map<String, Map<String,Integer>> getTypeToSectionToCount();
 
+  /**
+   * @deprecated
+   * @return
+   */
   Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(Map<String, Collection<String>> typeToSection);
+
+  List<SectionNode> getSectionNodes();
 }
