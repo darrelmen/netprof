@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -15,6 +16,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -26,6 +28,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.SectionWidget;
+import mitll.langtest.client.exercise.SelectionState;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
 
@@ -281,11 +284,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   }
 
   private void showSelectionState(ValueChangeEvent<String> event) {
-    String rawToken = getTokenFromEvent(event);
-
-    String token = getCleanToken(rawToken);
-
-    SelectionState selectionState = getSelectionState(token);
+    SelectionState selectionState = new SelectionState(event);
 
     for (Heading widget : typeToStatus.values()) {
       widget.setText("");
@@ -327,6 +326,22 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     Widget hideBoxesWidget = getHideBoxesWidget();
     fluidRow.add(new Column(2, hideBoxesWidget));
+
+    Widget flashcardWidget = getFlashcard();
+    fluidRow.add(new Column(2, flashcardWidget));
+  }
+
+  private Anchor flashcardLink;
+  protected Widget getFlashcard() {
+    flashcardLink = new Anchor("Flashcard", "#?flashcard=true");
+    return flashcardLink;
+  }
+
+  protected void setModeLinks(String historyToken) {
+    super.setModeLinks(historyToken);
+    if (flashcardLink != null) {
+      flashcardLink.setHref(GWT.getHostPageBaseURL() + "?flashcard=true#" + historyToken);
+    }
   }
 
   private FluidRow getInstructionRow() {
@@ -334,7 +349,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     fluidRow1.add(new Column(7, 3, new Heading(5, "Click on the buttons to select just what you want to see.")));
     return fluidRow1;
   }
-
 
   private Container addColumnButton(final String sectionInFirstType,
                                     final SectionWidget buttonGroupSectionWidget, boolean isClear) {
