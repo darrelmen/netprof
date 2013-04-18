@@ -44,11 +44,6 @@ public class StackedBarSectionWidget extends StackProgressBar implements Section
   }
 
   @Override
-  public void addClearButton(Button b) {
-    //To change body of implemented methods use File | Settings | File Templates.
-  }
-
-  @Override
   public String getCurrentSelection() {
     return currentSelection;
 /*    for (Bar b : buttons) {
