@@ -1,5 +1,6 @@
 package mitll.langtest.client.exercise;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -17,6 +18,16 @@ public class ListBoxSectionWidget extends ListBox implements SectionWidget {
   public String getCurrentSelection() {
     int selectedIndex = getSelectedIndex();
     return getItemText(selectedIndex);
+  }
+
+  @Override
+  public void addButton(Button b) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  @Override
+  public void addClearButton(Button b) {
+    //To change body of implemented methods use File | Settings | File Templates.
   }
 
   public String getFirstItem() {
@@ -40,7 +51,7 @@ public class ListBoxSectionWidget extends ListBox implements SectionWidget {
 
   /**
    * Don't change the selection unless it's not available in this list box.
-   * @see SectionExerciseList#populateListBox(String, java.util.Collection)
+   * @seex SectionExerciseList#populateListBox(String, java.util.Collection)
    * @param currentSelection
    */
   public void retainCurrentSelectionState( Collection<String> currentSelection) {
