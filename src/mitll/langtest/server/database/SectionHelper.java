@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Lesson;
+import mitll.langtest.shared.SectionNode;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -22,11 +23,10 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class SectionHelper {
- // public static final String SEMESTER = "semester";
   private static Logger logger = Logger.getLogger(SectionHelper.class);
-  private String unitType = "unit";
-  private String chapterType = "chapter";
-  private String weekType = "week";
+  private static final String unitType = "unit";
+  private static final String chapterType = "chapter";
+  private static final String weekType = "week";
 
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
@@ -43,19 +43,71 @@ public class SectionHelper {
         return first > second ? +1 : first < second ? -1 : 0;
       }
     });
+
     return types;
   }
 
+  public List<SectionNode> getSectionNodes() {
+    return getChildren(getTypeOrder());
+  }
+
+  private List<SectionNode> getChildren(List<String> typeOrder) {
+    String root = typeOrder.iterator().next();
+   // logger.warn("type order " + typeOrder + " root " + root);
+
+    List<SectionNode> firstSet = new ArrayList<SectionNode>();
+
+    Map<String, Map<String, Collection<String>>> sectionToTypeToSections = typeToSectionToTypeToSections.get(root);
+    for (Map.Entry<String, Map<String, Collection<String>>> rootSection : sectionToTypeToSections.entrySet()) {
+      SectionNode parent = new SectionNode(root, rootSection.getKey());
+      firstSet.add(parent);
+
+      Map<String, Collection<String>> typeToSections = rootSection.getValue();
+
+      if (!typeOrder.isEmpty()) {
+        List<String> remainingTypes = typeOrder.subList(1, typeOrder.size());
+        addChildren(remainingTypes, parent, typeToSections);
+      }
+    }
+
+    //logger.debug("tree is " + firstSet);
+    return firstSet;
+  }
+
+  private void addChildren(List<String> typeOrder, SectionNode parent, Map<String, Collection<String>> typeToSections) {
+    List<String> remainingTypes = typeOrder.subList(1, typeOrder.size());
+    logger.warn("type order " + typeOrder + " remaining " + remainingTypes);
+
+    String nextType = typeOrder.iterator().next();
+
+    Collection<String> children = typeToSections.get(nextType);
+    logger.warn("nextType " + nextType + " : " + children);
+    for (String childSection : children) {
+      SectionNode child = new SectionNode(nextType, childSection);
+      parent.addChild(child);
+
+      Map<String, Map<String, Collection<String>>> sectionToTypeToSections = typeToSectionToTypeToSections.get(nextType);
+      Map<String, Collection<String>> typeToSections2 = sectionToTypeToSections.get(childSection);
+
+      if (!remainingTypes.isEmpty()) {
+        addChildren(remainingTypes, child, typeToSections2);
+      }
+    }
+  }
+
+
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getTypeToSectionsForTypeAndSection(String, String)
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#getTypeToSectionsForTypeAndSection(String, String)
    * @param type
    * @param section
    * @return
    */
+/*
   public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
     Map<String, Map<String, Collection<String>>> sectionToSub = typeToSectionToTypeToSections.get(type);
     if (sectionToSub == null) return Collections.emptyMap();
     Map<String, Collection<String>> typeToSections = sectionToSub.get(section);
+*/
 /*
     if (section == null || section.length() == 0) {
       Collection<Map<String, Set<String>>> values = sectionToSub.values();
@@ -67,7 +119,8 @@ public class SectionHelper {
       }
       return retval;
     }
-    else {*/
+    else {*//*
+
       if (typeToSections == null) return Collections.emptyMap();
 
       Map<String,Collection<String>> retval = new HashMap<String, Collection<String>>();
@@ -78,6 +131,7 @@ public class SectionHelper {
       return retval;
   //  }
   }
+*/
 
   private Map<String,Collection<String>> getTypeToSectionsForTypeAndSection2(String type, String section) {
     Map<String, Map<String, Collection<String>>> sectionToSub = typeToSectionToTypeToSections.get(type);
