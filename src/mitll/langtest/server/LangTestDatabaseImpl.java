@@ -22,6 +22,7 @@ import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultsAndGrades;
+import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.Session;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
@@ -181,9 +182,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getSectionHelper().getTypeOrder();
   }
 
+
   @Override
-  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
-    return db.getSectionHelper().getTypeToSectionsForTypeAndSection(type, section);
+  public List<SectionNode> getSectionNodes() {
+    return db.getSectionHelper().getSectionNodes();
   }
 
   /**
@@ -201,10 +203,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getSectionHelper().getTypeToSectionToCount();
   }
 
-    private void logMemory() {
+  private void logMemory() {
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory();
-    long used = rt.totalMemory()-free;
+    long used = rt.totalMemory() - free;
     long max = rt.maxMemory();
     logger.debug("heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
   }
