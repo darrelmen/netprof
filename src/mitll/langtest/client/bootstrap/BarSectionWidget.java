@@ -50,7 +50,7 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
     return buttons.iterator().next().getText().trim();
   }
 
-  @Override
+/*  @Override
   public void selectFirstAfterAny() {
     for (Button b : buttons) {
       if (b.isActive()) {
@@ -60,7 +60,7 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
     }
     buttons.get(1).setActive(true);
   }
-
+*/
   @Override
   public void selectItem(Collection<String> section, boolean doToggle) {
     for (Button b : buttons) {
@@ -148,6 +148,16 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
 
   @Override
   public void enableAll() {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  @Override
+  public void addButton(Button b) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  @Override
+  public void addClearButton(Button b) {
     //To change body of implemented methods use File | Settings | File Templates.
   }
 }
