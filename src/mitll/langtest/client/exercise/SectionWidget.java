@@ -1,5 +1,6 @@
 package mitll.langtest.client.exercise;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.Collection;
@@ -15,13 +16,16 @@ import java.util.Map;
 public interface SectionWidget {
   String getCurrentSelection();
   String getFirstItem();
-  void selectFirstAfterAny();
+
   void selectItem(Collection<String> section, boolean doToggle);
-  //void retainCurrentSelectionState(Collection<String> currentSelection);
   void populateTypeWidget(Collection<String> items, Map<String, Integer> sectionToCount);
   public Widget getWidget();
 
   void enableInSet(Collection<String> inSet);
 
   void enableAll();
+
+  void addButton(Button b);
+
+  //void addClearButton(Button b);
 }
