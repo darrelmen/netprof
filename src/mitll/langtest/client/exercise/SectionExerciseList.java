@@ -659,7 +659,12 @@ public class SectionExerciseList extends PagingExerciseList {
         String[] split = section.split(",");
         List<String> sections = Arrays.asList(split);
 
-        selectionState.add(type, sections);
+        if (sections.isEmpty()) {
+          System.err.println("\tpart " + part + " is badly formed ");
+        }
+        else {
+          selectionState.add(type, sections);
+        }
         //System.out.println("getSelectionState : part " + part + " : " + type + "->" +section + " : " + selectionState);
       }
       else if (part.length() > 0) {
