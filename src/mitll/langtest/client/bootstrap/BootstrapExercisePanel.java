@@ -70,6 +70,12 @@ public class BootstrapExercisePanel extends FluidContainer {
   private int feedback = 0;
   private Timer t;
 
+  /**
+   * @see mitll.langtest.client.flashcard.FlashcardExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
+   * @param e
+   * @param service
+   * @param controller
+   */
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller) {
     setStyleName("exerciseBackground");
@@ -110,7 +116,7 @@ public class BootstrapExercisePanel extends FluidContainer {
   private Widget getQuestionContent(Exercise e) {
     PageHeader hero = new PageHeader();
     hero.addStyleName("hero-unit");
-    hero.setText(e.getContent());
+    hero.setText(e.getEnglishSentence());
     return hero;
   }
 
