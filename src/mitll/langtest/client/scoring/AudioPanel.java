@@ -337,7 +337,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       });
     }
     else {
-      System.out.println("getImageURLForAudio : no audio path for " + type);
+     // System.out.println("getImageURLForAudio : no audio path for " + type);
     }
   }
 
