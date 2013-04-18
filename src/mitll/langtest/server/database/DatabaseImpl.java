@@ -443,10 +443,10 @@ public class DatabaseImpl implements Database {
     }
 
     public List<Integer> getCorrectHistory() { return correctHistory; }
-/*
-    public void setExercises() {
-      Collections.shuffle(exercises,random);
-    }*/
+
+    public int getNumExercises() {
+      return exercises.size();
+    }
 
     public boolean isComplete() { return counter == exercises.size(); }
 
@@ -476,28 +476,28 @@ public class DatabaseImpl implements Database {
    * @param isTimedGame
    * @return
    */
+  public FlashcardResponse getNextExercise(List<Exercise> exercises, long userID, boolean isTimedGame) {
+    //List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
+    return getFlashcardResponse(userID, isTimedGame, exercises);
+  }
+
   public FlashcardResponse getNextExercise(long userID, boolean isTimedGame) {
     List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
+    return getFlashcardResponse(userID, isTimedGame, exercises);
+  }
+
+  private FlashcardResponse getFlashcardResponse(long userID, boolean isTimedGame, List<Exercise> exercises) {
     Map<String,Exercise> idToExercise = new HashMap<String, Exercise>();
     for (Exercise e : exercises) idToExercise.put(e.getID(),e);
     UserStateWrapper userStateWrapper;
 
     synchronized (userToState) {
-      // logger.info("getExercises : for user  " + userID);// + " index " + index);
-      if (!userToState.containsKey(userID)) {
-        String[] strings = new String[exercises.size()];
-        int i = 0;
-        for (Exercise e : exercises) {
-          strings[i++] = e.getID();
-        }
-        UserState userState = new UserState(strings);
-        if (userState.finished()) {
-          logger.info("-------------- user " + userID + " is finished ---------------- ");
-        }
-        userStateWrapper = new UserStateWrapper(userState, userID, exercises);
+      userStateWrapper = userToState.get(userID);
+      logger.info("getExercises : for user  " + userID + " idToExercise has " + idToExercise.size() + " user state "+ userStateWrapper);// + " index " + index);
+      if (userStateWrapper == null || (userStateWrapper.getNumExercises() != exercises.size())) {
+        userStateWrapper = getUserStateWrapper(userID, exercises);
         userToState.put(userID, userStateWrapper);
       }
-      userStateWrapper = userToState.get(userID);
     }
 
     if (isTimedGame) {
@@ -513,6 +513,21 @@ public class DatabaseImpl implements Database {
       return flashcardResponse;
     }
     return getFlashcardResponse(idToExercise, userStateWrapper);
+  }
+
+  private UserStateWrapper getUserStateWrapper(long userID, List<Exercise> exercises) {
+    UserStateWrapper userStateWrapper;
+    String[] strings = new String[exercises.size()];
+    int i = 0;
+    for (Exercise e : exercises) {
+      strings[i++] = e.getID();
+    }
+    UserState userState = new UserState(strings);
+/*    if (userState.finished()) {
+      logger.info("-------------- user " + userID + " is finished ---------------- ");
+    }*/
+    userStateWrapper = new UserStateWrapper(userState, userID, exercises);
+    return userStateWrapper;
   }
 
   private FlashcardResponse getFlashcardResponse(Map<String, Exercise> idToExercise, UserStateWrapper userState) {
