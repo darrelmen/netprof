@@ -83,12 +83,13 @@ public class SectionExerciseList extends PagingExerciseList {
   }
 
   /**
+   * After logging in, we get the type->section map and build the list boxes.
    * @see mitll.langtest.client.LangTest#gotUser
    * @param userID
    */
   @Override
   public void getExercises(final long userID) {
-    System.out.println("Get exercises for user=" + userID);
+    System.out.println("SectionExerciseList.getExercises : Get exercises for user=" + userID);
     this.userID = userID;
     service.getTypeToSection(new AsyncCallback<Map<String, Collection<String>>>() {
       @Override
@@ -105,12 +106,14 @@ public class SectionExerciseList extends PagingExerciseList {
         sectionPanel.add(flexTable);
 
         if (result.isEmpty()) {  // fallback to non-section option
+          System.out.println("SectionExerciseList.getExercises : no results ??? for user=" + userID);
+
           noSectionsGetExercises(userID);
         } else {
           String first = result.keySet().iterator().next();
-          System.out.println("\tselecting first key of first type=" + first);
+          //System.out.println("\tselecting first key of first type=" + first);
 
-          typeToBox.get(first).setSelectedIndex(1); // not any, which is the first list item
+          typeToBox.get(first).setSelectedIndex(0); // not any, which is the first list item
           pushFirstListBoxSelection();
         }
       }
@@ -425,6 +428,8 @@ public class SectionExerciseList extends PagingExerciseList {
   private void pushFirstListBoxSelection() {
     String initToken = History.getToken();
     if (initToken.length() == 0) {
+      System.out.println("pushFirstListBoxSelection : empty token");
+
       pushNewSectionHistoryToken();
     } else {
       System.out.println("fire history for " +initToken);
@@ -439,9 +444,9 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param type
    * @return list of sections for this type, sorted
    */
-  private List<String> getSections(Map<String, Collection<String>> result, String type) {
+/*  private List<String> getSections(Map<String, Collection<String>> result, String type) {
     return new ArrayList<String>(result.get(type));
-  }
+  }*/
 
   /**
    * @see #getExercises(long)
@@ -492,7 +497,15 @@ public class SectionExerciseList extends PagingExerciseList {
       studentLink.setHref(GWT.getHostPageBaseURL() +"?showSectionWidgets=false#" + historyToken);
     }
     if (currentToken.equals(historyToken)) {
-      System.out.println("pushNewSectionHistoryToken : skipping same token " + historyToken);
+      if (historyToken.isEmpty() && (currentExercises == null || currentExercises.isEmpty())) {
+        System.out.println("pushNewSectionHistoryToken : loading exercises given token '" + historyToken +"'");
+
+        noSectionsGetExercises(userID);
+      }
+      else {
+        System.out.println("pushNewSectionHistoryToken : skipping same token '" + historyToken +"'");
+      }
+
     } else {
       System.out.println("------------ push history '" + historyToken + "' -------------- ");
       History.newItem(historyToken);
@@ -579,13 +592,14 @@ public class SectionExerciseList extends PagingExerciseList {
       }
     } else {
       String token = event.getValue();
-      System.out.println("onValueChange " + token);
       if (token.length() == 0) {
+        System.out.println("\tonValueChange empty token");
+
         setListBox("", ANY);
         noSectionsGetExercises(userID);
       } else {
         token = getCleanToken(token);
-        //System.out.println("onValueChange after " + token);
+        System.out.println("\tonValueChange after " + token);
         try {
           SelectionState selectionState = getSelectionState(token);
 
