@@ -103,7 +103,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param userID
    */
   public void getExercises(long userID) {
-    System.out.println("getExercises for user " +userID);
+    System.out.println("ExerciseList:getExercises for user " +userID);
 
     useUserID = true;
     this.userID = userID;
@@ -141,7 +141,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     String token = History.getToken();
     System.out.println("pushFirstSelection : current token " + token + " vs new " +exerciseID);
     if (token != null && getIDFromToken(token).equals(exerciseID)) {
-      System.out.println("current token " + token + " same as new " +exerciseID);
+      System.out.println("\tcurrent token '" + token + "' same as new " +exerciseID);
       loadByIDFromToken(exerciseID);
     }
     else {
