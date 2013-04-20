@@ -445,6 +445,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         flashRecordPanel.hide();
         flashRecordPanel.hide2(); // must be a separate call!
 
+        System.out.println("makeFlashContainer: " + lastUser + " get exercises");
+
         exerciseList.getExercises(lastUser);
       }
 
