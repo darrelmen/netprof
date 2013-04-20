@@ -268,9 +268,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private List<Exercise> getExercisesInModeDependentOrder(long userID, String lessonPlanFile) {
     List<Exercise> exercises;
     if (serverProps.dataCollectMode) {
-       logger.debug("in data collect mode");
+       //logger.debug("in data collect mode");
       if (serverProps.biasTowardsUnanswered) {
-        logger.debug("in biasTowardsUnanswered mode");
+        //logger.debug("in biasTowardsUnanswered mode");
 
         if (serverProps.useOutsideResultCounts) {
           String outsideFileOverride = serverProps.outsideFile;
