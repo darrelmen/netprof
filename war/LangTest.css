@@ -22,6 +22,38 @@ h1 {
 
 }
 
+.headerBackground {
+    background-color: #4b6f6f;
+}
+
+.headerLowerBorder {
+    color: #3195b9;
+}
+
+.cardBackground {
+    background-color: #e8eaea;
+}
+
+.spaceBarBlue {
+    background-color: #3195b9;
+}
+
+.checkboxGreen {
+    background-color: #008a4d;
+}
+
+.cardForeground {
+    color: #262726;
+}
+
+.subtitleForeground {
+    color : #6d6f6f;
+}
+
+.questionMarkForeground {
+    color : #f0f9fb;
+}
+
 .noPadding {
     padding-top: 5px;
 }
@@ -168,7 +200,9 @@ fieldset > legend {
 }
 
 .exerciseBackground {
-    background-color: #F5F5F5;
+    background-color: #e8eaea;
+    color: #262726;
+
     border: 1px solid #E3E3E3;
     border-radius: 4px 4px 4px 4px;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) inset;
