@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" output="test-classes" path="test"/>
-	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/json-lib-2.4-jdk15.jar" sourcepath="C:/Users/go22670/langTestIngest/json/json-lib-2.4-jdk15-sources.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-codec-1.6.jar"/>
@@ -23,5 +22,8 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-fileupload-1.2.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/flashcard.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/imagewriter"/>
+	<classpathentry kind="lib" path="gwt/validation-api-1.0.0.GA-sources.jar"/>
+	<classpathentry kind="lib" path="gwt/validation-api-1.0.0.GA.jar"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
