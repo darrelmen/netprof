@@ -27,13 +27,17 @@ h1 {
     color: #ffffff;
 }
 
+.whiteBackground {
+    color:#ffffff;
+}
+
 .headerLowerBorder {
     border-style:solid;
     border-width: 2px;
-    border-left-width: 0;
-    border-right-width: 0;
-    border-top-width: 0;
+    border-top-color: #404141;
     border-bottom-color: #3195b9;
+    border-left-color: #404141;
+    border-right-color: #404141;
 }
 
 .cardBorder {
@@ -47,7 +51,11 @@ h1 {
  }
 
 .cardBackground {
-    background-color: #e8eaea;
+     background-color: #e8eaea;
+ }
+
+.cardHiddenText {
+    color: #e8eaea;
 }
 
 .cardText {
@@ -94,6 +102,7 @@ h1 {
 .noPadding {
     padding-top: 5px;
 }
+
 .floatLeft {
     float: left;
 }
