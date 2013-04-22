@@ -3,8 +3,7 @@ package mitll.langtest.client.bootstrap;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -51,9 +50,9 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private int lastCorrect = 0;
   private int prevCorrect = 0;
 
-  private static final String HELP_IMAGE = LangTest.LANGTEST_IMAGES + "/help-4.png";
+  //private static final String HELP_IMAGE = LangTest.LANGTEST_IMAGES + "/help-4.png";
   private final int gameTimeSeconds;
-  private FluidRow bottomRow = new FluidRow();
+  private Panel bottomRow = new FlowPanel();
   boolean isTimedGame = false;
   /**
    *
@@ -75,44 +74,28 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     exercisePanelColumn = new Column(SIZE);
     row.add(exercisePanelColumn);
 
-    //FluidRow correctAndImageRow = new FluidRow();
     Panel correctAndImageRow = new FlowPanel();
-    currentExerciseVPanel.add(correctAndImageRow);
     correctAndImageRow.addStyleName("headerBackground");
     correctAndImageRow.addStyleName("blockStyle");
-   // correct.addStyleName("darkerBlueColor");
     Panel pair = new HorizontalPanel();
     correctAndImageRow.add(pair);
     this.isTimedGame = isTimedGame;
     if (isTimedGame) {
-      Column w = new Column(6, 3, bar);
-      bottomRow.add(w);
+      bottomRow.add(bar);
+      bar.addStyleName("cardBorder");
+      DOM.setStyleAttribute(bar.getElement(), "marginBottom", "0px");
+      DOM.setStyleAttribute(bar.getElement(), "borderRadius", "0px");
+      DOM.setStyleAttribute(bar.getElement(), "backgroundColor", "#3195b9");
       bottomRow.setVisible(false);
       currentExerciseVPanel.add(bottomRow);
     }
+    currentExerciseVPanel.add(correctAndImageRow);
+
     Image checkmark = new Image(LangTest.LANGTEST_IMAGES + "checkboxCorrectRatio.png");
-    //Column checkboxIcon = new Column(1, checkmark);
     checkmark.addStyleName("checkboxPadding");
     pair.add(checkmark);
-
-
-
-    //
-    // Column correctColumn = new Column(10, correct);
-  //  Panel correctColumn = new FlowPanel();
-   // correctAndImageRow.add(correctColumn);
-    //correctColumn.addStyleName("floatLeft");
     correct.addStyleName("correctRatio");
     pair.add(correct);
-    // add help image on right side
-/*    Image image = new Image(HELP_IMAGE);
-    image.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.showFlashHelp();
-      }
-    });
-    correctAndImageRow.add(new Column(1, image));*/
 
     this.user = user;
   }
@@ -184,7 +167,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
           } else {
             boolean lastTenSeconds = remaining < 10;
-            if (now - lastMessage > 2000 || lastTenSeconds) {
+            if (true) {//now - lastMessage > 1000 || lastTenSeconds) {
             /*  if (now - lastTextMessage > 5000) {
                 lastTextMessage = now;
                 bar.setText(remaining + " seconds");
@@ -195,7 +178,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
               float percent = 100f * ((float)remaining/(float)gameTimeSeconds);
               bar.setText("");
               bar.setPercent((int)percent);
-              lastMessage = now;
+             // lastMessage = now;
             }
           }
         }
