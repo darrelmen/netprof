@@ -486,6 +486,13 @@ public class ASRScoring extends Scoring {
     logger.debug("read dict of size " +size + " in " + (now-then) + " millis");
   }
 
+  /**
+   * @see #computeRepeatExerciseScores(pronz.speech.Audio, String, String, boolean, String)
+   * @param testAudio
+   * @param sentence
+   * @param configFile
+   * @return
+   */
   private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
     long then = System.currentTimeMillis();
