@@ -103,7 +103,8 @@ public class AutoCRT {
   }
 
   /**
-   * @see LangTestDatabaseImpl#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.AudioCheck.ValidityAndDur, String)
+   * @see LangTestDatabaseImpl#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.AudioCheck.ValidityAndDur, String, boolean)
+   * @see LangTestDatabaseImpl#isMatch(mitll.langtest.shared.Exercise, java.util.List, java.io.File)
    *
    * @param e
    * @param allExercises
@@ -136,12 +137,13 @@ public class AutoCRT {
       asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
         asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
     boolean isCorrect = recoSentence != null && isCorrect(foregroundSentences, recoSentence);
+    answer.setCorrect(isCorrect);
     if (!isCorrect) {
       logger.info("incorrect response for exercise #" +e.getID() +
         " reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentences +"'");
     }
 
-    double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : isCorrect ? 1.0d :0.0d;
+    double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
     answer.setDecodeOutput(recoSentence);
     answer.setScore(scoreForAnswer);
   }
