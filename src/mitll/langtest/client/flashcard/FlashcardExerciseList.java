@@ -60,7 +60,7 @@ public class FlashcardExerciseList implements ListInterface {
       public void onSuccess(FlashcardResponse result) {
         //System.out.println("Got next for " +result.getID());
 
-        Panel exercisePanel = factory.getExercisePanel(result.e);
+        Panel exercisePanel = factory.getExercisePanel(result.getNextExercise());
         innerContainer.setWidget(exercisePanel);
       }
     });
