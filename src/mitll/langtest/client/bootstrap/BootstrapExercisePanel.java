@@ -8,18 +8,15 @@ import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.PageHeader;
 import com.github.gwtbootstrap.client.ui.Paragraph;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -63,7 +60,9 @@ public class BootstrapExercisePanel extends FluidContainer {
   private Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
   private Image correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
   private Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
-  private Image enterImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "space48_2.png"));
+  private Image enterImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "blueSpaceBar.png"));//"space48_2.png"));
+  private static final String HELP_IMAGE = LangTest.LANGTEST_IMAGES + "/helpIconBlue.png";
+
   private Heading recoOutput;
   private boolean keyIsDown;
   private boolean isDemoMode;
@@ -79,6 +78,7 @@ public class BootstrapExercisePanel extends FluidContainer {
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller) {
     setStyleName("exerciseBackground");
+    addStyleName("cardBorder");
    // int times = 0;
     stockStore = Storage.getLocalStorageIfSupported();
     if (stockStore != null) {
@@ -87,6 +87,22 @@ public class BootstrapExercisePanel extends FluidContainer {
     }
 
     FluidRow fluidRow = new FluidRow();
+    FlowPanel helpRow;
+    add(helpRow = new FlowPanel());
+    helpRow.addStyleName("floatRight");
+    helpRow.addStyleName("helpPadding");
+
+    // add help image on right side
+    Image image = new Image(HELP_IMAGE);
+
+    image.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.showFlashHelp();
+      }
+    });
+    helpRow.add(image);
+
     add(fluidRow);
     fluidRow.add(new Column(12, getQuestionContent(e)));
     addQuestions(e, service, controller, 1/*, times == 0*/);
@@ -114,9 +130,8 @@ public class BootstrapExercisePanel extends FluidContainer {
   }
 
   private Widget getQuestionContent(Exercise e) {
-    PageHeader hero = new PageHeader();
-    hero.addStyleName("hero-unit");
-    hero.setText(e.getEnglishSentence());
+    Widget hero = new Heading(1,e.getEnglishSentence());
+    hero.addStyleName("cardText");
     return hero;
   }
 
@@ -161,7 +176,8 @@ public class BootstrapExercisePanel extends FluidContainer {
 
     isDemoMode = controller.isDemoMode();
     row2.add(new Column(12, paragraph2));
-    recoOutput = new Heading(3);
+    recoOutput = new Heading(3,"Answer");
+    recoOutput.setVisible(false);
     paragraph2.add(recoOutput);
   }
 
@@ -308,6 +324,7 @@ public class BootstrapExercisePanel extends FluidContainer {
         if (feedback < MAX_INTRO_FEEBACK_COUNT) {
           String correctPrompt = "Correct! It's: " + exercise.getRefSentence();
           recoOutput.setText(correctPrompt);
+          recoOutput.setVisible(true);
           incrCookie(FEEDBACK_TIMES_SHOWN);
         }
       } else {
@@ -317,13 +334,14 @@ public class BootstrapExercisePanel extends FluidContainer {
         else {
           audioHelper.playIncorrect();
         }
-        String correctPrompt = "Correct Answer: " + exercise.getRefSentence() +
+        String correctPrompt = "Answer: " + exercise.getRefSentence() +
           (exercise.getTranslitSentence().length() > 0 ? " (" + exercise.getTranslitSentence() + ")" : "");
 
         if (isDemoMode) {
           correctPrompt = "Heard: " + result.decodeOutput + "<p>" + correctPrompt;
         }
         recoOutput.setText(correctPrompt);
+        recoOutput.setVisible(true);
 
         if (hasRefAudio) {
           waitForAudioToFinish();
