@@ -88,7 +88,7 @@ public class ASRScoring extends Scoring {
   private final Cache<String, Scores> audioToScore;
   private final Map<String, String> properties;
   private final String platform = Utils.package$.MODULE$.platform();
-  private final String language;
+  private String language = "";
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    * @param deployPath
@@ -439,7 +439,7 @@ public class ASRScoring extends Scoring {
     /**
      * Assumes that testAudio was recorded through the UI, which should prevent audio that is too short or too long.
      *
-     * @see #getScoreForAudio
+     * @see #calcScoreForAudio(String, String, String, String, boolean, String)
      * @param testAudio
      * @param sentence
      * @param decode
