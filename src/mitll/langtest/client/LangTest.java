@@ -1,7 +1,6 @@
 package mitll.langtest.client;
 
 import com.github.gwtbootstrap.client.ui.*;
-import com.github.gwtbootstrap.client.ui.Label;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -62,6 +61,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public static final String RECORDING_KEY = "SPACE BAR";
   private final DialogHelper dialogHelper = new DialogHelper(false);
   private final TimedGame timedGame = new TimedGame(this);
+  private final Flashcard flashcard = new Flashcard();
 
   private Panel currentExerciseVPanel = new FluidContainer();
   private ListInterface exerciseList;
@@ -80,6 +80,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private SoundManagerStatic soundManager;
   private PropertyHandler props;
   private HTML userline;
+
   /**
    * Make an exception handler that displays the exception.
    */
@@ -254,7 +255,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     RootPanel.get().addStyleName("noPadding");
     currentExerciseVPanel = container;
 
-    HorizontalPanel headerRow = makeFlashcardHeaderRow();
+    HorizontalPanel headerRow = flashcard.makeFlashcardHeaderRow(props.getSplash());
     container.add(headerRow);
 
     userManager = new UserManager(this, service, isCollectAudio(), false, isCRTDataCollectMode(), props.getAppTitle(), true);
@@ -263,11 +264,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     makeFlashContainer();
 
-    Row row2 = new FluidRow();
-    container.add(row2);
-
     Row flashRow = new FluidRow();
     container.add(flashRow);
+    flashRow.addStyleName("whiteBackground");
     flashRow.add(new Column(1, flashRecordPanel));
 
     setupSoundManager();
@@ -277,38 +276,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
 
     modeSelect();
-  }
-
-  private HorizontalPanel makeFlashcardHeaderRow() {
-    HorizontalPanel headerRow = new HorizontalPanel();
-    headerRow.setWidth("100%");
-    headerRow.addStyleName("headerBackground");
-    headerRow.addStyleName("headerLowerBorder");
-
-    com.github.gwtbootstrap.client.ui.Image flashcardImage = new com.github.gwtbootstrap.client.ui.Image(LANGTEST_IMAGES + "flashcardIcon2.png");
-    flashcardImage.addStyleName("floatLeft");
-
-    FlowPanel iconLeftHeader = new FlowPanel();
-    headerRow.add(iconLeftHeader);
-
-    Panel flashcard = new FlowPanel();
-    flashcard.addStyleName("inlineStyle");
-    flashcard.addStyleName("headerBackground");
-    flashcard.addStyleName("leftAlign");
-    Paragraph appName = new Paragraph("FLASHCARD");
-    appName.addStyleName("bigFont");
-    flashcard.add(appName);
-    Paragraph subtitle = new Paragraph(props.getSplash());
-    subtitle.addStyleName("subtitleForeground");
-
-    flashcard.add(subtitle);
-    iconLeftHeader.add(flashcardImage);
-    iconLeftHeader.add(flashcard);
-    headerRow.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-
-    com.github.gwtbootstrap.client.ui.Image collab = new com.github.gwtbootstrap.client.ui.Image(LANGTEST_IMAGES + "collabIcon2.png");
-    headerRow.add(collab);
-    return headerRow;
   }
 
   private void showTimedGameHelp() {
@@ -527,7 +494,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (showResults != null) showResults.setVisible(isGrading || props.isAdminView());
     if (monitoring != null) monitoring.setVisible(isGrading || props.isAdminView());
 
-    System.out.println("goodwave mode "+ props.isGoodwaveMode() + " " + isAutoCRTMode());
+    System.out.println("modeSelect : goodwave mode "+ props.isGoodwaveMode() + " " + isAutoCRTMode());
 
     checkInitFlash();
   }
@@ -741,9 +708,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void checkInitFlash() {
     if (/*!props.isArabicTextDataCollect() &&*/ (props.isCollectAudio() || props.isGoodwaveMode()) && !flashRecordPanel.gotPermission()) {
+      System.out.println("checkInitFlash : initFlash");
+
       flashRecordPanel.initFlash();
     }
     else {
+      System.out.println("checkInitFlash : skip init flash, just checkLogin");
+
       checkLogin();
     }
   }
