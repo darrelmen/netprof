@@ -185,7 +185,6 @@ public class BootstrapExercisePanel extends FluidContainer {
     recoOutput.addStyleName("cardHiddenText");
     DOM.setStyleAttribute(recoOutput.getElement(), "color", "#e8eaea");
 
-    //recoOutput.setVisible(true);
     paragraph2.add(recoOutput);
   }
 

@@ -302,7 +302,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
       if (result.finished) {
         Window.alert("Flashcards Complete!");
       } else {
-        Panel exercisePanel = factory.getExercisePanel(result.e);
+        Panel exercisePanel = factory.getExercisePanel(result.getNextExercise());
         exercisePanelColumn.clear();
 
         exercisePanelColumn.add(exercisePanel);
