@@ -26,7 +26,7 @@ output: tmp/levantine.out
 output-index: 1
 
 [Processing Stages]
-decprocess: 1 = 0   :> fe.SPFE  -> fe.NNBatch -> decode.HybridDecode[dictionary="TEMP_DIR/dict-wo-sp"]
+decprocess: 1 = 0   :> fe.SPFE  -> fe.NNBatch -> decode.HybridDecode[dictionary="TEMP_DIR/dict-wo-sp"] -> pron.NNScore
 
 [E-mail Experiment Options]
 name: 
@@ -54,6 +54,7 @@ frame-window: 13
 [pron.NNScore]
 phone-index: MODELS_DIR/label-map
 phone-normalizer: MODELS_DIR/phones.normalizer
+silence-norm: false
 
 [decode.HybridDecode]
 process-dictionary: false
@@ -65,5 +66,6 @@ lm: LM_TO_USE
 letter-to-sound-class: corpus.ArabicLTS
 lm-weight: 4.0
 beam-threshold: 200.0
+trace-flags: 3
 
 # End Configuration
