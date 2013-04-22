@@ -81,21 +81,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   protected void addTableWithPager() {
-    CellTable.Resources o = GWT.create(TableResources.class);
-    this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
-    table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
-
-  //  table.setWidth("100%", true);
-    table.setWidth("100%");
-    table.setHeight("auto");
-
-    // Add a selection model to handle user selection.
-    final SingleSelectionModel<ExerciseShell> selectionModel = new SingleSelectionModel<ExerciseShell>();
-    table.setSelectionModel(selectionModel);
-
-    Column<ExerciseShell, SafeHtml> id2 = getExerciseIdColumn();
-
-    table.addColumn(id2);
+    makeCellTable();
 
     // Create a data provider.
     this.dataProvider = new ListDataProvider<ExerciseShell>();
@@ -113,6 +99,24 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     add(column);
     column.add(pager);
     column.add(table);
+  }
+
+  protected void makeCellTable() {
+    CellTable.Resources o = GWT.create(TableResources.class);
+    this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
+    table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
+
+    //  table.setWidth("100%", true);
+    table.setWidth("100%");
+    table.setHeight("auto");
+
+    // Add a selection model to handle user selection.
+    final SingleSelectionModel<ExerciseShell> selectionModel = new SingleSelectionModel<ExerciseShell>();
+    table.setSelectionModel(selectionModel);
+
+    Column<ExerciseShell, SafeHtml> id2 = getExerciseIdColumn();
+
+    table.addColumn(id2);
   }
 
   private Column<ExerciseShell, SafeHtml> getExerciseIdColumn() {
