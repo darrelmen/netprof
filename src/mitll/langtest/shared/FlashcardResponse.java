@@ -12,7 +12,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class FlashcardResponse implements IsSerializable {
-  public Exercise e;
+  private Exercise nextExercise;
   public int correct, incorrect;
   public boolean finished = false;
   private List<Integer> correctHistory;
@@ -21,6 +21,27 @@ public class FlashcardResponse implements IsSerializable {
   public void setCorrectHistory(List<Integer> h) { correctHistory = h; }
 
   public FlashcardResponse() {}
-  public FlashcardResponse(Exercise e, int correct, int incorrect) {this.e = e; this.correct =correct; this.incorrect = incorrect;}
+
+  public FlashcardResponse(Exercise e, int correct, int incorrect) {
+    this.nextExercise = e;
+    this.correct = correct;
+    this.incorrect = incorrect;
+  }
   public FlashcardResponse(boolean finished, int correct, int incorrect) {this.finished = finished; this.correct =correct; this.incorrect = incorrect;}
+
+  public String toString() {
+    return "FlashcardResponse : " +
+      (nextExercise != null ? "exercise id=" + nextExercise.id : " no exercise") +
+      " correct " + correct + " incorrect " + incorrect +
+      " finished= " + finished +
+      (correctHistory != null ? " " + correctHistory.size() + " items in history." : "");
+  }
+
+  /**
+   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList.FlashcardResponseAsyncCallback#onSuccess(FlashcardResponse)
+   * @return
+   */
+  public Exercise getNextExercise() {
+    return nextExercise;
+  }
 }
