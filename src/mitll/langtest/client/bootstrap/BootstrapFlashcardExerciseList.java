@@ -1,20 +1,14 @@
 package mitll.langtest.client.bootstrap;
 
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.Container;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Image;
-import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.DialogHelper;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -42,7 +36,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private ExercisePanelFactory factory;
   private LangTestDatabaseAsync service;
   private UserManager user;
-  private Heading correct = new Heading(3);
+  private Heading correct = new Heading(4);
   //private Heading timeFeedback = new Heading(3);
   private ProgressBar bar = new ProgressBar();
  // private AudioHelper audioHelper = new AudioHelper();
@@ -81,11 +75,14 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     exercisePanelColumn = new Column(SIZE);
     row.add(exercisePanelColumn);
 
-    FluidRow correctAndImageRow = new FluidRow();
+    //FluidRow correctAndImageRow = new FluidRow();
+    Panel correctAndImageRow = new FlowPanel();
     currentExerciseVPanel.add(correctAndImageRow);
-
-    correct.addStyleName("darkerBlueColor");
-
+    correctAndImageRow.addStyleName("headerBackground");
+    correctAndImageRow.addStyleName("blockStyle");
+   // correct.addStyleName("darkerBlueColor");
+    Panel pair = new HorizontalPanel();
+    correctAndImageRow.add(pair);
     this.isTimedGame = isTimedGame;
     if (isTimedGame) {
       Column w = new Column(6, 3, bar);
@@ -93,17 +90,29 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
       bottomRow.setVisible(false);
       currentExerciseVPanel.add(bottomRow);
     }
-    correctAndImageRow.add(new Column(11, correct));
+    Image checkmark = new Image(LangTest.LANGTEST_IMAGES + "checkboxCorrectRatio.png");
+    //Column checkboxIcon = new Column(1, checkmark);
+    checkmark.addStyleName("checkboxPadding");
+    pair.add(checkmark);
 
+
+
+    //
+    // Column correctColumn = new Column(10, correct);
+  //  Panel correctColumn = new FlowPanel();
+   // correctAndImageRow.add(correctColumn);
+    //correctColumn.addStyleName("floatLeft");
+    correct.addStyleName("correctRatio");
+    pair.add(correct);
     // add help image on right side
-    Image image = new Image(HELP_IMAGE);
+/*    Image image = new Image(HELP_IMAGE);
     image.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         controller.showFlashHelp();
       }
     });
-    correctAndImageRow.add(new Column(1, image));
+    correctAndImageRow.add(new Column(1, image));*/
 
     this.user = user;
   }
@@ -315,7 +324,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
         exercisePanelColumn.add(exercisePanel);
         bottomRow.setVisible(true);
-        correct.setText("Correct " + result.correct + "/" + (result.correct + result.incorrect));
+        correct.setText(result.correct + "/" + (result.correct + result.incorrect));
         lastCorrect = result.correct;
         List<Integer> correctHistory = result.getCorrectHistory();
         prevCorrect = correctHistory == null || correctHistory.isEmpty() ? -1 : correctHistory.get(correctHistory.size() - 1);
