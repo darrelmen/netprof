@@ -5,19 +5,23 @@ import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
-import com.github.gwtbootstrap.client.ui.PageHeader;
 import com.github.gwtbootstrap.client.ui.Paragraph;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.media.client.Audio;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.storage.client.Storage;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.BrowserCheck;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -167,6 +171,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     paragraph.addStyleName("alignCenter");
     paragraph.add(recordButton);
     recordButton.addStyleName("alignCenter");
+
     row.add(new Column(12, paragraph));
 
     FluidRow row2 = new FluidRow();
@@ -177,7 +182,10 @@ public class BootstrapExercisePanel extends FluidContainer {
     isDemoMode = controller.isDemoMode();
     row2.add(new Column(12, paragraph2));
     recoOutput = new Heading(3,"Answer");
-    recoOutput.setVisible(false);
+    recoOutput.addStyleName("cardHiddenText");
+    DOM.setStyleAttribute(recoOutput.getElement(), "color", "#e8eaea");
+
+    //recoOutput.setVisible(true);
     paragraph2.add(recoOutput);
   }
 
@@ -263,7 +271,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     protected Anchor makeRecordButton() {
       recordButton = new ImageAnchor();
       recordButton.setResource(enterImage);
-      recordButton.setHeight("112px");
+     // recordButton.setHeight("112px");
       return recordButton;
     }
 
@@ -324,7 +332,9 @@ public class BootstrapExercisePanel extends FluidContainer {
         if (feedback < MAX_INTRO_FEEBACK_COUNT) {
           String correctPrompt = "Correct! It's: " + exercise.getRefSentence();
           recoOutput.setText(correctPrompt);
-          recoOutput.setVisible(true);
+        //  recoOutput.setVisible(true);
+          DOM.setStyleAttribute(recoOutput.getElement(), "color", "#000000");
+
           incrCookie(FEEDBACK_TIMES_SHOWN);
         }
       } else {
@@ -341,7 +351,7 @@ public class BootstrapExercisePanel extends FluidContainer {
           correctPrompt = "Heard: " + result.decodeOutput + "<p>" + correctPrompt;
         }
         recoOutput.setText(correctPrompt);
-        recoOutput.setVisible(true);
+        DOM.setStyleAttribute(recoOutput.getElement(), "color", "#000000");
 
         if (hasRefAudio) {
           waitForAudioToFinish();
