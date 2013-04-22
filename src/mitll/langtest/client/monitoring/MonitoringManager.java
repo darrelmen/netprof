@@ -41,7 +41,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created with IntelliJ IDEA.
+ * Show lots of charts and graphs to allow us to follow progress of data collection.
+ *
  * User: go22670
  * Date: 5/18/12
  * Time: 5:43 PM
@@ -52,7 +53,6 @@ public class MonitoringManager {
   private static final int HOUR = (60 * MIN);
 
   protected LangTestDatabaseAsync service;
-  //private final boolean useFile;
   private String item = "Item";
   private String items = item+"s";
   private String answer = "Answer";
@@ -67,7 +67,6 @@ public class MonitoringManager {
    */
   public MonitoringManager(LangTestDatabaseAsync s, PropertyHandler props) {
     this.service = s;
-    //  this.useFile = props.isReadFromFile();
     this.item = props.getNameForItem();
     this.answer = props.getNameForAnswer();
     this.answers = props.getNameForAnswer() + "s";
@@ -141,10 +140,6 @@ public class MonitoringManager {
     return toUse2;
   }
 
-  /**
-   * @deprecatedx so confusing!
-   * @param vp
-   */
 /*  private void doTimeUntilItems(final Panel vp) {
     service.getHoursToCompletion(useFile, new AsyncCallback<Map<Integer,Float>>() {
       public void onFailure(Throwable caught) {}
