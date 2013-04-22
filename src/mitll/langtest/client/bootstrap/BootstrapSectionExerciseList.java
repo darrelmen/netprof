@@ -22,6 +22,7 @@ import java.util.Set;
  * Date: 3/5/13
  * Time: 5:32 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated probably we should remove this
  */
 public class BootstrapSectionExerciseList extends SectionExerciseList {
   public BootstrapSectionExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service,
