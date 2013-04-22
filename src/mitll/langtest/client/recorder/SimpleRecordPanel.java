@@ -90,19 +90,19 @@ public class SimpleRecordPanel extends RecordButtonPanel {
       // i.e. autocrt -- revisit?
       showAutoCRTFeedback(result);
     }
-    else if (result.score != -1) {
+    else if (result.getScore() != -1) {
       resp.setHTML("I couldn't understand that, please record again.");
     }
   }
 
   private void showAutoCRTFeedback(AudioAnswer result) {
-    double score = result.score;
+    double score = result.getScore();
     score *= 2.5;
     score -= 1.25;
     score = Math.max(0,score);
     score = Math.min(1.0,score);
     String percent = ((int) (score * 100)) + "%";
-    if (result.score > 0.6) {
+    if (result.getScore() > 0.6) {
       resp.setHTML("Correct! Score for <font size=+1>" + result.decodeOutput + "</font> was " + percent);
       resp.setStyleName("correct");
     } else {
