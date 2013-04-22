@@ -339,16 +339,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * TODO remember exercise list between invokations
+   * TODO remember exercise list between invocations ?
    * @param userID
    * @param typeToSection
    * @return
    */
   @Override
   public FlashcardResponse getNextExercise(long userID, Map<String, Collection<String>> typeToSection) {
-    logger.debug("req " + typeToSection);
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-    logger.debug("\texercisesForSection " + exercisesForSection);
+    logger.debug("req " + typeToSection + " yields " + exercisesForSection.size() + " exercises.");
 
     FlashcardResponse nextExercise = db.getNextExercise(new ArrayList<Exercise>(exercisesForSection),userID, serverProps.isTimedGame());
     logger.debug("\tnextExercise " + nextExercise);
@@ -368,11 +367,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private FlashcardResponse getFlashcardResponse(long userID, FlashcardResponse nextExercise) {
-    if (nextExercise == null || nextExercise.e == null) {
+    if (nextExercise == null || nextExercise.getNextExercise() == null) {
       logger.error("huh? no next exercise for user " +userID);
       return nextExercise;
     }
-    String refAudio = nextExercise.e.getRefAudio();
+    String refAudio = nextExercise.getNextExercise().getRefAudio();
     if (refAudio != null && refAudio.length() > 0) {
       getWavAudioFile(refAudio);
       ensureMP3(refAudio);
