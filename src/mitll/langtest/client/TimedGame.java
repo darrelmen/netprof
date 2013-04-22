@@ -32,7 +32,7 @@ public class TimedGame {
     dialogHelper.showErrorMessage("Beat the clock!", msgs, "Yes!", new DialogHelper.CloseListener() {
       @Override
       public void gotYes() {
-        langTest.login();
+        langTest.gotUser(-1);
       }
 
       @Override
