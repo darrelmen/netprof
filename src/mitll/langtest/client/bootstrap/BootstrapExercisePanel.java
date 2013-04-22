@@ -312,7 +312,8 @@ public class BootstrapExercisePanel extends FluidContainer {
      */
     @Override
     protected void receivedAudioAnswer(AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
-      boolean correct = result.score > CORRECT_THRESHOLD;
+      boolean correct = result.isCorrect();
+      System.out.println("answer correct = " + correct + " pron score : " +result.getScore());
       recordButton.setResource(correct ? correctImage : incorrectImage);
       recordButton.setHeight("112px");
 
@@ -331,9 +332,7 @@ public class BootstrapExercisePanel extends FluidContainer {
         if (feedback < MAX_INTRO_FEEBACK_COUNT) {
           String correctPrompt = "Correct! It's: " + exercise.getRefSentence();
           recoOutput.setText(correctPrompt);
-        //  recoOutput.setVisible(true);
           DOM.setStyleAttribute(recoOutput.getElement(), "color", "#000000");
-
           incrCookie(FEEDBACK_TIMES_SHOWN);
         }
       } else {
