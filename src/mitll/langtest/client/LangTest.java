@@ -1,11 +1,7 @@
 package mitll.langtest.client;
 
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.Container;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Row;
+import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Label;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -21,18 +17,8 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
@@ -268,11 +254,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     RootPanel.get().addStyleName("noPadding");
     currentExerciseVPanel = container;
 
-    Row row = new FluidRow();
-    container.add(row);
-    Heading widgets = new Heading(3, props.getSplash());
-    widgets.addStyleName("sendButtonBlue");
-    row.add(new Column(12, widgets));
+    HorizontalPanel headerRow = makeFlashcardHeaderRow();
+    container.add(headerRow);
 
     userManager = new UserManager(this, service, isCollectAudio(), false, isCRTDataCollectMode(), props.getAppTitle(), true);
     this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager, this,
@@ -283,9 +266,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Row row2 = new FluidRow();
     container.add(row2);
 
-    Row row3 = new FluidRow();
-    container.add(row3);
-    row3.add(new Column(1, flashRecordPanel));
+    Row flashRow = new FluidRow();
+    container.add(flashRow);
+    flashRow.add(new Column(1, flashRecordPanel));
 
     setupSoundManager();
 
@@ -294,6 +277,38 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
 
     modeSelect();
+  }
+
+  private HorizontalPanel makeFlashcardHeaderRow() {
+    HorizontalPanel headerRow = new HorizontalPanel();
+    headerRow.setWidth("100%");
+    headerRow.addStyleName("headerBackground");
+    headerRow.addStyleName("headerLowerBorder");
+
+    com.github.gwtbootstrap.client.ui.Image flashcardImage = new com.github.gwtbootstrap.client.ui.Image(LANGTEST_IMAGES + "flashcardIcon2.png");
+    flashcardImage.addStyleName("floatLeft");
+
+    FlowPanel iconLeftHeader = new FlowPanel();
+    headerRow.add(iconLeftHeader);
+
+    Panel flashcard = new FlowPanel();
+    flashcard.addStyleName("inlineStyle");
+    flashcard.addStyleName("headerBackground");
+    flashcard.addStyleName("leftAlign");
+    Paragraph appName = new Paragraph("FLASHCARD");
+    appName.addStyleName("bigFont");
+    flashcard.add(appName);
+    Paragraph subtitle = new Paragraph(props.getSplash());
+    subtitle.addStyleName("subtitleForeground");
+
+    flashcard.add(subtitle);
+    iconLeftHeader.add(flashcardImage);
+    iconLeftHeader.add(flashcard);
+    headerRow.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+
+    com.github.gwtbootstrap.client.ui.Image collab = new com.github.gwtbootstrap.client.ui.Image(LANGTEST_IMAGES + "collabIcon2.png");
+    headerRow.add(collab);
+    return headerRow;
   }
 
   private void showTimedGameHelp() {
@@ -710,7 +725,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else {
       setFactory();
 
-      if (userID != lastUser || props.isGoodwaveMode()) {
+      if (userID != lastUser || props.isGoodwaveMode() || props.isFlashCard()) {
         System.out.println("gotUser : user changed - new " + userID + " vs last " + lastUser);
         if (/*props.isArabicTextDataCollect() ||*/ !props.isCollectAudio() || flashRecordPanel.gotPermission()) {
           System.out.println("\tgotUser : " + userID + " get exercises");
@@ -734,7 +749,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void checkLogin() {
-    if (props.isGoodwaveMode() || isAutoCRTMode()) {   // no login for pron mode
+    if (props.isGoodwaveMode() || isAutoCRTMode() || props.isFlashCard()) {   // no login for pron mode
       gotUser(-1);
     }
     else {
