@@ -11,7 +11,7 @@ h1 {
 }
 
 .body {
-    font-family: Arial,Helvetica,sans-serif;
+    font-family: Arial,sans-serif;
     color: #333333;
 
     background: #d3d3d3; /* for non-css3 browsers */
@@ -23,15 +23,36 @@ h1 {
 }
 
 .headerBackground {
-    background-color: #4b6f6f;
+    background-color: #404141;
+    color: #ffffff;
 }
 
 .headerLowerBorder {
-    color: #3195b9;
+    border-style:solid;
+    border-width: 2px;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-color: #3195b9;
 }
+
+.cardBorder {
+     border-style:solid;
+     border-width: 2px;
+    border-top-width: 0;
+    border-bottom-width: 0;
+     border-bottom-color: #404141;
+
+    padding-right: 0px;
+ }
 
 .cardBackground {
     background-color: #e8eaea;
+}
+
+.cardText {
+    padding: 60px;
+    margin: 20px 0 30px;
 }
 
 .spaceBarBlue {
@@ -42,12 +63,28 @@ h1 {
     background-color: #008a4d;
 }
 
+.checkboxPadding {
+    padding-left: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.helpPadding {
+     padding-top: 10px;
+ }
+
+.correctRatio {
+    padding-left: 5px;
+
+    padding-top: 12px;
+}
+
 .cardForeground {
     color: #262726;
 }
 
 .subtitleForeground {
-    color : #6d6f6f;
+    color : #b2b5b4;
 }
 
 .questionMarkForeground {
@@ -203,12 +240,11 @@ fieldset > legend {
     background-color: #e8eaea;
     color: #262726;
 
-    border: 1px solid #E3E3E3;
-    border-radius: 4px 4px 4px 4px;
+/*    border: 1px solid #E3E3E3;
+    border-radius: 4px 4px 4px 4px;*/
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) inset;
-    margin-bottom: 20px;
+    margin-bottom: 0px;
     min-height: 20px;
-    padding: 19px;
 }
 
 #nextButton {  margin-left: 20px; }
@@ -511,4 +547,10 @@ fieldset > legend {
 
 .rightAlign {
     text-align:right;
+}
+
+.bigFont {
+    font-size: 2em;
+    letter-spacing: 0.4em;
+    padding-top: 19px;
 }
