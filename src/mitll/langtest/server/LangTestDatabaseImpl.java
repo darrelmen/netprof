@@ -964,8 +964,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (serverProps.isFlashcard()|| doFlashcard) {
       makeAutoCRT();
       autoCRT.getFlashcardAnswer(getExercise(exercise), getExercises(), file, audioAnswer);
-      boolean isCorrect = audioAnswer.score > 0.8d;
-      db.updateFlashcardState(user, exercise, isCorrect);
+     // boolean isCorrect = audioAnswer.getScore() > 0.8d;
+      db.updateFlashcardState(user, exercise, audioAnswer.isCorrect());
       return audioAnswer;
     } else if (serverProps.isAutoCRT()) {
       autoCRT.getAutoCRTDecodeOutput(exercise, questionID, getExercise(exercise), file, audioAnswer);
@@ -1247,14 +1247,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private boolean isMatch(Exercise exercise, List<Exercise> exercises, File audioFile2) throws Exception {
     AudioAnswer audioAnswer = new AudioAnswer();
     autoCRT.getFlashcardAnswer(exercise, exercises, audioFile2, audioAnswer);
-    if (audioAnswer.score == -1) {
+    if (audioAnswer.getScore() == -1) {
       logger.error("hydec bad config file, stopping...");
       throw new Exception("hydec bad config file, stopping...");
     }
-    boolean isCorrect = audioAnswer.score > 0.8d;
+   // boolean isCorrect = audioAnswer.getScore() > 0.8d;
     logger.debug("---> exercise #" + exercise.getID() + " reco " + audioAnswer.decodeOutput +
-      " correct " + isCorrect + (isCorrect ? "" : " audio = " + audioFile2));
-    return isCorrect;
+      " correct " + audioAnswer.isCorrect() + (audioAnswer.isCorrect() ? "" : " audio = " + audioFile2));
+    return audioAnswer.isCorrect();
   }
 
   private String setInstallPath(boolean useFile) {
