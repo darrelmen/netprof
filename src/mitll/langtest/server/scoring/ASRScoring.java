@@ -100,7 +100,7 @@ public class ASRScoring extends Scoring {
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
     this.properties = properties;
-    this.language = properties.get("language");
+    this.language = properties.get("language") != null ? properties.get("language") : "";
     this.letterToSoundClass = language != null && language.equals("English") ? new EnglishLTS() : new ArabicLTS();
     readDictionary();
   }
