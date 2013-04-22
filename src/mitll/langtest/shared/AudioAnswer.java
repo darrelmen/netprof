@@ -14,7 +14,8 @@ public class AudioAnswer implements IsSerializable {
   public String path;
   public Validity validity;
   public String decodeOutput = "";
-  public double score = -1;
+  private double score = -1;
+  private boolean correct = false;
   public int durationInMillis;
 
   public enum Validity implements IsSerializable {
@@ -62,7 +63,26 @@ public class AudioAnswer implements IsSerializable {
   }
 
   public void setDecodeOutput(String decodeOutput) { this.decodeOutput = decodeOutput; }
+
+  /**
+   * @see mitll.langtest.server.AutoCRT#getFlashcardAnswer
+   * @param score
+   */
   public void setScore(double score) { this.score = score; }
 
-  public String toString() { return "Path " + path + " id " +reqid + " validity " + validity; }
+  public double getScore() {
+    return score;
+  }
+
+  public boolean isCorrect() {
+    return correct;
+  }
+
+  public void setCorrect(boolean correct) {
+    this.correct = correct;
+  }
+
+  public String toString() {
+    return "Path " + path + " id " + reqid + " validity " + validity + " correct " + correct + " score " + score;
+  }
 }
