@@ -1,7 +1,7 @@
 package mitll.langtest.client.table;
 
+import com.github.gwtbootstrap.client.ui.SimplePager;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -15,7 +15,7 @@ import com.google.gwt.view.client.HasRows;
  * To change this template use File | Settings | File Templates.
  */
 public class PagerTable {
-  protected Panel getPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows) {
+  public Panel getPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows) {
     SimplePager.Resources DEFAULT_RESOURCES = GWT.create(SimplePager.Resources.class);
     SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, true, fastForwardRows, true);
 
@@ -26,6 +26,7 @@ public class PagerTable {
     VerticalPanel vPanel = new VerticalPanel();
     vPanel.add(pager);
     vPanel.add(tableAsPanel);
+
     return vPanel;
   }
 }
