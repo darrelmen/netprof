@@ -25,6 +25,15 @@ public class ListBoxSectionWidget extends ListBox implements SectionWidget {
     //To change body of implemented methods use File | Settings | File Templates.
   }
 
+  @Override
+  public void addLabel(Widget label, String color) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  public void addLabel(Widget label) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
   public String getFirstItem() {
     return getItemText(0);  // first is Any
   }
