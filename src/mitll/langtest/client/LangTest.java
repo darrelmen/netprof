@@ -73,7 +73,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private MonitoringManager monitoringManager;
   private FlashRecordPanelHeadless flashRecordPanel;
 
-  private long lastUser = -1;
+  private long lastUser = -2;
   private String audioType = Result.AUDIO_TYPE_UNSET;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
@@ -207,7 +207,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // don't do flash if we're doing text only collection
     //System.out.println("teacher view " + props.isTeacherView() + " arabic text data " + props.isArabicTextDataCollect() + " collect audio " + props.isCollectAudio());
 
-    if (props.isCollectAudio() && !props.isFlashcardTeacherView()) {
+    if (props.isCollectAudio() && !props.isFlashcardTeacherView() || props.isFlashCard()) {
       makeFlashContainer();
       currentExerciseVPanel.add(flashRecordPanel);
     }
@@ -336,7 +336,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     logout.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         userManager.clearUser();
-        lastUser = -1;
+        lastUser = -2;
         userManager.teacherLogin();
       }
     });
@@ -498,12 +498,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void modeSelect() {
     boolean isGrading = props.isGrading();
-    if (logout != null) logout.setVisible(!props.isGoodwaveMode());
+    if (logout != null) logout.setVisible(!props.isGoodwaveMode() && !props.isFlashcardTeacherView());
+    if (userline != null) userline.setVisible(!props.isGoodwaveMode() && !props.isFlashcardTeacherView());
     if (users != null) users.setVisible(isGrading || props.isAdminView());
     if (showResults != null) showResults.setVisible(isGrading || props.isAdminView());
     if (monitoring != null) monitoring.setVisible(isGrading || props.isAdminView());
 
-    System.out.println("modeSelect : goodwave mode "+ props.isGoodwaveMode() + " " + isAutoCRTMode());
+    System.out.println("modeSelect : goodwave mode " + props.isGoodwaveMode() + " " + isAutoCRTMode());
 
     checkInitFlash();
   }
@@ -660,7 +661,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     userManager.clearUser();
     exerciseList.removeCurrentExercise();
     exerciseList.clear();
-    lastUser = -1;
+    lastUser = -2;
     modeSelect();
   }
 
@@ -716,7 +717,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void checkInitFlash() {
-    if (/*!props.isArabicTextDataCollect() &&*/ (props.isCollectAudio() || props.isGoodwaveMode()) && !flashRecordPanel.gotPermission()) {
+    if (/*!props.isArabicTextDataCollect() &&*/ (props.isCollectAudio() || props.isGoodwaveMode() || props.isFlashCard()) && !flashRecordPanel.gotPermission()) {
       System.out.println("checkInitFlash : initFlash");
 
       flashRecordPanel.initFlash();
@@ -729,7 +730,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void checkLogin() {
-    if (props.isGoodwaveMode() || isAutoCRTMode() || props.isFlashCard()) {   // no login for pron mode
+    if (props.isGoodwaveMode() || isAutoCRTMode() || props.isFlashCard() || props.isFlashcardTeacherView()) {   // no login for pron mode
       gotUser(-1);
     }
     else {
