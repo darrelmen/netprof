@@ -77,7 +77,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   }
 
   public void getExercises(final long userID) {
-    System.out.println("Get exercises for user=" + userID);
+    System.out.println("Flex : Get exercises for user=" + userID);
     this.userID = userID;
     sectionPanel.clear();
 
