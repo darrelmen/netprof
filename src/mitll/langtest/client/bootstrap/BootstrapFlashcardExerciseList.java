@@ -36,35 +36,30 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private LangTestDatabaseAsync service;
   private UserManager user;
   private Heading correct = new Heading(4);
-  //private Heading timeFeedback = new Heading(3);
   private ProgressBar bar = new ProgressBar();
- // private AudioHelper audioHelper = new AudioHelper();
 
-  private long start = -1;
   private Timer timer;
   private boolean expired = false;
   private boolean timerRunning = false;
-  //long lastTextMessage = -1;
-  private long lastMessage = -1;
 
   private int lastCorrect = 0;
   private int prevCorrect = 0;
 
-  //private static final String HELP_IMAGE = LangTest.LANGTEST_IMAGES + "/help-4.png";
   private final int gameTimeSeconds;
   private Panel bottomRow = new FlowPanel();
-  boolean isTimedGame = false;
+  private boolean isTimedGame = false;
+
   /**
+   *
    *
    * @param currentExerciseVPanel
    * @param service
    * @param user
-   * @param controller
    * @param gameTimeSeconds
    * @see mitll.langtest.client.LangTest#doFlashcard()
    */
   public BootstrapFlashcardExerciseList(Container currentExerciseVPanel, LangTestDatabaseAsync service,
-                                        UserManager user, final ExerciseController controller,
+                                        UserManager user,
                                         boolean isTimedGame, int gameTimeSeconds) {
     this.service = service;
     this.gameTimeSeconds = gameTimeSeconds;
@@ -132,60 +127,18 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   }
 
   private void startTimer(final long userID) {
-    System.out.println("startTimer for " + userID);
+    //System.out.println("startTimer for " + userID);
 
-    start = System.currentTimeMillis();
-    lastMessage = start;
- //   lastTextMessage = start;
     bar.setPercent(100);
     bar.setColor(ProgressBarBase.Color.DEFAULT);
     bar.setText(gameTimeSeconds + " seconds");
+    int integralStep = gameTimeSeconds < 100 ? (int)Math.ceil(100d/(double)gameTimeSeconds) : 1;
+    int numSteps = 100/integralStep;
+    int intervalMillis = Math.round(((float)(gameTimeSeconds*1000))/(float)numSteps);
 
-    timer = new Timer() {
-      @Override
-      public void run() {
-        if (expired) {
-          System.out.println(this + " - expired????");
-          timer.cancel();
-        } else {
-          timerRunning = true;
-          long now = System.currentTimeMillis();
-          long diff = now-start;
-          int remaining = gameTimeSeconds - (int)(diff/1000);
-
-          if (remaining < 0) {
-            expired = true;
-            bar.setColor(ProgressBarBase.Color.SUCCESS);
-            bar.setPercent(100);
-            bar.setText("Time's up!");
-
-            timer.cancel();
-            timerRunning = false;
-            //audioHelper.playCorrect(3);
-
-            getOutOfTimeDialog(userID);
-
-          } else {
-            boolean lastTenSeconds = remaining < 10;
-            if (true) {//now - lastMessage > 1000 || lastTenSeconds) {
-            /*  if (now - lastTextMessage > 5000) {
-                lastTextMessage = now;
-                bar.setText(remaining + " seconds");
-              }*/
-              if (lastTenSeconds) {
-                bar.setColor(ProgressBarBase.Color.WARNING);
-              }
-              float percent = 100f * ((float)remaining/(float)gameTimeSeconds);
-              bar.setText("");
-              bar.setPercent((int)percent);
-             // lastMessage = now;
-            }
-          }
-        }
-      }
-    };
-    System.out.println("starting " + timer + " for " + userID);
-    timer.scheduleRepeating(1000);
+    timer = new MyTimer(numSteps, integralStep,userID);
+//    System.out.println("starting " + timer + " for " + userID +" seconds " + gameTimeSeconds +" interval " + intervalMillis + " num steps " +numSteps);
+    timer.scheduleRepeating(intervalMillis);
   }
 
   private void getOutOfTimeDialog(final long userID) {
@@ -229,8 +182,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
           }
 
           @Override
-          public void onSuccess(Void result) {
-          }
+          public void onSuccess(Void result) {}
         });
       }
     }
@@ -311,6 +263,53 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
         lastCorrect = result.correct;
         List<Integer> correctHistory = result.getCorrectHistory();
         prevCorrect = correctHistory == null || correctHistory.isEmpty() ? -1 : correctHistory.get(correctHistory.size() - 1);
+      }
+    }
+  }
+
+  private class MyTimer extends Timer {
+    private final int numSteps;
+    private int currentSteps;
+    private final long userID;
+    private int stepSize;
+
+    public MyTimer(int numSteps, int stepSize, long userID) {
+      this.numSteps = numSteps;
+      this.userID = userID;
+      currentSteps = numSteps;
+      this.stepSize = stepSize;
+    }
+
+    @Override
+    public void run() {
+      if (expired) {
+        System.out.println(this + " - expired????");
+        timer.cancel();
+      } else {
+        timerRunning = true;
+        if (currentSteps == 0) {
+          expired = true;
+          bar.setColor(ProgressBarBase.Color.SUCCESS);
+          bar.setPercent(100);
+          bar.setText("Time's up!");
+
+          timer.cancel();
+          timerRunning = false;
+          //audioHelper.playCorrect(3);
+
+          getOutOfTimeDialog(userID);
+
+        } else {
+          currentSteps--;
+          boolean lastTenSeconds = currentSteps == 0 || numSteps / currentSteps > 5;
+
+          if (lastTenSeconds) {
+            bar.setColor(ProgressBarBase.Color.WARNING);
+          }
+          int percent = currentSteps * stepSize;
+          bar.setText("");
+          bar.setPercent(percent);
+        }
       }
     }
   }
