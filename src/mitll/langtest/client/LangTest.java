@@ -23,6 +23,7 @@ import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
+import mitll.langtest.client.bootstrap.TableSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -206,7 +207,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // don't do flash if we're doing text only collection
     //System.out.println("teacher view " + props.isTeacherView() + " arabic text data " + props.isArabicTextDataCollect() + " collect audio " + props.isCollectAudio());
 
-    if (props.isCollectAudio()) {
+    if (props.isCollectAudio() && !props.isFlashcardTeacherView()) {
       makeFlashContainer();
       currentExerciseVPanel.add(flashRecordPanel);
     }
@@ -415,32 +416,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     final UserFeedback feedback = (UserFeedback) this;
 
     boolean hideExerciseList = (props.isMinimalUI() && !props.isGrading()) && !props.isAdminView();
-    if (props.isFlashCard()) {
-      this.exerciseList = new FlashcardExerciseList(currentExerciseVPanel, service, feedback, userManager);
-    }
-    else if (isGrading) {
-      this.exerciseList = new GradedExerciseList(currentExerciseVPanel, service, feedback,
-          true, props.isEnglishOnlyMode(), this);
-    } else {
-      if (props.isShowSections()) {
-        boolean showSectionWidgets = props.isShowSectionWidgets();
-        this.exerciseList = new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), isAutoCRTMode(),showSectionWidgets, this);
-
-/*
-        System.out.println("makeExerciseList show section widgets " + showSectionWidgets);
-
-        this.exerciseList = new SectionExerciseList(currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets);
-*/
-     } else {
-        this.exerciseList = new PagingExerciseList(currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), isAutoCRTMode(), this) {
-          @Override
-          protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
-        };
-      }
-    }
+    this.exerciseList = makeExerciseList(secondRow, isGrading, feedback);
 
     if (hideExerciseList) {
       exerciseList.getWidget().setVisible(false);
@@ -451,6 +427,39 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       exerciseList.setExercise_title(props.getExercise_title());
     }
     addExerciseListOnLeftSide(leftColumn);
+  }
+
+  private ListInterface makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback) {
+  /*  if (props.isFlashCard()) {
+      return new FlashcardExerciseList(currentExerciseVPanel, service, feedback, userManager);
+    } else*/ if (isGrading) {
+      return new GradedExerciseList(currentExerciseVPanel, service, feedback,
+        true, props.isEnglishOnlyMode(), this);
+    } else {
+      if (props.isShowSections()) {
+        boolean showSectionWidgets = props.isShowSectionWidgets();
+        if (props.isFlashcardTeacherView()) {
+          return new TableSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
+            props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, this);
+        } else {
+          return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
+            props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, this);
+        }
+
+/*
+        System.out.println("makeExerciseList show section widgets " + showSectionWidgets);
+
+        this.exerciseList = new SectionExerciseList(currentExerciseVPanel, service, feedback,
+          props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets);
+*/
+     } else {
+        return new PagingExerciseList(currentExerciseVPanel, service, feedback,
+          props.isShowTurkToken(), isAutoCRTMode(), this) {
+          @Override
+          protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
+        };
+      }
+    }
   }
 
   private void addExerciseListOnLeftSide(Panel leftColumnContainer) {
