@@ -2,7 +2,7 @@ package mitll.langtest.client.bootstrap;
 
 import com.github.gwtbootstrap.client.ui.CellTable;
 import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
@@ -77,18 +77,10 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   private Widget getAsyncTable(Map<String, Collection<String>> typeToSection,int numResults) {
     CellTable<Exercise> table = makeCellTable();
     table.setWidth("100%");
-   // TextColumn<Result> id = addColumnsToTable(gradingView, showQuestionColumn, grades, grader, numGrades, table);
     table.setRowCount(numResults, true);
     table.setVisibleRange(0,Math.min(numResults,15));
     createProvider(typeToSection, numResults,table);
 
-    // Add a ColumnSortEvent.AsyncHandler to connect sorting to the
-    // AsyncDataPRrovider.
-/*    ColumnSortEvent.AsyncHandler columnSortHandler = new ColumnSortEvent.AsyncHandler(table);
-    table.addColumnSortHandler(columnSortHandler);*/
-
-    // We know that the data is sorted alphabetically by default.
-   // table.getColumnSortList().push(id);
 
     Panel pagerAndTable = getPagerAndTable(table);
     pagerAndTable.setWidth("100%");
@@ -134,13 +126,11 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
 
   @Override
   protected CellTable<Exercise> makeCellTable() {
- //   CellTable.Resources o = GWT.create(TableResources.class);
-    CellTable<Exercise> table = new CellTable<Exercise>(PAGE_SIZE);//, o);
+    CellTable<Exercise> table = new CellTable<Exercise>(PAGE_SIZE);
 
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
 
-    // table.setWidth("100%", true);
-    table.setWidth("100%");
+     table.setWidth("100%", true);
     table.setHeight("auto");
 
     // Add a selection model to handle user selection.
@@ -162,6 +152,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     };
     english.setSortable(true);
     table.addColumn(english, "Word/Expression");
+    table.setColumnWidth(english,33, Style.Unit.PCT);
 
     TextColumn<Exercise> flword = new TextColumn<Exercise>() {
       @Override
@@ -171,6 +162,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     };
     flword.setSortable(true);
     table.addColumn(flword, controller.getLanguage());
+    table.setColumnWidth(flword, 33, Style.Unit.PCT);
 
     TextColumn<Exercise> translit = new TextColumn<Exercise>() {
       @Override
@@ -180,6 +172,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     };
     translit.setSortable(true);
     table.addColumn(translit, "Transliteration");
+    table.setColumnWidth(translit,33, Style.Unit.PCT);
   }
 
 
