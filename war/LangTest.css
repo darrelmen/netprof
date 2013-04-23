@@ -99,6 +99,27 @@ h1 {
     color : #f0f9fb;
 }
 
+.primaryButtonColor {
+    background-color: #006DCC;
+}
+
+.clearButtonColor {
+     background-color: #ffffff;
+ }
+
+.successButtonColor {
+    background-color: #5BB75B;
+
+}
+
+.infoButtonColor {
+    background-color: #49AFCD;
+}
+
+.warningButtonColor {
+    background-color: #FAA732;
+}
+
 .noPadding {
     padding-top: 5px;
 }
