@@ -386,7 +386,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @param userID
    */
-  private void noSectionsGetExercises(long userID) {
+  protected void noSectionsGetExercises(long userID) {
     super.getExercises(userID);
   }
 
@@ -406,7 +406,7 @@ public class SectionExerciseList extends PagingExerciseList {
 
     @Override
     public void onSuccess(List<ExerciseShell> result) {
-      //System.out.println("loadExercises : onSuccess " + result.size() + " items.");
+      System.out.println("MySetExercisesCallback : onSuccess " + result.size() + " items.");
 
       if (!result.isEmpty()) {
         if (item != null) {
