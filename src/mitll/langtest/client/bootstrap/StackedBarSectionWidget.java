@@ -44,6 +44,15 @@ public class StackedBarSectionWidget extends StackProgressBar implements Section
   }
 
   @Override
+  public void addLabel(Widget label, String color) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  public void addLabel(Widget label) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  @Override
   public String getCurrentSelection() {
     return currentSelection;
 /*    for (Bar b : buttons) {
