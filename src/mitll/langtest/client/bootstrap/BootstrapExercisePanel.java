@@ -6,6 +6,8 @@ import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Paragraph;
+import com.github.gwtbootstrap.client.ui.ProgressBar;
+import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -21,6 +23,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -43,9 +46,9 @@ import java.util.List;
  */
 public class BootstrapExercisePanel extends FluidContainer {
   private static final int LONG_DELAY_MILLIS = 3500;
-  private static final int DELAY_MILLIS = 750;//1250;
+  private static final int DELAY_MILLIS = 1000;//1250;
   private static final int DELAY_MILLIS_LONG = 2500;
-  private static final double CORRECT_THRESHOLD = 0.6;
+  private Column scoreFeedbackColumn;
  // private static final String TIMES_HELP_SHOWN = "TimesHelpShown";
   private static final String FEEDBACK_TIMES_SHOWN = "FeedbackTimesShown";
   private static final int PERIOD_MILLIS = 500;
@@ -72,6 +75,8 @@ public class BootstrapExercisePanel extends FluidContainer {
   private boolean isDemoMode;
   private int feedback = 0;
   private Timer t;
+  private ProgressBar scoreFeedback = new ProgressBar();
+
 
   /**
    * @see mitll.langtest.client.flashcard.FlashcardExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
@@ -134,7 +139,9 @@ public class BootstrapExercisePanel extends FluidContainer {
   }
 
   private Widget getQuestionContent(Exercise e) {
-    Widget hero = new Heading(1,e.getEnglishSentence());
+    String stimulus = e.getEnglishSentence();
+    if (stimulus == null) stimulus = e.getContent();
+    Widget hero = new Heading(1, stimulus);
     hero.addStyleName("cardText");
     return hero;
   }
@@ -174,20 +181,26 @@ public class BootstrapExercisePanel extends FluidContainer {
 
     row.add(new Column(12, paragraph));
 
-    FluidRow row2 = new FluidRow();
-    add(row2);
+    FluidRow recoOutputRow = new FluidRow();
+    add(recoOutputRow);
     Paragraph paragraph2 = new Paragraph();
     paragraph2.addStyleName("alignCenter");
 
     isDemoMode = controller.isDemoMode();
-    row2.add(new Column(12, paragraph2));
+    recoOutputRow.add(new Column(12, paragraph2));
     recoOutput = new Heading(3,"Answer");
     recoOutput.addStyleName("cardHiddenText");
     DOM.setStyleAttribute(recoOutput.getElement(), "color", "#e8eaea");
 
     paragraph2.add(recoOutput);
-  }
 
+    FluidRow feedbackRow = new FluidRow();
+    add(feedbackRow);
+    SimplePanel widgets = new SimplePanel();
+    widgets.setHeight("40px");
+    scoreFeedbackColumn = new Column(6, 3, widgets);
+    feedbackRow.add(scoreFeedbackColumn);
+  }
   protected MyRecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
     return new MyRecordButtonPanel(service, controller, exercise, index);
   }
@@ -270,7 +283,6 @@ public class BootstrapExercisePanel extends FluidContainer {
     protected Anchor makeRecordButton() {
       recordButton = new ImageAnchor();
       recordButton.setResource(enterImage);
-     // recordButton.setHeight("112px");
       return recordButton;
     }
 
@@ -313,7 +325,10 @@ public class BootstrapExercisePanel extends FluidContainer {
     @Override
     protected void receivedAudioAnswer(AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
       boolean correct = result.isCorrect();
-      System.out.println("answer correct = " + correct + " pron score : " +result.getScore());
+      double score = result.getScore();
+      System.out.println("answer correct = " + correct + " pron score : " + score);
+      showPronScoreFeedback(score);
+
       recordButton.setResource(correct ? correctImage : incorrectImage);
       recordButton.setHeight("112px");
 
@@ -397,6 +412,24 @@ public class BootstrapExercisePanel extends FluidContainer {
     protected void receivedAudioFailure() {
       recordButton.setResource(enterImage);
     }
+  }
+
+  private void showPronScoreFeedback(double score) {
+    double percent = 100 * score;
+
+    System.out.println("show feedback = " +score);
+
+    scoreFeedbackColumn.clear();
+    scoreFeedbackColumn.add(scoreFeedback);
+
+    int percent1 = (int) percent;
+    scoreFeedback.setPercent(percent1  < 10 ? 10 : percent1);
+    scoreFeedback.setText("Pron score " + (int) percent + "%");
+    scoreFeedback.setVisible(true);
+    scoreFeedback.setColor(
+      score > 0.8 ? ProgressBarBase.Color.SUCCESS :
+      score > 0.6 ? ProgressBarBase.Color.DEFAULT :
+        score > 0.4 ? ProgressBarBase.Color.WARNING : ProgressBarBase.Color.DANGER);
   }
 
   private void showPopup(String html) {
