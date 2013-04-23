@@ -156,6 +156,15 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
     //To change body of implemented methods use File | Settings | File Templates.
   }
 
+  @Override
+  public void addLabel(Widget label, String color) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  public void addLabel(Widget label) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
 /*  @Override
   public void addClearButton(Button b) {
     //To change body of implemented methods use File | Settings | File Templates.
