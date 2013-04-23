@@ -137,4 +137,8 @@ public interface LangTestDatabase extends RemoteService {
   Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(Map<String, Collection<String>> typeToSection);
 
   List<SectionNode> getSectionNodes();
+
+  int getNumExercisesForSelectionState(Map<String, Collection<String>> typeToSection);
+
+  List<Exercise> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end);
 }
