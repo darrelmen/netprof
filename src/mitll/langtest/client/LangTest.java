@@ -259,7 +259,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     container.add(headerRow);
 
     userManager = new UserManager(this, service, isCollectAudio(), false, isCRTDataCollectMode(), props.getAppTitle(), true);
-    this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager, this,
+    this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager,
       props.isTimedGame(), props.getGameTimeSeconds());
 
     makeFlashContainer();
