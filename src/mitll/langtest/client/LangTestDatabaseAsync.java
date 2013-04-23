@@ -132,4 +132,8 @@ public interface LangTestDatabaseAsync {
   void getTypeOrder(AsyncCallback<Collection<String>> async);
 
   void getSectionNodes(AsyncCallback<List<SectionNode>> async);
+
+  void getNumExercisesForSelectionState(Map<String, Collection<String>> typeToSection, AsyncCallback<Integer> async);
+
+  void getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end, AsyncCallback<List<Exercise>> async);
 }
