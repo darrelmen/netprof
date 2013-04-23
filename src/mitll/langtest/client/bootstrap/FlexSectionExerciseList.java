@@ -71,6 +71,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     buttonTypes.add(ButtonType.WARNING);
   }
 
+
   @Override
   protected void addComponents() {
     addTableWithPager();
@@ -154,7 +155,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   private Panel panelInsideScrollPanel;
   private Panel scrollPanel;
   private Panel label, clear;
-//  private List<List<Widget>> rows = new ArrayList<List<Widget>>();
+
   private void addButtonRow(List<SectionNode> rootNodes, long userID, FluidContainer container, Collection<String> types) {
     System.out.println("getWidgetsForTypes (success) for user = " + userID + " got types " + types);
     typeToBox.clear();
@@ -166,14 +167,16 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     FlexTable firstTypeRow = new FlexTable();
     container.add(firstTypeRow);
 
+    int j = 0;
     for (String type : types) {
       ButtonGroupSectionWidget buttonGroupSectionWidget1 = new ButtonGroupSectionWidget(type);
       typeToBox.put(type,buttonGroupSectionWidget1);
+      typeToButton.put(type, buttonTypes.get(j++ % types.size()));
     }
 
     SectionWidget buttonGroupSectionWidget = typeToBox.get(firstType);
 
-    Container labelContainer = getLabelWidgetForRow(firstType);
+    Container labelContainer = getLabelWidgetForRow(firstType,typeToButton.get(firstType),buttonGroupSectionWidget);
     label = labelContainer;
 
     firstTypeRow.setWidget(0, 0, labelContainer);
@@ -182,9 +185,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     firstTypeRow.setWidget(0, 1, clearColumnContainer);
 
-    int j = 0;
     for (String type : types) {
-      typeToButton.put(type, buttonTypes.get(j++ % types.size()));
       if (type.equals(firstType)) continue;
       makeSectionWidget(labelContainer, clearColumnContainer, type, typeToBox.get(type));
     }
@@ -206,9 +207,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     sectionsInType = getSortedItems(sectionsInType);
     numExpectedSections = sectionsInType.size();
     numSections = numExpectedSections;
-/*    for (int i = 0; i < numExpectedSections; i++) {
-      rows.add(new ArrayList<Widget>());
-    }*/
 
     List<String> subTypes = new ArrayList<String>(types);
     List<String> subs = subTypes.subList(1, subTypes.size());
@@ -251,7 +249,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     return items;
   }
 
-  private Container getLabelWidgetForRow(String firstType) {
+  private Container getLabelWidgetForRow(String firstType, ButtonType buttonType,SectionWidget buttonGroupSectionWidget) {
     Container labelContainer = new FluidContainer();
     FluidRow rowAgain = new FluidRow();
 
@@ -260,7 +258,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     DOM.setStyleAttribute(labelContainer.getElement(), "paddingRight", "2px");
 
     Heading widget = makeLabelWidget(firstType);
+    String color = getButtonTypeStyle(buttonType);
 
+    buttonGroupSectionWidget.addLabel(widget,color);
     rowAgain.add(widget);
     labelContainer.add(rowAgain);
     return labelContainer;
@@ -310,7 +310,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     FluidRow status = new FluidRow();
     status.addStyleName("alignCenter");
     container.add(status);
-    //status.add(new Heading(5,"Showing "));
 
     for (String type : types) {
       Heading w = new Heading(4);
@@ -324,23 +323,35 @@ public class FlexSectionExerciseList extends SectionExerciseList {
  //   Widget emailWidget = getEmailWidget();
   //  fluidRow.add(new Column(2, /*3,*/ emailWidget));
 
-    Widget hideBoxesWidget = getHideBoxesWidget();
-    fluidRow.add(new Column(2, hideBoxesWidget));
-
+//    Widget hideBoxesWidget = getHideBoxesWidget();
     Widget flashcardWidget = getFlashcard();
-    fluidRow.add(new Column(2, flashcardWidget));
+    fluidRow.add(new Column(1, flashcardWidget));
+
+    Widget flashcardWidget2 = getFlashcard2();
+    fluidRow.add(new Column(1, flashcardWidget2));
   }
 
   private Anchor flashcardLink;
+
   protected Widget getFlashcard() {
-    flashcardLink = new Anchor("Flashcard", "#?flashcard=true");
+    flashcardLink = new Anchor("<h4>Flashcard</h4>", true,"?flashcard=true#", "_blank");
     return flashcardLink;
+  }
+
+  private Anchor flashcardLink2;
+
+  protected Widget getFlashcard2() {
+    flashcardLink2 = new Anchor("<h4>Timed Flashcard</h4>", true, "?flashcard=true&timedGame=true#", "_blank");
+    return flashcardLink2;
   }
 
   protected void setModeLinks(String historyToken) {
     super.setModeLinks(historyToken);
     if (flashcardLink != null) {
       flashcardLink.setHref(GWT.getHostPageBaseURL() + "?flashcard=true#" + historyToken);
+    }
+    if (flashcardLink2 != null) {
+      flashcardLink2.setHref(GWT.getHostPageBaseURL() + "?flashcard=true&timedGame=true#" + historyToken);
     }
   }
 
@@ -416,13 +427,17 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     pushFirstListBoxSelection();
   }
 
-  private SectionWidget makeSectionWidget(Container labelContainer, Panel clearColumnContainer, String typeForOriginal, SectionWidget sectionWidget) {
+  private SectionWidget makeSectionWidget(Container labelContainer, Panel clearColumnContainer, String typeForOriginal,
+                                          SectionWidget sectionWidget) {
+    ButtonType buttonType = typeToButton.get(typeForOriginal);
+
+    String color = getButtonTypeStyle(buttonType);
     // make label
 
-   labelContainer.add(getLabelWidget(typeForOriginal));
-
+    Widget labelWidget = getLabelWidget(typeForOriginal);
+    labelContainer.add(labelWidget);
+    sectionWidget.addLabel(labelWidget,color);
     // make
-    ButtonType buttonType = typeToButton.get(typeForOriginal);
 
     // make clear button
 
@@ -436,6 +451,11 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     clearColumnContainer.add(table2);
     return sectionWidget;
+  }
+
+  private String getButtonTypeStyle(ButtonType buttonType) {
+    return (buttonType.equals(ButtonType.PRIMARY)) ? "primaryButtonColor" :buttonType.equals(ButtonType.SUCCESS) ? "successButtonColor"
+        : (buttonType.equals(ButtonType.INFO)) ? "infoButtonColor" : "warningButtonColor";
   }
 
   /**
@@ -505,11 +525,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    // int offsetHeight = lastColumn.getOffsetHeight()+5;
    // System.out.println("onResize height is " + offsetHeight);
 
-    if (label != null) {
-      int width = Window.getClientWidth() - label.getOffsetWidth() - clear.getOffsetWidth() - 100;
-//      System.out.println("width is " + width);
-      scrollPanel.setWidth(Math.max(300, width) + "px");
-    }
+    setScrollPanelWidth();
 
  /*   if (scrollPanel.getOffsetHeight() != offsetHeight) {
     scrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
@@ -517,6 +533,19 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 */
   }
 
+  protected void setScrollPanelWidth() {
+    if (label != null) {
+      int width = Window.getClientWidth() - label.getOffsetWidth() - clear.getOffsetWidth() - 100;
+//      System.out.println("width is " + width);
+      scrollPanel.setWidth(Math.max(300, width) + "px");
+    }
+  }
+
+  /**
+   * @see #makeSectionWidget(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, mitll.langtest.client.exercise.SectionWidget)
+   * @param typeForOriginal
+   * @return
+   */
   private Widget getLabelWidget(String typeForOriginal) {
     FlexTable table3 = new FlexTable();
     Heading widget = new Heading(HEADING_FOR_LABEL, typeForOriginal);
@@ -525,7 +554,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     DOM.setStyleAttribute( widget.getElement(), "webkitMarginAfter", "10px");
     DOM.setStyleAttribute( widget.getElement(), "marginTop", "2px");
     DOM.setStyleAttribute( widget.getElement(), "marginBottom", "10px");
-    return table3;
+    return widget;
   }
 
   /**
