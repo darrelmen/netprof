@@ -228,12 +228,22 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     super.onResize();
 /*    System.out.println("Got on resize " + Window.getClientHeight() + " " +
         getOffsetHeight() + " bodyheight = " + table.getBodyHeight() + " table offset height " + table.getOffsetHeight() + " parent height " + getParent().getOffsetHeight());*/
+    int numRows = getNumTableRowsGivenScreenHeight();
+    if (table.getPageSize() != numRows) {
+      //System.out.println("num rows now " + numRows);
+      table.setPageSize(numRows);
+      table.redraw();
+      markCurrentExercise(currentExercise);
+    }
+  }
+
+  protected int getNumTableRowsGivenScreenHeight() {
     int header = getTableHeaderHeight();
     int leftOver = Window.getClientHeight() - header - 100;
 
     //System.out.println("Got on resize " + Window.getClientHeight() + " " + header + " result = " + leftOver);
 
-    float rawRatio = ((float) leftOver) / (float) HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
+    float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
     float tableRatio = Math.min(MAX_PAGES, rawRatio);
     // System.out.println("left over " + leftOver + " raw " + rawRatio + " table ratio " + tableRatio);
 
@@ -245,13 +255,11 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
         ratio /= 2; // hack for long ids
       }
     }
-    int numRows = Math.max(MIN_PAGE_SIZE, Math.round(ratio));
-    if (table.getPageSize() != numRows) {
-      //System.out.println("num rows now " + numRows);
-      table.setPageSize(numRows);
-      table.redraw();
-      markCurrentExercise(currentExercise);
-    }
+    return Math.max(MIN_PAGE_SIZE, Math.round(ratio));
+  }
+
+  protected int heightOfCellTableWith15Rows() {
+    return HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
   }
 
   protected int getTableHeaderHeight() {

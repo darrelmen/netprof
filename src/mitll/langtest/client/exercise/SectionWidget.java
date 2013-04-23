@@ -26,6 +26,7 @@ public interface SectionWidget {
   void enableAll();
 
   void addButton(Button b);
+  void addLabel(Widget label, String color);
 
   //void addClearButton(Button b);
 }
