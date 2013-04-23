@@ -1,8 +1,11 @@
 package mitll.langtest.client.bootstrap;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.SectionWidget;
@@ -26,6 +29,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
   private List<Button> buttons = new ArrayList<Button>();
   private Button clearButton;
   private String type;
+  private Widget label;
   private Map<String, Collection<Button>> nameToButton = new HashMap<String,Collection<Button>>();
   private String currentSelection = null;
 
@@ -35,7 +39,8 @@ class ButtonGroupSectionWidget implements SectionWidget {
 
   /**
    * @see FlexSectionExerciseList#addColumnButton
-   * @see FlexSectionExerciseList.TypeToSectionsAsyncCallback#onSuccess(java.util.Map)
+   * @see FlexSectionExerciseList#makeSectionWidget(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, mitll.langtest.client.exercise.SectionWidget)
+   * @see FlexSectionExerciseList#makeSubgroupButton(mitll.langtest.client.exercise.SectionWidget, String, String, com.github.gwtbootstrap.client.ui.constants.ButtonType, boolean)
    * @param b
    */
   @Override
@@ -52,6 +57,15 @@ class ButtonGroupSectionWidget implements SectionWidget {
       buttonsAtName.add(b);
     }
   }
+
+  @Override
+  public void addLabel(Widget label, String color) {
+    this.label = label;
+    System.out.println("label is " + label + " color " +color);
+    this.color = color;
+  }
+
+  String color;
 
   private void addClearButton(Button b) {
     clearButton = b;
@@ -144,6 +158,15 @@ class ButtonGroupSectionWidget implements SectionWidget {
           for (Button b : buttonsAtName) {
             boolean active = !doToggle || !b.isActive();
             b.setActive(active);
+            //String backgroundColor = DOM.getElementAttribute(b.getElement(), "backgroundColor");
+         /*   Element element = label.getElement();
+            if (element != null) {
+              DOM.setElementAttribute(element, "background-color", color);
+            }*/
+            if (label != null) {
+              label.addStyleName(color);
+            }
+
             anythingSelected |= active;
           }
         }
@@ -174,8 +197,14 @@ class ButtonGroupSectionWidget implements SectionWidget {
 
   private void setClearButtonState(Collection<String> sections, boolean anythingSelected) {
     if (clearButton != null) {
-      System.out.println("\tselectItem for type " +type+"="+sections + " set clear button.");
+      System.out.println("\tselectItem for type " + type + "=" + sections + " set clear button.");
       clearButton.setEnabled(anythingSelected);
+      if (!anythingSelected) {
+        System.out.println("\tselectItem clear color");
+
+        label.removeStyleName(color);
+      }
+
     }
     else {
       System.err.println("clear button is not set? ");
