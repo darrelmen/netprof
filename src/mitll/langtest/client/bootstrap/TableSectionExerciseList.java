@@ -35,7 +35,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   public TableSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                   UserFeedback feedback, boolean showTurkToken, boolean showInOrder,
                                   boolean showListBox, ExerciseController controller) {
-    super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox, controller);    //To change body of overridden methods use File | Settings | File Templates.
+    super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox, controller);
     setWidth("100%");
   }
 
@@ -73,14 +73,17 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     @Override
   protected void addTableWithPager() {  }
 
-
+  private CellTable<Exercise> table;
   private Widget getAsyncTable(Map<String, Collection<String>> typeToSection,int numResults) {
     CellTable<Exercise> table = makeCellTable();
     table.setWidth("100%");
     table.setRowCount(numResults, true);
-    table.setVisibleRange(0,Math.min(numResults,15));
+    int numRows = getNumTableRowsGivenScreenHeight();
+
+    table.setVisibleRange(0,Math.min(numResults,numRows));
     createProvider(typeToSection, numResults,table);
 
+    this.table = table;
 
     Panel pagerAndTable = getPagerAndTable(table);
     pagerAndTable.setWidth("100%");
@@ -108,6 +111,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
             System.out.println("createProvider : onSuccess for " + start + "->" + fend + " got " + result.size());
 
             updateRowData(start, result);
+            onResize();
           }
         });
       }
@@ -187,5 +191,22 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   protected void loadExercises(Map<String, Collection<String>> typeToSection, final String item) {
     System.out.println("loadExercises " + typeToSection + " and item '" + item + "'");
     doInitial(typeToSection);
+  }
+
+  @Override
+  public void onResize() {
+    setScrollPanelWidth();
+
+    int numRows = getNumTableRowsGivenScreenHeight();
+    if (table.getPageSize() != numRows) {
+      System.out.println("onResize : num rows now " + numRows);
+      table.setPageSize(numRows);
+      table.redraw();
+    }
+  }
+
+  @Override
+  protected int heightOfCellTableWith15Rows() {
+    return 700;
   }
 }
