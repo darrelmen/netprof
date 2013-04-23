@@ -240,7 +240,7 @@ public class PropertyHandler {
     setGrading(grading);
     // get audio repeats
     segmentRepeats = getInt(repeats, DEFAULT_SEGMENT_REPEATS,REPEATS) -1;
-    numGradesToCollect = getInt(numGrades, NUM_GRADES_TO_COLLECT_DEFAULT, NUM_GRADES_TO_COLLECT);
+    numGradesToCollect = getInt(numGrades, numGradesToCollect, NUM_GRADES_TO_COLLECT);
     if (numGrades != null)
     if (arabicCollect != null) {
       arabicTextDataCollect = !arabicCollect.equals("false");
@@ -261,7 +261,7 @@ public class PropertyHandler {
     if (adminParam != null) {
       adminView = !adminParam.equals("false");
     }
-    gameTimeSeconds = getInt(Window.Location.getParameter(GAME_TIME), DEFAULT_GAME_TIME_SECONDS,REPEATS);
+    gameTimeSeconds = getInt(Window.Location.getParameter(GAME_TIME), gameTimeSeconds, REPEATS);
 
     if (Window.Location.getParameter(SHOW_SECTION_WIDGETS) != null) {
       showSectionWidgets = !Window.Location.getParameter(SHOW_SECTION_WIDGETS).equals("false");
@@ -420,6 +420,7 @@ public class PropertyHandler {
   }
 
   public int getGameTimeSeconds() {
+    System.out.println("game time seconds " + gameTimeSeconds);
     return gameTimeSeconds;
   }
 
