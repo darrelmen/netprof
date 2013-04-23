@@ -173,7 +173,33 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection);
     return getExerciseShells(exercisesBiasTowardsUnanswered);
+  }
 
+  @Override
+  public List<Exercise> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end) {
+    List<Exercise> exercises;
+    if (typeToSection.isEmpty()) {
+      exercises = db.getExercises();
+    } else {
+      Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
+      exercises = new ArrayList<Exercise>(exercisesForSection);
+    }
+    List<Exercise> resultList = exercises.subList(start, end);
+    return new ArrayList<Exercise>(resultList);
+  }
+
+  @Override
+  public int getNumExercisesForSelectionState(Map<String, Collection<String>> typeToSection) {
+    if (typeToSection.isEmpty()) {
+      int size = db.getExercises().size();
+      logger.debug("getNumExercisesForSelectionState num = " + size);
+      return size;
+    } else {
+      Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
+      int size = exercisesForSection.size();
+      logger.debug("getNumExercisesForSelectionState req = " + typeToSection + " = " + size);
+      return size;
+    }
   }
 
   @Override
