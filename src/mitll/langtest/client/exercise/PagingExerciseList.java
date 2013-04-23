@@ -21,6 +21,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingExerciseList extends ExerciseList implements RequiresResize {
-  private static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
+  protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
   private ListDataProvider<ExerciseShell> dataProvider;
   private static final boolean DEBUG = false;
   private static final int ID_LINE_WRAP_LENGTH = 20;
@@ -48,7 +49,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   private static final int MIN_PAGE_SIZE = 3;
   private static final float DEFAULT_PAGE_SIZE = 15f;
   private CellTable<ExerciseShell> table;
-  private ExerciseController controller;
+  protected ExerciseController controller;
 
   public interface TableResources extends CellTable.Resources {
     /**
@@ -101,9 +102,10 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     column.add(table);
   }
 
-  protected void makeCellTable() {
+  protected CellTable<Exercise> makeCellTable() {
     CellTable.Resources o = GWT.create(TableResources.class);
     this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
+
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
 
     //  table.setWidth("100%", true);
@@ -114,6 +116,11 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     final SingleSelectionModel<ExerciseShell> selectionModel = new SingleSelectionModel<ExerciseShell>();
     table.setSelectionModel(selectionModel);
 
+    addColumnsToTable();
+    return null;
+  }
+
+  protected void addColumnsToTable() {
     Column<ExerciseShell, SafeHtml> id2 = getExerciseIdColumn();
 
     table.addColumn(id2);
