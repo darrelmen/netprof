@@ -275,6 +275,11 @@ public class PropertyHandler {
     if (flashcardParam != null) {
       flashCard = !flashcardParam.equals("false");
     }
+
+    String timedgameParam = Window.Location.getParameter(TIMED_GAME);
+    if (timedgameParam != null) {
+      timedGame = !timedgameParam.equals("false");
+    }
     return grading;
   }
 
