@@ -107,7 +107,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param userID
    */
   public void getExercises(long userID) {
-    //System.out.println("getExercises for user " +userID);
+    System.out.println("ExerciseList: getExercises for user " +userID);
 
     useUserID = true;
     this.userID = userID;
@@ -167,6 +167,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see GradedExerciseList#setFactory(ExercisePanelFactory, mitll.langtest.client.user.UserManager, int)
    */
   private void getExercisesInOrder() {
+
     service.getExerciseIds(new SetExercisesCallback());
   }
 
@@ -200,7 +201,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
 
     public void onSuccess(List<ExerciseShell> result) {
-      //System.out.println("SetExercisesCallback Got " +result.size() + " results");
+      System.out.println("SetExercisesCallback Got " +result.size() + " results");
       rememberExercises(result);
       loadFirstExercise();
     }
@@ -427,9 +428,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
+  protected void removeComponents() {
+    super.clear();
+  }
+
   @Override
   public void clear() {
-    super.clear();
+    removeComponents();
     progressMarkers.clear();
   }
 
