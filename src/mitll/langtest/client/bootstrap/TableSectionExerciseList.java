@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.SingleSelectionModel;
+import mitll.langtest.client.ExceptionHandlerDialog;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.table.PagerTable;
@@ -43,6 +44,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     service.getNumExercisesForSelectionState(typeToSection, new AsyncCallback<Integer>() {
       @Override
       public void onFailure(Throwable caught) {
+        Window.alert("getNumExercisesForSelectionState : Couldn't contact server.");
       }
 
       @Override
@@ -103,7 +105,9 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
         service.getFullExercisesForSelectionState(typeToSection, start, end, new AsyncCallback<List<Exercise>>() {
           @Override
           public void onFailure(Throwable caught) {
-            Window.alert("Can't contact server.");
+            Window.alert("getFullExercisesForSelectionState : Can't contact server.");
+            new ExceptionHandlerDialog(null,caught);
+
           }
 
           @Override
@@ -156,7 +160,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     };
     english.setSortable(true);
     table.addColumn(english, "Word/Expression");
-    table.setColumnWidth(english,33, Style.Unit.PCT);
+ //   table.setColumnWidth(english,33, Style.Unit.PCT);
 
     TextColumn<Exercise> flword = new TextColumn<Exercise>() {
       @Override
@@ -166,7 +170,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     };
     flword.setSortable(true);
     table.addColumn(flword, controller.getLanguage());
-    table.setColumnWidth(flword, 33, Style.Unit.PCT);
+ //   table.setColumnWidth(flword, 33, Style.Unit.PCT);
 
     TextColumn<Exercise> translit = new TextColumn<Exercise>() {
       @Override
@@ -176,7 +180,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     };
     translit.setSortable(true);
     table.addColumn(translit, "Transliteration");
-    table.setColumnWidth(translit,33, Style.Unit.PCT);
+  //  table.setColumnWidth(translit,33, Style.Unit.PCT);
   }
 
 
