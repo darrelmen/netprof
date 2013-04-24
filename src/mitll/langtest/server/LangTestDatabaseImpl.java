@@ -186,10 +186,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public List<Exercise> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end) {
     try {
       List<Exercise> exercises;
-      logger.debug("getFullExercisesForSelectionState req = " + typeToSection);
+      //logger.debug("getFullExercisesForSelectionState req = " + typeToSection);
 
       if (typeToSection.isEmpty()) {
-        logger.debug("getFullExercisesForSelectionState empty type->section");
+       // logger.debug("getFullExercisesForSelectionState empty type->section");
 
         exercises = db.getExercises();
       } else {
@@ -206,7 +206,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       return new ArrayList<Exercise>(resultList);
     } catch (Exception e) {
-      logger.error("Got "+e,e);  //To change body of catch statement use File | Settings | File Templates.
+      logger.error("Got "+e, e);
     }
     return Collections.emptyList();
   }
