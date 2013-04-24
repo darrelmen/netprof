@@ -426,6 +426,7 @@ public class BootstrapExercisePanel extends FluidContainer {
 
     int percent1 = (int) percent;
     scoreFeedback.setPercent(percent1  < 20 ? 20 : percent1);
+
     scoreFeedback.setText("Pron score " + (int) percent + "%");
     scoreFeedback.setVisible(true);
     scoreFeedback.setColor(
