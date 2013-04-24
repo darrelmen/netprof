@@ -193,6 +193,8 @@ class ButtonGroupSectionWidget implements SectionWidget {
     System.out.println("disable clear button for type " +type + " checking " +buttons.size() + " buttons");
 
     clearButton.setEnabled(false);
+    label.removeStyleName(color);
+
   }
 
   private void setClearButtonState(Collection<String> sections, boolean anythingSelected) {
