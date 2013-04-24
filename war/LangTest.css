@@ -81,6 +81,15 @@ h1 {
      padding-top: 10px;
  }
 
+.rowPadding {
+    padding-left: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-right: 10px;
+
+    margin-bottom: 2px;
+}
+
 .correctRatio {
     padding-left: 5px;
 
@@ -100,24 +109,24 @@ h1 {
 }
 
 .primaryButtonColor {
-    background-color: #006DCC;
+    background-color: #b2b5b4;
 }
 
 .clearButtonColor {
-     background-color: #ffffff;
+     background-color: #b2b5b4;
  }
 
 .successButtonColor {
-    background-color: #5BB75B;
+    background-color: #b2b5b4;
 
 }
 
 .infoButtonColor {
-    background-color: #49AFCD;
+    background-color: #b2b5b4;
 }
 
 .warningButtonColor {
-    background-color: #FAA732;
+    background-color: #b2b5b4;
 }
 
 .noPadding {
@@ -292,8 +301,6 @@ fieldset > legend {
 
 .alignTop {
     vertical-align:top;
-    background: #999;
-    display: inline-block;
 }
 
 .ImageOverlay{
