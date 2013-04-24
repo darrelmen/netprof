@@ -6,10 +6,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.SectionWidget;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,10 +34,13 @@ class ButtonGroupSectionWidget implements SectionWidget {
   private Widget label;
   private Map<String, Collection<Button>> nameToButton = new HashMap<String,Collection<Button>>();
   private String currentSelection = null;
+  private List<Panel> rows = new ArrayList<Panel>();
 
   public ButtonGroupSectionWidget(String type) {
     this.type = type;
   }
+
+  public void addRow(Panel row) { this.rows.add(row); }
 
   /**
    * @see FlexSectionExerciseList#addColumnButton
@@ -164,7 +169,9 @@ class ButtonGroupSectionWidget implements SectionWidget {
               DOM.setElementAttribute(element, "background-color", color);
             }*/
             if (label != null) {
-              label.addStyleName(color);
+//              label.addStyleName(color);
+
+              for (Panel p : rows) p.addStyleName(color);
             }
 
             anythingSelected |= active;
@@ -193,7 +200,9 @@ class ButtonGroupSectionWidget implements SectionWidget {
     System.out.println("disable clear button for type " +type + " checking " +buttons.size() + " buttons");
 
     clearButton.setEnabled(false);
-    label.removeStyleName(color);
+//    label.removeStyleName(color);
+    for (Panel p : rows) p.removeStyleName(color);
+
 
   }
 
@@ -204,7 +213,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
       if (!anythingSelected) {
         System.out.println("\tselectItem clear color");
 
-        label.removeStyleName(color);
+        for (Panel p : rows) p.removeStyleName(color);
       }
 
     }
