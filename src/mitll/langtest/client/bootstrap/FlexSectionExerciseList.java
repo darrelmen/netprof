@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -189,7 +190,10 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     clear = clearColumnContainer;
 
-    panelInsideScrollPanel = new HorizontalPanel();
+    HorizontalPanel widgets = new HorizontalPanel();
+    panelInsideScrollPanel = widgets;
+    panelInsideScrollPanel.addStyleName("blueBackground");
+    panelInsideScrollPanel.addStyleName("borderSpacing");
 
     makeScrollPanel(firstTypeRow, panelInsideScrollPanel);
 
@@ -219,7 +223,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
         HorizontalPanel rowForChildren = new HorizontalPanel();
 
-        rowContainer.setWidth("100%");
         rowForChildren.setWidth("100%");
         rowContainer.addStyleName("rowPadding");
         rowForChildren.setHorizontalAlignment(ALIGN_LEFT);
@@ -239,11 +242,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   }
 
   private void makeScrollPanel(FlexTable firstTypeRow, Panel panelInside) {
-    this.scrollPanel = new FlowPanel();
-    scrollPanel.add(panelInside);
-
+    this.scrollPanel = new ScrollPanel(panelInside);
+//    scrollPanel.addStyleName("border");
     firstTypeRow.setWidget(0,2,scrollPanel);
-    scrollPanel.addStyleName("overflowStyle");
   }
 
   private void populateButtonGroups(Collection<String> types) {
@@ -398,35 +399,20 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    */
   private Panel addColumnButton(final String sectionInFirstType,
                                     final ButtonGroupSectionWidget buttonGroupSectionWidget, boolean isClear) {
-    //Container columnContainer = new FluidContainer();
     FlowPanel columnContainer = new FlowPanel();
     columnContainer.addStyleName("inlineStyle");
-    DOM.setStyleAttribute(columnContainer.getElement(), "paddingLeft", "2px");
-    DOM.setStyleAttribute(columnContainer.getElement(), "paddingRight", "2px");
-
     // add a button
     Button overallButton = makeOverallButton(sectionInFirstType, isClear);
     addClickHandlerToButton(overallButton, sectionInFirstType, buttonGroupSectionWidget);
     buttonGroupSectionWidget.addButton(overallButton);
    // System.out.println("making button "+sectionInFirstType);
 
-/*
-    ButtonGroup group = new ButtonGroup();
-    group.setWidth("100%");
-    group.add(overallButton);
-*/
-
-    //FluidRow rowAgain = new FluidRow();
     Panel rowAgain = new FlowPanel();
     columnContainer.add(rowAgain);
-    rowAgain.setWidth("100%");
-
-   // rowAgain.add(group);
 
     rowAgain.add(overallButton);
     buttonGroupSectionWidget.addRow(rowAgain);
     rowAgain.addStyleName("rowPadding");
-
 
     return columnContainer;
   }
@@ -529,8 +515,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     List<String> objects = Collections.emptyList();
     List<String> subs = remainingTypes.isEmpty() ? objects : remainingTypes.subList(1, remainingTypes.size());
     String subType = subs.isEmpty() ? null : subs.iterator().next();
-
-    for (String section : sortedItems) {
+    int n = sortedItems.size();
+    for (int i = 0; i<n; i++){
+      String section = sortedItems.get(i);
       SectionNode sectionNode = nameToNode.get(section);
 
       List<SectionNode> children = sectionNode.getChildren();
@@ -539,6 +526,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       Button buttonForSection = makeSubgroupButton(sectionWidget, typeForOriginal,
         section,
         buttonType, false);
+      if (n > 1 && i < n-1) {
+        buttonForSection.addStyleName("buttonMargin");
+      }
 
       if (!children.isEmpty() && subType != null) {
         rowForSection = new VerticalPanel();
