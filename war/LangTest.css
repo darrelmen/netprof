@@ -82,12 +82,17 @@ h1 {
  }
 
 .rowPadding {
-    padding-left: 10px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    padding-right: 10px;
+    padding-left: 5px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-right: 5px;
 
     margin-bottom: 2px;
+}
+
+.borderSpacing {
+    border-collapse:separate;
+    border-spacing: 0px;
 }
 
 .correctRatio {
@@ -107,6 +112,10 @@ h1 {
 .questionMarkForeground {
     color : #f0f9fb;
 }
+
+.blueBackground {
+    background-color : #f0f9fb;
+ }
 
 .primaryButtonColor {
     background-color: #b2b5b4;
@@ -138,6 +147,10 @@ h1 {
 }
 .floatRight {
     float: right;
+}
+
+.border {
+    border : 1px solid;
 }
 
 .overflowStyle {
@@ -200,8 +213,10 @@ h1 {
 
 .inlineStyle {
     display: inline-block;
-    padding-left: 3px;
-    padding-right: 3px;
+}
+
+.buttonMargin {
+    margin-right: 3px;
 }
 
 .lessPadding {
