@@ -235,8 +235,8 @@
     </target>
 
     <target depends="build" name="msaSectionsFlashcard">
-        <jar destfile="farsiSections.war" basedir="war"
-             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/farsi/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models-dli-ara/**"
+        <jar destfile="msaFlashcard.war" basedir="war"
+             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/farsi/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
             >
 
             <manifest>
