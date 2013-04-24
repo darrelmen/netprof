@@ -108,7 +108,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     service.getTypeOrder(new AsyncCallback<Collection<String>>() {
       @Override
       public void onFailure(Throwable caught) {
-        //To change body of implemented methods use File | Settings | File Templates.
+Window.alert("getTypeOrder can't contact server. got "+ caught);
       }
 
       @Override
@@ -325,10 +325,10 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
 //    Widget hideBoxesWidget = getHideBoxesWidget();
     Widget flashcardWidget = getFlashcard();
-    fluidRow.add(new Column(1, flashcardWidget));
+    fluidRow.add(new Column(2, flashcardWidget));
 
     Widget flashcardWidget2 = getFlashcard2();
-    fluidRow.add(new Column(2, flashcardWidget2));
+    fluidRow.add(new Column(3, flashcardWidget2));
   }
 
   private Anchor flashcardLink;
