@@ -328,7 +328,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     fluidRow.add(new Column(1, flashcardWidget));
 
     Widget flashcardWidget2 = getFlashcard2();
-    fluidRow.add(new Column(1, flashcardWidget2));
+    fluidRow.add(new Column(2, flashcardWidget2));
   }
 
   private Anchor flashcardLink;
