@@ -175,17 +175,40 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return getExerciseShells(exercisesBiasTowardsUnanswered);
   }
 
+  /**
+   * @see mitll.langtest.client.bootstrap.TableSectionExerciseList#createProvider(java.util.Map, int, com.github.gwtbootstrap.client.ui.CellTable)
+   * @param typeToSection
+   * @param start
+   * @param end
+   * @return
+   */
   @Override
   public List<Exercise> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end) {
-    List<Exercise> exercises;
-    if (typeToSection.isEmpty()) {
-      exercises = db.getExercises();
-    } else {
-      Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-      exercises = new ArrayList<Exercise>(exercisesForSection);
+    try {
+      List<Exercise> exercises;
+      logger.debug("getFullExercisesForSelectionState req = " + typeToSection);
+
+      if (typeToSection.isEmpty()) {
+        logger.debug("getFullExercisesForSelectionState empty type->section");
+
+        exercises = db.getExercises();
+      } else {
+        logger.debug("getFullExercisesForSelectionState non-empty type->section "+ typeToSection+ " start " + start + " end " + end);
+
+        Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
+        exercises = new ArrayList<Exercise>(exercisesForSection);
+      }
+      logger.debug("getFullExercisesForSelectionState exercises "+ exercises.size() + " start " + start + " end " + end);
+
+      List<Exercise> resultList = exercises.subList(start, end);
+
+      logger.debug("getFullExercisesForSelectionState sublist has "+ resultList.size());
+
+      return new ArrayList<Exercise>(resultList);
+    } catch (Exception e) {
+      logger.error("Got "+e,e);  //To change body of catch statement use File | Settings | File Templates.
     }
-    List<Exercise> resultList = exercises.subList(start, end);
-    return new ArrayList<Exercise>(resultList);
+    return Collections.emptyList();
   }
 
   @Override
@@ -195,6 +218,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.debug("getNumExercisesForSelectionState num = " + size);
       return size;
     } else {
+      logger.debug("getNumExercisesForSelectionState req = " + typeToSection);
+
       Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
       int size = exercisesForSection.size();
       logger.debug("getNumExercisesForSelectionState req = " + typeToSection + " = " + size);

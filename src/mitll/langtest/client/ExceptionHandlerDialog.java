@@ -24,7 +24,7 @@ public class ExceptionHandlerDialog {
         text += "Caused by: ";
       }
     }
-    if (browserCheck.isIE7() && text.contains("Unknown runtime error")) { // hack for IE 7
+    if (browserCheck != null && browserCheck.isIE7() && text.contains("Unknown runtime error")) { // hack for IE 7
       return;
     }
     DialogBox dialogBox = new DialogBox(true, false);
