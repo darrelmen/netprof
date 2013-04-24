@@ -463,6 +463,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void addExerciseListOnLeftSide(Panel leftColumnContainer) {
+
     Heading items = new Heading(4,"Items");
     items.addStyleName("center");
 
@@ -472,7 +473,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     leftColumnContainer.add(leftColumn);
     leftColumnContainer.addStyleName("inlineStyle");
-    leftColumn.add(items);
+    if (!props.isFlashcardTeacherView()) {
+      leftColumn.add(items);
+    }
     leftColumn.add(exerciseList.getWidget());
   }
 
