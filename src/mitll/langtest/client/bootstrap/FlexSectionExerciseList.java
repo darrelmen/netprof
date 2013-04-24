@@ -21,7 +21,6 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -52,7 +51,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   public static final int HEADING_FOR_LABEL = 4;
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private Map<String,ButtonType> typeToButton = new HashMap<String, ButtonType>();
-  private int numExpectedSections = 0;
   private int numSections = 0;
 
   public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
@@ -108,17 +106,16 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     service.getTypeOrder(new AsyncCallback<Collection<String>>() {
       @Override
       public void onFailure(Throwable caught) {
-Window.alert("getTypeOrder can't contact server. got "+ caught);
+        Window.alert("getTypeOrder can't contact server. got " + caught);
       }
 
       @Override
       public void onSuccess(final Collection<String> sortedTypes) {
-
         if (showListBoxes) {
           service.getSectionNodes(new AsyncCallback<List<SectionNode>>() {
             @Override
             public void onFailure(Throwable caught) {
-              //To change body of implemented methods use File | Settings | File Templates.
+              Window.alert("getSectionNodes can't contact server. got " + caught);
             }
 
             @Override
@@ -156,25 +153,25 @@ Window.alert("getTypeOrder can't contact server. got "+ caught);
   private Panel scrollPanel;
   private Panel label, clear;
 
+  /**
+   * @see #getWidgetsForTypes(long)
+   * @param rootNodes
+   * @param userID
+   * @param container
+   * @param types
+   */
   private void addButtonRow(List<SectionNode> rootNodes, long userID, FluidContainer container, Collection<String> types) {
     System.out.println("getWidgetsForTypes (success) for user = " + userID + " got types " + types);
-    typeToBox.clear();
-    typeToButton.clear();
-
     String firstType = types.iterator().next(); // e.g. unit!
 
     container.add(getInstructionRow());
     FlexTable firstTypeRow = new FlexTable();
     container.add(firstTypeRow);
+    firstTypeRow.addStyleName("alignTop");
 
-    int j = 0;
-    for (String type : types) {
-      ButtonGroupSectionWidget buttonGroupSectionWidget1 = new ButtonGroupSectionWidget(type);
-      typeToBox.put(type,buttonGroupSectionWidget1);
-      typeToButton.put(type, buttonTypes.get(j++ % types.size()));
-    }
+    populateButtonGroups(types);
 
-    SectionWidget buttonGroupSectionWidget = typeToBox.get(firstType);
+    ButtonGroupSectionWidget buttonGroupSectionWidget = (ButtonGroupSectionWidget)typeToBox.get(firstType);
 
     Container labelContainer = getLabelWidgetForRow(firstType,typeToButton.get(firstType),buttonGroupSectionWidget);
     label = labelContainer;
@@ -187,26 +184,21 @@ Window.alert("getTypeOrder can't contact server. got "+ caught);
 
     for (String type : types) {
       if (type.equals(firstType)) continue;
-      makeSectionWidget(labelContainer, clearColumnContainer, type, typeToBox.get(type));
+      makeSectionWidget(labelContainer, clearColumnContainer, type, (ButtonGroupSectionWidget)typeToBox.get(type));
     }
 
     clear = clearColumnContainer;
 
     panelInsideScrollPanel = new HorizontalPanel();
 
-    this.scrollPanel = new FlowPanel();
-    scrollPanel.add(panelInsideScrollPanel);
-
-    firstTypeRow.setWidget(0,2,scrollPanel);
-    scrollPanel.addStyleName("overflowStyle");
+    makeScrollPanel(firstTypeRow, panelInsideScrollPanel);
 
     // add columns for each section within first type...
 
     Collection<String> sectionsInType = getLabels(rootNodes);
     Map<String, SectionNode> nameToNode = getNameToNode(rootNodes);
     sectionsInType = getSortedItems(sectionsInType);
-    numExpectedSections = sectionsInType.size();
-    numSections = numExpectedSections;
+    numSections = sectionsInType.size();
 
     List<String> subTypes = new ArrayList<String>(types);
     List<String> subs = subTypes.subList(1, subTypes.size());
@@ -215,18 +207,28 @@ Window.alert("getTypeOrder can't contact server. got "+ caught);
     Widget last = null;
     long then = System.currentTimeMillis();
     for (String sectionInFirstType : sectionsInType) {
-      Container columnContainer = addColumnButton(sectionInFirstType, buttonGroupSectionWidget, false);
+      Panel columnContainer = addColumnButton(sectionInFirstType, buttonGroupSectionWidget, false);
       last = columnContainer;
       DOM.setStyleAttribute(columnContainer.getElement(), "marginBottom", "5px");
       panelInsideScrollPanel.add(columnContainer);
 
       if (subType != null) {
         SectionNode sectionNode = nameToNode.get(sectionInFirstType);
-        SectionWidget sectionWidget1 = typeToBox.get(subType);
+        ButtonGroupSectionWidget sectionWidget1 = (ButtonGroupSectionWidget)typeToBox.get(subType);
+        Panel rowContainer = new FlowPanel();
 
-        HorizontalPanel rowAgain = new HorizontalPanel();
-        addButtonGroup(rowAgain, sectionNode.getChildren(), subType, subs, sectionWidget1);
-        columnContainer.add(rowAgain);
+        HorizontalPanel rowForChildren = new HorizontalPanel();
+
+        rowContainer.setWidth("100%");
+        rowForChildren.setWidth("100%");
+        rowContainer.addStyleName("rowPadding");
+        rowForChildren.setHorizontalAlignment(ALIGN_LEFT);
+        addButtonGroup(rowForChildren, sectionNode.getChildren(), subType, subs, sectionWidget1);
+        //columnContainer.add(rowForChildren);
+        rowContainer.add(rowForChildren);
+        columnContainer.add(rowContainer);
+
+        sectionWidget1.addRow(rowContainer);
       }
     }
     long now = System.currentTimeMillis();
@@ -234,6 +236,26 @@ Window.alert("getTypeOrder can't contact server. got "+ caught);
 
     setSizesAndPushFirst(last);
     addBottomText(container,types);
+  }
+
+  private void makeScrollPanel(FlexTable firstTypeRow, Panel panelInside) {
+    this.scrollPanel = new FlowPanel();
+    scrollPanel.add(panelInside);
+
+    firstTypeRow.setWidget(0,2,scrollPanel);
+    scrollPanel.addStyleName("overflowStyle");
+  }
+
+  private void populateButtonGroups(Collection<String> types) {
+    typeToBox.clear();
+    typeToButton.clear();
+
+    int j = 0;
+    for (String type : types) {
+      ButtonGroupSectionWidget buttonGroupSectionWidget1 = new ButtonGroupSectionWidget(type);
+      typeToBox.put(type,buttonGroupSectionWidget1);
+      typeToButton.put(type, buttonTypes.get(j++ % types.size()));
+    }
   }
 
   private Map<String, SectionNode> getNameToNode(List<SectionNode> rootNodes) {
@@ -317,14 +339,17 @@ Window.alert("getTypeOrder can't contact server. got "+ caught);
       status.add(w);
     }
     typeToStatus.values().iterator().next().setText("Showing all entries");
+  }
 
+  protected void addPreviewWidgets(Panel container) {
     FluidRow fluidRow = new FluidRow();
     container.add(fluidRow);
- //   Widget emailWidget = getEmailWidget();
-  //  fluidRow.add(new Column(2, /*3,*/ emailWidget));
+    //   Widget emailWidget = getEmailWidget();
+    //  fluidRow.add(new Column(2, /*3,*/ emailWidget));
 
 //    Widget hideBoxesWidget = getHideBoxesWidget();
     Widget flashcardWidget = getFlashcard();
+    fluidRow.add(new Column(2, new Heading(5, "Preview this list in these modes: ")));
     fluidRow.add(new Column(2, flashcardWidget));
 
     Widget flashcardWidget2 = getFlashcard2();
@@ -361,26 +386,52 @@ Window.alert("getTypeOrder can't contact server. got "+ caught);
     return fluidRow1;
   }
 
-  private Container addColumnButton(final String sectionInFirstType,
-                                    final SectionWidget buttonGroupSectionWidget, boolean isClear) {
-    Container columnContainer = new FluidContainer();
+ // private Map<String,Collection<Panel>> typeToRows = new HashMap<String, Collection<Panel>>();
+
+  /**
+   * @see #addButtonRow(java.util.List, long, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
+   * @paramx rowType
+   * @param sectionInFirstType
+   * @param buttonGroupSectionWidget
+   * @param isClear
+   * @return
+   */
+  private Panel addColumnButton(final String sectionInFirstType,
+                                    final ButtonGroupSectionWidget buttonGroupSectionWidget, boolean isClear) {
+    //Container columnContainer = new FluidContainer();
+    FlowPanel columnContainer = new FlowPanel();
     columnContainer.addStyleName("inlineStyle");
     DOM.setStyleAttribute(columnContainer.getElement(), "paddingLeft", "2px");
     DOM.setStyleAttribute(columnContainer.getElement(), "paddingRight", "2px");
 
-    ButtonGroup group = new ButtonGroup();
-    group.setWidth("100%");
-
     // add a button
     Button overallButton = makeOverallButton(sectionInFirstType, isClear);
+    addClickHandlerToButton(overallButton, sectionInFirstType, buttonGroupSectionWidget);
+    buttonGroupSectionWidget.addButton(overallButton);
    // System.out.println("making button "+sectionInFirstType);
 
+/*
+    ButtonGroup group = new ButtonGroup();
+    group.setWidth("100%");
     group.add(overallButton);
+*/
 
-    FluidRow rowAgain = new FluidRow();
+    //FluidRow rowAgain = new FluidRow();
+    Panel rowAgain = new FlowPanel();
     columnContainer.add(rowAgain);
-    rowAgain.add(group);
+    rowAgain.setWidth("100%");
 
+   // rowAgain.add(group);
+
+    rowAgain.add(overallButton);
+    buttonGroupSectionWidget.addRow(rowAgain);
+    rowAgain.addStyleName("rowPadding");
+
+
+    return columnContainer;
+  }
+
+  private void addClickHandlerToButton(Button overallButton, final String sectionInFirstType, final ButtonGroupSectionWidget buttonGroupSectionWidget) {
     overallButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -388,14 +439,8 @@ Window.alert("getTypeOrder can't contact server. got "+ caught);
         selections.add(sectionInFirstType);
         buttonGroupSectionWidget.selectItem(selections, true);
         pushNewSectionHistoryToken();
-  /*      for (Widget w : rows.get(0)) {
-          w.addStyleName("serverResponseLabelError");
-        }*/
       }
     });
-
-    buttonGroupSectionWidget.addButton(overallButton);
-    return columnContainer;
   }
 
   private Button makeOverallButton(String title, boolean isClear) {
@@ -419,16 +464,22 @@ Window.alert("getTypeOrder can't contact server. got "+ caught);
     // panelInsideScrollPanel.getParent().setHeight(Math.max(50, offsetHeight) + "px");
 
     int width = Window.getClientWidth() - label.getOffsetWidth() - clear.getOffsetWidth()- 100;
-
-  //  System.out.println("width is " + width);
-
     scrollPanel.setWidth(Math.max(300, width) + "px");
 
     pushFirstListBoxSelection();
   }
 
+  /**
+   * Add label and clear button to row for each type
+   * @see #addButtonRow(java.util.List, long, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
+   * @param labelContainer
+   * @param clearColumnContainer
+   * @param typeForOriginal
+   * @param sectionWidget
+   * @return
+   */
   private SectionWidget makeSectionWidget(Container labelContainer, Panel clearColumnContainer, String typeForOriginal,
-                                          SectionWidget sectionWidget) {
+                                          ButtonGroupSectionWidget sectionWidget) {
     ButtonType buttonType = typeToButton.get(typeForOriginal);
 
     String color = getButtonTypeStyle(buttonType);
@@ -441,15 +492,15 @@ Window.alert("getTypeOrder can't contact server. got "+ caught);
 
     // make clear button
 
-    FlexTable table2 = new FlexTable();
+/*    FlexTable table2 = new FlexTable();
     ButtonGroup group2 = new ButtonGroup();
-    table2.setWidget(0, 0, group2);
+    table2.setWidget(0, 0, group2);*/
 
     Button sectionButton = makeSubgroupButton(sectionWidget, typeForOriginal, ANY, buttonType, true);
-    group2.add(sectionButton);
+  //  group2.add(sectionButton);
     sectionWidget.addButton(sectionButton);
 
-    clearColumnContainer.add(table2);
+    clearColumnContainer.add(sectionButton);
     return sectionWidget;
   }
 
@@ -460,61 +511,55 @@ Window.alert("getTypeOrder can't contact server. got "+ caught);
 
   /**
    * @see FlexSectionExerciseList#addButtonRow(java.util.List, long, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
-   * @param container
+   * @param parentColumn
    * @param rootNodes
    * @param typeForOriginal
    * @param remainingTypes
    * @param sectionWidget
    */
-  private void addButtonGroup(Panel container, List<SectionNode> rootNodes, String typeForOriginal,
-                              List<String> remainingTypes, SectionWidget sectionWidget) {
+  private void addButtonGroup(HorizontalPanel parentColumn, List<SectionNode> rootNodes, String typeForOriginal,
+                              List<String> remainingTypes, ButtonGroupSectionWidget sectionWidget) {
     //String typeForOriginal = subs.isEmpty() ? null : subs.iterator().next();
 
     Map<String, SectionNode> nameToNode = getNameToNode(rootNodes);
 
     List<String> sortedItems = getSortedItems(getLabels(rootNodes));
     ButtonType buttonType = typeToButton.get(typeForOriginal);
-    int n = sortedItems.size();
 
     List<String> objects = Collections.emptyList();
     List<String> subs = remainingTypes.isEmpty() ? objects : remainingTypes.subList(1, remainingTypes.size());
     String subType = subs.isEmpty() ? null : subs.iterator().next();
 
-    for (int i = 0; i < n; i++) {
-      String section = sortedItems.get(i);
-
+    for (String section : sortedItems) {
       SectionNode sectionNode = nameToNode.get(section);
 
       List<SectionNode> children = sectionNode.getChildren();
 
-      Panel toAddToContainer;
+      Panel rowForSection;
       Button buttonForSection = makeSubgroupButton(sectionWidget, typeForOriginal,
         section,
         buttonType, false);
 
       if (!children.isEmpty() && subType != null) {
-        toAddToContainer = new VerticalPanel();
+        rowForSection = new VerticalPanel();
 
         DOM.setStyleAttribute(buttonForSection.getElement(), "paddingLeft", "0px");
         DOM.setStyleAttribute(buttonForSection.getElement(), "paddingRight", "0px");
         buttonForSection.setWidth("100%");
-        toAddToContainer.add(buttonForSection);
+        rowForSection.add(buttonForSection);
         // recurse on children
-        Panel horizontalContainerForChildren = new HorizontalPanel();
-        toAddToContainer.add(horizontalContainerForChildren);
+        HorizontalPanel horizontalContainerForChildren = new HorizontalPanel();
+        rowForSection.add(horizontalContainerForChildren);
+        sectionWidget.addRow(rowForSection);
+        rowForSection.addStyleName("rowPadding");
 
 /*        System.out.println("for " + typeForOriginal + "=" + section + " recurse on " + children.size() +
           " children at " + subType);*/
-        addButtonGroup(horizontalContainerForChildren, children, subType, subs, typeToBox.get(subType));
+        addButtonGroup(horizontalContainerForChildren, children, subType, subs, (ButtonGroupSectionWidget) typeToBox.get(subType));
       } else {
-        toAddToContainer = buttonForSection;
+        rowForSection = buttonForSection;
       }
-      container.add(toAddToContainer);
-      if (i != n - 1) {
-        SimplePanel child = new SimplePanel();
-        child.setWidth("3px");
-        container.add(child);
-      }
+      parentColumn.add(rowForSection);
     }
   }
 
@@ -542,7 +587,7 @@ Window.alert("getTypeOrder can't contact server. got "+ caught);
   }
 
   /**
-   * @see #makeSectionWidget(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, mitll.langtest.client.exercise.SectionWidget)
+   * @see #makeSectionWidget
    * @param typeForOriginal
    * @return
    */
@@ -558,7 +603,8 @@ Window.alert("getTypeOrder can't contact server. got "+ caught);
   }
 
   /**
-   * @see
+   * @see #addButtonGroup(com.google.gwt.user.client.ui.HorizontalPanel, java.util.List, String, java.util.List, ButtonGroupSectionWidget)
+   * @see #makeSectionWidget(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, ButtonGroupSectionWidget)
    * @param sectionWidgetFinal
    * @param type
    * @param section
@@ -566,7 +612,7 @@ Window.alert("getTypeOrder can't contact server. got "+ caught);
    * @param isClear
    * @return
    */
-  private Button makeSubgroupButton(final SectionWidget sectionWidgetFinal, final String type, final String section,
+  private Button makeSubgroupButton(final ButtonGroupSectionWidget sectionWidgetFinal, final String type, final String section,
                                     ButtonType buttonType, boolean isClear) {
     //System.out.println("making button " + type + "=" + section);
     Button sectionButton = new Button(section);
@@ -583,16 +629,8 @@ Window.alert("getTypeOrder can't contact server. got "+ caught);
     sectionButton.setType(isClear ? ButtonType.DEFAULT : buttonType);
     sectionButton.setEnabled(!isClear);
 
-    sectionButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        System.out.println("got click on button " + type + "=" + section);
-        List<String> selections = new ArrayList<String>();
-        selections.add(section);
-        sectionWidgetFinal.selectItem(selections, true);
-        pushNewSectionHistoryToken();
-      }
-    });
+    addClickHandlerToButton(sectionButton, section, sectionWidgetFinal);
+
     sectionWidgetFinal.addButton(sectionButton);
 
     return sectionButton;
