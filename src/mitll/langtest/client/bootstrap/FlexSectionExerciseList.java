@@ -1,11 +1,8 @@
 package mitll.langtest.client.bootstrap;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -279,7 +276,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
   private Map<String, SectionNode> getNameToNode(List<SectionNode> rootNodes) {
     Map<String,SectionNode> nameToNode = new HashMap<String, SectionNode>();
-    for (SectionNode n : rootNodes) nameToNode.put(n.getName(),n);
+    for (SectionNode n : rootNodes) nameToNode.put(n.getName(), n);
     return nameToNode;
   }
 
@@ -294,7 +291,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     Heading widget = makeLabelWidget(firstType);
     String color = getButtonTypeStyle(buttonType);
 
-    buttonGroupSectionWidget.addLabel(widget,color);
+    buttonGroupSectionWidget.addLabel(widget, color);
     labelRow.add(widget);
 
   //  return rowAgain;
@@ -362,19 +359,110 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
 //    Widget hideBoxesWidget = getHideBoxesWidget();
     Widget flashcardWidget = getFlashcard();
-    fluidRow.add(new Column(2, new Heading(5, "Preview this list in these modes: ")));
-    fluidRow.add(new Column(2, flashcardWidget));
+    fluidRow.add(new Column(2, new Heading(5, "Share link to flashcards for these items:")));
+    fluidRow.add(new Column(5, flashcardWidget));
+
+
 
     Widget flashcardWidget2 = getFlashcard2();
-    fluidRow.add(new Column(3, flashcardWidget2));
+    fluidRow.add(new Column(5, flashcardWidget2));
   }
 
   private Anchor flashcardLink;
 
   protected Widget getFlashcard() {
-    flashcardLink = new Anchor("<h4>Flashcard</h4>", true,"?flashcard=true#", "_blank");
-    return flashcardLink;
+    //flashcardLink = new Anchor("<h4>Flashcard</h4>", true,"?flashcard=true#", "_blank");
+    //Window.Location.getHref();
+
+    FlowPanel panel = new FlowPanel();
+    //panel.addStyleName("inlineStyle");
+    panel.addStyleName("border");
+    Heading flashcard = new Heading(5, "Flashcard URL");
+    flashcard.addStyleName("floatLeft");
+    panel.add(flashcard);
+    //panel.add(new UneditableInput(getFlashcardLink()));
+    TextBox w1 = new TextBox();
+    w1.addStyleName("leftTenMargin");
+
+    panel.add(w1);
+
+    w1.setText(getFlashcardLink());
+    //w1.setEnabled(false);
+     copy = new Button("Copy",IconType.COPY);
+    copy.addStyleName("leftTenMargin");
+    updateFlashcardCopy();
+    copy.getElement().setId("flashcardcopy");
+    copy.setTitle("Copy to clipboard.");
+  /*  copy.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+      }
+    });*/
+
+    panel.add(copy);
+     copiedFeedback = new Heading(6, "");
+    copiedFeedback.getElement().setId("flashcardcopyFeedback");
+    //copiedFeedback.setVisible(false);
+    panel.add(copiedFeedback);
+    copiedFeedback.addStyleName("floatRight");
+    return panel;
   }
+
+
+  protected void doZero() {
+    //super.onLoad();
+
+    zero(GWT.getModuleBaseURL());
+
+  }
+
+  private void updateFlashcardCopy() {
+    copy.getElement().setAttribute("data-clipboard-text", getFlashcardLink());
+  }
+  Button copy;
+  Heading copiedFeedback;
+
+  private static void feedback() {
+    //DOM.getElementById("flashcardcopyFeedback").setInnerText("Copied!");
+    // copiedFeedback.setText("Copied!");
+    Window.alert("Called!");
+  }
+
+  private native void registerCallback() /*-{
+      $wnd.feedback = $entry(@mitll.langtest.client.bootstrap.FlexSectionExerciseList::feedback());
+
+  }-*/;
+
+  private String getFlashcardLink() {
+    return GWT.getHostPageBaseURL() + "?flashcard=true#" + token;
+  }
+
+  private native void zero(String moduleBaseURL)  /*-{
+
+      var stuff =  $wnd.document.getElementById("flashcardcopy");
+     // alert("got " + stuff);
+
+      var clip = new $wnd.ZeroClipboard( stuff, {
+          moviePath: moduleBaseURL + "swf/ZeroClipboard.swf"
+      } );
+
+      clip.on( 'load', function(client) {
+         // $wnd.alert( "movie is loaded" );
+      } );
+
+      clip.on( 'complete', function(client, args) {
+       //   this.style.display = 'none'; // "this" is the element that was clicked
+        //  alert("Copied text to clipboard: " + args.text );
+          $wnd.document.getElementById("flashcardcopyFeedback").innerHTML = "Copied!";
+         //$wnd.feedback();
+      } );
+
+      clip.on( 'dataRequested', function ( client, args ) {
+          //clip.setText( 'Copied to clipboard.' );
+      } );
+
+  }-*/;
+
 
   private Anchor flashcardLink2;
 
@@ -383,7 +471,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     return flashcardLink2;
   }
 
+  String token = "";
   protected void setModeLinks(String historyToken) {
+    this.token = historyToken;
     super.setModeLinks(historyToken);
     if (flashcardLink != null) {
       flashcardLink.setHref(GWT.getHostPageBaseURL() + "?flashcard=true#" + historyToken);
@@ -391,6 +481,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     if (flashcardLink2 != null) {
       flashcardLink2.setHref(GWT.getHostPageBaseURL() + "?flashcard=true&timedGame=true#" + historyToken);
     }
+    updateFlashcardCopy();
   }
 
   private FluidRow getInstructionRow() {
