@@ -219,6 +219,31 @@ h1 {
     margin-right: 3px;
 }
 
+.shareTitle {
+    margin-right: 5px;
+}
+
+.buttonMargin2 {
+    margin-bottom: 10px;
+}
+
+.typewriter {
+    font-family: "Lucida Sans Typewriter", "Lucida Console", Monaco, "Bitstream Vera Sans Mono", monospace;
+}
+
+.url-input {
+    margin-top: 10px;
+}
+
+.url-box {
+    border: 1px solid #DDDDDD;
+    margin-left: -10px;
+    margin-top: 10px;
+    padding: 10px 10px 0;
+    width: 100%;
+    background-color: #fafafa;
+}
+
 .lessPadding {
     padding-left: 3px;
     padding-right: 3px;
