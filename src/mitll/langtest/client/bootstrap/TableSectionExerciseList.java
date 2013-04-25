@@ -64,6 +64,8 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
         FluidContainer container = new FluidContainer();
         addPreviewWidgets(container);
         add(container);
+
+        doZero();
       }
     });
   }
