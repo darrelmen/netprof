@@ -44,8 +44,8 @@ class ButtonGroupSectionWidget implements SectionWidget {
 
   /**
    * @see FlexSectionExerciseList#addColumnButton
-   * @see FlexSectionExerciseList#makeSectionWidget(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, mitll.langtest.client.exercise.SectionWidget)
-   * @see FlexSectionExerciseList#makeSubgroupButton(mitll.langtest.client.exercise.SectionWidget, String, String, com.github.gwtbootstrap.client.ui.constants.ButtonType, boolean)
+   * @see FlexSectionExerciseList#makeSectionWidget
+   * @see FlexSectionExerciseList#makeSubgroupButton
    * @param b
    */
   @Override
