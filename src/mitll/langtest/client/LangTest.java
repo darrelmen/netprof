@@ -169,8 +169,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     headerRow = new FluidRow();
 
     Widget title = getTitleWidget();
-    headerRow.add(new Column(10, title));
-    headerRow.add(new Column(2, getLogout()));
+    headerRow.add(new Column(props.isTeacherView() ? 12 : 10, title));
+    if (!props.isTeacherView()) {
+      headerRow.add(new Column(2, getLogout()));
+    }
     widgets.add(headerRow);
     // second row ---------------
 
@@ -234,9 +236,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private Widget getTitleWidget() {
-    FluidRow widgets = new FluidRow();
-    widgets.add(new Column(5, 4, new Heading(2, props.getAppTitle())));
-    return widgets;
+    FluidRow titleRow = new FluidRow();
+    titleRow.addStyleName("alignCenter");
+    titleRow.addStyleName("inlineStyle");
+    titleRow.add(new Heading(2, props.getAppTitle()));
+    return titleRow;
   }
 
   private void setPageTitle() {
