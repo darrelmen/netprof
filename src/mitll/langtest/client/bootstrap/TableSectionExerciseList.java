@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.SimplePager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -164,6 +165,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   @Override
   protected CellTable<Exercise> makeCellTable() {
     CellTable<Exercise> table = new CellTable<Exercise>(PAGE_SIZE);
+    DOM.setStyleAttribute(table.getElement(), "marginBottom", "2px");
 
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
 
