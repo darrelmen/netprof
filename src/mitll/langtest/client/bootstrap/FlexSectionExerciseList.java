@@ -45,6 +45,7 @@ import java.util.Set;
  */
 public class FlexSectionExerciseList extends SectionExerciseList {
   public static final int HEADING_FOR_LABEL = 4;
+  private static final String USER_PROMPT = "Choose a lesson, preview, and share flashcard exercises.";
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private Map<String,ButtonType> typeToButton = new HashMap<String, ButtonType>();
   private int numSections = 0;
@@ -64,7 +65,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     buttonTypes.add(ButtonType.INFO);
     buttonTypes.add(ButtonType.WARNING);
   }
-
 
   @Override
   protected void addComponents() {
@@ -172,15 +172,10 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     //FlowPanel labelContainer = new FlowPanel();
     Panel labelContainer = new VerticalPanel();
-    //labelContainer.setHeight("100%");
-
-    //Panel labelContainer =
-      addLabelWidgetForRow(labelContainer,firstType,typeToButton.get(firstType),buttonGroupSectionWidget);
+    addLabelWidgetForRow(labelContainer,firstType,typeToButton.get(firstType),buttonGroupSectionWidget);
     label = labelContainer;
 
     firstTypeRow.setWidget(0, 0, labelContainer);
-
-
 
     Panel clearColumnContainer = new VerticalPanel();
     //Panel clearColumnContainer = new FlowPanel();
@@ -253,7 +248,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     System.out.println("\tgetWidgetsForTypes took " + (now-then) + " millis");
 
     setSizesAndPushFirst(last);
-    addBottomText(container,types);
+    addBottomText(container);
   }
 
   private void makeScrollPanel(FlexTable firstTypeRow, Panel panelInside) {
@@ -287,14 +282,12 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     return items;
   }
 
-  private void addLabelWidgetForRow(Panel labelRow, String firstType, ButtonType buttonType,SectionWidget buttonGroupSectionWidget) {
+  private void addLabelWidgetForRow(Panel labelRow, String firstType, ButtonType buttonType, SectionWidget buttonGroupSectionWidget) {
     Heading widget = makeLabelWidget(firstType);
     String color = getButtonTypeStyle(buttonType);
 
     buttonGroupSectionWidget.addLabel(widget, color);
     labelRow.add(widget);
-
-  //  return rowAgain;
   }
 
   private Heading makeLabelWidget(String firstType) {
@@ -315,137 +308,150 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     }
   }
 
+  /**
+   * Add a line that spells out in text which lessons have been chosen.
+   * @param event
+   */
   private void showSelectionState(ValueChangeEvent<String> event) {
     SelectionState selectionState = new SelectionState(event);
 
-    for (Heading widget : typeToStatus.values()) {
-      widget.setText("");
-    }
-
+    StringBuilder status = new StringBuilder();
     Set<Map.Entry<String, Collection<String>>> entries = selectionState.typeToSection.entrySet();
     for (Map.Entry<String, Collection<String>> part : entries) {
-      Heading heading = typeToStatus.get(part.getKey());
-
-      if (heading == null) {
-        System.err.println("can't find " + part.getKey() + " in " + typeToStatus.keySet() + "?");
-      } else {
-        heading.setText(part.getKey() + " " + part.getValue().toString().replaceAll("\\[", "").replaceAll("\\]", ""));
-      }
+        String statusForType = part.getKey() + " " + part.getValue().toString().replaceAll("\\[", "").replaceAll("\\]", "");
+        status.append(statusForType).append(" ");
     }
+    statusHeader.setText(status.toString());
     if (entries.isEmpty()) {
-      typeToStatus.values().iterator().next().setText("Showing all entries");
+      statusHeader.setText("Showing all entries");
     }
   }
 
-  private Map<String,Heading> typeToStatus = new HashMap<String, Heading>();
-  private void addBottomText(FluidContainer container, Collection<String> types) {
+  private Heading statusHeader = new Heading(4);
+
+  private void addBottomText(FluidContainer container) {
     FluidRow status = new FluidRow();
     status.addStyleName("alignCenter");
+    status.addStyleName("inlineStyle");
     container.add(status);
-
-    for (String type : types) {
-      Heading w = new Heading(4);
-      typeToStatus.put(type,w);
-      status.add(w);
-    }
-    typeToStatus.values().iterator().next().setText("Showing all entries");
+    status.add(statusHeader);
+    statusHeader.setText("Showing all entries");
   }
 
   protected void addPreviewWidgets(Panel container) {
-    FluidRow fluidRow = new FluidRow();
+   // FluidRow fluidRow = new FluidRow();
+    Panel fluidRow = new FlowPanel();
     container.add(fluidRow);
     //   Widget emailWidget = getEmailWidget();
     //  fluidRow.add(new Column(2, /*3,*/ emailWidget));
 
 //    Widget hideBoxesWidget = getHideBoxesWidget();
-    Widget flashcardWidget = getFlashcard();
-    fluidRow.add(new Column(2, new Heading(5, "Share link to flashcards for these items:")));
-    fluidRow.add(new Column(5, flashcardWidget));
-
-
+    Widget flashcardWidget = getFlashcard("Flashcard URL");
+   // fluidRow.add(new Column(1, new Heading(5, "Preview and share")));
+    fluidRow.add(new Heading(5, "Preview and share"));
+    //fluidRow.add(new Column(5, flashcardWidget));
+    fluidRow.add(flashcardWidget);
 
     Widget flashcardWidget2 = getFlashcard2();
-    fluidRow.add(new Column(5, flashcardWidget2));
+    flashcardWidget2.addStyleName("floatRight");
+ //   fluidRow.add(new Column(5, flashcardWidget2));
+    fluidRow.add(flashcardWidget2);
   }
 
-  private Anchor flashcardLink;
+  private Button flashcardCopy;
+  private Button timedFlashcardCopy;
 
-  protected Widget getFlashcard() {
-    //flashcardLink = new Anchor("<h4>Flashcard</h4>", true,"?flashcard=true#", "_blank");
-    //Window.Location.getHref();
-
+  protected Widget getFlashcard( String title) {
     FlowPanel panel = new FlowPanel();
+    panel.setWidth("100%");
     //panel.addStyleName("inlineStyle");
-    panel.addStyleName("border");
-    Heading flashcard = new Heading(5, "Flashcard URL");
+    //panel.addStyleName("border");
+    panel.addStyleName("url-box");
+    Heading flashcard = new Heading(5, title);
     flashcard.addStyleName("floatLeft");
+    flashcard.addStyleName("shareTitle");
     panel.add(flashcard);
-    //panel.add(new UneditableInput(getFlashcardLink()));
-    TextBox w1 = new TextBox();
-    w1.addStyleName("leftTenMargin");
 
+    // make url input
+    TextBox w1 = new TextBox();
+    w1.addStyleName("url-input");
+    DOM.setStyleAttribute(w1.getElement(), "fontFamily", "\"Lucida Sans Typewriter\", \"Lucida Console\", Monaco, \"Bitstream Vera Sans Mono\",\"Courier New\", Courier, monospace;");
+    w1.setText(getFlashcardLink());
     panel.add(w1);
 
-    w1.setText(getFlashcardLink());
-    //w1.setEnabled(false);
-     copy = new Button("Copy",IconType.COPY);
-    copy.addStyleName("leftTenMargin");
-    updateFlashcardCopy();
-    copy.getElement().setId("flashcardcopy");
-    copy.setTitle("Copy to clipboard.");
-  /*  copy.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-      }
-    });*/
+    // make flashcardCopy button
+    String copyButtonID = "flashcardcopy";
+    flashcardCopy = makeCopyButton(copyButtonID);
 
-    panel.add(copy);
-     copiedFeedback = new Heading(6, "");
-    copiedFeedback.getElement().setId("flashcardcopyFeedback");
-    //copiedFeedback.setVisible(false);
-    panel.add(copiedFeedback);
+    panel.add(flashcardCopy);
+
+    // make flashcardCopy feedback
+    FlowPanel container = new FlowPanel();
+    container.addStyleName("floatRight");
+    Heading copiedFeedback = new Heading(6, "");
+    copiedFeedback.getElement().setId(copyButtonID +"Feedback");
     copiedFeedback.addStyleName("floatRight");
+    container.add(copiedFeedback);
+
+    panel.add(copiedFeedback);
+
     return panel;
   }
 
+  private Button makeCopyButton(String copyButtonID) {
+    Button copy = new Button("Copy", IconType.COPY);
+    copy.addStyleName("leftTenMargin");
+    copy.getElement().setId(copyButtonID);
+    copy.setTitle("Copy to clipboard.");
+    updateFlashcardCopy();
+    return copy;
+  }
 
+  /**
+   * @see TableSectionExerciseList#addTableToLayout(java.util.Map)
+   * @paramx widgetID
+   */
   protected void doZero() {
-    //super.onLoad();
+    String widgetID = "flashcardcopy";
 
-    zero(GWT.getModuleBaseURL());
-
+    zero(GWT.getModuleBaseURL(), widgetID, widgetID+"Feedback");
   }
 
   private void updateFlashcardCopy() {
-    copy.getElement().setAttribute("data-clipboard-text", getFlashcardLink());
+    if (flashcardCopy != null) {
+      flashcardCopy.getElement().setAttribute("data-clipboard-text", getFlashcardLink());
+    }
   }
-  Button copy;
-  Heading copiedFeedback;
 
+
+/*
   private static void feedback() {
     //DOM.getElementById("flashcardcopyFeedback").setInnerText("Copied!");
     // copiedFeedback.setText("Copied!");
     Window.alert("Called!");
   }
+*/
 
-  private native void registerCallback() /*-{
+/*  private native void registerCallback() *//*-{
       $wnd.feedback = $entry(@mitll.langtest.client.bootstrap.FlexSectionExerciseList::feedback());
 
-  }-*/;
+  }-*//*;*/
 
   private String getFlashcardLink() {
     return GWT.getHostPageBaseURL() + "?flashcard=true#" + token;
   }
 
-  private native void zero(String moduleBaseURL)  /*-{
+  private String getTimedFlashcardLink() {
+    return GWT.getHostPageBaseURL() + "?flashcard=true&timedGame=true#" + token;
+  }
 
-      var stuff =  $wnd.document.getElementById("flashcardcopy");
-     // alert("got " + stuff);
+  private native void zero(String moduleBaseURL,String widgetID,String widgetFeedbackID)  /*-{
+      var stuff =  $wnd.document.getElementById(widgetID);
 
       var clip = new $wnd.ZeroClipboard( stuff, {
           moviePath: moduleBaseURL + "swf/ZeroClipboard.swf"
       } );
-
+      clip.setHandCursor(true);
       clip.on( 'load', function(client) {
          // $wnd.alert( "movie is loaded" );
       } );
@@ -453,8 +459,8 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       clip.on( 'complete', function(client, args) {
        //   this.style.display = 'none'; // "this" is the element that was clicked
         //  alert("Copied text to clipboard: " + args.text );
-          $wnd.document.getElementById("flashcardcopyFeedback").innerHTML = "Copied!";
-         //$wnd.feedback();
+          $wnd.document.getElementById(widgetFeedbackID).innerHTML = "Copied!";
+       //  $wnd.feedback();
       } );
 
       clip.on( 'dataRequested', function ( client, args ) {
@@ -462,7 +468,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       } );
 
   }-*/;
-
 
   private Anchor flashcardLink2;
 
@@ -475,22 +480,24 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   protected void setModeLinks(String historyToken) {
     this.token = historyToken;
     super.setModeLinks(historyToken);
-    if (flashcardLink != null) {
+/*    if (flashcardLink != null) {
       flashcardLink.setHref(GWT.getHostPageBaseURL() + "?flashcard=true#" + historyToken);
-    }
+    }*/
     if (flashcardLink2 != null) {
       flashcardLink2.setHref(GWT.getHostPageBaseURL() + "?flashcard=true&timedGame=true#" + historyToken);
     }
     updateFlashcardCopy();
   }
 
-  private FluidRow getInstructionRow() {
-    FluidRow fluidRow1 = new FluidRow();
-    fluidRow1.add(new Column(7, 3, new Heading(5, "Click on the buttons to select just what you want to see.")));
-    return fluidRow1;
-  }
+  private Panel getInstructionRow() {
+    Panel instructions = new FluidRow();
+    instructions.addStyleName("alignCenter");
+    instructions.addStyleName("inlineStyle");
 
- // private Map<String,Collection<Panel>> typeToRows = new HashMap<String, Collection<Panel>>();
+    Heading heading = new Heading(5, USER_PROMPT);
+    instructions.add(heading);
+    return instructions;
+  }
 
   /**
    * @see #addButtonRow(java.util.List, long, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
@@ -508,7 +515,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     Button overallButton = makeOverallButton(sectionInFirstType);
     addClickHandlerToButton(overallButton, sectionInFirstType, buttonGroupSectionWidget);
     buttonGroupSectionWidget.addButton(overallButton);
-   // System.out.println("making button "+sectionInFirstType);
 
     Panel rowAgain = new FlowPanel();
     columnContainer.add(rowAgain);
@@ -532,6 +538,11 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     });
   }
 
+  /**
+   * @see #addColumnButton(String, ButtonGroupSectionWidget)
+   * @param title
+   * @return Button with this title and the initial type
+   */
   private Button makeOverallButton(String title) {
     Button overallButton = new Button(title);
 
@@ -547,15 +558,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   private Button makeClearButton() {
     Button clear = new Button(ANY);
 
-   // overallButton.setWidth("100%");
-/*    DOM.setStyleAttribute(overallButton.getElement(), "paddingLeft", "0px");
-    DOM.setStyleAttribute(overallButton.getElement(), "paddingRight", "0px");*/
-    //DOM.setStyleAttribute(overallButton.getElement(), "borderWidth", "0");
-
     DOM.setStyleAttribute(clear.getElement(), "marginTop", "5px");
     DOM.setStyleAttribute(clear.getElement(), "marginBottom", "12px");
 
- //   clear.addStyleName("buttonMargin2");
     clear.setType(ButtonType.DEFAULT);
     return clear;
   }
@@ -634,9 +639,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       List<SectionNode> children = sectionNode.getChildren();
 
       Panel rowForSection;
-      Button buttonForSection = makeSubgroupButton(sectionWidget,// typeForOriginal,
-        section,
-        buttonType, false);
+      Button buttonForSection = makeSubgroupButton(sectionWidget, section, buttonType, false);
       if (n > 1 && i < n-1) {
         buttonForSection.addStyleName("buttonMargin");
       }
@@ -693,9 +696,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @return
    */
   private Widget getLabelWidget(String typeForOriginal) {
-    //FlexTable table3 = new FlexTable();
     Heading widget = new Heading(HEADING_FOR_LABEL, typeForOriginal);
- //   table3.setWidget(0, 0, widget);
    // DOM.setStyleAttribute(widget.getElement(), "webkitMarginBefore", "10px");
  //   DOM.setStyleAttribute( widget.getElement(), "webkitMarginAfter", "10px");
   //  DOM.setStyleAttribute( widget.getElement(), "marginTop", "2px");
