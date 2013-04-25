@@ -1,9 +1,7 @@
 package mitll.langtest.client.bootstrap;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.ButtonGroup;
 import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.Container;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
@@ -152,7 +150,8 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
   private Panel panelInsideScrollPanel;
   private Panel scrollPanel;
-  private Panel label, clear;
+  private Panel  clear;
+  private Panel label;
 
   /**
    * @see #getWidgetsForTypes(long)
@@ -174,12 +173,31 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     ButtonGroupSectionWidget buttonGroupSectionWidget = (ButtonGroupSectionWidget)typeToBox.get(firstType);
 
-    Container labelContainer = getLabelWidgetForRow(firstType,typeToButton.get(firstType),buttonGroupSectionWidget);
+    //FlowPanel labelContainer = new FlowPanel();
+    Panel labelContainer = new VerticalPanel();
+    //labelContainer.setHeight("100%");
+
+    //Panel labelContainer =
+      addLabelWidgetForRow(labelContainer,firstType,typeToButton.get(firstType),buttonGroupSectionWidget);
     label = labelContainer;
 
     firstTypeRow.setWidget(0, 0, labelContainer);
 
-    Panel clearColumnContainer = addColumnButton(ANY, buttonGroupSectionWidget, true);
+
+
+    Panel clearColumnContainer = new VerticalPanel();
+    //Panel clearColumnContainer = new FlowPanel();
+   // clearColumnContainer.addStyleName("inlineStyle");
+    //clearColumnContainer.setHeight("100%");
+
+    //Panel clearColumnContainer =
+
+      //addColumnButton(ANY, buttonGroupSectionWidget, true);
+
+    Button clearButton = makeClearButton();
+    addClickHandlerToButton(clearButton, ANY, buttonGroupSectionWidget);
+    buttonGroupSectionWidget.addButton(clearButton);
+    clearColumnContainer.add(clearButton);
 
     firstTypeRow.setWidget(0, 1, clearColumnContainer);
 
@@ -211,7 +229,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     Widget last = null;
     long then = System.currentTimeMillis();
     for (String sectionInFirstType : sectionsInType) {
-      Panel columnContainer = addColumnButton(sectionInFirstType, buttonGroupSectionWidget, false);
+      Panel columnContainer = addColumnButton(sectionInFirstType, buttonGroupSectionWidget);
       last = columnContainer;
       DOM.setStyleAttribute(columnContainer.getElement(), "marginBottom", "5px");
       panelInsideScrollPanel.add(columnContainer);
@@ -272,28 +290,22 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     return items;
   }
 
-  private Container getLabelWidgetForRow(String firstType, ButtonType buttonType,SectionWidget buttonGroupSectionWidget) {
-    Container labelContainer = new FluidContainer();
-    FluidRow rowAgain = new FluidRow();
-
-    labelContainer.addStyleName("inlineStyle");
-    DOM.setStyleAttribute(labelContainer.getElement(), "paddingLeft", "2px");
-    DOM.setStyleAttribute(labelContainer.getElement(), "paddingRight", "2px");
-
+  private void addLabelWidgetForRow(Panel labelRow, String firstType, ButtonType buttonType,SectionWidget buttonGroupSectionWidget) {
     Heading widget = makeLabelWidget(firstType);
     String color = getButtonTypeStyle(buttonType);
 
     buttonGroupSectionWidget.addLabel(widget,color);
-    rowAgain.add(widget);
-    labelContainer.add(rowAgain);
-    return labelContainer;
+    labelRow.add(widget);
+
+  //  return rowAgain;
   }
 
   private Heading makeLabelWidget(String firstType) {
     Heading widget = new Heading(HEADING_FOR_LABEL, firstType);
     DOM.setStyleAttribute(widget.getElement(), "webkitMarginBefore", "0");
     DOM.setStyleAttribute( widget.getElement(), "webkitMarginAfter", "0");
-    DOM.setStyleAttribute( widget.getElement(), "marginBottom", "0px");
+    DOM.setStyleAttribute( widget.getElement(), "marginTop", "0px");
+    DOM.setStyleAttribute( widget.getElement(), "marginBottom", "15px");
     return widget;
   }
 
@@ -394,15 +406,15 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @paramx rowType
    * @param sectionInFirstType
    * @param buttonGroupSectionWidget
-   * @param isClear
+   * @paramx isClear
    * @return
    */
   private Panel addColumnButton(final String sectionInFirstType,
-                                    final ButtonGroupSectionWidget buttonGroupSectionWidget, boolean isClear) {
+                                    final ButtonGroupSectionWidget buttonGroupSectionWidget) {
     FlowPanel columnContainer = new FlowPanel();
     columnContainer.addStyleName("inlineStyle");
     // add a button
-    Button overallButton = makeOverallButton(sectionInFirstType, isClear);
+    Button overallButton = makeOverallButton(sectionInFirstType);
     addClickHandlerToButton(overallButton, sectionInFirstType, buttonGroupSectionWidget);
     buttonGroupSectionWidget.addButton(overallButton);
    // System.out.println("making button "+sectionInFirstType);
@@ -429,16 +441,32 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     });
   }
 
-  private Button makeOverallButton(String title, boolean isClear) {
+  private Button makeOverallButton(String title) {
     Button overallButton = new Button(title);
 
     overallButton.setWidth("100%");
     DOM.setStyleAttribute(overallButton.getElement(), "paddingLeft", "0px");
     DOM.setStyleAttribute(overallButton.getElement(), "paddingRight", "0px");
-    DOM.setStyleAttribute(overallButton.getElement(), "borderWidth", "0");
+    //DOM.setStyleAttribute(overallButton.getElement(), "borderWidth", "0");
 
-    overallButton.setType(isClear ? ButtonType.DEFAULT : ButtonType.PRIMARY);
+    overallButton.setType(ButtonType.PRIMARY);
     return overallButton;
+  }
+
+  private Button makeClearButton() {
+    Button clear = new Button(ANY);
+
+   // overallButton.setWidth("100%");
+/*    DOM.setStyleAttribute(overallButton.getElement(), "paddingLeft", "0px");
+    DOM.setStyleAttribute(overallButton.getElement(), "paddingRight", "0px");*/
+    //DOM.setStyleAttribute(overallButton.getElement(), "borderWidth", "0");
+
+    DOM.setStyleAttribute(clear.getElement(), "marginTop", "5px");
+    DOM.setStyleAttribute(clear.getElement(), "marginBottom", "12px");
+
+ //   clear.addStyleName("buttonMargin2");
+    clear.setType(ButtonType.DEFAULT);
+    return clear;
   }
 
   private void setSizesAndPushFirst(Widget columnContainer) {
@@ -464,26 +492,18 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @param sectionWidget
    * @return
    */
-  private SectionWidget makeSectionWidget(Container labelContainer, Panel clearColumnContainer, String typeForOriginal,
+  private SectionWidget makeSectionWidget(Panel labelContainer, Panel clearColumnContainer, String typeForOriginal,
                                           ButtonGroupSectionWidget sectionWidget) {
     ButtonType buttonType = typeToButton.get(typeForOriginal);
-
-    String color = getButtonTypeStyle(buttonType);
     // make label
 
     Widget labelWidget = getLabelWidget(typeForOriginal);
     labelContainer.add(labelWidget);
+    String color = getButtonTypeStyle(buttonType);
     sectionWidget.addLabel(labelWidget,color);
-    // make
 
     // make clear button
-
-/*    FlexTable table2 = new FlexTable();
-    ButtonGroup group2 = new ButtonGroup();
-    table2.setWidget(0, 0, group2);*/
-
-    Button sectionButton = makeSubgroupButton(sectionWidget, typeForOriginal, ANY, buttonType, true);
-  //  group2.add(sectionButton);
+    Button sectionButton = makeSubgroupButton(sectionWidget, ANY, buttonType, true);
     sectionWidget.addButton(sectionButton);
 
     clearColumnContainer.add(sectionButton);
@@ -523,7 +543,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       List<SectionNode> children = sectionNode.getChildren();
 
       Panel rowForSection;
-      Button buttonForSection = makeSubgroupButton(sectionWidget, typeForOriginal,
+      Button buttonForSection = makeSubgroupButton(sectionWidget,// typeForOriginal,
         section,
         buttonType, false);
       if (n > 1 && i < n-1) {
@@ -582,31 +602,31 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @return
    */
   private Widget getLabelWidget(String typeForOriginal) {
-    FlexTable table3 = new FlexTable();
+    //FlexTable table3 = new FlexTable();
     Heading widget = new Heading(HEADING_FOR_LABEL, typeForOriginal);
-    table3.setWidget(0, 0, widget);
-    DOM.setStyleAttribute(widget.getElement(), "webkitMarginBefore", "10px");
-    DOM.setStyleAttribute( widget.getElement(), "webkitMarginAfter", "10px");
-    DOM.setStyleAttribute( widget.getElement(), "marginTop", "2px");
+ //   table3.setWidget(0, 0, widget);
+   // DOM.setStyleAttribute(widget.getElement(), "webkitMarginBefore", "10px");
+ //   DOM.setStyleAttribute( widget.getElement(), "webkitMarginAfter", "10px");
+  //  DOM.setStyleAttribute( widget.getElement(), "marginTop", "2px");
     DOM.setStyleAttribute( widget.getElement(), "marginBottom", "10px");
+    DOM.setStyleAttribute( widget.getElement(), "marginRight", "5px");
     return widget;
   }
 
   /**
    * @see #addButtonGroup(com.google.gwt.user.client.ui.HorizontalPanel, java.util.List, String, java.util.List, ButtonGroupSectionWidget)
-   * @see #makeSectionWidget(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, ButtonGroupSectionWidget)
+   * @see #makeSectionWidget
    * @param sectionWidgetFinal
-   * @param type
+   * @paramx type
    * @param section
    * @param buttonType
    * @param isClear
    * @return
    */
-  private Button makeSubgroupButton(final ButtonGroupSectionWidget sectionWidgetFinal, final String type, final String section,
+  private Button makeSubgroupButton(final ButtonGroupSectionWidget sectionWidgetFinal, final String section,
                                     ButtonType buttonType, boolean isClear) {
     //System.out.println("making button " + type + "=" + section);
     Button sectionButton = new Button(section);
-    DOM.setStyleAttribute(sectionButton.getElement(), "borderWidth", "0");
 
     boolean shrinkHorizontally = numSections > 5;
   //  System.out.println("num " + numSections + " shrinkHorizontally " +shrinkHorizontally );
@@ -618,6 +638,12 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     sectionButton.setType(isClear ? ButtonType.DEFAULT : buttonType);
     sectionButton.setEnabled(!isClear);
+
+    if (isClear) {
+    //  DOM.setStyleAttribute(sectionButton.getElement(), "bottomMargin", "12px");
+      DOM.setStyleAttribute(sectionButton.getElement(), "marginBottom", "15px");
+
+    }
 
     addClickHandlerToButton(sectionButton, section, sectionWidgetFinal);
 
