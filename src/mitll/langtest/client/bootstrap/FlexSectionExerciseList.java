@@ -14,9 +14,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -46,6 +48,10 @@ import java.util.Set;
 public class FlexSectionExerciseList extends SectionExerciseList {
   public static final int HEADING_FOR_LABEL = 4;
   private static final String USER_PROMPT = "Choose a lesson, preview, and share flashcard exercises.";
+  public static final int FRAME_WIDTH = 1024-50-50;
+  public static final int FRAME_HEIGHT = 615;
+  public static final String FLASHCARDCOPY = "flashcardcopy";
+  public static final String TIMEDFLASHCARDCOPY = "timedflashcardcopy";
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private Map<String,ButtonType> typeToButton = new HashMap<String, ButtonType>();
   private int numSections = 0;
@@ -338,52 +344,80 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     statusHeader.setText("Showing all entries");
   }
 
+  /**
+   * @see TableSectionExerciseList#addTableToLayout(java.util.Map)
+   * @param container
+   */
   protected void addPreviewWidgets(Panel container) {
-   // FluidRow fluidRow = new FluidRow();
-    Panel fluidRow = new FlowPanel();
+    //FluidRow fluidRow = new FluidRow();
+    //Panel fluidRow = new FlowPanel();
+    HorizontalPanel fluidRow = new HorizontalPanel();
     container.add(fluidRow);
+    fluidRow.setWidth("100%");
+    fluidRow.addStyleName("inlineStyle");
     //   Widget emailWidget = getEmailWidget();
     //  fluidRow.add(new Column(2, /*3,*/ emailWidget));
 
 //    Widget hideBoxesWidget = getHideBoxesWidget();
-    Widget flashcardWidget = getFlashcard("Flashcard URL");
-   // fluidRow.add(new Column(1, new Heading(5, "Preview and share")));
-    fluidRow.add(new Heading(5, "Preview and share"));
-    //fluidRow.add(new Column(5, flashcardWidget));
-    fluidRow.add(flashcardWidget);
+    //fluidRow.add(new Heading(5, "Preview and share"));
 
-    Widget flashcardWidget2 = getFlashcard2();
+    urlInputBox.setText(getFlashcardLink());
+
+    System.out.println("adding copy buttons ---------- --- ");
+    flashcardCopy = makeCopyButton(FLASHCARDCOPY);
+    Widget flashcardWidget = getFlashcard("Flashcard URL", FLASHCARDCOPY, flashcardCopy, urlInputBox, false);
+    // fluidRow.add(new Column(1, new Heading(5, "Preview and share")));
+    //fluidRow.add(new Column(6, flashcardWidget));
+    //flashcardWidget.addStyleName("floatLeft");
+    fluidRow.add(flashcardWidget);
+   // flashcardWidget.setWidth("45%");
+
+    urlInputBox2.setText(getTimedFlashcardLink());
+
+    timedFlashcardCopy = makeCopyButton(TIMEDFLASHCARDCOPY);
+
+    updateFlashcardCopy();
+
+    Widget flashcardWidget2 = getFlashcard("Timed Flashcard URL", TIMEDFLASHCARDCOPY, timedFlashcardCopy, urlInputBox2, true);
+    //flashcardWidget2.addStyleName("floatRight");
+    SimplePanel w = new SimplePanel(new Heading(6));
+    w.setWidth("20px");
+    //w.setHeight("2px");
+    fluidRow.add(w);
+   // fluidRow.add(new Column(6, flashcardWidget2));
     flashcardWidget2.addStyleName("floatRight");
- //   fluidRow.add(new Column(5, flashcardWidget2));
+   // fluidRow.setHorizontalAlignment(ALIGN_RIGHT);
+
+     //flashcardWidget2.setWidth("45%");
+
     fluidRow.add(flashcardWidget2);
   }
 
   private Button flashcardCopy;
   private Button timedFlashcardCopy;
+  TextBox urlInputBox = new TextBox();
+  TextBox urlInputBox2 = new TextBox();
 
-  protected Widget getFlashcard( String title) {
+  protected Widget getFlashcard(String title, String copyButtonID, Button copyButton,TextBox urlInputBox,boolean timed) {
     FlowPanel panel = new FlowPanel();
-    panel.setWidth("100%");
+    //panel.setWidth("100%");
     //panel.addStyleName("inlineStyle");
     //panel.addStyleName("border");
     panel.addStyleName("url-box");
+
     Heading flashcard = new Heading(5, title);
     flashcard.addStyleName("floatLeft");
     flashcard.addStyleName("shareTitle");
-    panel.add(flashcard);
+   // panel.add(flashcard);
 
     // make url input
-    TextBox w1 = new TextBox();
-    w1.addStyleName("url-input");
-    DOM.setStyleAttribute(w1.getElement(), "fontFamily", "\"Lucida Sans Typewriter\", \"Lucida Console\", Monaco, \"Bitstream Vera Sans Mono\",\"Courier New\", Courier, monospace;");
-    w1.setText(getFlashcardLink());
-    panel.add(w1);
+    urlInputBox.addStyleName("url-input");
+    DOM.setStyleAttribute(urlInputBox.getElement(), "fontFamily",
+      "\"Lucida Sans Typewriter\", \"Lucida Console\", Monaco, \"Bitstream Vera Sans Mono\",\"Courier New\", Courier, monospace;");
+    panel.add(urlInputBox);
 
     // make flashcardCopy button
-    String copyButtonID = "flashcardcopy";
-    flashcardCopy = makeCopyButton(copyButtonID);
-
-    panel.add(flashcardCopy);
+    panel.add(copyButton);
 
     // make flashcardCopy feedback
     FlowPanel container = new FlowPanel();
@@ -394,8 +428,38 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     container.add(copiedFeedback);
 
     panel.add(copiedFeedback);
+    Button preview = getPreviewButton(timed);
+    panel.add(preview);
 
     return panel;
+  }
+
+  private Button getPreviewButton(final boolean doTimedFlashcard) {
+    Button preview = new Button("Preview");
+    preview.addStyleName("leftTenMargin");
+    preview.setTitle("Preview flashcards");
+
+    preview.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        Modal modal = new Modal(false, true);
+        String title = "Flashcard Preview";
+        if (doTimedFlashcard) title = "Timed " + title;
+        modal.setTitle(title);
+        modal.setCloseVisible(true);
+        Frame w = new Frame(doTimedFlashcard ? getTimedFlashcardLink() : getFlashcardLink());
+        modal.add(w);
+        w.setWidth(FRAME_WIDTH + "px");
+        w.setHeight(FRAME_HEIGHT +"px");
+        int modalWidth = FRAME_WIDTH + 50;
+        modal.setWidth(modalWidth + "px");
+        int heightSlip = 50;
+        modal.setMaxHeigth(FRAME_HEIGHT+ heightSlip + "px");
+        DOM.setStyleAttribute(modal.getElement(), "marginLeft", (-modalWidth / 2) + "px");
+        modal.show();
+      }
+    });
+    return preview;
   }
 
   private Button makeCopyButton(String copyButtonID) {
@@ -403,7 +467,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     copy.addStyleName("leftTenMargin");
     copy.getElement().setId(copyButtonID);
     copy.setTitle("Copy to clipboard.");
-    updateFlashcardCopy();
     return copy;
   }
 
@@ -412,17 +475,28 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @paramx widgetID
    */
   protected void doZero() {
-    String widgetID = "flashcardcopy";
+    String widgetID = FLASHCARDCOPY;
+    String timed = TIMEDFLASHCARDCOPY;
 
-    zero(GWT.getModuleBaseURL(), widgetID, widgetID+"Feedback");
+    System.out.println("setting up zerocopy----------------");
+    zero(GWT.getModuleBaseURL(), widgetID, widgetID + "Feedback");
+    zeroTimed(GWT.getModuleBaseURL(), timed, timed + "Feedback");
   }
 
   private void updateFlashcardCopy() {
+    String flashcardLink = getFlashcardLink();
     if (flashcardCopy != null) {
-      flashcardCopy.getElement().setAttribute("data-clipboard-text", getFlashcardLink());
+      flashcardCopy.getElement().setAttribute("data-clipboard-text", flashcardLink);
     }
-  }
+    //if (urlInputBox != null)
+    urlInputBox.setText(flashcardLink);
 
+    String timedFlashcardLink = getTimedFlashcardLink();
+    if (timedFlashcardCopy != null) {
+      timedFlashcardCopy.getElement().setAttribute("data-clipboard-text", timedFlashcardLink);
+    }
+    urlInputBox2.setText(timedFlashcardLink);
+  }
 
 /*
   private static void feedback() {
@@ -442,23 +516,26 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   }
 
   private String getTimedFlashcardLink() {
-    return GWT.getHostPageBaseURL() + "?flashcard=true&timedGame=true#" + token;
+    return GWT.getHostPageBaseURL() + "?flashcard=true" +
+      "&timedGame=true" +
+      "#" + token;
   }
 
   private native void zero(String moduleBaseURL,String widgetID,String widgetFeedbackID)  /*-{
       var stuff =  $wnd.document.getElementById(widgetID);
+      //alert("Stuff is " +stuff);
 
       var clip = new $wnd.ZeroClipboard( stuff, {
           moviePath: moduleBaseURL + "swf/ZeroClipboard.swf"
       } );
       clip.setHandCursor(true);
       clip.on( 'load', function(client) {
-         // $wnd.alert( "movie is loaded" );
+          $wnd.alert( "1 movie is loaded" );
       } );
 
       clip.on( 'complete', function(client, args) {
        //   this.style.display = 'none'; // "this" is the element that was clicked
-        //  alert("Copied text to clipboard: " + args.text );
+          alert("1 Copied text to clipboard: " + args.text );
           $wnd.document.getElementById(widgetFeedbackID).innerHTML = "Copied!";
        //  $wnd.feedback();
       } );
@@ -469,23 +546,45 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
   }-*/;
 
-  private Anchor flashcardLink2;
+  private native void zeroTimed(String moduleBaseURL,String widgetID,String widgetFeedbackID)  /*-{
+      var stuff2 =  $wnd.document.getElementById(widgetID);
+
+      var clip2 = new $wnd.ZeroClipboard( stuff2, {
+          moviePath: moduleBaseURL + "swf/ZeroClipboard.swf"
+      } );
+      clip2.setHandCursor(true);
+      clip2.on( 'load', function(client) {
+           $wnd.alert( "2 movie is loaded" );
+      } );
+
+      clip2.on( 'complete', function(client, args) {
+          //   this.style.display = 'none'; // "this" is the element that was clicked
+            alert("2 Copied text to clipboard: " + args.text );
+          $wnd.document.getElementById(widgetFeedbackID).innerHTML = "Copied!";
+          //  $wnd.feedback();
+      } );
+
+      clip2.on( 'dataRequested', function ( client, args ) {
+          //clip.setText( 'Copied to clipboard.' );
+      } );
+  }-*/;
+
+/*  private Anchor flashcardLink2;
 
   protected Widget getFlashcard2() {
     flashcardLink2 = new Anchor("<h4>Timed Flashcard</h4>", true, "?flashcard=true&timedGame=true#", "_blank");
     return flashcardLink2;
-  }
+  }*/
 
-  String token = "";
+  private String token = "";
+
+  /**
+   * @see mitll.langtest.client.exercise.SectionExerciseList#pushNewSectionHistoryToken()
+   * @param historyToken
+   */
   protected void setModeLinks(String historyToken) {
     this.token = historyToken;
-    super.setModeLinks(historyToken);
-/*    if (flashcardLink != null) {
-      flashcardLink.setHref(GWT.getHostPageBaseURL() + "?flashcard=true#" + historyToken);
-    }*/
-    if (flashcardLink2 != null) {
-      flashcardLink2.setHref(GWT.getHostPageBaseURL() + "?flashcard=true&timedGame=true#" + historyToken);
-    }
+    //super.setModeLinks(historyToken);
     updateFlashcardCopy();
   }
 
