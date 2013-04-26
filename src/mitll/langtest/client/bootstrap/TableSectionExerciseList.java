@@ -114,7 +114,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     pager.addStyleName("alignCenter");
     // Set the cellList as the display.
     pager.setDisplay(table);
-    pager.setPageSize(pageSize);
+    //pager.setPageSize(pageSize);
     // Add the pager and list to the page.
     VerticalPanel vPanel = new VerticalPanel();
     vPanel.setBorderWidth(1);
