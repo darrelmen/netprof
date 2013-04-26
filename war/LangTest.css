@@ -221,6 +221,7 @@ h1 {
 
 .shareTitle {
     margin-right: 5px;
+    padding-top: 6px;
 }
 
 .buttonMargin2 {
@@ -237,8 +238,8 @@ h1 {
 
 .url-box {
     border: 1px solid #DDDDDD;
-    margin-top: 10px;
-    padding: 10px 10px 0;
+    padding-left: 10px;
+    padding-right: 10px;
     background-color: #fafafa;
 }
 
@@ -251,6 +252,10 @@ h1 {
     border-width: 0;
 }
 
+.tableCenter {
+    margin-left:auto;
+    margin-right:auto;
+}
 
 .sendButton {
   display: block;
