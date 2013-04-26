@@ -467,20 +467,24 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void addExerciseListOnLeftSide(Panel leftColumnContainer) {
+    if (props.isTeacherView()) {
+      leftColumnContainer.add(exerciseList.getWidget());
+    } else {
 
-    Heading items = new Heading(4,"Items");
-    items.addStyleName("center");
+      Heading items = new Heading(4, "Items");
+      items.addStyleName("center");
 
-    FlowPanel leftColumn = new FlowPanel();
-    leftColumn.addStyleName("floatLeft");
-    DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
+      FlowPanel leftColumn = new FlowPanel();
+      leftColumn.addStyleName("floatLeft");
+      DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
 
-    leftColumnContainer.add(leftColumn);
-    leftColumnContainer.addStyleName("inlineStyle");
-    if (!props.isFlashcardTeacherView()) {
-      leftColumn.add(items);
+      leftColumnContainer.add(leftColumn);
+      leftColumnContainer.addStyleName("inlineStyle");
+      if (!props.isFlashcardTeacherView()) {
+        leftColumn.add(items);
+      }
+      leftColumn.add(exerciseList.getWidget());
     }
-    leftColumn.add(exerciseList.getWidget());
   }
 
   public int getHeightOfTopRows() {
