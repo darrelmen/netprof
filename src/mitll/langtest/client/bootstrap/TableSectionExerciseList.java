@@ -62,7 +62,8 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
         Widget asyncTable = getAsyncTable(typeToSection, result);
         p.add(asyncTable);
         add(p);
-        FluidContainer container = new FluidContainer();
+       // FluidContainer container = new FluidContainer();
+        FlowPanel container = new FlowPanel();
         addPreviewWidgets(container);
         add(container);
 
@@ -190,7 +191,6 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     };
     english.setSortable(true);
     table.addColumn(english, "Word/Expression");
- //   table.setColumnWidth(english,33, Style.Unit.PCT);
 
     TextColumn<Exercise> flword = new TextColumn<Exercise>() {
       @Override
@@ -200,7 +200,6 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     };
     flword.setSortable(true);
     table.addColumn(flword, controller.getLanguage());
- //   table.setColumnWidth(flword, 33, Style.Unit.PCT);
 
     TextColumn<Exercise> translit = new TextColumn<Exercise>() {
       @Override
@@ -210,7 +209,6 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     };
     translit.setSortable(true);
     table.addColumn(translit, "Transliteration");
-  //  table.setColumnWidth(translit,33, Style.Unit.PCT);
   }
 
 
@@ -223,7 +221,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   @Override
 
   protected void loadExercises(Map<String, Collection<String>> typeToSection, final String item) {
-    System.out.println("loadExercises " + typeToSection + " and item '" + item + "'");
+   // System.out.println("loadExercises " + typeToSection + " and item '" + item + "'");
     addTableToLayout(typeToSection);
   }
 
@@ -234,7 +232,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     int numRows = getNumTableRowsGivenScreenHeight();
     numRows = Math.min(10,numRows);
 
-    if (table.getPageSize() != numRows) {
+    if (table != null && table.getPageSize() != numRows) {
       System.out.println("onResize : num rows now " + numRows);
       table.setPageSize(numRows);
       table.redraw();
