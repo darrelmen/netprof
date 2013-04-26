@@ -266,7 +266,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
   private void makeScrollPanel(FlexTable firstTypeRow, Panel panelInside) {
     this.scrollPanel = new ScrollPanel(panelInside);
-//    scrollPanel.addStyleName("border");
     firstTypeRow.setWidget(0,2,scrollPanel);
   }
 
@@ -356,12 +355,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @param container
    */
   protected void addPreviewWidgets(Panel container) {
-    //FluidRow fluidRow = new FluidRow();
-    //Panel fluidRow = new FlowPanel();
     HorizontalPanel fluidRow = new HorizontalPanel();
     container.add(fluidRow);
     fluidRow.setWidth("100%");
-    fluidRow.addStyleName("inlineStyle");
     //   Widget emailWidget = getEmailWidget();
     //  fluidRow.add(new Column(2, /*3,*/ emailWidget));
 
@@ -370,7 +366,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     urlInputBox.setText(getFlashcardLink());
 
-    System.out.println("adding copy buttons ---------- --- ");
     flashcardCopy = makeCopyButton(FLASHCARDCOPY);
     flashcardCopy.addMouseOverHandler(new MouseOverHandler() {
       @Override
@@ -378,12 +373,8 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         bindZero(flashcardCopy.getElement(),getFlashcardLink());
       }
     });
-    Widget flashcardWidget = getFlashcard("Flashcard URL", FLASHCARDCOPY, flashcardCopy, urlInputBox, false);
-    // fluidRow.add(new Column(1, new Heading(5, "Preview and share")));
-    //fluidRow.add(new Column(6, flashcardWidget));
-    //flashcardWidget.addStyleName("floatLeft");
+    Widget flashcardWidget = getFlashcard("Flashcard", FLASHCARDCOPY, flashcardCopy, urlInputBox, false);
     fluidRow.add(flashcardWidget);
-   // flashcardWidget.setWidth("45%");
 
     urlInputBox2.setText(getTimedFlashcardLink());
 
@@ -396,37 +387,33 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     });
     updateFlashcardCopy();
 
-    Widget flashcardWidget2 = getFlashcard("Timed Flashcard URL", TIMEDFLASHCARDCOPY, timedFlashcardCopy, urlInputBox2, true);
-    //flashcardWidget2.addStyleName("floatRight");
+    Widget flashcardWidget2 = getFlashcard("Timed Flashcard", TIMEDFLASHCARDCOPY, timedFlashcardCopy, urlInputBox2, true);
     SimplePanel w = new SimplePanel(new Heading(6));
     w.setWidth("20px");
-    //w.setHeight("2px");
+    w.setHeight("2px");
     fluidRow.add(w);
-   // fluidRow.add(new Column(6, flashcardWidget2));
-    flashcardWidget2.addStyleName("floatRight");
-   // fluidRow.setHorizontalAlignment(ALIGN_RIGHT);
-
-     //flashcardWidget2.setWidth("45%");
 
     fluidRow.add(flashcardWidget2);
   }
 
   private Button flashcardCopy;
   private Button timedFlashcardCopy;
-  TextBox urlInputBox = new TextBox();
-  TextBox urlInputBox2 = new TextBox();
+  private TextBox urlInputBox = new TextBox();
+  private TextBox urlInputBox2 = new TextBox();
 
   protected Widget getFlashcard(String title, String copyButtonID, Button copyButton,TextBox urlInputBox,boolean timed) {
+    VerticalPanel outer = new VerticalPanel();
+    Heading titleHeader = new Heading(6, title);
+
+    outer.add(titleHeader);
     FlowPanel panel = new FlowPanel();
-    //panel.setWidth("100%");
-    //panel.addStyleName("inlineStyle");
-    //panel.addStyleName("border");
+    outer.add(panel);
     panel.addStyleName("url-box");
 
-    Heading flashcard = new Heading(5, title);
+    Heading flashcard = new Heading(5, "URL");
     flashcard.addStyleName("floatLeft");
     flashcard.addStyleName("shareTitle");
-   // panel.add(flashcard);
+    panel.add(flashcard);
 
     // make url input
     urlInputBox.addStyleName("url-input");
@@ -449,7 +436,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     Button preview = getPreviewButton(timed);
     panel.add(preview);
 
-    return panel;
+    return outer;
   }
 
   private Button getPreviewButton(final boolean doTimedFlashcard) {
@@ -490,15 +477,10 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
   /**
    * @see TableSectionExerciseList#addTableToLayout(java.util.Map)
-   * @paramx widgetID
    */
   protected void doZero() {
     String widgetID = FLASHCARDCOPY;
-  //  String timed = TIMEDFLASHCARDCOPY;
-
-    System.out.println("setting up zerocopy----------------");
     zero(GWT.getModuleBaseURL(), widgetID, widgetID + "Feedback");
-   // zeroTimed(GWT.getModuleBaseURL(), timed, timed + "Feedback");
     registerCallback();
   }
 
@@ -514,16 +496,11 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       timedFlashcardCopy.getElement().setAttribute("data-clipboard-text", timedFlashcardLink);
     }
     urlInputBox2.setText(timedFlashcardLink);
-
   }
 
   private static void feedback(String feedback) {
-    //DOM.getElementById("flashcardcopyFeedback").setInnerText("Copied!");
-    // copiedFeedback.setText("Copied!");
     showPopup("Copied " + feedback + " to clipboard.");
-
   }
-
 
   private static void showPopup(String html) {
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
@@ -540,10 +517,8 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     t.schedule(3000);
   }
 
-
   private native void registerCallback() /*-{
       $wnd.feedback = $entry(@mitll.langtest.client.bootstrap.FlexSectionExerciseList::feedback(Ljava/lang/String;));
-
   }-*/;
 
   private String getFlashcardLink() {
@@ -581,50 +556,15 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
   }-*/;
 
-  /**         clip.setHandCursor( true );
-
-   *      clip.addEventListener('complete', function (client, text) {
-   alert("Copy Ok: "+text);
-   });
+  /**
    * @param me
    * @param strMsg
    */
   private native void bindZero(com.google.gwt.user.client.Element me, String strMsg)/*-{
       var clip = new $wnd.ZeroClipboard();
       clip.setText(strMsg);
-
       clip.glue(me);
   }-*/;
-
-  private native void zeroTimed(String moduleBaseURL,String widgetID,String widgetFeedbackID)  /*-{
-      var stuff2 =  $wnd.document.getElementById(widgetID);
-
-      var clip2 = new $wnd.ZeroClipboard( stuff2, {
-          moviePath: moduleBaseURL + "swf/ZeroClipboard.swf"
-      } );
-      clip2.setHandCursor(true);
-      clip2.on( 'load', function(client) {
-           $wnd.alert( "2 movie is loaded" );
-      } );
-
-      clip2.on( 'complete', function(client, args) {
-          //   this.style.display = 'none'; // "this" is the element that was clicked
-            alert("2 Copied text to clipboard: " + args.text );
-          $wnd.document.getElementById(widgetFeedbackID).innerHTML = "Copied!";
-          //  $wnd.feedback();
-      } );
-
-      clip2.on( 'dataRequested', function ( client, args ) {
-          //clip.setText( 'Copied to clipboard.' );
-      } );
-  }-*/;
-
-/*  private Anchor flashcardLink2;
-
-  protected Widget getFlashcard2() {
-    flashcardLink2 = new Anchor("<h4>Timed Flashcard</h4>", true, "?flashcard=true&timedGame=true#", "_blank");
-    return flashcardLink2;
-  }*/
 
   private String token = "";
 
@@ -721,9 +661,10 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     panelInsideScrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
     // panelInsideScrollPanel.getParent().setHeight(Math.max(50, offsetHeight) + "px");
 
-    int width = Window.getClientWidth() - label.getOffsetWidth() - clear.getOffsetWidth()- 100;
-    scrollPanel.setWidth(Math.max(300, width) + "px");
-
+    int width = Window.getClientWidth() - label.getOffsetWidth() - clear.getOffsetWidth()- 90;
+    System.out.println("setting width to " +width);
+   // scrollPanel.setWidth(Math.max(300, width) + "px");
+    scrollPanel.setWidth("100%");
     pushFirstListBoxSelection();
   }
 
