@@ -66,7 +66,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
   @Override
   public void addLabel(Widget label, String color) {
     this.label = label;
-    System.out.println("label is " + label + " color " +color);
+    //System.out.println("label is " + label + " color " +color);
     this.color = color;
   }
 
