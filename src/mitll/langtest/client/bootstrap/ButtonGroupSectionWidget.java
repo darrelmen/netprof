@@ -255,15 +255,8 @@ class ButtonGroupSectionWidget implements SectionWidget {
   @Override
   public Widget getWidget() {  return null; }
 
-/*  public void addEnabledButtons(List<FlexSectionExerciseList.ButtonWithChildren> buttonChildren, boolean isEnable) {
-    rememberEnabled(buttonChildren, isEnable);
-    // System.out.println("enableInSet for " + type + " : " + inSet);
-
-    showEnabled();
-  }*/
-
   private void showEnabled() {
-    System.out.println("showEnabled " + enabled.size() + " enabled, " + disabled.size() + " disabled");
+    System.out.println(this + "showEnabled " + enabled.size() + " enabled, " + disabled.size() + " disabled");
 
     for (Button b : enabled) {
       b.setEnabled(true);
@@ -272,17 +265,22 @@ class ButtonGroupSectionWidget implements SectionWidget {
       b.setEnabled(false);
     }
   }
+  boolean first = true;
 
   private void rememberEnabled(List<FlexSectionExerciseList.ButtonWithChildren> buttonChildren, boolean isEnable) {
     System.out.println(this + " rememberEnabled " + enabled.size() + " enabled, " + disabled.size() + " disabled " + buttonChildren + " : to enable = " + isEnable);
 
     if (isEnable) {
-      if (enabled.size() == buttons.size()) enabled.clear();
+      if (enabled.size() == buttons.size() && first) {
+        //first = false;
+        enabled.clear();
+      }
       enabled.addAll(buttonChildren);
     }
     else {
       enabled.removeAll(buttonChildren);
     }
+    if (enabled.isEmpty()) enabled.addAll(buttons);
     disabled.clear();
     disabled.addAll(buttons);
     disabled.removeAll(enabled);
