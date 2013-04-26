@@ -204,9 +204,14 @@ public class SectionExerciseList extends PagingExerciseList {
     }
   }*/
 
-  private void selectItem(String type, Collection<String> section) {
+  /**
+   * @see #restoreListBoxState(SelectionState)
+   * @param type
+   * @param sections
+   */
+  protected void selectItem(String type, Collection<String> sections) {
     SectionWidget listBox = typeToBox.get(type);
-    listBox.selectItem(section, false);
+    listBox.selectItem(sections, false);
   }
 
   /**
@@ -361,7 +366,8 @@ public class SectionExerciseList extends PagingExerciseList {
 
       pushNewSectionHistoryToken();
     } else {
-      System.out.println("fire history for " +initToken);
+      System.out.println("pushFirstListBoxSelection fire history for token from URL: " +initToken);
+      setModeLinks(initToken);
       History.fireCurrentHistoryState();
     }
   }
@@ -409,7 +415,7 @@ public class SectionExerciseList extends PagingExerciseList {
 
   /**
    * @see #pushFirstListBoxSelection
-   * @seex SectionExerciseList.TypeToSectionsAsyncCallback#onSuccess(java.util.Map)
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addClickHandlerToButton(com.github.gwtbootstrap.client.ui.Button, String, mitll.langtest.client.bootstrap.ButtonGroupSectionWidget)
    */
   protected void pushNewSectionHistoryToken() {
     String historyToken = getHistoryToken(null);
@@ -580,19 +586,19 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param typeToSection
    */
   protected void setOtherListBoxes(final Map<String, Collection<String>> typeToSection) {
-    System.out.println("setOtherListBoxes type " + typeToSection);
-    service.getTypeToSectionsForTypeAndSection(typeToSection,
+    System.out.println("setOtherListBoxes type " + typeToSection + " skipping!!! ------------- ");
+/*    service.getTypeToSectionsForTypeAndSection(typeToSection,
       new AsyncCallback<Map<String, Collection<String>>>() {
         @Override
         public void onFailure(Throwable caught) {
           Window.alert("Can't contact server.");
         }
 
-        /**
+        *//**
          * This is a map from type to sections
          *
          * @param result
-         */
+         *//*
         @Override
         public void onSuccess(Map<String, Collection<String>> result) {
           System.out.println("\tsetOtherListBoxes for type " + typeToSection + ", result is " + result);
@@ -604,7 +610,7 @@ public class SectionExerciseList extends PagingExerciseList {
             populateListBoxAfterSelection(result);
           }
         }
-      });
+      });*/
   }
 
   /**
@@ -641,21 +647,15 @@ public class SectionExerciseList extends PagingExerciseList {
    */
   private void restoreListBoxState(SelectionState selectionState) {
     for (Map.Entry<String, Collection<String>> pair : selectionState.typeToSection.entrySet()) {
-      String type    = pair.getKey();
+      String type = pair.getKey();
       Collection<String> section = pair.getValue();
       if (!typeToBox.containsKey(type)) {
         if (!type.equals("item")) {
-          System.err.println("restoreListBoxState for " + selectionState + " : huh? bad type '" + type +"'");
+          System.err.println("restoreListBoxState for " + selectionState + " : huh? bad type '" + type + "'");
         }
       } else {
         selectItem(type, section);
       }
     }
   }
-
-  private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 390 - 20-65;
-
-/*  protected int getTableHeaderHeight() {
-    return 625 - HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
-  }*/
 }
