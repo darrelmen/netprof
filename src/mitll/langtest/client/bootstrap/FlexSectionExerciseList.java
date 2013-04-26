@@ -56,7 +56,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   public static final int HEADING_FOR_LABEL = 4;
   private static final String USER_PROMPT = "Choose a lesson, preview, and share flashcard exercises.";
   public static final int FRAME_WIDTH = 1024-50-50;
-  public static final int FRAME_HEIGHT = 615;
+  public static final int FRAME_HEIGHT = 640;
   public static final String FLASHCARDCOPY = "flashcardcopy";
   public static final String TIMEDFLASHCARDCOPY = "timedflashcardcopy";
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
@@ -464,7 +464,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         w.setHeight(FRAME_HEIGHT +"px");
         int modalWidth = FRAME_WIDTH + 50;
         modal.setWidth(modalWidth + "px");
-        int heightSlip = 50;
+        int heightSlip = 70;
         modal.setMaxHeigth(FRAME_HEIGHT+ heightSlip + "px");
         DOM.setStyleAttribute(modal.getElement(), "marginLeft", (-modalWidth / 2) + "px");
         modal.show();
