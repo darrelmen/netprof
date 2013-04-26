@@ -634,3 +634,7 @@ fieldset > legend {
     letter-spacing: 0.4em;
     padding-top: 19px;
 }
+
+.bottomMargin {
+    margin-bottom: 30%;
+}
