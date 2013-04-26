@@ -31,14 +31,20 @@ class ButtonGroupSectionWidget implements SectionWidget {
   private List<Button> buttons = new ArrayList<Button>();
   private Button clearButton;
   private String type;
-  private Widget label;
-  private Map<String, Collection<Button>> nameToButton = new HashMap<String,Collection<Button>>();
+
+  private Map<String, Collection<Button>> nameToButton = new HashMap<String, Collection<Button>>();
   private String currentSelection = null;
   private List<Panel> rows = new ArrayList<Panel>();
+  Set<Button> enabled = new HashSet<Button>();
+  Set<Button> disabled = new HashSet<Button>();
+  Map<String, SectionWidget> typeToBox;
 
-  public ButtonGroupSectionWidget(String type) {
+  public ButtonGroupSectionWidget(String type, Map<String,SectionWidget> typeToBox) {
     this.type = type;
+    this.typeToBox = typeToBox;
   }
+
+  public String getType() {return type;}
 
   public void addRow(Panel row) { this.rows.add(row); }
 
@@ -60,17 +66,16 @@ class ButtonGroupSectionWidget implements SectionWidget {
         nameToButton.put(name, buttonsAtName = new ArrayList<Button>());
       }
       buttonsAtName.add(b);
+      enabled.add(b);
     }
   }
 
   @Override
   public void addLabel(Widget label, String color) {
-    this.label = label;
-    //System.out.println("label is " + label + " color " +color);
     this.color = color;
   }
 
-  String color;
+  private String color;
 
   private void addClearButton(Button b) {
     clearButton = b;
@@ -117,16 +122,19 @@ class ButtonGroupSectionWidget implements SectionWidget {
 
   /**
    * @see FlexSectionExerciseList#populateListBoxAfterSelection(java.util.Map)
+   * @deprecated don't use this anymore
    * @param inSet
    */
   @Override
   public void enableInSet(Collection<String> inSet) {
-    System.out.println("enableInSet for " + type + " : " + inSet);
+    throw new IllegalArgumentException("don't call me!");
+
+/*    System.out.println("enableInSet for " + type + " : " + inSet);
 
     for (Button b : buttons) {
       String trim = b.getText().trim();
       b.setEnabled(inSet.contains(trim));
-    }
+    }*/
   }
 
   /**
@@ -136,9 +144,12 @@ class ButtonGroupSectionWidget implements SectionWidget {
   public void enableAll() {
     System.out.println("enableAll for " + type);
 
-    for (Button b : buttons) {
+  /*  for (Button b : buttons) {
       b.setEnabled(true);
-    }
+    }*/
+    enabled.addAll(buttons);
+    disabled.clear();
+    showEnabled();
   }
 
   @Override
@@ -147,13 +158,18 @@ class ButtonGroupSectionWidget implements SectionWidget {
   }
 
   @Override
-  public void selectItem(Collection<String> sections, boolean doToggle) {
+  public void selectItem(Collection<String> section, boolean doToggle) {
+    throw new IllegalArgumentException("don't call me!");
+  }
+
+  public void selectItem(Collection<String> sections, boolean doToggle, Map<String,SectionWidget> typeToBox) {
     System.out.println("selectItem " + type + "="+sections);
 
     if (sections.size() == 1 && sections.iterator().next().equals(SectionExerciseList.ANY)) {
       clearAll();
     } else {
       boolean anythingSelected = false;
+      ButtonGroupSectionWidget childGroup = null;
       for (String toSelect : sections) {
         Collection<Button> buttonsAtName = nameToButton.get(toSelect);
         if (buttonsAtName == null) {
@@ -163,23 +179,26 @@ class ButtonGroupSectionWidget implements SectionWidget {
           for (Button b : buttonsAtName) {
             boolean active = !doToggle || !b.isActive();
             b.setActive(active);
-            //String backgroundColor = DOM.getElementAttribute(b.getElement(), "backgroundColor");
-         /*   Element element = label.getElement();
-            if (element != null) {
-              DOM.setElementAttribute(element, "background-color", color);
-            }*/
-            if (label != null) {
-//              label.addStyleName(color);
-
-              for (Panel p : rows) p.addStyleName(color);
-            }
-
             anythingSelected |= active;
+
+            FlexSectionExerciseList.ButtonWithChildren bb = (FlexSectionExerciseList.ButtonWithChildren) b;
+            if (!bb.getButtonChildren().isEmpty()) {
+              String typeOfChildren = bb.getTypeOfChildren();
+              System.out.println("for " + bb+ " type of children " + typeOfChildren);
+              childGroup = (ButtonGroupSectionWidget) typeToBox.get(typeOfChildren);
+              childGroup.rememberEnabled(bb.getButtonChildren(), active);
+            }
           }
         }
       }
+      if (childGroup != null) {
+        childGroup.showEnabled();
+      }
       currentSelection = null;
 
+      if (anythingSelected) {
+        for (Panel p : rows) p.addStyleName(color);
+      }
    // boolean anythingSelected = isAnythingSelected();
    /*     if (didSelect && !anythingSelected) {
         System.err.println(">>>> selectItem " + type + "=" + sections + " but nothing selected?");
@@ -197,13 +216,22 @@ class ButtonGroupSectionWidget implements SectionWidget {
     }
     currentSelection = null;
 
-    System.out.println("disable clear button for type " +type + " checking " +buttons.size() + " buttons");
+    System.out.println("---------> disable clear button for type " +type + " checking " +buttons.size() + " buttons <----------- ");
 
     clearButton.setEnabled(false);
 //    label.removeStyleName(color);
     for (Panel p : rows) p.removeStyleName(color);
 
+    disabled.clear();
+    enabled.addAll(buttons);
 
+    showEnabled();
+
+    FlexSectionExerciseList.ButtonWithChildren next = (FlexSectionExerciseList.ButtonWithChildren) buttons.iterator().next();
+
+    if (next.hasChildren()) {
+      typeToBox.get(next.getTypeOfChildren()).enableAll();
+    }
   }
 
   private void setClearButtonState(Collection<String> sections, boolean anythingSelected) {
@@ -226,4 +254,40 @@ class ButtonGroupSectionWidget implements SectionWidget {
   public void populateTypeWidget(Collection<String> items, Map<String, Integer> sectionToCount) {}
   @Override
   public Widget getWidget() {  return null; }
+
+/*  public void addEnabledButtons(List<FlexSectionExerciseList.ButtonWithChildren> buttonChildren, boolean isEnable) {
+    rememberEnabled(buttonChildren, isEnable);
+    // System.out.println("enableInSet for " + type + " : " + inSet);
+
+    showEnabled();
+  }*/
+
+  private void showEnabled() {
+    System.out.println("showEnabled " + enabled.size() + " enabled, " + disabled.size() + " disabled");
+
+    for (Button b : enabled) {
+      b.setEnabled(true);
+    }
+    for (Button b : disabled) {
+      b.setEnabled(false);
+    }
+  }
+
+  private void rememberEnabled(List<FlexSectionExerciseList.ButtonWithChildren> buttonChildren, boolean isEnable) {
+    System.out.println(this + " rememberEnabled " + enabled.size() + " enabled, " + disabled.size() + " disabled " + buttonChildren + " : to enable = " + isEnable);
+
+    if (isEnable) {
+      if (enabled.size() == buttons.size()) enabled.clear();
+      enabled.addAll(buttonChildren);
+    }
+    else {
+      enabled.removeAll(buttonChildren);
+    }
+    disabled.clear();
+    disabled.addAll(buttons);
+    disabled.removeAll(enabled);
+    System.out.println(this + " now " + enabled.size() + " enabled, " + disabled.size() + " disabled");
+  }
+
+  public String toString() { return "Group " + type + " with " + buttons.size() + " buttons"; }
 }
