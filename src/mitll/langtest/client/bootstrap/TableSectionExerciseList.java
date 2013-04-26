@@ -104,6 +104,42 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     return pagerAndTable;
   }
 
+  private Panel getPagerAndTable(CellTable<Exercise> table) {
+    return getPagerAndTable(table, table, PAGE_SIZE, 1000);
+  }
+
+  private Panel getPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows) {
+    SimplePager.Resources DEFAULT_RESOURCES = GWT.create(SimplePager.Resources.class);
+    SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, true, fastForwardRows, true);
+    pager.addStyleName("alignCenter");
+    // Set the cellList as the display.
+    pager.setDisplay(table);
+    pager.setPageSize(pageSize);
+    // Add the pager and list to the page.
+    VerticalPanel vPanel = new VerticalPanel();
+    vPanel.setBorderWidth(1);
+    vPanel.add(tableAsPanel);
+
+/*    FluidRow row = new FluidRow();
+    Panel row2 = new FlowPanel();
+    row2.setWidth("100%");
+    row2.addStyleName("table-center");
+
+    row2.addStyleName("alignCenter");
+    row2.add(pager);*/
+    //row.addStyleName("inlineStyle");
+  //  row.add(new Column(12,row2));
+   // row.add(pager);
+
+    FlowPanel outer = new FlowPanel();
+    pager.addStyleName("tableCenter");
+    outer.add(pager);
+
+    vPanel.add(outer);
+
+    return vPanel;
+  }
+
   private AsyncDataProvider<Exercise> createProvider(final Map<String, Collection<String>> typeToSection,
                                                      final int numResults, CellTable<Exercise> table) {
     AsyncDataProvider<Exercise> dataProvider = new AsyncDataProvider<Exercise>() {
@@ -140,28 +176,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     return dataProvider;
   }
 
-  private Panel getPagerAndTable(CellTable<Exercise> table) {
-    return getPagerAndTable(table, table, PAGE_SIZE, 1000);
-  }
 
-  private Panel getPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows) {
-    SimplePager.Resources DEFAULT_RESOURCES = GWT.create(SimplePager.Resources.class);
-    SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, true, fastForwardRows, true);
-    pager.addStyleName("alignCenter");
-    // Set the cellList as the display.
-    pager.setDisplay(table);
-    pager.setPageSize(pageSize);
-    // Add the pager and list to the page.
-    VerticalPanel vPanel = new VerticalPanel();
-    vPanel.setBorderWidth(1);
-    vPanel.add(tableAsPanel);
-
-    FluidRow row = new FluidRow();
-    row.add(new Column(4,5,pager));
-    vPanel.add(row);
-
-    return vPanel;
-  }
 
   @Override
   protected CellTable<Exercise> makeCellTable() {
