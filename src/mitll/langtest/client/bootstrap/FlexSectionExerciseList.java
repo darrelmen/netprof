@@ -187,7 +187,11 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     addLabelWidgetForRow(labelContainer,firstType,typeToButton.get(firstType),buttonGroupSectionWidget);
     label = labelContainer;
 
-    firstTypeRow.setWidget(0, 0, labelContainer);
+    FlowPanel l2 = new FlowPanel();
+    l2.add(labelContainer);
+    l2.addStyleName("bottomMargin");
+
+    firstTypeRow.setWidget(0, 0, l2);
 
     Panel clearColumnContainer = new VerticalPanel();
 
@@ -196,7 +200,13 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     buttonGroupSectionWidget.addButton(clearButton);
     clearColumnContainer.add(clearButton);
 
-    firstTypeRow.setWidget(0, 1, clearColumnContainer);
+
+    FlowPanel c2 = new FlowPanel();
+    c2.add(clearColumnContainer);
+    c2.addStyleName("bottomMargin");
+    //clearColumnContainer.addStyleName("bottomMargin");
+
+    firstTypeRow.setWidget(0, 1, c2);
 
     for (String type : types) {
       if (type.equals(firstType)) continue;
@@ -695,7 +705,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     sectionWidget.addLabel(labelWidget,color);
 
     // make clear button
-    Button sectionButton = makeSubgroupButton(sectionWidget,/* typeForOriginal,*/ ANY, buttonType, true);
+    Button sectionButton = makeSubgroupButton(sectionWidget, ANY, buttonType, true);
     sectionWidget.addButton(sectionButton);
 
     clearColumnContainer.add(sectionButton);
