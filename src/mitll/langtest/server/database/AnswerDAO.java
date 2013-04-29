@@ -1,7 +1,6 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -34,13 +33,15 @@ public class AnswerDAO {
    * @param flq
    * @param spoken
    * @param audioType
+   * @param correct
+   * @param pronScore
    * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
    */
   public void addAnswer(int userID, Exercise e, int questionID, String answer, String audioFile,
-                        boolean flq, boolean spoken, String audioType) {
+                        boolean flq, boolean spoken, String audioType, boolean correct, float pronScore) {
     String plan = e.getPlan();
     String id = e.getID();
-    addAnswer(database,userID, plan, id, questionID, answer, audioFile, true,  flq, spoken, audioType, 0);
+    addAnswer(database,userID, plan, id, questionID, answer, audioFile, true,  flq, spoken, audioType, 0, correct, pronScore);
   }
 
   /**
@@ -92,13 +93,19 @@ public class AnswerDAO {
    * @param audioFile
    * @param valid
    * @param spoken
+   * @param correct
+   * @param pronScore
    */
   public void addAnswer(Database database, int userID, String plan, String id, int questionID, String answer,
-                        String audioFile, boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis) {
+                        String audioFile, boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis,
+                        boolean correct, float pronScore) {
     try {
+      long then = System.currentTimeMillis();
       Connection connection = database.getConnection();
-      addAnswerToTable(connection, userID, plan, id, questionID, answer, audioFile, valid,flq,spoken,audioType,durationInMillis);
+      addAnswerToTable(connection, userID, plan, id, questionID, answer, audioFile, valid, flq, spoken, audioType, durationInMillis, correct, pronScore);
       database.closeConnection(connection);
+      long now = System.currentTimeMillis();
+      if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
 
  /*     if (LOG_RESULTS) { // true to see what is in the table
         try {
@@ -118,6 +125,7 @@ public class AnswerDAO {
    * Each insert is marked with a timestamp.
    * This allows us to determine user completion rate.
    *
+   *
    * @param connection
    * @param userid
    * @param plan
@@ -126,25 +134,29 @@ public class AnswerDAO {
    * @param answer
    * @param audioFile
    * @param valid
+   * @param correct
+   * @param pronScore
    * @throws java.sql.SQLException
-   * @see #addAnswer
+   * @see #addAnswer(Database, int, String, String, int, String, String, boolean, boolean, boolean, String, int, boolean, float)
    */
   private void addAnswerToTable(Connection connection, int userid, String plan, String id, int questionID, String answer, String audioFile,
-                                boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis) throws SQLException {
+                                boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis, boolean correct, float pronScore) throws SQLException {
     PreparedStatement statement;
     statement = connection.prepareStatement("INSERT INTO results(" +
-        "userid," +
-        "plan," +
-      Database.EXID +"," +
-        "qid," +
-        Database.TIME+"," +
-        "answer," +
-        "valid," +
-        ResultDAO.FLQ +"," +
-        ResultDAO.SPOKEN +"," +
-        ResultDAO.AUDIO_TYPE +","+
-        ResultDAO.DURATION+
-        ") VALUES(?,?,?,?,?,?,?,?,?,?,?)");
+      "userid," +
+      "plan," +
+      Database.EXID + "," +
+      "qid," +
+      Database.TIME + "," +
+      "answer," +
+      "valid," +
+      ResultDAO.FLQ + "," +
+      ResultDAO.SPOKEN + "," +
+      ResultDAO.AUDIO_TYPE + "," +
+      ResultDAO.DURATION + "," +
+      ResultDAO.CORRECT + "," +
+      ResultDAO.PRON_SCORE +
+      ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
     int i = 1;
 
     boolean isAudioAnswer = answer == null || answer.length() == 0;
@@ -160,7 +172,10 @@ public class AnswerDAO {
     statement.setBoolean(i++, flq);
     statement.setBoolean(i++, spoken);
     statement.setString(i++, copyStringChar(audioType));
-    statement.setInt(i, durationInMillis);
+    statement.setInt(i++, durationInMillis);
+
+    statement.setBoolean(i++, correct);
+    statement.setFloat(i++, pronScore);
 
     //logger.info("valid is " +valid + " for " +statement);
 
