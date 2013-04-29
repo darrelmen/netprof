@@ -30,6 +30,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class AutoCRT {
+  public static final double MINIMUM_FLASHCARD_PRON_SCORE = 0.19;
   private static Logger logger = Logger.getLogger(AutoCRT.class);
   private Classifier<AutoGradeExperiment.Event> classifier = null;
   private Set<String> allAnswers = new HashSet<String>();
@@ -137,13 +138,13 @@ public class AutoCRT {
       asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
         asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
     boolean isCorrect = recoSentence != null && isCorrect(foregroundSentences, recoSentence);
-    answer.setCorrect(isCorrect);
+    double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
+    answer.setCorrect(isCorrect && scoreForAnswer > MINIMUM_FLASHCARD_PRON_SCORE);
     if (!isCorrect) {
       logger.info("incorrect response for exercise #" +e.getID() +
-        " reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentences +"'");
+        " reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentences +"' pron score was " + scoreForAnswer);
     }
 
-    double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
     answer.setDecodeOutput(recoSentence);
     answer.setScore(scoreForAnswer);
   }
