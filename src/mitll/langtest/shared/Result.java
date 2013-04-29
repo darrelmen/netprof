@@ -33,6 +33,8 @@ public class Result implements IsSerializable {
   public String audioType;
   public String gradeInfo = "";
   public int durationInMillis;
+  private boolean correct;
+  private float pronScore;
 
   public static final String AUDIO_TYPE_UNSET = "unset";
   public static final String AUDIO_TYPE_REGULAR = "regular";
@@ -61,9 +63,11 @@ public class Result implements IsSerializable {
    * @param spoken
    * @param answerType
    * @param durationInMillis
+   * @param correct
+   * @param pronScore
    */
   public Result(int uniqueID, long userid, String plan, String id, int qid, String answer,
-                boolean valid, long timestamp, boolean flq, boolean spoken, String answerType, int durationInMillis) {
+                boolean valid, long timestamp, boolean flq, boolean spoken, String answerType, int durationInMillis, boolean correct, float pronScore) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.plan = plan;
@@ -76,6 +80,8 @@ public class Result implements IsSerializable {
     this.spoken = spoken;
     this.audioType = answerType == null || answerType.length() == 0 ? AUDIO_TYPE_UNSET : answerType;
     this.durationInMillis = durationInMillis;
+    this.correct = correct;
+    this.pronScore = pronScore;
   }
 
   /**
@@ -95,10 +101,18 @@ public class Result implements IsSerializable {
     gradeInfo += g.grade +",";
   }
 
+  public boolean isCorrect() {
+    return correct;
+  }
+
+  public float getPronScore() {
+    return pronScore;
+  }
+
   @Override
   public String toString() {
     return "Result #" + uniqueID + "\t\tby user " + userid + "\texid " + id + " " +
         (flq ? "flq" : "english") + " " + (spoken ? "spoken" : "written") + " audioType : " + audioType +
-        " valid " + valid;
+        " valid " + valid + " " + (correct ? "correct":"incorrect") + " score " + pronScore;
   }
 }
