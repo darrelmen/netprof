@@ -47,7 +47,7 @@ lpcorder: 12
 
 [fe.NNBatch]
 n-output: N_OUTPUT
-n-hidden: 2000,2000
+n-hidden: N_HIDDEN
 mlp: MODELS_DIR/nn-weights
 frame-window: 13
 
