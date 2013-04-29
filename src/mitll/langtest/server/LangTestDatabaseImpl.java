@@ -960,6 +960,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return copy;
   }
 
+  /**
+   * @see mitll.langtest.client.ResultManager#showResults()
+   * @return
+   */
   @Override
   public int getNumResults() { return db.getNumResults(); }
 
@@ -994,19 +998,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           ") user = " + user + " exercise " + exercise +
           " question " + questionID + " file " + file.getAbsolutePath());
     }
-    db.addAudioAnswer(user, plan, exercise, questionID, file.getPath(),
-        isValid, flq, true, audioType, validity.durationInMillis);
 
     String wavPathWithForwardSlashSeparators = ensureForwardSlashes(wavPath);
     String url = optionallyMakeURL(wavPathWithForwardSlashSeparators);
     // logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
 
-    if (isValid) {
-      return getAudioAnswer(exercise, questionID, user, reqid, file, validity, url, doFlashcard);
-    }
-    else {
-      return new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
-    }
+    AudioAnswer answer = (isValid) ?
+      getAudioAnswer(exercise, questionID, user, reqid, file, validity, url, doFlashcard) :
+      new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
+
+    db.addAudioAnswer(user, plan, exercise, questionID, file.getPath(),
+      isValid, flq, true, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore());
+
+    return answer;
   }
 
   private AudioAnswer getAudioAnswer(String exercise, int questionID, int user, int reqid,
