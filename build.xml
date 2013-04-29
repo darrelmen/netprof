@@ -236,8 +236,19 @@
 
     <target depends="build" name="msaSectionsFlashcard">
         <jar destfile="msaFlashcard.war" basedir="war"
-             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/farsi/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
+             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
             >
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target depends="build" name="levantineSectionsFlashcard">
+        <jar destfile="levantineFlashcard.war" basedir="war"
+             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-levantine/**"
+                >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
