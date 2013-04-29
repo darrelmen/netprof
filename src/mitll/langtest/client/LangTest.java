@@ -165,17 +165,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // header/title line
     // first row ---------------
+    widgets.add(headerRow = makeHeaderRow());
 
-    headerRow = new FluidRow();
-
-    Widget title = getTitleWidget();
-    headerRow.add(new Column(props.isTeacherView() ? 12 : 10, title));
-    if (!props.isTeacherView()) {
-      headerRow.add(new Column(2, getLogout()));
-    }
-    widgets.add(headerRow);
     // second row ---------------
-
     secondRow = new FluidRow();
   //  secondRow.ensureDebugId("secondRow");
 
@@ -224,6 +216,29 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     modeSelect();
   }
 
+  private FluidRow makeHeaderRow() {
+    FluidRow headerRow = new FluidRow();
+
+    Widget title = getTitleWidget();
+    Column titleColumn = new Column(props.isFlashcardTeacherView() ? 12 : 10, title);
+    headerRow.add(titleColumn);
+    if (!props.isFlashcardTeacherView()) {
+      headerRow.add(new Column(2, getLogout()));
+    }
+    else if (props.isAdminView()) {
+      getLogout();
+      FluidRow adminRow = new FluidRow();
+      adminRow.addStyleName("alignCenter");
+      adminRow.addStyleName("inlineStyle");
+      adminRow.add(new Column(1, 2,users));
+      adminRow.add(new Column(1, 2, showResults));
+      adminRow.add(new Column(1, 2, monitoring));
+      titleColumn.add(adminRow);
+    }
+    //widgets.add(headerRow);
+    return headerRow;
+  }
+
   /**
    * @see mitll.langtest.client.exercise.SectionExerciseList#getEmailWidget()
    * @param subject
@@ -239,7 +254,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     FluidRow titleRow = new FluidRow();
     titleRow.addStyleName("alignCenter");
     titleRow.addStyleName("inlineStyle");
-    titleRow.add(new Heading(2, props.getAppTitle()));
+    Heading w = new Heading(2, props.getAppTitle());
+
+    titleRow.add(w);
+
     return titleRow;
   }
 
@@ -434,9 +452,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private ListInterface makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback) {
-  /*  if (props.isFlashCard()) {
-      return new FlashcardExerciseList(currentExerciseVPanel, service, feedback, userManager);
-    } else*/ if (isGrading) {
+    if (isGrading) {
       return new GradedExerciseList(currentExerciseVPanel, service, feedback,
         true, props.isEnglishOnlyMode(), this);
     } else {
@@ -449,18 +465,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
             props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, this);
         }
-
-/*
-        System.out.println("makeExerciseList show section widgets " + showSectionWidgets);
-
-        this.exerciseList = new SectionExerciseList(currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets);
-*/
-     } else {
+      } else {
         return new PagingExerciseList(currentExerciseVPanel, service, feedback,
           props.isShowTurkToken(), isAutoCRTMode(), this) {
           @Override
-          protected void checkBeforeLoad(ExerciseShell e) {} // don't try to login
+          protected void checkBeforeLoad(ExerciseShell e) {
+          } // don't try to login
         };
       }
     }
@@ -713,9 +723,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else {
       setFactory();
 
-      if (userID != lastUser || props.isGoodwaveMode() || props.isFlashCard()) {
+      if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
         System.out.println("gotUser : user changed - new " + userID + " vs last " + lastUser);
-        if (/*props.isArabicTextDataCollect() ||*/ !props.isCollectAudio() || flashRecordPanel.gotPermission()) {
+        if (!props.isCollectAudio() || flashRecordPanel.gotPermission()) {
           System.out.println("\tgotUser : " + userID + " get exercises");
           exerciseList.getExercises(userID);
         }
@@ -727,8 +737,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
+  // TODO : refactor all this into mode objects that decide whether we need flash or not, etc.
   private void checkInitFlash() {
-    if (/*!props.isArabicTextDataCollect() &&*/ (props.isCollectAudio() || props.isGoodwaveMode() || props.isFlashCard()) && !flashRecordPanel.gotPermission()) {
+    if ((props.isCollectAudio() || props.isGoodwaveMode() || props.isFlashCard()) && !flashRecordPanel.gotPermission()) {
       System.out.println("checkInitFlash : initFlash");
 
       flashRecordPanel.initFlash();
