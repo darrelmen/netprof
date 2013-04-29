@@ -238,7 +238,7 @@ public class ResultManager extends PagerTable {
         final int start = display.getVisibleRange().getStart();
         int end = start + display.getVisibleRange().getLength();
         end = end >= numResults ? numResults : end;
-        System.out.println("asking for " + start +"->" + end);
+        //System.out.println("asking for " + start +"->" + end);
         final int fend = end;
         service.getResults(start, end, new AsyncCallback<List<Result>>() {
           @Override
@@ -298,6 +298,13 @@ public class ResultManager extends PagerTable {
     return id;
   }
 
+  /**
+   *
+   * @param grader used in GradingResultManager subclass
+   * @param grader used in GradingResultManager subclass
+   * @param numGrades used in GradingResultManager subclass
+   * @param table to add columns to
+   */
   protected void addResultColumn(Collection<Grade> grades, int grader, int numGrades, CellTable<Result> table) {
       TextColumn<Result> date = new TextColumn<Result>() {
         @Override
@@ -350,6 +357,24 @@ public class ResultManager extends PagerTable {
     };
     valid.setSortable(true);
     table.addColumn(gradeInfo, "Grades");
+
+    TextColumn<Result> correct = new TextColumn<Result>() {
+      @Override
+      public String getValue(Result answer) {
+        return ""+answer.isCorrect();
+      }
+    };
+    correct.setSortable(true);
+    table.addColumn(correct, "Correct");
+
+    TextColumn<Result> pronScore = new TextColumn<Result>() {
+      @Override
+      public String getValue(Result answer) {
+        return ""+answer.getPronScore();
+      }
+    };
+    pronScore.setSortable(true);
+    table.addColumn(pronScore, "PronScore");
   }
 
 
