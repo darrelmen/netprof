@@ -1201,15 +1201,30 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
    */
   public void addAnswer(int userID, Exercise e, int questionID, String answer) {
-    answerDAO.addAnswer(userID, e, questionID, answer, "", !e.promptInEnglish, false, Result.AUDIO_TYPE_UNSET);
+    answerDAO.addAnswer(userID, e, questionID, answer, "", !e.promptInEnglish, false, Result.AUDIO_TYPE_UNSET, true, 0);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean)
+   * @param userID
+   * @param plan
+   * @param exerciseID
+   * @param questionID
+   * @param audioFile
+   * @param valid
+   * @param flq
+   * @param spoken
+   * @param audioType
+   * @param durationInMillis
+   * @param correct
+   * @param score
+   */
   public void addAudioAnswer(int userID, String plan, String exerciseID, int questionID,
                              String audioFile,
                              boolean valid, boolean flq, boolean spoken,
-                             String audioType, int durationInMillis) {
+                             String audioType, int durationInMillis, boolean correct, float score) {
     answerDAO.addAnswer(this, userID, plan, exerciseID, questionID, "", audioFile, valid, flq, spoken, audioType,
-      durationInMillis);
+      durationInMillis, correct, score);
   }
 
   /**
