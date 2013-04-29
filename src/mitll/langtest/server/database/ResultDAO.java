@@ -1,13 +1,11 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -44,6 +42,8 @@ public class ResultDAO extends DAO {
   static final String SPOKEN = "spoken";
   static final String AUDIO_TYPE = "audioType";
   static final String DURATION = "duration";
+  static final String CORRECT = "correct";
+  static final String PRON_SCORE = "pronscore";
 
   private GradeDAO gradeDAO;
   private ScheduleDAO scheduleDAO ;
@@ -79,7 +79,6 @@ public class ResultDAO extends DAO {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + RESULTS + ";");
       ResultSet rs = statement.executeQuery();
-      //List<Result> results = new ArrayList<Result>();
       if (rs.next()) {
         int i = 1;
         numResults = rs.getInt(i++);
@@ -103,9 +102,7 @@ public class ResultDAO extends DAO {
   private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<Result> results = new ArrayList<Result>();
-    int columnCount = rs.getMetaData().getColumnCount();
     while (rs.next()) {
-      int i = 1;
       int uniqueID = rs.getInt(ID);
       long userID = rs.getLong(USERID);
       String plan = rs.getString(PLAN);
@@ -117,8 +114,12 @@ public class ResultDAO extends DAO {
       boolean flq = rs.getBoolean(FLQ);
       boolean spoken = rs.getBoolean(SPOKEN);
 
-      String type = (columnCount >= i) ? rs.getString(AUDIO_TYPE) : null;
-      int dur = (columnCount >= i) ? rs.getInt(DURATION) : 0;
+      String type = rs.getString(AUDIO_TYPE) ;
+      int dur = rs.getInt(DURATION);
+
+      boolean correct = rs.getBoolean(CORRECT);
+      float pronScore = rs.getFloat(PRON_SCORE);
+
       Result e = new Result(uniqueID, userID, //id
           plan, // plan
           exid, // id
@@ -126,7 +127,7 @@ public class ResultDAO extends DAO {
           answer, // answer
           valid, // valid
           timestamp.getTime(),
-          flq, spoken, type, dur);
+          flq, spoken, type, dur, correct, pronScore);
       trimPathForWebPage(e);
       results.add(e);
     }
@@ -377,7 +378,7 @@ public class ResultDAO extends DAO {
    * Add values for the duration field to old collections that don't have them.
    * @param installPath
    */
-  public void enrichResultDurations(String installPath) {
+/*  public void enrichResultDurations(String installPath) {
     List<Result> results = getResults();
     AudioCheck check = new AudioCheck();
     logger.debug("enrichResultDurations checking " + results.size() + " results");
@@ -398,7 +399,7 @@ public class ResultDAO extends DAO {
       }
     }
     logger.debug("enriched " + count + " items of " + results.size() + " results");
-  }
+  }*/
 
   /**
    * @see #enrichResults
@@ -433,9 +434,9 @@ public class ResultDAO extends DAO {
 
   /**
    * Set the duration for one entry.
-   * @param toChange
+   * @paramx toChange
    */
-  private void enrichDur(Result toChange) {
+/*  private void enrichDur(Result toChange) {
     try {
       Connection connection = database.getConnection();
 
@@ -458,7 +459,7 @@ public class ResultDAO extends DAO {
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
+  }*/
 
   void dropResults(Database database) {
     try {
@@ -498,6 +499,10 @@ public class ResultDAO extends DAO {
       logger.info(RESULTS + " table had num columns = " + numColumns);
       addDurationColumnToTable(connection);
     }
+    if (numColumns < 14) {
+      logger.info(RESULTS + " table had num columns = " + numColumns);
+      addFlashcardColumnsToTable(connection);
+    }
    // removeTimeDefault(connection);
     //removeValidDefault(connection);
    // addValidDefault(connection);
@@ -529,16 +534,17 @@ public class ResultDAO extends DAO {
         FLQ + " BOOLEAN," +
         SPOKEN + " BOOLEAN," +
         AUDIO_TYPE + " VARCHAR," +
-        DURATION + " INT" +
+      DURATION + " INT," +
+      CORRECT + " BOOLEAN," +
+      PRON_SCORE + " FLOAT" +
       ")");
     statement.execute();
     statement.close();
   }
 
   private void addColumnToTable(Connection connection) throws SQLException {
-    PreparedStatement statement = null;
     try {
-      statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
+      PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
           FLQ +
           " BOOLEAN");
       statement.execute();
@@ -548,7 +554,7 @@ public class ResultDAO extends DAO {
     }
 
     try {
-      statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
+      PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
           SPOKEN +
           " BOOLEAN");
       statement.execute();
@@ -586,6 +592,30 @@ public class ResultDAO extends DAO {
           DURATION +
           " " +
           "INT");
+      statement.execute();
+      statement.close();
+    } catch (SQLException e) {
+      logger.warn("addDurationColumnToTable : got " + e);
+    }
+  }
+
+  private void addFlashcardColumnsToTable(Connection connection) throws SQLException {
+    try {
+      PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
+        CORRECT +
+        " " +
+        "BOOLEAN");
+      statement.execute();
+      statement.close();
+    } catch (SQLException e) {
+      logger.warn("addDurationColumnToTable : got " + e);
+    }
+
+    try {
+      PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
+        PRON_SCORE +
+        " " +
+        "FLOAT");
       statement.execute();
       statement.close();
     } catch (SQLException e) {
