@@ -1,12 +1,10 @@
 package mitll.langtest.client.bootstrap;
 
 import com.github.gwtbootstrap.client.ui.CellTable;
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.SimplePager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
+import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
@@ -90,6 +88,8 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   private CellTable<Exercise> table;
   private Widget getAsyncTable(Map<String, Collection<String>> typeToSection,int numResults) {
     CellTable<Exercise> table = makeCellTable();
+    table.setStriped(true);
+    table.setBordered(false);
     table.setWidth("100%");
     table.setRowCount(numResults, true);
     int numRows = getNumTableRowsGivenScreenHeight();
@@ -109,15 +109,17 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   }
 
   private Panel getPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows) {
-    SimplePager.Resources DEFAULT_RESOURCES = GWT.create(SimplePager.Resources.class);
-    SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, true, fastForwardRows, true);
-    pager.addStyleName("alignCenter");
+   // SimplePager.Resources DEFAULT_RESOURCES = GWT.create(SimplePager.Resources.class);
+   // SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, false, fastForwardRows, true);
+    SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER,false,true);
+
+  //  pager.addStyleName("alignCenter");
     // Set the cellList as the display.
     pager.setDisplay(table);
     //pager.setPageSize(pageSize);
     // Add the pager and list to the page.
     VerticalPanel vPanel = new VerticalPanel();
-    vPanel.setBorderWidth(1);
+   vPanel.setBorderWidth(1);
     vPanel.add(tableAsPanel);
 
 /*    FluidRow row = new FluidRow();
@@ -177,10 +179,18 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   }
 
 
+  public interface Resources extends
+    CellTable.Resources {
+
+    @Override
+    @Source({ CellTable.Style.DEFAULT_CSS, "FlashcardCellTableStyleSheet.css" })
+    CellTable.Style cellTableStyle();
+  }
 
   @Override
   protected CellTable<Exercise> makeCellTable() {
-    CellTable<Exercise> table = new CellTable<Exercise>(PAGE_SIZE);
+    Resources resources = GWT.create(Resources.class);
+    CellTable<Exercise> table = new CellTable<Exercise>(PAGE_SIZE,resources);
     DOM.setStyleAttribute(table.getElement(), "marginBottom", "2px");
 
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
