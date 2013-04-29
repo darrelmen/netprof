@@ -326,10 +326,6 @@ public class BootstrapExercisePanel extends FluidContainer {
     protected void receivedAudioAnswer(AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
       boolean correct = result.isCorrect();
       double score = result.getScore();
-      if (score < 0.2) {
-        // sometimes silence registers as correct -- hack to fix it
-        correct = false;
-      }
       System.out.println("answer correct = " + correct + " pron score : " + score);
 
       recordButton.setResource(correct ? correctImage : incorrectImage);
