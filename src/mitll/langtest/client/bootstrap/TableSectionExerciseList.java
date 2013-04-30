@@ -60,9 +60,8 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
         Widget asyncTable = getAsyncTable(typeToSection, result);
         p.add(asyncTable);
         add(p);
-       // FluidContainer container = new FluidContainer();
         FlowPanel container = new FlowPanel();
-        addPreviewWidgets(container);
+        container.add(getPreviewWidgets());
         add(container);
 
         doZero();
@@ -72,8 +71,6 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
 
   @Override
   public void clear() {
-    System.out.println("remove all components ");
-
     removeComponents();
   }
 
@@ -91,6 +88,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     table.setStriped(true);
     table.setBordered(false);
     table.setWidth("100%");
+    table.setHeight("100%");
     table.setRowCount(numResults, true);
     int numRows = getNumTableRowsGivenScreenHeight();
     numRows = Math.min(10,numRows);
@@ -105,37 +103,22 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   }
 
   private Panel getPagerAndTable(CellTable<Exercise> table) {
-    return getPagerAndTable(table, table, PAGE_SIZE, 1000);
+    return getPagerAndTable(table, table);
   }
 
-  private Panel getPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows) {
-   // SimplePager.Resources DEFAULT_RESOURCES = GWT.create(SimplePager.Resources.class);
-   // SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, false, fastForwardRows, true);
-    SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER,false,true);
-
-  //  pager.addStyleName("alignCenter");
+  private Panel getPagerAndTable(HasRows table, Widget tableAsPanel) {
+    SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, false, true);
     // Set the cellList as the display.
     pager.setDisplay(table);
-    //pager.setPageSize(pageSize);
     // Add the pager and list to the page.
     VerticalPanel vPanel = new VerticalPanel();
-   vPanel.setBorderWidth(1);
+    vPanel.setBorderWidth(1);
     vPanel.add(tableAsPanel);
-
-/*    FluidRow row = new FluidRow();
-    Panel row2 = new FlowPanel();
-    row2.setWidth("100%");
-    row2.addStyleName("table-center");
-
-    row2.addStyleName("alignCenter");
-    row2.add(pager);*/
-    //row.addStyleName("inlineStyle");
-  //  row.add(new Column(12,row2));
-   // row.add(pager);
 
     FlowPanel outer = new FlowPanel();
     pager.addStyleName("tableCenter");
     outer.add(pager);
+    outer.addStyleName("tableExerciseListHeader");
 
     vPanel.add(outer);
 
@@ -150,14 +133,13 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
         final int start = display.getVisibleRange().getStart();
         int end = start + display.getVisibleRange().getLength();
         end = end >= numResults ? numResults : end;
-        //System.out.println("asking for " + start +"->" + end);
+        System.out.println("createProvider : asking for " + start +"->" + end);
         final int fend = end;
         service.getFullExercisesForSelectionState(typeToSection, start, end, new AsyncCallback<List<Exercise>>() {
           @Override
           public void onFailure(Throwable caught) {
             Window.alert("getFullExercisesForSelectionState : Can't contact server.");
             new ExceptionHandlerDialog(null,caught);
-
           }
 
           @Override
@@ -165,11 +147,11 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
             System.out.println("createProvider : onSuccess for " + start + "->" + fend + " got " + result.size());
 
             updateRowData(start, result);
-            onResize();
           }
         });
       }
     };
+    setScrollPanelWidth();
 
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
@@ -260,6 +242,8 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     if (table != null && table.getPageSize() != numRows) {
       System.out.println("onResize : num rows now " + numRows);
       table.setPageSize(numRows);
+      System.out.println("onResize : redraw");
+
       table.redraw();
     }
   }
