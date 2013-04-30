@@ -11,6 +11,10 @@ import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.storage.client.Storage;
@@ -205,6 +209,13 @@ public class BootstrapExercisePanel extends FluidContainer {
     return new MyRecordButtonPanel(service, controller, exercise, index);
   }
 
+  public void grabFocus() {
+    for (MyRecordButtonPanel widget : answerWidgets) {
+      System.out.println("Grab focus!!!");
+      widget.getRecordButton().setFocus(true);
+    }
+  }
+
   private class MyRecordButtonPanel extends RecordButtonPanel {
     private final Exercise exercise;
     public MyRecordButtonPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, int index) {
@@ -281,8 +292,30 @@ public class BootstrapExercisePanel extends FluidContainer {
 
     @Override
     protected Anchor makeRecordButton() {
-      recordButton = new ImageAnchor();
+      recordButton = new ImageAnchor() {
+        @Override
+        protected void onLoad() {
+          super.onLoad();
+          recordButton.setFocus(true);
+        }
+      };
       recordButton.setResource(enterImage);
+      recordButton.setFocus(true);
+      recordButton.addFocusHandler(new FocusHandler() {
+        @Override
+        public void onFocus(FocusEvent event) {
+          System.out.println("\n\n\n record button got the focus! -------------- \n\n\n");
+        }
+      });
+
+      recordButton.addKeyDownHandler(new KeyDownHandler() {
+        @Override
+        public void onKeyDown(KeyDownEvent event) {
+          System.out.println("\n\n\n record button got key down : " +event+
+            "-------------- \n\n\n");
+        }
+      });
+
       return recordButton;
     }
 
