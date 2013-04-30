@@ -4,6 +4,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
@@ -186,7 +187,7 @@ public class RecordButtonPanel {
     recordButton.setTitle(RECORD);
   }
 
-  public Widget getRecordButton() { return recordButton; }
+  public FocusWidget getRecordButton() { return recordButton; }
 
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {}
   protected void receivedAudioFailure() {}
