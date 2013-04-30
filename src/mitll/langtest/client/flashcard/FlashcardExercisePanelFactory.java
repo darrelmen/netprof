@@ -28,6 +28,11 @@ public class FlashcardExercisePanelFactory extends ExercisePanelFactory {
     super(service, userFeedback, controller);
   }
 
+  /**
+   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList.FlashcardResponseAsyncCallback#onSuccess(mitll.langtest.shared.FlashcardResponse)
+   * @param e
+   * @return
+   */
   public Panel getExercisePanel(Exercise e) {
     return new BootstrapExercisePanel(e, service, controller);
   }
