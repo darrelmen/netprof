@@ -3,6 +3,7 @@ package mitll.langtest.client.bootstrap;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -263,8 +264,18 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
         lastCorrect = result.correct;
         List<Integer> correctHistory = result.getCorrectHistory();
         prevCorrect = correctHistory == null || correctHistory.isEmpty() ? -1 : correctHistory.get(correctHistory.size() - 1);
+
+        grabFocus((BootstrapExercisePanel) exercisePanel);
       }
     }
+  }
+
+  protected void grabFocus(final BootstrapExercisePanel panel) {
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
+      public void execute () {
+        panel.grabFocus();
+      }
+    });
   }
 
   private class MyTimer extends Timer {
