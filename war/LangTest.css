@@ -33,7 +33,7 @@ h1 {
 
 .headerLowerBorder {
     border-style:solid;
-    border-width: 4px;
+    border-width: 2px;
     border-top-color: #404141;
     border-bottom-color: #3195b9;
     border-left-color: #404141;
@@ -59,7 +59,7 @@ h1 {
 }
 
 .cardText {
-    padding: 60px;
+    padding: 55px;
     margin: 20px 0 30px;
 }
 
@@ -136,6 +136,10 @@ h1 {
 
 .warningButtonColor {
     background-color: #b2b5b4;
+}
+
+.tableExerciseListHeader {
+    background-color: #EAEAEA;
 }
 
 .noPadding {
@@ -241,6 +245,8 @@ h1 {
     padding-left: 10px;
     padding-right: 10px;
     background-color: #fafafa;
+    margin-left: 5px;
+    margin-bottom: 5px;
 }
 
 .lessPadding {
@@ -288,6 +294,10 @@ fieldset {
 
 .leftTenMargin {
     margin-left: 10px;
+}
+
+.leftFiveMargin {
+    margin-left: 5px;
 }
 
 .noMargin {
