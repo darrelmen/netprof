@@ -78,18 +78,18 @@ public class DatabaseImpl implements Database {
   private final String configDir;
   private String mediaDir;
   private final Map<Long,UserStateWrapper> userToState = new HashMap<Long,UserStateWrapper>();
-  private boolean showSemesters;
 
   /**
    * Just for testing
    * @param configDir
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    */
-/*
-  public DatabaseImpl(String configDir) {
-    this(configDir, "vlr-parle", false,false,"", false);
+
+  public DatabaseImpl(String configDir, String dbName, String lessonPlanFile) {
+    this(configDir, dbName, false,false,"", false, "",false);
+    this.useFile = true;
+    this.lessonPlanFile = lessonPlanFile;
   }
-*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
@@ -97,10 +97,9 @@ public class DatabaseImpl implements Database {
    * @param dbName
    * @param showSections
    * @param doImages
-   * @param showSemesters
    */
   public DatabaseImpl(String configDir, String dbName, boolean showSections, boolean isWordPairs,
-                      String language, boolean doImages, String relativeConfigDir, boolean isFlashcard, boolean showSemesters) {
+                      String language, boolean doImages, String relativeConfigDir, boolean isFlashcard) {
     connection = new H2Connection(configDir, dbName);
     this.showSections = showSections;
     this.isWordPairs = isWordPairs;
@@ -120,8 +119,6 @@ public class DatabaseImpl implements Database {
     }
     initializeDAOs();
     monitoringSupport = getMonitoringSupport();
-
-
   }
 
   /**
@@ -207,28 +204,6 @@ public class DatabaseImpl implements Database {
 
   public void setOutsideFile(String outsideFile) { monitoringSupport.setOutsideFile(outsideFile); }
 
-/*  public Map<String, Collection<String>> getTypeToSection() {
-    getExercises();
-    return exerciseDAO.getTypeToSections();
-  }*/
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getTypeToSectionsForTypeAndSection(String, String)
-   * @paramx type
-   * @paramx section
-   * @return
-   */
-/*  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
-    return exerciseDAO.getTypeToSectionsForTypeAndSection(type, section);
-  }*/
-
-/*  public Collection<Exercise> getExercisesForSection(String type, String section) {
-    return exerciseDAO.getExercisesForSection(type, section);
-  }*/
-/*  public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
-    return exerciseDAO.getExercisesForSelectionState(typeToSection);
-  }*/
-
   public SectionHelper getSectionHelper() {
     getExercises();
     return exerciseDAO.getSectionHelper();
@@ -290,8 +265,9 @@ public class DatabaseImpl implements Database {
    * @param expectedCount
    * @param filterResults
    * @param useFLQ
-   * @param useSpoken @return
+   * @param useSpoken
    * @param englishOnly
+   * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getNextUngradedExercise
    */
   public Exercise getNextUngradedExercise(Collection<String> activeExercises, int expectedCount, boolean filterResults,
@@ -477,7 +453,6 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public FlashcardResponse getNextExercise(List<Exercise> exercises, long userID, boolean isTimedGame) {
-    //List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
     return getFlashcardResponse(userID, isTimedGame, exercises);
   }
 
@@ -905,7 +880,7 @@ public class DatabaseImpl implements Database {
     int total = 0;
     for (ResultAndGrade rg : rgs) {
       total += rg.totalValidGrades();
-      ret.add(idToExercise.get(rg.result.id));
+      ret.add(idToExercise.get(rg.getResult().id));
     }
     logger.info("total valid grades " + total);
     return ret;
@@ -961,80 +936,6 @@ public class DatabaseImpl implements Database {
 
   public User getUser(long id) {
     return userDAO.getUserMap().get(id);
-  }
-
-
-  private static class ResultAndGrade implements Comparable<ResultAndGrade> {
-    private Result result;
-    private List<Grade> grades = new ArrayList<Grade>();
-
-    public ResultAndGrade(Result result, List<Grade> grades) {
-      this.result = result;
-      this.grades = grades;
-    }
-
-/*    public void addGrade(Grade g) {
-      grades.add(g);
-    }*/
-
-    public void addGrades(List<Grade> grades) {
-      this.grades.addAll(grades);
-    }
-
-    public float getRatio() {
-      int right = 0;
-      int wrong = 0;
-      for (Grade g : grades) {
-        if (g.grade > 3) right++; else if (g.grade > 0 && g.grade < 3) wrong++;
-      }
-      if (right == 0 && wrong == 0) return 0.5f; // items with no valid grades sort to the middle
-
-      float ratio = (float) right / (float) (right + wrong);
-    //  if (grades.size() > 100)
-   //   System.out.println("num = " + grades.size() +" : right " + right + " wrong " + wrong + " ratio " + ratio);
-      return ratio;
-    }
-
-    public int totalValidGrades() {
-      int total = 0;
-      for (Grade g : grades) {
-         if (g.grade > 0) total++;
-      }
-      return total;
-    }
-
-    private int getNumRight() {
-      int right = 0;
-      for (Grade g : grades) {
-        if (g.grade > 3) right++;
-      }
-      return right;
-    }
-    private int getNumWrong() {
-      int wrong = 0;
-      for (Grade g : grades) {
-        if (g.grade > 0 && g.grade < 3) wrong++;
-      }
-      return wrong;
-    }
-
-    @Override
-    public int compareTo(ResultAndGrade o) {
-      float ratio = getRatio();
-      float oratio = o.getRatio();
-      int numRight = getNumRight();
-      int numRight1 = o.getNumRight();
-
-      int numWrong = getNumWrong();
-      int numWrong1 = o.getNumWrong();
-      return ratio < oratio ? +1 : ratio > oratio ? -1 : numRight > numRight1 ? -1 : numRight < numRight1 ? +1 : numWrong > numWrong1 ? -1 : numWrong < numWrong1 ? +1 :0;
-    }
-
-    @Override
-    public String toString() {
-      return "'" + result + "'\tand grades (" + grades.size() + ")" + " ratio " + getRatio() +
-          new HashSet<Grade>(grades);
-    }
   }
 
   public long addUser(HttpServletRequest request, int age, String gender, int experience) {
@@ -1279,13 +1180,7 @@ public class DatabaseImpl implements Database {
    * @return list of duration and numAnswer pairs
    */
   public List<Session> getSessions() { return monitoringSupport.getSessions(); }
-  /**
-   * Given the observed rate of responses and the number of exercises to get
-   * responses for, make a map of number of responses->hours
-   * required to get that number of responses.
-   * @return # responses->hours to get that number
-   */
-  public Map<Integer,Float> getHoursToCompletion() {   return  monitoringSupport.getHoursToCompletion(getExercises()); }
+
  /**
    * TODO : worry about duplicate userid?
    * @return
