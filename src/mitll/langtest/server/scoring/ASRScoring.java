@@ -6,6 +6,7 @@ import audio.image.TranscriptEvent;
 import audio.imagewriter.ImageWriter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.io.Files;
 import corpus.ArabicLTS;
 import corpus.EnglishLTS;
 import corpus.HTKDictionary;
@@ -177,8 +178,6 @@ public class ASRScoring extends Scoring {
    * @param imageHeight image height
    * @param useScoreForBkgColor true if we want to color the segments by score else all are gray
    * @param useCache
-   * @paramx lmSentences foreground sentences (expected replies)
-   * @paramx background sentences
    * @return score info coming back from alignment/reco
    */
   private PretestScore scoreRepeatExercise(String testAudioDir, String testAudioFileNoSuffix,
@@ -243,23 +242,22 @@ public class ASRScoring extends Scoring {
     return getScoreForAudio(testAudioDir, testAudioFileNoSuffix, "", scoringDir, lmSentences, background);
   }*/
 
-/*  public Scores align(String testAudioDir, String testAudioFileNoSuffix,
-                      String sentence,
-                      String scoringDir) {
+  public Scores align(String testAudioDir, String testAudioFileNoSuffix,
+                      String sentence) {
     return getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir,
-        EMPTY_LIST, EMPTY_LIST);
-  }*/
+       false, Files.createTempDir().getAbsolutePath(), false);
+  }
 
   /**
    * @see #scoreRepeatExercise
-   * @param testAudioDir
-   * @param testAudioFileNoSuffix
-   * @param sentence
-   * @param scoringDir
-   * @param useCache
-   * @paramx lmSentences
-   * @paramx background
-   * @return
+   * @param testAudioDir audio file directory
+   * @param testAudioFileNoSuffix file name without suffix
+   * @param sentence for alignment, the sentence to align, for decoding, the vocab list to use to filter against the dictionary
+   * @param scoringDir war/scoring path
+   * @param decode true if doing decoding, false for alignment
+   * @param tmpDir to use to run hydec in
+   * @param useCache cache scores so subsequent requests for the same audio file will get the cached score
+   * @return Scores -- hydec score and event (word/phoneme) scores
    */
   private Scores getScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
                                   String sentence,
@@ -312,7 +310,7 @@ public class ASRScoring extends Scoring {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(java.io.File, java.util.List, java.util.List)
+   * @see AutoCRTScoring#getASRScoreForAudio(java.io.File, java.util.List
    * @param lmSentences
    * @param background
    * @return
@@ -483,7 +481,7 @@ public class ASRScoring extends Scoring {
     htkDictionary = new HTKDictionary(dictFile);
     long now = System.currentTimeMillis();
     int size = htkDictionary.size(); // force read from lazy val
-    logger.debug("read dict of size " +size + " in " + (now-then) + " millis");
+    logger.debug("read dict " + dictFile + " of size " +size + " in " + (now-then) + " millis");
   }
 
   /**

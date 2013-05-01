@@ -1,6 +1,11 @@
 package mitll.langtest.client;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Column;
+import com.github.gwtbootstrap.client.ui.Container;
+import com.github.gwtbootstrap.client.ui.FluidContainer;
+import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Row;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -16,8 +21,17 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
@@ -31,7 +45,6 @@ import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
-import mitll.langtest.client.flashcard.FlashcardExerciseList;
 import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.mail.MailDialog;
@@ -261,10 +274,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return titleRow;
   }
 
+  /**
+   * Set the page title and favicon.
+   */
   private void setPageTitle() {
     Element elementById = DOM.getElementById("title-tag");   // set the page title to be consistent
     if (elementById != null) {
       elementById.setInnerText(props.getAppTitle());
+    }
+
+    if (props.isFlashCard() || props.isFlashcardTeacherView()) {
+      Element element = DOM.getElementById("favicon");   // set the page title to be consistent
+      if (element != null) {
+        element.setAttribute("href", "flashFavIcon.gif");
+      }
     }
   }
 
