@@ -3,7 +3,6 @@ package mitll.langtest.server;
 import ag.experiment.AutoGradeExperiment;
 import mira.classifier.Classifier;
 import mitll.langtest.server.database.Export;
-import mitll.langtest.server.database.FileExerciseDAO;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
@@ -12,8 +11,6 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,16 +27,15 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class AutoCRT {
-  public static final double MINIMUM_FLASHCARD_PRON_SCORE = 0.19;
   private static Logger logger = Logger.getLogger(AutoCRT.class);
+
+  private static final double MINIMUM_FLASHCARD_PRON_SCORE = 0.19;
   private Classifier<AutoGradeExperiment.Event> classifier = null;
-  private Set<String> allAnswers = new HashSet<String>();
   private Map<String, Export.ExerciseExport> exerciseIDToExport;
   private String installPath;
   private String mediaDir;
   private final Export exporter;
   private AutoCRTScoring db;
-  private List<String> optionalBackgroundSentences = Collections.emptyList();
 
   public AutoCRT(Export exporter, AutoCRTScoring db, String installPath, String relativeConfigDir,
                  String backgroundFile) {
@@ -47,36 +43,12 @@ public class AutoCRT {
     this.mediaDir = relativeConfigDir;
     this.exporter = exporter;
     this.db = db;
-
-    getOptionalBackground(installPath, backgroundFile);
-  }
-
-  /**
-   * This was an experiment to improve reco performance, likely OBE.
-   *
-   * @deprecated this is probably a bad idea
-   * @param installPath
-   * @param backgroundFile
-   */
-  private void getOptionalBackground(String installPath, String backgroundFile) {
-    File background = new File(backgroundFile);
-    if (background.exists() && background.isFile()) {
-      FileExerciseDAO fileExerciseDAO = new FileExerciseDAO(true);
-      fileExerciseDAO.readFastAndSlowExercises(installPath, mediaDir, backgroundFile);  // TODO confirm this is the right thing
-      List<Exercise> rawExercises = fileExerciseDAO.getRawExercises();
-
-      List<String> sentences = new ArrayList<String>();
-      for (Exercise other : rawExercises) {
-          sentences.addAll(getRefSentences(other));
-      }
-      this.optionalBackgroundSentences = getBackgroundSentences(sentences);
-    }
   }
 
   /**
    * Get an auto crt reco output and score given an audio answer.
    *
-   * @see LangTestDatabaseImpl#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.AudioCheck.ValidityAndDur, String)
+   * @see LangTestDatabaseImpl#getAudioAnswer
    * @param exerciseID
    * @param e
    * @param audioFile
@@ -88,9 +60,7 @@ public class AutoCRT {
     List<String> exportedAnswers = getExportedAnswers(exerciseID, questionID);
     logger.info("got answers " + new HashSet<String>(exportedAnswers));
 
-    List<String> background = getBackgroundText(e);
-
-    PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, exportedAnswers, background);
+    PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, exportedAnswers);
 
     String recoSentence = asrScoreForAudio.getRecoSentence();
     logger.info("reco sentence was '" + recoSentence + "'");
@@ -105,34 +75,22 @@ public class AutoCRT {
 
   /**
    * @see LangTestDatabaseImpl#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.AudioCheck.ValidityAndDur, String, boolean)
-   * @see LangTestDatabaseImpl#isMatch(mitll.langtest.shared.Exercise, java.util.List, java.io.File)
-   *
+   * @see LangTestDatabaseImpl#isMatch
    * @param e
-   * @param allExercises
    * @param audioFile
    * @param answer
    */
   public void getFlashcardAnswer(Exercise e,
-                                 List<Exercise> allExercises,
                                  File audioFile,
                                  AudioAnswer answer) {
     List<String> foregroundSentences = getRefSentences(e);
-    if (allExercises.isEmpty()) logger.error("getFlashcardAnswer : huh? no background sentences?");
-
-    List<String> background = getBackground(e, allExercises);
-    background.addAll(optionalBackgroundSentences);
-
-    if (background.isEmpty()) logger.error("huh? background is empty despite having " + allExercises.size() + " ?");
-    //else logger.debug("using " +background.size() + " words");
-
     List<String> foreground = new ArrayList<String>();
     for (String ref : foregroundSentences) {
       foreground.add(removePunct(ref));
     }
 
-    logger.debug("foreground " + foreground + " back (" + background.size() + " words"+
-      ")" + background.subList(0,Math.min(10,background.size())) +"...");
-    PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, foreground, background);
+    logger.debug("getFlashcardAnswer : foreground " + foreground);
+    PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, foreground);
 
     String recoSentence =
       asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
@@ -149,34 +107,12 @@ public class AutoCRT {
     answer.setScore(scoreForAnswer);
   }
 
-  private List<String> getBackground(Exercise exercise, List<Exercise> allExercises) {
-    List<String> sentences = new ArrayList<String>();
-    String exerciseID = exercise.getID();
-    for (Exercise other : allExercises) {
-      if (!other.getID().equals(exerciseID)) {
-        sentences.addAll(getRefSentences(other));
-      }
-    }
-    return getBackgroundSentences(sentences);
-  }
-
   private boolean isCorrect(List<String> answerSentences, String recoSentence) {
     for (String answer : answerSentences) {
       String converted = answer.replaceAll("-", " ").replaceAll("\\.", "").toLowerCase();
-     // logger.debug("converted is " + converted);
       if (converted.equalsIgnoreCase(recoSentence)) return true;
     }
     return false;
-/*    SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
-    List<String> fvocab = svDecoderHelper.getSimpleVocab(Collections.singletonList(converted), 50);
-    if (fvocab.isEmpty()) logger.error("huh? foreground is empty for " +answerSentence);
-
-    List<String> rvocab = svDecoderHelper.getSimpleVocab(Collections.singletonList(recoSentence), 50);
-    if (rvocab.isEmpty()) logger.warn("recoSentence is empty for " +recoSentence);
-
-    boolean b = rvocab.containsAll(fvocab);
-    if (!b) logger.info("isCorrect - no match : reco " + rvocab + " vs answer " +fvocab);
-    return b;*/
   }
 
   /**
@@ -250,65 +186,6 @@ public class AutoCRT {
     }
   }
 
-  /**
-   * Get the background sentences to feed into a background language model.
-   * The background is the question content (orientation, prompting, etc.) and all other
-   * answers to all the other questions.
-   * @param e to harvest the question content from
-   * @return all background sentences
-   */
-  private List<String> getBackgroundText(Exercise e) {
-    List<String> background = new ArrayList<String>();
-    String content = e.getContent().replaceAll("\\<.*?\\>", "").replaceAll("&nbsp;", "");
-    for (String line : content.split("\n")) {
-      String trimmed = line.trim();
-      if (trimmed.length() > 0 && !trimmed.contains("Orient") && !trimmed.contains("Listen")) background.add(trimmed);
-    }
-
-    for (Exercise.QAPair pair : e.getForeignLanguageQuestions())  {
-      background.add(pair.getQuestion());
-    }
-
-    Collection<String> sentences = getAllExportedAnswers();
-    background.addAll(getBackgroundSentences(sentences));
-
-    logger.info("background has " + background.size() + " lines");
-    return background;
-  }
-
-  /**
-   * @see #getBackgroundText(mitll.langtest.shared.Exercise)
-   * @see #getFlashcardAnswer
-   * @param sentences
-   * @return
-   */
-  private List<String> getBackgroundSentences(Collection<String> sentences) {
-    //if (sentences.isEmpty()) logger.warn("getBackgroundSentences huh? no background sentences?");
-    List<String> background = new ArrayList<String>();
-
-    for (String answer : sentences) {
-      StringBuilder b = new StringBuilder();
-      for (int i = 0; i < answer.length(); i++) {
-        if (!Character.isDigit(answer.charAt(i))) {
-          b.append(answer.charAt(i));
-        }
-        else {
-          b.append(" ");
-        }
-      }
-      String result = b.toString().trim();
-      if (result.length() > 0) {
-        background.add(removePunct(result));
-      }
-    }
-    if (background.isEmpty()) {
-      logger.warn("huh? getBackgroundSentences no background sentences despite " +sentences.size()+ " inputs"+
-        "?");
-    }
-
-    return background;
-  }
-
   private Set<String> getTokenSet(List<String> exportedAnswers) {
     Set<String> tokens = new HashSet<String>();
     for (String l : exportedAnswers) {
@@ -324,8 +201,6 @@ public class AutoCRT {
     return t.replaceAll("\\p{P}","");
   }
 
-  private Collection<String> getAllExportedAnswers() { return allAnswers; }
-
   /**
    * @see #getAutoCRTDecodeOutput(String, int, mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
    * @param id
@@ -339,9 +214,7 @@ public class AutoCRT {
     for (Export.ResponseAndGrade resp : getExportForExercise(id, questionID).rgs) answers.add(resp.response);
     return answers;
   }
-/*  private Export.ExerciseExport getExportForExercise(Exercise e, int questionID) {
-    return getExportForExercise(e.getID(), questionID);
-  }*/
+
   private Export.ExerciseExport getExportForExercise(String id, int questionID) {
     return getExportForExercise(id + "_" + questionID);
   }
@@ -359,7 +232,7 @@ public class AutoCRT {
    */
   private Classifier<AutoGradeExperiment.Event> getClassifier() {
     if (classifier != null) return classifier;
-    allAnswers = new HashSet<String>();
+    Set<String> allAnswers = new HashSet<String>();
     List<Export.ExerciseExport> export = exporter.getExport(true, false);
     exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
     for (Export.ExerciseExport exp : export) {
