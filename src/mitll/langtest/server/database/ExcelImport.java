@@ -2,7 +2,6 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Lesson;
-import mitll.langtest.shared.TeacherClass;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -40,7 +39,7 @@ public class ExcelImport implements ExerciseDAO {
 
   private List<Exercise> exercises = null;
   private List<String> errors = new ArrayList<String>();
-  private TeacherClass teacherClass;
+  //private TeacherClass teacherClass;
   private final String file;
   private SectionHelper sectionHelper = new SectionHelper();
 
@@ -64,6 +63,10 @@ public class ExcelImport implements ExerciseDAO {
     return sectionHelper;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getExercises()
+   * @return
+   */
   public List<Exercise> getRawExercises() {
     synchronized (this) {
       if (exercises == null) {
@@ -73,7 +76,7 @@ public class ExcelImport implements ExerciseDAO {
     return exercises;
   }
 
-  public List<Exercise> readExercises(File file) {
+  private List<Exercise> readExercises(File file) {
     try {
       InputStream inp = new FileInputStream(file);
       return readExercises(inp);
@@ -92,7 +95,7 @@ public class ExcelImport implements ExerciseDAO {
     List<Exercise> exercises = new ArrayList<Exercise>();
     try {
       //logger.info("reading from " +inp);
-      teacherClass = new TeacherClass(-1);
+    //  teacherClass = new TeacherClass(-1);
       Workbook wb = WorkbookFactory.create(inp);
 
       for (int i = 0; i < wb.getNumberOfSheets(); i++) {
@@ -116,14 +119,6 @@ public class ExcelImport implements ExerciseDAO {
           logger.warn(error);
         }
       }
-     /* for (String key : typeToUnitToLesson.keySet()) {
-        Map<String, Lesson> categoryToLesson = typeToUnitToLesson.get(key);
-        lessons.addAll(categoryToLesson.values());
-        Set<String> sections = categoryToLesson.keySet();
-        if (!sections.isEmpty()) {
-          logger.debug("Section "+ key+ " : " + sections);
-        }
-      }*/
       sectionHelper.report();
 
 /*      if (!errors.isEmpty()) {
@@ -230,8 +225,7 @@ public class ExcelImport implements ExerciseDAO {
           }
           if (foreignLanguagePhrase.length() == 0) {
             //logger.warn("Got empty foreign language phrase row #" + next.getRowNum() +" for " + english);
-            errors.add(sheet.getSheetName()+"/"+
-                "row #" +(next.getRowNum()+1) + " phrase was blank.");
+            errors.add(sheet.getSheetName()+"/"+"row #" +(next.getRowNum()+1) + " phrase was blank.");
           } else {
             String translit = getCell(next, transliterationIndex);
 
@@ -242,28 +236,9 @@ public class ExcelImport implements ExerciseDAO {
               }
             }
 
-            Exercise imported;
-            List<String> translations = new ArrayList<String>();
-            if (foreignLanguagePhrase.length() > 0) {
-              translations.addAll(Arrays.asList(foreignLanguagePhrase.split(";")));
-              //logger.debug(english + "->" + translations);
-            }
-            if (isFlashcard) {
-              imported = new Exercise("flashcardStimulus", "" + (id++), english, translations, english);
-           //   logger.debug("Read " + imported);
-            } else {
-              //    Exercise imported = new Exercise("import", "" + id, content, false, true, english);
-              imported = getExercise(id++, dao, english, foreignLanguagePhrase, translit);
-            }
-            imported.setEnglishSentence(english);
-            imported.setTranslitSentence(translit);
-            imported.setRefSentences(translations);
-
-            exercises.add(imported);
-            if (weightIndex != -1) {
-              imported.setWeight(getNumericCell(next, weightIndex));
-            }
+            Exercise imported = getExercise(id++, dao, weightIndex, next, english, foreignLanguagePhrase, translit);
             recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported);
+            exercises.add(imported);
 /*            if (false)
               logger.debug("read '" + english + "' '" + foreignLanguagePhrase +
                   "' '" + translit + "' '" + unit + "' '" + chapter + "' '" + week + "'");*/
@@ -271,9 +246,6 @@ public class ExcelImport implements ExerciseDAO {
               lastRowValues.add(english);
               lastRowValues.add(foreignLanguagePhrase);
               lastRowValues.add(translit);
-          /*    lastRowValues.add(unit);
-              lastRowValues.add(chapter);
-              lastRowValues.add(week);*/
             }
             else if (!lastRowValues.isEmpty()) {
               lastRowValues.clear();
@@ -290,17 +262,38 @@ public class ExcelImport implements ExerciseDAO {
     return exercises;
   }
 
+  private Exercise getExercise(int id, FileExerciseDAO dao, int weightIndex, Row next,
+                               String english, String foreignLanguagePhrase, String translit) {
+    Exercise imported;
+    List<String> translations = new ArrayList<String>();
+    if (foreignLanguagePhrase.length() > 0) {
+      translations.addAll(Arrays.asList(foreignLanguagePhrase.split(";")));
+      //logger.debug(english + "->" + translations);
+    }
+    if (isFlashcard) {
+      imported = new Exercise("flashcardStimulus", "" + (id), english, translations, english);
+   //   logger.debug("Read " + imported);
+    } else {
+      //    Exercise imported = new Exercise("import", "" + id, content, false, true, english);
+      imported = getExercise(id, dao, english, foreignLanguagePhrase, translit);
+    }
+    imported.setEnglishSentence(english);
+    imported.setTranslitSentence(translit);
+    imported.setRefSentences(translations);
+
+    if (weightIndex != -1) {
+      imported.setWeight(getNumericCell(next, weightIndex));
+    }
+    return imported;
+  }
+
   private boolean recordUnitChapterWeek(int unitIndex, int chapterIndex, int weekIndex,
                                         Row next,
-                                        //String english, String foreignLanguagePhrase, String translit,
                                         Exercise imported) {
     String unit = getCell(next, unitIndex);
     String chapter = getCell(next, chapterIndex);
     String week = getCell(next, weekIndex);
     List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
-/*    boolean val = rememberExercise(typeToUnitToLesson.get("unit"), unit.trim(), unit, chapter, week, imported);
-    val |= rememberExercise(typeToUnitToLesson.get("chapter"), chapter.trim(), unit, chapter, week, imported);
-    val |= rememberExercise(typeToUnitToLesson.get("week"), week.trim(), unit, chapter, week, imported);*/
 
     if (unit.length() == 0 &&
       chapter.length() == 0 &&
@@ -320,17 +313,6 @@ public class ExcelImport implements ExerciseDAO {
 
     return false;
   }
-
-/*  private boolean rememberExercise(Map<String, Lesson> unitToLesson, String key, String unit, String chapter, String week, Exercise imported) {
-    if (key.length() > 0) {
-      Lesson unitLesson = unitToLesson.get(key);
-      if (unitLesson == null) unitToLesson.put(key, unitLesson = new Lesson(unit, chapter, week));
-      unitLesson.addExercise(imported);
-      return true;
-    } else {
-      return false;
-    }
-  }*/
 
   private Exercise getExercise(int id, FileExerciseDAO dao, String english, String foreignLanguagePhrase, String translit) {
     String content = dao.getContent(foreignLanguagePhrase, translit, english);
@@ -381,19 +363,9 @@ public class ExcelImport implements ExerciseDAO {
     return exercises;
   }
 
-/*  public List<Lesson> getLessons() {
-    return lessons;
-  }*/
-
   public Set<String> getSections() { return sectionHelper.getSections(); }
   public Map<String, Lesson> getSection(String type) {
     return sectionHelper.getSection(type);
-  }
-
-  public static void main(String[] arg) {
-    //new ExcelImport().readExercises(new File("Farsi_Curriculum_Glossary_vowelized_2013_02_04.xlsx"));
-    //new ExcelImport().readExercises(new File("2013_02_13_Dari_List_ZR_Path.xlsx"));
-    new ExcelImport().readExercises(new File("final6240.xlsx"));
   }
 
   public List<String> getErrors() {
