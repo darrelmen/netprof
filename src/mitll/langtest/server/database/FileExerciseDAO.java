@@ -2,9 +2,11 @@ package mitll.langtest.server.database;
 
 import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
+import mitll.langtest.server.scoring.ASRScoring;
+import mitll.langtest.server.scoring.Scores;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Lesson;
-import mitll.langtest.shared.Section;
+import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.AudioFormat;
@@ -12,6 +14,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -20,7 +23,6 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -781,13 +783,74 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
   }
 
+
+  /**
+   * Go through all exercise, find all results for each, take best scoring audio file from results
+   * @param path
+   */
+  // TODO later take data and use database so we keep metadata about audio
+  private void convertExamples(String path) {
+    DatabaseImpl db = new DatabaseImpl(
+      "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\dari\\",
+      "template",
+      "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\dari\\9000-dari-course-examples.xlsx");
+
+    List<Result> results = db.getResults();
+
+    //Map<String,Exercise> idToEx = new HashMap<String, Exercise>();
+    Map<String,List<Result>> idToResults = new HashMap<String, List<Result>>();
+
+    logger.debug("Got " + results.size() + " results");
+    List<Exercise> exercises = db.getExercises();
+    //for (Exercise e: exercises) idToEx.put(e.getID(),e);
+    for (Result r : results) {
+      List<Result> resultList = idToResults.get(r.getID());
+      if (resultList == null) {
+        idToResults.put(r.getID(), resultList = new ArrayList<Result>());
+      }
+      resultList.add(r);
+    }
+    logger.debug("Got " + exercises.size() + " exercises");
+
+    if (true) return;
+
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("language","Arabic");
+    properties.put("MODELS_DIR","models.dli-dari");
+    ASRScoring scoring = new ASRScoring("C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war", properties);
+
+
+
+    File dir = new File(path);
+    for (File execiseDir : dir.listFiles()) {
+      String exid = execiseDir.getName();
+      for (File question : execiseDir.listFiles()) {
+        for (File subject : question.listFiles()) {
+          for (File wav : subject.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+              return pathname.getName().endsWith(".wav");
+            }
+          })) {
+            // split file into fast and slow...?  how do you know which it was recorded under?
+            String refSentence = "something";
+            String name = wav.getName();
+            name = name.replaceAll(".wav","");
+            Scores align = scoring.align(subject.getAbsolutePath(), name, refSentence);
+          }
+        }
+      }
+    }
+  }
+
   public static void main(String [] arg) {
-    Pattern pattern = Pattern.compile("^\\d+\\.(.+)");
-    Matcher matcher = pattern.matcher("1. ????????? ????????");
-    System.out.println(matcher.matches());
+  //  Pattern pattern = Pattern.compile("^\\d+\\.(.+)");
+  //  Matcher matcher = pattern.matcher("1. ????????? ????????");
+ //   System.out.println(matcher.matches());
   //  System.out.println(" group " + matcher.find());
-    System.out.println(" match " + matcher.group(1));
+  //  System.out.println(" match " + matcher.group(1));
     //new FileExerciseDAO(relativeConfigDir).convertPlan();
+    new FileExerciseDAO(false).convertExamples("C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\dari\\examples");
     /*List<Exercise> rawExercises = new FileExerciseDAO(*//**//*"war"*//**//*).getRawExercises();
     System.out.println("first is " + rawExercises.iterator().next());*/
   }
