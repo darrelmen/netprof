@@ -22,7 +22,7 @@ public class H2Connection implements DatabaseConnection {
   private Connection conn;
 
   /**
-   * @see DatabaseImpl#DatabaseImpl(String, String, boolean, boolean, String, boolean, String, boolean, boolean)
+   * @see DatabaseImpl#DatabaseImpl(String, String, boolean, boolean, String, boolean, String, boolean)
    * @param configDir
    * @param dbName
    */
