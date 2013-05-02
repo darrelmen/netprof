@@ -11,7 +11,11 @@ import com.google.gwt.user.client.ui.DialogBox;
  * To change this template use File | Settings | File Templates.
  */
 public class ExceptionHandlerDialog {
-  public ExceptionHandlerDialog(BrowserCheck browserCheck,Throwable throwable) {
+  public ExceptionHandlerDialog(Throwable throwable) {
+    this(null, throwable);
+  }
+
+  public ExceptionHandlerDialog(BrowserCheck browserCheck, Throwable throwable) {
     String text = "Uncaught exception: ";
     while (throwable != null) {
       StackTraceElement[] stackTraceElements = throwable.getStackTrace();
