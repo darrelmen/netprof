@@ -3,7 +3,6 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -304,7 +303,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
           System.out.println("getImageURLForAudio : (failure) took " +(now-then) + " millis");
-          Window.alert("Couldn't contact server. Please check network connection.");
+          Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
         }
         public void onSuccess(ImageResponse result) {
           long now = System.currentTimeMillis();
