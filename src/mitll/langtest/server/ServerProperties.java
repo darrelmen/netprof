@@ -56,6 +56,8 @@ public class ServerProperties {
   private static final String ARABIC_TEXT_DATA_COLLECT = "arabicTextDataCollect";
   private static final String COLLECT_ONLY_AUDIO = "collectAudioOnly";
   private static final String TIMED_GAME = "timedGame";
+  private static final String MIN_PRON_SCORE = "minPronScore";
+  private static final String MIN_PRON_SCORE_DEFAULT = "0.20";
 
   private Properties props = null;
 
@@ -67,6 +69,7 @@ public class ServerProperties {
   public int firstNInOrder;
   public boolean isDataCollectAdminView;
   private double foregroundBlend;
+  private double minPronScore;
 
   public void readPropertiesFile(ServletContext servletContext, String configDir) {
    String configFile = servletContext.getInitParameter("configFile");
@@ -138,9 +141,12 @@ public class ServerProperties {
     return props.getProperty(MEDIA_DIR, "media");
   }
 
-
   public double getForegroundBlend() {
     return foregroundBlend;
+  }
+
+  public double getMinPronScore() {
+    return minPronScore;
   }
 
   public String getBackgroundFile() {
@@ -199,6 +205,9 @@ public class ServerProperties {
     useOutsideResultCounts = getDefaultTrue(USE_OUTSIDE_RESULT_COUNTS);
     isDataCollectAdminView = getDefaultFalse("dataCollectAdminView");
     outsideFile = props.getProperty(OUTSIDE_FILE, OUTSIDE_FILE_DEFAULT);
+
+
+
     String dateFromManifest = getDateFromManifest(servletContext);
     if (dateFromManifest != null && dateFromManifest.length() > 0) {
       //logger.debug("Date from manifest " + dateFromManifest);
@@ -214,6 +223,18 @@ public class ServerProperties {
         e1.printStackTrace();
       }
     }
+
+    try {
+      minPronScore = Double.parseDouble(props.getProperty(MIN_PRON_SCORE, MIN_PRON_SCORE_DEFAULT));
+    } catch (NumberFormatException e) {
+      logger.error("Couldn't parse property " + MIN_PRON_SCORE, e);
+      try {
+        minPronScore = Double.parseDouble(MIN_PRON_SCORE_DEFAULT);
+      } catch (NumberFormatException e1) {
+        e1.printStackTrace();
+      }
+    }
+
   }
 
   private boolean getDefaultFalse(String param) {
