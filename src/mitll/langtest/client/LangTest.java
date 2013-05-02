@@ -247,6 +247,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       adminRow.add(new Column(1, 2,users));
       adminRow.add(new Column(1, 2, showResults));
       adminRow.add(new Column(1, 2, monitoring));
+      HTML statusLine = getReleaseStatus();
+      adminRow.add(new Column(1, 2, statusLine));
+
       titleColumn.add(adminRow);
     }
     //widgets.add(headerRow);
@@ -570,7 +573,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         flashRecordPanel.hide();
         flashRecordPanel.hide2(); // must be a separate call!
 
-         checkLogin();
+        checkLogin();
       }
 
       public void gotDenial() {
@@ -718,7 +721,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     System.out.println("data collect mode " + props.isDataCollectMode() +
       " crt data collect " + props.isCRTDataCollectMode() +
       " teacher " + props.isTeacherView() + " grading " +props.isGrading());
-    if ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView() || props.isGrading()) {
+    if (!props.isFlashCard() && ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView() || props.isGrading())) {
       System.out.println("doing teacher login");
       userManager.teacherLogin();
     }
@@ -776,7 +779,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void checkLogin() {
-    if (props.isGoodwaveMode() || isAutoCRTMode() || props.isFlashCard() || props.isFlashcardTeacherView()) {   // no login for pron mode
+    if (props.isGoodwaveMode() || isAutoCRTMode() || (props.isFlashcardTeacherView() && !props.isFlashCard())) {   // no login for pron mode
       gotUser(-1);
     }
     else {
