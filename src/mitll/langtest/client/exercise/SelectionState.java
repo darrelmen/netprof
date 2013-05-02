@@ -2,7 +2,6 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.History;
-import sun.nio.cs.HistoricallyNamedCharset;
 
 import java.util.Arrays;
 import java.util.Collection;
