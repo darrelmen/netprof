@@ -2,7 +2,6 @@ package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 
 /**
