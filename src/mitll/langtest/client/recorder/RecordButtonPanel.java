@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.client.ExceptionHandlerDialog;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -162,7 +163,9 @@ public class RecordButtonPanel {
         public void onFailure(Throwable caught) {
           recordButton.setEnabled(true);
           receivedAudioFailure();
-          Window.alert("Server error : Couldn't post answers for exercise.");
+
+          Window.alert("writeAudioFile : stopRecording : Couldn't post answers for exercise.");
+          new ExceptionHandlerDialog(caught);
         }
 
         public void onSuccess(AudioAnswer result) {
