@@ -19,7 +19,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * The async counterpart of <code>LangTestDatabase</code>.
