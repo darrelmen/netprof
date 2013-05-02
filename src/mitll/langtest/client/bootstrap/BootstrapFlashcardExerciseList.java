@@ -1,18 +1,25 @@
 package mitll.langtest.client.bootstrap;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Column;
+import com.github.gwtbootstrap.client.ui.Container;
+import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.DialogHelper;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.SelectionState;
@@ -162,7 +169,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
         service.resetUserState(userID, new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
-            Window.alert("Couldn't contact server.");
+            Window.alert("resetUserState Couldn't contact server.");
           }
 
           @Override
@@ -179,7 +186,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
         service.clearUserState(userID, new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
-            Window.alert("Couldn't contact server.");
+            Window.alert("clearUserState Couldn't contact server.");
           }
 
           @Override
@@ -247,7 +254,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private class FlashcardResponseAsyncCallback implements AsyncCallback<FlashcardResponse> {
     @Override
     public void onFailure(Throwable caught) {
-      Window.alert("Couldn't contact server.");
+      Window.alert("FlashcardResponseAsyncCallback Couldn't contact server.");
     }
 
     @Override
