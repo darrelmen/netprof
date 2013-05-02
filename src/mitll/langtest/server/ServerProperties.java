@@ -64,11 +64,9 @@ public class ServerProperties {
   public boolean biasTowardsUnanswered, useOutsideResultCounts;
   public String outsideFile;
   public boolean isUrdu;
-  public boolean isWordPairs;
   public int firstNInOrder;
   public boolean isDataCollectAdminView;
   private double foregroundBlend;
-  private String backgroundFile;
 
   public void readPropertiesFile(ServletContext servletContext, String configDir) {
    String configFile = servletContext.getInitParameter("configFile");
