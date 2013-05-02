@@ -532,17 +532,22 @@ public class DatabaseImpl implements Database {
    */
   public void updateFlashcardState(long userID, String exerciseID, boolean isCorrect) {
     synchronized (userToState) {
-      UserStateWrapper state = userToState.get(userID);
-      if (state == null) {
-        logger.error("can't find state for user id " + userID);
-      } else {
-        state.state.update(exerciseID, isCorrect);
-        if (isCorrect) {
-          state.setCorrect(state.getCorrect() + 1);
+      try {
+        UserStateWrapper state = userToState.get(userID);
+        if (state == null) {
+          logger.error("can't find state for user id " + userID);
+        } else {
+          state.state.update(exerciseID, isCorrect);
+          if (isCorrect) {
+            state.setCorrect(state.getCorrect() + 1);
+          }
+          else {
+            state.setIncorrect(state.getIncorrect() + 1);
+          }
         }
-        else {
-          state.setIncorrect(state.getIncorrect() + 1);
-        }
+      } catch (Exception e) {
+        logger.warn("got " + e + " from updating "+ userID + " with " + exerciseID);
+        userToState.remove(userID);
       }
     }
   }
