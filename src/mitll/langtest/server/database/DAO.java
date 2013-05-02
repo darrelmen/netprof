@@ -3,7 +3,6 @@ package mitll.langtest.server.database;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
