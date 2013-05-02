@@ -9,9 +9,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
 
 /**
  * Checks for two things -- is the audio long enough ({@link #MinRecordLength} and is
@@ -28,8 +25,9 @@ public class AudioCheck {
 
   private static final int MinRecordLength = 1*(10000/2); // 10000 = 0.7 second
   private static final int WinSize = 10;
-  private static final float PowerThreshold = -85.0f;//-55.0f;
+  private static final float PowerThreshold = -75.0f;//-55.0f;
   private static final float VarianceThreshold = 20.0f;
+  private static final double CLIPPED_RATIO = 0.005; // 1/2 %
   private static final double LOG_OF_TEN = Math.log(10.0);
 
   private double dB(double power) {
@@ -66,10 +64,6 @@ public class AudioCheck {
 
   private double getDurationInSeconds(AudioInputStream audioInputStream) {
     long frames = audioInputStream.getFrameLength();
-
-
-    logger.info("got " + frames + " frames");
-
     AudioFormat format = audioInputStream.getFormat();
     return (frames + 0.0d) / format.getFrameRate();
   }
@@ -90,8 +84,6 @@ public class AudioCheck {
       if (bigEndian) {
         logger.warn("huh? file " + file.getAbsoluteFile() + " is in big endian format?");
       }
-      logger.info("encoding " + format.getEncoding() + " big endian = " + bigEndian);
-     // ByteOrder byteOrder = bigEndian ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
       int fsize = format.getFrameSize();
       assert(fsize == 2);
       assert(format.getChannels() == 1);
@@ -103,56 +95,29 @@ public class AudioCheck {
         return new ValidityAndDur(AudioAnswer.Validity.TOO_SHORT, dur);
       }
 
-
- /*     ShortBuffer sbuf =
-        ByteBuffer.wrap(audioBytes).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
-      short[] audioShorts = new short[sbuf.capacity()];
-      sbuf.get(audioShorts);
-*/
-
       // Verify audio power
       float pm = 0.0f, p2 = 0.0f, n = 0.0f;
       int bufSize = WinSize * fsize;
       byte[] buf = new byte[bufSize];
       float countClipped = 0f;
-     // float countNotClipped = 0f;
-      long frameIndex = 0;
-      long frameIndex2 = 0;
+
       while (ais.read(buf) == bufSize) {
-        float fpower = 0.0f/*, ns = 0.0f*/;
-        float fpower2 = 0.0f/*, ns = 0.0f*/;
+        float fpower = 0.0f;
         for (int i = 0; i < bufSize; i += fsize)
           for (int s = 0; s < fsize; s += 2) {
-           // short tmp = (short) ((buf[i + s] << 8) | buf[i + s + 1]);
-            short tmp = (short) ((buf[i + s] & 0xFF) | (buf[i + s + 1] << 8));
+            // short tmp = (short) ((buf[i + s] << 8) | buf[i + s + 1]); // BIG ENDIAN
+            short tmp = (short) ((buf[i + s] & 0xFF) | (buf[i + s + 1] << 8)); // LITTLE ENDIAN
 
             float r = ((float) tmp) / 32768.0f;
             if (Math.abs(r) > 0.98f) {
               countClipped++;
-       /*       logger.debug("at " + frameIndex + " s " + s + " i " + i +
-                " value was " + tmp + " and r " + r);*/
+       /*       logger.debug("at " + frameIndex + " s " + s + " i " + i + " value was " + tmp + " and r " + r);*/
             }
-            frameIndex++;
             fpower += r * r;
-            //ns += 1.0f;
           }
-/*
-        ShortBuffer sbuf = ByteBuffer.wrap(buf).order(byteOrder).asShortBuffer();
-        short[] audioShorts = new short[sbuf.capacity()];
-        sbuf.get(audioShorts);
-        for (short sample : audioShorts) {
-          float r = ((float) sample) / 32768.0f;
-          if (Math.abs(r) > 0.98f) {
-            countClipped++;
-            logger.debug("at " + frameIndex + //" s " + s + " i " + i+
-              " value was " + sample + " and r " + r);
-          }
-          frameIndex2++;
-          fpower2 += r * r;
-        }*/
 
         fpower /= (float) WinSize;
-        fpower = (float) dB((double)fpower);
+        fpower = (float) dB((double) fpower);
 
         pm += fpower;
         p2 += fpower * fpower;
@@ -160,17 +125,25 @@ public class AudioCheck {
       }
 
       float clippedRatio = countClipped / (float)frameLength;
-      boolean wasClipped = clippedRatio > 0.005;
+      boolean wasClipped = clippedRatio > CLIPPED_RATIO;
 /*      logger.info("of " + total +" got " +countClipped + " out of " + n +"  or " + clippedRatio  + "/" +clippedRatio2+
         " not " + notClippedRatio +" wasClipped = " + wasClipped);*/
 
       float mean = pm / n;
       float var = p2 / n - mean * mean;
       final boolean validAudio = mean > PowerThreshold || Math.sqrt(var) > VarianceThreshold;
-      logger.info("checkWavFile: audio recording (Length: " + frameLength + ") " +
-        "mean power = " + mean + " (dB), std = " + Math.sqrt(var) + " valid = " + validAudio + " was clipped " + wasClipped + " (" +(clippedRatio*100f)+
-        "% samples clipped)");
-      ValidityAndDur validityAndDur = new ValidityAndDur(validAudio ? AudioAnswer.Validity.OK : AudioAnswer.Validity.TOO_QUIET, dur);
+
+      if (wasClipped || !validAudio) {
+        logger.info("checkWavFile: audio recording (Length: " + frameLength + ") " +
+          "mean power = " + mean + " (dB) vs " + PowerThreshold +
+          ", std = " + Math.sqrt(var) + " vs " + VarianceThreshold+
+          " valid = " + validAudio + " was clipped " + wasClipped + " (" + (clippedRatio * 100f) +
+          "% samples clipped)");
+      }
+
+      AudioAnswer.Validity validity = validAudio ?
+        (wasClipped ? AudioAnswer.Validity.TOO_LOUD : AudioAnswer.Validity.OK) : AudioAnswer.Validity.TOO_QUIET;
+      ValidityAndDur validityAndDur = new ValidityAndDur(validity, dur);
 
       if (validityAndDur.validity != AudioAnswer.Validity.OK) {
         logger.info("validity " + validityAndDur);
