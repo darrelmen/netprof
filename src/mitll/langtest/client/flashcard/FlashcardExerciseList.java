@@ -53,7 +53,7 @@ public class FlashcardExerciseList implements ListInterface {
     service.getNextExercise(userID, new AsyncCallback<FlashcardResponse>() {
       @Override
       public void onFailure(Throwable caught) {
-        Window.alert("Couldn't contact server.");
+        Window.alert("getNextExercise Couldn't contact server.");
       }
 
       @Override
