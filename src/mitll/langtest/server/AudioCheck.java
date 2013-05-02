@@ -25,7 +25,7 @@ public class AudioCheck {
 
   private static final int MinRecordLength = 1*(10000/2); // 10000 = 0.7 second
   private static final int WinSize = 10;
-  private static final float PowerThreshold = -75.0f;//-55.0f;
+  private static final float PowerThreshold = -79.0f;//-55.0f;
   private static final float VarianceThreshold = 20.0f;
   private static final double CLIPPED_RATIO = 0.005; // 1/2 %
   private static final double LOG_OF_TEN = Math.log(10.0);
