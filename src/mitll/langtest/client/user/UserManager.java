@@ -382,7 +382,7 @@ public class UserManager {
 
         service.userExists(user.getText(), new AsyncCallback<Integer>() {
           public void onFailure(Throwable caught) {
-            Window.alert("Couldn't contact server");
+            Window.alert("userExists : Couldn't contact server");
           }
 
           public void onSuccess(Integer result) {
@@ -651,10 +651,10 @@ public class UserManager {
       monthsOfExperience, new AsyncCallback<Long>() {
       public void onFailure(Throwable caught) {
         if (dialogBox == null) {
-          Window.alert("Couldn't contact server.");
+          Window.alert("addUser : Couldn't contact server.");
         } else {
           // Show the RPC error message to the user
-          dialogBox.setText("Couldn't contact server.");
+          dialogBox.setText("addUser : Couldn't contact server.");
           dialogBox.center();
           closeButton.setFocus(true);
         }
