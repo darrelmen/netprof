@@ -53,7 +53,7 @@
         <pathelement location="war/WEB-INF/lib/dom4j-1.6.1.jar"/>
         <pathelement location="war/WEB-INF/lib/commons-fileupload-1.2.2.jar"/>
         <pathelement location="war/WEB-INF/lib/flashcard.jar"/>
-        <pathelement location="war/WEB-INF/lib/gwt-bootstrap-2.2.1.0-SNAPSHOT.jar"/>
+        <pathelement location="war/WEB-INF/lib/gwt-bootstrap-2.2.2.0-SNAPSHOT.jar"/>
     </path>
     <target name="init" depends="clean">
         <mkdir dir="war/WEB-INF/classes"/>
@@ -234,10 +234,10 @@
         </jar>
     </target>
 
-    <target depends="build" name="msaSectionsFlashcard">
+    <target depends="build" name="msaFlashcard">
         <jar destfile="msaFlashcard.war" basedir="war"
-             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
-            >
+             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
+                >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -245,9 +245,42 @@
         </jar>
     </target>
 
-    <target depends="build" name="levantineSectionsFlashcard">
+    <target depends="build" name="npCourseDari">
+        <jar destfile="npCourseDari.war" basedir="war"
+             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dari/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-dari/**"
+                >
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target depends="build" name="levantineFlashcard">
         <jar destfile="levantineFlashcard.war" basedir="war"
-             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-levantine/**"
+             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-levantine/**"
+                >
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target depends="build" name="dariFlashcard">
+        <jar destfile="dariFlashcard.war" basedir="war"
+             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-dari/**"
+                >
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target depends="build" name="pashtoFlashcard">
+        <jar destfile="pashtoFlashcard.war" basedir="war"
+             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-pashto/**"
                 >
 
             <manifest>
