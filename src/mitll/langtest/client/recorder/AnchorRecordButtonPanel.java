@@ -1,6 +1,5 @@
 package mitll.langtest.client.recorder;
 
-import com.google.gwt.user.client.ui.Anchor;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;

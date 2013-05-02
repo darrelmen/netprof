@@ -1,7 +1,5 @@
 package mitll.langtest.client.user;
 
-import mitll.langtest.shared.Result;
-
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
