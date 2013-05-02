@@ -8,9 +8,13 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
 import corpus.ArabicLTS;
+import corpus.DariLTS;
 import corpus.EnglishLTS;
 import corpus.HTKDictionary;
 import corpus.LTS;
+import corpus.LevantineLTS;
+import corpus.ModernStandardArabicLTS;
+import corpus.PashtoLTS;
 import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -67,6 +71,7 @@ public class ASRScoring extends Scoring {
   private static final String OPT_SIL_DEFAULT = "true";   // rsi-sctm-hlda
   private static final String HLDA_DIR = "HLDA_DIR";
   private static final String LM_TO_USE = "LM_TO_USE";
+  private static final String LTS_CLASS = "LTS_CLASS";
 
   private static final String HLDA_DIR_DEFAULT = "rsi-sctm-hlda";
   public static final String SMALL_LM_SLF = "smallLM.slf";
@@ -85,7 +90,7 @@ public class ASRScoring extends Scoring {
    * By keeping these here, we ensure that we only ever read the dictionary once
    */
   private HTKDictionary htkDictionary;
-  private final LTS letterToSoundClass;
+  private LTS letterToSoundClass;
   private final Cache<String, Scores> audioToScore;
   private final Map<String, String> properties;
   private final String platform = Utils.package$.MODULE$.platform();
@@ -103,6 +108,26 @@ public class ASRScoring extends Scoring {
     this.properties = properties;
     this.language = properties.get("language") != null ? properties.get("language") : "";
     this.letterToSoundClass = language != null && language.equals("English") ? new EnglishLTS() : new ArabicLTS();
+
+    if (language == null) {
+      this.letterToSoundClass = new ArabicLTS();
+      logger.warn("using default arabic LTS -- this may not be what you want -- set the language property.");
+    } else if (language.equalsIgnoreCase("English")) {
+      this.letterToSoundClass = new EnglishLTS();
+    } else if (language.equalsIgnoreCase("Arabic")) {
+      this.letterToSoundClass = new ArabicLTS();
+    } else if (language.equalsIgnoreCase("Dari")) {
+      this.letterToSoundClass = new DariLTS();
+    } else if (language.equalsIgnoreCase("Pashto")) {
+      this.letterToSoundClass = new PashtoLTS();
+    } else if (language.equalsIgnoreCase("MSA")) {
+      this.letterToSoundClass = new ModernStandardArabicLTS();
+    } else if (language.equalsIgnoreCase("Levantine")) {
+      this.letterToSoundClass = new LevantineLTS();
+    } else {
+      logger.error("huh? unsupported language " + language);
+    }
+    if (letterToSoundClass != null) logger.info("using LTS " + letterToSoundClass.getClass());
     readDictionary();
   }
 
@@ -566,7 +591,13 @@ public class ASRScoring extends Scoring {
     if (decode) {
       cfgTemplate = getProp(DECODE_CFG_TEMPLATE_PROP, DECODE_CFG_TEMPLATE_DEFAULT);
       kv.put(LM_TO_USE, tmpDir +File.separator +File.separator + SMALL_LM_SLF); // hack! TODO hack replace
-     // new FileCopier().copy(modelsDir+File.separator+"phones.dict",tmpDir+File.separator +"dict");   // Audio.hscore in pron sets dictionary=this value
+      if (letterToSoundClass != null) {
+        String value = letterToSoundClass.getClass().toString();
+        logger.info("setting lts to " + value);
+        kv.put(LTS_CLASS, value);
+      }
+
+      // new FileCopier().copy(modelsDir+File.separator+"phones.dict",tmpDir+File.separator +"dict");   // Audio.hscore in pron sets dictionary=this value
     }
     //logger.info("using config from template " + cfgTemplate);
 
