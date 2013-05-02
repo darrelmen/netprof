@@ -72,7 +72,6 @@ public class UserManager {
   private Storage stockStore = null;
   private final boolean isDataCollectAdmin;
   private final boolean useShortExpiration;
-  private static final boolean COLLECT_NAMES = false;
   private final boolean isFlashcard;
   private String appTitle;
 
