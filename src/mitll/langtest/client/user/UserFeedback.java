@@ -1,7 +1,6 @@
 package mitll.langtest.client.user;
 
 import mitll.langtest.client.DialogHelper;
-import mitll.langtest.client.LangTest;
 
 import java.util.List;
 
