@@ -14,7 +14,6 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -797,31 +796,47 @@ public class FileExerciseDAO implements ExerciseDAO {
 
     List<Result> results = db.getResults();
 
-    //Map<String,Exercise> idToEx = new HashMap<String, Exercise>();
+    Map<String,Exercise> idToEx = new HashMap<String, Exercise>();
     Map<String,List<Result>> idToResults = new HashMap<String, List<Result>>();
 
     logger.debug("Got " + results.size() + " results");
     List<Exercise> exercises = db.getExercises();
-    //for (Exercise e: exercises) idToEx.put(e.getID(),e);
+    for (Exercise e: exercises) idToEx.put(e.getID(),e);
     for (Result r : results) {
-      List<Result> resultList = idToResults.get(r.getID());
-      if (resultList == null) {
-        idToResults.put(r.getID(), resultList = new ArrayList<Result>());
+      String id = r.getID();
+      int i = Integer.parseInt(id);
+      if (i < 10) {
+        List<Result> resultList = idToResults.get(r.getID());
+        if (resultList == null) {
+          idToResults.put(r.getID(), resultList = new ArrayList<Result>());
+        }
+        resultList.add(r);
       }
-      resultList.add(r);
     }
-    logger.debug("Got " + exercises.size() + " exercises");
+    logger.debug("Got " + exercises.size() + " exercises and " + idToResults);
 
-    if (true) return;
 
     Map<String, String> properties = new HashMap<String, String>();
     properties.put("language","Arabic");
     properties.put("MODELS_DIR","models.dli-dari");
     ASRScoring scoring = new ASRScoring("C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war", properties);
 
+    for (Map.Entry<String, List<Result>> pair : idToResults.entrySet()) {
+      List<Result> resultsForExercise = pair.getValue();
+      for (Result r : resultsForExercise) {
+        Exercise exercise = idToEx.get(r.getID());
+        String refSentence = exercise.getRefSentence();
+        File answer = new File(r.answer);
+        String name = answer.getName().replaceAll(".wav", "");
+        String parent = answer.getParent();
+        Scores align = scoring.align(parent, name, refSentence + " " + refSentence);
+        logger.debug("got " + align + " for " + name);
+      }
+    }
 
+    if (true) return;
 
-    File dir = new File(path);
+/*    File dir = new File(path);
     for (File execiseDir : dir.listFiles()) {
       String exid = execiseDir.getName();
       for (File question : execiseDir.listFiles()) {
@@ -840,7 +855,7 @@ public class FileExerciseDAO implements ExerciseDAO {
           }
         }
       }
-    }
+    }*/
   }
 
   public static void main(String [] arg) {
