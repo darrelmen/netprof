@@ -259,7 +259,7 @@ public class GradingResultManager extends ResultManager {
       " result->grade has " + resultToGrade.size());*/
 
     service.addGrade(exerciseID, toAdd, new AsyncCallback<CountAndGradeID>() {
-      public void onFailure(Throwable caught) { Window.alert("Couldn't contact server."); }
+      public void onFailure(Throwable caught) { Window.alert("addGrade Couldn't contact server."); }
       public void onSuccess(CountAndGradeID result) {
         feedback.showStatus("Now " + result.count + " graded answers.");
         toAdd.id = (int) result.gradeID;
@@ -276,7 +276,7 @@ public class GradingResultManager extends ResultManager {
    */
   private void changeGrade(final Grade toChange) {
     service.changeGrade(toChange, new AsyncCallback<Void>() {
-      public void onFailure(Throwable caught) {  Window.alert("Couldn't contact server."); }
+      public void onFailure(Throwable caught) {  Window.alert("changeGrade Couldn't contact server."); }
       public void onSuccess(Void result) {
         feedback.showStatus("Grade changed to " + getStringForGrade(toChange.grade));
       }
