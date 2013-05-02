@@ -2,9 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Exercise;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
