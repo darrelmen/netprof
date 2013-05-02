@@ -8,13 +8,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -72,7 +70,7 @@ public class UserTable extends PagerTable {
 
     service.getUsers(new AsyncCallback<List<User>>() {
       public void onFailure(Throwable caught) {
-        Window.alert("couldn't contact server");
+        Window.alert("getUsers couldn't contact server");
       }
 
       public void onSuccess(List<User> result) {
@@ -146,7 +144,7 @@ public class UserTable extends PagerTable {
           service.setUserEnabled(object.id, value, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-              Window.alert("couldn't contact server.");
+              Window.alert("setUserEnabled couldn't contact server.");
             }
 
             @Override
