@@ -29,20 +29,31 @@ import java.util.Set;
 public class AutoCRT {
   private static Logger logger = Logger.getLogger(AutoCRT.class);
 
-  private static final double MINIMUM_FLASHCARD_PRON_SCORE = 0.19;
+  //private static final double MINIMUM_FLASHCARD_PRON_SCORE = 0.19;
   private Classifier<AutoGradeExperiment.Event> classifier = null;
   private Map<String, Export.ExerciseExport> exerciseIDToExport;
   private String installPath;
   private String mediaDir;
   private final Export exporter;
   private AutoCRTScoring db;
+  private double minPronScore;
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#makeAutoCRT()
+   * @param exporter
+   * @param db
+   * @param installPath
+   * @param relativeConfigDir
+   * @param backgroundFile
+   * @param minPronScore
+   */
   public AutoCRT(Export exporter, AutoCRTScoring db, String installPath, String relativeConfigDir,
-                 String backgroundFile) {
+                 String backgroundFile, double minPronScore) {
     this.installPath = installPath;
     this.mediaDir = relativeConfigDir;
     this.exporter = exporter;
     this.db = db;
+    this.minPronScore = minPronScore;
   }
 
   /**
@@ -97,7 +108,7 @@ public class AutoCRT {
         asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
     boolean isCorrect = recoSentence != null && isCorrect(foregroundSentences, recoSentence);
     double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
-    answer.setCorrect(isCorrect && scoreForAnswer > MINIMUM_FLASHCARD_PRON_SCORE);
+    answer.setCorrect(isCorrect && scoreForAnswer > minPronScore);
     if (!isCorrect) {
       logger.info("incorrect response for exercise #" +e.getID() +
         " reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentences +"' pron score was " + scoreForAnswer);
