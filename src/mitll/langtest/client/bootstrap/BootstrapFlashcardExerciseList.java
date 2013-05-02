@@ -114,7 +114,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
    */
   @Override
   public void getExercises(final long userID) {
-    System.out.println("--------------- getExercises for " + userID + " expired " +expired + " time running " + timerRunning);
+    System.out.println("-- getExercises for " + userID + " expired " +expired + " time running " + timerRunning);
 
     if (!expired) {
       if (!timerRunning) {
