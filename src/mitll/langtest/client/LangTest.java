@@ -125,6 +125,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
             new AsyncCallback<Void>() {
               @Override
               public void onFailure(Throwable caught) {
+                Window.alert("Couldn't contact server.  Please check your network connection.");
               }
 
               @Override
