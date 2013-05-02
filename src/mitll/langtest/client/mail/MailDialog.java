@@ -249,7 +249,7 @@ public class MailDialog {
           new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
-            Window.alert("Couldn't contact server.");
+            Window.alert("sendEmail Couldn't contact server.");
             dialogBox.hide();
           }
 
