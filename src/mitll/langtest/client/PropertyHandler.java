@@ -412,8 +412,6 @@ public class PropertyHandler {
   }
 
   public boolean isFlashcardTeacherView() {
-    System.out.println("isFlashcardTeacherView  " + flashcardTeacherView);
-
     return flashcardTeacherView;
   }
 
