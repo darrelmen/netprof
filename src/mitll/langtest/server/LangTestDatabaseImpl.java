@@ -359,7 +359,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     synchronized (this) {
       if (autoCRT == null) {
         String backgroundFile = configDir + File.separator + serverProps.getBackgroundFile();
-        autoCRT = new AutoCRT(db.getExport(), this, getInstallPath(), relativeConfigDir, backgroundFile);
+        autoCRT = new AutoCRT(db.getExport(), this, getInstallPath(), relativeConfigDir, backgroundFile, serverProps.getMinPronScore());
       }
     }
   }
