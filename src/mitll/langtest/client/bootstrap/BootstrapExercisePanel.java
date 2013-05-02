@@ -56,11 +56,11 @@ public class BootstrapExercisePanel extends FluidContainer {
  // private static final String TIMES_HELP_SHOWN = "TimesHelpShown";
   private static final String FEEDBACK_TIMES_SHOWN = "FeedbackTimesShown";
   private static final int PERIOD_MILLIS = 500;
-  public static final int MAX_INTRO_FEEBACK_COUNT = 5;
-  public static final int KEY_PRESS = 256;
-  public static final int KEY_UP = 512;
-  public static final int SPACE_CHAR = 32;
-  private static final int HIDE_DELAY = 2000;
+  private static final int MAX_INTRO_FEEBACK_COUNT = 5;
+  private static final int KEY_PRESS = 256;
+  private static final int KEY_UP = 512;
+  private static final int SPACE_CHAR = 32;
+  private static final int HIDE_DELAY = 2500;
 
   private final AudioHelper audioHelper = new AudioHelper();
   private List<MyRecordButtonPanel> answerWidgets = new ArrayList<MyRecordButtonPanel>();
@@ -446,15 +446,14 @@ public class BootstrapExercisePanel extends FluidContainer {
   }
 
   private void showPronScoreFeedback(double score) {
+    if (score < 0) score = 0;
     double percent = 100 * score;
-
-    System.out.println("show feedback = " +score);
 
     scoreFeedbackColumn.clear();
     scoreFeedbackColumn.add(scoreFeedback);
 
     int percent1 = (int) percent;
-    scoreFeedback.setPercent(percent1  < 20 ? 20 : percent1);
+    scoreFeedback.setPercent(percent1  < 40 ? 40 : percent1);   // just so the words will show up
 
     scoreFeedback.setText("Pronunciation score " + (int) percent + "%");
     scoreFeedback.setVisible(true);
