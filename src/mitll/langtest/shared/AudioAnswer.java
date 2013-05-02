@@ -20,8 +20,9 @@ public class AudioAnswer implements IsSerializable {
 
   public enum Validity implements IsSerializable {
     OK("Audio OK."),
-    TOO_SHORT("Audio too short. Record again."),
-    TOO_QUIET("Audio too quiet. Check your mic settings or speak louder."),
+    TOO_SHORT("Audio too short. Please record again."),
+    TOO_QUIET("Audio too quiet. Check your mic settings or speak closer to the mic."),
+    TOO_LOUD("Audio too loud. Check your mic settings or speak farther from the mic."),
     INVALID("There was a problem with the audio. Please record again.");
     private String prompt;
 
