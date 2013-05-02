@@ -45,6 +45,21 @@ nmfb: 24
 window: 25.0
 lpcorder: 12
 
+[decode.Align]
+models: MODELS_DIR/HLDA_DIR
+output-type: words+sil
+
+[decode.ResegmentDecoderOutput]
+resegment: true
+repad: true
+split-threshold: 0.50
+sil-padding: 0.25
+
+[decode.Reco2Meta]
+write-transcript: reseg
+write-format: reseg
+outdir: TEMP_DIR
+
 [fe.NNBatch]
 n-output: N_OUTPUT
 n-hidden: N_HIDDEN
@@ -63,7 +78,7 @@ word-penalty: 1.0
 grammar: MODELS_DIR/grammar
 dictionary: MODELS_DIR/HLDA_DIR/dict-wo-sp
 lm: LM_TO_USE
-letter-to-sound-class: corpus.ArabicLTS
+letter-to-sound-class: LTS_CLASS
 lm-weight: 4.0
 beam-threshold: 200.0
 trace-flags: 3
