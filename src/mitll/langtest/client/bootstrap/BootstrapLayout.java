@@ -1,17 +1,5 @@
 package mitll.langtest.client.bootstrap;
 
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Row;
-import com.github.gwtbootstrap.client.ui.base.IconAnchor;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RootPanel;
-import mitll.langtest.client.user.UserManager;
-
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
