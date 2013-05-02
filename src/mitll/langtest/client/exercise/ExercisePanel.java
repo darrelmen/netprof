@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.ExceptionHandlerDialog;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
@@ -470,6 +471,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
       service.addTextAnswer(user, exercise, i++, text, new AsyncCallback<Void>() {
         public void onFailure(Throwable caught) {
           userFeedback.showErrorMessage("Server error", "Couldn't post answers for exercise.");
+          new ExceptionHandlerDialog(caught);
         }
 
         public void onSuccess(Void result) {
