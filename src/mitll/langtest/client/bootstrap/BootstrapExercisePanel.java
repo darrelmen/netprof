@@ -50,8 +50,8 @@ import java.util.List;
  */
 public class BootstrapExercisePanel extends FluidContainer {
   private static final int LONG_DELAY_MILLIS = 3500;
-  private static final int DELAY_MILLIS = 1000;//1250;
-  private static final int DELAY_MILLIS_LONG = 2500;
+  private static final int DELAY_MILLIS = 1200;//1250;
+  private static final int DELAY_MILLIS_LONG = 3000;
   private Column scoreFeedbackColumn;
  // private static final String TIMES_HELP_SHOWN = "TimesHelpShown";
   private static final String FEEDBACK_TIMES_SHOWN = "FeedbackTimesShown";
@@ -366,12 +366,8 @@ public class BootstrapExercisePanel extends FluidContainer {
 
       boolean hasRefAudio = exercise.getRefAudio() != null;
 
-      if (result.validity == AudioAnswer.Validity.TOO_SHORT) {
-        showPopup("Audio was too short. Please record again.");
-        nextAfterDelay(correct);
-      }
-      else if (result.validity == AudioAnswer.Validity.TOO_QUIET) {
-        showPopup("Audio was too quiet. Please check your mic and record again.");
+      if (result.validity != AudioAnswer.Validity.OK) {
+        showPopup(result.validity.getPrompt());
         nextAfterDelay(correct);
       }
       else if (correct) {
@@ -460,7 +456,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     int percent1 = (int) percent;
     scoreFeedback.setPercent(percent1  < 20 ? 20 : percent1);
 
-    scoreFeedback.setText("Pron score " + (int) percent + "%");
+    scoreFeedback.setText("Pronunciation score " + (int) percent + "%");
     scoreFeedback.setVisible(true);
     scoreFeedback.setColor(
       score > 0.8 ? ProgressBarBase.Color.SUCCESS :
