@@ -803,7 +803,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     List<Exercise> exercises = db.getExercises();
     for (Exercise e: exercises) idToEx.put(e.getID(),e);
     for (Result r : results) {
-      String id = r.getID();
+      String id = r.id;
       int i = Integer.parseInt(id);
       if (i < 10) {
         List<Result> resultList = idToResults.get(r.getID());
@@ -815,22 +815,30 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
     logger.debug("Got " + exercises.size() + " exercises and " + idToResults);
 
-
     Map<String, String> properties = new HashMap<String, String>();
-    properties.put("language","Arabic");
+    properties.put("language","Dari");
+    properties.put("N_HIDDEN","2000,2000");
+    properties.put("N_OUTPUT","37");
+
     properties.put("MODELS_DIR","models.dli-dari");
     ASRScoring scoring = new ASRScoring("C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war", properties);
 
     for (Map.Entry<String, List<Result>> pair : idToResults.entrySet()) {
       List<Result> resultsForExercise = pair.getValue();
       for (Result r : resultsForExercise) {
-        Exercise exercise = idToEx.get(r.getID());
-        String refSentence = exercise.getRefSentence();
-        File answer = new File(r.answer);
-        String name = answer.getName().replaceAll(".wav", "");
-        String parent = answer.getParent();
-        Scores align = scoring.align(parent, name, refSentence + " " + refSentence);
-        logger.debug("got " + align + " for " + name);
+        Exercise exercise = idToEx.get(r.id);
+        if (exercise != null) {
+          String refSentence = exercise.getRefSentence();
+          File answer = new File(r.answer);
+          String name = answer.getName().replaceAll(".wav", "");
+          String parent = answer.getParent();
+          parent = "war\\config\\dari\\examples\\" + parent;
+          logger.debug("parent " + parent + " running result " + r.uniqueID + " for exercise " + exercise.getID() + " and audio file " + name);
+
+          Scores align = scoring.align(parent, name, refSentence + " " + refSentence);
+          logger.debug("got " + align + " for " + name);
+        }
+        else logger.warn("couldn't find " + r.getID() + " exercise");
       }
     }
 
