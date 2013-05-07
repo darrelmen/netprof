@@ -314,8 +314,6 @@ public class ASRScoring extends Scoring {
    * @param testAudioFileNoSuffix
    * @param sentence  only for align
    * @param scoringDir
-   * @paramx lmSentences if empty, doing align, if not, doing decode!
-   * @paramx background only for decode
    * @return Scores which is the overall score and the event scores
    */
   private Scores calcScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
@@ -323,7 +321,8 @@ public class ASRScoring extends Scoring {
                                    String scoringDir,
                                    boolean decode, String tmpDir) {
     Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
-    //logger.debug("dirs is " + dirs + " tmp " + dirs.tmp());
+    if (false) logger.debug("dirs is " + dirs +
+      " audio dir " + testAudioDir + " audio " + testAudioFileNoSuffix + " sentence " + sentence + " decode " + decode + " scoring dir " + scoringDir);
 
     Audio testAudio = Audio$.MODULE$.apply(
       testAudioDir, testAudioFileNoSuffix,
