@@ -13,8 +13,6 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.FocusWidget;
 
-import java.util.Date;
-
 /**
  * Basically a click handler and a timer to click stop recording, if the user doesn't.
  * User: go22670
