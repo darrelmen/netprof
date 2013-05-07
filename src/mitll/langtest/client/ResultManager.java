@@ -1,7 +1,6 @@
 package mitll.langtest.client;
 
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -9,7 +8,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -20,7 +18,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.HasRows;
 import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.grading.GradingExercisePanel;
 import mitll.langtest.client.table.PagerTable;
@@ -47,7 +44,7 @@ public class ResultManager extends PagerTable {
   protected static final String UNGRADED = "Ungraded";
   protected static final String SKIP = "Skip";
   public static final int GRADING_WIDTH = 700;
-  private int pageSize = PAGE_SIZE;
+  protected int pageSize = PAGE_SIZE;
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
   private final AudioTag audioTag = new AudioTag();
@@ -114,7 +111,7 @@ public class ResultManager extends PagerTable {
       dialogVPanel.remove(closeButton);
     }
 
-    Widget table = getAsyncTable(numResults, false, true, new ArrayList<Grade>(),-1, 1);
+    Widget table = getAsyncTable(numResults, true, new ArrayList<Grade>(),-1, 1);
     dialogVPanel.add(table);
     dialogVPanel.add(closeButton);
 
@@ -124,19 +121,24 @@ public class ResultManager extends PagerTable {
 
   /**
    * @see mitll.langtest.client.ResultManager#showResults
-   * @see GradingExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see GradingExercisePanel#showResults(java.util.Collection, java.util.Collection, LangTestDatabaseAsync, mitll.langtest.client.grading.GradingExercisePanel, boolean, int, int, int, int)
    * @param result
-   * @param gradingView
    * @param showQuestionColumn
    * @param grades
    * @param grader
    * @param numGrades
    * @return
    */
-  public Widget getTable(Collection<Result> result, final boolean gradingView, boolean showQuestionColumn,
+  public Widget getTable(Collection<Result> result, boolean showQuestionColumn,
                          Collection<Grade> grades, final int grader, int numGrades) {
+    CellTable<Result> table = getResultCellTable(result, showQuestionColumn, grades, grader, numGrades);
+    return getPagerAndTable(table);
+  }
+
+  protected CellTable<Result> getResultCellTable(Collection<Result> result,
+                                                 boolean showQuestionColumn, Collection<Grade> grades, int grader, int numGrades) {
     CellTable<Result> table = new CellTable<Result>();
-    TextColumn<Result> id = addColumnsToTable(gradingView, showQuestionColumn, grades, grader, numGrades, table);
+    TextColumn<Result> id = addColumnsToTable(showQuestionColumn, grades, grader, numGrades, table);
 
     // Create a data provider.
     List<Result> list = createProvider(result, table);
@@ -144,9 +146,7 @@ public class ResultManager extends PagerTable {
     // Add a ColumnSortEvent.ListHandler to connect sorting to the
     // java.util.List.
     addSorter(table, id, list);
-
-    // Create a SimplePager.
-    return getPagerAndTable(table);
+    return table;
   }
 
   private List<Result> createProvider(Collection<Result> result, CellTable<Result> table) {
@@ -165,10 +165,10 @@ public class ResultManager extends PagerTable {
     return list;
   }
 
-  private Widget getAsyncTable(int numResults, final boolean gradingView, boolean showQuestionColumn,
+  private Widget getAsyncTable(int numResults, boolean showQuestionColumn,
                          Collection<Grade> grades, final int grader, int numGrades) {
     CellTable<Result> table = new CellTable<Result>();
-    TextColumn<Result> id = addColumnsToTable(gradingView, showQuestionColumn, grades, grader, numGrades, table);
+    TextColumn<Result> id = addColumnsToTable(showQuestionColumn, grades, grader, numGrades, table);
     table.setRowCount(numResults, true);
     table.setVisibleRange(0,15);
     createProvider(numResults, table);
@@ -185,13 +185,8 @@ public class ResultManager extends PagerTable {
     return getPagerAndTable(table);
   }
 
-  private TextColumn<Result> addColumnsToTable(boolean gradingView, boolean showQuestionColumn, Collection<Grade> grades,
+  private TextColumn<Result> addColumnsToTable(boolean showQuestionColumn, Collection<Grade> grades,
                                                int grader, int numGrades, CellTable<Result> table) {
-    String gradingWidth = GRADING_WIDTH + "px";
-    if (!gradingView) {
-      int i = (int)(Window.getClientWidth()*0.8f);
-      table.setWidth(gradingView ? gradingWidth : i + "px");
-    }
     TextColumn<Result> id = addUserPlanExercise(table);
     if (showQuestionColumn) {
       TextColumn<Result> experience = new TextColumn<Result>() {
