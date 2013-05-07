@@ -2,9 +2,9 @@ package mitll.langtest.client.grading;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
 /**
