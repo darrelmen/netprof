@@ -151,121 +151,59 @@ public class ResultDAO extends DAO {
    * @return
    */
   public boolean areAnyResultsLeftToGradeFor(Exercise e, int expected, boolean englishOnly) {
-    return !getResultsForExercise(e.getID(),expected, englishOnly).isEmpty();
-  }
-
-  /**
-   * Joins against grades -- don't return graded exercises
-   *
-   * @see DatabaseImpl#getResultsForExercise(String)
-   * @param exerciseID
-   * @param englishOnly
-   * @return results that haven't been graded yet
-   */
-  private List<Result> getResultsForExercise(String exerciseID, int expected, boolean englishOnly) {
+    String exerciseID = e.getID();
     GradeDAO.GradesAndIDs resultIDsForExercise = gradeDAO.getResultIDsForExercise(exerciseID);
-    return getResultsForExercise(exerciseID, resultIDsForExercise.grades, expected, englishOnly);
+    return !areAllResultsGraded(exerciseID, resultIDsForExercise.grades, expected, englishOnly);
   }
 
   /**
-   * Return all answers that don't have the required number of grades (expected).<br></br>
-   * I.e. those that require some additional grading
+   * Return true if all results have been graded at the grade number
+   *
    * Does some fancy filtering for english --
-   * TODO : Add proper filtering
-   * @see #getResultsForExercise(String, int, boolean)
+   * @see #areAnyResultsLeftToGradeFor
    * @param exerciseID
    * @param gradedResults
    * @param expected if > 1 remove flq results (hack!), if = 2 assumes english-only
-   * @param useEnglishGrades
+   * @param useEnglishGrades true if we should only look at english grades...
    * @return ungraded answers
    */
-  private List<Result> getResultsForExercise(String exerciseID, Collection<Grade> gradedResults, int expected, boolean useEnglishGrades) {
-    try {
-      List<Result> resultsForExercise = getAllResultsForExercise(exerciseID);
-      //enrichResults(resultsForExercise,exerciseID);
-      if (debug && !resultsForExercise.isEmpty()) logger.debug("for " + exerciseID + " expected " + expected +
-          " before " + resultsForExercise.size() + " results, and " + gradedResults.size() + " grades");
-      if (resultsForExercise.isEmpty()) {
-        return resultsForExercise;
-      }
-
-      // conditionally narrow down to only english results
-      // hack!
-      for (Iterator<Result> iter = resultsForExercise.iterator(); iter.hasNext(); ) {
-        Result next = iter.next();
-        if (useEnglishGrades && next.flq || next.userid == -1) {
-          iter.remove();
-        }
-      }
-
-      if (debug && false) logger.debug("\tafter removing flq " + resultsForExercise.size());
-
-      // count the number of grades for each result
-      Map<Integer,Integer> idToCount = new HashMap<Integer, Integer>();
-      Set<Integer> englishResultsWithGrades = new HashSet<Integer>();
-
-      int countAtIndex = 0;
-      for (Grade g : gradedResults) {
-        if (g.gradeIndex == expected-1 && g.grade != Grade.UNASSIGNED) {
-          countAtIndex++;
-        }
-        Integer countForResult = idToCount.get(g.resultID);
-        if (g.grade == Grade.UNASSIGNED) {
-          if (debug) logger.debug("\tgetResultsForExercise : skipping grade " + g); // TODO make sure it skips only ungraded items and that we see ungraded items when we look for the next ungraded exercise
-        }
-        else {
-          if (debug) logger.debug("\tgetResultsForExercise : including grade " + g);
-
-          if (g.gradeIndex == 0)
-          if (countForResult == null) idToCount.put(g.resultID, 1);
-          else {
-            idToCount.put(g.resultID, countForResult + 1);
-          }
-          if (useEnglishGrades && g.gradeType.equals("english-only")) {
-            englishResultsWithGrades.add(g.resultID);
-          }
-        }
-      }
-      if (countAtIndex == resultsForExercise.size()) {
-        if (countAtIndex > 0) {
-          //logger.debug("found " +countAtIndex + " at index " + expected + " for " + exerciseID);
-        }
-        return Collections.emptyList();
-      }
-      else {
-        logger.debug("continuing, found " +countAtIndex + " at index " + expected + " for " + exerciseID +
-          " given " + resultsForExercise.size() + " results");
-      }
-      if (debug) System.out.println("\t map of result->count for result "+ idToCount.size());
-
-      // now go back through the list of results and remove all those that have the number of grades we require
-      // for this grading -- i.e. for english only grading we expect to have two...
-      for (Iterator<Result> iter = resultsForExercise.iterator(); iter.hasNext();) {
-        Result next = iter.next();
-        Integer count = idToCount.get(next.uniqueID);
-        if (count != null && count >= expected || (useEnglishGrades && englishResultsWithGrades.contains(next.uniqueID))) {
-          if (debug) {
-            if (count != null && count >= expected)
-              logger.debug("\tremoving graded item for result " + next + " since count = " + count + " vs " + expected);
-            else
-              logger.debug("\tremoving graded item for result " + next + " since is english grade");
-          }
-          iter.remove();
-        }
-        else {
-          //System.out.println("NOT removing graded item for result " + next + " count = " + count);
-        }
-      }
-      if (debug && !resultsForExercise.isEmpty()) {
-        logger.debug("\tExercise #" + exerciseID + " : " +
-          "after removing graded items count = " + resultsForExercise.size());
-      }
-
-      return resultsForExercise;
-    } catch (Exception ee) {
-      ee.printStackTrace();
+  private boolean areAllResultsGraded(String exerciseID, Collection<Grade> gradedResults, int expected, boolean useEnglishGrades) {
+    List<Result> resultsForExercise = getAllResultsForExercise(exerciseID);
+    if (debug && !resultsForExercise.isEmpty()) logger.debug("for " + exerciseID + " expected " + expected +
+      " grades/item before " + resultsForExercise.size() + " results, and " + gradedResults.size() + " grades");
+    if (resultsForExercise.isEmpty()) {
+      return true;
     }
-    return new ArrayList<Result>();
+
+    // conditionally narrow down to only english results
+    // hack!
+    for (Iterator<Result> iter = resultsForExercise.iterator(); iter.hasNext(); ) {
+      Result next = iter.next();
+      if (useEnglishGrades && next.flq || next.userid == -1) {
+       // logger.debug("removing result " + next + " since userid is " + next.userid);
+        iter.remove();
+      }
+    }
+
+    if (debug && false) logger.debug("\tafter removing flq " + resultsForExercise.size());
+
+    int countAtIndex = 0;
+    for (Grade g : gradedResults) {
+      if (g.gradeIndex == expected - 1 && g.grade != Grade.UNASSIGNED) {
+        countAtIndex++;
+      }
+    }
+
+    int numResults = resultsForExercise.size();
+    boolean allGraded = numResults <= countAtIndex;
+
+    if (debug) {
+      logger.debug("areAllResultsGraded checking exercise " + exerciseID +
+        " found " + countAtIndex + " grades at index at grade # " + expected +
+        " given " + numResults + " results -- all graded is " + allGraded);
+    }
+
+    return allGraded;
   }
 
   /**
