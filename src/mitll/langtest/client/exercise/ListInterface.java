@@ -3,7 +3,6 @@ package mitll.langtest.client.exercise;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 
 /**
