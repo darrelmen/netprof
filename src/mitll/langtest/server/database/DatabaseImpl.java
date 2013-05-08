@@ -872,10 +872,9 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  public long addUser(HttpServletRequest request, int age, String gender, int experience) {
-    // String header = request.getHeader("X-FORWARDED-FOR");
+  public long addUser(HttpServletRequest request, int age, String gender, int experience, String dialect) {
     String ip = getIPInfo(request);
-    return addUser(age, gender, experience, ip);
+    return addUser(age, gender, experience, ip,dialect);
   }
 
   /**
@@ -886,12 +885,13 @@ public class DatabaseImpl implements Database {
    * @param age
    * @param gender
    * @param experience
-   * @param ipAddr
+   * @param ipAddr user agent info
+   * @param dialect speaker dialect
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(int, String, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
-  private long addUser(int age, String gender, int experience, String ipAddr) {
-    return userDAO.addUser(age, gender, experience, ipAddr, "", "", "", "", "", false);
+  private long addUser(int age, String gender, int experience, String ipAddr, String dialect) {
+    return userDAO.addUser(age, gender, experience, ipAddr, "", "", "", dialect, "", false);
   }
 
   public long addUser(HttpServletRequest request,
