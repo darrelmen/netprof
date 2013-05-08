@@ -28,4 +28,6 @@ public class Scores {
     this.hydecScore = hydecScore;
     this.eventScores = eventScores;
   }
+
+  public String toString() { return "Scores score " + hydecScore + " events " + eventScores; }
 }
