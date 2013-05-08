@@ -1,6 +1,10 @@
 package mitll.langtest.server.database;
 
+import audio.image.ImageType;
+import audio.image.TranscriptEvent;
+import audio.image.TranscriptReader;
 import audio.imagewriter.AudioConverter;
+import audio.imagewriter.ImageWriter;
 import audio.tools.FileCopier;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.Scores;
@@ -28,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -782,6 +787,12 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
   }
 
+  private String prependDeploy(String deployPath, String pathname) {
+    if (!new File(pathname).exists()) {
+      pathname = deployPath + File.separator + pathname;
+    }
+    return pathname;
+  }
 
   /**
    * Go through all exercise, find all results for each, take best scoring audio file from results
@@ -823,6 +834,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     properties.put("MODELS_DIR","models.dli-dari");
     ASRScoring scoring = new ASRScoring("C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war", properties);
 
+    int count = 0;
     for (Map.Entry<String, List<Result>> pair : idToResults.entrySet()) {
       List<Result> resultsForExercise = pair.getValue();
       for (Result r : resultsForExercise) {
@@ -836,10 +848,58 @@ public class FileExerciseDAO implements ExerciseDAO {
           logger.debug("parent " + parent + " running result " + r.uniqueID + " for exercise " + exercise.getID() + " and audio file " + name);
 
           Scores align = scoring.align(parent, name, refSentence + " " + refSentence);
-          logger.debug("got " + align + " for " + name);
+
+          String wordLabFile   = prependDeploy(parent,name + ".words.lab");
+
+          try {
+            SortedMap<Float,TranscriptEvent> timeToEvent = new TranscriptReader().readEventsFromFile(wordLabFile);
+
+            float start1 = -1, end1 =-1, start2 = -1, end2 = -1;
+            boolean didFirst = false;
+            int refLength = refSentence.split("\\s").length;
+            logger.debug("refSentence " + refSentence + " length " + refLength);
+            int tokenCount = 0;
+            for (Map.Entry<Float, TranscriptEvent> timeEventPair : timeToEvent.entrySet()) {
+              TranscriptEvent transcriptEvent = timeEventPair.getValue();
+              String word = transcriptEvent.event;
+              logger.debug("\ttoken " + tokenCount +
+                " got " + word + " and " + transcriptEvent);
+              if (word.equals("<s>") || word.equals("</s>")) continue;
+              if (refSentence.startsWith(word) && tokenCount == 0) {
+                if (!didFirst) {
+                  start1 = transcriptEvent.start;
+                } else {
+                  start2 = transcriptEvent.start;
+                }
+                tokenCount++;
+              }
+              else if (refSentence.endsWith(word) && tokenCount == refLength-1) {
+                if (!didFirst) {
+                  end1 = transcriptEvent.end;
+                  didFirst = true;
+                  tokenCount = 0;
+                } else {
+                  end2 = transcriptEvent.end;
+                }
+              }
+              else tokenCount++;
+            }
+
+            logger.debug("\tfirst  " + start1 + "-" +end1 + " dur " + (end1-start1) +
+             " second " + start2 + "-" +end2 + " dur " + (end2-start2) +
+              " for " + name);
+
+
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+
+          logger.debug("\tgot " + align + " for " + name);
         }
         else logger.warn("couldn't find " + r.getID() + " exercise");
       }
+
+      if (count ++ > 1) break;
     }
 
     if (true) return;
