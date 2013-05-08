@@ -43,6 +43,7 @@ public class ServerProperties {
   private static final String CRTDATACOLLECT = "crtDataCollect";
   private static final String ARABIC_TEXT_DATA_COLLECT = "arabicTextDataCollect";
   private static final String COLLECT_ONLY_AUDIO = "collectAudioOnly";
+  private static final String LANGUAGE = "language";
 
   private Properties props = null;
 
@@ -78,6 +79,7 @@ public class ServerProperties {
 
   public String getH2Database() { return props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT); }
   public String getLessonPlan() { return props.getProperty("lessonPlanFile", "lesson.plan"); }
+  public String getLanguage() { return props.getProperty("language", "Arabic"); }
 
   public boolean isShowSections() {
     return !props.getProperty(SHOW_SECTIONS, "false").equals("false");
