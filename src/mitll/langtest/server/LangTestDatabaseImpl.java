@@ -1059,7 +1059,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String setInstallPath(boolean useFile) {
     String lessonPlanFile = getLessonPlan();
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
-    db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, serverProps.isUrdu, useFile);
+    db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, serverProps.getLanguage(), useFile);
 
     return lessonPlanFile;
   }
