@@ -745,8 +745,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   // Users ---------------------
 
-  public long addUser(int age, String gender, int experience) {
-    return db.addUser( getThreadLocalRequest(), age, gender, experience);
+  /**
+   * @see mitll.langtest.client.user.UserManager#displayLoginBox()
+   * @param age
+   * @param gender
+   * @param experience
+   * @param dialect
+   * @return user id
+   */
+  public long addUser(int age, String gender, int experience, String dialect) {
+    return db.addUser( getThreadLocalRequest(), age, gender, experience, dialect);
   }
 
   /**
