@@ -71,6 +71,7 @@ public class DatabaseImpl implements Database {
   private boolean isUrdu;
   private boolean useFile;
   private final boolean showSections;
+  private String language;
 
   /**
    * Just for testing
@@ -156,7 +157,7 @@ public class DatabaseImpl implements Database {
    * @return
    */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    return useFile ? new FileExerciseDAO(mediaDir, isUrdu, showSections) : new SQLExerciseDAO(this, mediaDir);
+    return useFile ? new FileExerciseDAO(mediaDir, language, showSections) : new SQLExerciseDAO(this, mediaDir);
   }
 
   /**
@@ -164,15 +165,16 @@ public class DatabaseImpl implements Database {
    * @param installPath
    * @param lessonPlanFile
    * @param mediaDir
-   * @param isUrdu
+   * @param language
    */
-  public void setInstallPath(String installPath, String lessonPlanFile, String mediaDir, boolean isUrdu, boolean useFile) {
+  public void setInstallPath(String installPath, String lessonPlanFile, String mediaDir, String language, boolean useFile) {
    // logger.debug("got install path " + installPath + " media " + mediaDir + " is urdu " +isUrdu);
     this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
     this.mediaDir = mediaDir;
-    this.isUrdu = isUrdu;
+    this.isUrdu = language.equalsIgnoreCase("Urdu");
     this.useFile = useFile;
+    this.language = language;
   }
 
   public void setOutsideFile(String outsideFile) { monitoringSupport.setOutsideFile(outsideFile); }
