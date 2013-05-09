@@ -3,7 +3,6 @@ package mitll.langtest.server.database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.Set;
 
 /**
 * Created with IntelliJ IDEA.
