@@ -1,6 +1,5 @@
 package mitll.langtest.server;
 
-import mitll.langtest.server.database.DatabaseImpl;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
