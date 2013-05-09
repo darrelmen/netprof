@@ -5,8 +5,6 @@ package mitll.langtest.shared.scoring;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-import java.io.Serializable;
-
 /**
  * @author gregbramble
  * @deprecated
