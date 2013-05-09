@@ -1,7 +1,6 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
