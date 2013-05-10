@@ -127,7 +127,7 @@ public class ASRScoring extends Scoring {
     } else {
       logger.error("huh? unsupported language " + language);
     }
-    if (letterToSoundClass != null) logger.info("using LTS " + letterToSoundClass.getClass());
+    logger.info("using LTS " + letterToSoundClass.getClass());
     readDictionary();
   }
 
