@@ -412,12 +412,10 @@ public class DatabaseImpl implements Database {
   /**
    *
    *
-   * @param userID for this user
    * @return unmodifiable list of exercises
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long)
    */
-  public List<Exercise> getExercises(long userID) {
-    logger.info("getExercises : for user  " + userID);
+  public List<Exercise> getUnmodExercises() {
     List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
     return Collections.unmodifiableList(exercises);
   }
