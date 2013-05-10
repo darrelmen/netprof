@@ -1,5 +1,7 @@
 package mitll.langtest.server.database;
 
+import corpus.ModernStandardArabicLTS;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Lesson;
 import org.apache.log4j.Logger;
@@ -11,6 +13,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -39,7 +42,6 @@ public class ExcelImport implements ExerciseDAO {
 
   private List<Exercise> exercises = null;
   private List<String> errors = new ArrayList<String>();
-  //private TeacherClass teacherClass;
   private final String file;
   private SectionHelper sectionHelper = new SectionHelper();
 
@@ -94,8 +96,6 @@ public class ExcelImport implements ExerciseDAO {
   public List<Exercise> readExercises(InputStream inp) {
     List<Exercise> exercises = new ArrayList<Exercise>();
     try {
-      //logger.info("reading from " +inp);
-    //  teacherClass = new TeacherClass(-1);
       Workbook wb = WorkbookFactory.create(inp);
 
       for (int i = 0; i < wb.getNumberOfSheets(); i++) {
@@ -169,99 +169,142 @@ public class ExcelImport implements ExerciseDAO {
     int weekIndex = 0;
     int weightIndex = -1;
     List<String> lastRowValues = new ArrayList<String>();
+    try {
+  //    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("ltsIssues.txt"), FileExerciseDAO.ENCODING));
+  //    SmallVocabDecoder svd = new SmallVocabDecoder();
+   //   ModernStandardArabicLTS lts = new ModernStandardArabicLTS();
+      for (; iter.hasNext(); ) {
+        Row next = iter.next();
+    //    logger.warn("------------ Row # " + next.getRowNum() + " --------------- ");
+        boolean inMergedRow = rowToRange.keySet().contains(next.getRowNum());
 
-    for (; iter.hasNext(); ) {
-      Row next = iter.next();
-  //    logger.warn("------------ Row # " + next.getRowNum() + " --------------- ");
-      boolean inMergedRow = rowToRange.keySet().contains(next.getRowNum());
-
-      List<String> columns = new ArrayList<String>();
-      if (!gotHeader) {
-        Iterator<Cell> cellIterator = next.cellIterator();
-        while (cellIterator.hasNext()) {
-          Cell next1 = cellIterator.next();
-          columns.add(next1.toString().trim());
-        }
-      }
-
-      if (!gotHeader) {
-        for (String col : columns) {
-          String colNormalized = col.toLowerCase();
-          if (colNormalized.startsWith("Word".toLowerCase())) {
-            gotHeader = true;
-            colIndexOffset = columns.indexOf(col);
-          } else if (colNormalized.contains("transliteration")) {
-            transliterationIndex = columns.indexOf(col);
-          } else if (colNormalized.contains("unit")) {
-            unitIndex = columns.indexOf(col);
-          } else if (colNormalized.contains("chapter")) {
-            chapterIndex = columns.indexOf(col);
-          } else if (colNormalized.contains("week")) {
-            weekIndex = columns.indexOf(col);
-          } else if (colNormalized.contains("weight")) {
-            weightIndex = columns.indexOf(col);
+        List<String> columns = new ArrayList<String>();
+        if (!gotHeader) {
+          Iterator<Cell> cellIterator = next.cellIterator();
+          while (cellIterator.hasNext()) {
+            Cell next1 = cellIterator.next();
+            columns.add(next1.toString().trim());
           }
         }
-      }
-      else {
-        int colIndex = colIndexOffset;
-        String english = getCell(next, colIndex++).trim();
-        String foreignLanguagePhrase = getCell(next, colIndex).trim();
-        //logger.info("for row " + next.getRowNum() + " english = " + english + " in merged " + inMergedRow + " last row " + lastRowValues.size());
 
-        if (inMergedRow && !lastRowValues.isEmpty()) {
-          if (english.length() == 0) {
-            english = lastRowValues.get(0);
-            //logger.info("for row " + next.getRowNum() + " english using " + english);
-          }
-        }
-        if (gotHeader && english.length() > 0) {
-          // System.out.println("got entry line " +columns);
-          if (inMergedRow && !lastRowValues.isEmpty()) {
-            if (foreignLanguagePhrase.length() == 0) {
-              foreignLanguagePhrase = lastRowValues.get(1);
-              //logger.info("for row " + next.getRowNum() + " for foreign lang using " + foreignLanguagePhrase);
+        if (!gotHeader) {
+          for (String col : columns) {
+            String colNormalized = col.toLowerCase();
+            if (colNormalized.startsWith("Word".toLowerCase())) {
+              gotHeader = true;
+              colIndexOffset = columns.indexOf(col);
+            } else if (colNormalized.contains("transliteration")) {
+              transliterationIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("unit")) {
+              unitIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("chapter")) {
+              chapterIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("week")) {
+              weekIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("weight")) {
+              weightIndex = columns.indexOf(col);
             }
           }
-          if (foreignLanguagePhrase.length() == 0) {
-            //logger.warn("Got empty foreign language phrase row #" + next.getRowNum() +" for " + english);
-            errors.add(sheet.getSheetName()+"/"+"row #" +(next.getRowNum()+1) + " phrase was blank.");
-          } else {
-            String translit = getCell(next, transliterationIndex);
+        }
+        else {
+          int colIndex = colIndexOffset;
+          String english = getCell(next, colIndex++).trim();
+          String foreignLanguagePhrase = getCell(next, colIndex).trim();
+          //logger.info("for row " + next.getRowNum() + " english = " + english + " in merged " + inMergedRow + " last row " + lastRowValues.size());
 
+          if (inMergedRow && !lastRowValues.isEmpty()) {
+            if (english.length() == 0) {
+              english = lastRowValues.get(0);
+              //logger.info("for row " + next.getRowNum() + " english using " + english);
+            }
+          }
+          if (gotHeader && english.length() > 0) {
+            // System.out.println("got entry line " +columns);
             if (inMergedRow && !lastRowValues.isEmpty()) {
-              if (translit.length() == 0) {
-                translit = lastRowValues.get(2);
-                //logger.info("for row " + next.getRowNum() + " for translit using " + translit);
+              if (foreignLanguagePhrase.length() == 0) {
+                foreignLanguagePhrase = lastRowValues.get(1);
+                //logger.info("for row " + next.getRowNum() + " for foreign lang using " + foreignLanguagePhrase);
               }
             }
+            if (foreignLanguagePhrase.length() == 0) {
+              //logger.warn("Got empty foreign language phrase row #" + next.getRowNum() +" for " + english);
+              errors.add(sheet.getSheetName()+"/"+"row #" +(next.getRowNum()+1) + " phrase was blank.");
+            } else {
+              String translit = getCell(next, transliterationIndex);
 
-            Exercise imported = getExercise(id++, dao, weightIndex, next, english, foreignLanguagePhrase, translit);
-            recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported);
-            exercises.add(imported);
-/*            if (false)
-              logger.debug("read '" + english + "' '" + foreignLanguagePhrase +
-                  "' '" + translit + "' '" + unit + "' '" + chapter + "' '" + week + "'");*/
-            if (inMergedRow) {
-              lastRowValues.add(english);
-              lastRowValues.add(foreignLanguagePhrase);
-              lastRowValues.add(translit);
+              if (inMergedRow && !lastRowValues.isEmpty()) {
+                if (translit.length() == 0) {
+                  translit = lastRowValues.get(2);
+                  //logger.info("for row " + next.getRowNum() + " for translit using " + translit);
+                }
+              }
+
+              Exercise imported = getExercise(id++, dao, weightIndex, next, english, foreignLanguagePhrase, translit);
+              //checkLTS(id, writer, svd, lts, english, foreignLanguagePhrase);
+
+              recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported);
+              exercises.add(imported);
+  /*            if (false)
+                logger.debug("read '" + english + "' '" + foreignLanguagePhrase +
+                    "' '" + translit + "' '" + unit + "' '" + chapter + "' '" + week + "'");*/
+              if (inMergedRow) {
+                lastRowValues.add(english);
+                lastRowValues.add(foreignLanguagePhrase);
+                lastRowValues.add(translit);
+              }
+              else if (!lastRowValues.isEmpty()) {
+                lastRowValues.clear();
+              }
             }
-            else if (!lastRowValues.isEmpty()) {
-              lastRowValues.clear();
-            }
+          } else if (gotHeader && foreignLanguagePhrase.length() > 0) {
+            errors.add(sheet.getSheetName()+"/"+
+                "row #" +(next.getRowNum()+1) + " Word/Expression was blank");// but phrase was " +foreignLanguagePhrase);
           }
-        } else if (gotHeader && foreignLanguagePhrase.length() > 0) {
-          errors.add(sheet.getSheetName()+"/"+
-              "row #" +(next.getRowNum()+1) + " Word/Expression was blank");// but phrase was " +foreignLanguagePhrase);
         }
       }
+    //  writer.close();
+    } catch (Exception e) {
+      logger.error("got " + e,e);
     }
-///    sectionHelper.checkIfSemesters();
 
     return exercises;
   }
 
+  private void checkLTS(int id, BufferedWriter writer, SmallVocabDecoder svd, ModernStandardArabicLTS lts, String english, String foreignLanguagePhrase) {
+    List<String> tokens = svd.getTokens(foreignLanguagePhrase);
+    try {
+
+      for (String token : tokens) {
+        String[][] process = lts.process(token);
+        if (process == null) {
+          String message = "couldn't do lts on exercise #" + (id - 1) + " token '" + token +
+            "' length " + token.length() + " trim '" + token.trim() +
+            "' " +
+            " '" + foreignLanguagePhrase + "' english = '" + english + "'";
+          logger.error(message);
+          //logger.error("\t tokens " + tokens + " num =  " + tokens.size());
+
+          writer.write(message);
+          writer.write("\n");
+        }
+      }
+    } catch (Exception e) {
+      logger.error("couldn't do lts on " + (id - 1) + " " + foreignLanguagePhrase + " " + english);
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+  }
+
+  /**
+   * @see #readFromSheet(org.apache.poi.ss.usermodel.Sheet)
+   * @param id
+   * @param dao
+   * @param weightIndex
+   * @param next
+   * @param english
+   * @param foreignLanguagePhrase
+   * @param translit
+   * @return
+   */
   private Exercise getExercise(int id, FileExerciseDAO dao, int weightIndex, Row next,
                                String english, String foreignLanguagePhrase, String translit) {
     Exercise imported;
@@ -272,6 +315,9 @@ public class ExcelImport implements ExerciseDAO {
     }
     if (isFlashcard) {
       imported = new Exercise("flashcardStimulus", "" + (id), english, translations, english);
+      if (imported.getEnglishSentence() == null && imported.getContent() == null) {
+        logger.warn("both english sentence and content null for exercise " + id);
+      }
    //   logger.debug("Read " + imported);
     } else {
       //    Exercise imported = new Exercise("import", "" + id, content, false, true, english);
