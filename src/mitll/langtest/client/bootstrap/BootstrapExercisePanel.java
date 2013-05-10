@@ -52,8 +52,8 @@ public class BootstrapExercisePanel extends FluidContainer {
   private static final int LONG_DELAY_MILLIS = 3500;
   private static final int DELAY_MILLIS = 1200;//1250;
   private static final int DELAY_MILLIS_LONG = 3000;
+  public static final String PRONUNCIATION_SCORE = "Pronunciation score ";
   private Column scoreFeedbackColumn;
- // private static final String TIMES_HELP_SHOWN = "TimesHelpShown";
   private static final String FEEDBACK_TIMES_SHOWN = "FeedbackTimesShown";
   private static final int PERIOD_MILLIS = 500;
   private static final int MAX_INTRO_FEEBACK_COUNT = 5;
@@ -92,35 +92,23 @@ public class BootstrapExercisePanel extends FluidContainer {
                                 final ExerciseController controller) {
     setStyleName("exerciseBackground");
     addStyleName("cardBorder");
-   // int times = 0;
     stockStore = Storage.getLocalStorageIfSupported();
     if (stockStore != null) {
-     // times = getCookieValue(TIMES_HELP_SHOWN);
       feedback = getCookieValue(FEEDBACK_TIMES_SHOWN);
     }
+    isDemoMode = controller.isDemoMode();
 
-    FluidRow fluidRow = new FluidRow();
-    FlowPanel helpRow;
-    add(helpRow = new FlowPanel());
-    helpRow.addStyleName("floatRight");
-    helpRow.addStyleName("helpPadding");
+    add(getHelpRow(controller));
+    add(getCardPrompt(e));
 
-    // add help image on right side
-    Image image = new Image(HELP_IMAGE);
-
-    image.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.showFlashHelp();
-      }
-    });
-    helpRow.add(image);
-
-    add(fluidRow);
-    fluidRow.add(new Column(12, getQuestionContent(e)));
-    addQuestions(e, service, controller, 1/*, times == 0*/);
+    addRecordingAndFeedbackWidgets(e, service, controller);
   }
 
+  /**
+   * Store a cookie for the initial feedback for new users.
+   * @param key
+   * @return
+   */
   private int getCookieValue(String key) {
     int times = 0;
     String timesHelpShown = stockStore.getItem(key);
@@ -137,81 +125,150 @@ public class BootstrapExercisePanel extends FluidContainer {
     return times;
   }
 
+  /**
+   * @see MyRecordButtonPanel#showCorrectFeedback(double)
+   * @param key
+   */
   private void incrCookie(String key) {
     int cookieValue = getCookieValue(key);
     stockStore.setItem(key,""+(cookieValue+1));
   }
 
+  /**
+   * Make row for help question mark, right justify
+   * @param controller
+   * @return
+   */
+  private Widget getHelpRow(final ExerciseController controller) {
+    FlowPanel helpRow = new FlowPanel();
+    helpRow.addStyleName("floatRight");
+    helpRow.addStyleName("helpPadding");
+
+    // add help image on right side of row
+    helpRow.add(getHelpImage(controller));
+    return helpRow;
+  }
+
+  private Image getHelpImage(final ExerciseController controller) {
+    Image image = new Image(HELP_IMAGE);
+
+    image.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.showFlashHelp();
+      }
+    });
+    return image;
+  }
+
+  /**
+   * Make a row to show the question content (the prompt or stimulus)
+   *  and the space bar and feedback widgets beneath it.
+   * @param e
+   * @return
+   */
+  private Widget getCardPrompt(Exercise e) {
+    FluidRow questionRow = new FluidRow();
+    Widget questionContent = getQuestionContent(e);
+    Column contentContainer = new Column(12, questionContent);
+    questionRow.add(contentContainer);
+    return questionRow;
+  }
+
   private Widget getQuestionContent(Exercise e) {
     String stimulus = e.getEnglishSentence();
     if (stimulus == null) stimulus = e.getContent();
+    if (stimulus == null) stimulus = "Blank for exercise #" +e.getID();
     Widget hero = new Heading(1, stimulus);
     hero.addStyleName("cardText");
     return hero;
   }
 
   /**
-   * For every question,
-   * <ul>
-   * <li>show the text of the question,  </li>
-   * <li>the prompt to the test taker (e.g "Speak your response in English")  </li>
-   * <li>an answer widget (either a simple text box, an flash audio record and playback widget, or a list of the answers, when grading </li>
-   * </ul>     <br></br>
-   * Remember the answer widgets so we can notice which have been answered, and then know when to enable the next button.
-   *
+   * Three rows below the stimulus word/expression:<p></p>
+   *  record space bar image <br></br>
+   *  reco feedback - whether the recorded audio was correct/incorrect, etc.  <br></br>
+   *  score feedback - pron score
    * @param e
    * @param service
    * @param controller     used in subclasses for audio control
-   * @param questionNumber
-   * @paramx showHelp
    */
-  private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber/*, boolean showHelp*/) {
-    //for (Exercise.QAPair pair : e.getQuestions()) {
-    // add question header
-    questionNumber++;
-    // add question prompt
-    FluidRow row = new FluidRow();
-    add(row);
-    //row.add(new Column(12,new HTML(getQuestionPrompt(e.promptInEnglish))));
-
-    // add answer widget
-    MyRecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, questionNumber - 1);
+  private void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
+    // add answer widget to do the recording
+    MyRecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1);
     this.answerWidgets.add(answerWidget);
-    Widget recordButton = answerWidget.getRecordButton();
-    Paragraph paragraph = new Paragraph();
-    paragraph.addStyleName("alignCenter");
-    paragraph.add(recordButton);
-    recordButton.addStyleName("alignCenter");
 
-    row.add(new Column(12, paragraph));
+    FluidRow recordButtonRow = getRecordButtonRow(answerWidget.getRecordButton());
+    add(recordButtonRow);
 
-    FluidRow recoOutputRow = new FluidRow();
+    FluidRow recoOutputRow = getRecoOutputRow();
     add(recoOutputRow);
+
+    FluidRow feedbackRow = getScoreFeedbackRow();
+    add(feedbackRow);
+  }
+
+  /**
+   * Center align the record button image.
+   * @param recordButton
+   * @return
+   */
+  private FluidRow getRecordButtonRow(Widget recordButton) {
+    FluidRow recordButtonRow = new FluidRow();
+    Paragraph recordButtonContainer = new Paragraph();
+    recordButtonContainer.addStyleName("alignCenter");
+    recordButtonContainer.add(recordButton);
+    recordButton.addStyleName("alignCenter");
+    recordButtonRow.add(new Column(12, recordButtonContainer));
+    return recordButtonRow;
+  }
+
+  /**
+   * Center align the text feedback (correct/incorrect)
+   * @return
+   */
+  private FluidRow getRecoOutputRow() {
+    FluidRow recoOutputRow = new FluidRow();
     Paragraph paragraph2 = new Paragraph();
     paragraph2.addStyleName("alignCenter");
 
-    isDemoMode = controller.isDemoMode();
     recoOutputRow.add(new Column(12, paragraph2));
     recoOutput = new Heading(3,"Answer");
-    recoOutput.addStyleName("cardHiddenText");
+    recoOutput.addStyleName("cardHiddenText");   // same color as background so text takes up space but is invisible
     DOM.setStyleAttribute(recoOutput.getElement(), "color", "#e8eaea");
 
     paragraph2.add(recoOutput);
+    return recoOutputRow;
+  }
 
+  /**
+   * Holds the pron score feedback.
+   * Initially made with a placeholder.
+   * @return
+   */
+  private FluidRow getScoreFeedbackRow() {
     FluidRow feedbackRow = new FluidRow();
-    add(feedbackRow);
     SimplePanel widgets = new SimplePanel();
     widgets.setHeight("40px");
     scoreFeedbackColumn = new Column(6, 3, widgets);
     feedbackRow.add(scoreFeedbackColumn);
+    return feedbackRow;
   }
-  protected MyRecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
+
+  protected MyRecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service,
+                                                ExerciseController controller, final int index) {
     return new MyRecordButtonPanel(service, controller, exercise, index);
   }
 
+  /**
+   * Not sure if this is actually necessary -- this is part of who gets the focus when the flashcard is inside
+   * an internal frame in a dialog.
+   *
+   * @see BootstrapFlashcardExerciseList#grabFocus(BootstrapExercisePanel)
+   */
   public void grabFocus() {
     for (MyRecordButtonPanel widget : answerWidgets) {
-      System.out.println("Grab focus!!!");
+      //System.out.println("Grab focus!!!");
       widget.getRecordButton().setFocus(true);
     }
   }
@@ -304,15 +361,14 @@ public class BootstrapExercisePanel extends FluidContainer {
       recordButton.addFocusHandler(new FocusHandler() {
         @Override
         public void onFocus(FocusEvent event) {
-          System.out.println("\n\n\n record button got the focus! -------------- \n\n\n");
+          System.out.println("record button got the focus! -------------- ");
         }
       });
 
       recordButton.addKeyDownHandler(new KeyDownHandler() {
         @Override
         public void onKeyDown(KeyDownEvent event) {
-          System.out.println("\n\n\n record button got key down : " +event+
-            "-------------- \n\n\n");
+          System.out.println(" record button got key down : " +event+  "-------------- ");
         }
       });
 
@@ -350,10 +406,16 @@ public class BootstrapExercisePanel extends FluidContainer {
     }
 
     /**
+     * Deal with three cases: <br></br>
+     *   * the audio was invalid in some way : too short, too quiet, too loud<br></br>
+     *   * the audio was the correct response<br></br>
+     *   * the audio was incorrect<br></br><p></p>
+     *
+     * And then move on to the next item.
      * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
-     * @param result
-     * @param questionState
-     * @param outer
+     * @param result response from server
+     * @param questionState ignored here
+     * @param outer ignored here
      */
     @Override
     protected void receivedAudioAnswer(AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
@@ -369,40 +431,53 @@ public class BootstrapExercisePanel extends FluidContainer {
       if (result.validity != AudioAnswer.Validity.OK) {
         showPopup(result.validity.getPrompt());
         nextAfterDelay(correct);
-      }
-      else if (correct) {
-        showPronScoreFeedback(score);
-
-        audioHelper.playCorrect();
-        if (feedback < MAX_INTRO_FEEBACK_COUNT) {
-          String correctPrompt = "Correct! It's: " + exercise.getRefSentence();
-          recoOutput.setText(correctPrompt);
-          DOM.setStyleAttribute(recoOutput.getElement(), "color", "#000000");
-          incrCookie(FEEDBACK_TIMES_SHOWN);
-        }
+      } else if (correct) {
+        showCorrectFeedback(score);
       } else {   // incorrect!!
-        showPronScoreFeedback(score);
-
-        if (hasRefAudio) {
-          audioHelper.play(exercise.getRefAudio());
-        } else {
-          audioHelper.playIncorrect();
-        }
-        String correctPrompt = "Answer: " + exercise.getRefSentence() +
-          (exercise.getTranslitSentence().length() > 0 ? " (" + exercise.getTranslitSentence() + ")" : "");
-
-        if (isDemoMode) {
-          correctPrompt = "Heard: " + result.decodeOutput + "<p>" + correctPrompt;
-        }
-        recoOutput.setText(correctPrompt);
-        DOM.setStyleAttribute(recoOutput.getElement(), "color", "#000000");
-
-        if (hasRefAudio) {
-          waitForAudioToFinish();
-        }
+        showIncorrectFeedback(result, score, hasRefAudio);
       }
       if (correct || !hasRefAudio) {
         nextAfterDelay(correct);
+      }
+    }
+
+    private void showCorrectFeedback(double score) {
+      showPronScoreFeedback(score);
+
+      audioHelper.playCorrect();
+      if (feedback < MAX_INTRO_FEEBACK_COUNT) {
+        String correctPrompt = "Correct! It's: " + exercise.getRefSentence();
+        recoOutput.setText(correctPrompt);
+        DOM.setStyleAttribute(recoOutput.getElement(), "color", "#000000");
+        incrCookie(FEEDBACK_TIMES_SHOWN);
+      }
+    }
+
+    /**
+     * If there's reference audio, play it and wait for it to finish.
+     * @param result
+     * @param score
+     * @param hasRefAudio
+     */
+    private void showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio) {
+      showPronScoreFeedback(score);
+
+      if (hasRefAudio) {
+        audioHelper.play(exercise.getRefAudio());
+      } else {
+        audioHelper.playIncorrect();
+      }
+      String correctPrompt = "Answer: " + exercise.getRefSentence() +
+        (exercise.getTranslitSentence().length() > 0 ? " (" + exercise.getTranslitSentence() + ")" : "");
+
+      if (isDemoMode) {
+        correctPrompt = "Heard: " + result.decodeOutput + "<p>" + correctPrompt;
+      }
+      recoOutput.setText(correctPrompt);
+      DOM.setStyleAttribute(recoOutput.getElement(), "color", "#000000");
+
+      if (hasRefAudio) {
+        waitForAudioToFinish();
       }
     }
 
@@ -417,13 +492,16 @@ public class BootstrapExercisePanel extends FluidContainer {
       t.schedule(isDemoMode ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : DELAY_MILLIS_LONG);
     }
 
+    /**
+     * Move on to the next exercise after the audio has finished playing.
+     */
     private void waitForAudioToFinish() {
-      // Schedule the timer to run once in 1 seconds.
+      // Schedule the timer to run once in 1/2 second
       Timer t = new Timer() {
         @Override
         public void run() {
           if (audioHelper.hasEnded()) {
-            // Schedule the timer to run once in 1 seconds.
+            // Schedule the timer to run after user has had time to read the feedback
             Timer t = new Timer() {
               @Override
               public void run() {
@@ -445,6 +523,11 @@ public class BootstrapExercisePanel extends FluidContainer {
     }
   }
 
+  /**
+   * Show progress bar with score percentage, colored by score.
+   * Note it has to be wide enough to hold the text "pronunciation score xxx %"
+   * @param score
+   */
   private void showPronScoreFeedback(double score) {
     if (score < 0) score = 0;
     double percent = 100 * score;
@@ -455,7 +538,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     int percent1 = (int) percent;
     scoreFeedback.setPercent(percent1  < 40 ? 40 : percent1);   // just so the words will show up
 
-    scoreFeedback.setText("Pronunciation score " + (int) percent + "%");
+    scoreFeedback.setText(PRONUNCIATION_SCORE + (int) percent + "%");
     scoreFeedback.setVisible(true);
     scoreFeedback.setColor(
       score > 0.8 ? ProgressBarBase.Color.SUCCESS :
