@@ -204,19 +204,36 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public Exercise getExercise(String id) {
     List<Exercise> exercises = getExercises();
-    for (Exercise e : exercises) {
-      if (id.equals(e.getID())) {
-        return e;
-      }
+    Exercise byID = getByID(exercises, id);
+    if (byID == null) {
+      logger.error("huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
     }
-    return null;
+    else {
+      logger.debug("getExercise for exid " + id + " found ");
+    }
+    return byID;
   }
 
   public Exercise getExercise(String id, long userID) {
     List<Exercise> exercises = getExercises(userID);
+    Exercise byID = getByID(exercises, id);
+    if (byID == null) {
+      return getExercise(id);
+    }
+    else {
+      return byID;
+    }
+  }
+
+  /**
+   * This is really slow - todo use a map!
+   * @param exercises
+   * @param id
+   * @return
+   */
+  private Exercise getByID(List<Exercise> exercises, String id) {
     for (Exercise e : exercises) {
       if (id.equals(e.getID())) {
-        logger.info("getExercise for user " +userID + " exid " + id + " got " + e);
         return e;
       }
     }
@@ -289,7 +306,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } else {
       logger.debug("*not* in data collect mode");
 
-      exercises = serverProps.isArabicTextDataCollect() ? db.getRandomBalancedList() : db.getExercises(userID);
+      exercises = serverProps.isArabicTextDataCollect() ? db.getRandomBalancedList() : db.getUnmodExercises();
     }
     return exercises;
   }
