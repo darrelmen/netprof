@@ -504,7 +504,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     frame.addLoadHandler(new LoadHandler() {
       @Override
       public void onLoad(LoadEvent event) {
-        System.out.println("got load event " + event);
+        System.out.println("getPreviewModal got load event " + event + " setting focus on frame");
         setFocusOnFrame(frame);
       }
     });
@@ -527,7 +527,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         Document contentDocument = iframe.getContentDocument();
         Element child = DOM.getChild(frame.getElement(), 0);
         com.google.gwt.dom.client.Element record_button1 = contentDocument.getElementById("record_button");
-        System.out.println("got load event child " + child + " " + record_button1);
+        System.out.println("setFocusOnFrame : got load event child " + child + " record button  " + record_button1);
 
         if (record_button1 == null) {
           new Timer() {
