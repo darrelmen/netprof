@@ -77,20 +77,18 @@ public class SmallVocabDecoder {
       sentencesToUse.add(UNKNOWN_MODEL);
       for (String sentence : sentencesToUse) {
         List<String> tokens = getTokens(sentence);
-        int numTokens = tokens.size();
         int start = 0;
 
-        for (int newNodeIndex = 0; newNodeIndex < numTokens; newNodeIndex++) {
+        for (String token : tokens) {
           int next = newNodes++;
-          String wordForThisNode = tokens.get(newNodeIndex);
           linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=" + next +
             " l=" +
-            (wordForThisNode.equals(UNKNOWN_MODEL) ? UNKNOWN_MODEL_BIAS : "-1.00") +
+            (token.equals(UNKNOWN_MODEL) ? UNKNOWN_MODEL_BIAS : "-1.00") +
             "\n");
           nodesBuf.append("I=" +
             next +
             " W=" +
-            wordForThisNode +
+            token +
             "\n");
 
           start = next;
@@ -111,20 +109,22 @@ public class SmallVocabDecoder {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#createSLFFile(java.util.List, java.util.List, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#createSLFFile
    * @param lmSentences
    * @param background
    * @param tmpDir
    * @param scoringDir
    * @return absolute path slf file, if it was made successfully
    */
-  public String createSLFFile(List<String> lmSentences, List<String> background, String tmpDir,
+/*
+  private String createSLFFile(List<String> lmSentences, List<String> background, String tmpDir,
                               String scoringDir, double foregroundBackgroundBlend) {
     SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
     this.foregroundBackgroundBlend = foregroundBackgroundBlend;
     List<String> backgroundVocab = svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT);
     return createSLFFile(lmSentences, background, backgroundVocab, tmpDir, null, scoringDir);
   }
+*/
 
   /**
    * Get the foreground and background sentences. <br></br>
@@ -179,17 +179,24 @@ public class SmallVocabDecoder {
    * memory and segfault! <br></br>
    * Remember to add special tokens like silence, pause, and unk
    * @see ASRScoring#getUsedTokens(java.util.List, java.util.List)
-   * @see #createSLFFile
    * @param background sentences
    * @return most frequent vocabulary words
    */
   public List<String> getVocab(List<String> background, int vocabSizeLimit) {
     List<String> all = new ArrayList<String>();
-    all.add("-pau-");  // include?
+/*    all.add("-pau-");  // include?
     all.add("<s>");
-    all.add("</s>");
+    all.add("</s>");*/
     /*, "<unk>"*/
-    all.addAll(getSimpleVocab(background, vocabSizeLimit));
+    List<String> simpleVocab = getSimpleVocab(background, vocabSizeLimit);
+    all.addAll(simpleVocab);
+
+    String sentence = background.iterator().next();
+
+    logger.debug("num sentences " + background.size()+
+      " first is " + sentence + " length " + sentence.length() +" got " + simpleVocab.size() + " tokens : '" + simpleVocab +
+      "'");
+
     return all;
   }
 
@@ -200,39 +207,37 @@ public class SmallVocabDecoder {
    * @return
    */
   public List<String> getSimpleVocab(List<String> sentences, int vocabSizeLimit) {
-    List<String> all = new ArrayList<String>();
-
+    // count the tokens
     final Map<String, Integer> sc = new HashMap<String, Integer>();
     for (String sentence : sentences) {
-      for (String untrimedToken : sentence.split("\\s")) { // split on spaces
-        String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
-        String token = tt.trim();
-        if (token.length() > 0) {
-          Integer c = sc.get(token);
-          sc.put(token, (c == null) ? 1 : c + 1);
-        }
+      for (String token : getTokens(sentence)) {
+        Integer c = sc.get(token);
+        sc.put(token, (c == null) ? 1 : c + 1);
       }
     }
+
+    // sort by frequency
     List<String> vocab = new ArrayList<String>(sc.keySet());
     Collections.sort(vocab, new Comparator<String>() {
       public int compare(String s, String s2) {
-        Integer first  = sc.get(s);
+        Integer first = sc.get(s);
         Integer second = sc.get(s2);
         return first < second ? +1 : first > second ? -1 : 0;
       }
     });
 
-    all.addAll(vocab.subList(0,Math.min(vocab.size(), vocabSizeLimit)));
-
+    // take top n most frequent
+    List<String> all = new ArrayList<String>(); // copy list b/c sublist not serializable ???
+    all.addAll(vocab.subList(0, Math.min(vocab.size(), vocabSizeLimit)));
     return all;
   }
 
-  private List<String> getTokens(String sentence) {
+  public List<String> getTokens(String sentence) {
     List<String> all = new ArrayList<String>();
 
-    for (String untrimedToken : sentence.split("\\s")) { // split on spaces
+    for (String untrimedToken : sentence.split("\\p{Z}+")) { // split on spaces
       String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
-      String token = tt.trim();
+      String token = tt.trim();  // necessary?
       if (token.length() > 0) {
         all.add(token);
       }
