@@ -23,7 +23,7 @@ public class OutsideCount {
   private static Logger logger = Logger.getLogger(OutsideCount.class);
 
   /**
-   * @see DatabaseImpl#getExercisesBiasTowardsUnanswered(long, String)
+   * @see DatabaseImpl#getExercisesBiasTowardsUnanswered(long, String, boolean)
    * @see MonitoringSupport#getExToCount(java.util.List)
    * @see MonitoringSupport#getExToCountMaleOrFemale(java.util.List, boolean)
    * @param isMale
@@ -79,7 +79,7 @@ public class OutsideCount {
    * Parse the external count file from Wade.
    * This should only be a one off if people are consistently using the website.
    *
-   * @see DatabaseImpl#getExercisesBiasTowardsUnanswered(long, String)
+   * @see DatabaseImpl#getExercisesBiasTowardsUnanswered(long, String, boolean)
    * @param overrideCountsFile
    * @return map of gender to phrase to count of answers for that phrase
    */
