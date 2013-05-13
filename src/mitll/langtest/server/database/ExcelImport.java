@@ -45,6 +45,7 @@ public class ExcelImport implements ExerciseDAO {
   private final String file;
   private SectionHelper sectionHelper = new SectionHelper();
   private boolean debug = false;
+  String mediaDir;
 
   public ExcelImport() {
     this.file = null;
@@ -52,13 +53,14 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   /**
-   * @see DatabaseImpl#makeDAO(boolean, String, boolean)
+   * @see DatabaseImpl#makeDAO
    * @param file
    * @param isFlashcard
    */
-  public ExcelImport(String file, boolean isFlashcard) {
+  public ExcelImport(String file, boolean isFlashcard, String mediaDir) {
     this.file = file;
     this.isFlashcard = isFlashcard;
+    this.mediaDir = mediaDir;
   }
 
   @Override
@@ -373,6 +375,14 @@ public class ExcelImport implements ExerciseDAO {
 
     imported.addQuestion();
 
+
+    String name = ""+id;
+    String fastAudioRef = mediaDir+File.separator+name+File.separator+ "fast" + ".wav";
+    String slowAudioRef = mediaDir+File.separator+name+File.separator+ "slow" + ".wav";
+
+
+       imported.setRefAudio(fastAudioRef);
+    imported.setSlowRefAudio(slowAudioRef);
    // exercises.add(imported);
     return imported;
   }
