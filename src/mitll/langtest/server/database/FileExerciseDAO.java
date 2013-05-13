@@ -6,6 +6,8 @@ import audio.image.TranscriptReader;
 import audio.imagewriter.AudioConverter;
 import audio.imagewriter.ImageWriter;
 import audio.tools.FileCopier;
+import mitll.langtest.server.AudioCheck;
+import mitll.langtest.server.AudioConversion;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.Scores;
 import mitll.langtest.shared.Exercise;
@@ -16,10 +18,12 @@ import org.apache.log4j.Logger;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -852,7 +856,7 @@ public class FileExerciseDAO implements ExerciseDAO {
    * @param path
    */
   // TODO later take data and use database so we keep metadata about audio
-  private void convertExamples(String path) {
+  private void convertExamples(String path) throws Exception{
     DatabaseImpl db = new DatabaseImpl(
       "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\dari\\",
       "template",
@@ -862,6 +866,10 @@ public class FileExerciseDAO implements ExerciseDAO {
 
     Map<String,Exercise> idToEx = new HashMap<String, Exercise>();
     Map<String,List<Result>> idToResults = new HashMap<String, List<Result>>();
+
+    FileWriter missingSlow = new FileWriter("war\\config\\dari\\missingSlow.txt");
+
+    FileWriter missingFast = new FileWriter("war\\config\\dari\\missingFast.txt");
 
     logger.debug("Got " + results.size() + " results");
     List<Exercise> exercises = db.getExercises();
@@ -887,37 +895,78 @@ public class FileExerciseDAO implements ExerciseDAO {
     properties.put("MODELS_DIR","models.dli-dari");
     ASRScoring scoring = new ASRScoring("C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war", properties);
 
+    File newRefDir = new File("war\\config\\dari\\refAudio");
+    newRefDir.mkdir();
+
+    File bestDir = new File("war\\config\\dari\\bestAudio");
+    bestDir.mkdir();
+
     int count = 0;
     for (Map.Entry<String, List<Result>> pair : idToResults.entrySet()) {
       List<Result> resultsForExercise = pair.getValue();
+
+
+      String exid = resultsForExercise.iterator().next().id;
+      Exercise exercise = idToEx.get(exid);
+      String refSentence = exercise.getRefSentence();
+      int refLength = refSentence.split("\\p{Z}+").length;
+      logger.debug("refSentence " + refSentence + " length " + refLength);
+
+      File refDirForExercise = new File(newRefDir, exid);
+      logger.warn("making dir " + pair.getKey() + " at " + refDirForExercise.getAbsolutePath());
+      refDirForExercise.mkdir();
+
+      File bestDirForExercise = new File(bestDir, exid);
+      logger.warn("making dir " + pair.getKey() + " at " + bestDirForExercise.getAbsolutePath());
+      bestDirForExercise.mkdir();
+      float bestSlow = 0, bestFast = 0, bestTotal = 0;
+      String best = "";
+
       for (Result r : resultsForExercise) {
-        Exercise exercise = idToEx.get(r.id);
         if (exercise != null) {
-          String refSentence = exercise.getRefSentence();
           File answer = new File(r.answer);
+
           String name = answer.getName().replaceAll(".wav", "");
           String parent = answer.getParent();
           parent = "war\\config\\dari\\examples\\" + parent;
+
+          File answer2 = new File(parent,answer.getName());
+
+          double durationInSeconds = 0;
+          if (!answer2.exists()) {
+            logger.error("can't find " + answer2.getAbsolutePath());
+          }
+          else {
+            durationInSeconds = new AudioCheck().getDurationInSeconds(answer2);
+            logger.debug("dur of " + answer2 + " is " + durationInSeconds + " seconds");
+          }
+
+          String testAudioFileNoSuffix = null;
+          try {
+            testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(parent, name);
+          } catch (UnsupportedAudioFileException e) {
+           logger.error("got " +e,e);
+          }
+
           logger.debug("parent " + parent + " running result " + r.uniqueID + " for exercise " + exercise.getID() + " and audio file " + name);
 
-          Scores align = scoring.align(parent, name, refSentence + " " + refSentence);
+          Scores align = scoring.align(parent, testAudioFileNoSuffix, refSentence + " " + refSentence);
 
-          String wordLabFile   = prependDeploy(parent,name + ".words.lab");
-
+          String wordLabFile   = prependDeploy(parent,testAudioFileNoSuffix + ".words.lab");
           try {
             SortedMap<Float,TranscriptEvent> timeToEvent = new TranscriptReader().readEventsFromFile(wordLabFile);
 
             float start1 = -1, end1 =-1, start2 = -1, end2 = -1;
             boolean didFirst = false;
-            int refLength = refSentence.split("\\s").length;
-            logger.debug("refSentence " + refSentence + " length " + refLength);
+
             int tokenCount = 0;
+            float scoreTotal1 = 0, scoreTotal2 = 0;
             for (Map.Entry<Float, TranscriptEvent> timeEventPair : timeToEvent.entrySet()) {
               TranscriptEvent transcriptEvent = timeEventPair.getValue();
               String word = transcriptEvent.event;
-              logger.debug("\ttoken " + tokenCount +
-                " got " + word + " and " + transcriptEvent);
+              logger.debug("\ttoken " + tokenCount + " got " + word + " and " + transcriptEvent);
               if (word.equals("<s>") || word.equals("</s>")) continue;
+              if (!didFirst) scoreTotal1 += transcriptEvent.score; else scoreTotal2 += transcriptEvent.score;
               if (refSentence.startsWith(word) && tokenCount == 0) {
                 if (!didFirst) {
                   start1 = transcriptEvent.start;
@@ -925,22 +974,103 @@ public class FileExerciseDAO implements ExerciseDAO {
                   start2 = transcriptEvent.start;
                 }
                 tokenCount++;
+                logger.debug("\t1 token " + tokenCount + " vs " + (refLength-1));
+
               }
               else if (refSentence.endsWith(word) && tokenCount == refLength-1) {
                 if (!didFirst) {
                   end1 = transcriptEvent.end;
+                  logger.debug("\t2 token " + tokenCount + " == " + (refLength-1));
+
                   didFirst = true;
                   tokenCount = 0;
                 } else {
                   end2 = transcriptEvent.end;
                 }
               }
-              else tokenCount++;
+              else {
+                tokenCount++;
+                logger.debug("\t3 token " + tokenCount + " vs " + (refLength-1));
+              }
             }
 
-            logger.debug("\tfirst  " + start1 + "-" +end1 + " dur " + (end1-start1) +
-             " second " + start2 + "-" +end2 + " dur " + (end2-start2) +
+            float dur1 = end1 - start1;
+            float dur2 = end2 - start2;
+            float fastScore = scoreTotal1 / (float) refLength;
+            float slowScore = scoreTotal2 / (float) refLength;
+            logger.debug("\tfirst  " + start1 + "-" +end1 + " dur " + dur1 +
+              " score " + fastScore +
+             " second " + start2 + "-" +end2 + " dur " + dur2 +
+              " score " + slowScore +
               " for " + name);
+
+            if (fastScore > bestFast) {
+              bestFast = fastScore;
+            }
+            if (slowScore > bestSlow) {
+              bestSlow = slowScore;
+            }
+            if (bestTotal < fastScore + slowScore) {
+              bestTotal = fastScore + slowScore;
+              best = testAudioFileNoSuffix;
+
+              logger.debug("best so far is  " + best + " score " + bestTotal +
+                " fast " + fastScore + "/" + slowScore);
+            }
+
+            File longFileFile = new File(parent,testAudioFileNoSuffix+".wav");
+            if (!longFileFile.exists())logger.error("huh? can't find  " + longFileFile.getAbsolutePath());
+
+
+            logger.debug("writing ref files to " + refDirForExercise.getName() + " input " + longFileFile.getName() +
+              " Start " + start1 + " " + dur1 + " start2 " + start2 + " dur " + dur2);
+
+            float pad = 0.25f;
+            float s1 = Math.max(0,start1-pad);
+            float s2 = Math.max(0,start2-pad);
+
+            float floatDur = (float) durationInSeconds;
+            float e1 = Math.min(floatDur,end1+pad);
+            float midPoint = end1 + ((start2 - end1) / 2);
+            if (e1 > midPoint) {
+            //  logger.warn("adjust e1 from " + e1 + " to " +midPoint);
+              e1 = midPoint;
+              s1 = midPoint;
+            }
+
+            float e2 = Math.min(floatDur, end2 + pad);
+            // if (e1 > (end1-start2)/2) e1 = (end1-start2)/2;
+
+            float d1 = e1 - s1;
+            float d2 = e2 - s2;
+
+            logger.debug("writing ref files to " + refDirForExercise.getName() + " input " + longFileFile.getName() +
+              " pad s1 " + s1 + " " + d1 + " s2 " + s2 + " dur " + d2);
+
+
+            if (dur1 < 1) {
+              logger.warn("Skipping audio " + longFileFile.getName() + " since fast audio too short ");
+            } else {
+              new AudioConverter().trim("C:\\Users\\go22670\\sox-14-3-2\\sox.exe",
+                longFileFile.getAbsolutePath(),
+                new File(refDirForExercise, testAudioFileNoSuffix + "_" + FAST + ".wav").getAbsolutePath(),
+                s1,
+                d1);
+            }
+
+            if (dur2 < 1) {
+              logger.warn("Skipping audio " + longFileFile.getName() + " since slow audio too short ");
+
+            } else {
+              new AudioConverter().trim("C:\\Users\\go22670\\sox-14-3-2\\sox.exe",
+                longFileFile.getAbsolutePath(),
+                new File(refDirForExercise, testAudioFileNoSuffix + "_" + SLOW + ".wav").getAbsolutePath(),
+                s2,
+                d2);
+            }
+
+
+            // new FileCopier().copy(new File(base, shortFile).getAbsolutePath(), new File(newRefDir, FAST + ".wav").getAbsolutePath());
 
 
           } catch (IOException e) {
@@ -952,31 +1082,32 @@ public class FileExerciseDAO implements ExerciseDAO {
         else logger.warn("couldn't find " + r.getID() + " exercise");
       }
 
-      if (count ++ > 1) break;
-    }
-
-    if (true) return;
-
-/*    File dir = new File(path);
-    for (File execiseDir : dir.listFiles()) {
-      String exid = execiseDir.getName();
-      for (File question : execiseDir.listFiles()) {
-        for (File subject : question.listFiles()) {
-          for (File wav : subject.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-              return pathname.getName().endsWith(".wav");
-            }
-          })) {
-            // split file into fast and slow...?  how do you know which it was recorded under?
-            String refSentence = "something";
-            String name = wav.getName();
-            name = name.replaceAll(".wav","");
-            Scores align = scoring.align(subject.getAbsolutePath(), name, refSentence);
-          }
+      if (bestTotal > 0) {
+        logger.debug("best is " + best + " total " + bestTotal);
+        File fast = new File(refDirForExercise, best + "_" + FAST + ".wav");
+        if (!fast.exists()) {
+          missingFast.write(exid + "\n");
+        } else {
+          new FileCopier().copy(fast.getAbsolutePath(), new File(bestDirForExercise, FAST + ".wav").getAbsolutePath());
+        }
+        File slow = new File(refDirForExercise, best + "_" + SLOW + ".wav");
+        if (!slow.exists()) {
+          missingSlow.write(exid + "\n");
+        } else {
+          new FileCopier().copy(slow.getAbsolutePath(), new File(bestDirForExercise, SLOW + ".wav").getAbsolutePath());
         }
       }
-    }*/
+      else {
+        logger.debug("\n\n------------- no valid audio for " + exid);
+
+        missingFast.write(exid + "\n");
+        missingSlow.write(exid + "\n");
+      }
+      if (count ++ > 10) break;
+    }
+
+    missingFast.close();;
+    missingSlow.close();;
   }
 
   public static void main(String [] arg) {
@@ -986,7 +1117,11 @@ public class FileExerciseDAO implements ExerciseDAO {
   //  System.out.println(" group " + matcher.find());
   //  System.out.println(" match " + matcher.group(1));
     //new FileExerciseDAO(relativeConfigDir).convertPlan();
-    new FileExerciseDAO(false).convertExamples("C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\dari\\examples");
+    try {
+      new FileExerciseDAO(false).convertExamples("C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\dari\\examples");
+    } catch (Exception e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
     /*List<Exercise> rawExercises = new FileExerciseDAO(*//**//*"war"*//**//*).getRawExercises();
     System.out.println("first is " + rawExercises.iterator().next());*/
   }
