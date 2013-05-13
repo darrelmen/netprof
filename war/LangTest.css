@@ -457,6 +457,16 @@ fieldset > legend {
     font-size: 24px;
 }
 
+.pashtofont {
+    font-family: 'Pashto Kror Asiatype','HSPashto','HSTahoma',Arial,Helvetica,sans-serif;
+    font-size: larger;
+}
+
+.pashtofont td {
+    font-family: 'Pashto Kror Asiatype','HSPashto','HSTahoma',Arial,Helvetica,sans-serif;
+    font-size: larger;
+}
+
 /**
 * From here down is part of a partial attempt to have more graceful recovery from encountering a flash blocker.
 * This attempt wasn't completed though.
