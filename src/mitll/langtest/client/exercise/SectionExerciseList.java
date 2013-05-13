@@ -81,12 +81,13 @@ public class SectionExerciseList extends PagingExerciseList {
   }
 
   /**
+   * After logging in, we get the type->section map and build the list boxes.
    * @see mitll.langtest.client.LangTest#gotUser
    * @param userID
    */
   @Override
   public void getExercises(final long userID) {
-    System.out.println("Get exercises for user=" + userID);
+    System.out.println("SectionExerciseList.getExercises : Get exercises for user=" + userID);
     this.userID = userID;
     service.getTypeToSectionToCount(new AsyncCallback<Map<String, Map<String, Integer>>>() {
       @Override
@@ -429,7 +430,7 @@ public class SectionExerciseList extends PagingExerciseList {
 
   /**
    * @see #pushFirstListBoxSelection
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addClickHandlerToButton(com.github.gwtbootstrap.client.ui.Button, String, mitll.langtest.client.bootstrap.ButtonGroupSectionWidget)
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addClickHandlerToButton
    */
   protected void pushNewSectionHistoryToken() {
     String historyToken = getHistoryToken(null);
