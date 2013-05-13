@@ -71,6 +71,7 @@ public class DatabaseImpl implements Database {
   private boolean isUrdu;
   private boolean useFile;
   private final boolean showSections;
+  private String language;
 
   /**
    * Just for testing
@@ -156,7 +157,7 @@ public class DatabaseImpl implements Database {
    * @return
    */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    return useFile ? new FileExerciseDAO(mediaDir, isUrdu, showSections) : new SQLExerciseDAO(this, mediaDir);
+    return useFile ? new FileExerciseDAO(mediaDir, language, showSections) : new SQLExerciseDAO(this, mediaDir);
   }
 
   /**
@@ -164,15 +165,16 @@ public class DatabaseImpl implements Database {
    * @param installPath
    * @param lessonPlanFile
    * @param mediaDir
-   * @param isUrdu
+   * @param language
    */
-  public void setInstallPath(String installPath, String lessonPlanFile, String mediaDir, boolean isUrdu, boolean useFile) {
+  public void setInstallPath(String installPath, String lessonPlanFile, String mediaDir, String language, boolean useFile) {
    // logger.debug("got install path " + installPath + " media " + mediaDir + " is urdu " +isUrdu);
     this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
     this.mediaDir = mediaDir;
-    this.isUrdu = isUrdu;
+    this.isUrdu = language.equalsIgnoreCase("Urdu");
     this.useFile = useFile;
+    this.language = language;
   }
 
   public void setOutsideFile(String outsideFile) { monitoringSupport.setOutsideFile(outsideFile); }
@@ -410,12 +412,10 @@ public class DatabaseImpl implements Database {
   /**
    *
    *
-   * @param userID for this user
    * @return unmodifiable list of exercises
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long)
    */
-  public List<Exercise> getExercises(long userID) {
-    logger.info("getExercises : for user  " + userID);
+  public List<Exercise> getUnmodExercises() {
     List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
     return Collections.unmodifiableList(exercises);
   }
@@ -870,10 +870,9 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  public long addUser(HttpServletRequest request, int age, String gender, int experience) {
-    // String header = request.getHeader("X-FORWARDED-FOR");
+  public long addUser(HttpServletRequest request, int age, String gender, int experience, String dialect) {
     String ip = getIPInfo(request);
-    return addUser(age, gender, experience, ip);
+    return addUser(age, gender, experience, ip,dialect);
   }
 
   /**
@@ -884,12 +883,13 @@ public class DatabaseImpl implements Database {
    * @param age
    * @param gender
    * @param experience
-   * @param ipAddr
+   * @param ipAddr user agent info
+   * @param dialect speaker dialect
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(int, String, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
-  private long addUser(int age, String gender, int experience, String ipAddr) {
-    return userDAO.addUser(age, gender, experience, ipAddr, "", "", "", "", "", false);
+  private long addUser(int age, String gender, int experience, String ipAddr, String dialect) {
+    return userDAO.addUser(age, gender, experience, ipAddr, "", "", "", dialect, "", false);
   }
 
   public long addUser(HttpServletRequest request,
