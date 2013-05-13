@@ -44,6 +44,7 @@ public class ExcelImport implements ExerciseDAO {
   private List<String> errors = new ArrayList<String>();
   private final String file;
   private SectionHelper sectionHelper = new SectionHelper();
+  private boolean debug = false;
 
   public ExcelImport() {
     this.file = null;
@@ -159,7 +160,7 @@ public class ExcelImport implements ExerciseDAO {
     }
     int id = 0;
     boolean gotHeader = false;
-    FileExerciseDAO dao = new FileExerciseDAO(false,false, "", isFlashcard);
+    FileExerciseDAO dao = new FileExerciseDAO("","", false, isFlashcard);
 
     int colIndexOffset = 0;
 
@@ -352,6 +353,8 @@ public class ExcelImport implements ExerciseDAO {
     if (unit.startsWith("'")) unit = unit.substring(1);
     if (chapter.startsWith("'")) chapter = chapter.substring(1);
     if (week.startsWith("'")) week = week.substring(1);
+
+    if (debug) logger.debug("unit " + unit + " chapter " + chapter + " week " + week);
 
     if (unit.length() > 0) pairs.add(sectionHelper.addUnitToLesson(imported,unit));
     if (chapter.length() > 0) pairs.add(sectionHelper.addChapterToLesson(imported,chapter));
