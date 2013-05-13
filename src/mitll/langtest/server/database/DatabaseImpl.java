@@ -183,7 +183,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath(boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    * @param installPath
    * @param lessonPlanFile
    * @param relativeConfigDir
@@ -589,24 +589,37 @@ public class DatabaseImpl implements Database {
    * @param userID so we can show gender aware orderings (i.e. show entries with fewer female responses to females, etc.)
    * @return ordered list of exercises
    */
-  public List<Exercise> getExercisesBiasTowardsUnanswered(long userID) {
+  public List<Exercise> getExercisesBiasTowardsUnanswered(long userID, boolean useWeights) {
     List<Exercise> rawExercises = getExercises();
-    return getExercisesBiasTowardsUnanswered(userID, rawExercises);
+    return getExercisesBiasTowardsUnanswered(userID, rawExercises,useWeights);
   }
 
-  public List<Exercise> getExercisesBiasTowardsUnanswered(long userID, Collection<Exercise> rawExercises) {
+  public List<Exercise> getExercisesBiasTowardsUnanswered(long userID, Collection<Exercise> rawExercises, boolean useWeights) {
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
     Map<String,Double> idToWeight = new HashMap<String, Double>();
 
-    populateInitialExerciseIDToCount(rawExercises, idToExercise, idToCount,idToWeight);
+    populateInitialExerciseIDToCount(rawExercises, idToExercise, idToCount,idToWeight, useWeights);
 
     // only find answers that are for the gender
     /*Collection<String> alreadyAnswered =*/
     getExerciseIDToResultCount(userID, idToCount);
 
+   // logger.debug("getExercisesBiasTowardsUnanswered id->count " + idToCount);
+    //logger.debug("count " +idToCount.get())
+
     Map<String, Integer> idToCountScaled = getScaledIdToCount(idToCount, idToWeight);
+
+  //  logger.debug("getExercisesBiasTowardsUnanswered idToCountScaled " + idToCountScaled);
+
     SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCountScaled);
+    List<String> sampleIDs = countToIds.get(countToIds.firstKey());
+    //logger.debug("getExercisesBiasTowardsUnanswered count keys " + countToIds.keySet() + " first set sample " + sampleIDs.subList(0, Math.min(sampleIDs.size(),20)));
+    /*logger.debug("getExercisesBiasTowardsUnanswered count keys " + countToIds.keySet() + " first set sample (" +
+      countToIds.firstKey() +
+      ") = " + sampleIDs);*/
+
+    //logger.debug("getExercisesBiasTowardsUnanswered map " + countToIds);
     return getResultsRandomizedPerUser(userID, idToExercise, countToIds, idToWeight);
   }
 
@@ -623,9 +636,10 @@ public class DatabaseImpl implements Database {
 
     for (Map.Entry<String,Integer> idAndCount : idToCount.entrySet()) {
       String id = idAndCount.getKey();
-      Double weight = idToWeight.get(id);
       double doubleCount = (double) idAndCount.getValue();
+      Double weight = idToWeight.get(id);
       int round = (int)Math.round(doubleCount / weight);
+     // if (round != idAndCount.getValue()) logger.debug("different " + round + " vs " + idAndCount.getValue() + " for " + id);
       idToCountScaled.put(id, round);
     }
     return idToCountScaled;
@@ -637,15 +651,16 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long)
    * @param userID
    * @param outsideFile
+   * @param useWeights
    * @return
    */
-  public List<Exercise> getExercisesBiasTowardsUnanswered(long userID, String outsideFile) {
+  public List<Exercise> getExercisesBiasTowardsUnanswered(long userID, String outsideFile, boolean useWeights) {
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
     Map<String,Double> idToWeight = new HashMap<String, Double>();
     List<Exercise> rawExercises = getExercises();
 
-    populateInitialExerciseIDToCount(rawExercises, idToExercise, idToCount,idToWeight);
+    populateInitialExerciseIDToCount(rawExercises, idToExercise, idToCount,idToWeight,useWeights);
     //logger.info("initial map of online counts is size = " + idToCount.size() +" " + idToCount.values().size());
 
     boolean isMale = userDAO.isUserMale(userID);
@@ -673,8 +688,8 @@ public class DatabaseImpl implements Database {
    * Given a map of answer counts to exercise ids at those counts, randomize the order based on the
    * user id, then return a list of Exercises with those ids.
    *
-   * @see #getExercisesBiasTowardsUnanswered(long)
-   * @see #getExercisesBiasTowardsUnanswered(long, String)
+   * @see #getExercisesBiasTowardsUnanswered(long,boolean)
+   * @see #getExercisesBiasTowardsUnanswered(long, String, boolean)
    * @param userID for this user
    * @param idToExercise so we can go from id to exercise
    * @param countToIds statistics about answers for each exercise
@@ -720,8 +735,8 @@ public class DatabaseImpl implements Database {
 
   /**
    * Reverse the map -- make a map of result count->list of ids at that count
-   * @see #getExercisesBiasTowardsUnanswered(long)
-   * @see #getExercisesBiasTowardsUnanswered(long, String)
+   * @see #getExercisesBiasTowardsUnanswered(long,boolean)
+   * @see #getExercisesBiasTowardsUnanswered(long, String, boolean)
    * @param idToCount
    * @return
    */
@@ -737,17 +752,17 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see #getExercisesBiasTowardsUnanswered(long)
-   * @see #getExercisesBiasTowardsUnanswered(long, String)
+   * @see #getExercisesBiasTowardsUnanswered(long,boolean)
+   * @see #getExercisesBiasTowardsUnanswered(long, String, boolean)
    * @param idToExercise
    * @param idToCount
    */
   private void populateInitialExerciseIDToCount(Collection<Exercise> rawExercises,
                                                 Map<String, Exercise> idToExercise, Map<String, Integer> idToCount,
-                                                Map<String, Double> idToWeight) {
+                                                Map<String, Double> idToWeight, boolean useWeights) {
     for (Exercise e : rawExercises) {
       idToCount.put(e.getID(), 0);
-      double weight = e.getWeight() == 0 ? 1 : Math.max(1, Math.log(e.getWeight())); // 1->n
+      double weight = !useWeights || e.getWeight() == 0 ? 1 : Math.max(1, Math.log(e.getWeight())); // 1->n
       idToWeight.put(e.getID(), weight);
       idToExercise.put(e.getID(), e);
     }
@@ -756,8 +771,8 @@ public class DatabaseImpl implements Database {
   /**
    * multiple responses by the same user count as one in count->id map.
    *
-   * @see #getExercisesBiasTowardsUnanswered(long)
-   * @see #getExercisesBiasTowardsUnanswered(long,String)
+   * @see #getExercisesBiasTowardsUnanswered(long,boolean)
+   * @see #getExercisesBiasTowardsUnanswered(long, String, boolean)
    * @param userID
    * @paramx userMale
    * @param idToCount exercise id->count
@@ -1161,7 +1176,7 @@ public class DatabaseImpl implements Database {
 
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @see mitll.langtest.server.SiteDeployer#doSiteResponse(DatabaseImpl, javax.servlet.http.HttpServletResponse, mitll.langtest.server.SiteDeployer, mitll.langtest.shared.Site)
    * @param site
    * @return
    */
@@ -1170,7 +1185,22 @@ public class DatabaseImpl implements Database {
   public Site getSiteByID(long id) { return siteDAO.getSiteByID(id); }
   public List<Site> getDeployedSites() { return siteDAO.getDeployedSites(); }
   public void deploy(Site site) { siteDAO.deploy(site); }
+
+  /**
+   * @see mitll.langtest.server.SiteDeployer#deploySite(DatabaseImpl, mitll.langtest.server.mail.MailSupport, javax.servlet.http.HttpServletRequest, String, String, long, String, String, String)
+   * @param site
+   * @param name
+   * @param lang
+   * @param notes
+   * @return
+   */
   public Site updateSite(Site site, String name, String lang, String notes) { return siteDAO.updateSite(site, name, lang, notes); }
+
+  /**
+   * @see mitll.langtest.server.SiteDeployer#updateExerciseFile(mitll.langtest.shared.Site, String, DatabaseImpl)
+   * @param site
+   */
+  public void updateSiteFile(Site site) { siteDAO.updateSiteFileInDB(site); }
 
   /**
    * TODO : worry about duplicate userid?
