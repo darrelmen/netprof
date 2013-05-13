@@ -177,29 +177,30 @@ public class DatabaseImpl implements Database {
    * @return
    */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    return useFile ?
+/*    return useFile ?
       new FileExerciseDAO(isUrdu, showSections, mediaDir, isFlashcard) :
       new SQLExerciseDAO(this, relativeConfigDir);
+  */
+    return useFile ? new FileExerciseDAO(mediaDir, language, showSections, isFlashcard) : new SQLExerciseDAO(this, mediaDir);
+
   }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    * @param installPath
    * @param lessonPlanFile
-   * @param relativeConfigDir
-   * @param isUrdu
+   * @param mediaDir
+   * @param language
    */
-  public void setInstallPath(String installPath, String lessonPlanFile, String relativeConfigDir,
-                             boolean isUrdu, boolean useFile, String mediaDir) {
-    //logger.debug("got install path " + i + " media " + relativeConfigDir + " is urdu " +isUrdu);
+  public void setInstallPath(String installPath, String lessonPlanFile, String relativeConfigDir, String language, boolean useFile, String mediaDir) {
+   // logger.debug("got install path " + installPath + " media " + mediaDir + " is urdu " +isUrdu);
     this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
     this.relativeConfigDir = relativeConfigDir;
-    this.isUrdu = isUrdu;
-    this.useFile = useFile;
     this.mediaDir = mediaDir;
-
-    //resultDAO.enrichResultDurations(installPath);
+    this.isUrdu = language.equalsIgnoreCase("Urdu");
+    this.useFile = useFile;
+    this.language = language;
   }
 
   public void setOutsideFile(String outsideFile) { monitoringSupport.setOutsideFile(outsideFile); }
@@ -222,7 +223,6 @@ public class DatabaseImpl implements Database {
    * @param lessonPlanFile
    * @return
    * @see #getExercises()
-   * @see #getExercises(long)
    */
   private List<Exercise> getExercises(boolean useFile, String lessonPlanFile) {
     if (lessonPlanFile == null) {
@@ -572,12 +572,10 @@ public class DatabaseImpl implements Database {
   /**
    *
    *
-   * @param userID for this user
    * @return unmodifiable list of exercises
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long)
    */
-  public List<Exercise> getExercises(long userID) {
-    logger.info("getExercises : for user  " + userID);
+  public List<Exercise> getUnmodExercises() {
     List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
     return Collections.unmodifiableList(exercises);
   }
@@ -958,10 +956,9 @@ public class DatabaseImpl implements Database {
     return userDAO.getUserMap().get(id);
   }
 
-  public long addUser(HttpServletRequest request, int age, String gender, int experience) {
-    // String header = request.getHeader("X-FORWARDED-FOR");
+  public long addUser(HttpServletRequest request, int age, String gender, int experience, String dialect) {
     String ip = getIPInfo(request);
-    return addUser(age, gender, experience, ip);
+    return addUser(age, gender, experience, ip,dialect);
   }
 
   /**
@@ -972,12 +969,13 @@ public class DatabaseImpl implements Database {
    * @param age
    * @param gender
    * @param experience
-   * @param ipAddr
+   * @param ipAddr user agent info
+   * @param dialect speaker dialect
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(int, String, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
-  private long addUser(int age, String gender, int experience, String ipAddr) {
-    return userDAO.addUser(age, gender, experience, ipAddr, "", "", "", "", "", false);
+  private long addUser(int age, String gender, int experience, String ipAddr, String dialect) {
+    return userDAO.addUser(age, gender, experience, ipAddr, "", "", "", dialect, "", false);
   }
 
   public long addUser(HttpServletRequest request,
