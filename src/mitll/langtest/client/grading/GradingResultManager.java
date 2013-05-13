@@ -23,8 +23,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Table that lets the user set grades for the results (answers).  Supports two columns of grades.
@@ -49,6 +51,48 @@ public class GradingResultManager extends ResultManager {
   public GradingResultManager(LangTestDatabaseAsync s, UserFeedback feedback, boolean englishOnlyMode) {
     super(s,feedback, "Answer");
     this.englishOnlyMode = englishOnlyMode;
+  }
+
+  @Override
+  protected CellTable<Result> getResultCellTable(Collection<Result> result,
+                                                 boolean showQuestionColumn, Collection<Grade> grades,
+                                                 int grader, int numGrades) {
+    CellTable<Result> resultCellTable = super.getResultCellTable(result, showQuestionColumn, grades, grader, numGrades);
+    String gradingWidth = GRADING_WIDTH + "px"; // todo do something better here?
+    resultCellTable.setWidth(gradingWidth +"px");
+
+    showPageWithUngraded(result, grades, numGrades, resultCellTable);
+    return resultCellTable;
+  }
+
+  /**
+   * Set the page to the first one with ungraded results.
+   * @param result
+   * @param grades
+   * @param numGrades
+   * @param resultCellTable
+   */
+  private void showPageWithUngraded(Collection<Result> result, Collection<Grade> grades, int numGrades, CellTable<Result> resultCellTable) {
+    Set<Integer> gradedResults = new HashSet<Integer>();
+    for (Grade g : grades) {
+      if (g.gradeIndex == numGrades-1) {
+        gradedResults.add(g.resultID);
+      }
+    }
+
+    int index = 0;
+    //  System.out.println("getResultCellTable num grades to look for " + numGrades + " results " + gradedResults);
+
+    for (Result r : result) {
+      if (gradedResults.contains(r.uniqueID)) {
+        index++;
+      }
+      else { break; }
+    }
+
+    int page = index / pageSize;
+    // System.out.println("getResultCellTable last graded " + index + " page " + page + " page size " + pageSize);
+    resultCellTable.setVisibleRange(page * pageSize, Math.min(result.size(),(page+1)* pageSize));
   }
 
   /**
@@ -238,9 +282,9 @@ public class GradingResultManager extends ResultManager {
           gradesForResult.add(g);
         } else if (gradingColumnIndex == 1 && (gradeType.equals(ENGLISH_ONLY) || gradeType.length() == 0)) { // for second column, don't include "any"
           gradesForResult.add(g);
-        } else {
+        }/* else {
           //System.out.println("\tCol " + gradingColumnIndex + " Skipping " + g);
-        }
+        }*/
       }
     }
     return resultToGrade;
