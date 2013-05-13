@@ -229,7 +229,7 @@ public class GradingExercisePanel extends ExercisePanel {
       rm.setPageSize(twoQPageSize);
     }
 
-    return rm.getTable(results, true, false, grades, grader, controller.getNumGradesToCollect());
+    return rm.getTable(results, false, grades, grader, controller.getNumGradesToCollect());
   }
 
   @Override
