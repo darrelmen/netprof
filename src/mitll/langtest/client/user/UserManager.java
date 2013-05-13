@@ -576,6 +576,7 @@ public class UserManager {
     // add experience drop box
     final ListBox experienceBox = getExperienceBox();
     VerticalPanel experiencePanel = getGenderPanel(experienceBox);
+    final TextBox dialect = new TextBox();
 
     VerticalPanel dialogVPanel = new VerticalPanel();
     dialogVPanel.addStyleName("dialogVPanel");
@@ -585,8 +586,11 @@ public class UserManager {
     dialogVPanel.add(genderPanel);
     dialogVPanel.add(new HTML("<br><b>Please select months of experience</b>"));
     dialogVPanel.add(experiencePanel);
+    dialogVPanel.add(new HTML("<br><b>Dialect</b>"));
+    dialogVPanel.add(dialect);
     dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
     dialogVPanel.add(closeButton);
+    closeButton.setFocus(true);
     dialogBox.setWidget(dialogVPanel);
 
     // Create a handler for the sendButton and nameField
@@ -595,8 +599,12 @@ public class UserManager {
        * Fired when the user clicks on the sendButton.
        */
       public void onClick(ClickEvent event) {
-        dialogBox.hide();
-        sendNameToServer();
+        if (dialect.getText().isEmpty()) {
+          Window.alert("Dialect is empty");
+        } else {
+          dialogBox.hide();
+          sendNameToServer();
+        }
       }
 
       /**
@@ -618,7 +626,7 @@ public class UserManager {
         }
         service.addUser(getAge(ageEntryBox),
             genderBox.getValue(genderBox.getSelectedIndex()),
-            monthsOfExperience, new AsyncCallback<Long>() {
+            monthsOfExperience, dialect.getText(), new AsyncCallback<Long>() {
           public void onFailure(Throwable caught) {
             // Show the RPC error message to the user
             dialogBox.setText("Couldn't contact server.");
