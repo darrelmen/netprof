@@ -11,8 +11,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.googlecode.gchart.client.GChart;
 import com.googlecode.gchart.client.GChart.AnnotationLocation;
 import com.googlecode.gchart.client.GChart.SymbolType;
-import mitll.langtest.client.scoring.ScoreListener;
 import mitll.langtest.client.pretest.PretestGauge;
+import mitll.langtest.client.scoring.ScoreListener;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.ArrayList;
