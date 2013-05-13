@@ -578,6 +578,7 @@ public class UserManager {
     // add experience drop box
     final ListBox experienceBox = getExperienceBox();
     VerticalPanel experiencePanel = getGenderPanel(experienceBox);
+    final TextBox dialect = new TextBox();
 
     VerticalPanel dialogVPanel = new VerticalPanel();
     dialogVPanel.addStyleName("dialogVPanel");
@@ -587,8 +588,11 @@ public class UserManager {
     dialogVPanel.add(genderPanel);
     dialogVPanel.add(new HTML("<br><b>Please select months of experience</b>"));
     dialogVPanel.add(experiencePanel);
+    dialogVPanel.add(new HTML("<br><b>Dialect</b>"));
+    dialogVPanel.add(dialect);
     dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
     dialogVPanel.add(closeButton);
+    closeButton.setFocus(true);
     dialogBox.setWidget(dialogVPanel);
 
     // Create a handler for the sendButton and nameField
@@ -597,8 +601,12 @@ public class UserManager {
        * Fired when the user clicks on the sendButton.
        */
       public void onClick(ClickEvent event) {
-        dialogBox.hide();
-        sendNameToServer();
+        if (dialect.getText().isEmpty()) {
+          Window.alert("Dialect is empty");
+        } else {
+          dialogBox.hide();
+          sendNameToServer();
+        }
       }
 
       /**
@@ -618,7 +626,7 @@ public class UserManager {
         if (experienceBox.getSelectedIndex() == EXPERIENCE_CHOICES.size() - 1) {
           monthsOfExperience = 20 * 12;
         }
-        addUser(monthsOfExperience, ageEntryBox, genderBox, dialogBox, closeButton);
+        addUser(monthsOfExperience, ageEntryBox, genderBox, dialect,dialogBox, closeButton);
       }
     }
 
@@ -631,23 +639,23 @@ public class UserManager {
   }
 
   private void addUser(int monthsOfExperience, TextBox ageEntryBox, ListBox genderBox) {
-    addUser(monthsOfExperience, ageEntryBox, genderBox, null, null);
+    addUser(monthsOfExperience, ageEntryBox, genderBox, null,null, null);
   }
 
-  private void addUser(int monthsOfExperience, TextBox ageEntryBox, ListBox genderBox, final DialogBox dialogBox, final Button closeButton) {
+  private void addUser(int monthsOfExperience, TextBox ageEntryBox, ListBox genderBox, TextBox dialectBox,final DialogBox dialogBox, final Button closeButton) {
     int age = getAge(ageEntryBox);
     String gender = genderBox.getValue(genderBox.getSelectedIndex());
-    addUser(age, gender, monthsOfExperience, dialogBox, closeButton);
+    addUser(age, gender, monthsOfExperience, dialectBox.getText(),dialogBox, closeButton);
   }
 
   private void addUser(int age, String gender, int monthsOfExperience) {
-    addUser(age, gender, monthsOfExperience, null, null);
+    addUser(age, gender, monthsOfExperience, "",null, null);
   }
 
-  private void addUser(int age, String gender, int monthsOfExperience, final DialogBox dialogBox, final Button closeButton) {
+  private void addUser(int age, String gender, int monthsOfExperience, String dialect,final DialogBox dialogBox, final Button closeButton) {
     service.addUser(age,
       gender,
-      monthsOfExperience, new AsyncCallback<Long>() {
+      monthsOfExperience,dialect, new AsyncCallback<Long>() {
       public void onFailure(Throwable caught) {
         if (dialogBox == null) {
           Window.alert("addUser : Couldn't contact server.");
