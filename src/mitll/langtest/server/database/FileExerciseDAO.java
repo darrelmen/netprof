@@ -48,6 +48,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   private static final String SLOW = "slow";
   private static final boolean TESTING = false;
   private static final int MAX_ERRORS = 100;
+  private final String language;
 
   private List<Exercise> exercises;
   private final String mediaDir;
@@ -56,15 +57,18 @@ public class FileExerciseDAO implements ExerciseDAO {
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
   private Map<String,Map<String,Map<String,Set<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String,Map<String,Set<String>>>>();
+  private boolean isPashto;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
    * @param mediaDir
-   * @param isUrdu
+   * @param language
    */
-  public FileExerciseDAO(String mediaDir, boolean isUrdu, boolean showSections) {
+  public FileExerciseDAO(String mediaDir, String language, boolean showSections) {
     this.mediaDir = mediaDir;
-    this.isUrdu = isUrdu;
+    this.isUrdu = language.equalsIgnoreCase("Urdu");
+    this.language = language;
+    this.isPashto = language.equalsIgnoreCase("Pashto");
     this.showSections = showSections;
     //logger.debug("mediaDir " + mediaDir);
   }
@@ -93,7 +97,7 @@ public class FileExerciseDAO implements ExerciseDAO {
 
   @Override
   public Collection<Exercise> getExercisesForSelectionState(Map<String, String> typeToSection) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    return null;
   }
 
   /**
@@ -229,6 +233,14 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
   }
 
+  /**
+   * Read from tsv file that points to other files.
+   *
+   * @param installPath
+   * @param configDir
+   * @param line
+   * @return
+   */
   private Exercise readTSVLine(String installPath, String configDir, String line) {
     if (line.trim().length() == 0) {
       logger.debug("skipping empty line");
@@ -242,10 +254,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     String type = split[i++].trim();
     String includeFile = split[i++].trim();
 
-    if (includeFile.startsWith("file://")) {
-      includeFile = includeFile.substring("file://".length());
-    }
-    File include = new File(configDir,includeFile);
+    File include = getIncludeFile(configDir, includeFile);
 
     boolean exists = include.exists();
     if (!exists) {
@@ -262,7 +271,7 @@ public class FileExerciseDAO implements ExerciseDAO {
         String englishQuestion = split[i++].trim();
         String arabicAnswers = split[i++].trim();
         String englishAnswers = split[i++].trim();
-        String notes = split[i++].trim();
+       // String notes = split[i++].trim();
 
         Exercise exercise = new Exercise("plan", id, content, false, false, englishQuestion);
 
@@ -271,6 +280,13 @@ public class FileExerciseDAO implements ExerciseDAO {
         return exercise;
       }
     }
+  }
+
+  private File getIncludeFile(String configDir, String includeFile) {
+    if (includeFile.startsWith("file://")) {
+      includeFile = includeFile.substring("file://".length());
+    }
+    return new File(configDir,includeFile);
   }
 
   /**
@@ -515,7 +531,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     return "<div class=\"Instruction\">\n" +
         "<span class=\"Instruction-title\">Say:</span>\n" +
         "<span class=\"" +
-        (isUrdu ? "urdufont" : "Instruction-data") +
+        (isUrdu ? "urdufont" : isPashto ? "pashtofont" : "Instruction-data") +
         "\"> " + arabic +
         "</span>\n" +
         "</div>\n";
