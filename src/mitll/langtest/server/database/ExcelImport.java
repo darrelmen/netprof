@@ -347,12 +347,13 @@ public class ExcelImport implements ExerciseDAO {
       ) {
       unit = "Blank";
     }
-    if (unit.length() > 0) {
-/*      String[] split = unit.split("-");
-      pairs.add(sectionHelper.addExerciseToLesson(imported, "semester", split[0]));
-      pairs.add(sectionHelper.addUnitToLesson(imported, split.length > 1 ? split[1] : split[0]));*/
-      pairs.add(sectionHelper.addUnitToLesson(imported,unit));
-    }
+
+    // hack to trim off leading tics
+    if (unit.startsWith("'")) unit = unit.substring(1);
+    if (chapter.startsWith("'")) chapter = chapter.substring(1);
+    if (week.startsWith("'")) week = week.substring(1);
+
+    if (unit.length() > 0) pairs.add(sectionHelper.addUnitToLesson(imported,unit));
     if (chapter.length() > 0) pairs.add(sectionHelper.addChapterToLesson(imported,chapter));
     if (week.length() > 0) pairs.add(sectionHelper.addWeekToLesson(imported,week));
     sectionHelper.addAssociations(pairs);
