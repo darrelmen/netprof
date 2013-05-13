@@ -94,14 +94,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                          HttpServletResponse response) throws ServletException, IOException {
     boolean isMultipart = ServletFileUpload.isMultipartContent(new ServletRequestContext(request));
     if (isMultipart) {
+      logger.debug("Request " + request.getQueryString() + " path "  +request.getPathInfo());
       SiteDeployer siteDeployer = new SiteDeployer();
-      Site site = siteDeployer.getSite(request, configDir);
+      SiteDeployer.SiteInfo siteInfo = siteDeployer.getSite(request, configDir, db, getInstallPath());
+      Site site = siteInfo.site;
       if (site == null) {
         super.service(request, response);
         return;
       }
 
-      siteDeployer.doSiteResponse(db,response, siteDeployer, site);
+      if (siteInfo.isUpdate) {
+        response.setContentType("text/plain");
+        response.getWriter().write("Spreadsheet updated.");
+      } else {
+        siteDeployer.doSiteResponse(db, response, siteDeployer, site);
+      }
     } else {
       super.service(request, response);
     }
@@ -126,6 +133,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    *    then copy to install path/../name
    *
+   * @see mitll.langtest.client.DataCollectAdmin#makeDataCollectNewSiteForm2
    * @param id
    * @param name
    * @param language
@@ -134,6 +142,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public boolean deploySite(long id, String name, String language, String notes) {
+    logger.debug("deploy site id=" +id + " name " + name);
     SiteDeployer siteDeployer = new SiteDeployer();
     return siteDeployer.deploySite(db, getMailSupport(), getThreadLocalRequest(), configDir, getInstallPath(), id, name, language, notes);
   }
@@ -171,7 +180,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public List<ExerciseShell> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection, long userID) {
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-    List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection);
+    List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection,serverProps.shouldUseWeights());
     return getExerciseShells(exercisesBiasTowardsUnanswered);
   }
 
@@ -239,7 +248,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.exercise.SectionExerciseList#setOtherListBoxes(java.util.Map)
+   * @see mitll.langtest.client.exercise.SectionExerciseList#setOtherListBoxes
    * @param typeToSection
    * @return
    */
@@ -333,23 +342,27 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private List<Exercise> getExercisesInModeDependentOrder(long userID, String lessonPlanFile) {
     List<Exercise> exercises;
     if (serverProps.dataCollectMode) {
-      // logger.debug("in data collect mode");
+       //logger.debug("in data collect mode");
       if (serverProps.biasTowardsUnanswered) {
+        //logger.debug("in biasTowardsUnanswered mode");
+
         if (serverProps.useOutsideResultCounts) {
           String outsideFileOverride = serverProps.outsideFile;
           if (lessonPlanFile.contains("farsi")) outsideFileOverride = configDir + File.separator + "farsi.txt";
           else if (lessonPlanFile.contains("urdu")) outsideFileOverride = configDir + File.separator + "urdu.txt";
           else if (lessonPlanFile.contains("sudanese"))
             outsideFileOverride = configDir + File.separator + "sudanese.txt";
-          exercises = db.getExercisesBiasTowardsUnanswered(userID, outsideFileOverride);
+          exercises = db.getExercisesBiasTowardsUnanswered(userID, outsideFileOverride, serverProps.shouldUseWeights());
           db.setOutsideFile(outsideFileOverride);
         } else {
-          exercises = db.getExercisesBiasTowardsUnanswered(userID);
+          exercises = db.getExercisesBiasTowardsUnanswered(userID,serverProps.shouldUseWeights());
         }
       } else {
         exercises = db.getExercisesFirstNInOrder(userID, serverProps.firstNInOrder);
       }
     } else {
+      logger.debug("*not* in data collect mode");
+
       exercises = serverProps.isArabicTextDataCollect() ? db.getRandomBalancedList() : db.getExercises(userID);
     }
     return exercises;
