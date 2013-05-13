@@ -121,17 +121,18 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
 
   private Widget getQuestionContent(Exercise e) {
     String content = e.getContent();
-    return getHTML(content);
+    HTML html = getHTML(content, true);
+    return html;
   }
 
-  private Widget getHTML(String content) {
+  private HTML getHTML(String content, boolean requireAlignment) {
     boolean rightAlignContent = controller.isRightAlignContent();
     HasDirection.Direction direction =
-      rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
+      requireAlignment && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
     //System.out.println("content alignment guess is " + direction);
 
     HTML html = new HTML(content, direction);
-    if (/*direction.equals(HasDirection.Direction.RTL) || */rightAlignContent) {
+    if (requireAlignment && rightAlignContent) {
       html.addStyleName("rightAlign");
     }
 
@@ -234,7 +235,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     }
     else {
       String questionHeader = prefix + question;
-      add(getHTML("<h4>" + questionHeader + "</h4>"));
+      add(getHTML("<h4>" + questionHeader + "</h4>",false));
     }
   }
 
