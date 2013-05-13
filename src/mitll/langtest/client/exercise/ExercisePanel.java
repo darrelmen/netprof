@@ -137,6 +137,9 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     }
 
     html.addStyleName("wrapword");
+    if (getLanguage().equalsIgnoreCase("Pashto")) {
+      html.addStyleName("pashtofont");
+    }
     return html;
   }
 
