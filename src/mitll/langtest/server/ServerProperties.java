@@ -31,6 +31,7 @@ public class ServerProperties {
   public static final String FOREGROUND_BLEND = "foregroundBlend";
   public static final String FOREGROUND_BLEND_DEFAULT = "0.8";
   private static final String USE_SCORE_CACHE = "useScoreCache";
+  private static final String USE_WEIGHTS = "useWeights";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
   public static final String FIRST_N_IN_ORDER = "firstNInOrder";
@@ -70,6 +71,7 @@ public class ServerProperties {
   public boolean isDataCollectAdminView;
   private double foregroundBlend;
   private double minPronScore;
+  public boolean useWeights;
 
   public void readPropertiesFile(ServletContext servletContext, String configDir) {
    String configFile = servletContext.getInitParameter("configFile");
@@ -164,6 +166,9 @@ public class ServerProperties {
   public boolean isTimedGame() {
     return !props.getProperty(TIMED_GAME, "false").equals("false");
   }
+  public boolean shouldUseWeights() {
+    return !props.getProperty(USE_WEIGHTS, "false").equals("false");
+  }
 
   public boolean isCollectAudio() {
     return collectAudio;
@@ -200,10 +205,10 @@ public class ServerProperties {
     }
     dataCollectMode = getDefaultFalse(DATA_COLLECT_MODE);
     collectAudio = !props.getProperty(COLLECT_AUDIO, COLLECT_AUDIO_DEFAULT).equals("false");
-    isUrdu = getDefaultFalse(URDU);
-    biasTowardsUnanswered = getDefaultTrue(BIAS_TOWARDS_UNANSWERED);
-    useOutsideResultCounts = getDefaultTrue(USE_OUTSIDE_RESULT_COUNTS);
-    isDataCollectAdminView = getDefaultFalse("dataCollectAdminView");
+    isUrdu = !props.getProperty(URDU, "false").equals("false");
+    biasTowardsUnanswered = !props.getProperty(BIAS_TOWARDS_UNANSWERED, "true").equals("false");
+    useOutsideResultCounts = !props.getProperty(USE_OUTSIDE_RESULT_COUNTS, "false").equals("false");
+    isDataCollectAdminView = !props.getProperty("dataCollectAdminView", "false").equals("false");
     outsideFile = props.getProperty(OUTSIDE_FILE, OUTSIDE_FILE_DEFAULT);
 
 
