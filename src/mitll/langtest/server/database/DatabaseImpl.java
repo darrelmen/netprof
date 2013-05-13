@@ -230,7 +230,7 @@ public class DatabaseImpl implements Database {
       return Collections.emptyList();
     }
     boolean isExcel = lessonPlanFile.endsWith(".xlsx");
-    makeDAO(useFile, lessonPlanFile, isExcel);
+    makeDAO(useFile, lessonPlanFile, isExcel, mediaDir);
 
     if (useFile && !isExcel) {
       if (isWordPairs) {
@@ -247,10 +247,10 @@ public class DatabaseImpl implements Database {
     return rawExercises;
   }
 
-  private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel) {
+  private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel, String mediaDir) {
     if (exerciseDAO == null) {
       if (useFile && excel) {
-        this.exerciseDAO = new ExcelImport(lessonPlanFile, isFlashcard);
+        this.exerciseDAO = new ExcelImport(lessonPlanFile, isFlashcard, mediaDir);
       }
       else {
         this.exerciseDAO = makeExerciseDAO(useFile);
