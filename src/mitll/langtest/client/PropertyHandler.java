@@ -280,6 +280,9 @@ public class PropertyHandler {
     if (timedgameParam != null) {
       timedGame = !timedgameParam.equals("false");
     }
+    if (Window.Location.getParameter(SHOW_SECTIONS) != null) {
+      showSections = !Window.Location.getParameter(SHOW_SECTIONS).equals("false");
+    }
     return grading;
   }
 
