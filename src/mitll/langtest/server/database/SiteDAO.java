@@ -221,9 +221,9 @@ public class SiteDAO extends DAO {
       sql = "UPDATE site " +
         "SET " +
         "file='" + toChange.getExerciseFile() + "', " +
-        "filepath='" + toChange.getSavedExerciseFile() + "' " +
+        "filepath='" + toChange.getSavedExerciseFile() + "', " +
+        "notes='" + toChange.notes + "' " +
         "WHERE id=" + toChange.id;
-
 
       logger.debug("update " + toChange);
       if (!doUpdate(sql)) {
