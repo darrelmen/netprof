@@ -1048,7 +1048,7 @@ public class FileExerciseDAO implements ExerciseDAO {
               " pad s1 " + s1 + " " + d1 + " s2 " + s2 + " dur " + d2);
 
 
-            if (dur1 < 1) {
+            if (d1 < 1) {
               logger.warn("Skipping audio " + longFileFile.getName() + " since fast audio too short ");
             } else {
               new AudioConverter().trim("C:\\Users\\go22670\\sox-14-3-2\\sox.exe",
@@ -1058,7 +1058,7 @@ public class FileExerciseDAO implements ExerciseDAO {
                 d1);
             }
 
-            if (dur2 < 1) {
+            if (d2 < 1) {
               logger.warn("Skipping audio " + longFileFile.getName() + " since slow audio too short ");
 
             } else {
@@ -1068,15 +1068,9 @@ public class FileExerciseDAO implements ExerciseDAO {
                 s2,
                 d2);
             }
-
-
-            // new FileCopier().copy(new File(base, shortFile).getAbsolutePath(), new File(newRefDir, FAST + ".wav").getAbsolutePath());
-
-
           } catch (IOException e) {
             e.printStackTrace();
           }
-
           logger.debug("\tgot " + align + " for " + name);
         }
         else logger.warn("couldn't find " + r.getID() + " exercise");
@@ -1106,8 +1100,8 @@ public class FileExerciseDAO implements ExerciseDAO {
       if (count ++ > 10) break;
     }
 
-    missingFast.close();;
-    missingSlow.close();;
+    missingFast.close();
+    missingSlow.close();
   }
 
   public static void main(String [] arg) {
