@@ -43,7 +43,7 @@ public class SiteDAO extends DAO {
    * @return
    */
   public Site addSite(Site site) {
-    return addSite(site.creatorID,site.name,site.language,site.notes,site.exerciseFile,site.savedExerciseFile, site.getFeedback(), false);
+    return addSite(site.creatorID,site.name,site.language,site.notes, site.getExerciseFile(), site.getSavedExerciseFile(), site.getFeedback(), false);
   }
   public Site addSite(long creatorID, String name, String language, String notes, String file, String filePath, String feedback, boolean deployed) {
     long id = 0;
@@ -162,7 +162,9 @@ public class SiteDAO extends DAO {
   }
 
   public Site updateSite(Site site, String name, String lang, String notes) {
-    if (site.name.equals(name) && site.language.equals(lang) && site.notes.equals(notes)) return site;
+    if (site.name.equals(name) && site.language.equals(lang) && site.notes.equals(notes)) {
+      return site;
+    }
     else {
       site.name = name;
       site.language = lang;
@@ -184,6 +186,10 @@ public class SiteDAO extends DAO {
     return sites;
   }
 
+  /**
+   * @see DatabaseImpl#deploy(mitll.langtest.shared.Site)
+   * @param toChange
+   */
   public void deploy(Site toChange) {
     try {
       Connection connection = database.getConnection();
@@ -209,32 +215,64 @@ public class SiteDAO extends DAO {
     }
   }
 
-  private void updateSiteInDB(Site toChange, String name, String lang, String notes) {
+  public void updateSiteFileInDB(Site toChange) {
+    String sql = "";
     try {
-      Connection connection = database.getConnection();
-      PreparedStatement statement;
+      sql = "UPDATE site " +
+        "SET " +
+        "file='" + toChange.getExerciseFile() + "', " +
+        "filepath='" + toChange.getSavedExerciseFile() + "' " +
+        "WHERE id=" + toChange.id;
 
-      String sql = "UPDATE site " +
-          "SET " +
-          "name='" + name+ "' " +
-          "language='" + lang+ "' " +
-          "notes='" + notes+ "' " +
-          "WHERE id=" + toChange.id;
-      logger.debug("update " + toChange );
-      statement = connection.prepareStatement(sql);
 
-      int i = statement.executeUpdate();
-
-      logger.debug("UPDATE " + i + " with " + sql);
-      if (i == 0) {
+      logger.debug("update " + toChange);
+      if (!doUpdate(sql)) {
         logger.error("huh? didn't update " + toChange);
       }
+    } catch (Exception e) {
+      logger.error("got " + e + " doing sql |" + sql + "|", e);
+    }
+  }
 
-      statement.close();
-      database.closeConnection(connection);
+  /**
+   * @see #updateSite(mitll.langtest.shared.Site, String, String, String)
+   * @param toChange
+   * @param name
+   * @param lang
+   * @param notes
+   */
+  private void updateSiteInDB(Site toChange, String name, String lang, String notes) {
+    try {
+      String sql = "UPDATE site " +
+          "SET " +
+          "name='" + name+ "', " +
+          "language='" + lang+ "', " +
+          "notes='" + notes+ "' " +
+          "WHERE id=" + toChange.id;
+
+      logger.debug("update " + toChange );
+      if (!doUpdate(sql)) {
+        logger.error("huh? didn't update " + toChange);
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  private boolean doUpdate(String sql) throws Exception {
+    PreparedStatement statement;
+    Connection connection = database.getConnection();
+    statement = connection.prepareStatement(sql);
+
+    int i = statement.executeUpdate();
+
+    logger.debug("UPDATE " + i + " with " + sql);
+
+
+
+    statement.close();
+    database.closeConnection(connection);
+    return (i != 0);
   }
 
 
