@@ -41,6 +41,7 @@ public class ExcelImport implements ExerciseDAO {
   private TeacherClass teacherClass;
   private final String file;
   private SectionHelper sectionHelper = new SectionHelper();
+  private boolean debug = false;
 
   @Override
   public Map<String, Collection<String>> getTypeToSections() {
@@ -166,7 +167,7 @@ public class ExcelImport implements ExerciseDAO {
     }
     int id = 0;
     boolean gotHeader = false;
-    FileExerciseDAO dao = new FileExerciseDAO(null,false,false);
+    FileExerciseDAO dao = new FileExerciseDAO(null,"",false);
 
     int colIndexOffset = 0;
 
@@ -302,6 +303,8 @@ public class ExcelImport implements ExerciseDAO {
     if (chapter.startsWith("'")) chapter = chapter.substring(1);
     if (week.startsWith("'")) week = week.substring(1);
 
+    if (debug) logger.debug("unit " + unit + " chapter " + chapter + " week " + week);
+
     if (unit.length() > 0) pairs.add(sectionHelper.addUnitToLesson(imported,unit));
     if (chapter.length() > 0) pairs.add(sectionHelper.addChapterToLesson(imported,chapter));
     if (week.length() > 0) pairs.add(sectionHelper.addWeekToLesson(imported,week));
@@ -382,7 +385,9 @@ public class ExcelImport implements ExerciseDAO {
   public static void main(String[] arg) {
     //new ExcelImport().readExercises(new File("Farsi_Curriculum_Glossary_vowelized_2013_02_04.xlsx"));
     //new ExcelImport().readExercises(new File("2013_02_13_Dari_List_ZR_Path.xlsx"));
-    new ExcelImport().readExercises(new File("final6240.xlsx"));
+    File file1 = new File("Russian_BC_Vocab2.xlsx");
+    if (!file1.exists()) System.err.println("cant find " + file1.getAbsolutePath());
+    new ExcelImport().readExercises(file1);
   }
 
   public List<String> getErrors() {
