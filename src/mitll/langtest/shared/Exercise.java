@@ -185,6 +185,7 @@ public class Exercise extends ExerciseShell  {
   public String getRefAudio() { return refAudio; }
   public String getSlowAudioRef() { return slowAudioRef; }
   public void setRefAudio(String s) { this.refAudio = s; }
+  public void setSlowRefAudio(String s) { this.slowAudioRef = s; }
   public String getRefSentence() { return refSentences.isEmpty() ? "" : refSentences.get(0); }
 
   public void setRefSentences(List<String> sentenceRefs) {
