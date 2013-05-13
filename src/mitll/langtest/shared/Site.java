@@ -18,9 +18,9 @@ public class Site implements IsSerializable {
   public long creatorID;
   private String creator;
   public String notes;
-  public String exerciseFile;
-  public String savedExerciseFile;
-  public String savedExerciseFileName;
+  private String exerciseFile;
+  private String savedExerciseFile;
+  private String savedExerciseFileName;
 
   public transient Collection<Exercise> exercises; // i.e. don't serialize
   public Exercise example; //  don't write to db
@@ -54,8 +54,8 @@ public class Site implements IsSerializable {
     this.name = name;
     this.language = language;
     this.notes = notes;
-    this.exerciseFile = exerciseFile;
-    this.savedExerciseFile = filePath;
+    this.setExerciseFile(exerciseFile);
+    this.setSavedExerciseFile(filePath);
     this.feedback = feedback;
     this.deployed = deployed;
     this.creationDate = timestamp;
@@ -87,11 +87,26 @@ public class Site implements IsSerializable {
   }
 
 
-  public String toString() { return "id " + id + " name " +name + " lang " +language + " creatorID " +creatorID +
-      " notes " +notes + " file " +exerciseFile + " path "+ savedExerciseFile;}
+  public String toString() { return "Site : id " + id + " name " +name + " lang " +language + " creatorID " +creatorID +
+      " notes " +notes + " file " + getExerciseFile() + " path "+ getSavedExerciseFile() + " saved file name " + savedExerciseFileName;}
 
+  public String getExerciseFile() {
+    return exerciseFile;
+  }
 
-/*  public void setDeployed(boolean deployed) {
-    this.deployed = deployed;
-  }*/
+  public void setExerciseFile(String exerciseFile) {
+    this.exerciseFile = exerciseFile;
+  }
+
+  public String getSavedExerciseFile() {
+    return savedExerciseFile;
+  }
+
+  public void setSavedExerciseFile(String savedExerciseFile) {
+    this.savedExerciseFile = savedExerciseFile;
+  }
+
+  public String getSavedExerciseFileName() {
+    return savedExerciseFileName;
+  }
 }
