@@ -469,7 +469,7 @@ public class SectionHelper {
       //lessons.addAll(categoryToLesson.values());
       Set<String> sections = categoryToLesson.keySet();
       if (!sections.isEmpty()) {
-        logger.debug("Section type : " + key + " : sections " + sections);
+        //logger.debug("Section type : " + key + " : sections " + sections);
       }
     }
   }

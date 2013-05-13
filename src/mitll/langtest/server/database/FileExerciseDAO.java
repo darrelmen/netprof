@@ -92,6 +92,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     this.mediaDir = mediaDir;
     this.isFlashcard = isFlashcard;
     logger.debug("is flashcard " +isFlashcard);
+    //logger.debug("mediaDir " + mediaDir);
   }
 
   /**
@@ -316,7 +317,7 @@ public class FileExerciseDAO implements ExerciseDAO {
             boolean isTSV = line2.contains("\t");
             exercise = simpleFile ?
                 getSimpleExerciseForLine(line2,id) :
-              isTSV ? readTSVLine(configDir,line2) : getExerciseForLine(line2);
+              isTSV ? readTSVLine(installPath,configDir,line2) : getExerciseForLine(line2);
           }
           if (exercise != null) {
             if (showSections) {
@@ -350,12 +351,13 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
   }
 
+
   private BufferedReader getReader(String lessonPlanFile) throws FileNotFoundException, UnsupportedEncodingException {
     FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
     return new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
   }
 
-  private Exercise readTSVLine(String configDir, String line) {
+  private Exercise readTSVLine(String installPath, String configDir, String line) {
     if (line.trim().length() == 0) {
       logger.debug("skipping empty line");
       return null;
@@ -377,42 +379,73 @@ public class FileExerciseDAO implements ExerciseDAO {
     if (!exists) {
       logger.warn("couldn't open file " + include + " for line " + line);
       return null;
-    }
-    else {
-      StringBuilder builder = getContentFromIncludeFile(include);
-      String arabicQuestion = split[i++].trim();
-      String englishQuestion = split[i++].trim();
-      String arabicAnswers = split[i++].trim();
-      String englishAnswers = split[i++].trim();
-      String notes = split[i++].trim();
+    } else {
+      boolean listening = type.equalsIgnoreCase("listening");
+      String content = getContentFromIncludeFile(installPath, include, listening);
+      if (content.isEmpty()) {
+        logger.warn("no content for exercise " + id + " type " + type);
+        return null;
+      } else {
+        String arabicQuestion = split[i++].trim();
+        String englishQuestion = split[i++].trim();
+        String arabicAnswers = split[i++].trim();
+        String englishAnswers = split[i++].trim();
+        String notes = split[i++].trim();
 
-      Exercise exercise = new Exercise("plan", id, builder.toString(), false, false, englishQuestion);
+        Exercise exercise = new Exercise("plan", id, content, false, false, englishQuestion);
 
-      addQuestion(arabicQuestion,  arabicAnswers,  exercise,true);
-      addQuestion(englishQuestion, englishAnswers, exercise,false);
-      return exercise;
+        addQuestion(arabicQuestion, arabicAnswers, exercise, true);
+        addQuestion(englishQuestion, englishAnswers, exercise, false);
+        return exercise;
+      }
     }
   }
 
-  private StringBuilder getContentFromIncludeFile(File include) {
+  /**
+   * If listening, include HTML 5 audio reference, otherwise include text from file.
+   * @param include
+   * @param isListening
+   * @return
+   */
+  private String getContentFromIncludeFile(String installPath, File include, boolean isListening) {
     StringBuilder builder = new StringBuilder();
+    String audioFileEquivalent = include.getName().replace(".html", ".wav");
     try {
-      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(include), ENCODING));
-      String line2;
-      while ((line2 = reader.readLine()) != null) {
-        line2 = line2.trim();
-        if (SKIP_MP3_LINES_IN_INCLUDES && line2.startsWith("File://") && line2.endsWith(".mp3")) {
-          //logger.debug("skipping mp3 include line for now...");
+      if (isListening) {
+        String audioPath = mediaDir + File.separator + "media" + File.separator + audioFileEquivalent;
+
+        File file = new File(audioPath);
+        boolean exists = file.exists();
+        if (!exists) {
+          file = new File(installPath,audioPath);
+          exists = file.exists();
         }
-        else {
-          builder.append(line2);
+        if (!exists) {
+          logger.warn("couldn't find audio file at " + file.getAbsolutePath());
+        } else {
+          builder.append(getHTML5Audio(audioPath));
         }
+      } else {
+        readFromFile(include, builder);
       }
-      reader.close();
     } catch (IOException e) {
       logger.error("got " + e, e);
     }
-    return builder;
+    return builder.toString();
+  }
+
+  private void readFromFile(File include, StringBuilder builder) throws IOException {
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(include), ENCODING));
+    String line2;
+    while ((line2 = reader.readLine()) != null) {
+      line2 = line2.trim();
+      if (line2.startsWith("File://") && line2.endsWith(".mp3")) {
+        //logger.debug("skipping mp3 include line for now : " + line2);
+      } else {
+        builder.append(line2);
+      }
+    }
+    reader.close();
   }
 
   private void addQuestion(String question, String answers, Exercise exercise, boolean isFLQ) {
@@ -422,14 +455,22 @@ public class FileExerciseDAO implements ExerciseDAO {
     exercise.addQuestion(isFLQ ? Exercise.FL : Exercise.EN, question, alternateAnswers.get(0), new ArrayList<String>(objects));
   }
 
-  private String getHTML5Audio() {
+  /**
+   * @see #getContentFromIncludeFile
+   * @param audioPath
+   * @return
+   */
+  private String getHTML5Audio(String audioPath) {
+    String mp3Ref = audioPath.replace(".wav",".mp3");//"config/pilot/media/bc-L0P-k15/bc-L0P-k15_My_house_door.mp3";
+    String oggRef = audioPath.replace(".wav",".ogg");
+   // logger.debug("file path " + mp3Ref);
     return "<h2>Listen to this audio and answer the question below</h2>\n"+
     "<audio controls='controls'>"+
     "<source type='audio/mp3' src='" +
-      "config/pilot/media/bc-L0P-k15/bc-L0P-k15_My_house_door.mp3" +
+      mp3Ref +
       "'></source>"+
     "<source type='audio/ogg' src='" +
-      "config/pilot/media/bc-L0P-k15/bc-L0P-k15_My_house_door.ogg" +
+      oggRef +
       "'></source>"+
     "  Your browser does not support the audio tag."+
     "</audio>";
