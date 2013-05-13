@@ -55,6 +55,34 @@ lpcorder: 20
 [fe.Norm]
 gaussianize: false
 
+[fe.SPFE]
+sample-rate: 16000.0
+frame-rate: 100.0
+lofreq: 65
+hifreq: 7000
+max-delta: 3
+numcep: 12
+ctype: PLP
+lifter: 0
+nmfb: 24
+window: 20.0
+lpcorder: 20
+
+[decode.Align]
+models: MODELS_DIR
+output-type: words+sil
+
+[decode.ResegmentDecoderOutput]
+resegment: true
+repad: true
+split-threshold: 0.50
+sil-padding: 0.25
+
+[decode.Reco2Meta]
+write-transcript: reseg
+write-format: reseg
+outdir: TEMP_DIR
+
 [fe.NNBatch]
 n-output: N_OUTPUT
 n-hidden: 2500,2500
