@@ -519,7 +519,10 @@ public class ASRScoring extends Scoring {
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
     long then = System.currentTimeMillis();
     try {
-      jscoreOut = testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
+
+      //synchronized (this) {
+        jscoreOut = testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
+     // }
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
       logger.info("got score " + hydec_score +" and took " + timeToRunHydec + " millis");
