@@ -4,6 +4,7 @@ import audio.image.TranscriptEvent;
 import audio.image.TranscriptReader;
 import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
+import corpus.HTKDictionary;
 import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.server.scoring.ASRScoring;
@@ -53,28 +54,26 @@ import java.util.regex.Pattern;
  */
 public class FileExerciseDAO implements ExerciseDAO {
   public static final List<String> EMPTY_LIST = Collections.emptyList();
-  public static final int MAX = 1;
+  public static final int MAX = 20;
   private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
 
- // private static final boolean SKIP_MP3_LINES_IN_INCLUDES = true;
   public static final String ENCODING = "UTF8";
   private static final String LESSON_FILE = "lesson-737.csv";
-  private static final String FAST = "fast";
-  private static final String SLOW = "slow";
+  private static final String FAST = "Fast";
+  private static final String SLOW = "Slow";
   private static final boolean TESTING = false;
   private static final int MAX_ERRORS = 100;
   private final String mediaDir;
- // private final String language;
 
   private List<Exercise> exercises;
-  //private final String relativeConfigDir;
   private final boolean isUrdu;
   private final boolean showSections;
   private final boolean isFlashcard;
+  private boolean debug;
 
   @Override
   public SectionHelper getSectionHelper() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    return null;
   }
 
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
@@ -891,7 +890,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     for (Result r : results) {
       String id = r.id;
       int i = Integer.parseInt(id);
-      if (i < MAX //&& i == 3
+      if (i < MAX// && i == 927
         ) {
         List<Result> resultList = idToResults.get(r.getID());
         if (resultList == null) {
@@ -913,6 +912,10 @@ public class FileExerciseDAO implements ExerciseDAO {
     ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
 
     int count = 0;
+
+    ASRScoring scoring = getAsrScoring(".",null);
+    final HTKDictionary dict = scoring.getDict();
+
     List<Future<?>> futures = new ArrayList<Future<?>>();
     for (final Map.Entry<String, List<Result>> pair : idToResults.entrySet()) {
       Future<?> submit = executorService.submit(new Runnable() {
@@ -920,7 +923,7 @@ public class FileExerciseDAO implements ExerciseDAO {
         public void run() {
           try {
             getBestForEachExercise(idToEx, missingSlow, missingFast,
-              newRefDir, bestDir, pair,configDir);
+              newRefDir, bestDir, pair,configDir,dict);
           } catch (IOException e) {
             logger.error("Doing " + pair.getKey() + " and " + pair.getValue() +
               " Got " + e, e);
@@ -951,27 +954,26 @@ public class FileExerciseDAO implements ExerciseDAO {
     executorService.shutdown();
   }
 
-  private ASRScoring getAsrScoring(String installPath) {
+  private ASRScoring getAsrScoring(String installPath, HTKDictionary dictionary) {
     Map<String, String> properties = new HashMap<String, String>();
     properties.put("language","Dari");
     properties.put("N_HIDDEN","2000,2000");
     properties.put("N_OUTPUT","37");
 
     properties.put("MODELS_DIR","models.dli-dari");
-    return new ASRScoring(installPath +
-      File.separator +
-      "war", properties);
+    String deployPath = installPath + File.separator + "war";
+    return dictionary == null ? new ASRScoring(deployPath, properties) : new ASRScoring(deployPath, properties, dictionary);
   }
 
   private void getBestForEachExercise(Map<String, Exercise> idToEx, FileWriter missingSlow, FileWriter missingFast,// ASRScoring scoring,
-                                      File newRefDir, File bestDir, Map.Entry<String, List<Result>> pair,String configDir ) throws IOException {
+                                      File newRefDir, File bestDir, Map.Entry<String, List<Result>> pair,String configDir, HTKDictionary dictionary ) throws IOException {
     List<Result> resultsForExercise = pair.getValue();
 
     String exid = resultsForExercise.iterator().next().id;
     Exercise exercise = idToEx.get(exid);
     StringBuilder builder = new StringBuilder();
     for (String s : exercise.getRefSentences()) {builder.append(s).append(" ");}
-    String refSentence = builder.toString();//exercise.getRefSentence();
+    String refSentence = builder.toString();
     refSentence = refSentence.replaceAll("\\p{P}", "");
     String[] split = refSentence.split("\\p{Z}+");
     int refLength = split.length;
@@ -982,13 +984,13 @@ public class FileExerciseDAO implements ExerciseDAO {
     File refDirForExercise = new File(newRefDir, exid);
     String key = pair.getKey();
     if (key.equals(exid)) logger.error("huh?> not the same " + key + "  and " + exid);
-    logger.warn("making dir " + key + " at " + refDirForExercise.getAbsolutePath());
+    logger.debug("making dir " + key + " at " + refDirForExercise.getAbsolutePath());
     refDirForExercise.mkdir();
 
     File bestDirForExercise = new File(bestDir, exid);
-    logger.warn("making dir " + key + " at " + bestDirForExercise.getAbsolutePath());
+    logger.debug("making dir " + key + " at " + bestDirForExercise.getAbsolutePath());
     bestDirForExercise.mkdir();
-    final ASRScoring scoring = getAsrScoring(".");
+    final ASRScoring scoring = getAsrScoring(".",dictionary);
     String best = getBestFilesFromResults(scoring, resultsForExercise, exercise, refSentence, firstToken, lastToken,refLength, refDirForExercise,configDir);
 
     if (best != null) {
@@ -996,7 +998,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       writeBestFiles(missingSlow, missingFast, exid, refDirForExercise, bestDirForExercise, best);
     }
     else {
-      logger.debug("\n\n------------- no valid audio for " + exid);
+      logger.warn("\n\n------------- no valid audio for " + exid);
 
       synchronized (missingFast) {
         missingFast.write(exid + "\n");
@@ -1008,7 +1010,8 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   private String getBestFilesFromResults(ASRScoring scoring, List<Result> resultsForExercise,
-                                         Exercise exercise, String refSentence,String first,String last, int refLength, File refDirForExercise,String configDir ) {
+                                         Exercise exercise, String refSentence,String first,String last, int refLength,
+                                         File refDirForExercise,String configDir ) {
     String best = null;
 
     float bestSlow = 0, bestFast = 0, bestTotal = 0;
@@ -1018,19 +1021,21 @@ public class FileExerciseDAO implements ExerciseDAO {
 
         String name = answer.getName().replaceAll(".wav", "");
         String parent = answer.getParent();
-      //  String configDir = "war\\config\\dari\\";
         parent = configDir +
           "examples" +
           File.separator + parent;
 
         double durationInSeconds = getDuration(answer, parent);
-
+        if (durationInSeconds < 0.5) {
+          logger.warn("skipping " + name + " since it's less than a 1/2 second long.");
+          continue;
+        }
         String testAudioFileNoSuffix = getConverted(name, parent);
 
         logger.debug("parent " + parent + " running result " + r.uniqueID + " for exercise " + exercise.getID() + " and audio file " + name);
 
         Scores align = scoring.align(parent, testAudioFileNoSuffix, refSentence + " " + refSentence);
-        logger.debug("\tgot " + align + " for " + name);
+      //  logger.debug("\tgot " + align + " for " + name);
 
         String wordLabFile   = prependDeploy(parent,testAudioFileNoSuffix + ".words.lab");
         try {
@@ -1121,13 +1126,12 @@ public class FileExerciseDAO implements ExerciseDAO {
     float s1 = Math.max(0,start1-pad);
     float s2 = Math.max(0,start2-pad);
 
-   // float floatDur = (float) durationInSeconds;
     float e1 = Math.min(floatDur,end1+pad);
     float midPoint = end1 + ((start2 - end1) / 2);
     if (e1 > midPoint) {
     //  logger.warn("adjust e1 from " + e1 + " to " +midPoint);
-      e1 = midPoint;
-      s1 = midPoint;
+      e1 = Math.max(end1,midPoint);
+      s2 = Math.min(start2,midPoint);
     }
 
     float e2 = Math.min(floatDur, end2 + pad);
@@ -1139,7 +1143,10 @@ public class FileExerciseDAO implements ExerciseDAO {
     if (!longFileFile.exists())logger.error("huh? can't find  " + longFileFile.getAbsolutePath());
 
     logger.debug("writing ref files to " + refDirForExercise.getName() + " input " + longFileFile.getName() +
-      " pad s1 " + s1 + " " + d1 + " s2 " + s2 + " dur " + d2);
+      " pad s1 " + s1 + "-" + e1+
+      " dur " + d1 +
+      " s2 " + s2 + "-" + e2+
+      " dur " + d2);
 
     AudioConverter audioConverter = new AudioConverter();
     String binPath = AudioConversion.WINDOWS_SOX_BIN_DIR;
@@ -1227,7 +1234,9 @@ public class FileExerciseDAO implements ExerciseDAO {
         TranscriptEvent transcriptEvent = timeEventPair.getValue();
         String word = transcriptEvent.event.trim();
         if (word.equals("<s>") || word.equals("</s>")) continue;
-        //logger.debug("\ttoken " + tokenCount + " got " + word + " and " + transcriptEvent);
+
+        if (debug) logger.debug("\ttoken " + tokenCount + " got " + word + " and " + transcriptEvent);
+
         if (!didFirst) scoreTotal1 += transcriptEvent.score; else scoreTotal2 += transcriptEvent.score;
         tokenCount++;
         if (tokenCount == 1 && first.equals(word)) {
@@ -1236,13 +1245,13 @@ public class FileExerciseDAO implements ExerciseDAO {
           } else {
             start2 = transcriptEvent.start;
           }
-         // logger.debug("\t1 token " + tokenCount + " vs " + (refLength-1));
+          if (debug) logger.debug("\t1 token " + tokenCount + " vs " + (refLength-1));
 
         }
         if (tokenCount == refLength && last.equals(word)) {
           if (!didFirst) {
             end1 = transcriptEvent.end;
-          //  logger.debug("\tgot end of fast, token " + tokenCount);
+            if (debug) logger.debug("\tgot end of fast, token " + tokenCount);
 
             didFirst = true;
             tokenCount = 0;
@@ -1252,14 +1261,14 @@ public class FileExerciseDAO implements ExerciseDAO {
         }
 
         if (tokenCount > refLength) logger.error("\n\n\n------ huh? didn't catch ending token???");
-        //logger.debug("\t3 token " + tokenCount + " vs " + (refLength));
+        if (debug) logger.debug("\t3 token " + tokenCount + " vs " + (refLength));
       }
 
       float dur1 = end1 - start1;
       float dur2 = end2 - start2;
       fastScore = scoreTotal1 / (float) refLength;
       slowScore = scoreTotal2 / (float) refLength;
-      logger.debug("\tfirst  " + start1 + "-" +end1 + " dur " + dur1 +
+      if (debug) logger.debug("\tfirst  " + start1 + "-" +end1 + " dur " + dur1 +
         " score " + fastScore +
        " second " + start2 + "-" +end2 + " dur " + dur2 +
         " score " + slowScore +
