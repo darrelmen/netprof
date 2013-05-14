@@ -97,7 +97,7 @@ public class Exercise extends ExerciseShell  {
     super(id,tooltip);
     this.plan = plan;
     this.content = content;
-    this.type = recordAudio ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE;
+    this.setType(recordAudio ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE);
     this.promptInEnglish = promptInEnglish;
   }
 
@@ -117,7 +117,7 @@ public class Exercise extends ExerciseShell  {
     this.content = content;
     this.refAudio = audioRef;
     this.refSentences.add(sentenceRef);
-    this.type = EXERCISE_TYPE.REPEAT;
+    this.setType(EXERCISE_TYPE.REPEAT);
   }
 
   public Exercise(String plan, String id, String content, List<String> sentenceRefs, String tooltip) {
@@ -126,7 +126,7 @@ public class Exercise extends ExerciseShell  {
     this.plan = plan;
     this.content = content;
     this.refSentences = sentenceRefs;
-    this.type = EXERCISE_TYPE.RECORD;
+    this.setType(EXERCISE_TYPE.RECORD);
   }
 
   /**
@@ -142,7 +142,7 @@ public class Exercise extends ExerciseShell  {
   public Exercise(String plan, String id, String content, String fastAudioRef, String slowAudioRef, String sentenceRef, String tooltip) {
     this(plan,id,content,fastAudioRef,sentenceRef, tooltip);
     this.slowAudioRef = slowAudioRef;
-    this.type = EXERCISE_TYPE.REPEAT_FAST_SLOW;
+    this.setType(EXERCISE_TYPE.REPEAT_FAST_SLOW);
   }
 
   public ExerciseShell getShell() { return new ExerciseShell(getID(), getTooltip()); }
@@ -206,7 +206,7 @@ public class Exercise extends ExerciseShell  {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getExercises(long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#setPromptAndRecordOnExercises(long, java.util.List)
    * @param b
    */
   public void setPromptInEnglish(boolean b) {
@@ -214,7 +214,7 @@ public class Exercise extends ExerciseShell  {
   }
 
   public void setRecordAnswer(boolean spoken) {
-    type = spoken ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE;
+    setType(spoken ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE);
   }
 
   /**
@@ -262,6 +262,10 @@ public class Exercise extends ExerciseShell  {
     slots.add(s);
   }
   //public List<String> getSlots() { return slots; }
+
+  public void setType(EXERCISE_TYPE type) {
+    this.type = type;
+  }
 
   public String toString() {
     if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
