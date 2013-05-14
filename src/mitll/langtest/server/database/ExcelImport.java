@@ -45,7 +45,7 @@ public class ExcelImport implements ExerciseDAO {
   private final String file;
   private SectionHelper sectionHelper = new SectionHelper();
   private boolean debug = false;
-  String mediaDir;
+  private String mediaDir;
 
   public ExcelImport() {
     this.file = null;
@@ -375,13 +375,11 @@ public class ExcelImport implements ExerciseDAO {
 
     imported.addQuestion();
 
-
     String name = ""+id;
-    String fastAudioRef = mediaDir+File.separator+name+File.separator+ "fast" + ".wav";
-    String slowAudioRef = mediaDir+File.separator+name+File.separator+ "slow" + ".wav";
-
-
-       imported.setRefAudio(fastAudioRef);
+    String fastAudioRef = mediaDir+File.separator+name+File.separator+ "Fast" + ".wav";
+    String slowAudioRef = mediaDir+File.separator+name+File.separator+ "Slow" + ".wav";
+    imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
+    imported.setRefAudio(fastAudioRef);
     imported.setSlowRefAudio(slowAudioRef);
    // exercises.add(imported);
     return imported;
