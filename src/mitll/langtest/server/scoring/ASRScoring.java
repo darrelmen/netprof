@@ -95,12 +95,18 @@ public class ASRScoring extends Scoring {
   private final Map<String, String> properties;
   private final String platform = Utils.package$.MODULE$.platform();
   private String language = "";
+
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    * @param deployPath
    * @param properties
    */
   public ASRScoring(String deployPath, Map<String, String> properties) {
+    this(deployPath, properties, null);
+    readDictionary();
+  }
+
+  public ASRScoring(String deployPath, Map<String, String> properties, HTKDictionary dict) {
     super(deployPath);
 
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
@@ -128,8 +134,9 @@ public class ASRScoring extends Scoring {
       logger.error("huh? unsupported language " + language);
     }
     logger.info("using LTS " + letterToSoundClass.getClass());
-    readDictionary();
+    this.htkDictionary = dict;
   }
+
 
 /*  private Set<String> wordsInDict = new HashSet<String>();
   private void readDict() {
@@ -273,6 +280,8 @@ public class ASRScoring extends Scoring {
        false, Files.createTempDir().getAbsolutePath(), false);
   }
 
+  //Set<String> currentCalcs = new HashSet<String>();
+
   /**
    * @see #scoreRepeatExercise
    * @param testAudioDir audio file directory
@@ -291,6 +300,7 @@ public class ASRScoring extends Scoring {
     String key = testAudioDir + File.separator + testAudioFileNoSuffix;
     Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
     if (scores == null) {
+
       scores = calcScoreForAudio(testAudioDir,testAudioFileNoSuffix,sentence,scoringDir,
         decode,tmpDir);
       audioToScore.put(key, scores);
@@ -497,15 +507,22 @@ public class ASRScoring extends Scoring {
   }
 
   private void readDictionary() {
+    htkDictionary = makeDict();
+  }
+
+  public HTKDictionary getDict() { return htkDictionary; }
+
+  public HTKDictionary makeDict() {
     String dictFile = getDictFile(getModelsDir());
     boolean dictExists = new File(dictFile).exists();
     if (!dictExists) logger.error("readDictionary : Can't find dict file at " + dictFile);
 
     long then = System.currentTimeMillis();
-    htkDictionary = new HTKDictionary(dictFile);
+    HTKDictionary htkDictionary = new HTKDictionary(dictFile);
     long now = System.currentTimeMillis();
     int size = htkDictionary.size(); // force read from lazy val
     logger.debug("read dict " + dictFile + " of size " +size + " in " + (now-then) + " millis");
+    return htkDictionary;
   }
 
   /**
