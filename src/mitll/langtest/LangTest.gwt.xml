@@ -31,13 +31,9 @@
 
   <public path='public'/>
 
-  <!-- TODO: Add this when it is an object -->
-  <!-- This script is so that Sound Manager 2 can be accessed through JSNI -->
-  <!-- <script src="soundmanager2.js"/>  -->
-
   <!-- These 3 scripts are necessary so that Flash Recording can work -->
-    <script src="js/jquery-1.9.1.min.js"/>
-    <script src="js/jquery-migrate-1.1.1.min.js"/>
+  <script src="js/jquery-1.9.1.min.js"/>
+  <script src="js/jquery-migrate-1.1.1.min.js"/>
   <script src="js/swfobject.js"/>
   <script src="js/recorder.js"/>
 
