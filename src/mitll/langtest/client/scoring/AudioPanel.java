@@ -1,12 +1,12 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -42,21 +42,19 @@ import java.util.Map;
 public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected static final int MIN_WIDTH = 256;
   private static final float WAVEFORM_HEIGHT = 128f;//96;
-  private static final float SPECTROGRAM_HEIGHT = 80f;//96;
+  private static final float SPECTROGRAM_HEIGHT = 65f;//96;
   private static final int RIGHT_MARGIN = ASRScorePanel.X_CHART_SIZE+150;//550;//1;//400;
   protected static final String WAVEFORM = "Waveform";
   protected static final String SPECTROGRAM = "Spectrogram";
-  public static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence and speech occur, or whether the mic is working properly.";
+  public static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence" +
+    " and speech occur, or whether the mic is working properly.";
   protected String audioPath;
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
   private boolean useKeyboard = true;
 
   protected ImageAndCheck waveform,spectrogram,phones,words;
-  /**
-   * @deprecated
-   */
-  protected ImageAndCheck speech;
+
   private int lastWidth = 0;
   private Panel imageContainer;
   private AudioPositionPopup audioPositionPopup;
@@ -111,7 +109,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     hp.setCellHorizontalAlignment(playAudio,HorizontalPanel.ALIGN_LEFT);
 
     HorizontalPanel controlPanel = new HorizontalPanel();
-
+    //controlPanel.setSpacing(3);
     waveform = new ImageAndCheck();
     imageContainer.add(waveform.image);
     controlPanel.add(addCheckbox(WAVEFORM, waveform));
@@ -128,10 +126,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     phones = new ImageAndCheck();
     imageContainer.add(phones.image);
     controlPanel.add(addCheckbox("phones", phones));
-
-    speech = new ImageAndCheck();
-    imageContainer.add(speech.image);
-    controlPanel.add(addCheckbox("speech", speech));
 
     hp.add(controlPanel);
     hp.setCellHorizontalAlignment(controlPanel, HorizontalPanel.ALIGN_RIGHT);
