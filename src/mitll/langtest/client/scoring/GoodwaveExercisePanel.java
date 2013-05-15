@@ -163,7 +163,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     CaptionPanel cpContent = new CaptionPanel(INSTRUCTIONS);
     Widget questionContent = new HTML(content);
-    questionContent.addStyleName("leftTenMargin");
+  //  questionContent.addStyleName("leftTenMargin");
     cpContent.setContentWidget(questionContent);
     vp.add(cpContent);
 
@@ -225,10 +225,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     ASRScoringAudioPanel audioPanel;
 
     if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
-      audioPanel = new FastAndSlowASRScoringAudioPanel(path);
+      audioPanel = new FastAndSlowASRScoringAudioPanel(path, scorePanel);
     }
     else {
-      audioPanel = new ASRScoringAudioPanel(path,e.getRefSentence(),service,controller, false);
+      audioPanel = new ASRScoringAudioPanel(path,e.getRefSentence(),service,controller, false, scorePanel);
     }
     audioPanel.setRefAudio(path, e.getRefSentence());
     ResizableCaptionPanel cp = new ResizableCaptionPanel(NATIVE_REFERENCE_SPEAKER);
@@ -256,7 +256,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
-   * @paramx exercise
    * @param service
    * @param controller
    * @param index
@@ -288,7 +287,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     public ASRRecordAudioPanel(LangTestDatabaseAsync service, int index) {
       super(service, controller.getSoundManager(), controller.showOnlyOneExercise(), controller.getSegmentRepeats(),
         false, // no keyboard
-        controller.isLogClientMessages(),controller);
+        controller.isLogClientMessages(),controller, scorePanel);
       this.index = index;
     }
 
@@ -375,13 +374,14 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * @see GoodwaveExercisePanel#getScoringAudioPanel(mitll.langtest.shared.Exercise, String)
      * @param path
      */
-    public FastAndSlowASRScoringAudioPanel(String path) {
+    public FastAndSlowASRScoringAudioPanel(String path, ScoreListener scoreListener) {
       super(path,
           exercise.getRefSentence(),
           GoodwaveExercisePanel.this.service,
           controller,
           false // no keyboard space bar binding
-      );
+        ,
+        scoreListener);
     }
 
     @Override
