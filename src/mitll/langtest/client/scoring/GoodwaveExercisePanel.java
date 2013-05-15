@@ -1,7 +1,11 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.RadioButton;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -9,7 +13,6 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ProvidesResize;
-import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -17,7 +20,6 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRScorePanel;
-import mitll.langtest.client.gauge.ScorePanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.AudioAnswer;
@@ -66,7 +68,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     this.controller = controller;
     this.service = service;
 
-    VerticalPanel center = new VerticalPanel();
+    final VerticalPanel center = new VerticalPanel();
 
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
@@ -78,17 +80,29 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
     if (e.isRepeat()) {
-      ASRScorePanel widgets = new ASRScorePanel();
-      add(widgets);
-      scorePanel = widgets;
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          Window.alert("Code download failed");
+        }
+
+        public void onSuccess() {
+          System.out.println("\n\ndelayed fragment...");
+          ASRScorePanel widgets = new ASRScorePanel();
+          add(widgets);
+          scorePanel = widgets;
+          addQuestions(service, controller, 1, center);
+        }
+      });
     }
     else {
+      addQuestions(service, controller, 1, center);
+    }
+  /*  else {
       ScorePanel w = new ScorePanel(false);
       add(w);
       scorePanel = w;
-    }
+    }*/
 
-    addQuestions(service, controller, 1, center);
   }
 
   /**
