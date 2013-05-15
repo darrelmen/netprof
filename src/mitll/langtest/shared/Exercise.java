@@ -185,9 +185,25 @@ public class Exercise extends ExerciseShell  {
   public String getRefAudio() { return refAudio; }
   public String getSlowAudioRef() { return slowAudioRef; }
   public void setRefAudio(String s) { this.refAudio = s; }
-  public void setSlowRefAudio(String s) { this.slowAudioRef = s; }
-  public String getRefSentence() { return refSentences.isEmpty() ? "" : refSentences.get(0); }
 
+  /**
+   * @see mitll.langtest.server.database.ExcelImport#getExercise(int, mitll.langtest.server.database.FileExerciseDAO, String, String, String)
+   * @param s
+   */
+  public void setSlowRefAudio(String s) { this.slowAudioRef = s; }
+
+  public String getRefSentence() {
+    StringBuilder builder = new StringBuilder();
+    for (String s : refSentences) {
+      builder.append(s).append(" ");
+    }
+    return builder.toString();
+  }
+
+  /**
+   * @see mitll.langtest.server.database.ExcelImport#getExercise(int, mitll.langtest.server.database.FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String)
+   * @param sentenceRefs
+   */
   public void setRefSentences(List<String> sentenceRefs) {
     this.refSentences = sentenceRefs;
   }
