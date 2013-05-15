@@ -144,7 +144,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     String content = e.getContent();
     String path = null;
     if (e.isRepeat()) {
-      this.refAudio = e.getRefAudio();
+      this.refAudio = e.getRefAudio() != null ? e.getRefAudio() : e.getSlowAudioRef();
+      System.out.println("e " +e.getID() + " ref audio " + e.getRefAudio() + " slow " + e.getSlowAudioRef());
       path = refAudio;
     }
     else if (content.contains("audio")) {  // if we don't have proper REPEAT exercises
@@ -183,29 +184,33 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private void ensureMP3(Exercise e, String path, final VerticalPanel vp) {
     final String fpath = path;
     final Exercise fe = e;
-    //System.out.println("ensuring mp3 exists for " +path);
+    System.out.println("for exercise " + fe.getID() + " ensuring mp3 exists for " +path);
     service.ensureMP3(path,new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
-        System.err.println("huh? couldn't write an MP3?");
+        Window.alert("Couldn't contact server (ensureMP3).");
       }
 
       @Override
       public void onSuccess(Void result) {
         if (fe.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
-          //System.out.println("ensuring mp3 exists for slow audio path " +fe.getSlowAudioRef());
+          if (fe.getSlowAudioRef() != null && !fpath.equals(fe.getSlowAudioRef())) {
+            System.out.println("for exercise " + fe.getID() +" ensuring mp3 exists for slow audio path " +fe.getSlowAudioRef());
+            service.ensureMP3(fe.getSlowAudioRef(), new AsyncCallback<Void>() {
+              @Override
+              public void onFailure(Throwable caught) {
+                Window.alert("Couldn't contact server (ensureMP3).");
+              }
 
-          service.ensureMP3(fe.getSlowAudioRef(), new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              System.err.println("huh? couldn't write an MP3 for " + fe.getSlowAudioRef() + "?");
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-              vp.add(getScoringAudioPanel(fe, fpath));
-            }
-          });
+              @Override
+              public void onSuccess(Void result) {
+                vp.add(getScoringAudioPanel(fe, fpath));
+              }
+            });
+          }
+          else {
+            vp.add(getScoringAudioPanel(fe, fpath));
+          }
         } else {
           vp.add(getScoringAudioPanel(fe, fpath));
         }
@@ -384,32 +389,43 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         scoreListener);
     }
 
+    /**
+     * @see AudioPanel#addWidgets(String)
+     * @return
+     */
     @Override
     protected Widget getBeforePlayWidget() {
       VerticalPanel vp = new VerticalPanel();
-      RadioButton fast = new RadioButton(GROUP, FAST);
-      vp.add(fast);
-      fast.setWidth(RADIO_BUTTON_WIDTH);
 
-      fast.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          setRefAudio(exercise.getRefAudio());
-          getImagesForPath(wavToMP3(exercise.getRefAudio()));
-        }
-      });
-      RadioButton slow = new RadioButton(GROUP, SLOW);
-      slow.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          setRefAudio(exercise.getSlowAudioRef());
-          getImagesForPath(wavToMP3(exercise.getSlowAudioRef()));
-        }
-      });
-      slow.setWidth(RADIO_BUTTON_WIDTH);
-      vp.add(slow);
-      vp.setWidth("50px");
-      fast.setValue(true);
+      if (exercise.getRefAudio() != null) {
+        RadioButton fast = new RadioButton(GROUP, FAST);
+        vp.add(fast);
+        fast.setWidth(RADIO_BUTTON_WIDTH);
+
+        fast.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            setRefAudio(exercise.getRefAudio());
+            getImagesForPath(wavToMP3(exercise.getRefAudio()));
+          }
+        });
+        fast.setValue(true);
+      }
+
+      if (exercise.getSlowAudioRef() != null) {
+        RadioButton slow = new RadioButton(GROUP, SLOW);
+        slow.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            setRefAudio(exercise.getSlowAudioRef());
+            getImagesForPath(wavToMP3(exercise.getSlowAudioRef()));
+          }
+        });
+        slow.setWidth(RADIO_BUTTON_WIDTH);
+        vp.add(slow);
+        vp.setWidth("50px");
+      }
+
       HorizontalPanel hp = new HorizontalPanel();
       hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
       hp.add(vp);

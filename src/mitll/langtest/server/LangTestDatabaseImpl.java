@@ -177,11 +177,30 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return getExerciseShells(exercisesBiasTowardsUnanswered);
   }*/
 
+  /**
+   * Don't randomize order if we're in netProF (formerly goodwave) mode.
+   *
+   * @see mitll.langtest.client.exercise.SectionExerciseList#loadExercises
+   * @param typeToSection
+   * @param userID
+   * @return
+   */
   @Override
   public List<ExerciseShell> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection, long userID) {
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-    List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection,serverProps.shouldUseWeights());
-    return getExerciseShells(exercisesBiasTowardsUnanswered);
+    if (serverProps.isGoodwaveMode()) {
+      List<ExerciseShell> exerciseShells = getExerciseShells(exercisesForSection);
+      Collections.sort(exerciseShells,new Comparator<ExerciseShell>() {
+        @Override
+        public int compare(ExerciseShell o1, ExerciseShell o2) {
+          return o1.getID().compareTo(o2.getID());
+        }
+      });
+      return exerciseShells;
+    } else {
+      List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection, serverProps.shouldUseWeights());
+      return getExerciseShells(exercisesBiasTowardsUnanswered);
+    }
   }
 
   /**
@@ -527,13 +546,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getQuestionContent(mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#ensureMP3(mitll.langtest.shared.Exercise, String, com.google.gwt.user.client.ui.VerticalPanel)
    *
    * @param wavFile
    */
   public void ensureMP3(String wavFile) {
-    //logger.debug("ensure mp3 for " +wavFile);
-    new AudioConversion().ensureWriteMP3(wavFile, getInstallPath());
+    if (wavFile == null) {
+      logger.warn("ensureMP3 huh? wavFile is null?");
+    } else {
+      //logger.debug("ensure mp3 for " +wavFile);
+      new AudioConversion().ensureWriteMP3(wavFile, getInstallPath());
+    }
   }
 
   /**
@@ -602,7 +625,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Does DTW Scoring.
    *
-   * @see mitll.langtest.client.scoring.DTWScoringPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @seex mitll.langtest.client.scoring.DTWScoringPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param audioFile
    * @param refs
@@ -611,7 +634,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @deprecated use {@link #getASRScoreForAudio}
    * @return
    */
-  public PretestScore getScoreForAudioFile(int reqid, String audioFile, Collection<String> refs, int width, int height) {
+/*  public PretestScore getScoreForAudioFile(int reqid, String audioFile, Collection<String> refs, int width, int height) {
     logger.info("getASRScoreForAudio " + audioFile + " against " + refs);
     if (refs.isEmpty()) {
       logger.error("getASRScoreForAudio no refs? ");
@@ -654,7 +677,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       //System.out.println("score " + pretestScore);
       return pretestScore;
     }
-  }
+  }*/
 
   /**
    * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
