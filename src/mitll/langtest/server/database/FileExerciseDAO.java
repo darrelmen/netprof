@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
  */
 public class FileExerciseDAO implements ExerciseDAO {
   public static final List<String> EMPTY_LIST = Collections.emptyList();
-  public static final int MAX = 20;
+  public static final int MAX = 12000;
   private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
 
   public static final String ENCODING = "UTF8";
@@ -1013,7 +1013,7 @@ public class FileExerciseDAO implements ExerciseDAO {
                                          Exercise exercise, String refSentence,String first,String last, int refLength,
                                          File refDirForExercise,String configDir ) {
     String best = null;
-
+    String id = exercise.getID();
     float bestSlow = 0, bestFast = 0, bestTotal = 0;
     for (Result r : resultsForExercise) {
       if (exercise != null) {
@@ -1032,15 +1032,16 @@ public class FileExerciseDAO implements ExerciseDAO {
         }
         String testAudioFileNoSuffix = getConverted(name, parent);
 
-        logger.debug("parent " + parent + " running result " + r.uniqueID + " for exercise " + exercise.getID() + " and audio file " + name);
+        logger.debug("parent " + parent + " running result " + r.uniqueID + " for exercise " + id + " and audio file " + name);
 
         Scores align = scoring.align(parent, testAudioFileNoSuffix, refSentence + " " + refSentence);
       //  logger.debug("\tgot " + align + " for " + name);
+        float hydecScore = align.hydecScore;
 
         String wordLabFile   = prependDeploy(parent,testAudioFileNoSuffix + ".words.lab");
         try {
           GetAlignments getAlignments = new GetAlignments(first,last, refLength, name, wordLabFile).invoke();
-          float fastScore = getAlignments.getFastScore();
+   /*       float fastScore = getAlignments.getFastScore();
           float slowScore = getAlignments.getSlowScore();
 
           if (fastScore > bestFast) {
@@ -1048,12 +1049,13 @@ public class FileExerciseDAO implements ExerciseDAO {
           }
           if (slowScore > bestSlow) {
             bestSlow = slowScore;
-          }
-          if (bestTotal < fastScore + slowScore) {
-            bestTotal = fastScore + slowScore;
+          }*/
+          if (bestTotal < hydecScore) {//fastScore + slowScore) {
+            bestTotal = hydecScore;
             best = testAudioFileNoSuffix;
 
-            logger.debug("best so far is  " + best + " score " + bestTotal + " fast " + fastScore + "/" + slowScore);
+            logger.debug("ex " + id+ " best so far is  " + best + " score " + bestTotal + " hydecScore " + hydecScore);
+            //  " fast " + fastScore + "/" + slowScore);
 
             writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
               getAlignments);
