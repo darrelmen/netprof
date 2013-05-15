@@ -60,6 +60,7 @@ public class ServerProperties {
   private static final String MIN_PRON_SCORE = "minPronScore";
   private static final String MIN_PRON_SCORE_DEFAULT = "0.20";
   private static final String RTL = "rtl";
+  private static final String GOODWAVE_MODE = "goodwaveMode";
 
   private Properties props = null;
 
@@ -171,6 +172,11 @@ public class ServerProperties {
   public boolean isRTL() {
     return !props.getProperty(RTL, "false").equals("false");
   }
+
+  public boolean isGoodwaveMode() {
+    return !props.getProperty(GOODWAVE_MODE, "false").equals("false");
+  }
+
   public boolean shouldUseWeights() {
     return !props.getProperty(USE_WEIGHTS, "false").equals("false");
   }
