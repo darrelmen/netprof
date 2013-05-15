@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -80,19 +81,27 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
     if (e.isRepeat()) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
-        }
+      if (false) {
+        GWT.runAsync(new RunAsyncCallback() {
+          public void onFailure(Throwable caught) {
+            Window.alert("Code download failed");
+          }
 
-        public void onSuccess() {
-          System.out.println("\n\ndelayed fragment...");
-          ASRScorePanel widgets = new ASRScorePanel();
-          add(widgets);
-          scorePanel = widgets;
-          addQuestions(service, controller, 1, center);
-        }
-      });
+          public void onSuccess() {
+            System.out.println("\n\ndelayed fragment...");
+            ASRScorePanel widgets = new ASRScorePanel();
+            add(widgets);
+            scorePanel = widgets;
+            addQuestions(service, controller, 1, center);
+          }
+        });
+      }
+      else {
+        ASRScorePanel widgets = new ASRScorePanel();
+        add(widgets);
+        scorePanel = widgets;
+        addQuestions(service, controller, 1, center);
+      }
     }
     else {
       addQuestions(service, controller, 1, center);
@@ -397,6 +406,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     protected Widget getBeforePlayWidget() {
       VerticalPanel vp = new VerticalPanel();
 
+      System.out.println("\n\n\n getBeforePlayWidget");
+
+      boolean anyRef = false;
       if (exercise.getRefAudio() != null) {
         RadioButton fast = new RadioButton(GROUP, FAST);
         vp.add(fast);
@@ -405,11 +417,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         fast.addClickHandler(new ClickHandler() {
           @Override
           public void onClick(ClickEvent event) {
+            doPause();    // if the audio is playing, stop it
             setRefAudio(exercise.getRefAudio());
             getImagesForPath(wavToMP3(exercise.getRefAudio()));
           }
         });
         fast.setValue(true);
+        anyRef = true;
       }
 
       if (exercise.getSlowAudioRef() != null) {
@@ -417,14 +431,29 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         slow.addClickHandler(new ClickHandler() {
           @Override
           public void onClick(ClickEvent event) {
+            doPause();
             setRefAudio(exercise.getSlowAudioRef());
             getImagesForPath(wavToMP3(exercise.getSlowAudioRef()));
           }
         });
         slow.setWidth(RADIO_BUTTON_WIDTH);
         vp.add(slow);
-        vp.setWidth("50px");
+        anyRef = true;
       }
+      vp.setWidth("50px");
+
+      if (!anyRef) {
+        System.out.println("\n\n\n showing no ref audio");
+        vp.add(new Label("No reference audio."));
+      }
+      else {
+        System.out.println("\n" +
+          "\n" +
+          "\n" +
+          " found ref audio");
+
+      }
+
 
       HorizontalPanel hp = new HorizontalPanel();
       hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
