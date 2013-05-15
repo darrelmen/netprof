@@ -1,10 +1,14 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -17,12 +21,14 @@ import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
@@ -43,6 +49,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
+  private Image recordImage1;
+  private Image recordImage2;
 
   /**
    * ??? Just for backward compatibility -- so we can run against old plan files
@@ -113,6 +121,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }*/
 
   }
+  public void setBusy(boolean v) { this.isBusy = v;}
 
   /**
    * For every question,
@@ -180,6 +189,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     if (path != null) {
       ensureMP3(e, path, vp);
     }
+    else {
+      vp.add(getScoringAudioPanel(e, path));
+    }
     return vp;
   }
 
@@ -235,7 +247,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @return
    */
   private Widget getScoringAudioPanel(final Exercise e, String path) {
+    if (path != null) {
     path = wavToMP3(path);
+    }
     ASRScoringAudioPanel audioPanel;
 
     if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
@@ -292,7 +306,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     private final int index;
     private PostAudioRecordButton postAudioRecordButton;
     private PlayAudioPanel playAudioPanel;
-
+    private static final int PERIOD_MILLIS = 500;
     /**
      * @see GoodwaveExercisePanel#getAnswerWidget
      * @param service
@@ -303,6 +317,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         false, // no keyboard
         controller.isLogClientMessages(),controller, scorePanel);
       this.index = index;
+
     }
 
     /**
@@ -316,51 +331,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      */
     @Override
     protected PlayAudioPanel makePlayAudioPanel(Widget toAdd) {
-      postAudioRecordButton = new PostAudioRecordButton(exercise, controller, service, index) {
-        @Override
-        public void useResult(AudioAnswer result) {
-          setRefAudio(refAudio, exercise.getRefSentence());
-          getImagesForPath(wavToMP3(result.path));
-        }
-
-        @Override
-        protected void startRecording() {
-          playAudioPanel.setPlayEnabled(false);
-          isBusy = true;
-          super.startRecording();
-        }
-
-        @Override
-        protected void stopRecording() {
-          playAudioPanel.setPlayEnabled(true);
-          isBusy = false;
-          super.stopRecording();
-        }
-      };
-
-      playAudioPanel = new PlayAudioPanel(soundManager, new PlayListener() {
-        public void playStarted() {
-          isBusy = true;
-          postAudioRecordButton.getRecord().setEnabled(false);
-        }
-
-        public void playStopped() {
-          isBusy = false;
-          postAudioRecordButton.getRecord().setEnabled(true);
-        }
-      }) {
-        @Override
-        protected void addButtons() {
-          add(postAudioRecordButton.getRecord());
-          super.addButtons();
-        }
-
-        /**
-         * No keyboard listener for play button -- since there can be two play buttons -- which one gets the space bar?
-         */
-        @Override
-        protected void addKeyboardListener() {}
-      };
+      postAudioRecordButton = new MyPostAudioRecordButton();
+      //postAudioRecordButton.getRecord().addStyleName("recordButtonMargin");    // height of the media record images
+      DOM.setElementProperty(postAudioRecordButton.getRecord().getElement(),"margin","8px");
+      recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
+      recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
+      playAudioPanel = new MyPlayAudioPanel(recordImage1,recordImage2, soundManager, postAudioRecordButton, GoodwaveExercisePanel.this);
       return playAudioPanel;
     }
 
@@ -368,6 +344,102 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     protected void onUnload() {
       super.onUnload();
       postAudioRecordButton.onUnload();
+    }
+
+    private class MyPlayAudioPanel extends PlayAudioPanel {
+      public MyPlayAudioPanel(Image recordImage1, Image recordImage2,SoundManagerAPI soundManager,
+                              final PostAudioRecordButton postAudioRecordButton1, final GoodwaveExercisePanel goodwaveExercisePanel) {
+        super(soundManager, new PlayListener() {
+          public void playStarted() {
+            goodwaveExercisePanel.setBusy(true);
+            postAudioRecordButton1.getRecord().setEnabled(false);
+          }
+
+          public void playStopped() {
+            goodwaveExercisePanel.setBusy(false);
+            postAudioRecordButton1.getRecord().setEnabled(true);
+          }
+        });
+        add(recordImage1);
+        recordImage1.setVisible(false);
+        add(recordImage2);
+        recordImage2.setVisible(false);
+      }
+
+      @Override
+      protected void addButtons() {
+        add(postAudioRecordButton.getRecord());
+        super.addButtons();
+      }
+
+      /**
+       * No keyboard listener for play button -- since there can be two play buttons -- which one gets the space bar?
+       */
+      @Override
+      protected void addKeyboardListener() {}
+    }
+
+    private class MyPostAudioRecordButton extends PostAudioRecordButton {
+      private Timer t = null;
+
+      public MyPostAudioRecordButton() {
+        super(exercise, controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index);
+      }
+
+      @Override
+      public void useResult(AudioAnswer result) {
+        setRefAudio(refAudio, exercise.getRefSentence());
+        getImagesForPath(wavToMP3(result.path));
+      }
+
+      @Override
+      protected void startRecording() {
+        playAudioPanel.setPlayEnabled(false);
+        isBusy = true;
+        super.startRecording();
+      }
+
+      @Override
+      protected void stopRecording() {
+        playAudioPanel.setPlayEnabled(true);
+        isBusy = false;
+        super.stopRecording();
+      }
+
+      @Override
+      protected void showRecording() {
+        super.showRecording();
+        recordImage1.setVisible(true);
+        flipImage();
+      }
+
+      @Override
+      public void showStopped() {
+        super.showStopped();
+        recordImage1.setVisible(false);
+        recordImage2.setVisible(false);
+        t.cancel();
+      }
+
+      private boolean first = true;
+
+      private void flipImage() {
+        t = new Timer() {
+          @Override
+          public void run() {
+            if (first) {
+              recordImage1.setVisible(false);
+              recordImage2.setVisible(true);
+            }
+            else {
+              recordImage1.setVisible(true);
+              recordImage2.setVisible(false);
+            }
+            first = !first;
+          }
+        };
+        t.scheduleRepeating(PERIOD_MILLIS);
+      }
     }
   }
 
@@ -406,8 +478,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     protected Widget getBeforePlayWidget() {
       VerticalPanel vp = new VerticalPanel();
 
-      System.out.println("\n\n\n getBeforePlayWidget");
-
       boolean anyRef = false;
       if (exercise.getRefAudio() != null) {
         RadioButton fast = new RadioButton(GROUP, FAST);
@@ -443,17 +513,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       vp.setWidth("50px");
 
       if (!anyRef) {
-        System.out.println("\n\n\n showing no ref audio");
         vp.add(new Label("No reference audio."));
       }
-      else {
-        System.out.println("\n" +
-          "\n" +
-          "\n" +
-          " found ref audio");
-
-      }
-
 
       HorizontalPanel hp = new HorizontalPanel();
       hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
