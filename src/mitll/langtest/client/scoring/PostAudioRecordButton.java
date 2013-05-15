@@ -111,6 +111,7 @@ public class PostAudioRecordButton extends RecordButton {
     service.logMessage(message, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
+       // Window.alert("trouble contacting server.");
       }
 
       @Override
