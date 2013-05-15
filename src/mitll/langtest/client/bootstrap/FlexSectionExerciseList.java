@@ -142,7 +142,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
             @Override
             public void onSuccess(List<SectionNode> result) {
-              addButtonRow(result, userID, container, sortedTypes);
+              addButtonRow(result, userID, container, sortedTypes, !controller.isGoodwaveMode()); // TODO do something better here
             }
           });
         }
@@ -182,12 +182,13 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @param userID
    * @param container
    * @param types
+   * @param addInstructions
    */
-  private void addButtonRow(List<SectionNode> rootNodes, long userID, FluidContainer container, Collection<String> types) {
+  private void addButtonRow(List<SectionNode> rootNodes, long userID, FluidContainer container, Collection<String> types, boolean addInstructions) {
     System.out.println("getWidgetsForTypes (success) for user = " + userID + " got types " + types);
     String firstType = types.iterator().next(); // e.g. unit!
 
-    container.add(getInstructionRow());
+    if (addInstructions) container.add(getInstructionRow());
     FlexTable firstTypeRow = new FlexTable();
     container.add(firstTypeRow);
     firstTypeRow.addStyleName("alignTop");
@@ -670,8 +671,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   }
 
   /**
-   * @see #addButtonRow(java.util.List, long, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
-   * @paramx type
+   * @see #addButtonRow
    * @param sectionInFirstType
    * @param buttonGroupSectionWidget
    * @return
@@ -760,7 +760,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
   /**
    * Add label and clear button to row for each type
-   * @see #addButtonRow(java.util.List, long, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
+   * @see #addButtonRow
    * @param labelContainer
    * @param clearColumnContainer
    * @param typeForOriginal
@@ -791,7 +791,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   }
 
   /**
-   * @see FlexSectionExerciseList#addButtonRow(java.util.List, long, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
+   * @see FlexSectionExerciseList#addButtonRow
    * @param parentColumn
    * @param rootNodes
    * @param typeForOriginal
