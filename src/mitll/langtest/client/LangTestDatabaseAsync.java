@@ -49,8 +49,6 @@ public interface LangTestDatabaseAsync {
 
   void getASRScoreForAudio(int reqid, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, AsyncCallback<PretestScore> async);
 
-  void getScoreForAudioFile(int reqid, String audioFile, Collection<String> refs, int width, int height, AsyncCallback<PretestScore> async);
-
   void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, AsyncCallback<ImageResponse> async);
 
   void getProperties(AsyncCallback<Map<String, String>> async);
@@ -107,13 +105,7 @@ public interface LangTestDatabaseAsync {
 
   void logMessage(String message, AsyncCallback<Void> async);
 
- // void getTypeToSection(AsyncCallback<Map<String, Collection<String>>> async);
- // void getTypeToSectionsForTypeAndSection(String type, String section, AsyncCallback<Map<String, Collection<String>>> async);
-
-//  void getExercisesForSection(String type, String section, long userID, AsyncCallback<List<ExerciseShell>> async);
-
   void sendEmail(int userID, String to, String replyTo, String subject, String message, String token, AsyncCallback<Void> async);
-
 
   void getNextExercise(long userID, AsyncCallback<FlashcardResponse> async);
   void getNextExercise(long userID, Map<String, Collection<String>> typeToSection, AsyncCallback<FlashcardResponse> async);
