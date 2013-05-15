@@ -663,7 +663,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
  public Map<String, String> getProperties() { return serverProps.getProperties();  }
 
   /**
-   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param testAudioFile
    * @param sentence
@@ -715,7 +715,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean)
    * @see mitll.langtest.server.scoring.AutoCRTScoring#getASRScoreForAudio(java.io.File, java.util.List
-   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param testAudioFile
    * @param sentence empty string when using lmSentences non empty and vice-versa
@@ -1338,7 +1338,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     //logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
     db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, serverProps.getLanguage(), useFile,
-      relativeConfigDir+File.separator+serverProps.getMediaDir());
+      relativeConfigDir+File.separator+serverProps.getMediaDir(), serverProps.isRTL());
 
     return lessonPlanFile;
   }

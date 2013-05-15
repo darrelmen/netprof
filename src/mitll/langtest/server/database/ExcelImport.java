@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +40,7 @@ import java.util.Set;
 public class ExcelImport implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(ExcelImport.class);
   private final boolean isFlashcard;
+  private final boolean isRTL;
 
   private List<Exercise> exercises = null;
   private List<String> errors = new ArrayList<String>();
@@ -47,20 +49,27 @@ public class ExcelImport implements ExerciseDAO {
   private boolean debug = false;
   private String mediaDir;
 
+  /**
+   * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
+   */
   public ExcelImport() {
     this.file = null;
     this.isFlashcard = false;
+    this.isRTL = false;
   }
 
   /**
    * @see DatabaseImpl#makeDAO
    * @param file
    * @param isFlashcard
+   * @param isRTL
    */
-  public ExcelImport(String file, boolean isFlashcard, String mediaDir) {
+  public ExcelImport(String file, boolean isFlashcard, String mediaDir, boolean isRTL) {
     this.file = file;
     this.isFlashcard = isFlashcard;
     this.mediaDir = mediaDir;
+    this.isRTL = isRTL;
+    logger.debug("media dir " +mediaDir);
   }
 
   @Override
@@ -328,7 +337,17 @@ public class ExcelImport implements ExerciseDAO {
     }
     imported.setEnglishSentence(english);
     imported.setTranslitSentence(translit);
-    imported.setRefSentences(translations);
+    List<String> inOrderTranslations = new ArrayList<String>(translations);
+    if (isRTL) {
+ /*     if (id < 5) {
+        logger.debug("is RTL! ------- " + inOrderTranslations);
+      }
+      Collections.reverse(inOrderTranslations);
+      if (id < 5) {
+        logger.debug("after ------- " + inOrderTranslations);
+      }*/
+    }
+    imported.setRefSentences(inOrderTranslations);
 
     if (weightIndex != -1) {
       imported.setWeight(getNumericCell(next, weightIndex));
@@ -366,23 +385,38 @@ public class ExcelImport implements ExerciseDAO {
     return false;
   }
 
+  /**
+   * @see #getExercise(int, FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String)
+   * @param id
+   * @param dao
+   * @param english
+   * @param foreignLanguagePhrase
+   * @param translit
+   * @return
+   */
   private Exercise getExercise(int id, FileExerciseDAO dao, String english, String foreignLanguagePhrase, String translit) {
     String content = dao.getContent(foreignLanguagePhrase, translit, english);
     Exercise imported = new Exercise("import", "" + id, content, false, true, english);
-    imported.addSlot(english);
+/*    imported.addSlot(english);
     imported.addSlot(foreignLanguagePhrase);
-    imported.addSlot(translit);
+    imported.addSlot(translit);*/
 
     imported.addQuestion();
 
     String name = ""+id;
     String fastAudioRef = mediaDir+File.separator+name+File.separator+ "Fast" + ".wav";
     String slowAudioRef = mediaDir+File.separator+name+File.separator+ "Slow" + ".wav";
+
+  //  logger.debug("path is " + fastAudioRef);
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
-    imported.setRefAudio(fastAudioRef);
-    imported.setSlowRefAudio(slowAudioRef);
+    imported.setRefAudio(ensureForwardSlashes(fastAudioRef));
+    imported.setSlowRefAudio(ensureForwardSlashes(slowAudioRef));
    // exercises.add(imported);
     return imported;
+  }
+
+  private String ensureForwardSlashes(String wavPath) {
+    return wavPath.replaceAll("\\\\", "/");
   }
 
   private String getCell(Row next, int col) {
