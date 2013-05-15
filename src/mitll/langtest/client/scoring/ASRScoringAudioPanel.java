@@ -27,10 +27,11 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param numRepeats
    * @param useKeyboard
    * @param logMessages
+   * @param gaugePanel
    */
   public ASRScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth,
-                              int numRepeats, boolean useKeyboard, boolean logMessages,ExerciseController controller) {
-    super(service, useFullWidth, numRepeats, useKeyboard, controller);
+                              int numRepeats, boolean useKeyboard, boolean logMessages, ExerciseController controller, ScoreListener gaugePanel) {
+    super(service, useFullWidth, numRepeats, useKeyboard, controller, gaugePanel);
   }
 
   /**
@@ -40,17 +41,18 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param service
    * @param controller
    * @param useKeyboard
+   * @param gaugePanel
    */
   public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
-                              ExerciseController controller, boolean useKeyboard) {
+                              ExerciseController controller, boolean useKeyboard, ScoreListener gaugePanel) {
     super(path, refSentence, service, controller.showOnlyOneExercise(),
-        controller.getSegmentRepeats(), useKeyboard, controller);
+        controller.getSegmentRepeats(), useKeyboard, controller, gaugePanel);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
   /**
    * Shows spinning beachball (ish) gif while we wait...
-   * @see ScoringAudioPanel#getTranscriptImageURLForAudio(String, String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
+   * @see ScoringAudioPanel#getTranscriptImageURLForAudio
    * @param path to audio file on server
    * @param refAudio IGNORED HERE
    * @param refSentence what should be aligned
