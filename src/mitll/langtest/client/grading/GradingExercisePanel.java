@@ -220,7 +220,7 @@ public class GradingExercisePanel extends ExercisePanel {
                              LangTestDatabaseAsync service, GradingExercisePanel outer,
                              boolean moreThanOneQuestion, int index, int pageSize, int twoQPageSize, int grader) {
     ResultManager rm = new GradingResultManager(service, userFeedback, false);
-    rm.setFeedback(outer);
+   // rm.setFeedback(outer);
     rm.setPageSize(pageSize);
     if (moreThanOneQuestion) {
       List<Result> filtered = new ArrayList<Result>();
