@@ -108,7 +108,7 @@ public class WaveformExercisePanel extends ExercisePanel {
       super(null, service,
         false, // use full screen width
         true, // use keyboard
-        controller);
+        controller, null);
       this.index = index;
     }
 
