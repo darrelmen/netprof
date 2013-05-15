@@ -235,7 +235,6 @@ public class DatabaseImpl implements Database {
       return Collections.emptyList();
     }
     boolean isExcel = lessonPlanFile.endsWith(".xlsx");
-    logger.debug("is RTL " + isRTL);
     makeDAO(useFile, lessonPlanFile, isExcel, mediaDir, isRTL);
 
     if (useFile && !isExcel) {
