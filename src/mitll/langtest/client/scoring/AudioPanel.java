@@ -143,6 +143,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.audioPath = path;
   }
 
+  public void doPause() { playAudio.doPause(); }
+
   /**
    * This is sort of a hack -- so we can get left justify...
    * @return
