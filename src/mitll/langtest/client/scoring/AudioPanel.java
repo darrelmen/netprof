@@ -41,9 +41,9 @@ import java.util.Map;
  */
 public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected static final int MIN_WIDTH = 256;
-  private static final float WAVEFORM_HEIGHT = 128f;//96;
-  private static final float SPECTROGRAM_HEIGHT = 65f;//96;
-  private static final int RIGHT_MARGIN = ASRScorePanel.X_CHART_SIZE+150;//550;//1;//400;
+  private static final float WAVEFORM_HEIGHT = 100f;//96;
+  private static final float SPECTROGRAM_HEIGHT = 60f;//96;
+  //private static final int RIGHT_MARGIN = ASRScorePanel.X_CHART_SIZE+150;//550;//1;//400;
   protected static final String WAVEFORM = "Waveform";
   protected static final String SPECTROGRAM = "Spectrogram";
   public static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence" +
@@ -64,7 +64,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private PlayAudioPanel playAudio;
   private final boolean debug = false;
   private float screenPortion = 1.0f;
-  private int rightMarginToUse;
+  //private int rightMarginToUse;
   private final boolean logMessages;
   private ExerciseController controller;
 
@@ -80,8 +80,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
                     boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
     this.soundManager = controller.getSoundManager();
     this.service = service;
-    rightMarginToUse = useFullWidth ? RIGHT_MARGIN :  ASRScorePanel.X_CHART_SIZE+400;
-    System.out.println("use full width " + useFullWidth + " right margin " + rightMarginToUse);
+   // rightMarginToUse = useFullWidth ? RIGHT_MARGIN :  ASRScorePanel.X_CHART_SIZE+400;
+  //  System.out.println("use full width " + useFullWidth + " right margin " + rightMarginToUse);
     this.useKeyboard = useKeyboard;
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
