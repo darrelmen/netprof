@@ -66,17 +66,6 @@ public interface LangTestDatabase extends RemoteService {
 
   PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg);
 
-  /**
-   * @deprecated
-   * @param reqid
-   * @param audioFile
-   * @param refs
-   * @param width
-   * @param height
-   * @return
-   */
-  PretestScore getScoreForAudioFile(int reqid, String audioFile, Collection<String> refs, int width, int height);
-
   Map<String,String> getProperties();
 
   Exercise getExercise(String id);
