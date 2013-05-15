@@ -62,7 +62,6 @@ public class ResultManager extends PagerTable {
     this.nameForAnswer = nameForAnswer;
   }
 
-  public void setFeedback(GradingExercisePanel panel) {}
   public void setPageSize(int s) { this.pageSize = s; }
 
   private Widget lastTable = null;
