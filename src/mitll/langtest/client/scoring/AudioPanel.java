@@ -64,7 +64,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private PlayAudioPanel playAudio;
   private final boolean debug = false;
   private float screenPortion = 1.0f;
-  //private int rightMarginToUse;
   private final boolean logMessages;
   private ExerciseController controller;
 
@@ -88,8 +87,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.gaugePanel = gaugePanel;
     addWidgets(path);
   }
-
-  //protected void setRightMargin(int m) { this.rightMarginToUse = m; }
 
   public void onResize() {
     getImages();
