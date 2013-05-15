@@ -21,6 +21,7 @@ import java.util.Map;
  * Date: 4/3/13
  * Time: 7:23 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated  just an experiment
  */
 public class StackedBarSectionWidget extends StackProgressBar implements SectionWidget {
   private static final String ANY = SectionExerciseList.ANY;
