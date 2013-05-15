@@ -171,7 +171,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       return;
     }
 
-    if (props.isAdminView()) {
+    if (props.isGoodwaveMode() || props.isAdminView()) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           Window.alert("Code download failed");
@@ -186,7 +186,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           }, ColumnChart.PACKAGE, LineChart.PACKAGE);
         }
       });
+    }
 
+    if (props.isAdminView()) {
       final LangTest outer = this;
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
@@ -945,6 +947,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isPromptBeforeNextItem() {  return props.isPromptBeforeNextItem(); }
   public boolean isRightAlignContent() {  return props.isRightAlignContent(); }
   public boolean isFlashCard() {  return props.isFlashCard(); }
+  public boolean isGoodwaveMode() {  return props.isGoodwaveMode(); }
 
   // recording methods...
   /**
