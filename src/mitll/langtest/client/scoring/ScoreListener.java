@@ -11,4 +11,5 @@ import mitll.langtest.shared.scoring.PretestScore;
  */
 public interface ScoreListener {
   void gotScore(PretestScore score);
+  int getOffsetWidth();
 }
