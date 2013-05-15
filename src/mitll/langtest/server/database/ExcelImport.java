@@ -78,7 +78,7 @@ public class ExcelImport implements ExerciseDAO {
     this.relativeConfigDir = relativeConfigDir;
     getMissing(relativeConfigDir,"missingSlow.txt",missingSlowSet);
     getMissing(relativeConfigDir,"missingFast.txt",missingFastSet);
-    logger.debug("media dir " +mediaDir);
+    logger.debug("media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());
   }
 
   private void getMissing(String relativeConfigDir,String file, Set<Integer> missing) {
