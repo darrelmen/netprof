@@ -64,22 +64,35 @@
   <context-param>
     <param-name>config</param-name>
 
-    <!--<param-value>dari</param-value>-->
+    <param-value>dari</param-value>
     <!--<param-value>autocrt</param-value>-->
     <!--<param-value>urdu</param-value>-->
     <!--<param-value>english</param-value>-->
     <!--<param-value>farsi2</param-value>-->
-    <param-value>levantine</param-value>
-    <!--<param-value>pilot</param-value> -->
+<!--
+    <param-value>farsi</param-value>
+-->
+
+<!--
+      <param-value>flashcard</param-value>
+-->
+<!--
+      <param-value>unitFlashcard</param-value>
+-->
+
+
+      <!--<param-value>pilot</param-value> -->
     <!--<param-value>pashto</param-value>-->
     <!--<param-value>msa</param-value>-->
   </context-param>
 
-<!--
-  <context-param>
+ <context-param>
         <param-name>configFile</param-name>
-        <param-value>arabicText.properties</param-value>
-  </context-param>
+<!--
+     <param-value>frenchEnglish.properties</param-value>
 -->
+
+             <param-value>dari.properties</param-value>
+  </context-param>
 
 </web-app>
