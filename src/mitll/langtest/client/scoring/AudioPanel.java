@@ -48,6 +48,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected static final String SPECTROGRAM = "Spectrogram";
   public static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence" +
     " and speech occur, or whether the mic is working properly.";
+  private final ScoreListener gaugePanel;
   protected String audioPath;
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
@@ -73,9 +74,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param service
    * @param useFullWidth
    * @param useKeyboard
+   * @param gaugePanel
    */
   public AudioPanel(String path, LangTestDatabaseAsync service, boolean useFullWidth,
-                    boolean useKeyboard, ExerciseController controller) {
+                    boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
     this.soundManager = controller.getSoundManager();
     this.service = service;
     rightMarginToUse = useFullWidth ? RIGHT_MARGIN :  ASRScorePanel.X_CHART_SIZE+400;
@@ -83,6 +85,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.useKeyboard = useKeyboard;
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
+    this.gaugePanel = gaugePanel;
     addWidgets(path);
   }
 
@@ -109,7 +112,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     hp.setCellHorizontalAlignment(playAudio,HorizontalPanel.ALIGN_LEFT);
 
     HorizontalPanel controlPanel = new HorizontalPanel();
-    //controlPanel.setSpacing(3);
+
     waveform = new ImageAndCheck();
     imageContainer.add(waveform.image);
     controlPanel.add(addCheckbox(WAVEFORM, waveform));
@@ -251,9 +254,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @see #onResize()
    */
   private void getImages() {
-    int leftColumnWidth = Math.min(175,controller.getLeftColumnWidth()) + 70;
+    int leftColumnWidth = Math.min(175,controller.getLeftColumnWidth()) + 50;
     //int rightMargin = screenPortion == 1.0f ? leftColumnWidth : (int)(screenPortion*((float)rightMarginToUse));
-    int width = (int) ((screenPortion*((float)Window.getClientWidth())) - leftColumnWidth);
+    int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : 0;
+    int width = (int) ((screenPortion*((float)Window.getClientWidth())) - leftColumnWidth) - rightSide;
 
   //  System.out.println("getImages : leftColumnWidth " + leftColumnWidth + " width " + width + " vs window width " + Window.getClientWidth());
 
@@ -385,6 +389,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     Panel p = new HorizontalPanel();
     p.add(w);
     p.add(new Label(label));
+    p.addStyleName("buttonMargin");
     p.setVisible(false);
     widget.check = p;
     return p;
