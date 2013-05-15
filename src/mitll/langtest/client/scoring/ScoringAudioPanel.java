@@ -93,7 +93,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   protected void getEachImage(int width) {
     super.getEachImage(width);
     if (refAudio != null) {
-      getTranscriptImageURLForAudio(audioPath, refAudio, refSentence, width,words,phones,speech);
+      getTranscriptImageURLForAudio(audioPath, refAudio, refSentence, width,words,phones);
     }
     else {
       System.out.println("AudioPanel.getImages : no ref audio");
@@ -108,36 +108,33 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param width
    * @param wordTranscript
    * @param phoneTranscript
-   * @param speechTranscript
    */
   private void getTranscriptImageURLForAudio(final String path, final String refAudio, String refSentence, int width,
                                              final ImageAndCheck wordTranscript,
-                                             final ImageAndCheck phoneTranscript,
-                                             final ImageAndCheck speechTranscript) {
+                                             final ImageAndCheck phoneTranscript) {
     int widthToUse = Math.max(MIN_WIDTH, width);
     int height = ANNOTATION_HEIGHT;
 
     int reqid = getReqID("score");
-    scoreAudio(path, refAudio, refSentence, wordTranscript, phoneTranscript, speechTranscript, widthToUse, height, reqid);
+    scoreAudio(path, refAudio, refSentence, wordTranscript, phoneTranscript, widthToUse, height, reqid);
   }
 
   protected abstract void scoreAudio(final String path, String refAudio, String refSentence,
                                      final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
-                                     final ImageAndCheck speechTranscript, int toUse, int height, int reqid);
+                                     int toUse, int height, int reqid);
 
   private static final String IMAGES_REDX_PNG  = LangTest.LANGTEST_IMAGES +"redx.png";
 
   /**
    * Record the image URLs in the Image widgets and enable the check boxes
-   * @see ASRScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see ScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param result
    * @param wordTranscript
    * @param phoneTranscript
-   * @param speechTranscript
    * @param scoredBefore
    */
   protected void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
-                           ImageAndCheck speechTranscript, boolean scoredBefore) {
+                           boolean scoredBefore) {
     //System.out.println("useResult got " + result);
     if (result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT) != null) {
       showImageAndCheck(result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT), wordTranscript);
@@ -151,9 +148,6 @@ public abstract class ScoringAudioPanel extends AudioPanel {
     else {
       phoneTranscript.image.setUrl(IMAGES_REDX_PNG);
     }
-/*    if (result.getsTypeToImage().get(NetPronImageType.SPEECH_TRANSCRIPT) != null) {
-      showImageAndCheck(result.getsTypeToImage().get(NetPronImageType.SPEECH_TRANSCRIPT), speechTranscript);
-    }*/
     if (!scoredBefore && scoreListener != null) {
       System.out.println("new score returned " + result);
       scoreListener.gotScore(result);
