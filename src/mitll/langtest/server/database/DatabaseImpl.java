@@ -77,6 +77,8 @@ public class DatabaseImpl implements Database {
   private boolean doImages;
   private final String configDir;
   private String mediaDir;
+  private boolean isRTL;
+
   private final Map<Long,UserStateWrapper> userToState = new HashMap<Long,UserStateWrapper>();
 
   /**
@@ -189,10 +191,12 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    * @param installPath
    * @param lessonPlanFile
-   * @param mediaDir
    * @param language
+   * @param mediaDir
+   * @param isRTL
    */
-  public void setInstallPath(String installPath, String lessonPlanFile, String relativeConfigDir, String language, boolean useFile, String mediaDir) {
+  public void setInstallPath(String installPath, String lessonPlanFile, String relativeConfigDir, String language,
+                             boolean useFile, String mediaDir, boolean isRTL) {
    // logger.debug("got install path " + installPath + " media " + mediaDir + " is urdu " +isUrdu);
     this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
@@ -201,6 +205,7 @@ public class DatabaseImpl implements Database {
     this.isUrdu = language.equalsIgnoreCase("Urdu");
     this.useFile = useFile;
     this.language = language;
+    this.isRTL = isRTL;
   }
 
   public void setOutsideFile(String outsideFile) { monitoringSupport.setOutsideFile(outsideFile); }
@@ -230,7 +235,8 @@ public class DatabaseImpl implements Database {
       return Collections.emptyList();
     }
     boolean isExcel = lessonPlanFile.endsWith(".xlsx");
-    makeDAO(useFile, lessonPlanFile, isExcel, mediaDir);
+    logger.debug("is RTL " + isRTL);
+    makeDAO(useFile, lessonPlanFile, isExcel, mediaDir, isRTL);
 
     if (useFile && !isExcel) {
       if (isWordPairs) {
@@ -247,10 +253,10 @@ public class DatabaseImpl implements Database {
     return rawExercises;
   }
 
-  private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel, String mediaDir) {
+  private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel, String mediaDir, boolean isRTL) {
     if (exerciseDAO == null) {
       if (useFile && excel) {
-        this.exerciseDAO = new ExcelImport(lessonPlanFile, isFlashcard, mediaDir);
+        this.exerciseDAO = new ExcelImport(lessonPlanFile, isFlashcard, mediaDir, isRTL);
       }
       else {
         this.exerciseDAO = makeExerciseDAO(useFile);
