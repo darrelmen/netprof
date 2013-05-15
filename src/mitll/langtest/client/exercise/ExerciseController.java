@@ -50,6 +50,7 @@ public interface ExerciseController {
   boolean isPromptBeforeNextItem();
   boolean isRightAlignContent();
   boolean isFlashCard();
+  boolean isGoodwaveMode();
   int getLeftColumnWidth();
   int getHeightOfTopRows();
 }
