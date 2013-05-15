@@ -31,29 +31,32 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private PretestScore result;
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.sound.SoundManagerAPI, boolean, int, boolean, boolean,ExerciseController)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.sound.SoundManagerAPI, boolean, int, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
    * @param service
    * @param useFullWidth
    * @param numRepeats
    * @param useKeyboard
+   * @param gaugePanel
    */
   public ScoringAudioPanel(LangTestDatabaseAsync service, boolean useFullWidth,
-                           int numRepeats, boolean useKeyboard, ExerciseController controller) {
-    this(null, null, service, useFullWidth, numRepeats, useKeyboard, controller);
+                           int numRepeats, boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
+    this(null, null, service, useFullWidth, numRepeats, useKeyboard, controller, gaugePanel);
   }
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener)
    * @param path
    * @param refSentence
    * @param service
    * @param useFullWidth
    * @param numRepeats
    * @param useKeyboard
+   * @param gaugePanel
    */
   public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
-                           boolean useFullWidth, int numRepeats, boolean useKeyboard, ExerciseController controller) {
-    super(path, service, useFullWidth, useKeyboard, controller);
+                           boolean useFullWidth, int numRepeats, boolean useKeyboard, ExerciseController controller,
+                           ScoreListener gaugePanel) {
+    super(path, service, useFullWidth, useKeyboard, controller, gaugePanel);
     this.refSentence = refSentence;
     addClickHandlers(numRepeats);
   }
