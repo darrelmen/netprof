@@ -400,6 +400,7 @@ public class ExcelImport implements ExerciseDAO {
 
     // hack to trim off leading tics
     if (unit.startsWith("'")) unit = unit.substring(1);
+    if (unit.equals("intro")) unit = "Intro"; // hack
     if (chapter.startsWith("'")) chapter = chapter.substring(1);
     if (week.startsWith("'")) week = week.substring(1);
 
@@ -441,11 +442,11 @@ public class ExcelImport implements ExerciseDAO {
     if (!missingFastSet.contains(id)) {
       imported.setRefAudio(ensureForwardSlashes(fastAudioRef));
     }
-    else logger.debug("no fast audio for " + id);
+    //else logger.debug("no fast audio for " + id);
     if (!missingSlowSet.contains(id)) {
       imported.setSlowRefAudio(ensureForwardSlashes(slowAudioRef));
     }
-    else logger.debug("no slow audio for " + id);
+   // else logger.debug("no slow audio for " + id);
 
     return imported;
   }
