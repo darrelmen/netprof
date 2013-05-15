@@ -239,7 +239,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // set up center panel, initially with flash record panel
     currentExerciseVPanel = new FluidContainer();
 
-    DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "marginLeft", "10px");
+    //DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "marginLeft", "10px");
+    DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
     makeExerciseList(secondRow, leftColumn, props.isGrading());
     if (usualLayout) {
@@ -591,7 +592,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   @Override
   public int getLeftColumnWidth() {
     int offsetWidth = exerciseList.getWidget().getOffsetWidth();
-  //  System.out.println("left col width " +offsetWidth);
+    System.out.println("left col width " +offsetWidth);
     return offsetWidth;
   }
 
