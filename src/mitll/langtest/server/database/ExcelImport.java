@@ -13,10 +13,12 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +44,7 @@ public class ExcelImport implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(ExcelImport.class);
   private final boolean isFlashcard;
   private final boolean isRTL;
+  private String relativeConfigDir;
 
   private List<Exercise> exercises = null;
   private List<String> errors = new ArrayList<String>();
@@ -48,7 +52,8 @@ public class ExcelImport implements ExerciseDAO {
   private SectionHelper sectionHelper = new SectionHelper();
   private boolean debug = false;
   private String mediaDir;
-
+  private Set<Integer> missingSlowSet = new HashSet<Integer>();
+  private Set<Integer> missingFastSet = new HashSet<Integer>();
   /**
    * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
    */
@@ -63,13 +68,36 @@ public class ExcelImport implements ExerciseDAO {
    * @param file
    * @param isFlashcard
    * @param isRTL
+   * @param relativeConfigDir
    */
-  public ExcelImport(String file, boolean isFlashcard, String mediaDir, boolean isRTL) {
+  public ExcelImport(String file, boolean isFlashcard, String mediaDir, boolean isRTL, String relativeConfigDir) {
     this.file = file;
     this.isFlashcard = isFlashcard;
     this.mediaDir = mediaDir;
     this.isRTL = isRTL;
+    this.relativeConfigDir = relativeConfigDir;
+    getMissing(relativeConfigDir,"missingSlow.txt",missingSlowSet);
+    getMissing(relativeConfigDir,"missingFast.txt",missingFastSet);
     logger.debug("media dir " +mediaDir);
+  }
+
+  private void getMissing(String relativeConfigDir,String file, Set<Integer> missing) {
+    File missingSlow = new File(relativeConfigDir, file);
+    if (missingSlow.exists()) {
+      try {
+        BufferedReader reader = new BufferedReader(new FileReader(missingSlow));
+        String line;
+        while ((line = reader.readLine()) != null) {
+          String trim = line.trim();
+          if (trim.length() > 0) {
+            missing.add(Integer.parseInt(trim));
+          }
+        }
+      } catch (Exception e) {
+        logger.error("Reading " + missingSlow.getAbsolutePath() + " Got  " + e, e);
+      }
+
+    }
   }
 
   @Override
@@ -409,9 +437,16 @@ public class ExcelImport implements ExerciseDAO {
 
   //  logger.debug("path is " + fastAudioRef);
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
-    imported.setRefAudio(ensureForwardSlashes(fastAudioRef));
-    imported.setSlowRefAudio(ensureForwardSlashes(slowAudioRef));
-   // exercises.add(imported);
+
+    if (!missingFastSet.contains(id)) {
+      imported.setRefAudio(ensureForwardSlashes(fastAudioRef));
+    }
+    else logger.debug("no fast audio for " + id);
+    if (!missingSlowSet.contains(id)) {
+      imported.setSlowRefAudio(ensureForwardSlashes(slowAudioRef));
+    }
+    else logger.debug("no slow audio for " + id);
+
     return imported;
   }
 
