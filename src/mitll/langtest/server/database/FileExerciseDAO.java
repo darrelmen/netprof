@@ -936,9 +936,9 @@ public class FileExerciseDAO implements ExerciseDAO {
     logger.info("got " +futures.size() + " futures");
      count = 0;
     for (Future<?> future : futures) {
-      logger.info("get on " + future);
+     // logger.info("get on " + future);
       Object o = future.get();
-      logger.info("unblock on " + future);
+     // logger.info("unblock on " + future);
 
       count++;
       System.out.print(".");if (count % 30 == 0) System.out.println();
@@ -947,7 +947,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     logger.info("all " +futures.size() + " futures complete");
 
     missingFast.close();
-    logger.info("closing missing fast");
+    //logger.info("closing missing fast");
 
     missingSlow.close();
     logger.info("closing missing slow");
@@ -971,9 +971,9 @@ public class FileExerciseDAO implements ExerciseDAO {
 
     String exid = resultsForExercise.iterator().next().id;
     Exercise exercise = idToEx.get(exid);
-    StringBuilder builder = new StringBuilder();
-    for (String s : exercise.getRefSentences()) {builder.append(s).append(" ");}
-    String refSentence = builder.toString();
+    //StringBuilder builder = new StringBuilder();
+  //  for (String s : exercise.getRefSentences()) {builder.append(s).append(" ");}
+    String refSentence = exercise.getRefSentence();
     refSentence = refSentence.replaceAll("\\p{P}", "");
     String[] split = refSentence.split("\\p{Z}+");
     int refLength = split.length;
@@ -1053,8 +1053,7 @@ public class FileExerciseDAO implements ExerciseDAO {
             bestTotal = fastScore + slowScore;
             best = testAudioFileNoSuffix;
 
-            logger.debug("best so far is  " + best + " score " + bestTotal +
-              " fast " + fastScore + "/" + slowScore);
+            logger.debug("best so far is  " + best + " score " + bestTotal + " fast " + fastScore + "/" + slowScore);
 
             writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
               getAlignments);
