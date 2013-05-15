@@ -56,14 +56,13 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param refSentence what should be aligned
    * @param wordTranscript image panel that needs a URL pointing to an image generated on the server
    * @param phoneTranscript image panel that needs a URL pointing to an image generated on the server
-   * @param speechTranscript IGNORED HERE
    * @param toUse width of images made on serer
    * @param height of images returned
    * @param reqid so if many requests are made quickly and the returns are out of order, we can ignore older requests
    */
   protected void scoreAudio(final String path, String refAudio, String refSentence,
                             final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
-                            final ImageAndCheck speechTranscript, int toUse, int height, int reqid) {
+                            int toUse, int height, int reqid) {
     //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
     boolean wasVisible = wordTranscript.image.isVisible();
 
@@ -90,7 +89,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
         t.cancel();
 
         if (isMostRecentRequest("score", result.getReqid())) {
-          useResult(result, wordTranscript, phoneTranscript, speechTranscript, tested.contains(path));
+          useResult(result, wordTranscript, phoneTranscript, tested.contains(path));
           tested.add(path);
         } else {
           System.out.println("ignoring " + path + " with req " + result.getReqid());
