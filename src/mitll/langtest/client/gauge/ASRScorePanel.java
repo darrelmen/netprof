@@ -67,6 +67,8 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
 	public ASRScorePanel(){
+
+    addStyleName("leftFiveMargin");
     setWidth("200px");
     CaptionPanel chartCaptionPanel = new CaptionPanel("Exercise History");
 
