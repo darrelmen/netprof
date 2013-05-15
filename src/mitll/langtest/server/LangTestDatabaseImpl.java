@@ -190,17 +190,31 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     if (serverProps.isGoodwaveMode()) {
       List<ExerciseShell> exerciseShells = getExerciseShells(exercisesForSection);
-      Collections.sort(exerciseShells,new Comparator<ExerciseShell>() {
-        @Override
-        public int compare(ExerciseShell o1, ExerciseShell o2) {
-          return o1.getID().compareTo(o2.getID());
-        }
-      });
+      final boolean isInt = !exerciseShells.isEmpty() && exerciseShells.iterator().next().getID().matches("^[0-9]+$"); // returns true
+
+      sortByIDs(exerciseShells, isInt);
       return exerciseShells;
     } else {
       List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection, serverProps.shouldUseWeights());
       return getExerciseShells(exercisesBiasTowardsUnanswered);
     }
+  }
+
+  private void sortByIDs(List<ExerciseShell> exerciseShells, final boolean anInt) {
+    Collections.sort(exerciseShells, new Comparator<ExerciseShell>() {
+      @Override
+      public int compare(ExerciseShell o1, ExerciseShell o2) {
+        String id1 = o1.getID();
+        String id2 = o2.getID();
+        if (anInt) {
+          int i1 = Integer.parseInt(id1);
+          int i2 = Integer.parseInt(id2);
+          return i1 < i2 ? -1 : i1 > i2 ? +1 : 0;
+        } else {
+          return id1.compareTo(id2);
+        }
+      }
+    });
   }
 
   /**
