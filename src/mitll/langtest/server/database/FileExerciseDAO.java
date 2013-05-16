@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
  */
 public class FileExerciseDAO implements ExerciseDAO {
   public static final List<String> EMPTY_LIST = Collections.emptyList();
-  public static final int MAX = 51;
+  public static final int MAX = 12000;
   public static final double MIN_DUR = 0.2;
   private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
 
