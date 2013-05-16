@@ -280,9 +280,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     FluidRow headerRow = new FluidRow();
 
     Widget title = getTitleWidget();
-    Column titleColumn = new Column(props.isFlashcardTeacherView() ? 12 : 10, title);
+    boolean takeWholeWidth = props.isFlashcardTeacherView() || props.isShowSections();
+    Column titleColumn = new Column(takeWholeWidth ? 12 : 10, title);
     headerRow.add(titleColumn);
-    if (!props.isFlashcardTeacherView()) {
+    if (!takeWholeWidth) {
       headerRow.add(new Column(2, getLogout()));
     }
     else if (props.isAdminView()) {
