@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -72,16 +71,13 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @see mitll.langtest.client.exercise.WaveformExercisePanel.RecordAudioPanel#RecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int)
    * @see ScoringAudioPanel#ScoringAudioPanel
    * @param service
-   * @param useFullWidth
    * @param useKeyboard
    * @param gaugePanel
    */
-  public AudioPanel(String path, LangTestDatabaseAsync service, boolean useFullWidth,
+  public AudioPanel(String path, LangTestDatabaseAsync service,
                     boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
     this.soundManager = controller.getSoundManager();
     this.service = service;
-   // rightMarginToUse = useFullWidth ? RIGHT_MARGIN :  ASRScorePanel.X_CHART_SIZE+400;
-  //  System.out.println("use full width " + useFullWidth + " right margin " + rightMarginToUse);
     this.useKeyboard = useKeyboard;
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
