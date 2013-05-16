@@ -1017,7 +1017,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     String id = exercise.getID();
     float bestSlow = 0, bestFast = 0, bestTotal = 0;
     for (Result r : resultsForExercise) {
-      if (exercise != null) {
+    //  if (exercise != null) {
         File answer = new File(r.answer);
 
         String name = answer.getName().replaceAll(".wav", "");
@@ -1067,8 +1067,8 @@ public class FileExerciseDAO implements ExerciseDAO {
         } catch (IOException e) {
           e.printStackTrace();
         }
-      }
-      else logger.warn("couldn't find " + r.getID() + " exercise");
+     // }
+     // else logger.warn("couldn't find " + r.getID() + " exercise");
     }
     return best;
   }
