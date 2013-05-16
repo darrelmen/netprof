@@ -5,19 +5,25 @@ import audio.image.TranscriptReader;
 import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
 import corpus.HTKDictionary;
+import corpus.LTS;
+import corpus.ModernStandardArabicLTS;
 import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.Scores;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -106,7 +112,7 @@ public class SplitAudio {
     final Map<String, String> properties = getProperties(language, configDir);
     ASRScoring scoring = getAsrScoring(".",null,properties);
 
-
+    checkLTS(exercises, scoring.getLTS());
 
     final HTKDictionary dict = scoring.getDict();
 
@@ -146,6 +152,52 @@ public class SplitAudio {
     missingSlow.close();
     logger.info("closing missing slow");
     executorService.shutdown();
+  }
+
+  private void checkLTS(List<Exercise> exercises, LTS lts) {
+    try {
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("ltsIssues.txt"), FileExerciseDAO.ENCODING));
+
+      SmallVocabDecoder svd = new SmallVocabDecoder();
+      int errors = 0;
+      for (Exercise e : exercises) {
+        String id = e.getID();
+
+        if (checkLTS(Integer.parseInt(id), writer, svd, lts, e.getEnglishSentence(), e.getRefSentence())) errors++;
+      }
+
+      if (errors > 0) logger.error("found " + errors + " lts errors");
+      writer.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private boolean checkLTS(int id, BufferedWriter writer, SmallVocabDecoder svd, LTS lts, String english, String foreignLanguagePhrase) {
+    List<String> tokens = svd.getTokens(foreignLanguagePhrase);
+    boolean error = false;
+    try {
+
+      for (String token : tokens) {
+        String[][] process = lts.process(token);
+        if (process == null) {
+          String message = "couldn't do lts on exercise #" + (id - 1) + " token '" + token +
+            "' length " + token.length() + " trim '" + token.trim() +
+            "' " +
+            " '" + foreignLanguagePhrase + "' english = '" + english + "'";
+          logger.error(message);
+          //logger.error("\t tokens " + tokens + " num =  " + tokens.size());
+
+          writer.write(message);
+          writer.write("\n");
+          error = true;
+        }
+      }
+    } catch (Exception e) {
+      logger.error("couldn't do lts on " + (id - 1) + " " + foreignLanguagePhrase + " " + english);
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+    return error;
   }
 
   private Map<String, String> getProperties(String language, String configDir) throws IOException {
