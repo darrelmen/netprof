@@ -106,7 +106,7 @@ public class WaveformExercisePanel extends ExercisePanel {
      */
     public RecordAudioPanel(LangTestDatabaseAsync service, int index) {
       super(null, service,
-        false, // use full screen width
+        // use full screen width
         true, // use keyboard
         controller, null);
       this.index = index;
