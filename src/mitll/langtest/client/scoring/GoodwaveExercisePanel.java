@@ -248,7 +248,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    */
   private Widget getScoringAudioPanel(final Exercise e, String path) {
     if (path != null) {
-    path = wavToMP3(path);
+      path = wavToMP3(path);
     }
     ASRScoringAudioPanel audioPanel;
 
