@@ -21,6 +21,8 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -61,6 +63,8 @@ public class BootstrapExercisePanel extends FluidContainer {
   private static final int KEY_UP = 512;
   private static final int SPACE_CHAR = 32;
   private static final int HIDE_DELAY = 2500;
+  private static final String WAV = ".wav";
+  private static final String MP3 = ".mp3";
 
   private final AudioHelper audioHelper = new AudioHelper();
   private List<MyRecordButtonPanel> answerWidgets = new ArrayList<MyRecordButtonPanel>();
@@ -418,15 +422,16 @@ public class BootstrapExercisePanel extends FluidContainer {
      * @param outer ignored here
      */
     @Override
-    protected void receivedAudioAnswer(AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
+    protected void receivedAudioAnswer(final AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
       boolean correct = result.isCorrect();
-      double score = result.getScore();
+      final double score = result.getScore();
       System.out.println("answer correct = " + correct + " pron score : " + score);
 
       recordButton.setResource(correct ? correctImage : incorrectImage);
       recordButton.setHeight("112px");
 
-      boolean hasRefAudio = exercise.getRefAudio() != null;
+      String path = exercise.getRefAudio() != null ? exercise.getRefAudio() : exercise.getSlowAudioRef();
+      final boolean hasRefAudio = path != null;
 
       if (result.validity != AudioAnswer.Validity.OK) {
         showPopup(result.validity.getPrompt());
@@ -434,7 +439,22 @@ public class BootstrapExercisePanel extends FluidContainer {
       } else if (correct) {
         showCorrectFeedback(score);
       } else {   // incorrect!!
-        showIncorrectFeedback(result, score, hasRefAudio);
+        if (hasRefAudio) {
+            service.ensureMP3(path, new AsyncCallback<Void>() {
+              @Override
+              public void onFailure(Throwable caught) {
+                Window.alert("Couldn't contact server (ensureMP3).");
+              }
+
+              @Override
+              public void onSuccess(Void result2) {
+                showIncorrectFeedback(result, score, hasRefAudio);
+              }
+            });
+        }
+        else {
+          showIncorrectFeedback(result, score, hasRefAudio);
+        }
       }
       if (correct || !hasRefAudio) {
         nextAfterDelay(correct);
@@ -463,7 +483,9 @@ public class BootstrapExercisePanel extends FluidContainer {
       showPronScoreFeedback(score);
 
       if (hasRefAudio) {
-        audioHelper.play(exercise.getRefAudio());
+        String path = exercise.getRefAudio();
+        path= (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
+        audioHelper.play(path);
       } else {
         audioHelper.playIncorrect();
       }
