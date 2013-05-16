@@ -75,10 +75,11 @@ public class ExcelImport implements ExerciseDAO {
     this.isFlashcard = isFlashcard;
     this.mediaDir = mediaDir;
     this.isRTL = isRTL;
-    this.relativeConfigDir = relativeConfigDir;
+//    this.relativeConfigDir = relativeConfigDir;
     getMissing(relativeConfigDir,"missingSlow.txt",missingSlowSet);
     getMissing(relativeConfigDir,"missingFast.txt",missingFastSet);
-    logger.debug("media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());
+    logger.debug("config " + relativeConfigDir +
+      " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());
   }
 
   private void getMissing(String relativeConfigDir,String file, Set<Integer> missing) {
@@ -97,6 +98,9 @@ public class ExcelImport implements ExerciseDAO {
         logger.error("Reading " + missingSlow.getAbsolutePath() + " Got  " + e, e);
       }
 
+    }
+    else {
+      logger.debug("Can't find " + file);
     }
   }
 
