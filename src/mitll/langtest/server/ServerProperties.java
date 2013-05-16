@@ -61,6 +61,7 @@ public class ServerProperties {
   private static final String MIN_PRON_SCORE_DEFAULT = "0.20";
   private static final String RTL = "rtl";
   private static final String GOODWAVE_MODE = "goodwaveMode";
+  private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
 
   private Properties props = null;
 
@@ -175,6 +176,10 @@ public class ServerProperties {
 
   public boolean isGoodwaveMode() {
     return !props.getProperty(GOODWAVE_MODE, "false").equals("false");
+  }
+
+  public boolean isFlashcardTeacherView() {
+    return !props.getProperty(FLASHCARD_TEACHER_VIEW, "false").equals("false");
   }
 
   public boolean shouldUseWeights() {
