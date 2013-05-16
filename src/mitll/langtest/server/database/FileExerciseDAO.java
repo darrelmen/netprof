@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
  */
 public class FileExerciseDAO implements ExerciseDAO {
   public static final List<String> EMPTY_LIST = Collections.emptyList();
-  public static final int MAX = 12000;
+  public static final int MAX = 2;// 12000;
   public static final double MIN_DUR = 0.2;
   private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
 
@@ -856,23 +856,26 @@ public class FileExerciseDAO implements ExerciseDAO {
   /**
    * Go through all exercise, find all results for each, take best scoring audio file from results
    * @param numThreads
+   * @param audioDir
    */
   // TODO later take data and use database so we keep metadata about audio
-  private void convertExamples(int numThreads) throws Exception{
+  private void convertExamples(int numThreads, String audioDir, String language,String spreadsheet) throws Exception{
     String installPath = ".";
+    //String language = "dari";
     String dariConfig = File.separator +
       "war" +
       File.separator +
       "config" +
       File.separator +
-      "dari" +
+      language +
       File.separator;
     final String configDir = installPath + dariConfig;
+ //   String spreadsheet = "9000-dari-course-examples.xlsx";
     DatabaseImpl db = new DatabaseImpl(
       configDir,
       "template",
       configDir+
-        "9000-dari-course-examples.xlsx");
+        spreadsheet);
 
     List<Result> results = db.getResults();
 
@@ -902,12 +905,11 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
     logger.debug("Got " + exercises.size() + " exercises");// and " + idToResults);
 
-    final File newRefDir = new File(configDir +
-      "refAudio");
+    final String placeToPutAudio = ".."+File.separator+audioDir + File.separator;
+    final File newRefDir = new File(placeToPutAudio + "refAudio");
     newRefDir.mkdir();
 
-    final File bestDir = new File(configDir +
-      "bestAudio");
+    final File bestDir = new File(placeToPutAudio + "bestAudio");
     bestDir.mkdir();
 
     ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
@@ -924,7 +926,7 @@ public class FileExerciseDAO implements ExerciseDAO {
         public void run() {
           try {
             getBestForEachExercise(idToEx, missingSlow, missingFast,
-              newRefDir, bestDir, pair,configDir,dict);
+              newRefDir, bestDir, pair,placeToPutAudio,dict);
           } catch (IOException e) {
             logger.error("Doing " + pair.getKey() + " and " + pair.getValue() +
               " Got " + e, e);
@@ -966,8 +968,9 @@ public class FileExerciseDAO implements ExerciseDAO {
     return dictionary == null ? new ASRScoring(deployPath, properties) : new ASRScoring(deployPath, properties, dictionary);
   }
 
-  private void getBestForEachExercise(Map<String, Exercise> idToEx, FileWriter missingSlow, FileWriter missingFast,// ASRScoring scoring,
-                                      File newRefDir, File bestDir, Map.Entry<String, List<Result>> pair,String configDir, HTKDictionary dictionary ) throws IOException {
+  private void getBestForEachExercise(Map<String, Exercise> idToEx, FileWriter missingSlow, FileWriter missingFast,
+                                      File newRefDir, File bestDir, Map.Entry<String, List<Result>> pair,
+                                      String collectedAudioDir, HTKDictionary dictionary) throws IOException {
     List<Result> resultsForExercise = pair.getValue();
 
     String exid = resultsForExercise.iterator().next().id;
@@ -992,7 +995,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     logger.debug("making dir " + key + " at " + bestDirForExercise.getAbsolutePath());
     bestDirForExercise.mkdir();
     final ASRScoring scoring = getAsrScoring(".",dictionary);
-    String best = getBestFilesFromResults(scoring, resultsForExercise, exercise, refSentence, firstToken, lastToken,refLength, refDirForExercise,configDir);
+    String best = getBestFilesFromResults(scoring, resultsForExercise, exercise, refSentence, firstToken, lastToken,refLength, refDirForExercise,collectedAudioDir);
 
     if (best != null) {
       logger.debug("best is " + best);// + " total " + bestTotal);
@@ -1012,7 +1015,7 @@ public class FileExerciseDAO implements ExerciseDAO {
 
   private String getBestFilesFromResults(ASRScoring scoring, List<Result> resultsForExercise,
                                          Exercise exercise, String refSentence,String first,String last, int refLength,
-                                         File refDirForExercise,String configDir ) {
+                                         File refDirForExercise,String collectedAudioDir ) {
     String best = null;
     String id = exercise.getID();
     float bestSlow = 0, bestFast = 0, bestTotal = 0;
@@ -1022,8 +1025,8 @@ public class FileExerciseDAO implements ExerciseDAO {
 
         String name = answer.getName().replaceAll(".wav", "");
         String parent = answer.getParent();
-        parent = configDir +
-          "examples" +
+        parent = collectedAudioDir +
+       //   "examples" +
           File.separator + parent;
 
         double durationInSeconds = getDuration(answer, parent);
@@ -1222,6 +1225,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     public float getEnd2() {
       return end2;
     }
+/*
 
     public float getFastScore() {
       return fastScore;
@@ -1230,6 +1234,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     public float getSlowScore() {
       return slowScore;
     }
+*/
 
     public GetAlignments invoke() throws IOException {
       SortedMap<Float,TranscriptEvent> timeToEvent = new TranscriptReader().readEventsFromFile(wordLabFile);
@@ -1300,10 +1305,10 @@ public class FileExerciseDAO implements ExerciseDAO {
      // "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2";
       //String installPath = arg[0];
       int numThreads = Integer.parseInt(arg[0]);
-
+      String audioDir = arg[1];
 
         ;
-      new FileExerciseDAO(false).convertExamples(numThreads);
+      new FileExerciseDAO(false).convertExamples(numThreads, audioDir, arg[2],arg[3]);
     } catch (Exception e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
