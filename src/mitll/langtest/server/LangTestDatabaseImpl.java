@@ -180,18 +180,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public List<ExerciseShell> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection, long userID) {
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     if (serverProps.isGoodwaveMode()) {
-//      final boolean isInt = !exerciseShells.isEmpty() && exerciseShells.iterator().next().getID().matches("^[0-9]+$"); // returns true
-      List<Exercise> copy = new ArrayList<Exercise>(exercisesForSection);
-      sortByIDs(copy/*, isInt*/);
-      List<ExerciseShell> exerciseShells = getExerciseShells(copy);
-      return exerciseShells;
+      List<Exercise> copy = getSortedExercises(exercisesForSection);
+      return getExerciseShells(copy);
     } else {
       List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection, serverProps.shouldUseWeights());
       return getExerciseShells(exercisesBiasTowardsUnanswered);
     }
   }
 
-  private void sortByIDs(List<Exercise> exerciseShells/*, final boolean anInt*/) {
+  private List<Exercise> getSortedExercises(Collection<Exercise> exercisesForSection) {
+    List<Exercise> copy = new ArrayList<Exercise>(exercisesForSection);
+    sortByIDs(copy);
+    return copy;
+  }
+
+  private void sortByIDs(List<Exercise> exerciseShells) {
     Collections.sort(exerciseShells, new Comparator<ExerciseShell>() {
       @Override
       public int compare(ExerciseShell o1, ExerciseShell o2) {
@@ -217,13 +220,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       if (typeToSection.isEmpty()) {
        // logger.debug("getFullExercisesForSelectionState empty type->section");
-
-        exercises = db.getExercises();
+        exercises = getSortedExercises(db.getExercises());
       } else {
         logger.debug("getFullExercisesForSelectionState non-empty type->section "+ typeToSection+ " start " + start + " end " + end);
 
         Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-        exercises = new ArrayList<Exercise>(exercisesForSection);
+        exercises = getSortedExercises(exercisesForSection);
       }
       logger.debug("getFullExercisesForSelectionState exercises "+ exercises.size() + " start " + start + " end " + end);
 
