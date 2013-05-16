@@ -55,6 +55,7 @@ import java.util.regex.Pattern;
 public class FileExerciseDAO implements ExerciseDAO {
   public static final List<String> EMPTY_LIST = Collections.emptyList();
   public static final int MAX = 51;
+  public static final double MIN_DUR = 0.2;
   private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
 
   public static final String ENCODING = "UTF8";
@@ -1026,7 +1027,7 @@ public class FileExerciseDAO implements ExerciseDAO {
           File.separator + parent;
 
         double durationInSeconds = getDuration(answer, parent);
-        if (durationInSeconds < 0.5) {
+        if (durationInSeconds < MIN_DUR) {
           logger.warn("skipping " + name + " since it's less than a 1/2 second long.");
           continue;
         }
@@ -1153,26 +1154,36 @@ public class FileExerciseDAO implements ExerciseDAO {
     String binPath = AudioConversion.WINDOWS_SOX_BIN_DIR;
     if (! new File(binPath).exists()) binPath = AudioConversion.LINUX_SOX_BIN_DIR;
     String sox = audioConverter.getSox(binPath);
-    if (d1 < 1) {
+    if (d1 < MIN_DUR) {
       logger.warn("Skipping audio " + longFileFile.getName() + " since fast audio too short ");
     } else {
 
+      File fast = new File(refDirForExercise, testAudioFileNoSuffix + "_" + FAST + ".wav");
       audioConverter.trim(sox,
         longFileFile.getAbsolutePath(),
-        new File(refDirForExercise, testAudioFileNoSuffix + "_" + FAST + ".wav").getAbsolutePath(),
+        fast.getAbsolutePath(),
         s1,
         d1);
+
+      if (new AudioCheck().getDurationInSeconds(fast)< MIN_DUR) {
+        fast.delete();
+      }
     }
 
-    if (d2 < 1) {
+    if (d2 < MIN_DUR) {
       logger.warn("Skipping audio " + longFileFile.getName() + " since slow audio too short ");
 
     } else {
+      File slow = new File(refDirForExercise, testAudioFileNoSuffix + "_" + SLOW + ".wav");
       audioConverter.trim(sox,
         longFileFile.getAbsolutePath(),
-        new File(refDirForExercise, testAudioFileNoSuffix + "_" + SLOW + ".wav").getAbsolutePath(),
+        slow.getAbsolutePath(),
         s2,
         d2);
+
+      if (new AudioCheck().getDurationInSeconds(slow)< MIN_DUR) {
+        slow.delete();
+      }
     }
   }
 
