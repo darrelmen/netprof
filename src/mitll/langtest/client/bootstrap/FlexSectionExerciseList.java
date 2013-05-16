@@ -925,9 +925,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       this.type = type;
     }
 
-    public void addChild(ButtonWithChildren b) {
+/*    public void addChild(ButtonWithChildren b) {
       children.add(b);
-    }
+    }*/
 
     public void setChildren(List<ButtonWithChildren> children) {
       this.children = children;
