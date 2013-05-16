@@ -284,7 +284,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param width
    * @param imageAndCheck
    */
-  private void getImageURLForAudio(String path, final String type,int width, final ImageAndCheck imageAndCheck) {
+  private void getImageURLForAudio(final String path, final String type,int width, final ImageAndCheck imageAndCheck) {
     int toUse = Math.max(MIN_WIDTH, width);
     float heightForType = type.equals(WAVEFORM) ? WAVEFORM_HEIGHT : SPECTROGRAM_HEIGHT;
     int height = Math.max(10,(int) (((float)Window.getClientHeight())/1200f * heightForType));
@@ -305,6 +305,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
           if (!result.successful) {
             System.err.println("got error for request for type " + type);
+            Window.alert("missing audio file on server " + path);
           }
           else if (isMostRecentRequest(type,result.req)) {
             imageAndCheck.image.setUrl(result.imageURL);

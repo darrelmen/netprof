@@ -137,6 +137,7 @@ public class ASRScoring extends Scoring {
     this.htkDictionary = dict;
   }
 
+  public LTS getLTS() { return letterToSoundClass; }
 
 /*  private Set<String> wordsInDict = new HashSet<String>();
   private void readDict() {
