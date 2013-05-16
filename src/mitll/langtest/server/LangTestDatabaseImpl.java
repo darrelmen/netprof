@@ -168,15 +168,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return ids;
   }
 
-/*  @Override
-  public Map<String, Collection<String>> getTypeToSection() { return db.getSectionHelper().getTypeToSection(); }*/
-/*  @Override
-  public List<ExerciseShell> getExercisesForSection(String type, String section, long userID) {
-    Collection<Exercise> exercisesForSection = db.getExercisesForSection(type, section);
-    List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection);
-    return getExerciseShells(exercisesBiasTowardsUnanswered);
-  }*/
-
   /**
    * Don't randomize order if we're in netProF (formerly goodwave) mode.
    *
@@ -189,10 +180,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public List<ExerciseShell> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection, long userID) {
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     if (serverProps.isGoodwaveMode()) {
-      List<ExerciseShell> exerciseShells = getExerciseShells(exercisesForSection);
-      final boolean isInt = !exerciseShells.isEmpty() && exerciseShells.iterator().next().getID().matches("^[0-9]+$"); // returns true
-
-      sortByIDs(exerciseShells, isInt);
+//      final boolean isInt = !exerciseShells.isEmpty() && exerciseShells.iterator().next().getID().matches("^[0-9]+$"); // returns true
+      List<Exercise> copy = new ArrayList<Exercise>(exercisesForSection);
+      sortByIDs(copy/*, isInt*/);
+      List<ExerciseShell> exerciseShells = getExerciseShells(copy);
       return exerciseShells;
     } else {
       List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection, serverProps.shouldUseWeights());
@@ -200,19 +191,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  private void sortByIDs(List<ExerciseShell> exerciseShells, final boolean anInt) {
+  private void sortByIDs(List<Exercise> exerciseShells/*, final boolean anInt*/) {
     Collections.sort(exerciseShells, new Comparator<ExerciseShell>() {
       @Override
       public int compare(ExerciseShell o1, ExerciseShell o2) {
-        String id1 = o1.getID();
-        String id2 = o2.getID();
-        if (anInt) {
-          int i1 = Integer.parseInt(id1);
-          int i2 = Integer.parseInt(id2);
-          return i1 < i2 ? -1 : i1 > i2 ? +1 : 0;
-        } else {
-          return id1.compareTo(id2);
-        }
+        String id1 = o1.getTooltip();
+        String id2 = o2.getTooltip();
+          return id1.toLowerCase().compareTo(id2.toLowerCase());
       }
     });
   }
