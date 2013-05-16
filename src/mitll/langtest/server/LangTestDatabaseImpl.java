@@ -155,6 +155,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public List<ExerciseShell> getExerciseIds(long userID) {
     logger.debug("getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
     List<Exercise> exercises = getExercises(userID);
+    if (serverProps.isGoodwaveMode()) exercises = getSortedExercises(exercises);
     List<ExerciseShell> ids = getExerciseShells(exercises);
     logMemory();
     return ids;
@@ -178,11 +179,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public List<ExerciseShell> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection, long userID) {
+
+    logger.debug("getExercisesForSelectionState for " + typeToSection + " and " +userID);
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-    if (serverProps.isGoodwaveMode()) {
+    if (serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
+
+      logger.debug("\tsorting");
+
       List<Exercise> copy = getSortedExercises(exercisesForSection);
       return getExerciseShells(copy);
     } else {
+      logger.debug("\t *not* sorting");
+
       List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection, serverProps.shouldUseWeights());
       return getExerciseShells(exercisesBiasTowardsUnanswered);
     }
@@ -580,7 +588,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     ImageWriter imageWriter = new ImageWriter();
 
     String wavAudioFile = getWavAudioFile(audioFile);
-
+    if (!new File(wavAudioFile).exists()) {
+      return new ImageResponse();
+    }
     ImageType imageType1 =
         imageType.equalsIgnoreCase(ImageType.WAVEFORM.toString()) ? ImageType.WAVEFORM :
             imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM : null;
@@ -759,6 +769,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     assert(testAudioFile != null && sentence != null);
     makeASRScoring();
     testAudioFile = dealWithMP3Audio(testAudioFile);
+    if (!new File(testAudioFile).exists()) return new PretestScore();
 
     String installPath = getInstallPath();
 
@@ -792,7 +803,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see #getScoreForAudioFile
+   * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean)
    * @param testAudioFile
    * @return
    */
