@@ -39,7 +39,8 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingExerciseList extends ExerciseList implements RequiresResize {
-  protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
+  private static final int MAX_LENGTH_ID = 27;
+protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
   private ListDataProvider<ExerciseShell> dataProvider;
   private static final boolean DEBUG = false;
   private static final int ID_LINE_WRAP_LENGTH = 20;
@@ -121,7 +122,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   protected void addColumnsToTable() {
     Column<ExerciseShell, SafeHtml> id2 = getExerciseIdColumn();
-
+    id2.setCellStyleNames("alignLeft");
     table.addColumn(id2);
   }
 
@@ -137,7 +138,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
       }) {
         @Override
         public SafeHtml getValue(ExerciseShell object) {
-          return getColumnToolTip(object.getID(), object.getTooltip());
+          return getColumnToolTip(object.getTooltip(), object.getTooltip());
         }
 
         @Override
@@ -152,12 +153,10 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
               gotClickOnItem(e);
             }
           }
- /*         else if (BrowserEvents.MOUSEOVER.equals(event.getType())) {
-            System.out.println("got mouseover on " + object.getID());
-          }*/
         }
 
         private SafeHtml getColumnToolTip(String columnText, String toolTipText) {
+          if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0,MAX_LENGTH_ID-3)+"...";
           String htmlConstant = "<html>" + "<head><style>" +
               "span.tip { TEXT-DECORATION: none; color:#1776B3}" +
               "A.tip:hover  {CURSOR:default;}" +

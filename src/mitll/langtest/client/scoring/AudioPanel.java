@@ -48,6 +48,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected static final String SPECTROGRAM = "Spectrogram";
   public static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence" +
     " and speech occur, or whether the mic is working properly.";
+  public static final int IMAGE_WIDTH_SLOP = 80;
   private final ScoreListener gaugePanel;
   protected String audioPath;
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
@@ -253,7 +254,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @see #onResize()
    */
   private void getImages() {
-    int leftColumnWidth = Math.min(175,controller.getLeftColumnWidth()) + 50;
+    int leftColumnWidth = Math.min(175,controller.getLeftColumnWidth()) + IMAGE_WIDTH_SLOP;
     //int rightMargin = screenPortion == 1.0f ? leftColumnWidth : (int)(screenPortion*((float)rightMarginToUse));
     int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : 0;
     int width = (int) ((screenPortion*((float)Window.getClientWidth())) - leftColumnWidth) - rightSide;
