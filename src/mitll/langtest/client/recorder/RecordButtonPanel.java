@@ -37,7 +37,7 @@ public class RecordButtonPanel {
   protected final Image recordImage;
   protected final Image stopImage;
   protected ImageAnchor recordButton;
-  private LangTestDatabaseAsync service;
+  protected LangTestDatabaseAsync service;
   protected ExerciseController controller;
   private Exercise exercise;
   private ExerciseQuestionState questionState;
