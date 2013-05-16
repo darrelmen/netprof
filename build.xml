@@ -280,7 +280,7 @@
 
     <target depends="build" name="netProFDari">
         <jar destfile="netProFDari.war" basedir="war"
-             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dari/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-dari/**"
+             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dari/bestAudio/**,config/dari/*dari*,,config/dari/missing*,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-dari/**"
                 >
 
             <manifest>
@@ -379,7 +379,11 @@
             <arg line="-war"/>
             <arg value="war"/>
             <arg line="-style"/>
+<!--
             <arg value="OBF"/>
+-->
+            <arg value="PRETTY"/>
+
             <arg value="-compileReport"/>
 
 
