@@ -76,6 +76,7 @@ public class DatabaseImpl implements Database {
   private String language;
   private boolean doImages;
   private final String configDir;
+  private final String absConfigDir;
   private String mediaDir;
   private boolean isRTL;
 
@@ -103,6 +104,7 @@ public class DatabaseImpl implements Database {
   public DatabaseImpl(String configDir, String dbName, boolean showSections, boolean isWordPairs,
                       String language, boolean doImages, String relativeConfigDir, boolean isFlashcard) {
     connection = new H2Connection(configDir, dbName);
+    absConfigDir = configDir;
     this.showSections = showSections;
     this.isWordPairs = isWordPairs;
     this.doImages = doImages;
@@ -255,7 +257,8 @@ public class DatabaseImpl implements Database {
   private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel, String mediaDir, boolean isRTL) {
     if (exerciseDAO == null) {
       if (useFile && excel) {
-        this.exerciseDAO = new ExcelImport(lessonPlanFile, isFlashcard, mediaDir, isRTL, relativeConfigDir);
+        logger.info("absConfigDir dir is " +absConfigDir);
+        this.exerciseDAO = new ExcelImport(lessonPlanFile, isFlashcard, mediaDir, isRTL, absConfigDir);
       }
       else {
         this.exerciseDAO = makeExerciseDAO(useFile);
