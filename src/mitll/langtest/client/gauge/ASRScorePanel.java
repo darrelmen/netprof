@@ -173,6 +173,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     options.setColors(colors);
 
     AxisOptions options1 = AxisOptions.create();
+    options1.setMinValue(0);
     options1.setMaxValue(100);
     options1.setTextPosition("none");
     options.setVAxisOptions(options1);
