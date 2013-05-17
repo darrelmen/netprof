@@ -6,7 +6,6 @@ import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
 import corpus.HTKDictionary;
 import corpus.LTS;
-import corpus.ModernStandardArabicLTS;
 import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.server.scoring.ASRScoring;
@@ -45,7 +44,7 @@ public class SplitAudio {
   private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
 
   private boolean debug;
-  private static final int MAX = 20;// 12000;
+  private static final int MAX = 12000;
   private static final double MIN_DUR = 0.2;
   private static final String FAST = "Fast";
   private static final String SLOW = "Slow";
