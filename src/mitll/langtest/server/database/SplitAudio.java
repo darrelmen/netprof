@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.SortedMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -65,7 +66,6 @@ public class SplitAudio {
   // TODO later take data and use database so we keep metadata about audio
   private void convertExamples(int numThreads, String audioDir, String language,String spreadsheet) throws Exception{
     String installPath = ".";
-    //String language = "dari";
     String dariConfig = File.separator +
       "war" +
       File.separator +
@@ -74,47 +74,65 @@ public class SplitAudio {
       language +
       File.separator;
     final String configDir = installPath + dariConfig;
-    //   String spreadsheet = "9000-dari-course-examples.xlsx";
     DatabaseImpl db = new DatabaseImpl(
       configDir,
       "template",
       configDir+
         spreadsheet);
 
-
     final Map<String,Exercise> idToEx = new HashMap<String, Exercise>();
-
-    final FileWriter missingSlow = new FileWriter(configDir +
-      "missingSlow.txt");
-
-    final FileWriter missingFast = new FileWriter(configDir +
-      "missingFast.txt");
+    final FileWriter missingSlow = new FileWriter(configDir + "missingSlow.txt");
+    final FileWriter missingFast = new FileWriter(configDir + "missingFast.txt");
 
     List<Exercise> exercises = db.getExercises();
+    logger.debug("Got " + exercises.size() + " exercises");
     for (Exercise e: exercises) idToEx.put(e.getID(),e);
 
-
     Map<String, List<Result>> idToResults = getIDToResultsMap(db);
-    logger.debug("Got " + exercises.size() + " exercises");// and " + idToResults);
+    for (String exid : idToEx.keySet()) {
+      String resultID = exid + "/0";
+      if (!idToResults.containsKey(resultID)) {
+        idToResults.put(resultID, new ArrayList<Result>());
+      }
+    }
+    if (exercises.size() != idToResults.size()) logger.error("\n\n\nhuh? id->results map size " + idToResults.size());
 
     final String placeToPutAudio = ".."+File.separator+audioDir + File.separator;
     final File newRefDir = new File(placeToPutAudio + "refAudio");
     newRefDir.mkdir();
-
     final File bestDir = new File(placeToPutAudio + "bestAudio");
     bestDir.mkdir();
 
-    ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
-
-    int count = 0;
 
     final Map<String, String> properties = getProperties(language, configDir);
     ASRScoring scoring = getAsrScoring(".",null,properties);
 
-    checkLTS(exercises, scoring.getLTS());
+//    checkLTS(exercises, scoring.getLTS());
 
     final HTKDictionary dict = scoring.getDict();
 
+    ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
+    List<Future<?>> futures = getSplitAudioFutures(idToEx, missingSlow, missingFast, idToResults, placeToPutAudio,
+      newRefDir, bestDir,
+      properties, dict, executorService);
+
+    blockUntilComplete(futures);
+
+    missingFast.close();
+    missingSlow.close();
+    logger.info("closing missing slow");
+    executorService.shutdown();
+  }
+
+  private void blockUntilComplete(List<Future<?>> futures) throws InterruptedException, ExecutionException {
+    logger.info("got " +futures.size() + " futures");
+    for (Future<?> future : futures) {
+      Object o = future.get();
+    }
+    logger.info("all " +futures.size() + " futures complete");
+  }
+
+  private List<Future<?>> getSplitAudioFutures(final Map<String, Exercise> idToEx, final FileWriter missingSlow, final FileWriter missingFast, Map<String, List<Result>> idToResults, final String placeToPutAudio, final File newRefDir, final File bestDir, final Map<String, String> properties, final HTKDictionary dict, ExecutorService executorService) {
     List<Future<?>> futures = new ArrayList<Future<?>>();
     for (final Map.Entry<String, List<Result>> pair : idToResults.entrySet()) {
       Future<?> submit = executorService.submit(new Runnable() {
@@ -131,26 +149,7 @@ public class SplitAudio {
       });
       futures.add(submit);
     }
-
-    logger.info("got " +futures.size() + " futures");
-    count = 0;
-    for (Future<?> future : futures) {
-      // logger.info("get on " + future);
-      Object o = future.get();
-      // logger.info("unblock on " + future);
-
-      count++;
-      System.out.print(".");if (count % 30 == 0) System.out.println();
-    }
-
-    logger.info("all " +futures.size() + " futures complete");
-
-    missingFast.close();
-    //logger.info("closing missing fast");
-
-    missingSlow.close();
-    logger.info("closing missing slow");
-    executorService.shutdown();
+    return futures;
   }
 
   private void checkLTS(List<Exercise> exercises, LTS lts) {
@@ -253,14 +252,14 @@ public class SplitAudio {
                                       File newRefDir, File bestDir, Map.Entry<String, List<Result>> pair,
                                       String collectedAudioDir, HTKDictionary dictionary,Map<String, String> properties) throws IOException {
     List<Result> resultsForExercise = pair.getValue();
-
+    if (resultsForExercise.isEmpty()) return;
     String exid = resultsForExercise.iterator().next().id;
     Exercise exercise = idToEx.get(exid);
-    //StringBuilder builder = new StringBuilder();
-    //  for (String s : exercise.getRefSentences()) {builder.append(s).append(" ");}
+
     String refSentence = exercise.getRefSentence();
     refSentence = refSentence.replaceAll("\\p{P}", "");
-    String[] split = refSentence.split("\\p{Z}+");
+    String[] split = refSentence.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
+    refSentence = getRefSentence(split);
     int refLength = split.length;
     String firstToken = split[0].trim();
     String lastToken = split[refLength-1].trim();
@@ -269,14 +268,16 @@ public class SplitAudio {
     File refDirForExercise = new File(newRefDir, exid);
     String key = pair.getKey();
     if (key.equals(exid)) logger.error("huh?> not the same " + key + "  and " + exid);
-    logger.debug("making dir " + key + " at " + refDirForExercise.getAbsolutePath());
+    //logger.debug("making dir " + key + " at " + refDirForExercise.getAbsolutePath());
     refDirForExercise.mkdir();
 
     File bestDirForExercise = new File(bestDir, exid);
     logger.debug("making dir " + key + " at " + bestDirForExercise.getAbsolutePath());
     bestDirForExercise.mkdir();
     final ASRScoring scoring = getAsrScoring(".",dictionary,properties);
-    String best = getBestFilesFromResults(scoring, resultsForExercise, exercise, refSentence, firstToken, lastToken,refLength, refDirForExercise,collectedAudioDir);
+    String best = getBestFilesFromResults(scoring, resultsForExercise, exercise, refSentence,
+      firstToken, lastToken,
+      refLength, refDirForExercise,collectedAudioDir);
 
     if (best != null) {
       logger.debug("best is " + best);// + " total " + bestTotal);
@@ -287,15 +288,39 @@ public class SplitAudio {
 
       synchronized (missingFast) {
         missingFast.write(exid + "\n");
+        missingFast.flush();
       }
       synchronized (missingSlow) {
         missingSlow.write(exid + "\n");
+        missingSlow.flush();
       }
     }
   }
 
+  private String getRefSentence(String[] refSentences) {
+    StringBuilder builder = new StringBuilder();
+    for (String s : refSentences) {
+      builder.append(s).append(" ");
+    }
+    return builder.toString();
+  }
+
+  /**
+   * Run alignment and split the audio.
+   * @param scoring
+   * @param resultsForExercise
+   * @param exercise
+   * @param refSentence
+   * @param first
+   * @param last
+   * @param refLength
+   * @param refDirForExercise
+   * @param collectedAudioDir
+   * @return
+   */
   private String getBestFilesFromResults(ASRScoring scoring, List<Result> resultsForExercise,
-                                         Exercise exercise, String refSentence,String first,String last, int refLength,
+                                         Exercise exercise, String refSentence,
+                                         String first, String last, int refLength,
                                          File refDirForExercise,String collectedAudioDir ) {
     String best = null;
     String id = exercise.getID();
@@ -303,12 +328,8 @@ public class SplitAudio {
     for (Result r : resultsForExercise) {
       //  if (exercise != null) {
       File answer = new File(r.answer);
-
       String name = answer.getName().replaceAll(".wav", "");
-      String parent = answer.getParent();
-      parent = collectedAudioDir +
-        //   "examples" +
-        File.separator + parent;
+      String parent = collectedAudioDir + File.separator + answer.getParent();
 
       double durationInSeconds = getDuration(answer, parent);
       if (durationInSeconds < MIN_DUR) {
@@ -323,7 +344,7 @@ public class SplitAudio {
       //  logger.debug("\tgot " + align + " for " + name);
       float hydecScore = align.hydecScore;
 
-      String wordLabFile   = prependDeploy(parent,testAudioFileNoSuffix + ".words.lab");
+      String wordLabFile = prependDeploy(parent,testAudioFileNoSuffix + ".words.lab");
       try {
         GetAlignments getAlignments = new GetAlignments(first,last, refLength, name, wordLabFile).invoke();
    /*       float fastScore = getAlignments.getFastScore();
