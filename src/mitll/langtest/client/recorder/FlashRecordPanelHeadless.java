@@ -6,6 +6,7 @@ package mitll.langtest.client.recorder;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -41,6 +42,17 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     add(flashContent);
     hide();
   }
+
+  public native boolean checkIfFlashInstalled() /*-{
+      var hasFlash = false;
+      try {
+          var fo = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+          if(fo) hasFlash = true;
+      }catch(e){
+          if(navigator.mimeTypes ["application/x-shockwave-flash"] != undefined) hasFlash = true;
+      }
+      return hasFlash;
+  }-*/;
 
   public void show() {
     setSize(WIDTH + "px", HEIGHT + "px");
@@ -101,6 +113,9 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
       micPermission.gotPermission();
     }
     else {
+      if (!checkIfFlashInstalled()) {
+        Window.alert("Flash player must be installed to record audio.");
+      }
       installFlash(GWT.getModuleBaseURL(), id);
     }
   }
