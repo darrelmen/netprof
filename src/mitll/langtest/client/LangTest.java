@@ -377,6 +377,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     modeSelect();
   }
 
+
+
   private void showTimedGameHelp() {
     TimedGame timedGame = new TimedGame(this);
     timedGame.showTimedGameHelp(props);
