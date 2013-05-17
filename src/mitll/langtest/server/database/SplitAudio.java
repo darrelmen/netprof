@@ -89,13 +89,16 @@ public class SplitAudio {
     for (Exercise e: exercises) idToEx.put(e.getID(),e);
 
     Map<String, List<Result>> idToResults = getIDToResultsMap(db);
-    for (String exid : idToEx.keySet()) {
-      String resultID = exid + "/0";
-      if (!idToResults.containsKey(resultID)) {
-        idToResults.put(resultID, new ArrayList<Result>());
+
+    if (true) {
+      for (String exid : idToEx.keySet()) {
+        String resultID = exid + "/0";
+        if (!idToResults.containsKey(resultID)) {
+          idToResults.put(resultID, new ArrayList<Result>());
+        }
       }
+      if (exercises.size() != idToResults.size()) logger.error("\n\n\nhuh? id->results map size " + idToResults.size());
     }
-    if (exercises.size() != idToResults.size()) logger.error("\n\n\nhuh? id->results map size " + idToResults.size());
 
     final String placeToPutAudio = ".."+File.separator+audioDir + File.separator;
     final File newRefDir = new File(placeToPutAudio + "refAudio");
@@ -213,7 +216,7 @@ public class SplitAudio {
     for (Result r : results) {
       String id = r.id;
       int i = Integer.parseInt(id);
-      if (i < MAX// && i == 927
+      if (i < MAX // && i == 335
         ) {
         List<Result> resultList = idToResults.get(r.getID());
         if (resultList == null) {
