@@ -76,8 +76,11 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   @Override
   protected void onUnload() {
     super.onUnload();
+
+    doPause();
     destroySound();
-    //System.out.println("doing unload of play ------------------> ");
+    if (listener != null) listener.reinitialize();    // remove playing line, if it's there
+    System.out.println("doing unload of play ------------------> ");
 
     if (keyHandler != null) keyHandler.removeHandler();
   }
