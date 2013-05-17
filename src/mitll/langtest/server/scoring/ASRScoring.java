@@ -133,7 +133,7 @@ public class ASRScoring extends Scoring {
     } else {
       logger.error("huh? unsupported language " + language);
     }
-    logger.info("using LTS " + letterToSoundClass.getClass());
+  //  logger.info("using LTS " + letterToSoundClass.getClass());
     this.htkDictionary = dict;
   }
 
