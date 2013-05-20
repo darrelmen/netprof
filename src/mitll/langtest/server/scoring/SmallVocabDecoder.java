@@ -191,11 +191,12 @@ public class SmallVocabDecoder {
     List<String> simpleVocab = getSimpleVocab(background, vocabSizeLimit);
     all.addAll(simpleVocab);
 
-    String sentence = background.iterator().next();
-
-    logger.debug("num sentences " + background.size()+
-      " first is " + sentence + " length " + sentence.length() +" got " + simpleVocab.size() + " tokens : '" + simpleVocab +
-      "'");
+    if (false) {
+      String sentence = background.iterator().next();
+      logger.debug("num sentences " + background.size() +
+        " first is " + sentence + " length " + sentence.length() + " got " + simpleVocab.size() + " tokens : '" + simpleVocab +
+        "'");
+    }
 
     return all;
   }
