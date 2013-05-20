@@ -44,7 +44,6 @@ public class ExcelImport implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(ExcelImport.class);
   private final boolean isFlashcard;
   private final boolean isRTL;
-  private String relativeConfigDir;
 
   private List<Exercise> exercises = null;
   private List<String> errors = new ArrayList<String>();
@@ -75,7 +74,6 @@ public class ExcelImport implements ExerciseDAO {
     this.isFlashcard = isFlashcard;
     this.mediaDir = mediaDir;
     this.isRTL = isRTL;
-//    this.relativeConfigDir = relativeConfigDir;
     getMissing(relativeConfigDir,"missingSlow.txt",missingSlowSet);
     getMissing(relativeConfigDir,"missingFast.txt",missingFastSet);
     logger.debug("config " + relativeConfigDir +
@@ -100,7 +98,7 @@ public class ExcelImport implements ExerciseDAO {
 
     }
     else {
-      logger.debug("Can't find " + file);
+      logger.debug("Can't find " + file + " under " + relativeConfigDir + " abs path " + missingSlow.getAbsolutePath());
     }
   }
 
@@ -175,11 +173,6 @@ public class ExcelImport implements ExerciseDAO {
     } catch (InvalidFormatException e) {
       e.printStackTrace();
     }
-/*    if (false && logger.isDebugEnabled()) {
-      for (Lesson l : getLessons()) {
-        logger.debug("lesson " + l);
-      }
-    }*/
     return exercises;
   }
 
@@ -214,9 +207,6 @@ public class ExcelImport implements ExerciseDAO {
     int weightIndex = -1;
     List<String> lastRowValues = new ArrayList<String>();
     try {
-  //    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("ltsIssues.txt"), FileExerciseDAO.ENCODING));
-  //    SmallVocabDecoder svd = new SmallVocabDecoder();
-   //   ModernStandardArabicLTS lts = new ModernStandardArabicLTS();
       for (; iter.hasNext(); ) {
         Row next = iter.next();
     //    logger.warn("------------ Row # " + next.getRowNum() + " --------------- ");
@@ -254,6 +244,9 @@ public class ExcelImport implements ExerciseDAO {
           int colIndex = colIndexOffset;
           String english = getCell(next, colIndex++).trim();
           String foreignLanguagePhrase = getCell(next, colIndex).trim();
+
+          // remove starting or ending tics
+          foreignLanguagePhrase = cleanTics(foreignLanguagePhrase);
           //logger.info("for row " + next.getRowNum() + " english = " + english + " in merged " + inMergedRow + " last row " + lastRowValues.size());
 
           if (inMergedRow && !lastRowValues.isEmpty()) {
@@ -284,8 +277,6 @@ public class ExcelImport implements ExerciseDAO {
               }
 
               Exercise imported = getExercise(id++, dao, weightIndex, next, english, foreignLanguagePhrase, translit);
-              //checkLTS(id, writer, svd, lts, english, foreignLanguagePhrase);
-
               recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported);
               exercises.add(imported);
   /*            if (false)
@@ -312,6 +303,14 @@ public class ExcelImport implements ExerciseDAO {
     }
 
     return exercises;
+  }
+
+  private String cleanTics(String foreignLanguagePhrase) {
+    if (foreignLanguagePhrase.startsWith("\'")) {
+      foreignLanguagePhrase = foreignLanguagePhrase.substring(1);
+    }
+    if (foreignLanguagePhrase.endsWith("\'"))   foreignLanguagePhrase = foreignLanguagePhrase.substring(0,foreignLanguagePhrase.length()-1);
+    return foreignLanguagePhrase;
   }
 
   private void checkLTS(int id, BufferedWriter writer, SmallVocabDecoder svd, ModernStandardArabicLTS lts, String english, String foreignLanguagePhrase) {
