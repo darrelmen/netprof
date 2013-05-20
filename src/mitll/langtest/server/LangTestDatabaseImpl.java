@@ -729,7 +729,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } else {
       makeASRScoring();
       List<String> unk = new ArrayList<String>();
-      unk.add("UNKNOWNMODEL");
+      unk.add(SmallVocabDecoder.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
       String vocab = asrScoring.getUsedTokens(lmSentences, unk);
       return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, 128, 128, false, true, tmpDir, serverProps.useScoreCache());
     }
