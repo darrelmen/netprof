@@ -85,6 +85,8 @@ public class AutoCRT {
   }
 
   /**
+   * Allow multiple correct answers from synonym sentence list.
+   *
    * @see LangTestDatabaseImpl#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.AudioCheck.ValidityAndDur, String, boolean)
    * @see LangTestDatabaseImpl#isMatch
    * @param e
@@ -99,6 +101,13 @@ public class AutoCRT {
     for (String ref : foregroundSentences) {
       foreground.add(removePunct(ref));
     }
+    int n = foreground.size();
+    for (String synonym : getRefs(e.getSynonymSentences())) {
+      if (!foregroundSentences.contains(synonym)) {
+        foreground.add(removePunct(synonym));
+      }
+    }
+    if (foreground.size() > n) logger.debug("Added " + e.getSynonymSentences() + " synonyms");
 
     logger.debug("getFlashcardAnswer : foreground " + foreground);
     PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, foreground);
@@ -131,8 +140,13 @@ public class AutoCRT {
    * @return
    */
   private List<String> getRefSentences(Exercise other) {
+    List<String> refSentences = other.getRefSentences();
+    return getRefs(refSentences);
+  }
+
+  private List<String> getRefs(List<String> refSentences) {
     List<String> refs = new ArrayList<String>();
-    for (String ref : other.getRefSentences()) {
+    for (String ref : refSentences) {
       refs.add(ref.trim().toUpperCase());
     }
     return refs;
