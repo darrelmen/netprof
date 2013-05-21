@@ -49,6 +49,7 @@ public class SplitAudio {
   private static final double MIN_DUR = 0.2;
   private static final String FAST = "Fast";
   private static final String SLOW = "Slow";
+  private AudioCheck audioCheck = new AudioCheck();
 
   /**
     * Go through all exercise, find all results for each, take best scoring audio file from results
@@ -216,7 +217,7 @@ public class SplitAudio {
     for (Result r : results) {
       String id = r.id;
       int i = Integer.parseInt(id);
-      if (i < MAX // && i == 335
+      if (i < MAX //&& i < 101
         ) {
         List<Result> resultList = idToResults.get(r.getID());
         if (resultList == null) {
@@ -229,14 +230,6 @@ public class SplitAudio {
   }
 
   private ASRScoring getAsrScoring(String installPath, HTKDictionary dictionary,Map<String, String> properties) {
-/*    Map<String, String> properties = new HashMap<String, String>();
-    String language = "Dari";
-    properties.put("language", language);
-    String nHidden = "2000,2000";
-    properties.put("N_HIDDEN", nHidden);
-    properties.put("N_OUTPUT","37");
-
-    properties.put("MODELS_DIR","models.dli-dari");*/
     String deployPath = installPath + File.separator + "war";
     return dictionary == null ? new ASRScoring(deployPath, properties) : new ASRScoring(deployPath, properties, dictionary);
   }
@@ -247,7 +240,6 @@ public class SplitAudio {
       String sp = (String)prop;
       kv.put(sp,props.getProperty(sp).trim());
     }
-    //logger.debug("for config " + relativeConfigDir + " prop file has " + kv.size() + " properties : " + props.keySet());
     return kv;
   }
 
@@ -283,7 +275,8 @@ public class SplitAudio {
       refLength, refDirForExercise,collectedAudioDir);
 
     if (best != null) {
-      logger.debug("best is " + best);// + " total " + bestTotal);
+      logger.debug("for " +key +
+        " best is " + best);// + " total " + bestTotal);
       writeBestFiles(missingSlow, missingFast, exid, refDirForExercise, bestDirForExercise, best);
     }
     else {
@@ -359,16 +352,24 @@ public class SplitAudio {
           if (slowScore > bestSlow) {
             bestSlow = slowScore;
           }*/
-        if (bestTotal < hydecScore) {//fastScore + slowScore) {
+        boolean valid = getAlignments.isValid();
+        if (!valid) {
+          logger.warn("\n-----------> ex " + id + " score " + hydecScore + "  couldn't find start and end ");
+        }
+        if (bestTotal < hydecScore && valid && hydecScore > 0.1f) {//fastScore + slowScore) {
           bestTotal = hydecScore;
           best = testAudioFileNoSuffix;
 
           logger.debug("ex " + id+ " best so far is  " + best + " score " + bestTotal + " hydecScore " + hydecScore);
           //  " fast " + fastScore + "/" + slowScore);
-
           writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
             getAlignments);
+
         }
+       /* if (valid) {//getAlignments.isValid()) {
+          writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
+            getAlignments);
+        }*/
 
 /*            logger.debug("writing ref files to " + refDirForExercise.getName() + " input " + longFileFile.getName() +
             " Start " + start1 + " " + dur1 + " start2 " + start2 + " dur " + dur2);*/
@@ -399,7 +400,7 @@ public class SplitAudio {
       logger.error("can't find " + answer2.getAbsolutePath());
     }
     else {
-      durationInSeconds = new AudioCheck().getDurationInSeconds(answer2);
+      durationInSeconds = audioCheck.getDurationInSeconds(answer2);
       logger.debug("dur of " + answer2 + " is " + durationInSeconds + " seconds");
     }
     return durationInSeconds;
@@ -473,7 +474,7 @@ public class SplitAudio {
         s1,
         d1);
 
-      if (new AudioCheck().getDurationInSeconds(fast)< MIN_DUR) {
+      if (fast.exists() && audioCheck.getDurationInSeconds(fast)< MIN_DUR) {
         fast.delete();
       }
     }
@@ -489,7 +490,7 @@ public class SplitAudio {
         s2,
         d2);
 
-      if (new AudioCheck().getDurationInSeconds(slow)< MIN_DUR) {
+      if (slow.exists() && audioCheck.getDurationInSeconds(slow)< MIN_DUR) {
         slow.delete();
       }
     }
@@ -506,6 +507,8 @@ public class SplitAudio {
     private float end2;
     private float fastScore;
     private float slowScore;
+
+    private int starts,ends;
 
     public GetAlignments(String first, String last,int refLength, String name, String wordLabFile) {
       this.first = first;
@@ -530,8 +533,11 @@ public class SplitAudio {
     public float getEnd2() {
       return end2;
     }
-/*
 
+    public boolean isValid() {
+      return starts >= 2 && ends >= 2;
+    }
+/*
     public float getFastScore() {
       return fastScore;
     }
@@ -552,10 +558,16 @@ public class SplitAudio {
 
       int tokenCount = 0;
       float scoreTotal1 = 0, scoreTotal2 = 0;
+
       for (Map.Entry<Float, TranscriptEvent> timeEventPair : timeToEvent.entrySet()) {
         TranscriptEvent transcriptEvent = timeEventPair.getValue();
         String word = transcriptEvent.event.trim();
-        if (word.equals("<s>") || word.equals("</s>")) continue;
+        boolean start = word.equals("<s>");
+        if (start) starts++;
+        boolean end = word.equals("</s>");
+        if (end) ends++;
+
+        if (start || end) continue;
 
         if (debug) logger.debug("\ttoken " + tokenCount + " got " + word + " and " + transcriptEvent);
 
