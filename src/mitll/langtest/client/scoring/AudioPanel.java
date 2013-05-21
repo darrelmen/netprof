@@ -47,7 +47,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected static final String SPECTROGRAM = "Spectrogram";
   public static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence" +
     " and speech occur, or whether the mic is working properly.";
-  public static final int IMAGE_WIDTH_SLOP = 80;
+  public static final int IMAGE_WIDTH_SLOP = 100;
   private final ScoreListener gaugePanel;
   protected String audioPath;
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
