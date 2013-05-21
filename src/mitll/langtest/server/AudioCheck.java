@@ -49,15 +49,19 @@ public class AudioCheck {
    * @return
    */
   public double getDurationInSeconds(File file) {
+    AudioInputStream audioInputStream = null;
     try {
-      AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
+      audioInputStream = AudioSystem.getAudioInputStream(file);
       double dur = getDurationInSeconds(audioInputStream);
       audioInputStream.close();
       return dur;
-    } catch (UnsupportedAudioFileException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
+    } catch (Exception e) {
+      try {
+        if (audioInputStream != null) audioInputStream.close();
+      } catch (IOException e1) {
+        logger.error("got " +e,e);
+      }
+      logger.error("got " +e,e);
     }
     return 0d;
   }
