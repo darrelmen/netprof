@@ -206,6 +206,9 @@ public class ExcelImport implements ExerciseDAO {
     int weekIndex = 0;
     int weightIndex = -1;
     List<String> lastRowValues = new ArrayList<String>();
+    Map<String,List<Exercise>> englishToExercises = new HashMap<String, List<Exercise>>();
+    int semis = 0;
+
     try {
       for (; iter.hasNext(); ) {
         Row next = iter.next();
@@ -247,6 +250,7 @@ public class ExcelImport implements ExerciseDAO {
 
           // remove starting or ending tics
           foreignLanguagePhrase = cleanTics(foreignLanguagePhrase);
+
           //logger.info("for row " + next.getRowNum() + " english = " + english + " in merged " + inMergedRow + " last row " + lastRowValues.size());
 
           if (inMergedRow && !lastRowValues.isEmpty()) {
@@ -266,6 +270,8 @@ public class ExcelImport implements ExerciseDAO {
             if (foreignLanguagePhrase.length() == 0) {
               //logger.warn("Got empty foreign language phrase row #" + next.getRowNum() +" for " + english);
               errors.add(sheet.getSheetName()+"/"+"row #" +(next.getRowNum()+1) + " phrase was blank.");
+            } else if (foreignLanguagePhrase.contains(";")) {
+              semis++;
             } else {
               String translit = getCell(next, transliterationIndex);
 
@@ -278,6 +284,13 @@ public class ExcelImport implements ExerciseDAO {
 
               Exercise imported = getExercise(id++, dao, weightIndex, next, english, foreignLanguagePhrase, translit);
               recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported);
+
+              // keep track of synonyms (or better term)
+              String englishSentence = imported.getEnglishSentence();
+              List<Exercise> exercisesForSentence = englishToExercises.get(englishSentence);
+              if (exercisesForSentence == null) englishToExercises.put(englishSentence, exercisesForSentence = new ArrayList<Exercise>());
+              exercisesForSentence.add(imported);
+
               exercises.add(imported);
   /*            if (false)
                 logger.debug("read '" + english + "' '" + foreignLanguagePhrase +
@@ -297,12 +310,43 @@ public class ExcelImport implements ExerciseDAO {
           }
         }
       }
-    //  writer.close();
+
+      addSynonyms(englishToExercises);
     } catch (Exception e) {
       logger.error("got " + e,e);
     }
-
+    if (semis > 0) {
+      logger.info("Skipped " + semis + " entries with semicolons or " + (100f*((float)semis)/(float)exercises.size())+ "%");
+    }
     return exercises;
+  }
+
+  private void addSynonyms(Map<String, List<Exercise>> englishToExercises) {
+    for (List<Exercise> exercises2 : englishToExercises.values()) {
+      if (exercises2.size() > 1) {
+        List<String> translations = new ArrayList<String>();
+        List<String> transliterations = new ArrayList<String>();
+        for (Exercise e : exercises2) {
+          for (int i = 0; i < e.getRefSentences().size(); i++) {
+            try {
+              String ref = e.getRefSentences().get(i);
+              String translit = e.getTranslitSentences().get(i);
+              if (!translations.contains(ref)) {
+                translations.add(ref);
+                transliterations.add(translit);
+              }
+            } catch (Exception e1) {
+              logger.error("got " + e1 + " on " + e);
+            }
+          }
+        }
+
+        for (Exercise e : exercises2) {
+          e.setSynonymSentences(translations);
+          e.setSynonymTransliterations(transliterations);
+        }
+      }
+    }
   }
 
   private String cleanTics(String foreignLanguagePhrase) {
