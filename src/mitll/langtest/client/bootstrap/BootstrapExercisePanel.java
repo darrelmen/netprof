@@ -320,7 +320,6 @@ public class BootstrapExercisePanel extends FluidContainer {
                                                    @Override
                                                    public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
                                                      NativeEvent ne = event.getNativeEvent();
-
                                                      if ("[object KeyboardEvent]".equals(ne.getString())) {
 
                           /*                             System.out.println(new java.util.Date() + " : key handler : Got " + event + " type int " +
@@ -331,6 +330,9 @@ public class BootstrapExercisePanel extends FluidContainer {
                                                        boolean keyPress = typeInt == KEY_PRESS;
                                                        boolean isSpace = ne.getCharCode() == SPACE_CHAR;
 
+                                                       if (keyPress && !isSpace) {
+                                                         showPopup("Press and hold space bar to begin recording, release to stop.");
+                                                       }
                                                        if (keyPress && !keyIsDown && isSpace) {
                                                          keyIsDown = true;
                                                          doClick();

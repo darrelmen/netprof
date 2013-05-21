@@ -132,7 +132,6 @@ protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to ve
         public Set<String> getConsumedEvents() {
           Set<String> events = new HashSet<String>();
           events.add(BrowserEvents.CLICK);
-        //  events.add(BrowserEvents.MOUSEOVER);
           return events;
         }
       }) {
@@ -147,7 +146,7 @@ protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to ve
           if (BrowserEvents.CLICK.equals(event.getType())) {
             final ExerciseShell e = object;
             if (isExercisePanelBusy()) {
-              Window.alert("Exercise busy.");
+              Window.alert("Please stop recording before changing items.");
               markCurrentExercise(currentExercise);
             } else {
               gotClickOnItem(e);
