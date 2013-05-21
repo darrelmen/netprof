@@ -206,8 +206,11 @@ public class SplitAudio {
     Properties props = new Properties();
     String propFile = configDir + File.separator + language + ".properties";
     logger.debug("reading from props " +propFile);
-    props.load(new FileInputStream(propFile));
-    return getProperties(props);
+    FileInputStream inStream = new FileInputStream(propFile);
+    props.load(inStream);
+    Map<String, String> properties = getProperties(props);
+    inStream.close();
+    return properties;
   }
 
   private Map<String, List<Result>> getIDToResultsMap(DatabaseImpl db) {
