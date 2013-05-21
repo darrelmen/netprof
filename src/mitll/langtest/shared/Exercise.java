@@ -21,6 +21,7 @@ import java.util.Map;
 public class Exercise extends ExerciseShell  {
   private static final ArrayList<String> EMPTY_LIST = new ArrayList<String>();
 
+
   public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE, REPEAT, REPEAT_FAST_SLOW, MULTI_REF }
   public static final String EN = "en";
   public static final String FL = "fl";
@@ -34,6 +35,8 @@ public class Exercise extends ExerciseShell  {
   private String slowAudioRef;
   private String englishSentence;
   private List<String> refSentences = new ArrayList<String>();
+  private List<String> synonymSentences = new ArrayList<String>();
+  private List<String> synonymTransliterations = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
   private double weight;
   private transient List<String> slots = new ArrayList<String>();
@@ -186,6 +189,22 @@ public class Exercise extends ExerciseShell  {
   public String getSlowAudioRef() { return slowAudioRef; }
   public void setRefAudio(String s) { this.refAudio = s; }
 
+  public List<String> getSynonymSentences() {
+    return synonymSentences;
+  }
+
+  public void setSynonymSentences(List<String> synonymSentences) {
+    this.synonymSentences = synonymSentences;
+  }
+
+  public List<String> getSynonymTransliterations() {
+    return synonymTransliterations;
+  }
+
+  public void setSynonymTransliterations(List<String> synonymTransliterations) {
+    this.synonymTransliterations = synonymTransliterations;
+  }
+
   /**
    * @see mitll.langtest.server.database.ExcelImport#getExercise(int, mitll.langtest.server.database.FileExerciseDAO, String, String, String)
    * @param s
@@ -214,6 +233,10 @@ public class Exercise extends ExerciseShell  {
   public void setRefSentence(String ref) {
     refSentences.clear();
     refSentences.add(ref);
+  }
+
+  public void addRefSentence(String ref) {
+    if (!refSentences.contains(ref)) refSentences.add(ref);
   }
 
   public void setTranslitSentence(String translitSentence) {
