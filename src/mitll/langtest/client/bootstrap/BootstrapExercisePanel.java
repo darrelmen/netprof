@@ -489,8 +489,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       } else {
         audioHelper.playIncorrect();
       }
-      String correctPrompt = "Answer: " + exercise.getRefSentence() +
-        (exercise.getTranslitSentence().length() > 0 ? " (" + exercise.getTranslitSentence() + ")" : "");
+      String correctPrompt = getCorrectDisplay();
 
       if (isDemoMode) {
         correctPrompt = "Heard: " + result.decodeOutput + "<p>" + correctPrompt;
@@ -501,6 +500,22 @@ public class BootstrapExercisePanel extends FluidContainer {
       if (hasRefAudio) {
         waitForAudioToFinish();
       }
+    }
+
+    private String getCorrectDisplay() {
+      String refSentence = exercise.getRefSentence();
+      boolean hasSynonyms = !exercise.getSynonymSentences().isEmpty();
+      if (hasSynonyms) {
+        refSentence = "";
+        for (int i = 0; i < exercise.getSynonymSentences().size(); i++) {
+          String synonym = exercise.getSynonymSentences().get(i);
+          String translit = exercise.getSynonymTransliterations().get(i);
+          refSentence += synonym + "(" +translit + ") or ";
+        }
+        refSentence = refSentence.substring(0, refSentence.length() - " or ".length());
+      }
+      String translit = exercise.getTranslitSentence().length() > 0 ? " (" + exercise.getTranslitSentence() + ")" : "";
+      return "Answer: " + refSentence + (hasSynonyms ? "" : translit);
     }
 
     private void nextAfterDelay(boolean correct) {
