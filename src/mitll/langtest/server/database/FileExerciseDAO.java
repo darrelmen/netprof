@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
 public class FileExerciseDAO implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
 
-  private static final boolean SKIP_MP3_LINES_IN_INCLUDES = true;
+  //private static final boolean SKIP_MP3_LINES_IN_INCLUDES = true;
   public static final String ENCODING = "UTF8";
   private static final String LESSON_FILE = "lesson-737.csv";
   private static final String FAST = "fast";
@@ -70,7 +70,6 @@ public class FileExerciseDAO implements ExerciseDAO {
     this.language = language;
     this.isPashto = language.equalsIgnoreCase("Pashto");
     this.showSections = showSections;
-    //logger.debug("mediaDir " + mediaDir);
   }
 
   public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
@@ -169,20 +168,21 @@ public class FileExerciseDAO implements ExerciseDAO {
         logger.error("can't find '" + file +"'");
         return;
       }
-      else {
-       // logger.debug("found file at " + file.getAbsolutePath());
-      }
+
       FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
       BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
       String line2;
       int count = 0;
-      logger.debug("using install path " + installPath + " lesson " + lessonPlanFile + " isurdu " +isUrdu);
+      //logger.debug("using install path " + installPath + " lesson " + lessonPlanFile + " isurdu " +isUrdu);
       exercises = new ArrayList<Exercise>();
       Pattern pattern = Pattern.compile("^\\d+\\.(.+)");
       int errors = 0;
+
+      String lastID = "";
+      Exercise lastExercise = null;
       while ((line2 = reader.readLine()) != null) {
         count++;
-       if (TESTING && count > 200) break;
+     //  if (TESTING && count > 200) break;
 
         Matcher matcher = pattern.matcher(line2.trim());
         boolean wordListOnly = matcher.matches();
@@ -192,22 +192,30 @@ public class FileExerciseDAO implements ExerciseDAO {
           if (wordListOnly) {
             String group = matcher.group(1);
             exercise = getWordListExercise(group,""+count);
+            exercises.add(exercise);
           }
           else {
             int length = line2.split("\\(").length;
             boolean simpleFile = length == 2 && line2.split("\\(")[1].trim().endsWith(")");
             boolean isTSV = line2.contains("\t");
             exercise = simpleFile ?
-                getSimpleExerciseForLine(line2) :
-              isTSV ? readTSVLine(installPath,configDir,line2) : getExerciseForLine(line2);
-          }
-          if (exercise != null) {
-            if (showSections) {
-              addSectionTest(count, exercise);
+              getSimpleExerciseForLine(line2) :
+              isTSV ? readTSVLine(installPath, configDir, line2) : getExerciseForLine(line2);
+
+            if (exercise.getID().equals(lastID)) {
+              //logger.debug("ex " +lastID+ " adding " + exercise.getEnglishQuestions());
+              lastExercise.addQuestions(Exercise.EN, exercise.getEnglishQuestions());
+              lastExercise.addQuestions(Exercise.FL, exercise.getForeignLanguageQuestions());
+            }
+            else {
+              exercises.add(exercise);
+              if (showSections) {
+                addSectionTest(count, exercise);
+              }
+              lastExercise = exercise;
             }
 
-            // if (count < 10) logger.info("Got " + exercise);
-            exercises.add(exercise);
+            lastID = exercise.getID();
           }
         } catch (Exception e) {
           logger.error("Got " + e + ".Skipping line -- couldn't parse line #"+count + " : " +line2,e);
@@ -247,7 +255,6 @@ public class FileExerciseDAO implements ExerciseDAO {
       return null;
     }
     String[] split = line.split("\\t");
-    //int len = split.length;
     int i =0;
     String id = split[i++].trim();
     String level = split[i++].trim();
@@ -271,7 +278,6 @@ public class FileExerciseDAO implements ExerciseDAO {
         String englishQuestion = split[i++].trim();
         String arabicAnswers = split[i++].trim();
         String englishAnswers = split[i++].trim();
-       // String notes = split[i++].trim();
 
         Exercise exercise = new Exercise("plan", id, content, false, false, englishQuestion);
 
