@@ -51,6 +51,7 @@ public class AudioHelper {
   }
 
   private void playAudio(String openAudio, String mp3Audio) {
-    mistakeAudio.setSrc((browserCheck.isFirefox()) ? openAudio : mp3Audio);
+ //   mistakeAudio.setSrc((browserCheck.isFirefox()) ? openAudio : mp3Audio);
+    mistakeAudio.setSrc( mp3Audio);
   }
 }
