@@ -21,7 +21,6 @@ import java.util.Map;
 public class Exercise extends ExerciseShell  {
   private static final ArrayList<String> EMPTY_LIST = new ArrayList<String>();
 
-
   public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE, REPEAT, REPEAT_FAST_SLOW, MULTI_REF }
   public static final String EN = "en";
   public static final String FL = "fl";
@@ -37,6 +36,7 @@ public class Exercise extends ExerciseShell  {
   private List<String> refSentences = new ArrayList<String>();
   private List<String> synonymSentences = new ArrayList<String>();
   private List<String> synonymTransliterations = new ArrayList<String>();
+  private List<String> synonymAudioRefs = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
   private double weight;
   private transient List<String> slots = new ArrayList<String>();
@@ -188,6 +188,7 @@ public class Exercise extends ExerciseShell  {
   public String getRefAudio() { return refAudio; }
   public String getSlowAudioRef() { return slowAudioRef; }
   public void setRefAudio(String s) { this.refAudio = s; }
+  public boolean hasRefAudio() { return refAudio != null || slowAudioRef != null; }
 
   public List<String> getSynonymSentences() {
     return synonymSentences;
@@ -203,6 +204,14 @@ public class Exercise extends ExerciseShell  {
 
   public void setSynonymTransliterations(List<String> synonymTransliterations) {
     this.synonymTransliterations = synonymTransliterations;
+  }
+
+  public List<String> getSynonymAudioRefs() {
+    return synonymAudioRefs;
+  }
+
+  public void setSynonymAudioRefs(List<String> synonymAudioRefs) {
+    this.synonymAudioRefs = synonymAudioRefs;
   }
 
   /**
