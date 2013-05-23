@@ -53,6 +53,7 @@ public class ExcelImport implements ExerciseDAO {
   private String mediaDir;
   private Set<Integer> missingSlowSet = new HashSet<Integer>();
   private Set<Integer> missingFastSet = new HashSet<Integer>();
+  private boolean shouldHaveRefAudio = false;
   /**
    * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
    */
@@ -74,13 +75,14 @@ public class ExcelImport implements ExerciseDAO {
     this.isFlashcard = isFlashcard;
     this.mediaDir = mediaDir;
     this.isRTL = isRTL;
-    getMissing(relativeConfigDir,"missingSlow.txt",missingSlowSet);
-    getMissing(relativeConfigDir,"missingFast.txt",missingFastSet);
+    boolean missingExists = getMissing(relativeConfigDir, "missingSlow.txt", missingSlowSet);
+    missingExists &= getMissing(relativeConfigDir,"missingFast.txt",missingFastSet);
+    shouldHaveRefAudio = missingExists;
     logger.debug("config " + relativeConfigDir +
       " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());
   }
 
-  private void getMissing(String relativeConfigDir,String file, Set<Integer> missing) {
+  private boolean getMissing(String relativeConfigDir,String file, Set<Integer> missing) {
     File missingSlow = new File(relativeConfigDir, file);
     if (missingSlow.exists()) {
       try {
@@ -100,6 +102,7 @@ public class ExcelImport implements ExerciseDAO {
     else {
       logger.debug("Can't find " + file + " under " + relativeConfigDir + " abs path " + missingSlow.getAbsolutePath());
     }
+    return missingSlow.exists();
   }
 
   @Override
@@ -272,6 +275,7 @@ public class ExcelImport implements ExerciseDAO {
               errors.add(sheet.getSheetName()+"/"+"row #" +(next.getRowNum()+1) + " phrase was blank.");
             } else if (foreignLanguagePhrase.contains(";")) {
               semis++;
+              id++;
             } else {
               String translit = getCell(next, transliterationIndex);
 
@@ -283,15 +287,21 @@ public class ExcelImport implements ExerciseDAO {
               }
 
               Exercise imported = getExercise(id++, dao, weightIndex, next, english, foreignLanguagePhrase, translit);
-              recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported);
+              if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
+                recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported);
 
-              // keep track of synonyms (or better term)
-              String englishSentence = imported.getEnglishSentence();
-              List<Exercise> exercisesForSentence = englishToExercises.get(englishSentence);
-              if (exercisesForSentence == null) englishToExercises.put(englishSentence, exercisesForSentence = new ArrayList<Exercise>());
-              exercisesForSentence.add(imported);
+                // keep track of synonyms (or better term)
+                String englishSentence = imported.getEnglishSentence();
+                List<Exercise> exercisesForSentence = englishToExercises.get(englishSentence);
+                if (exercisesForSentence == null)
+                  englishToExercises.put(englishSentence, exercisesForSentence = new ArrayList<Exercise>());
+                exercisesForSentence.add(imported);
 
-              exercises.add(imported);
+                exercises.add(imported);
+              }
+              else {
+                logger.info("skipping exercise " +imported.getID() + " : " + imported.getEnglishSentence() +" since no audio.");
+              }
   /*            if (false)
                 logger.debug("read '" + english + "' '" + foreignLanguagePhrase +
                     "' '" + translit + "' '" + unit + "' '" + chapter + "' '" + week + "'");*/
@@ -324,16 +334,23 @@ public class ExcelImport implements ExerciseDAO {
   private void addSynonyms(Map<String, List<Exercise>> englishToExercises) {
     for (List<Exercise> exercises2 : englishToExercises.values()) {
       if (exercises2.size() > 1) {
+        Set<String> translationSet = new HashSet<String>();
+
         List<String> translations = new ArrayList<String>();
         List<String> transliterations = new ArrayList<String>();
+        List<String> audioRefs = new ArrayList<String>();
         for (Exercise e : exercises2) {
           for (int i = 0; i < e.getRefSentences().size(); i++) {
             try {
               String ref = e.getRefSentences().get(i);
+              String transLower = ref.toLowerCase().trim();
+
               String translit = e.getTranslitSentences().get(i);
-              if (!translations.contains(ref)) {
+              if (!translationSet.contains(transLower)) {
                 translations.add(ref);
                 transliterations.add(translit);
+                translationSet.add(transLower);
+                audioRefs.add(e.getRefAudio());
               }
             } catch (Exception e1) {
               logger.error("got " + e1 + " on " + e);
@@ -341,9 +358,21 @@ public class ExcelImport implements ExerciseDAO {
           }
         }
 
+        if (translations.size() > 1) {
+          for (Exercise e : exercises2) {
+            e.setSynonymSentences(translations);
+            e.setSynonymTransliterations(transliterations);
+            e.setSynonymAudioRefs(audioRefs);
+            logger.debug("e " + e.getID() + " '" + e.getEnglishSentence() +
+              "' has " + e.getSynonymAudioRefs().size() + " audio refs or " + translations);
+          }
+        }
+      } else if (false) {   // hard to test
         for (Exercise e : exercises2) {
-          e.setSynonymSentences(translations);
-          e.setSynonymTransliterations(transliterations);
+          List<String> doubles = new ArrayList<String>();
+          doubles.add(e.getRefAudio());
+          doubles.add(e.getRefAudio());
+          e.setSynonymAudioRefs(doubles);
         }
       }
     }
@@ -405,23 +434,12 @@ public class ExcelImport implements ExerciseDAO {
       if (imported.getEnglishSentence() == null && imported.getContent() == null) {
         logger.warn("both english sentence and content null for exercise " + id);
       }
-   //   logger.debug("Read " + imported);
     } else {
-      //    Exercise imported = new Exercise("import", "" + id, content, false, true, english);
       imported = getExercise(id, dao, english, foreignLanguagePhrase, translit);
     }
     imported.setEnglishSentence(english);
     imported.setTranslitSentence(translit);
     List<String> inOrderTranslations = new ArrayList<String>(translations);
-    if (isRTL) {
- /*     if (id < 5) {
-        logger.debug("is RTL! ------- " + inOrderTranslations);
-      }
-      Collections.reverse(inOrderTranslations);
-      if (id < 5) {
-        logger.debug("after ------- " + inOrderTranslations);
-      }*/
-    }
     imported.setRefSentences(inOrderTranslations);
 
     if (weightIndex != -1) {
@@ -473,27 +491,20 @@ public class ExcelImport implements ExerciseDAO {
   private Exercise getExercise(int id, FileExerciseDAO dao, String english, String foreignLanguagePhrase, String translit) {
     String content = dao.getContent(foreignLanguagePhrase, translit, english);
     Exercise imported = new Exercise("import", "" + id, content, false, true, english);
-/*    imported.addSlot(english);
-    imported.addSlot(foreignLanguagePhrase);
-    imported.addSlot(translit);*/
-
     imported.addQuestion();
 
     String name = ""+id;
     String fastAudioRef = mediaDir+File.separator+name+File.separator+ "Fast" + ".wav";
     String slowAudioRef = mediaDir+File.separator+name+File.separator+ "Slow" + ".wav";
 
-  //  logger.debug("path is " + fastAudioRef);
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
 
     if (!missingFastSet.contains(id)) {
       imported.setRefAudio(ensureForwardSlashes(fastAudioRef));
     }
-    //else logger.debug("no fast audio for " + id);
     if (!missingSlowSet.contains(id)) {
       imported.setSlowRefAudio(ensureForwardSlashes(slowAudioRef));
     }
-   // else logger.debug("no slow audio for " + id);
 
     return imported;
   }
