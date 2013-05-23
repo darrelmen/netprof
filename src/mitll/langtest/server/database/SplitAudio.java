@@ -220,7 +220,7 @@ public class SplitAudio {
     for (Result r : results) {
       String id = r.id;
       int i = Integer.parseInt(id);
-      if (i < MAX //&& i < 101
+      if (i < MAX //&& i == 3496
         ) {
         List<Result> resultList = idToResults.get(r.getID());
         if (resultList == null) {
@@ -253,7 +253,10 @@ public class SplitAudio {
     if (resultsForExercise.isEmpty()) return;
     String exid = resultsForExercise.iterator().next().id;
     Exercise exercise = idToEx.get(exid);
-
+    if (exercise == null) {
+      logger.info("skipping ex id " + exid);
+      return;
+    }
     String refSentence = exercise.getRefSentence();
     refSentence = refSentence.replaceAll("\\p{P}", "");
     String[] split = refSentence.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
@@ -261,7 +264,7 @@ public class SplitAudio {
     int refLength = split.length;
     String firstToken = split[0].trim();
     String lastToken = split[refLength-1].trim();
-    logger.debug("refSentence " + refSentence + " length " + refLength + " first |" + firstToken + "| last |" +lastToken +"|");
+   // logger.debug("refSentence " + refSentence + " length " + refLength + " first |" + firstToken + "| last |" +lastToken +"|");
 
     File refDirForExercise = new File(newRefDir, exid);
     String key = pair.getKey();
@@ -270,7 +273,7 @@ public class SplitAudio {
     refDirForExercise.mkdir();
 
     File bestDirForExercise = new File(bestDir, exid);
-    logger.debug("making dir " + key + " at " + bestDirForExercise.getAbsolutePath());
+  //  logger.debug("making dir " + key + " at " + bestDirForExercise.getAbsolutePath());
     bestDirForExercise.mkdir();
     final ASRScoring scoring = getAsrScoring(".",dictionary,properties);
     String best = getBestFilesFromResults(scoring, resultsForExercise, exercise, refSentence,
@@ -278,8 +281,7 @@ public class SplitAudio {
       refLength, refDirForExercise,collectedAudioDir);
 
     if (best != null) {
-      logger.debug("for " +key +
-        " best is " + best);// + " total " + bestTotal);
+      logger.debug("for " +key + " : '" + exercise.getEnglishSentence() + "' best is " + best);// + " total " + bestTotal);
       writeBestFiles(missingSlow, missingFast, exid, refDirForExercise, bestDirForExercise, best);
     }
     else {
@@ -337,7 +339,7 @@ public class SplitAudio {
       }
       String testAudioFileNoSuffix = getConverted(name, parent);
 
-      logger.debug("parent " + parent + " running result " + r.uniqueID + " for exercise " + id + " and audio file " + name);
+      //logger.debug("parent " + parent + " running result " + r.uniqueID + " for exercise " + id + " and audio file " + name);
 
       Scores align = scoring.align(parent, testAudioFileNoSuffix, refSentence + " " + refSentence);
       //  logger.debug("\tgot " + align + " for " + name);
@@ -345,9 +347,9 @@ public class SplitAudio {
 
       String wordLabFile = prependDeploy(parent,testAudioFileNoSuffix + ".words.lab");
       try {
-        GetAlignments getAlignments = new GetAlignments(first,last, refLength, name, wordLabFile).invoke();
-   /*       float fastScore = getAlignments.getFastScore();
-          float slowScore = getAlignments.getSlowScore();
+        GetAlignments alignments = new GetAlignments(first,last, refLength, name, wordLabFile).invoke();
+   /*       float fastScore = alignments.getFastScore();
+          float slowScore = alignments.getSlowScore();
 
           if (fastScore > bestFast) {
             bestFast = fastScore;
@@ -355,23 +357,25 @@ public class SplitAudio {
           if (slowScore > bestSlow) {
             bestSlow = slowScore;
           }*/
-        boolean valid = getAlignments.isValid();
+        boolean valid = alignments.isValid();
         if (!valid) {
-          logger.warn("\n-----------> ex " + id + " score " + hydecScore + "  couldn't find start and end ");
+          logger.warn("\n---> ex " + id + " " + exercise.getEnglishSentence() +
+            " score " + hydecScore +
+            " invalid alignment : " + alignments.getWordSeq() + " : " + alignments.getScores());
         }
         if (bestTotal < hydecScore && valid && hydecScore > 0.1f) {//fastScore + slowScore) {
           bestTotal = hydecScore;
           best = testAudioFileNoSuffix;
 
-          logger.debug("ex " + id+ " best so far is  " + best + " score " + bestTotal + " hydecScore " + hydecScore);
+          logger.debug("ex " + id+ " " + exercise.getEnglishSentence() +" best so far is " + best + " score " + bestTotal + " hydecScore " + hydecScore);
           //  " fast " + fastScore + "/" + slowScore);
           writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
-            getAlignments);
+            alignments);
 
         }
-       /* if (valid) {//getAlignments.isValid()) {
+       /* if (valid) {//alignments.isValid()) {
           writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
-            getAlignments);
+            alignments);
         }*/
 
 /*            logger.debug("writing ref files to " + refDirForExercise.getName() + " input " + longFileFile.getName() +
@@ -404,7 +408,7 @@ public class SplitAudio {
     }
     else {
       durationInSeconds = audioCheck.getDurationInSeconds(answer2);
-      logger.debug("dur of " + answer2 + " is " + durationInSeconds + " seconds");
+   //   logger.debug("dur of " + answer2 + " is " + durationInSeconds + " seconds");
     }
     return durationInSeconds;
   }
@@ -502,6 +506,7 @@ public class SplitAudio {
   private class GetAlignments {
     private String first,last;
     private int refLength;
+    int lowWordScores =0;
     private String name;
     private String wordLabFile;
     private float start1;
@@ -512,6 +517,7 @@ public class SplitAudio {
     private float slowScore;
 
     private int starts,ends;
+    private String wordSeq = "", scores = "";
 
     public GetAlignments(String first, String last,int refLength, String name, String wordLabFile) {
       this.first = first;
@@ -538,8 +544,11 @@ public class SplitAudio {
     }
 
     public boolean isValid() {
-      return starts >= 2 && ends >= 2;
+      return lowWordScores < 2;//starts >= 2 && ends >= 2;
     }
+
+    public String getWordSeq() { return wordSeq; }
+    public String getScores() { return scores; }
 /*
     public float getFastScore() {
       return fastScore;
@@ -561,10 +570,13 @@ public class SplitAudio {
 
       int tokenCount = 0;
       float scoreTotal1 = 0, scoreTotal2 = 0;
+      wordSeq = "";
 
       for (Map.Entry<Float, TranscriptEvent> timeEventPair : timeToEvent.entrySet()) {
         TranscriptEvent transcriptEvent = timeEventPair.getValue();
+        scores += transcriptEvent.toString() + ", ";
         String word = transcriptEvent.event.trim();
+        wordSeq += word + " ";
         boolean start = word.equals("<s>");
         if (start) starts++;
         boolean end = word.equals("</s>");
@@ -574,7 +586,10 @@ public class SplitAudio {
 
         if (debug) logger.debug("\ttoken " + tokenCount + " got " + word + " and " + transcriptEvent);
 
-        if (!didFirst) scoreTotal1 += transcriptEvent.score; else scoreTotal2 += transcriptEvent.score;
+        float score = transcriptEvent.score;
+        if (!didFirst) scoreTotal1 += score; else scoreTotal2 += score;
+        if (score < 0.2f) lowWordScores++;
+
         tokenCount++;
         if (tokenCount == 1 && first.equals(word)) {
           if (!didFirst) {
