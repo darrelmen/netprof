@@ -37,10 +37,14 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
+import mitll.langtest.client.sound.AudioControl;
+import mitll.langtest.client.sound.Sound;
+import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -57,7 +61,8 @@ public class BootstrapExercisePanel extends FluidContainer {
   public static final String PRONUNCIATION_SCORE = "Pronunciation score ";
   private Column scoreFeedbackColumn;
   private static final String FEEDBACK_TIMES_SHOWN = "FeedbackTimesShown";
-  private static final int PERIOD_MILLIS = 500;
+  public static final int DELAY_MILLIS1 = 300;
+  private static final int PERIOD_MILLIS = DELAY_MILLIS1;
   private static final int MAX_INTRO_FEEBACK_COUNT = 5;
   private static final int KEY_PRESS = 256;
   private static final int KEY_UP = 512;
@@ -66,7 +71,7 @@ public class BootstrapExercisePanel extends FluidContainer {
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
 
-  private final AudioHelper audioHelper = new AudioHelper();
+ // private final AudioHelper audioHelper = new AudioHelper();
   private List<MyRecordButtonPanel> answerWidgets = new ArrayList<MyRecordButtonPanel>();
   private Storage stockStore = null;
 
@@ -77,6 +82,7 @@ public class BootstrapExercisePanel extends FluidContainer {
   private Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
   private Image enterImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "blueSpaceBar.png"));//"space48_2.png"));
   private static final String HELP_IMAGE = LangTest.LANGTEST_IMAGES + "/helpIconBlue.png";
+  private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>");
 
   private Heading recoOutput;
   private boolean keyIsDown;
@@ -84,7 +90,6 @@ public class BootstrapExercisePanel extends FluidContainer {
   private int feedback = 0;
   private Timer t;
   private ProgressBar scoreFeedback = new ProgressBar();
-
 
   /**
    * @see mitll.langtest.client.flashcard.FlashcardExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
@@ -101,11 +106,14 @@ public class BootstrapExercisePanel extends FluidContainer {
       feedback = getCookieValue(FEEDBACK_TIMES_SHOWN);
     }
     isDemoMode = controller.isDemoMode();
+    soundManager = controller.getSoundManager();
 
     add(getHelpRow(controller));
     add(getCardPrompt(e));
 
     addRecordingAndFeedbackWidgets(e, service, controller);
+    warnNoFlash.setVisible(false);
+    add(warnNoFlash);
   }
 
   /**
@@ -411,6 +419,8 @@ public class BootstrapExercisePanel extends FluidContainer {
       onUnload();
     }
 
+    int numMP3s = 0;
+
     /**
      * Deal with three cases: <br></br>
      *   * the audio was invalid in some way : too short, too quiet, too loud<br></br>
@@ -442,17 +452,7 @@ public class BootstrapExercisePanel extends FluidContainer {
         showCorrectFeedback(score);
       } else {   // incorrect!!
         if (hasRefAudio) {
-            service.ensureMP3(path, new AsyncCallback<Void>() {
-              @Override
-              public void onFailure(Throwable caught) {
-                Window.alert("Couldn't contact server (ensureMP3).");
-              }
-
-              @Override
-              public void onSuccess(Void result2) {
-                showIncorrectFeedback(result, score, hasRefAudio);
-              }
-            });
+          ensureMP3(result, score, path, hasRefAudio);
         }
         else {
           showIncorrectFeedback(result, score, hasRefAudio);
@@ -463,10 +463,54 @@ public class BootstrapExercisePanel extends FluidContainer {
       }
     }
 
+    /**
+     * Make sure all the mp3s we may play exist on the server.
+     * @param result
+     * @param score
+     * @param path
+     * @param hasRefAudio
+     */
+    private void ensureMP3(final AudioAnswer result, final double score, String path, final boolean hasRefAudio) {
+      boolean hasSynonymAudio = !exercise.getSynonymAudioRefs().isEmpty();
+
+      if (hasSynonymAudio) {
+        numMP3s = exercise.getSynonymAudioRefs().size();
+        for (String spath : exercise.getSynonymAudioRefs()) {
+       //   spath = (spath.endsWith(WAV)) ? spath.replace(WAV, MP3) : spath;
+          service.ensureMP3(spath, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              Window.alert("Couldn't contact server (ensureMP3).");
+            }
+
+            @Override
+            public void onSuccess(Void result2) {
+              numMP3s--;
+              if (numMP3s == 0) {
+                showIncorrectFeedback(result, score, hasRefAudio);
+              }
+            }
+          });
+        }
+      } else {
+        service.ensureMP3(path, new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            Window.alert("Couldn't contact server (ensureMP3).");
+          }
+
+          @Override
+          public void onSuccess(Void result2) {
+            showIncorrectFeedback(result, score, hasRefAudio);
+          }
+        });
+      }
+    }
+
     private void showCorrectFeedback(double score) {
       showPronScoreFeedback(score);
 
-      audioHelper.playCorrect();
+      playCorrect();
       if (feedback < MAX_INTRO_FEEBACK_COUNT) {
         String correctPrompt = "Correct! It's: " + exercise.getRefSentence();
         recoOutput.setText(correctPrompt);
@@ -474,6 +518,8 @@ public class BootstrapExercisePanel extends FluidContainer {
         incrCookie(FEEDBACK_TIMES_SHOWN);
       }
     }
+
+    private List<String> toPlay = new ArrayList<String>();
 
     /**
      * If there's reference audio, play it and wait for it to finish.
@@ -484,12 +530,25 @@ public class BootstrapExercisePanel extends FluidContainer {
     private void showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio) {
       showPronScoreFeedback(score);
 
+      boolean hasSynonymAudio = !exercise.getSynonymAudioRefs().isEmpty();
       if (hasRefAudio) {
-        String path = exercise.getRefAudio();
-        path= (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
-        audioHelper.play(path);
+         if (hasSynonymAudio) {
+           toPlay.addAll(exercise.getSynonymAudioRefs());
+           System.out.println("showIncorrectFeedback : playing " + toPlay);
+           playAllAudio();
+         }
+        else {
+          String path = exercise.getRefAudio();
+          path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
+          createSound(path, new EndListener() {
+            @Override
+            public void songEnded() {
+              goToNextItem();
+            }
+          });
+        }
       } else {
-        audioHelper.playIncorrect();
+        playIncorrect();
       }
       String correctPrompt = getCorrectDisplay();
 
@@ -498,10 +557,38 @@ public class BootstrapExercisePanel extends FluidContainer {
       }
       recoOutput.setText(correctPrompt);
       DOM.setStyleAttribute(recoOutput.getElement(), "color", "#000000");
+    }
 
-      if (hasRefAudio) {
-        waitForAudioToFinish();
-      }
+    private void playAllAudio() {
+      String path = toPlay.get(0);
+      path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
+
+      System.out.println("playAllAudio : " + toPlay.size() + " playing " + path);
+      createSound(path, new EndListener() {
+        @Override
+        public void songEnded() {
+          toPlay.remove(0);
+
+          System.out.println("playAllAudio : songEnded " + toPlay.size() + " items left.");
+
+          if (!toPlay.isEmpty()) {
+            playAllAudio();
+          }
+          else {
+            goToNextItem();
+          }
+        }
+      });
+    }
+
+    private void goToNextItem() {
+      Timer t = new Timer() {
+        @Override
+        public void run() {
+          controller.loadNextExercise(exercise);
+        }
+      };
+      t.schedule(isDemoMode ? LONG_DELAY_MILLIS : DELAY_MILLIS);
     }
 
     private String getCorrectDisplay() {
@@ -531,35 +618,81 @@ public class BootstrapExercisePanel extends FluidContainer {
       t.schedule(isDemoMode ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : DELAY_MILLIS_LONG);
     }
 
-    /**
-     * Move on to the next exercise after the audio has finished playing.
-     */
-    private void waitForAudioToFinish() {
-      // Schedule the timer to run once in 1/2 second
-      Timer t = new Timer() {
-        @Override
-        public void run() {
-          if (audioHelper.hasEnded()) {
-            // Schedule the timer to run after user has had time to read the feedback
-            Timer t = new Timer() {
-              @Override
-              public void run() {
-                controller.loadNextExercise(exercise);
-              }
-            };
-            t.schedule(isDemoMode ? LONG_DELAY_MILLIS : DELAY_MILLIS);
-          }
-          else {
-            waitForAudioToFinish();
-          }
-        }
-      };
-      t.schedule(500);
-    }
     @Override
     protected void receivedAudioFailure() {
       recordButton.setResource(enterImage);
     }
+  }
+
+
+  public void playCorrect() {
+    startSong("langtest/sounds/correct4.mp3", new EndListener() {
+      @Override
+      public void songEnded() {
+      }
+    });
+  }
+
+  public void playIncorrect() {
+    startSong("langtest/sounds/incorrect1.mp3", new EndListener() {
+      @Override
+      public void songEnded() {
+      }
+    });
+  }
+
+
+  public void startSong(String path, EndListener endListener){
+    // System.out.println("PlayAudioPanel : start song : " + path);
+    if (soundManager.isReady()) {
+      //System.out.println(new Date() + " Sound manager is ready.");
+      if (soundManager.isOK()) {
+        destroySound();
+        createSound(path,endListener);
+      } else {
+        System.out.println(new Date() + " Sound manager is not OK!.");
+        warnNoFlash.setVisible(true);
+      }
+    }
+  }
+  private Sound currentSound = null;
+  private SoundManagerAPI soundManager;
+
+  /**
+   * @see #startSong
+   * @param song
+   */
+  private void createSound(final String song, final EndListener endListener){
+    currentSound = new Sound(new AudioControl() {
+      @Override
+      public void reinitialize() {
+        System.out.println("song " +song + " ended---");
+        destroySound();
+        endListener.songEnded();
+      }
+
+      @Override
+      public void songFirstLoaded(double durationEstimate) {}
+
+      @Override
+      public void songLoaded(double duration) {
+        soundManager.play(currentSound);
+      }
+
+      @Override
+      public void update(double position) {}
+    });
+    soundManager.createSound(currentSound, song, song);
+  }
+
+  private void destroySound() {
+    if (currentSound != null) {
+      this.soundManager.destroySound(currentSound);
+    }
+  }
+
+  private static interface EndListener {
+    void songEnded();
   }
 
   /**
