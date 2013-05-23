@@ -155,6 +155,7 @@ public class SoundManager {
   }
 
 	public static void songFinished(Sound sound){
+    System.out.println("sound finished!");
 		sound.parent.reinitialize();
 	}
 
