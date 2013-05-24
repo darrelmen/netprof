@@ -160,8 +160,9 @@ public class ExcelImport implements ExerciseDAO {
 
       if (!errors.isEmpty()) {
         logger.warn("there were " + errors.size() + " errors");
+        int count = 0;
         for (String error : errors) {
-          logger.warn(error);
+          if (count++ < 10) logger.warn(error);
         }
       }
       sectionHelper.report();
@@ -235,9 +236,9 @@ public class ExcelImport implements ExerciseDAO {
               colIndexOffset = columns.indexOf(col);
             } else if (colNormalized.contains("transliteration")) {
               transliterationIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("unit")) {
+            } else if (colNormalized.contains("unit") || colNormalized.contains("book")) {
               unitIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("chapter")) {
+            } else if (colNormalized.contains("chapter") || colNormalized.contains("lesson")) {
               chapterIndex = columns.indexOf(col);
             } else if (colNormalized.contains("week")) {
               weekIndex = columns.indexOf(col);
@@ -363,8 +364,7 @@ public class ExcelImport implements ExerciseDAO {
             e.setSynonymSentences(translations);
             e.setSynonymTransliterations(transliterations);
             e.setSynonymAudioRefs(audioRefs);
-            logger.debug("e " + e.getID() + " '" + e.getEnglishSentence() +
-              "' has " + e.getSynonymAudioRefs().size() + " audio refs or " + translations);
+            //logger.debug("e " + e.getID() + " '" + e.getEnglishSentence() + "' has " + e.getSynonymAudioRefs().size() + " audio refs or " + translations);
           }
         }
       } else if (false) {   // hard to test
