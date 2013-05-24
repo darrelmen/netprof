@@ -19,7 +19,6 @@ h1 {
     /*filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#b4b4b4'); */ /* for IE */
     /*background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#b4b4b4));*/ /* for webkit browsers */
     /*background: -moz-linear-gradient(top,  #ffffff,  #b4b4b4);*/ /* for firefox 3.6+ */
-
 }
 
 .bigLink {
@@ -75,16 +74,10 @@ h1 {
 fieldset {
     margin: 5px 15px 0px 15px;
     border-style: none;
-    /*border-bottom-style: solid;
-      border-bottom-width: 1px;
-      border-bottom-color: #666666;*/
-
-    /*margin: 0;
-      padding: 20px 15px 20px 15px;*/
 }
 
-.leftTenMargin {
-    margin-left: 10px;
+.leftFifteenPercentMargin {
+    margin-left: 15%;
 }
 
 .noMargin {
@@ -230,12 +223,16 @@ fieldset > legend {
 
 .pashtofont {
     font-family: 'Pashto Kror Asiatype','HSPashto','HSTahoma',Arial,Helvetica,sans-serif;
-    font-size: larger;
+    font-size: x-large;
 }
 
 .pashtofont td {
     font-family: 'Pashto Kror Asiatype','HSPashto','HSTahoma',Arial,Helvetica,sans-serif;
-    font-size: larger;
+    font-size: x-large;
+}
+
+.inlineStyle {
+    display: inline-block;
 }
 
 /**
