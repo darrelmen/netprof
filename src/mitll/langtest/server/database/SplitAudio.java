@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -75,16 +76,18 @@ public class SplitAudio {
         "5100-english-no-gloss.txt");
 
     Map<String, List<Result>> idToResults = getIDToResultsMap(db2);
-            logger.warn("id->results " +idToResults.size() + " e.g. " +idToResults.keySet().iterator().next());
+    logger.warn("id->results " + idToResults.size() + " e.g. " + idToResults.keySet().iterator().next());
     Map<Long, User> userMap = new UserDAO(db2).getUserMap();
 
     Map<String, Exercise> englishToEx = new HashMap<String, Exercise>();
     Map<String, List<Result>> englishToResults2 = new HashMap<String, List<Result>>();
     int count = 0;
+    int c = 0;
     for (Exercise e : db2.getExercises()) {
       String englishSentence = e.getEnglishSentence();
+
       if (englishSentence == null) {
-        //logger.warn("huh? no english sentence for " + e.getID());
+        //if (c++ < 10) logger.warn("convertEnglish huh? no english sentence for " + e.getID() + " instead " +e.getRefSentence());
         englishSentence = e.getRefSentence();
       }
 
@@ -122,6 +125,7 @@ public class SplitAudio {
             //logger.warn("skipping duplicate entry : " + e.getID() + " " + englishSentence);
           } else {
             englishToEx.put(key, e);
+            if (key.equalsIgnoreCase("complete")) {logger.warn("map " +key + " -> " + e); }
           }
         }
       }
@@ -133,21 +137,31 @@ public class SplitAudio {
 
   //  Map<Exercise, Exercise> chapterToNonChapter = new HashMap<Exercise, Exercise>();
 
-    Map<String,Exercise> idToEx = new HashMap<String, Exercise>();
-    Map<String, List<Result>> idToResults2 = new HashMap<String, List<Result>>();
+    Map<String,Exercise> idToEx = new TreeMap<String, Exercise>();
+    Map<String, List<Result>> idToResults2 = new TreeMap<String, List<Result>>();
 
     int skipped = 0;
+    int count2 = 0;
     Map<Exercise, List<Result>> chapterToResult = new HashMap<Exercise, List<Result>>();
     for (Exercise e : unitAndChapter.getExercises()) {
       String key = e.getEnglishSentence().toLowerCase().trim();
       if (englishToEx.containsKey(key)) {
         //logger.warn("skipping duplicate entry : " + e.getID() + " "+ e.getEnglishSentence());
-        //chapterToNonChapter.put(e, englishToEx.get(key));
         List<Result> value = englishToResults2.get(key);
-        chapterToResult.put(e,englishToResults2.get(key));
+        chapterToResult.put(e,value);
         idToEx.put(e.getID(),e);
         if (value.isEmpty()) logger.warn("huh? no results for ex " +key); //never happen
-        idToResults2.put(e.getID()+"/0", value);
+        idToResults2.put(e.getID(), value);
+
+        if (key.equals("complete")) {
+          logger.warn("key " + key + " value " + value + " ex " + e.getID() + "");
+        }
+        //if (e.getID().equals("0")) {
+        if (count2++ < 10)
+          logger.warn("ex " +e.getID()+
+            " key " + key + " value " + value + " ex " + e.getID() + " " + idToResults2.get(key));
+
+        //}
       } else {
         if (skipped++ < 10) logger.warn("skipping " + e.getID() + " : " + key);// + " no match in " +englishToEx.size() + " entries.");
       }
@@ -167,9 +181,11 @@ public class SplitAudio {
     }
   }
 
+/*
   private void convertExamples(int numThreads, String audioDir, String language,String spreadsheet) throws Exception{
     convertExamples(numThreads, audioDir, language, spreadsheet,"template");
   }
+*/
 
     /**
       * Go through all exercise, find all results for each, take best scoring audio file from results
@@ -282,11 +298,12 @@ public class SplitAudio {
                                                final HTKDictionary dict, ExecutorService executorService) {
     List<Future<?>> futures = new ArrayList<Future<?>>();
     for (final Map.Entry<String, List<Result>> pair : idToResults.entrySet()) {
+      logger.debug("pair " + pair);
       Future<?> submit = executorService.submit(new Runnable() {
         @Override
         public void run() {
           try {
-            getBestForEachExercise(idToEx, missingSlow, missingFast,
+            getBestForEachExercise(pair.getKey(), idToEx, missingSlow, missingFast,
               newRefDir, bestDir, pair,placeToPutAudio,dict, properties);
           } catch (IOException e) {
             logger.error("Doing " + pair.getKey() + " and " + pair.getValue() +
@@ -295,54 +312,9 @@ public class SplitAudio {
         }
       });
       futures.add(submit);
+    //  break;
     }
     return futures;
-  }
-
-  private void checkLTS(List<Exercise> exercises, LTS lts) {
-    try {
-      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("ltsIssues.txt"), FileExerciseDAO.ENCODING));
-
-      SmallVocabDecoder svd = new SmallVocabDecoder();
-      int errors = 0;
-      for (Exercise e : exercises) {
-        String id = e.getID();
-
-        if (checkLTS(Integer.parseInt(id), writer, svd, lts, e.getEnglishSentence(), e.getRefSentence())) errors++;
-      }
-
-      if (errors > 0) logger.error("found " + errors + " lts errors");
-      writer.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  private boolean checkLTS(int id, BufferedWriter writer, SmallVocabDecoder svd, LTS lts, String english, String foreignLanguagePhrase) {
-    List<String> tokens = svd.getTokens(foreignLanguagePhrase);
-    boolean error = false;
-    try {
-
-      for (String token : tokens) {
-        String[][] process = lts.process(token);
-        if (process == null) {
-          String message = "couldn't do lts on exercise #" + (id - 1) + " token '" + token +
-            "' length " + token.length() + " trim '" + token.trim() +
-            "' " +
-            " '" + foreignLanguagePhrase + "' english = '" + english + "'";
-          logger.error(message);
-          //logger.error("\t tokens " + tokens + " num =  " + tokens.size());
-
-          writer.write(message);
-          writer.write("\n");
-          error = true;
-        }
-      }
-    } catch (Exception e) {
-      logger.error("couldn't do lts on " + (id - 1) + " " + foreignLanguagePhrase + " " + english);
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-    return error;
   }
 
   private Map<String, String> getProperties(String language, String configDir) throws IOException {
@@ -389,29 +361,36 @@ public class SplitAudio {
     return kv;
   }
 
-  private void getBestForEachExercise(Map<String, Exercise> idToEx, FileWriter missingSlow, FileWriter missingFast,
+  private void getBestForEachExercise(String exid2, Map<String, Exercise> idToEx, FileWriter missingSlow, FileWriter missingFast,
                                       File newRefDir, File bestDir, Map.Entry<String, List<Result>> pair,
-                                      String collectedAudioDir, HTKDictionary dictionary,Map<String, String> properties) throws IOException {
+                                      String collectedAudioDir, HTKDictionary dictionary, Map<String, String> properties) throws IOException {
     List<Result> resultsForExercise = pair.getValue();
     if (resultsForExercise.isEmpty()) return;
-    String exid = resultsForExercise.iterator().next().id;
-    Exercise exercise = idToEx.get(exid);
+    Exercise exercise = idToEx.get(exid2);
     if (exercise == null) {
-      logger.info("skipping ex id " + exid);
+      logger.info("skipping ex id " + exid2 + " since not in  " + idToEx.keySet());
       return;
     }
-    String refSentence = exercise.getRefSentence();
+    getBest(missingSlow, missingFast, newRefDir, bestDir, pair, collectedAudioDir, dictionary, properties, resultsForExercise, exid2, exercise);
+  }
+
+  private void getBest(FileWriter missingSlow, FileWriter missingFast, File newRefDir, File bestDir,
+                       Map.Entry<String, List<Result>> pair, String collectedAudioDir,
+                       HTKDictionary dictionary, Map<String, String> properties,
+                       List<Result> resultsForExercise, String exid, Exercise exercise) throws IOException {
+    //   String refSentence = exercise.getRefSentence();   // TODO switch on language
+    String refSentence = exercise.getEnglishSentence();
     refSentence = refSentence.replaceAll("\\p{P}", "");
     String[] split = refSentence.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
-    refSentence = getRefSentence(split);
+    refSentence = getRefSentence(split).trim();
     int refLength = split.length;
     String firstToken = split[0].trim();
     String lastToken = split[refLength-1].trim();
-   // logger.debug("refSentence " + refSentence + " length " + refLength + " first |" + firstToken + "| last |" +lastToken +"|");
+    // logger.debug("refSentence " + refSentence + " length " + refLength + " first |" + firstToken + "| last |" +lastToken +"|");
 
     File refDirForExercise = new File(newRefDir, exid);
     String key = pair.getKey();
-    if (key.equals(exid)) logger.error("huh?> not the same " + key + "  and " + exid);
+    if (!key.equals(exid)) logger.error("huh?> not the same " + key + "  and " + exid);
     //logger.debug("making dir " + key + " at " + refDirForExercise.getAbsolutePath());
     refDirForExercise.mkdir();
 
@@ -488,33 +467,23 @@ public class SplitAudio {
       String doubled = refSentence + " " + refSentence;
       doubled = doubled.toUpperCase();
       Scores align = scoring.align(parent, testAudioFileNoSuffix, doubled);
-      //  logger.debug("\tgot " + align + " for " + name);
+      logger.debug("\tgot " + align + " for " + name + " for " +doubled);
       float hydecScore = align.hydecScore;
 
       String wordLabFile = prependDeploy(parent,testAudioFileNoSuffix + ".words.lab");
       try {
         GetAlignments alignments = new GetAlignments(first,last, refLength, name, wordLabFile).invoke();
-   /*       float fastScore = alignments.getFastScore();
-          float slowScore = alignments.getSlowScore();
-
-          if (fastScore > bestFast) {
-            bestFast = fastScore;
-          }
-          if (slowScore > bestSlow) {
-            bestSlow = slowScore;
-          }*/
-        boolean valid = alignments.isValid();
+         boolean valid = alignments.isValid();
         if (!valid) {
           logger.warn("\n---> ex " + id + " " + exercise.getEnglishSentence() +
             " score " + hydecScore +
             " invalid alignment : " + alignments.getWordSeq() + " : " + alignments.getScores());
         }
-        if (bestTotal < hydecScore && valid && hydecScore > 0.1f) {//fastScore + slowScore) {
+        if (bestTotal < hydecScore && valid && hydecScore > 0.1f) {
           bestTotal = hydecScore;
           best = testAudioFileNoSuffix;
 
           logger.debug("ex " + id+ " " + exercise.getEnglishSentence() +" best so far is " + best + " score " + bestTotal + " hydecScore " + hydecScore);
-          //  " fast " + fastScore + "/" + slowScore);
           writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
             alignments);
 
@@ -690,20 +659,11 @@ public class SplitAudio {
     }
 
     public boolean isValid() {
-      return lowWordScores < 2;//starts >= 2 && ends >= 2;
+      return lowWordScores < 2;
     }
 
     public String getWordSeq() { return wordSeq; }
     public String getScores() { return scores; }
-/*
-    public float getFastScore() {
-      return fastScore;
-    }
-
-    public float getSlowScore() {
-      return slowScore;
-    }
-*/
 
     public GetAlignments invoke() throws IOException {
       SortedMap<Float,TranscriptEvent> timeToEvent = new TranscriptReader().readEventsFromFile(wordLabFile);
@@ -737,7 +697,7 @@ public class SplitAudio {
         if (score < 0.2f) lowWordScores++;
 
         tokenCount++;
-        if (tokenCount == 1 && first.equals(word)) {
+        if (tokenCount == 1 && first.equalsIgnoreCase(word)) {
           if (!didFirst) {
             start1 = transcriptEvent.start;
           } else {
@@ -746,7 +706,7 @@ public class SplitAudio {
           if (debug) logger.debug("\t1 token " + tokenCount + " vs " + (refLength-1));
 
         }
-        if (tokenCount == refLength && last.equals(word)) {
+        if (tokenCount == refLength && last.equalsIgnoreCase(word)) {
           if (!didFirst) {
             end1 = transcriptEvent.end;
             if (debug) logger.debug("\tgot end of fast, token " + tokenCount);
@@ -781,6 +741,53 @@ public class SplitAudio {
       pathname = deployPath + File.separator + pathname;
     }
     return pathname;
+  }
+
+
+  private void checkLTS(List<Exercise> exercises, LTS lts) {
+    try {
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("ltsIssues.txt"), FileExerciseDAO.ENCODING));
+
+      SmallVocabDecoder svd = new SmallVocabDecoder();
+      int errors = 0;
+      for (Exercise e : exercises) {
+        String id = e.getID();
+
+        if (checkLTS(Integer.parseInt(id), writer, svd, lts, e.getEnglishSentence(), e.getRefSentence())) errors++;
+      }
+
+      if (errors > 0) logger.error("found " + errors + " lts errors");
+      writer.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private boolean checkLTS(int id, BufferedWriter writer, SmallVocabDecoder svd, LTS lts, String english, String foreignLanguagePhrase) {
+    List<String> tokens = svd.getTokens(foreignLanguagePhrase);
+    boolean error = false;
+    try {
+
+      for (String token : tokens) {
+        String[][] process = lts.process(token);
+        if (process == null) {
+          String message = "couldn't do lts on exercise #" + (id - 1) + " token '" + token +
+            "' length " + token.length() + " trim '" + token.trim() +
+            "' " +
+            " '" + foreignLanguagePhrase + "' english = '" + english + "'";
+          logger.error(message);
+          //logger.error("\t tokens " + tokens + " num =  " + tokens.size());
+
+          writer.write(message);
+          writer.write("\n");
+          error = true;
+        }
+      }
+    } catch (Exception e) {
+      logger.error("couldn't do lts on " + (id - 1) + " " + foreignLanguagePhrase + " " + english);
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+    return error;
   }
 
   public static void main(String [] arg) {
