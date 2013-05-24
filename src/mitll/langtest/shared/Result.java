@@ -112,7 +112,8 @@ public class Result implements IsSerializable {
   @Override
   public String toString() {
     return "Result #" + uniqueID + "\t\tby user " + userid + "\texid " + id + " " +
-        (flq ? "flq" : "english") + " " + (spoken ? "spoken" : "written") + " audioType : " + audioType +
+        (flq ? "flq" : "english") + "  ans " +answer+
+      " " + (spoken ? "spoken" : "written") + " audioType : " + audioType +
         " valid " + valid + " " + (correct ? "correct":"incorrect") + " score " + pronScore;
   }
 }
