@@ -13,6 +13,7 @@ import mitll.langtest.server.scoring.Scores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
@@ -42,7 +43,7 @@ import java.util.concurrent.Future;
  * To change this template use File | Settings | File Templates.
  */
 public class SplitAudio {
-  private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
+  private static Logger logger = Logger.getLogger(SplitAudio.class);
 
   private boolean debug;
   private static final int MAX = 12000;
@@ -52,43 +53,148 @@ public class SplitAudio {
   private AudioCheck audioCheck = new AudioCheck();
 
   /**
-    * Go through all exercise, find all results for each, take best scoring audio file from results
-   *
-   * e.g. for dari:
-   *
-   * 10 dariAudio dari 9000-dari-course-examples.xlsx
-   *
-   * for msa:
-   *
-   * 20 msaAudio msa 3700-msa-course-examples.xlsx
-  * @param numThreads
-  * @param audioDir
-  */
-  // TODO later take data and use database so we keep metadata about audio
+   * read the english spreadsheet
+   * find items in the word list that match
+   * for the exercises with matches, find audio recorded by native speakers (exp = 240 months)
+   * MAYBE try to find partial matches...?
+   */
+  private void convertEnglish(int numThreads, String audioDir) {
+    String language = "english";
+    final String configDir = getConfigDir(language);
+
+    DatabaseImpl unitAndChapter = new DatabaseImpl(
+      configDir,
+      language,
+      configDir+
+        "ESL_ELC_5071-30books_chapters.xlsx");
+
+    DatabaseImpl db2 = new DatabaseImpl(
+      configDir,
+      language,
+      configDir +
+        "5100-english-no-gloss.txt");
+
+    Map<String, List<Result>> idToResults = getIDToResultsMap(db2);
+            logger.warn("id->results " +idToResults.size() + " e.g. " +idToResults.keySet().iterator().next());
+    Map<Long, User> userMap = new UserDAO(db2).getUserMap();
+
+    Map<String, Exercise> englishToEx = new HashMap<String, Exercise>();
+    Map<String, List<Result>> englishToResults2 = new HashMap<String, List<Result>>();
+    int count = 0;
+    for (Exercise e : db2.getExercises()) {
+      String englishSentence = e.getEnglishSentence();
+      if (englishSentence == null) {
+        //logger.warn("huh? no english sentence for " + e.getID());
+        englishSentence = e.getRefSentence();
+      }
+
+      if (englishSentence == null) logger.warn("huh? no english sentence for " + e.getID());
+      else {
+        String key = englishSentence.toLowerCase().trim();
+
+        // make sure we have result for exercise
+        // make sure the result is by native speaker
+        List<Result> resultList = idToResults.get(e.getID()+"/0");
+
+        boolean nativeResult = false;
+        if (resultList != null) {
+          for (Result r : resultList) {
+            User user = userMap.get(r.userid);
+            if (user == null) logger.warn("huh? no user " + r.userid + " for " + r);
+            else {
+              if (user.experience > 239) {
+                nativeResult = true;
+                List<Result> resultList1 = englishToResults2.get(key);
+                if (resultList1 == null) englishToResults2.put(key, resultList1 = new ArrayList<Result>());
+                resultList1.add(r);
+              }
+            }
+          }
+          if (!nativeResult) {
+            if (count++ < 10) logger.warn("no native recordings for " +e.getID());
+          }
+        }
+        else {
+          /*if (count++ < 100)*/ logger.warn("no results for ex " + e.getID());
+        }
+        if (nativeResult) {
+          if (englishToEx.containsKey(key)) {
+            //logger.warn("skipping duplicate entry : " + e.getID() + " " + englishSentence);
+          } else {
+            englishToEx.put(key, e);
+          }
+        }
+      }
+    }
+
+    logger.warn("no native recordings for " + count + " items.");
+
+  //  Map<String, Exercise> englishToEx2 = new HashMap<String, Exercise>();
+
+  //  Map<Exercise, Exercise> chapterToNonChapter = new HashMap<Exercise, Exercise>();
+
+    Map<String,Exercise> idToEx = new HashMap<String, Exercise>();
+    Map<String, List<Result>> idToResults2 = new HashMap<String, List<Result>>();
+
+    int skipped = 0;
+    Map<Exercise, List<Result>> chapterToResult = new HashMap<Exercise, List<Result>>();
+    for (Exercise e : unitAndChapter.getExercises()) {
+      String key = e.getEnglishSentence().toLowerCase().trim();
+      if (englishToEx.containsKey(key)) {
+        //logger.warn("skipping duplicate entry : " + e.getID() + " "+ e.getEnglishSentence());
+        //chapterToNonChapter.put(e, englishToEx.get(key));
+        List<Result> value = englishToResults2.get(key);
+        chapterToResult.put(e,englishToResults2.get(key));
+        idToEx.put(e.getID(),e);
+        if (value.isEmpty()) logger.warn("huh? no results for ex " +key); //never happen
+        idToResults2.put(e.getID()+"/0", value);
+      } else {
+        if (skipped++ < 10) logger.warn("skipping " + e.getID() + " : " + key);// + " no match in " +englishToEx.size() + " entries.");
+      }
+      //  else englishToEx2.put(key,e);
+    }
+    logger.warn("overlap is " + idToEx.size() + "/" + chapterToResult.size()+   "/"+idToResults2.size()+
+      " out of " + unitAndChapter.getExercises().size() + " skipped " + skipped);
+
+    try {
+      convertExamples(numThreads, audioDir,language,idToEx,idToResults2);
+    } catch (IOException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    } catch (InterruptedException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    } catch (ExecutionException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+  }
+
   private void convertExamples(int numThreads, String audioDir, String language,String spreadsheet) throws Exception{
-    String installPath = ".";
-    String dariConfig = File.separator +
-      "war" +
-      File.separator +
-      "config" +
-      File.separator +
-      language +
-      File.separator;
-    final String configDir = installPath + dariConfig;
+    convertExamples(numThreads, audioDir, language, spreadsheet,"template");
+  }
+
+    /**
+      * Go through all exercise, find all results for each, take best scoring audio file from results
+     *
+     * e.g. for dari:
+     *
+     * 10 dariAudio dari 9000-dari-course-examples.xlsx
+     *
+     * for msa:
+     *
+     * 20 msaAudio msa 3700-msa-course-examples.xlsx
+    * @param numThreads
+    * @param audioDir
+    */
+  // TODO later take data and use database so we keep metadata about audio
+  private void convertExamples(int numThreads, String audioDir, String language,String spreadsheet,String dbName) throws Exception{
+    final String configDir = getConfigDir(language);
+
     DatabaseImpl db = new DatabaseImpl(
       configDir,
-      "template",
+      dbName,
       configDir+
         spreadsheet);
 
-    final Map<String,Exercise> idToEx = new HashMap<String, Exercise>();
-    final FileWriter missingSlow = new FileWriter(configDir + "missingSlow.txt");
-    final FileWriter missingFast = new FileWriter(configDir + "missingFast.txt");
-
-    List<Exercise> exercises = db.getExercises();
-    logger.debug("Got " + exercises.size() + " exercises");
-    for (Exercise e: exercises) idToEx.put(e.getID(),e);
-
+    final Map<String, Exercise> idToEx = getIdToExercise(db);
     Map<String, List<Result>> idToResults = getIDToResultsMap(db);
 
     if (true) {
@@ -98,15 +204,23 @@ public class SplitAudio {
           idToResults.put(resultID, new ArrayList<Result>());
         }
       }
-      if (exercises.size() != idToResults.size()) logger.error("\n\n\nhuh? id->results map size " + idToResults.size());
+      //if (exercises.size() != idToResults.size()) logger.error("\n\n\nhuh? id->results map size " + idToResults.size());
     }
 
-    final String placeToPutAudio = ".."+File.separator+audioDir + File.separator;
+    convertExamples(numThreads, audioDir, language,/* configDir,*/ idToEx, idToResults);
+  }
+
+  private void convertExamples(int numThreads, String audioDir, String language,// String configDir,
+                               Map<String, Exercise> idToEx,
+                               Map<String, List<Result>> idToResults) throws IOException, InterruptedException, ExecutionException {
+    final String configDir = getConfigDir(language);
+
+
+    final String placeToPutAudio = ".."+ File.separator+audioDir + File.separator;
     final File newRefDir = new File(placeToPutAudio + "refAudio");
     newRefDir.mkdir();
     final File bestDir = new File(placeToPutAudio + "bestAudio");
     bestDir.mkdir();
-
 
     final Map<String, String> properties = getProperties(language, configDir);
     ASRScoring scoring = getAsrScoring(".",null,properties);
@@ -116,6 +230,9 @@ public class SplitAudio {
     final HTKDictionary dict = scoring.getDict();
 
     ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
+
+    final FileWriter missingSlow = new FileWriter(configDir + "missingSlow.txt");
+    final FileWriter missingFast = new FileWriter(configDir + "missingFast.txt");
     List<Future<?>> futures = getSplitAudioFutures(idToEx, missingSlow, missingFast, idToResults, placeToPutAudio,
       newRefDir, bestDir,
       properties, dict, executorService);
@@ -128,6 +245,27 @@ public class SplitAudio {
     executorService.shutdown();
   }
 
+  private String getConfigDir(String language) {
+    String installPath = ".";
+    String dariConfig = File.separator +
+      "war" +
+      File.separator +
+      "config" +
+      File.separator +
+      language +
+      File.separator;
+    return installPath + dariConfig;
+  }
+
+  private Map<String, Exercise> getIdToExercise(DatabaseImpl db) {
+    final Map<String,Exercise> idToEx = new HashMap<String, Exercise>();
+
+    List<Exercise> exercises = db.getExercises();
+    logger.debug("Got " + exercises.size() + " exercises");
+    for (Exercise e: exercises) idToEx.put(e.getID(),e);
+    return idToEx;
+  }
+
   private void blockUntilComplete(List<Future<?>> futures) throws InterruptedException, ExecutionException {
     logger.info("got " +futures.size() + " futures");
     for (Future<?> future : futures) {
@@ -136,7 +274,12 @@ public class SplitAudio {
     logger.info("all " +futures.size() + " futures complete");
   }
 
-  private List<Future<?>> getSplitAudioFutures(final Map<String, Exercise> idToEx, final FileWriter missingSlow, final FileWriter missingFast, Map<String, List<Result>> idToResults, final String placeToPutAudio, final File newRefDir, final File bestDir, final Map<String, String> properties, final HTKDictionary dict, ExecutorService executorService) {
+  private List<Future<?>> getSplitAudioFutures(final Map<String, Exercise> idToEx,
+                                               final FileWriter missingSlow, final FileWriter missingFast,
+                                               Map<String, List<Result>> idToResults,
+                                               final String placeToPutAudio, final File newRefDir, final File bestDir,
+                                               final Map<String, String> properties,
+                                               final HTKDictionary dict, ExecutorService executorService) {
     List<Future<?>> futures = new ArrayList<Future<?>>();
     for (final Map.Entry<String, List<Result>> pair : idToResults.entrySet()) {
       Future<?> submit = executorService.submit(new Runnable() {
@@ -273,7 +416,8 @@ public class SplitAudio {
     refDirForExercise.mkdir();
 
     File bestDirForExercise = new File(bestDir, exid);
-  //  logger.debug("making dir " + key + " at " + bestDirForExercise.getAbsolutePath());
+    logger.debug("for '" +refSentence +
+      "' making dir " + key + " at " + bestDirForExercise.getAbsolutePath());
     bestDirForExercise.mkdir();
     final ASRScoring scoring = getAsrScoring(".",dictionary,properties);
     String best = getBestFilesFromResults(scoring, resultsForExercise, exercise, refSentence,
@@ -341,7 +485,9 @@ public class SplitAudio {
 
       //logger.debug("parent " + parent + " running result " + r.uniqueID + " for exercise " + id + " and audio file " + name);
 
-      Scores align = scoring.align(parent, testAudioFileNoSuffix, refSentence + " " + refSentence);
+      String doubled = refSentence + " " + refSentence;
+      doubled = doubled.toUpperCase();
+      Scores align = scoring.align(parent, testAudioFileNoSuffix, doubled);
       //  logger.debug("\tgot " + align + " for " + name);
       float hydecScore = align.hydecScore;
 
@@ -641,7 +787,8 @@ public class SplitAudio {
     try {
       int numThreads = Integer.parseInt(arg[0]);
       String audioDir = arg[1];
-      new SplitAudio().convertExamples(numThreads, audioDir, arg[2], arg[3]);
+      // new SplitAudio().convertExamples(numThreads, audioDir, arg[2], arg[3]);
+       new SplitAudio().convertEnglish(numThreads,audioDir);
     } catch (Exception e) {
       e.printStackTrace();
     }
