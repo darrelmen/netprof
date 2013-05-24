@@ -36,6 +36,16 @@ public class FlashcardExerciseList implements ListInterface {
   }
 
   @Override
+  public int getComplete() {
+    return 0;  //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  @Override
+  public int getPercentComplete() {
+    return 0;
+  }
+
+  @Override
   public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {
     this.factory = factory;
   }
