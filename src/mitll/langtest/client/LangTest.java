@@ -1,5 +1,7 @@
 package mitll.langtest.client;
 
+import com.github.gwtbootstrap.client.ui.ProgressBar;
+import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -65,8 +67,8 @@ import java.util.Map;
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   // TODO : consider putting these in the .css file?
-  private static final int HEADER_HEIGHT = 90;
-  private static final int FOOTER_HEIGHT = 20;
+  private static final int HEADER_HEIGHT = 160;
+  private static final int FOOTER_HEIGHT = 50;
   private static final int EXERCISE_LIST_WIDTH = 210;
   private static final int EAST_WIDTH = 90;
 
@@ -131,6 +133,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
   }
 
+  private ProgressBar progressBar;
   /**
    * Use DockLayout to put a header at the top, exercise list on the left, and eventually
    * the current exercise in the center.  There is also a status on line on the bottom.
@@ -181,12 +184,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     VerticalPanel exerciseListPanel = new VerticalPanel();
 
     widgets.addNorth(hp, HEADER_HEIGHT);
-    widgets.addSouth(status = new Label(), footerHeight);
+
+    if (isCRTDataCollectMode()) {
+      addProgressBar(widgets);
+    }
     if ((props.isMinimalUI() && !props.isGrading()) && !props.isAdminView()) {
       exerciseListPanel.setVisible(false);
       widgets.addWest(exerciseListPanel, 10);
-    }
-    else {
+    } else {
       widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH);
     }
     // set up center panel, initially with flash record panel
@@ -225,6 +230,89 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     modeSelect();
   }
+
+  private void addProgressBar(DockLayoutPanel widgets) {
+    progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
+    progressBar.setWidth("70%");
+    progressBar.setPercent(100);
+    progressBar.setText("No items completed.");
+    progressBar.setColor(ProgressBarBase.Color.DEFAULT);
+    progressBar.addStyleName("leftFifteenPercentMargin");
+    widgets.addSouth(progressBar, 50);
+  }
+
+  /**
+   * JavaScript code to detect available availability of a
+   * particular font in a browser using JavaScript and CSS.
+   *
+   * Author : Lalit Patel
+   * Website: http://www.lalit.org/lab/javascript-css-font-detect/
+   * License: Apache Software License 2.0
+   *          http://www.apache.org/licenses/LICENSE-2.0
+   * Version: 0.15 (21 Sep 2009)
+   *          Changed comparision font to default from sans-default-default,
+   *          as in FF3.0 font of child element didn't fallback
+   *          to parent element if the font is missing.
+   * Version: 0.2 (04 Mar 2012)
+   *          Comparing font against all the 3 generic font families ie,
+   *          'monospace', 'sans-serif' and 'sans'. If it doesn't match all 3
+   *          then that font is 100% not available in the system
+   * Version: 0.3 (24 Mar 2012)
+   *          Replaced sans with serif in the list of baseFonts
+   */
+
+  /**
+   * Usage: d = new Detector();
+   *        d.detect('font name');
+   */
+  public native boolean checkFont(String fontToCheck) /*-{
+
+      var Detector = function () {
+          // a font will be compared against all the three default fonts.
+          // and if it doesn't match all 3 then that font is not available.
+          var baseFonts = ['monospace', 'sans-serif', 'serif'];
+
+          //we use m or w because these two characters take up the maximum width.
+          // And we use a LLi so that the same matching fonts can get separated
+          var testString = "mmmmmmmmmmlli";
+
+          //we test using 72px font size, we may use any size. I guess larger the better.
+          var testSize = '72px';
+
+          var h = document.getElementsByTagName("body")[0];
+
+          // create a SPAN in the document to get the width of the text we use to test
+          var s = document.createElement("span");
+          s.style.fontSize = testSize;
+          s.innerHTML = testString;
+          var defaultWidth = {};
+          var defaultHeight = {};
+          for (var index in baseFonts) {
+              //get the default width for the three base fonts
+              s.style.fontFamily = baseFonts[index];
+              h.appendChild(s);
+              defaultWidth[baseFonts[index]] = s.offsetWidth; //width for the default font
+              defaultHeight[baseFonts[index]] = s.offsetHeight; //height for the defualt font
+              h.removeChild(s);
+          }
+
+          function detect(font) {
+              var detected = false;
+              for (var index in baseFonts) {
+                  s.style.fontFamily = font + ',' + baseFonts[index]; // name of the font along with the base font for fallback.
+                  h.appendChild(s);
+                  var matched = (s.offsetWidth != defaultWidth[baseFonts[index]] || s.offsetHeight != defaultHeight[baseFonts[index]]);
+                  h.removeChild(s);
+                  detected = detected || matched;
+              }
+              return detected;
+          }
+
+          this.detect = detect;
+      }
+      var d = new Detector();
+      return d.detect(fontToCheck);
+  }-*/;
 
   /**
    * @see mitll.langtest.client.exercise.SectionExerciseList#getEmailWidget()
@@ -468,6 +556,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       exerciseList.setFactory(new FlashcardExercisePanelFactory(service, this, this), userManager, 1);
     } else {
       exerciseList.setFactory(new ExercisePanelFactory(service, this, this), userManager, 1);
+    }
+
+    if (getLanguage().equalsIgnoreCase("Pashto") && !checkFont(
+//      "Nafees Pakistani Naskh" // testing
+        "Pashto Kror Asiatype"
+    )) {
+      showErrorMessage("Pashto Kror Asiatype not installed","Pashto Kror Asiatype not installed.<p/>" +
+        "Text may be hard to read.  Try to get the font from " +
+        "<a href='http://www.pukhto.net/software-details.php?soft_id=12&active=6'>" +
+        "http://www.pukhto.net/software-details.php?soft_id=12&active=6" +
+        "</a>");
     }
   }
 
@@ -713,7 +812,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     VerticalPanel dialogVPanel = new VerticalPanel();
     dialogVPanel.addStyleName("dialogVPanel");
-    dialogVPanel.add(new Label(msg));
+    dialogVPanel.add(new HTML(msg));
 
     dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
     dialogVPanel.add(closeButton);
@@ -729,7 +828,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public void showStatus(String msg) { status.setText(msg); }
 
-  public boolean loadNextExercise(Exercise current) { return exerciseList.loadNextExercise(current);  }
+  public boolean loadNextExercise(Exercise current) {
+    progressBar.setPercent(100-exerciseList.getPercentComplete());
+    progressBar.setText(exerciseList.getComplete() + " complete.");
+    return exerciseList.loadNextExercise(current);
+  }
   public boolean loadPreviousExercise(Exercise current) { return exerciseList.loadPreviousExercise(current);  }
   public boolean onFirst(Exercise current) { return exerciseList.onFirst(current); }
 }
