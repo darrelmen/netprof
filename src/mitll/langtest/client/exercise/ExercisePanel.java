@@ -12,15 +12,19 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -57,7 +61,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   private static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
   private static final String TEACHER_PROMPT = "Record the phrase above by clicking the record button, speak, and then stop when finished. ";
   private static final String LEFT_ARROW_TOOLTIP = "Press the left arrow key to go to the previous item.";
-  private static final String RIGHT_ARROW_TOOLTIP = "Press the right arrow key to go to the next item.";
+  private static final String RIGHT_ARROW_TOOLTIP = "Press enter to go to the next item.";
   private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
   private static final String ENGLISH = "English";
   private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
@@ -88,6 +92,8 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     this.service = service;
     this.feedback = userFeedback;
     addItemHeader(e);
+
+    enableNextOnlyWhenAllCompleted = !getLanguage().equalsIgnoreCase("Pashto");
 
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
@@ -301,7 +307,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
       next.setEnabled(false);
     }
     buttonRow.add(next);
-    if (useKeyHandler) next.setTitle(RIGHT_ARROW_TOOLTIP);
+    if (true) next.setTitle(RIGHT_ARROW_TOOLTIP);
 
     DOM.setElementAttribute(next.getElement(), "id", "nextButton");
 
@@ -323,8 +329,8 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   }
 
   private void addKeyHandler(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                             final ExerciseController controller, boolean useKeyHandler) {
-    if (useKeyHandler) {
+                             final ExerciseController controller, final boolean useKeyHandler) {
+   // if (useKeyHandler) {
       keyHandler = Event.addNativePreviewHandler(new
                                                      Event.NativePreviewHandler() {
 
@@ -333,8 +339,11 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
                                                          NativeEvent ne = event.getNativeEvent();
                                                          int keyCode = ne.getKeyCode();
                                                          boolean isLeft = keyCode == KeyCodes.KEY_LEFT;
-                                                         boolean isRight = keyCode == KeyCodes.KEY_RIGHT;
-                                                         if ((isLeft || isRight) && event.getTypeInt() == 512 &&
+                                                      //   boolean isRight = keyCode == KeyCodes.KEY_RIGHT;
+                                                         boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
+
+                                                      //   System.out.println("key code is " +keyCode);
+                                                         if (((useKeyHandler && isLeft) || isEnter) && event.getTypeInt() == 512 &&
                                                              "[object KeyboardEvent]".equals(ne.getString())) {
                                                            ne.preventDefault();
 
@@ -356,7 +365,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
                                                        }
                                                      });
       //System.out.println("getNextAndPreviousButtons made click handler " + keyHandler);
-    }
+   // }
   }
 
   /**
@@ -463,23 +472,44 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     int i = 1;
     int user = controller.getUser();
     final Set<Widget> incomplete = new HashSet<Widget>();
-    incomplete.addAll(answers);
+
+    boolean allHaveText = true;
     for (final Widget tb : answers) {
       String text = ((HasValue<String>) tb).getValue();
-      service.addTextAnswer(user, exercise, i++, text, new AsyncCallback<Void>() {
-        public void onFailure(Throwable caught) {
-          userFeedback.showErrorMessage("Server error", "Couldn't post answers for exercise.");
-        }
+      if (text.length() == 0) allHaveText = false;
+    }
+    if (!allHaveText) {
+      showPopup("Please answer all questions.");
+    } else {
+      incomplete.addAll(answers);
+      for (final Widget tb : answers) {
+        String text = ((HasValue<String>) tb).getValue();
+        service.addTextAnswer(user, exercise, i++, text, new AsyncCallback<Void>() {
+          public void onFailure(Throwable caught) {
+            userFeedback.showErrorMessage("Server error", "Couldn't post answers for exercise.");
+          }
 
-        public void onSuccess(Void result) {
-          incomplete.remove(tb);
-          if (incomplete.isEmpty()) {
-            controller.loadNextExercise(completedExercise);
+          public void onSuccess(Void result) {
+            incomplete.remove(tb);
+            if (incomplete.isEmpty()) {
+              controller.loadNextExercise(completedExercise);
+            }
           }
         }
+        );
       }
-      );
     }
+  }
+
+  private void showPopup(String toShow) {
+    final PopupPanel popupImage = new PopupPanel(true);
+    popupImage.add(new HTML(toShow));
+    popupImage.showRelativeTo(next);
+    Timer t = new Timer() {
+      @Override
+      public void run() { popupImage.hide(); }
+    };
+    t.schedule(3000);
   }
 
   /**
@@ -503,6 +533,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     boolean allowPaste = controller.isDemoMode();
     final TextBox answer = allowPaste ? new TextBox() : new NoPasteTextBox();
     answer.setWidth(ANSWER_BOX_WIDTH);
+    answer.setFocus(true);
     if (!exercise.promptInEnglish) {
       answer.setDirection(HasDirection.Direction.RTL);
     }
@@ -523,6 +554,16 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     }
     else {
       return answer;
+    }
+  }
+
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+
+    Widget widget = answers.get(0);
+    if (widget instanceof FocusWidget) {
+      ((FocusWidget)widget).setFocus(true);
     }
   }
 
