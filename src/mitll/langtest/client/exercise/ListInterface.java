@@ -28,8 +28,6 @@ public interface ListInterface extends RequiresResize {
    */
   void getExercises(long userID);
 
-  //void getExercisesInOrder();
-
   /**
    * @see mitll.langtest.client.LangTest#makeExerciseList(com.google.gwt.user.client.ui.Panel, boolean)
    * @param exercise_title
@@ -63,4 +61,8 @@ public interface ListInterface extends RequiresResize {
    * @see mitll.langtest.client.LangTest#resetState()
    */
   void removeCurrentExercise();
+
+  int getPercentComplete();
+
+  int getComplete();
 }
