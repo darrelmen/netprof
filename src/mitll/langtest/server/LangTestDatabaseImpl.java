@@ -928,8 +928,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getSessions();
   }
 
+  /**
+   * @see mitll.langtest.client.monitoring.MonitoringManager#doSessionQuery(com.google.gwt.user.client.ui.Panel)
+   * @return
+   */
   public Map<String,Number> getResultStats() {
     return db.getResultStats();
+  }
+
+  @Override
+  public Map<Integer, Map<String, Map<String, Integer>>> getGradeCountPerExercise() {
+    return db.getGradeCountPerExercise();
   }
 
   @Override
