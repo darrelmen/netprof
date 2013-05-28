@@ -305,7 +305,8 @@ public class GradingResultManager extends ResultManager {
     service.addGrade(exerciseID, toAdd, new AsyncCallback<CountAndGradeID>() {
       public void onFailure(Throwable caught) { Window.alert("Couldn't contact server."); }
       public void onSuccess(CountAndGradeID result) {
-        feedback.showStatus("Now " + result.count + " graded answers.");
+        feedback.showStatus("Now " + result.count + " graded out of " +result.resultCount +
+          " answers (" + (int)(100f*(float)result.count/result.resultCount) + "%)");
         toAdd.id = (int) result.gradeID;
         resultToGrade.put(resultID, toAdd);
         System.out.println("\tgrade added at " + new Date() + " adding result " + resultID + " -> grade " + toAdd +
