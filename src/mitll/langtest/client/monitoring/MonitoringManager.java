@@ -90,13 +90,13 @@ public class MonitoringManager {
     dialogBox.setHeight("80%");
     dialogVPanel.setHeight("80%");
 
-    int left = (Window.getClientWidth()) / 20;
-    int top  = (Window.getClientHeight()) / 20;
+    int left = (Window.getClientWidth()) / 40;
+    int top  = (Window.getClientHeight()) / 160;
     dialogBox.setPopupPosition(left, top);
 
     ScrollPanel sp = new ScrollPanel();
-    sp.setHeight((int)(Window.getClientHeight()*0.8f) + "px");
-    sp.setWidth((int)(Window.getClientWidth()*0.9f) + "px");
+    sp.setHeight((int)(Window.getClientHeight()*0.88f) + "px");
+    sp.setWidth((int)(Window.getClientWidth()*0.90f) + "px");
 
     final VerticalPanel vp = new VerticalPanel();
     vp.setWidth((int)(Window.getClientWidth()*0.88f) + "px");
@@ -106,6 +106,7 @@ public class MonitoringManager {
     doDesiredQuery(getVPanel(vp));
     doSessionQuery(getVPanel(vp));
     doResultQuery(getVPanel(vp));
+    doGradeQuery(getVPanel(vp));
     doGenderQuery(getVPanel(vp));
    // doTimeUntilItems(getSPanel(vp));
     doResultLineQuery(getVPanel(vp));
@@ -339,6 +340,10 @@ public class MonitoringManager {
         final double totalHours = total.doubleValue();
         final double avgSecs = result.get("avgSecs").doubleValue();
         final int badRecordings = result.get("badRecordings").intValue();
+
+        vp.add(addGradeInfo(result));
+
+
         vp.add(new HTML("<h2>Session Info</h2>"));
 
         service.getSessions(new AsyncCallback<List<Session>>() {
@@ -346,12 +351,12 @@ public class MonitoringManager {
           public void onFailure(Throwable caught) {}
 
           @Override
-          public void onSuccess(List<Session> result) {
+          public void onSuccess(List<Session> sessions) {
             long totalTime = 0;
             long total = 0;
-            long valid = result.size();
+            long valid = sessions.size();
             Map<Long,Integer> rateToCount = new HashMap<Long, Integer>();
-            for (Session s: result) {
+            for (Session s: sessions) {
               totalTime += s.duration;
               total += s.numAnswers;
 
@@ -398,6 +403,9 @@ public class MonitoringManager {
 
             flex.setText(row,0,"Avg audio collected/" + item);
             flex.setText(row++,1,""+ roundToHundredth(avgSecs) + " sec");
+
+
+
             vp.add(flex);
             getRateChart(rateToCount, vp);
           }
@@ -405,6 +413,46 @@ public class MonitoringManager {
       }
     });
 
+  }
+
+  private Panel addGradeInfo(Map<String, Number> result) {
+    VerticalPanel vp = new VerticalPanel();
+    HTML html = new HTML("<h2>Grade Stats</h2>");
+    vp.add(html);
+
+    for (int i = 0; i < 3; i++) {
+      if (result.containsKey("totalGraded_" + i)) {
+        HTML html2 = new HTML("<h3>Grade Round #" + (i + 1) +
+          "</h2>");
+        vp.add(html2);
+        FlexTable flex = new FlexTable();
+
+        final int graded = result.get("totalGraded_" + i).intValue();
+        final int validGrades = result.get("validGraded_" + i).intValue();
+        final int percentGraded = result.get("percentGraded_" + i).intValue();
+        final int incorrect = result.get("incorrectGraded_" + i).intValue();
+        final int correct = result.get("correctGraded_" + i).intValue();
+        int row = 0;
+
+        flex.setText(row, 0, "Total Graded");
+        flex.setText(row++, 1, "" + graded + " (" + percentGraded + "% of " + answers +
+          ")");
+        flex.setText(row, 0, "% of Results graded");
+        flex.setText(row++, 1, "" + percentGraded + "%");
+        flex.setText(row, 0, "Total Valid Graded (1-5)");
+        flex.setText(row++, 1, "" + validGrades + " (" + getPercent(validGrades, graded) + ")");
+        flex.setText(row, 0, "Incorrect Grades (1-3)");
+        flex.setText(row++, 1, "" + incorrect + " (" + getPercent(incorrect, validGrades) + " of valid)");
+        flex.setText(row, 0, "Correct Grades (4-5)");
+        flex.setText(row++, 1, "" + correct + " (" + getPercent(correct, validGrades) + " of valid)");
+        vp.add(flex);
+      }
+    }
+    return vp;
+  }
+
+  private String getPercent(int numer, int denom) {
+    return (int)(100f*(float)numer/(float)denom) + "%";
   }
 
   private float roundToHundredth(double totalHours) {
@@ -593,6 +641,65 @@ public class MonitoringManager {
         vp.add(getGenderCounts(result.get("maleCount"), result.get("femaleCount")));
       }
     });
+  }
+
+  private void doGradeQuery(final Panel vp) {
+    service.getGradeCountPerExercise(new AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        Window.alert("couldn't contact server.");
+      }
+
+      @Override
+      public void onSuccess(Map<Integer, Map<String, Map<String, Integer>>> result) {
+        for (int i = 0; i < 3; i++) {
+          Map<String, Map<String, Integer>> gradeSet = result.get(i);
+          if (gradeSet != null) {
+            Map<String, Integer> correct = gradeSet.get("correct");
+            List<String> keys = new ArrayList<String>(correct.keySet());
+            System.out.println("keys are " + keys);
+            String sample = keys.isEmpty() ? "" : keys.iterator().next();
+            final boolean firstInt = Character.isDigit(sample.charAt(0));
+            Collections.sort(keys, new Comparator<String>() {
+              @Override
+              public int compare(String o1, String o2) {
+                String[] split = o1.split("/");
+                String r1 = split[0];
+                String q1 = split[1];
+
+                String[] split2 = o2.split("/");
+                String r2 = split2[0];
+                String q2 = split2[1];
+
+                int comp;
+                if (firstInt) {
+                  comp = safeCompare(r1, r2);
+                } else comp = o1.compareTo(o2);
+
+                if (comp != 0) return comp;
+                else {
+                  return safeCompare(q1, q2);
+                }
+              }
+            });
+
+            vp.add(getGradeCounts(i, 0, keys.size(), keys, correct, gradeSet.get("incorrect")));
+          }
+        }
+      }
+    });
+  }
+
+  private int safeCompare(String r1, String r2) {
+    int comp;
+    try {
+      int i = Integer.parseInt(r1);
+      int j = Integer.parseInt(r2);
+      comp = i < j ? -1 : i > j ? +1 : 0;
+    } catch (NumberFormatException e) {
+      comp = r1.compareTo(r2);
+    }
+    return comp;
   }
 
   private void doResultByDayQuery(final Panel vp) {
@@ -1057,6 +1164,52 @@ public class MonitoringManager {
 
     return new ColumnChart(data, options);
   }
+
+
+  private ColumnChart getGradeCounts(int round,int start, int end, List<String> keysToUse,
+                                   Map<String, Integer> correctToCount,
+                                   Map<String, Integer> incorrectToCount) {
+    Options options = Options.create();
+    options.setTitle("Number of " +
+      items +
+      " with this many " +
+      "grades" +
+      " correct/incorrect " + "Round #" +(round+1)//+
+    //  "(" + start + " - " + end +
+     // ")"
+    );
+
+    labelAxes(options,
+      "",
+      "Number of " +
+        items);
+
+    DataTable data = DataTable.create();
+    data.addColumn(AbstractDataTable.ColumnType.STRING, answers);
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "" +
+      items +
+      " w/ # " +
+      answers +
+      ", Correct");
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "" +
+      items +
+      " w/ # " +
+      answers +
+      ", Incorrect");
+
+    int r = 0;
+    for (String key : keysToUse) {
+      data.addRow();
+      data.setValue(r, 0, key);
+      data.setValue(r, 1, correctToCount.get(key));
+      data.setValue(r, 2, incorrectToCount.get(key));
+      r++;
+    }
+
+   return new ColumnChart(data, options);
+    //return new LineChart(data, options);
+  }
+
 
   private DataTable getDataTable(String slot, Map<String, Integer> langToCount, boolean isDate) {
     DataTable data = DataTable.create();
