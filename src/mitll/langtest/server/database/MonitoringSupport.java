@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.Session;
 import mitll.langtest.shared.User;
@@ -44,15 +45,17 @@ public class MonitoringSupport {
 
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
+  private final GradeDAO gradeDAO;
   private String outsideFile;
 
   public MonitoringSupport() {
-    this(null,null);
+    this(null,null,null);
   }
 
-  public MonitoringSupport(UserDAO userDAO, ResultDAO resultDAO) {
+  public MonitoringSupport(UserDAO userDAO, ResultDAO resultDAO, GradeDAO gradeDAO) {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
+    this.gradeDAO = gradeDAO;
   }
 
   public void setOutsideFile(String outsideFile) { this.outsideFile = outsideFile; }
@@ -151,11 +154,7 @@ public class MonitoringSupport {
 
     long rateInMillis = totalTime / total;
 
-    Map<String, Integer> exToCount = getExToCount(exercises);
-
-
-
-    List<Integer> overall = getCountArray(exToCount);
+    List<Integer> overall = getOverallResultCount(exercises);
     int totalAnswers = 0;
     for (Integer c : overall) totalAnswers += c;
     double numItems = (double) overall.size();
@@ -246,6 +245,43 @@ public class MonitoringSupport {
   }
 
   /**
+   * round->correct/incorrect->id->count
+   *
+   * @param exercises
+   * @return
+   */
+  public Map<Integer, Map<String, Map<String,Integer>>> getGradeCountPerExercise(List<Exercise> exercises) {
+    List<Result> results = getResults();
+    Map<Integer, List<Grade>> idToGrade = gradeDAO.getIdToGrade();
+    Map<Integer, Map<String, Map<String,Integer>>> roundToGradeToCount = new HashMap<Integer, Map<String, Map<String, Integer>>>();
+    for (Result r : results) {
+      String key = r.id + "/" + r.qid;
+
+      List<Grade> grades = idToGrade.get(r.uniqueID);
+      if (grades == null) {
+        //logger.warn("no grade for result " + key);
+      }
+      else {
+        for (Grade g : grades) {
+          Map<String, Map<String, Integer>> gradeToCount = roundToGradeToCount.get(g.gradeIndex);
+          if (gradeToCount == null)
+            roundToGradeToCount.put(g.gradeIndex, gradeToCount = new HashMap<String, Map<String, Integer>>());
+
+          if (g.grade > 0) {   // only valid grades
+            String key1 = (g.grade < 4) ? "incorrect" : "correct";
+            Map<String, Integer> resultToGrade = gradeToCount.get(key1);
+            if (resultToGrade == null) gradeToCount.put(key1, resultToGrade = getInitialIdToCount(exercises));
+            Integer c = resultToGrade.get(key);
+           // logger.debug("key " +key + " val " + c);
+            resultToGrade.put(key, (c == null) ? 1 : c + 1);
+          }
+        }
+      }
+    }
+    return roundToGradeToCount;
+  }
+
+  /**
    * Get results for only male or only female users.
    *
    * @param isMale
@@ -319,7 +355,6 @@ public class MonitoringSupport {
    * @return
    */
   private Map<String, Integer> getInitialIdToCount( List<Exercise> exercises) {
-//    List<Exercise> exercises = getExercises(useFile);
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
     for (Exercise e : exercises) {
       if (e.getNumQuestions() == 0) {
@@ -408,11 +443,9 @@ public class MonitoringSupport {
    * @return
    */
   public Map<String,List<Integer>> getResultPerExercise(List<Exercise> exercises) {
-    Map<String, Integer> exToCount = getExToCount(exercises);
-    List<Integer> overall = getCountArray(exToCount);
+    List<Integer> overall = getOverallResultCount(exercises);
     List<Integer> male = getCountArray(getExToCountMaleOrFemale(exercises,true));
     List<Integer> female = getCountArray(getExToCountMaleOrFemale(exercises,false));
-
 
     Map<String,List<Integer>> typeToList = new HashMap<String, List<Integer>>();
     typeToList.put("overall",overall);
@@ -421,6 +454,27 @@ public class MonitoringSupport {
 
     return typeToList;
   }
+
+  private List<Integer> getOverallResultCount(List<Exercise> exercises) {
+    Map<String, Integer> exToCount = getExToCount(exercises);
+    return getCountArray(exToCount);
+  }
+/*
+
+  public Map<String,List<Integer>> getGradeCountPerExercise(List<Exercise> exercises) {
+
+    List<Integer> overall = getOverallResultCount(exercises);
+    List<Integer> male = getCountArray(getExToCountMaleOrFemale(exercises,true));
+    List<Integer> female = getCountArray(getExToCountMaleOrFemale(exercises,false));
+
+    Map<String,List<Integer>> typeToList = new HashMap<String, List<Integer>>();
+    typeToList.put("overall",overall);
+    typeToList.put("male",male);
+    typeToList.put("female",female);
+
+    return typeToList;
+  }
+*/
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getResultCountsByGender()
@@ -610,6 +664,7 @@ public class MonitoringSupport {
 
   /**
    * Return some statistics related to the hours of audio that have been collected
+   * @see mitll.langtest.server.database.DatabaseImpl#getResultStats()
    * @return
    */
   public Map<String,Number> getResultStats() {
@@ -630,15 +685,51 @@ public class MonitoringSupport {
         }
       }
     }
+
     Map<String,Number> typeToStat = new HashMap<String,Number>();
+    for (int i = 0; i < 3; i++) {
+      GradeInfo gradeInfo = new GradeInfo(gradeDAO, i);
+      if (gradeInfo.gradeCount > 0) {
+        typeToStat.put("totalGraded_" +i, gradeInfo.gradeCount);
+        typeToStat.put("validGraded_" +i, gradeInfo.valid);
+        typeToStat.put("incorrectGraded_" +i, gradeInfo.incorrect);
+        typeToStat.put("correctGraded_" +i, gradeInfo.correct);
+        typeToStat.put("percentGraded_" +i, (int)(100f*(float)gradeInfo.gradeCount/(float)results.size()));
+      }
+    }
+
     Number aDouble = total / ((double)HOUR);
     typeToStat.put("totalHrs", aDouble);
     double value = count > 0 ? total / ((double)count) : 0;
     typeToStat.put("avgSecs", value/1000);
     typeToStat.put("totalAudioAnswers", count);
     typeToStat.put("badRecordings", badDur);
+
+
     logger.debug("audio dur stats " + typeToStat);
     return typeToStat;
+  }
+
+  private static class GradeInfo {
+    int gradeCount = 0;
+    int valid = 0;
+    int incorrect = 0;
+    int correct = 0;
+
+    public GradeInfo(GradeDAO gradeDAO, int index) {
+      Collection<Grade> grades = gradeDAO.getGrades();
+
+      for (Grade g : grades) {
+        if (g.gradeIndex == index) {
+          if (g.grade > 0) {
+            valid++;
+            if (g.grade < 4) incorrect++;
+            else correct++;
+          }
+          gradeCount++;
+        }
+      }
+    }
   }
 
   public List<User> getUsers() {
