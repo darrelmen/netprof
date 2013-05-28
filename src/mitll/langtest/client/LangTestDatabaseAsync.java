@@ -116,4 +116,6 @@ public interface LangTestDatabaseAsync {
   void getNextExercise(long userID, AsyncCallback<Exercise> async);
 
   void getExercisesForSelectionState(Map<String, String> typeToSection, long userID, AsyncCallback<List<ExerciseShell>> async);
+
+  void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
 }
