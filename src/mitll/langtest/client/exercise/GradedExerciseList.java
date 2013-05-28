@@ -1,8 +1,11 @@
 package mitll.langtest.client.exercise;
 
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -92,10 +95,21 @@ public class GradedExerciseList extends PagingExerciseList {
             loadExercise(toLoad);
           }
           else {
-            Window.alert("All answers graded.");
+            showPopup("All answers graded.");
           }
         }
       }
     });
+  }
+
+  private void showPopup(String toShow) {
+    final PopupPanel popupImage = new PopupPanel(true);
+    popupImage.add(new HTML(toShow));
+    popupImage.showRelativeTo(this);
+    Timer t = new Timer() {
+      @Override
+      public void run() { popupImage.hide(); }
+    };
+    t.schedule(3000);
   }
 }
