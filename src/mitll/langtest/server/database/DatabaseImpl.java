@@ -56,7 +56,7 @@ public class DatabaseImpl implements Database {
   private final UserDAO userDAO = new UserDAO(this);
   private final ResultDAO resultDAO = new ResultDAO(this,userDAO);
   private final AnswerDAO answerDAO = new AnswerDAO(this);
-  private final GradeDAO gradeDAO = new GradeDAO(this,userDAO);
+  private final GradeDAO gradeDAO = new GradeDAO(this,userDAO, resultDAO);
   private final SiteDAO siteDAO = new SiteDAO(this, userDAO);
 
   private DatabaseConnection connection = null;
@@ -148,7 +148,7 @@ public class DatabaseImpl implements Database {
   }
 
   public MonitoringSupport getMonitoringSupport() {
-    return new MonitoringSupport(userDAO, resultDAO);
+    return new MonitoringSupport(userDAO, resultDAO,gradeDAO);
   }
 
   /**
@@ -712,9 +712,7 @@ public class DatabaseImpl implements Database {
 
     // join results with grades
     List<Result> results = getResults();
-    Collection<Grade> grades = gradeDAO.getGrades();
-
-    Map<Integer, List<Grade>> idToGrade = getIdToGrade(grades);
+    Map<Integer, List<Grade>> idToGrade = gradeDAO.getIdToGrade();
 
     Map<String,ResultAndGrade> exidToRG = new HashMap<String, ResultAndGrade>();
     for (Result r : results) {
@@ -1010,6 +1008,7 @@ public class DatabaseImpl implements Database {
     return new ResultsAndGrades(resultsForExercise, gradesAndIDs.grades, spokenToLangToResult);
   }
 
+/*
   private Map<Integer, List<Grade>> getIdToGrade(Collection<Grade> grades) {
     Map<Integer,List<Grade>> idToGrade = new HashMap<Integer, List<Grade>>();
     for (Grade g : grades) {
@@ -1022,6 +1021,7 @@ public class DatabaseImpl implements Database {
 
     return idToGrade;
   }
+*/
 
   /**
    * Creates the result table if it's not there.
@@ -1118,7 +1118,7 @@ public class DatabaseImpl implements Database {
    * required to get that number of responses.
    * @return # responses->hours to get that number
    */
-  public Map<Integer,Float> getHoursToCompletion() {   return  monitoringSupport.getHoursToCompletion(getExercises()); }
+ // public Map<Integer,Float> getHoursToCompletion() {   return  monitoringSupport.getHoursToCompletion(getExercises()); }
  /**
    * TODO : worry about duplicate userid?
    * @return
@@ -1154,9 +1154,12 @@ public class DatabaseImpl implements Database {
   public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts() {  return monitoringSupport.getDesiredCounts(getExercises()); }
    /**
    * Return some statistics related to the hours of audio that have been collected
+    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultStats()
    * @return
    */
   public Map<String,Number> getResultStats() { return monitoringSupport.getResultStats(); }
+
+  public Map<Integer, Map<String, Map<String,Integer>>> getGradeCountPerExercise() { return monitoringSupport.getGradeCountPerExercise(getExercises());}
 
   public void destroy() {
     try {
