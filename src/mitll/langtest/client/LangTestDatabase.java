@@ -103,7 +103,6 @@ public interface LangTestDatabase extends RemoteService {
 
   List<Result> getResults(int start, int end);
 
-//  Map<Integer, Float> getHoursToCompletion(boolean useFile);
   Map<String,Number> getResultStats();
 
   Map<String, Map<Integer, Integer>> getResultCountsByGender();
@@ -125,7 +124,7 @@ public interface LangTestDatabase extends RemoteService {
 
   Exercise getNextExercise(long userID);
 
- // List<ExerciseShell> getExercisesForSection(String type, String section, long userID);
-
   void sendEmail(int userID, String to, String replyTo, String subject, String message, String token);
+
+  Map<Integer, Map<String, Map<String, Integer>>> getGradeCountPerExercise();
 }
