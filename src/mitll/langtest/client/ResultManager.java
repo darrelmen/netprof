@@ -85,6 +85,8 @@ public class ResultManager extends PagerTable {
     int left = (Window.getClientWidth()) / 20;
     int top  = (Window.getClientHeight()) / 20;
     dialogBox.setPopupPosition(left, top);
+    dialogVPanel.setWidth("100%");
+    dialogBox.setWidth((int)((float)Window.getClientWidth()*0.8f) + "px");
 
     service.getNumResults(new AsyncCallback<Integer>() {
       @Override
