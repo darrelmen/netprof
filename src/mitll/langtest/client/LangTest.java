@@ -76,7 +76,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Panel currentExerciseVPanel = new VerticalPanel();
   private ListInterface exerciseList;
-  private Label status;
+  private Label status = new Label();
 
   private UserManager userManager;
   private final UserTable userTable = new UserTable();
@@ -142,7 +142,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void onModuleLoad2() {
     if (props.isFlashCard()) {
-      //doFlashcard();
       return;
     }
     if (props.isDataCollectAdminView()) {
@@ -151,12 +150,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     // Load the visualization api, passing the onLoadCallback to be called
     // when loading is done.
-    VisualizationUtils.loadVisualizationApi(new Runnable() {
-      @Override
-      public void run() {
-        System.out.println("visualization has loaded.");
-      }
-    }, ColumnChart.PACKAGE, LineChart.PACKAGE);
+    if (props.isAdminView() || props.isGrading()) {
+      VisualizationUtils.loadVisualizationApi(new Runnable() {
+        @Override
+        public void run() {
+          System.out.println("visualization has loaded.");
+        }
+      }, ColumnChart.PACKAGE, LineChart.PACKAGE);
+    }
 
     userManager = new UserManager(this, service, isCollectAudio(), false,
       isCRTDataCollectMode() || isArabicTextDataCollect(), props.getAppTitle());
@@ -232,13 +233,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void addProgressBar(DockLayoutPanel widgets) {
-    progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
-    progressBar.setWidth("70%");
-    progressBar.setPercent(100);
-    progressBar.setText("No items completed.");
-    progressBar.setColor(ProgressBarBase.Color.DEFAULT);
-    progressBar.addStyleName("leftFifteenPercentMargin");
-    widgets.addSouth(progressBar, 50);
+    if (props.isGrading()) {
+      widgets.addSouth(status, 50);
+    } else {
+      progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
+      progressBar.setWidth("70%");
+      progressBar.setPercent(100);
+      progressBar.setText("No items completed.");
+      progressBar.setColor(ProgressBarBase.Color.DEFAULT);
+      progressBar.addStyleName("leftFifteenPercentMargin");
+
+      widgets.addSouth(progressBar, 50);
+    }
   }
 
   /**
@@ -829,8 +835,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void showStatus(String msg) { status.setText(msg); }
 
   public boolean loadNextExercise(Exercise current) {
-    progressBar.setPercent(100-exerciseList.getPercentComplete());
-    progressBar.setText(exerciseList.getComplete() + " complete.");
+    if (progressBar != null) {
+      progressBar.setPercent(100 - exerciseList.getPercentComplete());
+      progressBar.setText((exerciseList.getComplete()+1) + " complete.");
+    }
     return exerciseList.loadNextExercise(current);
   }
   public boolean loadPreviousExercise(Exercise current) { return exerciseList.loadPreviousExercise(current);  }
