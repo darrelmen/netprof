@@ -42,7 +42,7 @@ public class Export implements Database {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
     exerciseDAO = new SQLExerciseDAO(this, "");
-    gradeDAO = new GradeDAO(this,userDAO);
+    gradeDAO = new GradeDAO(this,userDAO, resultDAO);
   }
 
   public Export(ExerciseDAO exerciseDAO, ResultDAO resultDAO, GradeDAO gradeDAO) {
