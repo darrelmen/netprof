@@ -15,13 +15,10 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -52,7 +49,7 @@ public class ResultDAO extends DAO {
   public ResultDAO(Database database, UserDAO userDAO) {
     super(database);
 
-    gradeDAO = new GradeDAO(database, userDAO);
+    gradeDAO = new GradeDAO(database, userDAO, this);
     scheduleDAO = new ScheduleDAO(database);
   }
 
@@ -79,7 +76,6 @@ public class ResultDAO extends DAO {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + RESULTS + ";");
       ResultSet rs = statement.executeQuery();
-      //List<Result> results = new ArrayList<Result>();
       if (rs.next()) {
         int i = 1;
         numResults = rs.getInt(i++);
