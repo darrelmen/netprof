@@ -149,7 +149,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     CaptionPanel cpContent = new CaptionPanel(INSTRUCTIONS);
     Widget questionContent = new HTML(content);
-    questionContent.addStyleName("leftTenMargin");
+    questionContent.addStyleName("leftFifteenPercentMargin");
     cpContent.setContentWidget(questionContent);
     vp.add(cpContent);
 
