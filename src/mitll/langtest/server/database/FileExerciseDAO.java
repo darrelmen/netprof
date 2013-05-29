@@ -265,7 +265,11 @@ public class FileExerciseDAO implements ExerciseDAO {
 
     boolean exists = include.exists();
     if (!exists) {
-      logger.warn("couldn't open file " + include + " for line " + line);
+      include = new File(installPath,includeFile);
+      exists = include.exists();
+    }
+     if (!exists) {
+      logger.warn("couldn't open file " + include.getName() + " at " +include.getAbsolutePath() + " for line " + line);
       return null;
     } else {
       boolean listening = type.equalsIgnoreCase("listening");
@@ -358,7 +362,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     String mp3Ref = audioPath.replace(".wav",".mp3");//"config/pilot/media/bc-L0P-k15/bc-L0P-k15_My_house_door.mp3";
     String oggRef = audioPath.replace(".wav",".ogg");
    // logger.debug("file path " + mp3Ref);
-    return "<h2>Listen to this audio and answer the question below</h2>\n"+
+    return "<h5>Listen to this audio and answer the question below</h5>\n"+
     "<audio controls='controls'>"+
     "<source type='audio/mp3' src='" +
       mp3Ref +
