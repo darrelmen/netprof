@@ -223,6 +223,10 @@ public class MonitoringSupport {
       }
     }
 
+    for (Map.Entry<String, Integer> pair : idToCount.entrySet()) {
+      if (pair.getValue() == 0) logger.warn("huh? no results for " + pair.getKey());
+    }
+
     if (outsideFile != null) {
       Map<String, Integer> idToCountOutsideMale = new OutsideCount().getExerciseIDToOutsideCount( true, outsideFile,exercises);
       Map<String, Integer> idToCountOutsideFemale = new OutsideCount().getExerciseIDToOutsideCount( false, outsideFile,exercises);
