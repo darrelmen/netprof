@@ -198,9 +198,8 @@ public class MonitoringSupport {
   }
 
   /**
-   * @see #getHoursToCompletion
+   * @see #getOverallResultCount(java.util.List)
    * @see #getResultCountToCount
-   * @see #getResultPerExercise
    * @return
    */
   private Map<String, Integer> getExToCount(List<Exercise> exercises) {
@@ -222,10 +221,12 @@ public class MonitoringSupport {
         } else idToCount.put(key, c + 1);
       }
     }
+/*
 
     for (Map.Entry<String, Integer> pair : idToCount.entrySet()) {
       if (pair.getValue() == 0) logger.warn("huh? no results for " + pair.getKey());
     }
+*/
 
     if (outsideFile != null) {
       Map<String, Integer> idToCountOutsideMale = new OutsideCount().getExerciseIDToOutsideCount( true, outsideFile,exercises);
@@ -258,6 +259,8 @@ public class MonitoringSupport {
     List<Result> results = getResults();
     Map<Integer, List<Grade>> idToGrade = gradeDAO.getIdToGrade();
     Map<Integer, Map<String, Map<String,Integer>>> roundToGradeToCount = new HashMap<Integer, Map<String, Map<String, Integer>>>();
+
+    int total = 0;
     for (Result r : results) {
       String key = r.id + "/" + r.qid;
 
@@ -266,6 +269,7 @@ public class MonitoringSupport {
         //logger.warn("no grade for result " + key);
       }
       else {
+        total += grades.size();
         for (Grade g : grades) {
           Map<String, Map<String, Integer>> gradeToCount = roundToGradeToCount.get(g.gradeIndex);
           if (gradeToCount == null)
@@ -282,6 +286,7 @@ public class MonitoringSupport {
         }
       }
     }
+    logger.info("found " + total + " grades for " + results.size() + " results");
     return roundToGradeToCount;
   }
 
