@@ -373,7 +373,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       ConcurrentMap<String,String> stringStringConcurrentMap = userToExerciseID.asMap();
       Collection<String> values = stringStringConcurrentMap.values();
       String currentExerciseForUser = userToExerciseID.getIfPresent(user);
-      //logger.debug("getNextUngradedExercise for " + user + " current " + currentExerciseForUser + " expected " + expectedGrades);
+      logger.debug("getNextUngradedExercise for " + user + " current " + currentExerciseForUser + " expected " + expectedGrades);
 
       Collection<String> currentActiveExercises = new HashSet<String>(values);
 
@@ -905,6 +905,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Map of overall, male, female to list of counts (ex 0 had 7, ex 1, had 5, etc.)
+   * @see mitll.langtest.client.monitoring.MonitoringManager#doResultLineQuery(com.google.gwt.user.client.ui.Panel)
    * @return
    */
   public Map<String, List<Integer>> getResultPerExercise() {
