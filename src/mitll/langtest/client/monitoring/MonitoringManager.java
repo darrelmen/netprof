@@ -421,8 +421,8 @@ public class MonitoringManager {
         flex.setText(row, 0, "Total Graded");
         flex.setText(row++, 1, "" + graded + " (" + percentGraded + "% of " + answers +
           ")");
-        flex.setText(row, 0, "% of Results graded");
-        flex.setText(row++, 1, "" + percentGraded + "%");
+/*        flex.setText(row, 0, "% of Results graded");
+        flex.setText(row++, 1, "" + percentGraded + "%");*/
         flex.setText(row, 0, "Total Valid Graded (1-5)");
         flex.setText(row++, 1, "" + validGrades + " (" + getPercent(validGrades, graded) + ")");
         flex.setText(row, 0, "Incorrect Grades (1-3)");
