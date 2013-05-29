@@ -482,7 +482,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     else {
       setExerciseListSize();
     }
-    HTML child = new HTML("<h2>Items</h2>");
+    HTML child = new HTML("<h5>Items</h5>");
     child.addStyleName("center");
     exerciseListPanel.add(child);
     exerciseListPanel.add(this.exerciseList.getWidget());
