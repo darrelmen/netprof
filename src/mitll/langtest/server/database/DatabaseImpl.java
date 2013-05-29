@@ -211,8 +211,7 @@ public class DatabaseImpl implements Database {
    * @param lessonPlanFile
    * @return
    * @see #getExercises()
-   * @see #getExercises(long)
-   */
+    */
   private List<Exercise> getExercises(boolean useFile, String lessonPlanFile) {
     if (lessonPlanFile == null) {
       logger.error("huh? lesson plan file is null???", new Exception());
@@ -306,7 +305,9 @@ public class DatabaseImpl implements Database {
     GradeDAO.GradesAndIDs allGradesExcluding = gradeDAO.getAllGradesExcluding(activeExercises);
     Map<Integer, Integer> idToCount = getResultIdToGradeCount(expectedCount, allGradesExcluding);
 /*    logger.info("getNextUngradedExerciseQuick found " + resultExcludingExercises.size() + " results, " +
-        "expected " + expectedCount + ", " + allGradesExcluding.resultIDs.size() + " graded results");*/
+      "expected count = " + expectedCount + ", " +
+      allGradesExcluding.resultIDs.size() + " graded results, filter results = " + filterResults +
+      " use flq " + useFLQ + " spoken " + useSpoken);*/
 
     // remove results that have grades...
     Iterator<Result> iterator = resultExcludingExercises.iterator();
@@ -319,16 +320,17 @@ public class DatabaseImpl implements Database {
         //if (result.flq)  // TODO : need to enrich Results with flq flag
         iterator.remove();
       }
-      else if (filterResults && (result.flq != useFLQ || result.spoken != useSpoken)) {
+  /*    else if (filterResults && (result.flq != useFLQ || result.spoken != useSpoken)) {
         //logger.debug("getNextUngradedExercise excluding " + result + " since no match for flq = " + useFLQ + " and spoken = " +useSpoken);
         iterator.remove();
-      }
+        skipped++;
+      }*/
       else if (numGrades != null) {
         logger.warn("\tfound grade " + numGrades + " for " +result +"?");
       }
     }
 
-   // logger.debug("getNextUngradedExercise after removing graded, there were " + resultExcludingExercises.size() + " results");
+    //logger.debug("getNextUngradedExercise after removing graded, there were " + resultExcludingExercises.size() + " results, skipped " + skipped);
 
     // whatever remains, find first exercise
 
@@ -338,11 +340,11 @@ public class DatabaseImpl implements Database {
     }
     if (exids.isEmpty()) return null;
     else {
-      //System.out.println("getNextUngradedExercise candidates are   " + exids);
+      //logger.debug("getNextUngradedExercise candidates are   " + exids);
       String first = exids.first();
       for (Exercise e : rawExercises) {
         if (e.getID().equals(first)) {
-          //logger.info("getNextUngradedExercise  " + e);
+       //   logger.info("getNextUngradedExercise  " + e);
 
           return e;
         }
@@ -355,10 +357,18 @@ public class DatabaseImpl implements Database {
     return null;
   }
 
+  /**
+   * @see #getNextUngradedExerciseQuick(java.util.Collection, int, boolean, boolean, boolean)
+   * @param expectedCount
+   * @param allGradesExcluding
+   * @return
+   */
   private Map<Integer, Integer> getResultIdToGradeCount(int expectedCount, GradeDAO.GradesAndIDs allGradesExcluding) {
     Map<Integer, Integer> idToCount = new HashMap<Integer, Integer>();
+    int atExpected = 0;
     for (Grade g : allGradesExcluding.grades) {
       if (g.gradeIndex == expectedCount - 1) {
+        atExpected++;
         if (!idToCount.containsKey(g.resultID)) {
           idToCount.put(g.resultID, 1);
         } else {
@@ -366,6 +376,9 @@ public class DatabaseImpl implements Database {
         }
       }
     }
+/*    logger.warn("found " + atExpected + " grades at " + expectedCount +
+      " out of " + allGradesExcluding.grades.size() + " returning map of " +idToCount.size() + " results to count");*/
+
     return idToCount;
   }
 
@@ -668,6 +681,7 @@ public class DatabaseImpl implements Database {
     List<Exercise> randomList = new ArrayList<Exercise>();
    // int focusGroupSize = exercisesGradeBalancing.size()/8;
   //  Set<Integer> chosen = new HashSet<Integer>();
+    long then = System.currentTimeMillis();
     int orig = exercisesGradeBalancing.size();
     while (randomList.size() < orig) {
       double v = random.nextGaussian();
@@ -681,7 +695,10 @@ public class DatabaseImpl implements Database {
         randomList.add(remove);
        // System.out.println("v " + v + " s " + shift + " scale " + index + "/"+ inRemaining+ " of " + remaining +" ex " + remove);
     }
-    logger.info("getRandomBalancedList : returning " + randomList.size() + " items, orig size " + orig);
+    long now = System.currentTimeMillis();
+
+    logger.info("getRandomBalancedList : returning " + randomList.size() + " items, orig size " + orig +
+      " took " +(now-then) + " millis");
     return randomList;
     // random.nextInt(exercisesGradeBalancing.size());
   }
@@ -730,8 +747,16 @@ public class DatabaseImpl implements Database {
     }
     List<ResultAndGrade> rgs = new ArrayList<ResultAndGrade>(exidToRG.values());
     Collections.sort(rgs);
-    logger.info("worst is " + rgs.get(0) + "\nbest is  " + rgs.get(rgs.size() - 1));
-   // for (ResultAndGrade rg : rgs)  System.out.println("rg " + rg);
+
+    try {
+      if (!results.isEmpty()) {
+        ResultAndGrade resultAndGrade = rgs.get(0);
+        ResultAndGrade resultAndGrade1 = rgs.get(rgs.size() - 1);
+        logger.info("worst result is " + resultAndGrade.result.getID() + " best result is " + resultAndGrade1.result.getID());
+      }
+    } catch (Exception e) {
+      logger.error("Got " +e,e);
+    }
     List<Exercise> ret = new ArrayList<Exercise>();
     int total = 0;
     for (ResultAndGrade rg : rgs) {
