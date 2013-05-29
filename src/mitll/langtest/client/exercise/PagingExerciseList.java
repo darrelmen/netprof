@@ -228,6 +228,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
       }
     }
     int numRows = Math.max(MIN_PAGE_SIZE, Math.round(ratio));
+    if (numRows > 25) numRows = 25;
     if (table.getPageSize() != numRows) {
       //System.out.println("num rows now " + numRows);
       table.setPageSize(numRows);
@@ -237,7 +238,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   protected int getTableHeaderHeight() {
-    return 625 - HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
+    return 670 - HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
   }
 
   /**
