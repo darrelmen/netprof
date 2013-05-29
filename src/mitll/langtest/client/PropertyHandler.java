@@ -99,13 +99,12 @@ public class PropertyHandler {
   private String lesson = "lesson";
   private boolean showSections = false;
   private boolean showSectionWidgets = true;
-  //private boolean debugEmail = true;
   private boolean flashCard = false;
   private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
   private float screenPortion;
   private boolean CRTDataCollectMode;
-  private String language;
+  private String language = "";
   private boolean promptBeforeNextItem = true;
   private boolean rightAlignContent;
 
