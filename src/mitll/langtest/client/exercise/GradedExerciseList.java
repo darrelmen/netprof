@@ -95,7 +95,7 @@ public class GradedExerciseList extends PagingExerciseList {
             loadExercise(toLoad);
           }
           else {
-            showPopup("All answers graded.");
+            showPopup("<h5>All answers graded.</h5>");
           }
         }
       }
@@ -105,7 +105,8 @@ public class GradedExerciseList extends PagingExerciseList {
   private void showPopup(String toShow) {
     final PopupPanel popupImage = new PopupPanel(true);
     popupImage.add(new HTML(toShow));
-    popupImage.showRelativeTo(this);
+    popupImage.setPopupPosition(Window.getClientWidth()/2,Window.getClientHeight()/2);
+    popupImage.show();
     Timer t = new Timer() {
       @Override
       public void run() { popupImage.hide(); }
