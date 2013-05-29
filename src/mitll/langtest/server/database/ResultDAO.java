@@ -432,6 +432,7 @@ public class ResultDAO extends DAO {
       logger.info(RESULTS + " table had num columns = " + numColumns);
       addDurationColumnToTable(connection);
     }
+   // enrichResults();
    // removeTimeDefault(connection);
     //removeValidDefault(connection);
    // addValidDefault(connection);
