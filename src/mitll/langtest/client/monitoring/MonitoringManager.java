@@ -142,22 +142,6 @@ public class MonitoringManager {
   }
 
   /**
-   * @deprecated so confusing!
-   * @param vp
-   */
-/*  private void doTimeUntilItems(final Panel vp) {
-    service.getHoursToCompletion(useFile, new AsyncCallback<Map<Integer,Float>>() {
-      public void onFailure(Throwable caught) {}
-
-      @Override
-      public void onSuccess(Map<Integer, Float> result) {
-       // String slot = "Projected hours until answers per item";
-        vp.add(getNumToHoursChart(result));
-      }
-    });
-  }*/
-
-  /**
    *
    * @param vp
    */
@@ -656,34 +640,39 @@ public class MonitoringManager {
           Map<String, Map<String, Integer>> gradeSet = result.get(i);
           if (gradeSet != null) {
             Map<String, Integer> correct = gradeSet.get("correct");
-            List<String> keys = new ArrayList<String>(correct.keySet());
-            System.out.println("keys are " + keys);
-            String sample = keys.isEmpty() ? "" : keys.iterator().next();
-            final boolean firstInt = Character.isDigit(sample.charAt(0));
-            Collections.sort(keys, new Comparator<String>() {
-              @Override
-              public int compare(String o1, String o2) {
-                String[] split = o1.split("/");
-                String r1 = split[0];
-                String q1 = split[1];
+            Map<String, Integer> incorrect = gradeSet.get("incorrect");
+            if (correct != null && !correct.isEmpty() && incorrect != null && !incorrect.isEmpty()) {
+              List<String> keys = new ArrayList<String>(correct.keySet());
+              System.out.println("keys are " + keys);
+              String sample = keys.isEmpty() ? "" : keys.iterator().next();
+              final boolean firstInt = Character.isDigit(sample.charAt(0));
+              Collections.sort(keys, new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                  String[] split = o1.split("/");
+                  String r1 = split[0];
+                  String q1 = split[1];
 
-                String[] split2 = o2.split("/");
-                String r2 = split2[0];
-                String q2 = split2[1];
+                  String[] split2 = o2.split("/");
+                  String r2 = split2[0];
+                  String q2 = split2[1];
 
-                int comp;
-                if (firstInt) {
-                  comp = safeCompare(r1, r2);
-                } else comp = o1.compareTo(o2);
+                  int comp;
+                  if (firstInt) {
+                    comp = safeCompare(r1, r2);
+                  } else comp = o1.compareTo(o2);
 
-                if (comp != 0) return comp;
-                else {
-                  return safeCompare(q1, q2);
+                  if (comp != 0) return comp;
+                  else {
+                    return safeCompare(q1, q2);
+                  }
                 }
-              }
-            });
+              });
 
-            vp.add(getGradeCounts(i, 0, keys.size(), keys, correct, gradeSet.get("incorrect")));
+              vp.add(getGradeCounts(i,
+                //0, keys.size(),
+                keys, correct, incorrect));
+            }
           }
         }
       }
@@ -1166,7 +1155,9 @@ public class MonitoringManager {
   }
 
 
-  private ColumnChart getGradeCounts(int round,int start, int end, List<String> keysToUse,
+  private LineChart getGradeCounts(int round,
+                                   //int start, int end,
+                                   List<String> keysToUse,
                                    Map<String, Integer> correctToCount,
                                    Map<String, Integer> incorrectToCount) {
     Options options = Options.create();
@@ -1199,15 +1190,20 @@ public class MonitoringManager {
 
     int r = 0;
     for (String key : keysToUse) {
-      data.addRow();
-      data.setValue(r, 0, key);
-      data.setValue(r, 1, correctToCount.get(key));
-      data.setValue(r, 2, incorrectToCount.get(key));
-      r++;
+      Integer correct = correctToCount.get(key);
+      Integer incorrect = incorrectToCount.get(key);
+
+    //  if (correct != null && incorrect != null) {
+        data.addRow();
+        data.setValue(r, 0, key);
+        data.setValue(r, 1, correct == null ? 0 : correct);
+        data.setValue(r, 2, incorrect == null ? 0 : incorrect);
+        r++;
+      //}
     }
 
-   return new ColumnChart(data, options);
-    //return new LineChart(data, options);
+   //return new ColumnChart(data, options);
+   return new LineChart(data, options);
   }
 
 
