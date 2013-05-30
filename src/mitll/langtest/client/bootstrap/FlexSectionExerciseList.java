@@ -133,8 +133,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
       @Override
       public void onSuccess(final Collection<String> sortedTypes) {
-        System.out.println("\n\ngetTypeOrder  : sorted types " +sortedTypes);
-
         if (showListBoxes) {
           service.getSectionNodes(new AsyncCallback<List<SectionNode>>() {
             @Override
