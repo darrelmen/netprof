@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -54,6 +53,7 @@ public class ExcelImport implements ExerciseDAO {
   private Set<Integer> missingSlowSet = new HashSet<Integer>();
   private Set<Integer> missingFastSet = new HashSet<Integer>();
   private boolean shouldHaveRefAudio = false;
+  private boolean usePredefinedTypeOrder;
   /**
    * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
    */
@@ -69,15 +69,17 @@ public class ExcelImport implements ExerciseDAO {
    * @param isFlashcard
    * @param isRTL
    * @param relativeConfigDir
+   * @param usePredefinedTypeOrder
    */
-  public ExcelImport(String file, boolean isFlashcard, String mediaDir, boolean isRTL, String relativeConfigDir) {
+  public ExcelImport(String file, boolean isFlashcard, String mediaDir, boolean isRTL, String relativeConfigDir,
+                     boolean usePredefinedTypeOrder) {
     this.file = file;
     this.isFlashcard = isFlashcard;
     this.mediaDir = mediaDir;
- //   this.isRTL = isRTL;
     boolean missingExists = getMissing(relativeConfigDir, "missingSlow.txt", missingSlowSet);
     missingExists &= getMissing(relativeConfigDir,"missingFast.txt",missingFastSet);
     shouldHaveRefAudio = missingExists;
+    this.usePredefinedTypeOrder = usePredefinedTypeOrder;
     logger.debug("config " + relativeConfigDir +
       " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());
   }
@@ -213,6 +215,7 @@ public class ExcelImport implements ExerciseDAO {
     Map<String,List<Exercise>> englishToExercises = new HashMap<String, List<Exercise>>();
     int semis = 0;
     int logging = 0;
+    String unitName = null, chapterName = null, weekName = null;
     try {
       for (; iter.hasNext(); ) {
         Row next = iter.next();
@@ -229,8 +232,10 @@ public class ExcelImport implements ExerciseDAO {
         }
 
         if (!gotHeader) {
+          List<String> predefinedTypeOrder = new ArrayList<String>();
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
+            //logger.debug("col " +col + " predef " +predefinedTypeOrder);
             if (colNormalized.startsWith("Word".toLowerCase())) {
               gotHeader = true;
               colIndexOffset = columns.indexOf(col);
@@ -238,16 +243,23 @@ public class ExcelImport implements ExerciseDAO {
               transliterationIndex = columns.indexOf(col);
             } else if (colNormalized.contains("unit") || colNormalized.contains("book")) {
               unitIndex = columns.indexOf(col);
+              predefinedTypeOrder.add(col);
+              unitName = col;
             } else if (colNormalized.contains("chapter") || colNormalized.contains("lesson")) {
               chapterIndex = columns.indexOf(col);
+              predefinedTypeOrder.add(col);
+              chapterName = col;
             } else if (colNormalized.contains("week")) {
               weekIndex = columns.indexOf(col);
+              predefinedTypeOrder.add(col);
+              weekName = col;
             } else if (colNormalized.contains("weight")) {
               weightIndex = columns.indexOf(col);
             }
           }
+          if (usePredefinedTypeOrder) sectionHelper.setPredefinedTypeOrder(predefinedTypeOrder);
 
-          logger.info("columns word index " + colIndexOffset + " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex);
+          //logger.info("columns word index " + colIndexOffset + " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex);
         }
         else {
           int colIndex = colIndexOffset;
@@ -291,7 +303,7 @@ public class ExcelImport implements ExerciseDAO {
 
               Exercise imported = getExercise(id++, dao, weightIndex, next, english, foreignLanguagePhrase, translit);
               if (/*true || */imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
-                recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported);
+                recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
                 // keep track of synonyms (or better term)
                 String englishSentence = imported.getEnglishSentence();
@@ -454,7 +466,7 @@ public class ExcelImport implements ExerciseDAO {
 
   private boolean recordUnitChapterWeek(int unitIndex, int chapterIndex, int weekIndex,
                                         Row next,
-                                        Exercise imported) {
+                                        Exercise imported, String unitName, String chapterName, String weekName) {
     String unit = getCell(next, unitIndex);
     String chapter = getCell(next, chapterIndex);
     String week = getCell(next, weekIndex);
@@ -473,11 +485,32 @@ public class ExcelImport implements ExerciseDAO {
     if (chapter.startsWith("'")) chapter = chapter.substring(1);
     if (week.startsWith("'")) week = week.substring(1);
 
-    if (debug) logger.debug("unit " + unit + " chapter " + chapter + " week " + week);
+    if (debug) logger.debug("unit " + unitIndex +"/"+unit + " chapter " + chapterIndex+"/"+chapter + " week " + week);
 
-    if (unit.length() > 0) pairs.add(sectionHelper.addUnitToLesson(imported,unit));
-    if (chapter.length() > 0) pairs.add(sectionHelper.addChapterToLesson(imported,chapter));
-    if (week.length() > 0) pairs.add(sectionHelper.addWeekToLesson(imported,week));
+    if (unit.length() > 0) {
+      if (usePredefinedTypeOrder) {
+        pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
+      }
+      else {
+        pairs.add(sectionHelper.addUnitToLesson(imported,unit));
+      }
+    }
+    if (chapter.length() > 0) {
+      if (usePredefinedTypeOrder) {
+        pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
+      }
+      else {
+        pairs.add(sectionHelper.addChapterToLesson(imported,chapter));
+      }
+    }
+    if (week.length() > 0) {
+      if (usePredefinedTypeOrder) {
+        pairs.add(sectionHelper.addExerciseToLesson(imported,weekName,chapter));
+      }
+      else {
+        pairs.add(sectionHelper.addWeekToLesson(imported,week));
+      }
+    }
     sectionHelper.addAssociations(pairs);
 
     return false;
@@ -564,9 +597,13 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   public static void main(String [] arg) {
-    ExcelImport config = new ExcelImport("C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\english\\ESL_ELC_5071-30books_chapters.xlsx", false, "config\\bestAudio", false, "config");
+    ExcelImport config = new ExcelImport(
+      "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\english\\ESL_ELC_5071-30books_chapters.xlsx", false, "config\\bestAudio", false, "config", true);
     List<Exercise> rawExercises = config.getRawExercises();
 
     System.out.println("first " + rawExercises.get(0));
+
+    List<String> typeOrder = config.sectionHelper.getTypeOrder();
+    System.out.println(" type order " +typeOrder);
   }
 }
