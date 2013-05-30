@@ -62,6 +62,7 @@ public class ServerProperties {
   private static final String RTL = "rtl";
   private static final String GOODWAVE_MODE = "goodwaveMode";
   private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
+  private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
 
   private Properties props = null;
 
@@ -180,6 +181,9 @@ public class ServerProperties {
 
   public boolean isFlashcardTeacherView() {
     return !props.getProperty(FLASHCARD_TEACHER_VIEW, "false").equals("false");
+  }
+  public boolean usePredefinedTypeOrder() {
+    return !props.getProperty(USE_PREDEFINED_TYPE_ORDER, "false").equals("false");
   }
 
   public boolean shouldUseWeights() {
