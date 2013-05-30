@@ -133,45 +133,53 @@ public class SplitAudio {
 
     logger.warn("no native recordings for " + count + " items.");
 
-  //  Map<String, Exercise> englishToEx2 = new HashMap<String, Exercise>();
-
-  //  Map<Exercise, Exercise> chapterToNonChapter = new HashMap<Exercise, Exercise>();
-
     Map<String,Exercise> idToEx = new TreeMap<String, Exercise>();
     Map<String, List<Result>> idToResults2 = new TreeMap<String, List<Result>>();
 
     int skipped = 0;
     int count2 = 0;
-    Map<Exercise, List<Result>> chapterToResult = new HashMap<Exercise, List<Result>>();
-    for (Exercise e : unitAndChapter.getExercises()) {
-      String key = e.getEnglishSentence().toLowerCase().trim();
-      if (englishToEx.containsKey(key)) {
-        //logger.warn("skipping duplicate entry : " + e.getID() + " "+ e.getEnglishSentence());
-        List<Result> value = englishToResults2.get(key);
-        chapterToResult.put(e,value);
-        idToEx.put(e.getID(),e);
-        if (value.isEmpty()) logger.warn("huh? no results for ex " +key); //never happen
-        idToResults2.put(e.getID(), value);
+    Map<Exercise, List<Result>> chapterToResult = null;
+    try {
+      final FileWriter skip = new FileWriter(configDir + "skip.txt");
+      final FileWriter skipWords = new FileWriter(configDir + "skipWords.txt");
 
-        if (key.equals("complete")) {
-          logger.warn("key " + key + " value " + value + " ex " + e.getID() + "");
+      chapterToResult = new HashMap<Exercise, List<Result>>();
+      for (Exercise e : unitAndChapter.getExercises()) {
+        String key = e.getEnglishSentence().toLowerCase().trim();
+        if (englishToEx.containsKey(key)) {
+          //logger.warn("skipping duplicate entry : " + e.getID() + " "+ e.getEnglishSentence());
+          List<Result> value = englishToResults2.get(key);
+          chapterToResult.put(e,value);
+          idToEx.put(e.getID(),e);
+          if (value.isEmpty()) logger.warn("huh? no results for ex " +key); //never happen
+          idToResults2.put(e.getID(), value);
+
+          if (key.equals("complete")) {
+            logger.warn("key " + key + " value " + value + " ex " + e.getID() + "");
+          }
+          //if (e.getID().equals("0")) {
+          if (count2++ < 10)
+            logger.warn("ex " +e.getID()+
+              " key " + key + " value " + value + " ex " + e.getID() + " " + idToResults2.get(key));
+
+          //}
+        } else {
+          if (skipped++ < 10) logger.warn("skipping " + e.getID() + " : " + key);// + " no match in " +englishToEx.size() + " entries.");
+          skip.write(e.getID()+"\n");
+          skipWords.write(key +"\n");
         }
-        //if (e.getID().equals("0")) {
-        if (count2++ < 10)
-          logger.warn("ex " +e.getID()+
-            " key " + key + " value " + value + " ex " + e.getID() + " " + idToResults2.get(key));
-
-        //}
-      } else {
-        if (skipped++ < 10) logger.warn("skipping " + e.getID() + " : " + key);// + " no match in " +englishToEx.size() + " entries.");
+        //  else englishToEx2.put(key,e);
       }
-      //  else englishToEx2.put(key,e);
+      skip.close();
+      skipWords.close();
+    } catch (IOException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
     logger.warn("overlap is " + idToEx.size() + "/" + chapterToResult.size()+   "/"+idToResults2.size()+
       " out of " + unitAndChapter.getExercises().size() + " skipped " + skipped);
 
     try {
-      convertExamples(numThreads, audioDir,language,idToEx,idToResults2);
+      if (false) convertExamples(numThreads, audioDir,language,idToEx,idToResults2);
     } catch (IOException e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     } catch (InterruptedException e) {
