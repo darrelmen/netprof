@@ -747,7 +747,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
    *
-   * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean)
+   * @see #getASRScoreForAudio(int, String, String, int, int, boolean)
    * @see mitll.langtest.server.scoring.AutoCRTScoring#getASRScoreForAudio(java.io.File, java.util.List
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
@@ -779,6 +779,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     //logger.debug("getASRScoreForAudio scoring " + testAudioName + " in dir " + testAudioDir);
     PretestScore pretestScore;
+    if (serverProps.getLanguage().equalsIgnoreCase("English")) sentence = sentence.toUpperCase();
     pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence,
