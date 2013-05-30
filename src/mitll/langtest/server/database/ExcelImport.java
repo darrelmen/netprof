@@ -43,7 +43,7 @@ import java.util.Set;
 public class ExcelImport implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(ExcelImport.class);
   private final boolean isFlashcard;
-  private final boolean isRTL;
+//  private final boolean isRTL;
 
   private List<Exercise> exercises = null;
   private List<String> errors = new ArrayList<String>();
@@ -60,7 +60,7 @@ public class ExcelImport implements ExerciseDAO {
   public ExcelImport() {
     this.file = null;
     this.isFlashcard = false;
-    this.isRTL = false;
+   //this.isRTL = false;
   }
 
   /**
@@ -74,7 +74,7 @@ public class ExcelImport implements ExerciseDAO {
     this.file = file;
     this.isFlashcard = isFlashcard;
     this.mediaDir = mediaDir;
-    this.isRTL = isRTL;
+ //   this.isRTL = isRTL;
     boolean missingExists = getMissing(relativeConfigDir, "missingSlow.txt", missingSlowSet);
     missingExists &= getMissing(relativeConfigDir,"missingFast.txt",missingFastSet);
     shouldHaveRefAudio = missingExists;
@@ -202,17 +202,17 @@ public class ExcelImport implements ExerciseDAO {
     boolean gotHeader = false;
     FileExerciseDAO dao = new FileExerciseDAO("","", false, isFlashcard);
 
-    int colIndexOffset = 0;
+    int colIndexOffset = -1;
 
-    int transliterationIndex = 0;
-    int unitIndex = 0;
-    int chapterIndex = 0;
-    int weekIndex = 0;
+    int transliterationIndex = -1;
+    int unitIndex = -1;
+    int chapterIndex = -1;
+    int weekIndex = -1;
     int weightIndex = -1;
     List<String> lastRowValues = new ArrayList<String>();
     Map<String,List<Exercise>> englishToExercises = new HashMap<String, List<Exercise>>();
     int semis = 0;
-
+    int logging = 0;
     try {
       for (; iter.hasNext(); ) {
         Row next = iter.next();
@@ -246,6 +246,8 @@ public class ExcelImport implements ExerciseDAO {
               weightIndex = columns.indexOf(col);
             }
           }
+
+          logger.info("columns word index " + colIndexOffset + " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex);
         }
         else {
           int colIndex = colIndexOffset;
@@ -288,7 +290,7 @@ public class ExcelImport implements ExerciseDAO {
               }
 
               Exercise imported = getExercise(id++, dao, weightIndex, next, english, foreignLanguagePhrase, translit);
-              if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
+              if (/*true || */imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
                 recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported);
 
                 // keep track of synonyms (or better term)
@@ -301,7 +303,9 @@ public class ExcelImport implements ExerciseDAO {
                 exercises.add(imported);
               }
               else {
-                logger.info("skipping exercise " +imported.getID() + " : " + imported.getEnglishSentence() +" since no audio.");
+                if (logging++ < 400) {
+                  logger.info("skipping exercise " +imported.getID() + " : '" + imported.getEnglishSentence() +"' since no audio.");
+                }
               }
   /*            if (false)
                 logger.debug("read '" + english + "' '" + foreignLanguagePhrase +
@@ -514,6 +518,7 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   private String getCell(Row next, int col) {
+    if (col == -1) return "";
     Cell cell = next.getCell(col);
     if (cell == null) return "";
 /*    if (cell.getArrayFormulaRange().getFirstRow() != cell.getArrayFormulaRange().getFirstRow()) {
@@ -556,5 +561,12 @@ public class ExcelImport implements ExerciseDAO {
 
   public List<String> getErrors() {
     return errors;
+  }
+
+  public static void main(String [] arg) {
+    ExcelImport config = new ExcelImport("C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\english\\ESL_ELC_5071-30books_chapters.xlsx", false, "config\\bestAudio", false, "config");
+    List<Exercise> rawExercises = config.getRawExercises();
+
+    System.out.println("first " + rawExercises.get(0));
   }
 }
