@@ -31,7 +31,7 @@ public class SectionHelper {
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
   private Map<String,Map<String,Map<String,Collection<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String,Map<String,Collection<String>>>>();
-
+ 
   public List<String> getTypeOrder() {
     List<String> types = new ArrayList<String>();
     types.addAll(typeToSectionToTypeToSections.keySet());
@@ -40,15 +40,19 @@ public class SectionHelper {
       public int compare(String o1, String o2) {
         int first = typeToSectionToTypeToSections.get(o1).size();
         int second =  typeToSectionToTypeToSections.get(o2).size();
+
+        logger.debug(o1 + "-> " + first + " vs " + o2 + "->" + second);
         return first > second ? +1 : first < second ? -1 : 0;
       }
     });
 
+    logger.info("types " + types );
     return types;
   }
 
   public List<SectionNode> getSectionNodes() {
-    return getChildren(getTypeOrder());
+	  List<SectionNode>  s =  getChildren(getTypeOrder());
+    return s;
   }
 
   private List<SectionNode> getChildren(List<String> typeOrder) {
@@ -469,7 +473,7 @@ public class SectionHelper {
       //lessons.addAll(categoryToLesson.values());
       Set<String> sections = categoryToLesson.keySet();
       if (!sections.isEmpty()) {
-        //logger.debug("Section type : " + key + " : sections " + sections);
+        logger.debug("Section type : " + key + " : sections " + sections);
       }
     }
   }
