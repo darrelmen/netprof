@@ -1402,7 +1402,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     boolean wordPairs = serverProps.isWordPairs();
     logger.debug("word pairs " + wordPairs);
     db = new DatabaseImpl(configDir, h2DatabaseFile, serverProps.isShowSections(), wordPairs,
-      serverProps.getLanguage(), serverProps.doImages(), relativeConfigDir, serverProps.isFlashcard());
+      serverProps.getLanguage(), serverProps.doImages(), relativeConfigDir, serverProps.isFlashcard(),
+      serverProps.usePredefinedTypeOrder());
   }
 
   private class DirAndName {
