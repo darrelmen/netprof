@@ -133,6 +133,8 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
       @Override
       public void onSuccess(final Collection<String> sortedTypes) {
+        System.out.println("\n\ngetTypeOrder  : sorted types " +sortedTypes);
+
         if (showListBoxes) {
           service.getSectionNodes(new AsyncCallback<List<SectionNode>>() {
             @Override
@@ -158,7 +160,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   private void addStudentTypeAndSection(FluidContainer container,Collection<String> sortedTypes) {
     String token = unencodeToken(History.getToken());
     SelectionState selectionState = getSelectionState(token);
-
+    System.out.println("\n\nsorted types " +sortedTypes);
     for (final String type : sortedTypes) {
       Collection<String> typeValue = selectionState.typeToSection.get(type);
       if (typeValue != null) {
