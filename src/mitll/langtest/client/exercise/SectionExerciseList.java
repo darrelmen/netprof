@@ -285,7 +285,13 @@ public class SectionExerciseList extends PagingExerciseList {
         if (firstHasSep) {
           String[] first = o1.split("-");
           left1 = first[0];
-          right1 = first[1];
+          if (first.length == 1) {
+        	  System.err.println("huh? couldn't split " + o1);
+        	  right1 = "";
+          }
+          else {
+        	  right1 = first[1];
+          }
         } else if (o1.contains(" ")) {
           firstHasSep = true;
           String[] first = o1.split("\\s");
