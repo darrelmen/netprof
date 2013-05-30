@@ -28,37 +28,37 @@ public class SectionHelper {
   private static final String chapterType = "chapter";
   private static final String weekType = "week";
 
+  private List<String> predefinedTypeOrder = new ArrayList<String>();
+
   private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
-  private Map<String,Map<String,Map<String,Collection<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String,Map<String,Collection<String>>>>();
- 
+  private Map<String, Map<String, Map<String, Collection<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String, Map<String, Collection<String>>>>();
+
   public List<String> getTypeOrder() {
-    List<String> types = new ArrayList<String>();
-    types.addAll(typeToSectionToTypeToSections.keySet());
-    Collections.sort(types, new Comparator<String>() {
-      @Override
-      public int compare(String o1, String o2) {
-        int first = typeToSectionToTypeToSections.get(o1).size();
-        int second =  typeToSectionToTypeToSections.get(o2).size();
+    if (predefinedTypeOrder.isEmpty()) {
+      List<String> types = new ArrayList<String>();
+      types.addAll(typeToSectionToTypeToSections.keySet());
+      Collections.sort(types, new Comparator<String>() {
+        @Override
+        public int compare(String o1, String o2) {
+          int first = typeToSectionToTypeToSections.get(o1).size();
+          int second = typeToSectionToTypeToSections.get(o2).size();
+          return first > second ? +1 : first < second ? -1 : 0;
+        }
+      });
 
-        logger.debug(o1 + "-> " + first + " vs " + o2 + "->" + second);
-        return first > second ? +1 : first < second ? -1 : 0;
-      }
-    });
-
-    logger.info("types " + types );
-    return types;
+      return types;
+    } else {
+      return predefinedTypeOrder;
+    }
   }
 
   public List<SectionNode> getSectionNodes() {
-	  List<SectionNode>  s =  getChildren(getTypeOrder());
-    return s;
+    return getChildren(getTypeOrder());
   }
 
   private List<SectionNode> getChildren(List<String> typeOrder) {
     String root = typeOrder.iterator().next();
-   // logger.warn("type order " + typeOrder + " root " + root);
-
     List<SectionNode> firstSet = new ArrayList<SectionNode>();
 
     Map<String, Map<String, Collection<String>>> sectionToTypeToSections = typeToSectionToTypeToSections.get(root);
@@ -74,18 +74,14 @@ public class SectionHelper {
       }
     }
 
-    //logger.debug("tree is " + firstSet);
     return firstSet;
   }
 
   private void addChildren(List<String> typeOrder, SectionNode parent, Map<String, Collection<String>> typeToSections) {
     List<String> remainingTypes = typeOrder.subList(1, typeOrder.size());
-   // logger.warn("type order " + typeOrder + " remaining " + remainingTypes);
-
     String nextType = typeOrder.iterator().next();
 
     Collection<String> children = typeToSections.get(nextType);
-  //  logger.warn("nextType " + nextType + " : " + children);
     for (String childSection : children) {
       SectionNode child = new SectionNode(nextType, childSection);
       parent.addChild(child);
@@ -98,44 +94,6 @@ public class SectionHelper {
       }
     }
   }
-
-
-  /**
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#getTypeToSectionsForTypeAndSection(String, String)
-   * @param type
-   * @param section
-   * @return
-   */
-/*
-  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(String type, String section) {
-    Map<String, Map<String, Collection<String>>> sectionToSub = typeToSectionToTypeToSections.get(type);
-    if (sectionToSub == null) return Collections.emptyMap();
-    Map<String, Collection<String>> typeToSections = sectionToSub.get(section);
-*/
-/*
-    if (section == null || section.length() == 0) {
-      Collection<Map<String, Set<String>>> values = sectionToSub.values();
-      Map<String,Collection<String>> retval = new HashMap<String, Collection<String>>();
-      for (Map<String, Set<String>> value : values) {
-        for (Map.Entry<String,Set<String>> pair : value.entrySet()) {
-          retval.put(pair.getKey(),new ArrayList<String>(pair.getValue()));
-        }
-      }
-      return retval;
-    }
-    else {*//*
-
-      if (typeToSections == null) return Collections.emptyMap();
-
-      Map<String,Collection<String>> retval = new HashMap<String, Collection<String>>();
-      for (Map.Entry<String,Collection<String>> pair : typeToSections.entrySet()) {
-        retval.put(pair.getKey(),new ArrayList<String>(pair.getValue()));
-      }
-      logger.debug("getTypeToSectionsForTypeAndSection type=" + type + " section="+section + " yields " + retval);
-      return retval;
-  //  }
-  }
-*/
 
   private Map<String,Collection<String>> getTypeToSectionsForTypeAndSection2(String type, String section) {
     Map<String, Map<String, Collection<String>>> sectionToSub = typeToSectionToTypeToSections.get(type);
@@ -202,8 +160,6 @@ public class SectionHelper {
         combineMapsTogether(resultMap,values,false);
       }
     }
-
-
 
     if (resultMap == null) {
       logger.error("couldn't find any valid types given " + typeToSections);
@@ -290,22 +246,8 @@ public class SectionHelper {
         copy = new HashSet<String>(setToAdd);
       }
       typeToSectionsForType.put(currentType, copy);
-      // logger.debug("\t resultMap now " + resultMap);
     }
   }
-
-  /**
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#getTypeToSection
-   * @return
-   */
-/*  public Map<String, Collection<String>> getTypeToSection() {
-    Map<String,Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
-    for (String key : typeToUnitToLesson.keySet()) {
-      Map<String, Lesson> stringLessonMap = typeToUnitToLesson.get(key);
-      typeToSection.put(key, new ArrayList<String>(stringLessonMap.keySet()));
-    }
-    return typeToSection;
-  }*/
 
   public Map<String, Map<String,Integer>> getTypeToSectionToCount() {
     Map<String,Map<String,Integer>> typeToSectionToCount = new HashMap<String, Map<String, Integer>>();
@@ -329,6 +271,7 @@ public class SectionHelper {
   public Collection<Exercise> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection) {
     Collection<Exercise> currentList = null;
 
+
     for (Map.Entry<String, Collection<String>> pair : typeToSection.entrySet()) {
       String type = pair.getKey();
       if (isKnownType(type)) {
@@ -345,6 +288,7 @@ public class SectionHelper {
       logger.error("couldn't find any valid types given " + typeToSection);
       currentList = Collections.emptyList();
     }
+    logger.debug("getExercisesForSelectionState : request " + typeToSection + " yielded " + currentList.size() + " exercises");
     return currentList;
   }
 
@@ -411,7 +355,9 @@ public class SectionHelper {
     Map<String, Lesson> unit = getSectionToLesson(type);
 
     Lesson even = unit.get(unitName);
-    if (even == null) unit.put(unitName, even = new Lesson(unitName, "", ""));
+    if (even == null) {
+      unit.put(unitName, even = new Lesson(unitName, "", ""));
+    }
     even.addExercise(exercise);
 
     return new Pair(type,unitName);
@@ -419,8 +365,14 @@ public class SectionHelper {
 
   private Map<String, Lesson> getSectionToLesson( String section) {
     Map<String, Lesson> unit = typeToUnitToLesson.get(section);
-    if (unit == null) typeToUnitToLesson.put(section, unit = new HashMap<String, Lesson>());
+    if (unit == null) {
+      typeToUnitToLesson.put(section, unit = new HashMap<String, Lesson>());
+    }
     return unit;
+  }
+
+  public void setPredefinedTypeOrder(List<String> predefinedTypeOrder) {
+    this.predefinedTypeOrder = predefinedTypeOrder;
   }
 
   public static class Pair {
@@ -470,10 +422,9 @@ public class SectionHelper {
   public void report() {
     for (String key : typeToUnitToLesson.keySet()) {
       Map<String, Lesson> categoryToLesson = typeToUnitToLesson.get(key);
-      //lessons.addAll(categoryToLesson.values());
       Set<String> sections = categoryToLesson.keySet();
       if (!sections.isEmpty()) {
-        logger.debug("Section type : " + key + " : sections " + sections);
+        logger.debug("report : Section type : " + key + " : sections " + sections);
       }
     }
   }
