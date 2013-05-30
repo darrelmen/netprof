@@ -79,6 +79,7 @@ public class DatabaseImpl implements Database {
   private final String absConfigDir;
   private String mediaDir;
   private boolean isRTL;
+  private boolean usePredefinedTypeOrder;
 
   private final Map<Long,UserStateWrapper> userToState = new HashMap<Long,UserStateWrapper>();
 
@@ -89,7 +90,7 @@ public class DatabaseImpl implements Database {
    */
 
   public DatabaseImpl(String configDir, String dbName, String lessonPlanFile) {
-    this(configDir, dbName, false,false,"", false, "",false);
+    this(configDir, dbName, false,false,"", false, "",false,false);
     this.useFile = true;
     this.lessonPlanFile = lessonPlanFile;
   }
@@ -102,7 +103,7 @@ public class DatabaseImpl implements Database {
    * @param doImages
    */
   public DatabaseImpl(String configDir, String dbName, boolean showSections, boolean isWordPairs,
-                      String language, boolean doImages, String relativeConfigDir, boolean isFlashcard) {
+                      String language, boolean doImages, String relativeConfigDir, boolean isFlashcard, boolean usePredefinedTypeOrder) {
     connection = new H2Connection(configDir, dbName);
     absConfigDir = configDir;
     this.showSections = showSections;
@@ -111,6 +112,7 @@ public class DatabaseImpl implements Database {
     this.language = language;
     this.configDir = relativeConfigDir;
     this.isFlashcard = isFlashcard;
+    this.usePredefinedTypeOrder = usePredefinedTypeOrder;
 
     try {
       if (getConnection() == null) {
@@ -257,8 +259,7 @@ public class DatabaseImpl implements Database {
   private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel, String mediaDir, boolean isRTL) {
     if (exerciseDAO == null) {
       if (useFile && excel) {
-        logger.info("absConfigDir dir is " +absConfigDir);
-        this.exerciseDAO = new ExcelImport(lessonPlanFile, isFlashcard, mediaDir, isRTL, absConfigDir);
+        this.exerciseDAO = new ExcelImport(lessonPlanFile, isFlashcard, mediaDir, isRTL, absConfigDir, usePredefinedTypeOrder);
       }
       else {
         this.exerciseDAO = makeExerciseDAO(useFile);
