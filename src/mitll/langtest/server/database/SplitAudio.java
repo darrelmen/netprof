@@ -25,10 +25,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
@@ -53,6 +56,67 @@ public class SplitAudio {
   private static final String SLOW = "Slow";
   private AudioCheck audioCheck = new AudioCheck();
 
+  public void dumpDir (String audioDir) {
+    final String placeToPutAudio = ".."+ File.separator+audioDir + File.separator;
+    final File bestDir = new File(placeToPutAudio + "bestAudio");
+    String[] list = bestDir.list();
+    logger.warn("in " +bestDir.getAbsolutePath() + " there are " + list.length);
+    Set<String> files = new HashSet<String>(Arrays.asList(list));
+
+    String language = "english";
+    final String configDir = getConfigDir(language);
+
+    DatabaseImpl unitAndChapter = new DatabaseImpl(
+      configDir,
+      language,
+      configDir+
+        "ESL_ELC_5071-30books_chapters.xlsx");
+
+    DatabaseImpl collected = new DatabaseImpl(
+      configDir,
+      language,
+      configDir +
+        "5100-english-no-gloss.txt");
+
+    Set<String> valid = new HashSet<String>();
+    for (Exercise e: collected.getExercises()) {
+      String englishSentence = e.getEnglishSentence();
+
+      if (englishSentence == null) {
+        //if (c++ < 10) logger.warn("convertEnglish huh? no english sentence for " + e.getID() + " instead " +e.getRefSentence());
+        englishSentence = e.getRefSentence();
+      }
+
+      if (englishSentence == null) logger.warn("huh? no english sentence for " + e.getID());
+      else {
+        String key = englishSentence.toLowerCase().trim();
+        valid.add(key);
+      }
+    }
+    logger.warn("valid has " + valid.size());
+
+    try {
+      final FileWriter skip = new FileWriter(configDir + "skip3.txt");
+      final FileWriter skipWords = new FileWriter(configDir + "skipWords3.txt");
+      int skipped = 0;
+      List<Exercise> exercises = unitAndChapter.getExercises();
+      for (Exercise e : exercises) {
+        String key = e.getEnglishSentence().toLowerCase().trim();
+
+        if (!files.contains(e.getID())) {
+          if (skipped++ < 10) logger.warn("skipping " + e.getID() + " : " + key);// + " no match in " +englishToEx.size() + " entries.");
+          skip.write(e.getID()+"\n");
+          skipWords.write(key +"\n");
+        }
+      }
+      skip.close();
+      skipWords.close();
+
+      logger.warn("skipped " + skipped + " of " + exercises.size() + " files " + files.size() +  " e.g. " + files.iterator().next());
+    } catch (IOException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+  }
   /**
    * read the english spreadsheet
    * find items in the word list that match
@@ -803,7 +867,8 @@ public class SplitAudio {
       int numThreads = Integer.parseInt(arg[0]);
       String audioDir = arg[1];
       // new SplitAudio().convertExamples(numThreads, audioDir, arg[2], arg[3]);
-       new SplitAudio().convertEnglish(numThreads,audioDir);
+   //   new SplitAudio().convertEnglish(numThreads,audioDir);
+      new SplitAudio().dumpDir(audioDir);
     } catch (Exception e) {
       e.printStackTrace();
     }
