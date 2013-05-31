@@ -261,7 +261,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // don't do flash if we're doing text only collection
     //System.out.println("teacher view " + props.isTeacherView() + " arabic text data " + props.isArabicTextDataCollect() + " collect audio " + props.isCollectAudio());
 
-    if (props.isCollectAudio() && !props.isFlashcardTeacherView() || props.isFlashCard()) {
+    if (shouldCollectAudio()) {
       makeFlashContainer();
       currentExerciseVPanel.add(flashRecordPanel);
     }
@@ -274,6 +274,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setupSoundManager();
 
     modeSelect();
+  }
+
+  private boolean shouldCollectAudio() {
+    return props.isCollectAudio() && !props.isFlashcardTeacherView() || props.isFlashCard()  || props.isGoodwaveMode() ;
   }
 
   private FluidRow makeHeaderRow() {
@@ -876,7 +880,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
       if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
         System.out.println("gotUser : user changed - new " + userID + " vs last " + lastUser);
-        if (!props.isCollectAudio() || flashRecordPanel.gotPermission()) {
+        if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
           System.out.println("\tgotUser : " + userID + " get exercises");
           exerciseList.getExercises(userID);
         }
@@ -890,7 +894,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   // TODO : refactor all this into mode objects that decide whether we need flash or not, etc.
   private void checkInitFlash() {
-    if ((props.isCollectAudio() || props.isGoodwaveMode() || props.isFlashCard()) && !flashRecordPanel.gotPermission()) {
+    if (shouldCollectAudio() && !flashRecordPanel.gotPermission()) {
       System.out.println("checkInitFlash : initFlash");
 
       flashRecordPanel.initFlash();
