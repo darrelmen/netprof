@@ -98,7 +98,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   }
 
   public void getExercises(final long userID) {
-    System.out.println("Flex : Get exercises for user=" + userID);
+    System.out.println("getExercises : Get exercises for user=" + userID);
     this.userID = userID;
     sectionPanel.clear();
 
@@ -267,6 +267,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         rowForChildren.setHorizontalAlignment(ALIGN_LEFT);
         List<ButtonWithChildren> buttonWithChildrens = addButtonGroup(rowForChildren, sectionNode.getChildren(), subType, subs, sectionWidget1);
         buttonWithChildren.setChildren(buttonWithChildrens);
+        buttonWithChildren.setButtonGroup(sectionWidget1);
         //columnContainer.add(rowForChildren);
         rowContainer.add(rowForChildren);
         columnContainer.add(rowContainer);
@@ -695,25 +696,36 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     return overallButton;
   }
 
-  private void addClickHandlerToButton(final ButtonWithChildren overallButton, final String sectionInFirstType, final ButtonGroupSectionWidget buttonGroupSectionWidget) {
+  private void addClickHandlerToButton(final ButtonWithChildren overallButton, final String sectionInFirstType,
+                                       final ButtonGroupSectionWidget buttonGroupSectionWidget) {
     overallButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        List<String> selections = new ArrayList<String>();
-        selections.add(sectionInFirstType);
-      //  System.out.println("got click on " + overallButton + " with children " + overallButton.getButtonChildren());
-        buttonGroupSectionWidget.selectItem(selections, true, typeToBox);
-       // buttonGroupSectionWidget.addEnabledButtons(overallButton.getButtonChildren());
+        //  System.out.println("got click on " + overallButton + " with children " + overallButton.getButtonChildren());
+/*        if (selectPathToParent) {
+          buttonGroupSectionWidget.selectButton(overallButton, typeToBox);
+        }
+        else {*/
+           buttonGroupSectionWidget.selectItem(sectionInFirstType, typeToBox);
+  //      }
         pushNewSectionHistoryToken();
       }
     });
   }
 
+  /**
+   * So when we get a URL with a bookmark in it, we have to make the UI appear consistent with it.
+   *
+   * @see SectionExerciseList#restoreListBoxState(mitll.langtest.client.exercise.SelectionState)
+   * @param type
+   * @param sections
+   */
   @Override
   protected void selectItem(String type, Collection<String> sections) {
     ButtonGroupSectionWidget listBox = (ButtonGroupSectionWidget)typeToBox.get(type);
 
     listBox.selectItem(sections, false, typeToBox);
+ //   listBox.selectButton();
   }
 
   /**
@@ -817,7 +829,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       List<SectionNode> children = sectionNode.getChildren();
 
       Panel rowForSection;
-      ButtonWithChildren buttonForSection = makeSubgroupButton(sectionWidget, /*subType,*/ section, buttonType, false);
+      ButtonWithChildren buttonForSection = makeSubgroupButton(sectionWidget, section, buttonType, false);
       buttonChildren.add(buttonForSection);
       if (n > 1 && i < n-1) {
         buttonForSection.addStyleName("buttonMargin");
@@ -838,8 +850,11 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
         System.out.println("for " + typeForOriginal + "=" + section + " recurse on " + children.size() +
           " children at " + subType);
-        List<ButtonWithChildren> subButtons = addButtonGroup(horizontalContainerForChildren, children, subType, subs, (ButtonGroupSectionWidget) typeToBox.get(subType));
+        ButtonGroupSectionWidget sectionWidget1 = (ButtonGroupSectionWidget) typeToBox.get(subType);
+        List<ButtonWithChildren> subButtons =
+          addButtonGroup(horizontalContainerForChildren, children, subType, subs, sectionWidget1);
         buttonForSection.setChildren(subButtons);
+        buttonForSection.setButtonGroup(sectionWidget1);
       } else {
         rowForSection = buttonForSection;
       }
@@ -888,7 +903,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    */
   private ButtonWithChildren makeSubgroupButton(final ButtonGroupSectionWidget sectionWidgetFinal,
                                                 final String section,
-                                    ButtonType buttonType, boolean isClear) {
+                                                ButtonType buttonType, boolean isClear) {
     //System.out.println("making button " + type + "=" + section);
     ButtonWithChildren sectionButton = new ButtonWithChildren(section, sectionWidgetFinal.getType());
   //  System.out.println("made button " + sectionButton);
@@ -913,13 +928,15 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     sectionWidgetFinal.addButton(sectionButton);
 
-
     return sectionButton;
   }
 
   public static class ButtonWithChildren extends Button {
-    List<ButtonWithChildren> children = new ArrayList<ButtonWithChildren>();
-    String type;
+    private List<ButtonWithChildren> children = new ArrayList<ButtonWithChildren>();
+    private String type;
+    private ButtonWithChildren parent;
+    private ButtonGroupSectionWidget buttonGroupContainer;
+
     public ButtonWithChildren(String caption, String type) {
       super(caption);
       this.type = type;
@@ -929,8 +946,32 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       children.add(b);
     }*/
 
+    /**
+     * @param children
+     * @see FlexSectionExerciseList#addButtonGroup(com.google.gwt.user.client.ui.HorizontalPanel, java.util.List, String, java.util.List, ButtonGroupSectionWidget)
+     * @see FlexSectionExerciseList#addButtonRow(java.util.List, long, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection, boolean)
+     */
     public void setChildren(List<ButtonWithChildren> children) {
       this.children = children;
+      for (ButtonWithChildren child : children) {
+        child.setParentButton(this);
+      }
+    }
+
+    public void setButtonGroup(ButtonGroupSectionWidget buttonGroupContainer) {
+       this.buttonGroupContainer = buttonGroupContainer;
+    }
+
+    public ButtonGroupSectionWidget getButtonGroup() {
+      return buttonGroupContainer;
+    }
+
+    public ButtonWithChildren getParentButton() {
+      return parent;
+    }
+
+    public void setParentButton(ButtonWithChildren parent) {
+      this.parent = parent;
     }
 
     public List<ButtonWithChildren> getButtonChildren() {
