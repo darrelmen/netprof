@@ -231,6 +231,14 @@ fieldset > legend {
     font-size: x-large;
 }
 
+.xlargeFont {
+    font-size: x-large;
+}
+
+.xlargeFont td {
+    font-size: x-large;
+}
+
 .inlineStyle {
     display: inline-block;
 }
