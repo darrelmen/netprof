@@ -130,6 +130,7 @@ public class AutoCRT {
   private boolean isCorrect(List<String> answerSentences, String recoSentence) {
     for (String answer : answerSentences) {
       String converted = answer.replaceAll("-", " ").replaceAll("\\.", "").toLowerCase();
+      converted = removePunct(converted);
       if (converted.equalsIgnoreCase(recoSentence)) return true;
     }
     return false;
