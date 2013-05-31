@@ -71,17 +71,16 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * @see mitll.langtest.client.LangTest#showPopupOnDenial()
    */
   public void initFlash() {
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-        if (!didPopup) {
-          show();
-          //System.out.println("initFlash : doing installFlash");
-          installFlash();
-          System.out.println("initFlash : did   installFlash");
-          didPopup = true;
-        }
-      }
-    });
+    rememberInstallFlash();
+  }
+
+  private void rememberInstallFlash() {
+    if (!didPopup) {
+      show();
+      installFlash();
+      System.out.println("initFlash : did   installFlash");
+      didPopup = true;
+    }
   }
 
   public static void setMicPermission(MicPermission micPermission) {
