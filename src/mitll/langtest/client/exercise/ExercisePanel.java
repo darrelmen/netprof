@@ -141,6 +141,9 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     if (getLanguage().equalsIgnoreCase("Pashto")) {
       html.addStyleName("pashtofont");
     }
+    else {
+      html.addStyleName("xlargeFont");
+    }
     return html;
   }
 
@@ -261,7 +264,8 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
 
   private String getLanguage() {
     String language = controller.getLanguage();
-    return language == null ? THE_FOREIGN_LANGUAGE : language;
+    String lang = (language == null || language.length() == 0) ? THE_FOREIGN_LANGUAGE : language;
+    return lang;
   }
 
   protected String getSpokenPrompt(boolean promptInEnglish) {
