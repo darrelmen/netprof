@@ -511,6 +511,9 @@ public class ExcelImport implements ExerciseDAO {
       }
     }
     if (chapter.length() > 0) {
+      if (language.equalsIgnoreCase("English")) {
+        chapter = unit + "-" + chapter; // hack for now to get unique chapters...
+      }
       if (usePredefinedTypeOrder) {
         pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
       }
