@@ -259,7 +259,7 @@ public class DatabaseImpl implements Database {
   private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel, String mediaDir, boolean isRTL) {
     if (exerciseDAO == null) {
       if (useFile && excel) {
-        this.exerciseDAO = new ExcelImport(lessonPlanFile, isFlashcard, mediaDir, isRTL, absConfigDir, usePredefinedTypeOrder);
+        this.exerciseDAO = new ExcelImport(lessonPlanFile, isFlashcard, mediaDir, isRTL, absConfigDir, usePredefinedTypeOrder, language);
       }
       else {
         this.exerciseDAO = makeExerciseDAO(useFile);
