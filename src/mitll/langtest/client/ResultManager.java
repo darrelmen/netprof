@@ -2,6 +2,9 @@ package mitll.langtest.client;
 
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -20,6 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.visualization.client.formatters.DateFormat;
 import mitll.langtest.client.grading.GradingExercisePanel;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.client.user.UserFeedback;
@@ -87,7 +91,8 @@ public class ResultManager extends PagerTable {
     int top  = (Window.getClientHeight()) / 40;
     dialogBox.setPopupPosition(left, top);
     dialogVPanel.setWidth("100%");
-    dialogBox.setWidth((int)((float)Window.getClientWidth()*0.85f) + "px");
+    //dialogBox.setWidth((int)((float)Window.getClientWidth()*0.85f) + "px");
+    //  dialogBox.setWidth("100%");
 
     service.getNumResults(new AsyncCallback<Integer>() {
       @Override
@@ -162,6 +167,8 @@ public class ResultManager extends PagerTable {
     }
 
     Widget table = getAsyncTable(numResults, true, new ArrayList<Grade>(),-1, 1);
+    table.setWidth("100%");
+
     dialogVPanel.add(table);
     dialogVPanel.add(closeButton);
 
@@ -344,15 +351,6 @@ public class ResultManager extends PagerTable {
     id.setSortable(true);
     table.addColumn(id, "User ID");
 
-    TextColumn<Result> age = new TextColumn<Result>() {
-      @Override
-      public String getValue(Result answer) {
-        return "" + answer.plan;
-      }
-    };
-    age.setSortable(true);
-    table.addColumn(age, "Plan");
-
     TextColumn<Result> gender = new TextColumn<Result>() {
       @Override
       public String getValue(Result answer) {
@@ -365,14 +363,7 @@ public class ResultManager extends PagerTable {
   }
 
   protected void addResultColumn(Collection<Grade> grades, int grader, int numGrades, CellTable<Result> table) {
-      TextColumn<Result> date = new TextColumn<Result>() {
-        @Override
-        public String getValue(Result answer) {
-          return "" + new Date(answer.timestamp);
-        }
-      };
-      date.setSortable(true);
-      table.addColumn(date, "Time");
+    addNoWrapColumn(table);
 
     TextColumn<Result> audioType = new TextColumn<Result>() {
       @Override
@@ -416,6 +407,23 @@ public class ResultManager extends PagerTable {
     };
     valid.setSortable(true);
     table.addColumn(gradeInfo, "Grades");
+  }
+
+  private void addNoWrapColumn(CellTable<Result> table) {
+    SafeHtmlCell cell = new SafeHtmlCell();
+    Column<Result,SafeHtml> dateCol = new Column<Result, SafeHtml>(cell) {
+      @Override
+      public SafeHtml getValue(Result answer) {
+        SafeHtmlBuilder sb = new SafeHtmlBuilder();
+        sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
+          new Date(answer.timestamp)+
+          "</span>" );
+
+        sb.appendHtmlConstant("</div>");
+        return sb.toSafeHtml();
+      }
+    };
+    table.addColumn(dateCol, "Time");
   }
 
 
