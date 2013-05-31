@@ -380,9 +380,16 @@ public class AudioConversion {
 
     File testMP3 = new File(mp3File);
     if (!testMP3.exists()) {
-    //  System.err.println("didn't write MP3 : " + testMP3.getAbsolutePath());
+      if (!new File(pathToAudioFile).exists()) {
+        logger.error("huh? source file " + pathToAudioFile + " doesn't exist?");
+      }
+      else {
+        logger.error("didn't write MP3 : " + testMP3.getAbsolutePath() +
+          " lame path " + lamePath +
+          " command was " + lameProc.command());
+      }
     } else {
-  //    System.out.println("Wrote to " + testMP3 + " length " + testMP3.getTotalSpace());
+      logger.debug("Wrote to " + testMP3 + " length " + testMP3.getTotalSpace());
     }
     return testMP3;
   }
