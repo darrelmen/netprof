@@ -52,8 +52,8 @@ public class FileExerciseDAO implements ExerciseDAO {
 
   private List<Exercise> exercises;
   private final boolean isUrdu;
-  private final boolean showSections;
   private final boolean isFlashcard;
+  private final boolean isEnglish;
 
   @Override
   public SectionHelper getSectionHelper() {
@@ -76,13 +76,10 @@ public class FileExerciseDAO implements ExerciseDAO {
    */
   public FileExerciseDAO(String mediaDir, String language, boolean showSections, boolean isFlashcard) {
     this.isUrdu = language.equalsIgnoreCase("Urdu");
- //   this.language = language;
+    this.isEnglish = language.equalsIgnoreCase("English");
     this.isPashto = language.equalsIgnoreCase("Pashto");
-    this.showSections = showSections;
     this.mediaDir = mediaDir;
     this.isFlashcard = isFlashcard;
-    logger.debug("is flashcard " +isFlashcard);
-    //logger.debug("mediaDir " + mediaDir);
   }
 
   /**
@@ -111,7 +108,7 @@ public class FileExerciseDAO implements ExerciseDAO {
         String translit = split[4];
         String english = split[5];
 
-        String content = getContent(arabic, translit, english);
+        String content = getContent(arabic, translit, english,"");
         String audioRef =  "ref"+ File.separator+name+File.separator+"reference.wav";
        /* if (installPath.length() > 0) {
           if (!installPath.endsWith(File.separator)) installPath += File.separator;
@@ -310,11 +307,6 @@ public class FileExerciseDAO implements ExerciseDAO {
               isTSV ? readTSVLine(installPath,configDir,line2) : getExerciseForLine(line2);
           }
           if (exercise != null) {
-            if (showSections) {
-              addSectionTest(count, exercise);
-            }
-
-            // if (count < 10) logger.info("Got " + exercise);
             exercises.add(exercise);
           }
         } catch (Exception e) {
@@ -360,7 +352,6 @@ public class FileExerciseDAO implements ExerciseDAO {
       return null;
     }
     String[] split = line.split("\\t");
-    //int len = split.length;
     int i =0;
     String id = split[i++].trim();
     String level = split[i++].trim();
@@ -477,56 +468,10 @@ public class FileExerciseDAO implements ExerciseDAO {
     "</audio>";
   }
 
-  private void addSectionTest(int count, Exercise exercise) {
-    // testing unit/chapter/week stuff
-    String unitType = "unit";
-    String chapterType = "chapter";
-    String weekType = "week";
-    String unitSection = (count % 2 == 0) ? "even" : "odd";
-    List<Pair> pairs = new ArrayList<Pair>();
-    pairs.add(addExerciseToLesson(exercise, unitType, unitSection));
-
-    String id = "" +count;
-    //Map<String, Lesson> chapter = getSectionToLesson(chapterType);
-    String digit = id.substring(id.length() - 1);
-    String chapterName = "Chapter " + digit;
-          /*Set<String> chapter1 = */
-    pairs.add(addExerciseToLesson(exercise, chapterType, chapterName));
-    // subSections.add(chapterName);
-/*          pairs.add(addAssociation(unitType,unitSection,chapterType,chapterName));
-          addAssociation(chapterType,chapterName,unitType,unitSection);*/
-
-    Integer chapterID = Integer.parseInt(digit);
-    if (chapterID < 3) {
-      pairs.add(addExerciseToLesson(exercise, weekType, "Week 1"));
-/*
-      addAssociation(chapterType, chapterName, unitType, unitSection);
-      addAssociation(unitType,unitSection,chapterType,chapterName);
-      addAssociation(weekType,"Week 1",chapterType,chapterName);
-      addAssociation(weekType,"Week 1",chapterType,chapterName);
-*/
-
-    } else if (chapterID < 6) {
-      pairs.add(addExerciseToLesson(exercise, weekType, "Week 2"));
-    }
-    addAssociations(pairs);
-  }
-
   private Map<String, Lesson> getSectionToLesson( String section) {
     Map<String, Lesson> unit = typeToUnitToLesson.get(section);
     if (unit == null) typeToUnitToLesson.put(section, unit = new HashMap<String, Lesson>());
     return unit;
-  }
-
-  private Pair addExerciseToLesson(Exercise exercise, String type, String unitName) {
-
-    Map<String, Lesson> unit = getSectionToLesson(type);
-
-    Lesson even = unit.get(unitName);
-    if (even == null) unit.put(unitName, even = new Lesson(unitName, "", ""));
-    even.addExercise(exercise);
-
-   return new Pair(type,unitName);
   }
 
   private static class Pair {
@@ -646,7 +591,6 @@ public class FileExerciseDAO implements ExerciseDAO {
         //logger.warn("huh? english is empty for " + line2);
       }
       Exercise imported = getFlashcardExercise(id, foreignLanguagePhrase, english, translit, audioRef);
-      //logger.debug("made flashcard " +imported);
       return imported;
     } else {
       Exercise exercise =
@@ -668,9 +612,6 @@ public class FileExerciseDAO implements ExerciseDAO {
     imported.setEnglishSentence(english);
     if (translit.length() > 0) {
       imported.setTranslitSentence(translit);
-    }
-    else {
-      //logger.warn("no translit for " + imported);
     }
     imported.setRefAudio(ensureForwardSlashes(audioRef));
     return imported;
@@ -694,7 +635,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     String translit = split1[3];
     String english = split1[4];
 
-    String content = getContent(arabic, translit, english);
+    String content = getContent(arabic, translit, english,"");
     String fastAudioRef = mediaDir+File.separator+name+File.separator+ FAST + ".wav";
     String slowAudioRef = mediaDir+File.separator+name+File.separator+ SLOW + ".wav";
 
@@ -702,20 +643,29 @@ public class FileExerciseDAO implements ExerciseDAO {
         ensureForwardSlashes(fastAudioRef), ensureForwardSlashes(slowAudioRef), arabic, english);
   }
 
-  public String getContent(String arabic, String translit, String english) {
-    return getArabic(arabic) +
-        (translit.length() > 0?
-        "<div class=\"Instruction\">\n" +
-        "<span class=\"Instruction-title\">Transliteration:</span>\n" +
-        "<span class=\"Instruction-data\"> " + translit +
-        "</span>\n" +
-        "</div>\n" : "")+
-        (english.length() > 0 ?
-        "<div class=\"Instruction\">\n" +
-        "<span class=\"Instruction-title\">Translation:</span>\n" +
-        "<span class=\"Instruction-data\"> " + english +
-        "</span>\n" +
-        "</div>" : "");
+  public String getContent(String arabic, String translit, String english, String meaning) {
+    String arabicHTML = getArabic(arabic);
+    String translitHTML = translit.length() > 0 ?
+      getSpanWrapper("Transliteration:", translit)
+      : "";
+    String translationHTML = (!isEnglish && english.length() > 0) ?
+      getSpanWrapper("Translation:", english) : "";
+    String meaningHTML = (isEnglish && meaning.length() > 0) ?
+      getSpanWrapper("Meaning:", meaning) : "";
+    return arabicHTML +
+      translitHTML +
+      translationHTML +
+      meaningHTML;
+  }
+
+  private String getSpanWrapper(String rowTitle, String english) {
+    return "<div class=\"Instruction\">\n" +
+    "<span class=\"Instruction-title\">" +
+      rowTitle +
+      "</span>\n" +
+    "<span class=\"Instruction-data\"> " + english +
+    "</span>\n" +
+    "</div>";
   }
 
   private String getArabic(String arabic) {
@@ -734,19 +684,10 @@ public class FileExerciseDAO implements ExerciseDAO {
     return "<img src='" +
       s +
       "'/>";
-      //media\\/bc-R0P-001\\/ac-R0P-001-potatoes.png\\\ ""
   }
-    private String getFlashcard(String flPhrase, String language) {
+
+  private String getFlashcard(String flPhrase, String language) {
     return flPhrase;
-    /*return "Repeat in " +language
-    return "<div class=\"Instruction\">\n" +
-      "<span class=\"Instruction-title\">Repeat in " +language +
-      ":</span>\n" +
-      "<span class=\"" +
-      (isUrdu ? "urdufont" : "Instruction-data") +
-      "\"> " + flPhrase +
-      "</span>\n" +
-      "</div>\n";*/
   }
 
   private InputStream getExerciseListStream(String exerciseFile) {
