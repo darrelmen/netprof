@@ -202,20 +202,22 @@ public class FileExerciseDAO implements ExerciseDAO {
               getSimpleExerciseForLine(line2) :
               isTSV ? readTSVLine(installPath, configDir, line2) : getExerciseForLine(line2);
 
-            if (exercise.getID().equals(lastID)) {
-              //logger.debug("ex " +lastID+ " adding " + exercise.getEnglishQuestions());
-              lastExercise.addQuestions(Exercise.EN, exercise.getEnglishQuestions());
-              lastExercise.addQuestions(Exercise.FL, exercise.getForeignLanguageQuestions());
-            }
-            else {
-              exercises.add(exercise);
-              if (showSections) {
-                addSectionTest(count, exercise);
+            if (exercise != null) {
+              if (exercise.getID().equals(lastID)) {
+                //logger.debug("ex " +lastID+ " adding " + exercise.getEnglishQuestions());
+                lastExercise.addQuestions(Exercise.EN, exercise.getEnglishQuestions());
+                lastExercise.addQuestions(Exercise.FL, exercise.getForeignLanguageQuestions());
+              } else {
+                exercises.add(exercise);
+                if (showSections) {
+                  addSectionTest(count, exercise);
+                }
+                lastExercise = exercise;
               }
-              lastExercise = exercise;
-            }
 
-            lastID = exercise.getID();
+
+              lastID = exercise.getID();
+            }
           }
         } catch (Exception e) {
           logger.error("Got " + e + ".Skipping line -- couldn't parse line #"+count + " : " +line2,e);
