@@ -225,10 +225,15 @@ public class ResultManager extends PagerTable {
     table.addColumn(audioFile, nameForAnswer);
 
     addResultColumn(grades, grader, numGrades, table);
-    // Create a data provider.
     return id;
   }
 
+  /**
+   * @see #getAsyncTable(int, boolean, java.util.Collection, int, int)
+   * @param numResults
+   * @param table
+   * @return
+   */
   private AsyncDataProvider<Result> createProvider(final int numResults, CellTable<Result> table) {
     AsyncDataProvider<Result> dataProvider = new AsyncDataProvider<Result>() {
       @Override
@@ -246,7 +251,9 @@ public class ResultManager extends PagerTable {
           @Override
           public void onSuccess(List<Result> result) {
             System.out.println("createProvider : onSuccess for " + start +"->" + fend + " got " + result.size());
-
+        /*    for (Result r : result) {
+              System.out.println("\tcreateProvider : got " +r);
+            }*/
             updateRowData(start, result);
           }
         });
