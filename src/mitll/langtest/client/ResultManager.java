@@ -1,6 +1,7 @@
 package mitll.langtest.client;
 
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -274,6 +275,7 @@ public class ResultManager extends PagerTable {
     };
     id.setSortable(true);
     table.addColumn(id, "User ID");
+/*
 
     TextColumn<Result> age = new TextColumn<Result>() {
       @Override
@@ -283,6 +285,7 @@ public class ResultManager extends PagerTable {
     };
     age.setSortable(true);
     table.addColumn(age, "Plan");
+*/
 
     TextColumn<Result> gender = new TextColumn<Result>() {
       @Override
@@ -303,14 +306,7 @@ public class ResultManager extends PagerTable {
    * @param table to add columns to
    */
   protected void addResultColumn(Collection<Grade> grades, int grader, int numGrades, CellTable<Result> table) {
-      TextColumn<Result> date = new TextColumn<Result>() {
-        @Override
-        public String getValue(Result answer) {
-          return "" + new Date(answer.timestamp);
-        }
-      };
-      date.setSortable(true);
-      table.addColumn(date, "Time");
+    addNoWrapColumn(table);
 
     TextColumn<Result> audioType = new TextColumn<Result>() {
       @Override
@@ -325,7 +321,7 @@ public class ResultManager extends PagerTable {
       @Override
       public String getValue(Result answer) {
         float secs = ((float) answer.durationInMillis) / 1000f;
-      //  System.out.println("Value " +answer.durationInMillis + " or " +secs);
+        //  System.out.println("Value " +answer.durationInMillis + " or " +secs);
         return "" + roundToHundredth(secs);
       }
     };
@@ -355,6 +351,7 @@ public class ResultManager extends PagerTable {
     valid.setSortable(true);
     table.addColumn(gradeInfo, "Grades");
 
+
     TextColumn<Result> correct = new TextColumn<Result>() {
       @Override
       public String getValue(Result answer) {
@@ -367,11 +364,28 @@ public class ResultManager extends PagerTable {
     TextColumn<Result> pronScore = new TextColumn<Result>() {
       @Override
       public String getValue(Result answer) {
-        return ""+answer.getPronScore();
+        return ""+roundToHundredth(answer.getPronScore());
       }
     };
     pronScore.setSortable(true);
     table.addColumn(pronScore, "PronScore");
+  }
+
+  private void addNoWrapColumn(CellTable<Result> table) {
+    SafeHtmlCell cell = new SafeHtmlCell();
+    Column<Result,SafeHtml> dateCol = new Column<Result, SafeHtml>(cell) {
+      @Override
+      public SafeHtml getValue(Result answer) {
+        SafeHtmlBuilder sb = new SafeHtmlBuilder();
+        sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
+          new Date(answer.timestamp)+
+          "</span>" );
+
+        sb.appendHtmlConstant("</div>");
+        return sb.toSafeHtml();
+      }
+    };
+    table.addColumn(dateCol, "Time");
   }
 
 
