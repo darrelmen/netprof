@@ -37,7 +37,7 @@
   <!-- <script src="soundmanager2.js"/>  -->
 
   <!-- These 3 scripts are necessary so that Flash Recording can work -->
-  <script src="langtest/js/jquery-1.9.1.min.js"/>
+  <script src="js/jquery-1.9.1.min.js"/>
   <script src="js/swfobject.js"/>
   <script src="js/recorder.js"/>
 
