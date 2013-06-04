@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -58,6 +59,95 @@ public class SplitAudio {
   private static final String FAST = "Fast";
   private static final String SLOW = "Slow";
   private AudioCheck audioCheck = new AudioCheck();
+
+  public void normalize(String audioDir) {
+
+    final String placeToPutAudio = ".."+ File.separator+audioDir + File.separator;
+    final File bestDir = new File(placeToPutAudio + "bestAudio");
+    File[] bestAudioDirs = bestDir.listFiles();
+    String[] list = bestDir.list();
+    logger.warn("in " +bestDir.getAbsolutePath() + " there are " + list.length);
+
+    List<File> temp = Arrays.asList(bestAudioDirs);
+    temp = temp.subList(0,10); // for now
+
+    String language = "english";
+    final String configDir = getConfigDir(language);
+    try {
+      String fileName = configDir + "analist";
+      File analistFile = new File(fileName);
+      final FileWriter analist = new FileWriter(analistFile);
+      int i = 0;
+      Set<String> valid = new HashSet<String>();
+      for (File file1 : temp) {
+      //  File file1 = new File(file);
+        if (!file1.exists()) {
+             logger.error("huh? " +file1.getAbsolutePath() + " doesn't exist");
+        }
+        if (!file1.isDirectory()) {
+          logger.error("huh? " +file1.getAbsolutePath() + " is not a directory...");
+
+        }
+        File[] files = file1.listFiles();
+        String dirname = file1.getName();
+     //   int i1 = Integer.parseInt(dirname);
+        valid.add(dirname);
+        if (files != null) {
+          for (File wav : files) {
+            System.out.println("path " + wav.getPath());
+            boolean isFast = (wav.getName().startsWith("Fast"));
+            String id = dirname + (isFast ? "F" : "S");
+            analist.write(id + " " + wav.getPath() + "\n");
+          }
+        }
+      }
+      analist.close();
+      logger.debug("wrote to " +analistFile.getAbsolutePath());
+
+      DatabaseImpl unitAndChapter = new DatabaseImpl(
+        configDir,
+        language,
+        configDir+
+          "ESL_ELC_5071-30books_chapters.xlsx");
+
+      String fileName2 = configDir + "transcript";
+      File transcriptFile = new File(fileName2);
+      final FileWriter transcript = new FileWriter(transcriptFile);
+      i = 0;
+      for (Exercise e:unitAndChapter.getExercises()) {
+        if (valid.contains(e.getID())) {
+        //  String id = dirname + (isFast ? "F" : "S");
+
+          transcript.write(e.getEnglishSentence() +" (" +e.getID()+ "F"+
+            ")"+
+            "\n");
+          transcript.write(e.getEnglishSentence() +" (" +e.getID()+ "S"+
+            ")"+
+            "\n");
+        }
+      }
+      transcript.close();
+      logger.debug("wrote to " +transcriptFile.getAbsolutePath());
+    } catch (IOException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+    //  Set<String> files = new HashSet<String>(Arrays.asList(list));
+
+    try {
+      final Map<String, String> properties = getProperties(language, configDir);
+      ASRScoring scoring = getAsrScoring(".", null, properties);
+
+//    checkLTS(exercises, scoring.getLTS());
+
+      final HTKDictionary dict = scoring.getDict();
+
+      ASRScoring asrScoring = getAsrScoring(".", dict, properties);
+
+    } catch (Exception e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+  }
+
 
   public void dumpDir (String audioDir) {
     final String placeToPutAudio = ".."+ File.separator+audioDir + File.separator;
@@ -871,7 +961,8 @@ public class SplitAudio {
       String audioDir = arg[1];
       // new SplitAudio().convertExamples(numThreads, audioDir, arg[2], arg[3]);
    //   new SplitAudio().convertEnglish(numThreads,audioDir);
-      new SplitAudio().dumpDir(audioDir);
+    //  new SplitAudio().dumpDir(audioDir);
+      new SplitAudio().normalize(audioDir);
     } catch (Exception e) {
       e.printStackTrace();
     }
