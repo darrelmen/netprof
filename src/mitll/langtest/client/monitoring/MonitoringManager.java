@@ -405,7 +405,7 @@ public class MonitoringManager {
     vp.add(html);
 
     for (int i = 0; i < 3; i++) {
-      if (result.containsKey("totalGraded_" + i)) {
+      if (result.containsKey("totalGraded_" + i) && result.get("totalGraded_" + i).intValue() > 5) {
         HTML html2 = new HTML("<h3>Grade Round #" + (i + 1) +
           "</h2>");
         vp.add(html2);
@@ -413,9 +413,14 @@ public class MonitoringManager {
 
         final int graded = result.get("totalGraded_" + i).intValue();
         final int validGrades = result.get("validGraded_" + i).intValue();
+        final float avgNumGraded = result.get("averageNumGraded_" + i).floatValue();
+        final float avgGrade = result.get("avgGrade_" + i).floatValue();
         final int percentGraded = result.get("percentGraded_" + i).intValue();
         final int incorrect = result.get("incorrectGraded_" + i).intValue();
+        final float avgIncorrect = result.get("averageNumIncorrect_" + i).floatValue();
         final int correct = result.get("correctGraded_" + i).intValue();
+        final float avgCorrect = result.get("averageNumCorrect_" + i).floatValue();
+
         int row = 0;
 
         flex.setText(row, 0, "Total Graded");
@@ -425,10 +430,25 @@ public class MonitoringManager {
         flex.setText(row++, 1, "" + percentGraded + "%");*/
         flex.setText(row, 0, "Total Valid Graded (1-5)");
         flex.setText(row++, 1, "" + validGrades + " (" + getPercent(validGrades, graded) + ")");
+
+
+        flex.setText(row, 0, "Average Number Graded");
+        flex.setText(row++, 1, "" + roundToHundredth(avgNumGraded));
+
+        flex.setText(row, 0, "Average Grade");
+        flex.setText(row++, 1, "" +  roundToHundredth(avgGrade));
+
         flex.setText(row, 0, "Incorrect Grades (1-3)");
         flex.setText(row++, 1, "" + incorrect + " (" + getPercent(incorrect, validGrades) + " of valid)");
+
+        flex.setText(row, 0, "Average Number Incorrect Grades");
+        flex.setText(row++, 1, "" +  roundToHundredth(avgIncorrect));
+
         flex.setText(row, 0, "Correct Grades (4-5)");
         flex.setText(row++, 1, "" + correct + " (" + getPercent(correct, validGrades) + " of valid)");
+
+        flex.setText(row, 0, "Average Number Correct Grades");
+        flex.setText(row++, 1, "" +  roundToHundredth(avgCorrect));
         vp.add(flex);
       }
     }
