@@ -1,4 +1,4 @@
-package mitll.langtest.server.database;
+package mitll.langtest.server.audio;
 
 import audio.image.TranscriptEvent;
 import audio.image.TranscriptReader;
@@ -8,6 +8,9 @@ import corpus.HTKDictionary;
 import corpus.LTS;
 import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.AudioConversion;
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.FileExerciseDAO;
+import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.Scores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
