@@ -189,6 +189,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (isCRTDataCollectMode()) {
       addProgressBar(widgets);
     }
+    else {
+      widgets.addSouth(status, 50);
+    }
     if ((props.isMinimalUI() && !props.isGrading()) && !props.isAdminView()) {
       exerciseListPanel.setVisible(false);
       widgets.addWest(exerciseListPanel, 10);
@@ -234,6 +237,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void addProgressBar(DockLayoutPanel widgets) {
     if (props.isGrading()) {
+      System.out.println("adding status line...");
+
       widgets.addSouth(status, 50);
     } else {
       progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);

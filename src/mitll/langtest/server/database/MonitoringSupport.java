@@ -143,7 +143,7 @@ public class MonitoringSupport {
    * @param exercises
    * @return # responses->hours to get that number
    */
-  public Map<Integer,Float> getHoursToCompletion(List<Exercise> exercises) {
+/*  public Map<Integer,Float> getHoursToCompletion(List<Exercise> exercises) {
     long totalTime = 0;
     long total = 0;
     for (Session s: getSessions()) {
@@ -175,7 +175,7 @@ public class MonitoringSupport {
 
     // logger.info("Est time to completion " +estToItems);
     return estToItems;
-  }
+  }*/
 
   /**
    * TODO : worry about duplicate userid?
@@ -701,8 +701,13 @@ public class MonitoringSupport {
       if (gradeInfo.gradeCount > 0) {
         typeToStat.put("totalGraded_" +i, gradeInfo.gradeCount);
         typeToStat.put("validGraded_" +i, gradeInfo.valid);
+        typeToStat.put("averageNumGraded_" +i, gradeInfo.avgNumGrades);
+
+        typeToStat.put("avgGrade_" +i, gradeInfo.avgGrade);
         typeToStat.put("incorrectGraded_" +i, gradeInfo.incorrect);
+        typeToStat.put("averageNumIncorrect_" +i, (float)gradeInfo.incorrect/(float)gradeInfo.numExercises);
         typeToStat.put("correctGraded_" +i, gradeInfo.correct);
+        typeToStat.put("averageNumCorrect_" +i, (float)gradeInfo.correct/(float)gradeInfo.numExercises);
         typeToStat.put("percentGraded_" +i, (int)(100f*(float)gradeInfo.gradeCount/(float)results.size()));
       }
     }
@@ -724,13 +729,17 @@ public class MonitoringSupport {
     int valid = 0;
     int incorrect = 0;
     int correct = 0;
+    int numExercises = 0;
+    int gradeTotal = 0;  float avgGrade; float avgNumGrades;
 
     public GradeInfo(GradeDAO gradeDAO, int index) {
       Collection<Grade> grades = gradeDAO.getGrades();
-
+      Set<String> exids = new HashSet<String>();
       for (Grade g : grades) {
         if (g.gradeIndex == index) {
           if (g.grade > 0) {
+            exids.add(g.exerciseID);
+            gradeTotal += g.grade;
             valid++;
             if (g.grade < 4) incorrect++;
             else correct++;
@@ -738,6 +747,9 @@ public class MonitoringSupport {
           gradeCount++;
         }
       }
+      numExercises = exids.size();
+      avgGrade = (float) gradeTotal / (float) valid;
+      avgNumGrades = (float) valid / (float) numExercises;
     }
   }
 
