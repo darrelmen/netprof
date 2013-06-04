@@ -148,11 +148,27 @@ public class UserManager {
       langTest.gotUser(user);
     }
     else if (isFlashcard) {
-      addUser(89,"male",0);
+      addAnonymousUser();
     }
     else {
       displayLoginBox();
     }
+  }
+
+  public void anonymousLogin() {
+    int user = getUser();
+    if (user != NO_USER_SET) {
+      System.out.println("UserManager.anonymousLogin : user : " + user);
+      rememberAudioType();
+      langTest.gotUser(user);
+    }
+    else {
+      addAnonymousUser();
+    }
+  }
+
+  private void addAnonymousUser() {
+    addUser(89,"male",0);
   }
 
   /**
@@ -261,7 +277,7 @@ public class UserManager {
   public void teacherLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
-      System.out.println("login user : " + user);
+      System.out.println("teacherLogin: login user : " + user);
       rememberAudioType();
       langTest.gotUser(user);
     } else {
