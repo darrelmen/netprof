@@ -171,7 +171,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       return;
     }
 
-    if (props.isGoodwaveMode() || props.isAdminView()) {
+    if (props.isGoodwaveMode() || props.isAdminView() || props.isGrading()) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           Window.alert("Code download failed");
@@ -188,7 +188,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       });
     }
 
-    if (props.isAdminView()) {
+    if (props.isAdminView() || props.isGrading()) {
       final LangTest outer = this;
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
@@ -842,7 +842,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see #modeSelect()
+   * @see #checkLogin()
    * @see ExerciseList#checkBeforeLoad(mitll.langtest.shared.ExerciseShell)
    */
   public void login() {
@@ -908,7 +908,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void checkLogin() {
     if (props.isGoodwaveMode() || isAutoCRTMode() || (props.isFlashcardTeacherView() && !props.isFlashCard())) {   // no login for pron mode
-      gotUser(-1);
+      userManager.anonymousLogin();
     }
     else {
       if (props.isTimedGame())  {
