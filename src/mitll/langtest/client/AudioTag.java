@@ -22,6 +22,7 @@ public class AudioTag {
    * @return
    */
   public SafeHtml getAudioTag(String result) {
+    result = ensureForwardSlashes(result);
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     String firstSource = INCLUDE_ALTERNATE_AUDIO ?
         "<source type=\"audio/" + (INCLUDE_ALTERNATE_COMPRESSED ? ALTERNATE_TYPE : "wav") + "\" " +
@@ -35,5 +36,9 @@ public class AudioTag {
         "Your browser does not support the audio tag.\n" +
         "</audio>");
     return sb.toSafeHtml();
+  }
+
+  private String ensureForwardSlashes(String wavPath) {
+    return wavPath.replaceAll("\\\\", "/");
   }
 }
