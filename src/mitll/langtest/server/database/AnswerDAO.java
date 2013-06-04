@@ -142,6 +142,7 @@ public class AnswerDAO {
   private void addAnswerToTable(Connection connection, int userid, String plan, String id, int questionID, String answer, String audioFile,
                                 boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis, boolean correct, float pronScore) throws SQLException {
     PreparedStatement statement;
+    logger.info("adding answer for " + id + " correct " + correct + " score " + pronScore);
     statement = connection.prepareStatement("INSERT INTO results(" +
       "userid," +
       "plan," +
