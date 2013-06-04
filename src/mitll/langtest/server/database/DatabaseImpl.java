@@ -310,6 +310,7 @@ public class DatabaseImpl implements Database {
       " use flq " + useFLQ + " spoken " + useSpoken);*/
 
     // remove results that have grades...
+    int skipped = 0;
     Iterator<Result> iterator = resultExcludingExercises.iterator();
     while (iterator.hasNext()) {
       Result result = iterator.next();
@@ -320,17 +321,18 @@ public class DatabaseImpl implements Database {
         //if (result.flq)  // TODO : need to enrich Results with flq flag
         iterator.remove();
       }
-  /*    else if (filterResults && (result.flq != useFLQ || result.spoken != useSpoken)) {
+      else if (filterResults && (result.flq != useFLQ || result.spoken != useSpoken)) {
         //logger.debug("getNextUngradedExercise excluding " + result + " since no match for flq = " + useFLQ + " and spoken = " +useSpoken);
         iterator.remove();
         skipped++;
-      }*/
+      }
       else if (numGrades != null) {
         logger.warn("\tfound grade " + numGrades + " for " +result +"?");
       }
     }
 
-    //logger.debug("getNextUngradedExercise after removing graded, there were " + resultExcludingExercises.size() + " results, skipped " + skipped);
+/*    logger.debug("getNextUngradedExercise after removing graded, there were " + resultExcludingExercises.size() + " results" +//);
+      ", skipped " + skipped);*/
 
     // whatever remains, find first exercise
 
@@ -340,7 +342,7 @@ public class DatabaseImpl implements Database {
     }
     if (exids.isEmpty()) return null;
     else {
-      //logger.debug("getNextUngradedExercise candidates are   " + exids);
+    //  logger.debug("getNextUngradedExercise candidates are   " + exids);
       String first = exids.first();
       for (Exercise e : rawExercises) {
         if (e.getID().equals(first)) {
@@ -367,7 +369,7 @@ public class DatabaseImpl implements Database {
     Map<Integer, Integer> idToCount = new HashMap<Integer, Integer>();
     int atExpected = 0;
     for (Grade g : allGradesExcluding.grades) {
-      if (g.gradeIndex == expectedCount - 1) {
+      if (g.gradeIndex == expectedCount - 1 && g.grade != Grade.UNASSIGNED) {
         atExpected++;
         if (!idToCount.containsKey(g.resultID)) {
           idToCount.put(g.resultID, 1);
@@ -1002,6 +1004,7 @@ public class DatabaseImpl implements Database {
 
    // Map<Long, List<Schedule>> scheduleForUserAndExercise = scheduleDAO.getScheduleForUserAndExercise(users, exid);
     Map<Boolean, Map<Boolean, List<Result>>> spokenToLangToResult = new HashMap<Boolean, Map<Boolean, List<Result>>>();
+    logger.debug("for exid " + exid + " got " +resultsForExercise.size() + " results and " + gradesAndIDs.grades.size() + " grades");
     for (Result r : resultsForExercise) {
      /* List<Schedule> schedules = scheduleForUserAndExercise.get(r.userid);
       if (schedules == null) {
@@ -1030,6 +1033,9 @@ public class DatabaseImpl implements Database {
         resultsForLang.add(r);
       }
     }
+
+    logger.debug("for exid " + exid + " got " +resultsForExercise.size() + " results and " + gradesAndIDs.grades.size() + " grades and " + spokenToLangToResult.size());
+
     return new ResultsAndGrades(resultsForExercise, gradesAndIDs.grades, spokenToLangToResult);
   }
 
