@@ -126,7 +126,11 @@ public class GradingExercisePanel extends ExercisePanel {
           if (langToResult != null) { // there might not be any written types
             System.out.println("spoken : " +isSpoken + " has " +langToResult.size() + " results");
             for (boolean isForeign : BOOLEANS) {
-              if (englishOnly && isForeign) continue; // skip non-english
+              if (englishOnly && isForeign) {
+                System.out.println("\tskipping! spoken : " +isSpoken + " isFLQ " + isForeign +" has " +langToResult.size() + " results");
+
+                continue; // skip non-english
+              }
               List<Result> results = langToResult.get(isForeign);
               if (results != null) {
                 System.out.println("\tspoken : " +isSpoken + " isFLQ " + isForeign +" has " +results.size() + " results");
@@ -136,7 +140,13 @@ public class GradingExercisePanel extends ExercisePanel {
 
                 vp.add(addAnswerGroup(resultsAndGrades.grades, results, bigPage, prompt, outer, service, n, index));
               }
+              else {
+                System.out.println("\tspoken : " +isSpoken + " isFLQ " + isForeign +" has " +results + " results");
+              }
             }
+          }
+          else {
+            System.out.println("spoken : " +isSpoken + " has " +langToResult + " results");
           }
         }
         if (!anyAnswers) vp.add(new HTML("<b><i>No answers yet.</i></b>"));
