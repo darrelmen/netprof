@@ -1147,11 +1147,11 @@ public class DatabaseImpl implements Database {
    * @param correct
    * @param score
    */
-  public void addAudioAnswer(int userID, String plan, String exerciseID, int questionID,
+  public long addAudioAnswer(int userID, String plan, String exerciseID, int questionID,
                              String audioFile,
                              boolean valid, boolean flq, boolean spoken,
                              String audioType, int durationInMillis, boolean correct, float score) {
-    answerDAO.addAnswer(this, userID, plan, exerciseID, questionID, "", audioFile, valid, flq, spoken, audioType,
+    return answerDAO.addAnswer(this, userID, plan, exerciseID, questionID, "", audioFile, valid, flq, spoken, audioType,
       durationInMillis, correct, score);
   }
 
@@ -1171,6 +1171,10 @@ public class DatabaseImpl implements Database {
    */
   public void changeGrade(Grade toChange) {
     gradeDAO.changeGrade(toChange);
+  }
+
+  public void changeAnswer(String id, boolean correct, float pronScore) {
+    answerDAO.changeAnswer(id, correct, pronScore);
   }
 
   public int userExists(String login) {
