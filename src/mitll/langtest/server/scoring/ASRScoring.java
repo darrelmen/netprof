@@ -130,6 +130,8 @@ public class ASRScoring extends Scoring {
       this.letterToSoundClass = new ModernStandardArabicLTS();
     } else if (language.equalsIgnoreCase("Levantine")) {
       this.letterToSoundClass = new LevantineLTS();
+    } else if (language.equalsIgnoreCase("Farsi")) {
+      this.letterToSoundClass = new ArabicLTS();  // TODO is there a FarsiLTS class???
     } else {
       logger.error("huh? unsupported language " + language);
     }
@@ -543,7 +545,7 @@ public class ASRScoring extends Scoring {
      // }
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
-      logger.info("got score " + hydec_score +" and took " + timeToRunHydec + " millis");
+      logger.info("getScoresFromHydec : got score " + hydec_score +" and took " + timeToRunHydec + " millis");
 
       return new Scores(hydec_score, jscoreOut._2);
     } catch (AssertionError e) {
