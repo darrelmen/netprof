@@ -1065,9 +1065,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       getAudioAnswer(exercise, questionID, user, reqid, file, validity, url, doFlashcard) :
       new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
 
-    db.addAudioAnswer(user, plan, exercise, questionID, file.getPath(),
+    long answerID = db.addAudioAnswer(user, plan, exercise, questionID, file.getPath(),
       isValid, flq, true, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore());
-
+    answer.setResultID(answerID);
     logger.info("writeAudioFile answer " + answer);
     return answer;
   }
