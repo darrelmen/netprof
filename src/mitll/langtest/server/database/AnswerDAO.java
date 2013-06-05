@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 
 /**
@@ -96,28 +97,23 @@ public class AnswerDAO {
    * @param correct
    * @param pronScore
    */
-  public void addAnswer(Database database, int userID, String plan, String id, int questionID, String answer,
+  public long addAnswer(Database database, int userID, String plan, String id, int questionID, String answer,
                         String audioFile, boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis,
                         boolean correct, float pronScore) {
     try {
       long then = System.currentTimeMillis();
       Connection connection = database.getConnection();
-      addAnswerToTable(connection, userID, plan, id, questionID, answer, audioFile, valid, flq, spoken, audioType, durationInMillis, correct, pronScore);
+      long newid = addAnswerToTable(connection, userID, plan, id, questionID, answer, audioFile, valid, flq, spoken,
+        audioType, durationInMillis, correct, pronScore);
       database.closeConnection(connection);
       long now = System.currentTimeMillis();
       if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
-
- /*     if (LOG_RESULTS) { // true to see what is in the table
-        try {
-          database.showResults();
-        } catch (Exception e1) {
-          e1.printStackTrace();
-        }
-      }*/
+      return newid;
 
     } catch (Exception ee) {
-      ee.printStackTrace();
+      logger.error("addAnswer got " + ee, ee);
     }
+    return -1;
   }
 
   /**
@@ -139,10 +135,12 @@ public class AnswerDAO {
    * @throws java.sql.SQLException
    * @see #addAnswer(Database, int, String, String, int, String, String, boolean, boolean, boolean, String, int, boolean, float)
    */
-  private void addAnswerToTable(Connection connection, int userid, String plan, String id, int questionID, String answer, String audioFile,
-                                boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis, boolean correct, float pronScore) throws SQLException {
+  private long addAnswerToTable(Connection connection, int userid, String plan, String id, int questionID,
+                                String answer, String audioFile,
+                                boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis,
+                                boolean correct, float pronScore) throws SQLException {
     PreparedStatement statement;
-    logger.info("adding answer for " + id + " correct " + correct + " score " + pronScore);
+    logger.info("adding answer for exid #" + id + " correct " + correct + " score " + pronScore);
     statement = connection.prepareStatement("INSERT INTO results(" +
       "userid," +
       "plan," +
@@ -157,7 +155,8 @@ public class AnswerDAO {
       ResultDAO.DURATION + "," +
       ResultDAO.CORRECT + "," +
       ResultDAO.PRON_SCORE +
-      ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
+      ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+
     int i = 1;
 
     boolean isAudioAnswer = answer == null || answer.length() == 0;
@@ -181,7 +180,53 @@ public class AnswerDAO {
     //logger.info("valid is " +valid + " for " +statement);
 
     statement.executeUpdate();
+
+    ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
+
+    long newID = -1;
+    if (rs.next()) {
+      newID = rs.getLong(1);
+    } else {
+      logger.error("huh? no key was generated?");
+    }
+
     statement.close();
+
+    return newID;
+  }
+
+  private boolean debug = true;
+
+  /**
+   * @see DatabaseImpl#changeGrade(mitll.langtest.shared.Grade)
+   * @param id
+   */
+  public void changeAnswer(String id, boolean correct, float score) {
+    try {
+      Connection connection = database.getConnection();
+      PreparedStatement statement;
+
+      String sql = "UPDATE results " +
+        "SET correct='" + correct + "', " +
+        ResultDAO.PRON_SCORE+"='" + score + "' " +
+        "WHERE id=" + id;
+      if (debug) {
+        logger.debug("changeAnswer " + id + " score " +score);
+      }
+      statement = connection.prepareStatement(sql);
+
+      int i = statement.executeUpdate();
+
+      if (debug) logger.debug("UPDATE " + i);
+      if (i == 0) {
+        logger.error("huh? didn't update the answer for " + id);
+      }
+
+      statement.close();
+      database.closeConnection(connection);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   private String copyStringChar(String plan) {
