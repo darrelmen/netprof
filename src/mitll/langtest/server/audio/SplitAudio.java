@@ -961,8 +961,16 @@ public class SplitAudio {
       String audioDir = arg[1];
       // new SplitAudio().convertExamples(numThreads, audioDir, arg[2], arg[3]);
    //   new SplitAudio().convertEnglish(numThreads,audioDir);
-    //  new SplitAudio().dumpDir(audioDir);
-      new SplitAudio().normalize(audioDir);
+      //  new SplitAudio().dumpDir(audioDir);
+      if (arg.length == 2) {
+        new SplitAudio().normalize(audioDir);
+      } else {
+        String language = arg[2];
+        String spreadsheet = arg[3];
+        String dbName = arg[4];
+        new SplitAudio().convertExamples(numThreads, audioDir, language, spreadsheet, dbName);
+
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }
