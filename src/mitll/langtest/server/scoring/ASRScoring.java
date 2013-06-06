@@ -10,6 +10,7 @@ import com.google.common.io.Files;
 import corpus.ArabicLTS;
 import corpus.DariLTS;
 import corpus.EnglishLTS;
+import corpus.FarsiLTS;
 import corpus.HTKDictionary;
 import corpus.LTS;
 import corpus.LevantineLTS;
@@ -19,6 +20,7 @@ import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import pronz.dirs.Dirs;
 import pronz.speech.Audio;
@@ -31,6 +33,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -131,7 +134,7 @@ public class ASRScoring extends Scoring {
     } else if (language.equalsIgnoreCase("Levantine")) {
       this.letterToSoundClass = new LevantineLTS();
     } else if (language.equalsIgnoreCase("Farsi")) {
-      this.letterToSoundClass = new ArabicLTS();  // TODO is there a FarsiLTS class???
+      this.letterToSoundClass = new FarsiLTS();  // TODO is there a FarsiLTS class???
     } else {
       logger.error("huh? unsupported language " + language);
     }
@@ -506,7 +509,15 @@ public class ASRScoring extends Scoring {
     boolean isArabicScript = !(language.equalsIgnoreCase("English"));
     if (!isArabicScript) logger.debug("using english LTS sound class since language is " + language);
 
-    return getScoresFromHydec(testAudio, sentence, configFile);
+    Scores scoresFromHydec = getScoresFromHydec(testAudio, sentence, configFile);
+    if (scoresFromHydec.hydecScore != -1) {
+      try {
+        FileUtils.deleteDirectory(new File(tmpDir));
+      } catch (IOException e) {
+        logger.error("Deleting dir " + tmpDir + " got " +e,e);
+      }
+    }
+    return scoresFromHydec;
   }
 
   private void readDictionary() {
