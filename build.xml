@@ -291,6 +291,17 @@
         </jar>
     </target>
 
+    <target depends="build" name="npfFarsi">
+        <jar destfile="npfFarsi.war" basedir="war"
+             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/farsi/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-farsi/**"
+                >
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
     <target depends="build" name="npfESL">
         <jar destfile="npfESL.war" basedir="war"
              includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.wsj01-16/**"
