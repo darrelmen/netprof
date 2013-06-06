@@ -2,20 +2,45 @@ package mitll.langtest.client;
 
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Paragraph;
+import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
 
-public class Flashcard {
-  HorizontalPanel makeFlashcardHeaderRow(String splashText) {
+/**
+ * Does fancy font sizing depending on available width...
+ */
+public class Flashcard implements RequiresResize {
+  boolean isNPF;
+  Paragraph appName;
+  Image flashcardImage;
+  Image collab;
+
+  public Flashcard(boolean isNPF) {
+    this.isNPF = isNPF;
+  }
+
+  public HorizontalPanel makeFlashcardHeaderRow(String splashText) {
+    String appIcon = "flashcardIcon2.png";
+    return getHeaderRow(splashText, appIcon, "FLASHCARD");
+  }
+
+  public HorizontalPanel makeNPFHeaderRow(String splashText) {
+    String appIcon = "npfIcon.png";
+    return getHeaderRow(splashText, appIcon, "PRONUNCIATION FEEDBACK");
+  }
+
+  private HorizontalPanel getHeaderRow(String splashText, String appIcon, String appTitle) {
     HorizontalPanel headerRow = new HorizontalPanel();
     headerRow.setWidth("100%");
     headerRow.addStyleName("headerBackground");
     headerRow.addStyleName("headerLowerBorder");
 
-    Image flashcardImage = new Image(LangTest.LANGTEST_IMAGES + "flashcardIcon2.png");
+    flashcardImage = new Image(LangTest.LANGTEST_IMAGES + appIcon);
     flashcardImage.addStyleName("floatLeft");
 
     FlowPanel iconLeftHeader = new FlowPanel();
@@ -25,8 +50,9 @@ public class Flashcard {
     flashcard.addStyleName("inlineStyle");
     flashcard.addStyleName("headerBackground");
     flashcard.addStyleName("leftAlign");
-    Paragraph appName = new Paragraph("FLASHCARD");
+    appName = new Paragraph("<span>" + appTitle + "</span>");
     appName.addStyleName("bigFont");
+
     flashcard.add(appName);
     Paragraph subtitle = new Paragraph(splashText);
     subtitle.addStyleName("subtitleForeground");
@@ -37,8 +63,52 @@ public class Flashcard {
     iconLeftHeader.add(flashcard);
     headerRow.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
-    Image collab = new Image(LangTest.LANGTEST_IMAGES + "collabIcon3.png");
+    collab = new Image(LangTest.LANGTEST_IMAGES + "collabIcon3.png");
     headerRow.add(collab);
+    if (isNPF) {
+      headerRow.addAttachHandler(new AttachEvent.Handler() {
+        @Override
+        public void onAttachOrDetach(AttachEvent event) {
+          onResize();
+        }
+      });
+    }
+
     return headerRow;
+  }
+
+  int min = 720;
+
+  @Override
+  public void onResize() {
+    if (isNPF) {
+      int clientWidth = Window.getClientWidth();
+
+      if (clientWidth < 1100) {
+        setFontWidth();
+      } else {
+        DOM.setStyleAttribute(appName.getElement(), "fontSize", "2em");
+      }
+    }
+  }
+
+  private void setFontWidth() {
+    int clientWidth = Window.getClientWidth();
+
+    int offsetWidth = flashcardImage.getOffsetWidth();
+    int offsetWidth1 = collab.getOffsetWidth();
+    int residual = clientWidth - offsetWidth - offsetWidth1 - 40;
+
+  //  System.out.println("left " + offsetWidth + " right " + offsetWidth1 + " window " + clientWidth + " residual " + residual);
+
+    double ratio = 2.0d * (double) residual / (double) min;
+    ratio *= 10;
+    ratio = Math.floor(ratio);
+    ratio /= 10;
+    if (ratio < 0.7) ratio = 0.7;
+    if (ratio > 2.0) ratio = 2.0;
+    String fontsize = ratio + "em";
+  //  System.out.println("Setting font size to " + fontsize);
+    DOM.setStyleAttribute(appName.getElement(), "fontSize", fontsize);
   }
 }
