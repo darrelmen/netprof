@@ -5,6 +5,7 @@ import audio.tools.FileCopier;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.shared.AudioAnswer;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.AudioFileFormat;
@@ -179,9 +180,7 @@ public class AudioConversion {
     return removeSuffix(name1);
   }
 
-  public File convertTo16Khz(File wavFile) throws UnsupportedAudioFileException {
-    //String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + ".wav";
-    //File wavFile = new File(pathname);
+  private File convertTo16Khz(File wavFile) throws UnsupportedAudioFileException {
     if (!wavFile.exists()) {
       System.err.println("convertTo16Khz " + wavFile + " doesn't exist");
       return wavFile;
@@ -190,6 +189,7 @@ public class AudioConversion {
       AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(wavFile);
       float sampleRate = audioFileFormat.getFormat().getSampleRate();
       if (sampleRate != 16000f) {
+      logger.debug("\\n\n\n\n\n\n--------> converting " + wavFile.getAbsolutePath());
         String binPath = WINDOWS_SOX_BIN_DIR;
         if (! new File(binPath).exists()) binPath = LINUX_SOX_BIN_DIR;
         String s = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
@@ -197,12 +197,14 @@ public class AudioConversion {
         String sampled = wavFile.getParent() + File.separator + removeSuffix(name1) + SIXTEEN_K_SUFFIX + ".wav";
         if (new FileCopier().copy(s, sampled)) {
           wavFile = new File(sampled);
+
+          // cleanup
+          String parent = new File(s).getParent();
+          File file = new File(parent);
+          FileUtils.deleteDirectory(file);
         }
       }
-    } /*catch (UnsupportedAudioFileException e) {
-     // e.printStackTrace();
-      throw e;
-    }*/ catch (IOException e) {
+    } catch (IOException e) {
       e.printStackTrace();
     }
     return wavFile;
