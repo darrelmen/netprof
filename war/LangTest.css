@@ -35,7 +35,7 @@ h1 {
     border-style:solid;
     border-width: 2px;
     border-top-color: #404141;
-    border-bottom-color: #3195b9;
+    border-bottom-color: #269cce;
     border-left-color: #404141;
     border-right-color: #404141;
 }
@@ -65,6 +65,9 @@ h1 {
 
 .spaceBarBlue {
     background-color: #3195b9;
+}
+.spaceBarBlueJess {
+    background-color: #269cce;
 }
 
 .checkboxGreen {
@@ -329,7 +332,7 @@ fieldset > legend {
 }
 
 .exerciseBackground {
-    background-color: #e8eaea;
+    background-color: #ebebec;
     color: #262726;
 
 /*    border: 1px solid #E3E3E3;
@@ -459,12 +462,16 @@ fieldset > legend {
 
 .pashtofont {
     font-family: 'Pashto Kror Asiatype','HSPashto','HSTahoma',Arial,Helvetica,sans-serif;
-    font-size: larger;
+    font-size: large;
 }
 
 .pashtofont td {
     font-family: 'Pashto Kror Asiatype','HSPashto','HSTahoma',Arial,Helvetica,sans-serif;
-    font-size: larger;
+    font-size: large;
+}
+
+.btn-success td {
+    background-color: #8de48d;
 }
 
 /**
