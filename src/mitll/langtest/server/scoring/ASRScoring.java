@@ -138,11 +138,11 @@ public class ASRScoring extends Scoring {
     } else {
       logger.error("huh? unsupported language " + language);
     }
-  //  logger.info("using LTS " + letterToSoundClass.getClass());
+//    logger.info("using LTS " + letterToSoundClass.getClass());
     this.htkDictionary = dict;
   }
 
-  public LTS getLTS() { return letterToSoundClass; }
+ // public LTS getLTS() { return letterToSoundClass; }
 
 /*  private Set<String> wordsInDict = new HashSet<String>();
   private void readDict() {
@@ -550,10 +550,7 @@ public class ASRScoring extends Scoring {
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
     long then = System.currentTimeMillis();
     try {
-
-      //synchronized (this) {
-        jscoreOut = testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
-     // }
+      jscoreOut = testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
       logger.info("getScoresFromHydec : got score " + hydec_score +" and took " + timeToRunHydec + " millis");
