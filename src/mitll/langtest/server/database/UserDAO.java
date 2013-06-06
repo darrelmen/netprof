@@ -298,4 +298,19 @@ public class UserDAO extends DAO {
     }
     return idToUser;
   }
+
+  public Map<Long, User> getNativeUserMap() {
+    List<User> users = getUsers();
+    Map<Long, User> idToUser = new HashMap<Long, User>();
+    for (User u : users) {
+      if (u.experience > 239) {
+        idToUser.put(u.id, u);
+      }
+    }
+    return idToUser;
+  }
+
+  public Set<Long> getNativeUsers() {
+    return getNativeUserMap().keySet();
+  }
 }
