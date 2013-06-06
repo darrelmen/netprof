@@ -54,7 +54,7 @@ public class SplitAudio {
   private static Logger logger = Logger.getLogger(SplitAudio.class);
 
   private boolean debug;
-  private static final int MAX = 20;//12000;
+  private static final int MAX = 22000;
   private static final double MIN_DUR = 0.2;
   private static final String FAST = "Fast";
   private static final String SLOW = "Slow";
@@ -148,15 +148,52 @@ public class SplitAudio {
     }
   }
 
-
-  public void dumpDir (String audioDir) {
+  public void dumpDir2 (String audioDir, String language, String dbName, String spreadsheet) {
     final String placeToPutAudio = ".."+ File.separator+audioDir + File.separator;
     final File bestDir = new File(placeToPutAudio + "bestAudio");
     String[] list = bestDir.list();
     logger.warn("in " +bestDir.getAbsolutePath() + " there are " + list.length);
     Set<String> files = new HashSet<String>(Arrays.asList(list));
 
-    String language = "english";
+    final String configDir = getConfigDir(language);
+
+    DatabaseImpl unitAndChapter = new DatabaseImpl(
+      configDir,
+      dbName,
+      configDir +
+        spreadsheet);
+
+    try {
+      final FileWriter skip = new FileWriter(configDir + "skip3.txt");
+      final FileWriter skipWords = new FileWriter(configDir + "skipWords3.txt");
+      int skipped = 0;
+      List<Exercise> exercises = unitAndChapter.getExercises();
+      for (Exercise e : exercises) {
+        String key = e.getEnglishSentence().toLowerCase().trim();
+
+        if (!files.contains(e.getID())) {
+          if (skipped++ < 30) logger.warn("skipping " + e.getID() + " : " + key);// + " no match in " +englishToEx.size() + " entries.");
+          skip.write(e.getID()+"\n");
+          skipWords.write(key +"\n");
+        }
+      }
+      skip.close();
+      skipWords.close();
+
+      logger.warn("skipped " + skipped + " of " + exercises.size() + " files " + files.size() +  " e.g. " + files.iterator().next());
+    } catch (IOException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+  }
+
+
+  public void dumpDir (String audioDir, String language) {
+    final String placeToPutAudio = ".."+ File.separator+audioDir + File.separator;
+    final File bestDir = new File(placeToPutAudio + "bestAudio");
+    String[] list = bestDir.list();
+    logger.warn("in " +bestDir.getAbsolutePath() + " there are " + list.length);
+    Set<String> files = new HashSet<String>(Arrays.asList(list));
+
     final String configDir = getConfigDir(language);
 
     DatabaseImpl unitAndChapter = new DatabaseImpl(
@@ -626,13 +663,12 @@ public class SplitAudio {
     // logger.debug("refSentence " + refSentence + " length " + refLength + " first |" + firstToken + "| last |" +lastToken +"|");
 
     File refDirForExercise = new File(newRefDir, exid);
-    String key = exid;//pair.getKey();
-  //  if (!key.equals(exid)) logger.error("huh?> not the same " + key + "  and " + exid);
+    //  if (!key.equals(exid)) logger.error("huh?> not the same " + key + "  and " + exid);
     //logger.debug("making dir " + key + " at " + refDirForExercise.getAbsolutePath());
     refDirForExercise.mkdir();
 
     File bestDirForExercise = new File(bestDir, exid);
-    logger.debug("for '" +refSentence + "' making dir " + key + " at " + bestDirForExercise.getAbsolutePath());
+  //  logger.debug("for '" +refSentence + "' making dir " + key + " at " + bestDirForExercise.getAbsolutePath());
     bestDirForExercise.mkdir();
     final ASRScoring scoring = getAsrScoring(".",dictionary,properties);
     String best = getBestFilesFromResults(scoring, resultsForExercise, exercise, refSentence,
@@ -640,7 +676,7 @@ public class SplitAudio {
       refLength, refDirForExercise,collectedAudioDir);
 
     if (best != null) {
-      logger.debug("for " +key + " : '" + exercise.getEnglishSentence() + "' best is " + best);// + " total " + bestTotal);
+      logger.debug("for " + exid + " : '" + exercise.getEnglishSentence() + "' best is " + best);// + " total " + bestTotal);
       writeBestFiles(missingSlow, missingFast, exid, refDirForExercise, bestDirForExercise, best);
     }
     else {
@@ -1037,7 +1073,8 @@ public class SplitAudio {
         String language = arg[2];
         String spreadsheet = arg[3];
         String dbName = arg[4];
-        new SplitAudio().convertExamples(numThreads, audioDir, language, spreadsheet, dbName);
+      //  new SplitAudio().convertExamples(numThreads, audioDir, language, spreadsheet, dbName);
+        new SplitAudio().dumpDir2(audioDir, language, dbName, spreadsheet);
 
       }
     } catch (Exception e) {
