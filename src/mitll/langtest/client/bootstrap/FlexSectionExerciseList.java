@@ -185,7 +185,8 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @param addInstructions
    */
   private void addButtonRow(List<SectionNode> rootNodes, long userID, FluidContainer container, Collection<String> types, boolean addInstructions) {
-    System.out.println("getWidgetsForTypes (success) for user = " + userID + " got types " + types);
+    int numRootNodes = rootNodes.size();
+    System.out.println("getWidgetsForTypes (success) for user = " + userID + " got types " + types + " num root nodes " + numRootNodes);
     String firstType = types.iterator().next(); // e.g. unit!
 
     if (addInstructions) container.add(getInstructionRow());
@@ -203,7 +204,10 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     FlowPanel l2 = new FlowPanel();
     l2.add(labelContainer);
-    l2.addStyleName("bottomMargin");
+    boolean usuallyThereWillBeAHorizScrollbar = numRootNodes > 6;
+    if (usuallyThereWillBeAHorizScrollbar) { // hack rule of thumb
+      l2.addStyleName("bottomMargin");
+    }
 
     firstTypeRow.setWidget(0, 0, l2);
 
@@ -217,7 +221,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     FlowPanel c2 = new FlowPanel();
     c2.add(clearColumnContainer);
+    if (usuallyThereWillBeAHorizScrollbar) { // hack rule of thumb
     c2.addStyleName("bottomMargin");
+    }
     //clearColumnContainer.addStyleName("bottomMargin");
 
     firstTypeRow.setWidget(0, 1, c2);
@@ -872,7 +878,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   protected void setScrollPanelWidth() {
     if (label != null) {
       int width = Window.getClientWidth() - label.getOffsetWidth() - clear.getOffsetWidth() - 90;
-      System.out.println("scrollPanel width is " + width);
+     // System.out.println("scrollPanel width is " + width);
       scrollPanel.setWidth(Math.max(300, width) + "px");
     }
   }
