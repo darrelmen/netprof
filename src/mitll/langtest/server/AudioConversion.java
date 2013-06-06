@@ -50,8 +50,6 @@ public class AudioConversion {
    */
   public AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString, File file) {
     File parentFile = file.getParentFile();
-    // System.out.println("making dir " + parentFile.getAbsolutePath());
-
     parentFile.mkdirs();
 
     byte[] byteArray = getBytesFromBase64String(base64EncodedString);
@@ -189,7 +187,6 @@ public class AudioConversion {
       AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(wavFile);
       float sampleRate = audioFileFormat.getFormat().getSampleRate();
       if (sampleRate != 16000f) {
-      logger.debug("\\n\n\n\n\n\n--------> converting " + wavFile.getAbsolutePath());
         String binPath = WINDOWS_SOX_BIN_DIR;
         if (! new File(binPath).exists()) binPath = LINUX_SOX_BIN_DIR;
         String s = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
