@@ -93,6 +93,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private SoundManagerStatic soundManager;
   private PropertyHandler props;
   private HTML userline;
+  Flashcard flashcard;
 
   /**
    * Make an exception handler that displays the exception.
@@ -274,6 +275,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setupSoundManager();
 
     modeSelect();
+
+
   }
 
   private boolean shouldCollectAudio() {
@@ -283,7 +286,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private FluidRow makeHeaderRow() {
     FluidRow headerRow = new FluidRow();
 
-    Widget title = getTitleWidget();
+    Widget title;
+    if (isGoodwaveMode()) {
+      flashcard = new Flashcard(props.isGoodwaveMode());
+      title = flashcard.makeNPFHeaderRow(props.getSplash());
+    }
+    else {
+      title = getTitleWidget();
+    }
     boolean takeWholeWidth = props.isFlashcardTeacherView() || props.isShowSections();
     Column titleColumn = new Column(takeWholeWidth ? 12 : 10, title);
     headerRow.add(titleColumn);
@@ -344,6 +354,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         element.setAttribute("href", "flashFavIcon.gif");
       }
     }
+    else if (props.isGoodwaveMode()) {
+      Element element = DOM.getElementById("favicon");   // set the page title to be consistent
+      if (element != null) {
+        element.setAttribute("href", LANGTEST_IMAGES + "npfFavIcon.gif");
+      }
+    }
   }
 
   /**
@@ -356,7 +372,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     RootPanel.get().addStyleName("noPadding");
     currentExerciseVPanel = container;
 
-    Flashcard flashcard = new Flashcard();
+    flashcard = new Flashcard(props.isGoodwaveMode());
 
     HorizontalPanel headerRow = flashcard.makeFlashcardHeaderRow(props.getSplash());
     container.add(headerRow);
@@ -511,6 +527,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Window.addResizeHandler(new ResizeHandler() {
       public void onResize(ResizeEvent event) {
         exerciseList.onResize();
+        if (flashcard != null) flashcard.onResize();
       }
     });
   }
@@ -601,7 +618,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   @Override
   public int getLeftColumnWidth() {
     int offsetWidth = exerciseList.getWidget().getOffsetWidth();
-    System.out.println("left col width " +offsetWidth);
+   // System.out.println("left col width " +offsetWidth);
     return offsetWidth;
   }
 
