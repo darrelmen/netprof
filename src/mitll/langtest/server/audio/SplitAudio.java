@@ -69,7 +69,7 @@ public class SplitAudio {
     logger.warn("in " +bestDir.getAbsolutePath() + " there are " + list.length);
 
     List<File> temp = Arrays.asList(bestAudioDirs);
-    temp = temp.subList(0,10); // for now
+    temp = temp.subList(0,3); // for now
 
     String language = "english";
     final String configDir = getConfigDir(language);
@@ -97,7 +97,19 @@ public class SplitAudio {
             System.out.println("path " + wav.getPath());
             boolean isFast = (wav.getName().startsWith("Fast"));
             String id = dirname + (isFast ? "F" : "S");
-            analist.write(id + " " + wav.getPath() + "\n");
+            analist.write(id + " " + wav.getPath().replace(".wav",".raw") + "\n");
+
+            File answer = wav;
+            String name = answer.getName().replaceAll(".wav", "");
+            String parent = answer.getParent();
+
+            double durationInSeconds = getDuration(answer, parent);
+            if (durationInSeconds < MIN_DUR) {
+              if (durationInSeconds > 0) logger.warn("skipping " + name + " since it's less than a 1/2 second long.");
+              continue;
+            }
+            String testAudioFileNoSuffix = getConverted(name, parent);
+            logger.info("converted " + testAudioFileNoSuffix);
           }
         }
       }
@@ -901,7 +913,7 @@ public class SplitAudio {
     private float fastScore;
     private float slowScore;
 
-    private int starts,ends;
+    //private int starts,ends;
     private String wordSeq = "", scores = "";
 
     public GetAlignments(String first, String last,int refLength, String name, String wordLabFile) {
@@ -954,9 +966,9 @@ public class SplitAudio {
         String word = transcriptEvent.event.trim();
         wordSeq += word + " ";
         boolean start = word.equals("<s>");
-        if (start) starts++;
+        //if (start) starts++;
         boolean end = word.equals("</s>");
-        if (end) ends++;
+        //if (end) ends++;
 
         if (start || end) continue;
 
