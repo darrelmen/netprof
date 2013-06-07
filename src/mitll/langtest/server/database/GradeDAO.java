@@ -29,10 +29,27 @@ public class GradeDAO extends DAO {
   private static final String GRADES = "grades";
   private final boolean debug = false;
   private final UserDAO userDAO;
+  private ResultDAO resultDAO;
 
-  public GradeDAO(Database database,UserDAO userDAO) {
+  public GradeDAO(Database database, UserDAO userDAO, ResultDAO resultDAO) {
     super(database);
     this.userDAO = userDAO;
+    this.resultDAO = resultDAO;
+  }
+
+  public Map<Integer, List<Grade>> getIdToGrade() {
+    Collection<Grade> grades = getGrades();
+
+    Map<Integer,List<Grade>> idToGrade = new HashMap<Integer, List<Grade>>();
+    for (Grade g : grades) {
+      List<Grade> gradesForResult = idToGrade.get(g.resultID);
+      if (gradesForResult == null) {
+        idToGrade.put(g.resultID, gradesForResult = new ArrayList<Grade>());
+      }
+      gradesForResult.add(g);
+    }
+
+    return idToGrade;
   }
 
   /**
@@ -130,7 +147,7 @@ public class GradeDAO extends DAO {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    return new CountAndGradeID(getCount(), id);
+    return new CountAndGradeID(getCount(), resultDAO.getNumResults(), id);
   }
 
 /*  private boolean gradeExists(int resultID, String grader, long gradeID) {
