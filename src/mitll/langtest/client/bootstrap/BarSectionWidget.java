@@ -106,7 +106,7 @@ public class BarSectionWidget extends ButtonGroup implements SectionWidget {
     System.out.println("populateTypeWidget : type = " +type + " with " +items.size() +" items.");
     buttons.clear();
     clear();
-    Button widgets = addButton(ANY);
+    //Button widgets = addButton(ANY);
     //widgets.setWidth("5%");
 
     int total = 0;
