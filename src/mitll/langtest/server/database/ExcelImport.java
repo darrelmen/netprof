@@ -99,6 +99,7 @@ public class ExcelImport implements ExerciseDAO {
             missing.add(Integer.parseInt(trim));
           }
         }
+        reader.close();
       } catch (Exception e) {
         logger.error("Reading " + missingSlow.getAbsolutePath() + " Got  " + e, e);
       }
