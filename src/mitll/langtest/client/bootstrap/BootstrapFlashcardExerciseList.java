@@ -228,6 +228,16 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   }
 
   @Override
+  public int getPercentComplete() {
+    return 0;
+  }
+
+  @Override
+  public int getComplete() {
+    return 0;
+  }
+
+  @Override
   public boolean loadPreviousExercise(ExerciseShell current) {
     return false;
   }
