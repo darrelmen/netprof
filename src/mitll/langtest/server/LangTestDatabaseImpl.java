@@ -405,9 +405,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         exercises = db.getExercisesFirstNInOrder(userID, serverProps.firstNInOrder);
       }
     } else {
-      logger.debug("*not* in data collect mode");
+      if (!serverProps.isArabicTextDataCollect()) logger.debug("*not* in data collect mode");
 
-      exercises = serverProps.isArabicTextDataCollect() ? db.getRandomBalancedList() : db.getUnmodExercises();
+      exercises = serverProps.isArabicTextDataCollect() ? db.getRandomBalancedList(userID) : db.getUnmodExercises();
     }
     return exercises;
   }
