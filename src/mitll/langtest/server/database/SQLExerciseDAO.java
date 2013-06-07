@@ -6,6 +6,7 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Clob;
@@ -26,8 +27,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
   private static final boolean DEBUG = false;
 
   private final Database database;
-  private final String mediaDir;
-  private  SectionHelper sectionHelper = new SectionHelper();
+  private String mediaDir;
 
   /**
    * @see DatabaseImpl#makeExerciseDAO(boolean)
@@ -37,11 +37,17 @@ public class SQLExerciseDAO implements ExerciseDAO {
   public SQLExerciseDAO(Database database, String mediaDir) {
     this.database = database;
     this.mediaDir = mediaDir;
+/*    String suffix = File.separator +
+      "media";
+    if (this.mediaDir.endsWith(suffix)) {
+      this.mediaDir = this.mediaDir.substring(0,mediaDir.length()-suffix.length());
+    }*/
+    logger.warn("media dir " + mediaDir);
   }
 
   @Override
   public SectionHelper getSectionHelper() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    return null;
   }
 
   /**
@@ -112,7 +118,8 @@ public class SQLExerciseDAO implements ExerciseDAO {
   private Exercise getExercise(String plan, String exid, JSONObject obj) {
     String content = getContent(obj);
 
-    String tip = "Item #"+exid; // TODO : have more informative tooltip
+    //String tip = "Item #"+exid; // TODO : have more informative tooltip
+    String tip = exid; // TODO : have more informative tooltip
     Exercise exercise = new Exercise(plan, exid, content, false, false, tip);
     Object qa1 = obj.get("qa");
     if (qa1 == null) {
@@ -171,5 +178,35 @@ public class SQLExerciseDAO implements ExerciseDAO {
       b.append(cbuf, 0, c);
     }
     return b.toString();
+  }
+
+  private static String getConfigDir(String language) {
+    String installPath = ".";
+    String dariConfig = File.separator +
+      "war" +
+      File.separator +
+      "config" +
+      File.separator +
+      language +
+      File.separator;
+    return installPath + dariConfig;
+  }
+
+  public static void main(String [] arg) {
+
+
+/*    final String configDir = getConfigDir("MSA");
+
+    DatabaseImpl unitAndChapter = new DatabaseImpl(
+      configDir,
+      "arabicText",
+      configDir +
+        spreadsheet);*/
+
+    SQLExerciseDAO sqlExerciseDAO = new SQLExerciseDAO(new SmallDatabaseImpl("war/config/pilot/arabicText"), "config" +
+      File.separator +
+      "media");
+    Exercise next = sqlExerciseDAO.getRawExercises().iterator().next();
+    System.out.println("First is " +next + " content " + next.getContent());
   }
 }
