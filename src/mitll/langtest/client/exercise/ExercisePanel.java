@@ -97,6 +97,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
 
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
+    hp.setWidth("100%");
     boolean rightAlignContent = controller.isRightAlignContent();
     if (rightAlignContent) {
       setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
@@ -113,13 +114,12 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     spacer.setSize("100%", "20px");
     add(spacer);
 
-    boolean includeKeyHandler = /*!controller.isAutoCRTMode() ||*/ controller.isCollectAudio();
+    boolean includeKeyHandler = controller.isCollectAudio();
     Panel buttonRow = getNextAndPreviousButtons(e, service, userFeedback, controller, includeKeyHandler);
     add(buttonRow);
   }
 
   protected void addItemHeader(Exercise e) {
-    // add(new HTML("<h3>Item #" + e.getID() + "</h3>"));
      add(new Heading(4,"Item #" + e.getID()));
   }
 
@@ -133,9 +133,9 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     boolean rightAlignContent = controller.isRightAlignContent();
     HasDirection.Direction direction =
       requireAlignment && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
-    //System.out.println("content alignment guess is " + direction);
 
     HTML html = new HTML(content, direction);
+    html.setWidth("100%");
     if (requireAlignment && rightAlignContent) {
       html.addStyleName("rightAlign");
     }
@@ -180,7 +180,6 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
         getQuestionHeader(questionNumber, n, engQAPair, shouldShowAnswer(),!controller.isDemoMode());
       }
       else {
-        //add(new HTML("<br></br>"));
         add(new Heading(6,""));
       }
       if (controller.isDemoMode()) {
@@ -250,7 +249,6 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   }
 
   private void addQuestionPrompt(Panel vp, Exercise e) {
-    //System.out.println("question prompt " + e.promptInEnglish + " for " +e);
     vp.add(new HTML(getQuestionPrompt(e.promptInEnglish)));
     SimplePanel spacer = new SimplePanel();
     spacer.setSize("50px", getQuestionPromptSpacer() + "px");
@@ -338,7 +336,6 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
 
   private void addKeyHandler(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                              final ExerciseController controller, final boolean useKeyHandler) {
-   // if (useKeyHandler) {
       keyHandler = Event.addNativePreviewHandler(new
                                                      Event.NativePreviewHandler() {
 
@@ -373,7 +370,6 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
                                                        }
                                                      });
       //System.out.println("getNextAndPreviousButtons made click handler " + keyHandler);
-   // }
   }
 
   /**
@@ -412,7 +408,6 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     Button yesButton;
 
     dialogBox = new DialogBox();
-    //DOM.setStyleAttribute(dialogBox.getElement(), "backgroundColor", "#ABCDEF");
     dialogBox.setText("Please confirm");
 
     yesButton = new Button("Yes");
