@@ -1,7 +1,7 @@
 package mitll.langtest.client.table;
 
-import com.github.gwtbootstrap.client.ui.SimplePager;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -16,6 +16,21 @@ import com.google.gwt.view.client.HasRows;
  */
 public class PagerTable {
   public Panel getPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows) {
+    com.github.gwtbootstrap.client.ui.SimplePager.Resources DEFAULT_RESOURCES = GWT.create(com.github.gwtbootstrap.client.ui.SimplePager.Resources.class);
+    com.github.gwtbootstrap.client.ui.SimplePager pager = new com.github.gwtbootstrap.client.ui.SimplePager(com.github.gwtbootstrap.client.ui.SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, true, fastForwardRows, true);
+
+    // Set the cellList as the display.
+    pager.setDisplay(table);
+    pager.setPageSize(pageSize);
+    // Add the pager and list to the page.
+    VerticalPanel vPanel = new VerticalPanel();
+    vPanel.add(pager);
+    vPanel.add(tableAsPanel);
+
+    return vPanel;
+  }
+
+  public Panel getOldSchoolPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows) {
     SimplePager.Resources DEFAULT_RESOURCES = GWT.create(SimplePager.Resources.class);
     SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, true, fastForwardRows, true);
 
