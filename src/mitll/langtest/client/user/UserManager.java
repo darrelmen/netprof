@@ -654,9 +654,9 @@ public class UserManager {
     show(dialogBox);
   }
 
-  private void addUser(int monthsOfExperience, TextBox ageEntryBox, ListBox genderBox) {
+/*  private void addUser(int monthsOfExperience, TextBox ageEntryBox, ListBox genderBox) {
     addUser(monthsOfExperience, ageEntryBox, genderBox, null,null, null);
-  }
+  }*/
 
   private void addUser(int monthsOfExperience, TextBox ageEntryBox, ListBox genderBox, TextBox dialectBox,final DialogBox dialogBox, final Button closeButton) {
     int age = getAge(ageEntryBox);
