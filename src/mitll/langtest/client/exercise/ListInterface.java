@@ -63,4 +63,8 @@ public interface ListInterface extends RequiresResize {
   void removeCurrentExercise();
 
   void reloadExercises();
+
+  int getPercentComplete();
+
+  int getComplete();
 }
