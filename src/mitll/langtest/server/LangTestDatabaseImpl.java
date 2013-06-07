@@ -11,7 +11,6 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
-import mitll.langtest.server.scoring.DTWScoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CountAndGradeID;
@@ -532,7 +531,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       ConcurrentMap<String,String> stringStringConcurrentMap = userToExerciseID.asMap();
       Collection<String> values = stringStringConcurrentMap.values();
       String currentExerciseForUser = userToExerciseID.getIfPresent(user);
-      //logger.debug("getNextUngradedExercise for " + user + " current " + currentExerciseForUser + " expected " + expectedGrades);
+      logger.debug("getNextUngradedExercise for " + user + " current " + currentExerciseForUser + " expected " + expectedGrades);
 
       Collection<String> currentActiveExercises = new HashSet<String>(values);
 
@@ -737,9 +736,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private String createSLFFile(List<String> lmSentences, String tmpDir) {
     SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
-    long then = System.currentTimeMillis();
+   // long then = System.currentTimeMillis();
     String slfFile = svDecoderHelper.createSimpleSLFFile(lmSentences, tmpDir);
-    long now = System.currentTimeMillis();
+  //  long now = System.currentTimeMillis();
     //logger.debug("simple create slf file took " + (now - then) + " millis");
     return slfFile;
   }
@@ -1106,6 +1105,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Map of overall, male, female to list of counts (ex 0 had 7, ex 1, had 5, etc.)
+   * @see mitll.langtest.client.monitoring.MonitoringManager#doResultLineQuery(com.google.gwt.user.client.ui.Panel)
    * @return
    */
   public Map<String, List<Integer>> getResultPerExercise() {
@@ -1129,8 +1129,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getSessions();
   }
 
+  /**
+   * @see mitll.langtest.client.monitoring.MonitoringManager#doSessionQuery(com.google.gwt.user.client.ui.Panel)
+   * @return
+   */
   public Map<String,Number> getResultStats() {
     return db.getResultStats();
+  }
+
+  @Override
+  public Map<Integer, Map<String, Map<String, Integer>>> getGradeCountPerExercise() {
+    return db.getGradeCountPerExercise();
   }
 
   @Override
