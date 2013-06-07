@@ -57,7 +57,7 @@ public class DatabaseImpl implements Database {
   private final UserDAO userDAO = new UserDAO(this);
   private final ResultDAO resultDAO = new ResultDAO(this,userDAO);
   private final AnswerDAO answerDAO = new AnswerDAO(this);
-  private final GradeDAO gradeDAO = new GradeDAO(this,userDAO);
+  private final GradeDAO gradeDAO = new GradeDAO(this,userDAO, resultDAO);
   private final SiteDAO siteDAO = new SiteDAO(this, userDAO);
 
   private DatabaseConnection connection = null;
@@ -174,7 +174,7 @@ public class DatabaseImpl implements Database {
   }
 
   public MonitoringSupport getMonitoringSupport() {
-    return new MonitoringSupport(userDAO, resultDAO);
+    return new MonitoringSupport(userDAO, resultDAO,gradeDAO);
   }
 
   /**
@@ -332,9 +332,12 @@ public class DatabaseImpl implements Database {
     GradeDAO.GradesAndIDs allGradesExcluding = gradeDAO.getAllGradesExcluding(activeExercises);
     Map<Integer, Integer> idToCount = getResultIdToGradeCount(expectedCount, allGradesExcluding);
 /*    logger.info("getNextUngradedExerciseQuick found " + resultExcludingExercises.size() + " results, " +
-        "expected " + expectedCount + ", " + allGradesExcluding.resultIDs.size() + " graded results");*/
+      "expected count = " + expectedCount + ", " +
+      allGradesExcluding.resultIDs.size() + " graded results, filter results = " + filterResults +
+      " use flq " + useFLQ + " spoken " + useSpoken);*/
 
     // remove results that have grades...
+    int skipped = 0;
     Iterator<Result> iterator = resultExcludingExercises.iterator();
     while (iterator.hasNext()) {
       Result result = iterator.next();
@@ -348,13 +351,15 @@ public class DatabaseImpl implements Database {
       else if (filterResults && (result.flq != useFLQ || result.spoken != useSpoken)) {
         //logger.debug("getNextUngradedExercise excluding " + result + " since no match for flq = " + useFLQ + " and spoken = " +useSpoken);
         iterator.remove();
+        skipped++;
       }
       else if (numGrades != null) {
         logger.warn("\tfound grade " + numGrades + " for " +result +"?");
       }
     }
 
-   // logger.debug("getNextUngradedExercise after removing graded, there were " + resultExcludingExercises.size() + " results");
+/*    logger.debug("getNextUngradedExercise after removing graded, there were " + resultExcludingExercises.size() + " results" +//);
+      ", skipped " + skipped);*/
 
     // whatever remains, find first exercise
 
@@ -364,11 +369,11 @@ public class DatabaseImpl implements Database {
     }
     if (exids.isEmpty()) return null;
     else {
-      //System.out.println("getNextUngradedExercise candidates are   " + exids);
+    //  logger.debug("getNextUngradedExercise candidates are   " + exids);
       String first = exids.first();
       for (Exercise e : rawExercises) {
         if (e.getID().equals(first)) {
-          //logger.info("getNextUngradedExercise  " + e);
+       //   logger.info("getNextUngradedExercise  " + e);
 
           return e;
         }
@@ -381,10 +386,18 @@ public class DatabaseImpl implements Database {
     return null;
   }
 
+  /**
+   * @see #getNextUngradedExerciseQuick(java.util.Collection, int, boolean, boolean, boolean)
+   * @param expectedCount
+   * @param allGradesExcluding
+   * @return
+   */
   private Map<Integer, Integer> getResultIdToGradeCount(int expectedCount, GradeDAO.GradesAndIDs allGradesExcluding) {
     Map<Integer, Integer> idToCount = new HashMap<Integer, Integer>();
+    int atExpected = 0;
     for (Grade g : allGradesExcluding.grades) {
-      if (g.gradeIndex == expectedCount - 1) {
+      if (g.gradeIndex == expectedCount - 1 && g.grade != Grade.UNASSIGNED) {
+        atExpected++;
         if (!idToCount.containsKey(g.resultID)) {
           idToCount.put(g.resultID, 1);
         } else {
@@ -392,6 +405,9 @@ public class DatabaseImpl implements Database {
         }
       }
     }
+/*    logger.warn("found " + atExpected + " grades at " + expectedCount +
+      " out of " + allGradesExcluding.grades.size() + " returning map of " +idToCount.size() + " results to count");*/
+
     return idToCount;
   }
 
@@ -837,6 +853,7 @@ public class DatabaseImpl implements Database {
     List<Exercise> randomList = new ArrayList<Exercise>();
    // int focusGroupSize = exercisesGradeBalancing.size()/8;
   //  Set<Integer> chosen = new HashSet<Integer>();
+    long then = System.currentTimeMillis();
     int orig = exercisesGradeBalancing.size();
     while (randomList.size() < orig) {
       double v = random.nextGaussian();
@@ -850,7 +867,10 @@ public class DatabaseImpl implements Database {
         randomList.add(remove);
        // System.out.println("v " + v + " s " + shift + " scale " + index + "/"+ inRemaining+ " of " + remaining +" ex " + remove);
     }
-    logger.info("getRandomBalancedList : returning " + randomList.size() + " items, orig size " + orig);
+    long now = System.currentTimeMillis();
+
+    logger.info("getRandomBalancedList : returning " + randomList.size() + " items, orig size " + orig +
+      " took " +(now-then) + " millis");
     return randomList;
     // random.nextInt(exercisesGradeBalancing.size());
   }
@@ -881,9 +901,7 @@ public class DatabaseImpl implements Database {
 
     // join results with grades
     List<Result> results = getResults();
-    Collection<Grade> grades = gradeDAO.getGrades();
-
-    Map<Integer, List<Grade>> idToGrade = getIdToGrade(grades);
+    Map<Integer, List<Grade>> idToGrade = gradeDAO.getIdToGrade();
 
     Map<String,ResultAndGrade> exidToRG = new HashMap<String, ResultAndGrade>();
     for (Result r : results) {
@@ -901,8 +919,16 @@ public class DatabaseImpl implements Database {
     }
     List<ResultAndGrade> rgs = new ArrayList<ResultAndGrade>(exidToRG.values());
     Collections.sort(rgs);
-    logger.info("worst is " + rgs.get(0) + "\nbest is  " + rgs.get(rgs.size() - 1));
-   // for (ResultAndGrade rg : rgs)  System.out.println("rg " + rg);
+
+    try {
+      if (!results.isEmpty()) {
+        ResultAndGrade resultAndGrade = rgs.get(0);
+        ResultAndGrade resultAndGrade1 = rgs.get(rgs.size() - 1);
+      //  logger.info("worst result is " + resultAndGrade.result.getID() + " best result is " + resultAndGrade1.result.getID());
+      }
+    } catch (Exception e) {
+      logger.error("Got " +e,e);
+    }
     List<Exercise> ret = new ArrayList<Exercise>();
     int total = 0;
     for (ResultAndGrade rg : rgs) {
@@ -1074,6 +1100,7 @@ public class DatabaseImpl implements Database {
 
    // Map<Long, List<Schedule>> scheduleForUserAndExercise = scheduleDAO.getScheduleForUserAndExercise(users, exid);
     Map<Boolean, Map<Boolean, List<Result>>> spokenToLangToResult = new HashMap<Boolean, Map<Boolean, List<Result>>>();
+    logger.debug("for exid " + exid + " got " +resultsForExercise.size() + " results and " + gradesAndIDs.grades.size() + " grades");
     for (Result r : resultsForExercise) {
      /* List<Schedule> schedules = scheduleForUserAndExercise.get(r.userid);
       if (schedules == null) {
@@ -1102,9 +1129,13 @@ public class DatabaseImpl implements Database {
         resultsForLang.add(r);
       }
     }
+
+    logger.debug("for exid " + exid + " got " +resultsForExercise.size() + " results and " + gradesAndIDs.grades.size() + " grades and " + spokenToLangToResult.size());
+
     return new ResultsAndGrades(resultsForExercise, gradesAndIDs.grades, spokenToLangToResult);
   }
 
+/*
   private Map<Integer, List<Grade>> getIdToGrade(Collection<Grade> grades) {
     Map<Integer,List<Grade>> idToGrade = new HashMap<Integer, List<Grade>>();
     for (Grade g : grades) {
@@ -1117,6 +1148,7 @@ public class DatabaseImpl implements Database {
 
     return idToGrade;
   }
+*/
 
   /**
    * Creates the result table if it's not there.
@@ -1262,9 +1294,12 @@ public class DatabaseImpl implements Database {
   public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts() {  return monitoringSupport.getDesiredCounts(getExercises()); }
    /**
    * Return some statistics related to the hours of audio that have been collected
+    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultStats()
    * @return
    */
   public Map<String,Number> getResultStats() { return monitoringSupport.getResultStats(); }
+
+  public Map<Integer, Map<String, Map<String,Integer>>> getGradeCountPerExercise() { return monitoringSupport.getGradeCountPerExercise(getExercises());}
 
   public void destroy() {
     try {
