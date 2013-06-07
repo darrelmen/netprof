@@ -13,6 +13,7 @@ import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -51,6 +52,7 @@ public class DatabaseImpl implements Database {
 
   private static final boolean DROP_USER = false;
   private static final boolean DROP_RESULT = false;
+  private static final int MIN_INCORRECT_ANSWERS = 10;
 
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
@@ -636,7 +638,7 @@ public class DatabaseImpl implements Database {
   //  logger.debug("getExercisesBiasTowardsUnanswered idToCountScaled " + idToCountScaled);
 
     SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCountScaled);
-    List<String> sampleIDs = countToIds.get(countToIds.firstKey());
+  //  List<String> sampleIDs = countToIds.get(countToIds.firstKey());
     //logger.debug("getExercisesBiasTowardsUnanswered count keys " + countToIds.keySet() + " first set sample " + sampleIDs.subList(0, Math.min(sampleIDs.size(),20)));
     /*logger.debug("getExercisesBiasTowardsUnanswered count keys " + countToIds.keySet() + " first set sample (" +
       countToIds.firstKey() +
@@ -846,13 +848,18 @@ public class DatabaseImpl implements Database {
   /**
    * An attempt to bias collection so that items that have only been answered correctly are shown more often
    * since we want an even distribution of correct and incorrect responses.
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesInModeDependentOrder(long, String)
    */
-  private Random random = new Random();
-  public List<Exercise> getRandomBalancedList() {
-    List<Exercise> exercisesGradeBalancing = getExercisesGradeBalancing();
+  public List<Exercise> getRandomBalancedList(long userID) {
+    List<Exercise> exercisesGradeBalancing = getExercisesGradeBalancing(userID);
+    return exercisesGradeBalancing;
+    //return getRandomList(exercisesGradeBalancing);
+  }
+
+/*  private List<Exercise> getRandomList(List<Exercise> exercisesGradeBalancing) {
     List<Exercise> randomList = new ArrayList<Exercise>();
-   // int focusGroupSize = exercisesGradeBalancing.size()/8;
-  //  Set<Integer> chosen = new HashSet<Integer>();
+    // int focusGroupSize = exercisesGradeBalancing.size()/8;
+    //  Set<Integer> chosen = new HashSet<Integer>();
     long then = System.currentTimeMillis();
     int orig = exercisesGradeBalancing.size();
     while (randomList.size() < orig) {
@@ -872,12 +879,7 @@ public class DatabaseImpl implements Database {
     logger.info("getRandomBalancedList : returning " + randomList.size() + " items, orig size " + orig +
       " took " +(now-then) + " millis");
     return randomList;
-    // random.nextInt(exercisesGradeBalancing.size());
-  }
-
-  private List<Exercise> getExercisesGradeBalancing() {
-    return getExercisesGradeBalancing(true, false);
-  }
+  }*/
 
     /**
      * Return exercises in an order that puts the items with all right answers towards the front and all wrong
@@ -887,56 +889,87 @@ public class DatabaseImpl implements Database {
      * Remember there can be multiple questions per exercise, so we need to average over the grades for all
      * answers for all questions for an exercise.
      *
+     * Complicated... for those items that have few answers, put those at the front so we get even coverage.
+     * For those items that have a decent number of answers, sort them by grade putting all correct items toward the
+     * front.
      *
-     * @param useFLQ
-     * @param useSpoken
+     * @param userID
      * @return
      */
-  private List<Exercise> getExercisesGradeBalancing(boolean useFLQ, boolean useSpoken) {
-    List<Exercise> rawExercises = getExercises();
+  public List<Exercise> getExercisesGradeBalancing(long userID) {//, boolean useFLQ, boolean useSpoken) {
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
-    for (Exercise e : rawExercises) {
-      idToExercise.put(e.getID(), e);
-    }
+    Map<String,Integer> idToCount = new HashMap<String, Integer>();
+    Map<String,Double> idToWeight = new HashMap<String, Double>();
 
-    // join results with grades
-    List<Result> results = getResults();
-    Map<Integer, List<Grade>> idToGrade = gradeDAO.getIdToGrade();
+    List<Exercise> rawExercises = getExercises();
+    populateInitialExerciseIDToCount(rawExercises, idToExercise, idToCount, idToWeight, false);
 
-    Map<String,ResultAndGrade> exidToRG = new HashMap<String, ResultAndGrade>();
-    for (Result r : results) {
-      if (r.flq == useFLQ && r.spoken == useSpoken) {
-        List<Grade> grades1 = idToGrade.get(r.uniqueID);
-        if (grades1 != null) {
-          ResultAndGrade resultAndGrade = exidToRG.get(r.id);
-          if (resultAndGrade == null) {
-            exidToRG.put(r.id, new ResultAndGrade(r, grades1));
-          } else {
-            resultAndGrade.addGrades(grades1);
+    // only find answers that are for the gender
+    getExerciseIDToResultCount(userID, idToCount);
+
+    // now make a map of count at this number to exercise ids for these numbers
+    SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
+    SortedMap<Integer, List<String>> integerListSortedMap = countToIds.subMap(0, MIN_INCORRECT_ANSWERS);
+    // logger.debug("num with less than ten are " + integerListSortedMap);
+
+    List<Exercise> fewResponses = getResultsRandomizedPerUser(userID, idToExercise, integerListSortedMap, idToWeight);
+    Set<String> fewSet = new HashSet<String>();
+    for (Exercise e : fewResponses) fewSet.add(e.getID());
+    logger.debug("getExercisesGradeBalancing for " + MIN_INCORRECT_ANSWERS + " fewSet size " + fewSet.size());
+    if (fewSet.size() == rawExercises.size()) {
+      logger.debug("we haven't gotten enough questions answered yet to bias towards easy questions");
+      return fewResponses;
+    } else {
+      // join results with grades
+      List<Result> results = getResults();
+      Map<Integer, List<Grade>> idToGrade = gradeDAO.getIdToGrade();
+
+      Map<String, ResultAndGrade> exidToRG = new HashMap<String, ResultAndGrade>();
+
+      for (Result r : results) {
+      //  if (r.flq == useFLQ && r.spoken == useSpoken) {
+          if (!fewSet.contains(r.id)) {
+            //    logger.debug("Skipping " + r.id);
+       //   } else {
+            List<Grade> grades1 = idToGrade.get(r.uniqueID);
+            if (grades1 != null) {
+              ResultAndGrade resultAndGrade = exidToRG.get(r.id);
+              if (resultAndGrade == null) {
+                exidToRG.put(r.id, new ResultAndGrade(r, grades1));
+              } else {
+                resultAndGrade.addGrades(grades1);
+              }
+            }
           }
+        //}
+      }
+
+      List<ResultAndGrade> rgs = new ArrayList<ResultAndGrade>(exidToRG.values());
+
+      // make a map of count of wrong answers -> list of results at that count
+      Map<Integer,List<ResultAndGrade>> countToRGs = new TreeMap<Integer, List<ResultAndGrade>>();
+      for (ResultAndGrade rg : rgs) {
+        List<ResultAndGrade> resultAndGrades = countToRGs.get(rg.getNumWrong());
+        if (resultAndGrades == null) countToRGs.put(rg.getNumWrong(), resultAndGrades = new ArrayList<ResultAndGrade>());
+        resultAndGrades.add(rg);
+      }
+      List<Exercise> ret = new ArrayList<Exercise>(fewResponses);
+      Random rnd = new Random(userID);
+
+      // now at each count of wrong answers, shuffle for this user.
+      for (List<ResultAndGrade> rgsAtCount : countToRGs.values()) {
+        //logger.debug("result at " + rgsAtCount.iterator().next().getNumWrong() + " is " +rgsAtCount.size());
+        Collections.shuffle(rgsAtCount, rnd);
+
+        for (ResultAndGrade rg : rgsAtCount) {
+          ret.add(idToExercise.get(rg.getResult().id));
         }
       }
-    }
-    List<ResultAndGrade> rgs = new ArrayList<ResultAndGrade>(exidToRG.values());
-    Collections.sort(rgs);
-
-    try {
-      if (!results.isEmpty()) {
-        ResultAndGrade resultAndGrade = rgs.get(0);
-        ResultAndGrade resultAndGrade1 = rgs.get(rgs.size() - 1);
-      //  logger.info("worst result is " + resultAndGrade.result.getID() + " best result is " + resultAndGrade1.result.getID());
+      if (ret.size() != rawExercises.size()) {
+        logger.error("huh? returning only " + ret.size() + " exercises, expecting " + rawExercises.size());
       }
-    } catch (Exception e) {
-      logger.error("Got " +e,e);
+      return ret;
     }
-    List<Exercise> ret = new ArrayList<Exercise>();
-    int total = 0;
-    for (ResultAndGrade rg : rgs) {
-      total += rg.totalValidGrades();
-      ret.add(idToExercise.get(rg.getResult().id));
-    }
-    logger.info("total valid grades " + total);
-    return ret;
   }
 
   public List<Exercise> getExercisesFirstNInOrder(long userID, int firstNInOrder) {
@@ -1307,5 +1340,30 @@ public class DatabaseImpl implements Database {
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
+  }
+  private static String getConfigDir(String language) {
+    String installPath = ".";
+    String dariConfig = File.separator +
+      "war" +
+      File.separator +
+      "config" +
+      File.separator +
+      language +
+      File.separator;
+    return installPath + dariConfig;
+  }
+
+  public static void main(String [] arg) {
+
+    String language = "pilot";
+    final String configDir = getConfigDir(language);
+
+    DatabaseImpl unitAndChapter = new DatabaseImpl(
+      configDir,
+      "arabicText",
+      "");
+    unitAndChapter.useFile =false;
+    unitAndChapter.mediaDir = "config";
+    unitAndChapter.getRandomBalancedList(0);
   }
 }
