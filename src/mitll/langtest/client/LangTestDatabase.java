@@ -142,4 +142,6 @@ public interface LangTestDatabase extends RemoteService {
   int getNumExercisesForSelectionState(Map<String, Collection<String>> typeToSection);
 
   List<Exercise> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end);
+
+  Map<Integer, Map<String, Map<String, Integer>>> getGradeCountPerExercise();
 }
