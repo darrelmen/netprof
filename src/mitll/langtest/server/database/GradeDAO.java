@@ -37,6 +37,10 @@ public class GradeDAO extends DAO {
     this.resultDAO = resultDAO;
   }
 
+  /**
+   *
+   * @return map of result id to grades for that result
+   */
   public Map<Integer, List<Grade>> getIdToGrade() {
     Collection<Grade> grades = getGrades();
 
