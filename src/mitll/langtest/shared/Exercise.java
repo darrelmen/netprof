@@ -163,21 +163,32 @@ public class Exercise extends ExerciseShell  {
     setRecordAnswer(false);
   }
 
-    /**
-     * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
-     * @param lang
-     * @param question
-     * @param answer
-     * @param alternateAnswers
-     */
+  /**
+   * @param lang
+   * @param question
+   * @param answer
+   * @param alternateAnswers
+   * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
+   */
   public void addQuestion(String lang, String question, String answer, List<String> alternateAnswers) {
+    QAPair pair = new QAPair(question, answer, alternateAnswers);
+    addQuestion(lang, pair);
+  }
+
+  public void addQuestions(String lang, List<QAPair> pairs) {
+    for (QAPair pair : pairs) {
+      addQuestion(lang, pair);
+    }
+  }
+
+  private void addQuestion(String lang, QAPair pair) {
     if (langToQuestion == null) langToQuestion = new HashMap<String, List<QAPair>>();
     List<QAPair> qaPairs = langToQuestion.get(lang);
     if (qaPairs == null) {
       langToQuestion.put(lang, qaPairs = new ArrayList<QAPair>());
     }
 
-    qaPairs.add(new QAPair(question, answer, alternateAnswers));
+    qaPairs.add(pair);
   }
 
   public String getPlan() { return plan; }
