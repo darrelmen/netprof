@@ -11,11 +11,13 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 */
 public class CountAndGradeID implements IsSerializable {
   public int count;
+  public int resultCount;
   public long gradeID;
 
   public CountAndGradeID() {}
-  public CountAndGradeID(int c, long g) {
+  public CountAndGradeID(int c, int resultCount, long g) {
     this.count = c;
+    this.resultCount = resultCount;
     this.gradeID = g;
   }
 }
