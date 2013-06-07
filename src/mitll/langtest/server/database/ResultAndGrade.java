@@ -8,9 +8,10 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
- * @see #getExercisesGradeBalancing(boolean, boolean)
+ * @see DatabaseImpl#getExercisesGradeBalancing
  */
 class ResultAndGrade implements Comparable<ResultAndGrade> {
+  private static final int HIGHEST_INCORRECT_GRADE = 3;
   private Result result;
   private List<Grade> grades = new ArrayList<Grade>();
 
@@ -18,10 +19,6 @@ class ResultAndGrade implements Comparable<ResultAndGrade> {
     this.result = result;
     this.grades = grades;
   }
-
-/*    public void addGrade(Grade g) {
-    grades.add(g);
-  }*/
 
   public void addGrades(List<Grade> grades) {
     this.grades.addAll(grades);
@@ -31,7 +28,7 @@ class ResultAndGrade implements Comparable<ResultAndGrade> {
     int right = 0;
     int wrong = 0;
     for (Grade g : grades) {
-      if (g.grade > 3) right++; else if (g.grade > 0 && g.grade < 3) wrong++;
+      if (g.grade > HIGHEST_INCORRECT_GRADE) right++; else if (g.grade > 0 && g.grade < HIGHEST_INCORRECT_GRADE) wrong++;
     }
     if (right == 0 && wrong == 0) return 0.5f; // items with no valid grades sort to the middle
 
@@ -41,39 +38,40 @@ class ResultAndGrade implements Comparable<ResultAndGrade> {
     return ratio;
   }
 
-  public int totalValidGrades() {
+/*  public int totalValidGrades() {
     int total = 0;
     for (Grade g : grades) {
        if (g.grade > 0) total++;
     }
     return total;
-  }
+  }*/
 
   private int getNumRight() {
     int right = 0;
     for (Grade g : grades) {
-      if (g.grade > 3) right++;
+      if (g.grade > HIGHEST_INCORRECT_GRADE) right++;
     }
     return right;
   }
-  private int getNumWrong() {
+  public int getNumWrong() {
     int wrong = 0;
     for (Grade g : grades) {
-      if (g.grade > 0 && g.grade < 3) wrong++;
+      if (g.grade > 0 && g.grade < HIGHEST_INCORRECT_GRADE) wrong++;
     }
     return wrong;
   }
 
   @Override
   public int compareTo(ResultAndGrade o) {
-    float ratio = getRatio();
-    float oratio = o.getRatio();
     int numRight = getNumRight();
     int numRight1 = o.getNumRight();
 
     int numWrong = getNumWrong();
     int numWrong1 = o.getNumWrong();
-    return ratio < oratio ? +1 : ratio > oratio ? -1 : numRight > numRight1 ? -1 : numRight < numRight1 ? +1 : numWrong > numWrong1 ? -1 : numWrong < numWrong1 ? +1 :0;
+
+    float ratio = getRatio();
+    float oratio = o.getRatio();
+    return ratio < oratio ? +1 : ratio > oratio ? -1 : numRight > numRight1 ? -1 : numRight < numRight1 ? +1 : numWrong > numWrong1 ? -1 : numWrong < numWrong1 ? +1 : 0;
   }
 
   public Result getResult() {
@@ -82,7 +80,7 @@ class ResultAndGrade implements Comparable<ResultAndGrade> {
 
   @Override
   public String toString() {
-    return "'" + getResult() + "'\tand grades (" + grades.size() + ")" + " ratio " + getRatio() +
+    return "'" + getResult().getID() + "'\tand grades (" + grades.size() + ")" + " ratio " + getRatio() +
         new HashSet<Grade>(grades);
   }
 }
