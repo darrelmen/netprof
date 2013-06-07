@@ -80,6 +80,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     this.isPashto = language.equalsIgnoreCase("Pashto");
     this.mediaDir = mediaDir;
     this.isFlashcard = isFlashcard;
+   // this.showSections = showSections;
   }
 
   /**
@@ -280,14 +281,17 @@ public class FileExerciseDAO implements ExerciseDAO {
       BufferedReader reader = getReader(lessonPlanFile);
       String line2;
       int count = 0;
-      logger.debug("using install path " + installPath + " lesson " + lessonPlanFile + " isurdu " +isUrdu);
+      //logger.debug("using install path " + installPath + " lesson " + lessonPlanFile + " isurdu " +isUrdu);
       exercises = new ArrayList<Exercise>();
       Pattern pattern = Pattern.compile("^\\d+\\.(.+)");
       int errors = 0;
       int id = 0;
+
+      String lastID = "";
+      Exercise lastExercise = null;
       while ((line2 = reader.readLine()) != null) {
         count++;
-       if (TESTING && count > 200) break;
+     //  if (TESTING && count > 200) break;
 
         Matcher matcher = pattern.matcher(line2.trim());
         boolean wordListOnly = matcher.matches();
@@ -297,17 +301,29 @@ public class FileExerciseDAO implements ExerciseDAO {
           if (wordListOnly) {
             String group = matcher.group(1);
             exercise = getWordListExercise(group,""+count);
+            exercises.add(exercise);
           }
           else {
             int length = line2.split("\\(").length;
             boolean simpleFile = length == 2 && line2.startsWith("<s>");
             boolean isTSV = line2.contains("\t");
             exercise = simpleFile ?
-                getSimpleExerciseForLine(line2,id) :
-              isTSV ? readTSVLine(installPath,configDir,line2) : getExerciseForLine(line2);
-          }
-          if (exercise != null) {
-            exercises.add(exercise);
+              getSimpleExerciseForLine(line2,id) :
+              isTSV ? readTSVLine(installPath, configDir, line2) : getExerciseForLine(line2);
+
+            if (exercise != null) {
+              id++;
+              if (exercise.getID().equals(lastID)) {
+                //logger.debug("ex " +lastID+ " adding " + exercise.getEnglishQuestions());
+                lastExercise.addQuestions(Exercise.EN, exercise.getEnglishQuestions());
+                lastExercise.addQuestions(Exercise.FL, exercise.getForeignLanguageQuestions());
+              } else {
+                exercises.add(exercise);
+                lastExercise = exercise;
+              }
+
+              lastID = exercise.getID();
+            }
           }
         } catch (Exception e) {
           logger.error("Got " + e + ".Skipping line -- couldn't parse line #"+count + " : " +line2,e);
@@ -362,7 +378,11 @@ public class FileExerciseDAO implements ExerciseDAO {
 
     boolean exists = include.exists();
     if (!exists) {
-      logger.warn("couldn't open file " + include + " for line " + line);
+      include = new File(installPath,includeFile);
+      exists = include.exists();
+    }
+     if (!exists) {
+      logger.warn("couldn't open file " + include.getName() + " at " +include.getAbsolutePath() + " for line " + line);
       return null;
     } else {
       boolean listening = type.equalsIgnoreCase("listening");
@@ -375,7 +395,6 @@ public class FileExerciseDAO implements ExerciseDAO {
         String englishQuestion = split[i++].trim();
         String arabicAnswers = split[i++].trim();
         String englishAnswers = split[i++].trim();
-       // String notes = split[i++].trim();
 
         Exercise exercise = new Exercise("plan", id, content, false, false, englishQuestion);
 
@@ -456,7 +475,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     String mp3Ref = audioPath.replace(".wav",".mp3");//"config/pilot/media/bc-L0P-k15/bc-L0P-k15_My_house_door.mp3";
     String oggRef = audioPath.replace(".wav",".ogg");
    // logger.debug("file path " + mp3Ref);
-    return "<h2>Listen to this audio and answer the question below</h2>\n"+
+    return "<h4>Listen to this audio and answer the question below</h4>\n"+
     "<audio controls='controls'>"+
     "<source type='audio/mp3' src='" +
       mp3Ref +
@@ -483,7 +502,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     }
   }
 
-  private void addAssociations(List<Pair> pairs) {
+/*  private void addAssociations(List<Pair> pairs) {
     for (Pair p : pairs) {
       List<Pair> others = new ArrayList<Pair>(pairs);
       others.remove(p);
@@ -493,7 +512,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       }
     }
   }
-
+*/
   private void addAssociation(Pair first, Pair second) {
     addAssociation(first.type, first.section, second.type, second.section);
   }
