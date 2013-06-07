@@ -66,7 +66,7 @@ public class URLUtils {
       String root = getRootFromURL(url);
       url = new URL(url, root + path);
     } catch (MalformedURLException e) {
-      String msg = "Error constructing new url for request=" + request + " & path=" + path;
+     // String msg = "Error constructing new url for request=" + request + " & path=" + path;
       // logger.log(Level.ERROR, msg, e);
       throw new RuntimeException(e);
     }
@@ -78,14 +78,14 @@ public class URLUtils {
     return constructURL(request,"").toString();
   }
 
-  private String getRootFromRequest(HttpServletRequest request) {
+/*  private String getRootFromRequest(HttpServletRequest request) {
     try {
       return getRootFromURL(new URL(request.getRequestURL().toString()));
     } catch (MalformedURLException e) {
       e.printStackTrace();
     }
     return null;
-  }
+  }*/
 
   private String getRootFromURL(URL url) {
     String root = "";
