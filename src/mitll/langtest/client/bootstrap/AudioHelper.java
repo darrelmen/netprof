@@ -2,11 +2,13 @@ package mitll.langtest.client.bootstrap;
 
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.user.client.Timer;
-import mitll.langtest.client.BrowserCheck;
 
+/**
+ * @deprecated  REMOVE ME THIS WAS A BAD IDEA
+ */
 public class AudioHelper {
   private Audio mistakeAudio;
-  private BrowserCheck browserCheck = new BrowserCheck().checkForCompatibleBrowser();
+  //private BrowserCheck browserCheck = new BrowserCheck().checkForCompatibleBrowser();
 
   public AudioHelper() {
     mistakeAudio = Audio.createIfSupported();
