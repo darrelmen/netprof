@@ -405,7 +405,7 @@ public class PropertyHandler {
   }
 
   /**
-   * @see LangTest#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, boolean)
+   * @see LangTest#makeExerciseList
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    * @see mitll.langtest.client.LangTest#setFactory()
    * @return
