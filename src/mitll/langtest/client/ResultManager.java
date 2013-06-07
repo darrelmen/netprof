@@ -1,5 +1,6 @@
 package mitll.langtest.client;
 
+import com.github.gwtbootstrap.client.ui.Modal;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -82,16 +83,19 @@ public class ResultManager extends PagerTable {
 
     final VerticalPanel dialogVPanel = new VerticalPanel();
 
-    int left = (Window.getClientWidth()) / 20;
-    int top  = (Window.getClientHeight()) / 20;
+    int left = (Window.getClientWidth()) / 40;
+    int top  = (Window.getClientHeight()) / 40;
     dialogBox.setPopupPosition(left, top);
+    dialogVPanel.setWidth("100%");
+    //dialogBox.setWidth((int)((float)Window.getClientWidth()*0.85f) + "px");
+    //  dialogBox.setWidth("100%");
 
     service.getNumResults(new AsyncCallback<Integer>() {
       @Override
       public void onFailure(Throwable caught) {}
       @Override
       public void onSuccess(Integer result) {
-        populateTable(result, dialogVPanel, dialogBox);
+        populateTableOld(result, dialogVPanel, dialogBox);
       }
     });
 
@@ -105,17 +109,84 @@ public class ResultManager extends PagerTable {
     });
   }
 
-  private void populateTable(int numResults, Panel dialogVPanel, DialogBox dialogBox) {
+  public void showResultsNew() {
+    // Create the popup dialog box
+    //   final DialogBox dialogBox = new DialogBox();
+    final Modal dialogBox = new Modal(false);
+    //  dialogBox.setText(nameForAnswer+"s");
+    dialogBox.setTitle(nameForAnswer+"s");
+    dialogBox.setCloseVisible(true);
+    dialogBox.setKeyboard(false);
+    // Enable glass background.
+    // dialogBox.setGlassEnabled(true);
+
+ /*   closeButton = new Button("Close");
+    closeButton.setEnabled(true);
+    closeButton.getElement().setId("closeButton");*/
+
+    //final VerticalPanel dialogVPanel = new VerticalPanel();
+/*
+    int left = (Window.getClientWidth()) / 40;
+    int top  = (Window.getClientHeight()) / 160;
+    // dialogBox.setPopupPosition(left, top);
+    dialogVPanel.setWidth("100%");*/
+    //  dialogBox.setWidth((int)((float)Window.getClientWidth()*0.9f) + "px");
+
+    service.getNumResults(new AsyncCallback<Integer>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+      @Override
+      public void onSuccess(Integer result) {
+        populateTable(result, /*dialogVPanel,*/ dialogBox);
+      }
+    });
+
+    // dialogBox.setWidget(dialogVPanel);
+   // dialogBox.add(dialogVPanel);
+
+    // Add a handler to send the name to the server
+ /*   closeButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        dialogBox.hide();
+      }
+    });*/
+  }
+
+
+  private void populateTableOld(int numResults, Panel dialogVPanel,
+                             DialogBox dialogBox
+
+  ) {
     if (lastTable != null) {
       dialogVPanel.remove(lastTable);
       dialogVPanel.remove(closeButton);
     }
 
     Widget table = getAsyncTable(numResults, true, new ArrayList<Grade>(),-1, 1);
+    table.setWidth("100%");
+
     dialogVPanel.add(table);
     dialogVPanel.add(closeButton);
 
     lastTable = table;
+    dialogBox.show();
+  }
+
+  private void populateTable(int numResults, //Panel dialogVPanel,
+                             //   DialogBox dialogBox
+                             Modal dialogBox
+  ) {
+   /* if (lastTable != null) {
+      dialogVPanel.remove(lastTable);
+      dialogVPanel.remove(closeButton);
+    }*/
+
+    Widget table = getAsyncTable(numResults, true, new ArrayList<Grade>(),-1, 1);
+//    dialogVPanel.add(table);
+  //  dialogVPanel.add(closeButton);
+
+//    lastTable = table;
+    dialogBox.add(table);
     dialogBox.show();
   }
 
@@ -282,17 +353,6 @@ public class ResultManager extends PagerTable {
     };
     id.setSortable(true);
     table.addColumn(id, "User ID");
-/*
-
-    TextColumn<Result> age = new TextColumn<Result>() {
-      @Override
-      public String getValue(Result answer) {
-        return "" + answer.plan;
-      }
-    };
-    age.setSortable(true);
-    table.addColumn(age, "Plan");
-*/
 
     TextColumn<Result> gender = new TextColumn<Result>() {
       @Override
@@ -401,7 +461,7 @@ public class ResultManager extends PagerTable {
   }
 
   private Panel getPagerAndTable(CellTable<Result> table) {
-     return getPagerAndTable(table, table, pageSize, 1000);
+     return getOldSchoolPagerAndTable(table, table, pageSize, 1000);
   }
 
   private void addSorter(CellTable<Result> table, TextColumn<Result> id, List<Result> list) {
