@@ -27,8 +27,10 @@ import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Handles left side of NetPron2 -- which exercise is the current one, highlighting, etc.
@@ -418,6 +420,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   @Override
+  public int getPercentComplete() { return (int) (100f*((float)visited.size()/(float)currentExercises.size())); }
+  @Override
+  public int getComplete() { return visited.size(); }
+
+  @Override
   public void removeCurrentExercise() {
     Widget current = innerContainer.getWidget();
     if (current != null) {
@@ -460,6 +467,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     System.out.println("loadNextExercise " +current);
     int i = getIndex(current);
 
+    visited.add(i);
+
     boolean onLast = i == currentExercises.size() - 1;
     if (onLast) {
       feedback.showErrorMessage("Test Complete", "Test Complete! Thank you!");
@@ -472,6 +481,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
     return onLast;
   }
+
+  private Set<Integer> visited = new HashSet<Integer>();
 
   /**
    * So a turker can get credit for their work.
