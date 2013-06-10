@@ -71,7 +71,6 @@ public class BootstrapExercisePanel extends FluidContainer {
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
 
- // private final AudioHelper audioHelper = new AudioHelper();
   private List<MyRecordButtonPanel> answerWidgets = new ArrayList<MyRecordButtonPanel>();
   private Storage stockStore = null;
 
