@@ -50,6 +50,9 @@ import java.util.Set;
 public class MonitoringManager {
   private static final int MIN = (60 * 1000);
   private static final int HOUR = (60 * MIN);
+  private static final int MIN_COUNT_FOR_BROWSER = 10;
+  private static final int MIN_COUNT_FOR_DIALECT = 10;
+  public static final int MIN_SIZE_TO_TRIGGER_FILTER = 15;
 
   protected LangTestDatabaseAsync service;
   private String item = "Item";
@@ -425,8 +428,7 @@ public class MonitoringManager {
         flex.setText(row, 0, "Total Graded");
         flex.setText(row++, 1, "" + graded + " (" + percentGraded + "% of " + answers +
           ")");
-/*        flex.setText(row, 0, "% of Results graded");
-        flex.setText(row++, 1, "" + percentGraded + "%");*/
+
         flex.setText(row, 0, "Total Valid Graded (1-5)");
         flex.setText(row++, 1, "" + validGrades + " (" + getPercent(validGrades, graded) + ")");
 
@@ -449,9 +451,39 @@ public class MonitoringManager {
         flex.setText(row, 0, "Average Number Correct Grades");
         flex.setText(row++, 1, "" +  roundToHundredth(avgCorrect));
         vp.add(flex);
+
+        addGraphOfExperienceToIncorrectAndCorrect(result, vp, i);
       }
     }
+    vp.setWidth("100%");
     return vp;
+  }
+
+  private void addGraphOfExperienceToIncorrectAndCorrect(Map<String, Number> result, VerticalPanel vp, int i) {
+    List<String> incorrectKeys = new ArrayList<String>();
+    List<String> correctKeys = new ArrayList<String>();
+    for (String key : result.keySet()) {
+      if (key.contains("at") && key.contains("_" + i)) {
+        if (key.startsWith("incorrect")) {
+          incorrectKeys.add(key);
+        } else if (key.startsWith("correct")) {
+          correctKeys.add(key);
+        }
+      }
+    }
+    Map<Integer,Integer> expToIncorrect = new HashMap<Integer, Integer>();
+    Map<Integer,Integer> expToCorrect = new HashMap<Integer, Integer>();
+    for (String key : incorrectKeys) {
+      final int incorrectAtExp = result.get(key).intValue();
+      expToIncorrect.put(Integer.parseInt(key.split("_at_")[1]), incorrectAtExp);
+    }
+
+    for (String key : correctKeys) {
+      final int correctAtExp = result.get(key).intValue();
+      expToCorrect.put(Integer.parseInt(key.split("_at_")[1]),correctAtExp);
+    }
+
+    vp.add(getExperienceToBoth(expToIncorrect, expToCorrect, "Incorrect"));
   }
 
   private String getPercent(int numer, int denom) {
@@ -735,10 +767,13 @@ public class MonitoringManager {
         int total =0;
         for (Integer count : userToCount.values()) total += count;
         vp.add(getPerUserChart(userToCount));
+  //      vp.add(getPerUserLineChart(userToCount));
+
         vp.add(new HTML("Avg " + answers + " per " +
             user +
             " = " + total/userToCount.size()));
         vp.add(getUserChart(userToCount));
+
         vp.add(getAgeChart(userToCount));
         vp.add(getLangChart(userToCount));
         vp.add(getDialectChart(userToCount));
@@ -799,6 +834,12 @@ public class MonitoringManager {
     return new ColumnChart(data, options);
   }
 
+  /**
+   * Number of answers per speaker chart
+   * @see #showUserInfo(com.google.gwt.user.client.ui.Panel)
+   * @param userToCount
+   * @return
+   */
   private ColumnChart getPerUserChart(Map<User, Integer> userToCount) {
     Options options = Options.create();
     options.setTitle("Number of " +
@@ -827,6 +868,112 @@ public class MonitoringManager {
       data.setValue(r, 0, age >= 100 ? age +"-"+(age+99): (age >= 10 ? age +"-" +(age+9) : ""+age));
       data.setValue(r++, 1, ageToCount.get(age));
     }
+
+    return new ColumnChart(data, options);
+  }
+
+  private ColumnChart getExperienceToBoth(Map<Integer, Integer> expToIncorrect,Map<Integer, Integer> expToCorrect, String incorrect) {
+    Options options = Options.create();
+    //String incorrect = "Incorrect";
+    options.setTitle("Number of " + " " + incorrect + "/Correct by User Experience");
+
+    AxisOptions options1 = AxisOptions.create();
+    options1.setMinValue(-1);
+    options1.setMaxValue(18);
+    options.setHAxisOptions(options1);
+    options1.setTitle("Months experience");
+
+    //options.setHAxisOptions(options1);
+    AxisOptions options2 = AxisOptions.create();
+    options2.setTitle("# " + incorrect + "/Correct responses");
+    options.setVAxisOptions(options2);
+
+    DataTable data = DataTable.create();
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Experience");
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Num " + "Correct");
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Num " + incorrect);
+
+    int r = 0;
+    List<Integer> countsForUsers = getSortedList(expToIncorrect.keySet());
+    System.out.println("exp " + countsForUsers);
+    for (Integer count : countsForUsers) {
+      if (count > 36) System.out.println("Skipping " + count + "->" + expToIncorrect.get(count));
+      else {
+        data.addRow();
+        data.setValue(r, 0, count);
+        data.setValue(r, 1, expToCorrect.get(count));
+        data.setValue(r++, 2, expToIncorrect.get(count));
+      }
+    }
+
+    ColumnChart columnChart = new ColumnChart(data, options);
+    columnChart.setWidth("90%");
+    return columnChart;
+  }
+
+  private ColumnChart getExperienceToIncorrect(Map<Integer, Integer> expToIncorrect, String incorrect) {
+    Options options = Options.create();
+    //String incorrect = "Incorrect";
+    options.setTitle("Number of " + " " + incorrect + " by User Experience");
+
+    labelAxes(options, "Months experience", "# " + incorrect + " responses");
+    DataTable data = DataTable.create();
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Experience");
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Num " + incorrect);
+
+    int r = 0;
+    List<Integer> countsForUsers = getSortedList(expToIncorrect.keySet());
+    System.out.println("exp " + countsForUsers);
+    for (Integer count : countsForUsers) {
+      if (count > 36) System.out.println("Skipping " + count + "->" + expToIncorrect.get(count));
+      else {
+        data.addRow();
+        data.setValue(r, 0, count);// count >= 100 ? count +"-"+(count+99): (count >= 10 ? count +"-" +(count+9) : ""+count));
+        data.setValue(r++, 1, expToIncorrect.get(count));
+      }
+    }
+
+    return new ColumnChart(data, options);
+  }
+
+  private ColumnChart getPerUserLineChart(Map<User, Integer> userToCount) {
+    Options options = Options.create();
+    options.setTitle("Number of " +
+      answers +
+      " per " +
+      user);
+
+    labelAxes(options, "", "# " + user);
+    DataTable data = DataTable.create();
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Num " + answers);
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, users +
+      " with this many");
+
+    Map<Integer, Integer> usersAtCount = new HashMap<Integer, Integer>();
+    for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
+      Integer count = pair.getValue();
+      // int binned = count >= 100 ? (count / 100)*100 : count >= 10 ? (count / 10)*10 : count;
+      Integer c = usersAtCount.get(count);
+      usersAtCount.put(count, (c == null) ? 1 : c + 1);
+    }
+
+    long total = 0;
+    for (Integer v : usersAtCount.values()) total += v;
+    long avg = total/usersAtCount.size();
+    System.out.println("avg " + avg);
+    AxisOptions options1 = AxisOptions.create();
+    options1.setMaxValue(4*avg);
+    options.setVAxisOptions(options1);
+
+    int r = 0;
+    List<Integer> countsForUsers = getSortedList(usersAtCount.keySet());
+    System.out.println("counts for users " + countsForUsers);
+    for (Integer count : countsForUsers) {
+      data.addRow();
+      data.setValue(r, 0, count);// count >= 100 ? count +"-"+(count+99): (count >= 10 ? count +"-" +(count+9) : ""+count));
+      data.setValue(r++, 1, usersAtCount.get(count));
+    }
+
 
     return new ColumnChart(data, options);
   }
@@ -967,23 +1114,26 @@ public class MonitoringManager {
     String slot = "Dialect";
     Options options = getOptions(slot);
 
-    Map<String,Integer> langToCount = new HashMap<String,Integer>();
+    Map<String,Integer> dialectToCount = new HashMap<String,Integer>();
 
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
       User user = pair.getKey();
       String dialect = user.dialect;
       if (dialect != null) {
+        if (dialect.length() == 0) dialect = "Unknown";
         String slotToUse = dialect.toLowerCase();
-        Integer c = langToCount.get(slotToUse);
+        Integer c = dialectToCount.get(slotToUse);
         if (count > 5) {
-          if (c == null) langToCount.put(slotToUse, count);
-          else langToCount.put(slotToUse, c + count);
+          if (c == null) dialectToCount.put(slotToUse, count);
+          else dialectToCount.put(slotToUse, c + count);
         }
       }
     }
 
-    DataTable data = getDataTable(slot, langToCount,false);
+    Map<String, Integer> dialectToCount2 = filterCount(dialectToCount, MIN_COUNT_FOR_DIALECT, 15);
+
+    DataTable data = getDataTable(slot, dialectToCount2,false);
 
     return new ColumnChart(data, options);
   }
@@ -993,22 +1143,38 @@ public class MonitoringManager {
     String slot = "Browser";
     Options options = getOptions(slot);
 
-    Map<String,Integer> langToCount = new HashMap<String,Integer>();
+    Map<String,Integer> browserToCount = new HashMap<String,Integer>();
 
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
       User user = pair.getKey();
-      String slotToUse = checker.getBrowser(user.ipaddr);
-      Integer c = langToCount.get(slotToUse);
+      String ipaddr = user.ipaddr;
+      boolean badIP = ipaddr == null || ipaddr.length() == 0;
+//      if (badIP) {
+//        /System.err.println("huh? no ipaddr for " + user);
+ //     }
+      String slotToUse = badIP ? "Unknown" : checker.getBrowser(ipaddr);
+      Integer c = browserToCount.get(slotToUse);
       if (count > 0) {
-        if (c == null) langToCount.put(slotToUse, count);
-        else langToCount.put(slotToUse, c + count);
+        browserToCount.put(slotToUse, (c == null) ? count : c + count);
       }
     }
+    Map<String, Integer> browserToCount2 = filterCount(browserToCount, MIN_COUNT_FOR_BROWSER, MIN_SIZE_TO_TRIGGER_FILTER);
 
-    DataTable data = getDataTable(slot, langToCount,false);
+    DataTable data = getDataTable(slot, browserToCount2, false);
 
     return new ColumnChart(data, options);
+  }
+
+  private Map<String, Integer> filterCount(Map<String, Integer> browserToCount, int minCount, int minSize) {
+    if (browserToCount.size() < minSize) return browserToCount;
+    Map<String, Integer> browserToCount2 = new HashMap<String, Integer>();
+
+    for (Map.Entry<String, Integer> pair : browserToCount.entrySet()) {
+      if (pair.getValue() > minCount)
+        browserToCount2.put(pair.getKey(), pair.getValue());
+    }
+    return browserToCount2;
   }
 
   private ColumnChart getUserChart(Map<User, Integer> userToCount) {
@@ -1021,6 +1187,9 @@ public class MonitoringManager {
       Integer doneByUser = pair.getValue();
       User user = pair.getKey();
       String name = user.userID;
+      if (name == null || name.length() == 0) {
+        name = ""+user.id;
+      }
       name = name.trim();
       Integer count = nameToCount.get(name);
       if (count == null) nameToCount.put(name,doneByUser);
@@ -1052,18 +1221,19 @@ public class MonitoringManager {
     data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Male "+ answers);
     int r = 0;
 
+    //System.out.println("counts " + counts);
     for (Integer c : counts) {
       List<String> users = countToUser.get(c);
+    //  System.out.println("\tcount " + c + " users " + users);
       for (String u : users) {
         data.addRow();
         data.setValue(r, 0, u);
         if (!males.contains(u)) {
-          data.setValue(r, 1, c);
-          data.setValue(r++, 2, 0);
-        }
-        else{
           data.setValue(r, 1, 0);
           data.setValue(r++, 2, c);
+        } else {
+          data.setValue(r, 1, c);
+          data.setValue(r++, 2, 0);
         }
       }
     }
