@@ -104,6 +104,10 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     }
     hp.setHorizontalAlignment(rightAlignContent ? HasHorizontalAlignment.ALIGN_RIGHT : HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e));
+    if (e.getContent().contains("Listen") || e.getContent().contains("listen")) {
+    } else {
+      addInstructions();
+    }
     add(hp);
 
     int i = 1;
@@ -117,6 +121,10 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     boolean includeKeyHandler = controller.isCollectAudio();
     Panel buttonRow = getNextAndPreviousButtons(e, service, userFeedback, controller, includeKeyHandler);
     add(buttonRow);
+  }
+
+  protected void addInstructions() {
+    add(new Heading(4, "Read the following text and answer the question or questions below."));
   }
 
   protected void addItemHeader(Exercise e) {
