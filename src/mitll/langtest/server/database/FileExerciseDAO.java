@@ -357,6 +357,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   /**
    * Read from tsv file that points to other files.
    *
+   * @see #readFastAndSlowExercises(String, String, String)
    * @param installPath
    * @param configDir
    * @param line
@@ -414,6 +415,7 @@ public class FileExerciseDAO implements ExerciseDAO {
 
   /**
    * If listening, include HTML 5 audio reference, otherwise include text from file.
+   * @see #readTSVLine(String, String, String)
    * @param include
    * @param isListening
    * @return
