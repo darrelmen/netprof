@@ -185,12 +185,7 @@ public class DatabaseImpl implements Database {
    * @return
    */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
-/*    return useFile ?
-      new FileExerciseDAO(isUrdu, showSections, mediaDir, isFlashcard) :
-      new SQLExerciseDAO(this, relativeConfigDir);
-  */
     return useFile ? new FileExerciseDAO(mediaDir, language, showSections, isFlashcard) : new SQLExerciseDAO(this, mediaDir);
-
   }
 
   /**
@@ -915,7 +910,7 @@ public class DatabaseImpl implements Database {
     List<Exercise> fewResponses = getResultsRandomizedPerUser(userID, idToExercise, integerListSortedMap, idToWeight);
     Set<String> fewSet = new HashSet<String>();
     for (Exercise e : fewResponses) fewSet.add(e.getID());
-    logger.debug("getExercisesGradeBalancing for " + MIN_INCORRECT_ANSWERS + " fewSet size " + fewSet.size());
+   // logger.debug("getExercisesGradeBalancing for " + MIN_INCORRECT_ANSWERS + " fewSet size " + fewSet.size());
     if (fewSet.size() == rawExercises.size()) {
       logger.debug("we haven't gotten enough questions answered yet to bias towards easy questions");
       return fewResponses;
