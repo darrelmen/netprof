@@ -44,7 +44,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private static final String USER_RECORDER = "User Recorder";
   private static final String INSTRUCTIONS = "Instructions";
   private boolean isBusy = false;
-  private static final String FAST = "Fast";
+  private static final String FAST = "Regular";
   private static final String SLOW = "Slow";
 
   private static final String WAV = ".wav";
