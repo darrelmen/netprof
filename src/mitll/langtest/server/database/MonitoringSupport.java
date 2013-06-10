@@ -686,18 +686,38 @@ public class MonitoringSupport {
       total += r.durationInMillis;
       if (r.durationInMillis > 0) {
         count++;
-      }
-      else if (r.spoken /*|| r.audioType.equals(Result.AUDIO_TYPE_UNSET)*/) {
-        badDur++;
-        if (maxWarns++ < 10){
-          logger.info("got bad audio result " + r + " path " + r.answer);
+      } else if (r.spoken /*|| r.audioType.equals(Result.AUDIO_TYPE_UNSET)*/) {
+        if (r.answer.endsWith(".wav")) {
+          badDur++;
+          if (maxWarns++ < 10) {
+            logger.info("possible bad audio result " + r + " path " + r.answer);
+          }
         }
       }
     }
 
+    if (maxWarns > 0 && maxWarns < results.size()) {
+      logger.warn("got " + maxWarns + " bad audio recordings out of " + results.size());
+    }
+
     Map<String,Number> typeToStat = new HashMap<String,Number>();
+    List<User> users = getUsers();
+
+    Map<Long,User> idToUser = new HashMap<Long, User>();
+    for (User u : users) {
+      idToUser.put(u.id,u);
+    }
+
+    Map<Integer, Integer> resultIDToExp = new HashMap<Integer, Integer>();
+    for (Result r : results) {
+      User user = idToUser.get(r.userid);
+      if (user == null) System.err.println("unknown user " + r.userid);
+      else resultIDToExp.put(r.uniqueID, user.experience);
+    }
+
+    Collection<Grade> grades1 = gradeDAO.getGrades();
     for (int i = 0; i < 3; i++) {
-      GradeInfo gradeInfo = new GradeInfo(gradeDAO, i);
+      GradeInfo gradeInfo = new GradeInfo(grades1, resultIDToExp, i);
       if (gradeInfo.gradeCount > 0) {
         typeToStat.put("totalGraded_" +i, gradeInfo.gradeCount);
         typeToStat.put("validGraded_" +i, gradeInfo.valid);
@@ -709,6 +729,18 @@ public class MonitoringSupport {
         typeToStat.put("correctGraded_" +i, gradeInfo.correct);
         typeToStat.put("averageNumCorrect_" +i, (float)gradeInfo.correct/(float)gradeInfo.numExercises);
         typeToStat.put("percentGraded_" +i, (int)(100f*(float)gradeInfo.gradeCount/(float)results.size()));
+
+        for (Map.Entry<Integer,Integer> expToInc : gradeInfo.expToIncorrect.entrySet()) {
+          String suffix = "_at_" + expToInc.getKey();
+          typeToStat.put("incorrectGraded_" + i + suffix, expToInc.getValue());
+          typeToStat.put("averageNumIncorrect_" +i+suffix, (float)expToInc.getValue()/(float)gradeInfo.numExercises);
+        }
+
+        for (Map.Entry<Integer,Integer> expToCorr : gradeInfo.expToCorrect.entrySet()) {
+          String suffix = "_at_" + expToCorr.getKey();
+          typeToStat.put("correctGraded_" + i + suffix, expToCorr.getValue());
+          typeToStat.put("averageNumCorrect_" +i+suffix, (float)expToCorr.getValue()/(float)gradeInfo.numExercises);
+        }
       }
     }
 
@@ -731,26 +763,54 @@ public class MonitoringSupport {
     int correct = 0;
     int numExercises = 0;
     int gradeTotal = 0;  float avgGrade; float avgNumGrades;
+    Map<Integer,Integer> expToIncorrect = new HashMap<Integer, Integer>();
+    Map<Integer,Integer> expToCorrect = new HashMap<Integer, Integer>();
 
-    public GradeInfo(GradeDAO gradeDAO, int index) {
-      Collection<Grade> grades = gradeDAO.getGrades();
+    /**
+     *
+     * @paramx gradeDAO
+     * @paramx idToUser
+     * @param index
+     */
+    public GradeInfo( Collection<Grade> grades, Map<Integer,Integer> resultToExp, int index) {
       Set<String> exids = new HashSet<String>();
       for (Grade g : grades) {
-        if (g.gradeIndex == index) {
-          if (g.grade > 0) {
+        if (g.gradeIndex == index) {  // for this grade round (1st, 2nd, etc)
+          if (g.grade > 0) {    // all valid (non-skip) grades
             exids.add(g.exerciseID);
             gradeTotal += g.grade;
             valid++;
-            if (g.grade < 4) incorrect++;
-            else correct++;
+
+            if (g.grade < 4) {
+              incorrect++;
+
+              int exp = resultToExp.containsKey(g.resultID) ? resultToExp.get(g.resultID) : -1;
+              Integer incorrectAtExp = expToIncorrect.get(exp);
+              expToIncorrect.put(exp,(incorrectAtExp == null) ? 1 : incorrectAtExp+1);
+            }
+            else {
+              correct++;
+
+              int exp = resultToExp.containsKey(g.resultID) ? resultToExp.get(g.resultID) : -1;
+              Integer correctAtExp = expToCorrect.get(exp);
+              expToCorrect.put(exp,(correctAtExp == null) ? 1 : correctAtExp+1);
+            }
           }
           gradeCount++;
         }
       }
       numExercises = exids.size();
+      if (numExercises == 0) numExercises = 1; //avoid NaN
       avgGrade = (float) gradeTotal / (float) valid;
       avgNumGrades = (float) valid / (float) numExercises;
     }
+
+/*    private int getExp(Map<Long, User> idToUser, Grade g) {
+      User key = idToUser.get((long)g.grader);
+      int exp = -1;
+      if (key != null) exp = key.experience;
+      return exp;
+    }*/
   }
 
   public List<User> getUsers() {
