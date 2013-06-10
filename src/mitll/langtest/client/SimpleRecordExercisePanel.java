@@ -48,6 +48,9 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
     return getSpokenPrompt(promptInEnglish);
   }
 
+  @Override
+  protected void addInstructions() {}
+
   /**
    * on the server, notice which audio posts have arrived, and take the latest ones...
    * <br></br>
