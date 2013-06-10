@@ -233,7 +233,10 @@ public class UserTable extends PagerTable {
     TextColumn<User> ipaddr = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        return "" + contact.ipaddr;
+        String ipaddr1 = contact.ipaddr;
+        int at = ipaddr1.lastIndexOf("at");
+        ipaddr1 = ipaddr1.substring(0,at);
+        return ipaddr1;
       }
     };
 
@@ -296,6 +299,7 @@ public class UserTable extends PagerTable {
     table.getColumnSortList().push(id);
 
     // Create a SimplePager.
-    return getPagerAndTable(table, table, 10, 10);
+   // return getPagerAndTable(table, table, 10, 10);
+    return getOldSchoolPagerAndTable(table, table, 10, 10);
   }
 }
