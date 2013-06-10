@@ -319,7 +319,7 @@ public class SplitAudio {
           }
         }
         else {
-          /*if (count++ < 100)*/ logger.warn("no results for ex " + e.getID());
+          if (count++ < 100) logger.warn("no results for ex " + e.getID());
         }
         if (nativeResult) {
           if (englishToEx.containsKey(key)) {
@@ -341,8 +341,8 @@ public class SplitAudio {
     int count2 = 0;
     Map<Exercise, List<Result>> chapterToResult = null;
     try {
-      final FileWriter skip = new FileWriter(configDir + "skip.txt");
-      final FileWriter skipWords = new FileWriter(configDir + "skipWords.txt");
+      final FileWriter skip = new FileWriter(configDir + "skip4.txt");
+      final FileWriter skipWords = new FileWriter(configDir + "skipWords4.txt");
 
       chapterToResult = new HashMap<Exercise, List<Result>>();
       for (Exercise e : unitAndChapter.getExercises()) {
@@ -380,7 +380,7 @@ public class SplitAudio {
       " out of " + unitAndChapter.getExercises().size() + " skipped " + skipped);
 
     try {
-      if (false) convertExamples(numThreads, audioDir,language,idToEx,idToResults2,nativeUsers);
+      if (true) convertExamples(numThreads, audioDir,language,idToEx,idToResults2,nativeUsers);
     } catch (IOException e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     } catch (InterruptedException e) {
@@ -445,8 +445,6 @@ public class SplitAudio {
 
     final Map<String, String> properties = getProperties(language, configDir);
     ASRScoring scoring = getAsrScoring(".",null,properties);
-
-//    checkLTS(exercises, scoring.getLTS());
 
     final HTKDictionary dict = scoring.getDict();
 
@@ -524,26 +522,30 @@ public class SplitAudio {
     List<String> ids = getIdsSorted(idToResults);
     for (final String id : ids) {
       final List<Result> resultList = idToResults.get(id);
-      final List<Result> natives = getResultsByNatives(nativeUsers, resultList);
-      if (natives.isEmpty() && !resultList.isEmpty()) {
-        logger.debug("getSplitAudioFutures id " + id + " all " + resultList.size() + " responses were by non-native speakers");
+      if (resultList == null) {
+        logger.warn("skipping " + id + " no results...");
       } else {
-        //logger.debug("getSplitAudioFutures id " + id + " examining " + natives.size() + " native responses.");
+        final List<Result> natives = getResultsByNatives(nativeUsers, resultList);
+        if (natives.isEmpty() && !resultList.isEmpty()) {
+          logger.debug("getSplitAudioFutures id " + id + " all " + resultList.size() + " responses were by non-native speakers");
+        } else {
+          //logger.debug("getSplitAudioFutures id " + id + " examining " + natives.size() + " native responses.");
 
-        Future<?> submit = executorService.submit(new Runnable() {
-          @Override
-          public void run() {
-            try {
-              getBestForEachExercise(id, idToEx, missingSlow, missingFast,
-                newRefDir, bestDir,
-                natives,
-                placeToPutAudio, dict, properties, language);
-            } catch (IOException e) {
-              logger.error("Doing " + id + " and " + resultList + " Got " + e, e);
+          Future<?> submit = executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+              try {
+                getBestForEachExercise(id, idToEx, missingSlow, missingFast,
+                  newRefDir, bestDir,
+                  natives,
+                  placeToPutAudio, dict, properties, language);
+              } catch (IOException e) {
+                logger.error("Doing " + id + " and " + resultList + " Got " + e, e);
+              }
             }
-          }
-        });
-        futures.add(submit);
+          });
+          futures.add(submit);
+        }
       }
     }
     return futures;
@@ -587,6 +589,12 @@ public class SplitAudio {
     return properties;
   }
 
+  /**
+   * @see #convertEnglish(int, String)
+   * @see #convertExamples(int, String, String, String, String)
+   * @param db
+   * @return
+   */
   private Map<String, List<Result>> getIDToResultsMap(DatabaseImpl db) {
     Map<String,List<Result>> idToResults = new HashMap<String, List<Result>>();
     List<Result> results = db.getResults();
@@ -594,7 +602,7 @@ public class SplitAudio {
     for (Result r : results) {
       String id = r.id;
       int i = Integer.parseInt(id);
-      if (i < MAX //&& i == 3496
+      if (i < MAX && i == 675//39//3496
         ) {
         List<Result> resultList = idToResults.get(id);//r.getID());
         if (resultList == null) {
@@ -604,6 +612,7 @@ public class SplitAudio {
         resultList.add(r);
       }
     }
+    logger.debug("got " + idToResults);
     return idToResults;
   }
 
@@ -1077,7 +1086,8 @@ public class SplitAudio {
       int numThreads = Integer.parseInt(arg[0]);
       String audioDir = arg[1];
       // new SplitAudio().convertExamples(numThreads, audioDir, arg[2], arg[3]);
-   //   new SplitAudio().convertEnglish(numThreads,audioDir);
+      new SplitAudio().convertEnglish(numThreads,audioDir);
+      if (true) return;
       //  new SplitAudio().dumpDir(audioDir);
       if (arg.length == 2) {
         new SplitAudio().normalize(audioDir);
@@ -1085,8 +1095,8 @@ public class SplitAudio {
         String language = arg[2];
         String spreadsheet = arg[3];
         String dbName = arg[4];
-      //  new SplitAudio().convertExamples(numThreads, audioDir, language, spreadsheet, dbName);
-        new SplitAudio().dumpDir2(audioDir, language, dbName, spreadsheet);
+        new SplitAudio().convertExamples(numThreads, audioDir, language, spreadsheet, dbName);
+       // new SplitAudio().dumpDir2(audioDir, language, dbName, spreadsheet);
 
       }
     } catch (Exception e) {
