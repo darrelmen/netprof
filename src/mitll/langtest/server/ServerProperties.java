@@ -143,6 +143,11 @@ public class ServerProperties {
   public String getLanguage() {
     return props.getProperty(LANGUAGE, "English");
   }
+
+  /**
+   * @see LangTestDatabaseImpl#setInstallPath(boolean)
+   * @return
+   */
   public String getMediaDir() {
     return props.getProperty(MEDIA_DIR, "media");
   }
