@@ -69,7 +69,7 @@ public class UserManager {
   private long userID = NO_USER_SET;
   private String userChosenID = "";
   private boolean isCollectAudio;
-  private Storage stockStore = null;
+//  private Storage stockStore = null;
   private final boolean isDataCollectAdmin;
   private final boolean useShortExpiration;
   private final boolean isFlashcard;
@@ -77,6 +77,8 @@ public class UserManager {
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
+   * @see mitll.langtest.client.LangTest#doFlashcard()
+   * @see mitll.langtest.client.LangTest#doDataCollectAdminView
    * @param lt
    * @param service
    * @param isDataCollectAdmin
@@ -89,7 +91,7 @@ public class UserManager {
     this.langTest = lt;
     this.service = service;
     this.isCollectAudio = isCollectAudio;
-    stockStore = Storage.getLocalStorageIfSupported();
+  //  stockStore = Storage.getLocalStorageIfSupported();
     this.isDataCollectAdmin = isDataCollectAdmin;
     this.isFlashcard = isFlashcard;
     this.useShortExpiration = useShortExpiration;
@@ -117,11 +119,13 @@ public class UserManager {
     if (useCookie) {
       Date expires = new Date(futureMoment);
       Cookies.setCookie("sid", "" + sessionID, expires);
-    } else if (stockStore != null) {
-      stockStore.setItem(getUserIDCookie(), "" + sessionID);
-      stockStore.setItem(getUserChosenID(), "" + userChosenID);
-      stockStore.setItem(getExpires(), "" + futureMoment);
-      stockStore.setItem(getAudioType(), "" + audioType);
+    } else if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+
+      localStorageIfSupported.setItem(getUserIDCookie(), "" + sessionID);
+      localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
+      localStorageIfSupported.setItem(getExpires(), "" + futureMoment);
+      localStorageIfSupported.setItem(getAudioType(), "" + audioType);
       System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " expires in " + (DURATION/1000) + " seconds");
     } else {
       userID = sessionID;
@@ -176,8 +180,10 @@ public class UserManager {
    * @return
    */
   public String getUserID() {
-    if (stockStore != null) {
-      return stockStore.getItem(getUserChosenID());
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+
+      return localStorageIfSupported.getItem(getUserChosenID());
     }
     else {
       return userChosenID;
@@ -185,8 +191,10 @@ public class UserManager {
   }
 
   private void rememberAudioType() {
-    if (stockStore != null) {
-      String audioType = stockStore.getItem(getAudioType());
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+
+      String audioType = localStorageIfSupported.getItem(getAudioType());
       if (audioType == null) {
         audioType = Result.AUDIO_TYPE_FAST_AND_SLOW;
       }
@@ -206,12 +214,13 @@ public class UserManager {
       }
       return Integer.parseInt(sid);
     }
-    else if (stockStore != null) {
-      String sid = stockStore.getItem(getUserIDCookie());
+    else if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+      String sid = localStorageIfSupported.getItem(getUserIDCookie());
       System.out.println("user id cookie for " +getUserIDCookie() + " is " + sid);
       if (sid != null && !sid.equals("" + NO_USER_SET)) {
         checkExpiration(sid);
-        sid = stockStore.getItem(getUserIDCookie());
+        sid = localStorageIfSupported.getItem(getUserIDCookie());
       }
       return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
     }
@@ -234,7 +243,9 @@ public class UserManager {
   }
 
   private void checkExpiration(String sid) {
-    String expires = stockStore.getItem(getExpires());
+    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+
+    String expires = localStorageIfSupported.getItem(getExpires());
     if (expires == null) {
       System.out.println("checkExpiration : no expires item?");
     }
@@ -261,9 +272,11 @@ public class UserManager {
     langTest.rememberAudioType(Result.AUDIO_TYPE_UNSET);
     if (useCookie) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
-    } else if (stockStore != null) {
-      stockStore.removeItem(getUserIDCookie());
-      stockStore.removeItem(getUserChosenID());
+    } else if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+
+      localStorageIfSupported.removeItem(getUserIDCookie());
+      localStorageIfSupported.removeItem(getUserChosenID());
       System.out.println("clearUser : removed item " + getUserID() +
         " user now " + getUser());
     } else {
