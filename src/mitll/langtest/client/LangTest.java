@@ -49,7 +49,9 @@ import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
+import mitll.langtest.client.flashcard.Flashcard;
 import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
+import mitll.langtest.client.flashcard.TimedGame;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.mail.MailDialog;
 import mitll.langtest.client.monitoring.MonitoringManager;
@@ -123,8 +125,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
       public void onSuccess(Map<String, String> result) {
         long now = System.currentTimeMillis();
-//        System.out.println("onModuleLoad.getProperties : (success) took " + (now - then) + " millis");
-
         props = new PropertyHandler(result);
         onModuleLoad2();
         if (isLogClientMessages()) {
@@ -235,9 +235,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // second row ---------------
     secondRow = new FluidRow();
-  //  secondRow.ensureDebugId("secondRow");
-
     widgets.add(secondRow);
+
     // third row ---------------
 
     Panel thirdRow = new HorizontalPanel();
@@ -245,24 +244,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     thirdRow.add(leftColumn);
     widgets.add(thirdRow);
 
-  //  widgets.addNorth(hp, HEADER_HEIGHT);
-
     if (isCRTDataCollectMode()) {
       addProgressBar(widgets);
     }
-/*    else {
-      widgets.addSouth(status, 50);
+    else {
+      widgets.add(status);
     }
-    if ((props.isMinimalUI() && !props.isGrading()) && !props.isAdminView()) {
-      exerciseListPanel.setVisible(false);
-      widgets.addWest(exerciseListPanel, 10);
-    } else {
-      widgets.addWest(exerciseListPanel, EXERCISE_LIST_WIDTH);
-    }*/
+
     // set up center panel, initially with flash record panel
     currentExerciseVPanel = new FluidContainer();
 
-    //DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "marginLeft", "10px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
     makeExerciseList(secondRow, leftColumn, props.isGrading());
@@ -276,8 +267,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       currentExerciseVPanel.addStyleName("noMargin");
       RootPanel.get().add(currentExerciseVPanel);
     }
-
-    // set up left side exercise list
 
     // don't do flash if we're doing text only collection
     //System.out.println("teacher view " + props.isTeacherView() + " arabic text data " + props.isArabicTextDataCollect() + " collect audio " + props.isCollectAudio());
@@ -342,7 +331,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       System.out.println("adding status line...");
 
       //    widgets.addSouth(status, 50);
-          widgets.add(status);
+      widgets.add(status);
     } else {
       progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
       progressBar.setWidth("70%");
