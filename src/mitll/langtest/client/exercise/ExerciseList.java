@@ -471,7 +471,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
     boolean onLast = i == currentExercises.size() - 1;
     if (onLast) {
-      feedback.showErrorMessage("Test Complete", "Test Complete! Thank you!");
+      onLastItem();
     }
     else {
       getNextExercise(current);
@@ -480,6 +480,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       showTurkToken(current);
     }
     return onLast;
+  }
+
+  protected void onLastItem() {
+    feedback.showErrorMessage("Test Complete", "Test Complete! Thank you!");
   }
 
   private Set<Integer> visited = new HashSet<Integer>();
