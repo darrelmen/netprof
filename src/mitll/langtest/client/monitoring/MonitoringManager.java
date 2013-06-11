@@ -911,7 +911,7 @@ public class MonitoringManager {
     return columnChart;
   }
 
-  private ColumnChart getExperienceToIncorrect(Map<Integer, Integer> expToIncorrect, String incorrect) {
+ /* private ColumnChart getExperienceToIncorrect(Map<Integer, Integer> expToIncorrect, String incorrect) {
     Options options = Options.create();
     //String incorrect = "Incorrect";
     options.setTitle("Number of " + " " + incorrect + " by User Experience");
@@ -935,8 +935,8 @@ public class MonitoringManager {
 
     return new ColumnChart(data, options);
   }
-
-  private ColumnChart getPerUserLineChart(Map<User, Integer> userToCount) {
+*/
+/*  private ColumnChart getPerUserLineChart(Map<User, Integer> userToCount) {
     Options options = Options.create();
     options.setTitle("Number of " +
       answers +
@@ -976,7 +976,7 @@ public class MonitoringManager {
 
 
     return new ColumnChart(data, options);
-  }
+  }*/
 
   private ColumnChart getResultCountChart(Map<Integer, Integer> resultToCount) {
     Options options = Options.create();
