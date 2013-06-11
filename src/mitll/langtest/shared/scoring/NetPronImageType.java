@@ -10,6 +10,5 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * To change this template use File | Settings | File Templates.
  */
 public enum NetPronImageType implements IsSerializable {
-  WAVEFORM, SPECTROGRAM, WORD_TRANSCRIPT, /*SPEECH_TRANSCRIPT,*/ PHONE_TRANSCRIPT
-
+  WAVEFORM, SPECTROGRAM, WORD_TRANSCRIPT, PHONE_TRANSCRIPT
 }
