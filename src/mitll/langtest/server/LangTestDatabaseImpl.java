@@ -77,7 +77,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       .concurrencyLevel(4)
       .maximumSize(10000)
       .expireAfterWrite(TIMEOUT, TimeUnit.MINUTES).build();
-  private boolean testReco = true;
 
   /**
    * This allows us to upload an exercise file and create a new {@link Site}.
