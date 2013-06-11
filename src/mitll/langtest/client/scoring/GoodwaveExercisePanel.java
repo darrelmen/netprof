@@ -510,7 +510,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         vp.add(slow);
         anyRef = true;
       }
-      vp.setWidth("50px");
+      vp.setWidth("80px");
 
       if (!anyRef) {
         vp.add(new Label("No reference audio."));
