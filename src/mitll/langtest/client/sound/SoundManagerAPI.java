@@ -21,7 +21,7 @@ public interface SoundManagerAPI {
    */
    void play(Sound sound);
    void setPosition(Sound sound, double position);
-  void setPositionAndPlay(Sound sound, double position);
+  //void setPositionAndPlay(Sound sound, double position);
   void playInterval(Sound sound, int start, int end);
 
   /**
@@ -30,9 +30,9 @@ public interface SoundManagerAPI {
 
   void exportStaticMethods();
   void loaded();
-  void songFinished(Sound sound);
-   void songFirstLoaded(Sound sound, double durationEstimate);
-   void songLoaded(Sound sound, double duration);
+ // void songFinished(Sound sound);
+  // void songFirstLoaded(Sound sound, double durationEstimate);
+  // void songLoaded(Sound sound, double duration);
   void update(Sound sound, double position);
 
   boolean isOK();
