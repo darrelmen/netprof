@@ -45,7 +45,7 @@ import java.util.Set;
 /**
  * Note that for text input answers, the user is prevented from cut-copy-paste.<br></br>
  *
- * Subclassed to provide for audio recording and playback {@link mitll.langtest.client.SimpleRecordExercisePanel} and
+ * Subclassed to provide for audio recording and playback {@link mitll.langtest.client.recorder.SimpleRecordExercisePanel} and
  * grading of answers {@link mitll.langtest.client.grading.GradingExercisePanel}
  *
  * User: GO22670
