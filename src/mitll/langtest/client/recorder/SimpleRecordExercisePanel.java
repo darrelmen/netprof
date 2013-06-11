@@ -1,6 +1,7 @@
-package mitll.langtest.client;
+package mitll.langtest.client.recorder;
 
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanel;
 import mitll.langtest.client.recorder.SimpleRecordPanel;
