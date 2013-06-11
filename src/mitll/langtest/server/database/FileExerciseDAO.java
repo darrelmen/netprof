@@ -53,6 +53,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   private final boolean isUrdu;
   private final boolean isFlashcard;
   private final boolean isEnglish;
+  private boolean processSemicolons = false;
 
   @Override
   public SectionHelper getSectionHelper() {
@@ -555,7 +556,8 @@ public class FileExerciseDAO implements ExerciseDAO {
    */
   private String getRefSentence(String contentSentence) {
     String e1 = contentSentence.trim();
-    if (e1.contains(";")) {
+    if (processSemicolons && e1.contains(";")) {
+      logger.warn("found semi " + e1);
       String[] split = e1.split(";");
 
       String firstPhrase = split[0];
