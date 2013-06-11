@@ -1,6 +1,6 @@
-package mitll.langtest.shared;
+package mitll.langtest.server.database;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.Exercise;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,7 +14,7 @@ import java.util.List;
  * Time: 7:14 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Lesson implements IsSerializable {
+public class Lesson {
   private List<Exercise> exerciseList = new ArrayList<Exercise>();
   public long timestamp;
   public String unit;
