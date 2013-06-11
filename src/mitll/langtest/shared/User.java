@@ -21,11 +21,11 @@ public class User implements IsSerializable {
   /**
    * @deprecated avoid COUHES issues
    */
-  public String firstName;
+//  public String firstName;
   /**
    * @deprecated avoid COUHES issues
    */
-  public String lastName;
+//  public String lastName;
   public String nativeLang,dialect;
   public String userID;
   public boolean enabled;
@@ -60,8 +60,8 @@ public class User implements IsSerializable {
     this.ipaddr = ipaddr;
     this.password = password;
     this.timestamp = timestamp;
-    this.firstName = first;
-    this.lastName = last;
+   // this.firstName = first;
+  //  this.lastName = last;
     this.nativeLang = nativeLang;
     this.dialect = dialect;
     this.userID = userID;
@@ -91,6 +91,7 @@ public class User implements IsSerializable {
 
   public String toString() {
     return "user " + id + " age " + age + " gender " + gender +
-        " name " + firstName + " " + lastName + " native " + nativeLang + " dialect " + dialect;
+      //  " name " + firstName + " " + lastName +
+      " native " + nativeLang + " dialect " + dialect;
   }
 }
