@@ -13,7 +13,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class SectionNode implements IsSerializable {
-  public SectionNode() {}
+  public SectionNode() {}   // required for serialization
   private String type;
   private String name;
   private List<SectionNode> children = new ArrayList<SectionNode>();
