@@ -212,13 +212,6 @@ public class SectionExerciseList extends PagingExerciseList {
     return listBox.getFirstItem();  // first is Any
   }
 
-/*  private void selectFirst(String type) {
-    SectionWidget listBox = typeToBox.get(type);
-    if (listBox != null) {
-      listBox.selectFirstAfterAny(); // not any, which is the first list item
-    }
-  }*/
-
   /**
    * @see #restoreListBoxState(SelectionState)
    * @param type
@@ -608,30 +601,6 @@ public class SectionExerciseList extends PagingExerciseList {
    */
   protected void setOtherListBoxes(final Map<String, Collection<String>> typeToSection) {
     System.out.println("setOtherListBoxes type " + typeToSection + " skipping!!! ------------- ");
-/*    service.getTypeToSectionsForTypeAndSection(typeToSection,
-      new AsyncCallback<Map<String, Collection<String>>>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          Window.alert("Can't contact server.");
-        }
-
-        *//**
-         * This is a map from type to sections
-         *
-         * @param result
-         *//*
-        @Override
-        public void onSuccess(Map<String, Collection<String>> result) {
-          System.out.println("\tsetOtherListBoxes for type " + typeToSection + ", result is " + result);
-
-          if (result == null) {
-            System.err.println("couldn't get result for " + typeToSection);
-            Window.alert("Sorry -- error on server.  Please report.");
-          } else {
-            populateListBoxAfterSelection(result);
-          }
-        }
-      });*/
   }
 
   /**
@@ -666,7 +635,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @param selectionState
    */
-  private void restoreListBoxState(SelectionState selectionState) {
+  protected void restoreListBoxState(SelectionState selectionState) {
     for (Map.Entry<String, Collection<String>> pair : selectionState.typeToSection.entrySet()) {
       String type = pair.getKey();
       Collection<String> section = pair.getValue();
