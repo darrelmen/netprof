@@ -215,7 +215,7 @@ public class AudioConversion {
    * @param pathToWav
    * @deprecated
    */
-  private void writeOGG(String pathToWav) {
+/*  private void writeOGG(String pathToWav) {
     String mp3File = pathToWav.replace(".wav",".ogg");
     String exePath = FFMPEG_PATH_WINDOWS;    // Windows
     if (!new File(exePath).exists()) {
@@ -224,12 +224,8 @@ public class AudioConversion {
     if (!new File(exePath).exists()) {
       System.err.println("no lame installed at " + exePath + " or " +FFMPEG_PATH_WINDOWS);
     }
-
-/*    System.out.println("using " +exePath +" audio :'" +pathToWav +
-        "' mp3 '" +mp3File+
-        "'");*/
     writeWithFFMPEG(exePath, pathToWav, mp3File);
-  }
+  }*/
 
   /**
    * Writes a WEBM file.  This is an open source format supported by Firefox (which doesn't handle mp3).
