@@ -3,7 +3,6 @@ package mitll.langtest.server.database;
 import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Lesson;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.AudioFormat;
