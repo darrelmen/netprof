@@ -24,14 +24,8 @@ import java.util.Map;
  * The async counterpart of <code>LangTestDatabase</code>.
  */
 public interface LangTestDatabaseAsync {
-  @Deprecated
-  void getExercises(long userID, AsyncCallback<List<Exercise>> async);
-  @Deprecated
-  void getExercises(AsyncCallback<List<Exercise>> async);
-
   void addTextAnswer(int usedID, Exercise exercise, int questionID, String answer, AsyncCallback<Void> async);
   void addUser(int age, String gender, int experience, String dialect, AsyncCallback<Long> async);
-  void isAnswerValid(int userID, Exercise exercise, int questionID, AsyncCallback<Boolean> async);
   void getUsers(AsyncCallback<List<User>> async);
 
   void writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
@@ -118,7 +112,7 @@ public interface LangTestDatabaseAsync {
 
   void getTypeToSectionToCount(AsyncCallback<Map<String, Map<String, Integer>>> async);
 
-  void getTypeToSectionsForTypeAndSection(Map<String, Collection<String>> typeToSection, AsyncCallback<Map<String, Collection<String>>> async);
+ // void getTypeToSectionsForTypeAndSection(Map<String, Collection<String>> typeToSection, AsyncCallback<Map<String, Collection<String>>> async);
 
   void getTypeOrder(AsyncCallback<Collection<String>> async);
 
