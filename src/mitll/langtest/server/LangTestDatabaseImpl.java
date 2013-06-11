@@ -278,10 +278,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param typeToSection
    * @return
    */
-  @Override
+/*  @Override
   public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(Map<String, Collection<String>> typeToSection) {
     return db.getSectionHelper().getTypeToSectionsForTypeAndSection(typeToSection);
-  }
+  }*/
 
   @Override
   public Map<String, Map<String,Integer>> getTypeToSectionToCount() {
@@ -632,63 +632,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * Does DTW Scoring.
-   *
-   * @seex mitll.langtest.client.scoring.DTWScoringPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
-   * @param reqid
-   * @param audioFile
-   * @param refs
-   * @param width
-   * @param height
-   * @deprecated use {@link #getASRScoreForAudio}
-   * @return
-   */
-/*  public PretestScore getScoreForAudioFile(int reqid, String audioFile, Collection<String> refs, int width, int height) {
-    logger.info("getASRScoreForAudio " + audioFile + " against " + refs);
-    if (refs.isEmpty()) {
-      logger.error("getASRScoreForAudio no refs? ");
-      PretestScore pretestScore = new PretestScore();
-      pretestScore.setReqid(reqid);
-      return pretestScore;
-    }
-    String installPath = getInstallPath();
-    AudioConversion audioConversion = new AudioConversion();
-
-    File testAudioFile = audioConversion.getProperAudioFile(audioFile, installPath);
-
-    logger.debug("\tscoring after conversion " + testAudioFile.getAbsolutePath());
-    String name = testAudioFile.getName();
-
-    String imageOutDir = getImageOutDir();
-    String testAudioDir = testAudioFile.getParent();
-
-    logger.debug("\tscoring " + name + " in dir " +testAudioDir);
-
-    Collection<String> names = new ArrayList<String>();
-    String refAudioDir = null;
-
-    for (String ref : refs) {
-      File properAudioFile = audioConversion.getProperAudioFile(ref, installPath);
-      if (refAudioDir == null) refAudioDir = properAudioFile.getParent();
-      names.add(removeSuffix(properAudioFile.getName()));
-    }
-    //System.out.println("converted refs " + refs +" into " + names);
-
-    if (names.isEmpty()) {
-      logger.error("no valid ref files");
-      return new PretestScore();
-    } else {
-      DTWScoring dtwScoring;
-      dtwScoring = new DTWScoring(installPath);
-      PretestScore pretestScore =
-          dtwScoring.score(testAudioDir, removeSuffix(name), refAudioDir, names, imageOutDir, width, height);
-      pretestScore.setReqid(reqid);
-      //System.out.println("score " + pretestScore);
-      return pretestScore;
-    }
-  }*/
-
-  /**
    * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
    * @return
    */
@@ -914,9 +857,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.addAnswer(userID, exercise, questionID, answer);
   }
 
-  public boolean isAnswerValid(int userID, Exercise exercise, int questionID) {
+/*  public boolean isAnswerValid(int userID, Exercise exercise, int questionID) {
     return db.isAnswerValid(userID, exercise, questionID, db);
-  }
+  }*/
 
   public double getScoreForAnswer(Exercise e, int questionID, String answer) {
     return autoCRT.getScoreForExercise(e, questionID, answer);
