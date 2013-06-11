@@ -1,4 +1,4 @@
-package mitll.langtest.client;
+package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Paragraph;
@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
+import mitll.langtest.client.LangTest;
 
 /**
  * Does fancy font sizing depending on available width...
