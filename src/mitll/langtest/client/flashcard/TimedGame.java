@@ -1,4 +1,8 @@
-package mitll.langtest.client;
+package mitll.langtest.client.flashcard;
+
+import mitll.langtest.client.DialogHelper;
+import mitll.langtest.client.LangTest;
+import mitll.langtest.client.PropertyHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +14,7 @@ public class TimedGame {
     this.langTest = langTest;
   }
 
-  void showTimedGameHelp(PropertyHandler props) {
+  public void showTimedGameHelp(PropertyHandler props) {
     List<String> msgs = new ArrayList<String>();
     msgs.add("Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.");
     String duration;// = "one " + "minute";
