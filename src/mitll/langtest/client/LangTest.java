@@ -75,12 +75,6 @@ import java.util.Map;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
-  // TODO : consider putting these in the .css file?
-//  private static final int HEADER_HEIGHT = 160;
-//  private static final int FOOTER_HEIGHT = 50;
-//  private static final int EXERCISE_LIST_WIDTH = 210;
-//  private static final int EAST_WIDTH = 90;
-
   public static final String LANGTEST_IMAGES = "langtest/images/";
   public static final String RECORDING_KEY = "SPACE BAR";
   private final DialogHelper dialogHelper = new DialogHelper(false);
@@ -103,7 +97,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private SoundManagerStatic soundManager;
   private PropertyHandler props;
   private HTML userline;
-  Flashcard flashcard;
+  private Flashcard flashcard;
+
+  private FluidRow headerRow, secondRow;
+  private ProgressBar progressBar;
 
   /**
    * Make an exception handler that displays the exception.
@@ -147,8 +144,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
   }
 
-  private FluidRow headerRow, secondRow;
-  private ProgressBar progressBar;
   /**
    * Use DockLayout to put a header at the top, exercise list on the left, and eventually
    * the current exercise in the center.  There is also a status on line on the bottom.
@@ -156,6 +151,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Initially the flash record player is put in the center of the DockLayout
    */
   public void onModuleLoad2() {
+    userManager = new UserManager(this,service, isCollectAudio(), false, isCRTDataCollectMode() || isArabicTextDataCollect(), props.getAppTitle(),false);
+
     if (props.isFlashCard()) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
@@ -222,7 +219,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       });
     }
 
-    userManager = new UserManager(this,service, isCollectAudio(), false, isCRTDataCollectMode() || isArabicTextDataCollect(), props.getAppTitle(),false);
     boolean usualLayout = !showOnlyOneExercise();
     Container widgets = new FluidContainer();
 
@@ -361,79 +357,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * JavaScript code to detect available availability of a
-   * particular font in a browser using JavaScript and CSS.
-   *
-   * Author : Lalit Patel
-   * Website: http://www.lalit.org/lab/javascript-css-font-detect/
-   * License: Apache Software License 2.0
-   *          http://www.apache.org/licenses/LICENSE-2.0
-   * Version: 0.15 (21 Sep 2009)
-   *          Changed comparision font to default from sans-default-default,
-   *          as in FF3.0 font of child element didn't fallback
-   *          to parent element if the font is missing.
-   * Version: 0.2 (04 Mar 2012)
-   *          Comparing font against all the 3 generic font families ie,
-   *          'monospace', 'sans-serif' and 'sans'. If it doesn't match all 3
-   *          then that font is 100% not available in the system
-   * Version: 0.3 (24 Mar 2012)
-   *          Replaced sans with serif in the list of baseFonts
-   */
-
-  /**
-   * Usage: d = new Detector();
-   *        d.detect('font name');
-   */
-  public native boolean checkFont(String fontToCheck) /*-{
-
-      var Detector = function () {
-          // a font will be compared against all the three default fonts.
-          // and if it doesn't match all 3 then that font is not available.
-          var baseFonts = ['monospace', 'sans-serif', 'serif'];
-
-          //we use m or w because these two characters take up the maximum width.
-          // And we use a LLi so that the same matching fonts can get separated
-          var testString = "mmmmmmmmmmlli";
-
-          //we test using 72px font size, we may use any size. I guess larger the better.
-          var testSize = '72px';
-
-          var h = document.getElementsByTagName("body")[0];
-
-          // create a SPAN in the document to get the width of the text we use to test
-          var s = document.createElement("span");
-          s.style.fontSize = testSize;
-          s.innerHTML = testString;
-          var defaultWidth = {};
-          var defaultHeight = {};
-          for (var index in baseFonts) {
-              //get the default width for the three base fonts
-              s.style.fontFamily = baseFonts[index];
-              h.appendChild(s);
-              defaultWidth[baseFonts[index]] = s.offsetWidth; //width for the default font
-              defaultHeight[baseFonts[index]] = s.offsetHeight; //height for the defualt font
-              h.removeChild(s);
-          }
-
-          function detect(font) {
-              var detected = false;
-              for (var index in baseFonts) {
-                  s.style.fontFamily = font + ',' + baseFonts[index]; // name of the font along with the base font for fallback.
-                  h.appendChild(s);
-                  var matched = (s.offsetWidth != defaultWidth[baseFonts[index]] || s.offsetHeight != defaultHeight[baseFonts[index]]);
-                  h.removeChild(s);
-                  detected = detected || matched;
-              }
-              return detected;
-          }
-
-          this.detect = detect;
-      }
-      var d = new Detector();
-      return d.detect(fontToCheck);
-  }-*/;
-
-  /**
    * @see mitll.langtest.client.exercise.SectionExerciseList#getEmailWidget()
    * @param subject
    * @param linkTitle
@@ -441,7 +364,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   @Override
   public void showEmail(final String subject, final String linkTitle, final String token) {
-    new MailDialog(service, userManager).showEmail(subject, linkTitle, token);
+    GWT.runAsync(new RunAsyncCallback() {
+      public void onFailure(Throwable caught) {
+        Window.alert("Code download failed");
+      }
+
+      public void onSuccess() {
+        new MailDialog(service, userManager).showEmail(subject, linkTitle, token);
+      }
+    });
   }
 
   private Widget getTitleWidget() {
@@ -536,7 +467,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   @Override
   public void showFlashHelp() {
     if (props.isTimedGame()) {
-
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           Window.alert("Code download failed");
@@ -786,6 +716,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
   }
 
+  /**
+   * @see #gotUser(long)
+   */
   private void setFactory() {
     final LangTest outer =this;
     if (props.isGoodwaveMode()) {
@@ -799,16 +732,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         }
       });
     } else if (props.isGrading()) {
-
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
-        }
-
-        public void onSuccess() {
-          exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer), userManager, props.getNumGradesToCollect());
-        }
-      });
+      exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer), userManager, props.getNumGradesToCollect());
     } else if (props.isFlashCard()) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
@@ -841,15 +765,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       });
     }
 
-    if (getLanguage().equalsIgnoreCase("Pashto") && !checkFont(
-//      "Nafees Pakistani Naskh" // testing
-        "Pashto Kror Asiatype"
-    )) {
-      showErrorMessage("Pashto Kror Asiatype not installed","Pashto Kror Asiatype not installed.<p/>" +
-        "Text may be hard to read.  Try to get the font from " +
-        "<a href='http://www.pukhto.net/software-details.php?soft_id=12&active=6'>" +
-        "http://www.pukhto.net/software-details.php?soft_id=12&active=6" +
-        "</a>");
+    if (getLanguage().equalsIgnoreCase("Pashto")) {
+      new FontChecker(this).checkPashto();
     }
   }
 
@@ -1130,19 +1047,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     dialogHelper.showErrorMessage(title, msg);
   }
 
-    /**
-     * Note : depends on bootstrap
-     * @param title
-     * @param msgs
-     */
-  @Override
-  public void showErrorMessage(String title, List<String> msgs, String buttonName, final DialogHelper.CloseListener listener) {
-    dialogHelper.showErrorMessage(title, msgs, buttonName, listener);
-  }
-
-  public void showStatus(String msg) {
-    //status.setText(msg);
-  }
+  public void showStatus(String msg) { status.setText(msg); }
 
   public boolean loadNextExercise(Exercise current) {
     if (progressBar != null) {
