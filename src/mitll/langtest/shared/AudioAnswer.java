@@ -98,9 +98,9 @@ public class AudioAnswer implements IsSerializable {
     this.correct = correct;
   }
 
-  public long getResultID() {
+/*  public long getResultID() {
     return resultID;
-  }
+  }*/
 
   public void setResultID(long resultID) {
     this.resultID = resultID;
