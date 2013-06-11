@@ -21,7 +21,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * UserManager: go22670
  * Date: 5/17/12
  * Time: 3:54 PM
- * To change this template use File | Settings | File Templates.
+ * @deprecated just use normal users
  */
 public class Grader implements IsSerializable {
   public long id;
