@@ -507,7 +507,9 @@ public class ASRScoring extends Scoring {
 
     // there are currently only two letter-to-sound classes EnglishLTS and ArabicLTS.  What about french? spanish?
     boolean isArabicScript = !(language.equalsIgnoreCase("English"));
-    if (!isArabicScript) logger.debug("using english LTS sound class since language is " + language);
+    if (!isArabicScript) {
+      //logger.debug("using english LTS sound class since language is " + language);
+    }
 
     Scores scoresFromHydec = getScoresFromHydec(testAudio, sentence, configFile);
     if (scoresFromHydec.hydecScore != -1) {
