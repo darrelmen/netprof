@@ -67,6 +67,11 @@ public class GradedExerciseList extends PagingExerciseList {
     });
   }
 
+  @Override
+  protected void onLastItem() {
+    getNextUngraded(false);
+  }
+
   /**
    * @see #loadNextExercise(mitll.langtest.shared.ExerciseShell)
    * @param current

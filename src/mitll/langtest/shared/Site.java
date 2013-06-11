@@ -26,7 +26,7 @@ public class Site implements IsSerializable {
   public Exercise example; //  don't write to db
   private String feedback;
   private boolean deployed;
-  private long creationDate;
+  //private long creationDate;
   public String creationDateReadable;
 
   public Site() {}
@@ -58,7 +58,7 @@ public class Site implements IsSerializable {
     this.setSavedExerciseFile(filePath);
     this.feedback = feedback;
     this.deployed = deployed;
-    this.creationDate = timestamp;
+//    this.creationDate = timestamp;
     this.creationDateReadable = creationDateReadable;
     this.savedExerciseFileName = savedFileName;
   }
