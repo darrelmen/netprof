@@ -17,6 +17,4 @@ public interface UserFeedback {
   void login();
 
   void showEmail(String subject, String linkTitle, String token);
-
-  void showErrorMessage(String title, List<String> msgs, String buttonName, DialogHelper.CloseListener listener);
 }
