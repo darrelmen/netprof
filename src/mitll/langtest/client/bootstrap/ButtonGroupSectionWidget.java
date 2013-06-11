@@ -149,9 +149,9 @@ class ButtonGroupSectionWidget implements SectionWidget {
     selectItem(selections, true, typeToBox);
   }
 
-  public void selectButton(FlexSectionExerciseList.ButtonWithChildren button, Map<String, SectionWidget> typeToBox) {
+/*  public void selectButton(FlexSectionExerciseList.ButtonWithChildren button, Map<String, SectionWidget> typeToBox) {
     selectButton(button, true, typeToBox);
-  }
+  }*/
 
   /**
    * Partially implemented -- maybe return to this later
@@ -160,7 +160,6 @@ class ButtonGroupSectionWidget implements SectionWidget {
    * @param typeToBox
    */
   public void selectButton(FlexSectionExerciseList.ButtonWithChildren button, boolean doToggle, Map<String, SectionWidget> typeToBox) {
-    //   boolean doToggle = true;
     boolean active = toggleButton(doToggle, button);
     System.out.println("selectButton on " + button);
 
@@ -309,7 +308,8 @@ class ButtonGroupSectionWidget implements SectionWidget {
       b.setEnabled(false);
     }
   }
-  boolean first = true;
+  public Collection<Button> getEnabledButtons() { return enabled; }
+  private boolean first = true;
 
   private void rememberEnabled(List<FlexSectionExerciseList.ButtonWithChildren> buttonChildren, boolean isEnable) {
     System.out.println(this + " rememberEnabled " + enabled.size() + " enabled, " + disabled.size() + " disabled " + buttonChildren + " : to enable = " + isEnable);
