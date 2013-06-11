@@ -64,7 +64,6 @@ public class Scoring {
    * Given an audio file without a suffix, check if there are label files, and if so, for each one,
    * write out a transcript image file.  Write them to the imageOutDir, and use the specified width and height.
    *
-   * @see DTWScoring#score(String, String, String, java.util.Collection, String, int, int)
    * @see ASRScoring#scoreRepeatExercise
    *
    * @param imageOutDir
