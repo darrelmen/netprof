@@ -51,6 +51,7 @@ import java.util.concurrent.Future;
  * To change this template use File | Settings | File Templates.
  */
 public class SplitAudio {
+  public static final double DURATION_CHECK = 1.2;
   private static Logger logger = Logger.getLogger(SplitAudio.class);
 
   private boolean debug;
@@ -284,11 +285,10 @@ public class SplitAudio {
     else {
       logger.debug("found " + nativeUsers.size() + " native users");
     }
-   // Map<String, Exercise> englishToEx = new HashMap<String, Exercise>();
     Set<String> flatEnglish = new HashSet<String>();
-    Map<String, List<Result>> englishToResults2 = new HashMap<String, List<Result>>();
+    Map<String, List<Result>> flastListEnglishToResults = new HashMap<String, List<Result>>();
     int count = 0;
-    int c = 0;
+   // int c = 0;
     int nonNativeRecordings = 0;
     for (Exercise e : flatList.getExercises()) {
       String englishSentence = e.getEnglishSentence();
@@ -298,7 +298,10 @@ public class SplitAudio {
         englishSentence = e.getRefSentence();
       }
 
-      if (englishSentence == null) logger.warn("huh? no english sentence for " + e.getID());
+      if (englishSentence.contains(";")) {
+        //logger.warn("skipping semi colon : " + englishSentence);
+      }
+      else if (englishSentence == null) logger.warn("huh? no english sentence for " + e.getID());
       else {
         String key = englishSentence.toLowerCase().trim();
 
@@ -311,8 +314,8 @@ public class SplitAudio {
           for (Result r : resultList) {
             if (nativeUsers.contains(r.userid)) {
               nativeResult = true;
-              List<Result> resultList1 = englishToResults2.get(key);
-              if (resultList1 == null) englishToResults2.put(key, resultList1 = new ArrayList<Result>());
+              List<Result> resultList1 = flastListEnglishToResults.get(key);
+              if (resultList1 == null) flastListEnglishToResults.put(key, resultList1 = new ArrayList<Result>());
               resultList1.add(r);
             }
             else {
@@ -356,9 +359,9 @@ public class SplitAudio {
 
       for (Exercise e : unitAndChapter.getExercises()) {
         String key = e.getEnglishSentence().toLowerCase().trim();
-        if (englishToResults2.containsKey(key)) {
-          //logger.warn("skipping duplicate entry : " + e.getID() + " "+ e.getEnglishSentence());
-          List<Result> value = englishToResults2.get(key);
+        if (flastListEnglishToResults.containsKey(key)) {
+          //logger.warn("found " +key + " : " + e.getID() + " "+ e.getEnglishSentence());
+          List<Result> value = flastListEnglishToResults.get(key);
           chapterExerciseToResult.put(e, value);
           idToEx.put(e.getID(),e);
           if (value.isEmpty()) logger.warn("huh? no results for ex " +key); //never happen
@@ -607,7 +610,9 @@ public class SplitAudio {
     for (Result r : results) {
       String id = r.id;
       int i = Integer.parseInt(id);
-      if (i < MAX && (i == 675 || i == 3488)//39//3496
+      if (i < MAX //&&
+        //(i == 675 || i == 3488 || i == 4374 || i == 3658 || i == 4026 || i == 3697  || i == 4116  || i == 627 || i == 4083|| i == 3375|| i == 4185)//39//3496
+        //( i == 3375)//39//3496
         ) {
         List<Result> resultList = idToResults.get(id);//r.getID());
         if (resultList == null) {
@@ -775,13 +780,18 @@ public class SplitAudio {
             " invalid alignment : " + alignments.getWordSeq() + " : " + alignments.getScores());
         }
         if (bestTotal < hydecScore && valid && hydecScore > 0.1f) {
-          bestTotal = hydecScore;
-          best = testAudioFileNoSuffix;
+          boolean consistent = writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
+            alignments);
+          if (consistent) {
+            bestTotal = hydecScore;
+            best = testAudioFileNoSuffix;
 
-          logger.debug("ex " + id+ " " + exercise.getEnglishSentence() +" best so far is " + best + " score " + bestTotal + " hydecScore " + hydecScore);
+            logger.debug("new best : ex " + id + " " + exercise.getEnglishSentence() + " best so far is " + best + " score " + bestTotal + " hydecScore " + hydecScore);
+          }
+        } else if (valid) {
+          logger.debug("ex " + id + " " + exercise.getEnglishSentence() + " best so far is " + best + " score " + bestTotal + " hydecScore " + hydecScore);
           writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
             alignments);
-
         }
        /* if (valid) {//alignments.isValid()) {
           writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
@@ -829,6 +839,16 @@ public class SplitAudio {
     return durationInSeconds;
   }
 
+  /**
+   * @see #getBest(java.io.FileWriter, java.io.FileWriter, java.io.File, java.io.File, String, corpus.HTKDictionary, java.util.Map, java.util.List, String, mitll.langtest.shared.Exercise, String)
+   * @param missingSlow
+   * @param missingFast
+   * @param exid
+   * @param refDirForExercise
+   * @param bestDirForExercise
+   * @param best
+   * @throws IOException
+   */
   private void writeBestFiles(FileWriter missingSlow, FileWriter missingFast,
                               String exid, File refDirForExercise, File bestDirForExercise, String best) throws IOException {
     File fast = new File(refDirForExercise, best + "_" + FAST + ".wav");
@@ -850,7 +870,7 @@ public class SplitAudio {
     }
   }
 
-  private void writeTheTrimmedFiles(File refDirForExercise, String parent, float floatDur, String testAudioFileNoSuffix,
+  private boolean writeTheTrimmedFiles(File refDirForExercise, String parent, float floatDur, String testAudioFileNoSuffix,
                                     GetAlignments alignments) {
     float pad = 0.25f;
 
@@ -863,26 +883,29 @@ public class SplitAudio {
     float e1 = Math.min(floatDur,end1+pad);
     float midPoint = end1 + ((start2 - end1) / 2);
     if (e1 > midPoint) {
-      logger.warn("adjust e1 from " + e1 + " to " +midPoint);
-      e1 = Math.max(end1,midPoint);
-      s2 = Math.min(start2,midPoint);
+      logger.warn("e1 " + e1 + " is after the midpoint " +midPoint);
+
+      return false;
+    /*  e1 = Math.max(end1,midPoint);
+      s2 = Math.min(start2,midPoint);*/
     }
 
     float end2 = alignments.getEnd2();
-    logger.debug("first file " + start1 + "->" + end1 + " second " + start2 + "->" + end2);
+   // logger.debug("first file " + start1 + "->" + end1 + " second " + start2 + "->" + end2);
     float e2 = Math.min(floatDur, end2 + pad);
 
     float d1 = e1 - s1;
     float d2 = e2 - s2;
-    if (d2 < d1) {
-      logger.warn("huh? slow segment dur "+d2 + " < fast dur " + d1 + " so fixing end to end of audio");
+    if (d2 < d1* DURATION_CHECK) {
+      logger.debug("slow segment dur " + d2 + " < fast dur " + (d1 * DURATION_CHECK) + " so fixing end to end of audio");
       // can either repair or throw this one out
       e2 = floatDur;
       d2 = e2-s2;
     }
-    if (d2 < d1) {
-      logger.warn("Still after repair slow segment dur "+d2 + " < fast dur " + d1 + " so fixing end to end of audio");
+    if (d2 < d1* DURATION_CHECK) {
+      logger.warn("Still after repair slow segment dur "+d2 + " < fast dur " + (d1* DURATION_CHECK) + " so fixing end to end of audio");
       // can either repair or throw this one out
+      return false;
     }
 
     File longFileFile = new File(parent,testAudioFileNoSuffix+".wav");
@@ -900,6 +923,7 @@ public class SplitAudio {
     String sox = audioConverter.getSox(binPath);
     if (d1 < MIN_DUR) {
       logger.warn("Skipping audio " + longFileFile.getName() + " since fast audio too short ");
+      return false;
     } else {
 
       File fast = new File(refDirForExercise, testAudioFileNoSuffix + "_" + FAST + ".wav");
@@ -910,7 +934,9 @@ public class SplitAudio {
         d1);
 
       if (fast.exists() && audioCheck.getDurationInSeconds(fast)< MIN_DUR) {
+        logger.error("huh? after writing with sox, the audio file is too short?");
         fast.delete();
+        return false;
       }
     }
 
@@ -919,7 +945,7 @@ public class SplitAudio {
         logger.warn("Skipping audio " + longFileFile.getName() + " since slow audio too short");
       else
         logger.warn("Skipping audio " + longFileFile.getName() + " since slow audio shorter than fast.");
-
+      return false;
     } else {
       File slow = new File(refDirForExercise, testAudioFileNoSuffix + "_" + SLOW + ".wav");
       audioConverter.trim(sox,
@@ -929,9 +955,12 @@ public class SplitAudio {
         d2);
 
       if (slow.exists() && audioCheck.getDurationInSeconds(slow)< MIN_DUR) {
+        logger.error("huh? after writing with sox, the audio file is too short?");
         slow.delete();
+        return false;
       }
     }
+    return true;
   }
 
   private class GetAlignments {
