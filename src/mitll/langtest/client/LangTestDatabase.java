@@ -36,8 +36,6 @@ public interface LangTestDatabase extends RemoteService {
   List<ExerciseShell> getExerciseIds(long userID);
   List<ExerciseShell> getExerciseIds();
 
-  List<Exercise> getExercises(long userID);
-  List<Exercise> getExercises();
   ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
 
   // gradeDAO
@@ -52,7 +50,6 @@ public interface LangTestDatabase extends RemoteService {
 
   // answer DAO
   void addTextAnswer(int userID, Exercise exercise, int questionID, String answer);
-  boolean isAnswerValid(int userID, Exercise exercise, int questionID);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard);
   double getScoreForAnswer(Exercise e, int questionID, String answer);
@@ -130,12 +127,6 @@ public interface LangTestDatabase extends RemoteService {
    * @return
    */
   Map<String, Map<String,Integer>> getTypeToSectionToCount();
-
-  /**
-   * @deprecated
-   * @return
-   */
-  Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(Map<String, Collection<String>> typeToSection);
 
   List<SectionNode> getSectionNodes();
 
