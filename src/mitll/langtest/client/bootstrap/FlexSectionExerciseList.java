@@ -75,6 +75,10 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private Map<String,ButtonType> typeToButton = new HashMap<String, ButtonType>();
   private int numSections = 0;
+  private Panel panelInsideScrollPanel;
+  private ScrollPanel scrollPanel;
+  private Panel clear;
+  private Panel label;
 
   public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
@@ -170,11 +174,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       }
     }
   }
-
-  private Panel panelInsideScrollPanel;
-  private Panel scrollPanel;
-  private Panel  clear;
-  private Panel label;
 
   /**
    * @see #getWidgetsForTypes(long)
@@ -734,11 +733,27 @@ public class FlexSectionExerciseList extends SectionExerciseList {
  //   listBox.selectButton();
   }
 
-  /**
-   * @see #addColumnButton
-   * @param title
-   * @return Button with this title and the initial type
-   */
+/*  @Override
+  protected void restoreListBoxState(SelectionState selectionState) {
+    super.restoreListBoxState(selectionState);
+
+    for (String type : typeToBox.keySet()) {
+      ButtonGroupSectionWidget listBox = (ButtonGroupSectionWidget)typeToBox.get(type);
+      Collection<Button> enabledButtons = listBox.getEnabledButtons();
+      if (!enabledButtons.isEmpty())  {
+        Button next = enabledButtons.iterator().next();
+        System.out.println("ensure " + next + " is visible...");
+        scrollPanel.ensureVisible(next);
+        break;
+      }
+    }
+  }*/
+
+    /**
+     * @see #addColumnButton
+     * @param title
+     * @return Button with this title and the initial type
+     */
   private ButtonWithChildren makeOverallButton(String type, String title) {
     ButtonWithChildren overallButton = new ButtonWithChildren(title, type);
 
