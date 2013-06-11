@@ -3,7 +3,6 @@ package mitll.langtest.server.database;
 import corpus.ModernStandardArabicLTS;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Lesson;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
