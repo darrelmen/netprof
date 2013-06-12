@@ -5,41 +5,19 @@ import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Modal;
-import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.event.ShownEvent;
-import com.github.gwtbootstrap.client.ui.event.ShownHandler;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.IFrameElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.LoadEvent;
-import com.google.gwt.event.dom.client.LoadHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Frame;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -68,10 +46,7 @@ import java.util.Set;
 public class FlexSectionExerciseList extends SectionExerciseList {
   private static final int HEADING_FOR_LABEL = 4;
   private static final String USER_PROMPT = "Choose a lesson, preview, and share flashcard exercises.";
-  private static final int FRAME_WIDTH = 1024-50-50;
-  private static final int FRAME_HEIGHT = 640-30;
-  private static final String FLASHCARDCOPY = "flashcardcopy";
-  private static final String TIMEDFLASHCARDCOPY = "timedflashcardcopy";
+
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private Map<String,ButtonType> typeToButton = new HashMap<String, ButtonType>();
   private int numSections = 0;
@@ -221,9 +196,8 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     FlowPanel c2 = new FlowPanel();
     c2.add(clearColumnContainer);
     if (usuallyThereWillBeAHorizScrollbar) { // hack rule of thumb
-    c2.addStyleName("bottomMargin");
+      c2.addStyleName("bottomMargin");
     }
-    //clearColumnContainer.addStyleName("bottomMargin");
 
     firstTypeRow.setWidget(0, 1, c2);
 
@@ -305,7 +279,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       typeToButton.put(type, buttonTypes.get(j++ % types.size()));
     }
 
-    System.out.println("populateButtonGroups " + types + " : " + typeToBox);
+    //System.out.println("populateButtonGroups " + types + " : " + typeToBox);
   }
 
   private Map<String, SectionNode> getNameToNode(List<SectionNode> rootNodes) {
@@ -313,7 +287,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     for (SectionNode n : rootNodes) nameToNode.put(n.getName(), n);
     return nameToNode;
   }
-
 
   protected List<String> getLabels(List<SectionNode> nodes) {
     List<String> items = new ArrayList<String>();
@@ -375,295 +348,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     container.add(status);
     status.add(statusHeader);
     statusHeader.setText("Showing all entries");
-  }
-
-  /**
-   * @see TableSectionExerciseList#addTableToLayout(java.util.Map)
-   */
-  protected Widget getPreviewWidgets() {
-    HorizontalPanel previewRow = new HorizontalPanel();
-    previewRow.setWidth("100%");
-    DOM.setStyleAttribute(previewRow.getElement(), "marginTop", "5px");
-    previewRow.addStyleName("tableExerciseListHeader");
-
-    //   Widget emailWidget = getEmailWidget();
-    //  previewRow.add(new Column(2, /*3,*/ emailWidget));
-
-//    Widget hideBoxesWidget = getHideBoxesWidget();
-    //previewRow.add(new Heading(5, "Preview and share"));
-
-    urlInputBox.setText(getFlashcardLink());
-
-    flashcardCopy = makeCopyButton(FLASHCARDCOPY);
-    flashcardCopy.addMouseOverHandler(new MouseOverHandler() {
-      @Override
-      public void onMouseOver(MouseOverEvent event) {
-        bindZero(flashcardCopy.getElement(),getFlashcardLink());
-      }
-    });
-    Widget flashcardWidget = getFlashcard("Flashcard", flashcardCopy, urlInputBox, false);
-    previewRow.add(flashcardWidget);
-
-    urlInputBox2.setText(getTimedFlashcardLink());
-
-    timedFlashcardCopy = makeCopyButton(TIMEDFLASHCARDCOPY);
-    timedFlashcardCopy.addMouseOverHandler(new MouseOverHandler() {
-      @Override
-      public void onMouseOver(MouseOverEvent event) {
-        bindZero(timedFlashcardCopy.getElement(), getTimedFlashcardLink());
-      }
-    });
-    updateFlashcardCopy();
-
-    Widget flashcardWidget2 = getFlashcard("Timed Flashcard", timedFlashcardCopy, urlInputBox2, true);
-    SimplePanel w = new SimplePanel(new Heading(6));
-    w.setWidth("10px");
-    w.setHeight("2px");
-    previewRow.add(w);
-
-    previewRow.add(flashcardWidget2);
-
-    return previewRow;
-  }
-
-  private Button flashcardCopy;
-  private Button timedFlashcardCopy;
-  private TextBox urlInputBox = new TextBox();
-  private TextBox urlInputBox2 = new TextBox();
-
-  /**
-   * @see #getPreviewWidgets
-   * @param title
-   * @param copyButton
-   * @param urlInputBox
-   * @param timed
-   * @return
-   */
-  protected Widget getFlashcard(String title, Button copyButton, TextBox urlInputBox, boolean timed) {
-    VerticalPanel titleAndURL = new VerticalPanel();
-
-    Heading titleHeader = new Heading(6, title);
-    DOM.setStyleAttribute(titleHeader.getElement(), "marginLeft", "5px");
-    DOM.setStyleAttribute(titleHeader.getElement(), "marginTop", "5px");
-    DOM.setStyleAttribute(titleHeader.getElement(), "marginBottom", "5px");
-
-    titleAndURL.add(titleHeader);
-
-    FlowPanel urlCopyPreviewContainer = new FlowPanel();
-    titleAndURL.add(urlCopyPreviewContainer);
-    urlCopyPreviewContainer.addStyleName("url-box");
-
-    Heading flashcard = new Heading(5, "URL");
-    flashcard.addStyleName("floatLeft");
-    flashcard.addStyleName("shareTitle");
-    urlCopyPreviewContainer.add(flashcard);
-
-    // make url input
-    urlInputBox.addStyleName("url-input");
-    DOM.setStyleAttribute(urlInputBox.getElement(), "fontFamily",
-      "\"Lucida Sans Typewriter\", \"Lucida Console\", Monaco, \"Bitstream Vera Sans Mono\",\"Courier New\", Courier, monospace;");
-    urlCopyPreviewContainer.add(urlInputBox);
-
-    // make flashcardCopy button
-    Panel twoButtons = new FlowPanel();
-    twoButtons.addStyleName("inlineStyle");
-    twoButtons.add(copyButton);
-
-    Button preview = getPreviewButton(timed);
-    twoButtons.add(preview);
-    urlCopyPreviewContainer.add(twoButtons);
-
-    return titleAndURL;
-  }
-
-  private Button getPreviewButton(final boolean doTimedFlashcard) {
-    Button preview = new Button("Preview");
-    preview.addStyleName("leftTenMargin");
-    preview.setTitle("Preview flashcards");
-
-    preview.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        getPreviewModal(doTimedFlashcard);
-      }
-    });
-    return preview;
-  }
-
-  private void getPreviewModal(boolean doTimedFlashcard) {
-    final Modal modal = new Modal();
-    String title = "Flashcard Preview";
-    if (doTimedFlashcard) title = "Timed " + title;
-
-    modal.setTitle(title);
-    modal.setCloseVisible(true);
-    modal.setKeyboard(false);
-
-    modal.addShownHandler(new ShownHandler() {
-      @Override
-      public void onShown(ShownEvent shownEvent) {
-        System.out.println("onShown " + shownEvent);
-      }
-    });
-
-    final Frame frame = new Frame(doTimedFlashcard ? getTimedFlashcardLink() : getFlashcardLink());
-    modal.add(frame);
-    frame.addLoadHandler(new LoadHandler() {
-      @Override
-      public void onLoad(LoadEvent event) {
-        System.out.println("getPreviewModal got load event " + event + " setting focus on frame");
-        setFocusOnFrame(frame);
-      }
-    });
-    frame.setWidth(FRAME_WIDTH + "px");
-    frame.setHeight(FRAME_HEIGHT + "px");
-    int modalWidth = FRAME_WIDTH + 50;
-    modal.setWidth(modalWidth + "px");
-    int heightSlip = 30;
-    modal.setMaxHeigth(FRAME_HEIGHT + heightSlip + "px");
-    DOM.setStyleAttribute(modal.getElement(), "marginLeft", (-modalWidth / 2) + "px");
-    modal.show();
-  }
-
-  private int tries =10;
-  private void setFocusOnFrame(final Frame frame) {
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-        JavaScriptObject cast = frame.getElement().cast();
-        IFrameElement iframe = (IFrameElement) cast;
-        Document contentDocument = iframe.getContentDocument();
-        Element child = DOM.getChild(frame.getElement(), 0);
-        com.google.gwt.dom.client.Element record_button1 = contentDocument.getElementById("record_button");
-        System.out.println("setFocusOnFrame : got load event child " + child + " record button  " + record_button1);
-
-        if (record_button1 == null) {
-          new Timer() {
-            @Override
-            public void run() {
-              if (tries-- > 0)
-              setFocusOnFrame(frame);
-            }
-
-          }.schedule(1000);
-        }
-        else {
-          iframe.focus();
-        }
-      }
-    });
-  }
-
-  private Button makeCopyButton(String copyButtonID) {
-    Button copy = new Button("Copy", IconType.COPY);
-    copy.addStyleName("leftTenMargin");
-    copy.getElement().setId(copyButtonID);
-    copy.setTitle("Copy to clipboard.");
-    return copy;
-  }
-
-  /**
-   * @see TableSectionExerciseList#addTableToLayout(java.util.Map)
-   */
-  protected void doZero() {
-    String widgetID = FLASHCARDCOPY;
-    zero(GWT.getModuleBaseURL(), widgetID, widgetID + "Feedback");
-    registerCallback();
-  }
-
-  /**
-   * @see #setModeLinks(String)
-   */
-  private void updateFlashcardCopy() {
-    String flashcardLink = getFlashcardLink();
-    if (flashcardCopy != null) {
-      flashcardCopy.getElement().setAttribute("data-clipboard-text", flashcardLink);
-    }
-    urlInputBox.setText(flashcardLink);
-
-    String timedFlashcardLink = getTimedFlashcardLink();
-    if (timedFlashcardCopy != null) {
-      timedFlashcardCopy.getElement().setAttribute("data-clipboard-text", timedFlashcardLink);
-    }
-    urlInputBox2.setText(timedFlashcardLink);
-  }
-
-  private static void feedback(String feedback) {
-    showPopup("Copied " + feedback + " to clipboard.");
-  }
-
-  private static void showPopup(String html) {
-    final PopupPanel pleaseWait = new DecoratedPopupPanel();
-    pleaseWait.setAutoHideEnabled(true);
-    pleaseWait.add(new HTML(html));
-    pleaseWait.center();
-
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        pleaseWait.hide();
-      }
-    };
-    t.schedule(3000);
-  }
-
-  private native void registerCallback() /*-{
-      $wnd.feedback = $entry(@mitll.langtest.client.bootstrap.FlexSectionExerciseList::feedback(Ljava/lang/String;));
-  }-*/;
-
-  private String getFlashcardLink() {
-    return GWT.getHostPageBaseURL() + "?flashcard=true#" + token;
-  }
-
-  private String getTimedFlashcardLink() {
-    return GWT.getHostPageBaseURL() + "?flashcard=true" +
-      "&timedGame=true" +
-      "#" + token;
-  }
-
-  private native void zero(String moduleBaseURL,String widgetID,String widgetFeedbackID)  /*-{
-      var stuff =  $wnd.document.getElementById(widgetID);
-      //alert("Stuff is " +stuff);
-
-      var clip = new $wnd.ZeroClipboard( stuff, {
-          moviePath: moduleBaseURL + "swf/ZeroClipboard.swf"
-      } );
-      clip.setHandCursor(true);
-      clip.on( 'load', function(client) {
-        //  $wnd.alert( "1 movie is loaded" );
-      } );
-
-      clip.on( 'complete', function(client, args) {
-       //   this.style.display = 'none'; // "this" is the element that was clicked
-       //   alert("Copied text to clipboard: " + args.text );
-      //    $wnd.document.getElementById(widgetFeedbackID).innerHTML = "Copied!";
-         $wnd.feedback(args.text);
-      } );
-
-      clip.on( 'dataRequested', function ( client, args ) {
-          //clip.setText( 'Copied to clipboard.' );
-      } );
-
-  }-*/;
-
-  /**
-   * @param me
-   * @param strMsg
-   */
-  private native void bindZero(com.google.gwt.user.client.Element me, String strMsg)/*-{
-      var clip = new $wnd.ZeroClipboard();
-      clip.setText(strMsg);
-      clip.glue(me);
-  }-*/;
-
-  private String token = "";
-
-  /**
-   * @see mitll.langtest.client.exercise.SectionExerciseList#pushNewSectionHistoryToken()
-   * @param historyToken
-   */
-  protected void setModeLinks(String historyToken) {
-    this.token = historyToken;
-    updateFlashcardCopy();
   }
 
   private Panel getInstructionRow() {
@@ -905,9 +589,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    */
   private Widget getLabelWidget(String typeForOriginal) {
     Heading widget = new Heading(HEADING_FOR_LABEL, typeForOriginal);
-   // DOM.setStyleAttribute(widget.getElement(), "webkitMarginBefore", "10px");
- //   DOM.setStyleAttribute( widget.getElement(), "webkitMarginAfter", "10px");
-  //  DOM.setStyleAttribute( widget.getElement(), "marginTop", "2px");
     DOM.setStyleAttribute( widget.getElement(), "marginBottom", "10px");
     DOM.setStyleAttribute( widget.getElement(), "marginRight", "5px");
     return widget;
@@ -962,10 +643,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       super(caption);
       this.type = type;
     }
-
-/*    public void addChild(ButtonWithChildren b) {
-      children.add(b);
-    }*/
 
     /**
      * @param children
