@@ -116,10 +116,8 @@ public abstract class ScoringAudioPanel extends AudioPanel {
                                              final ImageAndCheck wordTranscript,
                                              final ImageAndCheck phoneTranscript) {
     int widthToUse = Math.max(MIN_WIDTH, width);
-    int height = ANNOTATION_HEIGHT;
-
     int reqid = getReqID("score");
-    scoreAudio(path, refAudio, refSentence, wordTranscript, phoneTranscript, widthToUse, height, reqid);
+    scoreAudio(path, refAudio, refSentence, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, reqid);
   }
 
   protected abstract void scoreAudio(final String path, String refAudio, String refSentence,
