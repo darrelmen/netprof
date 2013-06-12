@@ -512,7 +512,7 @@ public class ASRScoring extends Scoring {
   //  }
 
     Scores scoresFromHydec = getScoresFromHydec(testAudio, sentence, configFile);
-    if (scoresFromHydec.hydecScore != -1 && false) {
+    if (scoresFromHydec.hydecScore != -1) {
       try {
         FileUtils.deleteDirectory(new File(tmpDir));
       } catch (IOException e) {
@@ -648,7 +648,7 @@ public class ASRScoring extends Scoring {
     //logger.debug("getHydecConfigFile : tmpDir is " + tmpDir);
 
     String pathToConfigTemplate = scoringDir + File.separator + "configurations" + File.separator + cfgTemplate;
-    logger.debug("template config is at " + pathToConfigTemplate + " map is " + kv);
+    //logger.debug("template config is at " + pathToConfigTemplate + " map is " + kv);
     doTemplateReplace(pathToConfigTemplate,configFile,kv);
     return configFile;
   }
