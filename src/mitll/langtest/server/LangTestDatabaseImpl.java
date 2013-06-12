@@ -15,6 +15,7 @@ import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.FlashcardResponse;
 import mitll.langtest.shared.Grade;
@@ -147,16 +148,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @see mitll.langtest.client.exercise.ExerciseList#getExercises
+   * @param reqID
    * @param userID
    * @return
    */
-  public List<ExerciseShell> getExerciseIds(long userID) {
+  public ExerciseListWrapper getExerciseIds(int reqID, long userID) {
     logger.debug("getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
     List<Exercise> exercises = getExercises(userID);
     if (serverProps.isGoodwaveMode()) exercises = getSortedExercises(exercises);
     List<ExerciseShell> ids = getExerciseShells(exercises);
     logMemory();
-    return ids;
+    return new ExerciseListWrapper(reqID,ids);
   }
 
   private List<ExerciseShell> getExerciseShells(Collection<Exercise> exercises) {
@@ -171,26 +173,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * Don't randomize order if we're in netProF (formerly goodwave) mode.
    *
    * @see mitll.langtest.client.exercise.SectionExerciseList#loadExercises
+   * @param reqID
    * @param typeToSection
-   * @param userID
-   * @return
-   */
+   * @param userID   @return
+   * */
   @Override
-  public List<ExerciseShell> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection, long userID) {
-
-    logger.debug("getExercisesForSelectionState for " + typeToSection + " and " +userID);
+  public ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
+    logger.debug("getExercisesForSelectionState req " + reqID+ " for " + typeToSection + " and " +userID);
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     if (serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
-
       logger.debug("\tsorting");
 
       List<Exercise> copy = getSortedExercises(exercisesForSection);
-      return getExerciseShells(copy);
+      return new ExerciseListWrapper(reqID, getExerciseShells(copy));
     } else {
       logger.debug("\t *not* sorting");
 
       List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection, serverProps.shouldUseWeights());
-      return getExerciseShells(exercisesBiasTowardsUnanswered);
+      return new ExerciseListWrapper(reqID, getExerciseShells(exercisesBiasTowardsUnanswered));
     }
   }
 
@@ -299,10 +299,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see mitll.langtest.client.exercise.ExerciseList#getExercisesInOrder()
    * @return
+   * @param reqID
    */
-  public List<ExerciseShell> getExerciseIds() {
+  public ExerciseListWrapper getExerciseIds(int reqID) {
     List<Exercise> exercises = getExercises();
-    return getExerciseShells(exercises);
+    return new ExerciseListWrapper(reqID, getExerciseShells(exercises));
   }
 
   public Exercise getExercise(String id) {
@@ -363,11 +364,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.exercise.ExerciseList#getExercises(long)
    */
   public List<Exercise> getExercises(long userID) {
-    String lessonPlanFile = getLessonPlan();
-
     makeAutoCRT();
 
-    List<Exercise> exercises = getExercisesInModeDependentOrder(userID, lessonPlanFile);
+    List<Exercise> exercises = getExercisesInModeDependentOrder(userID);
 
     if (serverProps.isCRTDataCollect()) {
       //logger.debug("isCRTDataCollect is true");
@@ -382,7 +381,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return exercises;
   }
 
-  private List<Exercise> getExercisesInModeDependentOrder(long userID, String lessonPlanFile) {
+  private List<Exercise> getExercisesInModeDependentOrder(long userID) {
     List<Exercise> exercises;
     if (serverProps.dataCollectMode) {
        //logger.debug("in data collect mode");
@@ -391,6 +390,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
         if (serverProps.useOutsideResultCounts) {
           String outsideFileOverride = serverProps.outsideFile;
+          String lessonPlanFile = getLessonPlan();
+
           if (lessonPlanFile.contains("farsi")) outsideFileOverride = configDir + File.separator + "farsi.txt";
           else if (lessonPlanFile.contains("urdu")) outsideFileOverride = configDir + File.separator + "urdu.txt";
           else if (lessonPlanFile.contains("sudanese"))
