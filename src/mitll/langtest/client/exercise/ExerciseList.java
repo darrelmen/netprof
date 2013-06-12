@@ -23,6 +23,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
@@ -59,6 +60,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private long userID;
   private final boolean showInOrder;
   private int countSincePrompt = 0;
+  protected int lastReqID = 0;
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -91,7 +93,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#setFactory()
+   * @see mitll.langtest.client.LangTest#setFactory
    * @param factory
    * @param user
    * @paramx doGrading
@@ -104,8 +106,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   /**
    * Get exercises for this user.
-   * @see mitll.langtest.client.LangTest#gotUser(long)
-   * @see mitll.langtest.client.LangTest#makeFlashContainer
+   * @see mitll.langtest.client.LangTest#doEverythingAfterFactory(long)
+   * @see SectionExerciseList#noSectionsGetExercises(long)
    * @param userID
    */
   public void getExercises(long userID) {
@@ -115,9 +117,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.userID = userID;
     if (showInOrder) {
       getExercisesInOrder();
-    }
-    else {
-      service.getExerciseIds(userID, new SetExercisesCallback());
+    } else {
+      lastReqID++;
+      service.getExerciseIds(lastReqID, userID, new SetExercisesCallback());
     }
   }
 
@@ -169,8 +171,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see GradedExerciseList#setFactory(ExercisePanelFactory, mitll.langtest.client.user.UserManager, int)
    */
   private void getExercisesInOrder() {
-
-    service.getExerciseIds(new SetExercisesCallback());
+    lastReqID++;
+    service.getExerciseIds(lastReqID,new SetExercisesCallback());
   }
 
   public void onResize() {
@@ -197,16 +199,24 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return token;
   }
 
-  protected class SetExercisesCallback implements AsyncCallback<List<ExerciseShell>> {
+  protected class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper> {
     public void onFailure(Throwable caught) {
       feedback.showErrorMessage("Server error", "Server error - couldn't get exercises.");
     }
 
-    public void onSuccess(List<ExerciseShell> result) {
-      System.out.println("SetExercisesCallback Got " +result.size() + " results");
-      rememberExercises(result);
-      loadFirstExercise();
+    public void onSuccess(ExerciseListWrapper result) {
+      System.out.println("SetExercisesCallback Got " + result.exercises.size() + " results");
+      if (isStaleResponse(result)) {
+        System.out.println("----> ignoring result " + result.reqID + " b/c before latest " + lastReqID);
+      } else {
+        rememberExercises(result.exercises);
+        loadFirstExercise();
+      }
     }
+  }
+
+  protected boolean isStaleResponse(ExerciseListWrapper result) {
+    return result.reqID < lastReqID;
   }
 
   protected void rememberExercises(List<ExerciseShell> result) {
