@@ -334,8 +334,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       postAudioRecordButton = new MyPostAudioRecordButton();
       //postAudioRecordButton.getRecord().addStyleName("recordButtonMargin");    // height of the media record images
       DOM.setElementProperty(postAudioRecordButton.getRecord().getElement(),"margin","8px");
-      recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
-      recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
+      recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
+      recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
       playAudioPanel = new MyPlayAudioPanel(recordImage1,recordImage2, soundManager, postAudioRecordButton, GoodwaveExercisePanel.this);
       return playAudioPanel;
     }
