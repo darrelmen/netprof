@@ -72,7 +72,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
     final Timer t = new Timer() {
       @Override
       public void run() {
-        wordTranscript.image.setUrl(LangTest.LANGTEST_IMAGES +"animated_progress.gif");
+        wordTranscript.image.setUrl(LangTest.LANGTEST_IMAGES +"animated_progress44.gif");
         wordTranscript.image.setVisible(true);
         phoneTranscript.image.setVisible(false);
       }
