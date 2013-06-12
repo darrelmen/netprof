@@ -405,7 +405,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         exercises = db.getExercisesFirstNInOrder(userID, serverProps.firstNInOrder);
       }
     } else {
-      if (!serverProps.isArabicTextDataCollect()) logger.debug("*not* in data collect mode");
+      //if (!serverProps.isArabicTextDataCollect()) logger.debug("*not* in data collect mode");
 
       exercises = serverProps.isArabicTextDataCollect() ? db.getRandomBalancedList(userID) : db.getUnmodExercises();
     }
@@ -614,8 +614,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     String imageURL = optionallyMakeURL(relativeImagePath);
     double duration = new AudioCheck().getDurationInSeconds(wavAudioFile);
-    logger.debug("for " + wavAudioFile + " type " + imageType + " rel path is " + relativeImagePath +
-        " url " + imageURL + " duration " + duration);
+/*    logger.debug("for " + wavAudioFile + " type " + imageType + " rel path is " + relativeImagePath +
+        " url " + imageURL + " duration " + duration);*/
 
     return new ImageResponse(reqid,imageURL, duration);
   }
