@@ -708,7 +708,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   /**
    * @see #gotUser(long)
    */
-  private void setFactory() {
+  private void setFactory(final long userID) {
     final LangTest outer =this;
     if (props.isGoodwaveMode()) {
       GWT.runAsync(new RunAsyncCallback() {
@@ -718,10 +718,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
         public void onSuccess() {
           exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer), userManager, 1);
+          doEverythingAfterFactory(userID);
         }
       });
     } else if (props.isGrading()) {
-      exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer), userManager, props.getNumGradesToCollect());
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          Window.alert("Code download failed");
+        }
+
+        public void onSuccess() {
+          exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer), userManager, props.getNumGradesToCollect());
+          doEverythingAfterFactory(userID);
+        }
+      });
     } else if (props.isFlashCard()) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
@@ -730,6 +740,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
         public void onSuccess() {
           exerciseList.setFactory(new FlashcardExercisePanelFactory(service, outer, outer), userManager, 1);
+          doEverythingAfterFactory(userID);
         }
       });
     } else if (props.isDataCollectMode() && props.isCollectAudio() && !props.isCRTDataCollectMode()) {
@@ -740,6 +751,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
         public void onSuccess() {
           exerciseList.setFactory(new WaveformExercisePanelFactory(service, outer, outer), userManager, 1);
+          doEverythingAfterFactory(userID);
         }
       });
     } else {
@@ -750,6 +762,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
         public void onSuccess() {
           exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer), userManager, 1);
+          doEverythingAfterFactory(userID);
         }
       });
     }
@@ -926,19 +939,21 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (props.isDataCollectAdminView()) {
       checkForAdminUser();
     } else {
-      setFactory();
+      setFactory(userID);
+    }
+  }
 
-      if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
-        System.out.println("gotUser : user changed - new " + userID + " vs last " + lastUser);
-        if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
-          System.out.println("\tgotUser : " + userID + " get exercises");
-          exerciseList.getExercises(userID);
-        }
-        lastUser = userID;
+  private void doEverythingAfterFactory(long userID) {
+    if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
+      System.out.println("gotUser : user changed - new " + userID + " vs last " + lastUser);
+      if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
+        System.out.println("\tgotUser : " + userID + " get exercises");
+        exerciseList.getExercises(userID);
       }
-      else if (props.isTimedGame()) {
-        exerciseList.reloadExercises();
-      }
+      lastUser = userID;
+    }
+    else if (props.isTimedGame()) {
+      exerciseList.reloadExercises();
     }
   }
 
