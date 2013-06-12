@@ -140,7 +140,7 @@ public class AnswerDAO {
                                 boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis,
                                 boolean correct, float pronScore) throws SQLException {
     PreparedStatement statement;
-    logger.info("adding answer for exid #" + id + " correct " + correct + " score " + pronScore);
+   // logger.info("adding answer for exid #" + id + " correct " + correct + " score " + pronScore);
     statement = connection.prepareStatement("INSERT INTO results(" +
       "userid," +
       "plan," +
