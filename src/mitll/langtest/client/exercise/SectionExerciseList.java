@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
@@ -52,7 +53,6 @@ public class SectionExerciseList extends PagingExerciseList {
    * for them (least answered/recorded first), and not let them skip forward in the list.
    */
   private boolean includeItemInBookmark = false;
-  //private boolean firstTime = true;
 
   /**
    * @see mitll.langtest.client.LangTest#makeExerciseList
@@ -180,27 +180,7 @@ public class SectionExerciseList extends PagingExerciseList {
     return listBox;
   }
 
-  protected void populateListBoxAfterSelection(Map<String, Collection<String>> result) {
-    for (Map.Entry<String, Collection<String>> pair : result.entrySet()) {
-      String type = pair.getKey();
-      populateListBox(type);
-    }
-  }
-
-  /**
-   * @seex #populateListBox(java.util.Map)
-   * @deprecated
-   * @param type
-   * @paramx sections
-   */
-  private void populateListBox(String type) {
-/*    System.out.println("populateListBox : " +type);
-
-    SectionWidget listBox = typeToBox.get(type);
-    String currentSelection = getCurrentSelection(type);
-    System.out.println("current selection is " +currentSelection);*/
-   // listBox.retainCurrentSelectionState(currentSelection);
-  }
+  protected void populateListBoxAfterSelection(Map<String, Collection<String>> result) {}
 
   private String getCurrentSelection(String type) {
     SectionWidget listBox = typeToBox.get(type);
@@ -224,8 +204,7 @@ public class SectionExerciseList extends PagingExerciseList {
 
   /**
    * Sort the sections added to the list box in an intelligent way (deal with keys like 56-57, etc.)
-   * @see #getExercises(long)
-   * @see #populateListBox(String)
+   * @see #getWidgetsForTypes(java.util.Map, long)
    * @param listBox
    * @param sectionToCount
    */
@@ -387,8 +366,8 @@ public class SectionExerciseList extends PagingExerciseList {
   }
 
   /**
-   * @see #getExercises(long)
-   * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
+   * @see #loadExercises(java.util.Map, String)
+   * @see #pushNewSectionHistoryToken()
    * @param userID
    */
   protected void noSectionsGetExercises(long userID) {
@@ -410,14 +389,16 @@ public class SectionExerciseList extends PagingExerciseList {
     }
 
     @Override
-    public void onSuccess(List<ExerciseShell> result) {
-      System.out.println("MySetExercisesCallback : onSuccess " + result.size() + " items.");
+    public void onSuccess(ExerciseListWrapper result) {
+      System.out.println("MySetExercisesCallback : onSuccess " + result.exercises.size() + " items.");
 
-      if (!result.isEmpty()) {
+      if (isStaleResponse(result)) {
+        System.out.println("\t----> ignoring result " + result.reqID + " b/c before latest " + lastReqID);
+      } else if (!result.exercises.isEmpty()) {
         if (item != null) {
-          rememberExercises(result);
+          rememberExercises(result.exercises);
           if (!loadByID(item)) {
-            System.out.println("loadExercises : loading first exercise since couldn't load item=" +item);
+            System.out.println("loadExercises : loading first exercise since couldn't load item=" + item);
             loadFirstExercise();
           }
         } else {
@@ -554,15 +535,12 @@ public class SectionExerciseList extends PagingExerciseList {
     } else {
       String token = event.getValue();
       System.out.println("onValueChange '" + token + "'");
-      //token = getCleanToken(token);
       try {
         SelectionState selectionState = getSelectionState(token);
-        System.out.println("onValueChange '" + token + "' yields state " + selectionState.typeToSection);
-
         restoreListBoxState(selectionState);
         Map<String, Collection<String>> typeToSection = selectionState.typeToSection;
 
-        System.out.println("onValueChange type->section " + typeToSection);
+        System.out.println("onValueChange '" + token + "' type->section " + typeToSection);
 
         setOtherListBoxes(typeToSection);
 
@@ -576,10 +554,6 @@ public class SectionExerciseList extends PagingExerciseList {
 
   }
 
-/*  protected String getCleanToken(String token) {
-    return unencodeToken(token);
-  }*/
-
   /**
    * When we get a history token push, select the exercise type, section, and optionally item.
    * @param typeToSection
@@ -587,11 +561,12 @@ public class SectionExerciseList extends PagingExerciseList {
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   protected void loadExercises(Map<String, Collection<String>> typeToSection, final String item) {
-    System.out.println("loadExercises " + typeToSection + " and item '" + item + "'");
+    System.out.println("loadExercises : " + typeToSection + " and item '" + item + "'");
     if (typeToSection.isEmpty() && item == null) {
       noSectionsGetExercises(userID);
     } else {
-      service.getExercisesForSelectionState(typeToSection, userID, new MySetExercisesCallback(item));
+      lastReqID++;
+      service.getExercisesForSelectionState(lastReqID, typeToSection, userID, new MySetExercisesCallback(item));
     }
   }
 
