@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.FlashcardResponse;
 import mitll.langtest.shared.Grade;
@@ -48,10 +49,6 @@ public interface LangTestDatabaseAsync {
   void getProperties(AsyncCallback<Map<String, String>> async);
 
   void ensureMP3(String wavFile, AsyncCallback<Void> async);
-
-  void getExerciseIds(long userID, AsyncCallback<List<ExerciseShell>> async);
-
-  void getExerciseIds(AsyncCallback<List<ExerciseShell>> async);
 
   void getExercise(String id, AsyncCallback<Exercise> async);
 
@@ -108,11 +105,7 @@ public interface LangTestDatabaseAsync {
 
   void clearUserState(long userID, AsyncCallback<Void> async);
 
-  void getExercisesForSelectionState(Map<String, Collection<String>> typeToSection, long userID, AsyncCallback<List<ExerciseShell>> async);
-
   void getTypeToSectionToCount(AsyncCallback<Map<String, Map<String, Integer>>> async);
-
- // void getTypeToSectionsForTypeAndSection(Map<String, Collection<String>> typeToSection, AsyncCallback<Map<String, Collection<String>>> async);
 
   void getTypeOrder(AsyncCallback<Collection<String>> async);
 
@@ -123,4 +116,16 @@ public interface LangTestDatabaseAsync {
   void getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end, AsyncCallback<List<Exercise>> async);
 
   void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
+
+  void getExerciseIds(int reqID, long userID, AsyncCallback<ExerciseListWrapper> async);
+
+  /**
+   * @param reqID
+   * @param typeToSection
+   * @param userID
+   * @return
+   */
+  void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, AsyncCallback<ExerciseListWrapper> async);
+
+  void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper> async);
 }
