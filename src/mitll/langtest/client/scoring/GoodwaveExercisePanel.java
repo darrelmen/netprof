@@ -114,13 +114,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     else {
       addQuestions(service, controller, 1, center);
     }
-  /*  else {
-      ScorePanel w = new ScorePanel(false);
-      add(w);
-      scorePanel = w;
-    }*/
-
   }
+
   public void setBusy(boolean v) { this.isBusy = v;}
 
   /**
