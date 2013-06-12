@@ -507,12 +507,12 @@ public class ASRScoring extends Scoring {
 
     // there are currently only two letter-to-sound classes EnglishLTS and ArabicLTS.  What about french? spanish?
     boolean isArabicScript = !(language.equalsIgnoreCase("English"));
-    if (!isArabicScript) {
+  //  if (!isArabicScript) {
       //logger.debug("using english LTS sound class since language is " + language);
-    }
+  //  }
 
     Scores scoresFromHydec = getScoresFromHydec(testAudio, sentence, configFile);
-    if (scoresFromHydec.hydecScore != -1) {
+    if (scoresFromHydec.hydecScore != -1 && false) {
       try {
         FileUtils.deleteDirectory(new File(tmpDir));
       } catch (IOException e) {
@@ -555,7 +555,7 @@ public class ASRScoring extends Scoring {
       jscoreOut = testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
-      logger.info("getScoresFromHydec : got score " + hydec_score +" and took " + timeToRunHydec + " millis");
+      logger.debug("getScoresFromHydec : got score " + hydec_score +" and took " + timeToRunHydec + " millis");
 
       return new Scores(hydec_score, jscoreOut._2);
     } catch (AssertionError e) {
