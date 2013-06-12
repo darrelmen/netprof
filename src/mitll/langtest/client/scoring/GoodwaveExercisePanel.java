@@ -479,6 +479,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       VerticalPanel vp = new VerticalPanel();
 
       boolean anyRef = false;
+      boolean madeFast = false;
       if (exercise.getRefAudio() != null) {
         RadioButton fast = new RadioButton(GROUP, FAST);
         vp.add(fast);
@@ -494,6 +495,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         });
         fast.setValue(true);
         anyRef = true;
+        madeFast = true;
       }
 
       if (exercise.getSlowAudioRef() != null) {
@@ -508,6 +510,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         });
         slow.setWidth(RADIO_BUTTON_WIDTH);
         vp.add(slow);
+        if (!madeFast) {
+          slow.setValue(true);
+        }
         anyRef = true;
       }
       vp.setWidth("80px");

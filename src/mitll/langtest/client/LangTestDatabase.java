@@ -5,7 +5,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.FlashcardResponse;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.ImageResponse;
@@ -33,8 +33,8 @@ public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
   // exerciseDAO
-  List<ExerciseShell> getExerciseIds(long userID);
-  List<ExerciseShell> getExerciseIds();
+  ExerciseListWrapper getExerciseIds(int reqID, long userID);
+  ExerciseListWrapper getExerciseIds(int reqID);
 
   ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
 
@@ -107,12 +107,11 @@ public interface LangTestDatabase extends RemoteService {
   Collection<String> getTypeOrder();
 
   /**
-   * @deprecated
+   * @param reqID
    * @param typeToSection
-   * @param userID
-   * @return
-   */
-  List<ExerciseShell> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection, long userID);
+   * @param userID   @return
+   * */
+  ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID);
 
   FlashcardResponse getNextExercise(long userID);
   FlashcardResponse getNextExercise(long userID,Map<String, Collection<String>> typeToSection);
