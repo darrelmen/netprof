@@ -104,27 +104,9 @@ public class SmallVocabDecoder {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    logger.debug("wrote " + slfFile + " exists " + new File(slfFile).exists());
+    //logger.debug("wrote " + slfFile + " exists " + new File(slfFile).exists());
     return slfFile;
   }
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#createSLFFile
-   * @param lmSentences
-   * @param background
-   * @param tmpDir
-   * @param scoringDir
-   * @return absolute path slf file, if it was made successfully
-   */
-/*
-  private String createSLFFile(List<String> lmSentences, List<String> background, String tmpDir,
-                              String scoringDir, double foregroundBackgroundBlend) {
-    SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
-    this.foregroundBackgroundBlend = foregroundBackgroundBlend;
-    List<String> backgroundVocab = svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT);
-    return createSLFFile(lmSentences, background, backgroundVocab, tmpDir, null, scoringDir);
-  }
-*/
 
   /**
    * Get the foreground and background sentences. <br></br>
@@ -478,6 +460,7 @@ public class SmallVocabDecoder {
     return slfOut;
   }
 
+/*
   public static void main(String []arg) {
     String tmpDir = Files.createTempDir().getAbsolutePath();
     String simpleSLFFile = new SmallVocabDecoder().createSimpleSLFFile(Arrays.asList("fred", "barney","fred barney","ace barry charley"), tmpDir);
@@ -485,4 +468,5 @@ public class SmallVocabDecoder {
    // String simpleSLFFile = new SmallVocabDecoder().createSimpleSLFFile(Arrays.asList("fred","barney"), tmpDir);
     System.out.println("wrote to " +simpleSLFFile);
   }
+*/
 }
