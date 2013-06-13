@@ -503,12 +503,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     fp1.getElement().getStyle().setFloat(Style.Float.LEFT);
     fp1.add(title);
 
-    users = new Anchor("Users");
-    users.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        userTable.showUsers(service, userManager.getUser(), true);
-      }
-    });
+    users = makeUsersAnchor(true);
     fp1.add(users);
     userManager = new UserManager(this,service, isCollectAudio(), props.isDataCollectAdminView(), false, props.getAppTitle(),false);
 
@@ -855,14 +850,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     });
 
-    users = new Anchor("Users");
-    users.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        userTable.showUsers(service, userManager.getUser(), false);
-      }
-    });
+    makeUsersAnchor(false);
     vp.add(users);
-    users.setVisible(props.isAdminView());
 
     showResults = new Anchor("Results");
     showResults.addClickHandler(new ClickHandler() {
@@ -903,6 +892,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     vp.add(statusLine);
 
     return vp;
+  }
+
+  private Anchor makeUsersAnchor(final boolean isDataCollectAdminView) {
+    users = new Anchor("Users");
+    users.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        userTable.showUsers(service, userManager.getUser(), isDataCollectAdminView);
+      }
+    });
+    users.setVisible(props.isAdminView());
+    return users;
   }
 
   private String getUserText() {
