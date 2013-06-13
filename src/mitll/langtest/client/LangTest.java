@@ -25,6 +25,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -101,8 +102,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private HTML userline;
   private Flashcard flashcard;
 
-  private FluidRow headerRow, secondRow;
+  private Panel headerRow;
+  private FluidRow secondRow;
   private ProgressBar progressBar;
+
+  private Anchor logout;
+  private Anchor users;
+  private Anchor showResults, monitoring;
 
   /**
    * Make an exception handler that displays the exception.
@@ -284,15 +290,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setupSoundManager();
 
     modeSelect();
-
-
   }
 
   private boolean shouldCollectAudio() {
     return props.isCollectAudio() && !props.isFlashcardTeacherView() || props.isFlashCard()  || props.isGoodwaveMode() ;
   }
 
-  private FluidRow makeHeaderRow() {
+  private Panel makeHeaderRow() {
     FluidRow headerRow = new FluidRow();
 
     Widget title;
@@ -308,21 +312,32 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     headerRow.add(titleColumn);
     if (!takeWholeWidth) {
       headerRow.add(new Column(2, getLogout()));
-    }
-    else if (props.isAdminView()) {
+    } else if (props.isAdminView() || props.isDataCollectMode()) {
       getLogout();
       FluidRow adminRow = new FluidRow();
       adminRow.addStyleName("alignCenter");
       adminRow.addStyleName("inlineStyle");
-      adminRow.add(new Column(1, 2,users));
-      adminRow.add(new Column(1, 2, showResults));
-      adminRow.add(new Column(1, 2, monitoring));
-      HTML statusLine = getReleaseStatus();
-      adminRow.add(new Column(1, 2, statusLine));
+
+      this.userline = new HTML(getUserText());
+
+      adminRow.add(new Column(2, userline));
+      Anchor logout = new Anchor("Logout");
+      logout.addClickHandler(new ClickHandler() {
+        public void onClick(ClickEvent event) {
+          resetState();
+        }
+      });
+      adminRow.add(new Column(2, logout));
+
+      if (props.isAdminView()) {
+        adminRow.add(new Column(2, users));
+        adminRow.add(new Column(2, showResults));
+        adminRow.add(new Column(2, monitoring));
+      }
+      adminRow.add(new Column(2, getReleaseStatus()));
 
       titleColumn.add(adminRow);
     }
-    //widgets.add(headerRow);
     return headerRow;
   }
 
@@ -674,7 +689,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (showResults != null) showResults.setVisible(isGrading || props.isAdminView());
     if (monitoring != null) monitoring.setVisible(isGrading || props.isAdminView());
 
-    System.out.println("modeSelect : goodwave mode " + props.isGoodwaveMode() + " " + isAutoCRTMode());
+    System.out.println("modeSelect : goodwave mode " + props.isGoodwaveMode() + " auto crt mode = " + isAutoCRTMode());
 
     checkInitFlash();
   }
@@ -820,9 +835,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     t.schedule(1000);
   }
 
-  private Anchor logout;
-  private Anchor users;
-  private Anchor showResults, monitoring;
   /**
    * Has both a logout and a users link and a results link
    * @return
