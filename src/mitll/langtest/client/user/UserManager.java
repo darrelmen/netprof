@@ -10,15 +10,18 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PasswordTextBox;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -152,6 +155,7 @@ public class UserManager {
       langTest.gotUser(user);
     }
     else if (isFlashcard) {
+      System.out.println("UserManager.login : adding anonymous user");
       addAnonymousUser();
     }
     else {
@@ -298,6 +302,7 @@ public class UserManager {
     }
   }
 
+  DisclosurePanel dp;
   private void displayTeacherLogin() {
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Data Collector Login");
@@ -368,7 +373,7 @@ public class UserManager {
     dialogVPanel.add(spacer2);
 
     VerticalPanel register = new VerticalPanel();
-    DisclosurePanel dp = new DisclosurePanel("Registration");
+    dp = new DisclosurePanel("Registration");
     dp.setContent(register);
     dp.setAnimationEnabled(true);
 
@@ -417,7 +422,7 @@ public class UserManager {
             boolean exists = result != -1;
             if (exists) {
               if (checkAudioSelection(regular, fastThenSlow)) {
-                Window.alert("Please choose either regular or regular then slow audio recording.");
+                showPopup("Please choose either regular or regular then slow audio recording.");
               } else {
                 dialogBox.hide();
                 String audioType = fastThenSlow.getValue() ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
@@ -427,12 +432,13 @@ public class UserManager {
             } else {
               System.out.println(user.getText() + " doesn't exist");
               if (user.getText().length() == 0) {
-                Window.alert("Please enter a user id.");
+                showPopup("Please enter a user id.");
               } else {
                 if (checkPassword(password)) {
-                  doRegistration(user, password, regular, fastThenSlow, nativeLang, dialect, ageEntryBox, experienceBox, genderBox, /*first, last,*/ dialogBox, login);
+                  doRegistration(user, password, regular, fastThenSlow, nativeLang, dialect, ageEntryBox,
+                    experienceBox, genderBox, /*first, last,*/ dialogBox, login);
                 } else {
-                  Window.alert("Please use password from the email");
+                  showPopup("Please use password from the email");
                 }
               }
             }
@@ -451,29 +457,32 @@ public class UserManager {
                               DialogBox dialogBox, Button login) {
     boolean valid = user.getText().length() > 0;
     if (!valid) {
-      Window.alert("Please enter a userid.");
+      showPopup("Please enter a userid.");
     } else {
       valid = password.getText().length() > 0;
       if (!valid) {
-        Window.alert("Please enter a password.");
+        showPopup("Please enter a password.");
       }
     }
     if (valid) {
       valid = checkPassword(password);
       if (!valid) {
-        Window.alert("Please use password from the email sent to you.");
+        showPopup("Please use password from the email sent to you.");
         valid = false;
       }
       else if (!isDataCollectAdmin && checkAudioSelection(regular, fastThenSlow)) {
-        Window.alert("Please choose either regular or regular then slow audio recording.");
+        showPopup("Please choose either regular or regular then slow audio recording.");
         valid = false;
-      }
-      else if (!isDataCollectAdmin && nativeLang.getText().isEmpty()) {
-        Window.alert("Language is empty");
+      } else if (!isDataCollectAdmin && nativeLang.getText().isEmpty()) {
+        if (!dp.isOpen()) {
+          dp.setOpen(true);
+        } else {
+          showPopup("Language is empty");
+        }
         valid = false;
       }
       else if (!isDataCollectAdmin && dialect.getText().isEmpty()) {
-        Window.alert("Dialect is empty");
+        showPopup("Dialect is empty");
         valid = false;
       }
 
@@ -482,10 +491,10 @@ public class UserManager {
           int age = getAge(ageEntryBox);
           if (!isDataCollectAdmin && (age < MIN_AGE) || (age > MAX_AGE && age != TEST_AGE)) {
             valid = false;
-            Window.alert("age '" + age + "' is too young or old.");
+            showPopup("age '" + age + "' is too young or old.");
           }
         } catch (NumberFormatException e) {
-          Window.alert("age '" + ageEntryBox.getText() + "' is invalid.");
+          showPopup("age '" + ageEntryBox.getText() + "' is invalid.");
           valid = false;
         }
       }
@@ -537,7 +546,7 @@ public class UserManager {
           addTeacher(enteredAge,
             experienceBox, genderBox, nativeLang, dialect, user, dialogBox, closeButton, isFastAndSlow);
         } else {
-          Window.alert("User " + user.getText() + " already registered, click login.");
+          showPopup("User " + user.getText() + " already registered, click login.");
         }
       }
     });
@@ -631,7 +640,7 @@ public class UserManager {
        */
       public void onClick(ClickEvent event) {
         if (dialect.getText().isEmpty()) {
-          Window.alert("Dialect is empty");
+          showPopup("Dialect is empty");
         } else {
           dialogBox.hide();
           sendNameToServer();
@@ -759,5 +768,20 @@ public class UserManager {
       }
     });
     return closeButton;
+  }
+
+  private void showPopup(String html) {
+    final PopupPanel pleaseWait = new DecoratedPopupPanel();
+    pleaseWait.setAutoHideEnabled(true);
+    pleaseWait.add(new HTML(html));
+    pleaseWait.center();
+
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        pleaseWait.hide();
+      }
+    };
+    t.schedule(3000);
   }
 }
