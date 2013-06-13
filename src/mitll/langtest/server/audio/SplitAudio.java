@@ -64,6 +64,36 @@ public class SplitAudio {
   private static final String SLOW = "Slow";
   private AudioCheck audioCheck = new AudioCheck();
 
+  public void checkTamas() {
+    File file = new File("89");
+    file = new File(file,"0");
+    file = new File(file,"subject-6");
+    File[] files = file.listFiles(new FileFilter() {
+      @Override
+      public boolean accept(File pathname) {
+        String name = pathname.getName();
+        return name.endsWith(".wav") && !name.contains("16K") ;
+      }
+    });
+    logger.info("got " + files.length+ " files ");
+
+    String language = "english";
+    final String configDir = getConfigDir(language);
+
+
+    try {
+      final Map<String, String> properties = getProperties(language, configDir);
+      ASRScoring scoring = getAsrScoring(".",null,properties);
+
+      for (File fastFile : files) {
+        String fastName = fastFile.getName().replaceAll(".wav", "");
+        Scores fast = getAlignmentScoresNoDouble(scoring, "fifty", fastName, fastFile.getParent(), getConverted(fastFile));
+        logger.info("score for " + fastFile.getName() + " score " + fast);
+      }
+    } catch (IOException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+  }
   /**
    * Write out an analist and a transcript file suitable for use with the englishRecalcPhoneNormalizer.cfg config
    */
@@ -779,9 +809,8 @@ public class SplitAudio {
                                          Exercise exercise, String refSentence,
                                          String first, String last, int refLength,
                                          File refDirForExercise,String collectedAudioDir ) {
-    //String best = null;
     String id = exercise.getID();
-    float bestSlow = 0, bestFast = 0, bestTotal = 0;
+    float bestSlow = 0, bestFast = 0;
     File bestSlowFile = null, bestFastFile = null;
     for (Result r : resultsForExercise) {
       File answer = new File(r.answer);
@@ -1279,7 +1308,7 @@ public class SplitAudio {
 
   public static void main(String [] arg) {
     try {
-      new SplitAudio().normalize();
+      new SplitAudio().checkTamas();
 
        if (true) return;
 
