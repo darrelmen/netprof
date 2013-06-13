@@ -104,7 +104,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     }
     hp.setHorizontalAlignment(rightAlignContent ? HasHorizontalAlignment.ALIGN_RIGHT : HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e));
-    if (e.getContent().contains("Listen") || e.getContent().contains("listen")) {
+    if (e.getContent().contains("Listen") || e.getContent().contains("listen") || controller.isDataCollectMode()) {   // hack
     } else {
       addInstructions();
     }
