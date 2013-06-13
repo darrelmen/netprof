@@ -45,14 +45,14 @@ public class FileExerciseDAO implements ExerciseDAO {
   private static final String LESSON_FILE = "lesson-737.csv";
   private static final String FAST = "Fast";
   private static final String SLOW = "Slow";
-  private static final boolean TESTING = false;
+  //private static final boolean TESTING = false;
   private static final int MAX_ERRORS = 100;
   private final String mediaDir;
 
   private List<Exercise> exercises;
-  private final boolean isUrdu;
+  private boolean isUrdu;
   private final boolean isFlashcard;
-  private final boolean isEnglish;
+  private boolean isEnglish;
   private boolean processSemicolons = false;
 
   @Override
@@ -67,24 +67,25 @@ public class FileExerciseDAO implements ExerciseDAO {
 
 
   public FileExerciseDAO(boolean isFlashcard) {
-    this("","",false,isFlashcard);
+    this("","", isFlashcard);
   }
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
    * @param mediaDir
    * @param language
    */
-  public FileExerciseDAO(String mediaDir, String language, boolean showSections, boolean isFlashcard) {
-    this.isUrdu = language.equalsIgnoreCase("Urdu");
-    this.isEnglish = language.equalsIgnoreCase("English");
-    this.isPashto = language.equalsIgnoreCase("Pashto");
+  public FileExerciseDAO(String mediaDir, String language, boolean isFlashcard) {
+    if (language != null) {
+      this.isUrdu = language.equalsIgnoreCase("Urdu");
+      this.isEnglish = language.equalsIgnoreCase("English");
+      this.isPashto = language.equalsIgnoreCase("Pashto");
+    }
     this.mediaDir = mediaDir;
     this.isFlashcard = isFlashcard;
-   // this.showSections = showSections;
   }
 
   /**
-   * TODO : write to h2
+   * TODO : write to h2?
    * @see DatabaseImpl#getExercises(boolean, String)
    * @deprecated
    * @param installPath
