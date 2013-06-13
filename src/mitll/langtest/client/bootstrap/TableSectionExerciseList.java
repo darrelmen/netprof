@@ -55,13 +55,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
+ * Largely assumes this is a flashcard teach view.
+ *
  * User: GO22670
  * Date: 4/23/13
  * Time: 4:21 PM
  * To change this template use File | Settings | File Templates.
  */
 public class TableSectionExerciseList extends FlexSectionExerciseList {
+  private static final String USER_PROMPT = "Choose a lesson, preview, and share flashcard exercises.";
+
   private static final int FRAME_WIDTH = 1024-50-50;
   private static final int FRAME_HEIGHT = 640-30;
   private static final String FLASHCARDCOPY = "flashcardcopy";
@@ -448,6 +451,11 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
    */
   private static void feedback(String feedback) {
     showPopup("Copied " + feedback + " to clipboard.");
+  }
+
+  @Override
+  protected String getUserPrompt() {
+    return USER_PROMPT;
   }
 
   public interface Resources extends CellTable.Resources {
