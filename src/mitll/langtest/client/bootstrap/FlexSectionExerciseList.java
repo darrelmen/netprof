@@ -45,7 +45,6 @@ import java.util.Set;
  */
 public class FlexSectionExerciseList extends SectionExerciseList {
   private static final int HEADING_FOR_LABEL = 4;
-  private static final String USER_PROMPT = "Choose a lesson, preview, and share flashcard exercises.";
 
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private Map<String,ButtonType> typeToButton = new HashMap<String, ButtonType>();
@@ -355,9 +354,16 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     instructions.addStyleName("alignCenter");
     instructions.addStyleName("inlineStyle");
 
-    Heading heading = new Heading(5, USER_PROMPT);
-    instructions.add(heading);
+    String userPrompt = getUserPrompt();
+    if (userPrompt.length() > 0) {
+      Heading heading = new Heading(5, userPrompt);
+      instructions.add(heading);
+    }
     return instructions;
+  }
+
+  protected String getUserPrompt() {
+    return "";
   }
 
   /**
