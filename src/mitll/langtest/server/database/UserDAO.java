@@ -20,11 +20,7 @@ import java.util.Set;
 public class UserDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserDAO.class);
 
- // private final Database database;
-
-  public UserDAO(Database database) {
-    super(database);
-  }
+  public UserDAO(Database database) { super(database); }
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
@@ -109,12 +105,16 @@ public class UserDAO extends DAO {
     }
   }
 
+  /**
+   * @see DatabaseImpl#userExists(String)
+   * @param id
+   * @return
+   */
   public synchronized int userExists(String id) {
     int val = -1;
     try {
       Connection connection = database.getConnection();
-      PreparedStatement statement;
-      statement = connection.prepareStatement("SELECT id from users where userID='" +
+      PreparedStatement statement = connection.prepareStatement("SELECT id from users where userID='" +
           id +
           "'");
       ResultSet rs = statement.executeQuery();
