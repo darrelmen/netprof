@@ -97,7 +97,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       SiteDeployer siteDeployer = new SiteDeployer();
       SiteDeployer.SiteInfo siteInfo = siteDeployer.getSite(request, configDir, db, getInstallPath());
       Site site = siteInfo.site;
-      if (site == null) {
+      if (site == null/* || !site.isValid()*/) {
         super.service(request, response);
         return;
       }
@@ -175,19 +175,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.exercise.SectionExerciseList#loadExercises
    * @param reqID
    * @param typeToSection
-   * @param userID   @return
-   * */
+   * @param userID
+   * @return
+   */
   @Override
   public ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
     logger.debug("getExercisesForSelectionState req " + reqID+ " for " + typeToSection + " and " +userID);
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     if (serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
-      logger.debug("\tsorting");
+      //logger.debug("\tsorting");
 
       List<Exercise> copy = getSortedExercises(exercisesForSection);
       return new ExerciseListWrapper(reqID, getExerciseShells(copy));
     } else {
-      logger.debug("\t *not* sorting");
+      //logger.debug("\t *not* sorting");
 
       List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection, serverProps.shouldUseWeights());
       return new ExerciseListWrapper(reqID, getExerciseShells(exercisesBiasTowardsUnanswered));
@@ -227,17 +228,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       if (typeToSection.isEmpty()) {
        // logger.debug("getFullExercisesForSelectionState empty type->section");
         exercises = getSortedExercises(db.getExercises());
+        logger.debug("getFullExercisesForSelectionState exercises "+ exercises.size() + " start " + start + " end " + end);
       } else {
-        logger.debug("getFullExercisesForSelectionState non-empty type->section "+ typeToSection+ " start " + start + " end " + end);
-
         Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
         exercises = getSortedExercises(exercisesForSection);
+        logger.debug("getFullExercisesForSelectionState non-empty type->section "+ typeToSection+
+          " start " + start + " end " + end + " yields "+ exercises.size());
       }
-      logger.debug("getFullExercisesForSelectionState exercises "+ exercises.size() + " start " + start + " end " + end);
-
       List<Exercise> resultList = exercises.subList(start, end);
-
-      logger.debug("getFullExercisesForSelectionState sublist has "+ resultList.size());
 
       return new ArrayList<Exercise>(resultList);
     } catch (Exception e) {
@@ -1352,9 +1350,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     String h2DatabaseFile = serverProps.getH2Database();
     boolean wordPairs = serverProps.isWordPairs();
-    logger.debug("word pairs " + wordPairs);
-    db = new DatabaseImpl(configDir, h2DatabaseFile, serverProps.isShowSections(), wordPairs,
-      serverProps.getLanguage(), serverProps.doImages(), relativeConfigDir, serverProps.isFlashcard(),
+    String language = serverProps.getLanguage();
+    logger.debug("word pairs " + wordPairs + " language " + language);
+    db = new DatabaseImpl(configDir, h2DatabaseFile, wordPairs,
+      language, serverProps.doImages(), relativeConfigDir, serverProps.isFlashcard(),
       serverProps.usePredefinedTypeOrder());
   }
 
