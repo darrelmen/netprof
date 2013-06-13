@@ -202,7 +202,7 @@ public class SiteDeployer {
    */
   public void doSiteResponse(DatabaseImpl db, HttpServletResponse response, SiteDeployer siteDeployer, Site site) throws IOException {
     response.setContentType("text/plain");
-    if (!siteDeployer.checkName(site) || db.siteExists(site)) {
+    if (!site.isValid() || !siteDeployer.checkName(site) || db.siteExists(site)) {
       response.getWriter().write("Name in use or invalid.");
     }
     else if (!site.getExercises().isEmpty()) {
@@ -355,20 +355,37 @@ public class SiteDeployer {
     return sectionInfo;
   }
 
+  /**
+   * @see #getSite
+   * @param configDir
+   * @param site
+   * @param item
+   */
   private void storeUploadedFile(String configDir, Site site, DiskFileItem item) {
     String uploadsDirPath = configDir + File.separator + "uploads";
     File uploadsDir = new File(uploadsDirPath);
     if (!uploadsDir.exists()) uploadsDir.mkdir();
     File dest = new File(uploadsDirPath + File.separator + System.currentTimeMillis() + "_" + site.getExerciseFile());
-    boolean b = item.getStoreLocation().renameTo(dest);
+    File uploadedFile = item.getStoreLocation();
+    boolean b = uploadedFile.renameTo(dest);
     if (!b) {
-      logger.error("couldn't rename tmp file " + item.getStoreLocation());
+      logger.warn("storeUploadedFile : couldn't rename tmp file " + uploadedFile + " to " +dest.getAbsolutePath());
+      try {
+        FileUtils.copyFile(uploadedFile, dest);
+        b = dest.exists();
+      } catch (IOException e) {
+        logger.error("storeUploadedFile : couldn't copy tmp file " + uploadedFile + " to " +dest.getAbsolutePath());
+      }
+    }
+    if (!b) {
+      logger.error("storeUploadedFile : couldn't rename tmp file " + uploadedFile + " to " +dest.getAbsolutePath());
+      site.setValid(false);
     }
     else {
-      logger.info("copied file to " + dest.getAbsolutePath());
+      logger.info("storeUploadedFile : copied file to " + dest.getAbsolutePath());
       site.setSavedExerciseFile(dest.getAbsolutePath());
       if (!new File(site.getSavedExerciseFile()).exists()) {
-        logger.error("huh? " + site.getSavedExerciseFile() + " doesn't exist?");
+        logger.error("storeUploadedFile : huh? " + site.getSavedExerciseFile() + " doesn't exist?");
       }
     }
   }
