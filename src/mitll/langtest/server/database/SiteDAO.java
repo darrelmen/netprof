@@ -28,7 +28,7 @@ import java.util.Map;
 public class SiteDAO extends DAO {
   private static Logger logger = Logger.getLogger(SiteDAO.class);
   private static final boolean DROP_TABLE = false;
-  UserDAO userDAO;
+  private UserDAO userDAO;
 
   private boolean debug = false;
 
@@ -45,7 +45,11 @@ public class SiteDAO extends DAO {
   public Site addSite(Site site) {
     return addSite(site.creatorID,site.name,site.language,site.notes, site.getExerciseFile(), site.getSavedExerciseFile(), site.getFeedback(), false);
   }
-  public Site addSite(long creatorID, String name, String language, String notes, String file, String filePath, String feedback, boolean deployed) {
+  private Site addSite(long creatorID, String name, String language, String notes, String file, String filePath, String feedback, boolean deployed) {
+    if (filePath == null) {
+      logger.error("huh? filePath is null?");
+      return null;
+    }
     long id = 0;
     try {
       Connection connection = database.getConnection();
@@ -77,7 +81,8 @@ public class SiteDAO extends DAO {
         System.err.println("huh? no key was generated?");
       }
       Map<Long,User> userMap = userDAO.getUserMap();
-      Site site = new Site(id, creatorID, name, language, notes, file, filePath, new File(filePath).getName(), feedback, false, now,
+      File file1 = new File(filePath);
+      Site site = new Site(id, creatorID, name, language, notes, file, filePath, file1.getName(), feedback, false, //now,
           getFormat(now));
       site.setCreator(userMap.get(creatorID).userID);
       statement.close();
@@ -123,9 +128,9 @@ public class SiteDAO extends DAO {
           boolean deployed = rs.getBoolean(i++);
           Timestamp timestamp1 = rs.getTimestamp(i++);
           long timestamp = timestamp1 != null ? timestamp1.getTime() : System.currentTimeMillis();
-          String name1 = new File(filePath).getName();
+          String name1 = filePath == null ? "Bad_File_Path" : new File(filePath).getName();
         //  logger.info("name " +name1 + " file path " +filePath + " exists = " + new File(filePath).exists());
-          Site site = new Site(id, creatorID, name, language, notes, file, filePath, name1, feedback, deployed, timestamp,
+          Site site = new Site(id, creatorID, name, language, notes, file, filePath, name1, feedback, deployed, //timestamp,
               getFormat(timestamp));
           User user = userMap.get(creatorID);
 
@@ -157,7 +162,7 @@ public class SiteDAO extends DAO {
     for (Site s : getDeployedSites()) {
       if (s.name.equals(name)) return s;
     }
-    logger.debug("couldn't find site with name " + name);
+    logger.debug("getSiteWithName : couldn't find site with name " + name);
     return null;
   }
 
