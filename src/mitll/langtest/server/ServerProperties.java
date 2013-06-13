@@ -28,8 +28,8 @@ public class ServerProperties {
   public static final String SHOW_SECTIONS = "showSections";
   public static final String DEBUG_EMAIL = "debugEmail";
   private static final String DOIMAGES = "doimages";
-  public static final String FOREGROUND_BLEND = "foregroundBlend";
-  public static final String FOREGROUND_BLEND_DEFAULT = "0.8";
+/*  public static final String FOREGROUND_BLEND = "foregroundBlend";
+  public static final String FOREGROUND_BLEND_DEFAULT = "0.8";*/
   private static final String USE_SCORE_CACHE = "useScoreCache";
   private static final String USE_WEIGHTS = "useWeights";
 
@@ -73,9 +73,8 @@ public class ServerProperties {
   public boolean isUrdu;
   public int firstNInOrder;
   public boolean isDataCollectAdminView;
-  private double foregroundBlend;
   private double minPronScore;
-  public boolean useWeights;
+//  public boolean useWeights;
 
   public void readPropertiesFile(ServletContext servletContext, String configDir) {
    String configFile = servletContext.getInitParameter("configFile");
@@ -141,7 +140,9 @@ public class ServerProperties {
   }
 
   public String getLanguage() {
-    return props.getProperty(LANGUAGE, "English");
+    String language = props.getProperty(LANGUAGE, "English");
+  //  logger.debug("language = " +language);
+    return language;
   }
 
   /**
@@ -150,10 +151,6 @@ public class ServerProperties {
    */
   public String getMediaDir() {
     return props.getProperty(MEDIA_DIR, "media");
-  }
-
-  public double getForegroundBlend() {
-    return foregroundBlend;
   }
 
   public double getMinPronScore() {
@@ -243,7 +240,7 @@ public class ServerProperties {
       //logger.debug("Date from manifest " + dateFromManifest);
       props.setProperty("releaseDate",dateFromManifest);
     }
-    try {
+/*    try {
       foregroundBlend = Double.parseDouble(props.getProperty(FOREGROUND_BLEND, FOREGROUND_BLEND_DEFAULT));
     } catch (NumberFormatException e) {
       logger.error("Couldn't parse property " + FOREGROUND_BLEND, e);
@@ -252,7 +249,7 @@ public class ServerProperties {
       } catch (NumberFormatException e1) {
         e1.printStackTrace();
       }
-    }
+    }*/
 
     try {
       minPronScore = Double.parseDouble(props.getProperty(MIN_PRON_SCORE, MIN_PRON_SCORE_DEFAULT));
