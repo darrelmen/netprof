@@ -589,7 +589,7 @@ public class ASRScoring extends Scoring {
    * @param modelsDir
    * @deprecated shouldn't be called anymore
    */
-  private void createGrammarFile(String modelsDir) {
+/*  private void createGrammarFile(String modelsDir) {
     String grammarAlignTemplate = modelsDir + File.separator + GRAMMAR_ALIGN_TEMPLATE;
     String grammarAlign = modelsDir + File.separator +GRAMMAR_ALIGN;
     Map<String,String> kv2 = new HashMap<String, String>();
@@ -597,7 +597,7 @@ public class ASRScoring extends Scoring {
 
     // grammar align file points to a dictionary file in the models directory...
     doTemplateReplace(grammarAlignTemplate,grammarAlign,kv2);
-  }
+  }*/
 
   /**
    * Creates a hydec config file from a template file by doing variable substitution.<br></br>
