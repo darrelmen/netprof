@@ -28,6 +28,7 @@ public class Site implements IsSerializable {
   private boolean deployed;
   //private long creationDate;
   public String creationDateReadable;
+  private boolean valid = true;
 
   public Site() {}
 
@@ -47,7 +48,7 @@ public class Site implements IsSerializable {
    * @param timestamp
    */
   public Site(long id, long creatorID, String name, String language, String notes, String exerciseFile, String filePath, String savedFileName,
-              String feedback, boolean deployed, long timestamp,
+              String feedback, boolean deployed, //long timestamp,
               String creationDateReadable) {
     this.id = id;
     this.creatorID = creatorID;
@@ -91,6 +92,14 @@ public class Site implements IsSerializable {
   }
 
 
+  public boolean isValid() {
+    return valid;
+  }
+
+  public void setValid(boolean valid) {
+    this.valid = valid;
+  }
+
   public String toString() { return "Site : id " + id + " name " +name + " lang " +language + " creatorID " +creatorID +
       " notes " +notes + " file " + getExerciseFile() + " path "+ getSavedExerciseFile() + " saved file name " + savedExerciseFileName;}
 
@@ -98,6 +107,10 @@ public class Site implements IsSerializable {
     return exerciseFile;
   }
 
+  /**
+   * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(Site, String, java.io.InputStream)
+   * @param exerciseFile
+   */
   public void setExerciseFile(String exerciseFile) {
     this.exerciseFile = exerciseFile;
   }
@@ -106,6 +119,10 @@ public class Site implements IsSerializable {
     return savedExerciseFile;
   }
 
+  /**
+   * @see mitll.langtest.server.SiteDeployer#storeUploadedFile(String, Site, org.apache.commons.fileupload.disk.DiskFileItem)
+   * @param savedExerciseFile
+   */
   public void setSavedExerciseFile(String savedExerciseFile) {
     this.savedExerciseFile = savedExerciseFile;
   }
