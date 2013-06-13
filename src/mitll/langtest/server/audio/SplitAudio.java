@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -63,27 +64,42 @@ public class SplitAudio {
   private static final String SLOW = "Slow";
   private AudioCheck audioCheck = new AudioCheck();
 
-  public void normalize(String audioDir) {
-
+  /**
+   * Write out an analist and a transcript file suitable for use with the englishRecalcPhoneNormalizer.cfg config
+   */
+  public void normalize() {
+    String audioDir = "englishAudio";
     final String placeToPutAudio = ".."+ File.separator+audioDir + File.separator;
-    final File bestDir = new File(placeToPutAudio + "bestAudio");
+    final File bestDir = new File(placeToPutAudio + "refAudio");
     File[] bestAudioDirs = bestDir.listFiles();
     String[] list = bestDir.list();
     logger.warn("in " +bestDir.getAbsolutePath() + " there are " + list.length);
 
     List<File> temp = Arrays.asList(bestAudioDirs);
-    temp = temp.subList(0,3); // for now
+   // temp = temp.subList(0,3); // for now
 
     String language = "english";
     final String configDir = getConfigDir(language);
+
+    DatabaseImpl unitAndChapter = new DatabaseImpl(
+      configDir,
+      language,
+      configDir+
+        "ESL_ELC_5071-30books_chapters.xlsx");
+    final Map<String, Exercise> idToEx = getIdToExercise(unitAndChapter);
+
     try {
       String fileName = configDir + "analist";
       File analistFile = new File(fileName);
       final FileWriter analist = new FileWriter(analistFile);
-      int i = 0;
-      Set<String> valid = new HashSet<String>();
+
+
+      String fileName2 = configDir + "transcript";
+      File transcriptFile = new File(fileName2);
+      final FileWriter transcript = new FileWriter(transcriptFile);
+
       for (File file1 : temp) {
-      //  File file1 = new File(file);
+        logger.warn("reading from " + file1.getName());
         if (!file1.exists()) {
              logger.error("huh? " +file1.getAbsolutePath() + " doesn't exist");
         }
@@ -91,78 +107,37 @@ public class SplitAudio {
           logger.error("huh? " +file1.getAbsolutePath() + " is not a directory...");
 
         }
-        File[] files = file1.listFiles();
+        File[] files = file1.listFiles(new FileFilter() {
+          @Override
+          public boolean accept(File pathname) {
+            return pathname.getName().endsWith(".raw");
+          }
+        });
         String dirname = file1.getName();
-     //   int i1 = Integer.parseInt(dirname);
-        valid.add(dirname);
-        if (files != null) {
-          for (File wav : files) {
-            System.out.println("path " + wav.getPath());
-            boolean isFast = (wav.getName().startsWith("Fast"));
-            String id = dirname + (isFast ? "F" : "S");
-            analist.write(id + " " + wav.getPath().replace(".wav",".raw") + "\n");
+        Exercise exercise = idToEx.get(dirname);
 
-            File answer = wav;
-            String name = answer.getName().replaceAll(".wav", "");
-            String parent = answer.getParent();
-
-            double durationInSeconds = getDuration(answer, parent);
-            if (durationInSeconds < MIN_DUR) {
-              if (durationInSeconds > 0) logger.warn("skipping " + name + " since it's less than a 1/2 second long.");
-              continue;
-            }
-            String testAudioFileNoSuffix = getConverted(parent, name);
-            logger.info("converted " + testAudioFileNoSuffix);
+        if (files != null && exercise != null) {
+          for (File rawFile : files) {
+            String id = rawFile.getName().replace(".raw","");
+            analist.write(id + " " + ensureForwardSlashes(rawFile.getPath())+ "\n");
+            transcript.write("<s> "+getEnglishRefSentence(exercise.getEnglishSentence()) +" </s> (" +id+
+              ")"+
+              "\n");
           }
         }
       }
       analist.close();
       logger.debug("wrote to " +analistFile.getAbsolutePath());
-
-      DatabaseImpl unitAndChapter = new DatabaseImpl(
-        configDir,
-        language,
-        configDir+
-          "ESL_ELC_5071-30books_chapters.xlsx");
-
-      String fileName2 = configDir + "transcript";
-      File transcriptFile = new File(fileName2);
-      final FileWriter transcript = new FileWriter(transcriptFile);
-      i = 0;
-      for (Exercise e:unitAndChapter.getExercises()) {
-        if (valid.contains(e.getID())) {
-        //  String id = dirname + (isFast ? "F" : "S");
-
-          transcript.write(e.getEnglishSentence() +" (" +e.getID()+ "F"+
-            ")"+
-            "\n");
-          transcript.write(e.getEnglishSentence() +" (" +e.getID()+ "S"+
-            ")"+
-            "\n");
-        }
-      }
       transcript.close();
       logger.debug("wrote to " +transcriptFile.getAbsolutePath());
     } catch (IOException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-    //  Set<String> files = new HashSet<String>(Arrays.asList(list));
-
-    try {
-      final Map<String, String> properties = getProperties(language, configDir);
-      ASRScoring scoring = getAsrScoring(".", null, properties);
-
-//    checkLTS(exercises, scoring.getLTS());
-
-      final HTKDictionary dict = scoring.getDict();
-
-      ASRScoring asrScoring = getAsrScoring(".", dict, properties);
-
-    } catch (Exception e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      logger.error("got "+e,e);
     }
   }
 
+  private String ensureForwardSlashes(String wavPath) {
+    return wavPath.replaceAll("\\\\", "/");
+  }
   public void dumpDirEnglish () {
    // logger.warn("audio dir " + audioDir + " lang " + language + " db " +dbName + " spreadsheet " + spreadsheet);
 
@@ -722,9 +697,8 @@ public class SplitAudio {
                        HTKDictionary dictionary, Map<String, String> properties,
                        List<Result> resultsForExercise, String exid, Exercise exercise, String language) throws IOException {
     String refSentence = language.equalsIgnoreCase("english") ? exercise.getEnglishSentence() : exercise.getRefSentence();
-    refSentence = refSentence.replaceAll("\\p{P}", "");
     String[] split = refSentence.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
-    refSentence = getRefSentence(split).trim();
+    refSentence = getRefSentence(refSentence, split);
     int refLength = split.length;
     String firstToken = split[0].trim();
     String lastToken = split[refLength-1].trim();
@@ -761,6 +735,22 @@ public class SplitAudio {
         missingSlow.flush();
       }
     }
+  }
+
+  private String getRefSentence(String refSentence) {
+    String[] split = refSentence.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
+    return getRefSentence(refSentence, split);
+  }
+
+  private String getEnglishRefSentence(String refSentence) {
+    String[] split = refSentence.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
+    return getRefSentence(refSentence, split).toUpperCase();
+  }
+
+  private String getRefSentence(String refSentence, String[] split) {
+    refSentence = refSentence.replaceAll("\\p{P}", "");
+    refSentence = getRefSentence(split).trim();
+    return refSentence;
   }
 
   private String getRefSentence(String[] refSentences) {
@@ -1289,7 +1279,7 @@ public class SplitAudio {
 
   public static void main(String [] arg) {
     try {
-      new SplitAudio().dumpDirEnglish();
+      new SplitAudio().normalize();
 
        if (true) return;
 
@@ -1299,7 +1289,7 @@ public class SplitAudio {
 //      new SplitAudio().convertEnglish(numThreads,audioDir);
        // new SplitAudio().dumpDir2(audioDir);
       if (arg.length == 2) {
-        new SplitAudio().normalize(audioDir);
+        new SplitAudio().normalize();
       } else {
         String language = arg[2];
         String spreadsheet = arg[3];
