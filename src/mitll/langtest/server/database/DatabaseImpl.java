@@ -409,13 +409,13 @@ public class DatabaseImpl implements Database {
   }
 
   private static class UserStateWrapper {
-    public UserState state;
+    public final UserState state;
     private int correct = 0;
     private int incorrect = 0;
     private int counter = 0;
     private List<Integer> correctHistory = new ArrayList<Integer>();
-    private List<Exercise> exercises;
-    private Random random;
+    private final List<Exercise> exercises;
+    private final Random random;
 
     public UserStateWrapper(UserState state, long userID, List<Exercise> exercises) {
       this.state = state;
@@ -462,6 +462,11 @@ public class DatabaseImpl implements Database {
 
     public Exercise getNextExercise() {
       return exercises.get(counter++ % exercises.size()); // defensive
+    }
+
+    public String toString() {
+      return "UserState : correct " + correct + " incorrect " + incorrect +
+        " num exercises " + getNextExercise() + " is complete " + isComplete();
     }
   }
 
