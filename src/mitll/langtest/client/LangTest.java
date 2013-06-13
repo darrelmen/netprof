@@ -711,60 +711,65 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void setFactory(final long userID) {
     final LangTest outer =this;
     if (props.isGoodwaveMode()) {
-      GWT.runAsync(new RunAsyncCallback() {
+/*      GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           Window.alert("Code download failed");
         }
 
         public void onSuccess() {
-          exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer), userManager, 1);
-          doEverythingAfterFactory(userID);
+
         }
-      });
+      });*/
+      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer), userManager, 1);
+      doEverythingAfterFactory(userID);
     } else if (props.isGrading()) {
-      GWT.runAsync(new RunAsyncCallback() {
+/*      GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           Window.alert("Code download failed");
         }
 
         public void onSuccess() {
-          exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer), userManager, props.getNumGradesToCollect());
-          doEverythingAfterFactory(userID);
+
         }
-      });
+      });*/
+      exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer), userManager, props.getNumGradesToCollect());
+      doEverythingAfterFactory(userID);
     } else if (props.isFlashCard()) {
-      GWT.runAsync(new RunAsyncCallback() {
+ /*     GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           Window.alert("Code download failed");
         }
 
         public void onSuccess() {
-          exerciseList.setFactory(new FlashcardExercisePanelFactory(service, outer, outer), userManager, 1);
-          doEverythingAfterFactory(userID);
+
         }
-      });
+      });*/
+      exerciseList.setFactory(new FlashcardExercisePanelFactory(service, outer, outer), userManager, 1);
+      doEverythingAfterFactory(userID);
     } else if (props.isDataCollectMode() && props.isCollectAudio() && !props.isCRTDataCollectMode()) {
-      GWT.runAsync(new RunAsyncCallback() {
+ /*     GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           Window.alert("Code download failed");
         }
 
         public void onSuccess() {
-          exerciseList.setFactory(new WaveformExercisePanelFactory(service, outer, outer), userManager, 1);
-          doEverythingAfterFactory(userID);
+
         }
-      });
+      });*/
+      exerciseList.setFactory(new WaveformExercisePanelFactory(service, outer, outer), userManager, 1);
+      doEverythingAfterFactory(userID);
     } else {
-      GWT.runAsync(new RunAsyncCallback() {
+/*      GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           Window.alert("Code download failed");
         }
 
         public void onSuccess() {
-          exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer), userManager, 1);
-          doEverythingAfterFactory(userID);
+
         }
-      });
+      });*/
+      exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer), userManager, 1);
+      doEverythingAfterFactory(userID);
     }
 
     if (getLanguage().equalsIgnoreCase("Pashto")) {
