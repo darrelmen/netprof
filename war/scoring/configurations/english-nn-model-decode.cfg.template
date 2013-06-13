@@ -92,7 +92,7 @@ frame-window: 13
 
 [pron.NNScore]
 phone-index: MODELS_DIR/phones.index
-phone-normalizer: MODELS_DIR/phones.normalizer.120k.nonorm
+phone-normalizer: MODELS_DIR/npfESLphones.normalizer
 silence-norm: false
 
 [decode.HybridDecode]
