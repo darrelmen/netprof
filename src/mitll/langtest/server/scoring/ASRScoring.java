@@ -625,7 +625,7 @@ public class ASRScoring extends Scoring {
       kv.put(LM_TO_USE, tmpDir +File.separator +File.separator + SMALL_LM_SLF); // hack! TODO hack replace
       if (letterToSoundClass != null) {
         String value = letterToSoundClass.getClass().toString();
-        logger.info("setting lts to " + value);
+       // logger.info("setting lts to " + value);
         kv.put(LTS_CLASS, value);
       }
 
