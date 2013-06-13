@@ -69,13 +69,10 @@ public class DatabaseImpl implements Database {
    * TODO : consider making proper v2 database!
    */
   private String lessonPlanFile;
-  private String relativeConfigDir;
-  private boolean isUrdu;
   private boolean isWordPairs;
   private boolean useFile;
   private boolean isFlashcard;
-  private final boolean showSections;
-  private String language;
+  private String language = "";
   private boolean doImages;
   private final String configDir;
   private final String absConfigDir;
@@ -92,7 +89,7 @@ public class DatabaseImpl implements Database {
    */
 
   public DatabaseImpl(String configDir, String dbName, String lessonPlanFile) {
-    this(configDir, dbName, false,false,"", false, "",false,false);
+    this(configDir, dbName, false,"", false, "",false,false);
     this.useFile = true;
     this.lessonPlanFile = lessonPlanFile;
   }
@@ -101,14 +98,12 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    * @param configDir
    * @param dbName
-   * @param showSections
    * @param doImages
    */
-  public DatabaseImpl(String configDir, String dbName, boolean showSections, boolean isWordPairs,
+  public DatabaseImpl(String configDir, String dbName, boolean isWordPairs,
                       String language, boolean doImages, String relativeConfigDir, boolean isFlashcard, boolean usePredefinedTypeOrder) {
     connection = new H2Connection(configDir, dbName);
     absConfigDir = configDir;
-    this.showSections = showSections;
     this.isWordPairs = isWordPairs;
     this.doImages = doImages;
     this.language = language;
@@ -185,7 +180,7 @@ public class DatabaseImpl implements Database {
    * @return
    */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    return useFile ? new FileExerciseDAO(mediaDir, language, showSections, isFlashcard) : new SQLExerciseDAO(this, mediaDir);
+    return useFile ? new FileExerciseDAO(mediaDir, language, isFlashcard) : new SQLExerciseDAO(this, mediaDir);
   }
 
   /**
@@ -201,9 +196,7 @@ public class DatabaseImpl implements Database {
    // logger.debug("got install path " + installPath + " media " + mediaDir + " is urdu " +isUrdu);
     this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
-    this.relativeConfigDir = relativeConfigDir;
     this.mediaDir = mediaDir;
-    this.isUrdu = language.equalsIgnoreCase("Urdu");
     this.useFile = useFile;
     this.language = language;
     this.isRTL = isRTL;
@@ -256,7 +249,7 @@ public class DatabaseImpl implements Database {
   private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel, String mediaDir, boolean isRTL) {
     if (exerciseDAO == null) {
       if (useFile && excel) {
-        this.exerciseDAO = new ExcelImport(lessonPlanFile, isFlashcard, mediaDir, isRTL, absConfigDir, usePredefinedTypeOrder, language);
+        this.exerciseDAO = new ExcelImport(lessonPlanFile, isFlashcard, mediaDir, absConfigDir, usePredefinedTypeOrder, language);
       }
       else {
         this.exerciseDAO = makeExerciseDAO(useFile);
@@ -848,12 +841,11 @@ public class DatabaseImpl implements Database {
   /**
    * An attempt to bias collection so that items that have only been answered correctly are shown more often
    * since we want an even distribution of correct and incorrect responses.
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesInModeDependentOrder(long, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesInModeDependentOrder
    */
   public List<Exercise> getRandomBalancedList(long userID) {
     List<Exercise> exercisesGradeBalancing = getExercisesGradeBalancing(userID);
     return exercisesGradeBalancing;
-    //return getRandomList(exercisesGradeBalancing);
   }
 
 /*  private List<Exercise> getRandomList(List<Exercise> exercisesGradeBalancing) {
