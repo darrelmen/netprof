@@ -53,7 +53,7 @@ public class ExcelImport implements ExerciseDAO {
   private Set<Integer> missingFastSet = new HashSet<Integer>();
   private boolean shouldHaveRefAudio = false;
   private boolean usePredefinedTypeOrder;
-  private String language;
+  private final String language;
 
   /**
    * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
@@ -61,18 +61,18 @@ public class ExcelImport implements ExerciseDAO {
   public ExcelImport() {
     this.file = null;
     this.isFlashcard = false;
+    this.language = "";
   }
 
   /**
    * @see DatabaseImpl#makeDAO
    * @param file
    * @param isFlashcard
-   * @param isRTL
    * @param relativeConfigDir
    * @param usePredefinedTypeOrder
    * @param language
    */
-  public ExcelImport(String file, boolean isFlashcard, String mediaDir, boolean isRTL, String relativeConfigDir,
+  public ExcelImport(String file, boolean isFlashcard, String mediaDir, String relativeConfigDir,
                      boolean usePredefinedTypeOrder, String language) {
     this.file = file;
     this.isFlashcard = isFlashcard;
@@ -199,7 +199,7 @@ public class ExcelImport implements ExerciseDAO {
     }
     int id = 0;
     boolean gotHeader = false;
-    FileExerciseDAO dao = new FileExerciseDAO("",language, false, isFlashcard);
+    FileExerciseDAO dao = new FileExerciseDAO("",language, isFlashcard);
 
     int colIndexOffset = -1;
 
@@ -416,7 +416,7 @@ public class ExcelImport implements ExerciseDAO {
     return foreignLanguagePhrase;
   }
 
-  private void checkLTS(int id, BufferedWriter writer, SmallVocabDecoder svd, ModernStandardArabicLTS lts, String english, String foreignLanguagePhrase) {
+/*  private void checkLTS(int id, BufferedWriter writer, SmallVocabDecoder svd, ModernStandardArabicLTS lts, String english, String foreignLanguagePhrase) {
     List<String> tokens = svd.getTokens(foreignLanguagePhrase);
     try {
 
@@ -438,7 +438,7 @@ public class ExcelImport implements ExerciseDAO {
       logger.error("couldn't do lts on " + (id - 1) + " " + foreignLanguagePhrase + " " + english);
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
-  }
+  }*/
 
   /**
    * @see #readFromSheet(org.apache.poi.ss.usermodel.Sheet)
@@ -618,7 +618,7 @@ public class ExcelImport implements ExerciseDAO {
 
   public static void main(String [] arg) {
     ExcelImport config = new ExcelImport(
-      "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\english\\ESL_ELC_5071-30books_chapters.xlsx", false, "config\\bestAudio", false, "war\\config\\english", true, "English");
+      "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\english\\ESL_ELC_5071-30books_chapters.xlsx", false, "config\\bestAudio", "war\\config\\english", true, "English");
     List<Exercise> rawExercises = config.getRawExercises();
 
     try {
