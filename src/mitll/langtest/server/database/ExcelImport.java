@@ -83,7 +83,7 @@ public class ExcelImport implements ExerciseDAO {
       " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());
   }
 
-  private boolean getMissing(String relativeConfigDir,String file, Set<String> missing) {
+  public boolean getMissing(String relativeConfigDir, String file, Set<String> missing) {
     File missingSlow = new File(relativeConfigDir, file);
     if (missingSlow.exists()) {
       try {
