@@ -10,6 +10,6 @@ import mitll.langtest.shared.scoring.PretestScore;
  * To change this template use File | Settings | File Templates.
  */
 public interface ScoreListener {
-  void gotScore(PretestScore score);
+  void gotScore(PretestScore score, boolean showOnlyOneExercise);
   int getOffsetWidth();
 }
