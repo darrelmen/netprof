@@ -56,7 +56,7 @@ public class SplitAudio {
   private static Logger logger = Logger.getLogger(SplitAudio.class);
 
   private boolean debug;
-  private static final int MAX = 22000;
+  private static final int MAX = 5;// 22000;
   public static final double BAD_PHONE = 0.1;
   public static final double BAD_PHONE_PERCENTAGE = 0.2;
   private static final double MIN_DUR = 0.2;
@@ -94,6 +94,155 @@ public class SplitAudio {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
   }
+
+  public void splitSimpleMSA(int numThreads) {
+    File file = new File("war");
+    file = new File(file,"config");
+    file = new File(file,"msa");
+    file = new File(file,"headstartMedia");
+    File[] files = file.listFiles(new FileFilter() {
+      @Override
+      public boolean accept(File pathname) {
+        String name = pathname.getName();
+        return name.endsWith(".wav") && !name.contains("16K") ;
+      }
+    });
+    logger.info("got " + files.length+ " files ");
+
+    String language = "msa";
+    final String configDir = getConfigDir(language);
+
+
+   DatabaseImpl unitAndChapter = new DatabaseImpl(
+      configDir,
+     language,
+      configDir+
+        "MSA-headstart.xlsx");
+    final Map<String, Exercise> idToEx = getIdToExercise(unitAndChapter);
+    final String placeToPutAudio = ".."+ File.separator+"msaHeadstartAudio" + File.separator;
+    final File newRefDir = new File(placeToPutAudio + "refAudio");
+    newRefDir.mkdir();
+
+    final File newRefDir2 = new File(placeToPutAudio + "refAudio2");
+    newRefDir2.mkdir();
+
+    try {
+      final Map<String, String> properties = getProperties(language, configDir);
+      ASRScoring scoringFirst = getAsrScoring(".", null, properties);
+      final HTKDictionary dict = scoringFirst.getDict();
+
+      List<File> sublist = Arrays.asList(files);
+   //   sublist = sublist.subList(0, 3);
+
+      ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
+
+       final FileWriter missingSlow = new FileWriter(configDir + "missingSlow.txt");
+        final FileWriter missingFast = new FileWriter(configDir + "missingFast.txt");
+
+      List<Future<?>> futures = new ArrayList<Future<?>>();
+      for (final File unsplit : sublist) {
+        Future<?> submit = executorService.submit(new Runnable() {
+          @Override
+          public void run() {
+            try {
+              writeOneMSAFile("msa", idToEx, newRefDir, properties, dict, unsplit, missingFast, missingSlow);
+            } catch (Exception e) {
+              logger.error("Doing " + unsplit.getName() + " Got " + e, e);
+            }
+          }
+        });
+        futures.add(submit);
+      }
+
+      blockUntilComplete(futures);
+
+        missingFast.close();
+         missingSlow.close();
+      logger.info("closing missing slow");
+      executorService.shutdown();
+
+    /*  for (File unsplit : sublist) {
+        writeOneMSAFile(language, idToEx, newRefDir, properties, dict, unsplit);
+      }*/
+    } catch (Exception e) {
+      logger.error("got " + e);
+    }
+  }
+
+  private void writeOneMSAFile(String language, Map<String, Exercise> idToEx, File newRefDir, Map<String, String> properties, HTKDictionary dict, File unsplit, FileWriter missingFast,
+                               FileWriter missingSlow) {
+    String name = unsplit.getName().replaceAll(".wav", "");
+    String parent = /*"." + File.separator + */unsplit.getParent();
+
+    double durationInSeconds = getDuration(unsplit, parent);
+    if (durationInSeconds < MIN_DUR) {
+      if (durationInSeconds > 0) logger.warn("skipping " + name + " since it's less than a 1/2 second long.");
+      return;
+    }
+    String testAudioFileNoSuffix = getConverted(parent, name);
+
+    Exercise exercise = idToEx.get(name);
+    if (exercise == null) {
+
+      recordMissing(missingFast, missingSlow, name);
+      return;
+    }
+    String refSentence = language.equalsIgnoreCase("english") ? exercise.getEnglishSentence() : exercise.getRefSentence();
+    refSentence = refSentence.replaceAll("\\p{P}", "");
+
+    String[] split = refSentence.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
+    refSentence = getRefSentence(refSentence, split);
+    int refLength = split.length;
+    String firstToken = split[0].trim();
+    String lastToken = split[refLength - 1].trim();
+
+    ASRScoring scoring = getAsrScoring(".",dict,properties);
+    Scores align = getAlignmentScores(scoring, refSentence, name, parent, testAudioFileNoSuffix);
+
+    if (align.hydecScore == -1) {
+      recordMissing(missingFast, missingSlow, name);
+      return;
+    }
+    try {
+      String wordLabFile = prependDeploy(parent, testAudioFileNoSuffix + ".words.lab");
+
+      GetAlignments alignments = new GetAlignments(firstToken, lastToken, refLength, name, wordLabFile).invoke();
+      boolean valid = alignments.isValid();
+      float hydecScore = align.hydecScore;
+      if (!valid) {
+        logger.warn("\n---> ex " + name + " " + exercise.getEnglishSentence() +
+          " score " + hydecScore +
+          " invalid alignment : " + alignments.getWordSeq() + " : " + alignments.getScores());
+      }
+      File refDirForExercise = new File(newRefDir, name);
+      refDirForExercise.mkdir();
+      if (//bestTotal < hydecScore &&
+        valid && hydecScore > 0.1f) {
+
+        FastAndSlow consistent = writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
+          alignments, true);
+        if (!consistent.valid) logger.error(name + " not valid");
+      }
+    } catch (Exception e) {
+      logger.error("got " + e);
+    }
+  }
+
+  private void recordMissing(FileWriter missingFast, FileWriter missingSlow, String name) {
+    try {
+      synchronized (missingFast) {
+        missingFast.write(name + "\n");
+        missingFast.flush();
+      }
+      synchronized (missingSlow) {
+        missingSlow.write(name + "\n");
+        missingSlow.flush();
+      }
+    } catch (IOException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+  }
+
   /**
    * Write out an analist and a transcript file suitable for use with the englishRecalcPhoneNormalizer.cfg config
    */
@@ -473,7 +622,6 @@ public class SplitAudio {
                                Map<String, List<Result>> idToResults, Set<Long> nativeUsers) throws IOException, InterruptedException, ExecutionException {
     final String configDir = getConfigDir(language);
 
-
     final String placeToPutAudio = ".."+ File.separator+audioDir + File.separator;
     final File newRefDir = new File(placeToPutAudio + "refAudio");
     newRefDir.mkdir();
@@ -829,8 +977,8 @@ public class SplitAudio {
       Scores align = getAlignmentScores(scoring, refSentence, name, parent, testAudioFileNoSuffix);
 
       try {
-        String wordLabFile = prependDeploy(parent,testAudioFileNoSuffix + ".words.lab");
-        GetAlignments alignments = new GetAlignments(first,last, refLength, name, wordLabFile).invoke();
+        String wordLabFile = prependDeploy(parent, testAudioFileNoSuffix + ".words.lab");
+        GetAlignments alignments = new GetAlignments(first, last, refLength, name, wordLabFile).invoke();
         boolean valid = alignments.isValid();
         float hydecScore = align.hydecScore;
         if (!valid) {
@@ -841,7 +989,7 @@ public class SplitAudio {
         if (//bestTotal < hydecScore &&
           valid && hydecScore > 0.1f) {
           FastAndSlow consistent = writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
-            alignments);
+            alignments, false);
           if (consistent.valid) {
             File fastFile = consistent.fast;
             File slowFile = consistent.slow;
@@ -878,29 +1026,13 @@ public class SplitAudio {
                   " best so far is " + bestSlowFile.getName() + " score " + bestSlow + " hydecScore " + hydecScore + "/" + slow.hydecScore);
               }
             }
-
-          //  bestTotal = hydecScore;
-          //  best = testAudioFileNoSuffix;
-
-           // logger.debug("new best : ex " + id + " " + exercise.getEnglishSentence() + " best so far is " + best + " score " + bestTotal + " hydecScore " + hydecScore);
           }
-        }/* else if (valid) {
-          logger.debug("ex " + id + " " + exercise.getEnglishSentence() + " best so far is " + best + " score " + bestTotal + " hydecScore " + hydecScore);
-          writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
-            alignments);
-        }*/
-       /* if (valid) {//alignments.isValid()) {
-          writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
-            alignments);
-        }*/
-
-/*            logger.debug("writing ref files to " + refDirForExercise.getName() + " input " + longFileFile.getName() +
-            " Start " + start1 + " " + dur1 + " start2 " + start2 + " dur " + dur2);*/
+        }
       } catch (IOException e) {
-        e.printStackTrace();
+        logger.error("Got " + e, e);
       }
     }
-    return new FastAndSlow(bestFastFile,bestSlowFile);
+    return new FastAndSlow(bestFastFile, bestSlowFile);
   }
 
   private float getPercentBadPhones(String fastName, Map<String, Float> phones) {
@@ -931,14 +1063,6 @@ public class SplitAudio {
     logger.debug("\tgot " + align + " for " + name + " for '" +doubled +"'");
     return align;
   }
-/*
-
-  private String getConverted(String collectedAudioDir, File answer) {
-    String name = answer.getName().replaceAll(".wav", "");
-    String parent = collectedAudioDir + File.separator + answer.getParent();
-    return getConverted(parent, name);
-  }
-*/
 
   private String getConverted(File answer) {
     String name = answer.getName().replaceAll(".wav", "");
@@ -1007,7 +1131,7 @@ public class SplitAudio {
   }
 
   private FastAndSlow writeTheTrimmedFiles(File refDirForExercise, String parent, float floatDur, String testAudioFileNoSuffix,
-                                    GetAlignments alignments) {
+                                           GetAlignments alignments, boolean remove16K) {
     float pad = 0.25f;
 
     float start1 = alignments.getStart1();
@@ -1083,7 +1207,8 @@ public class SplitAudio {
       return new FastAndSlow();
     } else {
 
-      fast = new File(refDirForExercise, testAudioFileNoSuffix + "_" + FAST + ".wav");
+      String nameToUse = remove16K ? testAudioFileNoSuffix.replace("_16K","") : testAudioFileNoSuffix;
+      fast = new File(refDirForExercise, nameToUse + "_" + FAST + ".wav");
       audioConverter.trim(sox,
         longFileFile.getAbsolutePath(),
         fast.getAbsolutePath(),
@@ -1104,7 +1229,9 @@ public class SplitAudio {
         logger.warn("Skipping audio " + longFileFile.getName() + " since slow audio shorter than fast.");*/
       return new FastAndSlow();
     } else {
-      slow = new File(refDirForExercise, testAudioFileNoSuffix + "_" + SLOW + ".wav");
+      String nameToUse = remove16K ? testAudioFileNoSuffix.replace("_16K","") : testAudioFileNoSuffix;
+
+      slow = new File(refDirForExercise, nameToUse + "_" + SLOW + ".wav");
       audioConverter.trim(sox,
         longFileFile.getAbsolutePath(),
         slow.getAbsolutePath(),
@@ -1308,11 +1435,12 @@ public class SplitAudio {
 
   public static void main(String [] arg) {
     try {
-      new SplitAudio().checkTamas();
-
-       if (true) return;
-
       int numThreads = Integer.parseInt(arg[0]);
+      //  new SplitAudio().checkTamas();
+       new SplitAudio().splitSimpleMSA(numThreads);
+
+    if (true) return;
+
       String audioDir = arg[1];
       // new SplitAudio().convertExamples(numThreads, audioDir, arg[2], arg[3]);
 //      new SplitAudio().convertEnglish(numThreads,audioDir);
@@ -1323,8 +1451,8 @@ public class SplitAudio {
         String language = arg[2];
         String spreadsheet = arg[3];
         String dbName = arg[4];
-     //   new SplitAudio().convertExamples(numThreads, audioDir, language, spreadsheet, dbName);
-        new SplitAudio().dumpDir2(audioDir, language, dbName, spreadsheet);
+        new SplitAudio().convertExamples(numThreads, audioDir, language, spreadsheet, dbName);
+     //   new SplitAudio().dumpDir2(audioDir, language, dbName, spreadsheet);
 
       }
     } catch (Exception e) {
