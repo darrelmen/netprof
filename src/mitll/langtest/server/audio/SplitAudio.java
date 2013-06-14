@@ -9,6 +9,7 @@ import corpus.LTS;
 import mitll.langtest.server.AudioCheck;
 import mitll.langtest.server.AudioConversion;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.ExcelImport;
 import mitll.langtest.server.database.FileExerciseDAO;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.scoring.ASRScoring;
@@ -52,11 +53,16 @@ import java.util.concurrent.Future;
  * To change this template use File | Settings | File Templates.
  */
 public class SplitAudio {
-  public static final double DURATION_CHECK = 1.2;
+  private static final double DURATION_CHECK = 1.2;
+
+  private static final int LOW_WORD_SCORE_THRESHOLD = 20;
+  private static final boolean THROW_OUT_FAST_LONGER_THAN_SLOW = false;
+  private static final float MSA_MIN_SCORE = 0.2f;
+
   private static Logger logger = Logger.getLogger(SplitAudio.class);
 
   private boolean debug;
-  private static final int MAX = 5;// 22000;
+  private static final int MAX = 22000;
   public static final double BAD_PHONE = 0.1;
   public static final double BAD_PHONE_PERCENTAGE = 0.2;
   private static final double MIN_DUR = 0.2;
@@ -98,20 +104,29 @@ public class SplitAudio {
   public void splitSimpleMSA(int numThreads) {
     File file = new File("war");
     file = new File(file,"config");
-    file = new File(file,"msa");
-    file = new File(file,"headstartMedia");
+    File relativeConfigDir = new File(file,"msa");
+    file = new File(relativeConfigDir,"headstartMediaOriginal");
+
+
+    final Set<String> rerunSet = new HashSet<String>();
+    new ExcelImport().getMissing(relativeConfigDir.getPath(),"rerun.txt",rerunSet);
+    logger.info("rerun " + rerunSet);
+
+  //  if (true) return;
+
     File[] files = file.listFiles(new FileFilter() {
       @Override
       public boolean accept(File pathname) {
         String name = pathname.getName();
-        return name.endsWith(".wav") && !name.contains("16K") ;
+        boolean inRerun = rerunSet.contains(name.substring(0,name.length()-4)) || rerunSet.isEmpty();
+        if (inRerun) logger.debug("redoing " + name);
+        return inRerun && name.endsWith(".wav") && !name.contains("16K") ;
       }
     });
     logger.info("got " + files.length+ " files ");
 
     String language = "msa";
     final String configDir = getConfigDir(language);
-
 
    DatabaseImpl unitAndChapter = new DatabaseImpl(
       configDir,
@@ -132,12 +147,12 @@ public class SplitAudio {
       final HTKDictionary dict = scoringFirst.getDict();
 
       List<File> sublist = Arrays.asList(files);
-   //   sublist = sublist.subList(0, 3);
+      //   sublist = sublist.subList(0, 3);
 
       ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
 
-       final FileWriter missingSlow = new FileWriter(configDir + "missingSlow.txt");
-        final FileWriter missingFast = new FileWriter(configDir + "missingFast.txt");
+      final FileWriter missingSlow = new FileWriter(configDir + "missingSlow.txt");
+      final FileWriter missingFast = new FileWriter(configDir + "missingFast.txt");
 
       List<Future<?>> futures = new ArrayList<Future<?>>();
       for (final File unsplit : sublist) {
@@ -199,7 +214,8 @@ public class SplitAudio {
     ASRScoring scoring = getAsrScoring(".",dict,properties);
     Scores align = getAlignmentScores(scoring, refSentence, name, parent, testAudioFileNoSuffix);
 
-    if (align.hydecScore == -1) {
+    if (align.hydecScore == -1 || align.hydecScore < MSA_MIN_SCORE) {
+      logger.warn("-----> adding " + name + " to missing list b/c of score = " +align.hydecScore);
       recordMissing(missingFast, missingSlow, name);
       return;
     }
@@ -216,11 +232,37 @@ public class SplitAudio {
       }
       File refDirForExercise = new File(newRefDir, name);
       refDirForExercise.mkdir();
-      if (//bestTotal < hydecScore &&
-        valid && hydecScore > 0.1f) {
-
+      if (valid && hydecScore > 0.1f) {
         FastAndSlow consistent = writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
           alignments, true);
+
+        if (consistent.valid) {
+          File fastFile = consistent.fast;
+          String fastName = fastFile.getName().replaceAll(".wav", "");
+
+          Scores fast = getAlignmentScoresNoDouble(scoring, refSentence, fastName, fastFile.getParent(), getConverted(fastFile));
+          if (fast.hydecScore > MSA_MIN_SCORE) {
+            float percentBadFast = getPercentBadPhones(fastName, fast.eventScores.get("phones"));
+            if (percentBadFast > BAD_PHONE_PERCENTAGE) {
+              logger.warn("---> rejecting new best b/c % bad phones = " + percentBadFast + " so not new best fast : ex " + name + //" " + exercise.getEnglishSentence() +
+                " hydecScore " + hydecScore + "/" + fast.hydecScore);
+              recordMissingFast(missingFast,name);
+            }
+          }
+
+          File slowFile = consistent.slow;
+          String slowName = slowFile.getName().replaceAll(".wav", "");
+          Scores slow = getAlignmentScoresNoDouble(scoring, refSentence, slowName, slowFile.getParent(), getConverted(slowFile));
+          if (slow.hydecScore > MSA_MIN_SCORE) {
+            float percentBadSlow = getPercentBadPhones(slowName, slow.eventScores.get("phones"));
+            if (percentBadSlow > BAD_PHONE_PERCENTAGE) {
+              logger.warn("---> rejecting new best b/c % bad phones = " + percentBadSlow + " so not new best slow : ex " + name + //" " + exercise.getEnglishSentence() +
+                " hydecScore " + hydecScore + "/" + slow.hydecScore);
+              recordMissingFast(missingSlow,name);
+            }
+          }
+        }
+
         if (!consistent.valid) logger.error(name + " not valid");
       }
     } catch (Exception e) {
@@ -230,16 +272,17 @@ public class SplitAudio {
 
   private void recordMissing(FileWriter missingFast, FileWriter missingSlow, String name) {
     try {
-      synchronized (missingFast) {
-        missingFast.write(name + "\n");
-        missingFast.flush();
-      }
-      synchronized (missingSlow) {
-        missingSlow.write(name + "\n");
-        missingSlow.flush();
-      }
+      recordMissingFast(missingFast, name);
+      recordMissingFast(missingSlow, name);
     } catch (IOException e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+  }
+
+  private void recordMissingFast(FileWriter missingFast, String name) throws IOException {
+    synchronized (missingFast) {
+      missingFast.write(name + "\n");
+      missingFast.flush();
     }
   }
 
@@ -904,14 +947,8 @@ public class SplitAudio {
     else {
       logger.warn("\n\n------------- no valid audio for " + exid);
 
-      synchronized (missingFast) {
-        missingFast.write(exid + "\n");
-        missingFast.flush();
-      }
-      synchronized (missingSlow) {
-        missingSlow.write(exid + "\n");
-        missingSlow.flush();
-      }
+      recordMissingFast(missingFast, exid);
+      recordMissingFast(missingSlow, exid);
     }
   }
 
@@ -992,9 +1029,7 @@ public class SplitAudio {
             alignments, false);
           if (consistent.valid) {
             File fastFile = consistent.fast;
-            File slowFile = consistent.slow;
             String fastName = fastFile.getName().replaceAll(".wav", "");
-            String slowName = slowFile.getName().replaceAll(".wav", "");
 
             Scores fast = getAlignmentScoresNoDouble(scoring, refSentence, fastName, fastFile.getParent(), getConverted(fastFile));
             if (fast.hydecScore > bestFast) {
@@ -1011,6 +1046,8 @@ public class SplitAudio {
               }
             }
 
+            File slowFile = consistent.slow;
+            String slowName = slowFile.getName().replaceAll(".wav", "");
             Scores slow = getAlignmentScoresNoDouble(scoring, refSentence, slowName, slowFile.getParent(), getConverted(slowFile));
             if (slow.hydecScore > bestSlow) {
               float percentBadSlow = getPercentBadPhones(slowName, slow.eventScores.get("phones"));
@@ -1146,17 +1183,18 @@ public class SplitAudio {
 /*    if (e1 > s2) {
       e1 = s2;
     }*/
-    if (e1 > start2)  {
-      logger.warn("for " + testAudioFileNoSuffix +
-        " end of fast " + e1 + " is after start of slow " + start2);
-      return new FastAndSlow();
-    }
 
     if (e1 > midPoint) {
       logger.debug("e1 " + e1 + " is after the midpoint " + midPoint);
   //    return new FastAndSlow();
       e1 = Math.max(end1,midPoint);
       //s2 = Math.min(start2,midPoint);
+    }
+
+    if (e1 > start2)  {
+      logger.warn("for " + testAudioFileNoSuffix +
+        " end of fast " + e1 + " is after start of slow " + start2);
+      return new FastAndSlow();
     }
 
     if (s2 < midPoint) {
@@ -1166,6 +1204,11 @@ public class SplitAudio {
 
     if (s2 < e1) {
       logger.error("huh? start of fast " + s2 + " is before end of slow " + e1);
+      return new FastAndSlow();
+    }
+
+    if (s2 < end1) {
+      logger.error("huh? start of fast " + s2 + " is before unpadded end of slow " + e1);
       return new FastAndSlow();
     }
 
@@ -1184,13 +1227,13 @@ public class SplitAudio {
     if (d2 < d1* DURATION_CHECK) {
       logger.warn("Still after repair slow segment dur "+d2 + " < fast dur " + (d1* DURATION_CHECK) + " so fixing end to end of audio");
       // can either repair or throw this one out
-      return new FastAndSlow();
+      if (THROW_OUT_FAST_LONGER_THAN_SLOW) return new FastAndSlow();
     }
 
     File longFileFile = new File(parent,testAudioFileNoSuffix+".wav");
     if (!longFileFile.exists())logger.error("huh? can't find  " + longFileFile.getAbsolutePath());
 
-    logger.debug("writing ref files to " + refDirForExercise.getName() + " input " + longFileFile.getName() +
+    logger.debug("writing ref files to " + refDirForExercise.getAbsolutePath() + " input " + longFileFile.getName() +
       " pad s1 " + s1 + "-" + e1+
       " dur " + d1 +
       " s2 " + s2 + "-" + e2+
@@ -1302,7 +1345,7 @@ public class SplitAudio {
     }
 
     public boolean isValid() {
-      return lowWordScores < 2;
+      return lowWordScores < LOW_WORD_SCORE_THRESHOLD;
     }
 
     public String getWordSeq() { return wordSeq; }
