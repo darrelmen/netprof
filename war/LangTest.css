@@ -296,6 +296,10 @@ fieldset {
     margin-left: 5px;
 }
 
+.leftTenMargin {
+    margin-left: 10px;
+}
+
 .noMargin {
     margin: 0px;
 }
