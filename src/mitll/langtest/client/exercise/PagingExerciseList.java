@@ -40,7 +40,7 @@ import java.util.Set;
  */
 public class PagingExerciseList extends ExerciseList implements RequiresResize {
   private static final int MAX_LENGTH_ID = 27;
-protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
+  protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
   private ListDataProvider<ExerciseShell> dataProvider;
   private static final boolean DEBUG = false;
   private static final int ID_LINE_WRAP_LENGTH = 20;
@@ -137,7 +137,7 @@ protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to ve
       }) {
         @Override
         public SafeHtml getValue(ExerciseShell object) {
-          return getColumnToolTip(object.getTooltip(), object.getTooltip());
+          return getColumnToolTip(object.getID(), object.getTooltip(), object.getTooltip());
         }
 
         @Override
@@ -154,7 +154,7 @@ protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to ve
           }
         }
 
-        private SafeHtml getColumnToolTip(String columnText, String toolTipText) {
+        private SafeHtml getColumnToolTip(String linkItemID, String columnText, String toolTipText) {
           if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0,MAX_LENGTH_ID-3)+"...";
           String htmlConstant = "<html>" + "<head><style>" +
               "span.tip { TEXT-DECORATION: none; color:#1776B3}" +
@@ -167,7 +167,7 @@ protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to ve
               "</style></head>" +
               "<body>" +
               "<a href=\"" +
-            getHistoryTokenForLink(columnText) +
+            getHistoryTokenForLink(linkItemID) +
             "\" class=\"tip\">" + columnText +
             "<span>" + toolTipText + "</span>" +
             "</a>" + "</body>" + "</html>";
@@ -185,7 +185,7 @@ protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to ve
   protected void gotClickOnItem(final ExerciseShell e) {}
 
   /**
-   * @see SectionExerciseList.MySetExercisesCallback#onSuccess(java.util.List)
+   * @see SectionExerciseList.MySetExercisesCallback#onSuccess
    */
   @Override
   protected void loadFirstExercise() {
