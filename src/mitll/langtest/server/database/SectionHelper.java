@@ -57,6 +57,7 @@ public class SectionHelper {
   }
 
   private List<SectionNode> getChildren(List<String> typeOrder) {
+    if (typeOrder.isEmpty()) return Collections.emptyList();
     String root = typeOrder.iterator().next();
     List<SectionNode> firstSet = new ArrayList<SectionNode>();
 
