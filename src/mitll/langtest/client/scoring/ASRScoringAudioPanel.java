@@ -6,8 +6,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.scoring.PretestScore;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Does ASR scoring -- adds phone and word transcript images below waveform and spectrum
@@ -17,21 +19,20 @@ import mitll.langtest.shared.scoring.PretestScore;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoringAudioPanel extends ScoringAudioPanel {
+  protected final Set<String> tested = new HashSet<String>();
   private boolean useScoreToColorBkg = true;
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#ASRRecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int)
    * @param service
-   * @param soundManager
    * @param useFullWidth
    * @param numRepeats
    * @param useKeyboard
-   * @param logMessages
    * @param gaugePanel
    */
-  public ASRScoringAudioPanel(LangTestDatabaseAsync service, SoundManagerAPI soundManager, boolean useFullWidth,
-                              int numRepeats, boolean useKeyboard, boolean logMessages, ExerciseController controller, ScoreListener gaugePanel) {
-    super(service, useFullWidth, numRepeats, useKeyboard, controller, gaugePanel);
+  public ASRScoringAudioPanel(LangTestDatabaseAsync service, boolean useFullWidth,
+                              int numRepeats, boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
+    super(service, numRepeats, useKeyboard, controller, gaugePanel);
   }
 
   /**
@@ -45,8 +46,8 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    */
   public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                               ExerciseController controller, boolean useKeyboard, ScoreListener gaugePanel) {
-    super(path, refSentence, service, controller.showOnlyOneExercise(),
-        controller.getSegmentRepeats(), useKeyboard, controller, gaugePanel);
+    super(path, refSentence, service,
+      controller.getSegmentRepeats(), useKeyboard, controller, gaugePanel);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
