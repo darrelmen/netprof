@@ -132,13 +132,13 @@
       </jar>
     </target>
 
-    <target depends="build" name="warArabicVLL">
+<!--    <target depends="build" name="warArabicVLL">
         <jar destfile="npArabicVLL2.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,answers/**,audioimages/**,scoring/**,config/first/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
             </manifest>
         </jar>
-    </target>
+    </target>-->
 
     <target depends="build" name="flashcard">
         <jar destfile="npEnglishFlashcard.war" basedir="war"
@@ -170,6 +170,7 @@
         </jar>
     </target>
 
+<!--
     <target depends="build" name="dataCollectAdmin">
         <jar destfile="dataCollectAdmin.war" basedir="war" excludes="WEB-INF/lib/pronz.jar,WEB-INF/lib/mira.jar,media/**,config/dataCollectAdmin/uploads/**,config/pilot/**,answers/**,fastAndSlowRef/**,audioimages/**,scoring/**,config/first/**,config/urdu/**,config/autoCRT/**,config/msa/**,config/msa/**,config/levantine/**,config/eqyptian/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
             <manifest>
@@ -177,6 +178,7 @@
             </manifest>
         </jar>
     </target>
+-->
 
     <target depends="build" name="warArabicVLL2">
         <jar destfile="npArabicVLL.war" basedir="war"
@@ -212,7 +214,7 @@
         </jar>
     </target>
 
-    <target depends="build" name="testPashto">
+<!--    <target depends="build" name="testPashto">
         <jar destfile="testPashto.war" basedir="war"
              includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pashto/**,soundmanager2.js"
              excludes="WEB=INF/lib/pronz.jar">
@@ -221,7 +223,7 @@
                 <attribute name="Built-Date" value="${current.time}"/>
             </manifest>
         </jar>
-    </target>
+    </target>-->
 
     <target depends="build" name="farsiSections">
         <jar destfile="farsiSections.war" basedir="war"
@@ -278,8 +280,8 @@
         </jar>
     </target>
 
-    <target depends="build" name="netProFDari">
-        <jar destfile="netProFDari.war" basedir="war"
+    <target depends="build" name="npfDari">
+        <jar destfile="npfDari.war" basedir="war"
              includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dari/bestAudio/**,config/dari/*dari*,,config/dari/missing*,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-dari/**"
                 >
 
@@ -300,9 +302,9 @@
         </jar>
     </target>
 
-    <target depends="build" name="npfESL">
-        <jar destfile="npfESL.war" basedir="war"
-             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.wsj01-16/**"
+    <target depends="build" name="hsMSA">
+        <jar destfile="hsMSA.war" basedir="war"
+             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/msa/headstartMedia/**,config/msa/headstart.properties,config/msa/MSA-headstart.*,config/msa/msa.h2*,,config/msa/missing*,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
                 >
 
             <manifest>
@@ -324,8 +326,8 @@
     </target>
 
     <target depends="build" name="dataCollectAdmin2">
-        <jar destfile="farsiSections.war" basedir="war"
-             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dataCollectAdmin/**,soundmanager2.js"
+        <jar destfile="dataCollectAdmin.war" basedir="war"
+             includes="favicon.ico,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dataCollectAdmin/**"
              excludes="WEB=INF/lib/pronz.jar">
 
             <manifest>
