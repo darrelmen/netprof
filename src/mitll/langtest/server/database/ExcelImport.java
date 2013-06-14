@@ -1,7 +1,5 @@
 package mitll.langtest.server.database;
 
-import corpus.ModernStandardArabicLTS;
-import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.Exercise;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -13,7 +11,6 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -49,8 +46,8 @@ public class ExcelImport implements ExerciseDAO {
   private SectionHelper sectionHelper = new SectionHelper();
   private boolean debug = false;
   private String mediaDir;
-  private Set<Integer> missingSlowSet = new HashSet<Integer>();
-  private Set<Integer> missingFastSet = new HashSet<Integer>();
+  private Set<String> missingSlowSet = new HashSet<String>();
+  private Set<String> missingFastSet = new HashSet<String>();
   private boolean shouldHaveRefAudio = false;
   private boolean usePredefinedTypeOrder;
   private final String language;
@@ -86,7 +83,7 @@ public class ExcelImport implements ExerciseDAO {
       " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());
   }
 
-  private boolean getMissing(String relativeConfigDir,String file, Set<Integer> missing) {
+  private boolean getMissing(String relativeConfigDir,String file, Set<String> missing) {
     File missingSlow = new File(relativeConfigDir, file);
     if (missingSlow.exists()) {
       try {
@@ -95,7 +92,7 @@ public class ExcelImport implements ExerciseDAO {
         while ((line = reader.readLine()) != null) {
           String trim = line.trim();
           if (trim.length() > 0) {
-            missing.add(Integer.parseInt(trim));
+            missing.add(trim);
           }
         }
         reader.close();
@@ -209,6 +206,8 @@ public class ExcelImport implements ExerciseDAO {
     int weekIndex = -1;
     int weightIndex = -1;
     int meaningIndex = -1;
+    int idIndex = -1;
+    int contextIndex = -1;
     List<String> lastRowValues = new ArrayList<String>();
     Map<String,List<Exercise>> englishToExercises = new HashMap<String, List<Exercise>>();
     int semis = 0;
@@ -235,6 +234,7 @@ public class ExcelImport implements ExerciseDAO {
           List<String> predefinedTypeOrder = new ArrayList<String>();
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
+          //  colNormalized = colNormalized.toLowerCase()
             if (colNormalized.startsWith("Word".toLowerCase())) {
               gotHeader = true;
               colIndexOffset = columns.indexOf(col);
@@ -256,12 +256,23 @@ public class ExcelImport implements ExerciseDAO {
               weightIndex = columns.indexOf(col);
             } else if (colNormalized.contains("meaning")) {
               meaningIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("id")) {
+              idIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("context")) {
+              contextIndex = columns.indexOf(col);
             }
           }
-          if (usePredefinedTypeOrder) sectionHelper.setPredefinedTypeOrder(predefinedTypeOrder);
+          if (usePredefinedTypeOrder) {
+            sectionHelper.setPredefinedTypeOrder(predefinedTypeOrder);
+          }
 
           logger.info("columns word index " + colIndexOffset +
-            " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex + " meaning " +meaningIndex);
+            " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
+            " meaning " +meaningIndex +
+            " transliterationIndex " +transliterationIndex +
+            " contextIndex " +contextIndex +
+            " id " +idIndex
+          );
         }
         else {
           int colIndex = colIndexOffset;
@@ -295,13 +306,15 @@ public class ExcelImport implements ExerciseDAO {
             if (foreignLanguagePhrase.length() == 0) {
               logger.info("Got empty foreign language phrase row #" + next.getRowNum() +" for " + english);
               errors.add(sheet.getSheetName()+"/"+"row #" +(next.getRowNum()+1) + " phrase was blank.");
-              id++;
+              id++;    // TODO is this the right thing for Dari and Farsi???
             } else if (foreignLanguagePhrase.contains(";")) {
               semis++;
-              id++;
+              id++;     // TODO is this the right thing for Dari and Farsi???
             } else {
               String translit = getCell(next, transliterationIndex);
               String meaning = getCell(next, meaningIndex);
+              String givenIndex = getCell(next, idIndex);
+              String context = getCell(next, contextIndex);
 
               if (inMergedRow && !lastRowValues.isEmpty()) {
                 if (translit.length() == 0) {
@@ -310,7 +323,10 @@ public class ExcelImport implements ExerciseDAO {
                 }
               }
 
-              Exercise imported = getExercise(id++, dao, weightIndex, next, english, foreignLanguagePhrase, translit, meaning);
+              boolean expectFastAndSlow = idIndex == -1;
+              String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
+              Exercise imported = getExercise(idToUse, dao, weightIndex, next, english, foreignLanguagePhrase, translit,
+                meaning, context, expectFastAndSlow);
               if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
                 recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
@@ -450,10 +466,12 @@ public class ExcelImport implements ExerciseDAO {
    * @param foreignLanguagePhrase
    * @param translit
    * @param meaning
+   * @param context
    * @return
    */
-  private Exercise getExercise(int id, FileExerciseDAO dao, int weightIndex, Row next,
-                               String english, String foreignLanguagePhrase, String translit, String meaning) {
+  private Exercise getExercise(String id, FileExerciseDAO dao, int weightIndex, Row next,
+                               String english, String foreignLanguagePhrase, String translit, String meaning,
+                               String context, boolean expectFastAndSlow) {
     Exercise imported;
     List<String> translations = new ArrayList<String>();
     if (foreignLanguagePhrase.length() > 0) {
@@ -461,12 +479,12 @@ public class ExcelImport implements ExerciseDAO {
       //logger.debug(english + "->" + translations);
     }
     if (isFlashcard) {
-      imported = new Exercise("flashcardStimulus", "" + (id), english, translations, english);
+      imported = new Exercise("flashcardStimulus", id, english, translations, english);
       if (imported.getEnglishSentence() == null && imported.getContent() == null) {
         logger.warn("both english sentence and content null for exercise " + id);
       }
     } else {
-      imported = getExercise(id, dao, english, foreignLanguagePhrase, translit, meaning);
+      imported = getExercise(id, dao, english, foreignLanguagePhrase, translit, meaning, context, expectFastAndSlow);
     }
     imported.setEnglishSentence(english);
     imported.setTranslitSentence(translit);
@@ -535,33 +553,42 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   /**
-   * @see #getExercise(int, FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String, String)
+   * @see #getExercise(String, FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, boolean)
    * @param id
    * @param dao
    * @param english
    * @param foreignLanguagePhrase
    * @param translit
    * @param meaning
+   * @param context
+   * @param expectFastAndSlow
    * @return
    */
-  private Exercise getExercise(int id, FileExerciseDAO dao,
-                               String english, String foreignLanguagePhrase, String translit, String meaning) {
-    String content = dao.getContent(foreignLanguagePhrase, translit, english, meaning);
-    Exercise imported = new Exercise("import", "" + id, content, false, true, english);
-    imported.addQuestion();
+  private Exercise getExercise(String id, FileExerciseDAO dao,
+                               String english, String foreignLanguagePhrase, String translit, String meaning,
+                               String context, boolean expectFastAndSlow) {
+    //if (context.length() > 0)logger.debug("context " +context);
+    String content = dao.getContent(foreignLanguagePhrase, translit, english, meaning,context);
+    Exercise imported = new Exercise("import", id, content, false, true, english);
+    imported.addQuestion();   // TODO : needed?
 
-    String name = ""+id;
-    String fastAudioRef = mediaDir+File.separator+name+File.separator+ "Fast" + ".wav";
-    String slowAudioRef = mediaDir+File.separator+name+File.separator+ "Slow" + ".wav";
+  //  if (expectFastAndSlow) {
+      String fastAudioRef = mediaDir + File.separator + id + File.separator + "Fast" + ".wav";
+      String slowAudioRef = mediaDir + File.separator + id + File.separator + "Slow" + ".wav";
 
-    imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
+      imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
 
-    if (!missingFastSet.contains(id)) {
-      imported.setRefAudio(ensureForwardSlashes(fastAudioRef));
-    }
-    if (!missingSlowSet.contains(id)) {
-      imported.setSlowRefAudio(ensureForwardSlashes(slowAudioRef));
-    }
+      if (!missingFastSet.contains(id)) {
+        imported.setRefAudio(ensureForwardSlashes(fastAudioRef));
+      }
+      if (!missingSlowSet.contains(id)) {
+        imported.setSlowRefAudio(ensureForwardSlashes(slowAudioRef));
+      }
+/*    } else {
+      String ref = mediaDir + File.separator + id + ".wav";
+      imported.setType(Exercise.EXERCISE_TYPE.REPEAT);
+      imported.setRefAudio(ensureForwardSlashes(ref));
+    }*/
 
     return imported;
   }
