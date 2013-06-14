@@ -308,9 +308,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * @param index
      */
     public ASRRecordAudioPanel(LangTestDatabaseAsync service, int index) {
-      super(service, controller.getSoundManager(), controller.showOnlyOneExercise(), controller.getSegmentRepeats(),
+      super(service, controller.showOnlyOneExercise(), controller.getSegmentRepeats(),
         false, // no keyboard
-        controller.isLogClientMessages(),controller, scorePanel);
+        controller, scorePanel);
       this.index = index;
 
     }
@@ -327,7 +327,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     @Override
     protected PlayAudioPanel makePlayAudioPanel(Widget toAdd) {
       postAudioRecordButton = new MyPostAudioRecordButton();
-      //postAudioRecordButton.getRecord().addStyleName("recordButtonMargin");    // height of the media record images
       DOM.setElementProperty(postAudioRecordButton.getRecord().getElement(),"margin","8px");
       recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
       recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
