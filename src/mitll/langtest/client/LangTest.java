@@ -230,8 +230,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     if (usualLayout) {
       RootPanel.get().add(widgets);
-      DOM.setStyleAttribute(RootPanel.get().getElement(), "paddingTop", "2px");
     }
+    DOM.setStyleAttribute(RootPanel.get().getElement(), "paddingTop", "2px");
 
     addResizeHandler();
 
@@ -307,7 +307,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     else {
       title = getTitleWidget();
     }
-    boolean takeWholeWidth = props.isFlashcardTeacherView() || props.isShowSections();
+    boolean takeWholeWidth = props.isFlashcardTeacherView() || props.isShowSections() || props.isGoodwaveMode();
     Column titleColumn = new Column(takeWholeWidth ? 12 : 10, title);
     headerRow.add(titleColumn);
     if (!takeWholeWidth) {
@@ -536,6 +536,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     userManager.teacherLogin();
   }
 
+  /**
+   * @see #doDataCollectAdminView()
+   * @see #getLogout()
+   * @see #makeHeaderRow()
+   * @return
+   */
   private HTML getReleaseStatus() {
     browserCheck.getBrowserAndVersion();
 
