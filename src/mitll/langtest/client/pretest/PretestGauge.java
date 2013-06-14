@@ -18,8 +18,9 @@ import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
  *
  */
 public class PretestGauge extends HTML{
-	private String id;
-	private JavaScriptObject canvasObject, gaugeObject;
+	private String id;                      // referenced in native js
+  private JavaScriptObject canvasObject;  // referenced in native js
+  private JavaScriptObject gaugeObject;   // referenced in native js
 
 	private PopupPanel tooltip;
 
