@@ -667,6 +667,10 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   public String getContent(String arabic, String translit, String english, String meaning) {
+    return getContent(arabic, translit, english, meaning, "");
+  }
+
+  public String getContent(String arabic, String translit, String english, String meaning, String context) {
     String arabicHTML = getArabic(arabic);
     String translitHTML = translit.length() > 0 ?
       getSpanWrapper("Transliteration:", translit)
@@ -675,10 +679,14 @@ public class FileExerciseDAO implements ExerciseDAO {
       getSpanWrapper("Translation:", english) : "";
     String meaningHTML = (isEnglish && meaning.length() > 0) ?
       getSpanWrapper("Meaning:", meaning) : "";
+
+    String contextHTML = (context.length() > 0) ?
+      getSpanWrapper("Context:", context) : "";
     return arabicHTML +
       translitHTML +
       translationHTML +
-      meaningHTML;
+      meaningHTML +
+      contextHTML;
   }
 
   private String getSpanWrapper(String rowTitle, String english) {
