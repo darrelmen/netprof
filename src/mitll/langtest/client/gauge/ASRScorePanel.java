@@ -19,6 +19,7 @@ import com.google.gwt.visualization.client.LegendPosition;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.pretest.PretestGauge;
 import mitll.langtest.client.scoring.ScoreListener;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -113,17 +114,19 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
 
   /**
+   *
    * @param score
+   * @param showOnlyOneExercise
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#useResult
    */
-  public void gotScore(PretestScore score) {
+  public void gotScore(PretestScore score, boolean showOnlyOneExercise) {
     float zeroToHundred = score.getHydecScore() * 100f;
     //System.out.println("ASRScorePanel : " +score + " hydec " + score.getHydecScore() + " " +zeroToHundred);
     setASRGaugeValue(Math.min(100.0f, zeroToHundred));
     updatePhoneAccuracy(score.getPhoneScores());
     scores.add(score.getHydecScore());
     chartPanel.clear();
-    chartPanel.add(doChart());
+    chartPanel.add(doChart(showOnlyOneExercise));
   }
 
 /*  private ColumnChart doChartOld() {
@@ -158,10 +161,10 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     return new ColumnChart(data,options);
   }*/
 
-  private ColumnChart doChart() {
+  private ColumnChart doChart(boolean showOnlyOneExercise) {
     Options options = Options.create();
     options.setLegend(LegendPosition.NONE);
-    options.setGridlineColor("white");
+    options.setGridlineColor(showOnlyOneExercise ? "#efefef" : "white");
     options.setHeight(CHART_HEIGHT);
     String[] colors = new String[scores.size()];
     for (int i = 0; i < scores.size(); i++) {
@@ -193,11 +196,16 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
       data.setValue(0,i+1, round);
     }
 
-    return new ColumnChart(data,options);
+    if (showOnlyOneExercise) {
+      options.setBackgroundColor("#efefef");
+    }
+    ColumnChart columnChart = new ColumnChart(data, options);
+
+    return columnChart;
   }
 
   /**
-   * @see #gotScore
+   * @see mitll.langtest.client.scoring.ScoreListener#gotScore
    * @param phoneAccuracies
    */
   private void updatePhoneAccuracy(final Map<String, Float> phoneAccuracies){
