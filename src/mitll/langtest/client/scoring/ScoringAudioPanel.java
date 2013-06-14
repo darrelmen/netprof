@@ -9,9 +9,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Asks server to score the audio.  Gets back transcript image URLs, phonem scores and end times.
@@ -26,21 +24,20 @@ public abstract class ScoringAudioPanel extends AudioPanel {
 
   private String refSentence;
   private String refAudio;
-  protected final Set<String> tested = new HashSet<String>();
   private ScoreListener scoreListener;
   private PretestScore result;
+  private boolean showOnlyOneExercise = false; // true for when called from the headstart website
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.sound.SoundManagerAPI, boolean, int, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, boolean, int, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
    * @param service
-   * @param useFullWidth
    * @param numRepeats
    * @param useKeyboard
    * @param gaugePanel
    */
-  public ScoringAudioPanel(LangTestDatabaseAsync service, boolean useFullWidth,
+  public ScoringAudioPanel(LangTestDatabaseAsync service,
                            int numRepeats, boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
-    this(null, null, service, useFullWidth, numRepeats, useKeyboard, controller, gaugePanel);
+    this(null, null, service, numRepeats, useKeyboard, controller, gaugePanel);
   }
 
   /**
@@ -48,16 +45,16 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param path
    * @param refSentence
    * @param service
-   * @param useFullWidth
    * @param numRepeats
    * @param useKeyboard
    * @param gaugePanel
    */
   public ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
-                           boolean useFullWidth, int numRepeats, boolean useKeyboard, ExerciseController controller,
+                           int numRepeats, boolean useKeyboard, ExerciseController controller,
                            ScoreListener gaugePanel) {
     super(path, service, useKeyboard, controller, gaugePanel);
     this.refSentence = refSentence;
+    showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers(numRepeats);
   }
 
@@ -151,7 +148,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
     }
     if (!scoredBefore && scoreListener != null) {
       System.out.println("new score returned " + result);
-      scoreListener.gotScore(result);
+      scoreListener.gotScore(result, showOnlyOneExercise);
     }
     this.result = result;
   }
