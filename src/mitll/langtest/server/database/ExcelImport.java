@@ -326,7 +326,7 @@ public class ExcelImport implements ExerciseDAO {
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
               Exercise imported = getExercise(idToUse, dao, weightIndex, next, english, foreignLanguagePhrase, translit,
-                meaning, context, expectFastAndSlow);
+                meaning, context);
               if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
                 recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
@@ -471,12 +471,11 @@ public class ExcelImport implements ExerciseDAO {
    */
   private Exercise getExercise(String id, FileExerciseDAO dao, int weightIndex, Row next,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
-                               String context, boolean expectFastAndSlow) {
+                               String context) {
     Exercise imported;
     List<String> translations = new ArrayList<String>();
     if (foreignLanguagePhrase.length() > 0) {
       translations.addAll(Arrays.asList(foreignLanguagePhrase.split(";")));
-      //logger.debug(english + "->" + translations);
     }
     if (isFlashcard) {
       imported = new Exercise("flashcardStimulus", id, english, translations, english);
@@ -484,7 +483,7 @@ public class ExcelImport implements ExerciseDAO {
         logger.warn("both english sentence and content null for exercise " + id);
       }
     } else {
-      imported = getExercise(id, dao, english, foreignLanguagePhrase, translit, meaning, context, expectFastAndSlow);
+      imported = getExercise(id, dao, english, foreignLanguagePhrase, translit, meaning, context);
     }
     imported.setEnglishSentence(english);
     imported.setTranslitSentence(translit);
@@ -553,7 +552,7 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   /**
-   * @see #getExercise(String, FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, boolean)
+   * @see #getExercise(String, FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String)
    * @param id
    * @param dao
    * @param english
@@ -561,34 +560,27 @@ public class ExcelImport implements ExerciseDAO {
    * @param translit
    * @param meaning
    * @param context
-   * @param expectFastAndSlow
    * @return
    */
   private Exercise getExercise(String id, FileExerciseDAO dao,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
-                               String context, boolean expectFastAndSlow) {
-    //if (context.length() > 0)logger.debug("context " +context);
-    String content = dao.getContent(foreignLanguagePhrase, translit, english, meaning,context);
+                               String context) {
+    String content = dao.getContent(foreignLanguagePhrase, translit, english, meaning, context);
     Exercise imported = new Exercise("import", id, content, false, true, english);
     imported.addQuestion();   // TODO : needed?
 
-  //  if (expectFastAndSlow) {
-      String fastAudioRef = mediaDir + File.separator + id + File.separator + "Fast" + ".wav";
-      String slowAudioRef = mediaDir + File.separator + id + File.separator + "Slow" + ".wav";
+    String prefix = language.equalsIgnoreCase("msa") ? id + "_" : "";
+    String fastAudioRef = mediaDir + File.separator + id + File.separator + prefix + "Fast" + ".wav";
+    String slowAudioRef = mediaDir + File.separator + id + File.separator + prefix + "Slow" + ".wav";
 
-      imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
+    imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
 
-      if (!missingFastSet.contains(id)) {
-        imported.setRefAudio(ensureForwardSlashes(fastAudioRef));
-      }
-      if (!missingSlowSet.contains(id)) {
-        imported.setSlowRefAudio(ensureForwardSlashes(slowAudioRef));
-      }
-/*    } else {
-      String ref = mediaDir + File.separator + id + ".wav";
-      imported.setType(Exercise.EXERCISE_TYPE.REPEAT);
-      imported.setRefAudio(ensureForwardSlashes(ref));
-    }*/
+    if (!missingFastSet.contains(id)) {
+      imported.setRefAudio(ensureForwardSlashes(fastAudioRef));
+    }
+    if (!missingSlowSet.contains(id)) {
+      imported.setSlowRefAudio(ensureForwardSlashes(slowAudioRef));
+    }
 
     return imported;
   }
@@ -601,9 +593,6 @@ public class ExcelImport implements ExerciseDAO {
     if (col == -1) return "";
     Cell cell = next.getCell(col);
     if (cell == null) return "";
-/*    if (cell.getArrayFormulaRange().getFirstRow() != cell.getArrayFormulaRange().getFirstRow()) {
-      logger.warn("got multi row cell " + cell);
-    }*/
     if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
       double numericCellValue = cell.getNumericCellValue();
       return "" + new Double(numericCellValue).intValue();
@@ -619,15 +608,7 @@ public class ExcelImport implements ExerciseDAO {
   private double getNumericCell(Row next, int col) {
     Cell cell = next.getCell(col);
     if (cell == null) return -1;
-/*    if (cell.getArrayFormulaRange().getFirstRow() != cell.getArrayFormulaRange().getFirstRow()) {
-      logger.warn("got multi row cell " + cell);
-    }*/
-    if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-      return cell.getNumericCellValue();
-    }
-    else {
-      return -1;
-    }
+    return (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) ? cell.getNumericCellValue() : -1;
   }
 
   public List<Exercise> getExercises() {
