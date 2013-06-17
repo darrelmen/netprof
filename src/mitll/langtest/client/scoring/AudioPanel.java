@@ -54,7 +54,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private int reqid;
   private boolean useKeyboard = true;
 
-  protected ImageAndCheck waveform,spectrogram,phones,words;
+  private ImageAndCheck waveform;
+  private ImageAndCheck spectrogram;
+  protected ImageAndCheck phones;
+  protected ImageAndCheck words;
 
   private int lastWidth = 0;
   private Panel imageContainer;
@@ -108,13 +111,13 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     HorizontalPanel controlPanel = new HorizontalPanel();
 
     waveform = new ImageAndCheck();
-    imageContainer.add(waveform.image);
-    controlPanel.add(addCheckbox(WAVEFORM, waveform));
-    waveform.image.setAltText(WAVEFORM_TOOLTIP);
-    waveform.image.setTitle(WAVEFORM_TOOLTIP);
+    imageContainer.add(getWaveform().image);
+    controlPanel.add(addCheckbox(WAVEFORM, getWaveform()));
+    getWaveform().image.setAltText(WAVEFORM_TOOLTIP);
+    getWaveform().image.setTitle(WAVEFORM_TOOLTIP);
     spectrogram = new ImageAndCheck();
-    imageContainer.add(spectrogram.image);
-    controlPanel.add(addCheckbox(SPECTROGRAM, spectrogram));
+    imageContainer.add(getSpectrogram().image);
+    controlPanel.add(addCheckbox(SPECTROGRAM, getSpectrogram()));
 
     words = new ImageAndCheck();
     imageContainer.add(words.image);
@@ -167,7 +170,15 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.screenPortion = screenPortion;
   }
 
-  protected static class ImageAndCheck {
+  public ImageAndCheck getWaveform() {
+    return waveform;
+  }
+
+  public ImageAndCheck getSpectrogram() {
+    return spectrogram;
+  }
+
+  public static class ImageAndCheck {
     final Image image;
     Widget check;
     public ImageAndCheck() {
@@ -271,8 +282,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   protected void getEachImage(int width) {
-    getImageURLForAudio(audioPath, WAVEFORM, width, waveform);
-    getImageURLForAudio(audioPath, SPECTROGRAM, width, spectrogram);
+    getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
+    getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
   }
 
   /**
