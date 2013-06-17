@@ -490,7 +490,8 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
       if (text.length() == 0) allHaveText = false;
     }
     if (!allHaveText) {
-      showPopup("Please answer all questions.");
+      showPopup("Please answer " +
+        (answers.size() == 1 ? "the question." : "all questions."));
     } else {
       incomplete.addAll(answers);
       for (final Widget tb : answers) {
