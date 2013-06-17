@@ -4,6 +4,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -20,7 +21,7 @@ import mitll.langtest.shared.Exercise;
  * Time: 6:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PostAudioRecordButton extends RecordButton {
+public abstract class PostAudioRecordButton extends RecordButton {
   private static final String RECORD = "record";
   private static final String STOP = "stop";
 
@@ -30,8 +31,9 @@ public class PostAudioRecordButton extends RecordButton {
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
 
-  public PostAudioRecordButton(Exercise exercise, ExerciseController controller, LangTestDatabaseAsync service, int index) {
-    super(new Button(RECORD), controller.getRecordTimeout());
+  public PostAudioRecordButton(Exercise exercise, ExerciseController controller, LangTestDatabaseAsync service,
+                               int index, Image recordImage1, Image recordImage2) {
+    super(new Button(RECORD), controller.getRecordTimeout(), recordImage1, recordImage2, true);
 
     this.index = index;
     this.exercise = exercise;
@@ -115,12 +117,11 @@ public class PostAudioRecordButton extends RecordButton {
       }
 
       @Override
-      public void onSuccess(Void result) {
-      }
+      public void onSuccess(Void result) {}
     });
   }
 
-  protected void useInvalidResult(AudioAnswer result) {}
+  protected abstract void useInvalidResult(AudioAnswer result);
 
   @Override
   protected void startRecording() {
@@ -142,5 +143,5 @@ public class PostAudioRecordButton extends RecordButton {
     ((Button) getRecord()).setText(RECORD);
   }
 
-  public void useResult(AudioAnswer result) {}
+  public abstract void useResult(AudioAnswer result);
 }
