@@ -451,39 +451,14 @@ public class MonitoringSupport {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise
    * @return
    */
-  public Map<String,List<Integer>> getResultPerExercise(List<Exercise> exercises) {
-    List<Integer> overall = getOverallResultCount(exercises);
-    List<Integer> male = getCountArray(getExToCountMaleOrFemale(exercises,true));
-    List<Integer> female = getCountArray(getExToCountMaleOrFemale(exercises,false));
-
-    Map<String,List<Integer>> typeToList = new HashMap<String, List<Integer>>();
-    typeToList.put("overall",overall);
-    typeToList.put("male",male);
-    typeToList.put("female",female);
+  public Map<String, Map<String, Integer>> getResultPerExercise(List<Exercise> exercises) {
+    Map<String,Map<String, Integer>> typeToList = new HashMap<String,Map<String, Integer>>();
+    typeToList.put("overall",getExToCount(exercises));
+    typeToList.put("male",getExToCountMaleOrFemale(exercises,true));
+    typeToList.put("female",getExToCountMaleOrFemale(exercises,false));
 
     return typeToList;
   }
-
-  private List<Integer> getOverallResultCount(List<Exercise> exercises) {
-    Map<String, Integer> exToCount = getExToCount(exercises);
-    return getCountArray(exToCount);
-  }
-/*
-
-  public Map<String,List<Integer>> getGradeCountPerExercise(List<Exercise> exercises) {
-
-    List<Integer> overall = getOverallResultCount(exercises);
-    List<Integer> male = getCountArray(getExToCountMaleOrFemale(exercises,true));
-    List<Integer> female = getCountArray(getExToCountMaleOrFemale(exercises,false));
-
-    Map<String,List<Integer>> typeToList = new HashMap<String, List<Integer>>();
-    typeToList.put("overall",overall);
-    typeToList.put("male",male);
-    typeToList.put("female",female);
-
-    return typeToList;
-  }
-*/
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getResultCountsByGender()
