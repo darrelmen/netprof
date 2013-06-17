@@ -1,5 +1,6 @@
 package mitll.langtest.client.recorder;
 
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -45,6 +46,8 @@ public class RecordButtonPanel {
   private RecordButton rb;
   private int reqid = 0;
   protected Panel panel;
+  private Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
+  private Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
 
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
@@ -77,7 +80,7 @@ public class RecordButtonPanel {
   }
 
   protected RecordButton makeRecordButton(final ExerciseController controller, final RecordButtonPanel outer) {
-    return new RecordButton(recordButton, controller.getRecordTimeout()) {
+    return new RecordButton(recordButton, controller.getRecordTimeout(), recordImage1, recordImage2, controller.shouldAddRecordKeyBinding()) {
       @Override
       protected void stopRecording() {
         outer.stopRecording();
@@ -90,11 +93,13 @@ public class RecordButtonPanel {
 
       @Override
       protected void showRecording() {
+        super.showRecording();
         outer.showRecording();
       }
 
       @Override
       protected void showStopped() {
+        super.showStopped();
         outer.showStopped();
       }
     };
@@ -118,6 +123,11 @@ public class RecordButtonPanel {
     };
     hp.add(recordButtonContainer);
     this.panel = hp;
+
+    panel.add(recordImage1);
+    recordImage1.setVisible(false);
+    panel.add(recordImage2);
+    recordImage2.setVisible(false);
   }
 
   public void onUnload() {
