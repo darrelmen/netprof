@@ -5,8 +5,8 @@ import com.github.gwtbootstrap.client.ui.Container;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Row;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
+import com.github.gwtbootstrap.client.ui.Row;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -25,7 +25,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -80,6 +79,7 @@ import java.util.Map;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   public static final String LANGTEST_IMAGES = "langtest/images/";
   public static final String RECORDING_KEY = "SPACE BAR";
+  private static final String ITEMS = "Items";
   private final DialogHelper dialogHelper = new DialogHelper(false);
 
   private Panel currentExerciseVPanel = new FluidContainer();
@@ -343,9 +343,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void addProgressBar(Panel widgets) {
     if (props.isGrading()) {
-      System.out.println("adding status line...");
-
-      //    widgets.addSouth(status, 50);
       widgets.add(status);
     } else {
       progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
@@ -354,8 +351,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       progressBar.setText("No items completed.");
       progressBar.setColor(ProgressBarBase.Color.DEFAULT);
       progressBar.addStyleName("leftFifteenPercentMargin");
+      progressBar.addStyleName("topMargin");
 
- //     widgets.addSouth(progressBar, 50);
       widgets.add(progressBar);
     }
   }
@@ -645,8 +642,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (props.isTeacherView()) {
       leftColumnContainer.add(exerciseList.getWidget());
     } else {
-
-      Heading items = new Heading(4, "Items");
+      Heading items = new Heading(4, ITEMS);
       items.addStyleName("center");
 
       FlowPanel leftColumn = new FlowPanel();
@@ -655,7 +651,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
       leftColumnContainer.add(leftColumn);
       leftColumnContainer.addStyleName("inlineStyle");
-      if (!props.isFlashcardTeacherView()) {
+      if (!props.isFlashcardTeacherView() && !props.isMinimalUI()) {
         leftColumn.add(items);
       }
       leftColumn.add(exerciseList.getWidget());
@@ -1043,6 +1039,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isRightAlignContent() {  return props.isRightAlignContent(); }
   public boolean isFlashCard() {  return props.isFlashCard(); }
   public boolean isGoodwaveMode() {  return props.isGoodwaveMode(); }
+  public boolean shouldAddRecordKeyBinding() { return props.shouldAddRecordKeyBinding(); }
 
   // recording methods...
   /**
