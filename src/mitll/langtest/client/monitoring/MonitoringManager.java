@@ -53,6 +53,7 @@ public class MonitoringManager {
   private static final int MIN_COUNT_FOR_BROWSER = 10;
   private static final int MIN_COUNT_FOR_DIALECT = 10;
   public static final int MIN_SIZE_TO_TRIGGER_FILTER = 15;
+  public static final int ITEM_CHART_ITEM_WIDTH = 1000;
 
   protected LangTestDatabaseAsync service;
   private String item = "Item";
@@ -559,8 +560,20 @@ public class MonitoringManager {
     options.setVAxisOptions(options2);
   }
 
+
+  private void labelAxes2(Options options,String hAxisTitle ,String vAxisTitle) {
+    AxisOptions options1 = AxisOptions.create();
+    options1.setTitle(hAxisTitle);
+    options.setHAxisOptions(options1);
+
+    AxisOptions options2 = AxisOptions.create();
+    options2.setTitle(vAxisTitle);
+    options.setVAxisOptions(options2);
+  }
+
+
   private void doResultLineQuery(final Panel vp) {
-    service.getResultPerExercise(new AsyncCallback<Map<String,List<Integer>>>() {
+    service.getResultPerExercise(new AsyncCallback<Map<String,Map<String, Integer>>>() {
       public void onFailure(Throwable caught) {}
 
       /**
@@ -568,15 +581,10 @@ public class MonitoringManager {
        * @param result map or overall,male,female to counts
        */
       @Override
-      public void onSuccess(Map<String, List<Integer>> result) {
-        String title = answers + " per " + item + " index";
-
-        int size = result.values().iterator().next().size();
-        int chartSamples = 1000;
-
-        List<Integer> overall = result.get("overall");
+      public void onSuccess(Map<String, Map<String, Integer>> result) {
+        Map<String, Integer> overall = result.get("overall");
         int total = 0;
-        for (Integer c : overall) total += c;
+        for (Integer c : overall.values()) total += c;
         float ratio = ((float) total)/((float)overall.size());
         vp.add(new HTML("<b>Avg " +
             answers +
@@ -584,25 +592,40 @@ public class MonitoringManager {
             item +
             " = " + roundToHundredth(ratio) +"</b>") );
 
+        List<String> keys = new ArrayList<String>(overall.keySet());
+        sortKeysIntelligently(keys);
+        int size = keys.size();
+        boolean showItemIDs = size > 500;
+        String title = answers + " per " + item + (showItemIDs ? "index" : "");
+
+        int chartSamples = Math.min(ITEM_CHART_ITEM_WIDTH, size);
+
         for (int i = 0; i < size; i += chartSamples) {
-          Map<String, List<Integer>> typeToList = new HashMap<String, List<Integer>>();
-          for (Map.Entry<String, List<Integer>> pair : result.entrySet()) {
-            int endIndex = Math.min(size, i + chartSamples);
-            List<Integer> countsPerExercise = pair.getValue();
-            endIndex = Math.min(countsPerExercise.size(),endIndex);
-            typeToList.put(pair.getKey(), countsPerExercise.subList(i, endIndex));
+          Map<String, Map<String, Integer>> typeToList = new HashMap<String, Map<String, Integer>>();
+          int endIndex = Math.min(size, i + chartSamples);
+          endIndex = Math.min(keys.size(),endIndex);
+          List<String> sublist = keys.subList(i, endIndex);
+          for (Map.Entry<String, Map<String, Integer>> pair : result.entrySet()) {
+            Map<String, Integer> exidToCount = pair.getValue();
+            Map<String, Integer> submap = new HashMap<String, Integer>();
+            for (String key : sublist) {
+              Integer value = exidToCount.get(key);
+              submap.put(key, value == null ? 0 : value);
+            }
+            typeToList.put(pair.getKey(), submap);
           }
-          LineChart lineChart = getLineChart(typeToList, title + " (" + i + "-" + (i + chartSamples) + ")", i == 0, i);
+          String title1 = title + " (" + i + "-" + (i + chartSamples) + ")";
+          Widget lineChart = showItemIDs ? getLineChartBigSet(sublist, typeToList, title1, size < 300, i) : getLineChart(sublist, typeToList, title1, size < 300, i);
           vp.add(lineChart);
         }
 
         int maleTotal = 0;
         int femaleTotal = 0;
 
-        for (Integer c: result.get("male")) {
+        for (Integer c: result.get("male").values()) {
           maleTotal += c;
         }
-        for (Integer c: result.get("female")) {
+        for (Integer c: result.get("female").values()) {
           femaleTotal += c;
         }
         vp.add(getGenderChart(maleTotal,femaleTotal));
@@ -610,33 +633,86 @@ public class MonitoringManager {
     });
   }
 
-  private LineChart getLineChart(Map<String, List<Integer>> typeToList, String title, boolean goBig, int offset) {
+  private LineChart getLineChart(List<String> keys, Map<String, Map<String,Integer>> overallToExIDToCount, String title, boolean goBig, int offset) {
     Options options = Options.create();
     options.setTitle(title);
-    labelAxes(options,item +
+    labelAxes2(options,item +
         " index",
         "# " + answers);
     DataTable data = DataTable.create();
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Index");
-    for (String key : typeToList.keySet()) {
+    data.addColumn(AbstractDataTable.ColumnType.STRING, "ID");
+    for (String key : overallToExIDToCount.keySet()) {
+ //     System.out.println("type " + key);
       data.addColumn(AbstractDataTable.ColumnType.NUMBER, key);
     }
-    int size = typeToList.values().iterator().next().size();
+    int size = keys.size();
+  //  System.out.println(" keys " + size + " table " + data);
+
     data.addRows(size);
-    for (int i = 0; i < size; i++) {
-      data.setValue(i, 0, offset+i);
-    }
     int colCount = 1;
-    for (String key : typeToList.keySet()) {
-      List<Integer> result = typeToList.get(key);
-      int r = 0;
-      for (Integer n : result) {
-        data.setValue(r++, colCount, n);
+
+    int r = 0;
+    for (String exid : keys) {
+      data.setValue(r++, 0, exid);
+    }
+
+    for (String key : overallToExIDToCount.keySet()) {
+   //   System.out.println("type " + key + " keys " + keys);
+      Map<String, Integer> exidToCount = overallToExIDToCount.get(key);
+      r = 0;
+      for (String exid : keys) {
+        Integer value = exidToCount.get(exid);
+        data.setValue(r++, colCount, value == null ? 0 : value);
       }
       colCount++;
     }
     if (goBig) options.setHeight((int)(Window.getClientHeight()*0.3f));
-    return new LineChart(data, options);
+
+    LineChart lineChart = new LineChart(data, options);
+    lineChart.setWidth("96%");
+    return lineChart;
+  }
+
+  private LineChart getLineChartBigSet(List<String> keys, Map<String, Map<String,Integer>> overallToExIDToCount,  String title, boolean goBig, int offset) {
+    Options options = Options.create();
+    options.setTitle(title);
+    labelAxes2(options,item +
+      " index",
+      "# " + answers);
+    DataTable data = DataTable.create();
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Index");
+    for (String key : overallToExIDToCount.keySet()) {
+      //     System.out.println("type " + key);
+      data.addColumn(AbstractDataTable.ColumnType.NUMBER, key);
+    }
+    int size = keys.size();
+    //  System.out.println(" keys " + size + " table " + data);
+
+    data.addRows(size);
+    int colCount = 1;
+
+    int r = 0;
+
+    for (String exid : keys) {
+      data.setValue(r, 0, r);
+      r++;
+    }
+
+    for (String key : overallToExIDToCount.keySet()) {
+      //   System.out.println("type " + key + " keys " + keys);
+      Map<String, Integer> exidToCount = overallToExIDToCount.get(key);
+      r = 0;
+      for (String exid : keys) {
+        Integer value = exidToCount.get(exid);
+        data.setValue(r++, colCount, value == null ? 0 : value);
+      }
+      colCount++;
+    }
+    if (goBig) options.setHeight((int)(Window.getClientHeight()*0.3f));
+
+    LineChart lineChart = new LineChart(data, options);
+    lineChart.setWidth("96%");
+    return lineChart;
   }
 
   private void doResultQuery(final Panel vp) {
@@ -664,7 +740,6 @@ public class MonitoringManager {
       }
     });
   }
-
 
   private void doGenderQuery(final Panel vp) {
     service.getResultCountsByGender(new AsyncCallback<Map<String, Map<Integer, Integer>>>() {
@@ -695,36 +770,40 @@ public class MonitoringManager {
             if (correct != null && !correct.isEmpty() && incorrect != null && !incorrect.isEmpty()) {
               List<String> keys = new ArrayList<String>(correct.keySet());
               System.out.println("keys are " + keys);
-              String sample = keys.isEmpty() ? "" : keys.iterator().next();
-              final boolean firstInt = Character.isDigit(sample.charAt(0));
-              Collections.sort(keys, new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                  String[] split = o1.split("/");
-                  String r1 = split[0];
-                  String q1 = split[1];
-
-                  String[] split2 = o2.split("/");
-                  String r2 = split2[0];
-                  String q2 = split2[1];
-
-                  int comp;
-                  if (firstInt) {
-                    comp = safeCompare(r1, r2);
-                  } else comp = o1.compareTo(o2);
-
-                  if (comp != 0) return comp;
-                  else {
-                    return safeCompare(q1, q2);
-                  }
-                }
-              });
+              sortKeysIntelligently(keys);
 
               vp.add(getGradeCounts(i,
                 //0, keys.size(),
                 keys, correct, incorrect));
             }
           }
+        }
+      }
+    });
+  }
+
+  private void sortKeysIntelligently(List<String> keys) {
+    String sample = keys.isEmpty() ? "" : keys.iterator().next();
+    final boolean firstInt = Character.isDigit(sample.charAt(0));
+    Collections.sort(keys, new Comparator<String>() {
+      @Override
+      public int compare(String o1, String o2) {
+        String[] split = o1.split("/");
+        String r1 = split[0];
+        String q1 = split[1];
+
+        String[] split2 = o2.split("/");
+        String r2 = split2[0];
+        String q2 = split2[1];
+
+        int comp;
+        if (firstInt) {
+          comp = safeCompare(r1, r2);
+        } else comp = o1.compareTo(o2);
+
+        if (comp != 0) return comp;
+        else {
+          return safeCompare(q1, q2);
         }
       }
     });
@@ -1343,7 +1422,6 @@ public class MonitoringManager {
     return new ColumnChart(data, options);
   }
 
-
   private LineChart getGradeCounts(int round,
                                    //int start, int end,
                                    List<String> keysToUse,
@@ -1354,9 +1432,9 @@ public class MonitoringManager {
       items +
       " with this many " +
       "grades" +
-      " correct/incorrect " + "Round #" +(round+1)//+
-    //  "(" + start + " - " + end +
-     // ")"
+      " correct/incorrect " + "Round #" + (round + 1)//+
+      //  "(" + start + " - " + end +
+      // ")"
     );
 
     labelAxes(options,
@@ -1382,17 +1460,15 @@ public class MonitoringManager {
       Integer correct = correctToCount.get(key);
       Integer incorrect = incorrectToCount.get(key);
 
-    //  if (correct != null && incorrect != null) {
-        data.addRow();
-        data.setValue(r, 0, key);
-        data.setValue(r, 1, correct == null ? 0 : correct);
-        data.setValue(r, 2, incorrect == null ? 0 : incorrect);
-        r++;
-      //}
+      data.addRow();
+      data.setValue(r, 0, key);
+      data.setValue(r, 1, correct == null ? 0 : correct);
+      data.setValue(r, 2, incorrect == null ? 0 : incorrect);
+      r++;
     }
 
-   //return new ColumnChart(data, options);
-   return new LineChart(data, options);
+    //return new ColumnChart(data, options);
+    return new LineChart(data, options);
   }
 
 
