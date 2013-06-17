@@ -62,7 +62,7 @@ public class PropertyHandler {
   private static final String EXERCISE_TITLE = "exercise_title";
   private static final String TEACHER_CLASS = "class";
   private static final String LESSON = "lesson";
-  private static final String TEACHER_PARAM = TEACHER_VIEW;
+  //private static final String TEACHER_PARAM = TEACHER_VIEW;
   private static final String ADMIN_PARAM = "admin";
   private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
 
@@ -75,6 +75,7 @@ public class PropertyHandler {
   private static final int DEFAULT_GAME_TIME_SECONDS = 60;
   private static final String DEFAULT_EXERCISE = null;
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
+  private static final String ADD_RECORD_KEY_BINDING = "addRecordKeyBinding";
 
   private Map<String, String> props;
 
@@ -116,8 +117,9 @@ public class PropertyHandler {
   private float screenPortion;
   private boolean CRTDataCollectMode;
   private String splashTitle;
-  private boolean promptBeforeNextItem = true;
+  private boolean promptBeforeNextItem = false;
   private boolean rightAlignContent;
+  private boolean addRecordKeyBinding = true;
 
   public PropertyHandler(Map<String,String> props) {
     this.props = props;
@@ -165,6 +167,7 @@ public class PropertyHandler {
       else if (key.equals(GAME_TIME)) gameTimeSeconds = getInt(value,DEFAULT_GAME_TIME_SECONDS,GAME_TIME);
       else if (key.equals(CONTINUE_PROMPT)) promptBeforeNextItem = getBoolean(value);
       else if (key.equals(RIGHT_ALIGN_CONTENT)) rightAlignContent = getBoolean(value);
+      else if (key.equals(ADD_RECORD_KEY_BINDING)) addRecordKeyBinding = getBoolean(value);
     }
   }
 
@@ -293,7 +296,7 @@ public class PropertyHandler {
   /**
    * @see mitll.langtest.client.LangTest#modeSelect()
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
-   * @see mitll.langtest.client.LangTest#setFactory()
+   * @see mitll.langtest.client.LangTest#setFactory
    *
    * @return
    */
@@ -407,7 +410,7 @@ public class PropertyHandler {
   /**
    * @see LangTest#makeExerciseList
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
-   * @see mitll.langtest.client.LangTest#setFactory()
+   * @see mitll.langtest.client.LangTest#setFactory
    * @return
    */
   public boolean isFlashCard() {
@@ -444,5 +447,9 @@ public class PropertyHandler {
   }
   public boolean isRightAlignContent() {
     return rightAlignContent;
+  }
+
+  public boolean shouldAddRecordKeyBinding() {
+    return addRecordKeyBinding;
   }
 }
