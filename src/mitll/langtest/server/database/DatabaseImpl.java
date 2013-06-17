@@ -1309,7 +1309,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise
    * @return
    */
-  public Map<String,List<Integer>> getResultPerExercise() { return monitoringSupport.getResultPerExercise(getExercises()); }
+  public Map<String, Map<String, Integer>> getResultPerExercise() { return monitoringSupport.getResultPerExercise(getExercises()); }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultCountsByGender()
