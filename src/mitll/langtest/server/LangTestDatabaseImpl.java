@@ -1050,7 +1050,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.monitoring.MonitoringManager#doResultLineQuery(com.google.gwt.user.client.ui.Panel)
    * @return
    */
-  public Map<String, List<Integer>> getResultPerExercise() {
+  public Map<String, Map<String, Integer>> getResultPerExercise() {
     return db.getResultPerExercise();
   }
 
