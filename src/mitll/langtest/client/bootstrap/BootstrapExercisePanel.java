@@ -293,7 +293,7 @@ public class BootstrapExercisePanel extends FluidContainer {
 
    @Override
     protected RecordButton makeRecordButton(ExerciseController controller, final RecordButtonPanel outer) {
-      return new RecordButton(controller.getRecordTimeout()) {
+      return new RecordButton(controller.getRecordTimeout(), true) {
         @Override
         protected void stopRecording() {
           outer.stopRecording();
