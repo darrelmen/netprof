@@ -38,6 +38,8 @@ import java.util.regex.Pattern;
  * To change this template use File | Settings | File Templates.
  */
 public class FileExerciseDAO implements ExerciseDAO {
+  public static final String FILE_PREFIX = "file://";
+  public static final int FILE_PREFIX_LENGTH = "file://".length();
   private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
   public static final List<String> EMPTY_LIST = Collections.emptyList();
 
@@ -263,7 +265,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   /**
-   * @see DatabaseImpl#getExercises
+   * @see DatabaseImpl#getExercises(boolean, String)
    * @param installPath
    * @param lessonPlanFile
    */
@@ -378,13 +380,16 @@ public class FileExerciseDAO implements ExerciseDAO {
 
     File include = getIncludeFile(configDir, includeFile);
 
-    boolean exists = include.exists();
-    if (!exists) {
-      include = new File(installPath,includeFile);
-      exists = include.exists();
+    if (!include.exists()) {
+      File configDirFile = new File(installPath, configDir);
+      logger.warn("couldn't open file " + include.getName() + " at " +include.getAbsolutePath() + " config '" + configDir +"' with install path'" +
+        installPath +
+        "' new config dir " + configDirFile.getAbsolutePath());
+      include = getIncludeFile(configDirFile.getAbsolutePath(), includeFile);
     }
-     if (!exists) {
-      logger.warn("couldn't open file " + include.getName() + " at " +include.getAbsolutePath() + " for line " + line);
+     if (!include.exists()) {
+      logger.warn("couldn't open file " + include.getName() + " at " +include.getAbsolutePath() + " config " + configDir +
+        " for line " + line);
       return null;
     } else {
       boolean listening = type.equalsIgnoreCase("listening");
@@ -408,8 +413,15 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   private File getIncludeFile(String configDir, String includeFile) {
-    if (includeFile.startsWith("file://")) {
-      includeFile = includeFile.substring("file://".length());
+    if (includeFile.startsWith(FILE_PREFIX)) {
+      includeFile = includeFile.substring(FILE_PREFIX_LENGTH);
+      logger.debug("1 after '" +  includeFile+
+        "'");
+    }
+    else if (includeFile.startsWith("file:/")) { // weird issue with pashto...
+      logger.debug("2 include '" +  includeFile+
+        "'");
+      includeFile = includeFile.substring("file:/".length());
     }
     return new File(configDir,includeFile);
   }
