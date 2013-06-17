@@ -16,7 +16,7 @@ public class FontChecker {
   }
 
   public void checkPashto() {
-    if (checkFont(
+    if (!checkFont(
 //      "Nafees Pakistani Naskh" // testing
       "Pashto Kror Asiatype"
     )) {
