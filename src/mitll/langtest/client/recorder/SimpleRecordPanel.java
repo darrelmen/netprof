@@ -3,6 +3,7 @@
  */
 package mitll.langtest.client.recorder;
 
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -35,7 +36,6 @@ public class SimpleRecordPanel extends RecordButtonPanel {
   private Image check;
   private SimplePanel playback = new SimplePanel();
   private final AudioTag audioTag = new AudioTag();
-  private final HTML resp = new HTML();
 
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
@@ -57,8 +57,6 @@ public class SimpleRecordPanel extends RecordButtonPanel {
 
     // add playback html
     addPlayback();
-
-    widget.add(resp);
   }
 
   private void addPlayback() {
@@ -71,14 +69,14 @@ public class SimpleRecordPanel extends RecordButtonPanel {
     check.setAltText("Audio Saved");
     check.setVisible(false);
 
-    if (!controller.isAutoCRTMode()) getPanel().add(check);
+    getPanel().add(check);
   }
 
   @Override
   public void startRecording() {
     super.startRecording();
     playback.setWidget(new HTML(""));
-    resp.setText("");
+    if (check != null) check.setVisible(false);
   }
 
   /**
@@ -91,41 +89,6 @@ public class SimpleRecordPanel extends RecordButtonPanel {
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {
     showAudioValidity(result.validity, questionState, outer);
     setAudioTag(result.path);
-
-    if (result.decodeOutput.length() > 0) {
-      // i.e. autocrt -- revisit?
-      showAutoCRTFeedback(result);
-    }
-    else if (result.getScore() != -1) {
-      resp.setHTML("I couldn't understand that, please record again.");
-    }
-  }
-
-  private void showAutoCRTFeedback(AudioAnswer result) {
-    double score = result.getScore();
-    score *= 2.5;
-    score -= 1.25;
-    score = Math.max(0,score);
-    score = Math.min(1.0,score);
-    String percent = ((int) (score * 100)) + "%";
-    if (result.getScore() > 0.6) {
-      resp.setHTML("Correct! Score for <font size=+1>" + result.decodeOutput + "</font> was " + percent);
-      resp.setStyleName("correct");
-    } else {
-      resp.setHTML("Try again - score for <font size=+1>" + result.decodeOutput + "</font> was " + percent);
-      resp.setStyleName("incorrect");
-    }
-  }
-
-  @Override
-  public void stopRecording() {
-    super.stopRecording();
-    if (controller.isAutoCRTMode())  {
-      resp.removeStyleName("incorrect");
-      resp.removeStyleName("correct");
-      resp.setText("Scoring... please wait.");
-
-    }
   }
 
   /**
