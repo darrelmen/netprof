@@ -28,7 +28,7 @@ public class WaveformExercisePanel extends ExercisePanel {
   private RecordAudioPanel audioPanel;
   private Image recordImage1;
   private Image recordImage2;
-  private static final int PERIOD_MILLIS = 500;
+ // private static final int PERIOD_MILLIS = 500;
 
   /**
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
@@ -42,7 +42,7 @@ public class WaveformExercisePanel extends ExercisePanel {
     super(e, service, userFeedback, controller);
   }
 
-  public void setBusy(boolean v) { this.isBusy = v;}
+  public void setBusy(boolean v) { this.isBusy = v; }
 
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
@@ -114,91 +114,13 @@ public class WaveformExercisePanel extends ExercisePanel {
 
     @Override
     protected PlayAudioPanel makePlayAudioPanel(Widget toAdd) {
-      postAudioRecordButton = new PostAudioRecordButton(exercise, controller, service, index) {
-        private Timer t = null;
-
-        @Override
-        protected void startRecording() {
-        //  isBusy = true;
-
-          setBusy(true);
-          super.startRecording();
-          setButtonsEnabled(false);
-          playAudioPanel.setPlayEnabled(false);
-        }
-
-        @Override
-        protected void showRecording() {
-          super.showRecording();
-          recordImage1.setVisible(true);
-          flipImage();
-        }
-        private boolean first = true;
-
-        private void flipImage() {
-          t = new Timer() {
-            @Override
-            public void run() {
-              if (first) {
-                recordImage1.setVisible(false);
-                recordImage2.setVisible(true);
-              }
-              else {
-                recordImage1.setVisible(true);
-                recordImage2.setVisible(false);
-              }
-              first = !first;
-            }
-          };
-          t.scheduleRepeating(PERIOD_MILLIS);
-        }
-
-        @Override
-        public void showStopped() {
-          super.showStopped();
-          recordImage1.setVisible(false);
-          recordImage2.setVisible(false);
-          t.cancel();
-        }
-
-        /**
-         * @see mitll.langtest.client.recorder.RecordButton#stop()
-         */
-        @Override
-        protected void stopRecording() {
-          //System.out.println("RecordAudioPanel : Stop recording!");
-
-          setButtonsEnabled(true);
-          waveform.setVisible(true);
-          waveform.setUrl(LangTest.LANGTEST_IMAGES +"animated_progress.gif");
-
-          super.stopRecording();
-
-          playAudioPanel.setPlayEnabled(true);
-          setBusy(false);
-        }
-
-        @Override
-        public void useResult(AudioAnswer result) {
-          if (t != null) t.cancel();
-          getImagesForPath(wavToMP3(result.path));
-          ExerciseQuestionState state = WaveformExercisePanel.this;
-          state.recordCompleted(WaveformExercisePanel.this);
-        }
-
-        @Override
-        protected void useInvalidResult(AudioAnswer result) {
-          if (t != null) t.cancel();
-          waveform.setVisible(false);
-          spectrogram.setVisible(false);
-          ExerciseQuestionState state = WaveformExercisePanel.this;
-          state.recordIncomplete(WaveformExercisePanel.this);
-        }
-      };
-
       recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
       recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
+      System.out.println("making play audio panel with " + recordImage1 + " and " + recordImage2);
+
       playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, WaveformExercisePanel.this);
+      postAudioRecordButton = new MyPostAudioRecordButton(playAudioPanel,this, service, index);
+
       return playAudioPanel;
     }
 
@@ -243,5 +165,94 @@ public class WaveformExercisePanel extends ExercisePanel {
 
   private String wavToMP3(String path) {
     return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
+  }
+
+  private class MyPostAudioRecordButton extends PostAudioRecordButton {
+    private Timer t = null;
+    private RecordAudioPanel widgets;
+    private PlayAudioPanel playAudioPanel;
+
+    public MyPostAudioRecordButton(PlayAudioPanel playAudioPanel, RecordAudioPanel widgets, LangTestDatabaseAsync service, int index) {
+      super(exercise, controller, service, index, recordImage1, recordImage2);
+      this.widgets = widgets;
+      this.playAudioPanel = playAudioPanel;
+    }
+
+    @Override
+    protected void startRecording() {
+      setBusy(true);
+      super.startRecording();
+      setButtonsEnabled(false);
+      playAudioPanel.setPlayEnabled(false);
+    }
+
+ /*   @Override
+    protected void showRecording() {
+      super.showRecording();
+      recordImage1.setVisible(true);
+      flipImage();
+    }*/
+/*
+    private boolean first = true;
+
+    private void flipImage() {
+      t = new Timer() {
+        @Override
+        public void run() {
+          if (first) {
+            recordImage1.setVisible(false);
+            recordImage2.setVisible(true);
+          }
+          else {
+            recordImage1.setVisible(true);
+            recordImage2.setVisible(false);
+          }
+          first = !first;
+        }
+      };
+      t.scheduleRepeating(PERIOD_MILLIS);
+    }*/
+/*
+    @Override
+    public void showStopped() {
+      super.showStopped();
+      recordImage1.setVisible(false);
+      recordImage2.setVisible(false);
+      t.cancel();
+    }*/
+
+    /**
+     * @see mitll.langtest.client.recorder.RecordButton#stop()
+     */
+    @Override
+    protected void stopRecording() {
+      //System.out.println("RecordAudioPanel : Stop recording!");
+
+      setButtonsEnabled(true);
+      widgets.getWaveform().setVisible(true);
+      widgets.getWaveform().setUrl(LangTest.LANGTEST_IMAGES + "animated_progress.gif");
+
+      super.stopRecording();
+
+      playAudioPanel.setPlayEnabled(true);
+      setBusy(false);
+    }
+
+    @Override
+    public void useResult(AudioAnswer result) {
+      if (t != null) t.cancel();
+      widgets.getImagesForPath(wavToMP3(result.path));
+      ExerciseQuestionState state = WaveformExercisePanel.this;
+      state.recordCompleted(WaveformExercisePanel.this);
+    }
+
+    @Override
+    protected void useInvalidResult(AudioAnswer result) {
+      if (t != null) t.cancel();
+      widgets.getWaveform().setVisible(false);
+      widgets.getSpectrogram().setVisible(false);
+      ExerciseQuestionState state = WaveformExercisePanel.this;
+      state.recordIncomplete(WaveformExercisePanel.this);
+    }
   }
 }
