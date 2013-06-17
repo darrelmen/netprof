@@ -301,7 +301,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     private final int index;
     private PostAudioRecordButton postAudioRecordButton;
     private PlayAudioPanel playAudioPanel;
-    private static final int PERIOD_MILLIS = 500;
+   // private static final int PERIOD_MILLIS = 500;
     /**
      * @see GoodwaveExercisePanel#getAnswerWidget
      * @param service
@@ -374,10 +374,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
 
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
-      private Timer t = null;
-
       public MyPostAudioRecordButton() {
-        super(exercise, controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index);
+        super(exercise, controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index, recordImage1, recordImage2);
       }
 
       @Override
@@ -400,21 +398,30 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         super.stopRecording();
       }
 
+      /**
+       * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
+       * @param result
+       */
       @Override
+      protected void useInvalidResult(AudioAnswer result) {
+        //To change body of implemented methods use File | Settings | File Templates.
+      }
+
+/*      @Override
       protected void showRecording() {
         super.showRecording();
         recordImage1.setVisible(true);
         flipImage();
-      }
+      }*/
 
-      @Override
+ /*     @Override
       public void showStopped() {
         super.showStopped();
         recordImage1.setVisible(false);
         recordImage2.setVisible(false);
         t.cancel();
-      }
-
+      }*/
+/*
       private boolean first = true;
 
       private void flipImage() {
@@ -433,7 +440,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
           }
         };
         t.scheduleRepeating(PERIOD_MILLIS);
-      }
+      }*/
     }
   }
 
