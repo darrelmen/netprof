@@ -14,7 +14,7 @@ import mitll.langtest.shared.Exercise;
  */
 public class WaveformExercisePanelFactory extends ExercisePanelFactory {
   /**
-   * @see mitll.langtest.client.LangTest#setFactory()
+   * @see mitll.langtest.client.LangTest#setFactory
    * @param service
    * @param userFeedback
    * @param controller
