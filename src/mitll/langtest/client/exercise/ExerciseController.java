@@ -53,4 +53,5 @@ public interface ExerciseController {
   boolean isGoodwaveMode();
   int getLeftColumnWidth();
   int getHeightOfTopRows();
+  boolean shouldAddRecordKeyBinding();
 }
