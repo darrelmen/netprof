@@ -31,6 +31,15 @@ public abstract class PostAudioRecordButton extends RecordButton {
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
 
+  /**
+   * @see GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
+   * @param exercise
+   * @param controller
+   * @param service
+   * @param index
+   * @param recordImage1
+   * @param recordImage2
+   */
   public PostAudioRecordButton(Exercise exercise, ExerciseController controller, LangTestDatabaseAsync service,
                                int index, Image recordImage1, Image recordImage2) {
     super(new Button(RECORD), controller.getRecordTimeout(), recordImage1, recordImage2, true);
@@ -133,6 +142,7 @@ public abstract class PostAudioRecordButton extends RecordButton {
    */
   @Override
   protected void showRecording() {
+    super.showRecording();
     int w = getRecord().getOffsetWidth();
     ((Button) getRecord()).setText(STOP);
     if (getRecord().getOffsetWidth() < w) getRecord().setWidth(w + "px");
@@ -140,6 +150,7 @@ public abstract class PostAudioRecordButton extends RecordButton {
 
   @Override
   protected void showStopped() {
+    super.showStopped();
     ((Button) getRecord()).setText(RECORD);
   }
 
