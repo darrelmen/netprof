@@ -382,9 +382,9 @@ public class FileExerciseDAO implements ExerciseDAO {
 
     if (!include.exists()) {
       File configDirFile = new File(installPath, configDir);
-      logger.warn("couldn't open file " + include.getName() + " at " +include.getAbsolutePath() + " config '" + configDir +"' with install path'" +
+/*      logger.warn("couldn't open file " + include.getName() + " at " +include.getAbsolutePath() + " config '" + configDir +"' with install path'" +
         installPath +
-        "' new config dir " + configDirFile.getAbsolutePath());
+        "' new config dir " + configDirFile.getAbsolutePath());*/
       include = getIncludeFile(configDirFile.getAbsolutePath(), includeFile);
     }
      if (!include.exists()) {
@@ -415,8 +415,8 @@ public class FileExerciseDAO implements ExerciseDAO {
   private File getIncludeFile(String configDir, String includeFile) {
     if (includeFile.startsWith(FILE_PREFIX)) {
       includeFile = includeFile.substring(FILE_PREFIX_LENGTH);
-      logger.debug("1 after '" +  includeFile+
-        "'");
+  /*    logger.debug("1 after '" +  includeFile+
+        "'");*/
     }
     else if (includeFile.startsWith("file:/")) { // weird issue with pashto...
       logger.debug("2 include '" +  includeFile+
