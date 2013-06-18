@@ -63,12 +63,15 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class TableSectionExerciseList extends FlexSectionExerciseList {
-  private static final String USER_PROMPT = "Choose a lesson, preview, and share flashcard exercises.";
+  private static final String FLASHCARD = "audio vocabulary practice";
+  private static final String USER_PROMPT = "Choose a lesson, preview, and share " + FLASHCARD + " exercises.";
 
   private static final int FRAME_WIDTH = 1024-50-50;
   private static final int FRAME_HEIGHT = 640-30;
-  private static final String FLASHCARDCOPY = "flashcardcopy";
-  private static final String TIMEDFLASHCARDCOPY = "timedflashcardcopy";
+  private static final String FLASHCARDCOPY = FLASHCARD + "copy";
+  private static final String TIMEDFLASHCARDCOPY = "timed" + FLASHCARD + "copy";
+  private static final String FLASHCARD1 = "Audio Vocabulary Practice";
+  private static final String TIMED_FLASHCARD = "Timed AVP";
   private Button flashcardCopy;
   private Button timedFlashcardCopy;
   private TextBox urlInputBox = new TextBox();
@@ -192,7 +195,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
         bindZero(flashcardCopy.getElement(),getFlashcardLink());
       }
     });
-    Widget flashcardWidget = getFlashcard("Flashcard", flashcardCopy, urlInputBox, false);
+    Widget flashcardWidget = getFlashcard(FLASHCARD1, flashcardCopy, urlInputBox, false);
     previewRow.add(flashcardWidget);
 
     urlInputBox2.setText(getTimedFlashcardLink());
@@ -206,7 +209,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     });
     updateFlashcardCopy();
 
-    Widget flashcardWidget2 = getFlashcard("Timed Flashcard", timedFlashcardCopy, urlInputBox2, true);
+    Widget flashcardWidget2 = getFlashcard(TIMED_FLASHCARD, timedFlashcardCopy, urlInputBox2, true);
     SimplePanel w = new SimplePanel(new Heading(6));
     w.setWidth("10px");
     w.setHeight("2px");
@@ -265,7 +268,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   private Button getPreviewButton(final boolean doTimedFlashcard) {
     Button preview = new Button("Preview");
     preview.addStyleName("leftTenMargin");
-    preview.setTitle("Preview flashcards");
+    preview.setTitle("Preview " + FLASHCARD + "s");
 
     preview.addClickHandler(new ClickHandler() {
       @Override
@@ -278,7 +281,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
 
   private void getPreviewModal(boolean doTimedFlashcard) {
     final Modal modal = new Modal();
-    String title = "Flashcard Preview";
+    String title = FLASHCARD1 + " Preview";
     if (doTimedFlashcard) title = "Timed " + title;
 
     modal.setTitle(title);
@@ -361,13 +364,15 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   }
 
   private String getFlashcardLink() {
-    return GWT.getHostPageBaseURL() + "?flashcard=true#" + token;
+    return getFlashcardURL() + "#" + token;
   }
 
   private String getTimedFlashcardLink() {
-    return GWT.getHostPageBaseURL() + "?flashcard=true" +
-      "&timedGame=true" +
-      "#" + token;
+    return getFlashcardURL() + "&timedGame=true" + "#" + token;
+  }
+
+  private String getFlashcardURL() {
+    return GWT.getHostPageBaseURL() + "?" + "flashcard" + "=true";
   }
 
   private native void zero(String moduleBaseURL,String widgetID,String widgetFeedbackID)  /*-{
