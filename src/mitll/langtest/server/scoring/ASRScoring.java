@@ -136,7 +136,7 @@ public class ASRScoring extends Scoring {
     } else if (language.equalsIgnoreCase("Farsi")) {
       this.letterToSoundClass = new FarsiLTS();  // TODO is there a FarsiLTS class???
     } else {
-      logger.error("huh? unsupported language " + language);
+      logger.warn("NOTE: no LTS for language " + language);
     }
 //    logger.info("using LTS " + letterToSoundClass.getClass());
     this.htkDictionary = dict;
