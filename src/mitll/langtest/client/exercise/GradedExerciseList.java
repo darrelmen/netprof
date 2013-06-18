@@ -45,7 +45,7 @@ public class GradedExerciseList extends PagingExerciseList {
   }
 
   /**
-   * @see SetExercisesCallback#onSuccess(java.util.List)
+   * @see SetExercisesCallback#onSuccess
    */
   @Override
   protected void loadFirstExercise() {
