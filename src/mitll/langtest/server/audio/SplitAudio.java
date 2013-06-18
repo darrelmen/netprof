@@ -58,11 +58,12 @@ public class SplitAudio {
   private static final int LOW_WORD_SCORE_THRESHOLD = 20;
   private static final boolean THROW_OUT_FAST_LONGER_THAN_SLOW = false;
   private static final float MSA_MIN_SCORE = 0.2f;
+  public static final float LOW_SCORE_THRESHOLD = 0.2f;
 
   private static Logger logger = Logger.getLogger(SplitAudio.class);
 
   private boolean debug;
-  private static final int MAX = 22000;
+  private static final int MAX = 10;//22000;
   public static final double BAD_PHONE = 0.1;
   public static final double BAD_PHONE_PERCENTAGE = 0.2;
   private static final double MIN_DUR = 0.2;
@@ -232,7 +233,7 @@ public class SplitAudio {
       }
       File refDirForExercise = new File(newRefDir, name);
       refDirForExercise.mkdir();
-      if (valid && hydecScore > 0.1f) {
+      if (valid && hydecScore > LOW_SCORE_THRESHOLD) {
         FastAndSlow consistent = writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
           alignments, true);
 
@@ -845,7 +846,7 @@ public class SplitAudio {
         // ( i == 4026)//39//3496
        //( i == 675)//39//3496   // notebook
         //( i == 1826)//39//3496      // hello
-       && ( i == 4185)//39//3496      // eighty
+      // && ( i == 4185)//39//3496      // eighty
         ) {
         List<Result> resultList = idToResults.get(id);//r.getID());
         if (resultList == null) {
@@ -855,7 +856,10 @@ public class SplitAudio {
         resultList.add(r);
       }
     }
-    logger.debug("got " + idToResults.size() + " first key " + idToResults.keySet().iterator().next());
+    if (idToResults.isEmpty())
+      logger.warn("id->results is empty?");
+    else
+      logger.debug("got " + idToResults.size() + " id->results, first key " + idToResults.keySet().iterator().next());
     return idToResults;
   }
 
@@ -902,7 +906,10 @@ public class SplitAudio {
     Exercise exercise = idToEx.get(exid2);
     if (exercise == null) {
       if (exid2.length() > 3) {
-        exercise = idToEx.get(exid2.substring(0, exid2.length() - 3));
+        String trimmed = exid2.substring(0, exid2.length() - 3);
+        logger.debug("getBestForEachExercise trying exid " + trimmed);
+
+        exercise = idToEx.get(trimmed);
       }
     }
     if (exercise == null) {
@@ -939,7 +946,9 @@ public class SplitAudio {
       refLength, refDirForExercise,collectedAudioDir);
 
     if (fastAndSlow.valid) {
-      logger.debug("for " + exid + " : '" + exercise.getEnglishSentence() + "' best is " + fastAndSlow);// + " total " + bestTotal);
+      logger.debug("for " + exid + " : '" + exercise.getEnglishSentence() + "'/'" +
+        exercise.getRefSentence()+
+        "' best is " + fastAndSlow);// + " total " + bestTotal);
       writeBestFiles(missingSlow, missingFast, exid,
         //refDirForExercise,
         bestDirForExercise, fastAndSlow);
@@ -1089,7 +1098,7 @@ public class SplitAudio {
     String doubled = refSentence + " " + refSentence;
     doubled = doubled.toUpperCase();   // TODO : only for english!?
     Scores align = scoring.align(parent, testAudioFileNoSuffix, doubled);
-    logger.debug("\tgot " + align + " for " + name + " for '" +doubled +"'");
+    logger.debug("\tdoubled : got " + align + " for " + name + " for '" +doubled +"'");
     return align;
   }
 
@@ -1097,7 +1106,7 @@ public class SplitAudio {
     String doubled = refSentence;
     doubled = doubled.toUpperCase();   // TODO : only for english!?
     Scores align = scoring.align(parent, testAudioFileNoSuffix, doubled);
-    logger.debug("\tgot " + align + " for " + name + " for '" +doubled +"'");
+    logger.debug("\tsingle : got " + align + " for " + name + " for '" +doubled +"'");
     return align;
   }
 
@@ -1480,9 +1489,9 @@ public class SplitAudio {
     try {
       int numThreads = Integer.parseInt(arg[0]);
       //  new SplitAudio().checkTamas();
-       new SplitAudio().splitSimpleMSA(numThreads);
+  //     new SplitAudio().splitSimpleMSA(numThreads);
 
-    if (true) return;
+   // if (true) return;
 
       String audioDir = arg[1];
       // new SplitAudio().convertExamples(numThreads, audioDir, arg[2], arg[3]);
