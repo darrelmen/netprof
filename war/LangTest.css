@@ -292,6 +292,10 @@ fieldset {
     margin-left: 15%;
 }
 
+.topMargin {
+    margin-top: 10px;
+}
+
 .leftFiveMargin {
     margin-left: 5px;
 }
