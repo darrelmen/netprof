@@ -153,6 +153,9 @@ public abstract class RecordButton {
       recordImage1.setVisible(true);
       flipImage();
     }
+    else {
+      System.err.println("\n\n\n-----------> no record image so can't showRecording");// + " " + (now-then));
+    }
   }
 
   private boolean first = true;
