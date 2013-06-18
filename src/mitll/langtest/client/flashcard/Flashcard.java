@@ -16,10 +16,12 @@ import mitll.langtest.client.LangTest;
  * Does fancy font sizing depending on available width...
  */
 public class Flashcard implements RequiresResize {
-  boolean isNPF;
-  Paragraph appName;
-  Image flashcardImage;
-  Image collab;
+  private static final String AVP = "AUDIO VOCABULARY PRACTICE";
+  private static final String PRONUNCIATION_FEEDBACK = "PRONUNCIATION FEEDBACK";
+  private boolean isNPF;
+  private Paragraph appName;
+  private Image flashcardImage;
+  private Image collab;
 
   public Flashcard(boolean isNPF) {
     this.isNPF = isNPF;
@@ -27,12 +29,12 @@ public class Flashcard implements RequiresResize {
 
   public HorizontalPanel makeFlashcardHeaderRow(String splashText) {
     String appIcon = "flashcardIcon2.png";
-    return getHeaderRow(splashText, appIcon, "FLASHCARD");
+    return getHeaderRow(splashText, appIcon, AVP);
   }
 
   public HorizontalPanel makeNPFHeaderRow(String splashText) {
     String appIcon = "npfIcon.png";
-    return getHeaderRow(splashText, appIcon, "PRONUNCIATION FEEDBACK");
+    return getHeaderRow(splashText, appIcon, PRONUNCIATION_FEEDBACK);
   }
 
   private HorizontalPanel getHeaderRow(String splashText, String appIcon, String appTitle) {
