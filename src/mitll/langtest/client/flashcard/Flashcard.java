@@ -16,16 +16,18 @@ import mitll.langtest.client.LangTest;
  * Does fancy font sizing depending on available width...
  */
 public class Flashcard implements RequiresResize {
-  private static final String AVP = "AUDIO VOCABULARY PRACTICE";
+  private static final String AVP = "AUDIO VOCAB PRACTICE";
   private static final String PRONUNCIATION_FEEDBACK = "PRONUNCIATION FEEDBACK";
-  private boolean isNPF;
+  private static final double MAX_FONT_EM = 1.8d;
   private Paragraph appName;
   private Image flashcardImage;
   private Image collab;
 
-  public Flashcard(boolean isNPF) {
-    this.isNPF = isNPF;
-  }
+  /**
+   * @see mitll.langtest.client.LangTest#doFlashcard()
+   * @see mitll.langtest.client.LangTest#makeHeaderRow()
+   */
+  public Flashcard() {}
 
   public HorizontalPanel makeFlashcardHeaderRow(String splashText) {
     String appIcon = "flashcardIcon2.png";
@@ -68,31 +70,29 @@ public class Flashcard implements RequiresResize {
 
     collab = new Image(LangTest.LANGTEST_IMAGES + "collabIcon3.png");
     headerRow.add(collab);
-    if (isNPF) {
+
       headerRow.addAttachHandler(new AttachEvent.Handler() {
         @Override
         public void onAttachOrDetach(AttachEvent event) {
           onResize();
         }
       });
-    }
 
     return headerRow;
   }
 
-  int min = 720;
+  private int min = 720;
 
   @Override
   public void onResize() {
-    if (isNPF) {
       int clientWidth = Window.getClientWidth();
 
       if (clientWidth < 1100) {
         setFontWidth();
       } else {
-        DOM.setStyleAttribute(appName.getElement(), "fontSize", "2em");
+        DOM.setStyleAttribute(appName.getElement(), "fontSize", MAX_FONT_EM +
+          "em");
       }
-    }
   }
 
   private void setFontWidth() {
@@ -102,16 +102,16 @@ public class Flashcard implements RequiresResize {
     int offsetWidth1 = collab.getOffsetWidth();
     int residual = clientWidth - offsetWidth - offsetWidth1 - 40;
 
-  //  System.out.println("left " + offsetWidth + " right " + offsetWidth1 + " window " + clientWidth + " residual " + residual);
+//   System.out.println("setFontWidth : left " + offsetWidth + " right " + offsetWidth1 + " window " + clientWidth + " residual " + residual);
 
     double ratio = 2.0d * (double) residual / (double) min;
     ratio *= 10;
     ratio = Math.floor(ratio);
     ratio /= 10;
     if (ratio < 0.7) ratio = 0.7;
-    if (ratio > 2.0) ratio = 2.0;
+    if (ratio > MAX_FONT_EM) ratio =  MAX_FONT_EM;
     String fontsize = ratio + "em";
-  //  System.out.println("Setting font size to " + fontsize);
+  //  System.out.println("setFontWidth : Setting font size to " + fontsize);
     DOM.setStyleAttribute(appName.getElement(), "fontSize", fontsize);
   }
 }
