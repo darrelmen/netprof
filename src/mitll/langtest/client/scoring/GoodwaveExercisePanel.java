@@ -177,7 +177,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     CaptionPanel cpContent = new CaptionPanel(INSTRUCTIONS);
     Widget questionContent = new HTML(content);
-  //  questionContent.addStyleName("leftTenMargin");
     cpContent.setContentWidget(questionContent);
     vp.add(cpContent);
 
@@ -301,7 +300,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     private final int index;
     private PostAudioRecordButton postAudioRecordButton;
     private PlayAudioPanel playAudioPanel;
-   // private static final int PERIOD_MILLIS = 500;
+
     /**
      * @see GoodwaveExercisePanel#getAnswerWidget
      * @param service
@@ -326,10 +325,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      */
     @Override
     protected PlayAudioPanel makePlayAudioPanel(Widget toAdd) {
-      postAudioRecordButton = new MyPostAudioRecordButton();
-      DOM.setElementProperty(postAudioRecordButton.getRecord().getElement(),"margin","8px");
       recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
       recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
+      postAudioRecordButton = new MyPostAudioRecordButton();
+      DOM.setElementProperty(postAudioRecordButton.getRecord().getElement(),"margin","8px");
       playAudioPanel = new MyPlayAudioPanel(recordImage1,recordImage2, soundManager, postAudioRecordButton, GoodwaveExercisePanel.this);
       return playAudioPanel;
     }
@@ -403,47 +402,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
        * @param result
        */
       @Override
-      protected void useInvalidResult(AudioAnswer result) {
-        //To change body of implemented methods use File | Settings | File Templates.
-      }
-
-/*      @Override
-      protected void showRecording() {
-        super.showRecording();
-        recordImage1.setVisible(true);
-        flipImage();
-      }*/
-
- /*     @Override
-      public void showStopped() {
-        super.showStopped();
-        recordImage1.setVisible(false);
-        recordImage2.setVisible(false);
-        t.cancel();
-      }*/
-/*
-      private boolean first = true;
-
-      private void flipImage() {
-        t = new Timer() {
-          @Override
-          public void run() {
-            if (first) {
-              recordImage1.setVisible(false);
-              recordImage2.setVisible(true);
-            }
-            else {
-              recordImage1.setVisible(true);
-              recordImage2.setVisible(false);
-            }
-            first = !first;
-          }
-        };
-        t.scheduleRepeating(PERIOD_MILLIS);
-      }*/
+      protected void useInvalidResult(AudioAnswer result) {}
     }
   }
-
 
   public boolean isBusy() {
     return isBusy;
