@@ -722,7 +722,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void setFactory(final long userID) {
     final LangTest outer =this;
-    if (props.isGoodwaveMode()) {
+    if (props.isGoodwaveMode() && !props.isGrading()) {
 /*      GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           Window.alert("Code download failed");
