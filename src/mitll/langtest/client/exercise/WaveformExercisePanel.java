@@ -28,7 +28,6 @@ public class WaveformExercisePanel extends ExercisePanel {
   private RecordAudioPanel audioPanel;
   private Image recordImage1;
   private Image recordImage2;
- // private static final int PERIOD_MILLIS = 500;
 
   /**
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
@@ -186,48 +185,11 @@ public class WaveformExercisePanel extends ExercisePanel {
       playAudioPanel.setPlayEnabled(false);
     }
 
- /*   @Override
-    protected void showRecording() {
-      super.showRecording();
-      recordImage1.setVisible(true);
-      flipImage();
-    }*/
-/*
-    private boolean first = true;
-
-    private void flipImage() {
-      t = new Timer() {
-        @Override
-        public void run() {
-          if (first) {
-            recordImage1.setVisible(false);
-            recordImage2.setVisible(true);
-          }
-          else {
-            recordImage1.setVisible(true);
-            recordImage2.setVisible(false);
-          }
-          first = !first;
-        }
-      };
-      t.scheduleRepeating(PERIOD_MILLIS);
-    }*/
-/*
-    @Override
-    public void showStopped() {
-      super.showStopped();
-      recordImage1.setVisible(false);
-      recordImage2.setVisible(false);
-      t.cancel();
-    }*/
-
     /**
      * @see mitll.langtest.client.recorder.RecordButton#stop()
      */
     @Override
     protected void stopRecording() {
-      //System.out.println("RecordAudioPanel : Stop recording!");
-
       setButtonsEnabled(true);
       widgets.getWaveform().setVisible(true);
       widgets.getWaveform().setUrl(LangTest.LANGTEST_IMAGES + "animated_progress.gif");
