@@ -167,6 +167,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
         public void onSuccess() {
           doFlashcard();
+          addResizeHandler();
         }
       });
       return;
@@ -301,7 +302,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     Widget title;
     if (isGoodwaveMode()) {
-      flashcard = new Flashcard(props.isGoodwaveMode());
+      flashcard = new Flashcard();
       title = flashcard.makeNPFHeaderRow(props.getSplash());
     }
     else {
@@ -420,7 +421,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     RootPanel.get().addStyleName("noPadding");
     currentExerciseVPanel = container;
 
-    flashcard = new Flashcard(props.isGoodwaveMode());
+    flashcard = new Flashcard();
 
     HorizontalPanel headerRow = flashcard.makeFlashcardHeaderRow(props.getSplash());
     container.add(headerRow);
@@ -575,7 +576,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Window.addResizeHandler(new ResizeHandler() {
       public void onResize(ResizeEvent event) {
         exerciseList.onResize();
-        if (flashcard != null) flashcard.onResize();
+        if (flashcard != null) {
+          flashcard.onResize();
+        }
       }
     });
   }
