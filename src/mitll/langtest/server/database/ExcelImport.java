@@ -41,6 +41,7 @@ public class ExcelImport implements ExerciseDAO {
   private final boolean isFlashcard;
 
   private List<Exercise> exercises = null;
+  private Map<String,Exercise> idToExercise = new HashMap<String,Exercise>();
   private List<String> errors = new ArrayList<String>();
   private final String file;
   private SectionHelper sectionHelper = new SectionHelper();
@@ -123,6 +124,13 @@ public class ExcelImport implements ExerciseDAO {
       }
     }
     return exercises;
+  }
+
+  public Exercise getExercise(String id) {
+    if (idToExercise.isEmpty()) {
+      for (Exercise e : exercises) idToExercise.put(id,e);
+    }
+    return idToExercise.get(id);
   }
 
   private List<Exercise> readExercises(File file) {
@@ -624,7 +632,7 @@ public class ExcelImport implements ExerciseDAO {
     return errors;
   }
 
-  public static void main(String [] arg) {
+/*  public static void main(String [] arg) {
     ExcelImport config = new ExcelImport(
       "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\english\\ESL_ELC_5071-30books_chapters.xlsx", false, "config\\bestAudio", "war\\config\\english", true, "English");
     List<Exercise> rawExercises = config.getRawExercises();
@@ -650,5 +658,5 @@ public class ExcelImport implements ExerciseDAO {
 
     List<String> typeOrder = config.sectionHelper.getTypeOrder();
     System.out.println(" type order " +typeOrder);
-  }
+  }*/
 }
