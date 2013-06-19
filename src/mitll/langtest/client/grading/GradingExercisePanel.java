@@ -136,12 +136,12 @@ public class GradingExercisePanel extends ExercisePanel {
                 System.out.println("\tspoken : " +isSpoken + " isFLQ " + isForeign +" has " +results.size() + " results");
                 anyAnswers = true;
                 String prompt = getPrompt(isSpoken, isForeign, outer);
-                System.out.println("\tgetResultsForExercise add answer group for results (index = " + index+ ")" + results);
+                System.out.println("\tgetResultsForExercise add answer group for results (index = " + index+ ") size = " + results.size());
 
                 vp.add(addAnswerGroup(resultsAndGrades.grades, results, bigPage, prompt, outer, service, n, index));
               }
               else {
-                System.out.println("\tspoken : " +isSpoken + " isFLQ " + isForeign +" has " +results + " results");
+                System.out.println("\tspoken : " +isSpoken + " isFLQ " + isForeign);
               }
             }
           }
