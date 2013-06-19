@@ -1,26 +1,19 @@
 package mitll.langtest.server.database;
 
-import audio.imagewriter.AudioConverter;
-import audio.tools.FileCopier;
 import mitll.langtest.shared.Exercise;
 import org.apache.log4j.Logger;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,13 +31,13 @@ import java.util.regex.Pattern;
  * To change this template use File | Settings | File Templates.
  */
 public class FileExerciseDAO implements ExerciseDAO {
-  public static final String FILE_PREFIX = "file://";
-  public static final int FILE_PREFIX_LENGTH = "file://".length();
+  private static final String FILE_PREFIX = "file://";
+  private static final int FILE_PREFIX_LENGTH = "file://".length();
   private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
-  public static final List<String> EMPTY_LIST = Collections.emptyList();
+  private static final List<String> EMPTY_LIST = Collections.emptyList();
 
   public static final String ENCODING = "UTF8";
-  private static final String LESSON_FILE = "lesson-737.csv";
+ // private static final String LESSON_FILE = "lesson-737.csv";
   private static final String FAST = "Fast";
   private static final String SLOW = "Slow";
   //private static final boolean TESTING = false;
@@ -52,21 +45,12 @@ public class FileExerciseDAO implements ExerciseDAO {
   private final String mediaDir;
 
   private List<Exercise> exercises;
+  private Map<String,Exercise> idToExercise = new HashMap<String,Exercise>();
   private boolean isUrdu;
   private final boolean isFlashcard;
   private boolean isEnglish;
   private boolean processSemicolons = false;
-
-  @Override
-  public SectionHelper getSectionHelper() {
-    return null;
-  }
-
-  private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
-  // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
-  private Map<String,Map<String,Map<String,Set<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String,Map<String,Set<String>>>>();
   private boolean isPashto;
-
 
   public FileExerciseDAO(boolean isFlashcard) {
     this("","", isFlashcard);
@@ -86,13 +70,29 @@ public class FileExerciseDAO implements ExerciseDAO {
     this.isFlashcard = isFlashcard;
   }
 
+  @Override
+  public SectionHelper getSectionHelper() {
+    return null;
+  }
+
+  public Exercise getExercise(String id) {
+/*    if (idToExercise.isEmpty() || exercises.size() != idToExercise.size()) {
+      for (Exercise e : exercises) idToExercise.put(id,e);
+    }*/
+    if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
+    if (!idToExercise.containsKey(id)) {
+       logger.warn("couldn't find " +id + " in " +idToExercise.size() + " : ");
+    }
+    return idToExercise.get(id);
+  }
+
   /**
    * TODO : write to h2?
    * @see DatabaseImpl#getExercises(boolean, String)
    * @deprecated
    * @param installPath
    */
-  public void readExercises(String installPath) {
+/*  public void readExercises(String installPath) {
     if (exercises != null) return;
     String exerciseFile = LESSON_FILE;
     InputStream resourceAsStream = getExerciseListStream(exerciseFile);
@@ -114,10 +114,10 @@ public class FileExerciseDAO implements ExerciseDAO {
 
         String content = getContent(arabic, translit, english,"");
         String audioRef =  "ref"+ File.separator+name+File.separator+"reference.wav";
-       /* if (installPath.length() > 0) {
+       *//* if (installPath.length() > 0) {
           if (!installPath.endsWith(File.separator)) installPath += File.separator;
           audioRef = installPath + audioRef;
-        }*/
+        }*//*
         File file = new File(audioRef);
         if (!file.exists()) {
           file = new File(installPath,audioRef);
@@ -139,7 +139,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     else {
       logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
-  }
+  }*/
 
   /**
    *
@@ -148,7 +148,7 @@ public class FileExerciseDAO implements ExerciseDAO {
    * @param language
    * @param doImages
    */
-  public void readWordPairs(String lessonPlanFile, String language, boolean doImages, String configDir) {
+  public void readWordPairs(String lessonPlanFile, String language, boolean doImages) {
     if (exercises != null) return;
     exercises = new ArrayList<Exercise>();
     boolean isTSV =  (lessonPlanFile.endsWith(".tsv"));
@@ -173,7 +173,7 @@ public class FileExerciseDAO implements ExerciseDAO {
           gotHeader = true;
         } else {
           if (isTSV) {
-            id = readTSVLine(language, doImages, line, id);
+            id = readTSVLine(doImages, line, id);
           } else {
             id = readLine(language, doImages, line, id);
           }
@@ -189,19 +189,24 @@ public class FileExerciseDAO implements ExerciseDAO {
     } else {
       logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
+    populateIDToExercise();
+  }
+
+  private void populateIDToExercise() {
+    for (Exercise e : exercises) idToExercise.put(e.getID(),e);
   }
 
   /**
    * Expects the columns to be like this:
    * Word/Expression	Arabic	Transliteration	RefAudio	Unit	Chapter	Week	Weight
    *
-   * @param language
+   *
    * @param doImages
    * @param line
    * @param id
    * @return
    */
-  private int readTSVLine(String language, boolean doImages, String line, int id) {
+  private int readTSVLine(boolean doImages, String line, int id) {
     if (line.trim().length() == 0) {
       logger.debug("skipping empty line");
       return id;
@@ -226,7 +231,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       logger.error("huh? no translations with '" + line + "' and foreign : " + foreign);
     }
     else if (foreign.length() > 0) {
-      String flashcardStimulus = doImages ? getImageContent(foreign, language) : english;
+      String flashcardStimulus = doImages ? getImageContent(foreign) : english;
       String tooltip = doImages ? foreign : translations.get(0);
       if (doImages) translations.add(foreign);
       Exercise repeat = new Exercise("flashcardStimulus", "" + (id++), flashcardStimulus, translations, tooltip);
@@ -253,7 +258,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       logger.error("huh? no translations with '" + line + "' and foreign : " + foreign);
     }
     else if (foreign.length() > 0) {
-      String flashcard = doImages ? getImageContent(foreign, language) : getFlashcard(foreign, language);
+      String flashcard = doImages ? getImageContent(foreign) : getFlashcard(foreign, language);
       String tooltip = doImages ? foreign : translations.get(0);
       if (doImages) translations.add(foreign);
       Exercise repeat = new Exercise("flashcard", "" + (id++), flashcard, translations, tooltip);
@@ -337,9 +342,6 @@ public class FileExerciseDAO implements ExerciseDAO {
           }
         }
       }
-      if (!typeToUnitToLesson.isEmpty()) {
-        logger.debug("sections " + typeToUnitToLesson);
-      }
       reader.close();
     } catch (IOException e) {
      logger.error("reading " +lessonPlanFile+ " got " +e,e);
@@ -350,6 +352,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     else {
       logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
+    populateIDToExercise();
   }
 
   private BufferedReader getReader(String lessonPlanFile) throws FileNotFoundException, UnsupportedEncodingException {
@@ -500,50 +503,6 @@ public class FileExerciseDAO implements ExerciseDAO {
       "'></source>"+
     "  Your browser does not support the audio tag."+
     "</audio>";
-  }
-
-  private Map<String, Lesson> getSectionToLesson( String section) {
-    Map<String, Lesson> unit = typeToUnitToLesson.get(section);
-    if (unit == null) typeToUnitToLesson.put(section, unit = new HashMap<String, Lesson>());
-    return unit;
-  }
-
-  private static class Pair {
-    String type; String section;
-
-    public Pair(String type, String section) {
-      this.type = type;
-      this.section = section;
-    }
-  }
-
-/*  private void addAssociations(List<Pair> pairs) {
-    for (Pair p : pairs) {
-      List<Pair> others = new ArrayList<Pair>(pairs);
-      others.remove(p);
-      for (Pair o : others) {
-        addAssociation(p, o);
-       // addAssociation(o, p);
-      }
-    }
-  }
-*/
-  private void addAssociation(Pair first, Pair second) {
-    addAssociation(first.type, first.section, second.type, second.section);
-  }
-
-  private void addAssociation(String type, String unitName, String otherType, String otherSection) {
-    Map<String, Map<String, Set<String>>> sectionToTypeToSections = typeToSectionToTypeToSections.get(type);
-    if (sectionToTypeToSections == null) {
-      typeToSectionToTypeToSections.put(type, sectionToTypeToSections = new HashMap<String, Map<String, Set<String>>>());
-    }
-    Map<String, Set<String>> subsections = sectionToTypeToSections.get(unitName);
-    if (subsections == null) {
-      sectionToTypeToSections.put(unitName, subsections = new HashMap<String, Set<String>>());
-    }
-    Set<String> sections = subsections.get(otherType);
-    if (sections == null) subsections.put(otherType, sections = new HashSet<String>());
-    sections.add(otherSection);
   }
 
   /**
@@ -721,7 +680,7 @@ public class FileExerciseDAO implements ExerciseDAO {
         "</div>\n";
   }
 
-  private String getImageContent(String flPhrase, String language) {
+  private String getImageContent(String flPhrase) {
     String filePath = mediaDir + "/" + flPhrase + ".png";
     String s = ensureForwardSlashes(filePath);
     return "<img src='" +
@@ -733,7 +692,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     return flPhrase;
   }
 
-  private InputStream getExerciseListStream(String exerciseFile) {
+/*  private InputStream getExerciseListStream(String exerciseFile) {
     InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(exerciseFile);
     if (resourceAsStream == null) {
       logger.error("can't find " + exerciseFile);
@@ -752,7 +711,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       }
     }
     return resourceAsStream;
-  }
+  }*/
 
   private String ensureForwardSlashes(String wavPath) {
     return wavPath.replaceAll("\\\\", "/");
@@ -762,7 +721,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     return exercises;
   }
 
-  private void convertPlan() {
+/*  private void convertPlan() {
     InputStream resourceAsStream = getExerciseListStream("lesson.plan");
 
     if (resourceAsStream == null) return;
@@ -811,5 +770,5 @@ public class FileExerciseDAO implements ExerciseDAO {
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
+  }*/
 }
