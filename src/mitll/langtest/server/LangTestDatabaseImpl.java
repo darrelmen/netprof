@@ -201,7 +201,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return copy;
   }
 
-  private void sortByIDs(List<Exercise> exerciseShells) {
+  private void sortByIDs(List<? extends ExerciseShell> exerciseShells) {
     Collections.sort(exerciseShells, new Comparator<ExerciseShell>() {
       @Override
       public int compare(ExerciseShell o1, ExerciseShell o2) {
@@ -271,16 +271,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getSectionHelper().getSectionNodes();
   }
 
-  /**
-   * @see mitll.langtest.client.exercise.SectionExerciseList#setOtherListBoxes
-   * @param typeToSection
-   * @return
-   */
-/*  @Override
-  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(Map<String, Collection<String>> typeToSection) {
-    return db.getSectionHelper().getTypeToSectionsForTypeAndSection(typeToSection);
-  }*/
-
   @Override
   public Map<String, Map<String,Integer>> getTypeToSectionToCount() {
     return db.getSectionHelper().getTypeToSectionToCount();
@@ -305,41 +295,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public Exercise getExercise(String id) {
+    long then = System.currentTimeMillis();
     List<Exercise> exercises = getExercises();
-    Exercise byID = getByID(exercises, id);
+    Exercise byID = db.getExercise(id);
     if (byID == null) {
       logger.error("huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
     }
-    else {
-      logger.debug("getExercise for exid " + id + " found ");
+    long now = System.currentTimeMillis();
+    if (now - then > 50) {
+      logger.debug("getExercise : took " + (now - then) + " millis to find " + id);
     }
     return byID;
-  }
-
-  public Exercise getExercise(String id, long userID) {
-    List<Exercise> exercises = getExercises(userID);
-    Exercise byID = getByID(exercises, id);
-    if (byID == null) {
-      return getExercise(id);
-    }
-    else {
-      return byID;
-    }
-  }
-
-  /**
-   * This is really slow - todo use a map!
-   * @param exercises
-   * @param id
-   * @return
-   */
-  private Exercise getByID(List<Exercise> exercises, String id) {
-    for (Exercise e : exercises) {
-      if (id.equals(e.getID())) {
-        return e;
-      }
-    }
-    return null;
   }
 
   /**
