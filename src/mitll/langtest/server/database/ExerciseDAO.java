@@ -14,4 +14,6 @@ import java.util.List;
 public interface ExerciseDAO {
   List<Exercise> getRawExercises();
   SectionHelper getSectionHelper();
+
+  Exercise getExercise(String id);
 }
