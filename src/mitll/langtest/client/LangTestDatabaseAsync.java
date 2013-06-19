@@ -52,7 +52,7 @@ public interface LangTestDatabaseAsync {
 
   void getExercise(String id, AsyncCallback<Exercise> async);
 
-  void getExercise(String id, long userID, AsyncCallback<Exercise> async);
+ // void getExercise(String id, long userID, AsyncCallback<Exercise> async);
 
   void getScoreForAnswer(Exercise e, int questionID, String answer, AsyncCallback<Double> async);
 
