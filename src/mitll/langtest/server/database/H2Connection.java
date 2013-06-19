@@ -20,13 +20,20 @@ public class H2Connection implements DatabaseConnection {
   private static Logger logger = Logger.getLogger(H2Connection.class);
 
   private Connection conn;
+  private int cacheSizeKB;
+  private int queryCacheSize;
 
-  /**
-   * @see DatabaseImpl#DatabaseImpl(String, String, boolean, boolean, String, boolean, String, boolean)
-   * @param configDir
-   * @param dbName
-   */
   public H2Connection(String configDir, String dbName) {
+    this(configDir, dbName, 50000, 8);
+  }
+    /**
+     * @see DatabaseImpl#DatabaseImpl
+     * @param configDir
+     * @param dbName
+     */
+  public H2Connection(String configDir, String dbName, int cacheSizeKB, int queryCacheSize) {
+    this.cacheSizeKB = cacheSizeKB;
+    this.queryCacheSize = queryCacheSize;
     connect(configDir, dbName);
   }
 
@@ -41,9 +48,12 @@ public class H2Connection implements DatabaseConnection {
    */
   private void connect(String h2FilePath) {
     String url = "jdbc:h2:file:" + h2FilePath +
-        ";IFEXISTS=TRUE;" +
-        "QUERY_CACHE_SIZE=0;" +
-        "CACHE_SIZE=20000";
+      ";IFEXISTS=TRUE;" +
+      "QUERY_CACHE_SIZE=" +
+      queryCacheSize +
+      ";" +
+      "CACHE_SIZE=" +
+      cacheSizeKB;
 
     logger.debug("connecting to " + url);
     org.h2.Driver.load();
