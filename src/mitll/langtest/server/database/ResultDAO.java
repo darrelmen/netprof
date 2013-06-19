@@ -53,6 +53,64 @@ public class ResultDAO extends DAO {
     scheduleDAO = new ScheduleDAO(database);
   }
 
+  public List<SimpleResult> getSimpleResults() {
+    try {
+      Connection connection = database.getConnection();
+      PreparedStatement statement = connection.prepareStatement("SELECT " +
+        ID + ", " +
+        USERID + ", " +
+        Database.EXID+ ", "+
+        QID +
+        " FROM " +
+        RESULTS+";");
+
+      return getSimpleResultsForQuery(connection, statement);
+    } catch (Exception ee) {
+      ee.printStackTrace();
+    }
+    return new ArrayList<SimpleResult>();
+  }
+
+  /**
+   * Get a list of Results for this Query.
+   * @param connection
+   * @param statement
+   * @return
+   * @throws SQLException
+   */
+  private List<SimpleResult> getSimpleResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+    ResultSet rs = statement.executeQuery();
+    List<SimpleResult> results = new ArrayList<SimpleResult>();
+    while (rs.next()) {
+      int uniqueID = rs.getInt(ID);
+      long userID = rs.getLong(USERID);
+      String exid = rs.getString(Database.EXID);
+      int qid = rs.getInt(QID);
+
+      SimpleResult e = new SimpleResult(uniqueID, exid, qid, userID);
+      results.add(e);
+    }
+    rs.close();
+    statement.close();
+    database.closeConnection(connection);
+
+    return results;
+  }
+
+  public static class SimpleResult {
+    public int uniqueID;
+    public String id;
+    private int qid;
+    public long userid;
+
+
+    public SimpleResult(int uniqueID, String id, int qid, long userid) { this.uniqueID = uniqueID; this.id = id; this.qid = qid; this.userid = userid;}
+
+    public String getID() {
+      return id + "/" +qid;
+    }
+  }
+
   /**
    * Pulls the list of results out of the database.
    * @see mitll.langtest.server.database.DatabaseImpl#getResults()
