@@ -67,8 +67,6 @@ public interface LangTestDatabase extends RemoteService {
 
   Exercise getExercise(String id);
 
-  Exercise getExercise(String id, long userID);
-
   int userExists(String login);
 
   Site getSiteByID(long id);
