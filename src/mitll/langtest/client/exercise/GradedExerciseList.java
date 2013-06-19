@@ -82,9 +82,22 @@ public class GradedExerciseList extends PagingExerciseList {
   }
 
   private void getNextUngraded(final boolean showFirstIfNoneToGrade) {
+    final PopupPanel popup = getPopup2("Please wait...");
+    final Timer t = new Timer() {
+      @Override
+      public void run() { popup.show(); }
+    };
+    t.schedule(2000);
+
     service.getNextUngradedExercise(""+user.getUser(), expectedGrades, englishOnly, new AsyncCallback<Exercise>() {
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+        t.cancel();
+        popup.hide();
+      }
       public void onSuccess(Exercise result) {
+        t.cancel();
+        popup.hide();
+
         if (result != null) {
           for (ExerciseShell e : currentExercises) {
             if (e.getID().equals(result.getID())) {
@@ -108,14 +121,24 @@ public class GradedExerciseList extends PagingExerciseList {
   }
 
   private void showPopup(String toShow) {
-    final PopupPanel popupImage = new PopupPanel(true);
-    popupImage.add(new HTML(toShow));
-    popupImage.setPopupPosition(Window.getClientWidth()/2,Window.getClientHeight()/2);
-    popupImage.show();
+    final PopupPanel popupImage = getPopup(toShow);
     Timer t = new Timer() {
       @Override
       public void run() { popupImage.hide(); }
     };
     t.schedule(3000);
+  }
+
+  private PopupPanel getPopup(String toShow) {
+    final PopupPanel popupImage = getPopup2(toShow);
+    popupImage.show();
+    return popupImage;
+  }
+
+  private PopupPanel getPopup2(String toShow) {
+    final PopupPanel popupImage = new PopupPanel(true);
+    popupImage.add(new HTML(toShow));
+    popupImage.setPopupPosition(Window.getClientWidth()/2,Window.getClientHeight()/2);
+    return popupImage;
   }
 }
