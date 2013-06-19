@@ -229,6 +229,7 @@ public class GradeDAO extends DAO {
       ResultSet rs = statement.executeQuery();
       Set<Grade> grades = new HashSet<Grade>();
       Set<Integer> ids = new HashSet<Integer>();
+
       List<User> users = userDAO.getUsers();
       Map<String,User> idToUser = new HashMap<String, User>();
       for (User u : users) idToUser.put(u.userID,u);
