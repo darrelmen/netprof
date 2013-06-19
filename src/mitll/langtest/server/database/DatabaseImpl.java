@@ -215,6 +215,8 @@ public class DatabaseImpl implements Database {
    */
   public List<Exercise> getExercises() { return getExercises(useFile, lessonPlanFile); }
 
+  public Exercise getExercise(String id) { return exerciseDAO.getExercise(id); }
+
   /**
    *
    *
@@ -229,11 +231,11 @@ public class DatabaseImpl implements Database {
       return Collections.emptyList();
     }
     boolean isExcel = lessonPlanFile.endsWith(".xlsx");
-    makeDAO(useFile, lessonPlanFile, isExcel, mediaDir, isRTL);
+    makeDAO(useFile, lessonPlanFile, isExcel, mediaDir);
 
     if (useFile && !isExcel) {
       if (isWordPairs) {
-        ((FileExerciseDAO) exerciseDAO).readWordPairs(lessonPlanFile, language, doImages, configDir);
+        ((FileExerciseDAO) exerciseDAO).readWordPairs(lessonPlanFile, language, doImages);
       }
       else {
         ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, configDir, lessonPlanFile);
@@ -246,7 +248,7 @@ public class DatabaseImpl implements Database {
     return rawExercises;
   }
 
-  private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel, String mediaDir, boolean isRTL) {
+  private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel, String mediaDir) {
     if (exerciseDAO == null) {
       if (useFile && excel) {
         this.exerciseDAO = new ExcelImport(lessonPlanFile, isFlashcard, mediaDir, absConfigDir, usePredefinedTypeOrder, language);
@@ -316,10 +318,24 @@ public class DatabaseImpl implements Database {
    */
   private Exercise getNextUngradedExerciseQuick(Collection<String> activeExercises, int expectedCount,
                                                 boolean filterResults, boolean useFLQ, boolean useSpoken) {
-    List<Exercise> rawExercises = getExercises();
-    Collection<Result> resultExcludingExercises = resultDAO.getResultExcludingExercises(activeExercises);
+    long then = System.currentTimeMillis();
+    long start = then;
 
+    List<Exercise> rawExercises = getExercises();
+    long now = System.currentTimeMillis();
+    if (now-then > 100) logger.debug("getNextUngradedExerciseQuick took " +(now-then) + " to get exercises");
+
+    then = System.currentTimeMillis();
+    Collection<Result> resultExcludingExercises = resultDAO.getResultExcludingExercises(activeExercises);
+    now = System.currentTimeMillis();
+    if (now-then > 100) logger.debug("getNextUngradedExerciseQuick took " +(now-then) + " to get results");
+
+    then = System.currentTimeMillis();
     GradeDAO.GradesAndIDs allGradesExcluding = gradeDAO.getAllGradesExcluding(activeExercises);
+    now = System.currentTimeMillis();
+
+    if (now-then > 100) logger.debug("getNextUngradedExerciseQuick took " +(now-then) + " to get grades");
+
     Map<Integer, Integer> idToCount = getResultIdToGradeCount(expectedCount, allGradesExcluding);
 /*    logger.info("getNextUngradedExerciseQuick found " + resultExcludingExercises.size() + " results, " +
       "expected count = " + expectedCount + ", " +
@@ -365,11 +381,13 @@ public class DatabaseImpl implements Database {
         if (e.getID().equals(first)) {
        //   logger.info("getNextUngradedExercise  " + e);
 
+          now = System.currentTimeMillis();
+          logger.debug("getNextUngradedExerciseQuick : took " +(now-start) + " millis to get next ungraded");
           return e;
         }
       }
       if (!rawExercises.isEmpty()) {
-        logger.warn("getNextUngradedExercise2 expecting an exercise to match " + first);
+        logger.warn("getNextUngradedExerciseQuick expecting an exercise to match " + first);
       }
     }
 
@@ -384,10 +402,10 @@ public class DatabaseImpl implements Database {
    */
   private Map<Integer, Integer> getResultIdToGradeCount(int expectedCount, GradeDAO.GradesAndIDs allGradesExcluding) {
     Map<Integer, Integer> idToCount = new HashMap<Integer, Integer>();
-    int atExpected = 0;
+   // int atExpected = 0;
     for (Grade g : allGradesExcluding.grades) {
       if (g.gradeIndex == expectedCount - 1 && g.grade != Grade.UNASSIGNED) {
-        atExpected++;
+   //     atExpected++;
         if (!idToCount.containsKey(g.resultID)) {
           idToCount.put(g.resultID, 1);
         } else {
@@ -620,8 +638,9 @@ public class DatabaseImpl implements Database {
     populateInitialExerciseIDToCount(rawExercises, idToExercise, idToCount,idToWeight, useWeights);
 
     // only find answers that are for the gender
-    /*Collection<String> alreadyAnswered =*/
-    getExerciseIDToResultCount(userID, idToCount);
+    List<ResultDAO.SimpleResult> results = getSimpleResults();
+
+    getExerciseIDToResultCount(userID, idToCount,results);
 
    // logger.debug("getExercisesBiasTowardsUnanswered id->count " + idToCount);
     //logger.debug("count " +idToCount.get())
@@ -694,7 +713,9 @@ public class DatabaseImpl implements Database {
     }
 
     // only find answers that are for the gender
-    getExerciseIDToResultCount(userID, idToCount);
+    List<ResultDAO.SimpleResult> results = getSimpleResults();
+
+    getExerciseIDToResultCount(userID, idToCount,results);
 
     // now make a map of count at this number to exercise ids for these numbers
     SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
@@ -795,20 +816,21 @@ public class DatabaseImpl implements Database {
    * @paramx userMale
    * @param idToCount exercise id->count
    */
-  private Collection<String> getExerciseIDToResultCount(long userID, Map<String, Integer> idToCount) {
-    boolean userMale = userDAO.isUserMale(userID);
-    Map<Long, User> userMap = userDAO.getUserMap(userMale);
-    List<Result> results = getResults();
+  private Collection<String> getExerciseIDToResultCount(long userID, Map<String, Integer> idToCount, List<ResultDAO.SimpleResult> results) {
+    List<User> users = userDAO.getUsers();
+
+    boolean userMale = userDAO.isUserMale(userID, users);
+    Map<Long, User> userMap = userDAO.getUserMap(userMale, users);
     return getExerciseIDToResultCount(userID, userMap, results, idToCount);
   }
 
-  private Collection<String> getExerciseIDToResultCount(long userID, Map<Long, User> userMap, List<Result> results,
+  private Collection<String> getExerciseIDToResultCount(long userID, Map<Long, User> userMap, List<ResultDAO.SimpleResult> results,
                                                         Map<String, Integer> idToCount // what gets populated
   ) {
     List<String> alreadyAnsweredByThisUser = new ArrayList<String>();
     Map<String, Set<Long>> keyToUsers = new HashMap<String, Set<Long>>();
 
-    for (Result r : results) {
+    for (ResultDAO.SimpleResult r : results) {
       Integer current = idToCount.get(r.id);
       if (current != null) {  // unlikely not null
         if (userMap.containsKey(r.userid)) { // only get male or female results
@@ -888,16 +910,33 @@ public class DatabaseImpl implements Database {
      * @param userID
      * @return
      */
-  public List<Exercise> getExercisesGradeBalancing(long userID) {//, boolean useFLQ, boolean useSpoken) {
+  public List<Exercise> getExercisesGradeBalancing(long userID) {
+    logger.debug("getExercisesGradeBalancing " +userID);
+    long start = System.currentTimeMillis();
+    long then = System.currentTimeMillis();
+
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
     Map<String,Double> idToWeight = new HashMap<String, Double>();
 
     List<Exercise> rawExercises = getExercises();
+    long now = System.currentTimeMillis();
+
+    if (now-then > 100) logger.debug("getExercisesGradeBalancing took " +(now-then) + " to get exercises");
+
     populateInitialExerciseIDToCount(rawExercises, idToExercise, idToCount, idToWeight, false);
 
     // only find answers that are for the gender
-    getExerciseIDToResultCount(userID, idToCount);
+    then = System.currentTimeMillis();
+    List<ResultDAO.SimpleResult> results = getSimpleResults();
+    now = System.currentTimeMillis();
+
+    if (now-then > 100) logger.debug("getExercisesGradeBalancing took " +(now-then) + " to get results");
+
+    then = System.currentTimeMillis();
+    getExerciseIDToResultCount(userID, idToCount,results);
+    now = System.currentTimeMillis();
+    if (now-then > 100) logger.debug("getExercisesGradeBalancing took " +(now-then) + " to get users");
 
     // now make a map of count at this number to exercise ids for these numbers
     SortedMap<Integer, List<String>> countToIds = getCountToExerciseIDs(idToCount);
@@ -913,30 +952,13 @@ public class DatabaseImpl implements Database {
       return fewResponses;
     } else {
       // join results with grades
-      List<Result> results = getResults();
+      then = System.currentTimeMillis();
+
       Map<Integer, List<Grade>> idToGrade = gradeDAO.getIdToGrade();
+      now = System.currentTimeMillis();
+      if (now-then > 100) logger.debug("getExercisesGradeBalancing took " +(now-then) + " to get grades");
 
-      Map<String, ResultAndGrade> exidToRG = new HashMap<String, ResultAndGrade>();
-
-      for (Result r : results) {
-      //  if (r.flq == useFLQ && r.spoken == useSpoken) {
-          if (!fewSet.contains(r.id)) {
-            //    logger.debug("Skipping " + r.id);
-       //   } else {
-            List<Grade> grades1 = idToGrade.get(r.uniqueID);
-            if (grades1 != null) {
-              ResultAndGrade resultAndGrade = exidToRG.get(r.id);
-              if (resultAndGrade == null) {
-                exidToRG.put(r.id, new ResultAndGrade(r, grades1));
-              } else {
-                resultAndGrade.addGrades(grades1);
-              }
-            }
-          }
-        //}
-      }
-
-      List<ResultAndGrade> rgs = new ArrayList<ResultAndGrade>(exidToRG.values());
+      List<ResultAndGrade> rgs = getResultAndGrades(results, fewSet, idToGrade);
 
       // make a map of count of wrong answers -> list of results at that count
       Map<Integer,List<ResultAndGrade>> countToRGs = new TreeMap<Integer, List<ResultAndGrade>>();
@@ -960,8 +982,35 @@ public class DatabaseImpl implements Database {
       if (ret.size() != rawExercises.size()) {
         logger.error("huh? returning only " + ret.size() + " exercises, expecting " + rawExercises.size());
       }
+
+      now = System.currentTimeMillis();
+      logger.debug("took " +(now-start) + " millis to get exercise list for " +userID);
       return ret;
     }
+  }
+
+  private List<ResultAndGrade> getResultAndGrades(List<ResultDAO.SimpleResult> results, Set<String> fewSet, Map<Integer, List<Grade>> idToGrade) {
+    Map<String, ResultAndGrade> exidToRG = new HashMap<String, ResultAndGrade>();
+
+    for (ResultDAO.SimpleResult r : results) {
+    //  if (r.flq == useFLQ && r.spoken == useSpoken) {
+        if (!fewSet.contains(r.id)) {
+          //    logger.debug("Skipping " + r.id);
+     //   } else {
+          List<Grade> grades1 = idToGrade.get(r.uniqueID);
+          if (grades1 != null) {
+            ResultAndGrade resultAndGrade = exidToRG.get(r.id);
+            if (resultAndGrade == null) {
+              exidToRG.put(r.id, new ResultAndGrade(r, grades1));
+            } else {
+              resultAndGrade.addGrades(grades1);
+            }
+          }
+        }
+      //}
+    }
+
+    return new ArrayList<ResultAndGrade>(exidToRG.values());
   }
 
   public List<Exercise> getExercisesFirstNInOrder(long userID, int firstNInOrder) {
@@ -1086,6 +1135,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(int, int)
    */
   public List<Result> getResults() { return resultDAO.getResults(); }
+  private List<ResultDAO.SimpleResult> getSimpleResults() { return resultDAO.getSimpleResults(); }
 
   public List<Result> getResultsWithGrades() {
     List<Result> results = resultDAO.getResults();
