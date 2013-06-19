@@ -32,6 +32,6 @@ public class ResultsAndGrades implements IsSerializable {
 
 
   public String toString() {
-    return "ResultsAndGrades : " + results.size() + " results, " + grades.size() + " grades, spoken->lang->result " + spokenToLangToResult;
+    return "ResultsAndGrades : " + results.size() + " results, " + grades.size() + " grades, spoken->lang->result " + spokenToLangToResult.size();
   }
 }
