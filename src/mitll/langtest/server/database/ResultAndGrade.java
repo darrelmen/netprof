@@ -12,10 +12,10 @@ import java.util.List;
  */
 class ResultAndGrade implements Comparable<ResultAndGrade> {
   private static final int HIGHEST_INCORRECT_GRADE = 3;
-  private Result result;
+  private ResultDAO.SimpleResult result;
   private List<Grade> grades = new ArrayList<Grade>();
 
-  public ResultAndGrade(Result result, List<Grade> grades) {
+  public ResultAndGrade(ResultDAO.SimpleResult result, List<Grade> grades) {
     this.result = result;
     this.grades = grades;
   }
@@ -74,7 +74,7 @@ class ResultAndGrade implements Comparable<ResultAndGrade> {
     return ratio < oratio ? +1 : ratio > oratio ? -1 : numRight > numRight1 ? -1 : numRight < numRight1 ? +1 : numWrong > numWrong1 ? -1 : numWrong < numWrong1 ? +1 : 0;
   }
 
-  public Result getResult() {
+  public ResultDAO.SimpleResult getResult() {
     return result;
   }
 
