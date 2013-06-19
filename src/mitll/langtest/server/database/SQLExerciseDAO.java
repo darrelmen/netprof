@@ -50,6 +50,13 @@ public class SQLExerciseDAO implements ExerciseDAO {
     return null;
   }
 
+  @Override
+  public Exercise getExercise(String id) {
+    String sql = "SELECT * FROM exercises where EXID='" +id+ "'";
+    List<Exercise> exercises = getExercises(sql);
+    return (exercises.isEmpty())? null : exercises.iterator().next();
+  }
+
   /**
    * Hit the database for the exercises
    * <p/>
@@ -59,10 +66,14 @@ public class SQLExerciseDAO implements ExerciseDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#getExercises
    */
   public List<Exercise> getRawExercises() {
+    String sql = "SELECT * FROM exercises";
+    return getExercises(sql);
+  }
+
+  private List<Exercise> getExercises(String sql) {
     List<Exercise> exercises = new ArrayList<Exercise>();
     try {
       Connection connection = database.getConnection();
-      String sql = "SELECT * FROM exercises";
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       // int count = 0;
@@ -180,6 +191,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
     return b.toString();
   }
 
+/*
   private static String getConfigDir(String language) {
     String installPath = ".";
     String dariConfig = File.separator +
@@ -191,22 +203,23 @@ public class SQLExerciseDAO implements ExerciseDAO {
       File.separator;
     return installPath + dariConfig;
   }
+*/
 
-  public static void main(String [] arg) {
+/*  public static void main(String [] arg) {
 
 
-/*    final String configDir = getConfigDir("MSA");
+*//*    final String configDir = getConfigDir("MSA");
 
     DatabaseImpl unitAndChapter = new DatabaseImpl(
       configDir,
       "arabicText",
       configDir +
-        spreadsheet);*/
+        spreadsheet);*//*
 
     SQLExerciseDAO sqlExerciseDAO = new SQLExerciseDAO(new SmallDatabaseImpl("war/config/pilot/arabicText"), "config" +
       File.separator +
       "media");
     Exercise next = sqlExerciseDAO.getRawExercises().iterator().next();
     System.out.println("First is " +next + " content " + next.getContent());
-  }
+  }*/
 }
