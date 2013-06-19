@@ -269,6 +269,10 @@ public class UserDAO extends DAO {
 
   public boolean isUserMale(long userID) {
     List<User> users = getUsers();
+    return isUserMale(userID, users);
+  }
+
+  public boolean isUserMale(long userID, List<User> users) {
     User thisUser = null;
     for (User u : users) {
       if (u.id == userID) {
@@ -281,6 +285,10 @@ public class UserDAO extends DAO {
 
   public Map<Long, User> getUserMap(boolean getMale) {
     List<User> users = getUsers();
+    return getUserMap(getMale, users);
+  }
+
+  public Map<Long, User> getUserMap(boolean getMale, List<User> users) {
     Map<Long,User> idToUser = new HashMap<Long, User>();
     for (User u : users) {
       if (u.isMale() && getMale || (!u.isMale() && !getMale)) {
