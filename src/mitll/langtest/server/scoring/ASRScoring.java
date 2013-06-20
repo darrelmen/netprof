@@ -61,8 +61,8 @@ public class ASRScoring extends Scoring {
 
   private static final String DICT_WO_SP = "dict-wo-sp";
   private static final String GRAMMAR_ALIGN_TEMPLATE = "grammar.align.template";
-  private static final String GRAMMAR_ALIGN =
-      GRAMMAR_ALIGN_TEMPLATE.substring(0,GRAMMAR_ALIGN_TEMPLATE.length()-".template".length());
+/*  private static final String GRAMMAR_ALIGN =
+      GRAMMAR_ALIGN_TEMPLATE.substring(0,GRAMMAR_ALIGN_TEMPLATE.length()-".template".length());*/
   private static final String TEMP_DIR = "TEMP_DIR";
   private static final String MODELS_DIR_VARIABLE = "MODELS_DIR";
   private static final String N_OUTPUT = "N_OUTPUT";
@@ -98,6 +98,7 @@ public class ASRScoring extends Scoring {
   private final Map<String, String> properties;
   private final String platform = Utils.package$.MODULE$.platform();
   private String language = "";
+  private double lowScoreThresholdKeepTempDir = -1;
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
@@ -111,7 +112,7 @@ public class ASRScoring extends Scoring {
 
   public ASRScoring(String deployPath, Map<String, String> properties, HTKDictionary dict) {
     super(deployPath);
-
+    lowScoreThresholdKeepTempDir = 0.2;
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
     this.properties = properties;
@@ -514,7 +515,8 @@ public class ASRScoring extends Scoring {
   //  }
 
     Scores scoresFromHydec = getScoresFromHydec(testAudio, sentence, configFile);
-    if (scoresFromHydec.hydecScore != -1) {
+    double hydecScore = scoresFromHydec.hydecScore;
+    if (hydecScore != -1 || hydecScore < lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
       try {
         FileUtils.deleteDirectory(new File(tmpDir));
       } catch (IOException e) {
