@@ -121,15 +121,15 @@ public class ExcelImport implements ExerciseDAO {
     synchronized (this) {
       if (exercises == null) {
         exercises = readExercises(new File(file));
+        for (Exercise e : exercises) idToExercise.put(e.getID(),e);
       }
     }
     return exercises;
   }
 
   public Exercise getExercise(String id) {
-    if (idToExercise.isEmpty()) {
-      for (Exercise e : exercises) idToExercise.put(id,e);
-    }
+    if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
+
     return idToExercise.get(id);
   }
 
@@ -286,6 +286,7 @@ public class ExcelImport implements ExerciseDAO {
           int colIndex = colIndexOffset;
           String english = getCell(next, colIndex++).trim();
           String foreignLanguagePhrase = getCell(next, colIndex).trim();
+          String translit = getCell(next, transliterationIndex);
 
           // remove starting or ending tics
           foreignLanguagePhrase = cleanTics(foreignLanguagePhrase);
@@ -315,11 +316,10 @@ public class ExcelImport implements ExerciseDAO {
               logger.info("Got empty foreign language phrase row #" + next.getRowNum() +" for " + english);
               errors.add(sheet.getSheetName()+"/"+"row #" +(next.getRowNum()+1) + " phrase was blank.");
               id++;    // TODO is this the right thing for Dari and Farsi???
-            } else if (foreignLanguagePhrase.contains(";")) {
+            } else if (foreignLanguagePhrase.contains(";") || translit.contains(";")) {
               semis++;
               id++;     // TODO is this the right thing for Dari and Farsi???
             } else {
-              String translit = getCell(next, transliterationIndex);
               String meaning = getCell(next, meaningIndex);
               String givenIndex = getCell(next, idIndex);
               String context = getCell(next, contextIndex);
