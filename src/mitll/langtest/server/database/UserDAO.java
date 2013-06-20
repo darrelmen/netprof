@@ -40,7 +40,7 @@ public class UserDAO extends DAO {
    * @param enabled
    * @return newly inserted user id, or 0 if something goes horribly wrong
    */
-  public synchronized long addUser(int age, String gender, int experience, String ipAddr, String firstName,
+  public long addUser(int age, String gender, int experience, String ipAddr, String firstName,
                                    String lastName, String nativeLang, String dialect, String userID, boolean enabled) {
     try {
       // there are much better ways of doing this...
@@ -110,7 +110,7 @@ public class UserDAO extends DAO {
    * @param id
    * @return
    */
-  public synchronized int userExists(String id) {
+  public int userExists(String id) {
     int val = -1;
     try {
       Connection connection = database.getConnection();
@@ -161,7 +161,7 @@ public class UserDAO extends DAO {
 
     Set<String> expected = new HashSet<String>();
     expected.addAll(Arrays.asList("id","age","gender","experience","firstname","lastname","ipaddr","nativelang","dialect","userid","timestamp","enabled"));
-    boolean users = expected.removeAll(getColumns("users"));
+    /*boolean users = */expected.removeAll(getColumns("users"));
     if (!expected.isEmpty()) logger.info("adding columns for " + expected);
     for (String missing : expected) {
       if (missing.equalsIgnoreCase("firstName")) { addColumn(connection,"firstName","VARCHAR"); }
@@ -210,7 +210,7 @@ public class UserDAO extends DAO {
    * Pulls the list of users out of the database.
    * @return
    */
-  public synchronized List<User> getUsers() {
+  public List<User> getUsers() {
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement;
