@@ -76,9 +76,6 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   public Exercise getExercise(String id) {
-/*    if (idToExercise.isEmpty() || exercises.size() != idToExercise.size()) {
-      for (Exercise e : exercises) idToExercise.put(id,e);
-    }*/
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
     if (!idToExercise.containsKey(id)) {
        logger.warn("couldn't find " +id + " in " +idToExercise.size() + " : ");
@@ -86,60 +83,9 @@ public class FileExerciseDAO implements ExerciseDAO {
     return idToExercise.get(id);
   }
 
-  /**
-   * TODO : write to h2?
-   * @see DatabaseImpl#getExercises(boolean, String)
-   * @deprecated
-   * @param installPath
-   */
-/*  public void readExercises(String installPath) {
-    if (exercises != null) return;
-    String exerciseFile = LESSON_FILE;
-    InputStream resourceAsStream = getExerciseListStream(exerciseFile);
-    if (resourceAsStream == null) return;
-
-    try {
-      exercises = new ArrayList<Exercise>();
-      BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
-      String line2;
-      int count = 0;
-      logger.debug("using install path " + installPath);
-      while ((line2 = reader.readLine()) != null) {
-        String[] split = line2.split(",");
-        String name = split[1];
-        String displayName = split[2];
-        String arabic = split[3];
-        String translit = split[4];
-        String english = split[5];
-
-        String content = getContent(arabic, translit, english,"");
-        String audioRef =  "ref"+ File.separator+name+File.separator+"reference.wav";
-       *//* if (installPath.length() > 0) {
-          if (!installPath.endsWith(File.separator)) installPath += File.separator;
-          audioRef = installPath + audioRef;
-        }*//*
-        File file = new File(audioRef);
-        if (!file.exists()) {
-          file = new File(installPath,audioRef);
-        }
-        if (!file.exists()) {
-          if (count++ < 5) logger.debug("can't find audio file " + file.getAbsolutePath());
-        } else {
-          Exercise exercise = new Exercise("repeat", displayName, content, ensureForwardSlashes(audioRef), arabic, english);
-          exercises.add(exercise);
-        }
-      }
-      reader.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    if (exercises.isEmpty()) {
-      logger.error("no exercises found in " + exerciseFile +"?");
-    }
-    else {
-      logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
-    }
-  }*/
+  public void readWordPairs(String lessonPlanFile, String language, boolean doImages) {
+    readWordPairs(lessonPlanFile, language, doImages);
+  }
 
   /**
    *
@@ -147,8 +93,9 @@ public class FileExerciseDAO implements ExerciseDAO {
    * @param lessonPlanFile
    * @param language
    * @param doImages
+   * @param dontExpectHeader
    */
-  public void readWordPairs(String lessonPlanFile, String language, boolean doImages) {
+  public void readWordPairs(String lessonPlanFile, String language, boolean doImages, boolean dontExpectHeader) {
     if (exercises != null) return;
     exercises = new ArrayList<Exercise>();
     boolean isTSV =  (lessonPlanFile.endsWith(".tsv"));
@@ -166,16 +113,17 @@ public class FileExerciseDAO implements ExerciseDAO {
       int id = 1;
       boolean gotHeader = false;
 
-
-      while ((line = reader.readLine()) != null) {
-        if (!gotHeader && line.trim().startsWith("Word")) {
-          logger.info("for " + lessonPlanFile + " got header " + line);
-          gotHeader = true;
-        } else {
-          if (isTSV) {
-            id = readTSVLine(doImages, line, id);
+      if (dontExpectHeader) {
+        while ((line = reader.readLine()) != null) {
+          id = readLine(language, doImages, isTSV, line, id);
+        }
+      } else {
+        while ((line = reader.readLine()) != null) {
+          if (!gotHeader && line.trim().toLowerCase().startsWith("word")) { // skip lines until we get the header
+            logger.info("for " + lessonPlanFile + " got header " + line);
+            gotHeader = true;
           } else {
-            id = readLine(language, doImages, line, id);
+            id = readLine(language, doImages, isTSV, line, id);
           }
         }
       }
@@ -190,6 +138,15 @@ public class FileExerciseDAO implements ExerciseDAO {
       logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
     populateIDToExercise();
+  }
+
+  private int readLine(String language, boolean doImages, boolean TSV, String line, int id) {
+    if (TSV) {
+      id = readTSVLine(doImages, line, id);
+    } else {
+      id = readLine(language, doImages, line, id);
+    }
+    return id;
   }
 
   private void populateIDToExercise() {
