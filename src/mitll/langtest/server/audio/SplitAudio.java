@@ -723,6 +723,40 @@ public class SplitAudio {
   }
 
 
+  private Map<String,String> getCorrection2() {
+    Map<String,String> englishToCorrection = new HashMap<String,String>();
+    File file = new File("C:\\Users\\go22670\\DLITest\\bootstrap\\chineseAudio\\melot\\segmented_mandarin.tsv");
+    File file2 = new File("C:\\Users\\go22670\\DLITest\\bootstrap\\chineseAudio\\melot\\segmented_mandarin_utf8.tsv");
+
+    try {
+      FileOutputStream resourceAsStream = new FileOutputStream(file2);
+      BufferedWriter utf8 = new BufferedWriter(new OutputStreamWriter(resourceAsStream, "UTF8"));
+      if (!file.exists()) {
+        logger.error("can't find '" + file + "'");
+        return null;
+      } /*else {
+        // logger.debug("found file at " + file.getAbsolutePath());
+      }*/
+      BufferedReader reader = getReader(file);
+
+      String line;
+
+      int error = 0;
+      int error2 = 0;
+      int c = 0;
+      while ((line = reader.readLine()) != null) {
+        utf8.write(line);utf8.write("\n");
+      }
+      reader.close();
+      utf8.close();
+      if (error2 > 0) logger.error("got " + error2 + " errors");
+    } catch (Exception e) {
+      logger.error("reading " + file.getAbsolutePath() + " got " + e, e);
+    }
+
+    return englishToCorrection;
+  }
+
   private BufferedReader getReader(File lessonPlanFile) throws FileNotFoundException, UnsupportedEncodingException {
     FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
     return new BufferedReader(new InputStreamReader(resourceAsStream,"UTF16"));
@@ -980,7 +1014,7 @@ public class SplitAudio {
       }
     }
     if (exercise == null) {
-      logger.debug("getBestForEachExercise skipping ex id '" + exid2 + "' since not in exercises " + idsSorted);
+      logger.debug("getBestForEachExercise skipping ex id '" + exid2 + "' since not in " + idsSorted.size() + " exercises");
       return;
     }
     getBest(missingSlow, missingFast, newRefDir, bestDir,
@@ -1155,13 +1189,20 @@ public class SplitAudio {
   }
 
   private float getPercentBadPhones(String fastName, Map<String, Float> phones) {
-    logger.warn("Got " + phones);
     int countBad = 0;
     for (Map.Entry<String,Float> phoneToScore : phones.entrySet()) {
        if (phoneToScore.getValue() < BAD_PHONE) {
-         logger.warn("\tfor " + fastName + " got bad phone score " + phoneToScore.getKey() + " : " + phoneToScore.getValue());
+      //   logger.warn("\tfor " + fastName + " got bad phone score " + phoneToScore.getKey() + " : " + phoneToScore.getValue());
          countBad++;
        }
+    }
+    if (countBad > 0) {
+      logger.warn("getPercentBadPhones : " + phones);
+      for (Map.Entry<String,Float> phoneToScore : phones.entrySet()) {
+        if (phoneToScore.getValue() < BAD_PHONE) {
+          logger.warn("\tfor " + fastName + " got bad phone score " + phoneToScore.getKey() + " : " + phoneToScore.getValue());
+        }
+      }
     }
     float percentBad = (float) countBad/(float)phones.size();
     return percentBad;
