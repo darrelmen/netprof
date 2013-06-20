@@ -84,7 +84,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   public void readWordPairs(String lessonPlanFile, String language, boolean doImages) {
-    readWordPairs(lessonPlanFile, language, doImages);
+    readWordPairs(lessonPlanFile, language, doImages, false);
   }
 
   /**
