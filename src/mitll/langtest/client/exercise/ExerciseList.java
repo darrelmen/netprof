@@ -11,6 +11,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -363,12 +364,31 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   private class ExerciseAsyncCallback implements AsyncCallback<Exercise> {
     private final ExerciseShell exerciseShell;
+
+    /**
+     * @see ExerciseList#askServerForExercise(mitll.langtest.shared.ExerciseShell)
+     * @param exerciseShell
+     */
     public ExerciseAsyncCallback(ExerciseShell exerciseShell) { this.exerciseShell = exerciseShell; }
 
     @Override
-    public void onFailure(Throwable caught) { Window.alert("Can't connect to server."); }
+    public void onFailure(Throwable caught) {
+      if (caught instanceof IncompatibleRemoteServiceException) {
+        Window.alert("This application has recently been updated.  Please refresh your browser.");
+      }
+      else {
+        Window.alert("Message from server: " + caught.getMessage());
+      }
+    }
     @Override
-    public void onSuccess(Exercise result)  { useExercise(result, exerciseShell); }
+    public void onSuccess(Exercise result)  {
+      if (result == null) {
+        Window.alert("Unfortunately there's a configuration error and we can't find this exercise.");
+      }
+      else {
+        useExercise(result, exerciseShell);
+      }
+    }
   }
 
   /**
