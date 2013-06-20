@@ -135,8 +135,10 @@ public class ASRScoring extends Scoring {
       this.letterToSoundClass = new LevantineLTS();
     } else if (language.equalsIgnoreCase("Farsi")) {
       this.letterToSoundClass = new FarsiLTS();  // TODO is there a FarsiLTS class???
+    } else if (language.equalsIgnoreCase("Mandarin")) {
+      logger.info("NOTE: there is no LTS for " + language);
     } else {
-      logger.warn("NOTE: no LTS for language " + language);
+      logger.warn("NOTE: we have no LTS for " + language);
     }
 //    logger.info("using LTS " + letterToSoundClass.getClass());
     this.htkDictionary = dict;
