@@ -24,6 +24,7 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -124,9 +125,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     service.getProperties(new AsyncCallback<Map<String, String>>() {
       public void onFailure(Throwable caught) {
-        long now = System.currentTimeMillis();
-        System.out.println("onModuleLoad.getProperties : (failure) took " + (now - then) + " millis");
-        Window.alert("Couldn't contact server.  Please check your network connection.");
+        if (caught instanceof IncompatibleRemoteServiceException) {
+          Window.alert("This application has recently been updated.  Please refresh your browser.");
+        } else {
+          long now = System.currentTimeMillis();
+          System.out.println("onModuleLoad.getProperties : (failure) took " + (now - then) + " millis");
+          Window.alert("Couldn't contact server.  Please check your network connection.");
+        }
       }
 
       public void onSuccess(Map<String, String> result) {
