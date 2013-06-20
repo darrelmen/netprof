@@ -20,14 +20,18 @@ import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,11 +63,12 @@ public class SplitAudio {
   private static final boolean THROW_OUT_FAST_LONGER_THAN_SLOW = false;
   private static final float MSA_MIN_SCORE = 0.2f;
   public static final float LOW_SCORE_THRESHOLD = 0.2f;
+  public static final float LOW_SINGLE_SCORE_THRESHOLD = 0.4f;
 
   private static Logger logger = Logger.getLogger(SplitAudio.class);
 
   private boolean debug;
-  private static final int MAX = 10;//22000;
+  private static final int MAX = 50000;//22000;
   public static final double BAD_PHONE = 0.1;
   public static final double BAD_PHONE_PERCENTAGE = 0.2;
   private static final double MIN_DUR = 0.2;
@@ -645,6 +650,23 @@ public class SplitAudio {
         spreadsheet);
 
     final Map<String, Exercise> idToEx = getIdToExercise(db);
+
+    Map<String,String> englishToCorrection = getCorrection();
+
+    int c = 0;
+    int diff =0;
+    for (Exercise e : idToEx.values()) {
+      String eng = e.getEnglishSentence();
+      String chinese = englishToCorrection.get(eng);
+      if (chinese != null) {
+        c++;
+        if (!e.getRefSentence().equals(chinese)) diff++;
+        e.setRefSentence(chinese);
+      }
+    }
+
+    logger.debug("diff " + diff + " count " + c + " vs " + idToEx.size());
+
     Map<String, List<Result>> idToResults = getIDToResultsMap(db);
     Set<Long> nativeUsers = new UserDAO(db).getNativeUsers();
     logger.info("Found " + nativeUsers.size() + " native users");
@@ -659,6 +681,51 @@ public class SplitAudio {
     }
 
     convertExamples(numThreads, audioDir, language, idToEx, idToResults,nativeUsers);
+  }
+
+  private Map<String,String> getCorrection() {
+    Map<String,String> englishToCorrection = new HashMap<String,String>();
+    File file = new File("C:\\Users\\go22670\\DLITest\\bootstrap\\chineseAudio\\melot\\segmented_mandarin.tsv");
+    try {
+      if (!file.exists()) {
+        logger.error("can't find '" + file + "'");
+        return null;
+      } /*else {
+        // logger.debug("found file at " + file.getAbsolutePath());
+      }*/
+      BufferedReader reader = getReader(file);
+
+      String line;
+
+      int error = 0;
+      int error2 = 0;
+      int c = 0;
+      while ((line = reader.readLine()) != null) {
+        line = line.trim();
+        if (line.length() == 0) continue;
+      //  if (c++ < 10) logger.debug("line " +line);
+        String[] split = line.split("\\t");
+        try {
+          englishToCorrection.put(split[0], split[1]);
+        } catch (Exception e) {
+          if (error++ < 10) logger.error("reading " + file.getAbsolutePath() + " line '" + line + "' split len " +split.length, e);
+          error2++;
+          //e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+      }
+      reader.close();
+      if (error2 > 0) logger.error("got " + error2 + " errors");
+    } catch (Exception e) {
+      logger.error("reading " + file.getAbsolutePath() + " got " + e, e);
+    }
+
+    return englishToCorrection;
+  }
+
+
+  private BufferedReader getReader(File lessonPlanFile) throws FileNotFoundException, UnsupportedEncodingException {
+    FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
+    return new BufferedReader(new InputStreamReader(resourceAsStream,"UTF16"));
   }
 
   private void convertExamples(int numThreads, String audioDir, String language,
@@ -920,6 +987,8 @@ public class SplitAudio {
       collectedAudioDir, dictionary, properties, resultsForExercise, exid2, exercise, language);
   }
 
+  int good = 0;
+  int bad = 0;
   private void getBest(FileWriter missingSlow, FileWriter missingFast, File newRefDir, File bestDir,
                        String collectedAudioDir,
                        HTKDictionary dictionary, Map<String, String> properties,
@@ -952,9 +1021,13 @@ public class SplitAudio {
       writeBestFiles(missingSlow, missingFast, exid,
         //refDirForExercise,
         bestDirForExercise, fastAndSlow);
+      good++;
     }
     else {
-      logger.warn("\n\n------------- no valid audio for " + exid);
+      bad++;
+
+      logger.warn("Bad Now " + bad + "/" +good + " good "+
+        " : no valid audio for " + exid);
 
       recordMissingFast(missingFast, exid);
       recordMissingFast(missingSlow, exid);
@@ -1041,7 +1114,7 @@ public class SplitAudio {
             String fastName = fastFile.getName().replaceAll(".wav", "");
 
             Scores fast = getAlignmentScoresNoDouble(scoring, refSentence, fastName, fastFile.getParent(), getConverted(fastFile));
-            if (fast.hydecScore > bestFast) {
+            if (fast.hydecScore > bestFast && fast.hydecScore > LOW_SINGLE_SCORE_THRESHOLD) {
               float percentBadFast = getPercentBadPhones(fastName, fast.eventScores.get("phones"));
               if (percentBadFast > BAD_PHONE_PERCENTAGE) {
                 logger.warn("---> rejecting new best b/c % bad phones = " + percentBadFast + " so not new best fast : ex " + id + " " + exercise.getEnglishSentence() +
@@ -1058,7 +1131,7 @@ public class SplitAudio {
             File slowFile = consistent.slow;
             String slowName = slowFile.getName().replaceAll(".wav", "");
             Scores slow = getAlignmentScoresNoDouble(scoring, refSentence, slowName, slowFile.getParent(), getConverted(slowFile));
-            if (slow.hydecScore > bestSlow) {
+            if (slow.hydecScore > bestSlow && slow.hydecScore > LOW_SINGLE_SCORE_THRESHOLD) {
               float percentBadSlow = getPercentBadPhones(slowName, slow.eventScores.get("phones"));
               if (percentBadSlow > BAD_PHONE_PERCENTAGE) {
                 logger.warn("---> rejecting new best b/c % bad phones = " + percentBadSlow + " so not new best slow : ex " + id + " " + exercise.getEnglishSentence() +
