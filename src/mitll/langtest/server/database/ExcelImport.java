@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -216,6 +215,7 @@ public class ExcelImport implements ExerciseDAO {
     int meaningIndex = -1;
     int idIndex = -1;
     int contextIndex = -1;
+    int segmentedIndex = -1;
     List<String> lastRowValues = new ArrayList<String>();
     Map<String,List<Exercise>> englishToExercises = new HashMap<String, List<Exercise>>();
     int semis = 0;
@@ -268,6 +268,8 @@ public class ExcelImport implements ExerciseDAO {
               idIndex = columns.indexOf(col);
             } else if (colNormalized.contains("context")) {
               contextIndex = columns.indexOf(col);
+            } else if (colNormalized.contains("segmented")) {
+              segmentedIndex = columns.indexOf(col);
             }
           }
           if (usePredefinedTypeOrder) {
@@ -323,6 +325,7 @@ public class ExcelImport implements ExerciseDAO {
               String meaning = getCell(next, meaningIndex);
               String givenIndex = getCell(next, idIndex);
               String context = getCell(next, contextIndex);
+              String segmentedChinese = getCell(next, segmentedIndex);
 
               if (inMergedRow && !lastRowValues.isEmpty()) {
                 if (translit.length() == 0) {
@@ -334,7 +337,7 @@ public class ExcelImport implements ExerciseDAO {
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
               Exercise imported = getExercise(idToUse, dao, weightIndex, next, english, foreignLanguagePhrase, translit,
-                meaning, context);
+                meaning, context, segmentedChinese);
               if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
                 recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
@@ -475,11 +478,12 @@ public class ExcelImport implements ExerciseDAO {
    * @param translit
    * @param meaning
    * @param context
+   * @param segmentedChinese
    * @return
    */
   private Exercise getExercise(String id, FileExerciseDAO dao, int weightIndex, Row next,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
-                               String context) {
+                               String context, String segmentedChinese) {
     Exercise imported;
     List<String> translations = new ArrayList<String>();
     if (foreignLanguagePhrase.length() > 0) {
@@ -497,6 +501,7 @@ public class ExcelImport implements ExerciseDAO {
     imported.setTranslitSentence(translit);
     List<String> inOrderTranslations = new ArrayList<String>(translations);
     imported.setRefSentences(inOrderTranslations);
+    if (!segmentedChinese.isEmpty()) imported.setSegmented(segmentedChinese);
 
     if (weightIndex != -1) {
       imported.setWeight(getNumericCell(next, weightIndex));
@@ -560,7 +565,7 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   /**
-   * @see #getExercise(String, FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String)
+   * @see #getExercise(String, FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, String)
    * @param id
    * @param dao
    * @param english
