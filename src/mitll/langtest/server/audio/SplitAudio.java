@@ -723,7 +723,7 @@ public class SplitAudio {
   }
 
 
-  private Map<String,String> getCorrection2() {
+  public Map<String,String> getCorrection2() {
     Map<String,String> englishToCorrection = new HashMap<String,String>();
     File file = new File("C:\\Users\\go22670\\DLITest\\bootstrap\\chineseAudio\\melot\\segmented_mandarin.tsv");
     File file2 = new File("C:\\Users\\go22670\\DLITest\\bootstrap\\chineseAudio\\melot\\segmented_mandarin_utf8.tsv");
@@ -1604,8 +1604,8 @@ public class SplitAudio {
       int numThreads = Integer.parseInt(arg[0]);
       //  new SplitAudio().checkTamas();
   //     new SplitAudio().splitSimpleMSA(numThreads);
-
-   // if (true) return;
+      new SplitAudio().getCorrection2();
+    if (true) return;
 
       String audioDir = arg[1];
       // new SplitAudio().convertExamples(numThreads, audioDir, arg[2], arg[3]);
