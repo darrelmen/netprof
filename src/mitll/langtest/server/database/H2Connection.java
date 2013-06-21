@@ -22,6 +22,7 @@ public class H2Connection implements DatabaseConnection {
   private Connection conn;
   private int cacheSizeKB;
   private int queryCacheSize;
+  private int maxMemoryRows = 50000;
 
   public H2Connection(String configDir, String dbName) {
     this(configDir, dbName, 50000, 8);
@@ -49,11 +50,10 @@ public class H2Connection implements DatabaseConnection {
   private void connect(String h2FilePath) {
     String url = "jdbc:h2:file:" + h2FilePath +
       ";IFEXISTS=TRUE;" +
-      "QUERY_CACHE_SIZE=" +
-      queryCacheSize +
-      ";" +
-      "CACHE_SIZE=" +
-      cacheSizeKB;
+      "QUERY_CACHE_SIZE=" + queryCacheSize + ";" +
+      "CACHE_SIZE="       + cacheSizeKB + ";" +
+      "MAX_MEMORY_ROWS="  +maxMemoryRows
+      ;
 
     logger.debug("connecting to " + url);
     org.h2.Driver.load();
