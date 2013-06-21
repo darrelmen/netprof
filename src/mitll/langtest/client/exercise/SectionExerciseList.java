@@ -418,14 +418,13 @@ public class SectionExerciseList extends PagingExerciseList {
 
     setModeLinks(historyToken);
     if (currentToken.equals(historyToken)) {
-      if (currentExercises == null || currentExercises.isEmpty()) {
+      if (currentExercises == null || currentExercises.isEmpty() || historyToken.isEmpty()) {
      //   if (firstTime) {
           noSectionsGetExercises(userID);
       //  }
       } else {
-        System.out.println("pushNewSectionHistoryToken : skipping same token " + historyToken);
+        System.out.println("pushNewSectionHistoryToken : skipping same token '" + historyToken + "'");
       }
-
     } else {
       System.out.println("pushNewSectionHistoryToken : currentToken " + currentToken);
 
