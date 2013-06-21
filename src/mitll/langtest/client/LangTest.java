@@ -126,7 +126,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     service.getProperties(new AsyncCallback<Map<String, String>>() {
       public void onFailure(Throwable caught) {
         if (caught instanceof IncompatibleRemoteServiceException) {
-          Window.alert("This application has recently been updated.  Please refresh your browser.");
+          Window.alert("This application has recently been updated.\nPlease refresh this page, or restart your browser." +
+            "\nIf you still see this message, clear your cache. (" +caught.getMessage()+
+            ")");
         } else {
           long now = System.currentTimeMillis();
           System.out.println("onModuleLoad.getProperties : (failure) took " + (now - then) + " millis");
