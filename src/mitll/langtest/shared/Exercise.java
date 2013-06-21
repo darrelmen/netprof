@@ -33,6 +33,7 @@ public class Exercise extends ExerciseShell  {
   private String refAudio;
   private String slowAudioRef;
   private String englishSentence;
+  private String segmented;
   private List<String> refSentences = new ArrayList<String>();
   private List<String> synonymSentences = new ArrayList<String>();
   private List<String> synonymTransliterations = new ArrayList<String>();
@@ -255,9 +256,9 @@ public class Exercise extends ExerciseShell  {
     refSentences.add(ref);
   }
 
-  public void addRefSentence(String ref) {
+/*  public void addRefSentence(String ref) {
     if (!refSentences.contains(ref)) refSentences.add(ref);
-  }
+  }*/
 
   public void setTranslitSentence(String translitSentence) {
     translitSentences.clear();
@@ -324,6 +325,10 @@ public class Exercise extends ExerciseShell  {
 
   public void setType(EXERCISE_TYPE type) {
     this.type = type;
+  }
+
+  public void setSegmented(String segmented) {
+    this.segmented = segmented;
   }
 
   public String toString() {
