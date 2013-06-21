@@ -100,8 +100,8 @@ public class WaveformExercisePanel extends ExercisePanel {
     private PlayAudioPanel playAudioPanel;
     /**
      * @param service
-     * @paramx controller
      * @param index
+     * @see WaveformExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
      */
     public RecordAudioPanel(LangTestDatabaseAsync service, int index) {
       super(null, service,
@@ -111,14 +111,21 @@ public class WaveformExercisePanel extends ExercisePanel {
       this.index = index;
     }
 
+    /**
+     * @see AudioPanel#getPlayButtons(com.google.gwt.user.client.ui.Widget)
+     * @param toAdd
+     * @return
+     */
     @Override
     protected PlayAudioPanel makePlayAudioPanel(Widget toAdd) {
       recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
       recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
-      System.out.println("making play audio panel with " + recordImage1 + " and " + recordImage2);
+      System.out.println( "making play audio panel with " + recordImage1 + " and " + recordImage2);
 
+      MyPostAudioRecordButton myPostAudioRecordButton = new MyPostAudioRecordButton(/*playAudioPanel,*/this, service, index);
+      postAudioRecordButton = myPostAudioRecordButton;
       playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, WaveformExercisePanel.this);
-      postAudioRecordButton = new MyPostAudioRecordButton(playAudioPanel,this, service, index);
+      myPostAudioRecordButton.setPlayAudioPanel(playAudioPanel);
 
       return playAudioPanel;
     }
@@ -150,9 +157,13 @@ public class WaveformExercisePanel extends ExercisePanel {
         recordImage2.setVisible(false);
       }
 
+      /**
+       * @see PlayAudioPanel#PlayAudioPanel(mitll.langtest.client.sound.SoundManagerAPI)
+       */
       @Override
       protected void addButtons() {
-        add(postAudioRecordButton.getRecord());
+        if (postAudioRecordButton == null) System.err.println("huh? postAudioRecordButton is null???");
+        else add(postAudioRecordButton.getRecord());
         super.addButtons();
       }
     }
@@ -171,10 +182,10 @@ public class WaveformExercisePanel extends ExercisePanel {
     private RecordAudioPanel widgets;
     private PlayAudioPanel playAudioPanel;
 
-    public MyPostAudioRecordButton(PlayAudioPanel playAudioPanel, RecordAudioPanel widgets, LangTestDatabaseAsync service, int index) {
+    public MyPostAudioRecordButton(/*PlayAudioPanel playAudioPanel, */RecordAudioPanel widgets, LangTestDatabaseAsync service, int index) {
       super(exercise, controller, service, index, recordImage1, recordImage2);
       this.widgets = widgets;
-      this.playAudioPanel = playAudioPanel;
+      //this.setPlayAudioPanel(playAudioPanel);
     }
 
     @Override
@@ -215,6 +226,10 @@ public class WaveformExercisePanel extends ExercisePanel {
       widgets.getSpectrogram().setVisible(false);
       ExerciseQuestionState state = WaveformExercisePanel.this;
       state.recordIncomplete(WaveformExercisePanel.this);
+    }
+
+    public void setPlayAudioPanel(PlayAudioPanel playAudioPanel) {
+      this.playAudioPanel = playAudioPanel;
     }
   }
 }
