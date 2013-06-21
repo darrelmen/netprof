@@ -78,7 +78,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   public Exercise getExercise(String id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
     if (!idToExercise.containsKey(id)) {
-       logger.warn("couldn't find " +id + " in " +idToExercise.size() + " : ");
+       logger.warn("couldn't find " +id + " in " +idToExercise.size() + " exercises...");
     }
     return idToExercise.get(id);
   }
@@ -405,6 +405,16 @@ public class FileExerciseDAO implements ExerciseDAO {
         if (!exists) {
           file = new File(installPath,audioPath);
           exists = file.exists();
+        }
+
+        if (!exists) { // hack to remove double media dir
+          audioPath = mediaDir + File.separator + audioFileEquivalent;
+          file = new File(audioPath);
+          exists = file.exists();
+          if (!exists) {
+            file = new File(installPath,audioPath);
+            exists = file.exists();
+          }
         }
         if (!exists) {
           logger.warn("couldn't find audio file at " + file.getAbsolutePath());
