@@ -368,26 +368,36 @@ public class DatabaseImpl implements Database {
       ", skipped " + skipped);*/
 
     // whatever remains, find first exercise
-
-    SortedSet<String> exids = new TreeSet<String>();
-    for (Result r : resultExcludingExercises) {
-      exids.add(r.id);
+    if (resultExcludingExercises.isEmpty()) {
+      logger.debug("all results have been graded.");
+      return null;
     }
-    if (exids.isEmpty()) return null;
     else {
-    //  logger.debug("getNextUngradedExercise candidates are   " + exids);
-      String first = exids.first();
-      for (Exercise e : rawExercises) {
-        if (e.getID().equals(first)) {
-       //   logger.info("getNextUngradedExercise  " + e);
+      //  logger.debug("getNextUngradedExercise candidates are   " + exids);
+      SortedSet<String> exids = new TreeSet<String>(); // sort by id
+      for (Result r : resultExcludingExercises) {
+        exids.add(r.id);
+      }
 
+      int skipped2 = 0;
+      for (String candidate : exids) {
+        Exercise exerciseForID = getExercise(candidate);
+        if (exerciseForID != null) {
           now = System.currentTimeMillis();
-          logger.debug("getNextUngradedExerciseQuick : took " +(now-start) + " millis to get next ungraded");
-          return e;
+          if (skipped2 > 0) {
+            logger.debug("getNextUngradedExerciseQuick note : skipped " + skipped2 + " exercises...");
+          }
+          logger.debug("getNextUngradedExerciseQuick : took " +(now-start) + " millis to get next ungraded exid : " +exerciseForID);
+          return exerciseForID;
+        }
+        else {
+          skipped2++;
         }
       }
       if (!rawExercises.isEmpty()) {
-        logger.warn("getNextUngradedExerciseQuick expecting an exercise to match " + first);
+        logger.error("getNextUngradedExerciseQuick expecting an exercise to match any of " + exids.size() +
+          " (e.g." + exids.iterator().next()+
+          ") candidates in " + rawExercises.size() + " exercises.");
       }
     }
 
