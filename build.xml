@@ -314,6 +314,18 @@
     </target>
 
 
+    <target depends="build" name="npfMandarin">
+        <jar destfile="npfMandarin.war" basedir="war"
+             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/mandarin/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-mandarin/**"
+                >
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+
     <target depends="build" name="pashtoFlashcard">
         <jar destfile="pashtoFlashcard.war" basedir="war"
              includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-pashto/**"
