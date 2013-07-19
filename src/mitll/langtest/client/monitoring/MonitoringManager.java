@@ -54,6 +54,7 @@ public class MonitoringManager {
   private static final int MIN_COUNT_FOR_DIALECT = 10;
   public static final int MIN_SIZE_TO_TRIGGER_FILTER = 15;
   public static final int ITEM_CHART_ITEM_WIDTH = 1000;
+  public static final int MAX_GRADE_ROUNDS = 3;
 
   protected LangTestDatabaseAsync service;
   private String item = "Item";
@@ -592,8 +593,7 @@ public class MonitoringManager {
             item +
             " = " + roundToHundredth(ratio) +"</b>") );
 
-        List<String> keys = new ArrayList<String>(overall.keySet());
-        sortKeysIntelligently(keys);
+        List<String> keys = getSortedKeys(overall);
         int size = keys.size();
         boolean showItemIDs = size > 500;
         String title = answers + " per " + item + (showItemIDs ? "index" : "");
@@ -615,7 +615,10 @@ public class MonitoringManager {
             typeToList.put(pair.getKey(), submap);
           }
           String title1 = title + " (" + i + "-" + (i + chartSamples) + ")";
-          Widget lineChart = showItemIDs ? getLineChartBigSet(sublist, typeToList, title1, size < 300, i) : getLineChart(sublist, typeToList, title1, size < 300, i);
+          Widget lineChart = showItemIDs ?
+            getLineChartBigSet(sublist, typeToList, title1, size < 300, i) :
+            getLineChart(sublist, typeToList, title1, size < 300, i);
+
           vp.add(lineChart);
         }
 
@@ -631,6 +634,12 @@ public class MonitoringManager {
         vp.add(getGenderChart(maleTotal,femaleTotal));
       }
     });
+  }
+
+  private List<String> getSortedKeys(Map<String, Integer> overall) {
+    List<String> keys = new ArrayList<String>(overall.keySet());
+    sortKeysIntelligently(keys);
+    return keys;
   }
 
   private LineChart getLineChart(List<String> keys, Map<String, Map<String,Integer>> overallToExIDToCount, String title, boolean goBig, int offset) {
@@ -762,24 +771,58 @@ public class MonitoringManager {
 
       @Override
       public void onSuccess(Map<Integer, Map<String, Map<String, Integer>>> result) {
-        for (int i = 0; i < 3; i++) {
-          Map<String, Map<String, Integer>> gradeSet = result.get(i);
+        for (int gradeRound = 0; gradeRound < MAX_GRADE_ROUNDS; gradeRound++) {
+          Map<String, Map<String, Integer>> gradeSet = result.get(gradeRound);
           if (gradeSet != null) {
             Map<String, Integer> correct = gradeSet.get("correct");
             Map<String, Integer> incorrect = gradeSet.get("incorrect");
             if (correct != null && !correct.isEmpty() && incorrect != null && !incorrect.isEmpty()) {
-              List<String> keys = new ArrayList<String>(correct.keySet());
-              //System.out.println("keys are " + keys.size());
-              sortKeysIntelligently(keys);
-
-              vp.add(getGradeCounts(i,
-                //0, keys.size(),
-                keys, correct, incorrect));
+              List<String> keys = getSortedKeys(correct);
+              doChartSequence(gradeRound,keys,correct,incorrect,vp);
             }
           }
         }
       }
     });
+  }
+
+  /**
+   * Handles a large exercise list by making a sequence of charts.
+   * @param round
+   * @param keys
+   * @param correct
+   * @param incorrect
+   * @param vp
+   */
+  private void doChartSequence(int round, List<String> keys,
+                               Map<String, Integer> correct, Map<String, Integer> incorrect, final Panel vp) {
+    int size = keys.size();
+    boolean showItemIDs = size > 500;
+    int chartSamples = Math.min(ITEM_CHART_ITEM_WIDTH, size);
+
+    for (int i = 0; i < size; i += chartSamples) {
+      int endIndex = Math.min(size, i + chartSamples);
+      endIndex = Math.min(keys.size(),endIndex);
+      List<String> keySublist = keys.subList(i, endIndex);    // which items we show for this chart
+
+      Map<String, Integer> csubmap = new HashMap<String, Integer>();
+      for (String key : keySublist) {
+        Integer value = correct.get(key);
+        csubmap.put(key, value == null ? 0 : value);
+      }
+
+      Map<String, Integer> icsubmap = new HashMap<String, Integer>();
+      for (String key : keySublist) {
+        Integer value = incorrect.get(key);
+        icsubmap.put(key, value == null ? 0 : value);
+      }
+
+      LineChart gradeCounts = getGradeCounts(round,
+        i, endIndex,
+        keySublist, csubmap, icsubmap);
+
+      vp.add(gradeCounts);
+    }
   }
 
   private void sortKeysIntelligently(List<String> keys) {
@@ -1423,7 +1466,7 @@ public class MonitoringManager {
   }
 
   private LineChart getGradeCounts(int round,
-                                   //int start, int end,
+                                   int start, int end,
                                    List<String> keysToUse,
                                    Map<String, Integer> correctToCount,
                                    Map<String, Integer> incorrectToCount) {
@@ -1432,9 +1475,9 @@ public class MonitoringManager {
       items +
       " with this many " +
       "grades" +
-      " correct/incorrect " + "Round #" + (round + 1)//+
-      //  "(" + start + " - " + end +
-      // ")"
+      " correct/incorrect " + "Round #" + (round + 1)+
+        "(" + start + " - " + end +
+       ")"
     );
 
     labelAxes(options,
