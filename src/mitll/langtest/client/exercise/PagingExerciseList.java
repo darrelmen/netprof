@@ -12,16 +12,19 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.SimplePager;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -115,6 +118,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     // Add a selection model to handle user selection.
     final SingleSelectionModel<ExerciseShell> selectionModel = new SingleSelectionModel<ExerciseShell>();
     table.setSelectionModel(selectionModel);
+    // we don't want to listen for changes in the selection model, since that happens on load too -- we just want clicks
 
     addColumnsToTable();
     return null;
@@ -122,6 +126,18 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   protected void addColumnsToTable() {
     Column<ExerciseShell, SafeHtml> id2 = getExerciseIdColumn();
+
+    // this would be better, but want to consume clicks
+  /*  TextColumn<ExerciseShell> id2 = new TextColumn<ExerciseShell>() {
+      @Override
+      public String getValue(ExerciseShell exerciseShell) {
+        String columnText =  exerciseShell.getTooltip();
+        if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0,MAX_LENGTH_ID-3)+"...";
+
+        return columnText;
+      }
+    };*/
+
     id2.setCellStyleNames("alignLeft");
     table.addColumn(id2);
   }
@@ -137,13 +153,14 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
       }) {
         @Override
         public SafeHtml getValue(ExerciseShell object) {
-          return getColumnToolTip(object.getID(), object.getTooltip(), object.getTooltip());
+          return getColumnToolTip(object.getTooltip());
         }
 
         @Override
         public void onBrowserEvent(Cell.Context context, Element elem, ExerciseShell object, NativeEvent event) {
           super.onBrowserEvent(context, elem, object, event);
           if (BrowserEvents.CLICK.equals(event.getType())) {
+            System.out.println("got click " + event);
             final ExerciseShell e = object;
             if (isExercisePanelBusy()) {
               Window.alert("Please stop recording before changing items.");
@@ -154,24 +171,9 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
           }
         }
 
-        private SafeHtml getColumnToolTip(String linkItemID, String columnText, String toolTipText) {
+        private SafeHtml getColumnToolTip(String columnText) {
           if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0,MAX_LENGTH_ID-3)+"...";
-          String htmlConstant = "<html>" + "<head><style>" +
-              "span.tip { TEXT-DECORATION: none; color:#1776B3}" +
-              "A.tip:hover  {CURSOR:default;}" +
-              "A.tip span   {DISPLAY:none}" +
-              "A.tip span p {background:#d30300;color:#fff;font-weight:500;border-radius:5px;padding:5px;font-size:12px}" +
-              "A.tip:hover span {border:1px solid #e6e3e5;DISPLAY: block;Z-INDEX: 1000; PADDING: 0px 10px 0px 10px;" +
-              //"POSITION:absolute;float:left;background:#ffffd1;   TEXT-DECORATION: none}" +
-              "POSITION:absolute;background:#ffffd1;   TEXT-DECORATION: none}" +
-              "</style></head>" +
-              "<body>" +
-              "<a href=\"" +
-            getHistoryTokenForLink(linkItemID) +
-            "\" class=\"tip\">" + columnText +
-            "<span>" + toolTipText + "</span>" +
-            "</a>" + "</body>" + "</html>";
-          return new SafeHtmlBuilder().appendHtmlConstant(htmlConstant).toSafeHtml();
+          return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
         }
       };
   }
@@ -182,7 +184,9 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   protected String getHistoryToken(String id) { return "item=" +id; }
 
-  protected void gotClickOnItem(final ExerciseShell e) {}
+  protected void gotClickOnItem(final ExerciseShell e) {
+    pushNewItem(e.getID());
+  }
 
   /**
    * @see SectionExerciseList.MySetExercisesCallback#onSuccess
@@ -260,9 +264,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   protected int getTableHeaderHeight() {
-    int heightOfTopRows = controller.getHeightOfTopRows();
-
-    return heightOfTopRows;
+    return controller.getHeightOfTopRows();
   }
 
   /**
