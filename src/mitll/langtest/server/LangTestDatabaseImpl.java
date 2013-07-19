@@ -155,7 +155,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public ExerciseListWrapper getExerciseIds(int reqID, long userID) {
     logger.debug("getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
     List<Exercise> exercises = getExercises(userID);
-    if (serverProps.isGoodwaveMode()) exercises = getSortedExercises(exercises);
+    if (serverProps.isGoodwaveMode()) {
+      exercises = getSortedExercises(exercises);
+      if (!exercises.isEmpty()) logger.debug("sorting by id -- first is " + exercises.get(0).getID());
+    }
     List<ExerciseShell> ids = getExerciseShells(exercises);
     logMemory();
     return new ExerciseListWrapper(reqID,ids);
@@ -197,11 +200,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private List<Exercise> getSortedExercises(Collection<Exercise> exercisesForSection) {
     List<Exercise> copy = new ArrayList<Exercise>(exercisesForSection);
-    sortByIDs(copy);
+    sortByTooltip(copy);
     return copy;
   }
 
-  private void sortByIDs(List<? extends ExerciseShell> exerciseShells) {
+  /**
+   * I.e. by the lexicographic order of the displayed words in the word list
+   * @param exerciseShells
+   */
+  private void sortByTooltip(List<? extends ExerciseShell> exerciseShells) {
     Collections.sort(exerciseShells, new Comparator<ExerciseShell>() {
       @Override
       public int compare(ExerciseShell o1, ExerciseShell o2) {
@@ -332,6 +339,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     List<Exercise> exercises = getExercisesInModeDependentOrder(userID);
 
+    //logger.debug("isCRTDataCollect is " +serverProps.isCRTDataCollect());
+
     if (serverProps.isCRTDataCollect()) {
       //logger.debug("isCRTDataCollect is true");
 
@@ -391,11 +400,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * Note there is no english + text response combination.
    *
    * set the text only flag if not collecting audio
-   * @param userID
-   * @param exercises
+   * <p></p>
+   * Uses the user id as a random seed so we get repeatable behavior per user.
+   *
+   * @see #getExercises(long)
+   * @param userID for this user
+   * @param exercises to alter
    */
   private void setPromptAndRecordOnExercises(long userID, List<Exercise> exercises) {
     Random rand = new Random(userID);
+    //logger.debug("setPromptAndRecordOnExercises for " + userID + " collect audio " + serverProps.isCollectOnlyAudio());
     for (Exercise e : exercises) {
       if (serverProps.isCollectOnlyAudio()) {
         e.setRecordAnswer(true);
@@ -411,7 +425,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * TODO remember exercise list between invocations ?
    * @param userID
    * @param typeToSection
    * @return
