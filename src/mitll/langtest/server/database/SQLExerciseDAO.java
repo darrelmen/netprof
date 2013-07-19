@@ -17,7 +17,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class SQLExerciseDAO implements ExerciseDAO {
@@ -28,6 +30,8 @@ public class SQLExerciseDAO implements ExerciseDAO {
 
   private final Database database;
   private String mediaDir;
+  private List<Exercise> exercises;
+  private Map<String,Exercise> idToExercise = new HashMap<String,Exercise>();
 
   /**
    * @see DatabaseImpl#makeExerciseDAO(boolean)
@@ -52,9 +56,11 @@ public class SQLExerciseDAO implements ExerciseDAO {
 
   @Override
   public Exercise getExercise(String id) {
-    String sql = "SELECT * FROM exercises where EXID='" +id+ "'";
-    List<Exercise> exercises = getExercises(sql);
-    return (exercises.isEmpty())? null : exercises.iterator().next();
+    if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
+    if (!idToExercise.containsKey(id)) {
+      logger.warn("couldn't find " +id + " in " +idToExercise.size() + " exercises...");
+    }
+    return idToExercise.get(id);
   }
 
   /**
@@ -66,8 +72,16 @@ public class SQLExerciseDAO implements ExerciseDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#getExercises
    */
   public List<Exercise> getRawExercises() {
-    String sql = "SELECT * FROM exercises";
-    return getExercises(sql);
+    if (exercises == null) {
+      String sql = "SELECT * FROM exercises";
+      exercises = getExercises(sql);
+      populateIDToExercise();
+    }
+    return exercises;
+  }
+
+  private void populateIDToExercise() {
+    for (Exercise e : exercises) idToExercise.put(e.getID(),e);
   }
 
   private List<Exercise> getExercises(String sql) {
@@ -88,6 +102,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
         if (content.startsWith("{")) {
           JSONObject obj = JSONObject.fromObject(content);
           Exercise e = getExercise(plan, exid, obj);
+       //   logger.debug("Got " + e);
           if (e == null) {
             logger.warn("couldn't find exercise for plan '" + plan + "'");
           } else if (e.getID() == null) {
