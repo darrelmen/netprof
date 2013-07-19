@@ -31,9 +31,10 @@ import java.util.regex.Pattern;
  * To change this template use File | Settings | File Templates.
  */
 public class FileExerciseDAO implements ExerciseDAO {
+  private static final Logger logger = Logger.getLogger(FileExerciseDAO.class);
+
   private static final String FILE_PREFIX = "file://";
   private static final int FILE_PREFIX_LENGTH = "file://".length();
-  private static Logger logger = Logger.getLogger(FileExerciseDAO.class);
   private static final List<String> EMPTY_LIST = Collections.emptyList();
 
   public static final String ENCODING = "UTF8";
@@ -45,14 +46,14 @@ public class FileExerciseDAO implements ExerciseDAO {
   private final String mediaDir;
 
   private List<Exercise> exercises;
-  private Map<String,Exercise> idToExercise = new HashMap<String,Exercise>();
+  private final Map<String,Exercise> idToExercise = new HashMap<String,Exercise>();
   private boolean isUrdu;
   private final boolean isFlashcard;
   private boolean isEnglish;
-  private boolean processSemicolons = false;
+  private final boolean processSemicolons = false;
   private boolean isPashto;
 
-  public FileExerciseDAO(boolean isFlashcard) {
+  private FileExerciseDAO(boolean isFlashcard) {
     this("","", isFlashcard);
   }
   /**
@@ -95,7 +96,7 @@ public class FileExerciseDAO implements ExerciseDAO {
    * @param doImages
    * @param dontExpectHeader
    */
-  public void readWordPairs(String lessonPlanFile, String language, boolean doImages, boolean dontExpectHeader) {
+  private void readWordPairs(String lessonPlanFile, String language, boolean doImages, boolean dontExpectHeader) {
     if (exercises != null) return;
     exercises = new ArrayList<Exercise>();
     boolean isTSV =  (lessonPlanFile.endsWith(".tsv"));
@@ -140,6 +141,15 @@ public class FileExerciseDAO implements ExerciseDAO {
     populateIDToExercise();
   }
 
+  /**
+   * @see #readWordPairs(String, String, boolean,boolean)
+   * @param language
+   * @param doImages
+   * @param TSV
+   * @param line
+   * @param id
+   * @return
+   */
   private int readLine(String language, boolean doImages, boolean TSV, String line, int id) {
     if (TSV) {
       id = readTSVLine(doImages, line, id);
@@ -203,6 +213,14 @@ public class FileExerciseDAO implements ExerciseDAO {
     return id;
   }
 
+  /**
+   * @see #readLine(String, boolean, boolean, String, int)
+   * @param language
+   * @param doImages
+   * @param line
+   * @param id
+   * @return
+   */
   private int readLine(String language, boolean doImages, String line, int id) {
     String[] split = line.split(",");
     String foreign = split[0].trim();
@@ -400,6 +418,9 @@ public class FileExerciseDAO implements ExerciseDAO {
       if (isListening) {
         String audioPath = mediaDir + File.separator + "media" + File.separator + audioFileEquivalent;
 
+        if (!audioPath.contains("media")) {
+          audioPath = mediaDir + File.separator + "media" + File.separator + audioFileEquivalent;
+        }
         File file = new File(audioPath);
         boolean exists = file.exists();
         if (!exists) {
@@ -541,7 +562,6 @@ public class FileExerciseDAO implements ExerciseDAO {
       english = split1[1].trim();
       if (split1.length == 3) {
         translit = split1[2].trim();
-
       }
     }
     audioFileName = audioFileName.substring(0, audioFileName.length() - 1); // remove trailing )
@@ -557,7 +577,8 @@ public class FileExerciseDAO implements ExerciseDAO {
       Exercise exercise =
         new Exercise("repeat", audioFileName, content, ensureForwardSlashes(audioRef),
           foreignLanguagePhrase, foreignLanguagePhrase);
-      logger.debug("made " +exercise);
+      exercise.addQuestion(Exercise.EN, "Please record the sentence above.", "", EMPTY_LIST);  // required for grading view
+      exercise.addQuestion(Exercise.FL, "Please record the sentence above.", "", EMPTY_LIST);
 
       return exercise;
     }
@@ -604,7 +625,7 @@ public class FileExerciseDAO implements ExerciseDAO {
         ensureForwardSlashes(fastAudioRef), ensureForwardSlashes(slowAudioRef), arabic, english);
   }
 
-  public String getContent(String arabic, String translit, String english, String meaning) {
+  private String getContent(String arabic, String translit, String english, String meaning) {
     return getContent(arabic, translit, english, meaning, "");
   }
 
