@@ -684,11 +684,17 @@ public class MonitoringSupport {
     }
 
     Map<Integer, Integer> resultIDToExp = new HashMap<Integer, Integer>();
+    Set<Long> unknownUsers = new HashSet<Long>();
     for (Result r : results) {
       User user = idToUser.get(r.userid);
-      if (user == null) System.err.println("unknown user " + r.userid);
+      if (user == null) {
+        unknownUsers.add(r.userid);
+        //System.err.println("unknown user " + r.userid);
+      }
       else resultIDToExp.put(r.uniqueID, user.experience);
     }
+
+    logger.warn("getResultStats : found " + unknownUsers.size() + " unknown users : " + unknownUsers);
 
     Collection<Grade> grades1 = gradeDAO.getGrades();
     for (int i = 0; i < 3; i++) {
