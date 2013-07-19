@@ -497,7 +497,7 @@ public class ResultDAO extends DAO {
       addFlashcardColumnsToTable(connection);
     }
    // enrichResults();
-   // removeTimeDefault(connection);
+   removeTimeDefault(connection);
     //removeValidDefault(connection);
    // addValidDefault(connection);
   }
