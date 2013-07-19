@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Largely assumes this is a flashcard teach view.
+ * Largely assumes this is a flashcard teacher view.
  *
  * User: GO22670
  * Date: 4/23/13
