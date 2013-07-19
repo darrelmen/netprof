@@ -235,7 +235,8 @@ public class UserTable extends PagerTable {
       public String getValue(User contact) {
         String ipaddr1 = contact.ipaddr;
         int at = ipaddr1.lastIndexOf("at");
-        ipaddr1 = ipaddr1.substring(0,at);
+        
+        ipaddr1 = at == -1 ? "" : ipaddr1.substring(0,at);
         return ipaddr1;
       }
     };
