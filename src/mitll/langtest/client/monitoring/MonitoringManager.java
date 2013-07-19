@@ -769,7 +769,7 @@ public class MonitoringManager {
             Map<String, Integer> incorrect = gradeSet.get("incorrect");
             if (correct != null && !correct.isEmpty() && incorrect != null && !incorrect.isEmpty()) {
               List<String> keys = new ArrayList<String>(correct.keySet());
-              System.out.println("keys are " + keys);
+              //System.out.println("keys are " + keys.size());
               sortKeysIntelligently(keys);
 
               vp.add(getGradeCounts(i,
