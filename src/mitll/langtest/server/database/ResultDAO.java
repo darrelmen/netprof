@@ -478,6 +478,8 @@ public class ResultDAO extends DAO {
    */
   void createResultTable(Connection connection) throws SQLException {
     createTable(connection);
+    removeTimeDefault(connection);
+
     int numColumns = getNumColumns(connection, RESULTS);
     if (numColumns == 8) {
       logger.info(RESULTS + " table had num columns = " + numColumns);
@@ -497,7 +499,6 @@ public class ResultDAO extends DAO {
       addFlashcardColumnsToTable(connection);
     }
    // enrichResults();
-   removeTimeDefault(connection);
     //removeValidDefault(connection);
    // addValidDefault(connection);
   }
@@ -574,6 +575,7 @@ public class ResultDAO extends DAO {
   }
 
   private void removeTimeDefault(Connection connection) throws SQLException {
+    logger.info("removing time default value - current_timestamp steps on all values with NOW.");
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " + Database.TIME+
         " DROP DEFAULT");
     statement.execute();
