@@ -40,7 +40,6 @@ public class Exercise extends ExerciseShell  {
   private List<String> synonymAudioRefs = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
   private double weight;
-  private transient List<String> slots = new ArrayList<String>();
 
   public static class QAPair implements IsSerializable {
     private String question;
@@ -317,12 +316,6 @@ public class Exercise extends ExerciseShell  {
     this.englishSentence = englishSentence;
   }
 
-  public void addSlot(String s) {
-    if (slots == null) slots = new ArrayList<String>();
-    slots.add(s);
-  }
-  //public List<String> getSlots() { return slots; }
-
   public void setType(EXERCISE_TYPE type) {
     this.type = type;
   }
@@ -332,26 +325,32 @@ public class Exercise extends ExerciseShell  {
   }
 
   public String toString() {
+    String moreAboutQuestions = DEBUG ? " : " +  getQuestionToString() : "";
+    String questionInfo = langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size() + moreAboutQuestions;
+
     if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
       return "Exercise " + type + " " +plan+"/"+ id + "/" + " content bytes = " + content.length() +
-          " ref sentence '" + getRefSentence() +"' audio " + refAudio;
+          " ref sentence '" + getRefSentence() +"' audio " + refAudio + questionInfo;
     }
     else {
-      String questions = "";
-      if (langToQuestion != null) {
-        for (Map.Entry<String, List<QAPair>> pair : langToQuestion.entrySet()) {
-          questions += pair.getKey() + " -> ";
-          int i =1;
-          for (QAPair qa : pair.getValue()) {
-            questions += "#"+ (i++) +" : "+qa.toString() + ", ";
-          }
-        }
-      }
-      String moreAboutQuestions = DEBUG ? " : " + questions : "";
       return "Exercise " + getType() + " " +plan+"/"+ id + "/" + (promptInEnglish?"english":"foreign")+
           " : content bytes = " + content.length() + (DEBUG ? " content : " +content : "")+
           " ref '" + getRefSentence() + "' translit '" + getTranslitSentence()+ "'"+
-          (langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size() + moreAboutQuestions);
+        questionInfo;
     }
+  }
+
+  private String getQuestionToString() {
+    String questions = "";
+    if (langToQuestion != null) {
+      for (Map.Entry<String, List<QAPair>> pair : langToQuestion.entrySet()) {
+        questions += pair.getKey() + " -> ";
+        int i =1;
+        for (QAPair qa : pair.getValue()) {
+          questions += "#"+ (i++) +" : "+qa.toString() + ", ";
+        }
+      }
+    }
+    return questions;
   }
 }
