@@ -57,8 +57,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected UserManager user;
   private String exercise_title;
   protected final boolean showTurkToken;
-  private boolean useUserID = false;
-  private long userID;
   private final boolean showInOrder;
   private int countSincePrompt = 0;
   protected int lastReqID = 0;
@@ -114,8 +112,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public void getExercises(long userID) {
     System.out.println("ExerciseList: getExercises for user " +userID);
 
-    useUserID = true;
-    this.userID = userID;
     if (showInOrder) {
       getExercisesInOrder();
     } else {
@@ -159,8 +155,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
+   * Calling this will result in an immediate call to onValueChange (reacting to the history change)
+   *
    * @see #loadExercise(mitll.langtest.shared.ExerciseShell)
    * @see #pushFirstSelection(String)
+   * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @param exerciseID
    */
   protected void pushNewItem(String exerciseID) {
