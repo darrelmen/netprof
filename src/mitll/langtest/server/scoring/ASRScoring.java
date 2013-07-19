@@ -139,7 +139,7 @@ public class ASRScoring extends Scoring {
     } else if (language.equalsIgnoreCase("Mandarin")) {
       logger.info("NOTE: there is no LTS for " + language);
     } else {
-      logger.warn("NOTE: we have no LTS for " + language);
+      logger.warn("NOTE: we have no LTS for '" + language +"', using " + letterToSoundClass.getClass());
     }
 //    logger.info("using LTS " + letterToSoundClass.getClass());
     this.htkDictionary = dict;
