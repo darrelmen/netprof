@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -38,11 +39,10 @@ public class FileExerciseDAO implements ExerciseDAO {
   private static final List<String> EMPTY_LIST = Collections.emptyList();
 
   public static final String ENCODING = "UTF8";
- // private static final String LESSON_FILE = "lesson-737.csv";
   private static final String FAST = "Fast";
   private static final String SLOW = "Slow";
-  //private static final boolean TESTING = false;
   private static final int MAX_ERRORS = 100;
+  private static final boolean CONFIRM_AUDIO_REFS = false;
   private final String mediaDir;
 
   private List<Exercise> exercises;
@@ -206,7 +206,7 @@ public class FileExerciseDAO implements ExerciseDAO {
       repeat.setEnglishSentence(english);
       String audioRef = (refAudio.length() == 0) ? mediaDir + "/" + english + ".mp3" : mediaDir + "/" + refAudio;
     //  logger.debug("audio ref = " + audioRef);
-      repeat.setRefAudio(audioRef); // TODO confirm file exists.
+      repeat.setRefAudio(audioRef); // TODO confirm file exists. - see confirmAudio
 
       exercises.add(repeat);
     }
@@ -327,7 +327,27 @@ public class FileExerciseDAO implements ExerciseDAO {
     else {
       logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
+    if (CONFIRM_AUDIO_REFS) confirmAudioRefs(exercises,mediaDir);
     populateIDToExercise();
+  }
+
+  private void confirmAudioRefs(List<Exercise> exercises, String mediaDir) {
+    int c = 0;
+    try {
+      FileWriter writer = new FileWriter("missingAudio.txt");
+      for (Exercise e : exercises) {
+        String refAudio = e.getRefAudio();
+        File file = new File(refAudio);
+        if (!file.exists()) {
+          writer.write(e.getID() + "\n");
+          if (c++ < 10) logger.warn("missing audio " + e.getID() + " at " + file.getAbsolutePath());
+        }
+      }
+      writer.close();
+    } catch (IOException e) {
+      logger.error("got " + e, e);
+    }
+    if (c > 0) logger.warn("there were " + c + " items with missing audio");
   }
 
   private BufferedReader getReader(String lessonPlanFile) throws FileNotFoundException, UnsupportedEncodingException {
@@ -542,6 +562,7 @@ public class FileExerciseDAO implements ExerciseDAO {
    *
    * <s> word word word </s> (audio_file_name_without_suffix)
    *
+   * e.g. from MSA : trans.msa.unique
    * @see #readFastAndSlowExercises
    * @param line2
    * @return
