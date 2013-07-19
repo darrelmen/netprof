@@ -65,6 +65,17 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     TableStyle cellTableStyle();
   }
 
+  public interface RTLTableResources extends CellTable.Resources {
+    /**
+     * The styles applied to the table.
+     */
+    interface TableStyle extends CellTable.Style {}
+
+    @Override
+    @Source({CellTable.Style.DEFAULT_CSS, "RTLExerciseCellTableStyleSheet.css"})
+    TableStyle cellTableStyle();
+  }
+
   /**
    * @see mitll.langtest.client.LangTest#makeExerciseList
    * @param currentExerciseVPanel
@@ -106,7 +117,15 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   protected CellTable<Exercise> makeCellTable() {
-    CellTable.Resources o = GWT.create(TableResources.class);
+    CellTable.Resources o;
+
+    if (controller.isRightAlignContent()) {   // so when we truncate long entries, the ... appears on the correct end
+      o = GWT.create(RTLTableResources.class);
+    }
+    else {
+      o = GWT.create(TableResources.class);
+    }
+
     this.table = new CellTable<ExerciseShell>(PAGE_SIZE, o);
 
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
