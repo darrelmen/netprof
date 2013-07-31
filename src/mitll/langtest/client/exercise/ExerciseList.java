@@ -135,16 +135,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param exerciseID
    */
   private void pushFirstSelection(String exerciseID) {
-/*    String initToken = History.getToken();
-    if (initToken.length() == 0) {
-      pushNewItem(first);
-    } else {
-      System.out.println("fire history for " +initToken);
-      History.fireCurrentHistoryState();
-    }*/
-
     String token = History.getToken();
-    System.out.println("pushFirstSelection : current token '" + token + "' vs new " +exerciseID);
+    //System.out.println("pushFirstSelection : current token '" + token + "' vs new " +exerciseID);
     if (token != null && getIDFromToken(token).equals(exerciseID)) {
       System.out.println("\tpushFirstSelection :current token " + token + " same as new " +exerciseID);
       loadByIDFromToken(exerciseID);
@@ -220,7 +212,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   protected void rememberExercises(List<ExerciseShell> result) {
-    System.out.println("remembering " + result.size() + " exercises");
+    //System.out.println("remembering " + result.size() + " exercises");
     currentExercises = result; // remember current exercises
     idToExercise = new HashMap<String, ExerciseShell>();
     clear();
@@ -267,7 +259,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         if (e != null) toLoad = e;
       }
 
-      System.out.println("loadFirstExercise ex id =" + toLoad.getID());
+      //System.out.println("loadFirstExercise ex id =" + toLoad.getID());
       pushFirstSelection(toLoad.getID());
     }
   }
@@ -299,7 +291,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   private void askServerForExercise(ExerciseShell exerciseShell) {
-    System.out.println("askServerForExercise id = " + exerciseShell.getID());
+    //System.out.println("askServerForExercise id = " + exerciseShell.getID());
     service.getExercise(exerciseShell.getID(), new ExerciseAsyncCallback(exerciseShell));
   }
 
@@ -454,7 +446,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public void removeCurrentExercise() {
     Widget current = innerContainer.getWidget();
     if (current != null) {
-      System.out.println("Remove current widget");
+      //System.out.println("Remove current widget");
       if (!innerContainer.remove(current)) {
         System.out.println("\tdidn't remove current widget");
       }
