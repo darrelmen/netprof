@@ -21,7 +21,6 @@ public class PropertyHandler {
   private static final String APP_TITLE = "appTitle";
   private static final String SPLASH_TITLE = "splashTitle";
   private static final String SEGMENT_REPEATS = "segmentRepeats";
-  private static final String READ_FROM_FILE = "readFromFile";
   private static final String RELEASE_DATE = "releaseDate";
   private static final String BKG_COLOR_FOR_REF1 = "bkgColorForRef";
   private static final String AUTO_CRT = "autocrt";
@@ -60,9 +59,6 @@ public class PropertyHandler {
   private static final String REPEATS = "repeats";
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
   private static final String EXERCISE_TITLE = "exercise_title";
-  private static final String TEACHER_CLASS = "class";
-  private static final String LESSON = "lesson";
-  //private static final String TEACHER_PARAM = TEACHER_VIEW;
   private static final String ADMIN_PARAM = "admin";
   private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
 
@@ -76,8 +72,11 @@ public class PropertyHandler {
   private static final String DEFAULT_EXERCISE = null;
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
   private static final String ADD_RECORD_KEY_BINDING = "addRecordKeyBinding";
+  private static final String LOGIN_TYPE_PARAM = "loginType";
 
-  private Map<String, String> props;
+  public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT, DATA_COLLECTOR }
+
+  private final Map<String, String> props;
 
   private boolean grading = false;
   private boolean englishOnlyMode = false;
@@ -88,7 +87,6 @@ public class PropertyHandler {
   private boolean bkgColorForRef = false;
   private String exercise_title;
   private String appTitle = DLI_LANGUAGE_TESTING;
-  private boolean readFromFile;
   private boolean autocrt;
   private boolean demoMode;
   private boolean dataCollectMode;
@@ -102,13 +100,10 @@ public class PropertyHandler {
   private String nameForItem = "Item";
   private String nameForAnswer = "Recording";
   private String nameForRecorder = "Speaker";
-  private String teacherClass = "class";
-  private String lesson = "lesson";
   private String language = "";
   private boolean showSections = false;
   private boolean showSectionWidgets = true;
   private boolean flashcardTeacherView = false;
-  //private boolean debugEmail = true;
   private boolean flashCard = false;
   private boolean timedGame = false;
   private String releaseDate;
@@ -120,6 +115,7 @@ public class PropertyHandler {
   private boolean promptBeforeNextItem = false;
   private boolean rightAlignContent;
   private boolean addRecordKeyBinding = true;
+  private LOGIN_TYPE loginType = LOGIN_TYPE.UNDEFINED;
 
   public PropertyHandler(Map<String,String> props) {
     this.props = props;
@@ -138,14 +134,13 @@ public class PropertyHandler {
       else if (key.equals(SHOW_TURK_TOKEN)) showTurkToken = getBoolean(value);
       else if (key.equals(APP_TITLE)) appTitle = value;
       else if (key.equals(SEGMENT_REPEATS)) segmentRepeats = getInt(value,DEFAULT_SEGMENT_REPEATS,SEGMENT_REPEATS)-1;
-      else if (key.equals(READ_FROM_FILE)) readFromFile = getBoolean(value);
       else if (key.equals(RELEASE_DATE)) releaseDate = value;
       else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = getBoolean(value);
       else if (key.equals(AUTO_CRT)) autocrt = getBoolean(value);
       else if (key.equals(DEMO_MODE)) demoMode = getBoolean(value);
       else if (key.equals(DATA_COLLECT_MODE)) dataCollectMode = getBoolean(value);
       else if (key.equals(CRT_DATA_COLLECT_MODE)) CRTDataCollectMode = getBoolean(value);
-      else if (key.equals(RECORD_TIMEOUT)) recordTimeout = getInt(value,DEFAULT_TIMEOUT,RECORD_TIMEOUT);
+      else if (key.equals(RECORD_TIMEOUT)) recordTimeout = getInt(value, DEFAULT_TIMEOUT, RECORD_TIMEOUT);
       else if (key.equals(COLLECT_AUDIO)) collectAudio = getBoolean(value);
       else if (key.equals(ADMIN_VIEW)) adminView = getBoolean(value);
       else if (key.equals(MINIMAL_UI)) minimalUI = getBoolean(value);
@@ -154,7 +149,7 @@ public class PropertyHandler {
       else if (key.equals(NAME_FOR_RECORDER)) nameForRecorder = value;
       else if (key.equals(TEACHER_VIEW)) teacherView = getBoolean(value);
       else if (key.equals(DATA_COLLECT_ADMIN_VIEW)) dataCollectAdminView = getBoolean(value);
-      else if (key.equals(NUM_GRADES_TO_COLLECT)) numGradesToCollect = getInt(value,NUM_GRADES_TO_COLLECT_DEFAULT,NUM_GRADES_TO_COLLECT);
+      else if (key.equals(NUM_GRADES_TO_COLLECT)) numGradesToCollect = getInt(value, NUM_GRADES_TO_COLLECT_DEFAULT, NUM_GRADES_TO_COLLECT);
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
       else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
       else if (key.equals(SHOW_SECTION_WIDGETS)) showSectionWidgets = getBoolean(value);
@@ -164,10 +159,17 @@ public class PropertyHandler {
       else if (key.equals(LANGUAGE)) language = value;
       else if (key.equals(SPLASH_TITLE)) splashTitle = value;
       else if (key.equals(TIMED_GAME)) timedGame = getBoolean(value);
-      else if (key.equals(GAME_TIME)) gameTimeSeconds = getInt(value,DEFAULT_GAME_TIME_SECONDS,GAME_TIME);
+      else if (key.equals(GAME_TIME)) gameTimeSeconds = getInt(value, DEFAULT_GAME_TIME_SECONDS, GAME_TIME);
       else if (key.equals(CONTINUE_PROMPT)) promptBeforeNextItem = getBoolean(value);
       else if (key.equals(RIGHT_ALIGN_CONTENT)) rightAlignContent = getBoolean(value);
       else if (key.equals(ADD_RECORD_KEY_BINDING)) addRecordKeyBinding = getBoolean(value);
+      else if (key.equals(LOGIN_TYPE_PARAM)) {
+        try {
+          loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+          System.err.println("unknown value for " + key + " : " + value);
+        }
+      }
     }
   }
 
@@ -210,22 +212,6 @@ public class PropertyHandler {
     }
     else {
       this.exercise_title = DEFAULT_EXERCISE;
-    }
-
-    String tClass = Window.Location.getParameter(TEACHER_CLASS);
-    if (tClass != null) {
-      this.teacherClass = tClass;
-    }
-    else {
-     // this.exercise_title = DEFAULT_EXERCISE;
-    }
-
-    String lessonParam = Window.Location.getParameter(LESSON);
-    if (lessonParam != null) {
-      this.lesson = lessonParam;
-    }
-    else {
-      // this.exercise_title = DEFAULT_EXERCISE;
     }
 
     String screenPortionParam =  Window.Location.getParameter("screenPortion");
@@ -272,7 +258,6 @@ public class PropertyHandler {
     if (Window.Location.getParameter(SHOW_SECTION_WIDGETS) != null) {
       showSectionWidgets = !Window.Location.getParameter(SHOW_SECTION_WIDGETS).equals("false");
     }
-    System.out.println("show section widgets " + showSectionWidgets);
 
     String flashcardParam = Window.Location.getParameter(FLASHCARD);
     if (flashcardParam != null) {
@@ -304,7 +289,7 @@ public class PropertyHandler {
     return grading;
   }
 
-  public void setGrading(boolean v) { this.grading = v; }
+  private void setGrading(boolean v) { this.grading = v; }
 
   public boolean isEnglishOnlyMode() {
     return englishOnlyMode;
@@ -332,10 +317,6 @@ public class PropertyHandler {
 
   public String getAppTitle() {
     return appTitle;
-  }
-
-  public boolean isReadFromFile() {
-    return readFromFile;
   }
 
   public boolean isAutocrt() {
@@ -381,9 +362,6 @@ public class PropertyHandler {
   public String getNameForItem() { return nameForItem; }
   public String getNameForAnswer() { return nameForAnswer; }
   public String getNameForRecorder() { return nameForRecorder; }
-
-  public String getTeacherClass() { return teacherClass; }
-  public String getLesson() { return lesson; }
 
   public boolean isDataCollectAdminView() {
     return dataCollectAdminView;
@@ -452,4 +430,6 @@ public class PropertyHandler {
   public boolean shouldAddRecordKeyBinding() {
     return addRecordKeyBinding;
   }
+
+  public LOGIN_TYPE getLoginType() { return loginType; }
 }
