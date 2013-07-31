@@ -25,12 +25,11 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#ASRRecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int)
    * @param service
-   * @param useFullWidth
    * @param numRepeats
    * @param useKeyboard
    * @param gaugePanel
    */
-  public ASRScoringAudioPanel(LangTestDatabaseAsync service, boolean useFullWidth,
+  public ASRScoringAudioPanel(LangTestDatabaseAsync service,
                               int numRepeats, boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
     super(service, numRepeats, useKeyboard, controller, gaugePanel);
   }
