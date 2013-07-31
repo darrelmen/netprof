@@ -14,7 +14,10 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 /**
- * Created with IntelliJ IDEA.
+ * This has a lot of overlap with the PropertyHandler set of properties.
+ *
+ * TODO : There should be a better way of handling their relationship.
+ *
  * User: GO22670
  * Date: 3/5/13
  * Time: 2:30 PM
@@ -25,8 +28,7 @@ public class ServerProperties {
 
   private static final String BACKGROUND_FILE = "backgroundFile";
 
-  public static final String SHOW_SECTIONS = "showSections";
-  public static final String DEBUG_EMAIL = "debugEmail";
+  private static final String DEBUG_EMAIL = "debugEmail";
   private static final String DOIMAGES = "doimages";
 /*  public static final String FOREGROUND_BLEND = "foregroundBlend";
   public static final String FOREGROUND_BLEND_DEFAULT = "0.8";*/
@@ -34,7 +36,7 @@ public class ServerProperties {
   private static final String USE_WEIGHTS = "useWeights";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
-  public static final String FIRST_N_IN_ORDER = "firstNInOrder";
+  private static final String FIRST_N_IN_ORDER = "firstNInOrder";
   private static final String DATA_COLLECT_MODE = "dataCollect";
   private static final String COLLECT_AUDIO = "collectAudio";
   private static final String COLLECT_AUDIO_DEFAULT = "true";
@@ -63,6 +65,7 @@ public class ServerProperties {
   private static final String GOODWAVE_MODE = "goodwaveMode";
   private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
+  private static final String LOGIN_TYPE_PARAM = "loginType";
 
   private Properties props = null;
 
@@ -74,7 +77,6 @@ public class ServerProperties {
   public int firstNInOrder;
   public boolean isDataCollectAdminView;
   private double minPronScore;
-//  public boolean useWeights;
 
   public void readPropertiesFile(ServletContext servletContext, String configDir) {
    String configFile = servletContext.getInitParameter("configFile");
@@ -110,10 +112,6 @@ public class ServerProperties {
 
   public boolean useScoreCache() {
     return getDefaultTrue(USE_SCORE_CACHE);
-  }
-
-  public boolean isShowSections() {
-    return getDefaultFalse(SHOW_SECTIONS);
   }
 
   public boolean isDebugEMail() {
