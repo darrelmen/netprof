@@ -190,6 +190,17 @@ public class SplitAudio {
     }
   }
 
+  /**
+   * @see #splitSimpleMSA(int)
+   * @param language
+   * @param idToEx
+   * @param newRefDir
+   * @param properties
+   * @param dict
+   * @param unsplit
+   * @param missingFast
+   * @param missingSlow
+   */
   private void writeOneMSAFile(String language, Map<String, Exercise> idToEx, File newRefDir, Map<String, String> properties, HTKDictionary dict, File unsplit, FileWriter missingFast,
                                FileWriter missingSlow) {
     String name = unsplit.getName().replaceAll(".wav", "");
@@ -212,7 +223,7 @@ public class SplitAudio {
     refSentence = refSentence.replaceAll("\\p{P}", "");
 
     String[] split = refSentence.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
-    refSentence = getRefSentence(refSentence, split);
+    refSentence = getRefFromSplit(split);
     int refLength = split.length;
     String firstToken = split[0].trim();
     String lastToken = split[refLength - 1].trim();
@@ -453,7 +464,7 @@ public class SplitAudio {
       String englishSentence = e.getEnglishSentence();
 
       if (englishSentence == null) {
-        //if (c++ < 10) logger.warn("convertEnglish huh? no english sentence for " + e.getID() + " instead " +e.getRefSentence());
+        //if (c++ < 10) logger.warn("convertEnglish huh? no english sentence for " + e.getID() + " instead " +e.getRefFromSplit());
         englishSentence = e.getRefSentence();
       }
 
@@ -521,7 +532,7 @@ public class SplitAudio {
       String englishSentence = e.getEnglishSentence();
 
       if (englishSentence == null) {
-        //if (c++ < 10) logger.warn("convertEnglish huh? no english sentence for " + e.getID() + " instead " +e.getRefSentence());
+        //if (c++ < 10) logger.warn("convertEnglish huh? no english sentence for " + e.getID() + " instead " +e.getRefFromSplit());
         englishSentence = e.getRefSentence();
       }
 
@@ -762,6 +773,18 @@ public class SplitAudio {
     return new BufferedReader(new InputStreamReader(resourceAsStream,"UTF16"));
   }
 
+  /**
+   * @see #convertExamples(int, String, String, String, String)
+   * @param numThreads
+   * @param audioDir
+   * @param language
+   * @param idToEx
+   * @param idToResults
+   * @param nativeUsers
+   * @throws IOException
+   * @throws InterruptedException
+   * @throws ExecutionException
+   */
   private void convertExamples(int numThreads, String audioDir, String language,
                                Map<String, Exercise> idToEx,
                                Map<String, List<Result>> idToResults, Set<Long> nativeUsers) throws IOException, InterruptedException, ExecutionException {
@@ -806,6 +829,13 @@ public class SplitAudio {
     return installPath + dariConfig;
   }
 
+  /**
+   * @see #convertExamples(int, String, String, String, String)
+   * @see #normalize()
+   * @see #splitSimpleMSA(int)
+   * @param db
+   * @return
+   */
   private Map<String, Exercise> getIdToExercise(DatabaseImpl db) {
     final Map<String,Exercise> idToEx = new HashMap<String, Exercise>();
 
@@ -1023,13 +1053,31 @@ public class SplitAudio {
 
   int good = 0;
   int bad = 0;
+  int both = 0;
+
+  /**
+   * find best scoring fast and slow audio split files from the set of originals
+   * @see #getBestForEachExercise(String, java.util.Map, java.io.FileWriter, java.io.FileWriter, java.io.File, java.io.File, java.util.List, String, corpus.HTKDictionary, java.util.Map, String)
+   * @param missingSlow
+   * @param missingFast
+   * @param newRefDir
+   * @param bestDir
+   * @param collectedAudioDir
+   * @param dictionary
+   * @param properties
+   * @param resultsForExercise
+   * @param exid
+   * @param exercise
+   * @param language
+   * @throws IOException
+   */
   private void getBest(FileWriter missingSlow, FileWriter missingFast, File newRefDir, File bestDir,
                        String collectedAudioDir,
                        HTKDictionary dictionary, Map<String, String> properties,
                        List<Result> resultsForExercise, String exid, Exercise exercise, String language) throws IOException {
     String refSentence = language.equalsIgnoreCase("english") ? exercise.getEnglishSentence() : exercise.getRefSentence();
     String[] split = refSentence.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
-    refSentence = getRefSentence(refSentence, split);
+    refSentence = getRefFromSplit(split);
     int refLength = split.length;
     String firstToken = split[0].trim();
     String lastToken = split[refLength-1].trim();
@@ -1050,18 +1098,19 @@ public class SplitAudio {
 
     if (fastAndSlow.valid) {
       logger.debug("for " + exid + " : '" + exercise.getEnglishSentence() + "'/'" +
-        exercise.getRefSentence()+
+        exercise.getRefSentence() +
         "' best is " + fastAndSlow);// + " total " + bestTotal);
-      writeBestFiles(missingSlow, missingFast, exid,
-        //refDirForExercise,
+      boolean gotBoth = writeBestFiles(missingSlow, missingFast, exid,
         bestDirForExercise, fastAndSlow);
+      if (gotBoth) both++; // only if both fast and slow were written do we record it as having both parts done properly
       good++;
     }
     else {
       bad++;
 
-      logger.warn("Bad Now " + bad + "/" +good + " good "+
-        " : no valid audio for " + exid);
+      int pct = (int)(100f*(float)both/((float)(good+bad)));
+      logger.warn("Tally : bad " + bad + "/" +good + " good / "+ both+" both (" +pct+
+        "%): no valid audio for " + exid);
 
       recordMissingFast(missingFast, exid);
       recordMissingFast(missingSlow, exid);
@@ -1070,18 +1119,23 @@ public class SplitAudio {
 
   private String getRefSentence(String refSentence) {
     String[] split = refSentence.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
-    return getRefSentence(refSentence, split);
+    return getRefFromSplit(split);
   }
 
   private String getEnglishRefSentence(String refSentence) {
     String[] split = refSentence.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
-    return getRefSentence(refSentence, split).toUpperCase();
+    return getRefFromSplit(split).toUpperCase();
   }
 
-  private String getRefSentence(String refSentence, String[] split) {
-    refSentence = refSentence.replaceAll("\\p{P}", "");
-    refSentence = getRefSentence(split).trim();
-    return refSentence;
+  /**
+   * TODO : do we want to remove punctuation???
+   * @param split
+   * @return
+   */
+  private String getRefFromSplit(String[] split) {
+    String newRefSentence = getRefSentence(split).trim();
+   // newRefSentence = newRefSentence.replaceAll("\\p{P}", "");   // remove punct
+    return newRefSentence;
   }
 
   private String getRefSentence(String[] refSentences) {
@@ -1120,7 +1174,9 @@ public class SplitAudio {
 
       double durationInSeconds = getDuration(answer, parent);
       if (durationInSeconds < MIN_DUR) {
-        if (durationInSeconds > 0) logger.warn("skipping " + name + " since it's less than a 1/2 second long.");
+        if (durationInSeconds > 0) {
+          logger.warn("skipping " + name + " since it's less than a " + MIN_DUR+ " second long.");
+        }
         continue;
       }
       String testAudioFileNoSuffix = getConverted(parent, name);
@@ -1258,36 +1314,37 @@ public class SplitAudio {
    * @param missingSlow
    * @param missingFast
    * @param exid
-   * @paramx refDirForExercise
    * @param bestDirForExercise
-   * @paramxx best
    * @throws IOException
    */
-  private void writeBestFiles(FileWriter missingSlow, FileWriter missingFast,
-                              String exid,
-                              //File refDirForExercise,
-                              File bestDirForExercise,
-                              FastAndSlow fastAndSlow) throws IOException {
-    File fast = fastAndSlow.fast;//new File(refDirForExercise, best + "_" + FAST + ".wav");
-    if (fast == null ||!fast.exists()) {
+  private boolean writeBestFiles(FileWriter missingSlow, FileWriter missingFast,
+                                 String exid,
+                                 File bestDirForExercise,
+                                 FastAndSlow fastAndSlow) throws IOException {
+    File fast = fastAndSlow.fast;
+    boolean gotBoth = true;
+
+    if (fast == null || !fast.exists()) {
       if (fast != null) logger.warn("can't find fast " + fast.getAbsolutePath());
       missingFast.write(exid + "\n");
+      gotBoth = false;
     } else {
       File file = new File(bestDirForExercise, FAST + ".wav");
       logger.debug("fast wrote best to " + file.getAbsolutePath());
       new FileCopier().copy(fast.getAbsolutePath(), file.getAbsolutePath());
     }
-    File slow = fastAndSlow.slow;//new File(refDirForExercise, best + "_" + SLOW + ".wav");
+    File slow = fastAndSlow.slow;
     if (slow == null || !slow.exists()) {
       if (slow != null) logger.warn("can't find slow " + slow.getAbsolutePath());
-
       missingSlow.write(exid + "\n");
+      gotBoth = false;
     } else {
       File file = new File(bestDirForExercise, SLOW + ".wav");
       logger.debug("slow wrote best to " + file.getAbsolutePath());
 
       new FileCopier().copy(slow.getAbsolutePath(), file.getAbsolutePath());
     }
+    return gotBoth;
   }
 
   private FastAndSlow writeTheTrimmedFiles(File refDirForExercise, String parent, float floatDur, String testAudioFileNoSuffix,
@@ -1604,8 +1661,8 @@ public class SplitAudio {
       int numThreads = Integer.parseInt(arg[0]);
       //  new SplitAudio().checkTamas();
   //     new SplitAudio().splitSimpleMSA(numThreads);
-      new SplitAudio().getCorrection2();
-    if (true) return;
+  if (false)     new SplitAudio().getCorrection2();
+    //if (true) return;
 
       String audioDir = arg[1];
       // new SplitAudio().convertExamples(numThreads, audioDir, arg[2], arg[3]);
