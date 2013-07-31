@@ -29,7 +29,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   private boolean showOnlyOneExercise = false; // true for when called from the headstart website
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, boolean, int, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
    * @param service
    * @param numRepeats
    * @param useKeyboard
