@@ -137,7 +137,7 @@ public class ASRScoring extends Scoring {
     } else if (language.equalsIgnoreCase("Farsi")) {
       this.letterToSoundClass = new FarsiLTS();  // TODO is there a FarsiLTS class???
     } else if (language.equalsIgnoreCase("Mandarin")) {
-      logger.info("NOTE: there is no LTS for " + language);
+     //ara logger.info("NOTE: there is no LTS for " + language + " : that's OK though.");
     } else {
       logger.warn("NOTE: we have no LTS for '" + language +"', using " + letterToSoundClass.getClass());
     }
