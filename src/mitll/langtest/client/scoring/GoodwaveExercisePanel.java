@@ -8,7 +8,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -158,7 +157,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     String path = null;
     if (e.isRepeat()) {
       this.refAudio = e.getRefAudio() != null ? e.getRefAudio() : e.getSlowAudioRef();
-      System.out.println("e " +e.getID() + " ref audio " + e.getRefAudio() + " slow " + e.getSlowAudioRef());
+      //System.out.println("e " +e.getID() + " ref audio " + e.getRefAudio() + " slow " + e.getSlowAudioRef());
       path = refAudio;
     }
     else if (content.contains("audio")) {  // if we don't have proper REPEAT exercises
@@ -199,7 +198,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private void ensureMP3(Exercise e, String path, final VerticalPanel vp) {
     final String fpath = path;
     final Exercise fe = e;
-    System.out.println("for exercise " + fe.getID() + " ensuring mp3 exists for " +path);
+    //System.out.println("for exercise " + fe.getID() + " ensuring mp3 exists for " +path);
     service.ensureMP3(path,new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -210,7 +209,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       public void onSuccess(Void result) {
         if (fe.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
           if (fe.getSlowAudioRef() != null && !fpath.equals(fe.getSlowAudioRef())) {
-            System.out.println("for exercise " + fe.getID() +" ensuring mp3 exists for slow audio path " +fe.getSlowAudioRef());
+            //System.out.println("for exercise " + fe.getID() +" ensuring mp3 exists for slow audio path " +fe.getSlowAudioRef());
             service.ensureMP3(fe.getSlowAudioRef(), new AsyncCallback<Void>() {
               @Override
               public void onFailure(Throwable caught) {
@@ -307,7 +306,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * @param index
      */
     public ASRRecordAudioPanel(LangTestDatabaseAsync service, int index) {
-      super(service, controller.showOnlyOneExercise(), controller.getSegmentRepeats(),
+      super(service, controller.getSegmentRepeats(),
         false, // no keyboard
         controller, scorePanel);
       this.index = index;
