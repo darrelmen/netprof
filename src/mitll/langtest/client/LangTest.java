@@ -164,7 +164,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Initially the flash record player is put in the center of the DockLayout
    */
   public void onModuleLoad2() {
-    userManager = new UserManager(this,service, isCollectAudio(), false, isCRTDataCollectMode() || isArabicTextDataCollect(), props.getAppTitle(),false);
+    userManager = new UserManager(this,service, isCollectAudio(), false, getLoginType(), props.getAppTitle(),false);
 
     if (props.isFlashCard()) {
       GWT.runAsync(new RunAsyncCallback() {
@@ -433,7 +433,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     HorizontalPanel headerRow = flashcard.makeFlashcardHeaderRow(props.getSplash());
     container.add(headerRow);
 
-    userManager = new UserManager(this, service, isCollectAudio(), false, isCRTDataCollectMode(), props.getAppTitle(), true);
+    userManager = new UserManager(this, service, isCollectAudio(), false, getLoginType(), props.getAppTitle(), true);
     this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager,
       props.isTimedGame(), props.getGameTimeSeconds());
 
@@ -510,7 +510,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     users = makeUsersAnchor(true);
     fp1.add(users);
-    userManager = new UserManager(this,service, isCollectAudio(), props.isDataCollectAdminView(), false, props.getAppTitle(),false);
+    userManager = new UserManager(this,service, isCollectAudio(), props.isDataCollectAdminView(), getLoginType(),
+      props.getAppTitle(),false);
 
     logout = new Anchor("Logout");
     logout.addClickHandler(new ClickHandler() {
@@ -938,10 +939,23 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see ExerciseList#checkBeforeLoad(mitll.langtest.shared.ExerciseShell)
    */
   public void login() {
-    System.out.println("data collect mode " + props.isDataCollectMode() +
+    PropertyHandler.LOGIN_TYPE loginType = getLoginType();
+
+    System.out.println("loginType " + loginType +
+      " data collect mode " + props.isDataCollectMode() +
       " crt data collect " + props.isCRTDataCollectMode() +
-      " teacher " + props.isTeacherView() + " grading " +props.isGrading());
-    if (!props.isFlashCard() && ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView() || props.isGrading())) {
+      " teacher " + props.isTeacherView() + " grading " + props.isGrading());
+
+    if (loginType.equals(PropertyHandler.LOGIN_TYPE.STUDENT)) {
+      userManager.login();
+    }
+    else if (loginType.equals(PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR)) {
+      userManager.teacherLogin();
+    } // next has already been done in checkLogin
+  /*  else if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) {
+      userManager.teacherLogin();
+    }*/
+    else if (!props.isFlashCard() && ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView() || props.isGrading())) {
       System.out.println("doing teacher login");
       userManager.teacherLogin();
     }
@@ -986,6 +1000,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
+  /**
+   * @see #modeSelect()
+   */
   // TODO : refactor all this into mode objects that decide whether we need flash or not, etc.
   private void checkInitFlash() {
     if (shouldCollectAudio() && !flashRecordPanel.gotPermission()) {
@@ -1000,12 +1017,22 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
+  /**
+   * Called after the user clicks "Yes" in flash mic permission dialog.
+   *
+   * @see #checkInitFlash()
+   * @see #makeFlashContainer()
+   */
   private void checkLogin() {
-    if (props.isGoodwaveMode() || isAutoCRTMode() || (props.isFlashcardTeacherView() && !props.isFlashCard())) {   // no login for pron mode
+    PropertyHandler.LOGIN_TYPE loginType = getLoginType();
+
+    if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
       userManager.anonymousLogin();
-    }
-    else {
-      if (props.isTimedGame())  {
+    } else if (loginType.equals(PropertyHandler.LOGIN_TYPE.UNDEFINED) && // no explicit setting, so it's dependent on the mode
+      (props.isGoodwaveMode() || isAutoCRTMode() || (props.isFlashcardTeacherView() && !props.isFlashCard()))) {   // no login for pron mode
+      userManager.anonymousLogin();
+    } else {
+      if (props.isTimedGame()) {
         showTimedGameHelp();
       }
       else {
@@ -1050,6 +1077,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isFlashCard() {  return props.isFlashCard(); }
   public boolean isGoodwaveMode() {  return props.isGoodwaveMode(); }
   public boolean shouldAddRecordKeyBinding() { return props.shouldAddRecordKeyBinding(); }
+  private PropertyHandler.LOGIN_TYPE getLoginType() { return props.getLoginType(); }
 
   // recording methods...
   /**
