@@ -1,0 +1,44 @@
+package mitll.langtest.server.scoring;
+
+import org.apache.log4j.Logger;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.Map;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: GO22670
+ * Date: 8/1/13
+ * Time: 4:38 PM
+ * To change this template use File | Settings | File Templates.
+ */
+public class FileReplace {
+  private static Logger logger = Logger.getLogger(FileReplace.class);
+
+  public void doTemplateReplace(String infile, String outfile, Map<String,String> replaceMap) {
+    FileReader file;
+    String line;
+    try {
+      file = new FileReader(infile);
+      BufferedReader reader = new BufferedReader(file);
+
+      FileWriter output = new FileWriter(outfile);
+      BufferedWriter writer = new BufferedWriter(output);
+
+      while ((line = reader.readLine()) != null) {
+        String replaced = line;
+        for (Map.Entry<String, String> kv : replaceMap.entrySet()) {
+          replaced = replaced.replaceAll(kv.getKey(),kv.getValue());
+        }
+        writer.write(replaced +"\n");
+      }
+      reader.close();
+      writer.close();
+    } catch (Exception e) {
+      logger.error("got " +e,e);
+    }
+  }
+}
