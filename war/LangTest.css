@@ -177,10 +177,6 @@ h1 {
     font-weight: bold;
 }
 
-.alignJustify {
-     align: justify;
- }
-
 .bigLink {
     font-size: 1em;
     font-weight: bold;
@@ -477,10 +473,6 @@ fieldset > legend {
 
 .xlargeFont td {
     font-size: x-large;
-}
-
-.inlineStyle {
-    display: inline-block;
 }
 
 /**
