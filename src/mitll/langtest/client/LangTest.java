@@ -18,6 +18,9 @@ import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.i18n.shared.SafeHtmlBidiFormatter;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
@@ -304,6 +307,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return props.isCollectAudio() && !props.isFlashcardTeacherView() || props.isFlashCard()  || props.isGoodwaveMode() ;
   }
 
+  /**
+   * @see #onModuleLoad2()
+   * @return
+   */
   private Panel makeHeaderRow() {
     FluidRow headerRow = new FluidRow();
 
@@ -315,34 +322,37 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     else {
       title = getTitleWidget();
     }
-    boolean takeWholeWidth = props.isFlashcardTeacherView() || props.isShowSections() || props.isGoodwaveMode();
+
+    boolean isStudent = getLoginType().equals(PropertyHandler.LOGIN_TYPE.STUDENT);
+    boolean takeWholeWidth = isStudent || props.isFlashcardTeacherView() || props.isShowSections() || props.isGoodwaveMode();
+
     Column titleColumn = new Column(takeWholeWidth ? 12 : 10, title);
     headerRow.add(titleColumn);
     if (!takeWholeWidth) {
       headerRow.add(new Column(2, getLogout()));
-    } else if (props.isAdminView() || props.isDataCollectMode()) {
-      getLogout();
+    } else if (isStudent || props.isAdminView() || props.isDataCollectMode()) {
       FluidRow adminRow = new FluidRow();
       adminRow.addStyleName("alignCenter");
       adminRow.addStyleName("inlineStyle");
 
       this.userline = new HTML(getUserText());
-
-      adminRow.add(new Column(2, userline));
-      Anchor logout = new Anchor("Logout");
-      logout.addClickHandler(new ClickHandler() {
-        public void onClick(ClickEvent event) {
-          resetState();
-        }
-      });
-      adminRow.add(new Column(2, logout));
+      Anchor logout = getLogoutLink();
+      HTML releaseStatus = getReleaseStatus();
 
       if (props.isAdminView()) {
+        adminRow.add(new Column(2, userline));
+        adminRow.add(new Column(2, logout));
+        getLogout();
         adminRow.add(new Column(2, users));
         adminRow.add(new Column(2, showResults));
         adminRow.add(new Column(2, monitoring));
+        adminRow.add(new Column(2, releaseStatus));
       }
-      adminRow.add(new Column(2, getReleaseStatus()));
+      else {
+        adminRow.add(new Column(1, userline));
+        adminRow.add(new Column(2,  releaseStatus));
+        adminRow.add(new Column(2, 7,  logout));
+      }
 
       titleColumn.add(adminRow);
     }
@@ -552,7 +562,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     browserCheck.getBrowserAndVersion();
 
     String releaseDate = props.getReleaseDate() != null ? " " +
-      props.getReleaseDate() : "";
+      props.getReleaseDate() : " 07/19_19";
     return new HTML("<span><font size=-2>" + browserCheck.browser + " " + browserCheck.ver + releaseDate + "</font></span>");
   }
 
@@ -681,7 +691,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public boolean showOnlyOneExercise() {
-    return props.getExercise_title() != null /*|| props.isFlashCard()*/;
+    return props.getExercise_title() != null;
   }
 
   /**
@@ -692,7 +702,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void modeSelect() {
     boolean isGrading = props.isGrading();
     if (logout != null) logout.setVisible(!props.isGoodwaveMode() && !props.isFlashcardTeacherView());
-    if (userline != null) userline.setVisible(!props.isGoodwaveMode() && !props.isFlashcardTeacherView());
+    if (userline != null) {
+      boolean isStudent = getLoginType().equals(PropertyHandler.LOGIN_TYPE.STUDENT);
+
+      userline.setVisible(isStudent || (!props.isGoodwaveMode() && !props.isFlashcardTeacherView()));
+    }
     if (users != null) users.setVisible(isGrading || props.isAdminView());
     if (showResults != null) showResults.setVisible(isGrading || props.isAdminView());
     if (monitoring != null) monitoring.setVisible(isGrading || props.isAdminView());
@@ -855,13 +869,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     this.userline = new HTML(getUserText());
     vp.add(userline);
 
-    logout = new Anchor("Logout");
+    logout = getLogoutLink();
     vp.add(logout);
-    logout.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        resetState();
-      }
-    });
 
     makeUsersAnchor(false);
     vp.add(users);
@@ -905,6 +914,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     vp.add(statusLine);
 
     return vp;
+  }
+
+  private Anchor getLogoutLink() {
+    SafeHtmlBuilder b = new SafeHtmlBuilder();
+    String s = "<font size=+1>Sign Out</font>";
+    b.appendHtmlConstant(s);
+    Anchor logout = new Anchor(b.toSafeHtml());
+    logout.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        resetState();
+      }
+    });
+    return logout;
   }
 
   private Anchor makeUsersAnchor(final boolean isDataCollectAdminView) {
