@@ -6,31 +6,34 @@ import com.github.gwtbootstrap.client.ui.ControlLabel;
 import com.github.gwtbootstrap.client.ui.Controls;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
+import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.Popover;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.github.gwtbootstrap.client.ui.constants.Trigger;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.PasswordTextBox;
-import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -122,7 +125,7 @@ public class UserManager {
   // user tracking
 
   /**
-   *
+   * TODO : move cookie manipulation to separate class
    *
    * @param sessionID from database
    * @param audioType
@@ -397,148 +400,205 @@ public class UserManager {
     }
   }
 
+  /**
+   * Really should be named data collector (audio recorder) login
+   */
   private void displayTeacherLogin() {
-   // final DialogBox dialogBox = new DialogBox();
     final Modal dialogBox = new Modal();
-    //   dialogBox.setText("Data Collector Login");
-       dialogBox.setTitle("Data Collector Login");
-   // dialogBox.setAnimationEnabled(true);
+    dialogBox.setCloseVisible(false);
+    dialogBox.setKeyboard(false);
+    dialogBox.setBackdrop(BackdropType.STATIC);
 
-    // Enable glass background.
-  //  dialogBox.setGlassEnabled(true);
-
-    final TextBox user = new TextBox();
-/*    user.addKeyDownHandler(new KeyDownHandler() {
-      @Override
-      public void onKeyDown(KeyDownEvent event) {
-        System.out.println ("key = "+event.getNativeKeyCode());
-      }
-    });*/
-    final PasswordTextBox password = new PasswordTextBox();
-    final RadioButton regular = new RadioButton("AudioType","Regular Audio Recording");
-    final RadioButton fastThenSlow = new RadioButton("AudioType","Record Regular Speed then Slow");
-    Controls controls = new Controls();
-    controls.add(regular);
-    controls.add(fastThenSlow);
-    final TextBox nativeLang = new TextBox();
-    final TextBox dialect = new TextBox();
-    final TextBox ageEntryBox = new TextBox();
+    dialogBox.setTitle("Data Collector Login");
 
     final Button login = new Button("Login");
-
-    final ListBox genderBox = getGenderBox();
-    VerticalPanel genderPanel = getGenderPanel(genderBox);
-
-    final ListBox experienceBox = getExperienceBox();
-    VerticalPanel experiencePanel = getGenderPanel(experienceBox);
-
+    login.setType(ButtonType.PRIMARY);
     login.setEnabled(true);
 
     // We can set the id of a widget by accessing its Element
     login.getElement().setId("login");
+    final FormField user = addControlFormField(dialogBox, "User ID");
+    final FormField password = addControlFormField(dialogBox, "Password", true);
+    final RadioButton regular = new RadioButton("AudioType","Regular Audio Recording");
+    final RadioButton fastThenSlow = new RadioButton("AudioType","Record Regular Speed then Slow");
 
-    VerticalPanel dialogVPanel = new VerticalPanel();
-    dialogVPanel.addStyleName("dialogVPanel");
-    dialogVPanel.add(new HTML("<b>User ID</b>"));
-    dialogVPanel.add(user);
+    final ControlGroup recordingStyle = new ControlGroup();
 
-    HTML w = new HTML("<b>Password</b>");
-    w.setTitle("See email for your password.");
-    dialogVPanel.add(w);
-    dialogVPanel.add(password);
+    regular.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        recordingStyle.setType(ControlGroupType.NONE);   // clear any error markings
+      }
+    });
+    fastThenSlow.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        recordingStyle.setType(ControlGroupType.NONE);
+      }
+    });
 
-    HTML ww = new HTML("<b>Audio Recording Style</b>");
-    w.setTitle("Choose type of audio recording.");
     if (isCollectAudio) {
-      dialogVPanel.add(ww);
-      dialogVPanel.add(controls);
-/*      dialogVPanel.add(regular);
-      dialogVPanel.add(fastThenSlow);*/
+      recordingStyle.add(new ControlLabel("<b>Audio Recording Style</b>"));
+      Controls controls = new Controls();
+      controls.add(regular);
+      controls.add(fastThenSlow);
+      recordingStyle.add(controls);
+      dialogBox.add(recordingStyle);
     }
 
     SimplePanel spacer = new SimplePanel();
     spacer.setSize("20px", "5px");
-    dialogVPanel.add(spacer);
-    dialogVPanel.add(new HTML("<i>New users : click on Registration below and fill in the fields.</i>"));
+    dialogBox.add(spacer);
+    dialogBox.add(new HTML("<i>New users : click on Registration below and fill in the fields.</i>"));
     SimplePanel spacer2 = new SimplePanel();
     spacer2.setSize("20px", "5px");
-    dialogVPanel.add(spacer2);
+    dialogBox.add(spacer2);
 
-    VerticalPanel register = new VerticalPanel();
-    dp = new DisclosurePanel("Registration");
-    dp.setContent(register);
-    dp.setAnimationEnabled(true);
+    final FormField nativeLangGroup,dialectGroup,ageEntryGroup;
+    final ListBoxFormField genderGroup,experienceGroup;
+      VerticalPanel register = new VerticalPanel();
+      nativeLangGroup = addControlFormField(register, "Native Lang (L1)");
+      dialectGroup = addControlFormField(register, "Dialect");
+      ageEntryGroup = addControlFormField(register, "Your age");
+      genderGroup = getListBoxFormField(register, "Select gender", getGenderBox());
+      experienceGroup = getListBoxFormField(register, "Select months of experience", getExperienceBox());
 
-    dialogVPanel.add(dp);
-
-/*
-    if (COLLECT_NAMES) {
-      register.add(new HTML("<b>First Name</b>"));
-      register.add(first);
-      register.add(new HTML("<b>Last Name</b>"));
-      register.add(last);
-    }
-*/
-
+     dialogBox.setMaxHeigth(Window.getClientHeight()*0.8 + "px");
     if (!isDataCollectAdmin) {
-      register.add(new HTML("<b>Native Lang (L1)</b>"));
-      register.add(nativeLang);
-      register.add(new HTML("<b>Dialect</b>"));
-      register.add(dialect);
-      register.add(new HTML("<b>Your age</b>"));
-      register.add(ageEntryBox);
-      register.add(new HTML("<b>Select gender</b>"));
-      register.add(genderPanel);
-      register.add(new HTML("<b>Select months of experience</b>"));
-      register.add(new HTML("<b>in this language</b>"));
-      register.add(experiencePanel);
+      dp = new DisclosurePanel("Registration");
+      dp.setContent(register);
+      dp.addOpenHandler(new OpenHandler<DisclosurePanel>() {
+        @Override
+        public void onOpen(OpenEvent<DisclosurePanel> event) {
+          centerVertically(dialogBox.getElement()); // need to resize the dialog when reveal hidden widgets
+        }
+      });
+
+      dp.addCloseHandler(new CloseHandler<DisclosurePanel>() {
+        @Override
+        public void onClose(CloseEvent<DisclosurePanel> event) {
+          centerVertically(dialogBox.getElement());
+        }
+      });
+      dialogBox.add(dp);
     }
 
     FlowPanel hp = new FlowPanel();
     hp.getElement().getStyle().setFloat(Style.Float.RIGHT);
     hp.add(login);
 
-    dialogVPanel.add(hp);
-    dialogBox.add(dialogVPanel);
+    dialogBox.add(hp);
 
     login.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         // System.out.println("login button got click " + event);
 
-        service.userExists(user.getText(), new AsyncCallback<Integer>() {
-          public void onFailure(Throwable caught) {
-            Window.alert("userExists : Couldn't contact server");
-          }
+        final String userID = user.box.getText();
+        if (userID.length() == 0) {
+          markError(user, "Please enter a user id.");
+        } else {
+          service.userExists(userID, new AsyncCallback<Integer>() {
+            public void onFailure(Throwable caught) {
+              Window.alert("userExists : Couldn't contact server");
+            }
 
-          public void onSuccess(Integer result) {
-            boolean exists = result != -1;
-            if (exists) {
-              if (checkAudioSelection(regular, fastThenSlow)) {
-                showPopup("Please choose either regular or regular then slow audio recording.");
-              } else {
-                dialogBox.hide();
-                String audioType = fastThenSlow.getValue() ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
-                storeAudioType(audioType);
-                storeUser(result, audioType, user.getText(), PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR);
-              }
-            } else {
-              System.out.println(user.getText() + " doesn't exist");
-              if (user.getText().length() == 0) {
-                showPopup("Please enter a user id.");
-              } else {
-                if (checkPassword(password)) {
-                  doRegistration(user, password, regular, fastThenSlow, nativeLang, dialect, ageEntryBox,
-                    experienceBox, genderBox, /*first, last,*/ dialogBox, login);
+            public void onSuccess(Integer result) {
+              boolean exists = result != -1;
+              if (exists) {
+                if (!checkPassword(password)) {
+                  markError(password, "Please use password from the email.");
+                } else if (checkAudioSelection(regular, fastThenSlow)) {
+                  markError(recordingStyle, regular, "Try again", "Please choose either regular or regular then slow audio recording.");
+
                 } else {
-                  showPopup("Please use password from the email");
+                  dialogBox.hide();
+                  String audioType = fastThenSlow.getValue() ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
+                  storeAudioType(audioType);
+                  storeUser(result, audioType, userID, PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR);
+                }
+              } else {
+                System.out.println(userID + " doesn't exist");
+                if (checkPassword(password)) {
+                  doRegistration(user, password, recordingStyle,
+                    regular, fastThenSlow, nativeLangGroup, dialectGroup, ageEntryGroup,
+                    experienceGroup, genderGroup, dialogBox, login);
+                } else {
+                  markError(password, "Please use password from the email.");
                 }
               }
             }
-          }
-        });
+          });
+        }
       }
     });
     dialogBox.show();
+  }
+
+  /**
+   * From Modal code.
+   * Centers fixed positioned element vertically.
+   * @param e Element to center vertically
+   */
+  private native void centerVertically(Element e) /*-{
+      $wnd.jQuery(e).css("margin-top", (-1 * $wnd.jQuery(e).outerHeight() / 2) + "px");
+  }-*/;
+
+  private FormField addControlFormField(Panel dialogBox, String label) { return addControlFormField(dialogBox, label, false); }
+
+  private FormField addControlFormField(Panel dialogBox, String label, boolean isPassword) {
+    final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
+
+    return getFormField(dialogBox, label, user);
+  }
+
+  private FormField getFormField(Panel dialogBox, String label, TextBox user) {
+    final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user);
+    return new FormField(user, userGroup);
+  }
+
+  private ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
+    final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user);
+    return new ListBoxFormField(user, userGroup);
+  }
+
+  private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
+    final ControlGroup userGroup = new ControlGroup();
+    userGroup.add(new ControlLabel(label));
+    dialogBox.add(userGroup);
+    userGroup.add(user);
+    userGroup.addStyleName("leftFiveMargin");
+    return userGroup;
+  }
+
+  private static class FormField {
+    public final TextBox box;
+    public final ControlGroup group;
+
+    public FormField(final TextBox box, final ControlGroup group) {
+      this.box = box;
+
+      box.addKeyUpHandler(new KeyUpHandler() {
+        public void onKeyUp(KeyUpEvent event) {
+          if (box.getText().length() > 0) {
+            group.setType(ControlGroupType.NONE);
+          }
+        }
+      });
+
+      this.group = group;
+    }
+
+    public String getText() { return box.getText(); }
+  }
+
+  private static class ListBoxFormField {
+    public final ListBox box;
+    public final ControlGroup group;
+
+    public ListBoxFormField(ListBox box, ControlGroup group) {
+      this.box = box;
+      this.group = group;
+    }
   }
 
   /**
@@ -555,62 +615,61 @@ public class UserManager {
    * @param dialogBox
    * @param login
    */
-  private void doRegistration(TextBox user, PasswordTextBox password, RadioButton regular,
+  private void doRegistration(FormField user, FormField password, ControlGroup audioGroup,
+                              RadioButton regular,
                               RadioButton fastThenSlow,
-                              TextBox nativeLang, TextBox dialect, TextBox ageEntryBox,
-                              ListBox experienceBox, ListBox genderBox,
+                              FormField nativeLang, FormField dialect, FormField ageEntryBox,
+                              ListBoxFormField experienceBox, ListBoxFormField genderBox,
                               Modal dialogBox,
                               Button login) {
 
-    boolean valid = user.getText().length() > 0;
+    boolean valid = user.box.getText().length() > 0;
     if (!valid) {
-      showPopup("Please enter a userid.");
+      markError(user,"Please enter a userid.");
     } else {
-      valid = password.getText().length() > 0;
+      valid = password.box.getText().length() > 0;
       if (!valid) {
-        showPopup("Please enter a password.");
+        markError(user,"Please enter a userid.");
       }
     }
     if (valid) {
       valid = checkPassword(password);
       if (!valid) {
-        showPopup("Please use password from the email sent to you.");
+        markError(password, "Please use password from the email sent to you.");
         valid = false;
-      }
-      else if (!isDataCollectAdmin && checkAudioSelection(regular, fastThenSlow)) {
-        showPopup("Please choose either regular or regular then slow audio recording.");
+      } else if (!isDataCollectAdmin && checkAudioSelection(regular, fastThenSlow)) {
+        markError(audioGroup, regular, "Try Again", "Please choose either regular or regular then slow audio recording.");
         valid = false;
       } else if (!isDataCollectAdmin && nativeLang.getText().isEmpty()) {
         if (!dp.isOpen()) {
-          dp.setOpen(true);
+          dp.setOpen(true);   // reveal registration fields
         } else {
-          showPopup("Language is empty");
+          markError(nativeLang, "Language is empty");
         }
         valid = false;
-      }
-      else if (!isDataCollectAdmin && dialect.getText().isEmpty()) {
-        showPopup("Dialect is empty");
+      } else if (!isDataCollectAdmin && dialect.getText().isEmpty()) {
+        markError(dialect, "Dialect is empty");
         valid = false;
       }
 
       if (valid) {
         try {
-          int age = getAge(ageEntryBox);
+          int age = getAge(ageEntryBox.box);
           if (!isDataCollectAdmin && (age < MIN_AGE) || (age > MAX_AGE && age != TEST_AGE)) {
             valid = false;
-            showPopup("age '" + age + "' is too young or old.");
+            markError(ageEntryBox, "age '" + age + "' is too young or old.");
           }
         } catch (NumberFormatException e) {
-          showPopup("age '" + ageEntryBox.getText() + "' is invalid.");
+          markError(ageEntryBox, "age '" + ageEntryBox.getText() + "' is invalid.");
           valid = false;
         }
       }
       if (valid) {
-        int enteredAge = getAge(ageEntryBox);
-        checkUserOrCreate(enteredAge, user, experienceBox, genderBox, nativeLang, dialect, dialogBox,
-            login, fastThenSlow.getValue());
+        int enteredAge = getAge(ageEntryBox.box);
+        checkUserOrCreate(enteredAge, user, experienceBox.box, genderBox.box, nativeLang.box, dialect.box, dialogBox,
+          login, fastThenSlow.getValue());
       } else {
-        System.out.println("not valid ------------ ?");
+        //System.out.println("not valid ------------ ?");
       }
     }
   }
@@ -641,7 +700,7 @@ public class UserManager {
    * @param closeButton
    * @param isFastAndSlow
    */
-  private void checkUserOrCreate(final int enteredAge, final TextBox user, final ListBox experienceBox,
+  private void checkUserOrCreate(final int enteredAge, final FormField user, final ListBox experienceBox,
                                  final ListBox genderBox,
                                  final TextBox nativeLang, final TextBox dialect,
                                  final Modal dialogBox,
@@ -656,9 +715,9 @@ public class UserManager {
         System.out.println("user '" + user.getText() + "' exists " + result);
         if (result == -1) {
           addTeacher(enteredAge,
-            experienceBox, genderBox, nativeLang, dialect, user, dialogBox, closeButton, isFastAndSlow);
+            experienceBox, genderBox, nativeLang, dialect, user.box, dialogBox, closeButton, isFastAndSlow);
         } else {
-          showPopup("User " + user.getText() + " already registered, click login.");
+          markError(user, "User " + user.getText() + " already registered, click login.");
         }
       }
     });
@@ -713,19 +772,27 @@ public class UserManager {
       });
   }
 
-  private boolean checkPassword(PasswordTextBox password) {
+  private boolean checkPassword(FormField password) {
+    return checkPassword(password.box);
+  }
+
+  private boolean checkPassword(TextBox password) {
     String trim = password.getText().trim();
-    return trim.equalsIgnoreCase(GRADING) || trim.equalsIgnoreCase(TESTING);
+    boolean valid = trim.equalsIgnoreCase(GRADING) || trim.equalsIgnoreCase(TESTING);
+    return valid;
   }
 
   /**
+   * TODO : make this use convenience methods for making control groups
    * @see #login()
    */
   private void displayLoginBox() {
     // Create the popup dialog box
      final Modal dialogBox = new Modal();
      dialogBox.setCloseVisible(false);
-     dialogBox.setTitle("Login Questions");
+    dialogBox.setKeyboard(false);
+    dialogBox.setBackdrop(BackdropType.STATIC);
+    dialogBox.setTitle("Login Questions");
 
     final TextBox ageEntryBox = new TextBox();
     final ControlGroup ageGroup = new ControlGroup();
@@ -733,26 +800,24 @@ public class UserManager {
     ageGroup.add(ageEntryBox);
     final Button closeButton = makeCloseButton(ageEntryBox, ageGroup);
 
-    // Add a drop box with the list types
-    final ListBox genderBox = getGenderBox();
-
     // add experience drop box
-    final ListBox experienceBox = getExperienceBox();
-    final TextBox dialect = new TextBox();
     dialogBox.add(ageGroup);
 
     ControlGroup genderGroup = new ControlGroup();
     genderGroup.add(new ControlLabel("Select gender"));
+    final ListBox genderBox = getGenderBox();
     genderGroup.add(genderBox);
     dialogBox.add(genderGroup);
 
     ControlGroup expGroup = new ControlGroup();
     expGroup.add(new ControlLabel("Select months of experience"));
+    final ListBox experienceBox = getExperienceBox();
     expGroup.add(experienceBox);
     dialogBox.add(expGroup);
 
     final ControlGroup dialectGroup = new ControlGroup();
     dialectGroup.add(new ControlLabel("Enter dialect"));
+    final TextBox dialect = new TextBox();
     dialectGroup.add(dialect);
     dialect.addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
@@ -775,8 +840,7 @@ public class UserManager {
       public void onClick(ClickEvent event) {
         if (highlightAgeBox(ageEntryBox, ageGroup)) {
           if (dialect.getText().isEmpty()) {
-            dialectGroup.setType(ControlGroupType.ERROR);
-            setupPopover(dialect,"Please enter a language dialect.","Try again");
+            markError(dialectGroup, dialect,"Try again", "Please enter a language dialect.");
             dialect.setFocus(true);
           } else {
             dialogBox.hide();
@@ -784,7 +848,7 @@ public class UserManager {
           }
         }
         else {
-          setupPopover(ageEntryBox, "Please enter age between " + MIN_AGE + " and " + MAX_AGE+".","Try again");
+          setupPopover(ageEntryBox, "Try again", "Please enter age between " + MIN_AGE + " and " + MAX_AGE+".");
           ageEntryBox.setFocus(true);
         }
       }
@@ -808,22 +872,46 @@ public class UserManager {
     dialogBox.show();
   }
 
-  private void setupPopover(final Widget w, String message, String heading) {
+  private void markError(FormField dialectGroup, String message) {
+    markError(dialectGroup.group, dialectGroup.box, "Try Again", message);
+  }
+
+/*  private void markError(FormField dialectGroup, String header, String message) {
+    markError(dialectGroup.group, dialectGroup.box, header, message);
+  }*/
+
+/*  private void markError(ListBoxFormField dialectGroup, String message) {
+    markError(dialectGroup.group, dialectGroup.box, "Try Again", message);
+  }*/
+
+/*
+  private void markError(ListBoxFormField dialectGroup, String header, String message) {
+    markError(dialectGroup.group, dialectGroup.box, header, message);
+  }
+*/
+
+  private void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
+    dialectGroup.setType(ControlGroupType.ERROR);
+    dialect.setFocus(true);
+
+    setupPopover(dialect, header, message);//"Try again", "Please enter a language dialect.");
+  }
+
+  private void setupPopover(final Widget w, String heading, final String message) {
+   // System.out.println("triggering popover on " + w + " with " + message);
     final Popover popover = new Popover();
     popover.setWidget(w);
     popover.setText(message);
     popover.setHeading(heading);
     popover.setPlacement(Placement.RIGHT);
-    popover.setHideDelay(3000);
-    popover.setTrigger(Trigger.MANUAL);
     popover.reconfigure();
     popover.show();
 
     Timer t = new Timer() {
       @Override
       public void run() {
+        //System.out.println("hide popover on " + w + " with " + message);
         popover.hide();
-        popover.clear();
       }
     };
     t.schedule(3000);
@@ -835,14 +923,11 @@ public class UserManager {
    * @param ageEntryBox
    * @param genderBox
    * @param dialectBox
-   * @paramx dialogBox
-   * @paramxx closeButton
    */
   private void addUser(int monthsOfExperience, TextBox ageEntryBox, ListBox genderBox, TextBox dialectBox) {
     int age = getAge(ageEntryBox);
     String gender = genderBox.getValue(genderBox.getSelectedIndex());
-    addUser(age, gender, monthsOfExperience, dialectBox.getText(),
-      PropertyHandler.LOGIN_TYPE.STUDENT);
+    addUser(age, gender, monthsOfExperience, dialectBox.getText(), PropertyHandler.LOGIN_TYPE.STUDENT);
   }
 
   /**
@@ -852,8 +937,7 @@ public class UserManager {
    * @param monthsOfExperience
    */
   private void addUser(int age, String gender, int monthsOfExperience) {
-    addUser(age, gender, monthsOfExperience, "",
-      PropertyHandler.LOGIN_TYPE.ANONYMOUS);
+    addUser(age, gender, monthsOfExperience, "", PropertyHandler.LOGIN_TYPE.ANONYMOUS);
   }
 
   /**
@@ -890,13 +974,6 @@ public class UserManager {
     return experienceBox;
   }
 
-  private VerticalPanel getGenderPanel(ListBox genderBox) {
-    VerticalPanel genderPanel = new VerticalPanel();
-    genderPanel.setSpacing(4);
-    genderPanel.add(genderBox);
-    return genderPanel;
-  }
-
   private ListBox getGenderBox() {
     final ListBox genderBox = new ListBox(false);
     for (String s : Arrays.asList("Male", "Female")) {
@@ -904,14 +981,6 @@ public class UserManager {
     }
     genderBox.ensureDebugId("cwListBox-dropBox");
     return genderBox;
-  }
-
-  private void show(DialogBox dialogBox) {
-    int left = Window.getClientWidth() / 10;
-    int top = Window.getClientHeight() / 10;
-    dialogBox.setPopupPosition(left, top);
-
-    dialogBox.show();
   }
 
   private Button makeCloseButton(final TextBox ageEntryBox, final ControlGroup group) {
@@ -944,20 +1013,5 @@ public class UserManager {
     }
 
     return validAge;
-  }
-
-  private void showPopup(String html) {
-    final PopupPanel pleaseWait = new DecoratedPopupPanel();
-    pleaseWait.setAutoHideEnabled(true);
-    pleaseWait.add(new HTML(html));
-    pleaseWait.center();
-
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        pleaseWait.hide();
-      }
-    };
-    t.schedule(3000);
   }
 }
