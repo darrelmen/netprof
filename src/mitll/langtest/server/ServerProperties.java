@@ -68,6 +68,7 @@ public class ServerProperties {
   private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
   private static final String LOGIN_TYPE_PARAM = "loginType";
+  private static final String SORT_BY_ID = "sortByID";
 
   private Properties props = null;
 
@@ -199,6 +200,10 @@ public class ServerProperties {
 
   public boolean shouldUseWeights() {
     return !props.getProperty(USE_WEIGHTS, "false").equals("false");
+  }
+
+  public boolean sortExercisesByID() {
+    return getDefaultFalse(SORT_BY_ID);
   }
 
   public boolean isCollectAudio() {
