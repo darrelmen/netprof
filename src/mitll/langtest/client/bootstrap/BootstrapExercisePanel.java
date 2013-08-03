@@ -110,7 +110,12 @@ public class BootstrapExercisePanel extends FluidContainer {
     soundManager = controller.getSoundManager();
 
     add(getHelpRow(controller));
-    add(getCardPrompt(e,controller));
+   // try {
+    //  add(new HTML("Got here"));
+      add(getCardPrompt(e,controller));
+ /*   } catch (Exception e1) {
+      Window.alert("got " +e1);
+    }*/
 
     addRecordingAndFeedbackWidgets(e, service, controller);
     warnNoFlash.setVisible(false);
@@ -180,7 +185,7 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param e
    * @return
    */
-  private Widget getCardPrompt(Exercise e, ExerciseController controller) {
+  private Widget getCardPrompt(Exercise e, ExerciseController controller)/* throws Exception*/{
     FluidRow questionRow = new FluidRow();
     Widget questionContent = getQuestionContent(e, controller);
     Column contentContainer = new Column(12, questionContent);
@@ -188,14 +193,20 @@ public class BootstrapExercisePanel extends FluidContainer {
     return questionRow;
   }
 
-  private Widget getQuestionContent(Exercise e, ExerciseController controller) {
+  private Widget getQuestionContent(Exercise e, ExerciseController controller) /*throws Exception*/ {
     int headingSize = 1;
     String stimulus = e.getEnglishSentence();
     //System.out.println("stim " + stimulus);
     if (stimulus == null) {
+      //stimulus += "nullStim_Initially";
       //  headingSize = 4;
       if (e.getContent() != null) {
-        stimulus = "<h3 style='margin-right: 30px'>" + e.getContent() + "</h3>";
+        Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
+        stimulus = "<h3 style='margin-right: 30px'>" +
+        //  "Debug baby!"+
+          e.getContent() + "<br></br>" +
+          qaPair.getQuestion() +
+          "</h3>";
         HTML html = getHTML(stimulus, true, controller);
         html.addStyleName("cardText");
         html.addStyleName("marginRight");
@@ -203,12 +214,15 @@ public class BootstrapExercisePanel extends FluidContainer {
         return html;
       }
     }
+    else stimulus = "got english : " + stimulus;
+
     if (stimulus == null) stimulus = "Blank for exercise #" +e.getID();
 
    // System.out.println("Heading size " + headingSize);
 
     Widget hero = new Heading(headingSize, stimulus);
     hero.addStyleName("cardText");
+ //   if (true) throw new Exception("Testin!");
     return hero;
   }
 
