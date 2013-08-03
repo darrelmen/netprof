@@ -46,6 +46,8 @@ public class ServerProperties {
   private static final String OUTSIDE_FILE_DEFAULT = "distributions.txt";
   private static final String H2_DATABASE = "h2Database";
   private static final String H2_DATABASE_DEFAULT = "vlr-parle";
+  private static final String H2_STUDENT_ANSWERS_DATABASE = "h2StudentAnswers";
+  private static final String H2_STUDENT_ANSWERS_DATABASE_DEFAULT = "h2StudentAnswers";
   private static final String URDU = "urdu";
   private static final String READ_FROM_FILE = "readFromFile";
   private static final String FLASHCARD = "flashcard";
@@ -95,7 +97,12 @@ public class ServerProperties {
     }
   }
 
+  /**
+   * @see LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
+   * @return
+   */
   public String getH2Database() { return props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT); }
+  public String getH2StudentAnswersDatabase() { return props.getProperty(H2_STUDENT_ANSWERS_DATABASE, H2_STUDENT_ANSWERS_DATABASE_DEFAULT); }
   public String getLessonPlan() { return props.getProperty("lessonPlanFile", "lesson.plan"); }
 
   public boolean getUseFile() {
@@ -133,6 +140,10 @@ public class ServerProperties {
     return getDefaultFalse(DOIMAGES);
   }
 
+  /**
+   * @see LangTestDatabaseImpl#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.AudioCheck.ValidityAndDur, String, boolean)
+   * @return
+   */
   public boolean isAutoCRT() {
     return getDefaultFalse(AUTOCRT);
   }
