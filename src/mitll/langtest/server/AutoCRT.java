@@ -69,6 +69,7 @@ public class AutoCRT {
   public void getAutoCRTDecodeOutput(String exerciseID, int questionID, Exercise e, File audioFile,
                                      AudioAnswer answer) {
     Collection<String> exportedAnswers = getExportedAnswers(exerciseID, questionID);
+    exportedAnswers = db.getValidPhrases(exportedAnswers);
     logger.info("got answers " + exportedAnswers);
 
     PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, exportedAnswers);
@@ -237,7 +238,9 @@ public class AutoCRT {
     getClassifier();
 
     Set<String> answers = new TreeSet<String>();
-    for (Export.ResponseAndGrade resp : getExportForExercise(id, questionID).rgs) answers.add(resp.response);
+    for (Export.ResponseAndGrade resp : getExportForExercise(id, questionID).rgs) {
+      answers.add(resp.response);
+    }
     return answers;
   }
 
