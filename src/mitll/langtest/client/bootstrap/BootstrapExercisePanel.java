@@ -16,6 +16,8 @@ import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.DOM;
@@ -108,7 +110,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     soundManager = controller.getSoundManager();
 
     add(getHelpRow(controller));
-    add(getCardPrompt(e));
+    add(getCardPrompt(e,controller));
 
     addRecordingAndFeedbackWidgets(e, service, controller);
     warnNoFlash.setVisible(false);
@@ -178,21 +180,57 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param e
    * @return
    */
-  private Widget getCardPrompt(Exercise e) {
+  private Widget getCardPrompt(Exercise e, ExerciseController controller) {
     FluidRow questionRow = new FluidRow();
-    Widget questionContent = getQuestionContent(e);
+    Widget questionContent = getQuestionContent(e, controller);
     Column contentContainer = new Column(12, questionContent);
     questionRow.add(contentContainer);
     return questionRow;
   }
 
-  private Widget getQuestionContent(Exercise e) {
+  private Widget getQuestionContent(Exercise e, ExerciseController controller) {
+    int headingSize = 1;
     String stimulus = e.getEnglishSentence();
-    if (stimulus == null) stimulus = e.getContent();
+    //System.out.println("stim " + stimulus);
+    if (stimulus == null) {
+      //  headingSize = 4;
+      if (e.getContent() != null) {
+        stimulus = "<h3 style='margin-right: 30px'>" + e.getContent() + "</h3>";
+        HTML html = getHTML(stimulus, true, controller);
+        html.addStyleName("cardText");
+        html.addStyleName("marginRight");
+
+        return html;
+      }
+    }
     if (stimulus == null) stimulus = "Blank for exercise #" +e.getID();
-    Widget hero = new Heading(1, stimulus);
+
+   // System.out.println("Heading size " + headingSize);
+
+    Widget hero = new Heading(headingSize, stimulus);
     hero.addStyleName("cardText");
     return hero;
+  }
+
+  private HTML getHTML(String content, boolean requireAlignment, ExerciseController controller) {
+    boolean rightAlignContent = controller.isRightAlignContent();
+    HasDirection.Direction direction =
+      requireAlignment && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
+
+    HTML html = new HTML(content, direction);
+    html.setWidth("100%");
+    if (requireAlignment && rightAlignContent) {
+      html.addStyleName("rightAlign");
+    }
+
+    html.addStyleName("wrapword");
+  /*  if (getLanguage().equalsIgnoreCase("Pashto")) {
+      html.addStyleName("pashtofont");
+    }
+    else {
+      html.addStyleName("xlargeFont");
+    }*/
+    return html;
   }
 
   /**
