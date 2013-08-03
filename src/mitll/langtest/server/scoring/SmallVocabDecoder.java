@@ -1,6 +1,5 @@
 package mitll.langtest.server.scoring;
 
-import com.google.common.io.Files;
 import corpus.package$;
 import mitll.langtest.server.ProcessRunner;
 import mitll.langtest.server.database.FileExerciseDAO;
@@ -15,7 +14,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -60,7 +59,7 @@ public class SmallVocabDecoder {
   private final String platform = Utils.package$.MODULE$.platform();
   private double foregroundBackgroundBlend;
 
-  public String createSimpleSLFFile(List<String> lmSentences, String tmpDir) {
+  public String createSimpleSLFFile(Collection<String> lmSentences, String tmpDir) {
     String slfFile = tmpDir + File.separator + SMALL_LM_SLF;
 
     try {
@@ -160,7 +159,7 @@ public class SmallVocabDecoder {
    * Very important to limit the vocabulary (less than 300 words) or else the small vocab dcodr will run out of
    * memory and segfault! <br></br>
    * Remember to add special tokens like silence, pause, and unk
-   * @see ASRScoring#getUsedTokens(java.util.List, java.util.List)
+   * @see ASRScoring#getUsedTokens
    * @param background sentences
    * @return most frequent vocabulary words
    */
@@ -184,12 +183,12 @@ public class SmallVocabDecoder {
   }
 
   /**
-   * @see ASRScoring#getUniqueTokensInLM(java.util.List, java.util.List)
+   * @see ASRScoring#getUniqueTokensInLM
    * @param sentences
    * @param vocabSizeLimit
    * @return
    */
-  public List<String> getSimpleVocab(List<String> sentences, int vocabSizeLimit) {
+  public List<String> getSimpleVocab(Collection<String> sentences, int vocabSizeLimit) {
     // count the tokens
     final Map<String, Integer> sc = new HashMap<String, Integer>();
     for (String sentence : sentences) {
