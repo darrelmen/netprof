@@ -8,6 +8,7 @@ import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.Export;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
@@ -198,10 +199,33 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  /**
+   * @see #getExerciseIds(int, long)
+   * @see #getExercisesForSelectionState(int, java.util.Map, long)
+   * @see #getFullExercisesForSelectionState(java.util.Map, int, int)
+   * @param exercisesForSection
+   * @return
+   */
   private List<Exercise> getSortedExercises(Collection<Exercise> exercisesForSection) {
     List<Exercise> copy = new ArrayList<Exercise>(exercisesForSection);
-    sortByTooltip(copy);
+    if (serverProps.sortExercisesByID()) {
+      sortByID(copy);
+    }
+    else {
+      sortByTooltip(copy);
+    }
     return copy;
+  }
+
+  private void sortByID(List<Exercise> copy) {
+    Collections.sort(copy, new Comparator<ExerciseShell>() {
+      @Override
+      public int compare(ExerciseShell o1, ExerciseShell o2) {
+        String id1 = o1.getID();
+        String id2 = o2.getID();
+        return id1.toLowerCase().compareTo(id2.toLowerCase());
+      }
+    });
   }
 
   /**
@@ -388,6 +412,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     synchronized (this) {
       if (autoCRT == null) {
         DatabaseImpl exportDB = serverProps.isAutoCRT() ? studentAnswersDB : db;
+        if (serverProps.isAutoCRT()) {
+          setInstallPath(serverProps.getUseFile(), exportDB);
+          exportDB.getExercises();
+
+         // List<Export.ExerciseExport> export = exportDB.getExport().getExport(true, false);
+
+        }
         autoCRT = new AutoCRT(exportDB.getExport(), this, getInstallPath(), relativeConfigDir, serverProps.getMinPronScore());
       }
     }
@@ -424,6 +455,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList#getExercises(long)
    * @param userID
    * @param typeToSection
    * @return
@@ -431,9 +463,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public FlashcardResponse getNextExercise(long userID, Map<String, Collection<String>> typeToSection) {
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-    logger.debug("req " + typeToSection + " yields " + exercisesForSection.size() + " exercises.");
-
-    FlashcardResponse nextExercise = db.getNextExercise(new ArrayList<Exercise>(exercisesForSection),userID, serverProps.isTimedGame());
+    logger.debug("getNextExercise : req " + typeToSection + " yields " + exercisesForSection.size() + " exercises.");
+    List<Exercise> copy = new ArrayList<Exercise>(exercisesForSection);
+    if (serverProps.sortExercisesByID()) {
+      sortByID(copy);
+    }
+    FlashcardResponse nextExercise = db.getNextExercise(copy,userID, serverProps.isTimedGame());
     logger.debug("\tnextExercise " + nextExercise);
 
     return getFlashcardResponse(userID, nextExercise);
@@ -652,6 +687,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       String vocab = asrScoring.getUsedTokens(lmSentences, unk);
       return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, 128, 128, false, true, tmpDir, serverProps.useScoreCache());
     }
+  }
+
+  @Override
+  public Collection<String> getValidPhrases(Collection<String> phrases) {
+
+    return asrScoring.getValidPhrases(phrases);  //To change body of implemented methods use File | Settings | File Templates.
   }
 
   private String createSLFFile(Collection<String> lmSentences, String tmpDir) {
@@ -1212,7 +1253,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public void init() {
     readProperties(getServletContext());
-    setInstallPath(serverProps.getUseFile());
+    setInstallPath(serverProps.getUseFile(), db);
     if (serverProps.doRecoTest()) {
       doRecoTest();
     }
@@ -1302,12 +1343,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return audioAnswer.isCorrect();
   }
 
-  private String setInstallPath(boolean useFile) {
+  private String setInstallPath(boolean useFile, DatabaseImpl db) {
     String lessonPlanFile = getLessonPlan();
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
     //logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
-    db.setInstallPath(getInstallPath(), lessonPlanFile, relativeConfigDir, serverProps.getLanguage(), useFile,
+    db.setInstallPath(getInstallPath(), lessonPlanFile, serverProps.getLanguage(), useFile,
       relativeConfigDir+File.separator+serverProps.getMediaDir(), serverProps.isRTL());
 
     return lessonPlanFile;
