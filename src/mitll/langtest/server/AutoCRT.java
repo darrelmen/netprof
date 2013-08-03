@@ -11,11 +11,13 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * AutoCRT support -- basically wrapping Jacob's work that lives in mira.jar <br></br>
@@ -44,11 +46,9 @@ public class AutoCRT {
    * @param db
    * @param installPath
    * @param relativeConfigDir
-   * @param backgroundFile
    * @param minPronScore
    */
-  public AutoCRT(Export exporter, AutoCRTScoring db, String installPath, String relativeConfigDir,
-                 String backgroundFile, double minPronScore) {
+  public AutoCRT(Export exporter, AutoCRTScoring db, String installPath, String relativeConfigDir, double minPronScore) {
     this.installPath = installPath;
     this.mediaDir = relativeConfigDir;
     this.exporter = exporter;
@@ -68,8 +68,8 @@ public class AutoCRT {
    */
   public void getAutoCRTDecodeOutput(String exerciseID, int questionID, Exercise e, File audioFile,
                                      AudioAnswer answer) {
-    List<String> exportedAnswers = getExportedAnswers(exerciseID, questionID);
-    logger.info("got answers " + new HashSet<String>(exportedAnswers));
+    Collection<String> exportedAnswers = getExportedAnswers(exerciseID, questionID);
+    logger.info("got answers " + exportedAnswers);
 
     PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, exportedAnswers);
 
@@ -233,10 +233,10 @@ public class AutoCRT {
    * @param questionID
    * @return
    */
-  private List<String> getExportedAnswers(String id, int questionID) {
+  private Collection<String> getExportedAnswers(String id, int questionID) {
     getClassifier();
 
-    List<String> answers = new ArrayList<String>();
+    Set<String> answers = new TreeSet<String>();
     for (Export.ResponseAndGrade resp : getExportForExercise(id, questionID).rgs) answers.add(resp.response);
     return answers;
   }
@@ -258,12 +258,12 @@ public class AutoCRT {
    */
   private Classifier<AutoGradeExperiment.Event> getClassifier() {
     if (classifier != null) return classifier;
-    Set<String> allAnswers = new HashSet<String>();
+   // Set<String> allAnswers = new HashSet<String>();
     List<Export.ExerciseExport> export = exporter.getExport(true, false);
     exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
     for (Export.ExerciseExport exp : export) {
       exerciseIDToExport.put(exp.id,exp);
-      for (Export.ResponseAndGrade rg : exp.rgs) allAnswers.add(rg.response);
+ //     for (Export.ResponseAndGrade rg : exp.rgs) allAnswers.add(rg.response);
     }
     String[] args = new String[6];
 
