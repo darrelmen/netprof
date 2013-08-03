@@ -54,4 +54,6 @@ public interface ExerciseController {
   int getLeftColumnWidth();
   int getHeightOfTopRows();
   boolean shouldAddRecordKeyBinding();
+
+  int getFlashcardPreviewFrameHeight();
 }
