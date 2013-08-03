@@ -19,6 +19,7 @@ public class Flashcard implements RequiresResize {
   private static final String AVP = "AUDIO VOCAB PRACTICE";
   private static final String PRONUNCIATION_FEEDBACK = "PRONUNCIATION FEEDBACK";
   private static final double MAX_FONT_EM = 1.8d;
+  public static final int SLOP = 50;
   private Paragraph appName;
   private Image flashcardImage;
   private Image collab;
@@ -29,11 +30,21 @@ public class Flashcard implements RequiresResize {
    */
   public Flashcard() {}
 
+  /**
+   * @see mitll.langtest.client.LangTest#doFlashcard()
+   * @param splashText
+   * @return
+   */
   public HorizontalPanel makeFlashcardHeaderRow(String splashText) {
     String appIcon = "flashcardIcon2.png";
     return getHeaderRow(splashText, appIcon, AVP);
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#makeHeaderRow()
+   * @param splashText
+   * @return
+   */
   public HorizontalPanel makeNPFHeaderRow(String splashText) {
     String appIcon = "npfIcon.png";
     return getHeaderRow(splashText, appIcon, PRONUNCIATION_FEEDBACK);
@@ -100,9 +111,9 @@ public class Flashcard implements RequiresResize {
 
     int offsetWidth = flashcardImage.getOffsetWidth();
     int offsetWidth1 = collab.getOffsetWidth();
-    int residual = clientWidth - offsetWidth - offsetWidth1 - 40;
+    int residual = clientWidth - offsetWidth - offsetWidth1 - SLOP;
 
-//   System.out.println("setFontWidth : left " + offsetWidth + " right " + offsetWidth1 + " window " + clientWidth + " residual " + residual);
+    System.out.println("setFontWidth : left " + offsetWidth + " right " + offsetWidth1 + " window " + clientWidth + " residual " + residual);
 
     double ratio = 2.0d * (double) residual / (double) min;
     ratio *= 10;
