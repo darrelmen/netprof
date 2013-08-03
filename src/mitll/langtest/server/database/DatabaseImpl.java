@@ -1393,7 +1393,9 @@ public class DatabaseImpl implements Database {
       logger.error("got " + e, e);
     }
   }
-  private static String getConfigDir(String language) {
+  public String toString() { return "Database : "+ connection.getConnection(); }
+
+/*  private static String getConfigDir(String language) {
     String installPath = ".";
     String dariConfig = File.separator +
       "war" +
@@ -1403,9 +1405,9 @@ public class DatabaseImpl implements Database {
       language +
       File.separator;
     return installPath + dariConfig;
-  }
+  }*/
 
-  public static void main(String [] arg) {
+/*  public static void main(String [] arg) {
 
     String language = "pilot";
     final String configDir = getConfigDir(language);
@@ -1417,5 +1419,5 @@ public class DatabaseImpl implements Database {
     unitAndChapter.useFile =false;
     unitAndChapter.mediaDir = "config";
     unitAndChapter.getRandomBalancedList(0);
-  }
+  }*/
 }
