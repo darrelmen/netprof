@@ -691,7 +691,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public Collection<String> getValidPhrases(Collection<String> phrases) {
-
+    makeASRScoring(); // TODO : evil
     return asrScoring.getValidPhrases(phrases);  //To change body of implemented methods use File | Settings | File Templates.
   }
 
