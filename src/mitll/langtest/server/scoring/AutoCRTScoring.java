@@ -3,6 +3,7 @@ package mitll.langtest.server.scoring;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -13,5 +14,5 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public interface AutoCRTScoring {
-  PretestScore getASRScoreForAudio(File testAudioFile, List<String> lmSentences);
+  PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences);
 }
