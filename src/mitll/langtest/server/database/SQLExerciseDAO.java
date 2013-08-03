@@ -120,8 +120,8 @@ public class SQLExerciseDAO implements ExerciseDAO {
       statement.close();
       database.closeConnection(connection);
 
-      logger.debug("reporting for " +database);
-      sectionHelper.report();
+   //   logger.debug("reporting for " +database);
+   //   sectionHelper.report();
 
     } catch (Exception e) {
       logger.warn("got " + e,e);
