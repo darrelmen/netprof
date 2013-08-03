@@ -78,12 +78,14 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   private TextBox urlInputBox2 = new TextBox();
   private int tries =10;
   private String token = "";
+  private int frameHeight = FRAME_HEIGHT;
 
   public TableSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                   UserFeedback feedback, boolean showTurkToken, boolean showInOrder,
                                   boolean showListBox, ExerciseController controller) {
     super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox, controller);
     setWidth("100%");
+    this.frameHeight = controller.getFlashcardPreviewFrameHeight();
   }
 
   @Override
@@ -312,11 +314,11 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
       }
     });
     frame.setWidth(FRAME_WIDTH + "px");
-    frame.setHeight(FRAME_HEIGHT + "px");
+    frame.setHeight(frameHeight + "px");
     int modalWidth = FRAME_WIDTH + 50;
     modal.setWidth(modalWidth + "px");
     int heightSlip = 30;
-    modal.setMaxHeigth(FRAME_HEIGHT + heightSlip + "px");
+    modal.setMaxHeigth(frameHeight + heightSlip + "px");
     DOM.setStyleAttribute(modal.getElement(), "marginLeft", (-modalWidth / 2) + "px");
     modal.show();
   }
