@@ -430,6 +430,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * TODO : test without flash???
+   * @see #onModuleLoad2()
    */
   private void doFlashcard() {
     setPageTitle();
