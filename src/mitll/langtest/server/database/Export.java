@@ -25,12 +25,12 @@ import java.util.Set;
  * Time: 6:04 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Export implements Database {
+public class Export /*implements Database*/ {
   private ExerciseDAO exerciseDAO = null;
   private ResultDAO resultDAO = null;
   private GradeDAO gradeDAO = null;
 
-  public Export(String dburl) {
+/*  public Export(String dburl) {
     this.h2DbName = dburl;
     this.url = "jdbc:h2:" + h2DbName + ";IFEXISTS=TRUE;QUERY_CACHE_SIZE=0;";
     UserDAO userDAO = new UserDAO(this);
@@ -43,7 +43,7 @@ public class Export implements Database {
     }
     exerciseDAO = new SQLExerciseDAO(this, "");
     gradeDAO = new GradeDAO(this,userDAO, resultDAO);
-  }
+  }*/
 
   public Export(ExerciseDAO exerciseDAO, ResultDAO resultDAO, GradeDAO gradeDAO) {
     this.exerciseDAO = exerciseDAO;
@@ -51,7 +51,12 @@ public class Export implements Database {
     this.gradeDAO = gradeDAO;
   }
 
-
+  /**
+   * @see mitll.langtest.server.AutoCRT#getClassifier
+   * @param useFLQ
+   * @param useSpoken
+   * @return
+   */
   public List<ExerciseExport> getExport(boolean useFLQ,boolean useSpoken) {
     List<ExerciseExport> names = new ArrayList<ExerciseExport>();
 //    int n = 20;
@@ -121,7 +126,7 @@ public class Export implements Database {
    * @param useSpoken
    * @return
    */
-  public List<ExerciseExport> getExports(Map<Integer, List<Grade>> idToGrade, List<Result> resultsForExercise,
+  private List<ExerciseExport> getExports(Map<Integer, List<Grade>> idToGrade, List<Result> resultsForExercise,
                                          Exercise exercise, boolean useFLQ, boolean useSpoken) {
     boolean debug = false;
 
@@ -192,7 +197,7 @@ public class Export implements Database {
   }
 
   //private class DatabaseImpl2 implements Database {
-    private Logger logger = Logger.getLogger(Export.class);
+  /*  private Logger logger = Logger.getLogger(Export.class);
     private String url = "jdbc:h2:" + H2_DB_NAME + ";IFEXISTS=TRUE;QUERY_CACHE_SIZE=0;",
         dbOptions = "",//"?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull",
         driver = "org.h2.Driver";
@@ -226,19 +231,19 @@ public class Export implements Database {
         logger.warn("getConnection : conn " + c + " is closed!");
       }
       return c;
-    }
+    }*/
 
     /**
      * Just for dbLogin
      */
-    private Connection localConnection;
+   // private Connection localConnection;
     /**
      * Not necessary if we use the h2 DBStarter service -- see web.xml reference
      *
      * @return
      * @throws Exception
      */
-    private Connection dbLogin() throws Exception {
+ /*   private Connection dbLogin() throws Exception {
       if (localConnection != null) return localConnection;
       try {
         Class.forName(driver).newInstance();
@@ -269,16 +274,16 @@ public class Export implements Database {
         ex.printStackTrace();
         throw ex;
       }
-    }
+    }*/
 
 
-  public void closeConnection(Connection connection) throws SQLException {
+/*  public void closeConnection(Connection connection) throws SQLException {
     //  System.err.println("Closing " + connection);
     //connection.close();
     // System.err.println("Closing " + connection + " " + connection.isClosed());
-  }
+  }*/
 
-  public static void main(String[] arg) {
+/*  public static void main(String[] arg) {
     Export langTestDatabase = new Export("C:\\Users\\go22670\\mt_repo\\jdewitt\\pilot\\vlr-parle");
     //List<Exercise> exercises = langTestDatabase.getExercises();
     if (true) {
@@ -292,5 +297,5 @@ public class Export implements Database {
     //  List<Exercise> exercises = langTestDatabase.getRandomBalancedList();
 
     }
-  }
+  }*/
 }
