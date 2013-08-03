@@ -519,4 +519,17 @@ public class ASRScoring extends Scoring {
     Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
     return new Scores(0f, eventScores);
   }
+
+  public Collection<String> getValidPhrases(Collection<String> phrases) {
+    List<String> valid = new ArrayList<String>();
+    for (String phrase : phrases) {
+      try {
+        String[][] process = letterToSoundClass.process(phrase);
+        valid.add(phrase);
+      } catch (Exception e) {
+       logger.warn("skipped " + phrase);
+      }
+    }
+    return valid;
+  }
 }
