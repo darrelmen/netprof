@@ -100,6 +100,13 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   protected void addTableWithPager() {  }
 
   private CellTable<Exercise> table;
+
+  /**
+   * @see #addTableToLayout(java.util.Map)
+   * @param typeToSection
+   * @param numResults
+   * @return
+   */
   private Widget getAsyncTable(Map<String, Collection<String>> typeToSection,int numResults) {
     CellTable<Exercise> table = makeCellTable();
     table.setStriped(true);
@@ -469,6 +476,10 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     CellTable.Style cellTableStyle();
   }
 
+  /**
+   * @see #getAsyncTable(java.util.Map, int)
+   * @return
+   */
   @Override
   protected CellTable<Exercise> makeCellTable() {
     Resources resources = GWT.create(Resources.class);
@@ -493,7 +504,19 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     TextColumn<Exercise> english = new TextColumn<Exercise>() {
       @Override
       public String getValue(Exercise exercise) {
-        return "" + exercise.getEnglishSentence();
+
+        String englishSentence = exercise.getEnglishSentence();
+        if (englishSentence == null) {
+          List<Exercise.QAPair> englishQuestions = exercise.getEnglishQuestions();
+          if (englishQuestions != null && !englishQuestions.isEmpty()) {
+            Exercise.QAPair next = englishQuestions.iterator().next();
+            return next.getQuestion();
+          }
+          return "";
+        }
+        else {
+          return "" + englishSentence;
+        }
       }
     };
     english.setSortable(true);
@@ -502,7 +525,17 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     TextColumn<Exercise> flword = new TextColumn<Exercise>() {
       @Override
       public String getValue(Exercise exercise) {
-        return "" + exercise.getRefSentence();
+        String refSentence = exercise.getRefSentence();
+        if (refSentence == null || refSentence.length() == 0) {
+          List<Exercise.QAPair> questions = exercise.getForeignLanguageQuestions();
+          if (questions != null && !questions.isEmpty()) {
+            Exercise.QAPair next = questions.iterator().next();
+            return next.getQuestion();
+          }
+          return "";
+        } else {
+          return "" + refSentence;
+        }
       }
     };
     flword.setSortable(true);
