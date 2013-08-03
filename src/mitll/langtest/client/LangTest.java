@@ -1100,6 +1100,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isFlashCard() {  return props.isFlashCard(); }
   public boolean isGoodwaveMode() {  return props.isGoodwaveMode(); }
   public boolean shouldAddRecordKeyBinding() { return props.shouldAddRecordKeyBinding(); }
+  public int getFlashcardPreviewFrameHeight() { return props.getFlashcardPreviewFrameHeight(); }
+
   private PropertyHandler.LOGIN_TYPE getLoginType() { return props.getLoginType(); }
 
   // recording methods...
