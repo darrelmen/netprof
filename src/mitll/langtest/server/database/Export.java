@@ -26,6 +26,8 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class Export /*implements Database*/ {
+  private static Logger logger = Logger.getLogger(Export.class);
+
   private ExerciseDAO exerciseDAO = null;
   private ResultDAO resultDAO = null;
   private GradeDAO gradeDAO = null;
@@ -62,8 +64,11 @@ public class Export /*implements Database*/ {
 //    int n = 20;
 
     Map<Integer, List<Grade>> idToGrade = getIdToGrade(gradeDAO.getGrades());
+
+    logger.debug("got " +idToGrade.size() + " grades");
     Map<String,List<Result>> exerciseToResult = new HashMap<String, List<Result>>();
     List<Result> results = resultDAO.getResults();
+    logger.debug("got " +results.size() + " results");
 
     for (Result r : results) {
       List<Result> res = exerciseToResult.get(r.id);
@@ -71,13 +76,18 @@ public class Export /*implements Database*/ {
       res.add(r);
     }
 
-    for (Exercise e : getExercises()) {
+    List<Exercise> exercises = getExercises();
+    logger.debug("got " +exercises.size() + " exercises");
+
+    for (Exercise e : exercises) {
 //      System.out.println("on " + e);
       List<Result> results1 = exerciseToResult.get(e.getID());
       List<ExerciseExport> resultsForExercise = getExports(idToGrade, results1, e, useFLQ, useSpoken);
       names.addAll(resultsForExercise);
       // if (n-- == 0) break;
     }
+    logger.debug("got " +names.size() + " exports");
+
     return names;
   }
 
@@ -138,6 +148,7 @@ public class Export /*implements Database*/ {
       ExerciseExport e1 = new ExerciseExport(exercise.getID() + "_" + ++qid, q.getAnswer());
       qidToExport.put(qid, e1);
     }
+  //  logger.debug("got qid->export " +qidToExport.size() + " items");
     Set<ExerciseExport> valid = new HashSet<ExerciseExport>();
 
     List<Exercise.QAPair> qaPairs = useFLQ ? exercise.getForeignLanguageQuestions() : exercise.getEnglishQuestions();
@@ -149,26 +160,42 @@ public class Export /*implements Database*/ {
         System.err.println("no qid " + qid + " in " + qidToExport.keySet() + " for " + exercise);
       else {
         for (String answer : q.getAlternateAnswers()) {
-          exerciseExport.addRG(answer, 5);
+          if (answer.length() == 0) {
+            logger.error("huh? alternate answer is empty??? for " + q + " in " + exercise.getID());
+          } else {
+            exerciseExport.addRG(answer, 5);
+          }
         }
       }
       qid++;
     }
 
+   // logger.debug("got " +resultsForExercise.size() + " resultsForExercise ");
+
+
     // find results, after join with schedule, add join with the grade
     for (Result r : resultsForExercise) {
       if (r.flq == useFLQ && r.spoken == useSpoken) {
         ExerciseExport exerciseExport = qidToExport.get(r.qid);
-        List<Grade> gradesForResult = idToGrade.get(r.uniqueID);
-        if (gradesForResult == null) {
-          //System.err.println("no grades for result " + r);
-        } else {
-          for (Grade g : gradesForResult) {
-            if (g.grade > 0) {
-              exerciseExport.addRG(r.answer, g.grade);
-              if (!valid.contains(exerciseExport)) {
-                ret.add(exerciseExport);
-                valid.add(exerciseExport);
+        if (exerciseExport == null) logger.error("for " + r.getID() +
+          " can't find r qid " + r.qid + " in keys " + qidToExport.keySet());
+        else {
+          List<Grade> gradesForResult = idToGrade.get(r.uniqueID);
+          if (gradesForResult == null) {
+            //System.err.println("no grades for result " + r);
+          } else {
+            for (Grade g : gradesForResult) {
+              if (g.grade > 0) {
+                if (r.answer.length() > 0) {
+                  exerciseExport.addRG(r.answer, g.grade);
+                  if (!valid.contains(exerciseExport)) {
+                    ret.add(exerciseExport);
+                    valid.add(exerciseExport);
+                  }
+                }
+                else {
+                  logger.warn("skipping " + r.getID() + " with empty answer.");
+                }
               }
             }
           }
