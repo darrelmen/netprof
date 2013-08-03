@@ -167,6 +167,7 @@ public class DatabaseImpl implements Database {
   public void closeConnection(Connection connection) throws SQLException {}
 
   public Export getExport() {
+    if (exerciseDAO == null) logger.error("huh? exercise dao is null?");
     return new Export(exerciseDAO,resultDAO,gradeDAO);
   }
 
@@ -191,7 +192,7 @@ public class DatabaseImpl implements Database {
    * @param mediaDir
    * @param isRTL
    */
-  public void setInstallPath(String installPath, String lessonPlanFile, String relativeConfigDir, String language,
+  public void setInstallPath(String installPath, String lessonPlanFile, String language,
                              boolean useFile, String mediaDir, boolean isRTL) {
    // logger.debug("got install path " + installPath + " media " + mediaDir + " is urdu " +isUrdu);
     this.installPath = installPath;
