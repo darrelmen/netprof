@@ -19,7 +19,7 @@ public class Flashcard implements RequiresResize {
   private static final String AVP = "AUDIO VOCAB PRACTICE";
   private static final String PRONUNCIATION_FEEDBACK = "PRONUNCIATION FEEDBACK";
   private static final double MAX_FONT_EM = 1.8d;
-  public static final int SLOP = 50;
+  public static final int SLOP = 55;
   private Paragraph appName;
   private Image flashcardImage;
   private Image collab;
