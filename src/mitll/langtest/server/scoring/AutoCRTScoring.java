@@ -15,4 +15,5 @@ import java.util.List;
  */
 public interface AutoCRTScoring {
   PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences);
+  Collection<String> getValidPhrases(Collection<String> phrases);
 }
