@@ -73,6 +73,8 @@ public class PropertyHandler {
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
   private static final String ADD_RECORD_KEY_BINDING = "addRecordKeyBinding";
   private static final String LOGIN_TYPE_PARAM = "loginType";
+  private static final String FLASHCARD_PREVIEW_HEIGHT = "flashcardPreviewHeight";
+  private static final int DEFAULT_FLASHCARD_PREVIEW_HEIGHT = 610;
 
   public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT, DATA_COLLECTOR }
 
@@ -116,6 +118,7 @@ public class PropertyHandler {
   private boolean rightAlignContent;
   private boolean addRecordKeyBinding = true;
   private LOGIN_TYPE loginType = LOGIN_TYPE.UNDEFINED;
+  private int flashcardPreviewHeight = DEFAULT_FLASHCARD_PREVIEW_HEIGHT;
 
   public PropertyHandler(Map<String,String> props) {
     this.props = props;
@@ -160,6 +163,7 @@ public class PropertyHandler {
       else if (key.equals(SPLASH_TITLE)) splashTitle = value;
       else if (key.equals(TIMED_GAME)) timedGame = getBoolean(value);
       else if (key.equals(GAME_TIME)) gameTimeSeconds = getInt(value, DEFAULT_GAME_TIME_SECONDS, GAME_TIME);
+      else if (key.equals(FLASHCARD_PREVIEW_HEIGHT)) flashcardPreviewHeight = getInt(value, DEFAULT_FLASHCARD_PREVIEW_HEIGHT, FLASHCARD_PREVIEW_HEIGHT);
       else if (key.equals(CONTINUE_PROMPT)) promptBeforeNextItem = getBoolean(value);
       else if (key.equals(RIGHT_ALIGN_CONTENT)) rightAlignContent = getBoolean(value);
       else if (key.equals(ADD_RECORD_KEY_BINDING)) addRecordKeyBinding = getBoolean(value);
@@ -432,4 +436,8 @@ public class PropertyHandler {
   }
 
   public LOGIN_TYPE getLoginType() { return loginType; }
+
+  public int getFlashcardPreviewFrameHeight() {
+    return flashcardPreviewHeight;
+  }
 }
