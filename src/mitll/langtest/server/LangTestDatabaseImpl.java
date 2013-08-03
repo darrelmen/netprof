@@ -65,8 +65,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public static final String ANSWERS = "answers";
   private static final int TIMEOUT = 30;
   private static final String IMAGE_WRITER_IMAGES = "audioimages";
-  //private static final List<String> EMPTY_LIST = Collections.emptyList();
-  private DatabaseImpl db;
+
+  private DatabaseImpl db, studentAnswersDB;
   private ASRScoring asrScoring;
   private AutoCRT autoCRT;
   private final boolean makeFullURLs = false;
@@ -186,12 +186,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.debug("getExercisesForSelectionState req " + reqID+ " for " + typeToSection + " and " +userID);
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     if (serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
-      //logger.debug("\tsorting");
+      logger.debug("\tsorting");
 
       List<Exercise> copy = getSortedExercises(exercisesForSection);
       return new ExerciseListWrapper(reqID, getExerciseShells(copy));
     } else {
-      //logger.debug("\t *not* sorting");
+      logger.debug("\t *not* sorting");
 
       List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection, serverProps.shouldUseWeights());
       return new ExerciseListWrapper(reqID, getExerciseShells(exercisesBiasTowardsUnanswered));
@@ -214,7 +214,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       public int compare(ExerciseShell o1, ExerciseShell o2) {
         String id1 = o1.getTooltip();
         String id2 = o2.getTooltip();
-          return id1.toLowerCase().compareTo(id2.toLowerCase());
+        return id1.toLowerCase().compareTo(id2.toLowerCase());
       }
     });
   }
@@ -271,7 +271,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public Collection<String> getTypeOrder() {
     return db.getSectionHelper().getTypeOrder();
   }
-
 
   @Override
   public List<SectionNode> getSectionNodes() {
@@ -388,8 +387,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private void makeAutoCRT() {
     synchronized (this) {
       if (autoCRT == null) {
-        String backgroundFile = configDir + File.separator + serverProps.getBackgroundFile();
-        autoCRT = new AutoCRT(db.getExport(), this, getInstallPath(), relativeConfigDir, backgroundFile, serverProps.getMinPronScore());
+        DatabaseImpl exportDB = serverProps.isAutoCRT() ? studentAnswersDB : db;
+        autoCRT = new AutoCRT(exportDB.getExport(), this, getInstallPath(), relativeConfigDir, serverProps.getMinPronScore());
       }
     }
   }
@@ -640,7 +639,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param lmSentences to look for in the audio
    * @return PretestScore for audio
    */
-  public PretestScore getASRScoreForAudio(File testAudioFile, List<String> lmSentences) {
+  public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences) {
     String tmpDir = Files.createTempDir().getAbsolutePath();
     String slfFile = createSLFFile(lmSentences, tmpDir);
     if (!new File(slfFile).exists()) {
@@ -655,7 +654,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  private String createSLFFile(List<String> lmSentences, String tmpDir) {
+  private String createSLFFile(Collection<String> lmSentences, String tmpDir) {
     SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
    // long then = System.currentTimeMillis();
     String slfFile = svDecoderHelper.createSimpleSLFFile(lmSentences, tmpDir);
@@ -668,7 +667,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
    *
    * @see #getASRScoreForAudio(int, String, String, int, int, boolean)
-   * @see mitll.langtest.server.scoring.AutoCRTScoring#getASRScoreForAudio(java.io.File, java.util.List
+   * @see mitll.langtest.server.scoring.AutoCRTScoring#getASRScoreForAudio(java.io.File, Collection
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param testAudioFile
@@ -997,7 +996,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
     if (serverProps.isFlashcard()|| doFlashcard) {
       makeAutoCRT();
-      autoCRT.getFlashcardAnswer(getExercise(exercise), file, audioAnswer);
+
+      if (serverProps.isAutoCRT()) {
+        autoCRT.getAutoCRTDecodeOutput(exercise, questionID, getExercise(exercise), file, audioAnswer);
+      } else {
+        autoCRT.getFlashcardAnswer(getExercise(exercise), file, audioAnswer);
+      }
       db.updateFlashcardState(user, exercise, audioAnswer.isCorrect());
       return audioAnswer;
     } else if (serverProps.isAutoCRT()) {
@@ -1327,12 +1331,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     this.configDir = getInstallPath() + File.separator + relativeConfigDir;
 
     serverProps.readPropertiesFile(servletContext, configDir);
-
     String h2DatabaseFile = serverProps.getH2Database();
+
+    db = makeDatabaseImpl(h2DatabaseFile);
+    if (serverProps.isAutoCRT()) {
+      studentAnswersDB = makeDatabaseImpl(serverProps.getH2StudentAnswersDatabase());
+    }
+  }
+
+  private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
     boolean wordPairs = serverProps.isWordPairs();
     String language = serverProps.getLanguage();
     logger.debug("word pairs " + wordPairs + " language " + language + " config dir " + relativeConfigDir);
-    db = new DatabaseImpl(configDir, h2DatabaseFile, wordPairs,
+    return new DatabaseImpl(configDir, h2DatabaseFile, wordPairs,
       language, serverProps.doImages(), relativeConfigDir, serverProps.isFlashcard(),
       serverProps.usePredefinedTypeOrder());
   }

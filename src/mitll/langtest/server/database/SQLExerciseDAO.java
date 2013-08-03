@@ -32,6 +32,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
   private String mediaDir;
   private List<Exercise> exercises;
   private Map<String,Exercise> idToExercise = new HashMap<String,Exercise>();
+  private SectionHelper sectionHelper = new SectionHelper();
 
   /**
    * @see DatabaseImpl#makeExerciseDAO(boolean)
@@ -46,12 +47,12 @@ public class SQLExerciseDAO implements ExerciseDAO {
     if (this.mediaDir.endsWith(suffix)) {
       this.mediaDir = this.mediaDir.substring(0,mediaDir.length()-suffix.length());
     }*/
-    logger.warn("media dir " + mediaDir);
+    logger.debug("database " + database + " media dir " + mediaDir);
   }
 
   @Override
   public SectionHelper getSectionHelper() {
-    return null;
+    return sectionHelper;
   }
 
   @Override
@@ -109,6 +110,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
             logger.warn("no valid exid for " + e);
           } else {
             exercises.add(e);
+            recordUnitChapterWeek(e);
           }
         } else {
           logger.warn("expecting a { (marking json data), so skipping " + content);
@@ -117,6 +119,10 @@ public class SQLExerciseDAO implements ExerciseDAO {
       rs.close();
       statement.close();
       database.closeConnection(connection);
+
+      logger.debug("reporting for " +database);
+      sectionHelper.report();
+
     } catch (Exception e) {
       logger.warn("got " + e,e);
     }
@@ -127,6 +133,47 @@ public class SQLExerciseDAO implements ExerciseDAO {
       if (DEBUG) logger.debug("getRawExercises : found " + exercises.size() + " exercises.");
     }
     return exercises;
+  }
+
+  private boolean debug = true;
+  private boolean recordUnitChapterWeek(//int unitIndex, int chapterIndex, int weekIndex,
+                                      //  Row next,
+                                        Exercise imported
+    //, String unitName, String chapterName, String weekName
+  ) {
+    String[] split = imported.getID().split("-");
+    String unit = split[0];//getCell(next, unitIndex);
+    String chapter = split.length > 1 ? split[1] : "";//getCell(next, chapterIndex);
+    String week = "";//getCell(next, weekIndex);
+    List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
+
+    if (unit.length() == 0 &&
+      chapter.length() == 0 &&
+      week.length() == 0
+      ) {
+      unit = "Blank";
+    }
+
+    // hack to trim off leading tics
+    if (unit.startsWith("'")) unit = unit.substring(1);
+    if (unit.equals("intro")) unit = "Intro"; // hack
+    if (chapter.startsWith("'")) chapter = chapter.substring(1);
+    if (week.startsWith("'")) week = week.substring(1);
+
+    //if (debug) logger.debug("unit " + unitIndex +"/"+unit + " chapter " + chapterIndex+"/"+chapter + " week " + week);
+
+    if (unit.length() > 0) {
+        pairs.add(sectionHelper.addUnitToLesson(imported,unit));
+    }
+    if (chapter.length() > 0) {
+        pairs.add(sectionHelper.addChapterToLesson(imported,chapter));
+    }
+    if (week.length() > 0) {
+        pairs.add(sectionHelper.addWeekToLesson(imported,week));
+    }
+    sectionHelper.addAssociations(pairs);
+
+    return false;
   }
 
   /**
