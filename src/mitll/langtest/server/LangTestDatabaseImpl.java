@@ -1050,15 +1050,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       makeAutoCRT();
       makeASRScoring();
       if (serverProps.isAutoCRT()) {
-        logger.debug("scoring " + asrScoring);
-        autoCRT.getAutoCRTDecodeOutput(exercise, questionID, getExercise(exercise), file, audioAnswer, asrScoring);
+        autoCRT.getAutoCRTDecodeOutput(exercise, questionID, getExercise(exercise), file, audioAnswer);
       } else {
-        autoCRT.getFlashcardAnswer(getExercise(exercise), file, audioAnswer, asrScoring);
+        autoCRT.getFlashcardAnswer(getExercise(exercise), file, audioAnswer);
       }
       db.updateFlashcardState(user, exercise, audioAnswer.isCorrect());
       return audioAnswer;
     } else if (serverProps.isAutoCRT()) {
-      autoCRT.getAutoCRTDecodeOutput(exercise, questionID, getExercise(exercise), file, audioAnswer, asrScoring);
+      autoCRT.getAutoCRTDecodeOutput(exercise, questionID, getExercise(exercise), file, audioAnswer);
     }
     return audioAnswer;
   }
@@ -1260,6 +1259,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public void destroy() {
     super.destroy();
     db.destroy();
+    if (studentAnswersDB != null) {
+      studentAnswersDB.destroy();
+    }
   }
 
   @Override
@@ -1345,7 +1347,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private boolean isMatch(Exercise exercise, File audioFile) throws Exception {
     AudioAnswer audioAnswer = new AudioAnswer();
-    autoCRT.getFlashcardAnswer(exercise, audioFile, audioAnswer, asrScoring);
+    autoCRT.getFlashcardAnswer(exercise, audioFile, audioAnswer);
     if (audioAnswer.getScore() == -1) {
       logger.error("hydec bad config file, stopping...");
       throw new Exception("hydec bad config file, stopping...");
