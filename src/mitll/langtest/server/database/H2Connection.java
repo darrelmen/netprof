@@ -74,7 +74,7 @@ public class H2Connection implements DatabaseConnection {
     } else {
       sendShutdown();
       closeConnection();
-      org.h2.Driver.unload();
+      //org.h2.Driver.unload();
     }
   }
 
