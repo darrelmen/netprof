@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Does ASR scoring using hydec.  Results in either alignment or decoding, depending on the mode.
@@ -76,6 +77,12 @@ public class ASRScoring extends Scoring {
     readDictionary();
   }
 
+  /**
+   * @see mitll.langtest.server.audio.SplitAudio#getAsrScoring
+   * @param deployPath
+   * @param properties
+   * @param dict
+   */
   public ASRScoring(String deployPath, Map<String, String> properties, HTKDictionary dict) {
     super(deployPath);
     lowScoreThresholdKeepTempDir = 0.2;
@@ -303,7 +310,7 @@ public class ASRScoring extends Scoring {
   /**
    * @param lmSentences
    * @param background
-   * @see AutoCRTScoring#getASRScoreForAudio(java.io.File, Collection
+   * @see AutoCRTScoring#getASRScoreForAudio
    * @return
    */
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
@@ -324,7 +331,8 @@ public class ASRScoring extends Scoring {
    * @return
    */
   private String getUniqueTokensInLM(Collection<String> lmSentences, List<String> backgroundVocab) {
-    String sentence;Set<String> backSet = new HashSet<String>(backgroundVocab);
+    String sentence;
+    Set<String> backSet = new HashSet<String>(backgroundVocab);
     List<String> mergedVocab = new ArrayList<String>(backgroundVocab);
     List<String> foregroundVocab = svDecoderHelper.getSimpleVocab(lmSentences, FOREGROUND_VOCAB_LIMIT);
     for (String foregroundToken : foregroundVocab) {
@@ -452,8 +460,9 @@ public class ASRScoring extends Scoring {
 
     Scores scoresFromHydec = getScoresFromHydec(testAudio, sentence, configFile);
     double hydecScore = scoresFromHydec.hydecScore;
-    if (hydecScore != -1 || hydecScore < lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
+    if (/*hydecScore != -1 ||*/ hydecScore > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
       try {
+        logger.debug("deleting " + tmpDir + " since score is " +hydecScore);
         FileUtils.deleteDirectory(new File(tmpDir));
       } catch (IOException e) {
         logger.error("Deleting dir " + tmpDir + " got " +e,e);
@@ -493,6 +502,9 @@ public class ASRScoring extends Scoring {
   private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
     long then = System.currentTimeMillis();
+
+    logger.debug("getScoresFromHydec using " + configFile + " to decode " + sentence);
+
     try {
       jscoreOut = testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
       float hydec_score = jscoreOut._1;
@@ -520,16 +532,119 @@ public class ASRScoring extends Scoring {
     return new Scores(0f, eventScores);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getValidPhrases(java.util.Collection)
+   * @param phrases
+   * @return
+   */
   public Collection<String> getValidPhrases(Collection<String> phrases) {
-    List<String> valid = new ArrayList<String>();
+    return getValidSentences(phrases);
+ /*   List<String> valid = new ArrayList<String>();
     for (String phrase : phrases) {
       try {
-        String[][] process = letterToSoundClass.process(phrase);
-        valid.add(phrase);
+        if (!isPhraseInDict(phrase)) {
+          logger.warn("getValidPhrases : skipped " + phrase);
+        } else {
+          valid.add(phrase);
+        }
       } catch (Exception e) {
        logger.warn("skipped " + phrase);
       }
     }
+    if (phrases.size() != valid.size()) {
+      logger.warn("started with " + phrases.size() + " phrases, but now have " + valid.size() + " valid phrases.");
+    }
+    return valid;*/
+  }
+
+  private boolean isPhraseInDict(String phrase) {
+    return letterToSoundClass.process(phrase) != null;
+  }
+
+
+  private Collection<String> getValidSentences(Collection<String> sentences) {
+    Set<String> filtered = new TreeSet<String>();
+
+ /*   BufferedWriter utf8 = null;
+    try {
+      utf8 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("validTokens_for_" +sentences.size()+
+        "_" +System.currentTimeMillis()+
+        ".txt"), "UTF8"));
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+*/
+    Set<String> allValid = new HashSet<String>();
+    for (String sentence : sentences) {
+      List<String> tokens = svDecoderHelper.getTokens(sentence);
+      boolean valid = true;
+      for (String token : tokens) {
+        if (!isValid(token)) {
+          //logger.warn("\tgetValidSentences : token '" + token + "' is not in dictionary.");
+
+          valid = false;
+        }
+        else allValid.add(token);
+      }
+      if (valid) filtered.add(sentence);
+      else {
+        logger.warn("getValidSentences : skipping '" + sentence + "' which is not in dictionary.");
+      }
+    }
+
+/*    try {
+      if (utf8 != null) {
+        for (String t : allValid) utf8.write(t + "\n");
+        utf8.close();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }*/
+
+    return filtered;
+  }
+
+  private boolean isValid(String token) {
+    return checkToken(token) && isPhraseInDict(token);
+  }
+
+  private boolean checkToken(String token) {
+    boolean valid = true;
+    boolean digit = false;
+    boolean english = false;
+    if (token.equalsIgnoreCase(SmallVocabDecoder.UNKNOWN_MODEL)) return true;
+    for (int i = 0; i < token.length() && valid; i++) {
+      char c = token.charAt(i);
+      if (Character.isDigit(c)) {
+        valid = false;
+        digit = true;
+      }
+      if (Character.UnicodeBlock.of(c) == Character.UnicodeBlock.BASIC_LATIN) {
+        valid = false;
+        english = true;
+      }
+    }
+    //if (!valid) logger.warn((digit ? " found digit in " : (english ? " found english in " : "huh? invalid ?")) + token);
     return valid;
   }
+
+/*
+  public List<String> getTokens(String sentence) {
+    List<String> all = new ArrayList<String>();
+
+    for (String untrimedToken : sentence.split("\\p{Z}+")) { // split on spaces
+      String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
+      String token = tt.trim();  // necessary?
+      if (token.length() > 0) {
+        all.add(token);
+      }
+    }
+
+    return all;
+  }
+*/
+
+
 }
