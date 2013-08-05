@@ -103,7 +103,7 @@ public class Export /*implements Database*/ {
 
     public String toString() {
       return "id " + id + " " + key.size() + " keys : '" + "" +/*new HashSet<String>(key) +   */
-          "' and " + rgs.size() + " responses " + new HashSet<ResponseAndGrade>(rgs);
+          "' and " + rgs.size();// + " responses " + new HashSet<ResponseAndGrade>(rgs);
     }
   }
 
@@ -161,7 +161,7 @@ public class Export /*implements Database*/ {
       else {
         for (String answer : q.getAlternateAnswers()) {
           if (answer.length() == 0) {
-            logger.error("huh? alternate answer is empty??? for " + q + " in " + exercise.getID());
+            logger.warn("huh? alternate answer is empty??? for " + q + " in " + exercise.getID());
           } else {
             exerciseExport.addRG(answer, 5);
           }
@@ -177,7 +177,7 @@ public class Export /*implements Database*/ {
     for (Result r : resultsForExercise) {
       if (r.flq == useFLQ && r.spoken == useSpoken) {
         ExerciseExport exerciseExport = qidToExport.get(r.qid);
-        if (exerciseExport == null) logger.error("for " + r.getID() +
+        if (exerciseExport == null) logger.warn("for " + r.getID() +
           " can't find r qid " + r.qid + " in keys " + qidToExport.keySet());
         else {
           List<Grade> gradesForResult = idToGrade.get(r.uniqueID);
