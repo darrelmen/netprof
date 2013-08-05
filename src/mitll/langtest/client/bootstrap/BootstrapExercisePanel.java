@@ -110,9 +110,10 @@ public class BootstrapExercisePanel extends FluidContainer {
     soundManager = controller.getSoundManager();
 
     add(getHelpRow(controller));
+   // Window.alert("got here : BootstrapExercisePanel ");
    // try {
     //  add(new HTML("Got here"));
-      add(getCardPrompt(e,controller));
+      add(getCardPrompt(e, controller));
  /*   } catch (Exception e1) {
       Window.alert("got " +e1);
     }*/
@@ -196,27 +197,48 @@ public class BootstrapExercisePanel extends FluidContainer {
   private Widget getQuestionContent(Exercise e, ExerciseController controller) /*throws Exception*/ {
     int headingSize = 1;
     String stimulus = e.getEnglishSentence();
-    //System.out.println("stim " + stimulus);
-    if (stimulus == null) {
-      //stimulus += "nullStim_Initially";
-      //  headingSize = 4;
-      if (e.getContent() != null) {
-        Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
-        stimulus = "<h3 style='margin-right: 30px'>" +
-        //  "Debug baby!"+
-          e.getContent() + "<br></br>" +
-          qaPair.getQuestion() +
-          "</h3>";
-        HTML html = getHTML(stimulus, true, controller);
-        html.addStyleName("cardText");
-        html.addStyleName("marginRight");
-
-        return html;
-      }
+ //    String markup = "<p>\\W&nbsp; </p>";
+    //    Window.alert("doing getQuestionContent");
+    //String stimulus;
+    String content = e.getContent();
+    if (content == null) {
+      content = stimulus;
     }
-    else stimulus = "got english : " + stimulus;
+    else {
+      stimulus = content;
+   //   System.err.println("before " + content);
+   //   content = content.replaceAll("<p>","<br>");
+   //   content = content.replaceAll("</p>","</br>");
+     // if (content.contains(markup)) {
+      //  System.out.println("getQuestionContent : removing " + markup);
+     //   content = content.replaceAll(markup, "<br></br>");
+     // }
+    }
 
-    if (stimulus == null) stimulus = "Blank for exercise #" +e.getID();
+    //System.out.println("stim " + stimulus);
+    //stimulus += "nullStim_Initially";
+    //  headingSize = 4;
+    //  String content = e.getContent();
+    if (content != null) {
+      Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
+   /*   if (content.contains(markup)) {
+        System.out.println("getQuestionContent : removing " + markup);
+        content = content.replaceAll(markup, "<br></br>");
+      }*/
+      if (content.contains("<p>"))
+      stimulus = "<h3 style='margin-right: 30px'>" +
+      //  "Debug baby!"+
+        content +"<br>" +
+        qaPair.getQuestion() +
+        "</h3>";
+      HTML html = getHTML(stimulus, true, controller);
+      html.addStyleName("cardText");
+      html.addStyleName("marginRight");
+
+      return html;
+    }
+
+   // if (stimulus == null) stimulus = "Blank for exercise #" +e.getID();
 
    // System.out.println("Heading size " + headingSize);
 
@@ -644,17 +666,39 @@ public class BootstrapExercisePanel extends FluidContainer {
 
     private String getCorrectDisplay() {
       String refSentence = exercise.getRefSentence();
+      String translit = exercise.getTranslitSentence().length() > 0 ? " (" + exercise.getTranslitSentence() + ")" : "";
+
+      if (refSentence == null || refSentence.length() == 0) {
+        List<Exercise.QAPair> questions = exercise.getForeignLanguageQuestions();
+        Exercise.QAPair qaPair = questions.get(0);
+        StringBuilder b = new StringBuilder();
+        for (String alt : qaPair.getAlternateAnswers()) {
+          b.append(alt).append(", ");
+        }
+        if (b.length() > 0) refSentence = b.toString().substring(0, b.length() - 2);
+        //refSentence = qaPair.getAnswer();
+
+        List<Exercise.QAPair> eq = exercise.getEnglishQuestions();
+        qaPair = eq.get(0);
+
+
+        b = new StringBuilder();
+        for (String alt : qaPair.getAlternateAnswers()) {
+          b.append(alt).append(", ");
+        }
+        if (b.length() > 0) translit = " (" + b.toString().substring(0, b.length() - 2) + ")";
+
+      }
       boolean hasSynonyms = !exercise.getSynonymSentences().isEmpty();
       if (hasSynonyms) {
         refSentence = "";
         for (int i = 0; i < exercise.getSynonymSentences().size(); i++) {
           String synonym = exercise.getSynonymSentences().get(i);
-          String translit = exercise.getSynonymTransliterations().get(i);
-          refSentence += synonym + "(" +translit + ") or ";
+          String translit2 = exercise.getSynonymTransliterations().get(i);
+          refSentence += synonym + "(" +translit2 + ") or ";
         }
         refSentence = refSentence.substring(0, refSentence.length() - " or ".length());
       }
-      String translit = exercise.getTranslitSentence().length() > 0 ? " (" + exercise.getTranslitSentence() + ")" : "";
       return "Answer: " + refSentence + (hasSynonyms ? "" : translit);
     }
 
