@@ -91,7 +91,7 @@ public class AudioAnswer implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.AutoCRT#getFlashcardAnswer(Exercise, java.io.File, AudioAnswer)
+   * @see mitll.langtest.server.AutoCRT#getFlashcardAnswer(Exercise, java.io.File, AudioAnswer, Scoring)
    * @param correct
    */
   public void setCorrect(boolean correct) {
