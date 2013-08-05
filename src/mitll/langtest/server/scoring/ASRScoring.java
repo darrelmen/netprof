@@ -48,7 +48,7 @@ import java.util.TreeSet;
 public class ASRScoring extends Scoring {
   private static Logger logger = Logger.getLogger(ASRScoring.class);
 
-  private static final int FOREGROUND_VOCAB_LIMIT = 30;
+  private static final int FOREGROUND_VOCAB_LIMIT = 100;
   public static final String SMALL_LM_SLF = "smallLM.slf";
 
   private final SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
@@ -310,7 +310,7 @@ public class ASRScoring extends Scoring {
   /**
    * @param lmSentences
    * @param background
-   * @see AutoCRTScoring#getASRScoreForAudio
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(java.io.File, java.util.Collection)
    * @return
    */
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
@@ -576,7 +576,9 @@ public class ASRScoring extends Scoring {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
 */
-    Set<String> allValid = new HashSet<String>();
+    //Set<String> allValid = new HashSet<String>();
+    Set<String> skipped = new TreeSet<String>();
+
     for (String sentence : sentences) {
       List<String> tokens = svDecoderHelper.getTokens(sentence);
       boolean valid = true;
@@ -586,13 +588,16 @@ public class ASRScoring extends Scoring {
 
           valid = false;
         }
-        else allValid.add(token);
+        //else allValid.add(token);
       }
       if (valid) filtered.add(sentence);
       else {
-        logger.warn("getValidSentences : skipping '" + sentence + "' which is not in dictionary.");
+        skipped.add(sentence);
+       // logger.warn("getValidSentences : skipping '" + sentence + "' which is not in dictionary.");
       }
     }
+
+    logger.warn("getValidSentences : skipped " + skipped.size() + " sentences : " + skipped  );
 
 /*    try {
       if (utf8 != null) {
