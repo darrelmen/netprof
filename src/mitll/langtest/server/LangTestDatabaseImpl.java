@@ -8,7 +8,6 @@ import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.Export;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
@@ -463,13 +462,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public FlashcardResponse getNextExercise(long userID, Map<String, Collection<String>> typeToSection) {
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-    logger.debug("getNextExercise : req " + typeToSection + " yields " + exercisesForSection.size() + " exercises.");
+    //logger.debug("getNextExercise : req " + typeToSection + " yields " + exercisesForSection.size() + " exercises.");
     List<Exercise> copy = new ArrayList<Exercise>(exercisesForSection);
     if (serverProps.sortExercisesByID()) {
       sortByID(copy);
     }
     FlashcardResponse nextExercise = db.getNextExercise(copy,userID, serverProps.isTimedGame());
-    logger.debug("\tnextExercise " + nextExercise);
+    //logger.debug("\tnextExercise " + nextExercise);
 
     return getFlashcardResponse(userID, nextExercise);
   }
@@ -668,7 +667,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Get score when doing autoCRT on an audio file.
-   * @see AutoCRT#getAutoCRTDecodeOutput(String, int, mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
+   * @see AutoCRT#getAutoCRTDecodeOutput(String, int, mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer, mitll.langtest.server.scoring.Scoring)
    * @see AutoCRT#getFlashcardAnswer
    * @param testAudioFile audio file to score
    * @param lmSentences to look for in the audio
@@ -685,8 +684,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       List<String> unk = new ArrayList<String>();
       unk.add(SmallVocabDecoder.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
       String vocab = asrScoring.getUsedTokens(lmSentences, unk);
+      logger.debug("getASRScoreForAudio : vocab " + vocab);
       return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, 128, 128, false, true, tmpDir, serverProps.useScoreCache());
     }
+  }
+
+  private String createSLFFile(Collection<String> lmSentences, String tmpDir) {
+    SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
+    // long then = System.currentTimeMillis();
+    String slfFile = svDecoderHelper.createSimpleSLFFile(lmSentences, tmpDir);
+    //  long now = System.currentTimeMillis();
+    //logger.debug("simple create slf file took " + (now - then) + " millis");
+    return slfFile;
   }
 
   @Override
@@ -695,20 +704,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return asrScoring.getValidPhrases(phrases);  //To change body of implemented methods use File | Settings | File Templates.
   }
 
-  private String createSLFFile(Collection<String> lmSentences, String tmpDir) {
-    SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
-   // long then = System.currentTimeMillis();
-    String slfFile = svDecoderHelper.createSimpleSLFFile(lmSentences, tmpDir);
-  //  long now = System.currentTimeMillis();
-    //logger.debug("simple create slf file took " + (now - then) + " millis");
-    return slfFile;
-  }
-
   /**
    * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
    *
    * @see #getASRScoreForAudio(int, String, String, int, int, boolean)
-   * @see mitll.langtest.server.scoring.AutoCRTScoring#getASRScoreForAudio(java.io.File, Collection
+   * @see mitll.langtest.server.scoring.AutoCRTScoring#getASRScoreForAudio
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param testAudioFile
@@ -738,9 +738,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String testAudioDir = testDirAndName.getDir();
 
     //logger.debug("getASRScoreForAudio scoring " + testAudioName + " in dir " + testAudioDir);
-    PretestScore pretestScore;
-    if (serverProps.getLanguage().equalsIgnoreCase("English")) sentence = sentence.toUpperCase();
-    pretestScore = asrScoring.scoreRepeat(
+    if (serverProps.getLanguage().equalsIgnoreCase("English")) sentence = sentence.toUpperCase();  // hack for English
+    PretestScore pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence,
         getImageOutDir(), width, height, useScoreToColorBkg,decode,tmpDir, useCache);
@@ -1032,21 +1031,34 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return answer;
   }
 
+  /**
+   * @see #writeAudioFile(String, String, String, int, int, int, boolean, String, boolean)
+   * @param exercise
+   * @param questionID
+   * @param user
+   * @param reqid
+   * @param file
+   * @param validity
+   * @param url
+   * @param doFlashcard
+   * @return
+   */
   private AudioAnswer getAudioAnswer(String exercise, int questionID, int user, int reqid,
                                      File file, AudioCheck.ValidityAndDur validity, String url, boolean doFlashcard) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
     if (serverProps.isFlashcard()|| doFlashcard) {
       makeAutoCRT();
-
+      makeASRScoring();
       if (serverProps.isAutoCRT()) {
-        autoCRT.getAutoCRTDecodeOutput(exercise, questionID, getExercise(exercise), file, audioAnswer);
+        logger.debug("scoring " + asrScoring);
+        autoCRT.getAutoCRTDecodeOutput(exercise, questionID, getExercise(exercise), file, audioAnswer, asrScoring);
       } else {
-        autoCRT.getFlashcardAnswer(getExercise(exercise), file, audioAnswer);
+        autoCRT.getFlashcardAnswer(getExercise(exercise), file, audioAnswer, asrScoring);
       }
       db.updateFlashcardState(user, exercise, audioAnswer.isCorrect());
       return audioAnswer;
     } else if (serverProps.isAutoCRT()) {
-      autoCRT.getAutoCRTDecodeOutput(exercise, questionID, getExercise(exercise), file, audioAnswer);
+      autoCRT.getAutoCRTDecodeOutput(exercise, questionID, getExercise(exercise), file, audioAnswer, asrScoring);
     }
     return audioAnswer;
   }
@@ -1333,7 +1345,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private boolean isMatch(Exercise exercise, File audioFile) throws Exception {
     AudioAnswer audioAnswer = new AudioAnswer();
-    autoCRT.getFlashcardAnswer(exercise, audioFile, audioAnswer);
+    autoCRT.getFlashcardAnswer(exercise, audioFile, audioAnswer, asrScoring);
     if (audioAnswer.getScore() == -1) {
       logger.error("hydec bad config file, stopping...");
       throw new Exception("hydec bad config file, stopping...");
