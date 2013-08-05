@@ -59,6 +59,12 @@ public class SmallVocabDecoder {
   private final String platform = Utils.package$.MODULE$.platform();
   private double foregroundBackgroundBlend;
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#createSLFFile
+   * @param lmSentences
+   * @param tmpDir
+   * @return
+   */
   public String createSimpleSLFFile(Collection<String> lmSentences, String tmpDir) {
     String slfFile = tmpDir + File.separator + SMALL_LM_SLF;
 
@@ -72,10 +78,11 @@ public class SmallVocabDecoder {
       nodesBuf.append("I=1 W=</s>\n");
       int newNodes = 2;
       StringBuilder linksBuf = new StringBuilder();
-      List<String> sentencesToUse = new ArrayList<String>(lmSentences);
+      Collection<String> sentencesToUse = new ArrayList<String>(lmSentences);
       sentencesToUse.add(UNKNOWN_MODEL);
       for (String sentence : sentencesToUse) {
         List<String> tokens = getTokens(sentence);
+        //logger.debug("\tfor " + sentence + " tokens are " + tokens);
         int start = 0;
 
         for (String token : tokens) {
@@ -123,7 +130,7 @@ public class SmallVocabDecoder {
    * @param scoringDir hydec location
    * @return SLF file that is created, might not exist if any of the steps fail (e.g. if bin exes are not marked executable)
    */
-  public String createSLFFile(List<String> lmSentences, List<String> background, List<String> vocab, String tmpDir, String modelsDir,
+  private String createSLFFile(List<String> lmSentences, List<String> background, List<String> vocab, String tmpDir, String modelsDir,
                               String scoringDir) {
     String convertedFile = tmpDir + File.separator + SMALL_LM_SLF;
     if (platform.startsWith("win")) {
@@ -193,8 +200,12 @@ public class SmallVocabDecoder {
     final Map<String, Integer> sc = new HashMap<String, Integer>();
     for (String sentence : sentences) {
       for (String token : getTokens(sentence)) {
-        Integer c = sc.get(token);
-        sc.put(token, (c == null) ? 1 : c + 1);
+      //  if (isValid(scoring, token)) {
+          Integer c = sc.get(token);
+          sc.put(token, (c == null) ? 1 : c + 1);
+     /*   } else {
+          logger.warn("getSimpleVocab : skipping '" + token + "' which is not in dictionary.");
+        }*/
       }
     }
 
