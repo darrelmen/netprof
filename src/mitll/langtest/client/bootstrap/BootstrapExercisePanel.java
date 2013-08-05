@@ -93,10 +93,10 @@ public class BootstrapExercisePanel extends FluidContainer {
   private ProgressBar scoreFeedback = new ProgressBar();
 
   /**
-   * @see mitll.langtest.client.flashcard.FlashcardExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    * @param e
    * @param service
    * @param controller
+   * @see mitll.langtest.client.flashcard.FlashcardExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    */
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller) {
@@ -110,10 +110,10 @@ public class BootstrapExercisePanel extends FluidContainer {
     soundManager = controller.getSoundManager();
 
     add(getHelpRow(controller));
-   // Window.alert("got here : BootstrapExercisePanel ");
-   // try {
+    // Window.alert("got here : BootstrapExercisePanel ");
+    // try {
     //  add(new HTML("Got here"));
-      add(getCardPrompt(e, controller));
+    add(getCardPrompt(e, controller));
  /*   } catch (Exception e1) {
       Window.alert("got " +e1);
     }*/
@@ -125,6 +125,7 @@ public class BootstrapExercisePanel extends FluidContainer {
 
   /**
    * Store a cookie for the initial feedback for new users.
+   *
    * @param key
    * @return
    */
@@ -132,9 +133,8 @@ public class BootstrapExercisePanel extends FluidContainer {
     int times = 0;
     String timesHelpShown = stockStore.getItem(key);
     if (timesHelpShown == null) {
-      stockStore.setItem(key,"1");
-    }
-    else {
+      stockStore.setItem(key, "1");
+    } else {
       try {
         times = Integer.parseInt(timesHelpShown);
       } catch (NumberFormatException e1) {
@@ -145,16 +145,17 @@ public class BootstrapExercisePanel extends FluidContainer {
   }
 
   /**
-   * @see MyRecordButtonPanel#showCorrectFeedback(double)
    * @param key
+   * @see MyRecordButtonPanel#showCorrectFeedback(double)
    */
   private void incrCookie(String key) {
     int cookieValue = getCookieValue(key);
-    stockStore.setItem(key,""+(cookieValue+1));
+    stockStore.setItem(key, "" + (cookieValue + 1));
   }
 
   /**
    * Make row for help question mark, right justify
+   *
    * @param controller
    * @return
    */
@@ -182,11 +183,12 @@ public class BootstrapExercisePanel extends FluidContainer {
 
   /**
    * Make a row to show the question content (the prompt or stimulus)
-   *  and the space bar and feedback widgets beneath it.
+   * and the space bar and feedback widgets beneath it.
+   *
    * @param e
    * @return
    */
-  private Widget getCardPrompt(Exercise e, ExerciseController controller)/* throws Exception*/{
+  private Widget getCardPrompt(Exercise e, ExerciseController controller)/* throws Exception*/ {
     FluidRow questionRow = new FluidRow();
     Widget questionContent = getQuestionContent(e, controller);
     Column contentContainer = new Column(12, questionContent);
@@ -197,22 +199,21 @@ public class BootstrapExercisePanel extends FluidContainer {
   private Widget getQuestionContent(Exercise e, ExerciseController controller) /*throws Exception*/ {
     int headingSize = 1;
     String stimulus = e.getEnglishSentence();
- //    String markup = "<p>\\W&nbsp; </p>";
+    //    String markup = "<p>\\W&nbsp; </p>";
     //    Window.alert("doing getQuestionContent");
     //String stimulus;
     String content = e.getContent();
     if (content == null) {
       content = stimulus;
-    }
-    else {
+    } else {
       stimulus = content;
-   //   System.err.println("before " + content);
-   //   content = content.replaceAll("<p>","<br>");
-   //   content = content.replaceAll("</p>","</br>");
-     // if (content.contains(markup)) {
+      //   System.err.println("before " + content);
+      //   content = content.replaceAll("<p>","<br>");
+      //   content = content.replaceAll("</p>","</br>");
+      // if (content.contains(markup)) {
       //  System.out.println("getQuestionContent : removing " + markup);
-     //   content = content.replaceAll(markup, "<br></br>");
-     // }
+      //   content = content.replaceAll(markup, "<br></br>");
+      // }
     }
 
     //System.out.println("stim " + stimulus);
@@ -226,11 +227,11 @@ public class BootstrapExercisePanel extends FluidContainer {
         content = content.replaceAll(markup, "<br></br>");
       }*/
       if (content.contains("<p>"))
-      stimulus = "<h3 style='margin-right: 30px'>" +
-      //  "Debug baby!"+
-        content +"<br>" +
-        qaPair.getQuestion() +
-        "</h3>";
+        stimulus = "<h3 style='margin-right: 30px'>" +
+          //  "Debug baby!"+
+          content + "<br>" +
+          qaPair.getQuestion() +
+          "</h3>";
       HTML html = getHTML(stimulus, true, controller);
       html.addStyleName("cardText");
       html.addStyleName("marginRight");
@@ -238,13 +239,13 @@ public class BootstrapExercisePanel extends FluidContainer {
       return html;
     }
 
-   // if (stimulus == null) stimulus = "Blank for exercise #" +e.getID();
+    // if (stimulus == null) stimulus = "Blank for exercise #" +e.getID();
 
-   // System.out.println("Heading size " + headingSize);
+    // System.out.println("Heading size " + headingSize);
 
     Widget hero = new Heading(headingSize, stimulus);
     hero.addStyleName("cardText");
- //   if (true) throw new Exception("Testin!");
+    //   if (true) throw new Exception("Testin!");
     return hero;
   }
 
@@ -271,12 +272,13 @@ public class BootstrapExercisePanel extends FluidContainer {
 
   /**
    * Three rows below the stimulus word/expression:<p></p>
-   *  record space bar image <br></br>
-   *  reco feedback - whether the recorded audio was correct/incorrect, etc.  <br></br>
-   *  score feedback - pron score
+   * record space bar image <br></br>
+   * reco feedback - whether the recorded audio was correct/incorrect, etc.  <br></br>
+   * score feedback - pron score
+   *
    * @param e
    * @param service
-   * @param controller     used in subclasses for audio control
+   * @param controller used in subclasses for audio control
    */
   private void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
     // add answer widget to do the recording
@@ -295,6 +297,7 @@ public class BootstrapExercisePanel extends FluidContainer {
 
   /**
    * Center align the record button image.
+   *
    * @param recordButton
    * @return
    */
@@ -310,6 +313,7 @@ public class BootstrapExercisePanel extends FluidContainer {
 
   /**
    * Center align the text feedback (correct/incorrect)
+   *
    * @return
    */
   private FluidRow getRecoOutputRow() {
@@ -318,7 +322,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     paragraph2.addStyleName("alignCenter");
 
     recoOutputRow.add(new Column(12, paragraph2));
-    recoOutput = new Heading(3,"Answer");
+    recoOutput = new Heading(3, "Answer");
     recoOutput.addStyleName("cardHiddenText");   // same color as background so text takes up space but is invisible
     DOM.setStyleAttribute(recoOutput.getElement(), "color", "#ebebec");
 
@@ -329,6 +333,7 @@ public class BootstrapExercisePanel extends FluidContainer {
   /**
    * Holds the pron score feedback.
    * Initially made with a placeholder.
+   *
    * @return
    */
   private FluidRow getScoreFeedbackRow() {
@@ -360,12 +365,13 @@ public class BootstrapExercisePanel extends FluidContainer {
 
   private class MyRecordButtonPanel extends RecordButtonPanel {
     private final Exercise exercise;
+
     public MyRecordButtonPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, int index) {
       super(service, controller, exercise, null, index);
       this.exercise = exercise;
     }
 
-   @Override
+    @Override
     protected RecordButton makeRecordButton(ExerciseController controller, final RecordButtonPanel outer) {
       return new RecordButton(controller.getRecordTimeout(), true) {
         @Override
@@ -429,10 +435,11 @@ public class BootstrapExercisePanel extends FluidContainer {
                                                  });
         }
       };
-   }
+    }
 
     @Override
-    protected void layoutRecordButton() {}
+    protected void layoutRecordButton() {
+    }
 
     @Override
     protected Anchor makeRecordButton() {
@@ -455,7 +462,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       recordButton.addKeyDownHandler(new KeyDownHandler() {
         @Override
         public void onKeyDown(KeyDownEvent event) {
-          System.out.println(" record button got key down : " +event+  "-------------- ");
+          System.out.println(" record button got key down : " + event + "-------------- ");
         }
       });
 
@@ -463,6 +470,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     }
 
     private boolean first = true;
+
     @Override
     public void showRecording() {
       recordButton.setResource(recordImage1);
@@ -496,15 +504,16 @@ public class BootstrapExercisePanel extends FluidContainer {
 
     /**
      * Deal with three cases: <br></br>
-     *   * the audio was invalid in some way : too short, too quiet, too loud<br></br>
-     *   * the audio was the correct response<br></br>
-     *   * the audio was incorrect<br></br><p></p>
-     *
+     * * the audio was invalid in some way : too short, too quiet, too loud<br></br>
+     * * the audio was the correct response<br></br>
+     * * the audio was incorrect<br></br><p></p>
+     * <p/>
      * And then move on to the next item.
-     * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
-     * @param result response from server
+     *
+     * @param result        response from server
      * @param questionState ignored here
-     * @param outer ignored here
+     * @param outer         ignored here
+     * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
      */
     @Override
     protected void receivedAudioAnswer(final AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
@@ -526,8 +535,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       } else {   // incorrect!!
         if (hasRefAudio) {
           ensureMP3(result, score, path, hasRefAudio);
-        }
-        else {
+        } else {
           showIncorrectFeedback(result, score, hasRefAudio);
         }
       }
@@ -538,6 +546,7 @@ public class BootstrapExercisePanel extends FluidContainer {
 
     /**
      * Make sure all the mp3s we may play exist on the server.
+     *
      * @param result
      * @param score
      * @param path
@@ -549,7 +558,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       if (hasSynonymAudio) {
         numMP3s = exercise.getSynonymAudioRefs().size();
         for (String spath : exercise.getSynonymAudioRefs()) {
-       //   spath = (spath.endsWith(WAV)) ? spath.replace(WAV, MP3) : spath;
+          //   spath = (spath.endsWith(WAV)) ? spath.replace(WAV, MP3) : spath;
           service.ensureMP3(spath, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -596,6 +605,7 @@ public class BootstrapExercisePanel extends FluidContainer {
 
     /**
      * If there's reference audio, play it and wait for it to finish.
+     *
      * @param result
      * @param score
      * @param hasRefAudio
@@ -605,12 +615,11 @@ public class BootstrapExercisePanel extends FluidContainer {
 
       boolean hasSynonymAudio = !exercise.getSynonymAudioRefs().isEmpty();
       if (hasRefAudio) {
-         if (hasSynonymAudio) {
-           toPlay.addAll(exercise.getSynonymAudioRefs());
-           System.out.println("showIncorrectFeedback : playing " + toPlay);
-           playAllAudio();
-         }
-        else {
+        if (hasSynonymAudio) {
+          toPlay.addAll(exercise.getSynonymAudioRefs());
+          System.out.println("showIncorrectFeedback : playing " + toPlay);
+          playAllAudio();
+        } else {
           String path = exercise.getRefAudio();
           path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
           createSound(path, new EndListener() {
@@ -646,8 +655,7 @@ public class BootstrapExercisePanel extends FluidContainer {
 
           if (!toPlay.isEmpty()) {
             playAllAudio();
-          }
-          else {
+          } else {
             goToNextItem();
           }
         }
@@ -670,24 +678,9 @@ public class BootstrapExercisePanel extends FluidContainer {
 
       if (refSentence == null || refSentence.length() == 0) {
         List<Exercise.QAPair> questions = exercise.getForeignLanguageQuestions();
-        Exercise.QAPair qaPair = questions.get(0);
-        StringBuilder b = new StringBuilder();
-        for (String alt : qaPair.getAlternateAnswers()) {
-          b.append(alt).append(", ");
-        }
-        if (b.length() > 0) refSentence = b.toString().substring(0, b.length() - 2);
-        //refSentence = qaPair.getAnswer();
-
+        refSentence = getAltAnswers(questions);
         List<Exercise.QAPair> eq = exercise.getEnglishQuestions();
-        qaPair = eq.get(0);
-
-
-        b = new StringBuilder();
-        for (String alt : qaPair.getAlternateAnswers()) {
-          b.append(alt).append(", ");
-        }
-        if (b.length() > 0) translit = " (" + b.toString().substring(0, b.length() - 2) + ")";
-
+        translit = " (" + getAltAnswers(eq) + " )";
       }
       boolean hasSynonyms = !exercise.getSynonymSentences().isEmpty();
       if (hasSynonyms) {
@@ -695,7 +688,7 @@ public class BootstrapExercisePanel extends FluidContainer {
         for (int i = 0; i < exercise.getSynonymSentences().size(); i++) {
           String synonym = exercise.getSynonymSentences().get(i);
           String translit2 = exercise.getSynonymTransliterations().get(i);
-          refSentence += synonym + "(" +translit2 + ") or ";
+          refSentence += synonym + "(" + translit2 + ") or ";
         }
         refSentence = refSentence.substring(0, refSentence.length() - " or ".length());
       }
@@ -719,6 +712,19 @@ public class BootstrapExercisePanel extends FluidContainer {
     }
   }
 
+  private String getAltAnswers(List<Exercise.QAPair> questions) {
+    Exercise.QAPair qaPair = questions.get(0);
+    StringBuilder b = new StringBuilder();
+    for (String alt : qaPair.getAlternateAnswers()) {
+      if (alt.trim().length() > 0) {
+        b.append(alt).append(", ");
+      }
+    }
+    if (b.length() > 0) {
+      return b.toString().substring(0, b.length() - 2);
+    } else return "";
+  }
+
 
   public void playCorrect() {
     startSong("langtest/sounds/correct4.mp3", new EndListener() {
@@ -737,37 +743,39 @@ public class BootstrapExercisePanel extends FluidContainer {
   }
 
 
-  public void startSong(String path, EndListener endListener){
+  public void startSong(String path, EndListener endListener) {
     // System.out.println("PlayAudioPanel : start song : " + path);
     if (soundManager.isReady()) {
       //System.out.println(new Date() + " Sound manager is ready.");
       if (soundManager.isOK()) {
         destroySound();
-        createSound(path,endListener);
+        createSound(path, endListener);
       } else {
         System.out.println(new Date() + " Sound manager is not OK!.");
         warnNoFlash.setVisible(true);
       }
     }
   }
+
   private Sound currentSound = null;
   private SoundManagerAPI soundManager;
 
   /**
-   * @see #startSong
    * @param song
+   * @see #startSong
    */
-  private void createSound(final String song, final EndListener endListener){
+  private void createSound(final String song, final EndListener endListener) {
     currentSound = new Sound(new AudioControl() {
       @Override
       public void reinitialize() {
-        System.out.println("song " +song + " ended---");
+        System.out.println("song " + song + " ended---");
         destroySound();
         endListener.songEnded();
       }
 
       @Override
-      public void songFirstLoaded(double durationEstimate) {}
+      public void songFirstLoaded(double durationEstimate) {
+      }
 
       @Override
       public void songLoaded(double duration) {
@@ -775,7 +783,8 @@ public class BootstrapExercisePanel extends FluidContainer {
       }
 
       @Override
-      public void update(double position) {}
+      public void update(double position) {
+      }
     });
     soundManager.createSound(currentSound, song, song);
   }
@@ -793,6 +802,7 @@ public class BootstrapExercisePanel extends FluidContainer {
   /**
    * Show progress bar with score percentage, colored by score.
    * Note it has to be wide enough to hold the text "pronunciation score xxx %"
+   *
    * @param score
    */
   private void showPronScoreFeedback(double score) {
@@ -803,14 +813,14 @@ public class BootstrapExercisePanel extends FluidContainer {
     scoreFeedbackColumn.add(scoreFeedback);
 
     int percent1 = (int) percent;
-    scoreFeedback.setPercent(percent1  < 40 ? 40 : percent1);   // just so the words will show up
+    scoreFeedback.setPercent(percent1 < 40 ? 40 : percent1);   // just so the words will show up
 
     scoreFeedback.setText(PRONUNCIATION_SCORE + (int) percent + "%");
     scoreFeedback.setVisible(true);
     scoreFeedback.setColor(
       score > 0.8 ? ProgressBarBase.Color.SUCCESS :
-      score > 0.6 ? ProgressBarBase.Color.DEFAULT :
-        score > 0.4 ? ProgressBarBase.Color.WARNING : ProgressBarBase.Color.DANGER);
+        score > 0.6 ? ProgressBarBase.Color.DEFAULT :
+          score > 0.4 ? ProgressBarBase.Color.WARNING : ProgressBarBase.Color.DANGER);
   }
 
   private void showPopup(String html) {
