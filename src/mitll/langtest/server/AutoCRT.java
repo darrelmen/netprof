@@ -33,7 +33,7 @@ import java.util.TreeSet;
 public class AutoCRT {
   private static Logger logger = Logger.getLogger(AutoCRT.class);
 
-  private static final float MIN_CRT_SCORE = 0.5f;
+  private static final float MIN_CRT_SCORE = 0.1f;
   //private static final double MINIMUM_FLASHCARD_PRON_SCORE = 0.19;
   private Classifier<AutoGradeExperiment.Event> classifier = null;
   private Map<String, Export.ExerciseExport> exerciseIDToExport;
@@ -68,13 +68,12 @@ public class AutoCRT {
    * @param e
    * @param audioFile
    * @param answer
-   * @param scoring
    */
   public void getAutoCRTDecodeOutput(String exerciseID, int questionID, Exercise e, File audioFile,
-                                     AudioAnswer answer, Scoring scoring) {
+                                     AudioAnswer answer) {
     Collection<String> exportedAnswers = getExportedAnswers(exerciseID, questionID);
     exportedAnswers = db.getValidPhrases(exportedAnswers);
-    logger.info("got answers " + exportedAnswers);
+    logger.info("got answers " + exportedAnswers.size());
 
     PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, exportedAnswers);
 
@@ -102,11 +101,10 @@ public class AutoCRT {
    * @param e
    * @param audioFile
    * @param answer
-   * @param scoring
    */
   public void getFlashcardAnswer(Exercise e,
                                  File audioFile,
-                                 AudioAnswer answer, Scoring scoring) {
+                                 AudioAnswer answer) {
     List<String> foregroundSentences = getRefSentences(e);
     List<String> foreground = new ArrayList<String>();
     for (String ref : foregroundSentences) {
