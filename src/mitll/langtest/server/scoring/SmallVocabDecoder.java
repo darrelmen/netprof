@@ -221,6 +221,7 @@ public class SmallVocabDecoder {
 
     // take top n most frequent
     List<String> all = new ArrayList<String>(); // copy list b/c sublist not serializable ???
+    if (vocab.size() > vocabSizeLimit) logger.warn("truncating vocab size from " + vocab.size() + " to " + vocabSizeLimit);
     all.addAll(vocab.subList(0, Math.min(vocab.size(), vocabSizeLimit)));
     return all;
   }
