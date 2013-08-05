@@ -4,6 +4,8 @@ import ag.experiment.AutoGradeExperiment;
 import mira.classifier.Classifier;
 import mitll.langtest.server.database.Export;
 import mitll.langtest.server.scoring.AutoCRTScoring;
+import mitll.langtest.server.scoring.Scoring;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -31,6 +33,7 @@ import java.util.TreeSet;
 public class AutoCRT {
   private static Logger logger = Logger.getLogger(AutoCRT.class);
 
+  private static final float MIN_CRT_SCORE = 0.5f;
   //private static final double MINIMUM_FLASHCARD_PRON_SCORE = 0.19;
   private Classifier<AutoGradeExperiment.Event> classifier = null;
   private Map<String, Export.ExerciseExport> exerciseIDToExport;
@@ -61,13 +64,14 @@ public class AutoCRT {
    *
    * @see LangTestDatabaseImpl#getAudioAnswer
    * @param exerciseID
+   * @param questionID
    * @param e
    * @param audioFile
-   * @param questionID
    * @param answer
+   * @param scoring
    */
   public void getAutoCRTDecodeOutput(String exerciseID, int questionID, Exercise e, File audioFile,
-                                     AudioAnswer answer) {
+                                     AudioAnswer answer, Scoring scoring) {
     Collection<String> exportedAnswers = getExportedAnswers(exerciseID, questionID);
     exportedAnswers = db.getValidPhrases(exportedAnswers);
     logger.info("got answers " + exportedAnswers);
@@ -75,14 +79,19 @@ public class AutoCRT {
     PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, exportedAnswers);
 
     String recoSentence = asrScoreForAudio.getRecoSentence();
-    logger.info("reco sentence was '" + recoSentence + "'");
+    logger.info("reco sentence was '" + recoSentence + "', score " + asrScoreForAudio.getHydecScore());
+    if (recoSentence.equals(SmallVocabDecoder.UNKNOWN_MODEL) || asrScoreForAudio.getHydecScore() < MIN_CRT_SCORE) {
+      answer.setDecodeOutput("Unexpected word.");
+      answer.setScore(0d);
+    } else {
+      String annotatedResponse = getAnnotatedResponse(exerciseID, questionID, recoSentence);
 
-    String annotatedResponse = getAnnotatedResponse(exerciseID, questionID, recoSentence);
+      double scoreForAnswer = (recoSentence.length() > 0) ? getScoreForExercise(e, questionID, recoSentence) : 0.0d;
 
-    double scoreForAnswer = (recoSentence.length() > 0) ? getScoreForExercise(e, questionID, recoSentence) :0.0d;
-
-    answer.setDecodeOutput(annotatedResponse);
-    answer.setScore(scoreForAnswer);
+      answer.setDecodeOutput(annotatedResponse);
+      answer.setScore(scoreForAnswer);
+      answer.setCorrect(scoreForAnswer > 0.499);
+    }
   }
 
   /**
@@ -93,10 +102,11 @@ public class AutoCRT {
    * @param e
    * @param audioFile
    * @param answer
+   * @param scoring
    */
   public void getFlashcardAnswer(Exercise e,
                                  File audioFile,
-                                 AudioAnswer answer) {
+                                 AudioAnswer answer, Scoring scoring) {
     List<String> foregroundSentences = getRefSentences(e);
     List<String> foreground = new ArrayList<String>();
     for (String ref : foregroundSentences) {
@@ -208,7 +218,7 @@ public class AutoCRT {
     }
     else {
       double score = AutoGradeExperiment.getScore(getClassifier(), answer, exerciseExport);
-      logger.info("Score was " + score + " for " + exerciseExport);
+      logger.info("AutoGradeExperiment : score was " + score + " for " + exerciseExport);
       return score;
     }
   }
@@ -229,7 +239,7 @@ public class AutoCRT {
   }
 
   /**
-   * @see #getAutoCRTDecodeOutput(String, int, mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
+   * @see #getAutoCRTDecodeOutput(String, int, mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer, mitll.langtest.server.scoring.Scoring)
    * @param id
    * @param questionID
    * @return
@@ -255,6 +265,9 @@ public class AutoCRT {
    * Make a classifier given the export date, which has answers and their grades.<br></br>
    * The export data also includes the answer key for each question.<br></br>
    * This uses Jacob's classifier.
+   * @see #getExportedAnswers(String, int)
+   * @see #getScoreForExercise(String, int, String)
+   *
    * @see Export.ExerciseExport
    * @see AutoGradeExperiment
    * @return a mira classifier
