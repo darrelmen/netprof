@@ -21,7 +21,7 @@ import java.util.Map;
  * Time: 11:07 AM
  * To change this template use File | Settings | File Templates.
  */
-public class Scoring {
+public abstract class Scoring {
   private static Logger logger = Logger.getLogger(Scoring.class);
 
   private static final String WINDOWS_CONFIGURATIONS = "windowsConfig";
@@ -155,5 +155,7 @@ public class Scoring {
     return pathname;
   }
 
-  public String getScoringDir() { return scoringDir; }
+ // public abstract boolean isPhraseInDict(String phrase);
+
+  //public String getScoringDir() { return scoringDir; }
 }
