@@ -1131,7 +1131,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public Leaderboard postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState) {
     synchronized (leaderboard) {
-     // ScoreInfo previous = leaderboard.getPrevious(userid, selectionState);
       ScoreInfo scoreInfo = db.getScoreInfo(userid, timeTaken,/* previous, */selectionState);
       leaderboard.addScore(scoreInfo);
     }
