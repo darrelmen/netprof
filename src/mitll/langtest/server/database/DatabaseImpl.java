@@ -7,13 +7,13 @@ import mitll.langtest.shared.FlashcardResponse;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultsAndGrades;
+import mitll.langtest.shared.ScoreInfo;
 import mitll.langtest.shared.Session;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -434,11 +434,21 @@ public class DatabaseImpl implements Database {
     public final UserState state;
     private int correct = 0;
     private int incorrect = 0;
+
+    private int pcorrect = 0;
+    private int pincorrect = 0;
+
     private int counter = 0;
     private List<Integer> correctHistory = new ArrayList<Integer>();
     private final List<Exercise> exercises;
     private final Random random;
 
+    /**
+     * @see DatabaseImpl#getUserStateWrapper(long, java.util.List)
+     * @param state
+     * @param userID
+     * @param exercises
+     */
     public UserStateWrapper(UserState state, long userID, List<Exercise> exercises) {
       this.state = state;
       this.random = new Random(userID);
@@ -486,6 +496,22 @@ public class DatabaseImpl implements Database {
       return exercises.get(counter++ % exercises.size()); // defensive
     }
 
+    public int getPcorrect() {
+      return pcorrect;
+    }
+
+    public void setPcorrect(int pcorrect) {
+      this.pcorrect = pcorrect;
+    }
+
+    public int getPincorrect() {
+      return pincorrect;
+    }
+
+    public void setPincorrect(int pincorrect) {
+      this.pincorrect = pincorrect;
+    }
+
     public String toString() {
       return "UserState : correct " + correct + " incorrect " + incorrect +
         " num exercises " + getNextExercise() + " is complete " + isComplete();
@@ -499,25 +525,26 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getNextExercise(long)
    * @param userID
    * @param isTimedGame
+   * @param typeToSection
    * @return
    */
-  public FlashcardResponse getNextExercise(List<Exercise> exercises, long userID, boolean isTimedGame) {
-    return getFlashcardResponse(userID, isTimedGame, exercises);
+  public FlashcardResponse getNextExercise(List<Exercise> exercises, long userID, boolean isTimedGame, Map<String, Collection<String>> typeToSection) {
+    return getFlashcardResponse(userID, isTimedGame, exercises, typeToSection);
   }
 
   public FlashcardResponse getNextExercise(long userID, boolean isTimedGame) {
     List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
-    return getFlashcardResponse(userID, isTimedGame, exercises);
+    return getFlashcardResponse(userID, isTimedGame, exercises, new HashMap<String, Collection<String>>());
   }
 
-  private FlashcardResponse getFlashcardResponse(long userID, boolean isTimedGame, List<Exercise> exercises) {
-    Map<String,Exercise> idToExercise = new HashMap<String, Exercise>();
-    for (Exercise e : exercises) idToExercise.put(e.getID(),e);
+  private FlashcardResponse getFlashcardResponse(long userID, boolean isTimedGame, List<Exercise> exercises, Map<String, Collection<String>> typeToSection) {
+    Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
+    for (Exercise e : exercises) idToExercise.put(e.getID(), e);
     UserStateWrapper userStateWrapper;
 
     synchronized (userToState) {
       userStateWrapper = userToState.get(userID);
-      logger.info("getExercises : for user  " + userID + " idToExercise has " + idToExercise.size() + " user state "+ userStateWrapper);// + " index " + index);
+      logger.info("getExercises : for user  " + userID + " idToExercise has " + idToExercise.size() + " user state " + userStateWrapper);// + " index " + index);
       if (userStateWrapper == null || (userStateWrapper.getNumExercises() != exercises.size())) {
         userStateWrapper = getUserStateWrapper(userID, exercises);
         userToState.put(userID, userStateWrapper);
@@ -529,16 +556,33 @@ public class DatabaseImpl implements Database {
       if (userStateWrapper.isComplete()) {
         userStateWrapper.shuffle();
       }
-        flashcardResponse =
-          new FlashcardResponse(userStateWrapper.getNextExercise(),
+      flashcardResponse =
+        new FlashcardResponse(userStateWrapper.getNextExercise(),
           userStateWrapper.getCorrect(),
           userStateWrapper.getIncorrect());
-       flashcardResponse.setCorrectHistory(userStateWrapper.getCorrectHistory());
+      flashcardResponse.setCorrectHistory(userStateWrapper.getCorrectHistory());
       return flashcardResponse;
     }
     return getFlashcardResponse(idToExercise, userStateWrapper);
   }
 
+  public ScoreInfo getScoreInfo(long userID, long timeTaken, /*ScoreInfo previous, */Map<String, Collection<String>> selection) {
+    UserStateWrapper userStateWrapper = userToState.get(userID);
+
+    int correct = userStateWrapper.getPcorrect();
+    int incorrect =  userStateWrapper.getPincorrect();
+    ScoreInfo scoreInfo = new ScoreInfo(userID, userStateWrapper.correct - correct, userStateWrapper.incorrect - incorrect, timeTaken, selection);
+    userStateWrapper.setPcorrect(userStateWrapper.getCorrect());
+    userStateWrapper.setPincorrect(userStateWrapper.getIncorrect());
+    return scoreInfo;
+  }
+
+  /**
+   * @see #getFlashcardResponse(long, boolean, java.util.List
+   * @param userID
+   * @param exercises
+   * @return
+   */
   private UserStateWrapper getUserStateWrapper(long userID, List<Exercise> exercises) {
     UserStateWrapper userStateWrapper;
     String[] strings = new String[exercises.size()];
