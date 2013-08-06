@@ -16,6 +16,8 @@
 -->
   <inherits name='com.google.gwt.visualization.Visualization'/>
   <inherits name ="com.github.gwtbootstrap.Bootstrap"/>
+  <inherits name="org.moxieapps.gwt.highcharts.Highcharts"/>
+
   <set-property name="bootstrap.responsiveDesign" value="true"/>
 
   <!-- <inherits name='com.google.gwt.user.theme.standard.Standard'/> -->
@@ -40,4 +42,7 @@
   <script src="js/recorder.js"/>
 
   <script src="js/gauge.js"/>
+
+    <script src="js/highcharts.js"/>
+
 </module>
