@@ -566,12 +566,20 @@ public class DatabaseImpl implements Database {
     return getFlashcardResponse(idToExercise, userStateWrapper);
   }
 
-  public ScoreInfo getScoreInfo(long userID, long timeTaken, /*ScoreInfo previous, */Map<String, Collection<String>> selection) {
+  public ScoreInfo getScoreInfo(long userID, long timeTaken, Map<String, Collection<String>> selection) {
     UserStateWrapper userStateWrapper = userToState.get(userID);
 
     int correct = userStateWrapper.getPcorrect();
     int incorrect =  userStateWrapper.getPincorrect();
-    ScoreInfo scoreInfo = new ScoreInfo(userID, userStateWrapper.correct - correct, userStateWrapper.incorrect - incorrect, timeTaken, selection);
+
+   // logger.warn("prev " + correct + " inc " + incorrect);
+    //logger.warn("now  " + userStateWrapper.correct + " inc " + userStateWrapper.incorrect);
+
+    int diffC = Math.max(0,userStateWrapper.correct - correct);
+    int diffI = Math.max(0,userStateWrapper.incorrect - incorrect);
+  //  logger.warn("diff  " +diffC + " inc " + diffI);
+
+    ScoreInfo scoreInfo = new ScoreInfo(userID, diffC, diffI, timeTaken, selection);
     userStateWrapper.setPcorrect(userStateWrapper.getCorrect());
     userStateWrapper.setPincorrect(userStateWrapper.getIncorrect());
     return scoreInfo;
