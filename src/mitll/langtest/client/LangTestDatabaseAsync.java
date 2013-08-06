@@ -9,6 +9,7 @@ import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.FlashcardResponse;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.ImageResponse;
+import mitll.langtest.shared.Leaderboard;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultsAndGrades;
 import mitll.langtest.shared.SectionNode;
@@ -128,4 +129,8 @@ public interface LangTestDatabaseAsync {
   void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, AsyncCallback<ExerciseListWrapper> async);
 
   void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper> async);
+
+  void getLeaderboard(Map<String, Collection<String>> typeToSection, AsyncCallback<Leaderboard> async);
+
+  void postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState, AsyncCallback<Leaderboard> async);
 }
