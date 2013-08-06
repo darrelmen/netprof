@@ -69,6 +69,7 @@ public class ServerProperties {
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
   private static final String LOGIN_TYPE_PARAM = "loginType";
   private static final String SORT_BY_ID = "sortByID";
+  private static final String SHOW_LEADERBOARD = "showLeaderboard";
 
   private Properties props = null;
 
@@ -141,6 +142,10 @@ public class ServerProperties {
     return getDefaultFalse(DOIMAGES);
   }
 
+  public boolean doShowLeaderboard() {
+    return getDefaultFalse(SHOW_LEADERBOARD);
+  }
+
   /**
    * @see LangTestDatabaseImpl#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.AudioCheck.ValidityAndDur, String, boolean)
    * @return
@@ -167,9 +172,9 @@ public class ServerProperties {
     return minPronScore;
   }
 
-  public String getBackgroundFile() {
+/*  public String getBackgroundFile() {
     return props.getProperty(BACKGROUND_FILE,"");
-  }
+  }*/
 
   public boolean isArabicTextDataCollect() {
     return !props.getProperty(ARABIC_TEXT_DATA_COLLECT, "false").equals("false");
