@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TimedGame {
+  public static final String RECORDING_KEY = "SPACE BAR";
+
   private final LangTest langTest;
 
   public TimedGame(LangTest langTest) {
@@ -29,7 +31,7 @@ public class TimedGame {
     msgs.add("See how many you can get right in " +
       duration +
       "!");
-    msgs.add("Press and hold the " + LangTest.RECORDING_KEY + " to record.");
+    msgs.add("Press and hold the " + RECORDING_KEY + " to record.");
     msgs.add("Release to stop recording.");
     msgs.add("Ready to start the clock?");
     DialogHelper dialogHelper = new DialogHelper(false);
