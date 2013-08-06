@@ -2,6 +2,8 @@ package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Paragraph;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
@@ -10,7 +12,12 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
+import mitll.langtest.client.DialogHelper;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.PropertyHandler;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Does fancy font sizing depending on available width...
@@ -23,6 +30,7 @@ public class Flashcard implements RequiresResize {
   private Paragraph appName;
   private Image flashcardImage;
   private Image collab;
+  private int min = 720;
 
   /**
    * @see mitll.langtest.client.LangTest#doFlashcard()
@@ -92,7 +100,6 @@ public class Flashcard implements RequiresResize {
     return headerRow;
   }
 
-  private int min = 720;
 
   @Override
   public void onResize() {
@@ -124,5 +131,33 @@ public class Flashcard implements RequiresResize {
     String fontsize = ratio + "em";
   //  System.out.println("setFontWidth : Setting font size to " + fontsize);
     DOM.setStyleAttribute(appName.getElement(), "fontSize", fontsize);
+  }
+
+  public void showFlashHelp(final LangTest langTest) {
+    final PropertyHandler props = langTest.getProps();
+    if (props.isTimedGame()) {
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          Window.alert("Code download failed");
+        }
+
+        public void onSuccess() {
+          showTimedGameHelp(langTest);
+        }
+      });
+    } else {
+      List<String> msgs = new ArrayList<String>();
+      msgs.add("Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.");
+      msgs.add("Press and hold the " + TimedGame.RECORDING_KEY + " to record.");
+      msgs.add("Release to stop recording.");
+      DialogHelper dialogHelper = new DialogHelper(false);
+      dialogHelper.showErrorMessage("Help", msgs);
+    }
+  }
+
+  public void showTimedGameHelp(LangTest langTest) {
+    final PropertyHandler props = langTest.getProps();
+    TimedGame timedGame = new TimedGame(langTest);
+    timedGame.showTimedGameHelp(props);
   }
 }
