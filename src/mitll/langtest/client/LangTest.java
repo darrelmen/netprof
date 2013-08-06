@@ -5,9 +5,7 @@ import com.github.gwtbootstrap.client.ui.Container;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.Row;
-import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
@@ -18,8 +16,6 @@ import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.i18n.shared.SafeHtmlBidiFormatter;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.DOM;
@@ -43,19 +39,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
-import mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList;
-import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
-import mitll.langtest.client.bootstrap.TableSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
-import mitll.langtest.client.exercise.PagingExerciseList;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
 import mitll.langtest.client.flashcard.Flashcard;
 import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
-import mitll.langtest.client.flashcard.TimedGame;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
 import mitll.langtest.client.mail.MailDialog;
 import mitll.langtest.client.monitoring.MonitoringManager;
@@ -69,12 +59,9 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -82,9 +69,7 @@ import java.util.Map;
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   public static final String LANGTEST_IMAGES = "langtest/images/";
-  public static final String RECORDING_KEY = "SPACE BAR";
-  private static final String ITEMS = "Items";
-  private final DialogHelper dialogHelper = new DialogHelper(false);
+ // private static final String ITEMS = "Items";
 
   private Panel currentExerciseVPanel = new FluidContainer();
   private ListInterface exerciseList;
@@ -108,7 +93,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Panel headerRow;
   private FluidRow secondRow;
-  private ProgressBar progressBar;
+  private ProgressHelper progressBar;
 
   private Anchor logout;
   private Anchor users;
@@ -152,8 +137,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
               }
 
               @Override
-              public void onSuccess(Void result) {
-              }
+              public void onSuccess(Void result) {}
             });
         }
       }
@@ -170,16 +154,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     userManager = new UserManager(this,service, isCollectAudio(), false, getLoginType(), props.getAppTitle(),false);
 
     if (props.isFlashCard()) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
-        }
-
-        public void onSuccess() {
-          doFlashcard();
-          addResizeHandler();
-        }
-      });
+      loadFlashcard();
       return;
     }
     if (props.isDataCollectAdminView()) {
@@ -197,20 +172,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
 
     if (props.isGoodwaveMode() || props.isAdminView() || props.isGrading()) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
-        }
-
-        public void onSuccess() {
-          VisualizationUtils.loadVisualizationApi(new Runnable() {
-            @Override
-            public void run() {
-              System.out.println("\tloaded VisualizationUtils...");
-            }
-          }, ColumnChart.PACKAGE, LineChart.PACKAGE);
-        }
-      });
+      loadVisualizationPackages();
     }
 
     if (props.isAdminView() || props.isGrading()) {
@@ -303,6 +265,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     modeSelect();
   }
 
+  private void loadFlashcard() {
+    doFlashcard();
+    addResizeHandler();
+  }
+
+  private void loadVisualizationPackages() {
+    VisualizationUtils.loadVisualizationApi(new Runnable() {
+      @Override
+      public void run() {
+        System.out.println("\tloaded VisualizationUtils...");
+      }
+    }, ColumnChart.PACKAGE, LineChart.PACKAGE);
+  }
+
   private boolean shouldCollectAudio() {
     return props.isCollectAudio() && !props.isFlashcardTeacherView() || props.isFlashCard()  || props.isGoodwaveMode() ;
   }
@@ -363,15 +339,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (props.isGrading()) {
       widgets.add(status);
     } else {
-      progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
-      progressBar.setWidth("70%");
-      progressBar.setPercent(100);
-      progressBar.setText("No items completed.");
-      progressBar.setColor(ProgressBarBase.Color.DEFAULT);
-      progressBar.addStyleName("leftFifteenPercentMargin");
-      progressBar.addStyleName("topMargin");
-
-      widgets.add(progressBar);
+      progressBar = new ProgressHelper();
+      widgets.add(progressBar.getProgressBar());
     }
   }
 
@@ -414,14 +383,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       elementById.setInnerText(props.getAppTitle());
     }
 
+    Element element = DOM.getElementById("favicon");   // set the page title to be consistent
     if (props.isFlashCard() || props.isFlashcardTeacherView()) {
-      Element element = DOM.getElementById("favicon");   // set the page title to be consistent
       if (element != null) {
         element.setAttribute("href", "flashFavIcon.gif");
       }
     }
     else if (props.isGoodwaveMode()) {
-      Element element = DOM.getElementById("favicon");   // set the page title to be consistent
       if (element != null) {
         element.setAttribute("href", LANGTEST_IMAGES + "npfFavIcon.gif");
       }
@@ -445,8 +413,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     container.add(headerRow);
 
     userManager = new UserManager(this, service, isCollectAudio(), false, getLoginType(), props.getAppTitle(), true);
-    this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager,
-      props.isTimedGame(), props.getGameTimeSeconds());
+    this.exerciseList = new ExerciseListLayout(props).makeFlashcardExerciseList(container, service, userManager);
 
     makeFlashContainer();
 
@@ -464,13 +431,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     modeSelect();
   }
 
-
-
-  private void showTimedGameHelp() {
-    TimedGame timedGame = new TimedGame(this);
-    timedGame.showTimedGameHelp(props);
-  }
-
   private void showHelpNewUser() {
     Storage stockStore = Storage.getLocalStorageIfSupported();
     boolean showedHelpAlready = false;
@@ -485,25 +445,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
-  public void showFlashHelp() {
-    if (props.isTimedGame()) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
-        }
-
-        public void onSuccess() {
-          showTimedGameHelp();
-        }
-      });
-    } else {
-      List<String> msgs = new ArrayList<String>();
-      msgs.add("Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.");
-      msgs.add("Press and hold the " + RECORDING_KEY + " to record.");
-      msgs.add("Release to stop recording.");
-      dialogHelper.showErrorMessage("Help", msgs);
-    }
-  }
+  public void showFlashHelp() { flashcard.showFlashHelp(this); }
 
   private void doDataCollectAdminView() {
     setPageTitle();
@@ -614,70 +556,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param isGrading true if grading, false if not
    */
   private void makeExerciseList(FluidRow secondRow,Panel leftColumn, boolean isGrading) {
-    final UserFeedback feedback = (UserFeedback) this;
-
-    boolean hideExerciseList = (props.isMinimalUI() && !props.isGrading()) && !props.isAdminView();
-    this.exerciseList = makeExerciseList(secondRow, isGrading, feedback);
-
-    useExerciseList(leftColumn, hideExerciseList);
-  }
-
-  private void useExerciseList(Panel leftColumn, boolean hideExerciseList) {
-    if (hideExerciseList) {
-      exerciseList.getWidget().setVisible(false);
-      exerciseList.getWidget().setWidth("1px");
-    }
-
-    if (showOnlyOneExercise()) {
-      exerciseList.setExercise_title(props.getExercise_title());
-    }
-    addExerciseListOnLeftSide(leftColumn);
-  }
-
-  private ListInterface makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback) {
-    if (isGrading) {
-      GradedExerciseList widgets = new GradedExerciseList(currentExerciseVPanel, service, feedback,
-        true, props.isEnglishOnlyMode(), this);
-      return widgets;
-    } else {
-      if (props.isShowSections()) {
-        boolean showSectionWidgets = props.isShowSectionWidgets();
-        if (props.isFlashcardTeacherView()) {
-          return new TableSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-            props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, this);
-        } else {
-          return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-            props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, this);
-        }
-      } else {
-        return new PagingExerciseList(currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), isAutoCRTMode(), this) {
-          @Override
-          protected void checkBeforeLoad(ExerciseShell e) {
-          } // don't try to login
-        };
-      }
-    }
-  }
-
-  private void addExerciseListOnLeftSide(Panel leftColumnContainer) {
-    if (props.isTeacherView()) {
-      leftColumnContainer.add(exerciseList.getWidget());
-    } else {
-      Heading items = new Heading(4, ITEMS);
-      items.addStyleName("center");
-
-      FlowPanel leftColumn = new FlowPanel();
-      leftColumn.addStyleName("floatLeft");
-      DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
-
-      leftColumnContainer.add(leftColumn);
-      leftColumnContainer.addStyleName("inlineStyle");
-      if (!props.isFlashcardTeacherView() && !props.isMinimalUI()) {
-        leftColumn.add(items);
-      }
-      leftColumn.add(exerciseList.getWidget());
-    }
+    this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, leftColumn, this, currentExerciseVPanel,service,this);
   }
 
   public int getHeightOfTopRows() {
@@ -686,9 +565,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   @Override
   public int getLeftColumnWidth() {
-    int offsetWidth = exerciseList.getWidget().getOffsetWidth();
-   // System.out.println("left col width " +offsetWidth);
-    return offsetWidth;
+    return exerciseList.getWidget().getOffsetWidth();
   }
 
   public boolean showOnlyOneExercise() {
@@ -717,7 +594,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     checkInitFlash();
   }
 
-
   /**
    * Hookup feedback for events from Flash generated from the user's response to the Mic Access dialog
    *
@@ -744,71 +620,23 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
+   * This determines which kind of exercise we're going to do.
    * @see #gotUser(long)
    */
   private void setFactory(final long userID) {
     final LangTest outer =this;
     if (props.isGoodwaveMode() && !props.isGrading()) {
-/*      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
-        }
-
-        public void onSuccess() {
-
-        }
-      });*/
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer), userManager, 1);
-      doEverythingAfterFactory(userID);
     } else if (props.isGrading()) {
-/*      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
-        }
-
-        public void onSuccess() {
-
-        }
-      });*/
       exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer), userManager, props.getNumGradesToCollect());
-      doEverythingAfterFactory(userID);
     } else if (props.isFlashCard()) {
- /*     GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
-        }
-
-        public void onSuccess() {
-
-        }
-      });*/
       exerciseList.setFactory(new FlashcardExercisePanelFactory(service, outer, outer), userManager, 1);
-      doEverythingAfterFactory(userID);
     } else if (props.isDataCollectMode() && props.isCollectAudio() && !props.isCRTDataCollectMode()) {
- /*     GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
-        }
-
-        public void onSuccess() {
-
-        }
-      });*/
       exerciseList.setFactory(new WaveformExercisePanelFactory(service, outer, outer), userManager, 1);
-      doEverythingAfterFactory(userID);
     } else {
-/*      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
-        }
-
-        public void onSuccess() {
-
-        }
-      });*/
       exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer), userManager, 1);
-      doEverythingAfterFactory(userID);
     }
+    doEverythingAfterFactory(userID);
 
     if (getLanguage().equalsIgnoreCase("Pashto")) {
       new FontChecker(this).checkPashto();
@@ -1056,9 +884,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       userManager.anonymousLogin();
     } else {
       if (props.isTimedGame()) {
-        showTimedGameHelp();
-      }
-      else {
+        flashcard.showTimedGameHelp(this);
+      } else {
         login();
       }
     }
@@ -1080,6 +907,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   public int getUser() { return userManager.getUser(); }
+  public PropertyHandler getProps() { return props; }
   public boolean getEnglishOnly() { return props.isEnglishOnlyMode(); }
   public int getNumGradesToCollect() { return props.getNumGradesToCollect(); }
   public int getSegmentRepeats() { return props.getSegmentRepeats(); }
@@ -1131,6 +959,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public void showErrorMessage(String title,String msg) {
+    DialogHelper dialogHelper = new DialogHelper(false);
     dialogHelper.showErrorMessage(title, msg);
   }
 
@@ -1138,8 +967,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public boolean loadNextExercise(Exercise current) {
     if (progressBar != null) {
-      progressBar.setPercent(100 - exerciseList.getPercentComplete());
-      progressBar.setText((exerciseList.getComplete()+1) + " complete.");
+      progressBar.showAdvance(exerciseList);
     }
     return exerciseList.loadNextExercise(current);
   }
