@@ -7,12 +7,9 @@ import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Modal;
-import com.github.gwtbootstrap.client.ui.ModalFooter;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
-import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -42,7 +39,6 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.labels.PlotBandLabel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +52,7 @@ import java.util.Map;
  */
 public class BootstrapFlashcardExerciseList implements ListInterface {
   private static final int SIZE = 12;
-  public static final float HALF = (1f / 2f);
+  public static final float HALF = (1f / 4f);
   private final Column exercisePanelColumn;
   private ExercisePanelFactory factory;
   private LangTestDatabaseAsync service;
@@ -69,7 +65,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private boolean timerRunning = false;
 
   private int lastCorrect = 0;
-  private int prevCorrect = 0;
+ // private int prevCorrect = 0;
 
   private final int gameTimeSeconds;
   private Panel bottomRow = new FlowPanel();
@@ -120,8 +116,6 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     pair.add(correct);
 
     this.user = user;
-
-    //showDialog();
   }
 
   @Override
@@ -211,7 +205,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     Chart chart = new Chart()
       .setType(Series.Type.SPLINE)
       .setChartTitleText("Leaderboard")
-      .setChartSubtitleText(currentSelection.toString())
+      .setChartSubtitleText(currentSelection.toString().replace("{", "").replace("}", "").replace("=", " ").replace("[", "").replace("]", ""))
       .setMarginRight(10);
 
     // Number[] yValues = {163, 203, 276, 408, 547, 729, 628};
@@ -224,12 +218,12 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
     float from = under(pbCorrect);
     float to   = over(pbCorrect);
-    PlotBand correctBand = chart.getYAxis().createPlotBand()
+    PlotBand personalBest = chart.getYAxis().createPlotBand()
       .setColor("#f18d24")
       .setFrom(from)
       .setTo(to);
 
-    correctBand.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText("Personal Best"));
+    personalBest.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText("Personal Best"));
 
     PlotBand topScore = chart.getYAxis().createPlotBand()
       .setColor("#46bf00")
@@ -245,35 +239,78 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
     avgScore.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText("Course Average"));
 
-    chart.getYAxis().setPlotBands(
-      avgScore,
-      correctBand,
-      topScore
-      );
+    if (total > 2) {
+      if (top != pbCorrect) {
+        chart.getYAxis().setPlotBands(
+          avgScore,
+          personalBest,
+          topScore
+        );
+      } else {
+        chart.getYAxis().setPlotBands(
+          avgScore,
+          personalBest
+        );
+      }
+    }
 
     chart.getYAxis().setAxisTitleText("# Correct");
     chart.getXAxis().setAllowDecimals(false);
     chart.getYAxis().setAllowDecimals(true);
+    chart.getYAxis().setMin(0);
+    chart.getYAxis().setMax(top+2);
 
-    modal.setMaxHeigth("750px");
+     modal.setMaxHeigth("650px");
+    modal.setHeight("550px");
     modal.add(chart);
-    Button widgets = new Button();
-    widgets.setType(ButtonType.PRIMARY);
-    widgets.addClickHandler(new ClickHandler() {
+    Button yesButton = new Button();
+/*    yesButton.setHeight("30px");
+    yesButton.setWidth("50px");*/
+    yesButton.setType(ButtonType.PRIMARY);
+    yesButton.setText("Yes");
+    yesButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        modal.hide();
+        goAgain(userID);
+      }
+    });
+
+    FluidRow row = new FluidRow();
+    //if (doYesAndNo) {
+      row.add(new Column(4,yesButton));
+      row.add(new Column(4,new Heading(4)));
+      Button noButton = new Button("No");
+      noButton.setType(ButtonType.INVERSE);
+
+      row.add(new Column(4,noButton));
+      noButton.addClickHandler(new ClickHandler() {
+        public void onClick(ClickEvent event) {
+          modal.hide();
+          stopForNow(userID);
+        }
+      });
+
+    yesButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         modal.hide();
       }
     });
-    modal.add(widgets);//new ModalFooter(widgets));
+
+    FluidRow row1 = new FluidRow();
+    Column column = new Column(12);
+    row1.add(column);
+    column.add(new Heading(4,"Would you like to try again?"));
+    modal.add(row1);//new ModalFooter(yesButton));
+    modal.add(row);//new ModalFooter(yesButton));
     modal.show();
 
-    modal.addHiddenHandler(new HiddenHandler() {
+/*    modal.addHiddenHandler(new HiddenHandler() {
       @Override
       public void onHidden(HiddenEvent hiddenEvent) {
         getOutOfTimeDialog(userID);
       }
-    });
+    });*/
   }
 
   private float over(float pbCorrect) {
@@ -301,35 +338,43 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
       public void gotYes() {
 // better than last time? worse?
         // ask user to go again, reset counter on server
-        service.resetUserState(userID, new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            Window.alert("resetUserState Couldn't contact server.");
-          }
-
-          @Override
-          public void onSuccess(Void result) {
-            System.out.println("Going again!");
-            expired = false;
-            getExercises(userID);
-          }
-        });
+        goAgain(userID);
       }
 
       @Override
       public void gotNo() {
-        service.clearUserState(userID, new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            Window.alert("clearUserState Couldn't contact server.");
-          }
-
-          @Override
-          public void onSuccess(Void result) {}
-        });
+        stopForNow(userID);
       }
     }
     );
+  }
+
+  private void stopForNow(long userID) {
+    service.clearUserState(userID, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        Window.alert("clearUserState Couldn't contact server.");
+      }
+
+      @Override
+      public void onSuccess(Void result) {}
+    });
+  }
+
+  private void goAgain(final long userID) {
+    service.resetUserState(userID, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        Window.alert("resetUserState Couldn't contact server.");
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+        System.out.println("Going again!");
+        expired = false;
+        getExercises(userID);
+      }
+    });
   }
 
   @Override
@@ -414,8 +459,8 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
         bottomRow.setVisible(true);
         correct.setText(result.correct + "/" + (result.correct + result.incorrect));
         lastCorrect = result.correct;
-        List<Integer> correctHistory = result.getCorrectHistory();
-        prevCorrect = correctHistory == null || correctHistory.isEmpty() ? -1 : correctHistory.get(correctHistory.size() - 1);
+        //List<Integer> correctHistory = result.getCorrectHistory();
+        //prevCorrect = correctHistory == null || correctHistory.isEmpty() ? -1 : correctHistory.get(correctHistory.size() - 1);
 
         grabFocus((BootstrapExercisePanel) exercisePanel);
       }
