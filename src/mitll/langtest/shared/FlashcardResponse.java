@@ -18,6 +18,11 @@ public class FlashcardResponse implements IsSerializable {
   private List<Integer> correctHistory;
 
   public List<Integer> getCorrectHistory() { return correctHistory; }
+
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getFlashcardResponse
+   * @param h
+   */
   public void setCorrectHistory(List<Integer> h) { correctHistory = h; }
 
   public FlashcardResponse() {}
