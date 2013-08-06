@@ -24,10 +24,17 @@ public class SelectionState {
     parseToken(getTokenFromEvent(event));
   }
 
+  /**
+   * Populated from history token!
+   */
   public SelectionState() {
     this(History.getToken());
   }
 
+  /**
+   * @see SectionExerciseList#getSelectionState(String)
+   * @param token
+   */
   public SelectionState(String token) {
     parseToken(unencodeToken(token));
   }
@@ -93,6 +100,8 @@ public class SelectionState {
   public void setItem(String item) {
     this.item = item;
   }
+
+  public Map<String,Collection<String>> getSelection() { return typeToSection; }
 
   public String toString() {
     StringBuilder builder = new StringBuilder();
