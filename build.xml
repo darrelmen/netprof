@@ -54,6 +54,7 @@
         <pathelement location="war/WEB-INF/lib/commons-fileupload-1.2.2.jar"/>
         <pathelement location="war/WEB-INF/lib/flashcard.jar"/>
         <pathelement location="war/WEB-INF/lib/gwt-bootstrap-2.2.2.0-SNAPSHOT.jar"/>
+        <pathelement location="war/WEB-INF/lib/org.moxieapps.gwt.highcharts-1.5.0.jar"/>
     </path>
     <target name="init" depends="clean">
         <mkdir dir="war/WEB-INF/classes"/>
@@ -323,6 +324,18 @@
             </manifest>
         </jar>
     </target>
+
+    <target depends="build" name="avpESL">
+        <jar destfile="avpESLTimedFeedback.war" basedir="war"
+             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
+                >
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
 
 
     <target depends="build" name="npfMandarin">
