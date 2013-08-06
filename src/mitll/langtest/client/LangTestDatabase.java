@@ -9,6 +9,7 @@ import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.FlashcardResponse;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.ImageResponse;
+import mitll.langtest.shared.Leaderboard;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultsAndGrades;
 import mitll.langtest.shared.SectionNode;
@@ -132,4 +133,8 @@ public interface LangTestDatabase extends RemoteService {
   List<Exercise> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end);
 
   Map<Integer, Map<String, Map<String, Integer>>> getGradeCountPerExercise();
+
+  Leaderboard getLeaderboard(Map<String, Collection<String>> typeToSection);
+
+  Leaderboard postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState);
 }
