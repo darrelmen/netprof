@@ -566,27 +566,31 @@ public class DatabaseImpl implements Database {
     return getFlashcardResponse(idToExercise, userStateWrapper);
   }
 
+  private Map<Long,Integer> userToCorrect = new HashMap<Long, Integer>();
+
   public ScoreInfo getScoreInfo(long userID, long timeTaken, Map<String, Collection<String>> selection) {
     UserStateWrapper userStateWrapper = userToState.get(userID);
 
     int correct = userStateWrapper.getPcorrect();
     int incorrect =  userStateWrapper.getPincorrect();
 
-   // logger.warn("prev " + correct + " inc " + incorrect);
-    //logger.warn("now  " + userStateWrapper.correct + " inc " + userStateWrapper.incorrect);
+  //  logger.warn("prev " + correct + " inc " + incorrect);
+   //  logger.warn("now  " + userStateWrapper.correct + " inc " + userStateWrapper.incorrect);
 
-    int diffC = Math.max(0,userStateWrapper.correct - correct);
+    //int diffC = Math.max(0,userStateWrapper.correct - correct);
     int diffI = Math.max(0,userStateWrapper.incorrect - incorrect);
-  //  logger.warn("diff  " +diffC + " inc " + diffI);
+     logger.warn("diff  " +userToCorrect.get(userID) + " inc " + diffI);
 
-    ScoreInfo scoreInfo = new ScoreInfo(userID, diffC, diffI, timeTaken, selection);
+    ScoreInfo scoreInfo = new ScoreInfo(userID, userToCorrect.get(userID), 0, timeTaken, selection);
     userStateWrapper.setPcorrect(userStateWrapper.getCorrect());
     userStateWrapper.setPincorrect(userStateWrapper.getIncorrect());
+
+    userToCorrect.put(userID,0);
     return scoreInfo;
   }
 
   /**
-   * @see #getFlashcardResponse(long, boolean, java.util.List
+   * @see #getFlashcardResponse
    * @param userID
    * @param exercises
    * @return
@@ -632,6 +636,10 @@ public class DatabaseImpl implements Database {
    * @param isCorrect
    */
   public void updateFlashcardState(long userID, String exerciseID, boolean isCorrect) {
+    if (isCorrect) {
+      Integer integer = userToCorrect.get(userID);
+      userToCorrect.put(userID, integer == null ? 1 : integer + 1);
+    }
     synchronized (userToState) {
       try {
         UserStateWrapper state = userToState.get(userID);
@@ -641,6 +649,7 @@ public class DatabaseImpl implements Database {
           state.state.update(exerciseID, isCorrect);
           if (isCorrect) {
             state.setCorrect(state.getCorrect() + 1);
+ //           userToCorrect.put(userID,userToCorrect.get(userID) == null ? 1 : userToCorrect.get(userID+1));
           }
           else {
             state.setIncorrect(state.getIncorrect() + 1);
