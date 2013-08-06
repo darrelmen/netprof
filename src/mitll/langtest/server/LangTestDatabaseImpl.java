@@ -20,8 +20,10 @@ import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.FlashcardResponse;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.ImageResponse;
+import mitll.langtest.shared.Leaderboard;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultsAndGrades;
+import mitll.langtest.shared.ScoreInfo;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.Session;
 import mitll.langtest.shared.Site;
@@ -467,7 +469,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (serverProps.sortExercisesByID()) {
       sortByID(copy);
     }
-    FlashcardResponse nextExercise = db.getNextExercise(copy,userID, serverProps.isTimedGame());
+    FlashcardResponse nextExercise = db.getNextExercise(copy,userID, serverProps.isTimedGame(), typeToSection);
     //logger.debug("\tnextExercise " + nextExercise);
 
     return getFlashcardResponse(userID, nextExercise);
@@ -667,7 +669,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Get score when doing autoCRT on an audio file.
-   * @see AutoCRT#getAutoCRTDecodeOutput(String, int, mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer, mitll.langtest.server.scoring.Scoring)
+   * @see AutoCRT#getAutoCRTDecodeOutput
    * @see AutoCRT#getFlashcardAnswer
    * @param testAudioFile audio file to score
    * @param lmSentences to look for in the audio
@@ -1117,6 +1119,23 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public Map<Integer, Map<String, Map<String, Integer>>> getGradeCountPerExercise() {
     return db.getGradeCountPerExercise();
+  }
+
+  final Leaderboard leaderboard = new Leaderboard();
+
+  @Override
+  public Leaderboard getLeaderboard(Map<String, Collection<String>> typeToSection) {
+    return leaderboard;
+  }
+
+  @Override
+  public Leaderboard postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState) {
+    synchronized (leaderboard) {
+     // ScoreInfo previous = leaderboard.getPrevious(userid, selectionState);
+      ScoreInfo scoreInfo = db.getScoreInfo(userid, timeTaken,/* previous, */selectionState);
+      leaderboard.addScore(scoreInfo);
+    }
+    return leaderboard;
   }
 
   @Override
