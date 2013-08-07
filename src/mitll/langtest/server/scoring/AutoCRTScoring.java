@@ -4,7 +4,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * What the {@link mitll.langtest.server.AutoCRT} object sees of {@link mitll.langtest.server.LangTestDatabaseImpl}

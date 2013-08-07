@@ -3,7 +3,6 @@
  */
 package mitll.langtest.client.recorder;
 
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;

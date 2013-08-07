@@ -4,7 +4,6 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanel;
-import mitll.langtest.client.recorder.SimpleRecordPanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
@@ -57,13 +56,11 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    * <br></br>
    * Move on to next exercise...
    * @see ExercisePanel#clickNext(LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
-   * @param service
-   * @param userFeedback
    * @param controller
    * @param completedExercise
    */
   @Override
-  protected void postAnswers(LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller, Exercise completedExercise) {
+  public void postAnswers(ExerciseController controller, Exercise completedExercise) {
     controller.loadNextExercise(completedExercise);
   }
 }
