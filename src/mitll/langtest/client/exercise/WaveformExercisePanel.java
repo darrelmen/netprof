@@ -3,6 +3,7 @@ package mitll.langtest.client.exercise;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -80,13 +81,11 @@ public class WaveformExercisePanel extends ExercisePanel {
    * <br></br>
    * Move on to next exercise...
    *
-   * @param service
-   * @param userFeedback
    * @param controller
    * @param completedExercise
    */
   @Override
-  protected void postAnswers(LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller, Exercise completedExercise) {
+  public void postAnswers(ExerciseController controller, Exercise completedExercise) {
     controller.loadNextExercise(completedExercise);
   }
 
@@ -142,13 +141,13 @@ public class WaveformExercisePanel extends ExercisePanel {
           public void playStarted() {
             panel.setBusy(true);
             panel.setButtonsEnabled(false);
-            RecordAudioPanel.this.postAudioRecordButton.getRecord().setEnabled(false);
+            ((HasEnabled)RecordAudioPanel.this.postAudioRecordButton.getRecord()).setEnabled(false);
           }
 
           public void playStopped() {
             panel.setBusy(false);
             panel.setButtonsEnabled(true);
-            RecordAudioPanel.this.postAudioRecordButton.getRecord().setEnabled(true);
+            ((HasEnabled)RecordAudioPanel.this.postAudioRecordButton.getRecord()).setEnabled(true);
           }
         });
         add(recordImage1);
@@ -182,10 +181,9 @@ public class WaveformExercisePanel extends ExercisePanel {
     private RecordAudioPanel widgets;
     private PlayAudioPanel playAudioPanel;
 
-    public MyPostAudioRecordButton(/*PlayAudioPanel playAudioPanel, */RecordAudioPanel widgets, LangTestDatabaseAsync service, int index) {
+    public MyPostAudioRecordButton(RecordAudioPanel widgets, LangTestDatabaseAsync service, int index) {
       super(exercise, controller, service, index, recordImage1, recordImage2);
       this.widgets = widgets;
-      //this.setPlayAudioPanel(playAudioPanel);
     }
 
     @Override
