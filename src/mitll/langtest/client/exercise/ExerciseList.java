@@ -290,11 +290,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   //  }
   }
 
-  private void askServerForExercise(ExerciseShell exerciseShell) {
-    //System.out.println("askServerForExercise id = " + exerciseShell.getID());
-    service.getExercise(exerciseShell.getID(), new ExerciseAsyncCallback(exerciseShell));
-  }
-
   /**
    * This method is called whenever the application's history changes.
    * @see #pushNewItem(String)
@@ -325,6 +320,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       Window.alert("unknown item " + id);
       System.out.println("can't load " +id + " keys were " + idToExercise.keySet());
     }
+  }
+
+  private void askServerForExercise(ExerciseShell exerciseShell) {
+    System.out.println("askServerForExercise id = " + exerciseShell.getID());
+    service.getExercise(exerciseShell.getID(), new ExerciseAsyncCallback(exerciseShell));
   }
 
   protected String getTokenFromEvent(ValueChangeEvent<String> event) {
@@ -482,7 +482,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   @Override
   public boolean loadNextExercise(ExerciseShell current) {
-    System.out.println("loadNextExercise " +current);
+    System.out.println("loadNextExercise current is : " +current);
     int i = getIndex(current);
 
     visited.add(i);
