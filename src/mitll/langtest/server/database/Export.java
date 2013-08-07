@@ -5,10 +5,6 @@ import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,7 +21,7 @@ import java.util.Set;
  * Time: 6:04 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Export /*implements Database*/ {
+public class Export {
   private static Logger logger = Logger.getLogger(Export.class);
 
   private ExerciseDAO exerciseDAO = null;
