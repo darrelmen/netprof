@@ -1,6 +1,8 @@
 package mitll.langtest.client.exercise;
 
+import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
+import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -11,6 +13,8 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public interface ExerciseController {
+  LangTestDatabaseAsync getService();
+  UserFeedback getFeedback();
   boolean loadNextExercise(Exercise current);
 
   boolean loadPreviousExercise(Exercise current);
