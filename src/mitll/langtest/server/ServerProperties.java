@@ -26,8 +26,6 @@ import java.util.jar.Manifest;
 public class ServerProperties {
   private static Logger logger = Logger.getLogger(ServerProperties.class);
 
-  private static final String BACKGROUND_FILE = "backgroundFile";
-
   private static final String DEBUG_EMAIL = "debugEmail";
   private static final String DOIMAGES = "doimages";
 /*  public static final String FOREGROUND_BLEND = "foregroundBlend";
@@ -67,7 +65,7 @@ public class ServerProperties {
   private static final String GOODWAVE_MODE = "goodwaveMode";
   private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
-  private static final String LOGIN_TYPE_PARAM = "loginType";
+//  private static final String LOGIN_TYPE_PARAM = "loginType";
   private static final String SORT_BY_ID = "sortByID";
   private static final String SHOW_LEADERBOARD = "showLeaderboard";
 
@@ -161,7 +159,7 @@ public class ServerProperties {
   }
 
   /**
-   * @see LangTestDatabaseImpl#setInstallPath(boolean)
+   * @see LangTestDatabaseImpl#setInstallPath
    * @return
    */
   public String getMediaDir() {
