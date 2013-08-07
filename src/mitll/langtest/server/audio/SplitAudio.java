@@ -740,14 +740,14 @@ public class SplitAudio {
     File file2 = new File("C:\\Users\\go22670\\DLITest\\bootstrap\\chineseAudio\\melot\\segmented_mandarin_utf8.tsv");
 
     try {
-      FileOutputStream resourceAsStream = new FileOutputStream(file2);
-      BufferedWriter utf8 = new BufferedWriter(new OutputStreamWriter(resourceAsStream, "UTF8"));
       if (!file.exists()) {
         logger.error("can't find '" + file + "'");
         return null;
       } /*else {
         // logger.debug("found file at " + file.getAbsolutePath());
       }*/
+      FileOutputStream resourceAsStream = new FileOutputStream(file2);
+      BufferedWriter utf8 = new BufferedWriter(new OutputStreamWriter(resourceAsStream, "UTF8"));
       BufferedReader reader = getReader(file);
 
       String line;
@@ -760,7 +760,7 @@ public class SplitAudio {
       }
       reader.close();
       utf8.close();
-      if (error2 > 0) logger.error("got " + error2 + " errors");
+      //if (error2 > 0) logger.error("got " + error2 + " errors");
     } catch (Exception e) {
       logger.error("reading " + file.getAbsolutePath() + " got " + e, e);
     }
