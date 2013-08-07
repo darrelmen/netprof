@@ -22,7 +22,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.DialogHelper;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -63,9 +62,6 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private Timer timer;
   private boolean expired = false;
   private boolean timerRunning = false;
-
-  private int lastCorrect = 0;
- // private int prevCorrect = 0;
 
   private final int gameTimeSeconds;
   private Panel bottomRow = new FlowPanel();
@@ -169,7 +165,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
      service.postTimesUp(userID, gameTimeSeconds*1000, currentSelection, new AsyncCallback<Leaderboard>() {
        @Override
        public void onFailure(Throwable caught) {
-         //To change body of implemented methods use File | Settings | File Templates.
+         Window.alert("Couldn't contact server.");
        }
 
        @Override
@@ -199,16 +195,13 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     final Modal modal = new Modal();
     modal.setAnimation(false);
     modal.setCloseVisible(true);
- //   modal.set(true);
     modal.setWidth("720px");
-  //  modal.setTitle("Leaderboard");
     Chart chart = new Chart()
       .setType(Series.Type.SPLINE)
       .setChartTitleText("Leaderboard")
       .setChartSubtitleText(currentSelection.toString().replace("{", "").replace("}", "").replace("=", " ").replace("[", "").replace("]", ""))
       .setMarginRight(10);
 
-    // Number[] yValues = {163, 203, 276, 408, 547, 729, 628};
     Float[] yValues = yValuesForUser.toArray(new Float[0]);
 
     Series series = chart.createSeries()
@@ -276,7 +269,6 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     });
 
     FluidRow row = new FluidRow();
-    //if (doYesAndNo) {
       row.add(new Column(4,yesButton));
       row.add(new Column(4,new Heading(4)));
       Button noButton = new Button("No");
@@ -301,16 +293,9 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     Column column = new Column(12);
     row1.add(column);
     column.add(new Heading(4,"Would you like to try again?"));
-    modal.add(row1);//new ModalFooter(yesButton));
-    modal.add(row);//new ModalFooter(yesButton));
+    modal.add(row1);
+    modal.add(row);
     modal.show();
-
-/*    modal.addHiddenHandler(new HiddenHandler() {
-      @Override
-      public void onHidden(HiddenEvent hiddenEvent) {
-        getOutOfTimeDialog(userID);
-      }
-    });*/
   }
 
   private float over(float pbCorrect) {
@@ -321,14 +306,17 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     return pbCorrect - HALF;
   }
 
+/*
   private void getOutOfTimeDialog(final long userID) {
     List<String> msgs = new ArrayList<String>();
     msgs.add("You got "+lastCorrect +" correct!");
 
+*/
 /*    if (prevCorrect != -1 && lastCorrect > prevCorrect) {
       msgs.add("Even better than last time!");
       msgs.add("Before you had " + prevCorrect + " correct.");
-    }*/
+    }*//*
+
     msgs.add("Would you like to try again?");
 
     String title = lastCorrect == 0 ? "Try again?" : lastCorrect < 5 ? "Good job" : "Congratulations!";
@@ -348,6 +336,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     }
     );
   }
+*/
 
   private void stopForNow(long userID) {
     service.clearUserState(userID, new AsyncCallback<Void>() {
@@ -458,11 +447,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
         exercisePanelColumn.add(exercisePanel);
         bottomRow.setVisible(true);
         correct.setText(result.correct + "/" + (result.correct + result.incorrect));
-        lastCorrect = result.correct;
-        //List<Integer> correctHistory = result.getCorrectHistory();
-        //prevCorrect = correctHistory == null || correctHistory.isEmpty() ? -1 : correctHistory.get(correctHistory.size() - 1);
-
-        grabFocus((BootstrapExercisePanel) exercisePanel);
+        grabFocus((BootstrapExercisePanel) exercisePanel);   // TODO : not sure this works really
       }
     }
   }
@@ -503,8 +488,6 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
           timer.cancel();
           timerRunning = false;
-          //audioHelper.playCorrect(3);
-
           //getOutOfTimeDialog(userID);
           timesUp(userID);
         } else {
