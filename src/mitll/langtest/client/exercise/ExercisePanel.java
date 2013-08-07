@@ -1,22 +1,18 @@
 package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -37,7 +33,6 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,15 +48,16 @@ import java.util.Set;
  * Time: 1:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQuestionState, ProvidesResize, RequiresResize {
+public class ExercisePanel extends VerticalPanel implements
+  BusyPanel, ExerciseQuestionState, PostAnswerProvider, ProvidesResize, RequiresResize {
   private static final String ANSWER_BOX_WIDTH = "400px";
   private static final String REPEAT_ONCE = "<i>Repeat the phrase once at normal speed.</i>";
   private static final String REPEAT_TWICE = "<i>Repeat the phrase twice, first at normal and then at slow speed.</i>";
   private static final String TWO_SPACES = "&nbsp;&nbsp;";
   private static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
   private static final String TEACHER_PROMPT = "Record the phrase above by clicking the record button, speak, and then stop when finished. ";
-  private static final String LEFT_ARROW_TOOLTIP = "Press the left arrow key to go to the previous item.";
-  private static final String RIGHT_ARROW_TOOLTIP = "Press enter to go to the next item.";
+/*  private static final String LEFT_ARROW_TOOLTIP = "Press the left arrow key to go to the previous item.";
+  private static final String RIGHT_ARROW_TOOLTIP = "Press enter to go to the next item.";*/
   private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
   private static final String ENGLISH = "English";
   private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
@@ -71,10 +67,11 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   protected Exercise exercise = null;
   protected ExerciseController controller;
   private boolean enableNextOnlyWhenAllCompleted = true;
-  private Button prev,next;
-  private HandlerRegistration keyHandler;
+/*  private Button prev,next;
+  private HandlerRegistration keyHandler;*/
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
+  protected NavigationHelper navigationHelper;
   private boolean debug = false;
 
   /**
@@ -91,6 +88,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     this.controller = controller;
     this.service = service;
     this.feedback = userFeedback;
+    this.navigationHelper = getNavigationHelper(controller);
     addItemHeader(e);
 
     enableNextOnlyWhenAllCompleted = !getLanguage().equalsIgnoreCase("Pashto");
@@ -104,8 +102,8 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     }
     hp.setHorizontalAlignment(rightAlignContent ? HasHorizontalAlignment.ALIGN_RIGHT : HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e));
-    if (e.getContent().contains("Listen") || e.getContent().contains("listen") || controller.isDataCollectMode()) {   // hack
-    } else {
+    boolean showInstructions = !(e.getContent().toLowerCase().contains("listen") || controller.isDataCollectMode());   // hack
+    if (showInstructions) {
       addInstructions();
     }
     add(hp);
@@ -114,13 +112,21 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
 
     addQuestions(e, service, controller, i);
 
-    SimplePanel spacer = new SimplePanel();
-    spacer.setSize("100%", "20px");
+    SimplePanel spacer = makeSpacer();
     add(spacer);
 
-    boolean includeKeyHandler = controller.isCollectAudio();
-    Panel buttonRow = getNextAndPreviousButtons(e, service, userFeedback, controller, includeKeyHandler);
-    add(buttonRow);
+    // add next and prev buttons
+    add(navigationHelper);
+  }
+
+  private SimplePanel makeSpacer() {
+    SimplePanel spacer = new SimplePanel();
+    spacer.setSize("100%", "20px");
+    return spacer;
+  }
+
+  protected NavigationHelper getNavigationHelper(ExerciseController controller) {
+    return new NavigationHelper(exercise,controller, this);
   }
 
   protected void addInstructions() {
@@ -299,171 +305,11 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
     return 20;
   }
 
-  private Panel getNextAndPreviousButtons(final Exercise e, final LangTestDatabaseAsync service,
-                                          final UserFeedback userFeedback, final ExerciseController controller, boolean useKeyHandler) {
-    HorizontalPanel buttonRow = new HorizontalPanel();
-
-    this.prev = new Button("Previous");
-    prev.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        clickPrev(controller, e);
-      }
-    });
-    boolean onFirst = !controller.onFirst(e);
-    prev.setEnabled(onFirst);
-    if (useKeyHandler) prev.setTitle(LEFT_ARROW_TOOLTIP);
-
-    buttonRow.add(prev);
-    prev.setVisible(!controller.isMinimalUI() || !controller.isPromptBeforeNextItem());
-
-    this.next = new Button(getNextButtonText());
-    if (enableNextOnlyWhenAllCompleted) { // initially not enabled
-      next.setEnabled(false);
-    }
-    buttonRow.add(next);
-    if (true) next.setTitle(RIGHT_ARROW_TOOLTIP);
-
-    DOM.setElementAttribute(next.getElement(), "id", "nextButton");
-
-    // send answers to server
-    next.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        clickNext(service, userFeedback, controller, e);
-      }
-    });
-
-    // TODO : revisit in the context of text data collections
-    addKeyHandler(e, service, userFeedback, controller, useKeyHandler);
-
-    return buttonRow;
-  }
-
-  protected String getNextButtonText() {
-    return "Next";
-  }
-
-  private void addKeyHandler(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                             final ExerciseController controller, final boolean useKeyHandler) {
-      keyHandler = Event.addNativePreviewHandler(new
-                                                     Event.NativePreviewHandler() {
-
-                                                       @Override
-                                                       public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                                                         NativeEvent ne = event.getNativeEvent();
-                                                         int keyCode = ne.getKeyCode();
-                                                         boolean isLeft = keyCode == KeyCodes.KEY_LEFT;
-                                                      //   boolean isRight = keyCode == KeyCodes.KEY_RIGHT;
-                                                         boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
-
-                                                      //   System.out.println("key code is " +keyCode);
-                                                         if (((useKeyHandler && isLeft) || isEnter) && event.getTypeInt() == 512 &&
-                                                             "[object KeyboardEvent]".equals(ne.getString())) {
-                                                           ne.preventDefault();
-
-                                                           if (debug) {
-                                                             System.out.println(new Date() +
-                                                                 " : getNextAndPreviousButtons - key handler : " + keyHandler +
-                                                                 " Got " + event + " type int " +
-                                                                 event.getTypeInt() + " assoc " + event.getAssociatedType() +
-                                                                 " native " + event.getNativeEvent() +
-                                                                 " source " + event.getSource());
-                                                           }
-
-                                                           if (isLeft) {
-                                                             clickPrev(controller, e);
-                                                           } else {
-                                                             clickNext(service, userFeedback, controller, e);
-                                                           }
-                                                         }
-                                                       }
-                                                     });
-      //System.out.println("getNextAndPreviousButtons made click handler " + keyHandler);
-  }
-
-  /**
-   * Ignore clicks or keyboard activity when the widget is not enabled.
-   * @see #getNextAndPreviousButtons(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, boolean)
-   * @see #addKeyHandler(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, boolean)
-   * @param service
-   * @param userFeedback
-   * @param controller
-   * @param e
-   */
-  protected void clickNext(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                         final ExerciseController controller, final Exercise e) {
-    if (next.isEnabled() && next.isVisible()) {
-      if (controller.isMinimalUI() && !controller.isGrading() && controller.isPromptBeforeNextItem()) {
-        showConfirmNextDialog(service, userFeedback, controller, e);
-      } else {
-        postAnswers(service, userFeedback, controller, e);
-      }
-    }
-    else {
-      System.out.println("clickNext " +keyHandler+ " ignoring next");
-    }
-  }
-
-  /**
-   * Paul wanted a dialog that asks the user to confirm they want to move on to the next item.
-   * @param service
-   * @param userFeedback
-   * @param controller
-   * @param e
-   */
-  private void showConfirmNextDialog(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                                     final ExerciseController controller, final Exercise e) {
-    final DialogBox dialogBox;
-    Button yesButton;
-
-    dialogBox = new DialogBox();
-    dialogBox.setText("Please confirm");
-
-    yesButton = new Button("Yes");
-    yesButton.getElement().setId("yesButton");
-    yesButton.setFocus(true);
-
-    VerticalPanel dialogVPanel = new VerticalPanel();
-    dialogVPanel.addStyleName("dialogVPanel");
-    dialogVPanel.add(new Label("Are you ready to move on to the next item?"));
-
-    dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
-    HorizontalPanel hp = new HorizontalPanel();
-    hp.setSpacing(5);
-    dialogVPanel.add(hp);
-    hp.add(yesButton);
-    Button no = new Button("No");
-    no.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-      }
-    });
-    hp.add(no);
-    dialogBox.setWidget(dialogVPanel);
-
-    yesButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        postAnswers(service, userFeedback, controller, e);
-        dialogBox.hide();
-      }
-    });
-    dialogBox.center();
-  }
-
-  private void clickPrev(ExerciseController controller, Exercise e) {
-    if (prev.isEnabled() && prev.isVisible()) {
-    //  System.out.println("clickPrev " +keyHandler+ " click on prev " + prev);
-      controller.loadPreviousExercise(e);
-    }
-    else {
-      System.out.println("clickPrev " +keyHandler+ " ignoring click prev.");
-    }
-  }
-
   @Override
   protected void onUnload() {
     super.onUnload();
    // System.out.println("onUnload : doing unload of prev/next handler " +keyHandler);
-    if (keyHandler != null) keyHandler.removeHandler();
+    navigationHelper.removeKeyHandler();
   }
 
   /**
@@ -472,14 +318,12 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
    * <br></br>
    * Loads next exercise after the post.
    *
-   * @see ExercisePanel#getNextAndPreviousButtons(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, boolean)
-   * @param service
-   * @param userFeedback
+   * @see NavigationHelper#getNextAndPreviousButtons
    * @param controller
    * @param completedExercise
    */
-  protected void postAnswers(LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                             final ExerciseController controller, final Exercise completedExercise) {
+  @Override
+  public void postAnswers(final ExerciseController controller, final Exercise completedExercise) {
     int i = 1;
     int user = controller.getUser();
     final Set<Widget> incomplete = new HashSet<Widget>();
@@ -490,15 +334,14 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
       if (text.length() == 0) allHaveText = false;
     }
     if (!allHaveText) {
-      showPopup("Please answer " +
-        (answers.size() == 1 ? "the question." : "all questions."));
+      showPopup("Please answer " + (answers.size() == 1 ? "the question." : "all questions."));
     } else {
       incomplete.addAll(answers);
       for (final Widget tb : answers) {
         String text = ((HasValue<String>) tb).getValue();
         service.addTextAnswer(user, exercise, i++, text, new AsyncCallback<Void>() {
           public void onFailure(Throwable caught) {
-            userFeedback.showErrorMessage("Server error", "Couldn't post answers for exercise.");
+            controller.getFeedback().showErrorMessage("Server error", "Couldn't post answers for exercise.");
           }
 
           public void onSuccess(Void result) {
@@ -516,7 +359,7 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   private void showPopup(String toShow) {
     final PopupPanel popupImage = new PopupPanel(true);
     popupImage.add(new HTML(toShow));
-    popupImage.showRelativeTo(next);
+    popupImage.showRelativeTo(navigationHelper.getNext());
     Timer t = new Timer() {
       @Override
       public void run() { popupImage.hide(); }
@@ -658,16 +501,15 @@ public class ExercisePanel extends VerticalPanel implements BusyPanel, ExerciseQ
   }
 
   private void enableNext() {
-    enableNextButton((completed.size() == answers.size()));
+    navigationHelper.enableNextButton((completed.size() == answers.size()));
   }
 
-  public void enableNextButton(boolean val) {
-    next.setEnabled(val);
+  protected void enableNextButton(boolean val) {
+    navigationHelper.enableNextButton(val);
   }
 
-  public void setButtonsEnabled(boolean val) {
-    prev.setEnabled(val);
-    next.setEnabled(val);
+  protected void setButtonsEnabled(boolean val) {
+    navigationHelper.setButtonsEnabled(val);
   }
 
   /**
