@@ -2,8 +2,6 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.RadioButton;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.UriUtils;
@@ -12,6 +10,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -24,6 +23,8 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.NavigationHelper;
+import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
@@ -56,25 +57,25 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    */
   private String refAudio;
 
-  protected Exercise exercise = null;
-  protected ExerciseController controller;
-  protected LangTestDatabaseAsync service;
+  private Exercise exercise = null;
+  private final ExerciseController controller;
+  private final LangTestDatabaseAsync service;
   private ScoreListener scorePanel;
   private AudioPanel contentAudio, answerAudio;
+  private NavigationHelper navigationHelper;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
    * and a right side -- the charts and gauges {@link ASRScorePanel}
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    * @param e for this exercise
-   * @param service so we can post recorded audio
    * @param controller
    */
-  public GoodwaveExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
+  public GoodwaveExercisePanel(final Exercise e,
                                final ExerciseController controller) {
     this.exercise = e;
     this.controller = controller;
-    this.service = service;
+    this.service = controller.getService();
 
     final VerticalPanel center = new VerticalPanel();
 
@@ -88,34 +89,27 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
     if (e.isRepeat()) {
-      if (false) {
-        GWT.runAsync(new RunAsyncCallback() {
-          public void onFailure(Throwable caught) {
-            Window.alert("Code download failed");
-          }
-
-          public void onSuccess() {
-            System.out.println("\n\ndelayed fragment...");
-            ASRScorePanel widgets = new ASRScorePanel();
-            add(widgets);
-            scorePanel = widgets;
-            addQuestions(service, controller, 1, center);
-          }
-        });
-      }
-      else {
-        ASRScorePanel widgets = new ASRScorePanel();
-        add(widgets);
-        scorePanel = widgets;
-        addQuestions(service, controller, 1, center);
-      }
-    }
-    else {
+      ASRScorePanel widgets = new ASRScorePanel();
+      add(widgets);
+      scorePanel = widgets;
+      addQuestions(service, controller, 1, center);
+    } else {
       addQuestions(service, controller, 1, center);
     }
+
+    this.navigationHelper = new NavigationHelper(exercise, controller, new PostAnswerProvider() {
+      @Override
+      public void postAnswers(ExerciseController controller, Exercise completedExercise) {
+        System.out.println("postAnswers : load next exercise " + completedExercise.getID());
+        controller.loadNextExercise(completedExercise);
+      }
+    });
+    center.add(navigationHelper.makeSpacer());
+    center.add(navigationHelper);
+    navigationHelper.enableNextButton(true);
   }
 
-  public void setBusy(boolean v) { this.isBusy = v;}
+  private void setBusy(boolean v) { this.isBusy = v;}
 
   /**
    * For every question,
@@ -199,7 +193,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     final String fpath = path;
     final Exercise fe = e;
     //System.out.println("for exercise " + fe.getID() + " ensuring mp3 exists for " +path);
-    service.ensureMP3(path,new AsyncCallback<Void>() {
+    service.ensureMP3(path, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         Window.alert("Couldn't contact server (ensureMP3).");
@@ -221,8 +215,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
                 vp.add(getScoringAudioPanel(fe, fpath));
               }
             });
-          }
-          else {
+          } else {
             vp.add(getScoringAudioPanel(fe, fpath));
           }
         } else {
@@ -327,7 +320,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
       recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
       postAudioRecordButton = new MyPostAudioRecordButton();
-      DOM.setElementProperty(postAudioRecordButton.getRecord().getElement(),"margin","8px");
+      Widget record = postAudioRecordButton.getRecord();
+      DOM.setElementProperty(record.getElement(),"margin","8px");
       playAudioPanel = new MyPlayAudioPanel(recordImage1,recordImage2, soundManager, postAudioRecordButton, GoodwaveExercisePanel.this);
       return playAudioPanel;
     }
@@ -336,6 +330,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     protected void onUnload() {
       super.onUnload();
       postAudioRecordButton.onUnload();
+      navigationHelper.removeKeyHandler();
     }
 
     private class MyPlayAudioPanel extends PlayAudioPanel {
@@ -344,12 +339,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         super(soundManager, new PlayListener() {
           public void playStarted() {
             goodwaveExercisePanel.setBusy(true);
-            postAudioRecordButton1.getRecord().setEnabled(false);
+            ((HasEnabled)postAudioRecordButton1.getRecord()).setEnabled(false);
           }
 
           public void playStopped() {
             goodwaveExercisePanel.setBusy(false);
-            postAudioRecordButton1.getRecord().setEnabled(true);
+            ((HasEnabled)postAudioRecordButton1.getRecord()).setEnabled(true);
           }
         });
         add(recordImage1);
@@ -360,7 +355,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       @Override
       protected void addButtons() {
-        add(postAudioRecordButton.getRecord());
+        Widget record = postAudioRecordButton.getRecord();
+        add(record);
+        record.addStyleName("rightMargin");
         super.addButtons();
       }
 
