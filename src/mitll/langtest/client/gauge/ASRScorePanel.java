@@ -19,7 +19,6 @@ import com.google.gwt.visualization.client.LegendPosition;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import mitll.langtest.client.LangTest;
 import mitll.langtest.client.pretest.PretestGauge;
 import mitll.langtest.client.scoring.ScoreListener;
 import mitll.langtest.shared.scoring.PretestScore;
