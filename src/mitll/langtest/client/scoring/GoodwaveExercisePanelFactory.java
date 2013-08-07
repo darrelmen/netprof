@@ -28,6 +28,6 @@ public class GoodwaveExercisePanelFactory extends ExercisePanelFactory {
 
   @Override
   public Panel getExercisePanel(Exercise e) {
-    return new GoodwaveExercisePanel(e, service, controller);
+    return new GoodwaveExercisePanel(e, controller);
   }
 }
