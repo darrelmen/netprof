@@ -69,7 +69,6 @@ import java.util.Map;
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   public static final String LANGTEST_IMAGES = "langtest/images/";
- // private static final String ITEMS = "Items";
 
   private Panel currentExerciseVPanel = new FluidContainer();
   private ListInterface exerciseList;
@@ -902,7 +901,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers
+   * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
    * @see mitll.langtest.client.recorder.SimpleRecordPanel#stopRecording()
    * @return
    */
@@ -929,6 +928,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isGoodwaveMode() {  return props.isGoodwaveMode(); }
   public boolean shouldAddRecordKeyBinding() { return props.shouldAddRecordKeyBinding(); }
   public int getFlashcardPreviewFrameHeight() { return props.getFlashcardPreviewFrameHeight(); }
+  public LangTestDatabaseAsync getService() { return service; }
+  public UserFeedback getFeedback() { return this; }
 
   private PropertyHandler.LOGIN_TYPE getLoginType() { return props.getLoginType(); }
 
