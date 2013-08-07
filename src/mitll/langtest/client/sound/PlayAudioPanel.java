@@ -1,5 +1,7 @@
 package mitll.langtest.client.sound;
 
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -10,7 +12,6 @@ import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
@@ -35,7 +36,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   // anything longer than this gets the long audio number of repeats
   private static final float LONG_AUDIO_THRESHOLD = 1f;
   private static final String PLAY_LABEL = "\u25ba play";
-  private static final String PAUSE_LABEL = "<b>||</b> pause";
+  private static final String PAUSE_LABEL = "|| pause";
   public static final int SPACE_BAR = 32;
   private Sound currentSound = null;
   private SoundManagerAPI soundManager;
@@ -104,6 +105,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
         hasFocus = false;
       }
     });
+    playButton.setType(ButtonType.INFO);
 
     addKeyboardListener();
     if (keyHandler != null) {
@@ -177,18 +179,18 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
   private void setPlayButtonText() {
     String html = isPlaying() ? PLAY_LABEL : PAUSE_LABEL ;
-    playButton.setHTML(html);
+    playButton.setText(html);
   }
 
   private boolean isPlaying() {
-    return playButton.getHTML().equals(PAUSE_LABEL);
+    return playButton.getText().equals(PAUSE_LABEL);
   }
 
   private void setPlayLabel() {
     if (count == 0) {
      // System.out.println(new Date() + " setPlayLabel");
 
-      playButton.setHTML(PLAY_LABEL);
+      playButton.setText(PLAY_LABEL);
       if (playListener != null) {
         playListener.playStopped();
       }
