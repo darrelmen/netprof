@@ -36,7 +36,7 @@ public class AnswerDAO {
    * @param audioType
    * @param correct
    * @param pronScore
-   * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
    */
   public void addAnswer(int userID, Exercise e, int questionID, String answer, String audioFile,
                         boolean flq, boolean spoken, String audioType, boolean correct, float pronScore) {
