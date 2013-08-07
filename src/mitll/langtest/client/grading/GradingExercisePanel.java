@@ -9,6 +9,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.ResultManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanel;
+import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Grade;
@@ -230,7 +231,6 @@ public class GradingExercisePanel extends ExercisePanel {
                              LangTestDatabaseAsync service, GradingExercisePanel outer,
                              boolean moreThanOneQuestion, int index, int pageSize, int twoQPageSize, int grader) {
     ResultManager rm = new GradingResultManager(service, userFeedback, false);
-   // rm.setFeedback(outer);
     rm.setPageSize(pageSize);
     if (moreThanOneQuestion) {
       List<Result> filtered = new ArrayList<Result>();
@@ -248,18 +248,21 @@ public class GradingExercisePanel extends ExercisePanel {
   /**
    * Consider : on the server, notice which audio posts have arrived, and take the latest ones...
    *
-   * @param service
-   * @param userFeedback
    * @param controller
    * @param completedExercise
    */
   @Override
-  protected void postAnswers(LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller, Exercise completedExercise) {
+  public void postAnswers(ExerciseController controller, Exercise completedExercise) {
     controller.loadNextExercise(completedExercise);
   }
 
   @Override
-  protected String getNextButtonText() {
-    return "Next Ungraded";
+  protected NavigationHelper getNavigationHelper(ExerciseController controller) {
+    return new NavigationHelper(exercise,controller, this) {
+      @Override
+      protected String getNextButtonText() {
+        return "Next Ungraded";
+      }
+    };
   }
 }
