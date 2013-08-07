@@ -1,9 +1,5 @@
 package mitll.langtest.client.user;
 
-import mitll.langtest.client.DialogHelper;
-
-import java.util.List;
-
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
