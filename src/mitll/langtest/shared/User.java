@@ -18,14 +18,6 @@ public class User implements IsSerializable {
   public String ipaddr;
   public String  password;
   public long timestamp;
-  /**
-   * @deprecated avoid COUHES issues
-   */
-//  public String firstName;
-  /**
-   * @deprecated avoid COUHES issues
-   */
-//  public String lastName;
   public String nativeLang,dialect;
   public String userID;
   public boolean enabled;
