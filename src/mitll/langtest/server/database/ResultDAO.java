@@ -241,7 +241,7 @@ public class ResultDAO extends DAO {
       }
     }
 
-    if (debug && false) logger.debug("\tafter removing flq " + resultsForExercise.size());
+    //if (debug && false) logger.debug("\tafter removing flq " + resultsForExercise.size());
 
     int countAtIndex = 0;
     for (Grade g : gradedResults) {
