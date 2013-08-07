@@ -343,7 +343,7 @@ fieldset > legend {
     min-height: 20px;
 }
 
-#nextButton {  margin-left: 20px; }
+#nextButton {  margin-left: 5px; }
 .paddedHorizontalPanel .gwt-Button {
   padding-left: 20px;
 }
