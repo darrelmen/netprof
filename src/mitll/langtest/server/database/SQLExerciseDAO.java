@@ -6,7 +6,6 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Clob;
@@ -231,12 +230,12 @@ public class SQLExerciseDAO implements ExerciseDAO {
 
   private void addQuestions(Exercise exercise, Collection<JSONObject> qa) {
     for (JSONObject o : qa) {
-      Set<String> keys = o.keySet();
-      for (String lang : keys) {
+      Set keys = o.keySet();
+      for (Object lang : keys) {
         JSONObject qaForLang = (JSONObject) o.get(lang);
         String answerKey = (String) qaForLang.get("answerKey");
         List<String> alternateAnswers = Arrays.asList(answerKey.split("\\|\\|"));
-        exercise.addQuestion(lang, (String) qaForLang.get("question"), answerKey, alternateAnswers);
+        exercise.addQuestion(lang.toString(), (String) qaForLang.get("question"), answerKey, alternateAnswers);
       }
     }
   }
