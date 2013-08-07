@@ -1,8 +1,9 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -22,8 +23,8 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class PostAudioRecordButton extends RecordButton {
-  private static final String RECORD = "record";
-  private static final String STOP = "stop";
+  private static final String RECORD = "Record";
+  private static final String STOP = "Stop";
 
   private int index;
   private int reqid = 0;
@@ -43,6 +44,7 @@ public abstract class PostAudioRecordButton extends RecordButton {
   public PostAudioRecordButton(Exercise exercise, ExerciseController controller, LangTestDatabaseAsync service,
                                int index, Image recordImage1, Image recordImage2) {
     super(new Button(RECORD), controller.getRecordTimeout(), recordImage1, recordImage2, true);
+    ((Button)getRecord()).setType(ButtonType.PRIMARY);
 
     this.index = index;
     this.exercise = exercise;
@@ -145,7 +147,7 @@ public abstract class PostAudioRecordButton extends RecordButton {
     super.showRecording();
     int w = getRecord().getOffsetWidth();
     ((Button) getRecord()).setText(STOP);
-    if (getRecord().getOffsetWidth() < w) getRecord().setWidth(w + "px");
+   // if (getRecord().getOffsetWidth() < w) getRecord().setWidth(w + "px");
   }
 
   @Override
