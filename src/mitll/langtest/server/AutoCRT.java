@@ -4,7 +4,6 @@ import ag.experiment.AutoGradeExperiment;
 import mira.classifier.Classifier;
 import mitll.langtest.server.database.Export;
 import mitll.langtest.server.scoring.AutoCRTScoring;
-import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;

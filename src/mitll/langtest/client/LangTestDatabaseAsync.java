@@ -5,7 +5,6 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.FlashcardResponse;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.ImageResponse;
