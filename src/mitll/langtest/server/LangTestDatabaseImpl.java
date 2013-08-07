@@ -8,6 +8,7 @@ import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.SectionHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
@@ -157,7 +158,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public ExerciseListWrapper getExerciseIds(int reqID, long userID) {
     logger.debug("getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
     List<Exercise> exercises = getExercises(userID);
-    if (serverProps.isGoodwaveMode()) {
+    if (serverProps.isGoodwaveMode() && !serverProps.dataCollectMode) {
       exercises = getSortedExercises(exercises);
       if (!exercises.isEmpty()) logger.debug("sorting by id -- first is " + exercises.get(0).getID());
     }
@@ -294,7 +295,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public Collection<String> getTypeOrder() {
-    return db.getSectionHelper().getTypeOrder();
+    SectionHelper sectionHelper = db.getSectionHelper();
+    List<String> objects = Collections.emptyList();
+    return (sectionHelper == null) ? objects : sectionHelper.getTypeOrder();
   }
 
   @Override
@@ -383,7 +386,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (serverProps.dataCollectMode) {
        //logger.debug("in data collect mode");
       if (serverProps.biasTowardsUnanswered) {
-        //logger.debug("in biasTowardsUnanswered mode");
+        logger.debug("in biasTowardsUnanswered mode : user " +userID);
 
         if (serverProps.useOutsideResultCounts) {
           String outsideFileOverride = serverProps.outsideFile;
@@ -871,7 +874,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param exercise
    * @param questionID
    * @param answer
-   * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers
+   * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
    */
   public void addTextAnswer(int userID, Exercise exercise, int questionID, String answer) {
     db.addAnswer(userID, exercise, questionID, answer);
