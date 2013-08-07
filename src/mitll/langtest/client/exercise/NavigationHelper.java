@@ -9,21 +9,20 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-//import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
 import java.util.Date;
 
 /**
- * Created with IntelliJ IDEA.
+ * A row with prev/next buttons.  Key bindings for keys too.
+ * Has confirm dialog appear on next button in some modes.
+ *
  * User: GO22670
  * Date: 8/6/13
  * Time: 6:36 PM
