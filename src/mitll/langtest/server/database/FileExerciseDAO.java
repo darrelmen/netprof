@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,9 +52,6 @@ public class FileExerciseDAO implements ExerciseDAO {
   private final boolean processSemicolons = false;
   private boolean isPashto;
 
-  private FileExerciseDAO(boolean isFlashcard) {
-    this("","", isFlashcard);
-  }
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
    * @param mediaDir
