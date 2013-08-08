@@ -88,6 +88,7 @@ public class UserManager {
   private static final String AUDIO_TYPE = "audioType";
   private static final String LOGIN_TYPE = "loginType";
   public static final int NATIVE_MONTHS = 20 * 12;
+  private static final int INACTIVE_PERIOD_MILLIS = 1000 * 60 * 10; // ten minutes
   private final LangTestDatabaseAsync service;
   private final UserNotification langTest;
   private final boolean useCookie = false;
@@ -99,6 +100,9 @@ public class UserManager {
   private final boolean isFlashcard;
   private String appTitle;
   private DisclosurePanel dp;
+  private boolean trackUsers;
+
+  Timer userTimer;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
@@ -107,19 +111,19 @@ public class UserManager {
    * @param lt
    * @param service
    * @param isDataCollectAdmin
-   * @param loginType
-   * @param appTitle
    * @param isFlashcard
+   * @param props
    */
-  public UserManager(UserNotification lt, LangTestDatabaseAsync service, boolean isCollectAudio,
-                     boolean isDataCollectAdmin, PropertyHandler.LOGIN_TYPE loginType, String appTitle, boolean isFlashcard) {
+  public UserManager(UserNotification lt, LangTestDatabaseAsync service,
+                     boolean isDataCollectAdmin, boolean isFlashcard, PropertyHandler props) {
     this.langTest = lt;
     this.service = service;
-    this.isCollectAudio = isCollectAudio;
+    this.isCollectAudio = props.isCollectAudio();
     this.isDataCollectAdmin = isDataCollectAdmin;
     this.isFlashcard = isFlashcard;
-    this.loginType = loginType;
-    this.appTitle = appTitle;
+    this.loginType = props.getLoginType();
+    this.appTitle = props.getAppTitle();
+    this.trackUsers = props.isTrackUsers();
   }
 
   // user tracking
@@ -130,9 +134,9 @@ public class UserManager {
    * @param sessionID from database
    * @param audioType
    * @param userChosenID
-   * @see #displayLoginBox()
+   * @see #addTeacher(int, com.github.gwtbootstrap.client.ui.ListBox, com.github.gwtbootstrap.client.ui.ListBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.Button, boolean)
+   * @see #addUser(int, String, int, String, mitll.langtest.client.PropertyHandler.LOGIN_TYPE)
    * @see #displayTeacherLogin()
-   * @see #addTeacher
    */
   private void storeUser(long sessionID, String audioType, String userChosenID, PropertyHandler.LOGIN_TYPE userType) {
     //System.out.println("storeUser : user now " + sessionID);
@@ -155,7 +159,48 @@ public class UserManager {
       this.userChosenID = userChosenID;
     }
 
+    if (trackUsers) {
+      waitThenInactivate();
+    }
     langTest.gotUser(sessionID);
+  }
+
+  /**
+   * Somebody should call this when the user does something in taboo
+   */
+  public void userAlive() {
+    int user = getUser();
+    userOnline(user, true);
+    waitThenInactivate();
+  }
+
+  public void userInactive() {
+    int user = getUser();
+    userOnline(user, false);
+  }
+
+  private void userOnline(int user, boolean active) {
+    service.userOnline(user, active, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        Window.alert("Couldn't contact server, check network connection.");
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+      }
+    });
+  }
+
+  private void waitThenInactivate() {
+    if (userTimer != null) userTimer.cancel();
+    userTimer = new Timer() {
+      @Override
+      public void run() {
+        userInactive();
+      }
+    };
+    userTimer.schedule(INACTIVE_PERIOD_MILLIS);
   }
 
   private void rememberUserSessionEnd(long futureMoment) {
