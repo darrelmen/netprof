@@ -150,7 +150,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Initially the flash record player is put in the center of the DockLayout
    */
   public void onModuleLoad2() {
-    userManager = new UserManager(this,service, isCollectAudio(), false, getLoginType(), props.getAppTitle(),false);
+    userManager = new UserManager(this,service, false, false, props);
 
     if (props.isFlashCard()) {
       loadFlashcard();
@@ -411,7 +411,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     HorizontalPanel headerRow = flashcard.makeFlashcardHeaderRow(props.getSplash());
     container.add(headerRow);
 
-    userManager = new UserManager(this, service, isCollectAudio(), false, getLoginType(), props.getAppTitle(), true);
+    userManager = new UserManager(this, service, false, true, props);
     this.exerciseList = new ExerciseListLayout(props).makeFlashcardExerciseList(container, service, userManager);
 
     makeFlashContainer();
@@ -462,8 +462,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     users = makeUsersAnchor(true);
     fp1.add(users);
-    userManager = new UserManager(this,service, isCollectAudio(), props.isDataCollectAdminView(), getLoginType(),
-      props.getAppTitle(),false);
+    userManager = new UserManager(this,service, props.isDataCollectAdminView(),
+      false, props);
 
     logout = new Anchor("Logout");
     logout.addClickHandler(new ClickHandler() {
