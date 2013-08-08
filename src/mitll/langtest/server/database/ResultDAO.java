@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.LangTestDatabaseImpl;
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Grade;
 import mitll.langtest.shared.Result;
@@ -194,7 +195,7 @@ public class ResultDAO extends DAO {
   }
 
   private void trimPathForWebPage(Result r) {
-    int answer = r.answer.indexOf(LangTestDatabaseImpl.ANSWERS);
+    int answer = r.answer.indexOf(PathHelper.ANSWERS);
     if (answer == -1) return;
     r.answer = r.answer.substring(answer);
   }
