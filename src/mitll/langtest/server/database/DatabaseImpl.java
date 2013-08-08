@@ -430,6 +430,10 @@ public class DatabaseImpl implements Database {
     return idToCount;
   }
 
+  public void userOnline(long userid, boolean isOnline) {
+    if (isOnline) userDAO.addOnline(userid); else userDAO.removeOnline(userid);
+  }
+
   private static class UserStateWrapper {
     public final UserState state;
     private int correct = 0;
