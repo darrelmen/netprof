@@ -909,9 +909,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public void logMessage(String message) {
-    logger.debug("from client " + message);
+  public void userOnline(long userid, boolean isOnline) {
+    db.userOnline(userid, isOnline);
   }
+
+  @Override
+  public void logMessage(String message) { logger.debug("from client " + message); }
 
   /**
    * @see mitll.langtest.client.mail.MailDialog.SendClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
