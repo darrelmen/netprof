@@ -132,4 +132,6 @@ public interface LangTestDatabaseAsync {
   void getLeaderboard(Map<String, Collection<String>> typeToSection, AsyncCallback<Leaderboard> async);
 
   void postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState, AsyncCallback<Leaderboard> async);
+
+  void userOnline(long userid, boolean isOnline, AsyncCallback<Void> async);
 }
