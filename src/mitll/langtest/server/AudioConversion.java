@@ -50,7 +50,8 @@ public class AudioConversion {
    */
   public AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString, File file) {
     File parentFile = file.getParentFile();
-    parentFile.mkdirs();
+    boolean mkdirs = parentFile.mkdirs();
+    if (mkdirs) logger.debug("convertBase64ToAudioFiles : making dir at : " + parentFile.getAbsolutePath());
 
     byte[] byteArray = getBytesFromBase64String(base64EncodedString);
 
