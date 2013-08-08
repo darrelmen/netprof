@@ -68,6 +68,7 @@ public class ServerProperties {
 //  private static final String LOGIN_TYPE_PARAM = "loginType";
   private static final String SORT_BY_ID = "sortByID";
   private static final String SHOW_LEADERBOARD = "showLeaderboard";
+  private static final String TRACK_USERS_ONLINE = "trackUsers";
 
   private Properties props = null;
 
@@ -144,8 +145,12 @@ public class ServerProperties {
     return getDefaultFalse(SHOW_LEADERBOARD);
   }
 
+  public boolean trackUsers() {
+    return getDefaultFalse(TRACK_USERS_ONLINE);
+  }
+
   /**
-   * @see LangTestDatabaseImpl#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.AudioCheck.ValidityAndDur, String, boolean)
+   * @see LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    * @return
    */
   public boolean isAutoCRT() {
