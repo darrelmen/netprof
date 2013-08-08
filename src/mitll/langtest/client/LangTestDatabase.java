@@ -137,4 +137,6 @@ public interface LangTestDatabase extends RemoteService {
   Leaderboard getLeaderboard(Map<String, Collection<String>> typeToSection);
 
   Leaderboard postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState);
+
+  void userOnline(long userid, boolean isOnline);
 }
