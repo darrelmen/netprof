@@ -10,9 +10,7 @@ import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.SectionHelper;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
-import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
@@ -29,7 +27,6 @@ import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.Session;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
@@ -42,11 +39,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -62,20 +57,17 @@ import java.util.concurrent.TimeUnit;
  */
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring {
-  private static Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
+  private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
 
   private static final int MB = (1024 * 1024);
-  public static final String ANSWERS = "answers";
   private static final int TIMEOUT = 30;
-  private static final String IMAGE_WRITER_IMAGES = "audioimages";
 
   private DatabaseImpl db, studentAnswersDB;
-  private ASRScoring asrScoring;
-  private AutoCRT autoCRT;
-  private final boolean makeFullURLs = false;
+  private AudioFileHelper audioFileHelper;
   private String relativeConfigDir;
   private String configDir;
   private final ServerProperties serverProps = new ServerProperties();
+  private PathHelper pathHelper;
 
   private final Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
       .concurrencyLevel(4)
@@ -98,9 +90,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (isMultipart) {
       logger.debug("Request " + request.getQueryString() + " path "  +request.getPathInfo());
       SiteDeployer siteDeployer = new SiteDeployer();
-      SiteDeployer.SiteInfo siteInfo = siteDeployer.getSite(request, configDir, db, getInstallPath());
+      SiteDeployer.SiteInfo siteInfo = siteDeployer.getSite(request, configDir, db, pathHelper.getInstallPath());
       Site site = siteInfo.site;
-      if (site == null/* || !site.isValid()*/) {
+      if (site == null) {
         super.service(request, response);
         return;
       }
@@ -146,7 +138,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public boolean deploySite(long id, String name, String language, String notes) {
     logger.debug("deploy site id=" +id + " name " + name);
     SiteDeployer siteDeployer = new SiteDeployer();
-    return siteDeployer.deploySite(db, getMailSupport(), getThreadLocalRequest(), configDir, getInstallPath(), id, name, language, notes);
+    return siteDeployer.deploySite(db, getMailSupport(), getThreadLocalRequest(), configDir,
+      pathHelper.getInstallPath(), id, name, language, notes);
   }
 
   /**
@@ -361,7 +354,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return exercises for user id
    * @see mitll.langtest.client.exercise.ExerciseList#getExercises(long)
    */
-  public List<Exercise> getExercises(long userID) {
+  private List<Exercise> getExercises(long userID) {
     makeAutoCRT();
 
     List<Exercise> exercises = getExercisesInModeDependentOrder(userID);
@@ -373,7 +366,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       setPromptAndRecordOnExercises(userID, exercises);
     }
-    if (makeFullURLs) convertRefAudioURLs(exercises);
     //if (!exercises.isEmpty())
    //   logger.debug("for user #" + userID +" got " + exercises.size() + " exercises , first " + exercises.iterator().next());
           //" ref sentence = '" + exercises.iterator().next().getRefSentence() + "'");
@@ -410,22 +402,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       exercises = serverProps.isArabicTextDataCollect() ? db.getRandomBalancedList(userID) : db.getUnmodExercises();
     }
     return exercises;
-  }
-
-  private void makeAutoCRT() {
-    synchronized (this) {
-      if (autoCRT == null) {
-        DatabaseImpl exportDB = serverProps.isAutoCRT() ? studentAnswersDB : db;
-        if (serverProps.isAutoCRT()) {
-          setInstallPath(serverProps.getUseFile(), exportDB);
-          exportDB.getExercises();
-
-         // List<Export.ExerciseExport> export = exportDB.getExport().getExport(true, false);
-
-        }
-        autoCRT = new AutoCRT(exportDB.getExport(), this, getInstallPath(), relativeConfigDir, serverProps.getMinPronScore());
-      }
-    }
   }
 
   /**
@@ -517,19 +493,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.exercise.ExerciseList#getExercisesInOrder()
    * @return
    */
-  public List<Exercise> getExercises() {
-    List<Exercise> exercises = db.getExercises();
-    if (makeFullURLs) convertRefAudioURLs(exercises);
-    return exercises;
-  }
-
-  private void convertRefAudioURLs(List<Exercise> exercises) {
-    URLUtils urlUtils = new URLUtils(getThreadLocalRequest());
-    for (Exercise e : exercises) {
-      if (e.getRefAudio() != null) {
-        e.setRefAudio(urlUtils.makeURL(e.getRefAudio()));
-      }
-    }
+  List<Exercise> getExercises() {
+    return db.getExercises();
   }
 
   /**
@@ -577,8 +542,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (wavFile == null) {
       logger.warn("ensureMP3 huh? wavFile is null?");
     } else {
-      //logger.debug("ensure mp3 for " +wavFile);
-      new AudioConversion().ensureWriteMP3(wavFile, getInstallPath());
+      new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath());
     }
   }
 
@@ -609,11 +573,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         imageType.equalsIgnoreCase(ImageType.WAVEFORM.toString()) ? ImageType.WAVEFORM :
             imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM : null;
     if (imageType1 == null) return new ImageResponse(); // success = false!
-    String imageOutDir = getImageOutDir();
+    String imageOutDir = pathHelper.getImageOutDir();
     logger.debug("getting images for " + wavAudioFile + "");
-    String absolutePathToImage = imageWriter.writeImageSimple(wavAudioFile, getAbsoluteFile(imageOutDir).getAbsolutePath(),
+    String absolutePathToImage = imageWriter.writeImageSimple(wavAudioFile, pathHelper.getAbsoluteFile(imageOutDir).getAbsolutePath(),
         width, height, imageType1);
-    String installPath = getInstallPath();
+    String installPath = pathHelper.getInstallPath();
     //System.out.println("Absolute path to image is " + absolutePathToImage);
 
     String relativeImagePath = absolutePathToImage;
@@ -624,11 +588,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.error("huh? file path " + absolutePathToImage + " doesn't start with " + installPath + "?");
     }
 
-    relativeImagePath = ensureForwardSlashes(relativeImagePath);
+    relativeImagePath = pathHelper.ensureForwardSlashes(relativeImagePath);
     if (relativeImagePath.startsWith("/")) {
       relativeImagePath = relativeImagePath.substring(1);
     }
-    String imageURL = optionallyMakeURL(relativeImagePath);
+    String imageURL = relativeImagePath;
     double duration = new AudioCheck().getDurationInSeconds(wavAudioFile);
 /*    logger.debug("for " + wavAudioFile + " type " + imageType + " rel path is " + relativeImagePath +
         " url " + imageURL + " duration " + duration);*/
@@ -639,13 +603,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String getWavAudioFile(String audioFile) {
     if (audioFile.endsWith(".mp3")) {
       String wavFile = removeSuffix(audioFile) +".wav";
-      File test = getAbsoluteFile(wavFile);
-      audioFile = test.exists() ? test.getAbsolutePath() : getWavForMP3(audioFile);
+      File test = pathHelper.getAbsoluteFile(wavFile);
+      audioFile = test.exists() ? test.getAbsolutePath() : audioFileHelper.getWavForMP3(audioFile);
     }
-    else if (makeFullURLs) {
-      audioFile = new URLUtils(getThreadLocalRequest()).convertURLToRelativeFile(audioFile);
-    }
+
     return audioFile;
+  }
+
+  private String removeSuffix(String audioFile) {
+    return audioFile.substring(0, audioFile.length() - ".mp3".length());
   }
 
   /**
@@ -666,7 +632,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg) {
-      return getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
+      return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
         false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache());
   }
 
@@ -679,161 +645,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return PretestScore for audio
    */
   public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences) {
-    String tmpDir = Files.createTempDir().getAbsolutePath();
-    String slfFile = createSLFFile(lmSentences, tmpDir);
-    if (!new File(slfFile).exists()) {
-      logger.error("couldn't make slf file?");
-      return new PretestScore();
-    } else {
-      makeASRScoring();
-      List<String> unk = new ArrayList<String>();
-      unk.add(SmallVocabDecoder.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
-      String vocab = asrScoring.getUsedTokens(lmSentences, unk);
-      logger.debug("getASRScoreForAudio : vocab " + vocab);
-      return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, 128, 128, false, true, tmpDir, serverProps.useScoreCache());
-    }
+    return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences);
   }
 
-  private String createSLFFile(Collection<String> lmSentences, String tmpDir) {
-    SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
-    // long then = System.currentTimeMillis();
-    String slfFile = svDecoderHelper.createSimpleSLFFile(lmSentences, tmpDir);
-    //  long now = System.currentTimeMillis();
-    //logger.debug("simple create slf file took " + (now - then) + " millis");
-    return slfFile;
-  }
-
+  /**
+   * @see AutoCRT#getAutoCRTDecodeOutput(String, int, mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
+   * @param phrases
+   * @return
+   */
   @Override
   public Collection<String> getValidPhrases(Collection<String> phrases) {
-    makeASRScoring(); // TODO : evil
-    return asrScoring.getValidPhrases(phrases);  //To change body of implemented methods use File | Settings | File Templates.
-  }
-
-  /**
-   * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
-   *
-   * @see #getASRScoreForAudio(int, String, String, int, int, boolean)
-   * @see mitll.langtest.server.scoring.AutoCRTScoring#getASRScoreForAudio
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
-   * @param reqid
-   * @param testAudioFile
-   * @param sentence empty string when using lmSentences non empty and vice-versa
-   * @param width image dim
-   * @param height  image dim
-   * @param useScoreToColorBkg
-   * @param decode
-   * @param tmpDir
-   * @param useCache
-   * @return PretestScore
-   **/
-  private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
-                                           int width, int height, boolean useScoreToColorBkg,
-                                           boolean decode, String tmpDir, boolean useCache) {
-    logger.info("getASRScoreForAudio scoring " + testAudioFile + " with " + sentence + " req# " + reqid);
-
-    assert(testAudioFile != null && sentence != null);
-    makeASRScoring();
-    testAudioFile = dealWithMP3Audio(testAudioFile);
-    if (!new File(testAudioFile).exists()) return new PretestScore();
-
-    String installPath = getInstallPath();
-
-    DirAndName testDirAndName = new DirAndName(testAudioFile, installPath).invoke();
-    String testAudioName = testDirAndName.getName();
-    String testAudioDir = testDirAndName.getDir();
-
-    //logger.debug("getASRScoreForAudio scoring " + testAudioName + " in dir " + testAudioDir);
-    if (serverProps.getLanguage().equalsIgnoreCase("English")) sentence = sentence.toUpperCase();  // hack for English
-    PretestScore pretestScore = asrScoring.scoreRepeat(
-        testAudioDir, removeSuffix(testAudioName),
-        sentence,
-        getImageOutDir(), width, height, useScoreToColorBkg,decode,tmpDir, useCache);
-    pretestScore.setReqid(reqid);
-
-    if (makeFullURLs) {
-      URLUtils urlUtils = new URLUtils(getThreadLocalRequest());
-      Map<NetPronImageType, String> typeToURL = new HashMap<NetPronImageType, String>();
-      for (Map.Entry<NetPronImageType, String> kv : pretestScore.getsTypeToImage().entrySet()) {
-        typeToURL.put(kv.getKey(), urlUtils.makeURL(kv.getValue()));
-      }
-      pretestScore.setsTypeToImage(typeToURL);
-    }
-    return pretestScore;
-  }
-
-  private void makeASRScoring() {
-    if (asrScoring == null) {
-        asrScoring = new ASRScoring(getInstallPath(), getProperties()); // lazy eval since...?
-    }
-  }
-
-  /**
-   * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean)
-   * @param testAudioFile
-   * @return
-   */
-  private String dealWithMP3Audio(String testAudioFile) {
-    if (testAudioFile.endsWith(".mp3")) {
-      String noSuffix = removeSuffix(testAudioFile);
-      String wavFile = noSuffix +".wav";
-      File test = getAbsoluteFile(wavFile);
-      if (!test.exists()) {
-        logger.warn("expecting audio file with wav extension, but didn't find "  +test.getAbsolutePath());
-      }
-      return test.exists() ? test.getAbsolutePath() :  getWavForMP3(testAudioFile);
-    }
-    else {
-      return testAudioFile;
-    }
-  }
-
-  private String removeSuffix(String audioFile) {
-    return audioFile.substring(0, audioFile.length() - ".mp3".length());
-  }
-
-  /**
-   * @see #dealWithMP3Audio(String)
-   * @see #getImageForAudioFile(int, String, String, int, int)
-   * @param audioFile
-   * @return
-   */
-  private String getWavForMP3(String audioFile) {
-    return getWavForMP3(audioFile, getInstallPath());
-  }
-
-  /**
-   * Ultimately does lame --decode from.mp3 to.wav
-   *
-   * Worris about converting from either a relative path to an absolute path (given the webapp install location)
-   * or if audioFile is a URL, converting it to a relative path before making an absolute path.
-   *
-   * Gotta be a better way...
-   *
-   * @see #getWavForMP3(String)
-   * @param audioFile to convert
-   * @return
-   */
-  private String getWavForMP3(String audioFile, String installPath) {
-    assert(audioFile.endsWith(".mp3"));
-    if (makeFullURLs) audioFile = new URLUtils(getThreadLocalRequest()).convertURLToRelativeFile(audioFile);
-    String absolutePath = getAbsolute(audioFile,installPath).getAbsolutePath();
-
-    if (!new File(absolutePath).exists())
-      logger.error("getWavForMP3 : expecting file at " + absolutePath);
-    else {
-      AudioConversion audioConversion = new AudioConversion();
-      File file = audioConversion.convertMP3ToWav(absolutePath);
-      if (file.exists()) {
-        String orig = audioFile;
-        audioFile = file.getAbsolutePath();
-        logger.info("from " + orig + " wrote to " + file + " or " + audioFile);
-      }
-      else {
-        logger.error("getImageForAudioFile : can't find " + file.getAbsolutePath());
-      }
-    }
-    assert(audioFile.endsWith(".wav"));
-    return audioFile;
+    return audioFileHelper.getValidPhrases(phrases);
   }
 
   /**
@@ -860,7 +682,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private void ensureMP3(Collection<Result> results) {
     for (Result r : results) {
       if (r.answer.endsWith(".wav")) {
-        new AudioConversion().ensureWriteMP3(r.answer, getInstallPath());
+        new AudioConversion().ensureWriteMP3(r.answer, pathHelper.getInstallPath());
       }
     }
   }
@@ -880,12 +702,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.addAnswer(userID, exercise, questionID, answer);
   }
 
-/*  public boolean isAnswerValid(int userID, Exercise exercise, int questionID) {
-    return db.isAnswerValid(userID, exercise, questionID, db);
-  }*/
-
   public double getScoreForAnswer(Exercise e, int questionID, String answer) {
-    return autoCRT.getScoreForExercise(e, questionID, answer);
+    return audioFileHelper.getScoreForAnswer(e, questionID, answer);
   }
 
   // Grades ---------------------
@@ -1008,63 +826,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param doFlashcard
    * @return URL to audio on server and if audio is valid (not too short, etc.)
    */
+
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
                                     int user, int reqid, boolean flq, String audioType, boolean doFlashcard) {
-    String wavPath = getLocalPathToAnswer(plan, exercise, questionID, user);
-    File file = getAbsoluteFile(wavPath);
-
-    AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
-    boolean isValid = validity.validity == AudioAnswer.Validity.OK;
-    if (!isValid) {
-      logger.warn("got invalid audio file (" + validity +
-          ") user = " + user + " exercise " + exercise +
-          " question " + questionID + " file " + file.getAbsolutePath());
-    }
-
-    String wavPathWithForwardSlashSeparators = ensureForwardSlashes(wavPath);
-    String url = optionallyMakeURL(wavPathWithForwardSlashSeparators);
-    // logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
-
-    AudioAnswer answer = (isValid) ?
-      getAudioAnswer(exercise, questionID, user, reqid, file, validity, url, doFlashcard) :
-      new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
-
-    long answerID = db.addAudioAnswer(user, plan, exercise, questionID, file.getPath(),
-      isValid, flq, true, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore());
-    answer.setResultID(answerID);
-    logger.info("writeAudioFile answer " + answer);
-    return answer;
+    makeAutoCRT();
+    return this.audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, questionID, user, reqid, flq, audioType, doFlashcard, this);
   }
 
-  /**
-   * @see #writeAudioFile(String, String, String, int, int, int, boolean, String, boolean)
-   * @param exercise
-   * @param questionID
-   * @param user
-   * @param reqid
-   * @param file
-   * @param validity
-   * @param url
-   * @param doFlashcard
-   * @return
-   */
-  private AudioAnswer getAudioAnswer(String exercise, int questionID, int user, int reqid,
-                                     File file, AudioCheck.ValidityAndDur validity, String url, boolean doFlashcard) {
-    AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
-    if (serverProps.isFlashcard()|| doFlashcard) {
-      makeAutoCRT();
-      makeASRScoring();
-      if (serverProps.isAutoCRT()) {
-        autoCRT.getAutoCRTDecodeOutput(exercise, questionID, getExercise(exercise), file, audioAnswer);
-      } else {
-        autoCRT.getFlashcardAnswer(getExercise(exercise), file, audioAnswer);
-      }
-      db.updateFlashcardState(user, exercise, audioAnswer.isCorrect());
-      return audioAnswer;
-    } else if (serverProps.isAutoCRT()) {
-      autoCRT.getAutoCRTDecodeOutput(exercise, questionID, getExercise(exercise), file, audioAnswer);
-    }
-    return audioAnswer;
+  void makeAutoCRT() {
+    audioFileHelper.makeAutoCRT(relativeConfigDir, this, studentAnswersDB, this);
   }
 
   @Override
@@ -1124,17 +894,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getGradeCountPerExercise();
   }
 
-  final Leaderboard leaderboard = new Leaderboard();
+  private final Leaderboard leaderboard = new Leaderboard();
 
   @Override
-  public Leaderboard getLeaderboard(Map<String, Collection<String>> typeToSection) {
-    return leaderboard;
-  }
+  public Leaderboard getLeaderboard(Map<String, Collection<String>> typeToSection) {  return leaderboard;  }
 
   @Override
   public Leaderboard postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState) {
     synchronized (leaderboard) {
-      ScoreInfo scoreInfo = db.getScoreInfo(userid, timeTaken,/* previous, */selectionState);
+      ScoreInfo scoreInfo = db.getScoreInfo(userid, timeTaken, selectionState);
       leaderboard.addScore(scoreInfo);
     }
     return leaderboard;
@@ -1165,117 +933,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return new MailSupport(serverProps.isDebugEMail());
   }
 
-  private String optionallyMakeURL(String wavPathWithForwardSlashSeparators) {
-    return makeFullURLs ?
-        new URLUtils(getThreadLocalRequest()).makeURL(wavPathWithForwardSlashSeparators) :
-        wavPathWithForwardSlashSeparators;
-  }
-
-  private String ensureForwardSlashes(String wavPath) {
-    return wavPath.replaceAll("\\\\", "/");
-  }
-
-  private File getAbsoluteFile(String filePath) {
-    String realContextPath = getInstallPath();
-    return getAbsolute(filePath, realContextPath);
-  }
-
-  private File getAbsolute(String filePath, String realContextPath) {
-    return new File(realContextPath, filePath);
-  }
-
-  /**
-   * Figure out from the servlet context {@link #getServletContext()} and
-   * the thread local request {@link #getThreadLocalRequest()} where this instance of the webapp was
-   * installed.  This is really important since we use it to convert back and forth between
-   * relative and absolute paths to audio and image files.
-   * @return path to webapp install location
-   */
-  private String getInstallPath() {
-    ServletContext context = getServletContext();
-    if (context == null) {
-      logger.error("no servlet context.");
-      return "";
-    }
-
-    String realContextPath = getServletContext().getRealPath(getServletContext().getContextPath());
-
-    List<String> pathElements = Arrays.asList(realContextPath.split(realContextPath.contains("\\") ? "\\\\" : "/"));
-
-    // hack to deal with the app name being duplicated in the path
-    if (pathElements.size() > 1) {
-      String last = pathElements.get(pathElements.size() - 1);
-      String nextToLast = pathElements.get(pathElements.size() - 2);
-      if (last.equals(nextToLast)) {
-        String nodups = realContextPath.substring(0, realContextPath.length() - last.length() -1); // remove trailing slash
-        realContextPath = nodups;
-      }
-    }
-
-    return realContextPath;
-  }
-
-  /**
-   * Make a place to store the audio answer, of the form:<br></br>
-   *
-   * "answers"/plan/exercise/question/"subject-"user/"answer_"timestamp".wav"  <br></br>
-   *
-   * e.g. <br></br>
-   *
-   * answers\repeat\nl0020_ams\0\subject--1\answer_1349987649590.wav <br></br>
-   *
-   * or absolute  <br></br>
-   *
-   * C:\Users\go22670\apache-tomcat-7.0.25\webapps\netPron2\answers\repeat\nl0020_ams\0\subject--1\answer_1349987649590.wav
-   *
-   * @see #writeAudioFile
-   * @param plan
-   * @param exercise
-   * @param question
-   * @param user
-   * @return a path relative to the install dir
-   */
-  private String getLocalPathToAnswer(String plan, String exercise, int question, int user) {
-    String tomcatWriteDirectory = getTomcatDir();
-
-    String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-" + user;
-    String currentTestDir = tomcatWriteDirectory + File.separator + planAndTestPath;
-    String wavPath = currentTestDir + File.separator + "answer_" + System.currentTimeMillis() + ".wav";
-    File audioFilePath = new File(currentTestDir);
-    boolean mkdirs = audioFilePath.mkdirs();
-
-    return wavPath;
-  }
-
-  private String getTomcatDir() {
-    String tomcatWriteDirectory = getServletContext().getInitParameter("tomcatWriteDirectoryFullPath");
-    if (tomcatWriteDirectory == null) tomcatWriteDirectory = ANSWERS;
-
-    File test = new File(tomcatWriteDirectory);
-    if (!test.exists()) test.mkdirs();
-    if (!test.exists()) {
-      tomcatWriteDirectory = ANSWERS;
-    }
-    return tomcatWriteDirectory;
-  }
-
-  /**
-   * @see #getImageForAudioFile(int, String, String, int, int)
-   * @return path to image output dir
-   */
-  private String getImageOutDir() {
-    String imageOutdir = getServletContext().getInitParameter("imageOutdir");
-    if (imageOutdir == null) imageOutdir = IMAGE_WRITER_IMAGES;
-
-    File test = new File(imageOutdir);
-    if (!test.exists()) {
-      test = getAbsoluteFile(imageOutdir);
-//      System.out.println("made image out dir at " + test.getAbsolutePath());
-      test.mkdirs();
-    }
-    return imageOutdir;
-  }
-
   @Override
   public void destroy() {
     super.destroy();
@@ -1287,103 +944,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public void init() {
+    this.pathHelper = new PathHelper(getServletContext());
     readProperties(getServletContext());
     setInstallPath(serverProps.getUseFile(), db);
-    if (serverProps.doRecoTest()) {
-      doRecoTest();
-    }
-    if (serverProps.doRecoTest2()) {
-      doRecoTest2();
-    }
+    audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db);
+    new RecoTest(this,serverProps,pathHelper,audioFileHelper);
   }
 
   /**
-   * Run through all the exercises and test them against their ref audio.
-   * Ideally these should all or almost all correct.
+   * @see AudioFileHelper#makeAutoCRT(String, mitll.langtest.server.scoring.AutoCRTScoring, mitll.langtest.server.database.DatabaseImpl, LangTestDatabaseImpl)
+   * @param useFile
+   * @param db
+   * @return
    */
-  private void doRecoTest() {
-    List<Exercise> exercises = getExercises();
-    makeAutoCRT();
-
-    int incorrect = 0;
-    try {
-      for (Exercise exercise : exercises) {
-        File audioFile = new File(getInstallPath(), exercise.getRefAudio());
-        if (audioFile.exists()) {
-          boolean isCorrect = isCorrect(exercise);
-          if (!isCorrect) incorrect++;
-        } else {
-          logger.warn("for " + exercise + " can't find ref audio " + audioFile.getAbsolutePath());
-        }
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    logger.info("out of " + exercises.size() + " incorrect = " + incorrect);
-  }
-
-  private void doRecoTest2() {
-    List<Exercise> exercises = getExercises();
-    makeAutoCRT();
-
-    int incorrect = 0;
-    int total = 0;
-    try {
-      for (Exercise exercise : exercises) {
-        List<Exercise> others = new ArrayList<Exercise>(exercises);
-        others.remove(exercise);
-
-        for (Exercise other : others) {
-          File audioFile = new File(getInstallPath(), other.getRefAudio());
-          if (audioFile.exists()) {
-            boolean isMatch = isMatch(exercise, audioFile);
-            total++;
-            if (isMatch) {
-              logger.debug("for " + exercise.getID() + " falsely confused audio from " +other.getID() + " as correct match.");
-              incorrect++;
-            }
-          } else {
-            logger.warn("for " + exercise + " can't find ref audio " + audioFile.getAbsolutePath());
-          }
-        }
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    logger.info("out of " + total + " incorrect = " + incorrect + (100f * ((float) incorrect / (float) total)) + "%");
-  }
-
-  private boolean isCorrect(Exercise exercise) throws Exception {
-    File audioFile = new File(getInstallPath(), exercise.getRefAudio());
-    return isMatch(exercise, audioFile);
-  }
-
-  /**
-   * Does audioFile match the text in the ref sentence(s) in the exercise, given the other exercises
-   *
-   * @param exercise
-   * @param audioFile
-   * @return true if ref sentence from exercise is in the audio file
-   * @throws Exception
-   */
-  private boolean isMatch(Exercise exercise, File audioFile) throws Exception {
-    AudioAnswer audioAnswer = new AudioAnswer();
-    autoCRT.getFlashcardAnswer(exercise, audioFile, audioAnswer);
-    if (audioAnswer.getScore() == -1) {
-      logger.error("hydec bad config file, stopping...");
-      throw new Exception("hydec bad config file, stopping...");
-    }
-    logger.debug("---> exercise #" + exercise.getID() + " reco " + audioAnswer.decodeOutput +
-      " correct " + audioAnswer.isCorrect() + (audioAnswer.isCorrect() ? "" : " audio = " + audioFile));
-    return audioAnswer.isCorrect();
-  }
-
-  private String setInstallPath(boolean useFile, DatabaseImpl db) {
+  String setInstallPath(boolean useFile, DatabaseImpl db) {
     String lessonPlanFile = getLessonPlan();
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
-    //logger.debug("getExercises isurdu = " + isUrdu + " datacollect mode " + dataCollectMode);
-    db.setInstallPath(getInstallPath(), lessonPlanFile, serverProps.getLanguage(), useFile,
+    db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, serverProps.getLanguage(), useFile,
       relativeConfigDir+File.separator+serverProps.getMediaDir(), serverProps.isRTL());
 
     return lessonPlanFile;
@@ -1404,7 +982,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private void readProperties(ServletContext servletContext) {
     String config = servletContext.getInitParameter("config");
     this.relativeConfigDir = "config" + File.separator + config;
-    this.configDir = getInstallPath() + File.separator + relativeConfigDir;
+    this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
 
     serverProps.readPropertiesFile(servletContext, configDir);
     String h2DatabaseFile = serverProps.getH2Database();
@@ -1422,32 +1000,5 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return new DatabaseImpl(configDir, h2DatabaseFile, wordPairs,
       language, serverProps.doImages(), relativeConfigDir, serverProps.isFlashcard(),
       serverProps.usePredefinedTypeOrder());
-  }
-
-  private class DirAndName {
-    private final String testAudioFile;
-    private final String installPath;
-    private String testAudioName;
-    private String testAudioDir;
-
-    public DirAndName(String testAudioFile, String installPath) {
-      this.testAudioFile = testAudioFile;
-      this.installPath = installPath;
-    }
-
-    public String getName() {
-      return testAudioName;
-    }
-
-    public String getDir() {
-      return testAudioDir;
-    }
-
-    public DirAndName invoke() {
-      File testAudio = new File(testAudioFile);
-      testAudioName = testAudio.getName();
-      testAudioDir = testAudio.getParent().substring(installPath.length());
-      return this;
-    }
   }
 }
