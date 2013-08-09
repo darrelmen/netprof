@@ -181,7 +181,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
     logger.debug("getExercisesForSelectionState req " + reqID+ " for " + typeToSection + " and " +userID);
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-    if (serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
+    if (serverProps.sortExercises() || serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
       logger.debug("\tsorting");
 
       List<Exercise> copy = getSortedExercises(exercisesForSection);
@@ -289,6 +289,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public Collection<String> getTypeOrder() {
     SectionHelper sectionHelper = db.getSectionHelper();
+    if (sectionHelper == null) logger.warn("no section helper for " + db);
     List<String> objects = Collections.emptyList();
     return (sectionHelper == null) ? objects : sectionHelper.getTypeOrder();
   }
@@ -997,11 +998,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
-    boolean wordPairs = serverProps.isWordPairs();
-    String language = serverProps.getLanguage();
-    logger.debug("word pairs " + wordPairs + " language " + language + " config dir " + relativeConfigDir);
-    return new DatabaseImpl(configDir, h2DatabaseFile, wordPairs,
-      language, serverProps.doImages(), relativeConfigDir, serverProps.isFlashcard(),
-      serverProps.usePredefinedTypeOrder());
+    logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
+    return new DatabaseImpl(configDir, h2DatabaseFile, relativeConfigDir,  serverProps);
   }
 }
