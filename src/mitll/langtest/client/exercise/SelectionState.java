@@ -20,12 +20,17 @@ public class SelectionState {
   public String item;
   public Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
 
+  /**
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#showSelectionState(com.google.gwt.event.logical.shared.ValueChangeEvent)
+   * @param event
+   */
   public SelectionState(ValueChangeEvent<String> event) {
     parseToken(getTokenFromEvent(event));
   }
 
   /**
    * Populated from history token!
+   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList#getExercises(long)
    */
   public SelectionState() {
     this(History.getToken());
@@ -39,29 +44,33 @@ public class SelectionState {
     parseToken(unencodeToken(token));
   }
 
+  /**
+   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList#getExercises(long)
+   */
   public boolean isEmpty() { return typeToSection.isEmpty(); }
 
-  protected String getTokenFromEvent(ValueChangeEvent<String> event) {
+  private String getTokenFromEvent(ValueChangeEvent<String> event) {
     String token = event.getValue();
     token = unencodeToken(token);
     return token;
   }
 
 
-  protected String unencodeToken(String token) {
+  private String unencodeToken(String token) {
     token = token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ").replaceAll("\\+", " ");
     return token;
   }
 
+  boolean debug = false;
   private void parseToken(String token) {
     String[] parts = token.split(";");
 
     for (String part : parts) {
-      //System.out.println("getSelectionState : part " + part + " : " + Arrays.asList(parts));
+      if (debug) System.out.println("parseToken : part " + part + " : " + Arrays.asList(parts));
 
       if (part.contains("=")) {
         String[] segments = part.split("=");
-        //System.out.println("\tpart " + part + " : " + Arrays.asList(segments));
+        if (debug) System.out.println("\tpart " + part + " : " + Arrays.asList(segments));
 
         String type = segments[0].trim();
         String section = segments[1].trim();
@@ -69,39 +78,39 @@ public class SelectionState {
         List<String> sections = Arrays.asList(split);
 
         if (sections.isEmpty()) {
-          System.err.println("\tpart " + part + " is badly formed ");
+          System.err.println("\t\tparseToken : part " + part + " is badly formed ");
         }
         else {
+          if (debug) System.out.println("\t\tparseToken : add " + type + " : " +sections);
+
           add(type, sections);
         }
-        //System.out.println("getSelectionState : part " + part + " : " + type + "->" +section + " : " + selectionState);
+        if (debug) System.out.println("\tparseToken : part " + part + " : " + type + "->" +section);
       }
       else if (part.length() > 0) {
-        System.err.println("getSelectionState skipping part '" + part+ "'");
+        System.err.println("parseToken skipping part '" + part+ "'");
       }
     }
 
     if (token.contains("item")) {
       int item1 = token.indexOf("item=");
       String itemValue = token.substring(item1+"item=".length());
-      //System.out.println("getSelectionState : got item = '" + itemValue +"'");
+      if (debug) System.out.println("parseToken : got item = '" + itemValue +"'");
       setItem(itemValue);
     }
 
-    System.out.println("getSelectionState : got " +
-      this +
-      " from token '" +token + "'");
+    if (debug) System.out.println("parseToken : got " + this + " from token '" +token + "'");
   }
 
-  public void add(String type, Collection<String> section) {
+  private void add(String type, Collection<String> section) {
     typeToSection.put(type, section);
   }
 
-  public void setItem(String item) {
+  private void setItem(String item) {
     this.item = item;
   }
 
-  public Map<String,Collection<String>> getSelection() { return typeToSection; }
+ // public Map<String,Collection<String>> getSelection() { return typeToSection; }
 
   public String toString() {
     StringBuilder builder = new StringBuilder();
