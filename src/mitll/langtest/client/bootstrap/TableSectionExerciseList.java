@@ -43,7 +43,6 @@ import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.HasRows;
 import com.google.gwt.view.client.SingleSelectionModel;
-import mitll.langtest.client.ExceptionHandlerDialog;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.UserFeedback;
