@@ -14,6 +14,7 @@ import mitll.langtest.shared.ResultsAndGrades;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.TabooState;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -129,9 +130,13 @@ public interface LangTestDatabaseAsync {
 
   void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper> async);
 
-  void getLeaderboard(Map<String, Collection<String>> typeToSection, AsyncCallback<Leaderboard> async);
+ // void getLeaderboard(Map<String, Collection<String>> typeToSection, AsyncCallback<Leaderboard> async);
 
   void postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState, AsyncCallback<Leaderboard> async);
 
   void userOnline(long userid, boolean isOnline, AsyncCallback<Void> async);
+
+  void anyUsersAvailable(long userid, AsyncCallback<TabooState> async);
+
+  void registerPair(long userid, boolean isGiver, AsyncCallback<Void> async);
 }
