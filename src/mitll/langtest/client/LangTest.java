@@ -103,11 +103,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void onModuleLoad() {
     // set uncaught exception handler
-    GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
-      public void onUncaughtException(Throwable throwable) {
-        new ExceptionHandlerDialog(browserCheck,throwable);
-      }
-    });
+    dealWithExceptions();
     final long then = System.currentTimeMillis();
 
     service.getProperties(new AsyncCallback<Map<String, String>>() {
@@ -128,19 +124,35 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         props = new PropertyHandler(result);
         onModuleLoad2();
         if (isLogClientMessages()) {
-          service.logMessage("onModuleLoad.getProperties : (success) took " + (now - then) + " millis",
-            new AsyncCallback<Void>() {
-              @Override
-              public void onFailure(Throwable caught) {
-                Window.alert("Couldn't contact server.  Please check your network connection.");
-              }
-
-              @Override
-              public void onSuccess(Void result) {}
-            });
+          String message = "onModuleLoad.getProperties : (success) took " + (now - then) + " millis";
+          logMessageOnServer(message);
         }
       }
     });
+  }
+
+  private void dealWithExceptions() {
+    GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
+      public void onUncaughtException(Throwable throwable) {
+        ExceptionHandlerDialog exceptionHandlerDialog = new ExceptionHandlerDialog();
+        String exceptionAsString = exceptionHandlerDialog.getExceptionAsString(throwable);
+        logMessageOnServer("got browser exception : " + exceptionAsString);
+        exceptionHandlerDialog.showExceptionInDialog(browserCheck, exceptionAsString);
+      }
+    });
+  }
+
+  private void logMessageOnServer(String message) {
+    service.logMessage(message,
+      new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          Window.alert("Couldn't contact server.  Please check your network connection.");
+        }
+
+        @Override
+        public void onSuccess(Void result) {}
+      });
   }
 
   /**
@@ -462,8 +474,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     users = makeUsersAnchor(true);
     fp1.add(users);
-    userManager = new UserManager(this,service, props.isDataCollectAdminView(),
-      false, props);
+    userManager = new UserManager(this,service, props.isDataCollectAdminView(), false, props);
 
     logout = new Anchor("Logout");
     logout.addClickHandler(new ClickHandler() {
