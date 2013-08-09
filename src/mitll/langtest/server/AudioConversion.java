@@ -214,7 +214,6 @@ public class AudioConversion {
 
   /**
    * @param pathToWav
-   * @deprecated
    */
 /*  private void writeOGG(String pathToWav) {
     String mp3File = pathToWav.replace(".wav",".ogg");
