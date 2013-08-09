@@ -160,7 +160,7 @@ public class UserManager {
     }
 
     if (trackUsers) {
-      waitThenInactivate();
+      userAlive();
     }
     langTest.gotUser(sessionID);
   }
@@ -170,12 +170,15 @@ public class UserManager {
    */
   public void userAlive() {
     int user = getUser();
+    System.out.println(new Date() +" --------> userAlive : " + user);
     userOnline(user, true);
     waitThenInactivate();
   }
 
   public void userInactive() {
     int user = getUser();
+    System.out.println(new Date() +" --------> userInactive : " + user);
+
     userOnline(user, false);
   }
 
@@ -188,6 +191,7 @@ public class UserManager {
 
       @Override
       public void onSuccess(Void result) {
+        System.out.println("registered " + getUser() + " as being online.");
       }
     });
   }
@@ -433,13 +437,17 @@ public class UserManager {
 
   /**
    * @see mitll.langtest.client.LangTest#doDataCollectAdminView
+   * @see mitll.langtest.client.LangTest#login
    */
   public void teacherLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
-      System.out.println("teacherLogin: login user : " + user);
+      System.out.println("teacherLogin: got cached user : " + user);
       rememberAudioType();
       langTest.gotUser(user);
+      if (trackUsers) {
+        userAlive();
+      }
     } else {
       displayTeacherLogin();
     }
