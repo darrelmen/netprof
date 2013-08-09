@@ -22,29 +22,38 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class SectionHelper {
-  private static Logger logger = Logger.getLogger(SectionHelper.class);
+  private static final Logger logger = Logger.getLogger(SectionHelper.class);
   private static final String unitType = "unit";
   private static final String chapterType = "chapter";
   private static final String weekType = "week";
 
   private List<String> predefinedTypeOrder = new ArrayList<String>();
 
-  private Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
+  private final Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
-  private Map<String, Map<String, Map<String, Collection<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String, Map<String, Collection<String>>>>();
+  private final Map<String, Map<String, Map<String, Collection<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String, Map<String, Collection<String>>>>();
 
   public List<String> getTypeOrder() {
     if (predefinedTypeOrder.isEmpty()) {
       List<String> types = new ArrayList<String>();
       types.addAll(typeToSectionToTypeToSections.keySet());
-      Collections.sort(types, new Comparator<String>() {
-        @Override
-        public int compare(String o1, String o2) {
-          int first = typeToSectionToTypeToSections.get(o1).size();
-          int second = typeToSectionToTypeToSections.get(o2).size();
-          return first > second ? +1 : first < second ? -1 : 0;
-        }
-      });
+      if (types.isEmpty()) {
+        types.addAll(typeToUnitToLesson.keySet());
+       // Collections.sort(types);
+      }
+      else {
+        Collections.sort(types, new Comparator<String>() {
+          @Override
+          public int compare(String o1, String o2) {
+            int first = typeToSectionToTypeToSections.get(o1).size();
+            int second = typeToSectionToTypeToSections.get(o2).size();
+            return first > second ? +1 : first < second ? -1 : 0;
+          }
+        });
+      }
+
+     // logger.debug("getTypeOrder : types " + types);
+
 
       return types;
     } else {
@@ -62,15 +71,22 @@ public class SectionHelper {
     List<SectionNode> firstSet = new ArrayList<SectionNode>();
 
     Map<String, Map<String, Collection<String>>> sectionToTypeToSections = typeToSectionToTypeToSections.get(root);
-    for (Map.Entry<String, Map<String, Collection<String>>> rootSection : sectionToTypeToSections.entrySet()) {
-      SectionNode parent = new SectionNode(root, rootSection.getKey());
-      firstSet.add(parent);
+    if (sectionToTypeToSections != null) {
+      for (Map.Entry<String, Map<String, Collection<String>>> rootSection : sectionToTypeToSections.entrySet()) {
+        SectionNode parent = new SectionNode(root, rootSection.getKey());
+        firstSet.add(parent);
 
-      Map<String, Collection<String>> typeToSections = rootSection.getValue();
+        Map<String, Collection<String>> typeToSections = rootSection.getValue();
 
-      if (!typeOrder.isEmpty()) {
-        List<String> remainingTypes = typeOrder.subList(1, typeOrder.size());
-        addChildren(remainingTypes, parent, typeToSections);
+        if (!typeOrder.isEmpty()) {
+          List<String> remainingTypes = typeOrder.subList(1, typeOrder.size());
+          addChildren(remainingTypes, parent, typeToSections);
+        }
+      }
+    } else {
+      for (Map.Entry<String, Lesson> rootSection : typeToUnitToLesson.get(root).entrySet()) {
+        SectionNode parent = new SectionNode(root, rootSection.getKey());
+        firstSet.add(parent);
       }
     }
 
@@ -95,6 +111,7 @@ public class SectionHelper {
     }
   }
 
+/*
   private Map<String,Collection<String>> getTypeToSectionsForTypeAndSection2(String type, String section) {
     Map<String, Map<String, Collection<String>>> sectionToSub = typeToSectionToTypeToSections.get(type);
     if (sectionToSub == null)
@@ -102,8 +119,9 @@ public class SectionHelper {
     else
       return sectionToSub.get(section);
   }
+*/
 
-  public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(Map<String, Collection<String>> typeToSections) {
+ /* public Map<String, Collection<String>> getTypeToSectionsForTypeAndSection(Map<String, Collection<String>> typeToSections) {
     Map<String, Collection<String>> resultMap = null;
     Map<String, Map<String, Collection<String>>> typeToTypeToSections = new HashMap<String, Map<String, Collection<String>>>();
 
@@ -134,7 +152,7 @@ public class SectionHelper {
 
         }
 
-/*        for (String type2 : typeToSections.keySet()) {
+*//*        for (String type2 : typeToSections.keySet()) {
            if (!type2.equals(type))  {
              Collection<String> currentFilterResults = typeToSectionsForType.get(type2);
              Collection<String> userSelections = typeToSections.get(type2);
@@ -143,7 +161,7 @@ public class SectionHelper {
              typeToSections.put(type2,copy);
              logger.debug("\tafter AND against results for " + type + "/" +currentFilterResults + " : "+ typeToSections.get(type2));
            }
-        }*/
+        }*//*
         //combineMapsTogether(typeToSections, typeToSections, false);
         //    logger.debug("\tafter AND against selection for " + type + "/" +sectionForType + " : "+ typeToSectionsForType);
       }
@@ -188,13 +206,13 @@ public class SectionHelper {
               sectionsForType.addAll(matches);
 
 
-          /*    Collection<String> filteredSections = copy.get(constrainedType);
+          *//*    Collection<String> filteredSections = copy.get(constrainedType);
               logger.debug("\tsection " + section + " type " + constrainedType + ", matches " + matches + " examining " + filteredSections);
               if (filteredSections != null) {
                 filteredSections.retainAll(matches);
                 logger.debug("\tafter AND " + filteredSections);
               }
-*/
+*//*
             }
           }
         }
@@ -213,20 +231,20 @@ public class SectionHelper {
       resultMap = copy;
       logger.debug("result is " + resultMap);
       // user selections override filtered results
- /*     for (String type  : resultMap.keySet()) {
+ *//*     for (String type  : resultMap.keySet()) {
        // String type = typeToSectionsResult.getKey();
         if (typeToSections.containsKey(type)) {
           resultMap.put(type,typeToSections.get(type));
         }
-      }*/
+      }*//*
       //combineMapsTogether(resultMap,typeToSections,false);
    //   logger.debug("result is " + resultMap);
 
     }
     return resultMap;
-  }
+  }*/
 
-  private void combineMapsTogether(Map<String, Collection<String>> typeToSectionsForType,
+/*  private void combineMapsTogether(Map<String, Collection<String>> typeToSectionsForType,
                                    Map<String, Collection<String>> typeToSectionsForTypeAndSection2, boolean doOr) {
     for (String currentType : typeToSectionsForTypeAndSection2.keySet()) {
       Set<String> copy;
@@ -247,7 +265,7 @@ public class SectionHelper {
       }
       typeToSectionsForType.put(currentType, copy);
     }
-  }
+  }*/
 
   public Map<String, Map<String,Integer>> getTypeToSectionToCount() {
     Map<String,Map<String,Integer>> typeToSectionToCount = new HashMap<String, Map<String, Integer>>();
@@ -376,7 +394,7 @@ public class SectionHelper {
   }
 
   public static class Pair {
-    private String type; private String section;
+    private final String type; private final String section;
 
     public Pair(String type, String section) {
       this.type = type;
@@ -384,6 +402,10 @@ public class SectionHelper {
     }
   }
 
+  /**
+   * @see ExcelImport#recordUnitChapterWeek(int, int, int, org.apache.poi.ss.usermodel.Row, mitll.langtest.shared.Exercise, String, String, String)
+   * @param pairs
+   */
   public void addAssociations(List<Pair> pairs) {
     for (Pair p : pairs) {
       List<Pair> others = new ArrayList<Pair>(pairs);
