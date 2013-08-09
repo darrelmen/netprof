@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.Exercise;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -51,6 +52,7 @@ public class ExcelImport implements ExerciseDAO {
   private boolean shouldHaveRefAudio = false;
   private boolean usePredefinedTypeOrder;
   private final String language;
+  private boolean skipSemicolons;
 
   /**
    * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
@@ -64,21 +66,19 @@ public class ExcelImport implements ExerciseDAO {
   /**
    * @see DatabaseImpl#makeDAO
    * @param file
-   * @param isFlashcard
    * @param relativeConfigDir
-   * @param usePredefinedTypeOrder
-   * @param language
    */
-  public ExcelImport(String file, boolean isFlashcard, String mediaDir, String relativeConfigDir,
-                     boolean usePredefinedTypeOrder, String language) {
+  public ExcelImport(String file, String mediaDir, String relativeConfigDir, ServerProperties serverProps) {
     this.file = file;
-    this.isFlashcard = isFlashcard;
+    this.isFlashcard = serverProps.isFlashcard();
     this.mediaDir = mediaDir;
     boolean missingExists = getMissing(relativeConfigDir, "missingSlow.txt", missingSlowSet);
     missingExists &= getMissing(relativeConfigDir,"missingFast.txt",missingFastSet);
     shouldHaveRefAudio = missingExists;
-    this.usePredefinedTypeOrder = usePredefinedTypeOrder;
-    this.language = language;
+    this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
+    this.language = serverProps.getLanguage();
+    this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
+
     logger.debug("config " + relativeConfigDir +
       " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());
   }
@@ -318,7 +318,7 @@ public class ExcelImport implements ExerciseDAO {
               logger.info("Got empty foreign language phrase row #" + next.getRowNum() +" for " + english);
               errors.add(sheet.getSheetName()+"/"+"row #" +(next.getRowNum()+1) + " phrase was blank.");
               id++;    // TODO is this the right thing for Dari and Farsi???
-            } else if (foreignLanguagePhrase.contains(";") || translit.contains(";")) {
+            } else if (skipSemicolons && (foreignLanguagePhrase.contains(";") || translit.contains(";"))) {
               semis++;
               id++;     // TODO is this the right thing for Dari and Farsi???
             } else {
@@ -403,15 +403,17 @@ public class ExcelImport implements ExerciseDAO {
               String ref = e.getRefSentences().get(i);
               String transLower = ref.toLowerCase().trim();
 
-              String translit = e.getTranslitSentences().get(i);
-              if (!translationSet.contains(transLower)) {
-                translations.add(ref);
-                transliterations.add(translit);
-                translationSet.add(transLower);
-                audioRefs.add(e.getRefAudio());
+              if (!e.getTranslitSentences().isEmpty()) {
+                String translit = e.getTranslitSentences().get(i);
+                if (!translationSet.contains(transLower)) {
+                  translations.add(ref);
+                  transliterations.add(translit);
+                  translationSet.add(transLower);
+                  audioRefs.add(e.getRefAudio());
+                }
               }
             } catch (Exception e1) {
-              logger.error("got " + e1 + " on " + e);
+              logger.error("got " + e1 + " on " + e,e1);
             }
           }
         }
@@ -498,7 +500,9 @@ public class ExcelImport implements ExerciseDAO {
       imported = getExercise(id, dao, english, foreignLanguagePhrase, translit, meaning, context);
     }
     imported.setEnglishSentence(english);
-    imported.setTranslitSentence(translit);
+    if (translit.length() > 0) {
+      imported.setTranslitSentence(translit);
+    }
     List<String> inOrderTranslations = new ArrayList<String>(translations);
     imported.setRefSentences(inOrderTranslations);
     if (!segmentedChinese.isEmpty()) imported.setSegmented(segmentedChinese);
@@ -542,7 +546,7 @@ public class ExcelImport implements ExerciseDAO {
     }
     if (chapter.length() > 0) {
       if (language.equalsIgnoreCase("English")) {
-        chapter = unit + "-" + chapter; // hack for now to get unique chapters...
+        chapter = (unitIndex == -1 ? "" :unit + "-") + chapter; // hack for now to get unique chapters...
       }
       if (usePredefinedTypeOrder) {
         pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
@@ -637,12 +641,18 @@ public class ExcelImport implements ExerciseDAO {
     return errors;
   }
 
-/*  public static void main(String [] arg) {
+  public static void main(String [] arg) {
+/*
     ExcelImport config = new ExcelImport(
       "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\english\\ESL_ELC_5071-30books_chapters.xlsx", false, "config\\bestAudio", "war\\config\\english", true, "English");
+*/
+    ServerProperties serverProps = new ServerProperties();
+    serverProps.getProperties().put("language","English");
+    ExcelImport config = new ExcelImport(
+      "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\wordlist.xlsx", "config\\bestAudio", "war\\config\\english", serverProps);
     List<Exercise> rawExercises = config.getRawExercises();
 
-    try {
+/*    try {
       final FileWriter inc = new FileWriter("war\\config\\english" + "included.txt");
       final FileWriter incWords = new FileWriter("war\\config\\english" + "includedWords.txt");
               int incNum= 0;
@@ -657,11 +667,13 @@ public class ExcelImport implements ExerciseDAO {
       incWords.close();
     } catch (IOException e) {
       e.printStackTrace();
-    }
+    }*/
 
     System.out.println("first " + rawExercises.get(0));
 
     List<String> typeOrder = config.sectionHelper.getTypeOrder();
     System.out.println(" type order " +typeOrder);
-  }*/
+
+    System.out.println(" section nodes " + config.sectionHelper.getSectionNodes());
+  }
 }
