@@ -19,40 +19,11 @@ import java.util.Set;
 
 public class UserDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserDAO.class);
+  private final OnlineUsers onlineUsers;
 
-  private Collection<User> online = new HashSet<User>();
-  private Collection<User> active = new HashSet<User>();
 
-  public UserDAO(Database database) { super(database); }
+  public UserDAO(Database database) { super(database); this.onlineUsers = new OnlineUsers(this); }
 
-  public void addOnline(long userid) {
-    User userWhere = getUserWhere(userid);
-    if (userWhere != null) online.add(userWhere);
-
-    logger.info("\n---> addOnline online now " + getOnline());
-  }
-
-  public void removeOnline(long userid) {
-    User userWhere = getUserWhere(userid);
-    if (userWhere != null) online.remove(userWhere);
-
-    logger.info("removeOnline online now " + getOnline());
-  }
-
-  public Collection<User> getOnline() {
-    return online;
-  }
-
-  public void addActive(User user) {
-    if (!online.contains(user)) logger.error("huh" + user + " is not online.");
-    active.add(user);
-  }
-
-  public void removeActive(User user) {
-    boolean remove = active.remove(user);
-    if (!remove) logger.error("huh" +
-      user + " was not active.");
-  }
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
@@ -247,7 +218,7 @@ public class UserDAO extends DAO {
     return getUsers(sql);
   }
 
-  private User getUserWhere(long userid) {
+  User getUserWhere(long userid) {
     String sql = "SELECT * from users where id=" +userid+";";
     List<User> users = getUsers(sql);
     if (users.isEmpty()) {
@@ -305,8 +276,8 @@ public class UserDAO extends DAO {
           rs.getString("ipaddr"), // ip
           rs.getString("password"), // password
 
-          rs.getString("firstName"), // first
-          rs.getString("lastName"), // last
+          // first
+          // last
           rs.getString("nativeLang"), // native
           rs.getString("dialect"), // dialect
           userid = rs.getString("userid"), // userid
@@ -374,5 +345,9 @@ public class UserDAO extends DAO {
 
   public Set<Long> getNativeUsers() {
     return getNativeUserMap().keySet();
+  }
+
+  public OnlineUsers getOnlineUsers() {
+    return onlineUsers;
   }
 }
