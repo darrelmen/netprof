@@ -10,7 +10,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * Time: 3:54 PM
  * To change this template use File | Settings | File Templates.
  */
-public class User implements IsSerializable {
+public class User implements IsSerializable, Comparable<User> {
   public long id;
   public int age;
   public int gender;
@@ -28,7 +28,7 @@ public class User implements IsSerializable {
 
   public User(long id, int age, int gender, int experience, String ipaddr, String password,
                boolean enabled) {
-     this(id,age,gender,experience,ipaddr,password,"NOT_SET","NOT_SET","NOT_SET","NOT_SET","NOT_SET",0,enabled,false);
+     this(id,age,gender,experience,ipaddr,password, "NOT_SET","NOT_SET","NOT_SET",0,enabled,false);
   }
   /**
    * @see mitll.langtest.server.database.UserDAO#getUsers()
@@ -44,7 +44,7 @@ public class User implements IsSerializable {
    * @param isAdmin
    */
   public User(long id, int age, int gender, int experience, String ipaddr, String password,
-              String first, String last, String nativeLang, String dialect, String userID, long timestamp, boolean enabled, boolean isAdmin) {
+              String nativeLang, String dialect, String userID, long timestamp, boolean enabled, boolean isAdmin) {
      this.id = id;
     this.age = age;
     this.gender = gender;
@@ -52,14 +52,11 @@ public class User implements IsSerializable {
     this.ipaddr = ipaddr;
     this.password = password;
     this.timestamp = timestamp;
-   // this.firstName = first;
-  //  this.lastName = last;
     this.nativeLang = nativeLang;
     this.dialect = dialect;
     this.userID = userID;
     this.enabled = enabled;
     this.admin = isAdmin;
-
   }
 
   public boolean isMale() { return gender == 0; }
@@ -81,9 +78,22 @@ public class User implements IsSerializable {
     this.numResults = numResults;
   }
 
+  @Override
+  public int compareTo(User o) {
+    return id < o.id ? -1 : id > o.id ? +1 : 0;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return (obj instanceof User) && compareTo((User)obj) == 0;
+  }
+
+  @Override
+  public int hashCode() {
+    return new Long(id).hashCode();
+  }
+
   public String toString() {
-    return "user " + id + " age " + age + " gender " + gender +
-      //  " name " + firstName + " " + lastName +
-      " native " + nativeLang + " dialect " + dialect;
+    return "user " + id + " age " + age + " gender " + gender + " native " + nativeLang + " dialect " + dialect;
   }
 }
