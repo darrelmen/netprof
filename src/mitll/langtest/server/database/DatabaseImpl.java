@@ -11,6 +11,7 @@ import mitll.langtest.shared.ResultsAndGrades;
 import mitll.langtest.shared.ScoreInfo;
 import mitll.langtest.shared.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.TabooState;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
@@ -432,9 +433,13 @@ public class DatabaseImpl implements Database {
   }
 
   public void userOnline(long userid, boolean isOnline) {
-    if (isOnline) userDAO.addOnline(userid); else userDAO.removeOnline(userid);
+    if (isOnline) userDAO.getOnlineUsers().addOnline(userid); else userDAO.getOnlineUsers().removeOnline(userid);
   }
 
+  public TabooState anyAvailable(long userid) {  return userDAO.getOnlineUsers().anyAvailable(userid); }
+  public void registerPair(long userid, boolean isGiver) {
+    userDAO.getOnlineUsers().registerPair(userid, isGiver);
+  }
   private static class UserStateWrapper {
     public final UserState state;
     private int correct = 0;
