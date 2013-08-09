@@ -1,11 +1,18 @@
 package mitll.langtest.client;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.Container;
+import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.ControlLabel;
+import com.github.gwtbootstrap.client.ui.Controls;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Modal;
+import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.Row;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
@@ -97,6 +104,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Anchor logout;
   private Anchor users;
   private Anchor showResults, monitoring;
+  private Taboo taboo;
 
   /**
    * Make an exception handler that displays the exception.
@@ -163,7 +171,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void onModuleLoad2() {
     userManager = new UserManager(this,service, false, false, props);
-
+    if (props.isTrackUsers()) taboo = new Taboo(userManager, service, this);
     if (props.isFlashCard()) {
       loadFlashcard();
       return;
@@ -246,7 +254,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
-    makeExerciseList(secondRow, leftColumn, props.isGrading());
+    makeExerciseList(secondRow, leftColumn);
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("floatLeft");
       thirdRow.add(currentExerciseVPanel);
@@ -562,10 +570,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Supports different flavors of exercise list -- Paging, Grading, and vanilla.
    *
    * @see #onModuleLoad2()
-   * @paramx exerciseListPanel to add scroller to
-   * @param isGrading true if grading, false if not
    */
-  private void makeExerciseList(FluidRow secondRow,Panel leftColumn, boolean isGrading) {
+  private void makeExerciseList(FluidRow secondRow, Panel leftColumn) {
     this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, leftColumn, this, currentExerciseVPanel,service,this);
   }
 
@@ -633,7 +639,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * This determines which kind of exercise we're going to do.
    * @see #gotUser(long)
    */
-  private void setFactory(final long userID) {
+  void setFactory(final long userID) {
     final LangTest outer =this;
     if (props.isGoodwaveMode() && !props.isGrading()) {
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer), userManager, 1);
@@ -838,12 +844,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
-    System.out.println("gotUser : got user " +userID);
+    System.out.println("gotUser : got user " + userID);
     if (userline != null) userline.setHTML(getUserText());
     if (props.isDataCollectAdminView()) {
       checkForAdminUser();
     } else {
-      setFactory(userID);
+      final long fuserid = userID;
+      if (props.isTrackUsers()) { // OK we're playing taboo!
+        taboo.initialCheck(fuserid);
+
+       // checkForPartner(fuserid);
+      } else {
+        setFactory(userID);
+      }
     }
   }
 
