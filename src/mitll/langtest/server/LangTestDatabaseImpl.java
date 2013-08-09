@@ -26,6 +26,7 @@ import mitll.langtest.shared.ScoreInfo;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.TabooState;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -213,6 +214,34 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private void sortByID(List<Exercise> copy) {
+    boolean allInt = true;
+    int size = Math.min(5, copy.size());
+    for (int i = 0; i < size && allInt; i++) {
+      try {
+        Integer.parseInt(copy.get(i).getID());
+      } catch (NumberFormatException e) {
+        allInt = false;
+      }
+    }
+
+    if (allInt) {
+      try {
+        Collections.sort(copy, new Comparator<ExerciseShell>() {
+          @Override
+          public int compare(ExerciseShell o1, ExerciseShell o2) {
+            Integer first = Integer.parseInt(o1.getID());
+            return first.compareTo(Integer.parseInt(o2.getID()));
+          }
+        });
+      } catch (Exception e) {
+        sortByIDStrings(copy);
+      }
+    } else {
+      sortByIDStrings(copy);
+    }
+  }
+
+  private void sortByIDStrings(List<Exercise> copy) {
     Collections.sort(copy, new Comparator<ExerciseShell>() {
       @Override
       public int compare(ExerciseShell o1, ExerciseShell o2) {
@@ -897,8 +926,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private final Leaderboard leaderboard = new Leaderboard();
 
-  @Override
-  public Leaderboard getLeaderboard(Map<String, Collection<String>> typeToSection) {  return leaderboard;  }
+ // @Override
+  //public Leaderboard getLeaderboard(Map<String, Collection<String>> typeToSection) {  return leaderboard;  }
 
   @Override
   public Leaderboard postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState) {
@@ -910,11 +939,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public void userOnline(long userid, boolean isOnline) {
-    db.userOnline(userid, isOnline);
-  }
+  public void userOnline(long userid, boolean isOnline) {  db.userOnline(userid, isOnline);  }
 
   @Override
+  public TabooState anyUsersAvailable(long userid) {  return db.anyAvailable(userid);  }
+
+  @Override
+  public void registerPair(long userid, boolean isGiver) {
+    db.registerPair(userid, isGiver);
+  }
+
   public void logMessage(String message) { logger.debug("from client " + message); }
 
   /**
