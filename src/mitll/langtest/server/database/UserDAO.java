@@ -21,21 +21,37 @@ public class UserDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserDAO.class);
 
   private Collection<User> online = new HashSet<User>();
+  private Collection<User> active = new HashSet<User>();
 
   public UserDAO(Database database) { super(database); }
 
   public void addOnline(long userid) {
     User userWhere = getUserWhere(userid);
     if (userWhere != null) online.add(userWhere);
+
+    logger.info("\n---> addOnline online now " + getOnline());
   }
 
   public void removeOnline(long userid) {
     User userWhere = getUserWhere(userid);
     if (userWhere != null) online.remove(userWhere);
+
+    logger.info("removeOnline online now " + getOnline());
   }
 
   public Collection<User> getOnline() {
     return online;
+  }
+
+  public void addActive(User user) {
+    if (!online.contains(user)) logger.error("huh" + user + " is not online.");
+    active.add(user);
+  }
+
+  public void removeActive(User user) {
+    boolean remove = active.remove(user);
+    if (!remove) logger.error("huh" +
+      user + " was not active.");
   }
 
   /**
