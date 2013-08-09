@@ -53,6 +53,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   private ScrollPanel scrollPanel;
   private Panel clear;
   private Panel label;
+  private Heading statusHeader = new Heading(4);
 
   public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
@@ -160,6 +161,12 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   private void addButtonRow(List<SectionNode> rootNodes, long userID, FluidContainer container, Collection<String> types, boolean addInstructions) {
     int numRootNodes = rootNodes.size();
     System.out.println("getWidgetsForTypes (success) for user = " + userID + " got types " + types + " num root nodes " + numRootNodes);
+    if (types.isEmpty()) {
+      System.err.println("huh? types is empty?");
+      return;
+    }
+    showDefaultStatus();
+
     String firstType = types.iterator().next(); // e.g. unit!
 
     if (addInstructions) container.add(getInstructionRow());
@@ -256,7 +263,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     long now = System.currentTimeMillis();
     System.out.println("\tgetWidgetsForTypes took " + (now-then) + " millis");
 
-    setSizesAndPushFirst(last);
+    if (last != null) setSizesAndPushFirst(last);
     addBottomText(container);
   }
 
@@ -325,7 +332,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    */
   private void showSelectionState(ValueChangeEvent<String> event) {
     SelectionState selectionState = new SelectionState(event);
-
+    System.out.println("showSelectionState : got " + event + " and " + selectionState);
     StringBuilder status = new StringBuilder();
     Set<Map.Entry<String, Collection<String>>> entries = selectionState.typeToSection.entrySet();
     for (Map.Entry<String, Collection<String>> part : entries) {
@@ -333,20 +340,31 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         status.append(statusForType).append(" ");
     }
     statusHeader.setText(status.toString());
+    System.out.println("showSelectionState : entries " + entries + " from " + selectionState.typeToSection + " status " + status);
+
     if (entries.isEmpty()) {
-      statusHeader.setText("Showing all entries");
+      showDefaultStatus();
+    }
+    else {
+      System.out.println("showSelectionState : status now " + status);
     }
   }
 
-  private Heading statusHeader = new Heading(4);
+  private void showDefaultStatus() {
+    statusHeader.setText("Showing all entries");
+  }
 
+  /**
+   * @see #addButtonRow
+   * @param container
+   */
   private void addBottomText(FluidContainer container) {
     FluidRow status = new FluidRow();
     status.addStyleName("alignCenter");
     status.addStyleName("inlineStyle");
     container.add(status);
     status.add(statusHeader);
-    statusHeader.setText("Showing all entries");
+   // showDefaultStatus();
   }
 
   private Panel getInstructionRow() {
