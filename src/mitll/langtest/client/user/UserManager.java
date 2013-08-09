@@ -63,7 +63,7 @@ public class UserManager {
   private static final int WEEK_HOURS = 24 * 7;
   private static final int DAY_HOURS = 24;
   private static final int ONE_YEAR = 24 * 365;
-  private static final int ONE_MONTH_HOURS = 24 * 30;
+  //private static final int ONE_MONTH_HOURS = 24 * 30;
 
   private static final int EXPIRATION_HOURS = WEEK_HOURS;
   private static final int SHORT_EXPIRATION_HOURS = DAY_HOURS;
@@ -102,7 +102,8 @@ public class UserManager {
   private DisclosurePanel dp;
   private boolean trackUsers;
 
-  Timer userTimer;
+  private Timer userTimer;
+  private String loginTitle = "Data Collector Login";
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
@@ -124,6 +125,7 @@ public class UserManager {
     this.loginType = props.getLoginType();
     this.appTitle = props.getAppTitle();
     this.trackUsers = props.isTrackUsers();
+    if (trackUsers) loginTitle = "Taboo Login";
   }
 
   // user tracking
@@ -182,7 +184,7 @@ public class UserManager {
     userOnline(user, false);
   }
 
-  private void userOnline(int user, boolean active) {
+  private void userOnline(int user, final boolean active) {
     service.userOnline(user, active, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -191,7 +193,8 @@ public class UserManager {
 
       @Override
       public void onSuccess(Void result) {
-        System.out.println("registered " + getUser() + " as being online.");
+        System.out.println("registered " + getUser() + " as being " + (active ?
+          "online." : " offline."));
       }
     });
   }
@@ -462,7 +465,7 @@ public class UserManager {
     dialogBox.setKeyboard(false);
     dialogBox.setBackdrop(BackdropType.STATIC);
 
-    dialogBox.setTitle("Data Collector Login");
+    dialogBox.setTitle(loginTitle);
 
     final Button login = new Button("Login");
     login.setType(ButtonType.PRIMARY);
