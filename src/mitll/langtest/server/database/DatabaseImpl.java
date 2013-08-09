@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.flashcard.UserState;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.FlashcardResponse;
@@ -77,8 +78,8 @@ public class DatabaseImpl implements Database {
   private final String configDir;
   private final String absConfigDir;
   private String mediaDir;
-  private boolean isRTL;
   private boolean usePredefinedTypeOrder;
+  ServerProperties serverProps;
 
   private final Map<Long,UserStateWrapper> userToState = new HashMap<Long,UserStateWrapper>();
 
@@ -89,27 +90,28 @@ public class DatabaseImpl implements Database {
    */
 
   public DatabaseImpl(String configDir, String dbName, String lessonPlanFile) {
-    this(configDir, dbName, false,"", false, "",false,false);
+    this(configDir, dbName, "", new ServerProperties());
     this.useFile = true;
     this.lessonPlanFile = lessonPlanFile;
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#makeDatabaseImpl
    * @param configDir
    * @param dbName
-   * @param doImages
+   * @param serverProps
    */
-  public DatabaseImpl(String configDir, String dbName, boolean isWordPairs,
-                      String language, boolean doImages, String relativeConfigDir, boolean isFlashcard, boolean usePredefinedTypeOrder) {
+  public DatabaseImpl(String configDir, String dbName, String relativeConfigDir, ServerProperties serverProps) {
     connection = new H2Connection(configDir, dbName);
     absConfigDir = configDir;
-    this.isWordPairs = isWordPairs;
-    this.doImages = doImages;
-    this.language = language;
     this.configDir = relativeConfigDir;
-    this.isFlashcard = isFlashcard;
-    this.usePredefinedTypeOrder = usePredefinedTypeOrder;
+
+    this.isWordPairs = serverProps.isWordPairs();
+    this.doImages = serverProps.doImages();
+    this.language = serverProps.getLanguage();
+    this.isFlashcard = serverProps.isFlashcard();
+    this.usePredefinedTypeOrder =  serverProps.usePredefinedTypeOrder();
+    this.serverProps = serverProps;
 
     try {
       if (getConnection() == null) {
@@ -200,7 +202,6 @@ public class DatabaseImpl implements Database {
     this.mediaDir = mediaDir;
     this.useFile = useFile;
     this.language = language;
-    this.isRTL = isRTL;
   }
 
   public void setOutsideFile(String outsideFile) { monitoringSupport.setOutsideFile(outsideFile); }
@@ -252,7 +253,7 @@ public class DatabaseImpl implements Database {
   private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel, String mediaDir) {
     if (exerciseDAO == null) {
       if (useFile && excel) {
-        this.exerciseDAO = new ExcelImport(lessonPlanFile, isFlashcard, mediaDir, absConfigDir, usePredefinedTypeOrder, language);
+        this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, absConfigDir, serverProps);
       }
       else {
         this.exerciseDAO = makeExerciseDAO(useFile);
