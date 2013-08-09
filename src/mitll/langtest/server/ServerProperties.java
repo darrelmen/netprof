@@ -69,8 +69,10 @@ public class ServerProperties {
   private static final String SORT_BY_ID = "sortByID";
   private static final String SHOW_LEADERBOARD = "showLeaderboard";
   private static final String TRACK_USERS_ONLINE = "trackUsers";
+  private static final String SKIP_SEMICOLONS = "skipSemicolons";
+  private static final String SORT_EXERCISES = "sortExercises";
 
-  private Properties props = null;
+  private Properties props = new Properties();
 
   public boolean dataCollectMode;
   private boolean collectAudio;
@@ -174,11 +176,6 @@ public class ServerProperties {
   public double getMinPronScore() {
     return minPronScore;
   }
-
-/*  public String getBackgroundFile() {
-    return props.getProperty(BACKGROUND_FILE,"");
-  }*/
-
   public boolean isArabicTextDataCollect() {
     return !props.getProperty(ARABIC_TEXT_DATA_COLLECT, "false").equals("false");
   }
@@ -202,6 +199,7 @@ public class ServerProperties {
   public boolean isFlashcardTeacherView() {
     return !props.getProperty(FLASHCARD_TEACHER_VIEW, "false").equals("false");
   }
+
   public boolean usePredefinedTypeOrder() {
     return !props.getProperty(USE_PREDEFINED_TYPE_ORDER, "false").equals("false");
   }
@@ -216,6 +214,14 @@ public class ServerProperties {
 
   public boolean isCollectAudio() {
     return collectAudio;
+  }
+
+  public boolean shouldSkipSemicolonEntries() {
+    return getDefaultTrue(SKIP_SEMICOLONS);
+  }
+
+  public boolean sortExercises() {
+    return getDefaultFalse(SORT_EXERCISES);
   }
 
   /**
@@ -255,23 +261,11 @@ public class ServerProperties {
     isDataCollectAdminView = !props.getProperty("dataCollectAdminView", "false").equals("false");
     outsideFile = props.getProperty(OUTSIDE_FILE, OUTSIDE_FILE_DEFAULT);
 
-
-
     String dateFromManifest = getDateFromManifest(servletContext);
     if (dateFromManifest != null && dateFromManifest.length() > 0) {
       //logger.debug("Date from manifest " + dateFromManifest);
       props.setProperty("releaseDate",dateFromManifest);
     }
-/*    try {
-      foregroundBlend = Double.parseDouble(props.getProperty(FOREGROUND_BLEND, FOREGROUND_BLEND_DEFAULT));
-    } catch (NumberFormatException e) {
-      logger.error("Couldn't parse property " + FOREGROUND_BLEND, e);
-      try {
-        foregroundBlend = Double.parseDouble(FOREGROUND_BLEND_DEFAULT);
-      } catch (NumberFormatException e1) {
-        e1.printStackTrace();
-      }
-    }*/
 
     try {
       minPronScore = Double.parseDouble(props.getProperty(MIN_PRON_SCORE, MIN_PRON_SCORE_DEFAULT));
