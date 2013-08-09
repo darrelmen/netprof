@@ -165,7 +165,6 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
           @Override
           public void onFailure(Throwable caught) {
             Window.alert("getFullExercisesForSelectionState : Can't contact server.");
-            new ExceptionHandlerDialog(null,caught);
           }
 
           @Override
