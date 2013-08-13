@@ -65,10 +65,10 @@ public class Taboo {
         System.out.println("me : " + fuserid + " checking, anyUsersAvailable : " + result);
         if (result.isJoinedPair()) {
           if (result.isGiver()) {
-            doModal("You are the giver", "Now choose the next sentence your partner will see to guess the vocabulary word.", true);
+            doModal(fuserid,"You are the giver", "Now choose the next sentence your partner will see to guess the vocabulary word.", true);
           }
           else {
-            doModal("You are the receiver","Now choose the word that best fills in the blank in the sentence.",false);
+            doModal(fuserid,"You are the receiver","Now choose the word that best fills in the blank in the sentence.",false);
           }
 
           // TODO : somehow we begin receiving items to do and to guess at.
@@ -88,12 +88,10 @@ public class Taboo {
     });
   }
 
-  private void doModal(String title, String message, final boolean isGiver) {
+  private void doModal(final long userID, String title, String message, final boolean isGiver) {
     final Modal modal = new Modal(true);
-  //  String title = "You are the receiver";
     modal.setTitle(title);
     Heading w = new Heading(4);
-    //String message = "Now choose the word that best fills in the blank in the sentence.";
     w.setText(message);
     modal.add(w);
 
@@ -106,13 +104,16 @@ public class Taboo {
       public void onClick(ClickEvent event) {
         modal.hide();
         if (isGiver) {
-          Window.alert("Game on! You are the giver.");
+         // Window.alert("Game on! You are the giver.");
+          langTest.setTabooFactory(userID, isGiver);
         } else {
           Window.alert("You are the receiver.");
         }
         // TODO : set the factory for the receiver...
       }
     });
+    modal.add(begin);
+
     modal.show();
   }
 
@@ -158,7 +159,7 @@ public class Taboo {
     begin.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        Boolean isGiver = give.getValue();
+        final Boolean isGiver = give.getValue();
         if (!isGiver && !receive.getValue()) {
           Window.alert("please choose to give or receive.");  // TODO better highlighting
         } else {
@@ -171,7 +172,7 @@ public class Taboo {
 
             @Override
             public void onSuccess(Void result) {  // TODO : make the right exercise panel factory for the role (giver chooses and gives...)
-              langTest.setFactory(userID);
+              langTest.setTabooFactory(userID, isGiver);
             }
           });
 
