@@ -167,6 +167,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void onModuleLoad2() {
     userManager = new UserManager(this,service, false, false, props);
     if (props.isTrackUsers()) taboo = new Taboo(userManager, service, this);
+    loadVisualizationPackages();
     if (props.isFlashCard()) {
       loadFlashcard();
       return;
@@ -183,10 +184,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       });
 
       return;
-    }
-
-    if (props.isGoodwaveMode() || props.isAdminView() || props.isGrading()) {
-      loadVisualizationPackages();
     }
 
     if (props.isAdminView() || props.isGrading()) {
@@ -285,10 +282,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void loadVisualizationPackages() {
+    System.out.println("loadVisualizationPackages...");
+
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
       public void run() {
         System.out.println("\tloaded VisualizationUtils...");
+        logMessageOnServer("loaded VisualizationUtils.");
       }
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
   }
