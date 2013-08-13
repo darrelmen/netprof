@@ -103,11 +103,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void onModuleLoad() {
     // set uncaught exception handler
-    GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
-      public void onUncaughtException(Throwable throwable) {
-        new ExceptionHandlerDialog(browserCheck,throwable);
-      }
-    });
+    dealWithExceptions();
     final long then = System.currentTimeMillis();
 
     service.getProperties(new AsyncCallback<Map<String, String>>() {
@@ -143,6 +139,30 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
   }
 
+  private void dealWithExceptions() {
+    GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
+      public void onUncaughtException(Throwable throwable) {
+        ExceptionHandlerDialog exceptionHandlerDialog = new ExceptionHandlerDialog();
+        String exceptionAsString = exceptionHandlerDialog.getExceptionAsString(throwable);
+        logMessageOnServer("got browser exception : " + exceptionAsString);
+        exceptionHandlerDialog.showExceptionInDialog(browserCheck, exceptionAsString);
+      }
+    });
+  }
+
+  private void logMessageOnServer(String message) {
+    service.logMessage(message,
+      new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          Window.alert("Couldn't contact server.  Please check your network connection.");
+        }
+
+        @Override
+        public void onSuccess(Void result) {}
+      });
+  }
+
   /**
    * Use DockLayout to put a header at the top, exercise list on the left, and eventually
    * the current exercise in the center.  There is also a status on line on the bottom.
@@ -150,6 +170,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Initially the flash record player is put in the center of the DockLayout
    */
   public void onModuleLoad2() {
+    loadVisualizationPackages();
+
     userManager = new UserManager(this,service, isCollectAudio(), false, getLoginType(), props.getAppTitle(),false);
 
     if (props.isFlashCard()) {
@@ -168,10 +190,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       });
 
       return;
-    }
-
-    if (props.isGoodwaveMode() || props.isAdminView() || props.isGrading()) {
-      loadVisualizationPackages();
     }
 
     if (props.isAdminView() || props.isGrading()) {
@@ -270,10 +288,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void loadVisualizationPackages() {
+    System.out.println("loadVisualizationPackages...");
+
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
       public void run() {
         System.out.println("\tloaded VisualizationUtils...");
+        logMessageOnServer("loaded VisualizationUtils.");
       }
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
   }
