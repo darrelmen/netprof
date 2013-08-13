@@ -26,6 +26,7 @@ import mitll.langtest.shared.ScoreInfo;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.StimulusAnswerPair;
 import mitll.langtest.shared.TabooState;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -941,11 +942,46 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public void userOnline(long userid, boolean isOnline) {  db.userOnline(userid, isOnline);  }
 
+  /**
+   * @see mitll.langtest.client.taboo.Taboo#checkForPartner
+   * @param userid
+   * @return
+   */
   @Override
   public TabooState anyUsersAvailable(long userid) {  return db.anyAvailable(userid);  }
 
   @Override
   public void registerPair(long userid, boolean isGiver) {  db.registerPair(userid, isGiver);  }
+
+  /**
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory#getExercisePanel(mitll.langtest.shared.Exercise)
+   * @param userid
+   * @param stimulus
+   * @param answer
+   */
+  @Override
+  public void sendStimulus(long userid, String stimulus, String answer) {  db.sendStimulus(userid, stimulus, answer); }
+
+  @Override
+  public StimulusAnswerPair checkForStimulus(long userid) {
+    return db.checkForStimulus(userid);
+  }
+
+  @Override
+  public void registerAnswer(long userid, String stimulus, String answer, boolean isCorrect) {
+    db.registerAnswer(userid, stimulus, answer, isCorrect);
+  }
+
+  /**
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory#checkForCorrect(long, String, mitll.langtest.shared.Exercise, String)
+   * @param giverUserID
+   * @param stimulus
+   * @return
+   */
+  @Override
+  public int checkCorrect(long giverUserID, String stimulus) {
+    return db.checkCorrect(giverUserID, stimulus);
+  }
 
   public void logMessage(String message) {
     String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client " + message;
