@@ -65,12 +65,12 @@ public class ServerProperties {
   private static final String GOODWAVE_MODE = "goodwaveMode";
   private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
-//  private static final String LOGIN_TYPE_PARAM = "loginType";
   private static final String SORT_BY_ID = "sortByID";
   private static final String SHOW_LEADERBOARD = "showLeaderboard";
   private static final String TRACK_USERS_ONLINE = "trackUsers";
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
   private static final String SORT_EXERCISES = "sortExercises";
+  private static final String EXAMPLE_SENTENCE_FILE = "exampleSentenceFile";
 
   private Properties props = new Properties();
 
@@ -224,6 +224,10 @@ public class ServerProperties {
     return getDefaultFalse(SORT_EXERCISES);
   }
 
+  public String getExampleSentenceFile() {
+    return props.getProperty(EXAMPLE_SENTENCE_FILE);
+  }
+
   /**
    * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
    * @return
@@ -301,4 +305,5 @@ public class ServerProperties {
     }
     return "";
   }
+
 }
