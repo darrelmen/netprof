@@ -1,18 +1,11 @@
 package mitll.langtest.client;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.Container;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.ControlLabel;
-import com.github.gwtbootstrap.client.ui.Controls;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Modal;
-import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.Row;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
@@ -61,6 +54,8 @@ import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
+import mitll.langtest.client.taboo.GiverExerciseFactory;
+import mitll.langtest.client.taboo.Taboo;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
@@ -639,7 +634,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * This determines which kind of exercise we're going to do.
    * @see #gotUser(long)
    */
-  void setFactory(final long userID) {
+  public void setFactory(final long userID) {
     final LangTest outer =this;
     if (props.isGoodwaveMode() && !props.isGrading()) {
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer), userManager, 1);
@@ -657,6 +652,22 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (getLanguage().equalsIgnoreCase("Pashto")) {
       new FontChecker(this).checkPashto();
     }
+  }
+
+  /**
+   * @see Taboo#doTabooModal(long)
+   * @param userID
+   * @param isGiver
+   */
+  public void setTabooFactory(long userID, boolean isGiver) {
+    if (isGiver) {
+      GiverExerciseFactory factory = new GiverExerciseFactory(service, this, this);
+      exerciseList.setFactory(factory, userManager, 1);
+    }
+
+
+    doEverythingAfterFactory(userID);
+
   }
 
   /**
