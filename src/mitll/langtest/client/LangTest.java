@@ -55,6 +55,7 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.taboo.GiverExerciseFactory;
+import mitll.langtest.client.taboo.ReceiverExerciseFactory;
 import mitll.langtest.client.taboo.Taboo;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -154,7 +155,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         }
 
         @Override
-        public void onSuccess(Void result) {}
+        public void onSuccess(Void result) {
+        }
       });
   }
 
@@ -663,11 +665,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (isGiver) {
       GiverExerciseFactory factory = new GiverExerciseFactory(service, this, this);
       exerciseList.setFactory(factory, userManager, 1);
+    } else {
+      exerciseList.setFactory(new ReceiverExerciseFactory(service, this, this), userManager, 1);
     }
 
-
     doEverythingAfterFactory(userID);
-
   }
 
   /**
