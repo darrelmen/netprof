@@ -129,6 +129,7 @@ public class MailSupport {
       props.put("mail.smtp.host", email_server);
       props.put("mail.debug", ""+debugEmail);
       Session session = Session.getDefaultInstance(props, null);
+     // logger.debug("sending email to " + recipientEmail);
       Message msg = makeMessage(session, recipientName, recipientEmail, ccEmails, subject, message);
       Transport.send(msg);
     } catch (Exception e) {
