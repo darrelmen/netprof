@@ -525,7 +525,7 @@ public class SectionExerciseList extends PagingExerciseList {
 
     if (item != null && item.length() > 0 && hasExercise(item)) {
       if (includeItemInBookmark) {
-        System.out.println("onValueChange : loading item " + item);
+    //    System.out.println("onValueChange : loading item " + item);
         loadByIDFromToken(item);
       }
       else {
@@ -533,13 +533,13 @@ public class SectionExerciseList extends PagingExerciseList {
       }
     } else {
       String token = event.getValue();
-      System.out.println("onValueChange '" + token + "'");
+    //  System.out.println("onValueChange '" + token + "'");
       try {
         SelectionState selectionState = getSelectionState(token);
         restoreListBoxState(selectionState);
         Map<String, Collection<String>> typeToSection = selectionState.typeToSection;
 
-        System.out.println("onValueChange '" + token + "' type->section " + typeToSection);
+       // System.out.println("onValueChange '" + token + "' type->section " + typeToSection);
 
         setOtherListBoxes(typeToSection);
 
@@ -549,8 +549,7 @@ public class SectionExerciseList extends PagingExerciseList {
         e.printStackTrace();
       }
     }
-    System.out.println("onValueChange : ------ end : token is '" + rawToken + "' ------------ ");
-
+    //System.out.println("onValueChange : ------ end : token is '" + rawToken + "' ------------ ");
   }
 
   /**
