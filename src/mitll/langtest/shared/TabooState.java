@@ -10,15 +10,32 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * To change this template use File | Settings | File Templates.
  */
 public class TabooState implements IsSerializable {
-  public boolean anyAvailable;
-  public boolean joinedPair;
+  private boolean anyAvailable;
+  private boolean joinedPair;
+  private boolean giver;
 
   public TabooState() {}
 
-  public TabooState(boolean anyAvailable, boolean joinedPair) {
+  public TabooState(boolean anyAvailable, boolean joinedPair, boolean giver) {
     this.anyAvailable = anyAvailable;
     this.joinedPair = joinedPair;
+    this.giver = giver;
   }
 
-  public String toString() { return anyAvailable ? " some available " : joinedPair ? " just joined!" : "none available"; }
+  public boolean isAnyAvailable() {
+    return anyAvailable;
+  }
+
+  public boolean isJoinedPair() {
+    return joinedPair;
+  }
+
+  public boolean isGiver() {
+    return giver;
+  }
+
+  public String toString() {
+    String s = isAnyAvailable() ? " some available " : isJoinedPair() ? " just joined as " + (giver ? " giver " : " receiver ") : "none available";
+    return s;
+  }
 }
