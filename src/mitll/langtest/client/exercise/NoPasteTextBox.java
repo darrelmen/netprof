@@ -1,14 +1,14 @@
 package mitll.langtest.client.exercise;
 
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Stops the user from cut-copy-paste into the text box.
  * <p></p>
  * Prevents googling for answers.
  */
-class NoPasteTextBox extends TextBox {
+public class NoPasteTextBox extends TextBox {
   public NoPasteTextBox() {
     sinkEvents(Event.ONPASTE);
   }
