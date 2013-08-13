@@ -1,6 +1,5 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Grade;
@@ -25,7 +24,7 @@ import java.util.Map;
  *
  */
 public class ResultDAO extends DAO {
-  private static Logger logger = Logger.getLogger(ResultDAO.class);
+  private static final Logger logger = Logger.getLogger(ResultDAO.class);
 
   private static final String ID = "id";
   private static final String USERID = "userid";
@@ -43,9 +42,9 @@ public class ResultDAO extends DAO {
   static final String CORRECT = "correct";
   static final String PRON_SCORE = "pronscore";
 
-  private GradeDAO gradeDAO;
-  private ScheduleDAO scheduleDAO ;
-  private boolean debug = false;
+  private final GradeDAO gradeDAO;
+  private final ScheduleDAO scheduleDAO ;
+  private final boolean debug = false;
 
   public ResultDAO(Database database, UserDAO userDAO) {
     super(database);
@@ -99,10 +98,10 @@ public class ResultDAO extends DAO {
   }
 
   public static class SimpleResult {
-    public int uniqueID;
-    public String id;
-    private int qid;
-    public long userid;
+    public final int uniqueID;
+    public final String id;
+    private final int qid;
+    public final long userid;
 
 
     public SimpleResult(int uniqueID, String id, int qid, long userid) { this.uniqueID = uniqueID; this.id = id; this.qid = qid; this.userid = userid;}
@@ -135,10 +134,7 @@ public class ResultDAO extends DAO {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + RESULTS + ";");
       ResultSet rs = statement.executeQuery();
-      if (rs.next()) {
-        int i = 1;
-        numResults = rs.getInt(i++);
-      }
+      if (rs.next()) { numResults = rs.getInt(1); }
       rs.close();
       statement.close();
       database.closeConnection(connection);
@@ -538,7 +534,7 @@ public class ResultDAO extends DAO {
     statement.close();
   }
 
-  private void addColumnToTable(Connection connection) throws SQLException {
+  private void addColumnToTable(Connection connection) {
     try {
       PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
           FLQ +
@@ -560,7 +556,7 @@ public class ResultDAO extends DAO {
     }
   }
 
-  private void addTypeColumnToTable(Connection connection) throws SQLException {
+  private void addTypeColumnToTable(Connection connection) {
     PreparedStatement statement;
 
     try {
@@ -583,7 +579,7 @@ public class ResultDAO extends DAO {
     statement.close();
   }
 
-  private void addDurationColumnToTable(Connection connection) throws SQLException {
+  private void addDurationColumnToTable(Connection connection) {
     try {
       PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
           DURATION +
@@ -596,7 +592,7 @@ public class ResultDAO extends DAO {
     }
   }
 
-  private void addFlashcardColumnsToTable(Connection connection) throws SQLException {
+  private void addFlashcardColumnsToTable(Connection connection) {
     try {
       PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
         CORRECT +
@@ -626,17 +622,19 @@ public class ResultDAO extends DAO {
    * @param connection
    * @throws SQLException
    */
-  private void removeValidDefault(Connection connection) throws SQLException {
+/*  private void removeValidDefault(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " +"valid"+
         " DROP DEFAULT");
     statement.execute();
     statement.close();
-  }
+  }*/
 
+/*
   private void addValidDefault(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " +"valid"+
         " set DEFAULT true");
     statement.execute();
     statement.close();
   }
+*/
 }
