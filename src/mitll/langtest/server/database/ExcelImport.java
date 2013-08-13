@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -53,6 +54,7 @@ public class ExcelImport implements ExerciseDAO {
   private boolean usePredefinedTypeOrder;
   private final String language;
   private boolean skipSemicolons;
+  private File exampleSentenceFile;
 
   /**
    * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
@@ -61,6 +63,7 @@ public class ExcelImport implements ExerciseDAO {
     this.file = null;
     this.isFlashcard = false;
     this.language = "";
+    exampleSentenceFile = null;
   }
 
   /**
@@ -78,6 +81,10 @@ public class ExcelImport implements ExerciseDAO {
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.language = serverProps.getLanguage();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
+    String exampleSentenceFile1 = serverProps.getExampleSentenceFile();
+    if (exampleSentenceFile1 != null && exampleSentenceFile1.length() > 0) {
+      this.exampleSentenceFile = new File(relativeConfigDir, exampleSentenceFile1);
+    }
 
     logger.debug("config " + relativeConfigDir +
       " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());
@@ -135,7 +142,11 @@ public class ExcelImport implements ExerciseDAO {
   private List<Exercise> readExercises(File file) {
     try {
       InputStream inp = new FileInputStream(file);
-      return readExercises(inp);
+      List<Exercise> exercises1 = readExercises(inp);
+      if (exampleSentenceFile != null) {
+        populateExampleSentences(exercises1, exampleSentenceFile);
+      }
+      return exercises1;
     } catch (FileNotFoundException e) {
       logger.error("got "+e,e);
     }
@@ -641,6 +652,45 @@ public class ExcelImport implements ExerciseDAO {
     return errors;
   }
 
+/*  private void populateSentenceExamples(List<Exercise> rawExercises, String relativeConfigDir, String exampleFile) {
+    File examples = new File(relativeConfigDir, exampleFile);
+
+    populateExampleSentences(rawExercises, examples);
+  }*/
+
+  private void populateExampleSentences(List<Exercise> rawExercises, File examples) {
+    Map<String, List<Exercise>> refToEx = new HashMap<String, List<Exercise>>();
+    for (Exercise e : rawExercises) {
+      List<Exercise> exForRef = refToEx.get(e.getRefSentence().trim());
+      if (exForRef == null) refToEx.put(e.getRefSentence().trim(), exForRef = new ArrayList<Exercise>());
+      exForRef.add(e);
+    }
+
+    try {
+   /*   String name = "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\examples.txt";
+      File fname = new File(name);*/
+      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(examples), FileExerciseDAO.ENCODING));
+      String line2;
+      int c = 0;
+      while ((line2 = reader.readLine()) != null) {
+        c++;
+        String[] split = line2.split("\\t");
+        List<Exercise> exercises1 = refToEx.get(split[0].trim());
+        if (exercises1 != null) {
+          for (Exercise e : exercises1) {
+            if (e.getSynonymSentences().isEmpty()) logger.debug("adding to " +e);
+            e.getSynonymSentences().add(split[1]);
+          }
+        }
+      }
+      logger.debug("read " + c + " examples");
+
+      reader.close();
+    } catch (IOException e) {
+      logger.error("Got " + e, e);
+    }
+  }
+
   public static void main(String [] arg) {
 /*
     ExcelImport config = new ExcelImport(
@@ -648,8 +698,9 @@ public class ExcelImport implements ExerciseDAO {
 */
     ServerProperties serverProps = new ServerProperties();
     serverProps.getProperties().put("language","English");
+    serverProps.getProperties().put("collectAudio","false");
     ExcelImport config = new ExcelImport(
-      "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\wordlist.xlsx", "config\\bestAudio", "war\\config\\english", serverProps);
+      "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\wordlist2.xlsx", "config\\bestAudio", "war\\config\\taboo", serverProps);
     List<Exercise> rawExercises = config.getRawExercises();
 
 /*    try {
@@ -670,10 +721,12 @@ public class ExcelImport implements ExerciseDAO {
     }*/
 
     System.out.println("first " + rawExercises.get(0));
-
+    //populateSentenceExamples(rawExercises);
+    //writer.close();
+/*
     List<String> typeOrder = config.sectionHelper.getTypeOrder();
     System.out.println(" type order " +typeOrder);
 
-    System.out.println(" section nodes " + config.sectionHelper.getSectionNodes());
+    System.out.println(" section nodes " + config.sectionHelper.getSectionNodes());*/
   }
 }
