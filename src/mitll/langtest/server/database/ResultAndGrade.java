@@ -1,7 +1,6 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Grade;
-import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
 import java.util.HashSet;
