@@ -11,6 +11,7 @@ import mitll.langtest.shared.ResultsAndGrades;
 import mitll.langtest.shared.ScoreInfo;
 import mitll.langtest.shared.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.StimulusAnswerPair;
 import mitll.langtest.shared.TabooState;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
@@ -436,10 +437,44 @@ public class DatabaseImpl implements Database {
     if (isOnline) userDAO.getOnlineUsers().addOnline(userid); else userDAO.getOnlineUsers().removeOnline(userid);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#sendStimulus(long, String, String)
+   * @param userid
+   * @param stimulus
+   * @param answer
+   */
+  public void sendStimulus(long userid, String stimulus, String answer) {
+    userDAO.getOnlineUsers().sendStimulus(userid, stimulus, answer);
+  }
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#anyUsersAvailable(long)
+   * @param userid
+   * @return
+   */
   public TabooState anyAvailable(long userid) {  return userDAO.getOnlineUsers().anyAvailable(userid); }
   public void registerPair(long userid, boolean isGiver) {
     userDAO.getOnlineUsers().registerPair(userid, isGiver);
   }
+
+  public StimulusAnswerPair checkForStimulus(long userid) {
+   return userDAO.getOnlineUsers().checkForStimulus(userid);
+  }
+
+  public void registerAnswer(long userid, String stimulus, String answer, boolean correct) {
+    userDAO.getOnlineUsers().registerAnswer(userid, stimulus, answer, correct);
+  }
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#checkCorrect(long, String)
+   * @param giverUserID
+   * @param stimulus
+   * @return
+   */
+  public int checkCorrect(long giverUserID, String stimulus) {
+    return userDAO.getOnlineUsers().checkCorrect(giverUserID,stimulus);
+  }
+
   private static class UserStateWrapper {
     public final UserState state;
     private int correct = 0;
