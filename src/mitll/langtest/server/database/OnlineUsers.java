@@ -1,6 +1,5 @@
 package mitll.langtest.server.database;
 
-import com.github.gwtbootstrap.client.ui.Modal;
 import mitll.langtest.shared.TabooState;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
@@ -63,6 +62,14 @@ public class OnlineUsers {
     if (!remove) logger.error("huh" + user + " was not active.");
   }
 
+  /**
+   * The given user asks whether they're in a pairing.
+   * We check the current map of giver->receiver to see if the user is included.
+   * If they are, we return which side of the relationship they're on.
+   *
+   * @param userid
+   * @return
+   */
   public TabooState anyAvailable(long userid) {
     int diff = online.size() - active.size();
     logger.info("online " + online.size() + " active " + active.size() + " available = " + diff);
@@ -72,10 +79,14 @@ public class OnlineUsers {
     boolean receiver = false;
     for (User u : giverToReceiver.keySet()) if (u.id == userid) giver = true;
     for (User u : giverToReceiver.values()) if (u.id == userid) receiver = true;
+
+    if (giver && receiver) {  // sanity check
+      logger.error("\n\n---> huh? how can " + userid + " be both giver and receiver?");
+    }
     boolean joined = giver || receiver;
 
     if (joined) {
-     logger.info("yea! just joined " + userid);
+     logger.info("yea! just joined " + userid + " giver " + giver + " receiver " + receiver);
     } else if (avail) { // take us out of the pool
       User first = null, second = null;
       for (User u : online) {
@@ -93,7 +104,9 @@ public class OnlineUsers {
       }
     }
 
-    return new TabooState(avail, joined);
+    TabooState tabooState = new TabooState(avail, joined, giver);
+    logger.debug("returning " + tabooState);
+    return tabooState;
   }
 
   public void registerPair(long userid, boolean isGiver) {
@@ -142,11 +155,11 @@ public class OnlineUsers {
    // addActive(receiver);
   }
 
-  public void removePair(User giver, User receiver) {
+/*  public void removePair(User giver, User receiver) {
     giverToReceiver.remove(giver);
     removeActive(giver);
     removeActive(receiver);
-  }
+  }*/
 
   private static class Pair {
     User first = null, second = null;
