@@ -910,7 +910,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public void logMessage(String message) {
-    logger.debug("from client " + message);
+    String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client " + message;
+    logger.debug(prefixedMessage);
+
+    if (message.startsWith("got browser exception")) {
+      getMailSupport().email("Javascript Exception", prefixedMessage);
+    }
   }
 
   /**
