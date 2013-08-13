@@ -406,7 +406,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected boolean isExercisePanelBusy() {
     Widget current = innerContainer.getWidget();
-    return current != null && ((BusyPanel) current).isBusy();
+    return current != null && current instanceof BusyPanel && ((BusyPanel) current).isBusy();
   }
 
   /**
