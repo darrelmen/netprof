@@ -9,7 +9,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -56,8 +55,6 @@ public class ExercisePanel extends VerticalPanel implements
   private static final String TWO_SPACES = "&nbsp;&nbsp;";
   private static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
   private static final String TEACHER_PROMPT = "Record the phrase above by clicking the record button, speak, and then stop when finished. ";
-/*  private static final String LEFT_ARROW_TOOLTIP = "Press the left arrow key to go to the previous item.";
-  private static final String RIGHT_ARROW_TOOLTIP = "Press enter to go to the next item.";*/
   private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
   private static final String ENGLISH = "English";
   private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
@@ -67,12 +64,9 @@ public class ExercisePanel extends VerticalPanel implements
   protected Exercise exercise = null;
   protected ExerciseController controller;
   private boolean enableNextOnlyWhenAllCompleted = true;
-/*  private Button prev,next;
-  private HandlerRegistration keyHandler;*/
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
   protected NavigationHelper navigationHelper;
-  private boolean debug = false;
 
   /**
    * @see ExercisePanelFactory#getExercisePanel
@@ -512,22 +506,4 @@ public class ExercisePanel extends VerticalPanel implements
     navigationHelper.setButtonsEnabled(val);
   }
 
-  /**
-   * Stops the user from cut-copy-paste into the text box.
-   * <p></p>
-   * Prevents googling for answers.
-   */
-  private static class NoPasteTextBox extends TextBox {
-    public NoPasteTextBox() {
-      sinkEvents(Event.ONPASTE);
-    }
-    public void onBrowserEvent(Event event) {
-      super.onBrowserEvent(event);
-
-      if (event.getTypeInt() == Event.ONPASTE) {
-        event.stopPropagation();
-        event.preventDefault();
-      }
-    }
-  }
 }
