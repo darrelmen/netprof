@@ -390,7 +390,7 @@ public class UserManager {
           return true;
         }
         else {
-          System.out.println("checkExpiration : " +sid + " has expires on " + new Date(expirationDate) + " vs now " + new Date());
+          //System.out.println("checkExpiration : " +sid + " has expires on " + new Date(expirationDate) + " vs now " + new Date());
         }
       } catch (NumberFormatException e) {
         e.printStackTrace();
