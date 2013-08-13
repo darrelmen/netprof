@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.shared.StimulusAnswerPair;
 import mitll.langtest.shared.TabooState;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,7 +26,13 @@ public class OnlineUsers {
   private Collection<User> online = new HashSet<User>();
   private Collection<User> active = new HashSet<User>();
   private Collection<Pair> candidates = new ArrayList<Pair>();
+
+  // TODO : write to database
   private Map<User,User> giverToReceiver = new HashMap<User,User>();
+  // TODO : write to database
+  private Map<User,StimulusAnswerPair> receiverToStimulus = new HashMap<User,StimulusAnswerPair>();
+  // TODO : write to database
+  private Map<User,Map<String,List<AnswerBundle>>> receiverToAnswer = new HashMap<User, Map<String, List<AnswerBundle>>>();
 
   // TODO keep track of join time, order pairings on that basis
 
@@ -155,7 +163,68 @@ public class OnlineUsers {
    // addActive(receiver);
   }
 
-/*  public void removePair(User giver, User receiver) {
+  public void sendStimulus(long userid, String stimulus, String answer) {
+    User receiver = getReceiverForGiver(userid);
+    logger.debug("sending " + stimulus + " to " + receiver + " from giver " + userid);
+    receiverToStimulus.put(receiver, new StimulusAnswerPair(stimulus, answer));
+  }
+
+  public StimulusAnswerPair checkForStimulus(long receiverUserID) {
+    return receiverToStimulus.get(getUser(receiverUserID));
+  }
+
+  public void registerAnswer(long receiverUserID, String stimulus, String answer, boolean correct) {
+    receiverToStimulus.remove(getUser(receiverUserID));
+
+    User receiver = getUser(receiverUserID);
+    Map<String, List<AnswerBundle>> stimToAnswer = receiverToAnswer.get(receiver);
+    if (stimToAnswer == null) {
+      receiverToAnswer.put(receiver, stimToAnswer = new HashMap<String, List<AnswerBundle>>());
+    }
+    List<AnswerBundle> answerBundles = stimToAnswer.get(stimulus);
+    if (answerBundles == null) {
+      stimToAnswer.put(stimulus, answerBundles = new ArrayList<AnswerBundle>());
+    }
+    answerBundles.add(new AnswerBundle(stimulus,answer,correct));
+
+    logger.debug("user->answer now " + receiverToAnswer);
+  }
+
+  int count = 0;
+
+  /**
+   * @see DatabaseImpl#checkCorrect(long, String)
+   * @param giverUserID
+   * @param stimulus
+   * @return
+   */
+  public int checkCorrect(long giverUserID, String stimulus) {
+    User receiver = getReceiverForGiver(giverUserID);
+   // logger.debug("Giver " + giverUserID + " checking for answer from " + receiver);
+
+    Map<String, List<AnswerBundle>> stimToAnswer = receiverToAnswer.get(receiver);
+    if (stimToAnswer == null) {
+    //  logger.debug("no answer yet...");
+      return -1;
+    }
+    else {
+      List<AnswerBundle> answerBundles = stimToAnswer.get(stimulus);
+      if (answerBundles == null) {
+        //if (count++ < 4) logger.error("huh? '" +stimulus + "' is not recorded in " + stimToAnswer.keySet() + " for " + receiver);
+        return -1;
+      }
+      else {
+        AnswerBundle answerBundle = answerBundles.get(answerBundles.size() - 1);
+        return answerBundle.correct ? 1 : 0;
+      }
+    }
+  }
+
+  private User getReceiverForGiver(long userid) {
+    return giverToReceiver.get(getUser(userid));
+  }
+
+  /*  public void removePair(User giver, User receiver) {
     giverToReceiver.remove(giver);
     removeActive(giver);
     removeActive(receiver);
@@ -165,5 +234,19 @@ public class OnlineUsers {
     User first = null, second = null;
     public Pair(User first, User second) { this.first = first; this.second = second; }
     public String toString() { return "Pair : " + first + " and " + second; }
+  }
+
+  private static class AnswerBundle {
+    String stimulus;
+    String answer;
+    boolean correct;
+    long timestamp;
+
+    public AnswerBundle(String stimulus, String answer, boolean correct) {
+      this.stimulus = stimulus;
+      this.answer = answer;
+      this.correct = correct;
+      this.timestamp = System.currentTimeMillis();
+    }
   }
 }
