@@ -14,6 +14,7 @@ import mitll.langtest.shared.ResultsAndGrades;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.StimulusAnswerPair;
 import mitll.langtest.shared.TabooState;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -137,4 +138,12 @@ public interface LangTestDatabaseAsync {
   void anyUsersAvailable(long userid, AsyncCallback<TabooState> async);
 
   void registerPair(long userid, boolean isGiver, AsyncCallback<Void> async);
+
+  void sendStimulus(long userid, String stimulus, String answer, AsyncCallback<Void> async);
+
+  void checkForStimulus(long userid, AsyncCallback<StimulusAnswerPair> async);
+
+  void registerAnswer(long userid, String stimulus, String answer, boolean isCorrect, AsyncCallback<Void> async);
+
+  void checkCorrect(long giverUserID, String stimulus, AsyncCallback<Integer> async);
 }
