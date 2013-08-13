@@ -50,6 +50,16 @@ public class Taboo {
     userTimer.schedule(FIRST_POLL_PERIOD_MILLIS);
   }
 
+  private void pollForPartner() {
+    userTimer = new Timer() {
+      @Override
+      public void run() {
+        checkForPartner(userManager.getUser());
+      }
+    };
+    userTimer.schedule(INACTIVE_PERIOD_MILLIS);
+  }
+
   /**
    * TODO : Need some way to quit too - I don't want to play anymore.
    * @param fuserid
@@ -88,6 +98,7 @@ public class Taboo {
     });
   }
 
+
   private void doModal(final long userID, String title, String message, final boolean isGiver) {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
@@ -103,29 +114,13 @@ public class Taboo {
       @Override
       public void onClick(ClickEvent event) {
         modal.hide();
-        if (isGiver) {
-         // Window.alert("Game on! You are the giver.");
-          langTest.setTabooFactory(userID, isGiver);
-        } else {
-          Window.alert("You are the receiver.");
-        }
+        langTest.setTabooFactory(userID, isGiver);
         // TODO : set the factory for the receiver...
       }
     });
     modal.add(begin);
 
     modal.show();
-  }
-
-
-  private void pollForPartner() {
-    userTimer = new Timer() {
-      @Override
-      public void run() {
-        checkForPartner(userManager.getUser());
-      }
-    };
-    userTimer.schedule(INACTIVE_PERIOD_MILLIS);
   }
 
   private void cancelTimer() {
