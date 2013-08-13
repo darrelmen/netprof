@@ -15,6 +15,7 @@ import mitll.langtest.shared.ResultsAndGrades;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.StimulusAnswerPair;
 import mitll.langtest.shared.TabooState;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -135,13 +136,21 @@ public interface LangTestDatabase extends RemoteService {
 
   Map<Integer, Map<String, Map<String, Integer>>> getGradeCountPerExercise();
 
-  //Leaderboard getLeaderboard(Map<String, Collection<String>> typeToSection);
-
   Leaderboard postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState);
+
+  // taboo interface -- TODO : make this a separate module
 
   void userOnline(long userid, boolean isOnline);
 
   TabooState anyUsersAvailable(long userid);
 
   void registerPair(long userid, boolean isGiver);
+
+  void sendStimulus(long userid, String stimulus, String answer);
+
+  StimulusAnswerPair checkForStimulus(long userid);
+
+  void registerAnswer(long userid, String stimulus, String answer, boolean isCorrect);
+
+  int checkCorrect(long giverUserID, String stimulus);
 }
