@@ -945,9 +945,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public TabooState anyUsersAvailable(long userid) {  return db.anyAvailable(userid);  }
 
   @Override
-  public void registerPair(long userid, boolean isGiver) {
-    db.registerPair(userid, isGiver);
-  }
+  public void registerPair(long userid, boolean isGiver) {  db.registerPair(userid, isGiver);  }
 
   public void logMessage(String message) { logger.debug("from client " + message); }
 

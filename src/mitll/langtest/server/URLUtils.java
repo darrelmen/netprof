@@ -17,6 +17,7 @@ import java.net.URL;
 public class URLUtils {
   private static Logger logger = Logger.getLogger(URLUtils.class);
   private HttpServletRequest request;
+  public URLUtils() {}
   public URLUtils(HttpServletRequest request) {
     this.request = request;
   }
@@ -36,9 +37,9 @@ public class URLUtils {
     return encoded;
   }
 
-  private boolean isDevMode() {
+/*  private boolean isDevMode() {
     return isDevMode(request);
-  }
+  }*/
 
   private boolean isDevMode(HttpServletRequest request) {
     return request.getRequestURL().toString().contains("127.0.0.1:8888");
@@ -73,10 +74,10 @@ public class URLUtils {
     return url;
   }
 
-  private String getRootURL() {
+/*  private String getRootURL() {
     //return getRootFromRequest(getThreadLocalRequest());
     return constructURL(request,"").toString();
-  }
+  }*/
 
 /*  private String getRootFromRequest(HttpServletRequest request) {
     try {
@@ -98,18 +99,29 @@ public class URLUtils {
     return root;
   }
 
-  private String encodeURL(URL url) {
+  public String encodeURL(URL url) {
     try {
-      URI uri = new URI(url.getProtocol(),null,url.getHost(),url.getPort(),url.getPath(),url.getQuery(),null);
-      String s = uri.toString().replaceAll("&", "&amp;");
-      return s;
+      URI uri = new URI(url.getProtocol(),
+        null,url.getHost(),url.getPort(),url.getPath(),url.getQuery(),null);
+      return uri.toString().replaceAll("&", "&amp;");
     } catch (Exception e) {
       e.printStackTrace();
     }
     return "";
   }
 
-  public String convertURLToRelativeFile(String audioFile) {
+  public URL parseUrl(String s) throws Exception {
+    URL u = new URL(s);
+    return new URI(
+      u.getProtocol(),
+      u.getAuthority(),
+      u.getPath(),
+      u.getQuery(),
+      u.getRef()).
+      toURL();
+  }
+
+/*  public String convertURLToRelativeFile(String audioFile) {
     if (!isDevMode()) {
       String rootURL = getRootURL();
       if (!audioFile.startsWith(rootURL)) {
@@ -121,5 +133,5 @@ public class URLUtils {
       audioFile = relPath;
     }
     return audioFile;
-  }
+  }*/
 }
