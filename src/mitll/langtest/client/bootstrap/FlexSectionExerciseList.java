@@ -332,7 +332,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    */
   private void showSelectionState(ValueChangeEvent<String> event) {
     SelectionState selectionState = new SelectionState(event);
-    System.out.println("showSelectionState : got " + event + " and " + selectionState);
+    //System.out.println("showSelectionState : got " + event + " and " + selectionState);
     StringBuilder status = new StringBuilder();
     Set<Map.Entry<String, Collection<String>>> entries = selectionState.typeToSection.entrySet();
     for (Map.Entry<String, Collection<String>> part : entries) {
@@ -340,7 +340,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         status.append(statusForType).append(" ");
     }
     statusHeader.setText(status.toString());
-    System.out.println("showSelectionState : entries " + entries + " from " + selectionState.typeToSection + " status " + status);
+    //System.out.println("showSelectionState : entries " + entries + " from " + selectionState.typeToSection + " status " + status);
 
     if (entries.isEmpty()) {
       showDefaultStatus();
