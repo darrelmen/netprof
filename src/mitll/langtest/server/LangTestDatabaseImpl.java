@@ -947,7 +947,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public void registerPair(long userid, boolean isGiver) {  db.registerPair(userid, isGiver);  }
 
-  public void logMessage(String message) { logger.debug("from client " + message); }
+  public void logMessage(String message) {
+    String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client " + message;
+    logger.debug(prefixedMessage);
+
+    if (message.startsWith("got browser exception")) {
+      getMailSupport().email("Javascript Exception", prefixedMessage);
+    }
+  }
 
   /**
    * @see mitll.langtest.client.mail.MailDialog.SendClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
