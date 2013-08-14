@@ -252,6 +252,13 @@ public class DatabaseImpl implements Database {
     return rawExercises;
   }
 
+  /**
+   * @see #getExercises(boolean, String)
+   * @param useFile
+   * @param lessonPlanFile
+   * @param excel
+   * @param mediaDir
+   */
   private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel, String mediaDir) {
     if (exerciseDAO == null) {
       if (useFile && excel) {
