@@ -67,4 +67,6 @@ public interface ListInterface extends RequiresResize {
   int getPercentComplete();
 
   int getComplete();
+
+  void addAdHocExercise(String label);
 }
