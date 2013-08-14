@@ -13,6 +13,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
+import mitll.langtest.client.taboo.TabooExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseShell;
@@ -43,7 +44,6 @@ public class ExerciseListLayout {
    * Supports different flavors of exercise list -- Paging, Grading, and vanilla.
    *
    * @see LangTest#onModuleLoad2()
-   * @paramx isGrading true if grading, false if not
    */
   public ListInterface makeExerciseList(FluidRow secondRow,
                                 Panel leftColumn, UserFeedback feedback,
@@ -68,7 +68,7 @@ public class ExerciseListLayout {
     addExerciseListOnLeftSide(leftColumn);
   }
 
-  private ListInterface makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback,
+  protected ListInterface makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback,
                                          Panel currentExerciseVPanel, LangTestDatabaseAsync service, ExerciseController controller) {
     if (isGrading) {
       return new GradedExerciseList(currentExerciseVPanel, service, feedback,
@@ -80,8 +80,14 @@ public class ExerciseListLayout {
           return new TableSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
             props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, controller);
         } else {
+          if (props.isTrackUsers()) {
+            return new TabooExerciseList(secondRow, currentExerciseVPanel, service, feedback,
+              props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, controller);
+          }
+          else {
           return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
             props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, controller);
+          }
         }
       } else {
         return new PagingExerciseList(currentExerciseVPanel, service, feedback,
