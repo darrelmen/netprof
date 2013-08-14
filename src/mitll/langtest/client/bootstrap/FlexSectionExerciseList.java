@@ -76,8 +76,12 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     addTableWithPager();
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#doEverythingAfterFactory
+   * @param userID
+   */
   public void getExercises(final long userID) {
-    System.out.println("getExercises : Get exercises for user=" + userID);
+    System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID);
     this.userID = userID;
     sectionPanel.clear();
 
@@ -94,8 +98,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   /**
    * Assume for the moment that the first type has the largest elements... and every other type nests underneath it.
    *
-   * @see mitll.langtest.client.exercise.SectionExerciseList#useInitialTypeToSectionMap(java.util.Map, long)
-   * @paramx result
+   * @see #getExercises(long)
    * @param userID
    * @return
    */
