@@ -28,6 +28,7 @@ import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -60,6 +61,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private final boolean showInOrder;
   private int countSincePrompt = 0;
   protected int lastReqID = 0;
+  int adHocCount = 0;
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -212,7 +214,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   protected void rememberExercises(List<ExerciseShell> result) {
-    //System.out.println("remembering " + result.size() + " exercises");
+    System.out.println(new Date() + " : remembering " + result.size() + " exercises");
     currentExercises = result; // remember current exercises
     idToExercise = new HashMap<String, ExerciseShell>();
     clear();
@@ -226,10 +228,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected void flush() {}
 
   protected void addExerciseToList(final ExerciseShell e) {
-    final HTML w = new HTML("<b>" + e.getID() + "</b>");
-    w.setStylePrimaryName("exercise");
-    add(w);
-    progressMarkers.add(w);
+    final HTML w = makeAndAddExerciseEntry(e);
 
     w.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
@@ -247,6 +246,15 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       }
     });
   }
+
+  protected HTML makeAndAddExerciseEntry(ExerciseShell e) {
+    final HTML w = new HTML("<b>" + e.getID() + "</b>");
+    w.setStylePrimaryName("exercise");
+    add(w);
+    progressMarkers.add(w);
+    return w;
+  }
+
 
   protected void loadFirstExercise() {
     if (currentExercises.isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
@@ -390,8 +398,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param e
    */
   private void useExercise(Exercise result, ExerciseShell e) {
-    Panel exercisePanel = factory.getExercisePanel(result);
-    innerContainer.setWidget(exercisePanel);
+    makeExercisePanel(result);
 
     int i = getIndex(e);
     System.out.println("useExercise : " +e.getID() + " index " +i);
@@ -402,6 +409,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
     markCurrentExercise(i);
     currentExercise = i;
+  }
+
+  protected void makeExercisePanel(Exercise result) {
+    Panel exercisePanel = factory.getExercisePanel(result);
+    innerContainer.setWidget(exercisePanel);
   }
 
   protected boolean isExercisePanelBusy() {
@@ -441,6 +453,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public int getPercentComplete() { return (int) (100f*((float)visited.size()/(float)currentExercises.size())); }
   @Override
   public int getComplete() { return visited.size(); }
+
+  @Override
+  public void addAdHocExercise(String label) {
+    addExerciseToList(new ExerciseShell("ID_"+(adHocCount++),label));
+    flush();
+  }
 
   @Override
   public void removeCurrentExercise() {
