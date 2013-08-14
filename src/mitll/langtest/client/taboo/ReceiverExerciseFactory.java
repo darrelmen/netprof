@@ -8,9 +8,13 @@ import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Row;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -29,6 +33,8 @@ import mitll.langtest.client.exercise.NoPasteTextBox;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.StimulusAnswerPair;
+
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -76,12 +82,12 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
     public ReceiverPanel(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                          final ExerciseController controller) {
-      final ReceiverPanel outer = addWidgets(service,userFeedback,controller);
+      final ReceiverPanel outer = addWidgets(service,/*userFeedback,*/controller);
       checkForStimlus(service, controller, outer);
 
     }
 
-    private ReceiverPanel addWidgets(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
+    private ReceiverPanel addWidgets(final LangTestDatabaseAsync service, //final UserFeedback userFeedback,
                                      final ExerciseController controller) {
       final ReceiverPanel outer = this;
       Row w4 = new Row();
@@ -115,32 +121,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       begin.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          boolean isCorrect = guessBox.getText().equalsIgnoreCase(answer);
-          System.out.println("sending answer '" + guessBox.getText() + "' vs '" + answer+ "' which is " + isCorrect);
-          service.registerAnswer(controller.getUser(),stimulus.getText(),answer,isCorrect,new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              Window.alert("couldn't contact server");
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-              checkForStimlus(service,controller,outer);
-            }
-          });
-
-          if (isCorrect) {
-            showPopup("Correct! Please wait for the next item.");
-            correctImage.setVisible(true);
-            controller.addAdHocExercise(answer);
-            soundFeedback.playCorrect();
-          }
-          else {
-            incorrectImage.setVisible(true);
-            showPopup("Try again...");
-            soundFeedback.playIncorrect();
-          }
-          waitForNext();
+          sendAnswer(service, controller, outer, soundFeedback);
         }
 
       });
@@ -156,6 +137,35 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
       add(warnNoFlash);
       return outer;
+    }
+
+    private void sendAnswer(final LangTestDatabaseAsync service, final ExerciseController controller, final ReceiverPanel outer, SoundFeedback soundFeedback) {
+      boolean isCorrect = guessBox.getText().equalsIgnoreCase(answer);
+      System.out.println("sending answer '" + guessBox.getText() + "' vs '" + answer+ "' which is " + isCorrect);
+      service.registerAnswer(controller.getUser(),stimulus.getText(),answer,isCorrect,new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          Window.alert("couldn't contact server");
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          checkForStimlus(service,controller,outer);
+        }
+      });
+
+      if (isCorrect) {
+        showPopup("Correct! Please wait for the next item.");
+        correctImage.setVisible(true);
+        controller.addAdHocExercise(answer);
+        soundFeedback.playCorrect();
+      }
+      else {
+        incorrectImage.setVisible(true);
+        showPopup("Try again...");
+        soundFeedback.playIncorrect();
+      }
+      waitForNext();
     }
 
     private void waitForNext() {
@@ -196,13 +206,15 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         @Override
         public void onSuccess(StimulusAnswerPair result) {
           if (result != null) {
+            System.out.println("checkForStimulus.onSuccess : got  "+ result);
+
             prompt.setText("Please fill in the blank.");
             guessBox.setVisible(true);
             begin.setVisible(true);
             stimulus.setVisible(true);
             stimulus.setText(result.stimulus);
             outer.answer = result.answer;
-            System.out.println("answer " + answer);
+            System.out.println("checkForStimulus : answer '" + answer + "'");
           }
           else {
             Timer t = new Timer() {
@@ -218,6 +230,47 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         }
       });
     }
-    //return container;
+/*
+    HandlerRegistration keyHandler;
+
+    private void addKeyHandler() {
+      keyHandler = Event.addNativePreviewHandler(new
+                                                                       Event.NativePreviewHandler() {
+
+                                                                         @Override
+                                                                         public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                                                                           NativeEvent ne = event.getNativeEvent();
+                                                                           int keyCode = ne.getKeyCode();
+
+                                                                           boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
+
+                                                                           //   System.out.println("key code is " +keyCode);
+                                                                           if (isEnter && event.getTypeInt() == 512 &&
+                                                                             "[object KeyboardEvent]".equals(ne.getString())) {
+                                                                             ne.preventDefault();
+                                                                             sendAnswer(service, controller, outer, soundFeedback);
+                                                                           }
+                                                                         }
+                                                                       });
+      // System.out.println("addKeyHandler made click handler " + keyHandler);
+    }*/
+
+    @Override
+    protected void onLoad() {
+      super.onLoad();
+    //  addKeyHandler();
+    }
+
+    @Override
+    protected void onUnload() {
+      super.onUnload();
+     // removeKeyHandler();
+    }
+
+   /* public void removeKeyHandler() {
+      System.out.println("removeKeyHandler : " + keyHandler);
+
+      if (keyHandler != null) keyHandler.removeHandler();
+    }*/
   }
 }
