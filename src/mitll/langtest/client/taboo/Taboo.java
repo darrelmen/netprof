@@ -29,7 +29,7 @@ public class Taboo {
   private final LangTestDatabaseAsync service;
   private LangTest langTest;
 
-  private static final int FIRST_POLL_PERIOD_MILLIS = 1000 * 3; // ten minutes
+  //private static final int FIRST_POLL_PERIOD_MILLIS = 1000 * 3; // ten minutes
   private static final int INACTIVE_PERIOD_MILLIS = 1000 * 15; // ten minutes
 
   private Timer userTimer;
@@ -48,13 +48,6 @@ public class Taboo {
 
   public void initialCheck(final long fuserid) {
     checkForPartner(fuserid);
-/*    userTimer = new Timer() {
-      @Override
-      public void run() {
-        checkForPartner(fuserid);
-      }
-    };
-    userTimer.schedule(FIRST_POLL_PERIOD_MILLIS);*/
   }
 
   private void pollForPartner() {
