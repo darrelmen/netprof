@@ -39,14 +39,10 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
-import mitll.langtest.client.sound.AudioControl;
-import mitll.langtest.client.sound.Sound;
-import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -79,11 +75,11 @@ public class BootstrapExercisePanel extends FluidContainer {
   private Image waitingForResponseImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress48.gif"));
   private Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
   private Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
-  private Image correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
-  private Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
+  public Image correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
+  public Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
   private Image enterImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "blueSpaceBar.png"));//"space48_2.png"));
   private static final String HELP_IMAGE = LangTest.LANGTEST_IMAGES + "/helpIconBlue.png";
-  private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>");
+  public static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>";
 
   private Heading recoOutput;
   private boolean keyIsDown;
@@ -91,6 +87,7 @@ public class BootstrapExercisePanel extends FluidContainer {
   private int feedback = 0;
   private Timer t;
   private ProgressBar scoreFeedback = new ProgressBar();
+  private SoundFeedback soundFeedback;
 
   /**
    * @param e
@@ -107,7 +104,8 @@ public class BootstrapExercisePanel extends FluidContainer {
       feedback = getCookieValue(FEEDBACK_TIMES_SHOWN);
     }
     isDemoMode = controller.isDemoMode();
-    soundManager = controller.getSoundManager();
+    HTML warnNoFlash = new HTML(WARN_NO_FLASH);
+    soundFeedback = new SoundFeedback(controller.getSoundManager(), warnNoFlash);
 
     add(getHelpRow(controller));
     // Window.alert("got here : BootstrapExercisePanel ");
@@ -592,7 +590,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     private void showCorrectFeedback(double score) {
       showPronScoreFeedback(score);
 
-      playCorrect();
+      soundFeedback.playCorrect();
       if (feedback < MAX_INTRO_FEEBACK_COUNT) {
         String correctPrompt = "Correct! It's: " + exercise.getRefSentence();
         recoOutput.setText(correctPrompt);
@@ -622,7 +620,7 @@ public class BootstrapExercisePanel extends FluidContainer {
         } else {
           String path = exercise.getRefAudio();
           path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
-          createSound(path, new EndListener() {
+          soundFeedback.createSound(path, new SoundFeedback.EndListener() {
             @Override
             public void songEnded() {
               goToNextItem();
@@ -630,7 +628,7 @@ public class BootstrapExercisePanel extends FluidContainer {
           });
         }
       } else {
-        playIncorrect();
+        soundFeedback.playIncorrect();
       }
       String correctPrompt = getCorrectDisplay();
 
@@ -646,7 +644,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
 
       System.out.println("playAllAudio : " + toPlay.size() + " playing " + path);
-      createSound(path, new EndListener() {
+      soundFeedback.createSound(path, new SoundFeedback.EndListener() {
         @Override
         public void songEnded() {
           toPlay.remove(0);
@@ -723,80 +721,6 @@ public class BootstrapExercisePanel extends FluidContainer {
     if (b.length() > 0) {
       return b.toString().substring(0, b.length() - 2);
     } else return "";
-  }
-
-
-  public void playCorrect() {
-    startSong("langtest/sounds/correct4.mp3", new EndListener() {
-      @Override
-      public void songEnded() {
-      }
-    });
-  }
-
-  public void playIncorrect() {
-    startSong("langtest/sounds/incorrect1.mp3", new EndListener() {
-      @Override
-      public void songEnded() {
-      }
-    });
-  }
-
-
-  public void startSong(String path, EndListener endListener) {
-    // System.out.println("PlayAudioPanel : start song : " + path);
-    if (soundManager.isReady()) {
-      //System.out.println(new Date() + " Sound manager is ready.");
-      if (soundManager.isOK()) {
-        destroySound();
-        createSound(path, endListener);
-      } else {
-        System.out.println(new Date() + " Sound manager is not OK!.");
-        warnNoFlash.setVisible(true);
-      }
-    }
-  }
-
-  private Sound currentSound = null;
-  private SoundManagerAPI soundManager;
-
-  /**
-   * @param song
-   * @see #startSong
-   */
-  private void createSound(final String song, final EndListener endListener) {
-    currentSound = new Sound(new AudioControl() {
-      @Override
-      public void reinitialize() {
-        System.out.println("song " + song + " ended---");
-        destroySound();
-        endListener.songEnded();
-      }
-
-      @Override
-      public void songFirstLoaded(double durationEstimate) {
-      }
-
-      @Override
-      public void songLoaded(double duration) {
-        soundManager.play(currentSound);
-      }
-
-      @Override
-      public void update(double position) {
-      }
-    });
-    soundManager.createSound(currentSound, song, song);
-  }
-
-  private void destroySound() {
-    if (currentSound != null) {
-      this.soundManager.destroySound(currentSound);
-    }
-  }
-
-  private static interface EndListener {
-    void songEnded();
   }
 
   /**
