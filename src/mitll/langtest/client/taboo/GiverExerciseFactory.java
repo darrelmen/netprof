@@ -43,6 +43,8 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class GiverExerciseFactory extends ExercisePanelFactory {
+  private static final int CHECK_FOR_CORRECT_POLL_PERIOD = 1000;
+
   /**
    * @param service
    * @param userFeedback
@@ -244,7 +246,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
                 checkForCorrect(userid, stimulus, current, refSentence, feedback);
               }
             };
-            t.schedule(2000);
+            t.schedule(CHECK_FOR_CORRECT_POLL_PERIOD);
           }
         }
       });
