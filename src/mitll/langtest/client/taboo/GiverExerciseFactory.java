@@ -54,16 +54,17 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     super(service, userFeedback, controller);
   }
 
-  private List<String> sentItems = new ArrayList<String>();
-  private Map<RadioButton, String> choiceToExample;
-  private Controls choice = new Controls();
-  private final Button send = new Button("Send");
-
   public Panel getExercisePanel(final Exercise e) {
     return new GiverPanel(e);
   }
 
   private class GiverPanel extends FluidContainer {
+    private List<String> sentItems = new ArrayList<String>();
+    private Map<RadioButton, String> choiceToExample;
+    private Controls choice = new Controls();
+    private final Button send = new Button("Send");
+    private Heading pleaseWait = new Heading(4, "Please wait for receiver to answer...");
+
     public GiverPanel(final Exercise exercise) {
       if (exercise == null) {
         System.err.println("huh? exercise is null?");
@@ -107,140 +108,161 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
           final String stimulus = getSelectedItem();
           if (stimulus != null) {
             send.setEnabled(false);
-            final String toSendWithBlankedOutItem = getObfuscated(stimulus, refSentence);
-            final int user = controller.getUser();
-            service.sendStimulus(user, toSendWithBlankedOutItem, refSentence, new AsyncCallback<Void>() {
-              @Override
-              public void onFailure(Throwable caught) {
-                Window.alert("couldn't contact server.");
-              }
+            pleaseWait.setVisible(true);
 
-              @Override
-              public void onSuccess(Void result) {
-                System.out.println("Giver " + user + " Sent '" + stimulus + "'");
-                checkForCorrect(user, toSendWithBlankedOutItem, exercise, refSentence, soundFeedback);
-              }
-            });
+            sendStimulus(stimulus, refSentence, exercise, soundFeedback);
+          } else {
+            showPopup("Please select a sentence to send.");
           }
         }
 
       });
 
       add(send);
+      add(pleaseWait);
+      pleaseWait.setVisible(false);
     }
-  }
 
-  private String getSelectedItem() {
-    for (RadioButton choice : choiceToExample.keySet()) {
-      if (choice.getValue()) {
-        return choiceToExample.get(choice);
-      }
+    private void sendStimulus(final String stimulus, final String refSentence, final Exercise exercise, final SoundFeedback soundFeedback) {
+      final String toSendWithBlankedOutItem = getObfuscated(stimulus, refSentence);
+
+      System.out.println("stimulus    " + stimulus);
+      System.out.println("refSentence " + refSentence);
+      System.out.println("index " + stimulus.indexOf(refSentence));
+      System.out.println("toSendWithBlankedOutItem " + toSendWithBlankedOutItem);
+
+      final int user = controller.getUser();
+      service.sendStimulus(user, toSendWithBlankedOutItem, refSentence, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          Window.alert("couldn't contact server.");
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          System.out.println("sendStimulus.onSuccess : Giver " + user + " Sent '" + toSendWithBlankedOutItem + "' and not '" + stimulus + "'");
+          checkForCorrect(user, toSendWithBlankedOutItem, exercise, refSentence, soundFeedback);
+        }
+      });
     }
-    return null;
-  }
 
-  /**
-   * TODO : ask server what items have been sent instead of keeping in client, since if we reload the page,
-   * we loose the history.  OR we could shove it into the cache...?
-   *
-   * @param e
-   * @param refSentence
-   * @return
-   */
-  private Map<RadioButton, String> populateChoices(Exercise e, String refSentence) {
-    choice.clear();
-    final Map<RadioButton, String> choiceToExample = new HashMap<RadioButton, String>();
-    List<String> notSentYet = getNotSentYetHints(e, refSentence);
 
-    if (notSentYet.size() > 7) notSentYet = notSentYet.subList(0, 7);
-    for (String example : notSentYet) {
-      final RadioButton give = new RadioButton("Giver", example);
-      choiceToExample.put(give, example);
-      choice.add(give);
-    }
-    return choiceToExample;
-  }
-
-  private List<String> getNotSentYetHints(Exercise e, String refSentence) {
-    List<String> synonymSentences = e.getSynonymSentences();
-
-    List<String> notSentYet = new ArrayList<String>();
-    for (String candidate : synonymSentences) {
-      if (sentItems.contains(getObfuscated(candidate, refSentence))) {
-        System.out.println("---> already sent " + candidate);
-      } else {
-        notSentYet.add(candidate);
-      }
-    }
-    return notSentYet;
-  }
-
-  private String getObfuscated(String exampleToSend, String refSentence) {
-    StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < refSentence.length(); i++) builder.append('_');
-    if (!exampleToSend.contains(refSentence)) {
-      System.err.println("huh? '" + exampleToSend + "' doesn't contain '" + refSentence + "'");
-    }
-    return exampleToSend.replaceAll(refSentence, builder.toString());
-  }
-
-  /**
-   * Keep asking server if the receiver has made a correct answer or not.
-   *
-   * @param userid
-   * @param stimulus
-   * @param current
-   * @param refSentence
-   */
-  private void checkForCorrect(final long userid, final String stimulus, final Exercise current, final String refSentence,
-                               final SoundFeedback feedback) {
-    service.checkCorrect(userid, stimulus, new AsyncCallback<Integer>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        Window.alert("couldn't contact server.");
-      }
-
-      @Override
-      public void onSuccess(Integer result) {
-        if (result == 0) { // incorrect
-          showPopup("They didn't guess correctly, please send another sentence.");
-          feedback.playIncorrect();
-
-          sentItems.add(stimulus);
-          choiceToExample = populateChoices(current, refSentence);
-          send.setEnabled(true);
-        } else if (result == 1) {
-          showPopup("They guessed correctly!  Moving on to next item.");
-          feedback.playCorrect();
-
-          controller.loadNextExercise(current);
-          send.setEnabled(true);
-
-        } else { // they haven't answered yet
-          Timer t = new Timer() {
-            @Override
-            public void run() {
-              checkForCorrect(userid, stimulus, current, refSentence, feedback);
-            }
-          };
-          t.schedule(2000);
+    private String getSelectedItem() {
+      for (RadioButton choice : choiceToExample.keySet()) {
+        if (choice.getValue()) {
+          return choiceToExample.get(choice);
         }
       }
-    });
-  }
+      return null;
+    }
 
-  private void showPopup(String html) {
-    final PopupPanel pleaseWait = new DecoratedPopupPanel();
-    pleaseWait.setAutoHideEnabled(true);
-    pleaseWait.add(new HTML(html));
-    pleaseWait.center();
+    /**
+     * TODO : ask server what items have been sent instead of keeping in client, since if we reload the page,
+     * we loose the history.  OR we could shove it into the cache...?
+     *
+     * @param e
+     * @param refSentence
+     * @return
+     */
+    private Map<RadioButton, String> populateChoices(Exercise e, String refSentence) {
+      choice.clear();
+      final Map<RadioButton, String> choiceToExample = new HashMap<RadioButton, String>();
+      List<String> notSentYet = getNotSentYetHints(e, refSentence);
 
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        pleaseWait.hide();
+      if (notSentYet.size() > 7) notSentYet = notSentYet.subList(0, 7);
+      for (String example : notSentYet) {
+        final RadioButton give = new RadioButton("Giver", example);
+        choiceToExample.put(give, example);
+        choice.add(give);
       }
-    };
-    t.schedule(3000);
+      return choiceToExample;
+    }
+
+    private List<String> getNotSentYetHints(Exercise e, String refSentence) {
+      List<String> synonymSentences = e.getSynonymSentences();
+
+      List<String> notSentYet = new ArrayList<String>();
+      System.out.println("getNotSentYetHints for " + synonymSentences.size());
+      for (String candidate : synonymSentences) {
+        if (sentItems.contains(getObfuscated(candidate, refSentence))) {
+          System.out.println("---> already sent " + candidate);
+        } else {
+          notSentYet.add(candidate);
+        }
+      }
+      System.out.println("getNotSentYetHints now " + notSentYet.size());
+
+      return notSentYet;
+    }
+
+    private String getObfuscated(String exampleToSend, String refSentence) {
+      StringBuilder builder = new StringBuilder();
+      for (int i = 0; i < refSentence.length(); i++) builder.append('_');
+      if (!exampleToSend.contains(refSentence)) {
+        System.err.println("huh? '" + exampleToSend + "' doesn't contain '" + refSentence + "'");
+      }
+      return exampleToSend.replaceAll(refSentence, builder.toString());
+    }
+
+    /**
+     * Keep asking server if the receiver has made a correct answer or not.
+     *
+     * @param userid
+     * @param stimulus
+     * @param current
+     * @param refSentence
+     */
+    private void checkForCorrect(final long userid, final String stimulus, final Exercise current, final String refSentence,
+                                 final SoundFeedback feedback) {
+      service.checkCorrect(userid, stimulus, new AsyncCallback<Integer>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          Window.alert("couldn't contact server.");
+        }
+
+        @Override
+        public void onSuccess(Integer result) {
+          if (result == 0) { // incorrect
+            showPopup("They didn't guess correctly, please send another sentence.");
+            feedback.playIncorrect();
+
+            sentItems.add(stimulus);
+            choiceToExample = populateChoices(current, refSentence);
+            send.setEnabled(true);
+            pleaseWait.setVisible(false);
+          } else if (result == 1) {
+            showPopup("They guessed correctly!  Moving on to next item.");
+            feedback.playCorrect();
+
+            controller.loadNextExercise(current);
+            send.setEnabled(true);
+            pleaseWait.setVisible(false);
+          } else { // they haven't answered yet
+            Timer t = new Timer() {
+              @Override
+              public void run() {
+                checkForCorrect(userid, stimulus, current, refSentence, feedback);
+              }
+            };
+            t.schedule(2000);
+          }
+        }
+      });
+    }
+
+    private void showPopup(String html) {
+      final PopupPanel pleaseWait = new DecoratedPopupPanel();
+      pleaseWait.setAutoHideEnabled(true);
+      pleaseWait.add(new HTML(html));
+      pleaseWait.center();
+
+      Timer t = new Timer() {
+        @Override
+        public void run() {
+          pleaseWait.hide();
+        }
+      };
+      t.schedule(3000);
+    }
   }
 }
