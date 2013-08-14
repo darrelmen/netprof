@@ -34,9 +34,14 @@ public class TabooExerciseList extends FlexSectionExerciseList {
   @Override
   public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {
     super.setFactory(factory, user, expectedGrades);
-    makeExercisePanel(null);
+    if (!isGiver) makeExercisePanel(null);
   }
 
+  /**
+   * @see #getWidgetsForTypes(long)
+   * @param userID
+   * @param container
+   */
   @Override
   protected void getTypeOrder(long userID, FluidContainer container) {
     if (isGiver) {
