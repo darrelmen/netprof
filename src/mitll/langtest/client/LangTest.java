@@ -57,6 +57,7 @@ import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.taboo.GiverExerciseFactory;
 import mitll.langtest.client.taboo.ReceiverExerciseFactory;
 import mitll.langtest.client.taboo.Taboo;
+import mitll.langtest.client.taboo.TabooExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
@@ -92,6 +93,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private PropertyHandler props;
   private HTML userline;
   private Flashcard flashcard;
+  Heading pageTitle;
 
   private Panel headerRow;
   private FluidRow secondRow;
@@ -383,9 +385,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     FluidRow titleRow = new FluidRow();
     titleRow.addStyleName("alignCenter");
     titleRow.addStyleName("inlineStyle");
-    Heading w = new Heading(2, props.getAppTitle());
+    pageTitle = new Heading(2, props.getAppTitle());
 
-    titleRow.add(w);
+    titleRow.add(pageTitle);
 
     return titleRow;
   }
@@ -394,10 +396,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Set the page title and favicon.
    */
   private void setPageTitle() {
-    Element elementById = DOM.getElementById("title-tag");   // set the page title to be consistent
-    if (elementById != null) {
-      elementById.setInnerText(props.getAppTitle());
-    }
+    String appTitle = props.getAppTitle();
+    setTitle(appTitle);
 
     Element element = DOM.getElementById("favicon");   // set the page title to be consistent
     if (props.isFlashCard() || props.isFlashcardTeacherView()) {
@@ -409,6 +409,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       if (element != null) {
         element.setAttribute("href", LANGTEST_IMAGES + "npfFavIcon.gif");
       }
+    }
+  }
+
+  private void setTitle(String appTitle) {
+    Element elementById = DOM.getElementById("title-tag");   // set the page title to be consistent
+    if (elementById != null) {
+      elementById.setInnerText(appTitle);
     }
   }
 
@@ -662,11 +669,21 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param isGiver
    */
   public void setTabooFactory(long userID, boolean isGiver) {
+    String appTitle = props.getAppTitle();
     if (isGiver) {
       GiverExerciseFactory factory = new GiverExerciseFactory(service, this, this);
       exerciseList.setFactory(factory, userManager, 1);
+      ((TabooExerciseList)exerciseList).setGiver(true);
+      String appTitle1 = appTitle + " : Giver";
+      setTitle(appTitle1);
+      pageTitle.setText(appTitle1);
     } else {
       exerciseList.setFactory(new ReceiverExerciseFactory(service, this, this), userManager, 1);
+      ((TabooExerciseList)exerciseList).setGiver(false);
+
+      String appTitle1 = appTitle + " : Receiver";
+      setTitle(appTitle1);
+      pageTitle.setText(appTitle1);
     }
 
     doEverythingAfterFactory(userID);
@@ -862,11 +879,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (props.isDataCollectAdminView()) {
       checkForAdminUser();
     } else {
-      final long fuserid = userID;
       if (props.isTrackUsers()) { // OK we're playing taboo!
-        taboo.initialCheck(fuserid);
-
-       // checkForPartner(fuserid);
+        taboo.initialCheck(userID);
       } else {
         setFactory(userID);
       }
@@ -1011,4 +1025,5 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
   public boolean loadPreviousExercise(Exercise current) { return exerciseList.loadPreviousExercise(current);  }
   public boolean onFirst(Exercise current) { return exerciseList.onFirst(current); }
+  public void addAdHocExercise(String label) { exerciseList.addAdHocExercise(label); }
 }
