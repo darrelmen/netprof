@@ -214,7 +214,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
             stimulus.setVisible(true);
             stimulus.setText(result.stimulus);
             outer.answer = result.answer;
-            System.out.println("checkForStimulus : answer '" + answer + "'");
+          //  System.out.println("checkForStimulus : answer '" + answer + "'");
           }
           else {
             Timer t = new Timer() {
