@@ -60,4 +60,6 @@ public interface ExerciseController {
   boolean shouldAddRecordKeyBinding();
 
   int getFlashcardPreviewFrameHeight();
+
+  void addAdHocExercise(String label);
 }
