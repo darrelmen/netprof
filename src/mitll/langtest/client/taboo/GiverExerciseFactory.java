@@ -19,6 +19,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
+import mitll.langtest.client.bootstrap.SoundFeedback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
@@ -31,10 +33,10 @@ import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
- *
+ * <p/>
  * TODO : add receiver factory -- user does a free form input of the guess...
- *   what if they get part of the word?  feedback when they get it correct.
- *
+ * what if they get part of the word?  feedback when they get it correct.
+ * <p/>
  * User: GO22670
  * Date: 7/9/12
  * Time: 6:18 PM
@@ -42,57 +44,70 @@ import java.util.Map;
  */
 public class GiverExerciseFactory extends ExercisePanelFactory {
   /**
-   * @see mitll.langtest.client.LangTest#setFactory
    * @param service
    * @param userFeedback
    * @param controller
+   * @see mitll.langtest.client.LangTest#setFactory
    */
   public GiverExerciseFactory(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                               final ExerciseController controller) {
-    super(service,userFeedback,controller);
+    super(service, userFeedback, controller);
   }
 
-  List<String> sentItems = new ArrayList<String>();
-  Map<RadioButton, String> choiceToExample;
-  Controls choice = new Controls();
+  private List<String> sentItems = new ArrayList<String>();
+  private Map<RadioButton, String> choiceToExample;
+  private Controls choice = new Controls();
+  private final Button send = new Button("Send");
 
   public Panel getExercisePanel(final Exercise e) {
-    FluidContainer container = new FluidContainer();
+    return new GiverPanel(e);
+  }
 
-    Row w4 = new Row();
-    w4.add(new Heading(3, "User is trying to guess: "));
-    container.add(w4);
+  private class GiverPanel extends FluidContainer {
+    public GiverPanel(final Exercise exercise) {
+      if (exercise == null) {
+        System.err.println("huh? exercise is null?");
+        return;
+      }
 
-    Row w = new Row();
-    final String refSentence = e.getRefSentence().trim();
-    w.add(new Heading(2, refSentence));
-    container.add(w);
+      HTML warnNoFlash = new HTML(BootstrapExercisePanel.WARN_NO_FLASH);
+      warnNoFlash.setVisible(false);
+      final SoundFeedback soundFeedback = new SoundFeedback(controller.getSoundManager(), warnNoFlash);
 
-    Row w2 = new Row();
-    w2.add(new Column(12));
-    container.add(w2);
+      Row w4 = new Row();
+      w4.add(new Heading(3, "User is trying to guess: "));
+      add(w4);
 
-    Row w3 = new Row();
-    w3.add(new Heading(4, "Choose a hint sentence to send : "));
-    container.add(w3);
+      Row w = new Row();
+      final String refSentence = exercise.getRefSentence().trim();
+      w.add(new Heading(2, refSentence));
+      add(w);
 
-    // recordingStyle.add(new ControlLabel("<b>Audio Recording Style</b>"));
-    choiceToExample = populateChoices(e, refSentence);
-    final ControlGroup recordingStyle = new ControlGroup(); // necessary?
-    recordingStyle.add(choice);
-    container.add(choice);
+      Row w2 = new Row();
+      w2.add(new Column(12));
+      add(w2);
 
-    final Button begin = new Button("Send");
-    begin.setType(ButtonType.PRIMARY);
-    begin.setEnabled(true);
+      Row w3 = new Row();
+      w3.add(new Heading(4, "Choose a hint sentence to send : "));
+      add(w3);
 
-    begin.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        for (RadioButton choice : choiceToExample.keySet()) {
-          if (choice.getValue()) {
-            final String exampleToSend = choiceToExample.get(choice);
-            final String toSendWithBlankedOutItem = getObfuscated(exampleToSend, refSentence);
+      // recordingStyle.add(new ControlLabel("<b>Audio Recording Style</b>"));
+      choiceToExample = populateChoices(exercise, refSentence);
+      final ControlGroup recordingStyle = new ControlGroup(); // necessary?
+      recordingStyle.add(choice);
+      add(choice);
+
+      add(warnNoFlash);
+      send.setType(ButtonType.PRIMARY);
+      send.setEnabled(true);
+
+      send.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          final String stimulus = getSelectedItem();
+          if (stimulus != null) {
+            send.setEnabled(false);
+            final String toSendWithBlankedOutItem = getObfuscated(stimulus, refSentence);
             final int user = controller.getUser();
             service.sendStimulus(user, toSendWithBlankedOutItem, refSentence, new AsyncCallback<Void>() {
               @Override
@@ -102,38 +117,45 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
 
               @Override
               public void onSuccess(Void result) {
-                System.out.println("Giver " +user +" Sent '" + exampleToSend + "'");
-                checkForCorrect(user,toSendWithBlankedOutItem,e,refSentence);
+                System.out.println("Giver " + user + " Sent '" + stimulus + "'");
+                checkForCorrect(user, toSendWithBlankedOutItem, exercise, refSentence, soundFeedback);
               }
             });
-            return;
           }
         }
 
+      });
 
-          // if giver, then need to see wordlist, select next item to give to receiver
-          // after giving, poll for answer submission by receiver - correct, move on to next item
-          //   incorrect, choose next stimulus
-
-          // if receiver, wait for giver to give you an item, then choose your response
-       }
-
-    });
-
-    container.add(begin);
-
-    return container;
+      add(send);
+    }
   }
 
+  private String getSelectedItem() {
+    for (RadioButton choice : choiceToExample.keySet()) {
+      if (choice.getValue()) {
+        return choiceToExample.get(choice);
+      }
+    }
+    return null;
+  }
+
+  /**
+   * TODO : ask server what items have been sent instead of keeping in client, since if we reload the page,
+   * we loose the history.  OR we could shove it into the cache...?
+   *
+   * @param e
+   * @param refSentence
+   * @return
+   */
   private Map<RadioButton, String> populateChoices(Exercise e, String refSentence) {
     choice.clear();
     final Map<RadioButton, String> choiceToExample = new HashMap<RadioButton, String>();
     List<String> notSentYet = getNotSentYetHints(e, refSentence);
-    // TODO : only present choices not already sent
-    if (notSentYet.size() > 7) notSentYet = notSentYet.subList(0,7);
+
+    if (notSentYet.size() > 7) notSentYet = notSentYet.subList(0, 7);
     for (String example : notSentYet) {
-      final RadioButton give = new RadioButton("Giver",example);
-      choiceToExample.put(give,example);
+      final RadioButton give = new RadioButton("Giver", example);
+      choiceToExample.put(give, example);
       choice.add(give);
     }
     return choiceToExample;
@@ -143,11 +165,10 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     List<String> synonymSentences = e.getSynonymSentences();
 
     List<String> notSentYet = new ArrayList<String>();
-    for (String candidate:synonymSentences) {
-      if (sentItems.contains(getObfuscated(candidate,refSentence))) {
+    for (String candidate : synonymSentences) {
+      if (sentItems.contains(getObfuscated(candidate, refSentence))) {
         System.out.println("---> already sent " + candidate);
-      }
-      else {
+      } else {
         notSentYet.add(candidate);
       }
     }
@@ -156,15 +177,24 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
 
   private String getObfuscated(String exampleToSend, String refSentence) {
     StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < refSentence.length(); i++) builder.append('-');
+    for (int i = 0; i < refSentence.length(); i++) builder.append('_');
     if (!exampleToSend.contains(refSentence)) {
-      System.err.println("huh? '" +exampleToSend + "' doesn't contain '" +refSentence +"'");
+      System.err.println("huh? '" + exampleToSend + "' doesn't contain '" + refSentence + "'");
     }
     return exampleToSend.replaceAll(refSentence, builder.toString());
   }
 
-  private void checkForCorrect(final long userid, final String stimulus, final Exercise current, final String refSentence) {
-    service.checkCorrect(userid,stimulus, new AsyncCallback<Integer>() {
+  /**
+   * Keep asking server if the receiver has made a correct answer or not.
+   *
+   * @param userid
+   * @param stimulus
+   * @param current
+   * @param refSentence
+   */
+  private void checkForCorrect(final long userid, final String stimulus, final Exercise current, final String refSentence,
+                               final SoundFeedback feedback) {
+    service.checkCorrect(userid, stimulus, new AsyncCallback<Integer>() {
       @Override
       public void onFailure(Throwable caught) {
         Window.alert("couldn't contact server.");
@@ -174,18 +204,23 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       public void onSuccess(Integer result) {
         if (result == 0) { // incorrect
           showPopup("They didn't guess correctly, please send another sentence.");
+          feedback.playIncorrect();
+
           sentItems.add(stimulus);
           choiceToExample = populateChoices(current, refSentence);
-        }
-        else if (result == 1) {
+          send.setEnabled(true);
+        } else if (result == 1) {
           showPopup("They guessed correctly!  Moving on to next item.");
+          feedback.playCorrect();
+
           controller.loadNextExercise(current);
-        }
-        else { // they haven't answered yet
+          send.setEnabled(true);
+
+        } else { // they haven't answered yet
           Timer t = new Timer() {
             @Override
             public void run() {
-              checkForCorrect(userid,stimulus,current,refSentence);
+              checkForCorrect(userid, stimulus, current, refSentence, feedback);
             }
           };
           t.schedule(2000);
