@@ -34,6 +34,12 @@ public class Taboo {
 
   private Timer userTimer;
 
+  /**
+   * @see mitll.langtest.client.LangTest#onModuleLoad2()
+   * @param userManager
+   * @param service
+   * @param langTest
+   */
   public Taboo(UserManager userManager, LangTestDatabaseAsync service, LangTest langTest) {
     this.userManager = userManager;
     this.service = service;
@@ -68,28 +74,22 @@ public class Taboo {
     cancelTimer();
     service.anyUsersAvailable(fuserid, new AsyncCallback<TabooState>() {
       @Override
-      public void onFailure(Throwable caught) { Window.alert("Couldn't contact server."); }
+      public void onFailure(Throwable caught) {
+        Window.alert("Couldn't contact server.");
+      }
 
       @Override
       public void onSuccess(TabooState result) {
         System.out.println("me : " + fuserid + " checking, anyUsersAvailable : " + result);
         if (result.isJoinedPair()) {
           if (result.isGiver()) {
-            doModal(fuserid,"You are the giver", "Now choose the next sentence your partner will see to guess the vocabulary word.", true);
+            doModal(fuserid, "You are the giver", "Now choose the next sentence your partner will see to guess the vocabulary word.", true);
+          } else {
+            doModal(fuserid, "You are the receiver", "Now choose the word that best fills in the blank in the sentence.", false);
           }
-          else {
-            doModal(fuserid,"You are the receiver","Now choose the word that best fills in the blank in the sentence.",false);
-          }
-
-          // TODO : somehow we begin receiving items to do and to guess at.
-          // do the right factory, make a panel that can receive stimulus and show choices
-          // panel posts results back, giver notices results
-
-        }
-        else if (result.isAnyAvailable()) {
+        } else if (result.isAnyAvailable()) {
           doTabooModal(fuserid);
-        }
-        else {
+        } else {
           //Window.alert("do single player Mode");
           // TODO fill in single player mode
           pollForPartner();
@@ -97,7 +97,6 @@ public class Taboo {
       }
     });
   }
-
 
   private void doModal(final long userID, String title, String message, final boolean isGiver) {
     final Modal modal = new Modal(true);
@@ -115,7 +114,6 @@ public class Taboo {
       public void onClick(ClickEvent event) {
         modal.hide();
         langTest.setTabooFactory(userID, isGiver);
-        // TODO : set the factory for the receiver...
       }
     });
     modal.add(begin);
@@ -160,27 +158,19 @@ public class Taboo {
         } else {
           askGiverReceiver.hide();
 
-          // TODO : tell server we're playing... it will tell the partner to either be the giver or the receiver
           service.registerPair(userID, isGiver, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) { Window.alert("Couldn't contact server."); }
 
             @Override
-            public void onSuccess(Void result) {  // TODO : make the right exercise panel factory for the role (giver chooses and gives...)
+            public void onSuccess(Void result) {
               langTest.setTabooFactory(userID, isGiver);
             }
           });
-
-          // if giver, then need to see wordlist, select next item to give to receiver
-          // after giving, poll for answer submission by receiver - correct, move on to next item
-          //   incorrect, choose next stimulus
-
-          // if receiver, wait for giver to give you an item, then choose your response
         }
       }
     });
     askGiverReceiver.add(begin);
-
     askGiverReceiver.show();
   }
 }
