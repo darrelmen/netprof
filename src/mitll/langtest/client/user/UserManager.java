@@ -327,7 +327,8 @@ public class UserManager {
     else if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       String sid = localStorageIfSupported.getItem(getUserIDCookie());
-      System.out.println("user id cookie for " +getUserIDCookie() + " is " + sid);
+
+      //System.out.println("user id cookie for " +getUserIDCookie() + " is " + sid);
       if (sid != null && !sid.equals("" + NO_USER_SET)) {
         if (userExpired(sid)) {
           clearUser();
