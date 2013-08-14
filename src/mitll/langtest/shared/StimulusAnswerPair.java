@@ -19,4 +19,6 @@ public class StimulusAnswerPair implements IsSerializable {
     this.stimulus = stimulus;
     this.answer = answer;
   }
+
+  public String toString() { return "Stim : '" + stimulus + "' answer '" + answer + "'"; }
 }
