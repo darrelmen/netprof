@@ -12,16 +12,20 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,6 +43,8 @@ import java.util.Set;
  */
 public class ExcelImport implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(ExcelImport.class);
+  private static final int MIN_TABOO_ITEMS = 3;
+
   private final boolean isFlashcard;
 
   private List<Exercise> exercises = null;
@@ -50,6 +56,7 @@ public class ExcelImport implements ExerciseDAO {
   private String mediaDir;
   private Set<String> missingSlowSet = new HashSet<String>();
   private Set<String> missingFastSet = new HashSet<String>();
+  private Map<String, List<String>> wordToSamples = Collections.emptyMap();
   private boolean shouldHaveRefAudio = false;
   private boolean usePredefinedTypeOrder;
   private final String language;
@@ -84,9 +91,14 @@ public class ExcelImport implements ExerciseDAO {
     String exampleSentenceFile1 = serverProps.getExampleSentenceFile();
     if (exampleSentenceFile1 != null && exampleSentenceFile1.length() > 0) {
       this.exampleSentenceFile = new File(relativeConfigDir, exampleSentenceFile1);
+      wordToSamples = readSampleSentenceFile2(exampleSentenceFile);
+      logger.debug("ExcelImport : found " + exampleSentenceFile.getAbsolutePath());
+    }
+    else {
+      logger.debug("ExcelImport : didn't find " + exampleSentenceFile1);
     }
 
-    logger.debug("config " + relativeConfigDir +
+    logger.debug("\n\n\n\n ---> ExcelImport : config " + relativeConfigDir +
       " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());
   }
 
@@ -139,16 +151,28 @@ public class ExcelImport implements ExerciseDAO {
     return idToExercise.get(id);
   }
 
+  /**
+   * @see #getRawExercises()
+   * @param file
+   * @return
+   */
   private List<Exercise> readExercises(File file) {
     try {
       InputStream inp = new FileInputStream(file);
       List<Exercise> exercises1 = readExercises(inp);
-      if (exampleSentenceFile != null) {
+     /* if (exampleSentenceFile != null) {
         populateExampleSentences(exercises1, exampleSentenceFile);
+        List<Exercise> copy = new ArrayList<Exercise>();
+        for (Exercise e : exercises1) if (e.getSynonymSentences().size() > 0) copy.add(e);
+        logger.debug("got " + copy.size() + " exercises with stimulus sentences");
+        return copy;
       }
-      return exercises1;
+      else {*/
+        return exercises1;
+      //}
+
     } catch (FileNotFoundException e) {
-      logger.error("got "+e,e);
+      logger.error("looking for " + file.getAbsolutePath() + " got "+e,e);
     }
     return new ArrayList<Exercise>();
   }
@@ -350,16 +374,27 @@ public class ExcelImport implements ExerciseDAO {
               Exercise imported = getExercise(idToUse, dao, weightIndex, next, english, foreignLanguagePhrase, translit,
                 meaning, context, segmentedChinese);
               if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
-                recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
+                boolean valid = true;
+                boolean enoughItems = true;
+                if (!wordToSamples.isEmpty()) {
+                  List<String> samples = wordToSamples.get(imported.getRefSentence().trim());
+                  valid = (samples != null);
+                  if (valid) {
+                    enoughItems = samples.size() > MIN_TABOO_ITEMS;
+                    if (enoughItems) imported.setSynonymSentences(samples);
+                  }
+                }
+                if (valid && enoughItems) {
+                  recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
-                // keep track of synonyms (or better term)
-                String englishSentence = imported.getEnglishSentence();
-                List<Exercise> exercisesForSentence = englishToExercises.get(englishSentence);
-                if (exercisesForSentence == null)
-                  englishToExercises.put(englishSentence, exercisesForSentence = new ArrayList<Exercise>());
-                exercisesForSentence.add(imported);
-
-                exercises.add(imported);
+                  // keep track of synonyms (or better term)
+                  rememberExercise(exercises, englishToExercises, imported);
+                } else {
+                  if (valid)
+                    logger.debug("skipping exercise " + imported.getID() + " : '" + imported.getEnglishSentence() + "' since not enough sample sentences");
+                  else
+                    logger.debug("skipping exercise " + imported.getID() + " : '" + imported.getEnglishSentence() + "' since no samples sentences");
+                }
               }
               else {
                 if (logging++ < 3) {
@@ -398,6 +433,16 @@ public class ExcelImport implements ExerciseDAO {
       logger.info("Skipped " + semis + " entries with semicolons or " + (100f*((float)semis)/(float)id)+ "%");
     }
     return exercises;
+  }
+
+  private void rememberExercise(List<Exercise> exercises, Map<String, List<Exercise>> englishToExercises, Exercise imported) {
+    String englishSentence = imported.getEnglishSentence();
+    List<Exercise> exercisesForSentence = englishToExercises.get(englishSentence);
+    if (exercisesForSentence == null)
+      englishToExercises.put(englishSentence, exercisesForSentence = new ArrayList<Exercise>());
+    exercisesForSentence.add(imported);
+
+    exercises.add(imported);
   }
 
   private void addSynonyms(Map<String, List<Exercise>> englishToExercises) {
@@ -666,6 +711,10 @@ public class ExcelImport implements ExerciseDAO {
       exForRef.add(e);
     }
 
+    readSampleSentenceFile(examples, refToEx);
+  }
+
+  private void readSampleSentenceFile(File examples, Map<String, List<Exercise>> refToEx) {
     try {
    /*   String name = "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\examples.txt";
       File fname = new File(name);*/
@@ -678,17 +727,44 @@ public class ExcelImport implements ExerciseDAO {
         List<Exercise> exercises1 = refToEx.get(split[0].trim());
         if (exercises1 != null) {
           for (Exercise e : exercises1) {
-            if (e.getSynonymSentences().isEmpty()) logger.debug("adding to " +e);
+            //if (e.getSynonymSentences().isEmpty()) logger.debug("adding to " +e);
             e.getSynonymSentences().add(split[1]);
           }
         }
       }
-      logger.debug("read " + c + " examples");
+      logger.debug("populateExampleSentences : read " + c + " examples");
 
       reader.close();
     } catch (IOException e) {
       logger.error("Got " + e, e);
     }
+  }
+
+  private Map<String, List<String>> readSampleSentenceFile2(File examples) {
+    Map<String, List<String>> wordToSamples = new HashMap<String, List<String>>();
+    try {
+   /*   String name = "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\examples.txt";
+      File fname = new File(name);*/
+      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(examples), FileExerciseDAO.ENCODING));
+      String line2;
+      int c = 0;
+      while ((line2 = reader.readLine()) != null) {
+        c++;
+        String[] split = line2.split("\\t");
+        String word = split[0].trim();
+
+        List<String> samples = wordToSamples.get(word);
+        if (samples == null) wordToSamples.put(word, samples = new ArrayList<String>());
+        String sentence = split[1];
+        samples.add(sentence);
+      }
+      logger.debug("populateExampleSentences : read " + c + " examples");
+
+      reader.close();
+    } catch (IOException e) {
+      logger.error("Got " + e, e);
+    }
+    return wordToSamples;
   }
 
   public static void main(String [] arg) {
@@ -700,27 +776,97 @@ public class ExcelImport implements ExerciseDAO {
     serverProps.getProperties().put("language","English");
     serverProps.getProperties().put("collectAudio","false");
     ExcelImport config = new ExcelImport(
-      "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\wordlist2.xlsx", "config\\bestAudio", "war\\config\\taboo", serverProps);
+      "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\wordlist3.xlsx", "config\\bestAudio", "war\\config\\taboo", serverProps);
     List<Exercise> rawExercises = config.getRawExercises();
 
-/*    try {
-      final FileWriter inc = new FileWriter("war\\config\\english" + "included.txt");
-      final FileWriter incWords = new FileWriter("war\\config\\english" + "includedWords.txt");
-              int incNum= 0;
-      for (Exercise e: rawExercises)   {
-        String key = e.getEnglishSentence().toLowerCase().trim();
-
-        if (incNum++ < 50) logger.warn("inc " + e.getID() + " : " + key);// + " no match in " +englishToEx.size() + " entries.");
-        inc.write(e.getID()+"\n");
-        incWords.write(key +"\n");
-      }
-      inc.close();
-      incWords.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }*/
-
     System.out.println("first " + rawExercises.get(0));
+    Map<String, List<Exercise>> refToEx = new HashMap<String, List<Exercise>>();
+    for (Exercise e : rawExercises) {
+      List<Exercise> exForRef = refToEx.get(e.getRefSentence().trim());
+      if (exForRef == null) refToEx.put(e.getRefSentence().trim(), exForRef = new ArrayList<Exercise>());
+      exForRef.add(e);
+    }
+
+    logger.debug("ref has " + refToEx.size());
+
+    try {
+      String name = "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\spaFromTatoeba.csv";
+      String name2 = "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\nextExamples.txt";
+
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(name2), FileExerciseDAO.ENCODING));
+
+      File fname = new File(name);
+      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(fname), FileExerciseDAO.ENCODING));
+      String line2;
+      int c = 0;
+      int por = 0;
+      int para = 0;
+      int cuando = 0;
+      int este = 0;
+      Set<String> refs = new HashSet<String>();
+      while ((line2 = reader.readLine()) != null) {
+        c++;
+        String[] split = line2.split("\\t");
+        String sentence = split[2].trim();
+
+        for (String ref : refToEx.keySet()) {
+          if (sentence.contains(ref)) {
+            int i = sentence.indexOf(ref);
+            boolean spaceBefore = false, spaceAfter = false;
+            char before = ' ';
+            char after = ' ';
+            if (i > 0) {
+              before = sentence.charAt(i - 1);
+              spaceBefore = !Character.isAlphabetic(before);
+            }
+            if (i + ref.length() < sentence.length()) {
+              after = sentence.charAt(i + ref.length());
+              spaceAfter = !Character.isAlphabetic(after);
+            }
+            if (spaceBefore && spaceAfter) {
+              boolean valid = true;
+              if (ref.equals("por")) {
+                por++;
+                if (por > 50) valid = false;
+              }
+              if (ref.equals("para")) {
+                para++;
+                if (para > 50) valid = false;
+              }
+              if (ref.equals("cuando")) {
+                cuando++;
+                if (cuando > 50) valid = false;
+              }
+              if (ref.equals("este")) {
+                este++;
+                if (este > 50) valid = false;
+              }
+              if (valid) {
+                //logger.debug("found '" + sentence + "' for '" + ref + "'");
+                writer.write(ref);
+                writer.write("\t");
+                writer.write(sentence);
+                writer.write("\n");
+                refs.add(ref);
+              }
+            //  break;
+            }
+            else {
+              logger.debug("for '" + sentence + "' and '" + ref + "' before '" + before + "' after '" + after + "'");
+            }
+          }
+        }
+      }
+      logger.debug("read " + c + " examples, found " + refs.size() + " refs");
+      HashSet<String> residual = new HashSet<String>(refToEx.keySet());
+      residual.removeAll(refs);
+      logger.debug("not found " + residual);
+      reader.close();
+      writer.close();
+    } catch (IOException e) {
+      logger.error("Got " + e, e);
+    }
+
     //populateSentenceExamples(rawExercises);
     //writer.close();
 /*
