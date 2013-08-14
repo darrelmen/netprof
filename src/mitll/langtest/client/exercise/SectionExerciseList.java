@@ -138,7 +138,7 @@ public class SectionExerciseList extends PagingExerciseList {
       Map<String, Integer> sections = result.get(type);
       System.out.println("\tgetExercises sections for " + type + " = " + sections);
 
-      final SectionWidget listBox = makeListBox(type);
+      final SectionWidget listBox = makeListBox();
       typeToBox.put(type, listBox);
       populateListBox(listBox, sections);
       int col = 0;
@@ -168,7 +168,7 @@ public class SectionExerciseList extends PagingExerciseList {
     return flexTable;
   }
 
-  protected SectionWidget makeListBox(final String type) {
+  private SectionWidget makeListBox() {
     final ListBoxSectionWidget listBox = new ListBoxSectionWidget();
     listBox.addChangeHandler(new ChangeHandler() {
       @Override
