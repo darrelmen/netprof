@@ -4,19 +4,25 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Row;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
+import mitll.langtest.client.bootstrap.SoundFeedback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.NoPasteTextBox;
@@ -64,11 +70,15 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     Heading stimulus;
     String answer;
     final Button begin = new Button("Send Answer");
+    //Image correct = BootstrapExercisePanel.incorrectImage;
+    Image correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
+    Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
 
     public ReceiverPanel(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                          final ExerciseController controller) {
       final ReceiverPanel outer = addWidgets(service,userFeedback,controller);
       checkForStimlus(service, controller, outer);
+
     }
 
     private ReceiverPanel addWidgets(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
@@ -95,6 +105,11 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       begin.setType(ButtonType.PRIMARY);
       begin.setEnabled(true);
 
+
+      HTML warnNoFlash = new HTML(BootstrapExercisePanel.WARN_NO_FLASH);
+      warnNoFlash.setVisible(false);
+      final SoundFeedback soundFeedback = new SoundFeedback(controller.getSoundManager(), warnNoFlash);
+
       waitForNext();
 
       begin.addClickHandler(new ClickHandler() {
@@ -116,18 +131,30 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
           if (isCorrect) {
             showPopup("Correct! Please wait for the next item.");
-            // TODO change list to reflect completed items
+            correctImage.setVisible(true);
             controller.addAdHocExercise(answer);
+            soundFeedback.playCorrect();
           }
           else {
+            incorrectImage.setVisible(true);
             showPopup("Try again...");
+            soundFeedback.playIncorrect();
           }
           waitForNext();
         }
 
       });
 
-      add(begin);
+      FluidContainer container = new FluidContainer();
+      container.add(begin);
+ //     container.add(correctImage);
+  //    correctImage.setVisible(false);
+    //  container.add(incorrectImage);
+   ///   incorrectImage.setVisible(false);
+
+      add(container);
+
+      add(warnNoFlash);
       return outer;
     }
 
@@ -138,7 +165,8 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
       guessBox.setVisible(false);
       guessBox.setText("");
-
+   //   correctImage.setVisible(false);
+  //    incorrectImage.setVisible(false);
       begin.setVisible(false);
     }
 
