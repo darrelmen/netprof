@@ -47,7 +47,13 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     super(service, userFeedback, controller);
   }
 
+  /**
+   * @see TabooExerciseList#useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
+   * @param e
+   * @return
+   */
   public Panel getExercisePanel(Exercise e) {
+    System.out.println("getExercisePanel getting receiver panel ...");
     return new ReceiverPanel(service,userFeedback,controller);
   }
 
@@ -111,17 +117,12 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
           if (isCorrect) {
             showPopup("Correct! Please wait for the next item.");
             // TODO change list to reflect completed items
+            controller.addAdHocExercise(answer);
           }
           else {
             showPopup("Try again...");
           }
           waitForNext();
-
-          // if giver, then need to see wordlist, select next item to give to receiver
-          // after giving, poll for answer submission by receiver - correct, move on to next item
-          //   incorrect, choose next stimulus
-
-          // if receiver, wait for giver to give you an item, then choose your response
         }
 
       });
