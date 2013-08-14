@@ -55,6 +55,12 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private final Column exercisePanelColumn;
   private ExercisePanelFactory factory;
   private LangTestDatabaseAsync service;
+
+  @Override
+  public void addAdHocExercise(String label) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
   private UserManager user;
   private Heading correct = new Heading(4);
   private ProgressBar bar = new ProgressBar();
