@@ -664,27 +664,25 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see Taboo#doTabooModal(long)
+   * @see Taboo#chooseRoleModal(long)
    * @param userID
    * @param isGiver
    */
   public void setTabooFactory(long userID, boolean isGiver) {
+    System.out.println("User " + userID + " is a giver " + isGiver);
+    ((TabooExerciseList)exerciseList).setGiver(isGiver);
+
     String appTitle = props.getAppTitle();
+    String appTitle1 = appTitle + " : Giver";
     if (isGiver) {
       GiverExerciseFactory factory = new GiverExerciseFactory(service, this, this);
       exerciseList.setFactory(factory, userManager, 1);
-      ((TabooExerciseList)exerciseList).setGiver(true);
-      String appTitle1 = appTitle + " : Giver";
-      setTitle(appTitle1);
-      pageTitle.setText(appTitle1);
     } else {
       exerciseList.setFactory(new ReceiverExerciseFactory(service, this, this), userManager, 1);
-      ((TabooExerciseList)exerciseList).setGiver(false);
-
-      String appTitle1 = appTitle + " : Receiver";
-      setTitle(appTitle1);
-      pageTitle.setText(appTitle1);
+      appTitle1 = appTitle + " : Receiver";
     }
+    setTitle(appTitle1);
+    pageTitle.setText(appTitle1);
 
     doEverythingAfterFactory(userID);
   }
@@ -889,9 +887,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void doEverythingAfterFactory(long userID) {
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
-      System.out.println("gotUser : user changed - new " + userID + " vs last " + lastUser);
+      System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser);
       if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
-        System.out.println("\tgotUser : " + userID + " get exercises");
+        System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
         exerciseList.getExercises(userID);
       }
       lastUser = userID;
