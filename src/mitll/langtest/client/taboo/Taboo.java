@@ -47,13 +47,14 @@ public class Taboo {
   }
 
   public void initialCheck(final long fuserid) {
-    userTimer = new Timer() {
+    checkForPartner(fuserid);
+/*    userTimer = new Timer() {
       @Override
       public void run() {
         checkForPartner(fuserid);
       }
     };
-    userTimer.schedule(FIRST_POLL_PERIOD_MILLIS);
+    userTimer.schedule(FIRST_POLL_PERIOD_MILLIS);*/
   }
 
   private void pollForPartner() {
@@ -88,7 +89,7 @@ public class Taboo {
             doModal(fuserid, "You are the receiver", "Now choose the word that best fills in the blank in the sentence.", false);
           }
         } else if (result.isAnyAvailable()) {
-          doTabooModal(fuserid);
+          chooseRoleModal(fuserid);
         } else {
           //Window.alert("do single player Mode");
           // TODO fill in single player mode
@@ -125,7 +126,7 @@ public class Taboo {
     if (userTimer != null) userTimer.cancel();
   }
 
-  private void doTabooModal(final long userID) {
+  private void chooseRoleModal(final long userID) {
     final Modal askGiverReceiver = new Modal(true);
     askGiverReceiver.setCloseVisible(false);
 
