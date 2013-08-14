@@ -104,6 +104,12 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
     DOM.setStyleAttribute(container.getElement(), "paddingRight", "2px");
 
+    getTypeOrder(userID, container);
+
+    return container;
+  }
+
+  protected void getTypeOrder(final long userID, final FluidContainer container) {
     service.getTypeOrder(new AsyncCallback<Collection<String>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -130,8 +136,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         }
       }
     });
-
-    return container;
   }
 
   private void addStudentTypeAndSection(FluidContainer container,Collection<String> sortedTypes) {
@@ -160,7 +164,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    */
   private void addButtonRow(List<SectionNode> rootNodes, long userID, FluidContainer container, Collection<String> types, boolean addInstructions) {
     int numRootNodes = rootNodes.size();
-    System.out.println("getWidgetsForTypes (success) for user = " + userID + " got types " + types + " num root nodes " + numRootNodes);
+    System.out.println("addButtonRow (success) for user = " + userID + " got types " + types + " num root nodes " + numRootNodes);
     if (types.isEmpty()) {
       System.err.println("huh? types is empty?");
       return;
@@ -261,7 +265,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       }
     }
     long now = System.currentTimeMillis();
-    System.out.println("\tgetWidgetsForTypes took " + (now-then) + " millis");
+    System.out.println("\taddButtonRow took " + (now-then) + " millis");
 
     if (last != null) setSizesAndPushFirst(last);
     addBottomText(container);
@@ -332,7 +336,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    */
   private void showSelectionState(ValueChangeEvent<String> event) {
     SelectionState selectionState = new SelectionState(event);
-    //System.out.println("showSelectionState : got " + event + " and " + selectionState);
+    System.out.println("showSelectionState : got " + event + " and " + selectionState);
     StringBuilder status = new StringBuilder();
     Set<Map.Entry<String, Collection<String>>> entries = selectionState.typeToSection.entrySet();
     for (Map.Entry<String, Collection<String>> part : entries) {
@@ -358,7 +362,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @see #addButtonRow
    * @param container
    */
-  private void addBottomText(FluidContainer container) {
+  protected void addBottomText(FluidContainer container) {
     FluidRow status = new FluidRow();
     status.addStyleName("alignCenter");
     status.addStyleName("inlineStyle");
