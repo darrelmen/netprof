@@ -31,6 +31,7 @@ public class Flashcard implements RequiresResize {
   private Image flashcardImage;
   private Image collab;
   private int min = 720;
+  private String appTitle;
 
   /**
    * @see mitll.langtest.client.LangTest#doFlashcard()
@@ -54,8 +55,12 @@ public class Flashcard implements RequiresResize {
    * @return
    */
   public HorizontalPanel makeNPFHeaderRow(String splashText) {
+    return makeNPFHeaderRow(splashText,PRONUNCIATION_FEEDBACK);
+  }
+
+  public HorizontalPanel makeNPFHeaderRow(String splashText, String appTitle) {
     String appIcon = "npfIcon.png";
-    return getHeaderRow(splashText, appIcon, PRONUNCIATION_FEEDBACK);
+    return getHeaderRow(splashText, appIcon, appTitle);
   }
 
   private HorizontalPanel getHeaderRow(String splashText, String appIcon, String appTitle) {
@@ -160,4 +165,10 @@ public class Flashcard implements RequiresResize {
     TimedGame timedGame = new TimedGame(langTest);
     timedGame.showTimedGameHelp(props);
   }
+
+  public void setAppTitle(String appTitle) {
+    appName.setText(/*"<span>" + */appTitle/* + "</span>"*/);
+  //  this.appTitle = appTitle;
+  }
+
 }
