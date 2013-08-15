@@ -12,13 +12,16 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class StimulusAnswerPair implements IsSerializable {
   public String stimulus;
   public String answer;
+  public String exerciseID;
 
   public StimulusAnswerPair() {}
 
-  public StimulusAnswerPair(String stimulus, String answer) {
+  public StimulusAnswerPair(String exerciseID, String stimulus, String answer) {
+    this.exerciseID = exerciseID;
     this.stimulus = stimulus;
     this.answer = answer;
   }
 
-  public String toString() { return "Stim : '" + stimulus + "' answer '" + answer + "'"; }
+  public String toString() { return "Ex " +exerciseID+
+    " Stim : '" + stimulus + "' answer '" + answer + "'"; }
 }
