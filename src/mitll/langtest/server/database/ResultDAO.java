@@ -41,6 +41,7 @@ public class ResultDAO extends DAO {
   static final String DURATION = "duration";
   static final String CORRECT = "correct";
   static final String PRON_SCORE = "pronscore";
+  static final String STIMULUS = "stimulus";
 
   private final GradeDAO gradeDAO;
   private final ScheduleDAO scheduleDAO ;
@@ -166,22 +167,24 @@ public class ResultDAO extends DAO {
       boolean flq = rs.getBoolean(FLQ);
       boolean spoken = rs.getBoolean(SPOKEN);
 
-      String type = rs.getString(AUDIO_TYPE) ;
+      String type = rs.getString(AUDIO_TYPE);
       int dur = rs.getInt(DURATION);
 
       boolean correct = rs.getBoolean(CORRECT);
       float pronScore = rs.getFloat(PRON_SCORE);
+      String stimulus = rs.getString(STIMULUS);
 
-      Result e = new Result(uniqueID, userID, //id
-          plan, // plan
-          exid, // id
-          qid, // qid
-          answer, // answer
-          valid, // valid
-          timestamp.getTime(),
-          flq, spoken, type, dur, correct, pronScore);
-      trimPathForWebPage(e);
-      results.add(e);
+      Result result = new Result(uniqueID, userID, //id
+        plan, // plan
+        exid, // id
+        qid, // qid
+        answer, // answer
+        valid, // valid
+        timestamp.getTime(),
+        flq, spoken, type, dur, correct, pronScore);
+      result.setStimulus(stimulus);
+      trimPathForWebPage(result);
+      results.add(result);
     }
     rs.close();
     statement.close();
@@ -495,6 +498,10 @@ public class ResultDAO extends DAO {
       logger.info(RESULTS + " table had num columns = " + numColumns);
       addFlashcardColumnsToTable(connection);
     }
+    if (numColumns < 15) {
+      logger.info(RESULTS + " table had num columns = " + numColumns);
+      addStimulus(connection);
+    }
    // enrichResults();
     //removeValidDefault(connection);
    // addValidDefault(connection);
@@ -513,22 +520,23 @@ public class ResultDAO extends DAO {
    */
   private void createTable(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
-        RESULTS +
-        " (" +
-        "id IDENTITY, " +
-        "userid INT, " +
-        "plan VARCHAR, " +
-      Database.EXID +" VARCHAR, " +
+      RESULTS +
+      " (" +
+      "id IDENTITY, " +
+      "userid INT, " +
+      "plan VARCHAR, " +
+      Database.EXID + " VARCHAR, " +
       "qid INT," +
       Database.TIME + " TIMESTAMP, " +// " AS CURRENT_TIMESTAMP," +
       "answer CLOB," +
-        "valid BOOLEAN," +
-        FLQ + " BOOLEAN," +
-        SPOKEN + " BOOLEAN," +
-        AUDIO_TYPE + " VARCHAR," +
+      "valid BOOLEAN," +
+      FLQ + " BOOLEAN," +
+      SPOKEN + " BOOLEAN," +
+      AUDIO_TYPE + " VARCHAR," +
       DURATION + " INT," +
       CORRECT + " BOOLEAN," +
-      PRON_SCORE + " FLOAT" +
+      PRON_SCORE + " FLOAT," +
+      STIMULUS + " CLOB" +
       ")");
     statement.execute();
     statement.close();
@@ -612,7 +620,20 @@ public class ResultDAO extends DAO {
       statement.execute();
       statement.close();
     } catch (SQLException e) {
-      logger.warn("addDurationColumnToTable : got " + e);
+      logger.warn("addFlashcardColumnsToTable : got " + e);
+    }
+  }
+
+  private void addStimulus(Connection connection) {
+    try {
+      PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
+        STIMULUS +
+        " " +
+        "CLOB");
+      statement.execute();
+      statement.close();
+    } catch (SQLException e) {
+      logger.warn("addStimulus : got " + e);
     }
   }
 
