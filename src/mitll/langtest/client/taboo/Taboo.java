@@ -60,6 +60,8 @@ public class Taboo {
     userTimer.schedule(INACTIVE_PERIOD_MILLIS);
   }
 
+  boolean startedSinglePlayer;
+
   /**
    * TODO : Need some way to quit too - I don't want to play anymore.
    * @param fuserid
@@ -74,17 +76,23 @@ public class Taboo {
 
       @Override
       public void onSuccess(TabooState result) {
-        System.out.println("me : " + fuserid + " checking, anyUsersAvailable : " + result);
+        System.out.println("checkForPartner.onSuccess : me : " + fuserid + " checking, anyUsersAvailable : " + result);
         if (result.isJoinedPair()) {
           if (result.isGiver()) {
-            doModal(fuserid, "You are the giver", "Now choose the next sentence your partner will see to guess the vocabulary word.", true);
+            afterRoleDeterminedConfirmation(fuserid, "You are the giver", "Now choose the next sentence your partner will see to guess the vocabulary word.", true);
           } else {
-            doModal(fuserid, "You are the receiver", "Now choose the word that best fills in the blank in the sentence.", false);
+            afterRoleDeterminedConfirmation(fuserid, "You are the receiver", "Now choose the word that best fills in the blank in the sentence.", false);
           }
         } else if (result.isAnyAvailable()) {
           chooseRoleModal(fuserid);
         } else {
-          //Window.alert("do single player Mode");
+
+          if (!startedSinglePlayer) {
+            System.out.println("me : " + fuserid + " doing single player");
+
+            langTest.setTabooFactory(fuserid, false, true);
+            startedSinglePlayer = true;
+          }
           // TODO fill in single player mode
           pollForPartner();
         }
@@ -92,7 +100,8 @@ public class Taboo {
     });
   }
 
-  private void doModal(final long userID, String title, String message, final boolean isGiver) {
+
+  private void afterRoleDeterminedConfirmation(final long userID, String title, String message, final boolean isGiver) {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
     Heading w = new Heading(4);
@@ -107,7 +116,7 @@ public class Taboo {
       @Override
       public void onClick(ClickEvent event) {
         modal.hide();
-        langTest.setTabooFactory(userID, isGiver);
+        langTest.setTabooFactory(userID, isGiver, false);
       }
     });
     modal.add(begin);
@@ -158,7 +167,7 @@ public class Taboo {
 
             @Override
             public void onSuccess(Void result) {
-              langTest.setTabooFactory(userID, isGiver);
+              langTest.setTabooFactory(userID, isGiver, false);
             }
           });
         }
