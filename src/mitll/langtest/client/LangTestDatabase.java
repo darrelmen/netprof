@@ -146,11 +146,11 @@ public interface LangTestDatabase extends RemoteService {
 
   void registerPair(long userid, boolean isGiver);
 
-  void sendStimulus(long userid, String stimulus, String answer);
+  void sendStimulus(long userid, String exerciseID, String stimulus, String answer);
 
   StimulusAnswerPair checkForStimulus(long userid);
 
-  void registerAnswer(long userid, String stimulus, String answer, boolean isCorrect);
+  void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean isCorrect);
 
   int checkCorrect(long giverUserID, String stimulus);
 }
