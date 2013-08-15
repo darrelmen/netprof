@@ -105,6 +105,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.user = user;
   }
 
+  public ExercisePanelFactory getFactory() { return factory; }
+
   /**
    * Get exercises for this user.
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory(long)

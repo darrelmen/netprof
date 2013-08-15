@@ -98,8 +98,8 @@ public class ExcelImport implements ExerciseDAO {
       logger.debug("ExcelImport : didn't find " + exampleSentenceFile1);
     }
 
-    logger.debug("\n\n\n\n ---> ExcelImport : config " + relativeConfigDir +
-      " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());
+/*    logger.debug("\n\n\n\n ---> ExcelImport : config " + relativeConfigDir +
+      " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());*/
   }
 
   public boolean getMissing(String relativeConfigDir, String file, Set<String> missing) {
@@ -390,10 +390,11 @@ public class ExcelImport implements ExerciseDAO {
                   // keep track of synonyms (or better term)
                   rememberExercise(exercises, englishToExercises, imported);
                 } else {
-                  if (valid)
-                    logger.debug("skipping exercise " + imported.getID() + " : '" + imported.getEnglishSentence() + "' since not enough sample sentences");
-                  else
-                    logger.debug("skipping exercise " + imported.getID() + " : '" + imported.getEnglishSentence() + "' since no samples sentences");
+                  if (valid) {
+                    //logger.debug("skipping exercise " + imported.getID() + " : '" + imported.getEnglishSentence() + "' since not enough sample sentences");
+                  } else {
+                    //logger.debug("skipping exercise " + imported.getID() + " : '" + imported.getEnglishSentence() + "' since no samples sentences");
+                  }
                 }
               }
               else {
