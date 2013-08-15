@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,7 +39,7 @@ public class OnlineUsers {
 
   public OnlineUsers(UserDAO userDAO) { this.userDAO = userDAO; }
 
-  public void addOnline(long userid) {
+  public synchronized void addOnline(long userid) {
     User userWhere = getUser(userid);
     if (userWhere != null) online.add(userWhere);
 
@@ -49,26 +50,24 @@ public class OnlineUsers {
     return userDAO.getUserWhere(userid);
   }
 
-  public void removeOnline(long userid) {
+  public synchronized void removeOnline(long userid) {
     User userWhere = getUser(userid);
     if (userWhere != null) online.remove(userWhere);
 
     logger.info("removeOnline online now " + getOnline());
   }
 
-  public Collection<User> getOnline() {
-    return online;
-  }
+  private Collection<User> getOnline() { return online; }
 
-  public void addActive(User user) {
+/*  public synchronized void addActive(User user) {
     if (!online.contains(user)) logger.error("huh" + user + " is not online.");
     active.add(user);
   }
 
-  public void removeActive(User user) {
+  public synchronized void removeActive(User user) {
     boolean remove = active.remove(user);
     if (!remove) logger.error("huh" + user + " was not active.");
-  }
+  }*/
 
   /**
    * The given user asks whether they're in a pairing.
@@ -78,7 +77,7 @@ public class OnlineUsers {
    * @param userid
    * @return
    */
-  public TabooState anyAvailable(long userid) {
+  public synchronized TabooState anyAvailable(long userid) {
     int diff = online.size() - active.size();
     //logger.info("online " + online.size() + " active " + active.size() + " available = " + diff);
     boolean avail = diff > 1;
@@ -113,11 +112,11 @@ public class OnlineUsers {
     }
 
     TabooState tabooState = new TabooState(avail, joined, giver);
-    logger.debug("returning " + tabooState);
+   // logger.debug("returning " + tabooState);
     return tabooState;
   }
 
-  public void registerPair(long userid, boolean isGiver) {
+  public synchronized void registerPair(long userid, boolean isGiver) {
     Pair found = null;
 
     for (Pair p : candidates) {
@@ -163,17 +162,22 @@ public class OnlineUsers {
    // addActive(receiver);
   }
 
-  public void sendStimulus(long userid, String stimulus, String answer) {
+  public synchronized void sendStimulus(long userid, String exerciseID, String stimulus, String answer) {
     User receiver = getReceiverForGiver(userid);
     logger.debug("sending " + stimulus + " to " + receiver + " from giver " + userid);
-    receiverToStimulus.put(receiver, new StimulusAnswerPair(stimulus, answer));
+    receiverToStimulus.put(receiver, new StimulusAnswerPair(exerciseID, stimulus, answer));
   }
 
-  public StimulusAnswerPair checkForStimulus(long receiverUserID) {
+  /**
+   * @see DatabaseImpl#checkForStimulus(long)
+   * @param receiverUserID
+   * @return
+   */
+  public synchronized StimulusAnswerPair checkForStimulus(long receiverUserID) {
     return receiverToStimulus.get(getUser(receiverUserID));
   }
 
-  public void registerAnswer(long receiverUserID, String stimulus, String answer, boolean correct) {
+  public synchronized void registerAnswer(long receiverUserID, String stimulus, String answer, boolean correct) {
     receiverToStimulus.remove(getUser(receiverUserID));
 
     User receiver = getUser(receiverUserID);
@@ -187,7 +191,7 @@ public class OnlineUsers {
     }
     answerBundles.add(new AnswerBundle(stimulus,answer,correct));
 
-    logger.debug("user->answer now " + receiverToAnswer);
+    logger.debug("registerAnswer : user->answer now " + receiverToAnswer);
   }
 
   int count = 0;
@@ -198,7 +202,7 @@ public class OnlineUsers {
    * @param stimulus
    * @return
    */
-  public int checkCorrect(long giverUserID, String stimulus) {
+  public synchronized int checkCorrect(long giverUserID, String stimulus) {
     User receiver = getReceiverForGiver(giverUserID);
    // logger.debug("Giver " + giverUserID + " checking for answer from " + receiver);
 
@@ -215,7 +219,9 @@ public class OnlineUsers {
       }
       else {
         AnswerBundle answerBundle = answerBundles.get(answerBundles.size() - 1);
-        return answerBundle.correct ? 1 : 0;
+        int isCorrectResponse = answerBundle.correct ? 1 : 0;
+        stimToAnswer.remove(stimulus); // sent response to giver -- no need to remember them anymore
+        return isCorrectResponse;
       }
     }
   }
@@ -247,6 +253,10 @@ public class OnlineUsers {
       this.answer = answer;
       this.correct = correct;
       this.timestamp = System.currentTimeMillis();
+    }
+
+    public String toString() { return /*"stim : " + stimulus +*/ " answer '" +  answer+
+      "' is " +(correct ? "correct" : "incorrect") + " at " + new Date(timestamp);
     }
   }
 }
