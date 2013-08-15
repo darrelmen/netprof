@@ -56,6 +56,7 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.taboo.GiverExerciseFactory;
 import mitll.langtest.client.taboo.ReceiverExerciseFactory;
+import mitll.langtest.client.taboo.SinglePlayerRobot;
 import mitll.langtest.client.taboo.Taboo;
 import mitll.langtest.client.taboo.TabooExerciseList;
 import mitll.langtest.client.user.UserFeedback;
@@ -663,28 +664,44 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
+  private SinglePlayerRobot singlePlayerRobot;
+
   /**
    * @see Taboo#chooseRoleModal(long)
+   * @see Taboo#checkForPartner(long)
+   * @see
    * @param userID
    * @param isGiver
+   * @param singlePlayer
    */
-  public void setTabooFactory(long userID, boolean isGiver) {
-    System.out.println("User " + userID + " is a giver " + isGiver);
+  public void setTabooFactory(long userID, boolean isGiver, boolean singlePlayer) {
+    System.out.println("setTabooFactory : User " + userID + " is a giver " + isGiver + " single " + singlePlayer);
     ((TabooExerciseList)exerciseList).setGiver(isGiver);
 
     String appTitle = props.getAppTitle();
     String appTitle1 = appTitle + " : Giver";
+    boolean changed;
     if (isGiver) {
+      changed = (exerciseList.getFactory() instanceof ReceiverExerciseFactory);
       GiverExerciseFactory factory = new GiverExerciseFactory(service, this, this);
       exerciseList.setFactory(factory, userManager, 1);
+
     } else {
-      exerciseList.setFactory(new ReceiverExerciseFactory(service, this, this), userManager, 1);
-      appTitle1 = appTitle + " : Receiver";
+      changed = (exerciseList.getFactory() instanceof ReceiverExerciseFactory);
+
+      if (singlePlayer && singlePlayerRobot == null) {
+        singlePlayerRobot = new SinglePlayerRobot(service);
+      }
+
+      exerciseList.setFactory(new ReceiverExerciseFactory(service, this, this, singlePlayer ? singlePlayerRobot : null), userManager, 1);
+      appTitle1 = appTitle + (singlePlayer ? " : Single Player" : " : Receiver");
     }
     setTitle(appTitle1);
     pageTitle.setText(appTitle1);
 
-    doEverythingAfterFactory(userID);
+    if (!doEverythingAfterFactory(userID) && changed) {
+      exerciseList.getExercises(userID);
+    }
   }
 
   /**
@@ -885,7 +902,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  private void doEverythingAfterFactory(long userID) {
+  private boolean doEverythingAfterFactory(long userID) {
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
       System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser);
       if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
@@ -893,10 +910,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         exerciseList.getExercises(userID);
       }
       lastUser = userID;
-    }
-    else if (props.isTimedGame()) {
+      return true;
+    } else if (props.isTimedGame()) {
       exerciseList.reloadExercises();
-    }
+      return true;
+    } else return false;
   }
 
   /**
