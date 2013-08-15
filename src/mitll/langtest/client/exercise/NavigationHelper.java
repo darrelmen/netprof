@@ -46,6 +46,16 @@ public class NavigationHelper extends HorizontalPanel {
     getNextAndPreviousButtons(exercise, controller);
   }
 
+  public NavigationHelper(Exercise exercise, ExerciseController controller, boolean enableNextOnlyWhenAllCompleted) {
+    this.enableNextOnlyWhenAllCompleted = enableNextOnlyWhenAllCompleted;
+    this.provider = new PostAnswerProvider() {
+      @Override
+      public void postAnswers(ExerciseController controller, Exercise completedExercise) {}
+    };
+    setSpacing(5);
+    getNextAndPreviousButtons(exercise, controller);
+  }
+
   private String getLanguage( ExerciseController controller) {
     String language = controller.getLanguage();
     return (language == null || language.length() == 0) ? THE_FOREIGN_LANGUAGE : language;
