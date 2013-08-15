@@ -14,18 +14,26 @@ import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
+import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
+import com.github.gwtbootstrap.client.ui.event.ShowEvent;
+import com.github.gwtbootstrap.client.ui.event.ShowHandler;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -471,7 +479,7 @@ public class UserManager {
     final Button login = new Button("Login");
     login.setType(ButtonType.PRIMARY);
     login.setEnabled(true);
-
+    login.setTitle("Hit enter to log in.");
     // We can set the id of a widget by accessing its Element
     login.getElement().setId("login");
     final FormField user = addControlFormField(dialogBox, "User ID");
@@ -589,6 +597,54 @@ public class UserManager {
       }
     });
     dialogBox.show();
+
+    dialogBox.addHiddenHandler(new HiddenHandler() {
+      @Override
+      public void onHidden(HiddenEvent hiddenEvent) {
+        removeKeyHandler();
+      }
+    });
+
+    dialogBox.addShowHandler(new ShowHandler() {
+      @Override
+      public void onShow(ShowEvent showEvent) {
+        addKeyHandler(login);
+      }
+    });
+  }
+
+  private HandlerRegistration keyHandler;
+
+  private void addKeyHandler(final Button send) {
+    keyHandler = Event.addNativePreviewHandler(new
+                                                 Event.NativePreviewHandler() {
+
+                                                   @Override
+                                                   public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                                                     NativeEvent ne = event.getNativeEvent();
+                                                     int keyCode = ne.getKeyCode();
+
+                                                     boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
+
+                                                     //   System.out.println("key code is " +keyCode);
+                                                     if (isEnter && event.getTypeInt() == 512 &&
+                                                       "[object KeyboardEvent]".equals(ne.getString())) {
+                                                       ne.preventDefault();
+                                                       send.fireEvent(new ButtonClickEvent());
+                                                     }
+                                                   }
+                                                 });
+    // System.out.println("addKeyHandler made click handler " + keyHandler);
+  }
+
+  private class ButtonClickEvent extends ClickEvent{
+        /*To call click() function for Programmatic equivalent of the user clicking the button.*/
+  }
+
+  public void removeKeyHandler() {
+    System.out.println("removeKeyHandler : " + keyHandler);
+
+    if (keyHandler != null) keyHandler.removeHandler();
   }
 
   /**
