@@ -9,12 +9,8 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.Row;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -28,7 +24,6 @@ import mitll.langtest.client.bootstrap.SoundFeedback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.NavigationHelper;
-import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
@@ -188,13 +183,15 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     private void sendStimulus(final String stimulus, final String refSentence, final Exercise exercise, final SoundFeedback soundFeedback) {
       final String toSendWithBlankedOutItem = getObfuscated(stimulus, refSentence);
 
-      System.out.println("stimulus    " + stimulus);
+/*      System.out.println("stimulus    " + stimulus);
       System.out.println("refSentence " + refSentence);
       System.out.println("index " + stimulus.indexOf(refSentence));
-      System.out.println("toSendWithBlankedOutItem " + toSendWithBlankedOutItem);
+      System.out.println("toSendWithBlankedOutItem " + toSendWithBlankedOutItem);*/
+
+      //List<String> synonymSentences = exercise.getSynonymSentences();
 
       final int user = controller.getUser();
-      service.sendStimulus(user, toSendWithBlankedOutItem, refSentence, new AsyncCallback<Void>() {
+      service.sendStimulus(user, exercise.getID(), toSendWithBlankedOutItem, refSentence, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
           Window.alert("couldn't contact server.");
