@@ -125,6 +125,11 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     this.factory = factory;
   }
 
+  @Override
+  public ExercisePanelFactory getFactory() {
+    return factory;
+  }
+
   /**
    * @param userID
    * @see mitll.langtest.client.LangTest#gotUser(long)
