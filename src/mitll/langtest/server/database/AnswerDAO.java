@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -42,7 +43,11 @@ public class AnswerDAO {
                         boolean flq, boolean spoken, String audioType, boolean correct, float pronScore) {
     String plan = e.getPlan();
     String id = e.getID();
-    addAnswer(database,userID, plan, id, questionID, answer, audioFile, true,  flq, spoken, audioType, 0, correct, pronScore);
+    addAnswer(database,userID, plan, id, questionID, answer, audioFile, true,  flq, spoken, audioType, 0, correct, pronScore, "");
+  }
+
+  public void addAnswer(int userID, String plan, String exerciseID, String stimulus, String answer, boolean correct) {
+    addAnswer(database, userID, plan, exerciseID, 0, answer, "", true, false, false, Result.AUDIO_TYPE_UNSET, 0, correct, 0, stimulus);
   }
 
   /**
@@ -96,15 +101,16 @@ public class AnswerDAO {
    * @param spoken
    * @param correct
    * @param pronScore
+   * @param stimulus
    */
   public long addAnswer(Database database, int userID, String plan, String id, int questionID, String answer,
                         String audioFile, boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis,
-                        boolean correct, float pronScore) {
+                        boolean correct, float pronScore, String stimulus) {
     try {
       long then = System.currentTimeMillis();
       Connection connection = database.getConnection();
       long newid = addAnswerToTable(connection, userID, plan, id, questionID, answer, audioFile, valid, flq, spoken,
-        audioType, durationInMillis, correct, pronScore);
+        audioType, durationInMillis, correct, pronScore, stimulus);
       database.closeConnection(connection);
       long now = System.currentTimeMillis();
       if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
@@ -122,6 +128,7 @@ public class AnswerDAO {
    * This allows us to determine user completion rate.
    *
    *
+   *
    * @param connection
    * @param userid
    * @param plan
@@ -132,13 +139,14 @@ public class AnswerDAO {
    * @param valid
    * @param correct
    * @param pronScore
+   * @param stimulus
    * @throws java.sql.SQLException
-   * @see #addAnswer(Database, int, String, String, int, String, String, boolean, boolean, boolean, String, int, boolean, float)
+   * @see #addAnswer(Database, int, String, String, int, String, String, boolean, boolean, boolean, String, int, boolean, float, String)
    */
   private long addAnswerToTable(Connection connection, int userid, String plan, String id, int questionID,
                                 String answer, String audioFile,
                                 boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis,
-                                boolean correct, float pronScore) throws SQLException {
+                                boolean correct, float pronScore, String stimulus) throws SQLException {
     PreparedStatement statement;
    // logger.info("adding answer for exid #" + id + " correct " + correct + " score " + pronScore);
     statement = connection.prepareStatement("INSERT INTO results(" +
@@ -154,8 +162,9 @@ public class AnswerDAO {
       ResultDAO.AUDIO_TYPE + "," +
       ResultDAO.DURATION + "," +
       ResultDAO.CORRECT + "," +
-      ResultDAO.PRON_SCORE +
-      ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+      ResultDAO.PRON_SCORE + "," +
+      ResultDAO.STIMULUS +
+      ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
     int i = 1;
 
@@ -176,6 +185,7 @@ public class AnswerDAO {
 
     statement.setBoolean(i++, correct);
     statement.setFloat(i++, pronScore);
+    statement.setString(i++, stimulus);
 
     //logger.info("valid is " +valid + " for " +statement);
 
