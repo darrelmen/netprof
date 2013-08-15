@@ -9,8 +9,12 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.Row;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -23,6 +27,8 @@ import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
 import mitll.langtest.client.bootstrap.SoundFeedback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.exercise.NavigationHelper;
+import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
@@ -57,6 +63,9 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
   }
 
   public Panel getExercisePanel(final Exercise e) {
+
+    System.out.println("GiverExerciseFactory.getExercisePanel : " + e.getID());
+
     return new GiverPanel(e);
   }
 
@@ -103,6 +112,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       add(warnNoFlash);
       send.setType(ButtonType.PRIMARY);
       send.setEnabled(true);
+     // send.setTitle("Hit Enter to send.");
 
       send.addClickHandler(new ClickHandler() {
         @Override
@@ -123,7 +133,57 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       add(send);
       add(pleaseWait);
       pleaseWait.setVisible(false);
+
+      NavigationHelper w1 = new NavigationHelper(exercise, controller, false);
+      w1.addStyleName("topMargin");
+      add(w1);
     }
+
+/*    private HandlerRegistration keyHandler;
+
+    private void addKeyHandler() {
+      keyHandler = Event.addNativePreviewHandler(new
+                                                   Event.NativePreviewHandler() {
+
+                                                     @Override
+                                                     public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                                                       NativeEvent ne = event.getNativeEvent();
+                                                       int keyCode = ne.getKeyCode();
+
+                                                       boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
+
+                                                       //   System.out.println("key code is " +keyCode);
+                                                       if (isEnter && event.getTypeInt() == 512 &&
+                                                         "[object KeyboardEvent]".equals(ne.getString())) {
+                                                         ne.preventDefault();
+                                                         send.fireEvent(new ButtonClickEvent());
+                                                       }
+                                                     }
+                                                   });
+      // System.out.println("addKeyHandler made click handler " + keyHandler);
+    }
+
+    private class ButtonClickEvent extends ClickEvent{
+        *//*To call click() function for Programmatic equivalent of the user clicking the button.*//*
+    }
+
+    @Override
+    protected void onLoad() {
+      super.onLoad();
+      addKeyHandler();
+    }
+
+    @Override
+    protected void onUnload() {
+      super.onUnload();
+      removeKeyHandler();
+    }
+
+    public void removeKeyHandler() {
+      System.out.println("removeKeyHandler : " + keyHandler);
+
+      if (keyHandler != null) keyHandler.removeHandler();
+    }*/
 
     private void sendStimulus(final String stimulus, final String refSentence, final Exercise exercise, final SoundFeedback soundFeedback) {
       final String toSendWithBlankedOutItem = getObfuscated(stimulus, refSentence);
@@ -267,4 +327,5 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       t.schedule(3000);
     }
   }
+
 }
