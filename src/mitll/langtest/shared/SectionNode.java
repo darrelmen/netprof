@@ -13,20 +13,19 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class SectionNode implements IsSerializable {
-  public SectionNode() {}   // required for serialization
   private String type;
   private String name;
   private List<SectionNode> children = new ArrayList<SectionNode>();
 
+  public SectionNode() {}   // required for serialization
   public SectionNode(String type, String name) { this.type = type; this.name = name; }
-  public String getName() {
-    return name;
-  }
-
   public void addChild(SectionNode node) { children.add(node);}
+
+  public String getName() { return name; }
+  public String getType() { return type; }
   public List<SectionNode> getChildren() { return children; }
 
   public String toString() {
-    return type+"="+name + (children.isEmpty() ? "" : (" : [(" + children.size() + ") " + children +"]"));
+    return getType() +"="+name + (children.isEmpty() ? "" : (" : [(" + children.size() + ") " + children +"]"));
   }
 }
