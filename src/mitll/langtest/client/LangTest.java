@@ -314,6 +314,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       flashcard = new Flashcard();
       title = flashcard.makeNPFHeaderRow(props.getSplash());
     }
+    else if (props.isTrackUsers()) {
+      flashcard = new Flashcard();
+      title = flashcard.makeNPFHeaderRow(props.getSplash(), props.getAppTitle());
+    }
     else {
       title = getTitleWidget();
     }
@@ -406,7 +410,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         element.setAttribute("href", "flashFavIcon.gif");
       }
     }
-    else if (props.isGoodwaveMode()) {
+    else if (props.isGoodwaveMode() || props.isTrackUsers()) {
       if (element != null) {
         element.setAttribute("href", LANGTEST_IMAGES + "npfFavIcon.gif");
       }
@@ -697,7 +701,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       appTitle1 = appTitle + (singlePlayer ? " : Single Player" : " : Receiver");
     }
     setTitle(appTitle1);
-    pageTitle.setText(appTitle1);
+    if (pageTitle == null) {
+      flashcard.setAppTitle(appTitle1);
+    }
+    else {
+      pageTitle.setText(appTitle1);
+    }
 
     if (!doEverythingAfterFactory(userID) && changed) {
       exerciseList.getExercises(userID);
