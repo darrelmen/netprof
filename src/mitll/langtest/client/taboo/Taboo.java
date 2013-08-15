@@ -30,7 +30,7 @@ public class Taboo {
   private LangTest langTest;
 
   //private static final int FIRST_POLL_PERIOD_MILLIS = 1000 * 3; // ten minutes
-  private static final int INACTIVE_PERIOD_MILLIS = 1000 * 15; // ten minutes
+  private static final int INACTIVE_PERIOD_MILLIS = 1000 * 2; // ten minutes
 
   private Timer userTimer;
 
