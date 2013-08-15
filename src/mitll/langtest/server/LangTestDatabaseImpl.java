@@ -956,24 +956,30 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see mitll.langtest.client.taboo.GiverExerciseFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    * @param userid
+   * @param exerciseID
    * @param stimulus
    * @param answer
    */
   @Override
-  public void sendStimulus(long userid, String stimulus, String answer) {  db.sendStimulus(userid, stimulus, answer); }
+  public void sendStimulus(long userid, String exerciseID, String stimulus, String answer) {  db.sendStimulus(userid, exerciseID, stimulus, answer); }
 
+  /**
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#checkForStimulus(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
+   * @param userid
+   * @return
+   */
   @Override
   public StimulusAnswerPair checkForStimulus(long userid) {
     return db.checkForStimulus(userid);
   }
 
   @Override
-  public void registerAnswer(long userid, String stimulus, String answer, boolean isCorrect) {
-    db.registerAnswer(userid, stimulus, answer, isCorrect);
+  public void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean isCorrect) {
+    db.registerAnswer(userid, exerciseID, stimulus, answer, isCorrect);
   }
 
   /**
-   * @see mitll.langtest.client.taboo.GiverExerciseFactory#checkForCorrect(long, String, mitll.langtest.shared.Exercise, String)
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#checkForCorrect(long, String, mitll.langtest.shared.Exercise, String, mitll.langtest.client.bootstrap.SoundFeedback)
    * @param giverUserID
    * @param stimulus
    * @return
