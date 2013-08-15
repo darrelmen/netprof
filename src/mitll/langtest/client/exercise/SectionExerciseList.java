@@ -470,6 +470,10 @@ public class SectionExerciseList extends PagingExerciseList {
    // return historyToken +";item="+columnText;
   }
 
+  /**
+   * @see mitll.langtest.client.exercise.PagingExerciseList#getExerciseIdColumn()
+   * @param e
+   */
   @Override
   protected void gotClickOnItem(ExerciseShell e) {
     System.out.println("----------- got click on " + e.getID() + " -------------- ");
