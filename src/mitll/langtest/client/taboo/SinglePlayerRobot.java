@@ -68,7 +68,7 @@ public class SinglePlayerRobot {
   }
 
   /**
-   * @see ReceiverExerciseFactory.ReceiverPanel#checkForStimlus(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
+   * @see ReceiverExerciseFactory.ReceiverPanel#checkForStimulus
    * @param userid
    * @param async
    */
@@ -146,10 +146,10 @@ public class SinglePlayerRobot {
           String refSentence = currentExercise.getRefSentence().trim();
           if (synonymSentences.isEmpty()) {
             System.err.println("huh? no stim sentences for " + currentExercise);
-            async.onSuccess(new StimulusAnswerPair("Data error on server, please report.", refSentence));
+            async.onSuccess(new StimulusAnswerPair(result.getID(), "Data error on server, please report.", refSentence));
           } else {
             String rawStim = synonymSentences.remove(0);
-            async.onSuccess(new StimulusAnswerPair(getObfuscated(rawStim,refSentence), refSentence));
+            async.onSuccess(new StimulusAnswerPair(result.getID(), getObfuscated(rawStim,refSentence), refSentence));
           }
         }
       });
@@ -157,7 +157,7 @@ public class SinglePlayerRobot {
       String rawStim = synonymSentences.remove(0);
       String refSentence = currentExercise.getRefSentence().trim();
 
-      async.onSuccess(new StimulusAnswerPair(getObfuscated(rawStim,refSentence), refSentence));
+      async.onSuccess(new StimulusAnswerPair(currentExercise.getID(), getObfuscated(rawStim,refSentence), refSentence));
     }
   }
 
