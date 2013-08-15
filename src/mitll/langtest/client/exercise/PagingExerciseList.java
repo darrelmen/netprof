@@ -136,12 +136,12 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     table.setSelectionModel(selectionModel);
     // we don't want to listen for changes in the selection model, since that happens on load too -- we just want clicks
 
-    addColumnsToTable();
+    addColumnsToTable(true);
     return null;
   }
 
-  protected void addColumnsToTable() {
-    Column<ExerciseShell, SafeHtml> id2 = getExerciseIdColumn();
+  protected void addColumnsToTable(boolean consumeClicks) {
+    Column<ExerciseShell, SafeHtml> id2 = getExerciseIdColumn(consumeClicks);
 
     // this would be better, but want to consume clicks
   /*  TextColumn<ExerciseShell> id2 = new TextColumn<ExerciseShell>() {
@@ -158,12 +158,16 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     table.addColumn(id2);
   }
 
-  private Column<ExerciseShell, SafeHtml> getExerciseIdColumn() {
+  /**
+   * @see #addColumnsToTable
+   * @return
+   */
+  private Column<ExerciseShell, SafeHtml> getExerciseIdColumn(final boolean consumeClicks) {
     return new Column<ExerciseShell, SafeHtml>(new SafeHtmlCell() {
         @Override
         public Set<String> getConsumedEvents() {
           Set<String> events = new HashSet<String>();
-          events.add(BrowserEvents.CLICK);
+          if (consumeClicks) events.add(BrowserEvents.CLICK);
           return events;
         }
       }) {
@@ -176,7 +180,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
         public void onBrowserEvent(Cell.Context context, Element elem, ExerciseShell object, NativeEvent event) {
           super.onBrowserEvent(context, elem, object, event);
           if (BrowserEvents.CLICK.equals(event.getType())) {
-            System.out.println("got click " + event);
+            System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
             final ExerciseShell e = object;
             if (isExercisePanelBusy()) {
               Window.alert("Please stop recording before changing items.");
