@@ -35,6 +35,8 @@ public class Result implements IsSerializable {
   public int durationInMillis;
   private boolean correct;
   private float pronScore;
+  private String stimulus;
+
 
   public static final String AUDIO_TYPE_UNSET = "unset";
   public static final String AUDIO_TYPE_REGULAR = "regular";
@@ -107,6 +109,14 @@ public class Result implements IsSerializable {
 
   public float getPronScore() {
     return pronScore;
+  }
+
+  public String getStimulus() {
+    return stimulus;
+  }
+
+  public void setStimulus(String stimulus) {
+    this.stimulus = stimulus;
   }
 
   @Override
