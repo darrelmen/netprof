@@ -20,7 +20,7 @@ public interface ListInterface extends RequiresResize {
    * @param expectedGrades
    */
   void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades);
-
+  ExercisePanelFactory getFactory();
   /**
    * @see mitll.langtest.client.LangTest#gotUser(long)
    * @see mitll.langtest.client.LangTest#makeFlashContainer()
