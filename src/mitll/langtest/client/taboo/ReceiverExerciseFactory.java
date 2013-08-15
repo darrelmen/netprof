@@ -66,10 +66,10 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
   /**
    * @see TabooExerciseList#useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
-   * @param e
+   * @param totallyIgnored
    * @return
    */
-  public Panel getExercisePanel(Exercise e) {
+  public Panel getExercisePanel(Exercise totallyIgnored) {
     System.out.println("getExercisePanel getting receiver panel ...");
     return new ReceiverPanel(service,controller);
   }
@@ -80,6 +80,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     TextBox guessBox = new NoPasteTextBox();
     Heading stimulus;
     String answer;
+    String exerciseID;
     final Button send = new Button("Send Answer");
     Image correctImage   = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
     Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
@@ -163,7 +164,8 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         singlePlayerRobot.registerAnswer(correct);
       }
 
-      service.registerAnswer(controller.getUser(), stimulus.getText(), answer, correct, new RegisterAnswerResponseCallback(service, controller, outer));
+      service.registerAnswer(controller.getUser(), exerciseID, stimulus.getText(), guessBox.getText(), correct,
+        new RegisterAnswerResponseCallback(service, controller, outer));
     }
 
     private void waitForNext() {
@@ -234,6 +236,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       stimulus.setVisible(true);
       stimulus.setText(result.stimulus);
       outer.answer = result.answer;
+      exerciseID = result.exerciseID;
     }
 
     private HandlerRegistration keyHandler;
