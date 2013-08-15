@@ -80,7 +80,7 @@ public class OnlineUsers {
    */
   public TabooState anyAvailable(long userid) {
     int diff = online.size() - active.size();
-    logger.info("online " + online.size() + " active " + active.size() + " available = " + diff);
+    //logger.info("online " + online.size() + " active " + active.size() + " available = " + diff);
     boolean avail = diff > 1;
 
     boolean giver = false;
