@@ -222,7 +222,9 @@ public class UserDAO extends DAO {
     String sql = "SELECT * from users where id=" +userid+";";
     List<User> users = getUsers(sql);
     if (users.isEmpty()) {
-      logger.warn("no user with id " + userid);
+      if (userid > 0) {
+        logger.warn("no user with id " + userid);
+      }
       return null;
     }
     else if (users.size() > 1) {
