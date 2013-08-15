@@ -445,13 +445,14 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#sendStimulus(long, String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#sendStimulus
    * @param userid
+   * @param exerciseID
    * @param stimulus
    * @param answer
    */
-  public void sendStimulus(long userid, String stimulus, String answer) {
-    userDAO.getOnlineUsers().sendStimulus(userid, stimulus, answer);
+  public void sendStimulus(long userid, String exerciseID, String stimulus, String answer) {
+    userDAO.getOnlineUsers().sendStimulus(userid, exerciseID, stimulus, answer);
   }
 
   /**
@@ -464,12 +465,18 @@ public class DatabaseImpl implements Database {
     userDAO.getOnlineUsers().registerPair(userid, isGiver);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#checkForStimulus(long)
+   * @param userid
+   * @return
+   */
   public StimulusAnswerPair checkForStimulus(long userid) {
    return userDAO.getOnlineUsers().checkForStimulus(userid);
   }
 
-  public void registerAnswer(long userid, String stimulus, String answer, boolean correct) {
+  public void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean correct) {
     userDAO.getOnlineUsers().registerAnswer(userid, stimulus, answer, correct);
+    addAnswer((int) userid, "plan",exerciseID,stimulus,answer,correct);
   }
 
   /**
@@ -1360,7 +1367,15 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
    */
   public void addAnswer(int userID, Exercise e, int questionID, String answer) {
-    answerDAO.addAnswer(userID, e, questionID, answer, "", !e.promptInEnglish, false, Result.AUDIO_TYPE_UNSET, true, 0);
+    addAnswer(userID, e, questionID, answer, true);
+  }
+
+  public void addAnswer(int userID, String plan, String exerciseID, String stimulus, String answer, boolean correct) {
+    answerDAO.addAnswer(userID, plan, exerciseID, stimulus, answer, correct);
+
+  }
+  private void addAnswer(int userID, Exercise e, int questionID, String answer, boolean correct) {
+    answerDAO.addAnswer(userID, e, questionID, answer, "", !e.promptInEnglish, false, Result.AUDIO_TYPE_UNSET, correct, 0);
   }
 
   /**
@@ -1383,7 +1398,7 @@ public class DatabaseImpl implements Database {
                              boolean valid, boolean flq, boolean spoken,
                              String audioType, int durationInMillis, boolean correct, float score) {
     return answerDAO.addAnswer(this, userID, plan, exerciseID, questionID, "", audioFile, valid, flq, spoken, audioType,
-      durationInMillis, correct, score);
+      durationInMillis, correct, score, "");
   }
 
   /**
