@@ -3,6 +3,7 @@ package mitll.langtest.client.taboo;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ExerciseShell;
@@ -34,9 +35,11 @@ public class SinglePlayerRobot {
   Exercise currentExercise = null;
   List<String> synonymSentences = Collections.emptyList();
  // int nodeIndex, exerciseIndex, stimIndex;
+  PropertyHandler propertyHandler;
 
-  public SinglePlayerRobot(LangTestDatabaseAsync service) {
+  public SinglePlayerRobot(LangTestDatabaseAsync service, PropertyHandler propertyHandler) {
     this.service = service;
+    this.propertyHandler = propertyHandler;
   }
 
   /**
@@ -47,7 +50,7 @@ public class SinglePlayerRobot {
    *
    * @paramx fuserid
    */
-  public void doSinglePlayer(/*final long fuserid*/) {
+  public void doSinglePlayer() {
     if (nodes == null || nodes.isEmpty()) {
       System.out.println("---> doSinglePlayer getting nodes ");
 
@@ -61,7 +64,6 @@ public class SinglePlayerRobot {
         public void onSuccess(List<SectionNode> result) {
           nodes = result;
           System.out.println("\n\ngetSectionNodes.onSuccess : got nodes " + nodes);
-       //   getExercisesForNextChapter(userid, async);
         }
       });
     }
@@ -78,11 +80,8 @@ public class SinglePlayerRobot {
         async.onSuccess(null); // no more chapters, no more exercises, we're done -- TODO : start over?
       }
       else {
-        SectionNode chapter = null;
-        chapter = nodes.remove(0);
-        System.out.println("checkForStimulus.getExercisesForNextChapter : next chapter " + nodes.get(0));
-        //final SectionNode chapter = nodes.get(0);
-
+        SectionNode chapter = nodes.remove(0);
+        System.out.println("checkForStimulus.getExercisesForNextChapter : next chapter " + chapter);
         getExercisesForNextChapter(userid, chapter, async);
       }
     }
@@ -143,7 +142,10 @@ public class SinglePlayerRobot {
 
           synonymSentences = currentExercise.getSynonymSentences();
 
-          String refSentence = currentExercise.getRefSentence().trim();
+         // String refSentence = currentExercise.getRefSentence().trim();
+
+          final String refSentence = getRefSentence();
+
           if (synonymSentences.isEmpty()) {
             System.err.println("huh? no stim sentences for " + currentExercise);
             async.onSuccess(new StimulusAnswerPair(result.getID(), "Data error on server, please report.", refSentence));
@@ -155,18 +157,22 @@ public class SinglePlayerRobot {
       });
     } else {
       String rawStim = synonymSentences.remove(0);
-      String refSentence = currentExercise.getRefSentence().trim();
+      final String refSentence = getRefSentence();
 
       async.onSuccess(new StimulusAnswerPair(currentExercise.getID(), getObfuscated(rawStim,refSentence), refSentence));
     }
   }
 
+  private String getRefSentence() {
+    return propertyHandler.doTabooEnglish() ? currentExercise.getEnglishSentence().trim() : currentExercise.getRefSentence().trim();
+  }
+
   private String getObfuscated(String exampleToSend, String refSentence) {
     StringBuilder builder = new StringBuilder();
     for (int i = 0; i < refSentence.length(); i++) builder.append('_');
-    if (!exampleToSend.contains(refSentence)) {
+/*    if (!exampleToSend.contains(refSentence)) {
       System.err.println("huh? '" + exampleToSend + "' doesn't contain '" + refSentence + "'");
-    }
+    }*/
     return exampleToSend.replaceAll(refSentence, builder.toString());
   }
 
