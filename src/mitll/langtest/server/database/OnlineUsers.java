@@ -25,7 +25,7 @@ public class OnlineUsers {
 
   private final UserDAO userDAO;
   private Collection<User> online = new HashSet<User>();
-  private Collection<User> active = new HashSet<User>();
+  //private Collection<User> active = new HashSet<User>();
   private Collection<Pair> candidates = new ArrayList<Pair>();
 
   // TODO : write to database
@@ -39,11 +39,15 @@ public class OnlineUsers {
 
   public OnlineUsers(UserDAO userDAO) { this.userDAO = userDAO; }
 
+  /**
+   * @see DatabaseImpl#userOnline(long, boolean)
+   * @param userid
+   */
   public synchronized void addOnline(long userid) {
     User userWhere = getUser(userid);
     if (userWhere != null) online.add(userWhere);
 
-    logger.info("\n---> addOnline online now " + getOnline());
+    logger.info("---> addOnline online now " + getOnline());
   }
 
   private User getUser(long userid) {
@@ -54,33 +58,85 @@ public class OnlineUsers {
     User userWhere = getUser(userid);
     if (userWhere != null) online.remove(userWhere);
 
-    logger.info("removeOnline online now " + getOnline());
+    logger.info("---> removeOnline : removed " + userid +
+      " online now " + getOnline());
   }
 
   private Collection<User> getOnline() { return online; }
 
-/*  public synchronized void addActive(User user) {
-    if (!online.contains(user)) logger.error("huh" + user + " is not online.");
-    active.add(user);
+  public boolean isPartnerOnline(long giverOrReceiver, boolean isGiver) {
+    //  logger.debug("isPartnerOnline : checking for partner of " + giverOrReceiver);
+
+    User testUser = getUser(giverOrReceiver);
+    if (testUser == null) {
+      logger.error("isPartnerOnline : giver " + giverOrReceiver + " is unknown...?");
+
+      checkReceiverForGiver(giverOrReceiver);
+      return false; // huh?
+    }
+
+    // case 1 : I'm the giverOrReceiver
+    if (isGiver) {
+      // User giverUser = getUser(giverOrReceiver);
+      User receiver = giverToReceiver.get(testUser);
+      if (receiver == null) {
+        // giverOrReceiver is not a giver
+        logger.error("isPartnerOnline : user " + giverOrReceiver + " is not the giver (???)");
+
+        return false;
+      } else if (online.contains(receiver)) {
+   //     logger.debug("isPartnerOnline : for giver " + giverOrReceiver + ", receiver  " + receiver + " is online.");
+      } else {
+        logger.debug("isPartnerOnline : for giver " + giverOrReceiver + ", receiver  " + receiver + " is not online...");
+        checkReceiverForGiver(giverOrReceiver);
+
+        return false;
+      }
+    } else {
+      // case 2 : I'm the receiver
+      User giverForReceiver = getGiverForReceiver(giverOrReceiver);
+      if (giverForReceiver == null) {
+        logger.error("isPartnerOnline : user " + giverOrReceiver + " is not the receiver (???)");
+        return false;
+      } else if (online.contains(giverForReceiver)) {
+  //      logger.debug("isPartnerOnline : for receiver " + giverOrReceiver + ", giver  " + giverForReceiver + " is online.");
+      } else {
+        logger.debug("isPartnerOnline : for receiver " + giverOrReceiver + " giver " + giverForReceiver + " is not online...");
+        checkReceiverForGiver(giverOrReceiver);
+
+        return false;
+      }
+    }
+    return true;
   }
 
-  public synchronized void removeActive(User user) {
-    boolean remove = active.remove(user);
-    if (!remove) logger.error("huh" + user + " was not active.");
-  }*/
+  private User getGiverForReceiver(long receiver) {
+    // case 2 : I'm the receiver
+    for (Map.Entry<User, User> pair : giverToReceiver.entrySet()) {
+      if (pair.getValue().id == receiver) {
+        return pair.getKey();
+      }
+    }
+    return null;
+  }
 
   /**
    * The given user asks whether they're in a pairing.
    * We check the current map of giver->receiver to see if the user is included.
    * If they are, we return which side of the relationship they're on.
    *
+   * So the state machine : online->active (when two online have been paired but haven't accepted their roles)->paired
    * @param userid
    * @return
    */
   public synchronized TabooState anyAvailable(long userid) {
-    int diff = online.size() - active.size();
+    int diff = online.size() - candidates.size() * 2 - giverToReceiver.size() * 2;
     //logger.info("online " + online.size() + " active " + active.size() + " available = " + diff);
     boolean avail = diff > 1;
+    if (avail) {
+      logger.info("anyAvailable: online " + online.size() + " candidate pairs " + candidates.size() * 2 + " registered pairs " +
+        giverToReceiver.size() * 2 + " available = " + diff);
+    }
 
     boolean giver = false;
     boolean receiver = false;
@@ -88,32 +144,36 @@ public class OnlineUsers {
     for (User u : giverToReceiver.values()) if (u.id == userid) receiver = true;
 
     if (giver && receiver) {  // sanity check
-      logger.error("\n\n---> huh? how can " + userid + " be both giver and receiver?");
+      logger.error("\n\n---> huh? how can " + userid + " be both giver and receiver?\n\n");
     }
     boolean joined = giver || receiver;
 
     if (joined) {
-     logger.info("yea! just joined " + userid + " giver " + giver + " receiver " + receiver);
+      logger.info("yea! just joined " + userid + " giver " + giver + " receiver " + receiver);
     } else if (avail) { // take us out of the pool
-      User first = null, second = null;
-      for (User u : online) {
-        if (u.id == userid) {
-          first = u;
-        } else {
-          second = u;
-        }
-        if (first != null && second != null) {
-          candidates.add(new Pair(first, second));
-          active.add(first);
-          active.add(second);
-          break;
-        }
-      }
+      addCandidatePair(userid);
     }
 
     TabooState tabooState = new TabooState(avail, joined, giver);
    // logger.debug("returning " + tabooState);
     return tabooState;
+  }
+
+  private void addCandidatePair(long userid) {
+    User first = null, second = null;
+    for (User u : online) {
+      if (u.id == userid) {
+        first = u;
+      } else {
+        second = u;
+      }
+      if (first != null && second != null) {
+        candidates.add(new Pair(first, second));
+ /*       active.add(first);
+        active.add(second);*/
+        break;
+      }
+    }
   }
 
   public synchronized void registerPair(long userid, boolean isGiver) {
@@ -162,10 +222,25 @@ public class OnlineUsers {
    // addActive(receiver);
   }
 
-  public synchronized void sendStimulus(long userid, String exerciseID, String stimulus, String answer) {
+  /**
+   * 0 == OK
+   * 1 == inactive receiver
+   * 2 == paused...
+   *
+   * @param userid
+   * @param exerciseID
+   * @param stimulus
+   * @param answer
+   * @return
+   */
+  public synchronized int sendStimulus(long userid, String exerciseID, String stimulus, String answer) {
     User receiver = getReceiverForGiver(userid);
+    if (receiver == null) {
+      return 1;
+    }
     logger.debug("sending " + stimulus + " to " + receiver + " from giver " + userid);
     receiverToStimulus.put(receiver, new StimulusAnswerPair(exerciseID, stimulus, answer));
+    return 0;
   }
 
   /**
@@ -226,15 +301,36 @@ public class OnlineUsers {
     }
   }
 
-  private User getReceiverForGiver(long userid) {
-    return giverToReceiver.get(getUser(userid));
+  private User getReceiverForGiver(long giver) {
+    User giverUser = getUser(giver);
+    if (giverUser == null) {
+      logger.warn("huh? getReceiverForGiver " + giver + " is unknown.");
+      return null;
+    }
+    return giverToReceiver.get(giverUser);
   }
 
-  /*  public void removePair(User giver, User receiver) {
-    giverToReceiver.remove(giver);
-    removeActive(giver);
-    removeActive(receiver);
-  }*/
+  private void checkReceiverForGiver(long giverOrReceiver) {
+    // case 1: user is a giver
+    User giverUser = getUser(giverOrReceiver);
+    if (!online.contains(giverUser)) {
+      logger.debug("checkReceiverForGiver : Giver " + giverOrReceiver + " is not online...");
+      if (giverToReceiver.containsKey(giverUser)) giverToReceiver.remove(giverUser);
+    } else {
+      User receiver = giverToReceiver.get(giverUser);
+      if (!online.contains(receiver)) {
+        logger.debug("checkReceiverForGiver : receiver " + receiver + " is not online...");
+        giverToReceiver.remove(giverUser);
+      }
+    }
+    // case 2: user is a receiver
+
+    User giverForReceiver = getGiverForReceiver(giverOrReceiver);
+    if (giverForReceiver != null &&!online.contains(giverForReceiver)) {
+      logger.debug("checkReceiverForGiver : for receiver " + giverOrReceiver + " giver " + giverForReceiver + " is not online...");
+      giverToReceiver.remove(giverForReceiver);
+    }
+  }
 
   private static class Pair {
     User first = null, second = null;
