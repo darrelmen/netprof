@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.ResultManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanel;
@@ -139,7 +140,7 @@ public class GradingExercisePanel extends ExercisePanel {
                 String prompt = getPrompt(isSpoken, isForeign, outer);
                 System.out.println("\tgetResultsForExercise add answer group for results (index = " + index+ ") size = " + results.size());
 
-                vp.add(addAnswerGroup(resultsAndGrades.grades, results, bigPage, prompt, outer, service, n, index));
+                vp.add(addAnswerGroup(resultsAndGrades.grades, results, bigPage, prompt, outer, service, controller.getProps(), n, index));
               }
               else {
                 System.out.println("\tspoken : " +isSpoken + " isFLQ " + isForeign);
@@ -170,13 +171,14 @@ public class GradingExercisePanel extends ExercisePanel {
    * @param prompt
    * @param outer
    * @param service
+   * @param propertyHandler
    * @param n
    * @param index
    * @return
    */
   private Widget addAnswerGroup(Collection<Grade> grades,
                                 List<Result> results, boolean bigPage, String prompt,
-                                GradingExercisePanel outer, LangTestDatabaseAsync service, int n, int index) {
+                                GradingExercisePanel outer, LangTestDatabaseAsync service, PropertyHandler propertyHandler, int n, int index) {
     VerticalPanel vp = new VerticalPanel();
 
     int oneQuestionPageSize = bigPage ? BIG_ONE_QUESTION_PAGE_SIZE : ONE_QUESTION_PAGE_SIZE;
@@ -186,7 +188,7 @@ public class GradingExercisePanel extends ExercisePanel {
     spacer.setSize("50px", "5px");
     vp.add(spacer);
 
-    vp.add(showResults(results, grades, service, outer, n > 1, index,
+    vp.add(showResults(results, grades, service, propertyHandler, outer, n > 1, index,
         oneQuestionPageSize, twoQuestionPageSize, controller.getUser()));
     return vp;
   }
@@ -219,18 +221,18 @@ public class GradingExercisePanel extends ExercisePanel {
    * @param results
    * @param grades
    * @param service
-   * @param outer
+   * @param propertyHandler
+   *@param outer
    * @param moreThanOneQuestion
    * @param index
    * @param pageSize
    * @param twoQPageSize
-   * @param grader
-   * @return
+   * @param grader       @return
    */
   private Widget showResults(Collection<Result> results, Collection<Grade> grades,
-                             LangTestDatabaseAsync service, GradingExercisePanel outer,
+                             LangTestDatabaseAsync service, PropertyHandler propertyHandler, GradingExercisePanel outer,
                              boolean moreThanOneQuestion, int index, int pageSize, int twoQPageSize, int grader) {
-    ResultManager rm = new GradingResultManager(service, userFeedback, false);
+    ResultManager rm = new GradingResultManager(service, userFeedback, false, propertyHandler);
     rm.setPageSize(pageSize);
     if (moreThanOneQuestion) {
       List<Result> filtered = new ArrayList<Result>();
