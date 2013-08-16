@@ -204,7 +204,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
      */
     private void checkForStimulus(final LangTestDatabaseAsync service, final ExerciseController controller, final ReceiverPanel outer) {
       if (singlePlayerRobot != null) {
-        System.out.println("we have a single player robot...");
+       // System.out.println("we have a single player robot...");
         singlePlayerRobot.checkForStimulus(controller.getUser(), new StimulusAnswerPairAsyncCallback(outer, service, controller));
       } else {
         service.checkForStimulus(controller.getUser(), new StimulusAnswerPairAsyncCallback(outer, service, controller));
