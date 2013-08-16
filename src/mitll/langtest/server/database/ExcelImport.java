@@ -43,9 +43,10 @@ import java.util.Set;
  */
 public class ExcelImport implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(ExcelImport.class);
-  private static final int MIN_TABOO_ITEMS = 3;
+  private static final int MIN_TABOO_ITEMS = 2;
 
   private final boolean isFlashcard;
+  private boolean tabooEnglish;
 
   private List<Exercise> exercises = null;
   private Map<String,Exercise> idToExercise = new HashMap<String,Exercise>();
@@ -88,6 +89,7 @@ public class ExcelImport implements ExerciseDAO {
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.language = serverProps.getLanguage();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
+    this.tabooEnglish = serverProps.doTabooEnglish();
     String exampleSentenceFile1 = serverProps.getExampleSentenceFile();
     if (exampleSentenceFile1 != null && exampleSentenceFile1.length() > 0) {
       this.exampleSentenceFile = new File(relativeConfigDir, exampleSentenceFile1);
@@ -377,7 +379,8 @@ public class ExcelImport implements ExerciseDAO {
                 boolean valid = true;
                 boolean enoughItems = true;
                 if (!wordToSamples.isEmpty()) {
-                  List<String> samples = wordToSamples.get(imported.getRefSentence().trim());
+                  String wordToGuess = tabooEnglish ? imported.getEnglishSentence().trim() : imported.getRefSentence().trim();
+                  List<String> samples = wordToSamples.get(wordToGuess);
                   valid = (samples != null);
                   if (valid) {
                     enoughItems = samples.size() > MIN_TABOO_ITEMS;
@@ -704,7 +707,7 @@ public class ExcelImport implements ExerciseDAO {
     populateExampleSentences(rawExercises, examples);
   }*/
 
-  private void populateExampleSentences(List<Exercise> rawExercises, File examples) {
+/*  private void populateExampleSentences(List<Exercise> rawExercises, File examples) {
     Map<String, List<Exercise>> refToEx = new HashMap<String, List<Exercise>>();
     for (Exercise e : rawExercises) {
       List<Exercise> exForRef = refToEx.get(e.getRefSentence().trim());
@@ -717,8 +720,8 @@ public class ExcelImport implements ExerciseDAO {
 
   private void readSampleSentenceFile(File examples, Map<String, List<Exercise>> refToEx) {
     try {
-   /*   String name = "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\examples.txt";
-      File fname = new File(name);*/
+   *//*   String name = "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\examples.txt";
+      File fname = new File(name);*//*
       BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(examples), FileExerciseDAO.ENCODING));
       String line2;
       int c = 0;
@@ -739,7 +742,7 @@ public class ExcelImport implements ExerciseDAO {
     } catch (IOException e) {
       logger.error("Got " + e, e);
     }
-  }
+  }*/
 
   private Map<String, List<String>> readSampleSentenceFile2(File examples) {
     Map<String, List<String>> wordToSamples = new HashMap<String, List<String>>();
@@ -751,13 +754,18 @@ public class ExcelImport implements ExerciseDAO {
       int c = 0;
       while ((line2 = reader.readLine()) != null) {
         c++;
-        String[] split = line2.split("\\t");
-        String word = split[0].trim();
+        if (line2.trim().length() > 0) {
+          String[] split = line2.split("\\t");
+          if (split.length == 2) {
+            String word = split[0].trim();
 
-        List<String> samples = wordToSamples.get(word);
-        if (samples == null) wordToSamples.put(word, samples = new ArrayList<String>());
-        String sentence = split[1];
-        samples.add(sentence);
+            List<String> samples = wordToSamples.get(word);
+            if (samples == null) wordToSamples.put(word, samples = new ArrayList<String>());
+            String sentence = split[1];
+            samples.add(sentence);
+          }
+          else logger.warn("bad line " + line2);
+        }
       }
       logger.debug("populateExampleSentences : read " + c + " examples");
 
