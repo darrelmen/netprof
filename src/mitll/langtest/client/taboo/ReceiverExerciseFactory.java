@@ -122,6 +122,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       send.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
+          controller.pingAliveUser();
           sendAnswer(service, controller, outer, soundFeedback);
         }
 
