@@ -433,6 +433,7 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#getLogout()
    */
   public void clearUser() {
+    userInactive();
     langTest.rememberAudioType(Result.AUDIO_TYPE_UNSET);
     if (useCookie) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
