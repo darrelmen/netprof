@@ -28,11 +28,13 @@ public class Taboo {
   private final UserManager userManager;
   private final LangTestDatabaseAsync service;
   private LangTest langTest;
+  boolean startedSinglePlayer;
 
   //private static final int FIRST_POLL_PERIOD_MILLIS = 1000 * 3; // ten minutes
   private static final int INACTIVE_PERIOD_MILLIS = 1000 * 2; // ten minutes
+  private static final int INACTIVE_PERIOD_MILLIS2 = 1000 * 5; // ten minutes
 
-  private Timer userTimer;
+  private Timer userTimer, onlineTimer;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
@@ -50,17 +52,28 @@ public class Taboo {
     checkForPartner(fuserid);
   }
 
-  private void pollForPartner() {
-    userTimer = new Timer() {
-      @Override
-      public void run() {
-        checkForPartner(userManager.getUser());
-      }
-    };
-    userTimer.schedule(INACTIVE_PERIOD_MILLIS);
-  }
+  private void showUserState(String title, String message, final long fuserid) {
+    final Modal modal = new Modal(true);
+    modal.setTitle(title);
+    Heading w = new Heading(4);
+    w.setText(message);
+    modal.add(w);
 
-  boolean startedSinglePlayer;
+    final Button begin = new Button("OK");
+    begin.setType(ButtonType.PRIMARY);
+    begin.setEnabled(true);
+
+    begin.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        modal.hide();
+        checkForPartner(fuserid);
+      }
+    });
+    modal.add(begin);
+
+    modal.show();
+  }
 
   /**
    * TODO : Need some way to quit too - I don't want to play anymore.
@@ -68,6 +81,10 @@ public class Taboo {
    */
   private void checkForPartner(final long fuserid) {
     cancelTimer();
+    if (fuserid == -1) {
+      System.out.println("checkForPartner : me : " + fuserid + " has signed out.");
+      return;
+    }
     service.anyUsersAvailable(fuserid, new AsyncCallback<TabooState>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -79,34 +96,80 @@ public class Taboo {
         System.out.println("checkForPartner.onSuccess : me : " + fuserid + " checking, anyUsersAvailable : " + result);
         if (result.isJoinedPair()) {
           if (result.isGiver()) {
-            afterRoleDeterminedConfirmation(fuserid, "You are the giver", "Now choose the next sentence your partner will see to guess the vocabulary word.", true);
+            afterRoleDeterminedConfirmation(fuserid,
+              "You are the giver",
+              "Now choose the next sentence your partner will see to guess the vocabulary word.",
+              "Sign out to stop playing.",
+              true);
           } else {
-            afterRoleDeterminedConfirmation(fuserid, "You are the receiver", "Now choose the word that best fills in the blank in the sentence.", false);
+            afterRoleDeterminedConfirmation(fuserid,
+              "You are the receiver",
+              "Now choose the word that best fills in the blank in the sentence.",
+              "Sign out to stop playing.",
+              false);
           }
+          pollForPartnerOnline(fuserid, result.isGiver());
         } else if (result.isAnyAvailable()) {
           chooseRoleModal(fuserid);
         } else {
-
           if (!startedSinglePlayer) {
             System.out.println("me : " + fuserid + " doing single player");
 
             langTest.setTabooFactory(fuserid, false, true);
             startedSinglePlayer = true;
           }
-          // TODO fill in single player mode
           pollForPartner();
         }
       }
     });
   }
 
+  private void pollForPartnerOnline(final long fuserid, final boolean isGiver) {
+    onlineTimer = new Timer() {
+      @Override
+      public void run() {
+/*        System.out.println("pollForPartnerOnline : checking if " +
+          (isGiver ? " receiver partner " : " giver partner ") +
+          " of me, " + fuserid + ", is online...");*/
+        service.isPartnerOnline(fuserid, isGiver, new AsyncCallback<Boolean>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            Window.alert("Couldn't contact server.");
+          }
 
-  private void afterRoleDeterminedConfirmation(final long userID, String title, String message, final boolean isGiver) {
+          @Override
+          public void onSuccess(Boolean result) {
+            if (result) {
+              pollForPartnerOnline(fuserid, isGiver);
+            } else {
+              onlineTimer.cancel();
+              showUserState("Partner Signed Out", "Your partner signed out, will check for another...", fuserid);
+            }
+          }
+        });
+
+      }
+    };
+    onlineTimer.schedule(INACTIVE_PERIOD_MILLIS2);
+  }
+
+  private void pollForPartner() {
+    userTimer = new Timer() {
+      @Override
+      public void run() {
+        checkForPartner(userManager.getUser());
+      }
+    };
+    userTimer.schedule(INACTIVE_PERIOD_MILLIS);
+  }
+
+  private void afterRoleDeterminedConfirmation(final long userID, String title, String message, String message2, final boolean isGiver) {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
-    Heading w = new Heading(4);
-    w.setText(message);
-    modal.add(w);
+    modal.add(new Heading(4, message));
+    if (message2 != null) {
+      modal.add(new Heading(4, message2));
+    }
 
     final Button begin = new Button("Begin Game");
     begin.setType(ButtonType.PRIMARY);
@@ -117,6 +180,7 @@ public class Taboo {
       public void onClick(ClickEvent event) {
         modal.hide();
         langTest.setTabooFactory(userID, isGiver, false);
+        startedSinglePlayer = false;
       }
     });
     modal.add(begin);
