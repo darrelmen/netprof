@@ -81,7 +81,8 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       add(w4);
 
       Row w = new Row();
-      final String refSentence = exercise.getRefSentence().trim();
+
+      final String refSentence = controller.getProps().doTabooEnglish() ? exercise.getEnglishSentence().trim() : exercise.getRefSentence().trim();
       w.add(new Heading(2, refSentence));
       add(w);
 
@@ -248,9 +249,9 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     private String getObfuscated(String exampleToSend, String refSentence) {
       StringBuilder builder = new StringBuilder();
       for (int i = 0; i < refSentence.length(); i++) builder.append('_');
-      if (!exampleToSend.contains(refSentence)) {
+    /*  if (!exampleToSend.contains(refSentence)) {
         System.err.println("huh? '" + exampleToSend + "' doesn't contain '" + refSentence + "'");
-      }
+      }*/
       return exampleToSend.replaceAll(refSentence, builder.toString());
     }
 
