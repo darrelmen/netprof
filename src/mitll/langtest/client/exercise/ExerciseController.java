@@ -1,6 +1,7 @@
 package mitll.langtest.client.exercise;
 
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
@@ -63,4 +64,6 @@ public interface ExerciseController {
   int getFlashcardPreviewFrameHeight();
 
   void addAdHocExercise(String label);
+
+  PropertyHandler getProps();
 }
