@@ -46,6 +46,7 @@ public class ResultManager extends PagerTable {
   protected static final String UNGRADED = "Ungraded";
   protected static final String SKIP = "Skip";
   public static final int GRADING_WIDTH = 700;
+  private final boolean tabooMode;
   protected int pageSize = PAGE_SIZE;
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
@@ -58,10 +59,11 @@ public class ResultManager extends PagerTable {
    * @param feedback
    * @param nameForAnswer
    */
-  public ResultManager(LangTestDatabaseAsync s, UserFeedback feedback, String nameForAnswer) {
+  public ResultManager(LangTestDatabaseAsync s, UserFeedback feedback, String nameForAnswer, PropertyHandler propertyHandler) {
     this.service = s;
     this.feedback = feedback;
     this.nameForAnswer = nameForAnswer;
+    this.tabooMode = propertyHandler.isTrackUsers();
   }
 
   public void setPageSize(int s) { this.pageSize = s; }
@@ -375,34 +377,36 @@ public class ResultManager extends PagerTable {
   protected void addResultColumn(Collection<Grade> grades, int grader, int numGrades, CellTable<Result> table) {
     addNoWrapColumn(table);
 
-    TextColumn<Result> audioType = new TextColumn<Result>() {
-      @Override
-      public String getValue(Result answer) {
-        return answer.isFastAndSlowAudio() ? "Fast and Slow" : "Regular";
-      }
-    };
-    audioType.setSortable(true);
-    table.addColumn(audioType, "Audio Type");
+    if (!tabooMode) {
+      TextColumn<Result> audioType = new TextColumn<Result>() {
+        @Override
+        public String getValue(Result answer) {
+          return answer.isFastAndSlowAudio() ? "Fast and Slow" : "Regular";
+        }
+      };
+      audioType.setSortable(true);
+      table.addColumn(audioType, "Audio Type");
 
-    TextColumn<Result> dur = new TextColumn<Result>() {
-      @Override
-      public String getValue(Result answer) {
-        float secs = ((float) answer.durationInMillis) / 1000f;
-        //  System.out.println("Value " +answer.durationInMillis + " or " +secs);
-        return "" + roundToHundredth(secs);
-      }
-    };
-    dur.setSortable(true);
-    table.addColumn(dur, "Duration (Sec)");
+      TextColumn<Result> dur = new TextColumn<Result>() {
+        @Override
+        public String getValue(Result answer) {
+          float secs = ((float) answer.durationInMillis) / 1000f;
+          //  System.out.println("Value " +answer.durationInMillis + " or " +secs);
+          return "" + roundToHundredth(secs);
+        }
+      };
+      dur.setSortable(true);
+      table.addColumn(dur, "Duration (Sec)");
 
-    TextColumn<Result> valid = new TextColumn<Result>() {
-      @Override
-      public String getValue(Result answer) {
-        return ""+answer.valid;
-      }
-    };
-    valid.setSortable(true);
-    table.addColumn(valid, "Valid");
+      TextColumn<Result> valid = new TextColumn<Result>() {
+        @Override
+        public String getValue(Result answer) {
+          return "" + answer.valid;
+        }
+      };
+      valid.setSortable(true);
+      table.addColumn(valid, "Valid");
+    }
 
     TextColumn<Result> gradeInfo = new TextColumn<Result>() {
       @Override
@@ -415,9 +419,7 @@ public class ResultManager extends PagerTable {
         }
       }
     };
-    valid.setSortable(true);
     table.addColumn(gradeInfo, "Grades");
-
 
     TextColumn<Result> correct = new TextColumn<Result>() {
       @Override
@@ -428,14 +430,19 @@ public class ResultManager extends PagerTable {
     correct.setSortable(true);
     table.addColumn(correct, "Correct");
 
-    TextColumn<Result> pronScore = new TextColumn<Result>() {
-      @Override
-      public String getValue(Result answer) {
-        return ""+roundToHundredth(answer.getPronScore());
-      }
-    };
-    pronScore.setSortable(true);
-    table.addColumn(pronScore, "PronScore");
+    if (!tabooMode) {
+      TextColumn<Result> pronScore = new TextColumn<Result>() {
+        @Override
+        public String getValue(Result answer) {
+          return "" + roundToHundredth(answer.getPronScore());
+        }
+      };
+      pronScore.setSortable(true);
+      table.addColumn(pronScore, "PronScore");
+    }
+    if (tabooMode) {
+      addNoWrapColumn2(table);
+    }
   }
 
   private void addNoWrapColumn(CellTable<Result> table) {
@@ -455,6 +462,22 @@ public class ResultManager extends PagerTable {
     table.addColumn(dateCol, "Time");
   }
 
+  private void addNoWrapColumn2(CellTable<Result> table) {
+    SafeHtmlCell cell = new SafeHtmlCell();
+    Column<Result,SafeHtml> dateCol = new Column<Result, SafeHtml>(cell) {
+      @Override
+      public SafeHtml getValue(Result answer) {
+        SafeHtmlBuilder sb = new SafeHtmlBuilder();
+        sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
+         answer.getStimulus()+
+          "</span>" );
+
+        sb.appendHtmlConstant("</div>");
+        return sb.toSafeHtml();
+      }
+    };
+    table.addColumn(dateCol, "Time");
+  }
 
   private float roundToHundredth(double totalHours) {
     return ((float)((Math.round(totalHours*100))))/100f;
