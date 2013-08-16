@@ -440,19 +440,17 @@ public class DatabaseImpl implements Database {
     return idToCount;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#userOnline(long, boolean)
+   * @param userid
+   * @param isOnline
+   */
   public void userOnline(long userid, boolean isOnline) {
-    if (isOnline) userDAO.getOnlineUsers().addOnline(userid); else userDAO.getOnlineUsers().removeOnline(userid);
+    if (isOnline) getOnlineUsers().addOnline(userid); else getOnlineUsers().removeOnline(userid);
   }
 
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#sendStimulus
-   * @param userid
-   * @param exerciseID
-   * @param stimulus
-   * @param answer
-   */
-  public void sendStimulus(long userid, String exerciseID, String stimulus, String answer) {
-    userDAO.getOnlineUsers().sendStimulus(userid, exerciseID, stimulus, answer);
+  public OnlineUsers getOnlineUsers() {
+    return userDAO.getOnlineUsers();
   }
 
   /**
@@ -460,10 +458,10 @@ public class DatabaseImpl implements Database {
    * @param userid
    * @return
    */
-  public TabooState anyAvailable(long userid) {  return userDAO.getOnlineUsers().anyAvailable(userid); }
-  public void registerPair(long userid, boolean isGiver) {
-    userDAO.getOnlineUsers().registerPair(userid, isGiver);
-  }
+  public TabooState anyAvailable(long userid) {  return getOnlineUsers().anyAvailable(userid); }
+/*  public void registerPair(long userid, boolean isGiver) {
+    getOnlineUsers().registerPair(userid, isGiver);
+  }*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#checkForStimulus(long)
@@ -471,11 +469,11 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public StimulusAnswerPair checkForStimulus(long userid) {
-   return userDAO.getOnlineUsers().checkForStimulus(userid);
+   return getOnlineUsers().checkForStimulus(userid);
   }
 
   public void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean correct) {
-    userDAO.getOnlineUsers().registerAnswer(userid, stimulus, answer, correct);
+    getOnlineUsers().registerAnswer(userid, stimulus, answer, correct);
     addAnswer((int) userid, "plan",exerciseID,stimulus,answer,correct);
   }
 
@@ -486,7 +484,7 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public int checkCorrect(long giverUserID, String stimulus) {
-    return userDAO.getOnlineUsers().checkCorrect(giverUserID,stimulus);
+    return getOnlineUsers().checkCorrect(giverUserID, stimulus);
   }
 
   private static class UserStateWrapper {
