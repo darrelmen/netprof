@@ -22,6 +22,7 @@ public interface ExerciseController {
   boolean onFirst(Exercise current);
 
   int getUser();
+  void pingAliveUser();
 
   void startRecording();
   void stopRecording();
