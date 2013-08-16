@@ -50,6 +50,7 @@ public class PropertyHandler {
   private static final String CONTINUE_PROMPT = "promptBeforeNextItem";
   private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
   private static final String TRACK_ONLINE_USERS = "trackUsers";
+  private static final String TABOO_ENGLISH = "tabooEnglish";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -120,7 +121,7 @@ public class PropertyHandler {
   private boolean addRecordKeyBinding = true;
   private LOGIN_TYPE loginType = LOGIN_TYPE.UNDEFINED;
   private int flashcardPreviewHeight = DEFAULT_FLASHCARD_PREVIEW_HEIGHT;
-  private boolean trackUsers;
+  private boolean trackUsers, tabooEnglish;
 
   public PropertyHandler(Map<String,String> props) {
     this.props = props;
@@ -170,6 +171,7 @@ public class PropertyHandler {
       else if (key.equals(RIGHT_ALIGN_CONTENT)) rightAlignContent = getBoolean(value);
       else if (key.equals(ADD_RECORD_KEY_BINDING)) addRecordKeyBinding = getBoolean(value);
       else if (key.equals(TRACK_ONLINE_USERS)) trackUsers = getBoolean(value);
+      else if (key.equals(TABOO_ENGLISH)) tabooEnglish = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
@@ -446,5 +448,8 @@ public class PropertyHandler {
 
   public boolean isTrackUsers() {
     return trackUsers;
+  }
+  public boolean doTabooEnglish() {
+    return tabooEnglish;
   }
 }
