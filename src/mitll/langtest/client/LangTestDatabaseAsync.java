@@ -139,11 +139,13 @@ public interface LangTestDatabaseAsync {
 
   void registerPair(long userid, boolean isGiver, AsyncCallback<Void> async);
 
-  void sendStimulus(long userid, String exerciseID, String stimulus, String answer, AsyncCallback<Void> async);
+  void sendStimulus(long userid, String exerciseID, String stimulus, String answer, AsyncCallback<Integer> async);
 
   void checkForStimulus(long userid, AsyncCallback<StimulusAnswerPair> async);
 
   void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean isCorrect, AsyncCallback<Void> async);
 
   void checkCorrect(long giverUserID, String stimulus, AsyncCallback<Integer> async);
+
+  void isPartnerOnline(long userid, boolean isGiver, AsyncCallback<Boolean> async);
 }
