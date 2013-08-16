@@ -694,7 +694,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       changed = (exerciseList.getFactory() instanceof ReceiverExerciseFactory);
 
       if (singlePlayer && singlePlayerRobot == null) {
-        singlePlayerRobot = new SinglePlayerRobot(service);
+        singlePlayerRobot = new SinglePlayerRobot(service, props);
       }
 
       exerciseList.setFactory(new ReceiverExerciseFactory(service, this, this, singlePlayer ? singlePlayerRobot : null), userManager, 1);
