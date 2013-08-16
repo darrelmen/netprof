@@ -66,8 +66,8 @@ public class TabooExerciseList extends FlexSectionExerciseList {
     flush();
   }
 
-  @Override
+/*  @Override
   protected void addColumnsToTable(boolean consumeClicks) {
-    super.addColumnsToTable(false);
-  }
+    super.addColumnsToTable(isGiver);
+  }*/
 }
