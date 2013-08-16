@@ -951,7 +951,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public TabooState anyUsersAvailable(long userid) {  return db.anyAvailable(userid);  }
 
   @Override
-  public void registerPair(long userid, boolean isGiver) {  db.registerPair(userid, isGiver);  }
+  public void registerPair(long userid, boolean isGiver) {  db.getOnlineUsers().registerPair(userid, isGiver);  }
 
   /**
    * @see mitll.langtest.client.taboo.GiverExerciseFactory#getExercisePanel(mitll.langtest.shared.Exercise)
@@ -961,7 +961,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param answer
    */
   @Override
-  public void sendStimulus(long userid, String exerciseID, String stimulus, String answer) {  db.sendStimulus(userid, exerciseID, stimulus, answer); }
+  public int sendStimulus(long userid, String exerciseID, String stimulus, String answer) {
+   // db.sendStimulus(userid, exerciseID, stimulus, answer);
+    return db.getOnlineUsers().sendStimulus(userid, exerciseID, stimulus, answer);
+  }
+
+  @Override
+  public boolean isPartnerOnline(long userid, boolean isGiver) { return db.getOnlineUsers().isPartnerOnline(userid,isGiver); }
 
   /**
    * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#checkForStimulus(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
