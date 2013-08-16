@@ -93,7 +93,7 @@ public class Taboo {
 
       @Override
       public void onSuccess(TabooState result) {
-        System.out.println("checkForPartner.onSuccess : me : " + fuserid + " checking, anyUsersAvailable : " + result);
+        //System.out.println("checkForPartner.onSuccess : me : " + fuserid + " checking, anyUsersAvailable : " + result);
         if (result.isJoinedPair()) {
           if (result.isGiver()) {
             afterRoleDeterminedConfirmation(fuserid,
