@@ -71,6 +71,7 @@ public class ServerProperties {
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
   private static final String SORT_EXERCISES = "sortExercises";
   private static final String EXAMPLE_SENTENCE_FILE = "exampleSentenceFile";
+  private static final String TABOO_ENGLISH = "tabooEnglish";
 
   private Properties props = new Properties();
 
@@ -143,8 +144,12 @@ public class ServerProperties {
     return getDefaultFalse(DOIMAGES);
   }
 
-  public boolean doShowLeaderboard() {
+/*  public boolean doShowLeaderboard() {
     return getDefaultFalse(SHOW_LEADERBOARD);
+  }*/
+
+  public boolean doTabooEnglish() {
+    return getDefaultFalse(TABOO_ENGLISH);
   }
 
   public boolean trackUsers() {
