@@ -199,7 +199,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         }
 
         public void onSuccess() {
-          resultManager = new ResultManager(service, outer, props.getNameForAnswer());
+          resultManager = new ResultManager(service, outer, props.getNameForAnswer(), props);
         }
       });
 
