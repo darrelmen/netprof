@@ -10,6 +10,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.ResultManager;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CountAndGradeID;
@@ -47,9 +48,10 @@ public class GradingResultManager extends ResultManager {
    * @param s
    * @param feedback
    * @param englishOnlyMode
+   * @param propertyHandler
    */
-  public GradingResultManager(LangTestDatabaseAsync s, UserFeedback feedback, boolean englishOnlyMode) {
-    super(s,feedback, "Answer");
+  public GradingResultManager(LangTestDatabaseAsync s, UserFeedback feedback, boolean englishOnlyMode, PropertyHandler propertyHandler) {
+    super(s,feedback, "Answer",propertyHandler);
     this.englishOnlyMode = englishOnlyMode;
   }
 
