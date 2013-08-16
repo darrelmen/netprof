@@ -57,12 +57,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     super(service, userFeedback, controller);
   }
 
-  public Panel getExercisePanel(final Exercise e) {
-
-    System.out.println("GiverExerciseFactory.getExercisePanel : " + e.getID());
-
-    return new GiverPanel(e);
-  }
+  public Panel getExercisePanel(final Exercise e) { return new GiverPanel(e);  }
 
   private class GiverPanel extends FluidContainer {
     private List<String> sentItems = new ArrayList<String>();
@@ -116,7 +111,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
           if (stimulus != null) {
             send.setEnabled(false);
             pleaseWait.setVisible(true);
-
+            controller.pingAliveUser();
             sendStimulus(stimulus, refSentence, exercise, soundFeedback);
           } else {
             showPopup("Please select a sentence to send.");
@@ -182,25 +177,21 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
 
     private void sendStimulus(final String stimulus, final String refSentence, final Exercise exercise, final SoundFeedback soundFeedback) {
       final String toSendWithBlankedOutItem = getObfuscated(stimulus, refSentence);
-
-/*      System.out.println("stimulus    " + stimulus);
-      System.out.println("refSentence " + refSentence);
-      System.out.println("index " + stimulus.indexOf(refSentence));
-      System.out.println("toSendWithBlankedOutItem " + toSendWithBlankedOutItem);*/
-
-      //List<String> synonymSentences = exercise.getSynonymSentences();
-
       final int user = controller.getUser();
-      service.sendStimulus(user, exercise.getID(), toSendWithBlankedOutItem, refSentence, new AsyncCallback<Void>() {
+      service.sendStimulus(user, exercise.getID(), toSendWithBlankedOutItem, refSentence, new AsyncCallback<Integer>() {
         @Override
         public void onFailure(Throwable caught) {
           Window.alert("couldn't contact server.");
         }
 
         @Override
-        public void onSuccess(Void result) {
-          System.out.println("sendStimulus.onSuccess : Giver " + user + " Sent '" + toSendWithBlankedOutItem + "' and not '" + stimulus + "'");
-          checkForCorrect(user, toSendWithBlankedOutItem, exercise, refSentence, soundFeedback);
+        public void onSuccess(Integer result) {
+          if (result == 0) {
+            System.out.println("sendStimulus.onSuccess : Giver " + user + " Sent '" + toSendWithBlankedOutItem + "' and not '" + stimulus + "'");
+            checkForCorrect(user, toSendWithBlankedOutItem, exercise, refSentence, soundFeedback);
+          } else {
+            //showUserState("Partner Signed Out","Your partner signed out, will check for another if any available.");
+          }
         }
       });
     }
@@ -325,4 +316,26 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     }
   }
 
+/*  private void showUserState(String title, String message) {
+    final Modal modal = new Modal(true);
+    modal.setTitle(title);
+    Heading w = new Heading(4);
+    w.setText(message);
+    modal.add(w);
+
+    final Button begin = new Button("OK");
+    begin.setType(ButtonType.PRIMARY);
+    begin.setEnabled(true);
+
+    begin.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        modal.hide();
+       // langTest.setTabooFactory(userID, isGiver, false);
+      }
+    });
+    modal.add(begin);
+
+    modal.show();
+  }*/
 }
