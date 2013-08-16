@@ -982,6 +982,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   public int getUser() { return userManager.getUser(); }
+  public void pingAliveUser() { userManager.userAlive(); }
   public PropertyHandler getProps() { return props; }
   public boolean getEnglishOnly() { return props.isEnglishOnlyMode(); }
   public int getNumGradesToCollect() { return props.getNumGradesToCollect(); }
