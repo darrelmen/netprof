@@ -764,7 +764,7 @@ public class ExcelImport implements ExerciseDAO {
             String sentence = split[1];
             samples.add(sentence);
           }
-          else logger.warn("bad line " + line2);
+          else logger.warn("bad line " + line2 + " len " + split.length);
         }
       }
       logger.debug("populateExampleSentences : read " + c + " examples");
