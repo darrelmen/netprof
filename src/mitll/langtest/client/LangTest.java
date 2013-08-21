@@ -67,6 +67,7 @@ import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -672,7 +673,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private SinglePlayerRobot singlePlayerRobot;
 
   /**
-   * @see Taboo#chooseRoleModal(long)
+   * @see Taboo#askUserToChooseRole(long)
    * @see Taboo#checkForPartner(long)
    * @see
    * @param userID
@@ -1054,4 +1055,5 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean loadPreviousExercise(Exercise current) { return exerciseList.loadPreviousExercise(current);  }
   public boolean onFirst(Exercise current) { return exerciseList.onFirst(current); }
   public void addAdHocExercise(String label) { exerciseList.addAdHocExercise(label); }
+  public void setSelectionState(Map<String,Collection<String>> selectionState) { exerciseList.setSelectionState(selectionState);}
 }
