@@ -1,4 +1,4 @@
-package mitll.langtest.client.exercise;
+package mitll.langtest.client.grading;
 
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -7,6 +7,9 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.exercise.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
@@ -34,7 +37,7 @@ public class GradedExerciseList extends PagingExerciseList {
    * @param englishOnly
    */
   public GradedExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            boolean showInOrder, boolean englishOnly, ExerciseController  controller) {
+                            boolean showInOrder, boolean englishOnly, ExerciseController controller) {
     super(currentExerciseVPanel, service, feedback, false, showInOrder, controller);
     this.englishOnly = englishOnly;
   }
