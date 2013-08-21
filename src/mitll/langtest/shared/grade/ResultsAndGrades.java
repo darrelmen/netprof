@@ -1,6 +1,8 @@
-package mitll.langtest.shared;
+package mitll.langtest.shared.grade;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.Result;
+import mitll.langtest.shared.grade.Grade;
 
 import java.util.Collection;
 import java.util.List;
