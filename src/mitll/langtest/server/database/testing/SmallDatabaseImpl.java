@@ -1,5 +1,8 @@
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.testing;
 
+import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.UserDAO;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
