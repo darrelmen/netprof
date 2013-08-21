@@ -1,6 +1,7 @@
-package mitll.langtest.shared;
+package mitll.langtest.shared.flashcard;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.Exercise;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class FlashcardResponse implements IsSerializable {
   public boolean finished = false;
   private List<Integer> correctHistory;
 
-  public List<Integer> getCorrectHistory() { return correctHistory; }
+ // public List<Integer> getCorrectHistory() { return correctHistory; }
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getFlashcardResponse
@@ -36,7 +37,7 @@ public class FlashcardResponse implements IsSerializable {
 
   public String toString() {
     return "FlashcardResponse : " +
-      (nextExercise != null ? "exercise id=" + nextExercise.id : " no exercise") +
+      (nextExercise != null ? "exercise id=" + nextExercise.getID() : " no exercise") +
       " correct " + correct + " incorrect " + incorrect +
       " finished= " + finished +
       (correctHistory != null ? " " + correctHistory.size() + " items in history." : "");
