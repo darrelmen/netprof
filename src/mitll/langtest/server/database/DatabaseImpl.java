@@ -2,17 +2,20 @@ package mitll.langtest.server.database;
 
 import mitll.flashcard.UserState;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.shared.CountAndGradeID;
+import mitll.langtest.server.database.connection.DatabaseConnection;
+import mitll.langtest.server.database.connection.H2Connection;
+import mitll.langtest.server.database.taboo.OnlineUsers;
+import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.FlashcardResponse;
-import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.flashcard.FlashcardResponse;
+import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.ResultsAndGrades;
-import mitll.langtest.shared.ScoreInfo;
-import mitll.langtest.shared.Session;
+import mitll.langtest.shared.grade.ResultsAndGrades;
+import mitll.langtest.shared.flashcard.ScoreInfo;
+import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
-import mitll.langtest.shared.StimulusAnswerPair;
-import mitll.langtest.shared.TabooState;
+import mitll.langtest.shared.taboo.StimulusAnswerPair;
+import mitll.langtest.shared.taboo.TabooState;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
@@ -468,9 +471,9 @@ public class DatabaseImpl implements Database {
    * @param userid
    * @return
    */
-  public StimulusAnswerPair checkForStimulus(long userid) {
+/*  public StimulusAnswerPair checkForStimulus(long userid) {
    return getOnlineUsers().checkForStimulus(userid);
-  }
+  }*/
 
   public void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean correct) {
     getOnlineUsers().registerAnswer(userid, stimulus, answer, correct);
@@ -1411,7 +1414,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * @param toChange
-   * @see mitll.langtest.server.LangTestDatabaseImpl#changeGrade(mitll.langtest.shared.Grade)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#changeGrade(mitll.langtest.shared.grade.Grade)
    */
   public void changeGrade(Grade toChange) {
     gradeDAO.changeGrade(toChange);
