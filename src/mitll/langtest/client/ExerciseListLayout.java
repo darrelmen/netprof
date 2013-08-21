@@ -10,7 +10,7 @@ import mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.bootstrap.TableSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.GradedExerciseList;
+import mitll.langtest.client.grading.GradedExerciseList;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
 import mitll.langtest.client.taboo.TabooExerciseList;
@@ -29,7 +29,6 @@ import mitll.langtest.shared.ExerciseShell;
 public class ExerciseListLayout {
   private final PropertyHandler props;
   private ListInterface exerciseList;
-  private static final String ITEMS = "Items";
 
   public ExerciseListLayout(PropertyHandler props) {
     this.props = props;
@@ -68,7 +67,7 @@ public class ExerciseListLayout {
     addExerciseListOnLeftSide(leftColumn);
   }
 
-  protected ListInterface makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback,
+  private ListInterface makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback,
                                          Panel currentExerciseVPanel, LangTestDatabaseAsync service, ExerciseController controller) {
     if (isGrading) {
       return new GradedExerciseList(currentExerciseVPanel, service, feedback,
@@ -104,29 +103,22 @@ public class ExerciseListLayout {
     if (props.isTeacherView()) {
       leftColumnContainer.add(exerciseList.getWidget());
     } else {
-      Heading items = new Heading(4, ITEMS);
-      items.addStyleName("center");
+      leftColumnContainer.addStyleName("inlineStyle");
+      leftColumnContainer.add(exerciseList.getExerciseListOnLeftSide(props));
 
-      FlowPanel leftColumn = new FlowPanel();
+   /*   FlowPanel leftColumn = new FlowPanel();
       leftColumn.addStyleName("floatLeft");
       DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
 
       leftColumnContainer.add(leftColumn);
-      leftColumnContainer.addStyleName("inlineStyle");
       if (!props.isFlashcardTeacherView() && !props.isMinimalUI()) {
+        Heading items = new Heading(4, ITEMS);
+        items.addStyleName("center");
         leftColumn.add(items);
       }
-      leftColumn.add(exerciseList.getWidget());
+      leftColumn.add(exerciseList.getWidget());*/
     }
   }
-
-/*
-  public int getLeftColumnWidth() {
-    int offsetWidth = exerciseList.getWidget().getOffsetWidth();
-    // System.out.println("left col width " +offsetWidth);
-    return offsetWidth;
-  }
-*/
 
   private boolean showOnlyOneExercise() {
     return props.getExercise_title() != null;
