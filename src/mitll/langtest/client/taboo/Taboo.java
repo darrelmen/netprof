@@ -15,7 +15,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.TabooState;
+import mitll.langtest.shared.taboo.TabooState;
 
 /**
  * Created with IntelliJ IDEA.
