@@ -180,7 +180,7 @@ public class UserManager {
    */
   public void userAlive() {
     int user = getUser();
-    System.out.println(new Date() +" --------> userAlive : " + user);
+   // System.out.println(new Date() +" --------> userAlive : " + user);
     userOnline(user, true);
     waitThenInactivate();
   }
