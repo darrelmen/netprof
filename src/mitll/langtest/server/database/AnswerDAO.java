@@ -208,7 +208,7 @@ public class AnswerDAO {
   private boolean debug = true;
 
   /**
-   * @see DatabaseImpl#changeGrade(mitll.langtest.shared.Grade)
+   * @see DatabaseImpl#changeGrade(mitll.langtest.shared.grade.Grade)
    * @param id
    */
   public void changeAnswer(String id, boolean correct, float score) {
