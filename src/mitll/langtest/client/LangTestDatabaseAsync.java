@@ -2,20 +2,20 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.CountAndGradeID;
+import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.FlashcardResponse;
-import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.flashcard.FlashcardResponse;
+import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.ImageResponse;
-import mitll.langtest.shared.Leaderboard;
+import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.ResultsAndGrades;
+import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.SectionNode;
-import mitll.langtest.shared.Session;
+import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
-import mitll.langtest.shared.StimulusAnswerPair;
-import mitll.langtest.shared.TabooState;
+import mitll.langtest.shared.taboo.StimulusAnswerPair;
+import mitll.langtest.shared.taboo.TabooState;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -139,7 +139,7 @@ public interface LangTestDatabaseAsync {
 
   void registerPair(long userid, boolean isGiver, AsyncCallback<Void> async);
 
-  void sendStimulus(long userid, String exerciseID, String stimulus, String answer, AsyncCallback<Integer> async);
+  void sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, AsyncCallback<Integer> async);
 
   void checkForStimulus(long userid, AsyncCallback<StimulusAnswerPair> async);
 
