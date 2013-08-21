@@ -7,15 +7,15 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.ResultManager;
+import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanel;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.ResultsAndGrades;
+import mitll.langtest.shared.grade.ResultsAndGrades;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -98,7 +98,7 @@ public class GradingExercisePanel extends ExercisePanel {
    * Partitions results into 3 (or fewer) separate tables for each of the
    * possible spoken/written & english/f.l. combinations.
    * <br></br>
-   * Uses a result manager table (simple pager).  {@link mitll.langtest.client.ResultManager#getTable}<br></br>
+   * Uses a result manager table (simple pager).  {@link mitll.langtest.client.result.ResultManager#getTable}<br></br>
    * If the controller says this is an English only grading mode, then only show english answers.
    * @see ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, LangTestDatabaseAsync, UserFeedback, ExerciseController)
    * @param exercise
