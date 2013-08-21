@@ -51,6 +51,7 @@ import mitll.langtest.client.mail.MailDialog;
 import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
+import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
@@ -680,7 +681,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void setTabooFactory(long userID, boolean isGiver, boolean singlePlayer) {
     System.out.println("setTabooFactory : User " + userID + " is a giver " + isGiver + " single " + singlePlayer);
-    ((TabooExerciseList)exerciseList).setGiver(isGiver);
+    TabooExerciseList tabooExerciseList = (TabooExerciseList) exerciseList;
+    tabooExerciseList.setGiver(isGiver);
 
     String appTitle = props.getAppTitle();
     String appTitle1 = appTitle + " : Giver";
