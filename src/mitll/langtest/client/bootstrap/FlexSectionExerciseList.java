@@ -89,7 +89,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     if (!showListBoxes) {
       SelectionState selectionState = getSelectionState(History.getToken());
-      loadExercises(selectionState.typeToSection, selectionState.item);
+      loadExercises(selectionState.getTypeToSection(), selectionState.getItem());
     }
 
     sectionPanel.add(flexTable);
@@ -146,7 +146,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     SelectionState selectionState = getSelectionState(token);
     System.out.println("\n\nsorted types " +sortedTypes);
     for (final String type : sortedTypes) {
-      Collection<String> typeValue = selectionState.typeToSection.get(type);
+      Collection<String> typeValue = selectionState.getTypeToSection().get(type);
       if (typeValue != null) {
         FluidRow fluidRow = new FluidRow();
         container.add(fluidRow);
@@ -341,7 +341,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     SelectionState selectionState = new SelectionState(event);
     System.out.println("showSelectionState : got " + event + " and " + selectionState);
     StringBuilder status = new StringBuilder();
-    Set<Map.Entry<String, Collection<String>>> entries = selectionState.typeToSection.entrySet();
+    Set<Map.Entry<String, Collection<String>>> entries = selectionState.getTypeToSection().entrySet();
     for (Map.Entry<String, Collection<String>> part : entries) {
         String statusForType = part.getKey() + " " + part.getValue().toString().replaceAll("\\[", "").replaceAll("\\]", "");
         status.append(statusForType).append(" ");
