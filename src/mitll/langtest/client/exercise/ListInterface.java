@@ -1,11 +1,13 @@
 package mitll.langtest.client.exercise;
 
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseShell;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -72,4 +74,6 @@ public interface ListInterface extends RequiresResize {
   int getComplete();
 
   void addAdHocExercise(String label);
+
+  void setSelectionState(Map<String,Collection<String>> selectionState);
 }
