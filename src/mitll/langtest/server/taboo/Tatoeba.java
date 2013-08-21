@@ -1,15 +1,5 @@
 package mitll.langtest.server.taboo;
 
-import mitll.langtest.server.database.FileExerciseDAO;
-import mitll.langtest.shared.Exercise;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.List;
-
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
