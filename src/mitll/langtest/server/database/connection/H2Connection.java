@@ -1,4 +1,4 @@
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.connection;
 
 import org.apache.log4j.Logger;
 
@@ -28,7 +28,7 @@ public class H2Connection implements DatabaseConnection {
     this(configDir, dbName, 50000, 8);
   }
     /**
-     * @see DatabaseImpl#DatabaseImpl
+     * @see mitll.langtest.server.database.DatabaseImpl#DatabaseImpl
      * @param configDir
      * @param dbName
      */
