@@ -7,27 +7,30 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
+import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.SectionHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.CountAndGradeID;
+import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ExerciseShell;
-import mitll.langtest.shared.FlashcardResponse;
-import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.flashcard.FlashcardResponse;
+import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.ImageResponse;
-import mitll.langtest.shared.Leaderboard;
+import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.ResultsAndGrades;
-import mitll.langtest.shared.ScoreInfo;
+import mitll.langtest.shared.grade.ResultsAndGrades;
+import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.SectionNode;
-import mitll.langtest.shared.Session;
+import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
-import mitll.langtest.shared.StimulusAnswerPair;
-import mitll.langtest.shared.TabooState;
+import mitll.langtest.shared.taboo.StimulusAnswerPair;
+import mitll.langtest.shared.taboo.TabooState;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -531,7 +534,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Remember who is grading which exercise.  Time out reservation after 30 minutes.
    *
-   * @see mitll.langtest.client.exercise.GradedExerciseList#getNextUngraded
+   * @see mitll.langtest.client.grading.GradedExerciseList#getNextUngraded
    * @param user
    * @param expectedGrades
    * @param englishOnly
@@ -669,8 +672,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Get score when doing autoCRT on an audio file.
-   * @see AutoCRT#getAutoCRTDecodeOutput
-   * @see AutoCRT#getFlashcardAnswer
+   * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput
+   * @see mitll.langtest.server.autocrt.AutoCRT#getFlashcardAnswer
    * @param testAudioFile audio file to score
    * @param lmSentences to look for in the audio
    * @return PretestScore for audio
@@ -680,7 +683,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see AutoCRT#getAutoCRTDecodeOutput(String, int, mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
+   * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput(String, int, mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
    * @param phrases
    * @return
    */
@@ -749,7 +752,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.grading.GradingResultManager#changeGrade(mitll.langtest.shared.Grade)
+   * @see mitll.langtest.client.grading.GradingResultManager#changeGrade(mitll.langtest.shared.grade.Grade)
    * @param toChange
    */
   public void changeGrade(Grade toChange) {
@@ -816,7 +819,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @return
-   * @see mitll.langtest.client.ResultManager#showResults()
+   * @see mitll.langtest.client.result.ResultManager#showResults()
    */
   @Override
   public List<Result> getResults(int start, int end) {
@@ -833,7 +836,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.ResultManager#showResults()
+   * @see mitll.langtest.client.result.ResultManager#showResults()
    * @return
    */
   @Override
@@ -959,11 +962,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param exerciseID
    * @param stimulus
    * @param answer
+   * @param onLastStimulus
+   * @param skippedItem
    */
   @Override
-  public int sendStimulus(long userid, String exerciseID, String stimulus, String answer) {
+  public int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem) {
    // db.sendStimulus(userid, exerciseID, stimulus, answer);
-    return db.getOnlineUsers().sendStimulus(userid, exerciseID, stimulus, answer);
+    return db.getOnlineUsers().sendStimulus(userid, exerciseID, stimulus, answer, onLastStimulus, skippedItem);
   }
 
   @Override
@@ -976,7 +981,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public StimulusAnswerPair checkForStimulus(long userid) {
-    return db.checkForStimulus(userid);
+    return db.getOnlineUsers().checkForStimulus(userid);
   }
 
   @Override
@@ -985,7 +990,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#checkForCorrect(long, String, mitll.langtest.shared.Exercise, String, mitll.langtest.client.bootstrap.SoundFeedback)
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#checkForCorrect(long, String, mitll.langtest.shared.Exercise, String, mitll.langtest.client.sound.SoundFeedback)
    * @param giverUserID
    * @param stimulus
    * @return
@@ -1048,7 +1053,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param db
    * @return
    */
-  String setInstallPath(boolean useFile, DatabaseImpl db) {
+  public String setInstallPath(boolean useFile, DatabaseImpl db) {
     String lessonPlanFile = getLessonPlan();
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
