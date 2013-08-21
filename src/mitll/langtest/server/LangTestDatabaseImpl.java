@@ -29,6 +29,7 @@ import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 import mitll.langtest.shared.taboo.TabooState;
 import mitll.langtest.shared.User;
@@ -951,8 +952,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public TabooState anyUsersAvailable(long userid) {  return db.anyAvailable(userid);  }
+  public TabooState anyUsersAvailable(long userid) {  return db.getOnlineUsers().anyAvailable(userid);  }
 
+  /**
+   * @see mitll.langtest.client.taboo.Taboo#chooseRoleModal
+   * @param userid
+   * @param isGiver
+   */
   @Override
   public void registerPair(long userid, boolean isGiver) {  db.getOnlineUsers().registerPair(userid, isGiver);  }
 
@@ -972,7 +978,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public boolean isPartnerOnline(long userid, boolean isGiver) { return db.getOnlineUsers().isPartnerOnline(userid,isGiver); }
+  public PartnerState isPartnerOnline(long userid, boolean isGiver) { return db.getOnlineUsers().isPartnerOnline(userid,isGiver); }
+
+  @Override
+  public void registerSelectionState(long giver, Map<String, Collection<String>> selectionState) {
+    db.getOnlineUsers().registerSelectionState(giver, selectionState);
+  }
 
   /**
    * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#checkForStimulus(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
@@ -997,7 +1008,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public int checkCorrect(long giverUserID, String stimulus) {
-    return db.checkCorrect(giverUserID, stimulus);
+    return db.getOnlineUsers().checkCorrect(giverUserID, stimulus);
   }
 
   public void logMessage(String message) {
