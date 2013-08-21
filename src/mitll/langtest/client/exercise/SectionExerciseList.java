@@ -147,7 +147,7 @@ public class SectionExerciseList extends PagingExerciseList {
         flexTable.setWidget(row, col++, new HTML(type));
         flexTable.setWidget(row++, col, listBox.getWidget());
       } else {
-        Collection<String> typeValue = selectionState.typeToSection.get(type);
+        Collection<String> typeValue = selectionState.getTypeToSection().get(type);
         if (typeValue != null) {
           flexTable.setWidget(row, col++, new HTML(type));
           flexTable.setWidget(row++, col, new HTML("<b>" + typeValue + "</b>"));
@@ -419,9 +419,7 @@ public class SectionExerciseList extends PagingExerciseList {
     setModeLinks(historyToken);
     if (currentToken.equals(historyToken)) {
       if (currentExercises == null || currentExercises.isEmpty() || historyToken.isEmpty()) {
-     //   if (firstTime) {
-          noSectionsGetExercises(userID);
-      //  }
+        noSectionsGetExercises(userID);
       } else {
         System.out.println("pushNewSectionHistoryToken : skipping same token '" + historyToken + "'");
       }
@@ -431,7 +429,6 @@ public class SectionExerciseList extends PagingExerciseList {
       System.out.println("------------ push history '" + historyToken + "' -------------- ");
       History.newItem(historyToken);
     }
-    //firstTime = false;
   }
 
   protected void setModeLinks(String historyToken) {
@@ -465,13 +462,13 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param columnText
    * @return
    */
-  protected String getHistoryTokenForLink(String columnText) {
+ /* protected String getHistoryTokenForLink(String columnText) {
     return "#"+getHistoryToken(columnText);
    // return historyToken +";item="+columnText;
-  }
+  }*/
 
   /**
-   * @see mitll.langtest.client.exercise.PagingExerciseList#getExerciseIdColumn()
+   * @see mitll.langtest.client.exercise.PagingExerciseList#getExerciseIdColumn
    * @param e
    */
   @Override
@@ -484,7 +481,6 @@ public class SectionExerciseList extends PagingExerciseList {
 
 
   /**
-   * @see #getHistoryTokenForLink(String)
    * @see #pushNewItem(String)
    * @see #pushNewSectionHistoryToken()
    * @param id
@@ -525,7 +521,7 @@ public class SectionExerciseList extends PagingExerciseList {
   public void onValueChange(ValueChangeEvent<String> event) {
     String rawToken = getTokenFromEvent(event);
     System.out.println(new Date() +" onValueChange : ------ start: token is '" + rawToken +"' ------------ ");
-    String item = getSelectionState(rawToken).item;
+    String item = getSelectionState(rawToken).getItem();
 
     if (item != null && item.length() > 0 && hasExercise(item)) {
       if (includeItemInBookmark) {
@@ -541,13 +537,13 @@ public class SectionExerciseList extends PagingExerciseList {
       try {
         SelectionState selectionState = getSelectionState(token);
         restoreListBoxState(selectionState);
-        Map<String, Collection<String>> typeToSection = selectionState.typeToSection;
+        Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
 
        // System.out.println("onValueChange '" + token + "' type->section " + typeToSection);
 
         setOtherListBoxes(typeToSection);
 
-        loadExercises(selectionState.typeToSection, selectionState.item);
+        loadExercises(selectionState.getTypeToSection(), selectionState.getItem());
       } catch (Exception e) {
         System.out.println("onValueChange " + token + " badly formed. Got " + e);
         e.printStackTrace();
@@ -613,7 +609,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param selectionState
    */
   protected void restoreListBoxState(SelectionState selectionState) {
-    for (Map.Entry<String, Collection<String>> pair : selectionState.typeToSection.entrySet()) {
+    for (Map.Entry<String, Collection<String>> pair : selectionState.getTypeToSection().entrySet()) {
       String type = pair.getKey();
       Collection<String> section = pair.getValue();
       if (!typeToBox.containsKey(type)) {
