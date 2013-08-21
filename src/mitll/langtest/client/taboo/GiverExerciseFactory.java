@@ -11,6 +11,8 @@ import com.github.gwtbootstrap.client.ui.Row;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -293,13 +295,23 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
         @Override
         public void onSuccess(Integer result) {
           if (result == 0) { // incorrect
-            showPopup("They didn't guess correctly, please send another sentence.");
             feedback.playIncorrect();
-
             sentItems.add(stimulus);
             choiceToExample = populateChoices(current, refSentence);
-            send.setEnabled(true);
-            pleaseWait.setVisible(false);
+            if (choiceToExample.isEmpty()) {
+              showPopup("They didn't guess correctly, moving to next item...", new CloseHandler<PopupPanel>() {
+                @Override
+                public void onClose(CloseEvent<PopupPanel> event) {
+                  controller.loadNextExercise(current);
+                }
+              });
+
+            } else {
+              showPopup("They didn't guess correctly, please send another sentence.");
+
+              send.setEnabled(true);
+              pleaseWait.setVisible(false);
+            }
           } else if (result == 1) {
             lastSentExercise = ""; // clear last sent hint -- they got it correct
             showPopup("They guessed correctly!  Moving on to next item.");
@@ -322,10 +334,16 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     }
 
     private void showPopup(String html) {
+      showPopup(html, null);
+    }
+
+    private void showPopup(String html, CloseHandler<PopupPanel> closeHandler) {
       final PopupPanel pleaseWait = new DecoratedPopupPanel();
       pleaseWait.setAutoHideEnabled(true);
       pleaseWait.add(new HTML(html));
       pleaseWait.center();
+      if (closeHandler != null)
+        pleaseWait.addCloseHandler(closeHandler);
 
       Timer t = new Timer() {
         @Override
