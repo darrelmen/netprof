@@ -1,4 +1,4 @@
-package mitll.langtest.shared;
+package mitll.langtest.shared.flashcard;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -18,7 +18,7 @@ public class ScoreInfo implements IsSerializable {
   public int incorrect;
   public long timeTaken;
   public long timestamp;
-  Map<String, Collection<String>> selection;
+  public Map<String, Collection<String>> selection;
 
   public ScoreInfo() {}
 
