@@ -2,8 +2,15 @@ package mitll.langtest.client.taboo;
 
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Image;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -23,7 +30,20 @@ import java.util.List;
  */
 public class TabooExerciseList extends FlexSectionExerciseList {
   private boolean isGiver = true;
+  private Heading correct = new Heading(4);
+  private int correctCount, incorrectCount;
 
+  /**
+   * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
+   * @param secondRow
+   * @param currentExerciseVPanel
+   * @param service
+   * @param feedback
+   * @param showTurkToken
+   * @param showInOrder
+   * @param showListBox
+   * @param controller
+   */
   public TabooExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                            UserFeedback feedback, boolean showTurkToken, boolean showInOrder, boolean showListBox,
                            ExerciseController controller) {
@@ -31,10 +51,39 @@ public class TabooExerciseList extends FlexSectionExerciseList {
    // makeExercisePanel(null);
   }
 
+  /**
+   * TODO : replace the item list with a correct/incorrect counter
+   * TODO : how do we get the receiver to choose the chapter?
+   *
+   * @param factory
+   * @param user
+   * @param expectedGrades
+   */
   @Override
   public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {
     super.setFactory(factory, user, expectedGrades);
+    if (factory instanceof ReceiverExerciseFactory) {
+      ((ReceiverExerciseFactory)factory).setExerciseList(this);
+    }
+ /*   if (!isGiver) {
+      ((ReceiverExerciseFactory) factory).isSinglePlayer())
+    }*/
     if (!isGiver) makeExercisePanel(null);
+  }
+
+  public void incCorrect()   { correctCount++; setCorrect(); }
+  public void incIncorrect() { incorrectCount++; setCorrect(); }
+
+  @Override
+  public Widget getExerciseListOnLeftSide(PropertyHandler props) {
+    Panel correctAndImageRow = new FlowPanel();
+
+    return correctAndImageRow;    //To change body of overridden methods use File | Settings | File Templates.
+  }
+
+  public void setCorrect() {
+    correct.setText(correctCount + "/" + (correctCount + incorrectCount));
+
   }
 
   /**
@@ -65,9 +114,4 @@ public class TabooExerciseList extends FlexSectionExerciseList {
     }
     flush();
   }
-
-/*  @Override
-  protected void addColumnsToTable(boolean consumeClicks) {
-    super.addColumnsToTable(isGiver);
-  }*/
 }
