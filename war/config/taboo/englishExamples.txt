@@ -27,6 +27,11 @@ interviewer	The host of a TV show who questions another person.
 interviewer	Someone who asks you questions.
 announcer	On a TV show, a person who introduces the next part of the show.
 announcer	On a TV show, the person who speaks first and says who will be on the show.
+participant	Someone who takes part in something.
+participant	Someone who plays in a game, or takes part in a benefit walk.
+participant	Someone who takes part in an activity.
+audience	You buy a ticket for a movie, and then you are part of it.
+audience	In the theater, not the performers, but the people who watch the performance.
 the body	It has arms and legs, and a torso and a head.
 the body	Your physical presence is housed in this.
 
