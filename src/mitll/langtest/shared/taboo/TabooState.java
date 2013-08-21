@@ -16,6 +16,12 @@ public class TabooState implements IsSerializable {
 
   public TabooState() {}
 
+  /**
+   * @see mitll.langtest.server.database.taboo.OnlineUsers#anyAvailable(long)
+   * @param anyAvailable
+   * @param joinedPair
+   * @param giver
+   */
   public TabooState(boolean anyAvailable, boolean joinedPair, boolean giver) {
     this.anyAvailable = anyAvailable;
     this.joinedPair = joinedPair;
