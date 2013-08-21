@@ -1,7 +1,11 @@
-package mitll.langtest.server;
+package mitll.langtest.server.audio;
 
 import com.google.common.io.Files;
 import mitll.langtest.client.LangTestDatabase;
+import mitll.langtest.server.LangTestDatabaseImpl;
+import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
@@ -232,7 +236,7 @@ public class AudioFileHelper {
 
   /**
    * @see #dealWithMP3Audio(String)
-   * @see LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int)
    * @param audioFile
    * @return
    */
