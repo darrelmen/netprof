@@ -1,4 +1,4 @@
-package mitll.langtest.server;
+package mitll.langtest.server.audio;
 
 import mitll.langtest.shared.AudioAnswer;
 import org.apache.log4j.Logger;
@@ -34,7 +34,7 @@ public class AudioCheck {
   }
 
   /**
-   * @see LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int)
    * @param file
    * @return
    */
