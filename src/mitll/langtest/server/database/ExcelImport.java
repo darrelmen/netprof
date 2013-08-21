@@ -43,7 +43,7 @@ import java.util.Set;
  */
 public class ExcelImport implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(ExcelImport.class);
-  private static final int MIN_TABOO_ITEMS = 2;
+  private static final int MIN_TABOO_ITEMS = 1;
 
   private final boolean isFlashcard;
   private boolean tabooEnglish;
@@ -162,17 +162,7 @@ public class ExcelImport implements ExerciseDAO {
     try {
       InputStream inp = new FileInputStream(file);
       List<Exercise> exercises1 = readExercises(inp);
-     /* if (exampleSentenceFile != null) {
-        populateExampleSentences(exercises1, exampleSentenceFile);
-        List<Exercise> copy = new ArrayList<Exercise>();
-        for (Exercise e : exercises1) if (e.getSynonymSentences().size() > 0) copy.add(e);
-        logger.debug("got " + copy.size() + " exercises with stimulus sentences");
-        return copy;
-      }
-      else {*/
-        return exercises1;
-      //}
-
+      return exercises1;
     } catch (FileNotFoundException e) {
       logger.error("looking for " + file.getAbsolutePath() + " got "+e,e);
     }
@@ -260,6 +250,7 @@ public class ExcelImport implements ExerciseDAO {
     int skipped = 0;
     int englishSkipped = 0;
     String unitName = null, chapterName = null, weekName = null;
+    Set<String> withExamples = new HashSet<String>();
     try {
       for (; iter.hasNext(); ) {
         Row next = iter.next();
@@ -383,8 +374,10 @@ public class ExcelImport implements ExerciseDAO {
                   List<String> samples = wordToSamples.get(wordToGuess);
                   valid = (samples != null);
                   if (valid) {
+                    withExamples.add(wordToGuess);
                     enoughItems = samples.size() > MIN_TABOO_ITEMS;
                     if (enoughItems) imported.setSynonymSentences(samples);
+                    else logger.warn("not enough items for " + wordToGuess);
                   }
                 }
                 if (valid && enoughItems) {
@@ -425,7 +418,7 @@ public class ExcelImport implements ExerciseDAO {
     } catch (Exception e) {
       logger.error("got " + e,e);
     }
-
+       logger.info("got examples " + withExamples);
     logger.info("max id " +id);
     if (skipped > 0) {
       logger.info("Skipped " + skipped + " entries with missing audio. " + (100f*((float)skipped)/(float)id)+ "%");
@@ -744,6 +737,11 @@ public class ExcelImport implements ExerciseDAO {
     }
   }*/
 
+  /**
+   * @see mitll.langtest.server.database.ExcelImport#ExcelImport()
+   * @param examples
+   * @return
+   */
   private Map<String, List<String>> readSampleSentenceFile2(File examples) {
     Map<String, List<String>> wordToSamples = new HashMap<String, List<String>>();
     try {
