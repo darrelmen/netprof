@@ -17,7 +17,7 @@ public class AudioTag {
   private static final boolean INCLUDE_ALTERNATE_AUDIO = true;
 
   /**
-   * @see ResultManager#getTable
+   * @see mitll.langtest.client.result.ResultManager#getTable
    * @param result
    * @return
    */
