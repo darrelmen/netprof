@@ -4,6 +4,7 @@ import mitll.flashcard.UserState;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
+import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.server.database.taboo.OnlineUsers;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
@@ -14,8 +15,6 @@ import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
-import mitll.langtest.shared.taboo.StimulusAnswerPair;
-import mitll.langtest.shared.taboo.TabooState;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
@@ -456,126 +455,9 @@ public class DatabaseImpl implements Database {
     return userDAO.getOnlineUsers();
   }
 
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#anyUsersAvailable(long)
-   * @param userid
-   * @return
-   */
-  public TabooState anyAvailable(long userid) {  return getOnlineUsers().anyAvailable(userid); }
-/*  public void registerPair(long userid, boolean isGiver) {
-    getOnlineUsers().registerPair(userid, isGiver);
-  }*/
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#checkForStimulus(long)
-   * @param userid
-   * @return
-   */
-/*  public StimulusAnswerPair checkForStimulus(long userid) {
-   return getOnlineUsers().checkForStimulus(userid);
-  }*/
-
   public void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean correct) {
     getOnlineUsers().registerAnswer(userid, stimulus, answer, correct);
     addAnswer((int) userid, "plan",exerciseID,stimulus,answer,correct);
-  }
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#checkCorrect(long, String)
-   * @param giverUserID
-   * @param stimulus
-   * @return
-   */
-  public int checkCorrect(long giverUserID, String stimulus) {
-    return getOnlineUsers().checkCorrect(giverUserID, stimulus);
-  }
-
-  private static class UserStateWrapper {
-    public final UserState state;
-    private int correct = 0;
-    private int incorrect = 0;
-
-    private int pcorrect = 0;
-    private int pincorrect = 0;
-
-    private int counter = 0;
-    private List<Integer> correctHistory = new ArrayList<Integer>();
-    private final List<Exercise> exercises;
-    private final Random random;
-
-    /**
-     * @see DatabaseImpl#getUserStateWrapper(long, java.util.List)
-     * @param state
-     * @param userID
-     * @param exercises
-     */
-    public UserStateWrapper(UserState state, long userID, List<Exercise> exercises) {
-      this.state = state;
-      this.random = new Random(userID);
-      this.exercises = new ArrayList<Exercise>(exercises);
-      Collections.shuffle(exercises, random);
-    }
-
-    public int getCorrect() {
-      return correct;
-    }
-
-    public void setCorrect(int correct) {
-      this.correct = correct;
-    }
-
-    public int getIncorrect() {
-      return incorrect;
-    }
-
-    public void setIncorrect(int incorrect) {
-      this.incorrect = incorrect;
-    }
-
-    public List<Integer> getCorrectHistory() { return correctHistory; }
-
-    public int getNumExercises() {
-      return exercises.size();
-    }
-
-    public boolean isComplete() { return counter == exercises.size(); }
-
-    public void reset() {
-      correctHistory.add(correct);
-      correct = 0;
-      incorrect = 0;
-      shuffle();
-    }
-
-    public void shuffle() {
-      Collections.shuffle(exercises, random);
-      counter = 0;
-    }
-
-    public Exercise getNextExercise() {
-      return exercises.get(counter++ % exercises.size()); // defensive
-    }
-
-    public int getPcorrect() {
-      return pcorrect;
-    }
-
-    public void setPcorrect(int pcorrect) {
-      this.pcorrect = pcorrect;
-    }
-
-    public int getPincorrect() {
-      return pincorrect;
-    }
-
-    public void setPincorrect(int pincorrect) {
-      this.pincorrect = pincorrect;
-    }
-
-    public String toString() {
-      return "UserState : correct " + correct + " incorrect " + incorrect +
-        " num exercises " + getNextExercise() + " is complete " + isComplete();
-    }
   }
 
   /**
@@ -638,7 +520,7 @@ public class DatabaseImpl implements Database {
    //  logger.warn("now  " + userStateWrapper.correct + " inc " + userStateWrapper.incorrect);
 
     //int diffC = Math.max(0,userStateWrapper.correct - correct);
-    int diffI = Math.max(0,userStateWrapper.incorrect - incorrect);
+    int diffI = Math.max(0,userStateWrapper.getIncorrect() - incorrect);
      logger.warn("diff  " +userToCorrect.get(userID) + " inc " + diffI);
 
     ScoreInfo scoreInfo = new ScoreInfo(userID, userToCorrect.get(userID), 0, timeTaken, selection);
@@ -1341,21 +1223,6 @@ public class DatabaseImpl implements Database {
 
     return new ResultsAndGrades(resultsForExercise, gradesAndIDs.grades, spokenToLangToResult);
   }
-
-/*
-  private Map<Integer, List<Grade>> getIdToGrade(Collection<Grade> grades) {
-    Map<Integer,List<Grade>> idToGrade = new HashMap<Integer, List<Grade>>();
-    for (Grade g : grades) {
-      List<Grade> gradesForResult = idToGrade.get(g.resultID);
-      if (gradesForResult == null) {
-        idToGrade.put(g.resultID, gradesForResult = new ArrayList<Grade>());
-      }
-      gradesForResult.add(g);
-    }
-
-    return idToGrade;
-  }
-*/
 
   /**
    * Creates the result table if it's not there.
