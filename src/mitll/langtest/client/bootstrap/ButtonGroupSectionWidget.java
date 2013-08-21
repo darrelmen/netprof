@@ -84,6 +84,10 @@ class ButtonGroupSectionWidget implements SectionWidget {
     return currentSelection;
   }
 
+  /**
+   *
+   * @return a comma separated list of selected units, chapters, or sections
+   */
   private String getCurrentSelectionInternal() {
     System.out.println("getCurrentSelection for " + type + " checking " + buttons.size() + " buttons.");
     StringBuilder builder = new StringBuilder();
@@ -119,8 +123,8 @@ class ButtonGroupSectionWidget implements SectionWidget {
    * @deprecated don't use this anymore
    * @param inSet
    */
-  @Override
-  public void enableInSet(Collection<String> inSet) {  throw new IllegalArgumentException("don't call me!");  }
+ // @Override
+ // public void enableInSet(Collection<String> inSet) {  throw new IllegalArgumentException("don't call me!");  }
 
   /**
    * @see FlexSectionExerciseList#populateListBoxAfterSelection(java.util.Map)

@@ -1,6 +1,7 @@
 package mitll.langtest.server.database.taboo;
 
 import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 import mitll.langtest.shared.taboo.TabooState;
 import mitll.langtest.shared.User;
@@ -35,6 +36,7 @@ public class OnlineUsers {
   private Map<User,StimulusAnswerPair> receiverToStimulus = new HashMap<User,StimulusAnswerPair>();
   // TODO : write to database
   private Map<User,Map<String,List<AnswerBundle>>> receiverToAnswer = new HashMap<User, Map<String, List<AnswerBundle>>>();
+  private Map<User,Map<String, Collection<String>>> receiverToState = new HashMap<User, Map<String, Collection<String>>>();
 
   // TODO keep track of join time, order pairings on that basis
 
@@ -65,15 +67,26 @@ public class OnlineUsers {
 
   private Collection<User> getOnline() { return online; }
 
-  public boolean isPartnerOnline(long giverOrReceiver, boolean isGiver) {
+  /**
+   * For any partner query, there are three states:
+   *
+   * 1) The partner is online, so you return true (plus some info)
+   *  -- if I'm a giver, I also expect the receiver to tell me which chapters we're doing...
+   * 2) The partner is offline, in which case we clean up the giver->receiver map
+   * 3) The partner claims they have been paired, but we've erased the pairing in the giver->receiver map
+   *
+   * @param giverOrReceiver
+   * @param isGiver
+   * @return
+   */
+  public PartnerState isPartnerOnline(long giverOrReceiver, boolean isGiver) {
     //  logger.debug("isPartnerOnline : checking for partner of " + giverOrReceiver);
-
     User testUser = getUser(giverOrReceiver);
     if (testUser == null) {
       logger.error("isPartnerOnline : giver " + giverOrReceiver + " is unknown...?");
 
       checkReceiverForGiver(giverOrReceiver);
-      return false; // huh?
+      return new PartnerState(); // huh?
     }
 
     // case 1 : I'm the giverOrReceiver
@@ -81,34 +94,36 @@ public class OnlineUsers {
       // User giverUser = getUser(giverOrReceiver);
       User receiver = giverToReceiver.get(testUser);
       if (receiver == null) {
-        // giverOrReceiver is not a giver
-        logger.error("isPartnerOnline : user " + giverOrReceiver + " is not the giver (???)");
+        // giverOrReceiver is not a giver or we've cleaned up the entry already...(?)
+        logger.warn("isPartnerOnline : user " + giverOrReceiver + " is not the giver (???)");
 
-        return false;
+        return new PartnerState();
       } else if (online.contains(receiver)) {
-   //     logger.debug("isPartnerOnline : for giver " + giverOrReceiver + ", receiver  " + receiver + " is online.");
+        //     logger.debug("isPartnerOnline : for giver " + giverOrReceiver + ", receiver  " + receiver + " is online.");
+        Map<String, Collection<String>> typeToSelectionByPartner = receiverToState.get(receiver);
+        return new PartnerState(true,typeToSelectionByPartner);
       } else {
         logger.debug("isPartnerOnline : for giver " + giverOrReceiver + ", receiver  " + receiver + " is not online...");
         checkReceiverForGiver(giverOrReceiver);
 
-        return false;
+        return new PartnerState();
       }
     } else {
       // case 2 : I'm the receiver
       User giverForReceiver = getGiverForReceiver(giverOrReceiver);
       if (giverForReceiver == null) {
-        logger.error("isPartnerOnline : user " + giverOrReceiver + " is not the receiver (???)");
-        return false;
+        logger.warn("isPartnerOnline : user " + giverOrReceiver + " is not the receiver (???)");
+        return new PartnerState();
       } else if (online.contains(giverForReceiver)) {
   //      logger.debug("isPartnerOnline : for receiver " + giverOrReceiver + ", giver  " + giverForReceiver + " is online.");
+        return new PartnerState(true,null);
       } else {
         logger.debug("isPartnerOnline : for receiver " + giverOrReceiver + " giver " + giverForReceiver + " is not online...");
         checkReceiverForGiver(giverOrReceiver);
 
-        return false;
+        return new PartnerState();
       }
     }
-    return true;
   }
 
   private User getGiverForReceiver(long receiver) {
@@ -177,6 +192,12 @@ public class OnlineUsers {
     }
   }
 
+  /**
+   * User has chosen to be either a giver or receiver.
+   *
+   * @param userid
+   * @param isGiver
+   */
   public synchronized void registerPair(long userid, boolean isGiver) {
     Pair found = null;
 
@@ -280,10 +301,10 @@ public class OnlineUsers {
     logger.debug("registerAnswer : user->answer now " + receiverToAnswer);
   }
 
-  int count = 0;
+ // int count = 0;
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#checkCorrect(long, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#checkCorrect
    * @param giverUserID
    * @param stimulus
    * @return
@@ -312,6 +333,12 @@ public class OnlineUsers {
     }
   }
 
+  /**
+   * @see #checkCorrect(long, String)
+   * @see #sendStimulus(long, String, String, String, boolean, boolean)
+   * @param giver
+   * @return
+   */
   private User getReceiverForGiver(long giver) {
     User giverUser = getUser(giver);
     if (giverUser == null) {
@@ -321,6 +348,10 @@ public class OnlineUsers {
     return giverToReceiver.get(giverUser);
   }
 
+  /**
+   * Clean up the giver->receiver mapping if either the giver or receiver signs out.
+   * @param giverOrReceiver
+   */
   private void checkReceiverForGiver(long giverOrReceiver) {
     // case 1: user is a giver
     User giverUser = getUser(giverOrReceiver);
@@ -341,6 +372,10 @@ public class OnlineUsers {
       logger.debug("checkReceiverForGiver : for receiver " + giverOrReceiver + " giver " + giverForReceiver + " is not online...");
       giverToReceiver.remove(giverForReceiver);
     }
+  }
+
+  public void registerSelectionState(long receiver, Map<String, Collection<String>> selectionState) {
+    receiverToState.put(getUser(receiver),selectionState);
   }
 
   private static class Pair {
