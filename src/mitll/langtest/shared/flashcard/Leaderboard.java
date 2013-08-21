@@ -1,4 +1,4 @@
-package mitll.langtest.shared;
+package mitll.langtest.shared.flashcard;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -43,7 +43,7 @@ public class Leaderboard implements IsSerializable {
     return hash;
   }
 
-  public ScoreInfo getPrevious(long userid, Map<String, Collection<String>> selection) {
+/*  public ScoreInfo getPrevious(long userid, Map<String, Collection<String>> selection) {
     long latest = 0;
     ScoreInfo lastScore = null;
     List<ScoreInfo> scores = getScores(selection);
@@ -54,7 +54,7 @@ public class Leaderboard implements IsSerializable {
       }
     }
     return lastScore;
-  }
+  }*/
 
   public List<ScoreInfo> getScores(Map<String, Collection<String>> selection) {
     return selectionToScores.get(getHash(selection));
