@@ -14,6 +14,7 @@ import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 import mitll.langtest.shared.taboo.TabooState;
 import mitll.langtest.shared.User;
@@ -147,5 +148,7 @@ public interface LangTestDatabaseAsync {
 
   void checkCorrect(long giverUserID, String stimulus, AsyncCallback<Integer> async);
 
-  void isPartnerOnline(long userid, boolean isGiver, AsyncCallback<Boolean> async);
+  void isPartnerOnline(long userid, boolean isGiver, AsyncCallback<PartnerState> async);
+
+  void registerSelectionState(long giver, Map<String, Collection<String>> selectionState, AsyncCallback<Void> async);
 }

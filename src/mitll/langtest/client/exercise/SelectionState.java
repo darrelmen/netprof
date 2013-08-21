@@ -17,8 +17,8 @@ import java.util.Map;
 * To change this template use File | Settings | File Templates.
 */
 public class SelectionState {
-  public String item;
-  public Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
+  private String item;
+  private Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
 
   /**
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#showSelectionState(com.google.gwt.event.logical.shared.ValueChangeEvent)
@@ -47,7 +47,7 @@ public class SelectionState {
   /**
    * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList#getExercises(long)
    */
-  public boolean isEmpty() { return typeToSection.isEmpty(); }
+  public boolean isEmpty() { return getTypeToSection().isEmpty(); }
 
   private String getTokenFromEvent(ValueChangeEvent<String> event) {
     String token = event.getValue();
@@ -103,7 +103,11 @@ public class SelectionState {
   }
 
   private void add(String type, Collection<String> section) {
-    typeToSection.put(type, section);
+    getTypeToSection().put(type, section);
+  }
+
+  public String getItem() {
+    return item;
   }
 
   private void setItem(String item) {
@@ -112,9 +116,13 @@ public class SelectionState {
 
  // public Map<String,Collection<String>> getSelection() { return typeToSection; }
 
+  public Map<String, Collection<String>> getTypeToSection() {
+    return typeToSection;
+  }
+
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    for (Collection<String> section : typeToSection.values()) {
+    for (Collection<String> section : getTypeToSection().values()) {
       builder.append(section).append(", ");
     }
     String s = builder.toString();
