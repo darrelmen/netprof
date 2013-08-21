@@ -66,6 +66,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private boolean expired = false;
   private boolean timerRunning = false;
 
+
   private final int gameTimeSeconds;
   private Panel bottomRow = new FlowPanel();
   private boolean isTimedGame = false;
@@ -148,7 +149,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
       }
       else {
         System.out.println("Getting next for " +userID + " selection state : " +selectionState);
-        this.currentSelection = selectionState.typeToSection;
+        this.currentSelection = selectionState.getTypeToSection();
         service.getNextExercise(userID, currentSelection, new FlashcardResponseAsyncCallback());
       }
     }
@@ -475,6 +476,9 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
   @Override
   public void addAdHocExercise(String label) {}
+  @Override
+  public void setSelectionState(Map<String, Collection<String>> selectionState) {
+  }
 
   protected void grabFocus(final BootstrapExercisePanel panel) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
