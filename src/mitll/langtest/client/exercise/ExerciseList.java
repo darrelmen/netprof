@@ -1,5 +1,6 @@
 package mitll.langtest.client.exercise;
 
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -8,11 +9,13 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ProvidesResize;
@@ -21,6 +24,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
@@ -46,6 +50,7 @@ import java.util.Set;
 public abstract class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize,
   ValueChangeHandler<String> {
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
+  public static final String ITEMS = "Items";
   protected List<ExerciseShell> currentExercises = null;
   protected Map<String,ExerciseShell> idToExercise = null;
   protected int currentExercise = 0;
@@ -164,7 +169,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-   * @see GradedExerciseList#setFactory(ExercisePanelFactory, mitll.langtest.client.user.UserManager, int)
+   * @see mitll.langtest.client.grading.GradedExerciseList#setFactory(ExercisePanelFactory, mitll.langtest.client.user.UserManager, int)
    */
   private void getExercisesInOrder() {
     lastReqID++;
@@ -555,6 +560,22 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       loadExercise(currentExercises.get(i-1));
     }
     return onFirst;
+  }
+
+  @Override
+  public Widget getExerciseListOnLeftSide(PropertyHandler props) {
+    FlowPanel leftColumn = new FlowPanel();
+    leftColumn.addStyleName("floatLeft");
+    DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
+
+    //leftColumnContainer.add(leftColumn);
+    if (!props.isFlashcardTeacherView() && !props.isMinimalUI()) {
+      Heading items = new Heading(4, ITEMS);
+      items.addStyleName("center");
+      leftColumn.add(items);
+    }
+    leftColumn.add(getWidget());
+    return leftColumn;
   }
 
   @Override
