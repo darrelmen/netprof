@@ -1,4 +1,4 @@
-package mitll.langtest.client;
+package mitll.langtest.client.result;
 
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.google.gwt.cell.client.AbstractCell;
@@ -21,10 +21,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
+import mitll.langtest.client.AudioTag;
+import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.grading.GradingExercisePanel;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
@@ -193,7 +196,7 @@ public class ResultManager extends PagerTable {
   }
 
   /**
-   * @see mitll.langtest.client.ResultManager#showResults
+   * @see ResultManager#showResults
    * @see GradingExercisePanel#showResults(java.util.Collection, java.util.Collection, LangTestDatabaseAsync, mitll.langtest.client.grading.GradingExercisePanel, boolean, int, int, int, int)
    * @param result
    * @param showQuestionColumn
