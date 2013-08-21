@@ -1,7 +1,7 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.CountAndGradeID;
-import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.grade.CountAndGradeID;
+import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
@@ -57,7 +57,7 @@ public class GradeDAO extends DAO {
   }
 
   /**
-   * @see DatabaseImpl#changeGrade(mitll.langtest.shared.Grade)
+   * @see DatabaseImpl#changeGrade(mitll.langtest.shared.grade.Grade)
    * @param toChange
    */
   public void changeGrade(Grade toChange) {
@@ -88,7 +88,7 @@ public class GradeDAO extends DAO {
   }
 
   /**
-   * @see DatabaseImpl#addGrade(String, mitll.langtest.shared.Grade)
+   * @see DatabaseImpl#addGrade(String, mitll.langtest.shared.grade.Grade)
    * @param exerciseID
    * @param toAdd
    * @return
@@ -109,7 +109,7 @@ public class GradeDAO extends DAO {
    * @param grader
    * @param gradeType
    * @return
-   * @see DatabaseImpl#addGrade(String, mitll.langtest.shared.Grade)
+   * @see DatabaseImpl#addGrade(String, mitll.langtest.shared.grade.Grade)
    */
   private CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct,
                                    int grader, String gradeType, int gradeIndex) {
