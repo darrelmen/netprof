@@ -6,6 +6,9 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
+import java.util.Collection;
+import java.util.Map;
+
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -64,6 +67,6 @@ public interface ExerciseController {
   int getFlashcardPreviewFrameHeight();
 
   void addAdHocExercise(String label);
-
+  void setSelectionState(Map<String,Collection<String>> selectionState);
   PropertyHandler getProps();
 }
