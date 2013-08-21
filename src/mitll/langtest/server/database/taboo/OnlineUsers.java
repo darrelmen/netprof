@@ -1,7 +1,8 @@
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.taboo;
 
-import mitll.langtest.shared.StimulusAnswerPair;
-import mitll.langtest.shared.TabooState;
+import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.shared.taboo.StimulusAnswerPair;
+import mitll.langtest.shared.taboo.TabooState;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
@@ -40,7 +41,7 @@ public class OnlineUsers {
   public OnlineUsers(UserDAO userDAO) { this.userDAO = userDAO; }
 
   /**
-   * @see DatabaseImpl#userOnline(long, boolean)
+   * @see mitll.langtest.server.database.DatabaseImpl#userOnline(long, boolean)
    * @param userid
    */
   public synchronized void addOnline(long userid) {
@@ -227,29 +228,39 @@ public class OnlineUsers {
    * 1 == inactive receiver
    * 2 == paused...
    *
+   *
+   *
+   *
    * @param userid
    * @param exerciseID
    * @param stimulus
    * @param answer
+   * @param onLastStimulus
+   * @param skippedItem
    * @return
    */
-  public synchronized int sendStimulus(long userid, String exerciseID, String stimulus, String answer) {
+  public synchronized int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem) {
     User receiver = getReceiverForGiver(userid);
     if (receiver == null) {
       return 1;
     }
     logger.debug("sending " + stimulus + " to " + receiver + " from giver " + userid);
-    receiverToStimulus.put(receiver, new StimulusAnswerPair(exerciseID, stimulus, answer));
+    receiverToStimulus.put(receiver, new StimulusAnswerPair(exerciseID, stimulus, answer, onLastStimulus, skippedItem));
     return 0;
   }
 
   /**
-   * @see DatabaseImpl#checkForStimulus(long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#checkForStimulus(long)
    * @param receiverUserID
    * @return
    */
   public synchronized StimulusAnswerPair checkForStimulus(long receiverUserID) {
-    return receiverToStimulus.get(getUser(receiverUserID));
+    StimulusAnswerPair stimulusAnswerPair = receiverToStimulus.get(getUser(receiverUserID));
+    if (stimulusAnswerPair == null) {
+      stimulusAnswerPair = new StimulusAnswerPair();
+      stimulusAnswerPair.setNoStimYet(true);
+    }
+    return stimulusAnswerPair;
   }
 
   public synchronized void registerAnswer(long receiverUserID, String stimulus, String answer, boolean correct) {
@@ -272,7 +283,7 @@ public class OnlineUsers {
   int count = 0;
 
   /**
-   * @see DatabaseImpl#checkCorrect(long, String)
+   * @see mitll.langtest.server.database.DatabaseImpl#checkCorrect(long, String)
    * @param giverUserID
    * @param stimulus
    * @return
