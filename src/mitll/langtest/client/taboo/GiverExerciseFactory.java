@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
-import mitll.langtest.client.bootstrap.SoundFeedback;
+import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.NavigationHelper;
@@ -108,15 +108,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       send.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          final String stimulus = getSelectedItem();
-          if (stimulus != null) {
-            send.setEnabled(false);
-            pleaseWait.setVisible(true);
-            controller.pingAliveUser();
-            sendStimulus(stimulus, refSentence, exercise, soundFeedback);
-          } else {
-            showPopup("Please select a sentence to send.");
-          }
+          clickOnSend(exercise, refSentence, soundFeedback);
         }
 
       });
@@ -128,6 +120,21 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       NavigationHelper w1 = new NavigationHelper(exercise, controller, false);
       w1.addStyleName("topMargin");
       add(w1);
+    }
+
+    private void clickOnSend(Exercise exercise, String refSentence, SoundFeedback soundFeedback) {
+      final String stimulus = getSelectedItem();
+      if (stimulus != null) {
+        send.setEnabled(false);
+        pleaseWait.setVisible(true);
+        controller.pingAliveUser();
+        List<String> synonymSentences = exercise.getSynonymSentences();
+
+        boolean lastChoiceRemaining = (synonymSentences.size() - sentItems.size()) == 1;
+        sendStimulus(stimulus, refSentence, exercise, soundFeedback, lastChoiceRemaining);
+      } else {
+        showPopup("Please select a sentence to send.");
+      }
     }
 
 /*    private HandlerRegistration keyHandler;
@@ -176,14 +183,26 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       if (keyHandler != null) keyHandler.removeHandler();
     }*/
 
-    private void sendStimulus(final String stimulus, final String refSentence, final Exercise exercise, final SoundFeedback soundFeedback) {
+    String lastSentExercise = "";
+
+    /**
+     * @see GiverPanel#GiverPanel(mitll.langtest.shared.Exercise)
+     * @param stimulus
+     * @param refSentence
+     * @param exercise
+     * @param soundFeedback
+     * @param lastChoiceRemaining
+     */
+    private void sendStimulus(final String stimulus, final String refSentence, final Exercise exercise, final SoundFeedback soundFeedback,
+                              boolean lastChoiceRemaining) {
       final String toSendWithBlankedOutItem = getObfuscated(stimulus, refSentence);
       final int user = controller.getUser();
-      service.sendStimulus(user, exercise.getID(), toSendWithBlankedOutItem, refSentence, new AsyncCallback<Integer>() {
+      boolean differentExercise = lastSentExercise.length() > 0 && !lastSentExercise.equals(exercise.getID());
+      lastSentExercise = exercise.getID();
+      service.sendStimulus(user, exercise.getID(), toSendWithBlankedOutItem, refSentence, lastChoiceRemaining,
+        differentExercise, new AsyncCallback<Integer>() {
         @Override
-        public void onFailure(Throwable caught) {
-          Window.alert("couldn't contact server.");
-        }
+        public void onFailure(Throwable caught) { Window.alert("couldn't contact server."); }
 
         @Override
         public void onSuccess(Integer result) {
@@ -282,6 +301,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
             send.setEnabled(true);
             pleaseWait.setVisible(false);
           } else if (result == 1) {
+            lastSentExercise = ""; // clear last sent hint -- they got it correct
             showPopup("They guessed correctly!  Moving on to next item.");
             feedback.playCorrect();
 
