@@ -11,10 +11,10 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.ResultManager;
+import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.CountAndGradeID;
-import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.grade.CountAndGradeID;
+import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
@@ -98,7 +98,7 @@ public class GradingResultManager extends ResultManager {
   }
 
   /**
-   * @see mitll.langtest.client.ResultManager#getTable
+   * @see mitll.langtest.client.result.ResultManager#getTable
    * @param table
    * @return
    */
@@ -108,7 +108,7 @@ public class GradingResultManager extends ResultManager {
   }
 
   /**
-   * @see mitll.langtest.client.ResultManager#getTable
+   * @see mitll.langtest.client.result.ResultManager#getTable
    * @param grades
    * @param grader
    * @param numGrades
