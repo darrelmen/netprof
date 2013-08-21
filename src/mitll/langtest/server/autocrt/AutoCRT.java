@@ -1,4 +1,4 @@
-package mitll.langtest.server;
+package mitll.langtest.server.autocrt;
 
 import ag.experiment.AutoGradeExperiment;
 import mira.classifier.Classifier;
@@ -61,7 +61,7 @@ public class AutoCRT {
   /**
    * Get an auto crt reco output and score given an audio answer.
    *
-   * @see LangTestDatabaseImpl#getAudioAnswer
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getAudioAnswer
    * @param exerciseID
    * @param questionID
    * @param e
@@ -95,8 +95,8 @@ public class AutoCRT {
   /**
    * Allow multiple correct answers from synonym sentence list.
    *
-   * @see LangTestDatabaseImpl#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.AudioCheck.ValidityAndDur, String, boolean)
-   * @see LangTestDatabaseImpl#isMatch
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#isMatch
    * @param e
    * @param audioFile
    * @param answer
@@ -196,7 +196,7 @@ public class AutoCRT {
    * For this exercise and question, score the answer.<br></br>
    * Do this by getting all other answers to this question and the answer key and given this information
    * and the answer, ask the classifier to score the answer.
-   * @see LangTestDatabaseImpl#getScoreForAnswer(mitll.langtest.shared.Exercise, int, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer(mitll.langtest.shared.Exercise, int, String)
    * @param e for this exercise
    * @param questionID for this question (when multiple questions in an exercise)
    * @param answer to score (correct->incorrect)
