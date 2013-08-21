@@ -1,4 +1,4 @@
-package mitll.langtest.client.bootstrap;
+package mitll.langtest.client.sound;
 
 import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.sound.AudioControl;
