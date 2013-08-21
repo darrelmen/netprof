@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.Grader;
+import mitll.langtest.server.database.taboo.OnlineUsers;
+import mitll.langtest.shared.grade.Grader;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
@@ -134,7 +135,7 @@ public class UserDAO extends DAO {
     return val;
   }
 
-  void createUserTable(Database database) throws Exception {
+  public void createUserTable(Database database) throws Exception {
     Connection connection = database.getConnection();
 
     PreparedStatement statement;
@@ -199,7 +200,7 @@ public class UserDAO extends DAO {
     statement.close();
   }
 
-  void dropUserTable(Database database) throws Exception {
+  public void dropUserTable(Database database) throws Exception {
     System.err.println("----------- dropUserTable -------------------- ");
     Connection connection = database.getConnection();
     PreparedStatement statement;
@@ -218,7 +219,12 @@ public class UserDAO extends DAO {
     return getUsers(sql);
   }
 
-  User getUserWhere(long userid) {
+  /**
+   * @see OnlineUsers#getUser(long)
+   * @param userid
+   * @return
+   */
+  public User getUserWhere(long userid) {
     String sql = "SELECT * from users where id=" +userid+";";
     List<User> users = getUsers(sql);
     if (users.isEmpty()) {
