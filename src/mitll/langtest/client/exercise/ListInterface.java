@@ -1,7 +1,9 @@
 package mitll.langtest.client.exercise;
 
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseShell;
 
@@ -14,7 +16,7 @@ import mitll.langtest.shared.ExerciseShell;
  */
 public interface ListInterface extends RequiresResize {
   /**
-   * @see mitll.langtest.client.LangTest#setFactory()
+   * @see mitll.langtest.client.LangTest#setFactory
    * @param factory
    * @param user
    * @param expectedGrades
@@ -29,24 +31,25 @@ public interface ListInterface extends RequiresResize {
   void getExercises(long userID);
 
   /**
-   * @see mitll.langtest.client.LangTest#makeExerciseList(com.google.gwt.user.client.ui.Panel, boolean)
+   * @see mitll.langtest.client.LangTest#makeExerciseList
    * @param exercise_title
    */
   void setExercise_title(String exercise_title);
 
 
   /**
-   * @see mitll.langtest.client.LangTest#makeExerciseList(com.google.gwt.user.client.ui.Panel, boolean)
+   * @see mitll.langtest.client.LangTest#makeExerciseList
    * @return
    */
   Widget getWidget();
 
+  Widget getExerciseListOnLeftSide(PropertyHandler props);
 
-  /**
-   * @see mitll.langtest.client.LangTest#loadNextExercise(mitll.langtest.shared.Exercise)
-   * @param current
-   * @return
-   */
+    /**
+     * @see mitll.langtest.client.LangTest#loadNextExercise(mitll.langtest.shared.Exercise)
+     * @param current
+     * @return
+     */
   boolean loadNextExercise(ExerciseShell current);
 
   boolean loadPreviousExercise(ExerciseShell current);
