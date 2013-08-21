@@ -32,6 +32,7 @@ import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -230,6 +231,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       addExerciseToList(es);
     }
     flush();
+  }
+
+  public Collection<ExerciseShell> getExerciseShells() { return idToExercise.values(); }
+  public void setSelectionState(Map<String,Collection<String>> selectionState) {
+    String newSelectionState = selectionState.toString().replace("[", "").replace("]", "").replace("{","").replace("}","");
+    System.out.println("setSelectionState : setting selection state to : " + newSelectionState);
+    History.newItem(newSelectionState);
   }
 
   protected void flush() {}
