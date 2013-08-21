@@ -1,4 +1,4 @@
-package mitll.langtest.shared;
+package mitll.langtest.shared.taboo;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 

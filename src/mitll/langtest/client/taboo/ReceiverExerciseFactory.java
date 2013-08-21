@@ -19,19 +19,22 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
-import mitll.langtest.client.bootstrap.SoundFeedback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.NoPasteTextBox;
+import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.StimulusAnswerPair;
+import mitll.langtest.shared.taboo.StimulusAnswerPair;
 
 /**
  * Created with IntelliJ IDEA.
@@ -46,6 +49,7 @@ import mitll.langtest.shared.StimulusAnswerPair;
  */
 public class ReceiverExerciseFactory extends ExercisePanelFactory {
   SinglePlayerRobot singlePlayerRobot;
+  private TabooExerciseList exerciseList;
 
   /**
    *
@@ -53,7 +57,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
    * @param userFeedback
    * @param controller
    * @param singlePlayerRobot
-   * @see mitll.langtest.client.LangTest#setFactory
+   * @see mitll.langtest.client.LangTest#setTabooFactory
    */
   public ReceiverExerciseFactory(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                                  final ExerciseController controller, SinglePlayerRobot singlePlayerRobot) {
@@ -63,6 +67,10 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     }
     this.singlePlayerRobot = singlePlayerRobot;
   }
+
+ // public boolean isSinglePlayer() { return this.singlePlayerRobot != null; }
+  private int correctCount, incorrectCount;
+
 
   /**
    * @see TabooExerciseList#useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
@@ -74,8 +82,17 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     return new ReceiverPanel(service,controller);
   }
 
+  public void setExerciseList(TabooExerciseList exerciseList) {
+    this.exerciseList = exerciseList;
+  }
+
+ /* public TabooExerciseList getExerciseList() {
+    return exerciseList;
+  }*/
+
   private class ReceiverPanel extends FluidContainer {
     private static final String PLEASE_WAIT = "Please wait for giver to send next sentence.";
+    Heading exerciseDisplay = new Heading(3);
     Heading prompt = new Heading(3, "Checking for game partners...");
     TextBox guessBox = new NoPasteTextBox();
     Heading stimulus;
@@ -84,6 +101,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     final Button send = new Button("Send Answer");
     Image correctImage   = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
     Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
+    private Heading correct = new Heading(4);
 
     public ReceiverPanel(final LangTestDatabaseAsync service, final ExerciseController controller) {
       final ReceiverPanel outer = addWidgets(service,controller);
@@ -93,8 +111,12 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     private ReceiverPanel addWidgets(final LangTestDatabaseAsync service, final ExerciseController controller) {
       final ReceiverPanel outer = this;
       Row w4 = new Row();
-      w4.add(prompt);
+      w4.add(exerciseDisplay);
       add(w4);
+
+      Row w42 = new Row();
+      w42.add(prompt);
+      add(w42);
 
       Row w2 = new Row();
       w2.add(new Column(12));
@@ -138,7 +160,29 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       add(container);
 
       add(warnNoFlash);
+      add(getExerciseListOnLeftSide());
       return outer;
+    }
+
+    public Widget getExerciseListOnLeftSide() {
+      Panel correctAndImageRow = new FlowPanel();
+      correctAndImageRow.addStyleName("headerBackground");
+      correctAndImageRow.addStyleName("blockStyle");
+      correctAndImageRow.addStyleName("topMargin");
+      Panel pair = new HorizontalPanel();
+      correctAndImageRow.add(pair);
+
+      Image checkmark = new Image(LangTest.LANGTEST_IMAGES + "checkboxCorrectRatio.png");
+      checkmark.addStyleName("checkboxPadding");
+      pair.add(checkmark);
+      correct.addStyleName("correctRatio");
+      pair.add(correct);
+      setCorrect();
+      return correctAndImageRow;    //To change body of overridden methods use File | Settings | File Templates.
+    }
+
+    public void setCorrect() {
+      correct.setText(correctCount + "/" + (correctCount + incorrectCount));
     }
 
     private void sendAnswer(final LangTestDatabaseAsync service, final ExerciseController controller, final ReceiverPanel outer, SoundFeedback soundFeedback) {
@@ -151,11 +195,23 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         correctImage.setVisible(true);
         controller.addAdHocExercise(answer);
         soundFeedback.playCorrect();
+       // System.out.println("increment correct");
+
+        correctCount++;
+        setCorrect();
       }
       else {
         incorrectImage.setVisible(true);
         showPopup("Try again...");
         soundFeedback.playIncorrect();
+        if (onLastStim) {
+          incorrectCount++;
+          //System.out.println("---> incrementing incorrect");
+          setCorrect();
+        }
+        else {
+         // System.out.println("\t not incrementing incorrect");
+        }
       }
       waitForNext();
     }
@@ -171,6 +227,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
     private void waitForNext() {
       prompt.setText(PLEASE_WAIT);
+      exerciseDisplay.setText("");
       stimulus.setVisible(false);
       stimulus.setText("");
 
@@ -211,33 +268,51 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       }
     }
 
-    private void gotStimlusResponse(StimulusAnswerPair result, final ReceiverPanel outer, final LangTestDatabaseAsync service, final ExerciseController controller) {
-      if (result != null) {
-        System.out.println("checkForStimulus.onSuccess : got  " + result);
+    /**
+     * @see ReceiverPanel.StimulusAnswerPairAsyncCallback#onSuccess(mitll.langtest.shared.taboo.StimulusAnswerPair)
+     * @param result
+     * @param outer
+     * @param service
+     * @param controller
+     */
+    private void gotStimulusResponse(StimulusAnswerPair result, final ReceiverPanel outer,
+                                    final LangTestDatabaseAsync service, final ExerciseController controller) {
+      if (result != null && !result.noStimYet) {
+        System.out.println("gotStimulusResponse : got  " + result);
 
         showStimlus(result, outer);
         //  System.out.println("checkForStimulus : answer '" + answer + "'");
-      } else {
+      } else if (result != null) {
+        System.out.println("gotStimulusResponse : got  " + result);
+
         Timer t = new Timer() {
           @Override
           public void run() {
+            System.out.print(".");
             checkForStimulus(service, controller, outer);
           }
         };
 
         // Schedule the timer to run once in 1 seconds.
         t.schedule(1000);
+      } else {
+        Window.alert("Word list complete.");
       }
     }
 
+    private boolean onLastStim = false;
     private void showStimlus(StimulusAnswerPair result, ReceiverPanel outer) {
+      onLastStim = result.isLastStimulus;
+      exerciseDisplay.setText("Phrase # " + result.getExerciseID());
+
       prompt.setText("Please fill in the blank.");
       guessBox.setVisible(true);
       send.setVisible(true);
       stimulus.setVisible(true);
-      stimulus.setText(result.stimulus);
-      outer.answer = result.answer;
-      exerciseID = result.exerciseID;
+      stimulus.setText(result.getStimulus());
+      outer.answer = result.getAnswer();
+      exerciseID = result.getExerciseID();
+      guessBox.setFocus(true);
     }
 
     private HandlerRegistration keyHandler;
@@ -304,7 +379,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
       @Override
       public void onSuccess(StimulusAnswerPair result) {
-        gotStimlusResponse(result, outer, service, controller);
+        gotStimulusResponse(result, outer, service, controller);
       }
     }
 
@@ -329,6 +404,5 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         checkForStimulus(service, controller, outer);
       }
     }
-
   }
 }
