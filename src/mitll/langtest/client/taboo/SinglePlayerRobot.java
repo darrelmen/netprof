@@ -5,18 +5,14 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ExerciseShell;
-import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.Random;
 
 /**
@@ -28,13 +24,19 @@ import java.util.Random;
  */
 public class SinglePlayerRobot {
   private final LangTestDatabaseAsync service;
-  private List<SectionNode> nodes;
-  private List<ExerciseShell> exercisesRemaining = Collections.emptyList();
+//  private List<SectionNode> nodes;
+  private List<ExerciseShell> exercisesRemaining = null;
   private Exercise currentExercise = null;
   private List<String> synonymSentences = Collections.emptyList();
  // int nodeIndex, exerciseIndex, stimIndex;
   private PropertyHandler propertyHandler;
+  //private Collection<ExerciseShell> exerciseShells;
 
+  /**
+   * @see mitll.langtest.client.LangTest#setTabooFactory(long, boolean, boolean)
+   * @param service
+   * @param propertyHandler
+   */
   public SinglePlayerRobot(LangTestDatabaseAsync service, PropertyHandler propertyHandler) {
     this.service = service;
     this.propertyHandler = propertyHandler;
@@ -48,7 +50,7 @@ public class SinglePlayerRobot {
    *
    * @paramx fuserid
    */
-  public void doSinglePlayer() {
+/*  public void doSinglePlayer() {
     if (nodes == null || nodes.isEmpty()) {
       service.getSectionNodes(new AsyncCallback<List<SectionNode>>() {
         @Override
@@ -63,7 +65,7 @@ public class SinglePlayerRobot {
         }
       });
     }
-  }
+  }*/
 
   /**
    * @see ReceiverExerciseFactory.ReceiverPanel#checkForStimulus
@@ -71,29 +73,34 @@ public class SinglePlayerRobot {
    * @param async
    */
   public void checkForStimulus(long userid, AsyncCallback<StimulusAnswerPair> async) {
-    if (exercisesRemaining.isEmpty() && synonymSentences.isEmpty()) {
-      if (nodes == null) {
+    if (exercisesRemaining == null) {
+      StimulusAnswerPair stimulusAnswerPair = new StimulusAnswerPair();
+      stimulusAnswerPair.setNoStimYet(true);
+      async.onSuccess(stimulusAnswerPair); // async query not complete yet
+    }
+    else if (exercisesRemaining.isEmpty() && synonymSentences.isEmpty()) {
+    /*  if (nodes == null) {
         StimulusAnswerPair stimulusAnswerPair = new StimulusAnswerPair();
         stimulusAnswerPair.setNoStimYet(true);
         async.onSuccess(stimulusAnswerPair); // async query not complete yet
       }
       else if (nodes.isEmpty()) {
         System.out.println("checkForStimulus : no chapters left");
-
+*/
         async.onSuccess(null); // no more chapters, no more exercises, we're done -- TODO : start over?
-      }
+    /*  }
       else {
         SectionNode chapter = nodes.remove(0);
         System.out.println("checkForStimulus.getExercisesForNextChapter : next chapter " + chapter);
         getExercisesForNextChapter(userid, chapter, async);
-      }
+      }*/
     }
     else {
       getNextExercise(async);
     }
   }
 
-  private void getExercisesForNextChapter(final long fuserid, final SectionNode chapter, final AsyncCallback<StimulusAnswerPair> async) {
+/*  private void getExercisesForNextChapter(final long fuserid, final SectionNode chapter, final AsyncCallback<StimulusAnswerPair> async) {
     Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
     typeToSection.put(chapter.getType(), Arrays.asList(chapter.getName()));
     System.out.println("getExercisesForNextChapter requesting for " + typeToSection);
@@ -118,7 +125,7 @@ public class SinglePlayerRobot {
         }
       }
     });
-  }
+  }*/
 
   /**
    * @see #checkForStimulus(long, com.google.gwt.user.client.rpc.AsyncCallback)
@@ -217,6 +224,19 @@ public class SinglePlayerRobot {
 
   public void registerAnswer(boolean correct) {
     if (correct) synonymSentences = Collections.emptyList();
-    System.out.println("register answer " + correct);
+    //System.out.println("register answer " + correct);
   }
+
+  public void setExerciseShells(Collection<ExerciseShell> exerciseShells) {
+   // this.exerciseShells = exerciseShells;
+    System.out.println("setExerciseShells : got " + exerciseShells.size() + " exercises");
+    exercisesRemaining = new ArrayList<ExerciseShell>(exerciseShells);
+    Random rand = new Random();
+
+    shuffle(exercisesRemaining, rand);
+  }
+
+ /* public Collection<ExerciseShell> getExerciseShells() {
+    return exerciseShells;
+  }*/
 }
