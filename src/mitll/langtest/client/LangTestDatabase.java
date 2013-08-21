@@ -15,6 +15,7 @@ import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 import mitll.langtest.shared.taboo.TabooState;
 import mitll.langtest.shared.User;
@@ -154,5 +155,7 @@ public interface LangTestDatabase extends RemoteService {
 
   int checkCorrect(long giverUserID, String stimulus);
 
-  boolean isPartnerOnline(long userid, boolean isGiver);
+  PartnerState isPartnerOnline(long userid, boolean isGiver);
+
+  void registerSelectionState(long giver, Map<String, Collection<String>> selectionState);
 }
