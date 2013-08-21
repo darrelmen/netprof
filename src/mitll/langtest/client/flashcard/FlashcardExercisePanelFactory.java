@@ -28,7 +28,7 @@ public class FlashcardExercisePanelFactory extends ExercisePanelFactory {
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList.FlashcardResponseAsyncCallback#onSuccess(mitll.langtest.shared.FlashcardResponse)
+   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList.FlashcardResponseAsyncCallback#onSuccess(mitll.langtest.shared.flashcard.FlashcardResponse)
    * @param e
    * @return
    */
