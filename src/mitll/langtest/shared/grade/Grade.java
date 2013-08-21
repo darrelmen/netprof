@@ -1,9 +1,9 @@
-package mitll.langtest.shared;
+package mitll.langtest.shared.grade;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
- * Represents a grade of a {@link Result} by a grader.
+ * Represents a grade of a {@link mitll.langtest.shared.Result} by a grader.
  * <br></br>
  * So it has a reference to a result id, a grade, the name of the grader, and the grade type.
  * <br></br>
