@@ -1,11 +1,11 @@
 Parts of the city	Some examples are the downtown area, the uptown area, the suburbs.
 Parts of the city	Different neighborhoods within a large place where people live.
 Parts of the city	In Boston, examples are Chinatown, the North End, the Back bay.
-the outskirts		A place where people live that is not the central part of the city.
-the outskirts		When you live here, you live away from the center of the city.
-neighborhood		A nearby area.
-neighborhood		Where you and the people around you live.
-neighborhood		Mister Roger's ...
+the outskirts	A place where people live that is not the central part of the city.
+the outskirts	When you live here, you live away from the center of the city.
+neighborhood	A nearby area.
+neighborhood	Where you and the people around you live.
+neighborhood	Mister Roger's ...
 business district	A part of the city where you can go to do some shopping.
 business district	A part of the city where you can visit a bank or buy something.
 business district	A part of the city where things are bought and sold.
@@ -15,9 +15,9 @@ residential neighborhood	A part of the city where you find houses and not busine
 downtown	The center of the city.
 downtown	The opposite of uptown.
 downtown	The opposite of suburbs.
-suburbs		The opposite of downtown.
-suburbs		Where people move to get a bigger house or a larger lawn.
-suburbs		Where people live that is far from the center of the city.
+suburbs	The opposite of downtown.
+suburbs	Where people move to get a bigger house or a larger lawn.
+suburbs	Where people live that is far from the center of the city.
 bathroom	A place where one can wash oneself.
 bathroom	A place containing a toilet.
 bathroom	A place where you can take a shower.
