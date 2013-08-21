@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.Collection;
 
 /**
- * What the {@link mitll.langtest.server.AutoCRT} object sees of {@link mitll.langtest.server.LangTestDatabaseImpl}
+ * What the {@link mitll.langtest.server.autocrt.AutoCRT} object sees of {@link mitll.langtest.server.LangTestDatabaseImpl}
  * User: GO22670
  * Date: 1/10/13
  * Time: 1:20 PM
