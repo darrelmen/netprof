@@ -125,7 +125,7 @@ public class Flashcard implements RequiresResize {
     int offsetWidth1 = collab.getOffsetWidth();
     int residual = clientWidth - offsetWidth - offsetWidth1 - SLOP;
 
-    System.out.println("setFontWidth : left " + offsetWidth + " right " + offsetWidth1 + " window " + clientWidth + " residual " + residual);
+    //System.out.println("setFontWidth : left " + offsetWidth + " right " + offsetWidth1 + " window " + clientWidth + " residual " + residual);
 
     double ratio = 2.0d * (double) residual / (double) min;
     ratio *= 10;
