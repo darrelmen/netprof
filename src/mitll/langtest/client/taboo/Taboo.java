@@ -15,6 +15,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.TabooState;
 
 /**
@@ -76,7 +77,7 @@ public class Taboo {
   }
 
   /**
-   * TODO : Need some way to quit too - I don't want to play anymore.
+   * TODO : Need some way to quit too - I don't want to play anymore. Sign out?
    * @param fuserid
    */
   private void checkForPartner(final long fuserid) {
@@ -93,7 +94,7 @@ public class Taboo {
 
       @Override
       public void onSuccess(TabooState result) {
-        //System.out.println("checkForPartner.onSuccess : me : " + fuserid + " checking, anyUsersAvailable : " + result);
+        System.out.println("checkForPartner.onSuccess : me : " + fuserid + " checking, anyUsersAvailable : " + result);
         if (result.isJoinedPair()) {
           if (result.isGiver()) {
             afterRoleDeterminedConfirmation(fuserid,
@@ -110,7 +111,7 @@ public class Taboo {
           }
           pollForPartnerOnline(fuserid, result.isGiver());
         } else if (result.isAnyAvailable()) {
-          chooseRoleModal(fuserid);
+          askUserToChooseRole(fuserid);
         } else {
           if (!startedSinglePlayer) {
             System.out.println("me : " + fuserid + " doing single player");
@@ -128,19 +129,22 @@ public class Taboo {
     onlineTimer = new Timer() {
       @Override
       public void run() {
-/*        System.out.println("pollForPartnerOnline : checking if " +
+        System.out.println("pollForPartnerOnline : checking if " +
           (isGiver ? " receiver partner " : " giver partner ") +
-          " of me, " + fuserid + ", is online...");*/
-        service.isPartnerOnline(fuserid, isGiver, new AsyncCallback<Boolean>() {
+          " of me, " + fuserid + ", is online...");
+        service.isPartnerOnline(fuserid, isGiver, new AsyncCallback<PartnerState>() {
           @Override
           public void onFailure(Throwable caught) {
             Window.alert("Couldn't contact server.");
           }
 
           @Override
-          public void onSuccess(Boolean result) {
-            if (result) {
+          public void onSuccess(PartnerState partnerState) {
+            if (partnerState.getOnline()) {
               pollForPartnerOnline(fuserid, isGiver);
+              if (isGiver) {
+                langTest.setSelectionState(partnerState.getTypeToSelection());  // TODO user controller...
+              }
             } else {
               onlineTimer.cancel();
               showUserState("Partner Signed Out", "Your partner signed out, will check for another...", fuserid);
@@ -163,6 +167,14 @@ public class Taboo {
     userTimer.schedule(INACTIVE_PERIOD_MILLIS);
   }
 
+  /**
+   * @see #checkForPartner(long)
+   * @param userID
+   * @param title
+   * @param message
+   * @param message2
+   * @param isGiver
+   */
   private void afterRoleDeterminedConfirmation(final long userID, String title, String message, String message2, final boolean isGiver) {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
@@ -192,7 +204,7 @@ public class Taboo {
     if (userTimer != null) userTimer.cancel();
   }
 
-  private void chooseRoleModal(final long userID) {
+  private void askUserToChooseRole(final long userID) {
     final Modal askGiverReceiver = new Modal(true);
     askGiverReceiver.setCloseVisible(false);
 
@@ -201,8 +213,6 @@ public class Taboo {
     w.setText("Would you like to give items or receive them?");
     askGiverReceiver.add(w);
     final ControlGroup recordingStyle = new ControlGroup();
-
-    // recordingStyle.add(new ControlLabel("<b>Audio Recording Style</b>"));
     Controls controls = new Controls();
 
     final RadioButton give    = new RadioButton("Giver","Give");
@@ -221,7 +231,7 @@ public class Taboo {
       public void onClick(ClickEvent event) {
         final Boolean isGiver = give.getValue();
         if (!isGiver && !receive.getValue()) {
-          Window.alert("please choose to give or receive.");  // TODO better highlighting
+          Window.alert("Please choose to give or receive.");  // TODO better highlighting
         } else {
           askGiverReceiver.hide();
 
