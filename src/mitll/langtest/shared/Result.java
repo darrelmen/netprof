@@ -1,6 +1,7 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.grade.Grade;
 
 /**
  * An answer to a question. <br></br>

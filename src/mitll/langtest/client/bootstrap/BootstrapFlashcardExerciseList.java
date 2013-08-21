@@ -24,14 +24,16 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.SelectionState;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseShell;
-import mitll.langtest.shared.FlashcardResponse;
-import mitll.langtest.shared.Leaderboard;
-import mitll.langtest.shared.ScoreInfo;
+import mitll.langtest.shared.flashcard.FlashcardResponse;
+import mitll.langtest.shared.flashcard.Leaderboard;
+import mitll.langtest.shared.flashcard.ScoreInfo;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.PlotBand;
 import org.moxieapps.gwt.highcharts.client.Series;
@@ -55,11 +57,6 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private final Column exercisePanelColumn;
   private ExercisePanelFactory factory;
   private LangTestDatabaseAsync service;
-
-  @Override
-  public void addAdHocExercise(String label) {
-    //To change body of implemented methods use File | Settings | File Templates.
-  }
 
   private UserManager user;
   private Heading correct = new Heading(4);
@@ -182,12 +179,12 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
        @Override
        public void onSuccess(Leaderboard result) {
          List<ScoreInfo> scores = result.getScores(currentSelection);
-         showDialog(scores, userID);
+         showLeaderboardPlot(scores, userID);
        }
      });
   }
 
-  private void showDialog(List<ScoreInfo> scores, final long userID) {
+  private void showLeaderboardPlot(List<ScoreInfo> scores, final long userID) {
     int pbCorrect = 0;
     int top = 0;
     float total = 0;
@@ -385,6 +382,20 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     return new SimplePanel();
   }
 
+  public Widget getExerciseListOnLeftSide(PropertyHandler props) {
+    FlowPanel leftColumn = new FlowPanel();
+    leftColumn.addStyleName("floatLeft");
+    DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
+
+    if (!props.isFlashcardTeacherView() && !props.isMinimalUI()) {
+      Heading items = new Heading(4, ExerciseList.ITEMS);
+      items.addStyleName("center");
+      leftColumn.add(items);
+    }
+    leftColumn.add(getWidget());
+    return leftColumn;
+  }
+
   /**
    * @param current
    * @return
@@ -438,8 +449,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   }
 
   @Override
-  public void onResize() {
-  }
+  public void onResize() {}
 
   private class FlashcardResponseAsyncCallback implements AsyncCallback<FlashcardResponse> {
     @Override
@@ -462,6 +472,9 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
       }
     }
   }
+
+  @Override
+  public void addAdHocExercise(String label) {}
 
   protected void grabFocus(final BootstrapExercisePanel panel) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
