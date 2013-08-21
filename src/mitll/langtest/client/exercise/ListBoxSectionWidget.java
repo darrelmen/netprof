@@ -92,10 +92,10 @@ public class ListBoxSectionWidget extends ListBox implements SectionWidget {
     return this;
   }
 
-  @Override
+/*  @Override
   public void enableInSet(Collection<String> inSet) {
     //To change body of implemented methods use File | Settings | File Templates.
-  }
+  }*/
 
   @Override
   public void enableAll() {
