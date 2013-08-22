@@ -177,10 +177,11 @@ public class UserManager {
 
   /**
    * Somebody should call this when the user does something in taboo
+   * @see mitll.langtest.client.LangTest#pingAliveUser()
    */
   public void userAlive() {
     int user = getUser();
-   // System.out.println(new Date() +" --------> userAlive : " + user);
+    System.out.println(new Date() +" --------> userAlive : " + user);
     userOnline(user, true);
     waitThenInactivate();
   }
@@ -193,18 +194,19 @@ public class UserManager {
   }
 
   private void userOnline(int user, final boolean active) {
-    service.userOnline(user, active, new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        Window.alert("Couldn't contact server, check network connection.");
-      }
+    if (trackUsers) {
+      service.userOnline(user, active, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          Window.alert("Couldn't contact server, check network connection.");
+        }
 
-      @Override
-      public void onSuccess(Void result) {
-        System.out.println("registered " + getUser() + " as being " + (active ?
-          "online." : " offline."));
-      }
-    });
+        @Override
+        public void onSuccess(Void result) {
+          System.out.println("registered " + getUser() + " as being " + (active ? "online." : " offline."));
+        }
+      });
+    }
   }
 
   private void waitThenInactivate() {
@@ -338,11 +340,12 @@ public class UserManager {
 
       //System.out.println("user id cookie for " +getUserIDCookie() + " is " + sid);
       if (sid != null && !sid.equals("" + NO_USER_SET)) {
+        int userID1 = Integer.parseInt(sid);
         if (userExpired(sid)) {
-          clearUser();
+          clearUser(userID1);
         } else if (getLoginTypeFromStorage() != loginType) {
           System.out.println("current login type : " + getLoginTypeFromStorage() + " vs mode " + loginType);
-          clearUser();
+          clearUser(userID1);
         }
 
         sid = localStorageIfSupported.getItem(getUserIDCookie());
@@ -434,6 +437,15 @@ public class UserManager {
    */
   public void clearUser() {
     userInactive();
+    clearCookieState();
+  }
+
+  public void clearUser(int userID) {
+    userOnline(userID, false);
+    clearCookieState();
+  }
+
+  private void clearCookieState() {
     langTest.rememberAudioType(Result.AUDIO_TYPE_UNSET);
     if (useCookie) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
