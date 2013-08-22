@@ -68,6 +68,7 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
@@ -565,7 +566,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void addResizeHandler() {
     Window.addResizeHandler(new ResizeHandler() {
       public void onResize(ResizeEvent event) {
-        exerciseList.onResize();
+        if (exerciseList != null) {
+          exerciseList.onResize();
+        }
         if (flashcard != null) {
           flashcard.onResize();
         }
@@ -673,6 +676,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private SinglePlayerRobot singlePlayerRobot;
 
   /**
+   * @see Taboo#afterRoleDeterminedConfirmation(long, String, String, String, boolean)
    * @see Taboo#askUserToChooseRole(long)
    * @see Taboo#checkForPartner(long)
    * @see
@@ -681,16 +685,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param singlePlayer
    */
   public void setTabooFactory(long userID, boolean isGiver, boolean singlePlayer) {
-    System.out.println("setTabooFactory : User " + userID + " is a giver " + isGiver + " single " + singlePlayer);
-    TabooExerciseList tabooExerciseList = (TabooExerciseList) exerciseList;
-    tabooExerciseList.setGiver(isGiver);
+    System.out.println("setTabooFactory : User " + userID + " is giver = " + isGiver + " single " + singlePlayer);
+  //  TabooExerciseList tabooExerciseList = (TabooExerciseList) exerciseList;
+   // tabooExerciseList.setGiver(isGiver);
 
     String appTitle = props.getAppTitle();
     String appTitle1 = appTitle + " : Giver";
     boolean changed;
     if (isGiver) {
-      changed = (exerciseList.getFactory() instanceof ReceiverExerciseFactory);
+      changed = true;//(exerciseList.getFactory() instanceof ReceiverExerciseFactory);
       GiverExerciseFactory factory = new GiverExerciseFactory(service, this, this);
+      System.out.println("setTabooFactory : made " + factory);
+
       exerciseList.setFactory(factory, userManager, 1);
 
     } else {
@@ -702,6 +708,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
       exerciseList.setFactory(new ReceiverExerciseFactory(service, this, this, singlePlayer ? singlePlayerRobot : null), userManager, 1);
       appTitle1 = appTitle + (singlePlayer ? " : Single Player" : " : Receiver");
+      if (singlePlayer) {
+        setSelectionState(Collections.EMPTY_MAP);
+      }
     }
     setTitle(appTitle1);
     if (pageTitle == null) {
@@ -711,7 +720,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       pageTitle.setText(appTitle1);
     }
 
-    if (!doEverythingAfterFactory(userID) && changed) {
+    if (!doEverythingAfterFactory(userID) /*&& changed*/) {
       exerciseList.getExercises(userID);
     }
   }
