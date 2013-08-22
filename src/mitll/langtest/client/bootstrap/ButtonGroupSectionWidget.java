@@ -76,6 +76,10 @@ class ButtonGroupSectionWidget implements SectionWidget {
     clearButton.setEnabled(false);
   }
 
+  /**
+   * @see SectionExerciseList#getCurrentSelection(String)
+   * @return
+   */
   @Override
   public String getCurrentSelection() {
     if (currentSelection == null) {
@@ -85,11 +89,11 @@ class ButtonGroupSectionWidget implements SectionWidget {
   }
 
   /**
-   *
+   * @see #getCurrentSelection()
    * @return a comma separated list of selected units, chapters, or sections
    */
   private String getCurrentSelectionInternal() {
-    System.out.println("getCurrentSelection for " + type + " checking " + buttons.size() + " buttons.");
+    //System.out.println("getCurrentSelection for " + type + " checking " + buttons.size() + " buttons.");
     StringBuilder builder = new StringBuilder();
     Set<String> unique = new HashSet<String>();
     List<String> inOrder = new ArrayList<String>();
