@@ -480,6 +480,15 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   public void setSelectionState(Map<String, Collection<String>> selectionState) {
   }
 
+  @Override
+  public void hideExerciseList() {
+  }
+
+  @Override
+  public void showExerciseList() {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
   protected void grabFocus(final BootstrapExercisePanel panel) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
       public void execute () {
