@@ -46,11 +46,13 @@ public class NavigationHelper extends HorizontalPanel {
     getNextAndPreviousButtons(exercise, controller);
   }
 
-  public NavigationHelper(Exercise exercise, ExerciseController controller, boolean enableNextOnlyWhenAllCompleted) {
+  public NavigationHelper(final Exercise exercise, ExerciseController controller, boolean enableNextOnlyWhenAllCompleted) {
     this.enableNextOnlyWhenAllCompleted = enableNextOnlyWhenAllCompleted;
     this.provider = new PostAnswerProvider() {
       @Override
-      public void postAnswers(ExerciseController controller, Exercise completedExercise) {}
+      public void postAnswers(ExerciseController controller, Exercise completedExercise) {
+        controller.loadNextExercise(exercise);
+      }
     };
     setSpacing(5);
     getNextAndPreviousButtons(exercise, controller);
