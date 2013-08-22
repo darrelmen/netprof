@@ -3,6 +3,7 @@ package mitll.langtest.client.exercise;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.History;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -103,7 +104,9 @@ public class SelectionState {
   }
 
   private void add(String type, Collection<String> section) {
-    getTypeToSection().put(type, section);
+    List<String> copy = new ArrayList<String>();
+    for (String s : section) copy.add(s.trim());
+    getTypeToSection().put(type, copy);
   }
 
   public String getItem() {
