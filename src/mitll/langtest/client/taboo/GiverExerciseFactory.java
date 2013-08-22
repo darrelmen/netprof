@@ -52,14 +52,19 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
    * @param service
    * @param userFeedback
    * @param controller
-   * @see mitll.langtest.client.LangTest#setFactory
+   * @see mitll.langtest.client.LangTest#setTabooFactory(long, boolean, boolean)
    */
   public GiverExerciseFactory(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                               final ExerciseController controller) {
     super(service, userFeedback, controller);
   }
 
-  public Panel getExercisePanel(final Exercise e) { return new GiverPanel(e);  }
+  public Panel getExercisePanel(final Exercise e) {
+    System.out.println("\nGiverExerciseFactory.getExercisePanel getting receiver panel ...");
+    controller.pingAliveUser();
+
+    return new GiverPanel(e);
+  }
 
   private class GiverPanel extends FluidContainer {
     private List<String> sentItems = new ArrayList<String>();
@@ -119,7 +124,9 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       add(pleaseWait);
       pleaseWait.setVisible(false);
 
-      NavigationHelper w1 = new NavigationHelper(exercise, controller, false);
+      NavigationHelper w1 = new NavigationHelper(exercise, controller,
+        false // means next button is always enabled
+      );
       w1.addStyleName("topMargin");
       add(w1);
     }
@@ -139,53 +146,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       }
     }
 
-/*    private HandlerRegistration keyHandler;
-
-    private void addKeyHandler() {
-      keyHandler = Event.addNativePreviewHandler(new
-                                                   Event.NativePreviewHandler() {
-
-                                                     @Override
-                                                     public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                                                       NativeEvent ne = event.getNativeEvent();
-                                                       int keyCode = ne.getKeyCode();
-
-                                                       boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
-
-                                                       //   System.out.println("key code is " +keyCode);
-                                                       if (isEnter && event.getTypeInt() == 512 &&
-                                                         "[object KeyboardEvent]".equals(ne.getString())) {
-                                                         ne.preventDefault();
-                                                         send.fireEvent(new ButtonClickEvent());
-                                                       }
-                                                     }
-                                                   });
-      // System.out.println("addKeyHandler made click handler " + keyHandler);
-    }
-
-    private class ButtonClickEvent extends ClickEvent{
-        *//*To call click() function for Programmatic equivalent of the user clicking the button.*//*
-    }
-
-    @Override
-    protected void onLoad() {
-      super.onLoad();
-      addKeyHandler();
-    }
-
-    @Override
-    protected void onUnload() {
-      super.onUnload();
-      removeKeyHandler();
-    }
-
-    public void removeKeyHandler() {
-      System.out.println("removeKeyHandler : " + keyHandler);
-
-      if (keyHandler != null) keyHandler.removeHandler();
-    }*/
-
-    String lastSentExercise = "";
+    private String lastSentExercise = "";
 
     /**
      * @see GiverPanel#GiverPanel(mitll.langtest.shared.Exercise)
@@ -254,7 +215,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       List<String> synonymSentences = e.getSynonymSentences();
 
       List<String> notSentYet = new ArrayList<String>();
-      System.out.println("getNotSentYetHints for " + synonymSentences.size());
+     // System.out.println("getNotSentYetHints for " + synonymSentences.size());
       for (String candidate : synonymSentences) {
         if (sentItems.contains(getObfuscated(candidate, refSentence))) {
           System.out.println("---> already sent " + candidate);
@@ -262,7 +223,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
           notSentYet.add(candidate);
         }
       }
-      System.out.println("getNotSentYetHints now " + notSentYet.size());
+     // System.out.println("getNotSentYetHints now " + notSentYet.size());
 
       return notSentYet;
     }
@@ -354,27 +315,4 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       t.schedule(3000);
     }
   }
-
-/*  private void showUserState(String title, String message) {
-    final Modal modal = new Modal(true);
-    modal.setTitle(title);
-    Heading w = new Heading(4);
-    w.setText(message);
-    modal.add(w);
-
-    final Button begin = new Button("OK");
-    begin.setType(ButtonType.PRIMARY);
-    begin.setEnabled(true);
-
-    begin.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        modal.hide();
-       // langTest.setTabooFactory(userID, isGiver, false);
-      }
-    });
-    modal.add(begin);
-
-    modal.show();
-  }*/
 }
