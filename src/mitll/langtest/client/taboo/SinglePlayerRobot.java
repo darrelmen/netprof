@@ -229,7 +229,7 @@ public class SinglePlayerRobot {
 
   public void setExerciseShells(Collection<ExerciseShell> exerciseShells) {
    // this.exerciseShells = exerciseShells;
-    System.out.println("setExerciseShells : got " + exerciseShells.size() + " exercises");
+    //System.out.println("setExerciseShells : got " + exerciseShells.size() + " exercises");
     exercisesRemaining = new ArrayList<ExerciseShell>(exerciseShells);
     Random rand = new Random();
 

@@ -18,6 +18,9 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.TabooState;
 
+import java.util.Collection;
+import java.util.Map;
+
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -31,7 +34,6 @@ public class Taboo {
   private LangTest langTest;
   boolean startedSinglePlayer;
 
-  //private static final int FIRST_POLL_PERIOD_MILLIS = 1000 * 3; // ten minutes
   private static final int INACTIVE_PERIOD_MILLIS = 1000 * 2; // ten minutes
   private static final int INACTIVE_PERIOD_MILLIS2 = 1000 * 5; // ten minutes
 
@@ -50,30 +52,9 @@ public class Taboo {
   }
 
   public void initialCheck(final long fuserid) {
+    System.out.println("initialCheck : me : " + fuserid + " ...\n\n\n");
+
     checkForPartner(fuserid);
-  }
-
-  private void showUserState(String title, String message, final long fuserid) {
-    final Modal modal = new Modal(true);
-    modal.setTitle(title);
-    Heading w = new Heading(4);
-    w.setText(message);
-    modal.add(w);
-
-    final Button begin = new Button("OK");
-    begin.setType(ButtonType.PRIMARY);
-    begin.setEnabled(true);
-
-    begin.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        modal.hide();
-        checkForPartner(fuserid);
-      }
-    });
-    modal.add(begin);
-
-    modal.show();
   }
 
   /**
@@ -94,7 +75,9 @@ public class Taboo {
 
       @Override
       public void onSuccess(TabooState result) {
-        System.out.println("checkForPartner.onSuccess : me : " + fuserid + " checking, anyUsersAvailable : " + result);
+        if (result.isAnyAvailable()) {
+          System.out.println("checkForPartner.onSuccess : me : " + fuserid + " checking, anyUsersAvailable : " + result);
+        }
         if (result.isJoinedPair()) {
           if (result.isGiver()) {
             afterRoleDeterminedConfirmation(fuserid,
@@ -109,6 +92,9 @@ public class Taboo {
               "Sign out to stop playing.",
               false);
           }
+
+          System.out.println("\n\n\n----> checkForPartner.onSuccess : me : " + fuserid + " isGiver " + result.isGiver());
+
           pollForPartnerOnline(fuserid, result.isGiver());
         } else if (result.isAnyAvailable()) {
           askUserToChooseRole(fuserid);
@@ -125,13 +111,18 @@ public class Taboo {
     });
   }
 
+  /**
+   * Keep checking that the partner is still active, and if the giver, check if selection state has changed.
+   * @param fuserid
+   * @param isGiver
+   */
   private void pollForPartnerOnline(final long fuserid, final boolean isGiver) {
     onlineTimer = new Timer() {
       @Override
       public void run() {
-        System.out.println("pollForPartnerOnline : checking if " +
+/*        System.out.println("pollForPartnerOnline : checking if " +
           (isGiver ? " receiver partner " : " giver partner ") +
-          " of me, " + fuserid + ", is online...");
+          " of me, " + fuserid + ", is online...");*/
         service.isPartnerOnline(fuserid, isGiver, new AsyncCallback<PartnerState>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -143,11 +134,21 @@ public class Taboo {
             if (partnerState.getOnline()) {
               pollForPartnerOnline(fuserid, isGiver);
               if (isGiver) {
-                langTest.setSelectionState(partnerState.getTypeToSelection());  // TODO user controller...
+                Map<String,Collection<String>> typeToSelection = partnerState.getTypeToSelection();
+
+                System.out.println("pollForPartnerOnline : checked if" +
+                  (isGiver ? " receiver partner " : " giver partner ") +
+                  " of me, " + fuserid + ", is online and got state " + typeToSelection);
+                langTest.setSelectionState(typeToSelection);  // TODO user controller...
+              }
+              else {
+/*                System.out.println("pollForPartnerOnline : checked if " +
+                  (isGiver ? " receiver partner " : " giver partner ") +
+                  " of me, " + fuserid + ", is online.");*/
               }
             } else {
               onlineTimer.cancel();
-              showUserState("Partner Signed Out", "Your partner signed out, will check for another...", fuserid);
+              showPartnerSignedOut("Partner Signed Out", "Your partner signed out, will check for another...", fuserid);
             }
           }
         });
@@ -155,6 +156,29 @@ public class Taboo {
       }
     };
     onlineTimer.schedule(INACTIVE_PERIOD_MILLIS2);
+  }
+
+  private void showPartnerSignedOut(String title, String message, final long fuserid) {
+    final Modal modal = new Modal(true);
+    modal.setTitle(title);
+    Heading w = new Heading(4);
+    w.setText(message);
+    modal.add(w);
+
+    final Button begin = new Button("OK");
+    begin.setType(ButtonType.PRIMARY);
+    begin.setEnabled(true);
+
+    begin.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        modal.hide();
+        checkForPartner(fuserid);
+      }
+    });
+    modal.add(begin);
+
+    modal.show();
   }
 
   private void pollForPartner() {
@@ -204,6 +228,10 @@ public class Taboo {
     if (userTimer != null) userTimer.cancel();
   }
 
+  /**
+   * After choosing role, check to see if
+   * @param userID
+   */
   private void askUserToChooseRole(final long userID) {
     final Modal askGiverReceiver = new Modal(true);
     askGiverReceiver.setCloseVisible(false);
@@ -242,6 +270,8 @@ public class Taboo {
             @Override
             public void onSuccess(Void result) {
               langTest.setTabooFactory(userID, isGiver, false);
+              System.out.println("role registered for " +userID + " checking for partner...");
+              checkForPartner(userID);
             }
           });
         }
