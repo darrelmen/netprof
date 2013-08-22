@@ -5,7 +5,6 @@ import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
-import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.Row;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -54,7 +53,7 @@ import java.util.Date;
  */
 public class ReceiverExerciseFactory extends ExercisePanelFactory {
   public static final int POPUP_DURATION = 2000;
-  public static final int CHECK_FOR_STIMULUS_INTERVAL = 1000;
+  public static final int CHECK_FOR_STIMULUS_INTERVAL = 2000;
   private SinglePlayerRobot singlePlayerRobot;
 
   /**
@@ -79,9 +78,13 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
    * @return
    */
   public Panel getExercisePanel(Exercise totallyIgnored) {
-    System.out.println("\n\n\n\nReceiverExerciseFactory.getExercisePanel getting receiver panel ...");
+   // System.out.println("\nReceiverExerciseFactory.getExercisePanel getting receiver panel ...");
+    controller.pingAliveUser();
+
     return new ReceiverPanel(service,controller);
   }
+
+ // private Set<String> exerciseList = new HashSet<String>();
 
   /**
    * @see TabooExerciseList#rememberExercises(java.util.List)
@@ -91,16 +94,13 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     if (singlePlayerRobot != null) {
       singlePlayerRobot.setExerciseShells(exerciseShells);
     }
+   // for (ExerciseShell shell : exerciseShells) exerciseList.add(shell.getID());
   }
-
- /* public TabooExerciseList getExerciseList() {
-    return exerciseList;
-  }*/
 
   private class ReceiverPanel extends FluidContainer {
     private static final String PLEASE_WAIT = "Please wait for giver to send next sentence.";
     Heading exerciseDisplay = new Heading(3);
-    Heading prompt = new Heading(3, "Checking for game partners...");
+    Heading prompt = new Heading(3/*, "Checking for game partners..."*/);
     TextBox guessBox = new NoPasteTextBox();
     Heading stimulus;
     String answer;
@@ -147,13 +147,12 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       warnNoFlash.setVisible(false);
       final SoundFeedback soundFeedback = new SoundFeedback(controller.getSoundManager(), warnNoFlash);
 
-      waitForNext();
+      waitForNext(true);
 
       send.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          controller.pingAliveUser();
-          sendAnswer(service, controller, outer, soundFeedback);
+          sendAnswerOnClick(controller, service, outer, soundFeedback);
         }
 
       });
@@ -168,11 +167,16 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       add(container);
 
       add(warnNoFlash);
-      add(getExerciseListOnLeftSide());
+      add(addCorrectIncorrectFeedback());
       return outer;
     }
 
-    public Widget getExerciseListOnLeftSide() {
+    private void sendAnswerOnClick(ExerciseController controller, LangTestDatabaseAsync service, ReceiverPanel outer, SoundFeedback soundFeedback) {
+      controller.pingAliveUser();
+      sendAnswer(service, controller, outer, soundFeedback);
+    }
+
+    public Widget addCorrectIncorrectFeedback() {
       Panel correctAndImageRow = new FlowPanel();
       correctAndImageRow.addStyleName("headerBackground");
       correctAndImageRow.addStyleName("blockStyle");
@@ -207,6 +211,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
         correctCount++;
         setCorrect();
+//        keepTrackOfRemainingExercises();
       }
       else {
         incorrectImage.setVisible(true);
@@ -216,13 +221,21 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
           incorrectCount++;
           //System.out.println("---> incrementing incorrect");
           setCorrect();
+//          keepTrackOfRemainingExercises();
         }
         else {
          // System.out.println("\t not incrementing incorrect");
         }
       }
-      waitForNext();
+      waitForNext(false);
     }
+
+/*
+    private void keepTrackOfRemainingExercises() {
+      if (!exerciseList.contains(exerciseID)) System.err.println("huh? can't find " + exerciseID + " in list of current exercises...");
+      else exerciseList.remove(exerciseID);
+    }
+*/
 
     private void registerAnswer(final LangTestDatabaseAsync service, final ExerciseController controller, final ReceiverPanel outer, boolean correct) {
       if (singlePlayerRobot != null) {
@@ -233,8 +246,10 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         new RegisterAnswerResponseCallback(service, controller, outer));
     }
 
-    private void waitForNext() {
-      prompt.setText(PLEASE_WAIT);
+    private void waitForNext(boolean initialCall) {
+      //if (!initialCall) {
+        prompt.setText(PLEASE_WAIT);
+      //}
       exerciseDisplay.setText("");
       stimulus.setVisible(false);
       stimulus.setText("");
@@ -268,7 +283,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
      * @param outer
      */
     private void checkForStimulus(final LangTestDatabaseAsync service, final ExerciseController controller, final ReceiverPanel outer) {
-      System.out.println(new Date() + "checkForStimulus : user " + controller.getUser() + "----------------");
+      //System.out.println(new Date() + " : checkForStimulus : user " + controller.getUser() + "----------------");
       //cancelStimTimer();
 
       if (singlePlayerRobot != null) {
@@ -282,6 +297,9 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     private Timer checkStimTimer = null;
 
     /**
+     * See if giver has sent the next stimulus yet.
+     * If not, poll until it arrives.
+     *
      * @see ReceiverPanel.StimulusAnswerPairAsyncCallback#onSuccess(mitll.langtest.shared.taboo.StimulusAnswerPair)
      * @param result
      * @param outer
@@ -307,12 +325,12 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
           checkStimTimer = new Timer() {
             @Override
             public void run() {
-              System.out.println("Fired!  Timer : " + checkStimTimer + " " + new Date() + " : checkForStimulus : " + controller.getUser());
+             // System.out.println("Fired!  Timer : " + checkStimTimer + " " + new Date() + " : checkForStimulus : " + controller.getUser());
               checkStimTimer = null;
               checkForStimulus(service, controller, outer);
             }
           };
-          System.out.println("Queued: Timer : " + checkStimTimer + " " + new Date() + " : checkForStimulus : " + controller.getUser());
+          //System.out.println("Queued: Timer : " + checkStimTimer + " " + new Date() + " : checkForStimulus user #" + controller.getUser());
 
           // Schedule the timer to run once in 1 seconds.
           checkStimTimer.schedule(CHECK_FOR_STIMULUS_INTERVAL);
@@ -321,10 +339,10 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
           System.out.println("\tNot making a new timer for " + "? at " +new Date() );
 
         }
-      } else {
+      } else { // no more stimulus left...
         removeKeyHandler();
         prompt.setText("Please choose another chapter(s).");
-        showUserState("Word list complete","Please choose another chapter.");
+        new ModalInfoDialog("Word list complete", "Please choose another chapter.");
       }
     }
 
@@ -446,27 +464,8 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       }
     }
   }
-
+/*
   private void showUserState(String title, String message) {
-    final Modal modal = new Modal(true);
-    modal.setTitle(title);
-    Heading w = new Heading(4);
-    w.setText(message);
-    modal.add(w);
-
-    final Button begin = new Button("OK");
-    begin.setType(ButtonType.PRIMARY);
-    begin.setEnabled(true);
-    begin.setFocus(true);
-    begin.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        modal.hide();
-        // langTest.setTabooFactory(userID, isGiver, false);
-      }
-    });
-    modal.add(begin);
-
-    modal.show();
-  }
+    new ModalInfoDialog(title, message);
+  }*/
 }
