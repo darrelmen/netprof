@@ -18,6 +18,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseShell;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -51,8 +52,6 @@ public class TabooExerciseList extends FlexSectionExerciseList {
 
   /**
    *
-   * TODO : how do we get the receiver to notify giver of chapter choices?
-   *
    * @param factory
    * @param user
    * @param expectedGrades
@@ -60,60 +59,63 @@ public class TabooExerciseList extends FlexSectionExerciseList {
   @Override
   public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {
     super.setFactory(factory, user, expectedGrades);
+    System.out.println("TabooExerciseList.setFactory : " + factory.getClass() + " for user " + user.getUser());
     if (factory instanceof ReceiverExerciseFactory) {
       receiverFactory = (ReceiverExerciseFactory) factory;
-
-      //receiverFactory.setExerciseList(this);
+      isGiver = false;
     }
- /*   if (!isGiver) {
-      ((ReceiverExerciseFactory) factory).isSinglePlayer())
-    }*/
-    if (!isGiver) makeExercisePanel(null);
+
+    if (!isGiver) {
+      hideExerciseList();
+      makeExercisePanel(null);
+    }
+    else {
+      showExerciseList();
+    }
   }
 
   @Override
-  public Widget getExerciseListOnLeftSide(PropertyHandler props) {
-    Panel correctAndImageRow = new FlowPanel();
-
-    return correctAndImageRow;
+  protected void addBottomText(FluidContainer container) {
+    super.addBottomText(container);
+    if (isGiver) {
+      System.out.println("----> hiding container for " + userID);
+      container.setVisible(false);
+    }
   }
 
   /**
-   * @see #getWidgetsForTypes(long)
-   * @param userID
-   * @param container
+   * @see mitll.langtest.client.exercise.ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
+   * @see mitll.langtest.client.exercise.SectionExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
+   * @param result
    */
-  @Override
-  protected void getTypeOrder(long userID, FluidContainer container) {
-    if (!isGiver) {
-      super.getTypeOrder(userID, container);
-    }
-    else {
-      addBottomText(container);
-    }
-  }
-
-  public void setGiver(boolean isGiver) {
-    this.isGiver = isGiver;
-  }
-
   protected void rememberExercises(List<ExerciseShell> result) {
     SelectionState selectionState = getSelectionState(History.getToken());
     System.out.println("rememberExercises : user " + userID + " " + (isGiver ? " giver " : " receiver ") +
       " remembering " + result.size() + " exercises, " +
-      "state is " + selectionState);
-    currentExercises = result; // remember current exercises
-    idToExercise = new HashMap<String, ExerciseShell>();
-    clear();
-    for (final ExerciseShell es : result) {
-      idToExercise.put(es.getID(), es);
-      if (isGiver) addExerciseToList(es);
+      "state is '" + selectionState +"'");
+
+    if (isGiver) {
+      super.rememberExercises(result);
     }
-    flush();
-    if (receiverFactory != null) {
-      receiverFactory.setExerciseShells(getExerciseShells());
+    else {
+      currentExercises = result; // remember current exercises
+      idToExercise = new HashMap<String, ExerciseShell>();
+      clear();
+      for (final ExerciseShell es : result) {
+        idToExercise.put(es.getID(), es);
+        // addExerciseToList(es);
+      }
+      flush();
+      if (receiverFactory != null) {
+        receiverFactory.setExerciseShells(getExerciseShells());
+      }
+      tellPartnerMyChapterSelection(selectionState);
     }
-    if (!isGiver) {
+  }
+
+  private void tellPartnerMyChapterSelection(SelectionState selectionState) {
+   // if (!isGiver) { // tell your partner you changed the chapter selection
+      System.out.println("telling partner selection state for " + userID + " is " + selectionState);
       service.registerSelectionState(userID, selectionState.getTypeToSection(), new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -121,10 +123,21 @@ public class TabooExerciseList extends FlexSectionExerciseList {
         }
 
         @Override
-        public void onSuccess(Void result) {
-
-        }
+        public void onSuccess(Void result) {}
       });
+  //  }
+  }
+
+  @Override
+  protected void onLastItem() {
+    if (isGiver) {
+      new ModalInfoDialog("Word list complete", "Perhaps you like to choose another chapter?");
+    }
+    else {
+      List<String> message = new ArrayList<String>();
+      message.add("Please wait for giver to choose another chapter.");
+      message.add("Or you could stop playing by clicking sign out.");
+      new ModalInfoDialog("Word list complete", message);
     }
   }
 }

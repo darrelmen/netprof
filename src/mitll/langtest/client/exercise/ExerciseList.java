@@ -146,8 +146,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   private void pushFirstSelection(String exerciseID) {
     String token = History.getToken();
-    //System.out.println("pushFirstSelection : current token '" + token + "' vs new " +exerciseID);
-    if (token != null && getIDFromToken(token).equals(exerciseID)) {
+    String idFromToken = getIDFromToken(token);
+    System.out.println("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
+      "' vs new exercise " +exerciseID);
+    if (token != null && idFromToken.equals(exerciseID)) {
       System.out.println("\tpushFirstSelection :current token " + token + " same as new " +exerciseID);
       loadByIDFromToken(exerciseID);
     }
@@ -165,7 +167,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param exerciseID
    */
   protected void pushNewItem(String exerciseID) {
-    System.out.println("------------ pushNewItem : push history " + exerciseID + " -------------- ");
+    System.out.println("------------ ExerciseList.pushNewItem : push history " + exerciseID + " -------------- ");
     History.newItem("#item=" + exerciseID);
   }
 
@@ -201,13 +203,16 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return token;
   }
 
+  /**
+   * @see #getExercises(long)
+   */
   protected class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper> {
     public void onFailure(Throwable caught) {
       feedback.showErrorMessage("Server error", "Server error - couldn't get exercises.");
     }
 
     public void onSuccess(ExerciseListWrapper result) {
-      System.out.println("SetExercisesCallback Got " + result.exercises.size() + " results");
+      //System.out.println("SetExercisesCallback Got " + result.exercises.size() + " results");
       if (isStaleResponse(result)) {
         System.out.println("----> ignoring result " + result.reqID + " b/c before latest " + lastReqID);
       } else {
@@ -222,7 +227,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   protected void rememberExercises(List<ExerciseShell> result) {
-    System.out.println(new Date() + " : remembering " + result.size() + " exercises");
+    System.out.println("ExerciseList : remembering " + result.size() + " exercises");
     currentExercises = result; // remember current exercises
     idToExercise = new HashMap<String, ExerciseShell>();
     clear();
@@ -233,11 +238,29 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     flush();
   }
 
-  public Collection<ExerciseShell> getExerciseShells() { return idToExercise.values(); }
-  public void setSelectionState(Map<String,Collection<String>> selectionState) {
-    String newSelectionState = selectionState.toString().replace("[", "").replace("]", "").replace("{","").replace("}","");
-    System.out.println("setSelectionState : setting selection state to : " + newSelectionState);
-    History.newItem(newSelectionState);
+  public Collection<ExerciseShell> getExerciseShells() {
+    return idToExercise.values();
+  }
+
+  public void setSelectionState(Map<String, Collection<String>> selectionState) {
+   /* String newSelectionState = selectionState.toString().replace("[", "").replace("]", "").replace("{", "").replace("}", "");
+
+    if (!History.getToken().equals(newSelectionState)) {
+      System.out.println("ExerciseList.setSelectionState : setting selection state to : " + newSelectionState);
+      SelectionState selectionState2 = getSelectionState(token);
+      restoreListBoxState(selectionState2);
+      History.newItem(newSelectionState);
+    }*/
+  }
+
+  @Override
+  public void hideExerciseList() {
+    getParent().setVisible(false);
+    //getParent().setWidth("1px");
+  }
+
+  public void showExerciseList() {
+    getParent().setVisible(true);
   }
 
   protected void flush() {}
@@ -303,7 +326,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected void loadExercise(ExerciseShell exerciseShell) {
     String token = History.getToken();
     String id = getIDFromToken(unencodeToken(token));
-    System.out.println("loadExercise " + token + " -> " +id);
+    System.out.println("ExerciseList.loadExercise token '" + token + "' -> '" +id +"'");
 
 /*    if (id.equals(exerciseShell.getID())) {
       System.out.println("skipping current token " + token);
@@ -324,7 +347,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     String value = event.getValue();
     String token = getTokenFromEvent(event);
     String id = getIDFromToken(token);
-    System.out.println("onValueChange got " + event.getAssociatedType() + " "+ value + " token " + token + " id " + id);
+    System.out.println("ExerciseList.onValueChange got " + event.getAssociatedType() + " "+ value + " token " + token + " id " + id);
 
     if (id.length() > 0) {
       loadByIDFromToken(id);
@@ -515,12 +538,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   @Override
   public boolean loadNextExercise(ExerciseShell current) {
-    System.out.println("loadNextExercise current is : " +current);
     int i = getIndex(current);
 
     visited.add(i);
 
     boolean onLast = i == currentExercises.size() - 1;
+    System.out.println("loadNextExercise current is : " +current + " index " +i + " on last " + onLast);
     if (onLast) {
       onLastItem();
     }
@@ -533,6 +556,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return onLast;
   }
 
+  /**
+   * @see #loadNextExercise(mitll.langtest.shared.ExerciseShell)
+   */
   protected void onLastItem() {
     feedback.showErrorMessage("Test Complete", "Test Complete! Thank you!");
   }
@@ -570,10 +596,16 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return onFirst;
   }
 
+  /**
+   * @see mitll.langtest.client.ExerciseListLayout#addExerciseListOnLeftSide(com.google.gwt.user.client.ui.Panel)
+   * @param props
+   * @return
+   */
   @Override
   public Widget getExerciseListOnLeftSide(PropertyHandler props) {
     FlowPanel leftColumn = new FlowPanel();
     leftColumn.addStyleName("floatLeft");
+    leftColumn.addStyleName("minWidth");
     DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
 
     //leftColumnContainer.add(leftColumn);
