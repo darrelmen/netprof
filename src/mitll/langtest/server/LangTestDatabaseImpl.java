@@ -977,6 +977,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getOnlineUsers().sendStimulus(userid, exerciseID, stimulus, answer, onLastStimulus, skippedItem);
   }
 
+  /**
+   * @see mitll.langtest.client.taboo.Taboo#pollForPartnerOnline
+   * @param userid
+   * @param isGiver
+   * @return
+   */
   @Override
   public PartnerState isPartnerOnline(long userid, boolean isGiver) { return db.getOnlineUsers().isPartnerOnline(userid,isGiver); }
 
