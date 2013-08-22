@@ -42,22 +42,21 @@ public class ExerciseListLayout {
    * @see LangTest#onModuleLoad2()
    */
   public ListInterface makeExerciseList(FluidRow secondRow,
-                                Panel leftColumn, UserFeedback feedback,
-                                Panel currentExerciseVPanel, LangTestDatabaseAsync service, ExerciseController controller) {
+                                        Panel leftColumn, UserFeedback feedback,
+                                        Panel currentExerciseVPanel, LangTestDatabaseAsync service, ExerciseController controller) {
     boolean isGrading = props.isGrading();
     this.exerciseList = makeExerciseList(secondRow, isGrading, feedback, currentExerciseVPanel, service, controller);
 
     boolean hideExerciseList = (props.isMinimalUI() && !props.isGrading()) && !props.isAdminView();
-    useExerciseList(leftColumn, hideExerciseList);
+    useExerciseList(leftColumn);
+    if (hideExerciseList) {
+      exerciseList.hideExerciseList();
+    }
+
     return exerciseList;
   }
 
-  private void useExerciseList(Panel leftColumn, boolean hideExerciseList) {
-    if (hideExerciseList) {
-      exerciseList.getWidget().setVisible(false);
-      exerciseList.getWidget().setWidth("1px");
-    }
-
+  private void useExerciseList(Panel leftColumn) {
     if (showOnlyOneExercise()) {
       exerciseList.setExercise_title(props.getExercise_title());
     }
@@ -96,6 +95,10 @@ public class ExerciseListLayout {
     }
   }
 
+  /**
+   * @see #useExerciseList
+   * @param leftColumnContainer
+   */
   private void addExerciseListOnLeftSide(Panel leftColumnContainer) {
     if (props.isTeacherView()) {
       leftColumnContainer.add(exerciseList.getWidget());
