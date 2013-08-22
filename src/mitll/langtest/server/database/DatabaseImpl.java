@@ -448,7 +448,8 @@ public class DatabaseImpl implements Database {
    * @param isOnline
    */
   public void userOnline(long userid, boolean isOnline) {
-    if (isOnline) getOnlineUsers().addOnline(userid); else getOnlineUsers().removeOnline(userid);
+    if (isOnline) getOnlineUsers().addOnline(userid);
+    else getOnlineUsers().removeOnline(userid);
   }
 
   public OnlineUsers getOnlineUsers() {

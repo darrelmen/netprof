@@ -48,9 +48,15 @@ public class OnlineUsers {
    */
   public synchronized void addOnline(long userid) {
     User userWhere = getUser(userid);
+    int before = online.size();
     if (userWhere != null) online.add(userWhere);
 
-    logger.info("---> addOnline online now " + getOnline());
+    if (online.size() != before) {
+      logger.info("---> addOnline online now " + getOnline());
+    }
+    else {
+      logger.info("---> addOnline now " + getOnline().size() + " online...");
+    }
   }
 
   private User getUser(long userid) {
@@ -61,8 +67,7 @@ public class OnlineUsers {
     User userWhere = getUser(userid);
     if (userWhere != null) online.remove(userWhere);
 
-    logger.info("---> removeOnline : removed " + userid +
-      " online now " + getOnline());
+    logger.info("---> removeOnline : removed " + userid + " online now " + getOnline());
   }
 
   private Collection<User> getOnline() { return online; }
@@ -99,8 +104,8 @@ public class OnlineUsers {
 
         return new PartnerState();
       } else if (online.contains(receiver)) {
-        //     logger.debug("isPartnerOnline : for giver " + giverOrReceiver + ", receiver  " + receiver + " is online.");
         Map<String, Collection<String>> typeToSelectionByPartner = receiverToState.get(receiver);
+        logger.debug("isPartnerOnline : for giver " + giverOrReceiver + ", receiver  " + receiver + " is online, state " + typeToSelectionByPartner);
         return new PartnerState(true,typeToSelectionByPartner);
       } else {
         logger.debug("isPartnerOnline : for giver " + giverOrReceiver + ", receiver  " + receiver + " is not online...");
