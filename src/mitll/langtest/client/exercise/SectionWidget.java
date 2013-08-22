@@ -21,12 +21,8 @@ public interface SectionWidget {
   void populateTypeWidget(Collection<String> items, Map<String, Integer> sectionToCount);
   public Widget getWidget();
 
-  //void enableInSet(Collection<String> inSet);
-
   void enableAll();
 
   void addButton(Button b);
   void addLabel(Widget label, String color);
-
-  //void addClearButton(Button b);
 }

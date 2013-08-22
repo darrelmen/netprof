@@ -182,6 +182,11 @@ public class SectionExerciseList extends PagingExerciseList {
 
   protected void populateListBoxAfterSelection(Map<String, Collection<String>> result) {}
 
+  /**
+   * @see #getHistoryToken(String)
+   * @param type
+   * @return
+   */
   private String getCurrentSelection(String type) {
     SectionWidget listBox = typeToBox.get(type);
     return listBox.getCurrentSelection();
@@ -426,9 +431,14 @@ public class SectionExerciseList extends PagingExerciseList {
     } else {
       System.out.println("pushNewSectionHistoryToken : currentToken " + currentToken);
 
-      System.out.println("------------ push history '" + historyToken + "' -------------- ");
-      History.newItem(historyToken);
+      setHistoryItem(historyToken);
     }
+  }
+
+  private void setHistoryItem(String historyToken) {
+    System.out.println("------------ SectionExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
+
+    History.newItem(historyToken);
   }
 
   protected void setModeLinks(String historyToken) {
@@ -444,28 +454,20 @@ public class SectionExerciseList extends PagingExerciseList {
    */
   protected void pushNewItem(String exerciseID) {
     String historyToken = getHistoryToken(exerciseID);
-    System.out.println(new Date() + "------------ (section) pushNewItem : push history '" + historyToken + "' -------------- ");
+    String trimmedToken = historyToken.length() > 2? historyToken.substring(0,historyToken.length()-2) : historyToken;
+    System.out.println(new Date() + "------------ SectionExerciseList.pushNewItem : push history '" + historyToken + "' -------------- ");
 
     String token = History.getToken();
-    System.out.println("pushNewItem : current token " + token + " vs new " + exerciseID);
-    if (token != null && historyToken.equals(token)) {
+    getSelectionState(token);
+    System.out.println("pushNewItem : current token '" + token + "' vs new '" + exerciseID +"'");
+    if (token != null && (historyToken.equals(token) || trimmedToken.equals(token))) {
       System.out.println("\tcurrent token '" + token + "' same as new " + historyToken);
       loadByIDFromToken(exerciseID);
     } else {
-      System.out.println("\tcurrent token '" + token + "' different from new " + exerciseID);
-      History.newItem(historyToken);
+      System.out.println("\tcurrent token '" + token + "' different menu state '" +historyToken+ "' from new " + exerciseID);
+      setHistoryItem(historyToken);
     }
   }
-
-  /**
-   * @see mitll.langtest.client.exercise.PagingExerciseList#getExerciseIdColumn()
-   * @param columnText
-   * @return
-   */
- /* protected String getHistoryTokenForLink(String columnText) {
-    return "#"+getHistoryToken(columnText);
-   // return historyToken +";item="+columnText;
-  }*/
 
   /**
    * @see mitll.langtest.client.exercise.PagingExerciseList#getExerciseIdColumn
@@ -478,7 +480,6 @@ public class SectionExerciseList extends PagingExerciseList {
       loadByID(e.getID());
     }
   }
-
 
   /**
    * @see #pushNewItem(String)
@@ -609,16 +610,53 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param selectionState
    */
   protected void restoreListBoxState(SelectionState selectionState) {
+    Map<String, Collection<String>> selectionState2 = new HashMap<String, Collection<String>>();
+
+    for (String type : typeToBox.keySet()) {
+      selectionState2.put(type,Collections.singletonList(ANY));
+    }
+
     for (Map.Entry<String, Collection<String>> pair : selectionState.getTypeToSection().entrySet()) {
+      String type = pair.getKey();
+      Collection<String> section = pair.getValue();
+      selectionState2.put(type,section);
+    }
+
+    System.out.println("selection state " + selectionState2);
+
+    for (Map.Entry<String, Collection<String>> pair : selectionState2.entrySet()) {
       String type = pair.getKey();
       Collection<String> section = pair.getValue();
       if (!typeToBox.containsKey(type)) {
         if (!type.equals("item")) {
-          System.err.println("restoreListBoxState for " + selectionState + " : huh? bad type '" + type + "'");
+          System.err.println("restoreListBoxState for " + selectionState + " : huh? bad type '" + type +
+            "', expecting something in " + typeToBox.keySet());
         }
       } else {
         selectItem(type, section);
       }
+    }
+  }
+
+/*  protected void clearSelection() {
+    for (String type : typeToBox.keySet()) selectItem(type,Collections.singletonList(ANY));
+  }*/
+
+  @Override
+  public void setSelectionState(Map<String, Collection<String>> selectionState) {
+    String newSelectionState = selectionState.toString().replace("[", "").replace("]", "").replace("{", "").replace("}", "").replace(" ","");
+
+    SelectionState selectionState2 = getSelectionState(newSelectionState);
+    System.out.println("SectionExerciseList.setSelectionState : setting selection state to : '" + newSelectionState + "' or '" + selectionState2 +"'");
+    //if (newSelectionState.isEmpty()) clearSelection();
+    //else
+    restoreListBoxState(selectionState2);
+    String historyToken = getHistoryToken("1");
+    if (!historyToken.equals(newSelectionState)) {
+      System.err.println("\n\n\n\n----> after setting menu state, history token is " + historyToken + " vs expected '" + newSelectionState + "'");
+    }
+    if (!History.getToken().equals(newSelectionState)) {
+      History.newItem(newSelectionState);
     }
   }
 }
