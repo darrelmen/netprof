@@ -234,7 +234,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       }
     }
     long now = System.currentTimeMillis();
-    if (now-then > 100) System.out.println("\taddButtonRow took " + (now-then) + " millis");
+    if (now-then > 0) System.out.println("\taddButtonRow took " + (now-then) + " millis");
 
     if (last != null) setSizesAndPushFirst(last);
     addBottomText(container);
