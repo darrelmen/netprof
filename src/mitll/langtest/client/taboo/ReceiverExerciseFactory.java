@@ -78,7 +78,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
    * @return
    */
   public Panel getExercisePanel(Exercise totallyIgnored) {
-   // System.out.println("\nReceiverExerciseFactory.getExercisePanel getting receiver panel ...");
+    System.out.println("\nReceiverExerciseFactory.getExercisePanel getting receiver panel ...");
     controller.pingAliveUser();
 
     return new ReceiverPanel(service,controller);
@@ -215,15 +215,16 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       }
       else {
         incorrectImage.setVisible(true);
-        showPopup("Try again...");
         soundFeedback.playIncorrect();
         if (onLastStim) {
+          showPopup("All clues sent, moving to next item.", 3000);
           incorrectCount++;
           //System.out.println("---> incrementing incorrect");
           setCorrect();
 //          keepTrackOfRemainingExercises();
         }
         else {
+          showPopup("Try again...");
          // System.out.println("\t not incrementing incorrect");
         }
       }
@@ -261,7 +262,13 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       send.setVisible(false);
     }
 
+
     private void showPopup(String html) {
+      showPopup(html, POPUP_DURATION);
+    }
+
+    private void showPopup(String html, int dur) {
+
       final PopupPanel pleaseWait = new DecoratedPopupPanel();
       pleaseWait.setAutoHideEnabled(true);
       pleaseWait.add(new HTML(html));
@@ -273,7 +280,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
           pleaseWait.hide();
         }
       };
-      t.schedule(POPUP_DURATION);
+      t.schedule(dur);
     }
 
     /**
