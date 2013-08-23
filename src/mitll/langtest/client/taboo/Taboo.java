@@ -111,6 +111,7 @@ public class Taboo {
     });
   }
 
+  private String lastSelection = "";
   /**
    * Keep checking that the partner is still active, and if the giver, check if selection state has changed.
    * @param fuserid
@@ -136,9 +137,12 @@ public class Taboo {
               if (isGiver) {
                 Map<String,Collection<String>> typeToSelection = partnerState.getTypeToSelection();
 
-                System.out.println("pollForPartnerOnline : checked if" +
-                  (isGiver ? " receiver partner " : " giver partner ") +
-                  " of me, " + fuserid + ", is online and got state " + typeToSelection);
+                if (!lastSelection.equals(typeToSelection.toString())) {
+                  lastSelection = typeToSelection.toString();
+                  System.out.println("pollForPartnerOnline : checked if" +
+                    (isGiver ? " receiver partner " : " giver partner ") +
+                    " of me, " + fuserid + ", is online and got state " + typeToSelection);
+                }
                 langTest.setSelectionState(typeToSelection);  // TODO user controller...
               }
               else {
