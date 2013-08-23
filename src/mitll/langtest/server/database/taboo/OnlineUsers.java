@@ -105,7 +105,7 @@ public class OnlineUsers {
         return new PartnerState();
       } else if (online.contains(receiver)) {
         Map<String, Collection<String>> typeToSelectionByPartner = receiverToState.get(receiver);
-        logger.debug("isPartnerOnline : for giver " + giverOrReceiver + ", receiver  " + receiver + " is online, state " + typeToSelectionByPartner);
+        //logger.debug("isPartnerOnline : for giver " + giverOrReceiver + ", receiver  " + receiver + " is online, state " + typeToSelectionByPartner);
         return new PartnerState(true,typeToSelectionByPartner);
       } else {
         logger.debug("isPartnerOnline : for giver " + giverOrReceiver + ", receiver  " + receiver + " is not online...");
