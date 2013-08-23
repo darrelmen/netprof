@@ -493,7 +493,7 @@ public class SectionExerciseList extends PagingExerciseList {
     StringBuilder builder = new StringBuilder();
     for (String type : typeToBox.keySet()) {
       String section = getCurrentSelection(type);
-      //System.out.println("\tgetHistoryToken for " + type + " section = " +section);
+      System.out.println("\tSectionExerciseList.getHistoryToken for " + type + " section = " +section);
       if (section.equals(ANY)) {
         //System.out.println("getHistoryToken : Skipping box " + type + " (ANY) ");
       } else {
@@ -604,6 +604,27 @@ public class SectionExerciseList extends PagingExerciseList {
     return new SelectionState(token);
   }
 
+  private String lastSelectionState = "";
+  @Override
+  public void setSelectionState(Map<String, Collection<String>> selectionState) {
+    String newSelectionState = selectionState.toString().replace("[", "").replace("]", "").replace("{", "").replace("}", "").replace(" ", "");
+    if (!lastSelectionState.equals(newSelectionState)) {
+      lastSelectionState = newSelectionState;
+      SelectionState selectionState2 = getSelectionState(newSelectionState);
+      System.out.println("SectionExerciseList.setSelectionState : setting selection state to : '" + newSelectionState + "' or '" + selectionState2 + "'");
+
+      restoreListBoxState(selectionState2);
+      String historyToken = getHistoryToken("1");
+      if (historyToken.endsWith(",;")) historyToken = historyToken.substring(0, historyToken.length() - 2);
+      if (!historyToken.equals(newSelectionState)) {
+        System.err.println("\n\n\n\n----> after setting menu state, history token is '" + historyToken + "' vs expected '" + newSelectionState + "'");
+      }
+      if (!History.getToken().equals(newSelectionState)) {
+        setHistoryItem(newSelectionState);
+      }
+    }
+  }
+
   /**
    * Given a selectionState state, make sure the list boxes are consistent with it.
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
@@ -622,7 +643,7 @@ public class SectionExerciseList extends PagingExerciseList {
       selectionState2.put(type,section);
     }
 
-    System.out.println("selection state " + selectionState2);
+    System.out.println("restoreListBoxState : selection state " + selectionState2);
 
     for (Map.Entry<String, Collection<String>> pair : selectionState2.entrySet()) {
       String type = pair.getKey();
@@ -635,28 +656,6 @@ public class SectionExerciseList extends PagingExerciseList {
       } else {
         selectItem(type, section);
       }
-    }
-  }
-
-/*  protected void clearSelection() {
-    for (String type : typeToBox.keySet()) selectItem(type,Collections.singletonList(ANY));
-  }*/
-
-  @Override
-  public void setSelectionState(Map<String, Collection<String>> selectionState) {
-    String newSelectionState = selectionState.toString().replace("[", "").replace("]", "").replace("{", "").replace("}", "").replace(" ","");
-
-    SelectionState selectionState2 = getSelectionState(newSelectionState);
-    System.out.println("SectionExerciseList.setSelectionState : setting selection state to : '" + newSelectionState + "' or '" + selectionState2 +"'");
-    //if (newSelectionState.isEmpty()) clearSelection();
-    //else
-    restoreListBoxState(selectionState2);
-    String historyToken = getHistoryToken("1");
-    if (!historyToken.equals(newSelectionState)) {
-      System.err.println("\n\n\n\n----> after setting menu state, history token is " + historyToken + " vs expected '" + newSelectionState + "'");
-    }
-    if (!History.getToken().equals(newSelectionState)) {
-      History.newItem(newSelectionState);
     }
   }
 }
