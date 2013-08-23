@@ -60,7 +60,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
   }
 
   public Panel getExercisePanel(final Exercise e) {
-    System.out.println("\nGiverExerciseFactory.getExercisePanel getting receiver panel ...");
+    System.out.println("\nGiverExerciseFactory.getExercisePanel getting panel ...");
     controller.pingAliveUser();
 
     return new GiverPanel(e);
