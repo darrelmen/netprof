@@ -51,7 +51,8 @@ public class TabooExerciseList extends FlexSectionExerciseList {
   }
 
   /**
-   *
+   * If giving, show exercise list, hide selection buttons
+   * if receiving, hide exercise list, show selection buttons
    * @param factory
    * @param user
    * @param expectedGrades
@@ -59,27 +60,39 @@ public class TabooExerciseList extends FlexSectionExerciseList {
   @Override
   public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {
     super.setFactory(factory, user, expectedGrades);
-    System.out.println("TabooExerciseList.setFactory : " + factory.getClass() + " for user " + user.getUser());
     if (factory instanceof ReceiverExerciseFactory) {
       receiverFactory = (ReceiverExerciseFactory) factory;
       isGiver = false;
-    }
-
-    if (!isGiver) {
-      hideExerciseList();
-      makeExercisePanel(null);
+      System.out.println("TabooExerciseList.setFactory : " + factory.getClass() + " for user " + user.getUser() + " RECEIVER ");
     }
     else {
+      isGiver = true;
+      System.out.println("TabooExerciseList.setFactory : " + factory.getClass() + " for user " + user.getUser()+ " GIVER ");
+    }
+
+    if (isGiver) {
       showExerciseList();
+      if (buttonRow != null) buttonRow.setVisible(false);
+    }
+    else {
+      hideExerciseList();
+      if (buttonRow != null) buttonRow.setVisible(true);
     }
   }
 
+  FluidContainer buttonRow;
   @Override
   protected void addBottomText(FluidContainer container) {
     super.addBottomText(container);
+    buttonRow = container;
     if (isGiver) {
-      System.out.println("----> hiding container for " + userID);
+      System.out.println("\n\n----> GIVER:  addBottomText.hiding container for " + userID);
       container.setVisible(false);
+      showExerciseList();
+    } else {
+      hideExerciseList();
+
+      System.out.println("\n\n----> RECEIVER:  addBottomText.showing container for " + userID);
     }
   }
 
