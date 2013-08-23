@@ -242,16 +242,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return idToExercise.values();
   }
 
-  public void setSelectionState(Map<String, Collection<String>> selectionState) {
-   /* String newSelectionState = selectionState.toString().replace("[", "").replace("]", "").replace("{", "").replace("}", "");
-
-    if (!History.getToken().equals(newSelectionState)) {
-      System.out.println("ExerciseList.setSelectionState : setting selection state to : " + newSelectionState);
-      SelectionState selectionState2 = getSelectionState(token);
-      restoreListBoxState(selectionState2);
-      History.newItem(newSelectionState);
-    }*/
-  }
+  public void setSelectionState(Map<String, Collection<String>> selectionState) {}
 
   @Override
   public void hideExerciseList() {
