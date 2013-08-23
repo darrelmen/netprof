@@ -203,7 +203,7 @@ public class UserManager {
 
         @Override
         public void onSuccess(Void result) {
-          System.out.println("registered " + getUser() + " as being " + (active ? "online." : " offline."));
+         // System.out.println("registered " + getUser() + " as being " + (active ? "online." : " offline."));
         }
       });
     }
