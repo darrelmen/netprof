@@ -243,7 +243,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   private void makeLabelColumn(boolean usuallyThereWillBeAHorizScrollbar, String firstType, FlexTable firstTypeRow,
                                   ButtonGroupSectionWidget buttonGroupSectionWidget) {
     this.labelColumn = new VerticalPanel();
-    addLabelWidgetForRow(labelColumn,firstType,typeToButton.get(firstType),buttonGroupSectionWidget);
+    addLabelWidgetForRow(labelColumn, firstType, typeToButton.get(firstType), buttonGroupSectionWidget);
 
     FlowPanel l2 = makeFlowPanel(labelColumn, usuallyThereWillBeAHorizScrollbar);
 
@@ -456,11 +456,10 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    */
   @Override
   protected void selectItem(String type, Collection<String> sections) {
-    ButtonGroupSectionWidget listBox = (ButtonGroupSectionWidget)typeToBox.get(type);
-
-    System.out.println("selecting " + type + "=" + sections);
+    ButtonGroupSectionWidget listBox = (ButtonGroupSectionWidget) typeToBox.get(type);
+    listBox.clearSelectionState();
+    System.out.println("FlexSectionExerciseList.selectItem : selecting " + type + "=" + sections);
     listBox.selectItem(sections, false, typeToBox);
- //   listBox.selectButton();
   }
 
 /*  @Override
