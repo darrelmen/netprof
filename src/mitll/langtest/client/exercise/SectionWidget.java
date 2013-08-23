@@ -15,6 +15,7 @@ import java.util.Map;
  */
 public interface SectionWidget {
   String getCurrentSelection();
+  void clearSelectionState();
   String getFirstItem();
 
   void selectItem(Collection<String> section, boolean doToggle);
