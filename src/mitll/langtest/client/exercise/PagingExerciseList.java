@@ -183,7 +183,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
             System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
             final ExerciseShell e = object;
             if (isExercisePanelBusy()) {
-              Window.alert("Please stop recording before changing items.");
+              tellUserPanelIsBusy();
               markCurrentExercise(currentExercise);
             } else {
               gotClickOnItem(e);
@@ -198,9 +198,9 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
       };
   }
 
-/*  protected String getHistoryTokenForLink(String columnText) {
-    return "#item="+columnText;
-  }*/
+  protected void tellUserPanelIsBusy() {
+    Window.alert("Please stop recording before changing items.");
+  }
 
   protected String getHistoryToken(String id) { return "item=" +id; }
 
