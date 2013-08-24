@@ -63,9 +63,14 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private ProgressBar bar = new ProgressBar();
 
   private Timer timer;
+
+  @Override
+  public boolean loadNextExercise(String id) {
+    return false;
+  }
+
   private boolean expired = false;
   private boolean timerRunning = false;
-
 
   private final int gameTimeSeconds;
   private Panel bottomRow = new FlowPanel();
