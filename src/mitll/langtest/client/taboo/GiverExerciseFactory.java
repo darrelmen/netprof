@@ -256,6 +256,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
 
         @Override
         public void onSuccess(Integer result) {
+          System.out.println("checkForCorrect got " + result);
           if (result == 0) { // incorrect
             feedback.playIncorrect();
             sentItems.add(stimulus);
