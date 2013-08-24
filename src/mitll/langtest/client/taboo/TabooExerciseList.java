@@ -69,11 +69,23 @@ public class TabooExerciseList extends FlexSectionExerciseList {
 
     if (isGiver) {
       showExerciseList();
-      if (buttonRow != null) buttonRow.setVisible(false);
+      if (buttonRow != null) {
+        //buttonRow.setVisible(false);
+
+        for (int i = 0; i < buttonRow.getWidgetCount(); i++) {
+          if (buttonRow.getWidget(i) != statusHeader) buttonRow.getWidget(i).setVisible(false);
+        }
+      }
     }
     else {
       hideExerciseList();
-      if (buttonRow != null) buttonRow.setVisible(true);
+      if (buttonRow != null) {
+        //buttonRow.setVisible(true);
+
+        for (int i = 0; i < buttonRow.getWidgetCount(); i++) {
+          if (buttonRow.getWidget(i) != statusHeader) buttonRow.getWidget(i).setVisible(true);
+        }
+      }
     }
   }
 
@@ -87,13 +99,18 @@ public class TabooExerciseList extends FlexSectionExerciseList {
     super.addBottomText(container);
     buttonRow = container;
     if (isGiver) {
-      System.out.println("\n\n----> GIVER:  addBottomText.hiding container for " + userID);
-      container.setVisible(false);
+      System.out.println("----> GIVER:  addBottomText.hiding container for " + userID);
+      //container.setVisible(false);
+      for (int i = 0; i < container.getWidgetCount(); i++) {
+        if (container.getWidget(i) != statusHeader) container.getWidget(i).setVisible(false);
+      }
       showExerciseList();
     } else {
+      System.out.println("----> RECEIVER:  addBottomText.showing container for " + userID);
       hideExerciseList();
-
-      System.out.println("\n\n----> RECEIVER:  addBottomText.showing container for " + userID);
+      for (int i = 0; i < container.getWidgetCount(); i++) {
+        if (container.getWidget(i) != statusHeader) container.getWidget(i).setVisible(true);
+      }
     }
   }
 
