@@ -5,6 +5,7 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 
 import java.util.Collection;
 import java.util.Map;
@@ -19,7 +20,8 @@ import java.util.Map;
 public interface ExerciseController {
   LangTestDatabaseAsync getService();
   UserFeedback getFeedback();
-  boolean loadNextExercise(Exercise current);
+  boolean loadNextExercise(ExerciseShell current);
+  boolean loadNextExercise(String id);
 
   boolean loadPreviousExercise(Exercise current);
 
