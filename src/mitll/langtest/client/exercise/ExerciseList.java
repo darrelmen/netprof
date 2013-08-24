@@ -547,6 +547,15 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return onLast;
   }
 
+  public boolean loadNextExercise(String id) {
+    for (ExerciseShell e : currentExercises) {
+       if (e.getID().equals(id)) {
+         return loadNextExercise(e);
+       }
+    }
+    return true;
+  }
+
   /**
    * @see #loadNextExercise(mitll.langtest.shared.ExerciseShell)
    */

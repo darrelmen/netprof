@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
+import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -66,7 +67,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     return new GiverPanel(e);
   }
 
-  private class GiverPanel extends FluidContainer {
+  private class GiverPanel extends FluidContainer implements BusyPanel {
     private List<String> sentItems = new ArrayList<String>();
     private Map<RadioButton, String> choiceToExample;
     private Controls choice = new Controls();
@@ -313,6 +314,11 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
         }
       };
       t.schedule(3000);
+    }
+
+    @Override
+    public boolean isBusy() {
+      return pleaseWait.isVisible();
     }
   }
 }
