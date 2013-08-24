@@ -52,7 +52,7 @@ public class Taboo {
   }
 
   public void initialCheck(final long fuserid) {
-    System.out.println("initialCheck : me : " + fuserid + " ...\n\n\n");
+    System.out.println("initialCheck : me : " + fuserid + " ...");
 
     checkForPartner(fuserid);
   }
@@ -75,9 +75,9 @@ public class Taboo {
 
       @Override
       public void onSuccess(TabooState result) {
-        //if (result.isAnyAvailable()) {
-          //System.out.println("checkForPartner.onSuccess : me : " + fuserid + " checking, anyUsersAvailable : " + result);
-        //}
+        if (result.isAnyAvailable()) {
+          System.out.println("checkForPartner.onSuccess : me : " + fuserid + " checking, anyUsersAvailable : " + result);
+        }
         if (result.isJoinedPair()) {
           if (result.isGiver()) {
             afterRoleDeterminedConfirmation(fuserid,
@@ -93,21 +93,17 @@ public class Taboo {
               false);
           }
 
-          System.out.println("\n\n\n----> checkForPartner.onSuccess : me : " + fuserid + " isGiver " + result.isGiver());
+         // System.out.println("\n----> checkForPartner.onSuccess : me : " + fuserid + " isGiver " + result.isGiver());
 
           pollForPartnerOnline(fuserid, result.isGiver());
         } else if (result.isAnyAvailable()) {
           askUserToChooseRole(fuserid);
         } else {
-         // if (!inSingplePlayer) {
-
           if (!inSinglePlayer) {
             System.out.println("me : " + fuserid + " doing single player : " + inSinglePlayer);
             inSinglePlayer = true;
             langTest.setTabooFactory(fuserid, false, true);
           }
-        //    inSingplePlayer = true;
-       //   }
           pollForPartner();
         }
       }
