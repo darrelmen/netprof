@@ -65,6 +65,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
 
 import java.util.Collection;
@@ -1053,16 +1054,29 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     dialogHelper.showErrorMessage(title, msg);
   }
 
-  public void showStatus(String msg) { status.setText(msg); }
+  public void showStatus(String msg) {
+    status.setText(msg);
+  }
 
-  public boolean loadNextExercise(Exercise current) {
+  public boolean loadNextExercise(ExerciseShell current) {
     if (progressBar != null) {
       progressBar.showAdvance(exerciseList);
     }
     return exerciseList.loadNextExercise(current);
   }
-  public boolean loadPreviousExercise(Exercise current) { return exerciseList.loadPreviousExercise(current);  }
-  public boolean onFirst(Exercise current) { return exerciseList.onFirst(current); }
+
+  public boolean loadNextExercise(String id) {
+    return exerciseList.loadNextExercise(id);
+  }
+
+  public boolean loadPreviousExercise(Exercise current) {
+    return exerciseList.loadPreviousExercise(current);
+  }
+
+  public boolean onFirst(Exercise current) {
+    return exerciseList.onFirst(current);
+  }
+
   public void addAdHocExercise(String label) { exerciseList.addAdHocExercise(label); }
   public void setSelectionState(Map<String,Collection<String>> selectionState) { exerciseList.setSelectionState(selectionState);}
 }
