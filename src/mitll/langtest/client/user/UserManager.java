@@ -186,12 +186,14 @@ public class UserManager {
     waitThenInactivate();
   }
 
-  public void userInactive() {
+  private void userInactive() {
     int user = getUser();
     System.out.println(new Date() +" --------> userInactive : " + user);
 
     userOnline(user, false);
   }
+
+  public boolean isActive() { return getUser() != NO_USER_SET; }
 
   private void userOnline(int user, final boolean active) {
     if (trackUsers) {
