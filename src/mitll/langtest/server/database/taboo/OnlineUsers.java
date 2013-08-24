@@ -27,7 +27,6 @@ public class OnlineUsers {
 
   private final UserDAO userDAO;
   private Collection<User> online = new HashSet<User>();
-  //private Collection<User> active = new HashSet<User>();
   private Collection<Pair> candidates = new ArrayList<Pair>();
 
   // TODO : write to database
@@ -158,6 +157,10 @@ public class OnlineUsers {
       logger.info("anyAvailable: online " + online.size() + " candidate pairs " + candidates.size() * 2 + " registered pairs " +
         giverToReceiver.size() * 2 + " available = " + diff);
     }
+    else {
+      logger.info("anyAvailable: online " + online.size() + " candidate pairs " + candidates.size() * 2 + " registered pairs " +
+        giverToReceiver.size() * 2 + " available = " + diff);
+    }
 
     boolean giver = false;
     boolean receiver = false;
@@ -245,8 +248,6 @@ public class OnlineUsers {
     giverToReceiver.put(giver, receiver);
 
     logger.info("Yea! pair established " + giver + " -> " + receiver);
-   // addActive(giver);
-   // addActive(receiver);
   }
 
   /**
@@ -311,10 +312,10 @@ public class OnlineUsers {
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#checkCorrect
    * @param giverUserID
-   * @param stimulus
-   * @return
+   * @param exerciseID
+   *@param stimulus  @return
    */
-  public synchronized int checkCorrect(long giverUserID, String stimulus) {
+  public synchronized int checkCorrect(long giverUserID, String exerciseID, String stimulus) {
     User receiver = getReceiverForGiver(giverUserID);
    // logger.debug("Giver " + giverUserID + " checking for answer from " + receiver);
 
@@ -325,6 +326,8 @@ public class OnlineUsers {
     }
     else {
       List<AnswerBundle> answerBundles = stimToAnswer.get(stimulus);
+      logger.debug("Giver " + giverUserID + " checking for answer from " + receiver + " got " + answerBundles);
+
       if (answerBundles == null) {
         //if (count++ < 4) logger.error("huh? '" +stimulus + "' is not recorded in " + stimToAnswer.keySet() + " for " + receiver);
         return -1;
@@ -339,7 +342,7 @@ public class OnlineUsers {
   }
 
   /**
-   * @see #checkCorrect(long, String)
+   * @see #checkCorrect(long, String, String)
    * @see #sendStimulus(long, String, String, String, boolean, boolean)
    * @param giver
    * @return
@@ -347,7 +350,7 @@ public class OnlineUsers {
   private User getReceiverForGiver(long giver) {
     User giverUser = getUser(giver);
     if (giverUser == null) {
-      logger.warn("huh? getReceiverForGiver " + giver + " is unknown.");
+      logger.error("huh? getReceiverForGiver " + giver + " is unknown.");
       return null;
     }
     return giverToReceiver.get(giverUser);
@@ -395,6 +398,12 @@ public class OnlineUsers {
     boolean correct;
     long timestamp;
 
+    /**
+     * @see OnlineUsers#registerAnswer(long, String, String, boolean)
+     * @param stimulus
+     * @param answer
+     * @param correct
+     */
     public AnswerBundle(String stimulus, String answer, boolean correct) {
       this.stimulus = stimulus;
       this.answer = answer;
