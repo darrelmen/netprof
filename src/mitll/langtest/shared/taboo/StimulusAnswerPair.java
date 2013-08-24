@@ -53,6 +53,19 @@ public class StimulusAnswerPair implements IsSerializable {
     this.exerciseID = exerciseID;
   }
 
+  @Override
+  public boolean equals(Object other) {
+    if (!(other instanceof StimulusAnswerPair)) return false;
+    else {
+      StimulusAnswerPair ostim = (StimulusAnswerPair) other;
+      if (noStimYet != ostim.noStimYet) {
+        return false;
+      } else if (!exerciseID.equals(ostim.exerciseID)) {
+        return false;
+      } else return stimulus.equals(ostim.stimulus);
+    }
+  }
+
   public String toString() { return "Ex " + getExerciseID() +
     " Stim : '" + getStimulus() + "' answer '" + getAnswer() + "'"; }
 }
