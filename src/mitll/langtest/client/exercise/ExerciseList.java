@@ -229,6 +229,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected void rememberExercises(List<ExerciseShell> result) {
     System.out.println("ExerciseList : remembering " + result.size() + " exercises");
     currentExercises = result; // remember current exercises
+    currentExercise = 0;
     idToExercise = new HashMap<String, ExerciseShell>();
     clear();
     for (final ExerciseShell es : result) {
@@ -247,7 +248,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   @Override
   public void hideExerciseList() {
     getParent().setVisible(false);
-    //getParent().setWidth("1px");
   }
 
   public void showExerciseList() {
@@ -315,9 +315,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param exerciseShell
    */
   protected void loadExercise(ExerciseShell exerciseShell) {
-    String token = History.getToken();
-    String id = getIDFromToken(unencodeToken(token));
-    System.out.println("ExerciseList.loadExercise token '" + token + "' -> '" +id +"'");
+    //String token = History.getToken();
+    //String id = getIDFromToken(unencodeToken(token));
+    //System.out.println("ExerciseList.loadExercise token '" + token + "' and id '" +id +"'");
 
 /*    if (id.equals(exerciseShell.getID())) {
       System.out.println("skipping current token " + token);
@@ -464,9 +464,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   protected void getNextExercise(ExerciseShell current) {
     int i = getIndex(current);
-    if (i == -1) System.err.println("huh? couldn't find " +current + " in " + currentExercises.size() + " exercises?");
-    ExerciseShell next = currentExercises.get(i + 1);
-    loadExercise(next);
+    if (i == -1)
+      System.err.println("ExerciseList.getNextExercise : huh? couldn't find " + current + " in " + currentExercises.size() + " exercises : " + idToExercise.keySet());
+    else {
+      ExerciseShell next = currentExercises.get(i + 1);
+      loadExercise(next);
+    }
   }
 
   private int getIndex(ExerciseShell current) {
@@ -534,7 +537,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     visited.add(i);
 
     boolean onLast = i == currentExercises.size() - 1;
-    System.out.println("loadNextExercise current is : " +current + " index " +i + " on last " + onLast);
+    System.out.println("ExerciseList.loadNextExercise current is : " +current + " index " +i + " on last " + onLast);
     if (onLast) {
       onLastItem();
     }
@@ -548,6 +551,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   public boolean loadNextExercise(String id) {
+    System.out.println("ExerciseList.loadNextExercise " + id);
+    //Thread.dumpStack();
     for (ExerciseShell e : currentExercises) {
        if (e.getID().equals(id)) {
          return loadNextExercise(e);
