@@ -32,10 +32,10 @@ public class Taboo {
   private final UserManager userManager;
   private final LangTestDatabaseAsync service;
   private LangTest langTest;
-  boolean startedSinglePlayer;
+  boolean inSinglePlayer = false;
 
   private static final int INACTIVE_PERIOD_MILLIS = 1000 * 2; // ten minutes
-  private static final int INACTIVE_PERIOD_MILLIS2 = 1000 * 5; // ten minutes
+  private static final int INACTIVE_PERIOD_MILLIS2 = 1000 * 2; // ten minutes
 
   private Timer userTimer, onlineTimer;
 
@@ -75,9 +75,9 @@ public class Taboo {
 
       @Override
       public void onSuccess(TabooState result) {
-        if (result.isAnyAvailable()) {
-          System.out.println("checkForPartner.onSuccess : me : " + fuserid + " checking, anyUsersAvailable : " + result);
-        }
+        //if (result.isAnyAvailable()) {
+          //System.out.println("checkForPartner.onSuccess : me : " + fuserid + " checking, anyUsersAvailable : " + result);
+        //}
         if (result.isJoinedPair()) {
           if (result.isGiver()) {
             afterRoleDeterminedConfirmation(fuserid,
@@ -99,12 +99,15 @@ public class Taboo {
         } else if (result.isAnyAvailable()) {
           askUserToChooseRole(fuserid);
         } else {
-          if (!startedSinglePlayer) {
-            System.out.println("me : " + fuserid + " doing single player");
+         // if (!inSingplePlayer) {
 
+          if (!inSinglePlayer) {
+            System.out.println("me : " + fuserid + " doing single player : " + inSinglePlayer);
+            inSinglePlayer = true;
             langTest.setTabooFactory(fuserid, false, true);
-            startedSinglePlayer = true;
           }
+        //    inSingplePlayer = true;
+       //   }
           pollForPartner();
         }
       }
@@ -152,7 +155,9 @@ public class Taboo {
               }
             } else {
               onlineTimer.cancel();
-              showPartnerSignedOut("Partner Signed Out", "Your partner signed out, will check for another...", fuserid);
+              if (userManager.isActive()) {
+                showPartnerSignedOut("Partner Signed Out", "Your partner signed out, will check for another...", fuserid);
+              }
             }
           }
         });
@@ -220,7 +225,7 @@ public class Taboo {
       public void onClick(ClickEvent event) {
         modal.hide();
         langTest.setTabooFactory(userID, isGiver, false);
-        startedSinglePlayer = false;
+        inSinglePlayer = false;
       }
     });
     modal.add(begin);
@@ -274,6 +279,8 @@ public class Taboo {
             @Override
             public void onSuccess(Void result) {
               langTest.setTabooFactory(userID, isGiver, false);
+              inSinglePlayer = false;
+
               System.out.println("role registered for " +userID + " checking for partner...");
               checkForPartner(userID);
             }
