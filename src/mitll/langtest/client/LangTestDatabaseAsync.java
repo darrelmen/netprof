@@ -136,6 +136,8 @@ public interface LangTestDatabaseAsync {
 
   void userOnline(long userid, boolean isOnline, AsyncCallback<Void> async);
 
+  void isPartnerOnline(long userid, boolean isGiver, AsyncCallback<PartnerState> async);
+
   void anyUsersAvailable(long userid, AsyncCallback<TabooState> async);
 
   void registerPair(long userid, boolean isGiver, AsyncCallback<Void> async);
@@ -147,8 +149,6 @@ public interface LangTestDatabaseAsync {
   void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean isCorrect, AsyncCallback<Void> async);
 
   void checkCorrect(long giverUserID, String stimulus, AsyncCallback<Integer> async);
-
-  void isPartnerOnline(long userid, boolean isGiver, AsyncCallback<PartnerState> async);
 
   void registerSelectionState(long giver, Map<String, Collection<String>> selectionState, AsyncCallback<Void> async);
 }
