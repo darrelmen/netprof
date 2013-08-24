@@ -5,11 +5,8 @@ import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -80,7 +77,11 @@ public class TabooExerciseList extends FlexSectionExerciseList {
     }
   }
 
-  FluidContainer buttonRow;
+  protected void tellUserPanelIsBusy() {
+    new ModalInfoDialog("Please wait", "Please wait for you partner to respond.");
+  }
+
+  private FluidContainer buttonRow;
   @Override
   protected void addBottomText(FluidContainer container) {
     super.addBottomText(container);
@@ -120,35 +121,41 @@ public class TabooExerciseList extends FlexSectionExerciseList {
       }
       flush();
       if (receiverFactory != null) {
+        System.out.println("remembering " + result.size() );
         receiverFactory.setExerciseShells(getExerciseShells());
+      }
+      else {
+        System.err.println("no factory!!! \n\n\n ");
+
       }
       tellPartnerMyChapterSelection(selectionState);
     }
   }
 
   private void tellPartnerMyChapterSelection(SelectionState selectionState) {
-   // if (!isGiver) { // tell your partner you changed the chapter selection
-      System.out.println("telling partner selection state for " + userID + " is " + selectionState);
-      service.registerSelectionState(userID, selectionState.getTypeToSection(), new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          Window.alert("Can't contact server.");
-        }
+    System.out.println("telling partner selection state for " + userID + " is " + selectionState);
+    service.registerSelectionState(userID, selectionState.getTypeToSection(), new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        Window.alert("Can't contact server.");
+      }
 
-        @Override
-        public void onSuccess(Void result) {}
-      });
-  //  }
+      @Override
+      public void onSuccess(Void result) {}
+    });
   }
 
+  /**
+   * @see #loadNextExercise(mitll.langtest.shared.ExerciseShell)
+   */
   @Override
   protected void onLastItem() {
-    if (isGiver) {
+    if (!isGiver) {
       new ModalInfoDialog("Word list complete", "Perhaps you like to choose another chapter?");
     }
     else {
       List<String> message = new ArrayList<String>();
-      message.add("Please wait for giver to choose another chapter.");
+      message.add("Please wait for receiver to choose another chapter.");
       message.add("Or you could stop playing by clicking sign out.");
       new ModalInfoDialog("Word list complete", message);
     }
