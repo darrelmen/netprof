@@ -52,7 +52,8 @@ public interface ListInterface extends RequiresResize {
      * @param current
      * @return
      */
-  boolean loadNextExercise(ExerciseShell current);
+    boolean loadNextExercise(ExerciseShell current);
+  boolean loadNextExercise(String id);
 
   boolean loadPreviousExercise(ExerciseShell current);
 

@@ -32,7 +32,6 @@ public class ModalInfoDialog {
       @Override
       public void onClick(ClickEvent event) {
         modal.hide();
-        // langTest.setTabooFactory(userID, isGiver, false);
       }
     });
     modal.add(begin);
