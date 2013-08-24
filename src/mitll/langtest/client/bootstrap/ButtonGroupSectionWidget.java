@@ -86,7 +86,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
       currentSelection = getCurrentSelectionInternal();
     }
     else {
-      System.out.println("ButtonGroupSectionWidget returning cached selection state...");
+     // System.out.println("ButtonGroupSectionWidget returning cached selection state...");
     }
     return currentSelection;
   }
@@ -98,14 +98,14 @@ class ButtonGroupSectionWidget implements SectionWidget {
    * @return a comma separated list of selected units, chapters, or sections
    */
   private String getCurrentSelectionInternal() {
-    System.out.println("ButtonGroupSectionWidget.getCurrentSelectionInternal for " + type + " checking " + buttons.size() + " buttons.");
+  //  System.out.println("ButtonGroupSectionWidget.getCurrentSelectionInternal for " + type + " checking " + buttons.size() + " buttons.");
     StringBuilder builder = new StringBuilder();
     Set<String> unique = new HashSet<String>();
     List<String> inOrder = new ArrayList<String>();
     for (Button b : buttons) {
       if (b.isActive()) {
         String name = b.getText().trim();
-        System.out.println("\tButtonGroupSectionWidget.getCurrentSelectionInternal button " +name + " is active!");
+    //    System.out.println("\tButtonGroupSectionWidget.getCurrentSelectionInternal button " +name + " is active!");
 
         if (!unique.contains(name)) {
           unique.add(name);
@@ -113,7 +113,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
         }
       }
       else {
-        System.out.println("\tButtonGroupSectionWidget.getCurrentSelectionInternal button " + b.getText() + " is inactive!");
+     //   System.out.println("\tButtonGroupSectionWidget.getCurrentSelectionInternal button " + b.getText() + " is inactive!");
       }
     }
     for (String name : inOrder) {
@@ -132,7 +132,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
    */
   @Override
   public void enableAll() {
-    System.out.println("enableAll for " + type);
+   // System.out.println("enableAll for " + type);
     enabled.addAll(buttons);
     disabled.clear();
     showEnabled();
@@ -154,10 +154,6 @@ class ButtonGroupSectionWidget implements SectionWidget {
     selectItem(selections, true, typeToBox);
   }
 
-/*  public void selectButton(FlexSectionExerciseList.ButtonWithChildren button, Map<String, SectionWidget> typeToBox) {
-    selectButton(button, true, typeToBox);
-  }*/
-
   /**
    * Partially implemented -- maybe return to this later
    * @param button
@@ -166,7 +162,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
    */
   public void selectButton(FlexSectionExerciseList.ButtonWithChildren button, boolean doToggle, Map<String, SectionWidget> typeToBox) {
     boolean active = toggleButton(doToggle, button);
-    System.out.println("selectButton on " + button);
+  //  System.out.println("selectButton on " + button);
 
     // enable the children
     ButtonGroupSectionWidget childGroup = enableChildrenButtons(typeToBox, button, active);
@@ -202,7 +198,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
    * @param typeToBox
    */
   public void selectItem(Collection<String> sections, boolean doToggle, Map<String,SectionWidget> typeToBox) {
-    System.out.println("ButtonGroupSectionWidget: selectItem " + type + "="+sections);
+    //System.out.println("ButtonGroupSectionWidget: selectItem " + type + "="+sections);
 
     if (sections.size() == 1 && sections.iterator().next().equals(SectionExerciseList.ANY)) {
       clearAll();
@@ -222,7 +218,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
           for (Button unselectCandidate : allButtonsAtName) {
             if (!toSelectSet.contains(unselectCandidate)) {
               if (unselectCandidate.isActive()) {
-                System.out.println("ButtonGroupSectionWidget: unselecting " + unselectCandidate.getText());
+             //   System.out.println("ButtonGroupSectionWidget: unselecting " + unselectCandidate.getText());
 
                 unselectCandidate.setActive(false);
               }
@@ -270,8 +266,8 @@ class ButtonGroupSectionWidget implements SectionWidget {
   private boolean toggleButton(boolean doToggle, Button b) {
     boolean active = !doToggle || !b.isActive();
     b.setActive(active);
-    if (active) System.out.println("\ttoggleButton " + b.getText() + " is active");
-    else  System.out.println("\t\ttoggleButton " + b.getText() + " is inactive");
+ //   if (active) System.out.println("\ttoggleButton " + b.getText() + " is active");
+  //  else  System.out.println("\t\ttoggleButton " + b.getText() + " is inactive");
 
     return active;
   }
@@ -341,7 +337,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
       b.setEnabled(false);
     }
   }
-  public Collection<Button> getEnabledButtons() { return enabled; }
+ // public Collection<Button> getEnabledButtons() { return enabled; }
   private boolean first = true;
 
   private void rememberEnabled(List<FlexSectionExerciseList.ButtonWithChildren> buttonChildren, boolean isEnable) {
