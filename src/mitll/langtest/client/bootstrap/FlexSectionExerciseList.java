@@ -53,7 +53,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   private ScrollPanel scrollPanel;
   private Panel clearColumnContainer;
   private Panel labelColumn;
-  private Heading statusHeader = new Heading(4);
+  protected Heading statusHeader = new Heading(4);
 
   public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
