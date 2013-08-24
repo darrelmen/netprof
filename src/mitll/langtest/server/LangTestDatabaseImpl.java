@@ -955,7 +955,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public TabooState anyUsersAvailable(long userid) {  return db.getOnlineUsers().anyAvailable(userid);  }
 
   /**
-   * @see mitll.langtest.client.taboo.Taboo#chooseRoleModal
+   * @see mitll.langtest.client.taboo.Taboo
    * @param userid
    * @param isGiver
    */
@@ -1014,7 +1014,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public int checkCorrect(long giverUserID, String stimulus) {
-    return db.getOnlineUsers().checkCorrect(giverUserID, stimulus);
+    return db.getOnlineUsers().checkCorrect(giverUserID, "", stimulus);
   }
 
   public void logMessage(String message) {
