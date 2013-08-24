@@ -94,7 +94,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       singlePlayerRobot.setExerciseShells(exerciseShells);
     }
     else {
-      System.err.println("\n\n\n--->setExerciseShells ignoring items...");
+      //System.err.println("\n\n\n--->setExerciseShells ignoring items...");
     }
   }
 
@@ -223,16 +223,9 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     }
 
     private void loadNext(ExerciseController controller) {
-     // boolean found = false;
+      System.out.println("ReceiverExerciseFactory.loadNext '" + exerciseID+ "'  ");
+
       controller.loadNextExercise(exerciseID);
-/*      for (ExerciseShell es : exerciseList) {
-        if (es.getID().trim().equals(exerciseID.trim())) {
-          controller.loadNextExercise(es);
-          found = true;
-          break;
-        }
-      }*/
-    //  if (!found) System.err.println("->> couldn't find '" + exerciseID + "'");
     }
 
     private boolean checkCorrect() {
@@ -292,9 +285,9 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
      * @param outer
      */
     private void checkForStimulus(final LangTestDatabaseAsync service, final ExerciseController controller, final ReceiverPanel outer) {
-      System.out.println(new Date() + " : checkForStimulus : user " + controller.getUser() + " ----------------");
+     // System.out.println(new Date() + " : checkForStimulus : user " + controller.getUser() + " ----------------");
       if (singlePlayerRobot != null) {
-        System.out.println("checkForStimulus : we have a single player robot...");
+        System.out.println("ReceiverExerciseFactory.heckForStimulus : we have a single player robot...");
         singlePlayerRobot.checkForStimulus(new AsyncCallback<StimulusAnswerPair>() {
           @Override
           public void onFailure(Throwable caught) {}
@@ -335,7 +328,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
       if (result != null && !result.noStimYet) {
         //  cancelStimTimer();
-        System.out.println(new Date() + " gotStimulusResponse : showStimlus  " + result);
+        System.out.println(new Date() + " ReceiverExerciseFactory.gotStimulusResponse : showStimlus  " + result);
 
         showStimulus(result, outer);
         //  System.out.println("checkForStimulus : answer '" + answer + "'");
@@ -457,6 +450,9 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     }
 
     private void userHitEnterKey() {
+
+      System.out.println("\tReceiverExerciseFactory.userHitEnterKey " + keyHandler);
+
       send.fireEvent(new ButtonClickEvent());
     }
 
@@ -475,11 +471,21 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       super.onUnload();
       removeKeyHandler();
       cancelStimTimer();
+
+      if (verifyStimTimer != null) {
+        System.out.println("\tCancelling timer " + verifyStimTimer);
+
+        verifyStimTimer.cancel();
+      }
     }
 
     public void removeKeyHandler() {
-      System.out.println("removeKeyHandler : " + keyHandler);
+      if (keyHandler == null) {
+        System.err.println("\n\n\n\nReceiverExerciseFactory : removeKeyHandler : " + keyHandler);
 
+      } else {
+        System.out.println("ReceiverExerciseFactory : removeKeyHandler : " + keyHandler);
+      }
       if (keyHandler != null) keyHandler.removeHandler();
     }
 
