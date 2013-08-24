@@ -28,6 +28,7 @@ public class ModalInfoDialog {
     begin.setType(ButtonType.PRIMARY);
     begin.setEnabled(true);
     begin.setFocus(true);
+
     begin.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
