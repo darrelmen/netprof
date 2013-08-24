@@ -34,4 +34,103 @@ audience	You buy a ticket for a movie, and then you are part of it.
 audience	In the theater, not the performers, but the people who watch the performance.
 the body	It has arms and legs, and a torso and a head.
 the body	Your physical presence is housed in this.
-
+toaster	I put bread in the x this morning.
+toaster	The x burned my pizza -- I'll use an oven next time!
+toaster	Never use an x in the bathtub.
+toaster	When will my breakfast finally pop out of the x?
+toaster	John's favorite screensaver has flying x's.
+toaster	What's more important in the kitchen -- an x or a microwave?
+toaster	When eating eggs & bread for breakfast, don't put the *eggs* in the x.
+toaster	An x makes things warm and crunchy.
+toaster	x's make Eggo Waffles possible.
+toaster	I love the "ding" of my x in the morning.
+toaster	When usign an x, you much choose between "light" and "dark".
+toaster	You could just eat bread & jam, or you could use an x first.
+toaster	Sometimes an x is like a tiny oven.
+toaster	I can't wait until my bread pops out of the x!
+toaster	x is used with bread more than any other food.
+toaster	How many pieces of bread does your x hold?
+toaster	It would be very strange to have an x in your bedroom.
+toaster	Use the x, but don't do it for too long!
+toaster	My x is next to the microwave. How about yours?
+toaster	An x makes your food crispy.
+toaster	The x was invented in 1893.
+toaster	The modern pop-up x was invented in 1919.
+toaster	x's and sliced bread go great together.
+toaster	I like to put my bagels in the x.
+toaster	In dining halls, you'll see x's with conveyor belts.
+to hope	Everyone x's to win the lottery some day.
+to hope	I x you have a nice day.
+to hope	John x's to find a job soon.
+to hope	Everybody x's they'll be healthy.
+to hope	I x you visit again soon!
+to hope	I x this spot washes out!
+to hope	Many people x for world peace.
+to hope	I x things work out for you!
+to hope	I x you find your car keys!
+to hope	John x's to go back to school some day.
+to hope	Mary x's to be on time, but she might get stuck in traffic.
+to hope	Kate x's she'll ace the exam.
+to hope	I x I don't catch your cold!
+to hope	Kids x their parents will buy them ice cream.
+to hope	Who do you x to be when you grow up?
+to hope	I x you have a  good time in Hawaii!
+to hope	We x we get everything done in time.
+to hope	I x nothing bad happens tomorrow.
+to hope	We all x Zack comes home safely.
+to hope	Tom always x's that he'll catch Jerry.
+to hope	Pirates x they'll find treasure.
+to hope	I x next year is better than the last.
+to hope	I x dinner will be ready soon.
+to hope	The candidate x's he'll be elected.
+to hope	The postman x's the packages are light today.
+curtains	Some people don't use them.
+curtains	You usually leave them at home.
+curtains	Everyone who passes by can see them.
+curtains	They can keep passersby from seeing the inside of your house.
+curtains	They are often soft.
+curtains	They can become very dusty.
+curtains	You can open and close them.
+curtains	Sometimes they are made of lace.
+curtains	They are a household item.
+curtains	They can be made from a variety of materials, but usually look like cloth.
+curtains	They come in different opacities.
+curtains	They resemble items often found on beds.
+curtains	They may appear in all the rooms of a house.
+curtains	You might want them to match paint.
+curtains	Sometimes they touch the ceiling, other times they touch the floor.
+curtains	They usually have two sections.
+curtains	They block light.
+curtains	You would move them to get a view.
+curtains	You might use a pole to hang them.
+curtains	You might tie them back.
+curtains	Some people vacuum these.
+curtains	Many people only close these at night.
+curtains	You only need these if you have windows.
+curtains	Many showers use a different kind of these.
+curtains	They don't take up much space in a room.
+to recommend	You might do this for a friend.
+to recommend	Some people use the internet to find out if people have done this.
+to recommend	When there are multiple alternatives, you want someone to do this.
+to recommend	People do this for things they like.
+to recommend	Many people do this on websites without getting anything in return.
+to recommend	You can only do this while you are awake.
+to recommend	You can do this while sitting down.
+to recommend	Businesses want you to do this for them.
+to recommend	You can do this for a place you've visited just once.
+to recommend	You must have used or visited something to do this.
+to recommend	You can be far away from something while you do this.
+to recommend	People must speak or write to do this.
+to recommend	People like this when it happens to them.
+to recommend	You must have people do this for you when applying to universities or jobs.
+to recommend	Doctors sometimes do this.
+to recommend	People can do this at any time there is someone else around.
+to recommend	You need at least two people for this to take place.
+to recommend	Someone who asks to do this for you probably wants to help you.
+to recommend	Someone needs to know your preferences to do this well.
+to recommend	People might do this differently for different people.
+to recommend	A waiter might be asked to do this for different dishes on a menu.
+to recommend	Animals can't do this.
+to recommend	This can be done for people as well as objects.
+to recommend	People do this differently depending on their opinions.
+to recommend	People usually don't gain anything from this.
