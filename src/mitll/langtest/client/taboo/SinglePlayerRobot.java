@@ -12,11 +12,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Random;
 
 /**
- * Created with IntelliJ IDEA.
+ * TODO : add start/end game to protocol -- with starting a game, both sides get an item list.
+ *  When come to the end of the list, the game ends, and we register the score, and show the leaderboard feedback.
+ *
  * User: GO22670
  * Date: 8/15/13
  * Time: 12:36 PM
@@ -24,10 +25,10 @@ import java.util.Random;
  */
 public class SinglePlayerRobot {
   private final LangTestDatabaseAsync service;
+  private final Shuffler shuffler = new Shuffler();
   private List<ExerciseShell> exercisesRemaining = null;
   private Exercise currentExercise = null;
   private List<String> synonymSentences = Collections.emptyList();
- // int nodeIndex, exerciseIndex, stimIndex;
   private PropertyHandler propertyHandler;
 
   /**
@@ -55,33 +56,6 @@ public class SinglePlayerRobot {
       getNextExercise(async);
     }
   }
-
-/*  private void getExercisesForNextChapter(final long fuserid, final SectionNode chapter, final AsyncCallback<StimulusAnswerPair> async) {
-    Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
-    typeToSection.put(chapter.getType(), Arrays.asList(chapter.getName()));
-    System.out.println("getExercisesForNextChapter requesting for " + typeToSection);
-
-    service.getExercisesForSelectionState(0, typeToSection, fuserid, new AsyncCallback<ExerciseListWrapper>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        Window.alert("Couldn't contact server.");
-      }
-
-      @Override
-      public void onSuccess(ExerciseListWrapper result) {
-        System.out.println("getExercisesForSelectionState.onSuccess got " + result.exercises.size() + " exercises.");
-        exercisesRemaining = result.exercises;
-        Random rand = new Random();
-        shuffle(exercisesRemaining, rand);
-
-        if (exercisesRemaining.isEmpty()) {
-          System.err.println("huh? no exercises for " + chapter + "???");
-        } else {
-          getNextExercise(async);
-        }
-      }
-    });
-  }*/
 
   /**
    * @see #checkForStimulus(com.google.gwt.user.client.rpc.AsyncCallback
@@ -147,46 +121,23 @@ public class SinglePlayerRobot {
     return exampleToSend.replaceAll(refSentence, builder.toString());
   }
 
-
-  private void shuffle(List<ExerciseShell> list, Random rnd) {
-    int size = list.size();
-    ExerciseShell arr[] = list.toArray(new ExerciseShell[size]);
-
-    if (size < 5) {
-      for (int i=size; i>1; i--)
-        swap(arr, i-1, rnd.nextInt(i));
-    } else {
-      // Shuffle array
-      for (int i=size; i>1; i--)
-        swap(arr, i-1, rnd.nextInt(i));
-
-      // Dump array back into list
-      ListIterator<ExerciseShell> it = list.listIterator();
-      for (ExerciseShell anArr : arr) {
-        it.next();
-        it.set(anArr);
-      }
-    }
-  }
-
   /**
-   * Swaps the two specified elements in the specified array.
+   * @see ReceiverExerciseFactory.ReceiverPanel#registerAnswer(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
+   * @param correct
    */
-  private void swap(ExerciseShell[] arr, int i, int j) {
-    ExerciseShell tmp = arr[i];
-    arr[i] = arr[j];
-    arr[j] = tmp;
-  }
-
   public void registerAnswer(boolean correct) {
     if (correct) synonymSentences = Collections.emptyList();
   }
 
+  /**
+   * @see ReceiverExerciseFactory#setExerciseShells(java.util.Collection)
+   * @param exerciseShells
+   */
   public void setExerciseShells(Collection<ExerciseShell> exerciseShells) {
     synonymSentences = Collections.emptyList();
     exercisesRemaining = new ArrayList<ExerciseShell>(exerciseShells);
     Random rand = new Random();
 
-    shuffle(exercisesRemaining, rand);
+    shuffler.shuffle(exercisesRemaining, rand);
   }
 }
