@@ -460,11 +460,13 @@
             <arg line="-war"/>
             <arg value="war"/>
             <arg line="-style"/>
+
 <!--
             <arg value="OBF"/>
 -->
             <arg value="PRETTY"/>
-
+            <arg line="-localWorkers"/>
+            <arg value="6"/>
 <!--
             <arg value="-compileReport"/>
 -->
