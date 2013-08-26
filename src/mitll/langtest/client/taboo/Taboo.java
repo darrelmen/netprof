@@ -7,6 +7,8 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
+import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
@@ -29,6 +31,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class Taboo {
+  public static final String SIGN_OUT_TO_STOP_PLAYING = "Sign out to stop playing.";
   private final UserManager userManager;
   private final LangTestDatabaseAsync service;
   private LangTest langTest;
@@ -83,13 +86,13 @@ public class Taboo {
             afterRoleDeterminedConfirmation(fuserid,
               "You are the giver",
               "Now choose the next sentence your partner will see to guess the vocabulary word.",
-              "Sign out to stop playing.",
+              SIGN_OUT_TO_STOP_PLAYING,
               true);
           } else {
             afterRoleDeterminedConfirmation(fuserid,
               "You are the receiver",
               "Now choose the word that best fills in the blank in the sentence.",
-              "Sign out to stop playing.",
+              SIGN_OUT_TO_STOP_PLAYING,
               false);
           }
 
@@ -164,26 +167,12 @@ public class Taboo {
   }
 
   private void showPartnerSignedOut(String title, String message, final long fuserid) {
-    final Modal modal = new Modal(true);
-    modal.setTitle(title);
-    Heading w = new Heading(4);
-    w.setText(message);
-    modal.add(w);
-
-    final Button begin = new Button("OK");
-    begin.setType(ButtonType.PRIMARY);
-    begin.setEnabled(true);
-
-    begin.addClickHandler(new ClickHandler() {
+    new ModalInfoDialog(title,message,new HiddenHandler() {
       @Override
-      public void onClick(ClickEvent event) {
-        modal.hide();
+      public void onHidden(HiddenEvent hiddenEvent) {
         checkForPartner(fuserid);
       }
     });
-    modal.add(begin);
-
-    modal.show();
   }
 
   private void pollForPartner() {
