@@ -71,7 +71,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
       showExerciseList();
       if (buttonRow != null) {
         //buttonRow.setVisible(false);
-
+        // TODO : this stuff doesn't work properly...
         for (int i = 0; i < buttonRow.getWidgetCount(); i++) {
           if (buttonRow.getWidget(i) != statusHeader) buttonRow.getWidget(i).setVisible(false);
         }
@@ -123,12 +123,11 @@ public class TabooExerciseList extends FlexSectionExerciseList {
     SelectionState selectionState = getSelectionState(History.getToken());
     System.out.println("rememberExercises : user " + userID + " " + (isGiver ? " giver " : " receiver ") +
       " remembering " + result.size() + " exercises, " +
-      "state is '" + selectionState +"'");
+      "state is '" + selectionState + "'");
 
     if (isGiver) {
       super.rememberExercises(result);
-    }
-    else {
+    } else {
       currentExercises = result; // remember current exercises
       idToExercise = new HashMap<String, ExerciseShell>();
       clear();
@@ -138,12 +137,11 @@ public class TabooExerciseList extends FlexSectionExerciseList {
       }
       flush();
       if (receiverFactory != null) {
-        System.out.println("remembering " + result.size() );
+        System.out.println("remembering " + result.size());
         receiverFactory.setExerciseShells(getExerciseShells());
       }
       else {
         System.err.println("no factory!!! \n\n\n ");
-
       }
       tellPartnerMyChapterSelection(selectionState);
     }
