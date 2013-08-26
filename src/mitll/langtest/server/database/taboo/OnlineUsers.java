@@ -158,8 +158,8 @@ public class OnlineUsers {
         giverToReceiver.size() * 2 + " available = " + diff);
     }
     else {
-      logger.info("anyAvailable: online " + online.size() + " candidate pairs " + candidates.size() * 2 + " registered pairs " +
-        giverToReceiver.size() * 2 + " available = " + diff);
+/*      logger.info("anyAvailable: online " + online.size() + " candidate pairs " + candidates.size() * 2 + " registered pairs " +
+        giverToReceiver.size() * 2 + " available = " + diff);*/
     }
 
     boolean giver = false;
@@ -326,7 +326,7 @@ public class OnlineUsers {
     }
     else {
       List<AnswerBundle> answerBundles = stimToAnswer.get(stimulus);
-      logger.debug("Giver " + giverUserID + " checking for answer from " + receiver + " got " + answerBundles);
+   //   logger.debug("Giver " + giverUserID + " checking for answer from " + receiver + " got " + answerBundles);
 
       if (answerBundles == null) {
         //if (count++ < 4) logger.error("huh? '" +stimulus + "' is not recorded in " + stimToAnswer.keySet() + " for " + receiver);
