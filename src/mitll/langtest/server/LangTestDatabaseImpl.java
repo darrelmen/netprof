@@ -155,7 +155,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public ExerciseListWrapper getExerciseIds(int reqID, long userID) {
-    logger.debug("getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
+    logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
     List<Exercise> exercises = getExercises(userID);
     if (serverProps.isGoodwaveMode() && !serverProps.dataCollectMode) {
       exercises = getSortedExercises(exercises);
@@ -963,18 +963,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public void registerPair(long userid, boolean isGiver) {  db.getOnlineUsers().registerPair(userid, isGiver);  }
 
   /**
-   * @see mitll.langtest.client.taboo.GiverExerciseFactory#getExercisePanel(mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#sendStimulus(String, String, mitll.langtest.shared.Exercise, mitll.langtest.client.sound.SoundFeedback, boolean)
    * @param userid
    * @param exerciseID
    * @param stimulus
    * @param answer
    * @param onLastStimulus
    * @param skippedItem
+   * @param numClues
    */
   @Override
-  public int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem) {
+  public int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, int numClues) {
    // db.sendStimulus(userid, exerciseID, stimulus, answer);
-    return db.getOnlineUsers().sendStimulus(userid, exerciseID, stimulus, answer, onLastStimulus, skippedItem);
+    return db.getOnlineUsers().sendStimulus(userid, exerciseID, stimulus, answer, onLastStimulus, skippedItem, numClues);
   }
 
   /**
@@ -988,7 +989,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public void registerSelectionState(long giver, Map<String, Collection<String>> selectionState) {
-    db.getOnlineUsers().registerSelectionState(giver, selectionState);
+    Collection<Exercise> exercisesForSection = (selectionState.isEmpty()) ? getExercises(giver) : db.getSectionHelper().getExercisesForSelectionState(selectionState);
+    List<ExerciseShell> exerciseShells = getExerciseShells(exercisesForSection);
+    Collections.shuffle(exerciseShells);    // randomize order
+    db.getOnlineUsers().registerSelectionState(giver, selectionState, exerciseShells);
   }
 
   /**

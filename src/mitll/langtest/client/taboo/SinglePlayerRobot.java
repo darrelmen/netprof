@@ -6,10 +6,9 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.taboo.Game;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -25,10 +24,11 @@ import java.util.Random;
  */
 public class SinglePlayerRobot {
   private final LangTestDatabaseAsync service;
-  private final Shuffler shuffler = new Shuffler();
+  //private final Shuffler shuffler = new Shuffler();
   private List<ExerciseShell> exercisesRemaining = null;
   private Exercise currentExercise = null;
   private List<String> synonymSentences = Collections.emptyList();
+  private int numClues = 0;
   private PropertyHandler propertyHandler;
 
   /**
@@ -47,65 +47,71 @@ public class SinglePlayerRobot {
    */
   public void checkForStimulus(AsyncCallback<StimulusAnswerPair> async) {
     if (exercisesRemaining == null) {
+      System.out.println("checkForStimulus " + exercisesRemaining);
       StimulusAnswerPair stimulusAnswerPair = new StimulusAnswerPair();
       stimulusAnswerPair.setNoStimYet(true);
       async.onSuccess(stimulusAnswerPair); // async query not complete yet
-    } else if (exercisesRemaining.isEmpty() && synonymSentences.isEmpty()) {
-      async.onSuccess(null); // no more chapters, no more exercises, we're done -- TODO : start over?
     } else {
-      getNextExercise(async);
+      if (exercisesRemaining.isEmpty() && synonymSentences.isEmpty()) {
+        async.onSuccess(new StimulusAnswerPair(true,!anyGamesRemaining())); // no more chapters, no more exercises, we're done -- TODO : start over?
+      } else {
+        if (synonymSentences.isEmpty()) {
+          System.out.println("checkForStimulus " + exercisesRemaining.size());
+          getNextExercise(async);
+        } else {
+          String rawStim = synonymSentences.remove(0);
+          final String refSentence = getRefSentence();
+          boolean empty = synonymSentences.isEmpty();
+          // System.out.println("stim left " + synonymSentences.size() + " empty " + empty);
+
+          String obfuscated = getObfuscated(rawStim, refSentence);
+          async.onSuccess(new StimulusAnswerPair(currentExercise.getID(), obfuscated, refSentence, empty, false, numClues));
+        }
+      }
     }
   }
+
+ // public boolean onLastItem() { return exercisesRemaining != null && exercisesRemaining.size() == 0;}
 
   /**
    * @see #checkForStimulus(com.google.gwt.user.client.rpc.AsyncCallback
    * @param async
    */
   private void getNextExercise(final AsyncCallback<StimulusAnswerPair> async) {
-    if (synonymSentences.isEmpty()) {
-      System.out.println("SinglePlayerRobot.getNextExercise exercisesRemaining = " + exercisesRemaining.size());
+    System.out.println("SinglePlayerRobot.getNextExercise exercisesRemaining = " + exercisesRemaining.size());
 
-      ExerciseShell nextExerciseShell = exercisesRemaining.get(0);
-      System.out.println("SinglePlayerRobot.getNextExercise for = " + nextExerciseShell.getID());
+    ExerciseShell nextExerciseShell = exercisesRemaining.get(0);
+    System.out.println("SinglePlayerRobot.getNextExercise for = " + nextExerciseShell.getID());
 
-      service.getExercise(nextExerciseShell.getID(), new AsyncCallback<Exercise>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          Window.alert("Couldn't contact server.");
+    service.getExercise(nextExerciseShell.getID(), new AsyncCallback<Exercise>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        Window.alert("Couldn't contact server.");
+      }
+
+      @Override
+      public void onSuccess(Exercise result) {
+        System.out.println("SinglePlayerRobot.getNextExercise.onSuccess got " + result);
+
+        currentExercise = result;
+        exercisesRemaining.remove(0);
+
+        synonymSentences = Game.randomSample2(currentExercise.getSynonymSentences(), ReceiverExerciseFactory.MAX_CLUES_TO_GIVE, rnd);
+        numClues = synonymSentences.size();
+        final String refSentence = getRefSentence();
+
+        if (synonymSentences.isEmpty()) {
+          System.err.println("huh? no stim sentences for " + currentExercise);
+          async.onSuccess(new StimulusAnswerPair(result.getID(), "Data error on server, please report.", refSentence, false, false, numClues));
+        } else {
+          String rawStim = synonymSentences.remove(0);
+          boolean empty = synonymSentences.isEmpty();
+          // System.out.println("getNextExercise stim left " + synonymSentences.size() + " empty " + empty);
+          async.onSuccess(new StimulusAnswerPair(result.getID(), getObfuscated(rawStim, refSentence), refSentence,
+            empty, false, numClues));
         }
-
-        @Override
-        public void onSuccess(Exercise result) {
-          System.out.println("SinglePlayerRobot.getNextExercise.onSuccess got " + result);
-
-          currentExercise = result;
-          exercisesRemaining.remove(0);
-
-          synonymSentences = currentExercise.getSynonymSentences();
-
-          final String refSentence = getRefSentence();
-
-          if (synonymSentences.isEmpty()) {
-            System.err.println("huh? no stim sentences for " + currentExercise);
-            async.onSuccess(new StimulusAnswerPair(result.getID(), "Data error on server, please report.", refSentence, false, false));
-          } else {
-            String rawStim = synonymSentences.remove(0);
-            boolean empty = synonymSentences.isEmpty();
-           // System.out.println("getNextExercise stim left " + synonymSentences.size() + " empty " + empty);
-            async.onSuccess(new StimulusAnswerPair(result.getID(), getObfuscated(rawStim, refSentence), refSentence,
-              empty, false));
-          }
-        }
-      });
-    } else {
-      String rawStim = synonymSentences.remove(0);
-      final String refSentence = getRefSentence();
-      boolean empty = synonymSentences.isEmpty();
-     // System.out.println("stim left " + synonymSentences.size() + " empty " + empty);
-
-      async.onSuccess(new StimulusAnswerPair(currentExercise.getID(), getObfuscated(rawStim,refSentence), refSentence,
-        empty, false));
-    }
+      }
+    });
   }
 
   private String getRefSentence() {
@@ -129,15 +135,30 @@ public class SinglePlayerRobot {
     if (correct) synonymSentences = Collections.emptyList();
   }
 
+  public Game getGame() { return game; }
+  public boolean anyGamesRemaining() { return game.anyGamesRemaining(); }
+
+  private Game game;
+  private Random rnd = new Random();
+
   /**
-   * @see ReceiverExerciseFactory#setExerciseShells(java.util.Collection)
+   * @see ReceiverExerciseFactory#setExerciseShells
    * @param exerciseShells
    */
-  public void setExerciseShells(Collection<ExerciseShell> exerciseShells) {
-    synonymSentences = Collections.emptyList();
-    exercisesRemaining = new ArrayList<ExerciseShell>(exerciseShells);
-    Random rand = new Random();
+  public void setExerciseShells(List<ExerciseShell> exerciseShells) {
+    game = new Game(exerciseShells);
+  //  startGame();
+    //exercisesRemaining = new ArrayList<ExerciseShell>(exerciseShells);
+    //Random rand = new Random();
 
-    shuffler.shuffle(exercisesRemaining, rand);
+    //shuffler.shuffle(exercisesRemaining, rand);
   }
+
+  public Game startGame() {
+    exercisesRemaining = game.startGame();
+
+    synonymSentences = Collections.emptyList();
+    return game;
+  }
+
 }
