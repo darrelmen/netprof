@@ -18,14 +18,18 @@ public class ModalInfoDialog {
     this(title, Collections.singleton(message), null);
   }
 
+  public ModalInfoDialog(String title, Collection<String> messages) {
+    this(title, messages, null);
+  }
+
   public ModalInfoDialog(String title, String message, HiddenHandler handler) {
     this(title, Collections.singleton(message), handler);
   }
 
-  public ModalInfoDialog(String title, Collection<String> message, HiddenHandler handler) {
+  public ModalInfoDialog(String title, Collection<String> messages, HiddenHandler handler) {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
-    for (String m : message) {
+    for (String m : messages) {
       Heading w = new Heading(4);
       w.setText(m);
       modal.add(w);
