@@ -29,11 +29,13 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.taboo.Game;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Created with IntelliJ IDEA.
@@ -73,6 +75,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     private Controls choice = new Controls();
     private final Button send = new Button("Send");
     private Heading pleaseWait = new Heading(4, "Please wait for receiver to answer...");
+       List<String> synonymSentences;
 
     public GiverPanel(final Exercise exercise) {
       if (exercise == null) {
@@ -101,9 +104,10 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       Row w3 = new Row();
       w3.add(new Heading(4, "Choose a hint sentence to send : "));
       add(w3);
+      synonymSentences = Game.randomSample2(exercise.getSynonymSentences(), ReceiverExerciseFactory.MAX_CLUES_TO_GIVE, rnd);
 
       // recordingStyle.add(new ControlLabel("<b>Audio Recording Style</b>"));
-      choiceToExample = populateChoices(exercise, refSentence);
+      choiceToExample = populateChoices(synonymSentences, refSentence);
       final ControlGroup recordingStyle = new ControlGroup(); // necessary?
       recordingStyle.add(choice);
       add(choice);
@@ -138,15 +142,14 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
         send.setEnabled(false);
         pleaseWait.setVisible(true);
         controller.pingAliveUser();
-        List<String> synonymSentences = exercise.getSynonymSentences();
-
         boolean lastChoiceRemaining = (synonymSentences.size() - sentItems.size()) == 1;
-        sendStimulus(stimulus, refSentence, exercise, soundFeedback, lastChoiceRemaining);
+        sendStimulus(stimulus, refSentence, exercise, soundFeedback, lastChoiceRemaining, synonymSentences.size());
       } else {
         showPopup("Please select a sentence to send.");
       }
     }
 
+    Random rnd = new Random();
     private String lastSentExercise = "";
 
     /**
@@ -156,15 +159,16 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
      * @param exercise
      * @param soundFeedback
      * @param lastChoiceRemaining
+     * @param numClues
      */
     private void sendStimulus(final String stimulus, final String refSentence, final Exercise exercise, final SoundFeedback soundFeedback,
-                              boolean lastChoiceRemaining) {
+                              boolean lastChoiceRemaining, int numClues) {
       final String toSendWithBlankedOutItem = getObfuscated(stimulus, refSentence);
       final int user = controller.getUser();
       boolean differentExercise = lastSentExercise.length() > 0 && !lastSentExercise.equals(exercise.getID());
       lastSentExercise = exercise.getID();
       service.sendStimulus(user, exercise.getID(), toSendWithBlankedOutItem, refSentence, lastChoiceRemaining,
-        differentExercise, new AsyncCallback<Integer>() {
+        differentExercise, numClues, new AsyncCallback<Integer>() {
         @Override
         public void onFailure(Throwable caught) { Window.alert("couldn't contact server."); }
 
@@ -194,14 +198,16 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
      * TODO : ask server what items have been sent instead of keeping in client, since if we reload the page,
      * we loose the history.  OR we could shove it into the cache...?
      *
-     * @param e
+     * TODO : show mix of items...
+     *
+     * @param synonymSentences
      * @param refSentence
      * @return
      */
-    private Map<RadioButton, String> populateChoices(Exercise e, String refSentence) {
+    private Map<RadioButton, String> populateChoices(List<String> synonymSentences, String refSentence) {
       choice.clear();
       final Map<RadioButton, String> choiceToExample = new HashMap<RadioButton, String>();
-      List<String> notSentYet = getNotSentYetHints(e, refSentence);
+      List<String> notSentYet = getNotSentYetHints(synonymSentences, refSentence);
 
       if (notSentYet.size() > 7) notSentYet = notSentYet.subList(0, 7);
       for (String example : notSentYet) {
@@ -212,8 +218,9 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       return choiceToExample;
     }
 
-    private List<String> getNotSentYetHints(Exercise e, String refSentence) {
-      List<String> synonymSentences = e.getSynonymSentences();
+    private List<String> getNotSentYetHints(List<String> synonymSentences, String refSentence) {
+     // List<String> synonymSentences = e.getSynonymSentences();
+ //     List<String> synonymSentences = Game.randomSample2(e.getSynonymSentences(), ReceiverExerciseFactory.MAX_CLUES_TO_GIVE, rnd);
 
       List<String> notSentYet = new ArrayList<String>();
      // System.out.println("getNotSentYetHints for " + synonymSentences.size());
@@ -246,7 +253,8 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
      * @param current
      * @param refSentence
      */
-    private void checkForCorrect(final long userid, final String stimulus, final Exercise current, final String refSentence,
+    private void checkForCorrect(final long userid, final String stimulus, final Exercise current,
+                                 final String refSentence,
                                  final SoundFeedback feedback) {
       service.checkCorrect(userid, stimulus, new AsyncCallback<Integer>() {
         @Override
@@ -260,7 +268,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
           if (result == 0) { // incorrect
             feedback.playIncorrect();
             sentItems.add(stimulus);
-            choiceToExample = populateChoices(current, refSentence);
+            choiceToExample = populateChoices(synonymSentences, refSentence);
             if (choiceToExample.isEmpty()) {
               showPopup("They didn't guess correctly, moving to next item...", new CloseHandler<PopupPanel>() {
                 @Override
