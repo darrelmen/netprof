@@ -216,10 +216,14 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       if (isStaleResponse(result)) {
         System.out.println("----> ignoring result " + result.reqID + " b/c before latest " + lastReqID);
       } else {
-        rememberExercises(result.exercises);
-        loadFirstExercise();
+        rememberAndLoadFirst(result.exercises);
       }
     }
+  }
+
+  public void rememberAndLoadFirst(List<ExerciseShell>  exercises) {
+    rememberExercises(exercises);
+    loadFirstExercise();
   }
 
   protected boolean isStaleResponse(ExerciseListWrapper result) {
@@ -440,6 +444,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     currentExercise = i;
   }
 
+  public String getCurrentExerciseID() { return currentExercises != null ? currentExercises.get(currentExercise).getID() : "Unknown"; }
+
   protected void makeExercisePanel(Exercise result) {
     Panel exercisePanel = factory.getExercisePanel(result);
     innerContainer.setWidget(exercisePanel);
@@ -536,8 +542,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
     visited.add(i);
 
-    boolean onLast = i == currentExercises.size() - 1;
-    System.out.println("ExerciseList.loadNextExercise current is : " +current + " index " +i + " on last " + onLast);
+    boolean onLast = isOnLastItem(i);
+    System.out.println("ExerciseList.loadNextExercise current is : " +current + " index " +i +
+      " of " + currentExercises.size() +" last is " + (currentExercises.size() - 1)+" on last " + onLast);
+
     if (onLast) {
       onLastItem();
     }
@@ -548,6 +556,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       showTurkToken(current);
     }
     return onLast;
+  }
+
+  protected boolean isOnLastItem(int i) {
+    return i == currentExercises.size() - 1;
   }
 
   public boolean loadNextExercise(String id) {
