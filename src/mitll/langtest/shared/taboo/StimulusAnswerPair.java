@@ -10,21 +10,31 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 * To change this template use File | Settings | File Templates.
 */
 public class StimulusAnswerPair implements IsSerializable {
+  private int numClues;
   private String stimulus;
   private String answer;
   private String exerciseID;
   public boolean isLastStimulus;
   public boolean didGiverSkip;
   public boolean noStimYet;
+  private boolean gameOver;
+  private boolean chapterComplete;
 
   public StimulusAnswerPair() {}
 
-  public StimulusAnswerPair(String exerciseID, String stimulus, String answer, boolean isLastStimulus, boolean didGiverSkip) {
+  public StimulusAnswerPair(boolean gameOver, boolean chapterComplete) {
+    this.gameOver = gameOver;
+    this.chapterComplete = chapterComplete;
+  }
+
+  public StimulusAnswerPair(String exerciseID, String stimulus, String answer, boolean isLastStimulus,
+                            boolean didGiverSkip, int totalExpected) {
     this.setExerciseID(exerciseID);
     this.setStimulus(stimulus);
     this.setAnswer(answer);
     this.isLastStimulus = isLastStimulus;
     this.didGiverSkip = didGiverSkip;
+    this.numClues = totalExpected;
   }
 
   public void setNoStimYet(boolean v) { this.noStimYet = v; }
@@ -51,6 +61,18 @@ public class StimulusAnswerPair implements IsSerializable {
 
   public void setExerciseID(String exerciseID) {
     this.exerciseID = exerciseID;
+  }
+
+  public int getNumClues() {
+    return numClues;
+  }
+
+  public boolean isGameOver() {
+    return gameOver;
+  }
+
+  public boolean isChapterComplete() {
+    return chapterComplete;
   }
 
   @Override
