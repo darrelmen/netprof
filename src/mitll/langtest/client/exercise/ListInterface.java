@@ -7,6 +7,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,11 +26,14 @@ public interface ListInterface extends RequiresResize {
    */
   void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades);
   ExercisePanelFactory getFactory();
-  /**
-   * @see mitll.langtest.client.LangTest#gotUser(long)
-   * @see mitll.langtest.client.LangTest#makeFlashContainer()
-   * @param userID
-   */
+
+  void rememberAndLoadFirst(List<ExerciseShell> exercises);
+
+    /**
+     * @see mitll.langtest.client.LangTest#gotUser(long)
+     * @see mitll.langtest.client.LangTest#makeFlashContainer()
+     * @param userID
+     */
   void getExercises(long userID);
 
   /**
@@ -47,15 +51,18 @@ public interface ListInterface extends RequiresResize {
 
   Widget getExerciseListOnLeftSide(PropertyHandler props);
 
-    /**
-     * @see mitll.langtest.client.LangTest#loadNextExercise(mitll.langtest.shared.Exercise)
-     * @param current
-     * @return
-     */
-    boolean loadNextExercise(ExerciseShell current);
+  /**
+   * @param current
+   * @return
+   * @see mitll.langtest.client.LangTest#loadNextExercise(mitll.langtest.shared.Exercise)
+   */
+  boolean loadNextExercise(ExerciseShell current);
+
   boolean loadNextExercise(String id);
 
   boolean loadPreviousExercise(ExerciseShell current);
+
+  public String getCurrentExerciseID();
 
   boolean onFirst(ExerciseShell current);
 
