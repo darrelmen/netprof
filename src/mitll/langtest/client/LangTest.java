@@ -59,7 +59,6 @@ import mitll.langtest.client.taboo.GiverExerciseFactory;
 import mitll.langtest.client.taboo.ReceiverExerciseFactory;
 import mitll.langtest.client.taboo.SinglePlayerRobot;
 import mitll.langtest.client.taboo.Taboo;
-import mitll.langtest.client.taboo.TabooExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
@@ -142,12 +141,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
   }
 
+  /**
+   * Log browser exception on server, include user and exercise ids.  Consider including chapter selection.
+   * @see #onModuleLoad()
+   */
   private void dealWithExceptions() {
     GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
       public void onUncaughtException(Throwable throwable) {
         ExceptionHandlerDialog exceptionHandlerDialog = new ExceptionHandlerDialog();
         String exceptionAsString = exceptionHandlerDialog.getExceptionAsString(throwable);
-        logMessageOnServer("got browser exception : " + exceptionAsString);
+        int user = userManager != null ? userManager.getUser() : -1;
+        String exerciseID = exerciseList != null ? exerciseList.getCurrentExerciseID() : "Unknown";
+        logMessageOnServer("got browser exception : user #" + user + " exercise " + exerciseID + " : " + exceptionAsString);
         exceptionHandlerDialog.showExceptionInDialog(browserCheck, exceptionAsString);
       }
     });
@@ -162,8 +167,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         }
 
         @Override
-        public void onSuccess(Void result) {
-        }
+        public void onSuccess(Void result) {}
       });
   }
 
@@ -692,16 +696,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     String appTitle = props.getAppTitle();
     String appTitle1 = appTitle + " : Giver";
-    boolean changed;
+   // boolean changed;
     if (isGiver) {
-      changed = true;//(exerciseList.getFactory() instanceof ReceiverExerciseFactory);
+     // changed = true;//(exerciseList.getFactory() instanceof ReceiverExerciseFactory);
       GiverExerciseFactory factory = new GiverExerciseFactory(service, this, this);
       System.out.println("setTabooFactory : made " + factory);
 
       exerciseList.setFactory(factory, userManager, 1);
 
     } else {
-      changed = (exerciseList.getFactory() instanceof ReceiverExerciseFactory);
+    //  changed = (exerciseList.getFactory() instanceof ReceiverExerciseFactory);
 
       if (singlePlayer && singlePlayerRobot == null) {
         singlePlayerRobot = new SinglePlayerRobot(service, props);
@@ -713,6 +717,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         setSelectionState(Collections.EMPTY_MAP);
       }
     }
+    taboo.setExerciseList(exerciseList);
     setTitle(appTitle1);
     if (pageTitle == null) {
       flashcard.setAppTitle(appTitle1);
