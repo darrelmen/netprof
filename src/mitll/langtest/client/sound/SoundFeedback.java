@@ -60,7 +60,7 @@ public class SoundFeedback {
     currentSound = new Sound(new AudioControl() {
       @Override
       public void reinitialize() {
-        System.out.println("song " + song + " ended---");
+       // System.out.println("song " + song + " ended---");
         destroySound();
         endListener.songEnded();
       }
