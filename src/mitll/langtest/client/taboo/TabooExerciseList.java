@@ -6,6 +6,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.DialogHelper;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -137,8 +138,8 @@ public class TabooExerciseList extends FlexSectionExerciseList {
       }
       flush();
       if (receiverFactory != null) {
-        System.out.println("remembering " + result.size());
-        receiverFactory.setExerciseShells(getExerciseShells());
+        System.out.println("rememberExercises : remembering " + result.size());
+        receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(getExerciseShells()));
       }
       else {
         System.err.println("no factory!!! \n\n\n ");
@@ -161,18 +162,40 @@ public class TabooExerciseList extends FlexSectionExerciseList {
   }
 
   /**
+   * TODO : get game statistics and show leaderboard plot
+   *
+   * So there are two stopping points - at the end of the game and the end of the chapter...
    * @see #loadNextExercise(mitll.langtest.shared.ExerciseShell)
    */
   @Override
   protected void onLastItem() {
-    if (!isGiver) {
-      new ModalInfoDialog("Word list complete", "Perhaps you like to choose another chapter?");
-    }
-    else {
+    if (isGiver) {
       List<String> message = new ArrayList<String>();
       message.add("Please wait for receiver to choose another chapter.");
       message.add("Or you could stop playing by clicking sign out.");
-      new ModalInfoDialog("Word list complete", message);
+      new ModalInfoDialog("Game complete!", message);
+    } else {
+      new ModalInfoDialog("Chapter(s) complete.", "Would you like to practice this chapter again?");
+      new DialogHelper(true).showErrorMessage("Chapter(s) complete.", "Would you like to practice this chapter(s) again?", "Yes", new DialogHelper.CloseListener() {
+        @Override
+        public void gotYes() {
+          receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(getExerciseShells()));
+        }
+
+        @Override
+        public void gotNo() {
+
+        }
+      });
     }
   }
+
+/*  @Override
+  protected boolean isOnLastItem(int i) {
+    if (isGiver) {
+      return super.isOnLastItem(i);    //To change body of overridden methods use File | Settings | File Templates.
+    } else {
+      return receiverFactory.onLastItem();
+    }
+  }*/
 }
