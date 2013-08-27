@@ -1,6 +1,10 @@
 package mitll.langtest.shared.taboo;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.ExerciseShell;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,6 +14,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * To change this template use File | Settings | File Templates.
  */
 public class TabooState implements IsSerializable {
+  private List<ExerciseShell> exerciseShells;
   private boolean anyAvailable;
   private boolean joinedPair;
   private boolean giver;
@@ -22,10 +27,11 @@ public class TabooState implements IsSerializable {
    * @param joinedPair
    * @param giver
    */
-  public TabooState(boolean anyAvailable, boolean joinedPair, boolean giver) {
+  public TabooState(boolean anyAvailable, boolean joinedPair, boolean giver, List<ExerciseShell> exerciseShells) {
     this.anyAvailable = anyAvailable;
     this.joinedPair = joinedPair;
     this.giver = giver;
+    this.exerciseShells = exerciseShells;
   }
 
   public boolean isAnyAvailable() {
@@ -38,6 +44,10 @@ public class TabooState implements IsSerializable {
 
   public boolean isGiver() {
     return giver;
+  }
+
+  public List<ExerciseShell> getExerciseShells() {
+    return exerciseShells;
   }
 
   public String toString() {
