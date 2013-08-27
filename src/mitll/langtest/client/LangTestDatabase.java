@@ -193,15 +193,17 @@ public interface LangTestDatabase extends RemoteService {
 
   /**
    * Giver chooses a sentence to send to receiver
+   *
    * @param userid
    * @param exerciseID
    * @param stimulus
    * @param answer
    * @param onLastStimulus
    * @param skippedItem
+   * @param numClues
    * @return
    */
-  int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem);
+  int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, int numClues);
 
   /**
    * Receiver checks for stimulus
