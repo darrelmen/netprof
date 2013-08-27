@@ -1,6 +1,8 @@
 package mitll.langtest.server.database.taboo;
 
 import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.taboo.Game;
 import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 import mitll.langtest.shared.taboo.TabooState;
@@ -14,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,6 +27,7 @@ import java.util.Map;
  */
 public class OnlineUsers {
   private static final Logger logger = Logger.getLogger(OnlineUsers.class);
+  public static final int GAME_SIZE = 10;
 
   private final UserDAO userDAO;
   private Collection<User> online = new HashSet<User>();
@@ -36,6 +40,7 @@ public class OnlineUsers {
   // TODO : write to database
   private Map<User,Map<String,List<AnswerBundle>>> receiverToAnswer = new HashMap<User, Map<String, List<AnswerBundle>>>();
   private Map<User,Map<String, Collection<String>>> receiverToState = new HashMap<User, Map<String, Collection<String>>>();
+  private Map<User,Game> receiverToGame = new HashMap<User, Game>();
 
   // TODO keep track of join time, order pairings on that basis
 
@@ -146,6 +151,7 @@ public class OnlineUsers {
    * If they are, we return which side of the relationship they're on.
    *
    * So the state machine : online->active (when two online have been paired but haven't accepted their roles)->paired
+   * @see mitll.langtest.server.LangTestDatabaseImpl#anyUsersAvailable(long)
    * @param userid
    * @return
    */
@@ -168,20 +174,44 @@ public class OnlineUsers {
     for (User u : giverToReceiver.values()) if (u.id == userid) receiver = true;
 
     if (giver && receiver) {  // sanity check
-      logger.error("\n\n---> huh? how can " + userid + " be both giver and receiver?\n\n");
+      logger.error("\n\n---> anyAvailable : huh? how can " + userid + " be both giver and receiver?\n\n");
     }
     boolean joined = giver || receiver;
 
+    List<ExerciseShell> exerciseShells = null;
     if (joined) {
-      logger.info("yea! just joined " + userid + " giver " + giver + " receiver " + receiver);
+      logger.info("anyAvailable : yea! just joined " + userid + " giver " + giver + " receiver " + receiver);
+
+      User receiverUser;
+      long giverID, receiverID;
+      if (giver) {
+        receiverUser = giverToReceiver.get(getUser(userid));
+        giverID = userid;
+        receiverID = receiverUser.id;
+      } else {
+        receiverUser = getUser(userid);
+        giverID = getGiverForReceiver(userid).id;
+        receiverID = userid;
+      }
+      logger.info("anyAvailable : giver : " + giverID + " and receiver " + receiverID);
+
+      Game game = receiverToGame.get(receiverUser);
+      exerciseShells = game.startGame();
     } else if (avail) { // take us out of the pool
       addCandidatePair(userid);
     }
 
-    TabooState tabooState = new TabooState(avail, joined, giver);
+    TabooState tabooState = new TabooState(avail, joined, giver, exerciseShells);
    // logger.debug("returning " + tabooState);
     return tabooState;
   }
+
+  public Collection<ExerciseShell> getNextGameExercises(long userID, boolean isGiver) {
+    User receiverUser = isGiver ? giverToReceiver.get(getUser(userID)) : getUser(userID);
+    return receiverToGame.get(receiverUser).startGame();
+  }
+
+  Random rnd = new Random();
 
   private void addCandidatePair(long userid) {
     User first = null, second = null;
@@ -193,8 +223,6 @@ public class OnlineUsers {
       }
       if (first != null && second != null) {
         candidates.add(new Pair(first, second));
- /*       active.add(first);
-        active.add(second);*/
         break;
       }
     }
@@ -258,21 +286,23 @@ public class OnlineUsers {
    *
    *
    *
+   *
    * @param userid
    * @param exerciseID
    * @param stimulus
    * @param answer
    * @param onLastStimulus
    * @param skippedItem
+   * @param numClues
    * @return
    */
-  public synchronized int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem) {
+  public synchronized int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, int numClues) {
     User receiver = getReceiverForGiver(userid);
     if (receiver == null) {
       return 1;
     }
     logger.debug("sending " + stimulus + " to " + receiver + " from giver " + userid);
-    receiverToStimulus.put(receiver, new StimulusAnswerPair(exerciseID, stimulus, answer, onLastStimulus, skippedItem));
+    receiverToStimulus.put(receiver, new StimulusAnswerPair(exerciseID, stimulus, answer, onLastStimulus, skippedItem, numClues));
     return 0;
   }
 
@@ -307,13 +337,12 @@ public class OnlineUsers {
     logger.debug("registerAnswer : user->answer now " + receiverToAnswer);
   }
 
- // int count = 0;
-
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#checkCorrect
    * @param giverUserID
    * @param exerciseID
-   *@param stimulus  @return
+   * @param stimulus
+   * @return
    */
   public synchronized int checkCorrect(long giverUserID, String exerciseID, String stimulus) {
     User receiver = getReceiverForGiver(giverUserID);
@@ -343,7 +372,7 @@ public class OnlineUsers {
 
   /**
    * @see #checkCorrect(long, String, String)
-   * @see #sendStimulus(long, String, String, String, boolean, boolean)
+   * @see #sendStimulus(long, String, String, String, boolean, boolean, int)
    * @param giver
    * @return
    */
@@ -382,8 +411,15 @@ public class OnlineUsers {
     }
   }
 
-  public void registerSelectionState(long receiver, Map<String, Collection<String>> selectionState) {
+  /**
+   * @see mitll.langtest.client.taboo.TabooExerciseList#tellPartnerMyChapterSelection(mitll.langtest.client.exercise.SelectionState)
+   * @param receiver
+   * @param selectionState
+   * @param exercisesForSection
+   */
+  public void registerSelectionState(long receiver, Map<String, Collection<String>> selectionState, List<ExerciseShell> exercisesForSection) {
     receiverToState.put(getUser(receiver),selectionState);
+    receiverToGame.put(getUser(receiver),new Game(exercisesForSection));
   }
 
   private static class Pair {
