@@ -142,7 +142,7 @@ public interface LangTestDatabaseAsync {
 
   void registerPair(long userid, boolean isGiver, AsyncCallback<Void> async);
 
-  void sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, AsyncCallback<Integer> async);
+  void sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, int numClues, AsyncCallback<Integer> async);
 
   void checkForStimulus(long userid, AsyncCallback<StimulusAnswerPair> async);
 
