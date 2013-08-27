@@ -16,6 +16,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.TabooState;
@@ -41,6 +42,7 @@ public class Taboo {
   private static final int INACTIVE_PERIOD_MILLIS2 = 1000 * 2; // ten minutes
 
   private Timer userTimer, onlineTimer;
+  private ListInterface exerciseList;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
@@ -55,7 +57,7 @@ public class Taboo {
   }
 
   public void initialCheck(final long fuserid) {
-    System.out.println("initialCheck : me : " + fuserid + " ...");
+    System.out.println("Taboo.initialCheck : me : " + fuserid + " ...");
 
     checkForPartner(fuserid);
   }
@@ -97,7 +99,7 @@ public class Taboo {
           }
 
          // System.out.println("\n----> checkForPartner.onSuccess : me : " + fuserid + " isGiver " + result.isGiver());
-
+          exerciseList.rememberAndLoadFirst(result.getExerciseShells());
           pollForPartnerOnline(fuserid, result.isGiver());
         } else if (result.isAnyAvailable()) {
           askUserToChooseRole(fuserid);
@@ -186,6 +188,7 @@ public class Taboo {
   }
 
   /**
+   * TODO : use ModalInfoDialog
    * @see #checkForPartner(long)
    * @param userID
    * @param title
@@ -275,5 +278,9 @@ public class Taboo {
     });
     askGiverReceiver.add(begin);
     askGiverReceiver.show();
+  }
+
+  public void setExerciseList(ListInterface exerciseList) {
+    this.exerciseList = exerciseList;
   }
 }
