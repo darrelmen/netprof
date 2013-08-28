@@ -24,7 +24,6 @@ import java.util.Random;
  */
 public class SinglePlayerRobot {
   private final LangTestDatabaseAsync service;
-  //private final Shuffler shuffler = new Shuffler();
   private List<ExerciseShell> exercisesRemaining = null;
   private Exercise currentExercise = null;
   private List<String> synonymSentences = Collections.emptyList();
