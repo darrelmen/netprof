@@ -363,8 +363,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
-  private void askServerForExercise(ExerciseShell exerciseShell) {
-    System.out.println("askServerForExercise id = " + exerciseShell.getID());
+  protected void askServerForExercise(ExerciseShell exerciseShell) {
+    System.out.println("ExerciseList.askServerForExercise id = " + exerciseShell.getID());
     service.getExercise(exerciseShell.getID(), new ExerciseAsyncCallback(exerciseShell));
   }
 
