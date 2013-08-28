@@ -27,7 +27,7 @@ import java.util.Random;
  */
 public class OnlineUsers {
   private static final Logger logger = Logger.getLogger(OnlineUsers.class);
-  public static final int GAME_SIZE = 10;
+  public static final int GAME_SIZE = 3;
 
   private final UserDAO userDAO;
   private Collection<User> online = new HashSet<User>();
@@ -59,7 +59,7 @@ public class OnlineUsers {
       logger.info("---> addOnline online now " + getOnline());
     }
     else {
-      logger.info("---> addOnline now " + getOnline().size() + " online...");
+      //logger.info("---> addOnline now " + getOnline().size() + " online...");
     }
   }
 
@@ -321,20 +321,24 @@ public class OnlineUsers {
   }
 
   public synchronized void registerAnswer(long receiverUserID, String stimulus, String answer, boolean correct) {
-    receiverToStimulus.remove(getUser(receiverUserID));
-
     User receiver = getUser(receiverUserID);
-    Map<String, List<AnswerBundle>> stimToAnswer = receiverToAnswer.get(receiver);
-    if (stimToAnswer == null) {
-      receiverToAnswer.put(receiver, stimToAnswer = new HashMap<String, List<AnswerBundle>>());
-    }
-    List<AnswerBundle> answerBundles = stimToAnswer.get(stimulus);
-    if (answerBundles == null) {
-      stimToAnswer.put(stimulus, answerBundles = new ArrayList<AnswerBundle>());
-    }
-    answerBundles.add(new AnswerBundle(stimulus,answer,correct));
+    if (getGiverForReceiver(receiverUserID) == null) {
+ //     logger.debug("not remembering answer, since " + receiverUserID + " is playing by him/herself.");
+    } else {
+      receiverToStimulus.remove(receiver);
 
-    logger.debug("registerAnswer : user->answer now " + receiverToAnswer);
+      Map<String, List<AnswerBundle>> stimToAnswer = receiverToAnswer.get(receiver);
+      if (stimToAnswer == null) {
+        receiverToAnswer.put(receiver, stimToAnswer = new HashMap<String, List<AnswerBundle>>());
+      }
+      List<AnswerBundle> answerBundles = stimToAnswer.get(stimulus);
+      if (answerBundles == null) {
+        stimToAnswer.put(stimulus, answerBundles = new ArrayList<AnswerBundle>());
+      }
+      answerBundles.add(new AnswerBundle(stimulus, answer, correct));
+
+      logger.debug("registerAnswer : user->answer now " + receiverToAnswer);
+    }
   }
 
   /**
