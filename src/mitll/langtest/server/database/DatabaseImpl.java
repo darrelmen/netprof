@@ -456,6 +456,14 @@ public class DatabaseImpl implements Database {
     return userDAO.getOnlineUsers();
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#registerAnswer(long, String, String, String, boolean)
+   * @param userid
+   * @param exerciseID
+   * @param stimulus
+   * @param answer
+   * @param correct
+   */
   public void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean correct) {
     getOnlineUsers().registerAnswer(userid, stimulus, answer, correct);
     addAnswer((int) userid, "plan",exerciseID,stimulus,answer,correct);
