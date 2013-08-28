@@ -1005,6 +1005,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getOnlineUsers().checkForStimulus(userid);
   }
 
+  /**
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#registerAnswer(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
+   * @param userid
+   * @param exerciseID
+   * @param stimulus
+   * @param answer
+   * @param isCorrect
+   */
   @Override
   public void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean isCorrect) {
     db.registerAnswer(userid, exerciseID, stimulus, answer, isCorrect);
