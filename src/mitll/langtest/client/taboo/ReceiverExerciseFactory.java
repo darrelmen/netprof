@@ -9,6 +9,8 @@ import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Row;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
+import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -54,19 +56,20 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class ReceiverExerciseFactory extends ExercisePanelFactory {
-  public static final int POPUP_DURATION = 2000;
-  public static final int CHECK_FOR_STIMULUS_INTERVAL = 1000;
-  public static final int MAX_CLUES_TO_GIVE = 2;//5;
-  public static final int GAME_SIZE = 10;
+  private static final int POPUP_DURATION = 2000;
+  private static final int CHECK_FOR_STIMULUS_INTERVAL = 1000;
+  public static final int MAX_CLUES_TO_GIVE = 5;
+  //public static final int GAME_SIZE = 10;
 
   private SinglePlayerRobot singlePlayerRobot;
   private int exerciseCount = 0;
   private int stimulusCount;
-  int numExercisesInGame = 0;
-  int numGames = 0;
+  private int numExercisesInGame = 0;
+  private int numGames = 0;
   private int correctCount, incorrectCount;
   private int score;
   private int gameCount;
+  private int totalClues;
 
   /**
    *
@@ -112,14 +115,6 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     }
   }
 
-/*  public boolean onLastItem() {
-    if (singlePlayerRobot != null) {
-      return singlePlayerRobot.onLastItem();
-    } else { // TODO : ask ...server?
-      return false;
-    }
-  }*/
-
   private void startGame() {
     if (singlePlayerRobot != null) {
       numExercisesInGame = singlePlayerRobot.getGame().getNumExercises();
@@ -130,9 +125,9 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     exerciseCount = 0;
     stimulusCount = 0;
     gameCount++;
+    score = 0;
+    totalClues = 0;
   }
-
-  //public int getScore() { return score; }
 
   private class ReceiverPanel extends FluidContainer {
     private static final String PLEASE_WAIT = "Please wait for giver to send next sentence.";
@@ -143,8 +138,13 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     Heading stimulus = new Heading(3);
     String answer;
     String exerciseID;
-    final Button send = new Button("Send Answer");
-   // Image correctImage   = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
+    Button send;
+
+    private boolean onLastStim = false;
+    private StimulusAnswerPair displayedStimulus;
+    //private int numClues;
+
+    // Image correctImage   = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
   //  Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
     private Heading correct = new Heading(4);
 
@@ -180,6 +180,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       w.add(guessBox);
       add(w);
 
+      Button send = new Button("Send Answer");
       send.setType(ButtonType.PRIMARY);
       send.setEnabled(true);
       send.setTitle("Press the enter key.");
@@ -187,8 +188,6 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       HTML warnNoFlash = new HTML(BootstrapExercisePanel.WARN_NO_FLASH);
       warnNoFlash.setVisible(false);
       final SoundFeedback soundFeedback = new SoundFeedback(controller.getSoundManager(), warnNoFlash);
-
-      waitForNext();
 
       send.addClickHandler(new ClickHandler() {
         @Override
@@ -210,6 +209,10 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       add(container);
       add(warnNoFlash);
       add(addCorrectIncorrectFeedback());
+
+      this.send = send;
+      System.out.println("made send...");
+      waitForNext();
       return outer;
     }
 
@@ -252,7 +255,10 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
         correctCount++;
         exerciseCount++;
-        score += numClues-stimulusCount;
+        int i = displayedStimulus.getNumClues() - stimulusCount + 1;
+        //System.out.println("adding " + i + " to " + score + " clues " + displayedStimulus.getNumClues() + " stim " + stimulusCount);
+        score += i;
+        totalClues += displayedStimulus.getNumClues();
         stimulusCount = 0;
         setCorrect();
         showPopup("Correct!" + (singlePlayerRobot == null ? " Please wait for the next item." : ""));
@@ -279,15 +285,18 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     }
 
     private void loadNext(ExerciseController controller) {
-      System.out.println("ReceiverExerciseFactory.loadNext '" + exerciseID+ "'  ");
+     // System.out.println("ReceiverExerciseFactory.loadNext '" + exerciseID+ "'  ");
 
       controller.loadNextExercise(exerciseID);
     }
 
     private boolean checkCorrect() {
       boolean isCorrect = guessBox.getText().equalsIgnoreCase(answer);
-      if (answer.startsWith("to ")){ // verbs
-        isCorrect = guessBox.getText().equalsIgnoreCase(answer.substring(3));
+      for (String prefix : Arrays.asList("to ", "the ")) {  // TODO : hack for ENGLISH
+        if (answer.startsWith(prefix)) { // verbs
+          isCorrect = guessBox.getText().equalsIgnoreCase(answer.substring(prefix.length()));
+          if (isCorrect) break;
+        }
       }
       return isCorrect;
     }
@@ -307,7 +316,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         prompt.setText(singlePlayerRobot == null ? PLEASE_WAIT : "");
       //}
       exerciseDisplay.setText("");
-      stimulus.setVisible(false);
+     // stimulus.setVisible(false);
       stimulus.setText("");
 
       guessBox.setVisible(false);
@@ -318,10 +327,6 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     private void showPopup(String html) {
       showPopup(html, POPUP_DURATION, null);
     }
-
-/*    private void showPopup(String html, int dur) {
-      showPopup(html, dur, null);
-    }*/
 
     private void showPopup(String html, int dur, CloseHandler<PopupPanel> closeHandler) {
       final PopupPanel pleaseWait = new DecoratedPopupPanel();
@@ -343,6 +348,8 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
     /**
      * @see ReceiverPanel#ReceiverPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
+     * @see #gotStimulusResponse(mitll.langtest.shared.taboo.StimulusAnswerPair, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
+     *
      * @param service
      * @param controller
      * @param outer
@@ -361,26 +368,30 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
               System.out.println(new Date() + " gotStimulusResponse : showStimlus  " + result);
               showStimulus(result, outer);
             } else { // game over... dude...
-              removeKeyHandler();
+         //     removeKeyHandler();
           //    prompt.setText("Please choose another chapter(s).");
 
               if (result.isChapterComplete()) {
                 new ModalInfoDialog("Chapter(s) complete.", Arrays.asList("You've completed all the games.  Would you like to go again?", "Or you can choose another chapter or chapters."));
                 // TODO show leaderboard plot
-              }
-              else {
-                new ModalInfoDialog("Game complete!", "Game complete! Your score was " + score + " out of " + (MAX_CLUES_TO_GIVE*GAME_SIZE));
-                // TODO : post score to server.
+              } else {
+                int i = totalClues;// MAX_CLUES_TO_GIVE * numExercisesInGame;
+                new ModalInfoDialog("Game complete!", "Game complete! Your score was " + score + " out of " + i,
+                  new HiddenHandler() {
+                    @Override
+                    public void onHidden(HiddenEvent hiddenEvent) {
+                      // TODO : post score to server.
+                      System.out.println(new Date() +" onHidden.got hide...");
 
-                if (singlePlayerRobot != null) {
-                  singlePlayerRobot.startGame();
-                  startGame();
-                  checkForStimulus(service, controller, outer);
-                }
-                else { // TODO check with server. -- start next Game
+                      if (singlePlayerRobot != null) {
+                        singlePlayerRobot.startGame();
+                        startGame();
+                        checkForStimulus(service, controller, outer);
+                      } else { // TODO check with server. -- start next Game
 
-                }
-
+                      }
+                    }
+                  });
               }
             }
           }
@@ -485,9 +496,6 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       }
     }
 
-    private boolean onLastStim = false;
-    private StimulusAnswerPair displayedStimulus;
-    int numClues;
 
     private void showStimulus(StimulusAnswerPair result, ReceiverPanel outer) {
      // correctImage.setVisible(false);
@@ -503,8 +511,8 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       guessBox.setVisible(true);
       send.setVisible(true);
       stimulus.setVisible(true);
-      numClues = result.getNumClues();
-      stimulus.setText("Clue " + (++stimulusCount) + " of " + numClues + "<br/><font color=#0036a2>" + result.getStimulus() +"</font>");
+    // numClues = result.getNumClues();
+      stimulus.setText("Clue " + (++stimulusCount) + " of " + displayedStimulus.getNumClues() + "<br/><font color=#0036a2>" + result.getStimulus() +"</font>");
       outer.answer = result.getAnswer();
       exerciseID = result.getExerciseID();
       guessBox.setFocus(true);
@@ -526,17 +534,23 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
                                                        boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
                                                        if (isEnter && event.getTypeInt() == 512 &&
                                                          "[object KeyboardEvent]".equals(ne.getString())) {
+                                                   //      System.out.println("ReceiverExerciseFactory.addKeyHandler got click target " +  ne.getEventTarget());
+
                                                          ne.preventDefault();
+                                                         ne.stopPropagation();
                                                          userHitEnterKey();
                                                        }
                                                      }
                                                    });
-      // System.out.println("addKeyHandler made click handler " + keyHandler);
+      System.out.println(new Date() +" ReceiverExerciseFactory.addKeyHandler made click handler " + keyHandler);
     }
 
     private void userHitEnterKey() {
-      System.out.println("\tReceiverExerciseFactory.userHitEnterKey " + keyHandler);
-      send.fireEvent(new ButtonClickEvent());
+      System.out.println(new Date() +"\tReceiverExerciseFactory.userHitEnterKey " + keyHandler);
+      if (send != null && guessBox.getText().length() > 0) {
+        //removeKeyHandler();
+        send.fireEvent(new ButtonClickEvent());
+      }
     }
 
     private class ButtonClickEvent extends ClickEvent{
@@ -552,6 +566,8 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     @Override
     protected void onUnload() {
       super.onUnload();
+      System.out.println(new Date() +" ReceiverExerciseFactory : onUnload");
+
       removeKeyHandler();
       cancelStimTimer();
 
@@ -564,12 +580,14 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
     public void removeKeyHandler() {
       if (keyHandler == null) {
-        System.err.println("\n\n\n\nReceiverExerciseFactory : removeKeyHandler : " + keyHandler);
-
+        System.err.println(new Date() +" -- ReceiverExerciseFactory : removeKeyHandler : " + keyHandler);
       } else {
-        System.out.println("ReceiverExerciseFactory : removeKeyHandler : " + keyHandler);
+        System.out.println(new Date() +" ReceiverExerciseFactory : removeKeyHandler : " + keyHandler);
       }
-      if (keyHandler != null) keyHandler.removeHandler();
+      if (keyHandler != null){
+        keyHandler.removeHandler();
+        keyHandler = null;
+      }
     }
 
     private class StimulusAnswerPairAsyncCallback implements AsyncCallback<StimulusAnswerPair> {
