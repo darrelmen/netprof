@@ -139,7 +139,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
       flush();
       if (receiverFactory != null) {
         System.out.println("rememberExercises : remembering " + result.size());
-        receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(getExerciseShells()));
+        receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(currentExercises));
       }
       else {
         System.err.println("no factory!!! \n\n\n ");
@@ -175,11 +175,12 @@ public class TabooExerciseList extends FlexSectionExerciseList {
       message.add("Or you could stop playing by clicking sign out.");
       new ModalInfoDialog("Game complete!", message);
     } else {
-      new ModalInfoDialog("Chapter(s) complete.", "Would you like to practice this chapter again?");
+     // new ModalInfoDialog("Chapter(s) complete.", "Would you like to practice this chapter again?");
       new DialogHelper(true).showErrorMessage("Chapter(s) complete.", "Would you like to practice this chapter(s) again?", "Yes", new DialogHelper.CloseListener() {
         @Override
         public void gotYes() {
-          receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(getExerciseShells()));
+          receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(currentExercises));
+          askServerForExercise(currentExercises.get(0));
         }
 
         @Override
@@ -189,13 +190,4 @@ public class TabooExerciseList extends FlexSectionExerciseList {
       });
     }
   }
-
-/*  @Override
-  protected boolean isOnLastItem(int i) {
-    if (isGiver) {
-      return super.isOnLastItem(i);    //To change body of overridden methods use File | Settings | File Templates.
-    } else {
-      return receiverFactory.onLastItem();
-    }
-  }*/
 }
