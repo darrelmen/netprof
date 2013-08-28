@@ -33,7 +33,7 @@ public class Game implements IsSerializable {
     for (int i = 0; i < Math.min(allSelectedExercises.size(),OnlineUsers.GAME_SIZE); i++) {
       exercisesToDo.add(allSelectedExercises.get(i));
     }
-    System.out.println("startGame... from " + allSelectedExercises.size());
+    System.out.println("startGame... from " + allSelectedExercises.size() + " items.");
 
     //OnlineUsers.logger.info("---> new game!");
    // List<ExerciseShell> exercisesToDo = randomSample2(allSelectedExercises, OnlineUsers.GAME_SIZE, rnd);
