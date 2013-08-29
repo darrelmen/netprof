@@ -59,15 +59,15 @@ public class ModalInfoDialog {
                                                      }
                                                    }
                                                  });
-     System.out.println("addKeyHandler made click handler " + keyHandler);
+    // System.out.println("addKeyHandler made click handler " + keyHandler);
   }
 
   public void removeKeyHandler() {
     if (keyHandler == null) {
-      System.err.println("\nModalInfoDialog : removeKeyHandler : " + keyHandler);
+      //System.err.println("\nModalInfoDialog : removeKeyHandler : " + keyHandler);
 
     } else {
-      System.out.println("ModalInfoDialog : removeKeyHandler : " + keyHandler);
+     // System.out.println("ModalInfoDialog : removeKeyHandler : " + keyHandler);
     }
     if (keyHandler != null) {
       keyHandler.removeHandler();
@@ -116,7 +116,6 @@ public class ModalInfoDialog {
       }
     });
 */
-
     begin.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -130,7 +129,7 @@ public class ModalInfoDialog {
       modal.addHiddenHandler(handler);
     }
 
-    System.out.println(new Date() +" ModalInfoDialog.showing...");
+  //  System.out.println(new Date() +" ModalInfoDialog.showing...");
 
     modal.show();
   }
