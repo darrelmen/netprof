@@ -77,20 +77,16 @@ public class StimulusAnswerPair implements IsSerializable {
     return gameOver;
   }
 
-  public boolean isChapterComplete() {
+/*  public boolean isChapterComplete() {
     return chapterComplete;
-  }
+  }*/
 
   @Override
   public boolean equals(Object other) {
     if (!(other instanceof StimulusAnswerPair)) return false;
     else {
       StimulusAnswerPair ostim = (StimulusAnswerPair) other;
-      if (noStimYet != ostim.noStimYet) {
-        return false;
-      } else if (!exerciseID.equals(ostim.exerciseID)) {
-        return false;
-      } else return stimulus.equals(ostim.stimulus);
+      return noStimYet == ostim.noStimYet && exerciseID.equals(ostim.exerciseID) && stimulus.equals(ostim.stimulus);
     }
   }
 
