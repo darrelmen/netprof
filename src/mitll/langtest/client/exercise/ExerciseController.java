@@ -22,6 +22,8 @@ public interface ExerciseController {
   UserFeedback getFeedback();
   boolean loadNextExercise(ExerciseShell current);
   boolean loadNextExercise(String id);
+  boolean isLastExercise(String exerciseID);
+  void startOver();
 
   boolean loadPreviousExercise(Exercise current);
 
@@ -71,4 +73,5 @@ public interface ExerciseController {
   void addAdHocExercise(String label);
   void setSelectionState(Map<String,Collection<String>> selectionState);
   PropertyHandler getProps();
+
 }
