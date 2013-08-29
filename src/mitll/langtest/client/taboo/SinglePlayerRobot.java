@@ -7,6 +7,7 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.taboo.Game;
+import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 
 import java.util.Collections;
@@ -51,9 +52,9 @@ public class SinglePlayerRobot {
       stimulusAnswerPair.setNoStimYet(true);
       async.onSuccess(stimulusAnswerPair); // async query not complete yet
     } else {
-      if (exercisesRemaining.isEmpty() && synonymSentences.isEmpty()) {
+     /* if (exercisesRemaining.isEmpty() && synonymSentences.isEmpty()) {
         async.onSuccess(new StimulusAnswerPair(true,!anyGamesRemaining())); // no more chapters, no more exercises, we're done -- TODO : start over?
-      } else {
+      } else {*/
         if (synonymSentences.isEmpty()) {
           System.out.println("checkForStimulus " + exercisesRemaining.size());
           getNextExercise(async);
@@ -64,13 +65,15 @@ public class SinglePlayerRobot {
           // System.out.println("stim left " + synonymSentences.size() + " empty " + empty);
 
           String obfuscated = getObfuscated(rawStim, refSentence);
-          async.onSuccess(new StimulusAnswerPair(currentExercise.getID(), obfuscated, refSentence, empty, false, numClues));
+          async.onSuccess(new StimulusAnswerPair(currentExercise.getID(), obfuscated, refSentence, empty, false, numClues, isGameOver()));
         }
-      }
+      //}
     }
   }
 
- // public boolean onLastItem() { return exercisesRemaining != null && exercisesRemaining.size() == 0;}
+  private boolean isGameOver() {
+    return exercisesRemaining.isEmpty() && synonymSentences.isEmpty();
+  }
 
   /**
    * @see #checkForStimulus(com.google.gwt.user.client.rpc.AsyncCallback
@@ -101,13 +104,13 @@ public class SinglePlayerRobot {
 
         if (synonymSentences.isEmpty()) {
           System.err.println("huh? no stim sentences for " + currentExercise);
-          async.onSuccess(new StimulusAnswerPair(result.getID(), "Data error on server, please report.", refSentence, false, false, numClues));
+          async.onSuccess(new StimulusAnswerPair(result.getID(), "Data error on server, please report.", refSentence, false, false, numClues, true));
         } else {
           String rawStim = synonymSentences.remove(0);
           boolean empty = synonymSentences.isEmpty();
           // System.out.println("getNextExercise stim left " + synonymSentences.size() + " empty " + empty);
           async.onSuccess(new StimulusAnswerPair(result.getID(), getObfuscated(rawStim, refSentence), refSentence,
-            empty, false, numClues));
+            empty, false, numClues, isGameOver()));
         }
       }
     });
@@ -134,7 +137,7 @@ public class SinglePlayerRobot {
     if (correct) synonymSentences = Collections.emptyList();
   }
 
-  public Game getGame() { return game; }
+  public GameInfo getGame() { return game; }
   public boolean anyGamesRemaining() { return game.anyGamesRemaining(); }
 
   private Game game;
