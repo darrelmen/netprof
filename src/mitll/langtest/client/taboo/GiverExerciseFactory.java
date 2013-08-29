@@ -30,6 +30,7 @@ import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.taboo.Game;
+import mitll.langtest.shared.taboo.GameInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,7 +51,13 @@ import java.util.Random;
  */
 public class GiverExerciseFactory extends ExercisePanelFactory {
   private static final int CHECK_FOR_CORRECT_POLL_PERIOD = 1000;
-
+  private int exerciseCount = 0;
+  private int stimulusCount;
+  //private int numExercisesInGame = 0;
+  //private int numGames = 0;
+  private int gameCount;
+ // private GameInfo game;
+  GiverPanel giverPanel ;
   /**
    * @param service
    * @param userFeedback
@@ -63,6 +70,11 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
   }
 
   /**
+   * @see TabooExerciseList#rememberExercises(java.util.List)
+   */
+  public void startOver() { gameCount = 0; }
+
+  /**
    * @see mitll.langtest.client.exercise.ExerciseList#makeExercisePanel
    * @param e
    * @return
@@ -71,7 +83,20 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     System.out.println("\nGiverExerciseFactory.getExercisePanel getting panel ...");
     controller.pingAliveUser();
 
-    return new GiverPanel(e);
+    giverPanel = new GiverPanel(e);
+    return giverPanel;
+  }
+  private long lastTimestamp;
+
+  public void setGame(GameInfo game) {
+  //  this.game = game;
+    if (giverPanel != null) {
+      int numExercises = game.getNumExercises();
+      if (numExercises > -1 || game.getTimestamp() != lastTimestamp) {
+        giverPanel.startGame(game);
+        lastTimestamp = game.getTimestamp();
+      }
+    }
   }
 
   private class GiverPanel extends FluidContainer implements BusyPanel {
@@ -81,12 +106,29 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     private final Button send = new Button("Send");
     private Heading pleaseWait = new Heading(4, "Please wait for receiver to answer...");
        List<String> synonymSentences;
+    Heading exerciseDisplay = new Heading(3);
+    Heading stimulus = new Heading(3);
+    GameInfo gameInfo;
 
     public GiverPanel(final Exercise exercise) {
       if (exercise == null) {
         System.err.println("huh? exercise is null?");
         return;
       }
+
+      Row w5 = new Row();
+      w5.add(exerciseDisplay);
+      add(w5);
+    //  String gameInfoString = "Game " + (gameCount) + " of " + gameInfo.getNumGames();
+
+   //   exerciseDisplay.setText(gameInfoString +", item " + (++exerciseCount) + " of " +  gameInfo.getNumExercises());
+
+      synonymSentences = Game.randomSample2(exercise.getSynonymSentences(), ReceiverExerciseFactory.MAX_CLUES_TO_GIVE, rnd);
+
+  //    stimulus.setText("Clue " + (++stimulusCount) + " of " + synonymSentences.size());
+      Row w33 = new Row();
+      w33.add(stimulus);
+      add(w33);
 
       HTML warnNoFlash = new HTML(BootstrapExercisePanel.WARN_NO_FLASH);
       warnNoFlash.setVisible(false);
@@ -109,7 +151,6 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       Row w3 = new Row();
       w3.add(new Heading(4, "Choose a hint sentence to send : "));
       add(w3);
-      synonymSentences = Game.randomSample2(exercise.getSynonymSentences(), ReceiverExerciseFactory.MAX_CLUES_TO_GIVE, rnd);
 
       // recordingStyle.add(new ControlLabel("<b>Audio Recording Style</b>"));
       choiceToExample = populateChoices(synonymSentences, refSentence);
@@ -134,11 +175,48 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       add(pleaseWait);
       pleaseWait.setVisible(false);
 
-      NavigationHelper w1 = new NavigationHelper(exercise, controller,
+/*      NavigationHelper w1 = new NavigationHelper(exercise, controller,
         false // means next button is always enabled
       );
       w1.addStyleName("topMargin");
-      add(w1);
+      add(w1);*/
+
+//      startGame();
+    }
+
+/*
+    public void startGame() {
+      service.getGame(controller.getUser(),true,new AsyncCallback<GameInfo>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public void onSuccess(GameInfo result) {
+          if (result == null) System.err.println("huh? startGame no result???");
+          startGame(result);
+        }
+      });
+    }
+*/
+
+
+    private void startGame(GameInfo gameInfo) {
+      this.gameInfo = gameInfo;
+      //  numExercisesInGame = gameInfo.getNumExercises();
+      //   numGames = gameInfo.getNumGames();
+
+      exerciseCount = 0;
+      stimulusCount = 0;
+      gameCount++;
+      String gameInfoString = "Game " + (gameCount) + " of " + gameInfo.getNumGames();
+
+      int numExercises = gameInfo.getNumExercises();
+      exerciseDisplay.setText(gameInfoString +", item " + (++exerciseCount) + " of " + numExercises);
+      stimulus.setText("Clue " + (++stimulusCount) + " of " + synonymSentences.size());
+      // score = 0;
+      // totalClues = 0;
     }
 
     private void clickOnSend(Exercise exercise, String refSentence, SoundFeedback soundFeedback) {
@@ -173,8 +251,9 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       boolean differentExercise = lastSentExercise.length() > 0 && !lastSentExercise.equals(exercise.getID());
       lastSentExercise = exercise.getID();
       // TODO : figure out if this the last item in a game and the last stimulus
+      boolean isGameOver = lastChoiceRemaining && exerciseCount == gameInfo.getNumExercises();
       service.sendStimulus(user, exercise.getID(), toSendWithBlankedOutItem, refSentence, lastChoiceRemaining,
-        differentExercise, numClues, false, new AsyncCallback<Integer>() {
+        differentExercise, numClues, isGameOver, new AsyncCallback<Integer>() {
         @Override
         public void onFailure(Throwable caught) { Window.alert("couldn't contact server."); }
 
