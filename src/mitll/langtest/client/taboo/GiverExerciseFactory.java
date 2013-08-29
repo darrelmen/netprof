@@ -62,6 +62,11 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     super(service, userFeedback, controller);
   }
 
+  /**
+   * @see mitll.langtest.client.exercise.ExerciseList#makeExercisePanel
+   * @param e
+   * @return
+   */
   public Panel getExercisePanel(final Exercise e) {
     System.out.println("\nGiverExerciseFactory.getExercisePanel getting panel ...");
     controller.pingAliveUser();
@@ -149,7 +154,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       }
     }
 
-    Random rnd = new Random();
+    private Random rnd = new Random();
     private String lastSentExercise = "";
 
     /**
@@ -167,8 +172,9 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       final int user = controller.getUser();
       boolean differentExercise = lastSentExercise.length() > 0 && !lastSentExercise.equals(exercise.getID());
       lastSentExercise = exercise.getID();
+      // TODO : figure out if this the last item in a game and the last stimulus
       service.sendStimulus(user, exercise.getID(), toSendWithBlankedOutItem, refSentence, lastChoiceRemaining,
-        differentExercise, numClues, new AsyncCallback<Integer>() {
+        differentExercise, numClues, false, new AsyncCallback<Integer>() {
         @Override
         public void onFailure(Throwable caught) { Window.alert("couldn't contact server."); }
 
