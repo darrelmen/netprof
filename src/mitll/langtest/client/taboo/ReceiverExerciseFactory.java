@@ -93,8 +93,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
   public Panel getExercisePanel(Exercise totallyIgnored) {
     System.out.println("ReceiverExerciseFactory.getExercisePanel getting receiver panel ...");
     controller.pingAliveUser();
-
-    return new ReceiverPanel(service,controller/*, exercise.getID()*/);
+    return new ReceiverPanel(service,controller);
   }
 
   /**
