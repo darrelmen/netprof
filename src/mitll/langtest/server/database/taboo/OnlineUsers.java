@@ -59,6 +59,8 @@ public class OnlineUsers {
       logger.info("---> addOnline online now " + getOnline());
     }
     else {
+      logger.info("---> addOnline online user " + userid + " now "+getOnline().size() + " online...");
+
       //logger.info("---> addOnline now " + getOnline().size() + " online...");
     }
   }
@@ -109,8 +111,9 @@ public class OnlineUsers {
         return new PartnerState();
       } else if (online.contains(receiver)) {
         Map<String, Collection<String>> typeToSelectionByPartner = receiverToState.get(receiver);
+        GameInfo game = getGame(giverOrReceiver,isGiver);
         //logger.debug("isPartnerOnline : for giver " + giverOrReceiver + ", receiver  " + receiver + " is online, state " + typeToSelectionByPartner);
-        return new PartnerState(true,typeToSelectionByPartner);
+        return new PartnerState(true,typeToSelectionByPartner,game);
       } else {
         logger.debug("isPartnerOnline : for giver " + giverOrReceiver + ", receiver  " + receiver + " is not online...");
         checkReceiverForGiver(giverOrReceiver);
@@ -210,22 +213,29 @@ public class OnlineUsers {
 
   public GameInfo getGame(long userID, boolean isGiver) {
     Game game = getGameFor(userID, isGiver);
-    return new GameInfo(game.getNumGames(),game.getGameItems());
+   // List<ExerciseShell> gameItems = game.getGameItems();
+   // if (gameItems == null) logger.error("getGame : game for " + userID + " has not started?");
+    GameInfo gameInfo = game.getGameInfo();
+    logger.info("getGame for " + userID+" game info " + gameInfo);
+    return gameInfo;// GameInfo(game.getNumGames(), gameItems);
   }
 
   //public void startGame(long userID) {}
 
   public GameInfo startGame(long userID/*, boolean isGiver*/) {
     Game game = getGameFor(userID, false);
-    return new GameInfo(game.getNumGames(),game.startGame());
+    List<ExerciseShell> itemsInGame = game.startGame();
+    if (itemsInGame == null) logger.error("startGame huh? game for " + userID + " has not started???\n\n\n");
+    GameInfo gameInfo = game.getGameInfo();
+    logger.info("startGame for " + userID+" game info " + gameInfo);
+
+    return gameInfo;// GameInfo(game.getNumGames(), gameItems);
   }
 
   private Game getGameFor(long userID, boolean isGiver) {
     User receiverUser = isGiver ? giverToReceiver.get(getUser(userID)) : getUser(userID);
     return receiverToGame.get(receiverUser);
   }
-
-  // Random rnd = new Random();
 
   private void addCandidatePair(long userid) {
     User first = null, second = null;
@@ -301,7 +311,7 @@ public class OnlineUsers {
    *
    *
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#sendStimulus(long, String, String, String, boolean, boolean, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#sendStimulus
    * @param userid
    * @param exerciseID
    * @param stimulus
@@ -438,8 +448,13 @@ public class OnlineUsers {
    * @param exercisesForSection
    */
   public void registerSelectionState(long receiver, Map<String, Collection<String>> selectionState, List<ExerciseShell> exercisesForSection) {
-    receiverToState.put(getUser(receiver),selectionState);
-    receiverToGame.put(getUser(receiver),new Game(exercisesForSection));
+    logger.debug("-----> registerSelectionState : for receiver " + receiver+ " selectionState " + selectionState);
+
+    User user = getUser(receiver);
+    receiverToState.put(user,selectionState);
+    Game game = receiverToGame.get(user);
+    logger.debug("previous game was " +game);
+    receiverToGame.put(user,new Game(exercisesForSection));
   }
 
   private static class Pair {
