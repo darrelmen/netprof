@@ -70,7 +70,6 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
   private int score;
   private int gameCount;
   private int totalClues;
- // private Game game;
 
   /**
    *
@@ -160,7 +159,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
     public ReceiverPanel(final LangTestDatabaseAsync service, final ExerciseController controller) {
       final ReceiverPanel outer = addWidgets(service,controller);
-      System.out.println("-----> ReceiverPanel: making the panel... check for stimulus");
+    //  System.out.println("-----> ReceiverPanel: making the panel... check for stimulus");
       checkForStimulus(service, controller, outer);
     }
 
@@ -221,7 +220,6 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       add(addCorrectIncorrectFeedback());
 
       this.send = send;
-      System.out.println("made send...");
       waitForNext();
       return outer;
     }
@@ -491,12 +489,13 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         }
       } else {
 
-        if (result.isGameOver()) {     // game over... dude...
-          dealWithGameOver(/*result,*/ service, controller, outer);
-        } else {
+       isGameOver = result.isGameOver();
+    /*    if (result.isGameOver()) {     // game over... dude...
+          dealWithGameOver(*//*result,*//* service, controller, outer);
+        } else {*/
           System.out.println(new Date() + " ReceiverExerciseFactory.gotStimulusResponse : showStimlus  " + result);
           showStimulus(result, outer);
-        }
+      //  }
 
         //  cancelStimTimer();
       //  System.out.println(new Date() + " ReceiverExerciseFactory.gotStimulusResponse : showStimlus  " + result);
