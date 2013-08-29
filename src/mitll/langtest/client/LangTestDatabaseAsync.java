@@ -14,6 +14,7 @@ import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 import mitll.langtest.shared.taboo.TabooState;
@@ -142,7 +143,7 @@ public interface LangTestDatabaseAsync {
 
   void registerPair(long userid, boolean isGiver, AsyncCallback<Void> async);
 
-  void sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, int numClues, AsyncCallback<Integer> async);
+  void sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, int numClues, boolean isGameOver, AsyncCallback<Integer> async);
 
   void checkForStimulus(long userid, AsyncCallback<StimulusAnswerPair> async);
 
@@ -151,4 +152,8 @@ public interface LangTestDatabaseAsync {
   void checkCorrect(long giverUserID, String stimulus, AsyncCallback<Integer> async);
 
   void registerSelectionState(long giver, Map<String, Collection<String>> selectionState, AsyncCallback<Void> async);
+
+  void startGame(long userID, AsyncCallback<GameInfo> async);
+
+  void getGame(long userID, boolean isGiver, AsyncCallback<GameInfo> async);
 }
