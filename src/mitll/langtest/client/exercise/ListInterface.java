@@ -5,6 +5,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.taboo.GameInfo;
 
 import java.util.Collection;
 import java.util.List;
