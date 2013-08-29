@@ -59,6 +59,7 @@ import mitll.langtest.client.taboo.GiverExerciseFactory;
 import mitll.langtest.client.taboo.ReceiverExerciseFactory;
 import mitll.langtest.client.taboo.SinglePlayerRobot;
 import mitll.langtest.client.taboo.Taboo;
+import mitll.langtest.client.taboo.TabooExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
@@ -66,6 +67,7 @@ import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.taboo.GameInfo;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -179,7 +181,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void onModuleLoad2() {
     userManager = new UserManager(this,service, false, false, props);
-    if (props.isTrackUsers()) taboo = new Taboo(userManager, service, this);
+    if (props.isTrackUsers()) taboo = new Taboo(userManager, service, this, this);
     loadVisualizationPackages();
     if (props.isFlashCard()) {
       loadFlashcard();
@@ -691,22 +693,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void setTabooFactory(long userID, boolean isGiver, boolean singlePlayer) {
     System.out.println("setTabooFactory : User " + userID + " is giver = " + isGiver + " single " + singlePlayer);
-  //  TabooExerciseList tabooExerciseList = (TabooExerciseList) exerciseList;
-   // tabooExerciseList.setGiver(isGiver);
-
     String appTitle = props.getAppTitle();
     String appTitle1 = appTitle + " : Giver";
-   // boolean changed;
     if (isGiver) {
-     // changed = true;//(exerciseList.getFactory() instanceof ReceiverExerciseFactory);
       GiverExerciseFactory factory = new GiverExerciseFactory(service, this, this);
-      System.out.println("setTabooFactory : made " + factory);
+     // System.out.println("setTabooFactory : made " + factory);
 
       exerciseList.setFactory(factory, userManager, 1);
 
     } else {
-    //  changed = (exerciseList.getFactory() instanceof ReceiverExerciseFactory);
-
       if (singlePlayer && singlePlayerRobot == null) {
         singlePlayerRobot = new SinglePlayerRobot(service, props);
       }
@@ -717,7 +712,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         setSelectionState(Collections.EMPTY_MAP);
       }
     }
-    taboo.setExerciseList(exerciseList);
     setTitle(appTitle1);
     if (pageTitle == null) {
       flashcard.setAppTitle(appTitle1);
@@ -726,7 +720,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       pageTitle.setText(appTitle1);
     }
 
-    if (!doEverythingAfterFactory(userID) /*&& changed*/) {
+    if (!doEverythingAfterFactory(userID)) {
       exerciseList.getExercises(userID);
     }
   }
@@ -933,7 +927,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
       System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser);
       if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
-        System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
+      //  System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
         exerciseList.getExercises(userID);
       }
       lastUser = userID;
@@ -1078,6 +1072,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
   public void startOver() {
     exerciseList.startOver();
+  }
+
+  public void setGame(GameInfo gameInfo) {
+    ((TabooExerciseList)exerciseList).setGame(gameInfo);
   }
 
   public boolean loadPreviousExercise(Exercise current) {
