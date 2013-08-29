@@ -989,6 +989,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public PartnerState isPartnerOnline(long userid, boolean isGiver) { return db.getOnlineUsers().isPartnerOnline(userid,isGiver); }
 
+  /**
+   * @see mitll.langtest.client.taboo.TabooExerciseList#tellPartnerMyChapterSelection(mitll.langtest.client.exercise.SelectionState)
+   * @param giver
+   * @param selectionState
+   */
   @Override
   public void registerSelectionState(long giver, Map<String, Collection<String>> selectionState) {
     Collection<Exercise> exercisesForSection = (selectionState.isEmpty()) ? getExercises(giver) : db.getSectionHelper().getExercisesForSelectionState(selectionState);
@@ -1031,6 +1036,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getOnlineUsers().checkCorrect(giverUserID, "", stimulus);
   }
 
+  /**
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory#startGame()
+   * @param userID
+   * @return
+   */
   public GameInfo startGame(long userID) {
     return db.getOnlineUsers().startGame(userID);
   }
