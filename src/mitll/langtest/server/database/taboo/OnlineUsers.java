@@ -451,10 +451,15 @@ public class OnlineUsers {
     logger.debug("-----> registerSelectionState : for receiver " + receiver+ " selectionState " + selectionState);
 
     User user = getUser(receiver);
-    receiverToState.put(user,selectionState);
-    Game game = receiverToGame.get(user);
-    logger.debug("previous game was " +game);
-    receiverToGame.put(user,new Game(exercisesForSection));
+    Map<String, Collection<String>> current = receiverToState.get(user);
+    boolean sameSelection = current != null && current.equals(selectionState);
+    if (!sameSelection) {
+      receiverToState.put(user, selectionState);
+
+      Game game = receiverToGame.get(user);
+      logger.debug("previous game was " + game);
+      receiverToGame.put(user, new Game(exercisesForSection));
+    }
   }
 
   private static class Pair {
