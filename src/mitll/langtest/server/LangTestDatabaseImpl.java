@@ -29,6 +29,7 @@ import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 import mitll.langtest.shared.taboo.TabooState;
@@ -963,7 +964,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public void registerPair(long userid, boolean isGiver) {  db.getOnlineUsers().registerPair(userid, isGiver);  }
 
   /**
-   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#sendStimulus(String, String, mitll.langtest.shared.Exercise, mitll.langtest.client.sound.SoundFeedback, boolean)
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#sendStimulus
    * @param userid
    * @param exerciseID
    * @param stimulus
@@ -971,11 +972,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param onLastStimulus
    * @param skippedItem
    * @param numClues
+   * @param isGameOver
    */
   @Override
-  public int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, int numClues) {
+  public int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, int numClues, boolean isGameOver) {
    // db.sendStimulus(userid, exerciseID, stimulus, answer);
-    return db.getOnlineUsers().sendStimulus(userid, exerciseID, stimulus, answer, onLastStimulus, skippedItem, numClues);
+    return db.getOnlineUsers().sendStimulus(userid, exerciseID, stimulus, answer, onLastStimulus, skippedItem, numClues, isGameOver);
   }
 
   /**
@@ -1027,6 +1029,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public int checkCorrect(long giverUserID, String stimulus) {
     return db.getOnlineUsers().checkCorrect(giverUserID, "", stimulus);
+  }
+
+  public GameInfo startGame(long userID/*, boolean isGiver*/) {
+    return db.getOnlineUsers().startGame(userID);
+  }
+
+  public GameInfo getGame(long userID, boolean isGiver) {
+    return db.getOnlineUsers().getGame(userID, isGiver);
   }
 
   public void logMessage(String message) {
