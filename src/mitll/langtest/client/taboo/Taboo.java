@@ -18,6 +18,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.TabooState;
 
@@ -99,7 +100,8 @@ public class Taboo {
           }
 
          // System.out.println("\n----> checkForPartner.onSuccess : me : " + fuserid + " isGiver " + result.isGiver());
-          exerciseList.rememberAndLoadFirst(result.getExerciseShells());
+        //  exerciseList.rememberAndLoadFirst(result.getExerciseShells());
+        //  GameInfo gameInfo = result.getGameInfo();
           pollForPartnerOnline(fuserid, result.isGiver());
         } else if (result.isAnyAvailable()) {
           askUserToChooseRole(fuserid);
