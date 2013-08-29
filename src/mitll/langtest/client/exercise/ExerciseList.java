@@ -67,7 +67,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private final boolean showInOrder;
   private int countSincePrompt = 0;
   protected int lastReqID = 0;
-  int adHocCount = 0;
+  private int adHocCount = 0;
+  private Set<Integer> visited = new HashSet<Integer>();
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -446,6 +447,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   public String getCurrentExerciseID() { return currentExercises != null ? currentExercises.get(currentExercise).getID() : "Unknown"; }
 
+  /**
+   * @see #useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
+   * @param result
+   */
   protected void makeExercisePanel(Exercise result) {
     Panel exercisePanel = factory.getExercisePanel(result);
     innerContainer.setWidget(exercisePanel);
@@ -562,15 +567,25 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return i == currentExercises.size() - 1;
   }
 
+  public boolean isLastExercise(String id) {
+    System.out.println("ExerciseList.isLastExercise " + id);
+    ExerciseShell exerciseByID = getExerciseByID(id);
+    return exerciseByID != null && isOnLastItem(getIndex(exerciseByID));
+  }
+
   public boolean loadNextExercise(String id) {
     System.out.println("ExerciseList.loadNextExercise " + id);
-    //Thread.dumpStack();
+    ExerciseShell exerciseByID = getExerciseByID(id);
+    return exerciseByID != null && loadNextExercise(exerciseByID);
+  }
+
+  private ExerciseShell getExerciseByID(String id) {
     for (ExerciseShell e : currentExercises) {
-       if (e.getID().equals(id)) {
-         return loadNextExercise(e);
-       }
+      if (e.getID().equals(id)) {
+        return e;
+      }
     }
-    return true;
+    return null;
   }
 
   /**
@@ -580,7 +595,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     feedback.showErrorMessage("Test Complete", "Test Complete! Thank you!");
   }
 
-  private Set<Integer> visited = new HashSet<Integer>();
+  public void startOver() {}
+
 
   /**
    * So a turker can get credit for their work.
