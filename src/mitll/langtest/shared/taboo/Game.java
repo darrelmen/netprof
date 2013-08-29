@@ -1,6 +1,5 @@
 package mitll.langtest.shared.taboo;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.taboo.OnlineUsers;
 import mitll.langtest.shared.ExerciseShell;
 
@@ -21,6 +20,10 @@ public class Game extends GameInfo {
 
   public Game(){}
 
+  public GameInfo getGameInfo() {
+    return new GameInfo(getNumGames(), getGameItems(), getTimestamp());
+  }
+
   public Game(List<ExerciseShell> allSelectedExercises) {
     System.out.println("Game with " + allSelectedExercises.size());
     this.allSelectedExercises = Collections.unmodifiableList(allSelectedExercises);
@@ -37,43 +40,17 @@ public class Game extends GameInfo {
     int endIndex = Math.min(allSelectedExercises.size(), (gameCount + 1) * OnlineUsers.GAME_SIZE);
     incrementGames();
     exercisesToDo.addAll(allSelectedExercises.subList(fromIndex, endIndex));
- /*   for (int i = 0; i < numberInGame; i++) {
-      exercisesToDo.add(allSelectedExercises.get(i));
-    }*/
     System.out.println("startGame... from " + allSelectedExercises.size() + " (" +fromIndex+
       "-" +endIndex+
       ") items, " + "startGame... returning " + exercisesToDo.size() + " : " + exercisesToDo);
 
-    //OnlineUsers.logger.info("---> new game!");
-    // List<ExerciseShell> exercisesToDo = randomSample2(allSelectedExercises, OnlineUsers.GAME_SIZE, rnd);
-    // allSelectedExercises.removeAll(exercisesToDo);
-
-    //  System.out.println("startGame... returning " + exercisesToDo.size() + " : " + exercisesToDo);
-
-    //  this.numExercisesInGame = exercisesToDo.size();
     this.itemsInGame = exercisesToDo;
     return exercisesToDo;
   }
 
+  public boolean hasStarted() { return itemsInGame != null; }
+
   public List<ExerciseShell> getGameItems() { return itemsInGame; }
-
- // public int getNumExercises() { return numExercisesInGame; }
-
-  /*
-  public int numGamesRemaining() {
-    float ratio = (float) allSelectedExercises.size() / (float) OnlineUsers.GAME_SIZE;
-    System.out.println("numGamesRemaining : ratio " + ratio);
-    return (int) Math.ceil(ratio);
-  }*/
-
- /* public int getNumGames() {
-    return numGames;
-  }*/
-/*   private long storeTwo(long low, long high) {
-    long combined = low;
-    combined += high << 32;
-    return combined;
-  }*/
 
   public static <T> List<T> randomSample2(List<T> items, int m, Random rnd){
     if (m > items.size()) m = items.size();
