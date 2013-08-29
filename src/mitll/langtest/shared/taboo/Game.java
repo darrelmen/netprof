@@ -5,6 +5,7 @@ import mitll.langtest.server.database.taboo.OnlineUsers;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -15,64 +16,59 @@ import java.util.Random;
 * Time: 4:00 PM
 * To change this template use File | Settings | File Templates.
 */
-public class Game implements IsSerializable {
+public class Game extends GameInfo {
   private List<ExerciseShell> allSelectedExercises;
-  private int numGames;
-  private int numExercisesInGame;
 
   public Game(){}
 
   public Game(List<ExerciseShell> allSelectedExercises) {
     System.out.println("Game with " + allSelectedExercises.size());
-    this.allSelectedExercises = new ArrayList<ExerciseShell>(allSelectedExercises);
+    this.allSelectedExercises = Collections.unmodifiableList(allSelectedExercises);
     numGames = (int) Math.ceil((float)allSelectedExercises.size()/(float)OnlineUsers.GAME_SIZE);
   }
 
   public List<ExerciseShell> startGame() {
     List<ExerciseShell> exercisesToDo = new ArrayList<ExerciseShell>();
-    for (int i = 0; i < Math.min(allSelectedExercises.size(),OnlineUsers.GAME_SIZE); i++) {
-      exercisesToDo.add(allSelectedExercises.get(i));
+    if (!anyGamesRemaining()) {
+      System.out.println("wrap around... ?");
+      restartGames();
     }
-    System.out.println("startGame... from " + allSelectedExercises.size() + " items.");
+    int fromIndex = gameCount * OnlineUsers.GAME_SIZE;
+    int endIndex = Math.min(allSelectedExercises.size(), (gameCount + 1) * OnlineUsers.GAME_SIZE);
+    incrementGames();
+    exercisesToDo.addAll(allSelectedExercises.subList(fromIndex, endIndex));
+ /*   for (int i = 0; i < numberInGame; i++) {
+      exercisesToDo.add(allSelectedExercises.get(i));
+    }*/
+    System.out.println("startGame... from " + allSelectedExercises.size() + " (" +fromIndex+
+      "-" +endIndex+
+      ") items, " + "startGame... returning " + exercisesToDo.size() + " : " + exercisesToDo);
 
     //OnlineUsers.logger.info("---> new game!");
-   // List<ExerciseShell> exercisesToDo = randomSample2(allSelectedExercises, OnlineUsers.GAME_SIZE, rnd);
-    allSelectedExercises.removeAll(exercisesToDo);
+    // List<ExerciseShell> exercisesToDo = randomSample2(allSelectedExercises, OnlineUsers.GAME_SIZE, rnd);
+    // allSelectedExercises.removeAll(exercisesToDo);
 
-    System.out.println("startGame... returning " + exercisesToDo.size() + " : " + exercisesToDo);
+    //  System.out.println("startGame... returning " + exercisesToDo.size() + " : " + exercisesToDo);
 
-    this.numExercisesInGame = exercisesToDo.size();
+    //  this.numExercisesInGame = exercisesToDo.size();
+    this.itemsInGame = exercisesToDo;
     return exercisesToDo;
   }
 
-/*  public List<ExerciseShell> startGameOld(Random rnd) {
-    System.out.println("startGame... from " + allSelectedExercises.size());
+  public List<ExerciseShell> getGameItems() { return itemsInGame; }
 
-    //OnlineUsers.logger.info("---> new game!");
-    List<ExerciseShell> exercisesToDo = randomSample2(allSelectedExercises, OnlineUsers.GAME_SIZE, rnd);
-    allSelectedExercises.removeAll(exercisesToDo);
+ // public int getNumExercises() { return numExercisesInGame; }
 
-    System.out.println("startGame... returning " + exercisesToDo.size() + " : " + exercisesToDo);
-
-    this.numExercisesInGame = exercisesToDo.size();
-    return exercisesToDo;
-  }*/
-
-  public int getNumExercises() { return numExercisesInGame; }
-
-  public boolean anyGamesRemaining() {
-    return !allSelectedExercises.isEmpty();
-  }
-/*
+  /*
   public int numGamesRemaining() {
     float ratio = (float) allSelectedExercises.size() / (float) OnlineUsers.GAME_SIZE;
     System.out.println("numGamesRemaining : ratio " + ratio);
     return (int) Math.ceil(ratio);
   }*/
 
-  public int getNumGames() {
+ /* public int getNumGames() {
     return numGames;
-  }
+  }*/
 /*   private long storeTwo(long low, long high) {
     long combined = low;
     combined += high << 32;
