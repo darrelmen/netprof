@@ -6,6 +6,7 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.taboo.GameInfo;
 
 import java.util.Collection;
 import java.util.Map;
@@ -23,6 +24,7 @@ public interface ExerciseController {
   boolean loadNextExercise(ExerciseShell current);
   boolean loadNextExercise(String id);
   boolean isLastExercise(String exerciseID);
+  void setGame(GameInfo game);
   void startOver();
 
   boolean loadPreviousExercise(Exercise current);
