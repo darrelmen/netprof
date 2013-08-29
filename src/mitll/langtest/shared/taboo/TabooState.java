@@ -14,7 +14,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class TabooState implements IsSerializable {
-  private List<ExerciseShell> exerciseShells;
+ // private GameInfo gameInfo;
   private boolean anyAvailable;
   private boolean joinedPair;
   private boolean giver;
@@ -27,11 +27,11 @@ public class TabooState implements IsSerializable {
    * @param joinedPair
    * @param giver
    */
-  public TabooState(boolean anyAvailable, boolean joinedPair, boolean giver, List<ExerciseShell> exerciseShells) {
+  public TabooState(boolean anyAvailable, boolean joinedPair, boolean giver) {//}), GameInfo gameInfo) {
     this.anyAvailable = anyAvailable;
     this.joinedPair = joinedPair;
     this.giver = giver;
-    this.exerciseShells = exerciseShells;
+ //   this.gameInfo = gameInfo;
   }
 
   public boolean isAnyAvailable() {
@@ -46,9 +46,9 @@ public class TabooState implements IsSerializable {
     return giver;
   }
 
-  public List<ExerciseShell> getExerciseShells() {
-    return exerciseShells;
-  }
+/*  public GameInfo getGameInfo() {
+    return gameInfo;
+  }*/
 
   public String toString() {
     String s = isAnyAvailable() ? " some available " : isJoinedPair() ? " just joined as " + (giver ? " giver " : " receiver ") : "none available";
