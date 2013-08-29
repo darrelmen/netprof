@@ -15,6 +15,7 @@ import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 import mitll.langtest.shared.taboo.TabooState;
@@ -194,6 +195,7 @@ public interface LangTestDatabase extends RemoteService {
   /**
    * Giver chooses a sentence to send to receiver
    *
+   *
    * @param userid
    * @param exerciseID
    * @param stimulus
@@ -201,9 +203,10 @@ public interface LangTestDatabase extends RemoteService {
    * @param onLastStimulus
    * @param skippedItem
    * @param numClues
+   * @param isGameOver
    * @return
    */
-  int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, int numClues);
+  int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, int numClues, boolean isGameOver);
 
   /**
    * Receiver checks for stimulus
@@ -229,4 +232,7 @@ public interface LangTestDatabase extends RemoteService {
    * @return
    */
   int checkCorrect(long giverUserID, String stimulus);
+
+  GameInfo startGame(long userID/*, boolean isGiver*/);
+  GameInfo getGame(long userID, boolean isGiver);
 }
