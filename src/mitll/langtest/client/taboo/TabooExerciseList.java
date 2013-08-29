@@ -15,6 +15,7 @@ import mitll.langtest.client.exercise.SelectionState;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.taboo.GameInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import java.util.List;
 public class TabooExerciseList extends FlexSectionExerciseList {
   private boolean isGiver = true;
   private ReceiverExerciseFactory receiverFactory;
+  private GiverExerciseFactory giverExerciseFactory;
 
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
@@ -64,11 +66,12 @@ public class TabooExerciseList extends FlexSectionExerciseList {
       System.out.println("TabooExerciseList.setFactory : " + factory.getClass() + " for user " + user.getUser() + " RECEIVER ");
     }
     else {
+      giverExerciseFactory = (GiverExerciseFactory) factory;
       isGiver = true;
       System.out.println("TabooExerciseList.setFactory : " + factory.getClass() + " for user " + user.getUser()+ " GIVER ");
     }
 
-    if (isGiver) {
+   /* if (isGiver) {
       showExerciseList();
       if (buttonRow != null) {
         //buttonRow.setVisible(false);
@@ -78,7 +81,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
         }
       }
     }
-    else {
+    else {*/
       hideExerciseList();
       if (buttonRow != null) {
         //buttonRow.setVisible(true);
@@ -87,11 +90,17 @@ public class TabooExerciseList extends FlexSectionExerciseList {
           if (buttonRow.getWidget(i) != statusHeader) buttonRow.getWidget(i).setVisible(true);
         }
       }
-    }
+  //  }
   }
 
   protected void tellUserPanelIsBusy() {
     new ModalInfoDialog("Please wait", "Please wait for you partner to respond.");
+  }
+
+  public void setGame(GameInfo game) {
+    if (giverExerciseFactory != null) {
+      giverExerciseFactory.setGame(game);
+    }
   }
 
   private FluidContainer buttonRow;
@@ -105,10 +114,10 @@ public class TabooExerciseList extends FlexSectionExerciseList {
       for (int i = 0; i < container.getWidgetCount(); i++) {
         if (container.getWidget(i) != statusHeader) container.getWidget(i).setVisible(false);
       }
-      showExerciseList();
+     // showExerciseList();
     } else {
       System.out.println("----> RECEIVER:  addBottomText.showing container for " + userID);
-      hideExerciseList();
+    //  hideExerciseList();
       for (int i = 0; i < container.getWidgetCount(); i++) {
         if (container.getWidget(i) != statusHeader) container.getWidget(i).setVisible(true);
       }
@@ -128,7 +137,9 @@ public class TabooExerciseList extends FlexSectionExerciseList {
 
     if (isGiver) {
       super.rememberExercises(result);
-    } else {
+      giverExerciseFactory.startOver();
+    //  giverExerciseFactory.startGame();
+    } else {  // I am a receiver!
       currentExercises = result; // remember current exercises
       idToExercise = new HashMap<String, ExerciseShell>();
       clear();
