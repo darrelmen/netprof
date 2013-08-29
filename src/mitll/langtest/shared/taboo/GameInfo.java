@@ -3,6 +3,7 @@ package mitll.langtest.shared.taboo;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.ExerciseShell;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -14,27 +15,30 @@ import java.util.List;
  */
 public class GameInfo implements IsSerializable {
   protected int numGames;
-  // private  int numItemsInGame;
   protected List<ExerciseShell> itemsInGame;
-  //private List<ExerciseShell> currentGameItems;
-/*  private int numGames;
-  private int numExercisesInGame;*/
   protected int gameCount = 0;
+  protected long timestamp = System.currentTimeMillis();
 
-  public GameInfo() {
-  }
+  public GameInfo() {}
 
-  public GameInfo(int numGames, List<ExerciseShell> itemsInGame) {
+  public GameInfo(int numGames, List<ExerciseShell> itemsInGame, long timestamp) {
     this.numGames = numGames;
     this.itemsInGame = itemsInGame;
+    this.timestamp = timestamp;
   }
 
   public int getNumGames() {
     return numGames;
   }
 
+  public long getTimestamp() {
+    return timestamp;
+  }
+
+  public void setTimestamp() { timestamp = System.currentTimeMillis(); }
+
   public int getNumExercises() {
-    return itemsInGame.size();
+    return itemsInGame == null ? -1 : itemsInGame.size();
   }
 
   protected void restartGames() {
@@ -43,9 +47,13 @@ public class GameInfo implements IsSerializable {
 
   protected void incrementGames() {
     gameCount++;
+    setTimestamp();
+    //foreverGameCount++;
   }
 
   public boolean anyGamesRemaining() {
     return gameCount < numGames;
   }
+
+  public String toString() { return "GameInfo : " + numGames + " num exercises " + getNumExercises() + " timestamp " + new Date(timestamp); }
 }
