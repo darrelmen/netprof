@@ -179,8 +179,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
       new DialogHelper(true).showErrorMessage("Chapter(s) complete.", "Would you like to practice this chapter(s) again?", "Yes", new DialogHelper.CloseListener() {
         @Override
         public void gotYes() {
-          receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(currentExercises));
-          askServerForExercise(currentExercises.get(0));
+          startOver();
         }
 
         @Override
@@ -189,5 +188,10 @@ public class TabooExerciseList extends FlexSectionExerciseList {
         }
       });
     }
+  }
+
+  public void startOver() {
+    receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(currentExercises));
+    askServerForExercise(currentExercises.get(0));
   }
 }
