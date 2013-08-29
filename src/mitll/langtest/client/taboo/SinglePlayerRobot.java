@@ -47,7 +47,7 @@ public class SinglePlayerRobot {
    */
   public void checkForStimulus(AsyncCallback<StimulusAnswerPair> async) {
     if (exercisesRemaining == null) {
-      System.out.println("checkForStimulus " + exercisesRemaining);
+   //   System.out.println("checkForStimulus " + exercisesRemaining);
       StimulusAnswerPair stimulusAnswerPair = new StimulusAnswerPair();
       stimulusAnswerPair.setNoStimYet(true);
       async.onSuccess(stimulusAnswerPair); // async query not complete yet
@@ -56,7 +56,7 @@ public class SinglePlayerRobot {
         async.onSuccess(new StimulusAnswerPair(true,!anyGamesRemaining())); // no more chapters, no more exercises, we're done -- TODO : start over?
       } else {*/
         if (synonymSentences.isEmpty()) {
-          System.out.println("checkForStimulus " + exercisesRemaining.size());
+       //   System.out.println("checkForStimulus " + exercisesRemaining.size());
           getNextExercise(async);
         } else {
           String rawStim = synonymSentences.remove(0);
