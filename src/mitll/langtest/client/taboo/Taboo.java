@@ -16,6 +16,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.taboo.GameInfo;
@@ -43,18 +44,18 @@ public class Taboo {
   private static final int INACTIVE_PERIOD_MILLIS2 = 1000 * 2; // ten minutes
 
   private Timer userTimer, onlineTimer;
-  private ListInterface exerciseList;
-
+  ExerciseController controller;
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    * @param userManager
    * @param service
    * @param langTest
    */
-  public Taboo(UserManager userManager, LangTestDatabaseAsync service, LangTest langTest) {
+  public Taboo(UserManager userManager, LangTestDatabaseAsync service, LangTest langTest, ExerciseController controller) {
     this.userManager = userManager;
     this.service = service;
     this.langTest = langTest;
+    this.controller = controller;
   }
 
   public void initialCheck(final long fuserid) {
@@ -156,6 +157,7 @@ public class Taboo {
                   (isGiver ? " receiver partner " : " giver partner ") +
                   " of me, " + fuserid + ", is online.");*/
               }
+              controller.setGame(partnerState.getGameInfo());
             } else {
               onlineTimer.cancel();
               if (userManager.isActive()) {
@@ -280,9 +282,5 @@ public class Taboo {
     });
     askGiverReceiver.add(begin);
     askGiverReceiver.show();
-  }
-
-  public void setExerciseList(ListInterface exerciseList) {
-    this.exerciseList = exerciseList;
   }
 }
