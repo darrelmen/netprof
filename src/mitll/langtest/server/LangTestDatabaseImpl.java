@@ -1031,10 +1031,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getOnlineUsers().checkCorrect(giverUserID, "", stimulus);
   }
 
-  public GameInfo startGame(long userID/*, boolean isGiver*/) {
+  public GameInfo startGame(long userID) {
     return db.getOnlineUsers().startGame(userID);
   }
 
+  /**
+   *
+   * @param userID
+   * @param isGiver
+   * @return
+   */
   public GameInfo getGame(long userID, boolean isGiver) {
     return db.getOnlineUsers().getGame(userID, isGiver);
   }
