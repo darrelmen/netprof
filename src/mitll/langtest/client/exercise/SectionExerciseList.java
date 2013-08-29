@@ -459,7 +459,7 @@ public class SectionExerciseList extends PagingExerciseList {
 
     String token = History.getToken();
     getSelectionState(token);
-    System.out.println("pushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
+    //System.out.println("pushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
     if (token != null && (historyToken.equals(token) || trimmedToken.equals(token))) {
       System.out.println("\tcurrent token '" + token + "' same as new " + historyToken);
       loadByIDFromToken(exerciseID);
