@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.DialogHelper;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
@@ -38,6 +39,7 @@ import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 
 import java.util.Arrays;
@@ -47,8 +49,6 @@ import java.util.List;
 /**
  * Created with IntelliJ IDEA.
  * <p/>
- * TODO : add receiver factory -- user does a free form input of the guess...
- * what if they get part of the word?  feedback when they get it correct.
  * <p/>
  * User: GO22670
  * Date: 7/9/12
@@ -70,6 +70,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
   private int score;
   private int gameCount;
   private int totalClues;
+ // private Game game;
 
   /**
    *
@@ -94,7 +95,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     System.out.println("ReceiverExerciseFactory.getExercisePanel getting receiver panel ...");
     controller.pingAliveUser();
 
-    return new ReceiverPanel(service,controller);
+    return new ReceiverPanel(service,controller/*, exercise.getID()*/);
   }
 
   /**
@@ -102,26 +103,34 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
    * @param exerciseShells
    */
   public void setExerciseShells(List<ExerciseShell> exerciseShells) {
+    gameCount = 0;
     if (singlePlayerRobot != null) {
       singlePlayerRobot.setExerciseShells(exerciseShells);
-      singlePlayerRobot.startGame();
-      startGame();
+      startGame(singlePlayerRobot.startGame());
     }
     else {
-      //System.err.println("\n\n\n--->setExerciseShells ignoring items...");
-      numExercisesInGame = exerciseShells.size();
-
-      // TODO : do async call to service to start game
+      startGame();
     }
   }
 
   private void startGame() {
-    if (singlePlayerRobot != null) {
-      numExercisesInGame = singlePlayerRobot.getGame().getNumExercises();
-      numGames = singlePlayerRobot.getGame().getNumGames();
-    } else {
-      // TODO : get game from server
-    }
+    service.startGame(controller.getUser(),new AsyncCallback<GameInfo>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        //To change body of implemented methods use File | Settings | File Templates.
+      }
+
+      @Override
+      public void onSuccess(GameInfo result) {
+        startGame(result);
+      }
+    });
+  }
+
+  private void startGame(GameInfo gameInfo) {
+    numExercisesInGame = gameInfo.getNumExercises();
+    numGames = gameInfo.getNumGames();
+
     exerciseCount = 0;
     stimulusCount = 0;
     gameCount++;
@@ -147,6 +156,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     // Image correctImage   = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
   //  Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
     private Heading correct = new Heading(4);
+    private boolean isGameOver;
 
     public ReceiverPanel(final LangTestDatabaseAsync service, final ExerciseController controller) {
       final ReceiverPanel outer = addWidgets(service,controller);
@@ -242,7 +252,8 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       correct.setText(correctCount + "/" + (correctCount + incorrectCount));
     }
 
-    private void sendAnswer(final LangTestDatabaseAsync service, final ExerciseController controller, final ReceiverPanel outer, SoundFeedback soundFeedback) {
+    private void sendAnswer(final LangTestDatabaseAsync service, final ExerciseController controller,
+                            final ReceiverPanel outer, SoundFeedback soundFeedback) {
       boolean isCorrect = checkCorrect();
       System.out.println("sending answer '" + guessBox.getText() + "' vs '" + answer+ "' which is " + isCorrect);
       boolean onLast = onLastStim || stimulusCount == MAX_CLUES_TO_GIVE;   // never do more than 5 clues
@@ -262,7 +273,12 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         stimulusCount = 0;
         setCorrect();
         showPopup("Correct!" + (singlePlayerRobot == null ? " Please wait for the next item." : ""));
-        loadNext(controller);
+        if (isGameOver) {
+          // game over... dude...
+          dealWithGameOver(/*result,*/ service, controller, outer);
+        } else {
+          loadNext(controller);
+        }
       }
       else {
        // incorrectImage.setVisible(true);
@@ -275,7 +291,12 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
           //System.out.println("---> incrementing incorrect");
           setCorrect();
-          loadNext(controller);
+          if (isGameOver) {
+            dealWithGameOver(/*result,*/ service, controller, outer);
+
+          } else {
+            loadNext(controller);
+          }
         }
         else {
           showPopup("Try again...");
@@ -292,10 +313,12 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
     private boolean checkCorrect() {
       boolean isCorrect = guessBox.getText().equalsIgnoreCase(answer);
-      for (String prefix : Arrays.asList("to ", "the ")) {  // TODO : hack for ENGLISH
-        if (answer.startsWith(prefix)) { // verbs
-          isCorrect = guessBox.getText().equalsIgnoreCase(answer.substring(prefix.length()));
-          if (isCorrect) break;
+      if (!isCorrect) {
+        for (String prefix : Arrays.asList("to ", "the ")) {  // TODO : hack for ENGLISH
+          if (answer.startsWith(prefix)) { // verbs
+            isCorrect = guessBox.getText().equalsIgnoreCase(answer.substring(prefix.length()));
+            if (isCorrect) break;
+          }
         }
       }
       return isCorrect;
@@ -360,45 +383,71 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         System.out.println("ReceiverExerciseFactory.checkForStimulus : we have a single player robot...");
         singlePlayerRobot.checkForStimulus(new AsyncCallback<StimulusAnswerPair>() {
           @Override
-          public void onFailure(Throwable caught) {}
+          public void onFailure(Throwable caught) {
+          }
 
           @Override
           public void onSuccess(StimulusAnswerPair result) {
-            if (!result.isGameOver()) {
-              System.out.println(new Date() + " gotStimulusResponse : showStimlus  " + result);
+           // if (result.isGameOver()) {     // game over... dude...
+        //      dealWithGameOver(result, service, controller, outer);
+        //    } else {
+              System.out.println(new Date() + " gotStimulusResponse : showStimulus  " + result);
               showStimulus(result, outer);
-            } else { // game over... dude...
-         //     removeKeyHandler();
-          //    prompt.setText("Please choose another chapter(s).");
-
-              if (result.isChapterComplete()) {
-                new ModalInfoDialog("Chapter(s) complete.", Arrays.asList("You've completed all the games.  Would you like to go again?", "Or you can choose another chapter or chapters."));
-                // TODO show leaderboard plot
-              } else {
-                int i = totalClues;// MAX_CLUES_TO_GIVE * numExercisesInGame;
-                new ModalInfoDialog("Game complete!", "Game complete! Your score was " + score + " out of " + i,
-                  new HiddenHandler() {
-                    @Override
-                    public void onHidden(HiddenEvent hiddenEvent) {
-                      // TODO : post score to server.
-                      System.out.println(new Date() +" onHidden.got hide...");
-
-                      if (singlePlayerRobot != null) {
-                        singlePlayerRobot.startGame();
-                        startGame();
-                        checkForStimulus(service, controller, outer);
-                      } else { // TODO check with server. -- start next Game
-
-                      }
-                    }
-                  });
-              }
-            }
+          //  }
           }
         });
       } else {
         service.checkForStimulus(controller.getUser(), new StimulusAnswerPairAsyncCallback(outer, service, controller));
       }
+    }
+
+    private void dealWithGameOver(/*StimulusAnswerPair result,*/ final LangTestDatabaseAsync service, final ExerciseController controller, final ReceiverPanel outer) {
+    /*  if (result.isChapterComplete()) {
+        new ModalInfoDialog("Chapter(s) complete.", Arrays.asList("You've completed all the games.  Would you like to go again?", "Or you can choose another chapter or chapters."));
+        // TODO show leaderboard plot
+      } else {*/
+        new ModalInfoDialog("Game complete!", "Game complete! Your score was " + score + " out of " + totalClues,
+          new HiddenHandler() {
+            @Override
+            public void onHidden(HiddenEvent hiddenEvent) {
+              // TODO : post score to server.
+              System.out.println(new Date() + " onHidden.got hide...");
+              if (controller.isLastExercise(exerciseID)) {
+                new DialogHelper(true).showErrorMessage("Chapter(s) complete.", "Would you like to practice this chapter(s) again?", "Yes", new DialogHelper.CloseListener() {
+                  @Override
+                  public void gotYes() {
+                    controller.startOver();
+                  }
+
+                  @Override
+                  public void gotNo() {
+                     showPopup("To continue playing, choose another chapter.");
+                  }
+                });
+              }
+              else {
+              loadNext(controller);
+
+              if (singlePlayerRobot != null) {
+                startGame(singlePlayerRobot.startGame());
+                checkForStimulus(service, controller, outer);
+              } else {
+                service.startGame(controller.getUser(), new AsyncCallback<GameInfo>() {
+                  @Override
+                  public void onFailure(Throwable caught) {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                  }
+
+                  @Override
+                  public void onSuccess(GameInfo result) {
+                    startGame(result);
+                    checkForStimulus(service, controller, outer);
+                  }
+                });
+              }
+            }}
+          });
+      //}
     }
 
     private Timer checkStimTimer = null;
@@ -418,13 +467,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
                                     final LangTestDatabaseAsync service, final ExerciseController controller) {
      // System.out.println(new Date() + " gotStimulusResponse : got  " + result);
 
-      if (result != null && !result.noStimYet) {
-        //  cancelStimTimer();
-        System.out.println(new Date() + " ReceiverExerciseFactory.gotStimulusResponse : showStimlus  " + result);
-
-        showStimulus(result, outer);
-        //  System.out.println("checkForStimulus : answer '" + answer + "'");
-      } else if (result != null) {
+      if (result.noStimYet) {
         //System.out.println("---> " +new Date() + "gotStimulusResponse : got  " + result);
 
         if (checkStimTimer == null) {
@@ -445,13 +488,25 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         }
         else {
           System.out.println("\tNot making a new timer for " + "? at " +new Date() );
-
         }
-      } else { // no more stimulus left...
+      } else {
+
+        if (result.isGameOver()) {     // game over... dude...
+          dealWithGameOver(/*result,*/ service, controller, outer);
+        } else {
+          System.out.println(new Date() + " ReceiverExerciseFactory.gotStimulusResponse : showStimlus  " + result);
+          showStimulus(result, outer);
+        }
+
+        //  cancelStimTimer();
+      //  System.out.println(new Date() + " ReceiverExerciseFactory.gotStimulusResponse : showStimlus  " + result);
+
+        //showStimulus(result, outer);
+      } /*else { // no more stimulus left...
         removeKeyHandler();
         prompt.setText("Please choose another chapter(s).");
         new ModalInfoDialog("Word list complete", "Please choose another chapter.");
-      }
+      }*/
     }
 
     private void pollForStimChange(final ReceiverPanel outer) {
@@ -496,7 +551,6 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       }
     }
 
-
     private void showStimulus(StimulusAnswerPair result, ReceiverPanel outer) {
      // correctImage.setVisible(false);
    //   incorrectImage.setVisible(false);
@@ -519,6 +573,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       if (singlePlayerRobot == null) {
         pollForStimChange(outer);
       }
+      isGameOver = result.isGameOver();
     }
 
     private HandlerRegistration keyHandler;
