@@ -22,13 +22,19 @@ public class StimulusAnswerPair implements IsSerializable {
 
   public StimulusAnswerPair() {}
 
+  /**
+   * @see mitll.langtest.client.taboo.SinglePlayerRobot#checkForStimulus(com.google.gwt.user.client.rpc.AsyncCallback)
+   * @param gameOver
+   * @param chapterComplete
+   */
   public StimulusAnswerPair(boolean gameOver, boolean chapterComplete) {
     this.gameOver = gameOver;
     this.chapterComplete = chapterComplete;
   }
 
   public StimulusAnswerPair(String exerciseID, String stimulus, String answer, boolean isLastStimulus,
-                            boolean didGiverSkip, int totalExpected) {
+                            boolean didGiverSkip, int totalExpected, boolean isGameOver) {
+    this(isGameOver, false);
     this.setExerciseID(exerciseID);
     this.setStimulus(stimulus);
     this.setAnswer(answer);
