@@ -3,6 +3,7 @@ package mitll.langtest.server.database.taboo;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.taboo.Game;
+import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 import mitll.langtest.shared.taboo.TabooState;
@@ -16,7 +17,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 /**
  * Created with IntelliJ IDEA.
@@ -178,7 +178,8 @@ public class OnlineUsers {
     }
     boolean joined = giver || receiver;
 
-    List<ExerciseShell> exerciseShells = null;
+   // List<ExerciseShell> exerciseShells = null;
+   // GameInfo gameInfo = null;
     if (joined) {
       logger.info("anyAvailable : yea! just joined " + userid + " giver " + giver + " receiver " + receiver);
 
@@ -189,29 +190,42 @@ public class OnlineUsers {
         giverID = userid;
         receiverID = receiverUser.id;
       } else {
-        receiverUser = getUser(userid);
+       // receiverUser = getUser(userid);
         giverID = getGiverForReceiver(userid).id;
         receiverID = userid;
       }
       logger.info("anyAvailable : giver : " + giverID + " and receiver " + receiverID);
 
-      Game game = receiverToGame.get(receiverUser);
-      exerciseShells = game.startGame();
+    //  Game game = receiverToGame.get(receiverUser);
+      //exerciseShells = game.startGame();
+  //    gameInfo = new GameInfo(game.getNumGames(),game.startGame());
     } else if (avail) { // take us out of the pool
       addCandidatePair(userid);
     }
 
-    TabooState tabooState = new TabooState(avail, joined, giver, exerciseShells);
+    TabooState tabooState = new TabooState(avail, joined, giver/*, gameInfo*/);
    // logger.debug("returning " + tabooState);
     return tabooState;
   }
 
-  public Collection<ExerciseShell> getNextGameExercises(long userID, boolean isGiver) {
-    User receiverUser = isGiver ? giverToReceiver.get(getUser(userID)) : getUser(userID);
-    return receiverToGame.get(receiverUser).startGame();
+  public GameInfo getGame(long userID, boolean isGiver) {
+    Game game = getGameFor(userID, isGiver);
+    return new GameInfo(game.getNumGames(),game.getGameItems());
   }
 
-  Random rnd = new Random();
+  //public void startGame(long userID) {}
+
+  public GameInfo startGame(long userID/*, boolean isGiver*/) {
+    Game game = getGameFor(userID, false);
+    return new GameInfo(game.getNumGames(),game.startGame());
+  }
+
+  private Game getGameFor(long userID, boolean isGiver) {
+    User receiverUser = isGiver ? giverToReceiver.get(getUser(userID)) : getUser(userID);
+    return receiverToGame.get(receiverUser);
+  }
+
+  // Random rnd = new Random();
 
   private void addCandidatePair(long userid) {
     User first = null, second = null;
@@ -287,6 +301,7 @@ public class OnlineUsers {
    *
    *
    *
+   * @see mitll.langtest.server.LangTestDatabaseImpl#sendStimulus(long, String, String, String, boolean, boolean, int)
    * @param userid
    * @param exerciseID
    * @param stimulus
@@ -294,15 +309,16 @@ public class OnlineUsers {
    * @param onLastStimulus
    * @param skippedItem
    * @param numClues
+   * @param isGameOver
    * @return
    */
-  public synchronized int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, int numClues) {
+  public synchronized int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, int numClues, boolean isGameOver) {
     User receiver = getReceiverForGiver(userid);
     if (receiver == null) {
       return 1;
     }
     logger.debug("sending " + stimulus + " to " + receiver + " from giver " + userid);
-    receiverToStimulus.put(receiver, new StimulusAnswerPair(exerciseID, stimulus, answer, onLastStimulus, skippedItem, numClues));
+    receiverToStimulus.put(receiver, new StimulusAnswerPair(exerciseID, stimulus, answer, onLastStimulus, skippedItem, numClues, isGameOver));
     return 0;
   }
 
@@ -376,7 +392,7 @@ public class OnlineUsers {
 
   /**
    * @see #checkCorrect(long, String, String)
-   * @see #sendStimulus(long, String, String, String, boolean, boolean, int)
+   * @see #sendStimulus(long, String, String, String, boolean, boolean, int, boolean)
    * @param giver
    * @return
    */
