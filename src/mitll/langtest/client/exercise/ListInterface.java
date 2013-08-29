@@ -54,11 +54,13 @@ public interface ListInterface extends RequiresResize {
   /**
    * @param current
    * @return
-   * @see mitll.langtest.client.LangTest#loadNextExercise(mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.LangTest#loadNextExercise
    */
   boolean loadNextExercise(ExerciseShell current);
 
   boolean loadNextExercise(String id);
+  boolean isLastExercise(String id);
+  void startOver();
 
   boolean loadPreviousExercise(ExerciseShell current);
 
@@ -88,4 +90,5 @@ public interface ListInterface extends RequiresResize {
   void hideExerciseList();
 
   void showExerciseList();
+
 }
