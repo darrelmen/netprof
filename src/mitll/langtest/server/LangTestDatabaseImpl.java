@@ -1051,9 +1051,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param isGiver
    * @return
    */
-  public GameInfo getGame(long userID, boolean isGiver) {
+/*  public GameInfo getGame(long userID, boolean isGiver) {
     return db.getOnlineUsers().getGame(userID, isGiver);
-  }
+  }*/
 
   public void logMessage(String message) {
     String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client " + message;
