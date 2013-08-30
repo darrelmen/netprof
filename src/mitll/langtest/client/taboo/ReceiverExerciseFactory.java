@@ -32,6 +32,7 @@ import mitll.langtest.client.DialogHelper;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
+import mitll.langtest.client.bootstrap.LeaderboardPlot;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.NoPasteTextBox;
@@ -39,12 +40,15 @@ import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -96,12 +100,13 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     return new ReceiverPanel(service,controller);
   }
 
+  Map<String, Collection<String>> selectionState;
   /**
    * @see TabooExerciseList#rememberExercises(java.util.List)
    * @param exerciseShells
    */
-  public void setExerciseShells(List<ExerciseShell> exerciseShells) {
-    //gameCount = 0;
+  public void setExerciseShells(List<ExerciseShell> exerciseShells, Map<String, Collection<String>> selectionState) {
+    this.selectionState = selectionState;
     System.out.println("ReceiverExerciseFactory.setExerciseShells on " + exerciseShells.size());
 
     if (singlePlayerRobot != null) {
@@ -402,15 +407,54 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       }
     }
 
+    /**
+     * @see #sendAnswer(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, mitll.langtest.client.sound.SoundFeedback)
+     * @param service
+     * @param controller
+     * @param outer
+     */
     private void dealWithGameOver(final LangTestDatabaseAsync service, final ExerciseController controller, final ReceiverPanel outer) {
       new ModalInfoDialog("Game complete!", "Game complete! Your score was " + score + " out of " + totalClues,
         new HiddenHandler() {
           @Override
           public void onHidden(HiddenEvent hiddenEvent) {
-            // TODO : post score to server.
-            System.out.println(new Date() + " onHidden.got hide...");
+            System.out.println(new Date() + " dealWithGameOver..");
+            service.postGameScore(controller.getUser(),score,totalClues, new AsyncCallback<Void>() {
+              @Override
+              public void onFailure(Throwable caught) {
+                //To change body of implemented methods use File | Settings | File Templates.
+              }
+
+              @Override
+              public void onSuccess(Void result) {}
+            });
             if (controller.isLastExercise(exerciseID)) {
-              new DialogHelper(true).showErrorMessage("Chapter(s) complete.", "Would you like to practice this chapter(s) again?", "Yes", new DialogHelper.CloseListener() {
+              // TODO : show leaderboard
+              service.getLeaderboard(controller.getUser(), new AsyncCallback<Leaderboard>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                  //To change body of implemented methods use File | Settings | File Templates.
+                }
+
+                @Override
+                public void onSuccess(Leaderboard result) {
+                  new LeaderboardPlot().showLeaderboardPlot(result, controller.getUser(), 0, selectionState,
+                    "Would you like to practice this chapter(s) again?",
+                    new ClickHandler() {
+                      @Override
+                      public void onClick(ClickEvent event) {
+                        controller.startOver();
+                      }
+                    },
+                    new ClickHandler() {
+                      @Override
+                      public void onClick(ClickEvent event) {
+                        showPopup("To continue playing, choose another chapter.");
+                      }
+                    });
+                }
+              });
+             /* new DialogHelper(true).showErrorMessage("Chapter(s) complete.", "Would you like to practice this chapter(s) again?", "Yes", new DialogHelper.CloseListener() {
                 @Override
                 public void gotYes() {
                   controller.startOver();
@@ -420,7 +464,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
                 public void gotNo() {
                   showPopup("To continue playing, choose another chapter.");
                 }
-              });
+              });*/
             } else {
               loadNext(controller);
 
@@ -539,16 +583,16 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
    //   incorrectImage.setVisible(false);
       displayedStimulus = result;
       onLastStim = result.isLastStimulus;
-      String gameInfoString = "Game " + (gameInfo.getGameCount()) + " of " + gameInfo.getNumGames();
-    //  gameIndicator.setText(gameInfo);
-      exerciseDisplay.setText(gameInfoString +", item " + (exerciseCount+1) + " of " + gameInfo.getInitialNumExercises());
+      if (gameInfo != null) {
+        showGame();
+      }
 
       prompt.setText("Fill in the blank.");
       guessBox.setVisible(true);
       send.setVisible(true);
       stimulus.setVisible(true);
       if (result.getStimulus() != null) {
-        stimulus.setText("Clue " + (++stimulusCount) + " of " + displayedStimulus.getNumClues() + "<br/><font color=#0036a2>" + result.getStimulus() +"</font>");
+        showStim(result);
       }
       outer.answer = result.getAnswer();
       exerciseID = result.getExerciseID();
@@ -557,6 +601,25 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         pollForStimChange(outer);
       }
       isGameOver = result.isGameOver();
+    }
+
+    private void showStim(StimulusAnswerPair result) {
+      stimulus.setText("Clue #" + (++stimulusCount) + "<br/><font color=#0036a2>" + result.getStimulus() +"</font>");
+    }
+    private void showStimFull(StimulusAnswerPair result) {
+      stimulus.setText("Clue " + (++stimulusCount) + " of " + displayedStimulus.getNumClues() + "<br/><font color=#0036a2>" + result.getStimulus() +"</font>");
+    }
+
+    private void showGame() {
+      String gameInfoString = "Game #" + (gameInfo.getGameCount());// + " of " + gameInfo.getNumGames();
+      //  gameIndicator.setText(gameInfo);
+      exerciseDisplay.setText(gameInfoString + ", item #" + (exerciseCount + 1));// + " of " + gameInfo.getInitialNumExercises());
+    }
+
+    private void showGameFull() {
+      String gameInfoString = "Game " + (gameInfo.getGameCount() + 1) + " of " + gameInfo.getNumGames();
+      //  gameIndicator.setText(gameInfo);
+      exerciseDisplay.setText(gameInfoString + ", item " + (exerciseCount + 1) + " of " + gameInfo.getInitialNumExercises());
     }
 
     private HandlerRegistration keyHandler;
