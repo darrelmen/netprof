@@ -56,6 +56,11 @@ public class Leaderboard implements IsSerializable {
     return lastScore;
   }*/
 
+  /**
+   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList#timesUp(long)
+   * @param selection
+   * @return
+   */
   public List<ScoreInfo> getScores(Map<String, Collection<String>> selection) {
     return selectionToScores.get(getHash(selection));
   }
