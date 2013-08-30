@@ -29,7 +29,7 @@ public class SinglePlayerRobot {
   private Exercise currentExercise = null;
   private List<Exercise.QAPair> clueAnswerPairs = Collections.emptyList();
   private int numClues = 0;
-  private PropertyHandler propertyHandler;
+  //private PropertyHandler propertyHandler;
 
   /**
    * @see mitll.langtest.client.LangTest#setTabooFactory(long, boolean, boolean)
@@ -38,7 +38,7 @@ public class SinglePlayerRobot {
    */
   public SinglePlayerRobot(LangTestDatabaseAsync service, PropertyHandler propertyHandler) {
     this.service = service;
-    this.propertyHandler = propertyHandler;
+    //this.propertyHandler = propertyHandler;
   }
 
   /**
@@ -47,21 +47,17 @@ public class SinglePlayerRobot {
    */
   public void checkForStimulus(AsyncCallback<StimulusAnswerPair> async) {
     if (exercisesRemaining == null) {
-   //   System.out.println("checkForStimulus " + exercisesRemaining);
+      System.out.println("SinglePlayerRobot.checkForStimulus " + exercisesRemaining);
       StimulusAnswerPair stimulusAnswerPair = new StimulusAnswerPair();
       stimulusAnswerPair.setNoStimYet(true);
       async.onSuccess(stimulusAnswerPair); // async query not complete yet
     } else {
-     /* if (exercisesRemaining.isEmpty() && clueAnswerPairs.isEmpty()) {
-        async.onSuccess(new StimulusAnswerPair(true,!anyGamesRemaining())); // no more chapters, no more exercises, we're done -- TODO : start over?
-      } else {*/
-        if (clueAnswerPairs.isEmpty()) {
-       //   System.out.println("checkForStimulus " + exercisesRemaining.size());
-          getNextExercise(async);
-        } else {
-          replyWithNextClue(currentExercise.getID(),async);
-        }
-      //}
+      if (clueAnswerPairs.isEmpty()) {
+        System.out.println("SinglePlayerRobot.checkForStimulus " + exercisesRemaining.size());
+        getNextExercise(async);
+      } else {
+        replyWithNextClue(currentExercise.getID(), async);
+      }
     }
   }
 
@@ -94,17 +90,11 @@ public class SinglePlayerRobot {
 
         clueAnswerPairs = Game.randomSample2(currentExercise.getQuestions(), ReceiverExerciseFactory.MAX_CLUES_TO_GIVE, rnd);
         numClues = clueAnswerPairs.size();
-        // final String refSentence = getRefSentence();
 
         if (clueAnswerPairs.isEmpty()) {
           System.err.println("huh? no stim sentences for " + currentExercise);
           async.onSuccess(new StimulusAnswerPair(result.getID(), "Data error on server, please report.", "", false, false, numClues, true));
         } else {
-/*          String rawStim = clueAnswerPairs.remove(0).getQuestion();
-          boolean empty = clueAnswerPairs.isEmpty();
-          // System.out.println("getNextExercise stim left " + clueAnswerPairs.size() + " empty " + empty);
-          async.onSuccess(new StimulusAnswerPair(result.getID(), rawStim, refSentence, empty, false, numClues, isGameOver()));*/
-
           replyWithNextClue(currentExercise.getID(),async);
         }
       }
@@ -114,32 +104,11 @@ public class SinglePlayerRobot {
   private void replyWithNextClue(String exerciseID, AsyncCallback<StimulusAnswerPair> async) {
     Exercise.QAPair clueAnswerPair = clueAnswerPairs.remove(0);
     String rawStim = clueAnswerPair.getQuestion();
-    // final String refSentence = getRefSentence();
     boolean empty = clueAnswerPairs.isEmpty();
-    // System.out.println("stim left " + clueAnswerPairs.size() + " empty " + empty);
 
     String answer = clueAnswerPair.getAnswer();
-    //   String obfuscated = getObfuscated(rawStim, answer);
-//    String exerciseID = currentExercise.getID();
     async.onSuccess(new StimulusAnswerPair(exerciseID, rawStim, answer, empty, false, numClues, isGameOver()));
   }
-
-/*  private String getRefSentence() {
-    return propertyHandler.doTabooEnglish() ? currentExercise.getEnglishSentence().trim() : currentExercise.getRefSentence().trim();
-  }*/
-
-/*
-  private String getObfuscated(String exampleToSend, String refSentence) {
-    StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < refSentence.length(); i++) builder.append('_');
-*/
-/*    if (!exampleToSend.contains(refSentence)) {
-      System.err.println("huh? '" + exampleToSend + "' doesn't contain '" + refSentence + "'");
-    }*//*
-
-    return exampleToSend.replaceAll(refSentence, builder.toString());
-  }
-*/
 
   /**
    * @see ReceiverExerciseFactory.ReceiverPanel#registerAnswer(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
@@ -149,8 +118,8 @@ public class SinglePlayerRobot {
     if (correct) clueAnswerPairs = Collections.emptyList();
   }
 
-  public GameInfo getGame() { return game; }
-  public boolean anyGamesRemaining() { return game.anyGamesRemaining(); }
+ // public GameInfo getGame() { return game; }
+ // public boolean anyGamesRemaining() { return game.anyGamesRemaining(); }
 
   private Game game;
   private Random rnd = new Random();
@@ -161,11 +130,6 @@ public class SinglePlayerRobot {
    */
   public void setExerciseShells(List<ExerciseShell> exerciseShells) {
     game = new Game(exerciseShells);
-  //  startGame();
-    //exercisesRemaining = new ArrayList<ExerciseShell>(exerciseShells);
-    //Random rand = new Random();
-
-    //shuffler.shuffle(exercisesRemaining, rand);
   }
 
   public Game startGame() {
@@ -174,5 +138,4 @@ public class SinglePlayerRobot {
     clueAnswerPairs = Collections.emptyList();
     return game;
   }
-
 }
