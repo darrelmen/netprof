@@ -108,8 +108,6 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
         this.gameInfo = game;
         lastTimestamp = game.getTimestamp();
       }
-      //else {
-      //}
     }
   }
 
@@ -223,11 +221,17 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     private void startGame() {
       exerciseCount = 1;
       stimulusCount = 1;
-    //  gameCount++;
     }
 
     private void showGame(GameInfo gameInfo) {
-      String gameInfoString = "Game " + (gameInfo.getGameCount()) + " of " + gameInfo.getNumGames();
+      String gameInfoString = "Game #" + (gameInfo.getGameCount() + 1);// + " of " + gameInfo.getNumGames();
+  //    int numExercises = gameInfo.getNumExercises();
+      exerciseDisplay.setText(gameInfoString + ", item #" + (exerciseCount));// + " of " + numExercises);
+      stimulus.setText("Clue #" + (stimulusCount));// + " of " + clueAnswerPairs.size());
+    }
+
+    private void showGameFull(GameInfo gameInfo) {
+      String gameInfoString = "Game " + (gameInfo.getGameCount() + 1) + " of " + gameInfo.getNumGames();
       int numExercises = gameInfo.getNumExercises();
       exerciseDisplay.setText(gameInfoString + ", item " + (exerciseCount) + " of " + numExercises);
       stimulus.setText("Clue " + (stimulusCount) + " of " + clueAnswerPairs.size());
