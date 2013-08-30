@@ -117,8 +117,6 @@ public class SelectionState {
     this.item = item;
   }
 
- // public Map<String,Collection<String>> getSelection() { return typeToSection; }
-
   public Map<String, Collection<String>> getTypeToSection() {
     return typeToSection;
   }
