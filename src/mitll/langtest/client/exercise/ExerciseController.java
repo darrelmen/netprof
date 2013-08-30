@@ -1,5 +1,6 @@
 package mitll.langtest.client.exercise;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -26,6 +27,8 @@ public interface ExerciseController {
   boolean isLastExercise(String exerciseID);
   void setGame(GameInfo game);
   void startOver();
+
+  void askForRandomExercise(AsyncCallback<Exercise> callback);
 
   boolean loadPreviousExercise(Exercise current);
 
