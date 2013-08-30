@@ -31,6 +31,10 @@ public class Game extends GameInfo {
     numGames = (int) Math.ceil((float)allSelectedExercises.size()/(float)OnlineUsers.GAME_SIZE);
   }
 
+  /**
+   * @see OnlineUsers#startGame(long)
+   * @return
+   */
   public List<ExerciseShell> startGame() {
     List<ExerciseShell> exercisesToDo = new ArrayList<ExerciseShell>();
     if (!anyGamesRemaining()) {
@@ -46,6 +50,7 @@ public class Game extends GameInfo {
       ") items, " + "startGame... returning " + exercisesToDo.size() + " : " + exercisesToDo);
 
     this.itemsInGame = exercisesToDo;
+    initNumExercises = itemsInGame.size();
     return exercisesToDo;
   }
 
