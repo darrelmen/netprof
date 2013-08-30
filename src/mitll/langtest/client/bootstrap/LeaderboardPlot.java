@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.flashcard.ScoreInfo;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.PlotBand;
@@ -22,8 +23,18 @@ import java.util.Map;
 public class LeaderboardPlot {
   public static final float HALF = (1f / 4f);
 
-  public void showLeaderboardPlot(List<ScoreInfo> scores, final long userID, int gameTimeSeconds,
-                                  Map<String,Collection<String>> currentSelection,
+  public void showLeaderboardPlot(Leaderboard leaderboard, final long userID, int gameTimeSeconds,
+                                  Map<String, Collection<String>> currentSelection,
+                                  String prompt,
+                                  final ClickHandler onYes, final ClickHandler onNo) {
+    List<ScoreInfo> scores = leaderboard.getScores(currentSelection);
+
+    showLeaderboardPlot(scores, userID, gameTimeSeconds, currentSelection, prompt,onYes, onNo);
+  }
+
+  private void showLeaderboardPlot(List<ScoreInfo> scores, final long userID, int gameTimeSeconds,
+                                  Map<String, Collection<String>> currentSelection,
+                                  String prompt,
                                   final ClickHandler onYes, final ClickHandler onNo) {
     int pbCorrect = 0;
     int top = 0;
@@ -54,8 +65,9 @@ public class LeaderboardPlot {
 
     Float[] yValues = yValuesForUser.toArray(new Float[0]);
 
+    String seriesLabel = gameTimeSeconds > 0 ? "Correct in " + gameTimeSeconds + " seconds" : "Score";
     Series series = chart.createSeries()
-      .setName("Correct in " + gameTimeSeconds + " seconds")
+      .setName(seriesLabel)
       .setPoints(yValues);
     chart.addSeries(series);
 
@@ -144,7 +156,8 @@ public class LeaderboardPlot {
     FluidRow row1 = new FluidRow();
     Column column = new Column(12);
     row1.add(column);
-    column.add(new Heading(4, "Would you like to try again?"));
+//    String prompt = "Would you like to try again?";
+    column.add(new Heading(4, prompt));
     modal.add(row1);
     modal.add(row);
     modal.show();
