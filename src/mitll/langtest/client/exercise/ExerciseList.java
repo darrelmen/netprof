@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -244,8 +245,14 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     flush();
   }
 
-  public Collection<ExerciseShell> getExerciseShells() {
+/*  public Collection<ExerciseShell> getExerciseShells() {
     return idToExercise.values();
+  }
+  */
+  private Random random = new Random();
+  public void askForRandomExercise(AsyncCallback<Exercise> callback) {
+    ExerciseShell shell = currentExercises.get(random.nextInt(currentExercises.size()));
+    service.getExercise(shell.getID(), callback);
   }
 
   public void setSelectionState(Map<String, Collection<String>> selectionState) {}
