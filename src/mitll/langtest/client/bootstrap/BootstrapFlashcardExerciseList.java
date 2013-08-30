@@ -188,8 +188,8 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
        @Override
        public void onSuccess(Leaderboard result) {
-         List<ScoreInfo> scores = result.getScores(currentSelection);
-         leaderboardPlot.showLeaderboardPlot(scores, userID, gameTimeSeconds, currentSelection,
+       //  List<ScoreInfo> scores = result.getScores(currentSelection);
+         leaderboardPlot.showLeaderboardPlot(result, userID, gameTimeSeconds, currentSelection,  "Would you like to try again?",
            new ClickHandler() {
              @Override
              public void onClick(ClickEvent event) {
