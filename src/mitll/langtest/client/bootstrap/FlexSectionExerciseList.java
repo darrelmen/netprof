@@ -234,7 +234,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       }
     }
     long now = System.currentTimeMillis();
-    if (now-then > 0) System.out.println("\taddButtonRow took " + (now-then) + " millis");
+    if (now-then > 200) System.out.println("\taddButtonRow took " + (now-then) + " millis");
 
     if (last != null) setSizesAndPushFirst(last);
     addBottomText(container);
@@ -380,12 +380,13 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @see #addButtonRow
    * @param container
    */
-  protected void addBottomText(FluidContainer container) {
+  protected Widget addBottomText(FluidContainer container) {
     FluidRow status = new FluidRow();
     status.addStyleName("alignCenter");
     status.addStyleName("inlineStyle");
     container.add(status);
     status.add(statusHeader);
+    return status;
   }
 
   private Panel getInstructionRow() {

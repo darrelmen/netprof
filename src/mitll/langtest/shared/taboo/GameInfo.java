@@ -48,12 +48,16 @@ public class GameInfo implements IsSerializable {
   protected void incrementGames() {
     gameCount++;
     setTimestamp();
-    //foreverGameCount++;
   }
 
   public boolean anyGamesRemaining() {
     return gameCount < numGames;
   }
 
-  public String toString() { return "GameInfo : " + numGames + " num exercises " + getNumExercises() + " timestamp " + new Date(timestamp); }
+  public boolean hasStarted() { return itemsInGame != null; }
+
+  public List<ExerciseShell> getGameItems() { return itemsInGame; }
+
+  public String toString() { return "GameInfo : " + (hasStarted() ? " started " : " not started ") +
+    numGames + " num exercises " + getNumExercises() + " timestamp " + new Date(timestamp); }
 }
