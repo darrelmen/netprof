@@ -2,6 +2,8 @@ package mitll.langtest.server.database.taboo;
 
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.flashcard.Leaderboard;
+import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.taboo.Game;
 import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.PartnerState;
@@ -42,8 +44,15 @@ public class OnlineUsers {
   private Map<User,AnswerBundle> receiverToAnswer = new HashMap<User, AnswerBundle>();
   private Map<User,Map<String, Collection<String>>> receiverToState = new HashMap<User, Map<String, Collection<String>>>();
   private Map<User,Game> receiverToGame = new HashMap<User, Game>();
+ // private Map<User,List<Leaderboard>> userToScores = new HashMap<User, List<Leaderboard>>();
+  private Map<User,Leaderboard> userToScores = new HashMap<User,Leaderboard>();
 
-  // TODO keep track of join time, order pairings on that basis
+/*  private static class GameScore {
+    public int score;
+    public int max;
+    public GameScore(int score, int max) { this.score = score; this.max = max;}
+  }*/
+  // TODOx keep track of join time, order pairings on that basis
 
   public OnlineUsers(UserDAO userDAO) { this.userDAO = userDAO; }
 
@@ -360,16 +369,6 @@ public class OnlineUsers {
  //     logger.debug("not remembering answer, since " + receiverUserID + " is playing by him/herself.");
     } else {
       receiverToStimulus.remove(receiver);
-
-/*      Map<String, List<AnswerBundle>> stimToAnswer = receiverToAnswer.get(receiver);
-      if (stimToAnswer == null) {
-        receiverToAnswer.put(receiver, stimToAnswer = new HashMap<String, List<AnswerBundle>>());
-      }
-      List<AnswerBundle> answerBundles = stimToAnswer.get(stimulus);
-      if (answerBundles == null) {
-        stimToAnswer.put(stimulus, answerBundles = new ArrayList<AnswerBundle>());
-      }
-      answerBundles.add(new AnswerBundle(stimulus, answer, correct));*/
       receiverToAnswer.put(receiver,new AnswerBundle(stimulus, answer, correct));
 
       logger.debug("OnlineUsers.registerAnswer : user->answer now " + receiverToAnswer);
@@ -387,28 +386,14 @@ public class OnlineUsers {
     User receiver = getReceiverForGiver(giverUserID);
     //logger.debug("OnlineUsers.checkCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id);
 
-    //Map<String, List<AnswerBundle>> stimToAnswer = receiverToAnswer.get(receiver);
     AnswerBundle answerBundle = receiverToAnswer.get(receiver);
     if (answerBundle == null) {
-  //    logger.debug("\tno answer yet...");
+      //    logger.debug("\tno answer yet...");
       return -1;
-    }
-    else {
+    } else {
       logger.debug("\tcheckCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id + " got " + answerBundle);
-
- /*     List<AnswerBundle> answerBundles = stimToAnswer.get(stimulus);
-      logger.debug("\tGiver " + giverUserID + " checking for answer from " + receiver.id + " got " + answerBundles);
-
-      if (answerBundles == null) {
-        //if (count++ < 4) logger.error("huh? '" +stimulus + "' is not recorded in " + stimToAnswer.keySet() + " for " + receiver);
-        return -1;
-      }
-      else {*/
-     //   AnswerBundle answerBundle = answerBundles.get(answerBundles.size() - 1);
- //       int isCorrectResponse = answerBundle.correct ? 1 : 0;
       receiverToAnswer.remove(receiver); // sent response to giver -- no need to remember them anymore
-        return answerBundle.correct ? 1 : 0;
-   //   }
+      return answerBundle.correct ? 1 : 0;
     }
   }
 
@@ -474,6 +459,36 @@ public class OnlineUsers {
     }
   }
 
+ // private final Leaderboard leaderboard = new Leaderboard();
+
+  public void postGameScore(long userID, int score, int maxPossibleScore) {
+    User receiver = getUser(userID);
+    Map<String, Collection<String>> current = receiverToState.get(receiver);
+
+    User giverForReceiver = getGiverForReceiver(userID);
+    if (giverForReceiver != null) {
+      addGameScore(giverForReceiver, score, maxPossibleScore,current);
+    }
+    addGameScore(receiver,score,maxPossibleScore,current);
+  }
+
+  private void addGameScore(User giverForReceiver, int score, int maxPossibleScore, Map<String, Collection<String>> selectionState) {
+   /* List<GameScore> gameScores = userToScores.get(giverForReceiver);
+    if (gameScores == null) {
+      userToScores.put(giverForReceiver, gameScores = new ArrayList<GameScore>());
+      gameScores.add(new GameScore(score, maxPossibleScore));
+    }*/
+    Leaderboard leaderboard = userToScores.get(giverForReceiver);
+    if (leaderboard == null) userToScores.put(giverForReceiver, leaderboard = new Leaderboard());
+    leaderboard.addScore(new ScoreInfo(giverForReceiver.id,score,maxPossibleScore-score,0l,selectionState));  // TODO fill in time taken?
+  }
+
+  public Leaderboard getLeaderboard(long userID) {
+    Leaderboard leaderboard = userToScores.get(getUser(userID));
+    //leaderboard.s
+    return leaderboard;
+  }
+
   private static class Pair {
     User first = null, second = null;
     public Pair(User first, User second) { this.first = first; this.second = second; }
@@ -499,8 +514,7 @@ public class OnlineUsers {
       this.timestamp = System.currentTimeMillis();
     }
 
-    public String toString() { return /*"stim : " + stimulus +*/ " answer '" +  answer+
-      "' is " +(correct ? "correct" : "incorrect") + " at " + new Date(timestamp);
+    public String toString() { return " answer '" +  answer+ "' is " +(correct ? "correct" : "incorrect") + " at " + new Date(timestamp);
     }
   }
 }
