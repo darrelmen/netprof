@@ -968,7 +968,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userid
    * @param exerciseID
    * @param stimulus
-   * @param answer
+   * @param answers
    * @param onLastStimulus
    * @param skippedItem
    * @param numClues
