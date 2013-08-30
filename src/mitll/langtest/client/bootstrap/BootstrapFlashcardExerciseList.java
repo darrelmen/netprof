@@ -27,6 +27,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.SelectionState;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
 import mitll.langtest.shared.flashcard.Leaderboard;
@@ -390,6 +391,12 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
   @Override
   public void showExerciseList() {}
+
+  @Override
+  public void askForRandomExercise(AsyncCallback<Exercise> callback) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
   public void rememberAndLoadFirst(List<ExerciseShell> exercises){}
 
   protected void grabFocus(final BootstrapExercisePanel panel) {
