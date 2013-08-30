@@ -6,6 +6,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.DialogHelper;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
@@ -105,14 +106,14 @@ public class TabooExerciseList extends FlexSectionExerciseList {
 
   private FluidContainer buttonRow;
   @Override
-  protected void addBottomText(FluidContainer container) {
-    super.addBottomText(container);
+  protected Widget addBottomText(FluidContainer container) {
+    Widget widget = super.addBottomText(container);
     buttonRow = container;
     if (isGiver) {
       System.out.println("----> GIVER:  addBottomText.hiding container for " + userID);
       //container.setVisible(false);
       for (int i = 0; i < container.getWidgetCount(); i++) {
-        if (container.getWidget(i) != statusHeader) container.getWidget(i).setVisible(false);
+        if (container.getWidget(i) != widget) container.getWidget(i).setVisible(false);
       }
      // showExerciseList();
     } else {
@@ -122,6 +123,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
         if (container.getWidget(i) != statusHeader) container.getWidget(i).setVisible(true);
       }
     }
+    return widget;
   }
 
   /**
@@ -131,7 +133,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
    */
   protected void rememberExercises(List<ExerciseShell> result) {
     SelectionState selectionState = getSelectionState(History.getToken());
-    System.out.println("rememberExercises : user " + userID + " " + (isGiver ? " giver " : " receiver ") +
+    System.out.println("TabooExerciseList.rememberExercises : user " + userID + " " + (isGiver ? " giver " : " receiver ") +
       " remembering " + result.size() + " exercises, " +
       "state is '" + selectionState + "'");
 
@@ -148,19 +150,13 @@ public class TabooExerciseList extends FlexSectionExerciseList {
         // addExerciseToList(es);
       }
       flush();
-      if (receiverFactory != null) {
-        System.out.println("rememberExercises : remembering " + result.size());
-        receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(currentExercises));
-      }
-      else {
-        System.err.println("no factory!!! \n\n\n ");
-      }
+
       tellPartnerMyChapterSelection(selectionState);
     }
   }
 
   private void tellPartnerMyChapterSelection(SelectionState selectionState) {
-    System.out.println("telling partner selection state for " + userID + " is " + selectionState);
+    System.out.println("telling partner selection state for " + userID + " is '" + selectionState +"'");
     service.registerSelectionState(userID, selectionState.getTypeToSection(), new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -168,7 +164,15 @@ public class TabooExerciseList extends FlexSectionExerciseList {
       }
 
       @Override
-      public void onSuccess(Void result) {}
+      public void onSuccess(Void result) {
+        if (receiverFactory != null) {
+     //     System.out.println("TabooExerciseList.rememberExercises : remembering " + result.size());
+          receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(currentExercises));
+        }
+        else {
+          System.err.println("\n\n\nTabooExerciseList.rememberExercises : no factory!!! \n\n\n ");
+        }
+      }
     });
   }
 
