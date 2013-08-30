@@ -22,7 +22,7 @@ public class Game extends GameInfo {
 
   public GameInfo getGameInfo() {
     if (getGameItems() == null) System.err.println("getGameInfo : huh? game items is null?");
-    return new GameInfo(getNumGames(), getGameItems(), getTimestamp());
+    return new GameInfo(getNumGames(), getGameItems(), getTimestamp(), getGameCount());
   }
 
   public Game(List<ExerciseShell> allSelectedExercises) {
