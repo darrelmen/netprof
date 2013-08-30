@@ -15,9 +15,9 @@ import java.util.Map;
 public class ScoreInfo implements IsSerializable {
   public long userid;
   public int correct;
-  public int incorrect;
-  public long timeTaken;
-  public long timestamp;
+  private int incorrect;
+  private long timeTaken;
+  private long timestamp;
   public Map<String, Collection<String>> selection;
 
   public ScoreInfo() {}
