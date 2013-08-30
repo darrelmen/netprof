@@ -44,7 +44,7 @@ public class Taboo {
   private static final int INACTIVE_PERIOD_MILLIS2 = 1000 * 2; // ten minutes
 
   private Timer userTimer, onlineTimer;
-  ExerciseController controller;
+  private ExerciseController controller;
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    * @param userManager
