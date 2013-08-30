@@ -70,6 +70,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
   private int score;
   private int gameCount;
   private int totalClues;
+  boolean debugKeyHandler = false;
 
   /**
    *
@@ -102,7 +103,11 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
    */
   public void setExerciseShells(List<ExerciseShell> exerciseShells) {
     gameCount = 0;
+    System.out.println("ReceiverExerciseFactory.setExerciseShells on " + exerciseShells.size());
+
     if (singlePlayerRobot != null) {
+      System.out.println("ReceiverExerciseFactory.setExerciseShells single player robot.");
+
       singlePlayerRobot.setExerciseShells(exerciseShells);
       startGame(singlePlayerRobot.startGame());
     }
@@ -112,6 +117,8 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
   }
 
   private void startGame() {
+    System.out.println("ReceiverExerciseFactory.getExercisePanel startGame");
+
     service.startGame(controller.getUser(),new AsyncCallback<GameInfo>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -313,7 +320,11 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       if (!isCorrect) {
         for (String prefix : Arrays.asList("to ", "the ")) {  // TODO : hack for ENGLISH
           if (answer.startsWith(prefix)) { // verbs
-            isCorrect = guessBox.getText().equalsIgnoreCase(answer.substring(prefix.length()));
+            String truncated = answer.substring(prefix.length());
+            isCorrect = guessBox.getText().equalsIgnoreCase(truncated);
+            System.out.println("compared '" + guessBox.getText() +
+              "' with '" +truncated+
+              "' = " + isCorrect);
             if (isCorrect) break;
           }
         }
@@ -595,7 +606,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
                                                        }
                                                      }
                                                    });
-      System.out.println(new Date() +" ReceiverExerciseFactory.addKeyHandler made click handler " + keyHandler);
+      if (debugKeyHandler) System.out.println(new Date() +" ReceiverExerciseFactory.addKeyHandler made click handler " + keyHandler);
     }
 
     private void userHitEnterKey() {
@@ -633,9 +644,9 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
     public void removeKeyHandler() {
       if (keyHandler == null) {
-        System.err.println(new Date() +" -- ReceiverExerciseFactory : removeKeyHandler : " + keyHandler);
+        if (debugKeyHandler) System.err.println(new Date() +" -- ReceiverExerciseFactory : removeKeyHandler : " + keyHandler);
       } else {
-        System.out.println(new Date() +" ReceiverExerciseFactory : removeKeyHandler : " + keyHandler);
+        if (debugKeyHandler) System.out.println(new Date() +" ReceiverExerciseFactory : removeKeyHandler : " + keyHandler);
       }
       if (keyHandler != null){
         keyHandler.removeHandler();
