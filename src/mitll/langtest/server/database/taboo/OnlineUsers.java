@@ -327,7 +327,8 @@ public class OnlineUsers {
    * @param isGameOver
    * @return
    */
-  public synchronized int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, int numClues, boolean isGameOver) {
+  public synchronized int sendStimulus(long userid, String exerciseID, String stimulus, String answer,
+                                       boolean onLastStimulus, boolean skippedItem, int numClues, boolean isGameOver) {
     User receiver = getReceiverForGiver(userid);
     if (receiver == null) {
       return 1;
