@@ -573,7 +573,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
 
       @Override
       public void onSuccess(Integer result) {
-        System.out.println("num exercises for " + typeToSection + " is " + result);
+        System.out.println("getNumExercisesForSelectionState.onSuccess: num exercises for " + typeToSection + " is " + result);
         removeComponents();
         FlowPanel p = new FlowPanel();
         p.setWidth("100%");
