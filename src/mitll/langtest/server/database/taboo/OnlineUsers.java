@@ -215,26 +215,28 @@ public class OnlineUsers {
   long lastTimestamp;
   public GameInfo getGame(long userID, boolean isGiver) {
     Game game = getGameFor(userID, isGiver);
-    // List<ExerciseShell> gameItems = game.getGameItems();
     // if (gameItems == null) logger.error("getGame : game for " + userID + " has not started?");
     GameInfo gameInfo = game.getGameInfo();
     if (gameInfo.getTimestamp() != lastTimestamp) {
       logger.info("getGame for " + userID + " game info " + gameInfo);
       lastTimestamp = gameInfo.getTimestamp();
     }
-    return gameInfo;// GameInfo(game.getNumGames(), gameItems);
+    return gameInfo;
   }
 
-  //public void startGame(long userID) {}
-
-  public GameInfo startGame(long userID/*, boolean isGiver*/) {
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#startGame(long)
+   * @param userID
+   * @return
+   */
+  public GameInfo startGame(long userID) {
     Game game = getGameFor(userID, false);
     List<ExerciseShell> itemsInGame = game.startGame();
     if (itemsInGame == null) logger.error("startGame huh? game for " + userID + " has not started???\n\n\n");
     GameInfo gameInfo = game.getGameInfo();
     logger.info("startGame for " + userID+" game info " + gameInfo);
 
-    return gameInfo;// GameInfo(game.getNumGames(), gameItems);
+    return gameInfo;
   }
 
   private Game getGameFor(long userID, boolean isGiver) {
