@@ -53,7 +53,7 @@ public class Exercise extends ExerciseShell  {
      * @param alternateAnswers
      * @see Exercise#addQuestion(String, String, String, java.util.List
      */
-    public QAPair(String q, String a, List<String> alternateAnswers) { question = q; answer = a; this.alternateAnswers = alternateAnswers;}
+    private QAPair(String q, String a, List<String> alternateAnswers) { question = q; answer = a; this.alternateAnswers = alternateAnswers;}
 
     /**
      * @see mitll.langtest.client.exercise.ExercisePanel#addQuestions
@@ -73,6 +73,12 @@ public class Exercise extends ExerciseShell  {
 
     public List<String> getAlternateAnswers() {
       return alternateAnswers;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      QAPair otherpair = (QAPair) obj;
+      return question.equals(otherpair.question) && answer.equals(otherpair.answer);
     }
 
     public String toString() {
