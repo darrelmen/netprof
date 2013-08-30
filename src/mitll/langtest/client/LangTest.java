@@ -1073,6 +1073,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void startOver() {
     exerciseList.startOver();
   }
+  public void askForRandomExercise(AsyncCallback<Exercise> callback) { exerciseList.askForRandomExercise(callback); }
 
   public void setGame(GameInfo gameInfo) {
     ((TabooExerciseList)exerciseList).setGame(gameInfo);
