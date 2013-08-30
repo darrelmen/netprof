@@ -23,17 +23,15 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
 import mitll.langtest.client.exercise.BusyPanel;
-import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.exercise.NavigationHelper;
+import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.taboo.Game;
 import mitll.langtest.shared.taboo.GameInfo;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -60,7 +58,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
   private int stimulusCount;
   //private int numExercisesInGame = 0;
   //private int numGames = 0;
-  private int gameCount;
+ // private int gameCount;
  // private GameInfo game;
  private GameInfo gameInfo;
 
@@ -79,7 +77,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
   /**
    * @see TabooExerciseList#rememberExercises(java.util.List)
    */
-  public void startOver() { gameCount = 0; }
+  public void startOver() { /*gameCount = 0; */}
 
   /**
    * @see mitll.langtest.client.exercise.ExerciseList#makeExercisePanel
@@ -225,11 +223,11 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     private void startGame() {
       exerciseCount = 1;
       stimulusCount = 1;
-      gameCount++;
+    //  gameCount++;
     }
 
     private void showGame(GameInfo gameInfo) {
-      String gameInfoString = "Game " + (gameCount) + " of " + gameInfo.getNumGames();
+      String gameInfoString = "Game " + (gameInfo.getGameCount()) + " of " + gameInfo.getNumGames();
       int numExercises = gameInfo.getNumExercises();
       exerciseDisplay.setText(gameInfoString + ", item " + (exerciseCount) + " of " + numExercises);
       stimulus.setText("Clue " + (stimulusCount) + " of " + clueAnswerPairs.size());
