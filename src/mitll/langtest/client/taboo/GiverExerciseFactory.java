@@ -33,6 +33,7 @@ import mitll.langtest.shared.taboo.Game;
 import mitll.langtest.shared.taboo.GameInfo;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,8 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
   //private int numGames = 0;
   private int gameCount;
  // private GameInfo game;
+ private GameInfo gameInfo;
+
   GiverPanel giverPanel ;
   /**
    * @param service
@@ -80,7 +83,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
    * @return
    */
   public Panel getExercisePanel(final Exercise e) {
-    System.out.println("\nGiverExerciseFactory.getExercisePanel getting panel ...");
+    System.out.println("GiverExerciseFactory.getExercisePanel getting panel ...");
     controller.pingAliveUser();
 
     giverPanel = new GiverPanel(e);
@@ -88,12 +91,18 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
   }
   private long lastTimestamp;
 
+  /**
+   * @see TabooExerciseList#setGame(mitll.langtest.shared.taboo.GameInfo)
+   * @param game
+   */
   public void setGame(GameInfo game) {
   //  this.game = game;
     if (giverPanel != null) {
       int numExercises = game.getNumExercises();
-      if (numExercises > -1 || game.getTimestamp() != lastTimestamp) {
+      if (numExercises > -1 && game.getTimestamp() != lastTimestamp) {
+        System.out.println("setGame : last timestamp " +lastTimestamp + " <> new timestamp " + game.getTimestamp() + " num exercises " + numExercises);
         giverPanel.startGame(game);
+        this.gameInfo = game;
         lastTimestamp = game.getTimestamp();
       }
     }
@@ -105,10 +114,10 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     private Controls choice = new Controls();
     private final Button send = new Button("Send");
     private Heading pleaseWait = new Heading(4, "Please wait for receiver to answer...");
-       List<String> synonymSentences;
-    Heading exerciseDisplay = new Heading(3);
-    Heading stimulus = new Heading(3);
-    GameInfo gameInfo;
+    private List<String> synonymSentences;
+    private Heading exerciseDisplay = new Heading(3);
+    private Heading stimulus = new Heading(3);
+   // private GameInfo gameInfo;
 
     public GiverPanel(final Exercise exercise) {
       if (exercise == null) {
@@ -116,6 +125,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
         return;
       }
 
+      System.out.println("GiverPanel ------------->");
       Row w5 = new Row();
       w5.add(exerciseDisplay);
       add(w5);
@@ -124,7 +134,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
    //   exerciseDisplay.setText(gameInfoString +", item " + (++exerciseCount) + " of " +  gameInfo.getNumExercises());
 
       synonymSentences = Game.randomSample2(exercise.getSynonymSentences(), ReceiverExerciseFactory.MAX_CLUES_TO_GIVE, rnd);
-
+      if (gameInfo != null) startGame(gameInfo);
   //    stimulus.setText("Clue " + (++stimulusCount) + " of " + synonymSentences.size());
       Row w33 = new Row();
       w33.add(stimulus);
@@ -174,36 +184,10 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       add(send);
       add(pleaseWait);
       pleaseWait.setVisible(false);
-
-/*      NavigationHelper w1 = new NavigationHelper(exercise, controller,
-        false // means next button is always enabled
-      );
-      w1.addStyleName("topMargin");
-      add(w1);*/
-
-//      startGame();
     }
-
-/*
-    public void startGame() {
-      service.getGame(controller.getUser(),true,new AsyncCallback<GameInfo>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        @Override
-        public void onSuccess(GameInfo result) {
-          if (result == null) System.err.println("huh? startGame no result???");
-          startGame(result);
-        }
-      });
-    }
-*/
-
 
     private void startGame(GameInfo gameInfo) {
-      this.gameInfo = gameInfo;
+   //   this.gameInfo = gameInfo;
       //  numExercisesInGame = gameInfo.getNumExercises();
       //   numGames = gameInfo.getNumGames();
 
@@ -330,6 +314,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       return exampleToSend.replaceAll(refSentence, builder.toString());
     }
 
+    int lastCorrectResponse = -2;
     /**
      * Keep asking server if the receiver has made a correct answer or not.
      *
@@ -349,7 +334,10 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
 
         @Override
         public void onSuccess(Integer result) {
-          System.out.println("checkForCorrect got " + result);
+          if (lastCorrectResponse != result) {
+            System.out.println("GiverExerciseFactory : checkForCorrect got " + result);
+            lastCorrectResponse = result;
+          }
           if (result == 0) { // incorrect
             feedback.playIncorrect();
             sentItems.add(stimulus);
