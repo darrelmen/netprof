@@ -155,7 +155,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
     }
   }
 
-  private void tellPartnerMyChapterSelection(SelectionState selectionState) {
+  private void tellPartnerMyChapterSelection(final SelectionState selectionState) {
     System.out.println("telling partner selection state for " + userID + " is '" + selectionState +"'");
     service.registerSelectionState(userID, selectionState.getTypeToSection(), new AsyncCallback<Void>() {
       @Override
@@ -167,7 +167,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
       public void onSuccess(Void result) {
         if (receiverFactory != null) {
      //     System.out.println("TabooExerciseList.rememberExercises : remembering " + result.size());
-          receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(currentExercises));
+          receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(currentExercises),selectionState.getTypeToSection());
         }
         else {
           System.err.println("\n\n\nTabooExerciseList.rememberExercises : no factory!!! \n\n\n ");
@@ -206,7 +206,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
   }
 
   public void startOver() {
-    receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(currentExercises));
+    receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(currentExercises), null); // TODO : ARG how can I get the selection state????
     askServerForExercise(currentExercises.get(0));
   }
 }
