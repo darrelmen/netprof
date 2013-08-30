@@ -1045,6 +1045,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getOnlineUsers().startGame(userID);
   }
 
+  @Override
+  public void postGameScore(long userID, int score, int maxPossibleScore) {
+    db.getOnlineUsers().postGameScore(userID, score, maxPossibleScore);
+  }
+
+  public Leaderboard getLeaderboard(long userID) {
+    return db.getOnlineUsers().getLeaderboard(userID);
+  }
+
   /**
    *
    * @param userID
