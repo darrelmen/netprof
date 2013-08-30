@@ -27,7 +27,7 @@ public class SinglePlayerRobot {
   private final LangTestDatabaseAsync service;
   private List<ExerciseShell> exercisesRemaining = null;
   private Exercise currentExercise = null;
-  private List<String> synonymSentences = Collections.emptyList();
+  private List<Exercise.QAPair> clueAnswerPairs = Collections.emptyList();
   private int numClues = 0;
   private PropertyHandler propertyHandler;
 
@@ -52,27 +52,21 @@ public class SinglePlayerRobot {
       stimulusAnswerPair.setNoStimYet(true);
       async.onSuccess(stimulusAnswerPair); // async query not complete yet
     } else {
-     /* if (exercisesRemaining.isEmpty() && synonymSentences.isEmpty()) {
+     /* if (exercisesRemaining.isEmpty() && clueAnswerPairs.isEmpty()) {
         async.onSuccess(new StimulusAnswerPair(true,!anyGamesRemaining())); // no more chapters, no more exercises, we're done -- TODO : start over?
       } else {*/
-        if (synonymSentences.isEmpty()) {
+        if (clueAnswerPairs.isEmpty()) {
        //   System.out.println("checkForStimulus " + exercisesRemaining.size());
           getNextExercise(async);
         } else {
-          String rawStim = synonymSentences.remove(0);
-          final String refSentence = getRefSentence();
-          boolean empty = synonymSentences.isEmpty();
-          // System.out.println("stim left " + synonymSentences.size() + " empty " + empty);
-
-          String obfuscated = getObfuscated(rawStim, refSentence);
-          async.onSuccess(new StimulusAnswerPair(currentExercise.getID(), obfuscated, refSentence, empty, false, numClues, isGameOver()));
+          replyWithNextClue(currentExercise.getID(),async);
         }
       //}
     }
   }
 
   private boolean isGameOver() {
-    return exercisesRemaining.isEmpty() && synonymSentences.isEmpty();
+    return exercisesRemaining.isEmpty() && clueAnswerPairs.isEmpty();
   }
 
   /**
@@ -98,43 +92,61 @@ public class SinglePlayerRobot {
         currentExercise = result;
         exercisesRemaining.remove(0);
 
-        synonymSentences = Game.randomSample2(currentExercise.getSynonymSentences(), ReceiverExerciseFactory.MAX_CLUES_TO_GIVE, rnd);
-        numClues = synonymSentences.size();
-        final String refSentence = getRefSentence();
+        clueAnswerPairs = Game.randomSample2(currentExercise.getQuestions(), ReceiverExerciseFactory.MAX_CLUES_TO_GIVE, rnd);
+        numClues = clueAnswerPairs.size();
+        // final String refSentence = getRefSentence();
 
-        if (synonymSentences.isEmpty()) {
+        if (clueAnswerPairs.isEmpty()) {
           System.err.println("huh? no stim sentences for " + currentExercise);
-          async.onSuccess(new StimulusAnswerPair(result.getID(), "Data error on server, please report.", refSentence, false, false, numClues, true));
+          async.onSuccess(new StimulusAnswerPair(result.getID(), "Data error on server, please report.", "", false, false, numClues, true));
         } else {
-          String rawStim = synonymSentences.remove(0);
-          boolean empty = synonymSentences.isEmpty();
-          // System.out.println("getNextExercise stim left " + synonymSentences.size() + " empty " + empty);
-          async.onSuccess(new StimulusAnswerPair(result.getID(), getObfuscated(rawStim, refSentence), refSentence,
-            empty, false, numClues, isGameOver()));
+/*          String rawStim = clueAnswerPairs.remove(0).getQuestion();
+          boolean empty = clueAnswerPairs.isEmpty();
+          // System.out.println("getNextExercise stim left " + clueAnswerPairs.size() + " empty " + empty);
+          async.onSuccess(new StimulusAnswerPair(result.getID(), rawStim, refSentence, empty, false, numClues, isGameOver()));*/
+
+          replyWithNextClue(currentExercise.getID(),async);
         }
       }
     });
   }
 
-  private String getRefSentence() {
-    return propertyHandler.doTabooEnglish() ? currentExercise.getEnglishSentence().trim() : currentExercise.getRefSentence().trim();
+  private void replyWithNextClue(String exerciseID, AsyncCallback<StimulusAnswerPair> async) {
+    Exercise.QAPair clueAnswerPair = clueAnswerPairs.remove(0);
+    String rawStim = clueAnswerPair.getQuestion();
+    // final String refSentence = getRefSentence();
+    boolean empty = clueAnswerPairs.isEmpty();
+    // System.out.println("stim left " + clueAnswerPairs.size() + " empty " + empty);
+
+    String answer = clueAnswerPair.getAnswer();
+    //   String obfuscated = getObfuscated(rawStim, answer);
+//    String exerciseID = currentExercise.getID();
+    async.onSuccess(new StimulusAnswerPair(exerciseID, rawStim, answer, empty, false, numClues, isGameOver()));
   }
 
+/*  private String getRefSentence() {
+    return propertyHandler.doTabooEnglish() ? currentExercise.getEnglishSentence().trim() : currentExercise.getRefSentence().trim();
+  }*/
+
+/*
   private String getObfuscated(String exampleToSend, String refSentence) {
     StringBuilder builder = new StringBuilder();
     for (int i = 0; i < refSentence.length(); i++) builder.append('_');
+*/
 /*    if (!exampleToSend.contains(refSentence)) {
       System.err.println("huh? '" + exampleToSend + "' doesn't contain '" + refSentence + "'");
-    }*/
+    }*//*
+
     return exampleToSend.replaceAll(refSentence, builder.toString());
   }
+*/
 
   /**
    * @see ReceiverExerciseFactory.ReceiverPanel#registerAnswer(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
    * @param correct
    */
   public void registerAnswer(boolean correct) {
-    if (correct) synonymSentences = Collections.emptyList();
+    if (correct) clueAnswerPairs = Collections.emptyList();
   }
 
   public GameInfo getGame() { return game; }
@@ -159,7 +171,7 @@ public class SinglePlayerRobot {
   public Game startGame() {
     exercisesRemaining = game.startGame();
 
-    synonymSentences = Collections.emptyList();
+    clueAnswerPairs = Collections.emptyList();
     return game;
   }
 
