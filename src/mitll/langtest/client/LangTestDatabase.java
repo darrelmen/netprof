@@ -233,6 +233,6 @@ public interface LangTestDatabase extends RemoteService {
    */
   int checkCorrect(long giverUserID, String stimulus);
 
-  GameInfo startGame(long userID/*, boolean isGiver*/);
-  GameInfo getGame(long userID, boolean isGiver);
+  GameInfo startGame(long userID);
+//  GameInfo getGame(long userID, boolean isGiver);
 }
