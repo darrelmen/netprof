@@ -22,12 +22,13 @@ public class GameInfo implements IsSerializable {
 
   public GameInfo() {}
 
-  public GameInfo(int numGames, List<ExerciseShell> itemsInGame, long timestamp) {
+  public GameInfo(int numGames, List<ExerciseShell> itemsInGame, long timestamp, int gameCount) {
     this.numGames = numGames;
     this.itemsInGame = itemsInGame;
     this.timestamp = timestamp;
     this.initNumExercises = itemsInGame == null ? -1 : itemsInGame.size();
-    System.out.println("num exercises : " + initNumExercises);
+    this.gameCount = gameCount;
+   // System.out.println("GameInfo : num exercises : " + initNumExercises);
   }
 
   public int getNumGames() {
