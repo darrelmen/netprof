@@ -38,7 +38,8 @@ public class OnlineUsers {
   // TODO : write to database
   private Map<User,StimulusAnswerPair> receiverToStimulus = new HashMap<User,StimulusAnswerPair>();
   // TODO : write to database
-  private Map<User,Map<String,List<AnswerBundle>>> receiverToAnswer = new HashMap<User, Map<String, List<AnswerBundle>>>();
+ // private Map<User,Map<String,List<AnswerBundle>>> receiverToAnswer = new HashMap<User, Map<String, List<AnswerBundle>>>();
+  private Map<User,AnswerBundle> receiverToAnswer = new HashMap<User, AnswerBundle>();
   private Map<User,Map<String, Collection<String>>> receiverToState = new HashMap<User, Map<String, Collection<String>>>();
   private Map<User,Game> receiverToGame = new HashMap<User, Game>();
 
@@ -211,12 +212,16 @@ public class OnlineUsers {
     return tabooState;
   }
 
+  long lastTimestamp;
   public GameInfo getGame(long userID, boolean isGiver) {
     Game game = getGameFor(userID, isGiver);
-   // List<ExerciseShell> gameItems = game.getGameItems();
-   // if (gameItems == null) logger.error("getGame : game for " + userID + " has not started?");
+    // List<ExerciseShell> gameItems = game.getGameItems();
+    // if (gameItems == null) logger.error("getGame : game for " + userID + " has not started?");
     GameInfo gameInfo = game.getGameInfo();
-    logger.info("getGame for " + userID+" game info " + gameInfo);
+    if (gameInfo.getTimestamp() != lastTimestamp) {
+      logger.info("getGame for " + userID + " game info " + gameInfo);
+      lastTimestamp = gameInfo.getTimestamp();
+    }
     return gameInfo;// GameInfo(game.getNumGames(), gameItems);
   }
 
@@ -353,7 +358,7 @@ public class OnlineUsers {
     } else {
       receiverToStimulus.remove(receiver);
 
-      Map<String, List<AnswerBundle>> stimToAnswer = receiverToAnswer.get(receiver);
+/*      Map<String, List<AnswerBundle>> stimToAnswer = receiverToAnswer.get(receiver);
       if (stimToAnswer == null) {
         receiverToAnswer.put(receiver, stimToAnswer = new HashMap<String, List<AnswerBundle>>());
       }
@@ -361,9 +366,10 @@ public class OnlineUsers {
       if (answerBundles == null) {
         stimToAnswer.put(stimulus, answerBundles = new ArrayList<AnswerBundle>());
       }
-      answerBundles.add(new AnswerBundle(stimulus, answer, correct));
+      answerBundles.add(new AnswerBundle(stimulus, answer, correct));*/
+      receiverToAnswer.put(receiver,new AnswerBundle(stimulus, answer, correct));
 
-      logger.debug("registerAnswer : user->answer now " + receiverToAnswer);
+      logger.debug("OnlineUsers.registerAnswer : user->answer now " + receiverToAnswer);
     }
   }
 
@@ -376,27 +382,30 @@ public class OnlineUsers {
    */
   public synchronized int checkCorrect(long giverUserID, String exerciseID, String stimulus) {
     User receiver = getReceiverForGiver(giverUserID);
-   // logger.debug("Giver " + giverUserID + " checking for answer from " + receiver);
+    //logger.debug("OnlineUsers.checkCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id);
 
-    Map<String, List<AnswerBundle>> stimToAnswer = receiverToAnswer.get(receiver);
-    if (stimToAnswer == null) {
-    //  logger.debug("no answer yet...");
+    //Map<String, List<AnswerBundle>> stimToAnswer = receiverToAnswer.get(receiver);
+    AnswerBundle answerBundle = receiverToAnswer.get(receiver);
+    if (answerBundle == null) {
+  //    logger.debug("\tno answer yet...");
       return -1;
     }
     else {
-      List<AnswerBundle> answerBundles = stimToAnswer.get(stimulus);
-   //   logger.debug("Giver " + giverUserID + " checking for answer from " + receiver + " got " + answerBundles);
+      logger.debug("\tcheckCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id + " got " + answerBundle);
+
+ /*     List<AnswerBundle> answerBundles = stimToAnswer.get(stimulus);
+      logger.debug("\tGiver " + giverUserID + " checking for answer from " + receiver.id + " got " + answerBundles);
 
       if (answerBundles == null) {
         //if (count++ < 4) logger.error("huh? '" +stimulus + "' is not recorded in " + stimToAnswer.keySet() + " for " + receiver);
         return -1;
       }
-      else {
-        AnswerBundle answerBundle = answerBundles.get(answerBundles.size() - 1);
-        int isCorrectResponse = answerBundle.correct ? 1 : 0;
-        stimToAnswer.remove(stimulus); // sent response to giver -- no need to remember them anymore
-        return isCorrectResponse;
-      }
+      else {*/
+     //   AnswerBundle answerBundle = answerBundles.get(answerBundles.size() - 1);
+ //       int isCorrectResponse = answerBundle.correct ? 1 : 0;
+      receiverToAnswer.remove(receiver); // sent response to giver -- no need to remember them anymore
+        return answerBundle.correct ? 1 : 0;
+   //   }
     }
   }
 
