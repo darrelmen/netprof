@@ -316,16 +316,28 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     }
 
     private boolean checkCorrect() {
-      boolean isCorrect = guessBox.getText().equalsIgnoreCase(answer);
+      String guess = guessBox.getText();
+      boolean isCorrect = guess.equalsIgnoreCase(answer);
       if (!isCorrect) {
         for (String prefix : Arrays.asList("to ", "the ")) {  // TODO : hack for ENGLISH
           if (answer.startsWith(prefix)) { // verbs
             String truncated = answer.substring(prefix.length());
-            isCorrect = guessBox.getText().equalsIgnoreCase(truncated);
-            System.out.println("compared '" + guessBox.getText() +
-              "' with '" +truncated+
+            isCorrect = guess.equalsIgnoreCase(truncated);
+            System.out.println("compared '" + guess +
+              "' with '" + truncated +
               "' = " + isCorrect);
             if (isCorrect) break;
+          } else if (guess.startsWith(prefix)) { // verbs
+            String truncated = guess.substring(prefix.length());
+            isCorrect = answer.equalsIgnoreCase(truncated);
+            System.out.println("compared '" + truncated +
+              "' with '" + answer +
+              "' = " + isCorrect);
+            if (isCorrect) break;
+          } else {
+            System.out.println("answer '" + answer +
+              "' doesn't start with '" + prefix +
+              "'");
           }
         }
       }
@@ -396,12 +408,10 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
           @Override
           public void onSuccess(StimulusAnswerPair result) {
-           // if (result.isGameOver()) {     // game over... dude...
-        //      dealWithGameOver(result, service, controller, outer);
-        //    } else {
-              System.out.println(new Date() + " gotStimulusResponse : showStimulus  " + result);
+            System.out.println(new Date() + " gotStimulusResponse : showStimulus  " + result);
+         //   if (result.getExerciseID() != null) {
               showStimulus(result, outer);
-          //  }
+         //   }
           }
         });
       } else {
@@ -575,7 +585,9 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       send.setVisible(true);
       stimulus.setVisible(true);
     // numClues = result.getNumClues();
-      stimulus.setText("Clue " + (++stimulusCount) + " of " + displayedStimulus.getNumClues() + "<br/><font color=#0036a2>" + result.getStimulus() +"</font>");
+      if (result.getStimulus() != null) {
+        stimulus.setText("Clue " + (++stimulusCount) + " of " + displayedStimulus.getNumClues() + "<br/><font color=#0036a2>" + result.getStimulus() +"</font>");
+      }
       outer.answer = result.getAnswer();
       exerciseID = result.getExerciseID();
       guessBox.setFocus(true);
