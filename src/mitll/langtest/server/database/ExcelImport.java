@@ -57,7 +57,7 @@ public class ExcelImport implements ExerciseDAO {
   private String mediaDir;
   private Set<String> missingSlowSet = new HashSet<String>();
   private Set<String> missingFastSet = new HashSet<String>();
-  private Map<String, List<String>> wordToSamples = Collections.emptyMap();
+  private StimulusInfo stimulusInfo = null;
   private boolean shouldHaveRefAudio = false;
   private boolean usePredefinedTypeOrder;
   private final String language;
@@ -93,7 +93,7 @@ public class ExcelImport implements ExerciseDAO {
     String exampleSentenceFile1 = serverProps.getExampleSentenceFile();
     if (exampleSentenceFile1 != null && exampleSentenceFile1.length() > 0) {
       this.exampleSentenceFile = new File(relativeConfigDir, exampleSentenceFile1);
-      wordToSamples = readSampleSentenceFile2(exampleSentenceFile);
+      stimulusInfo = readSampleSentenceFile2(exampleSentenceFile);
       logger.debug("ExcelImport : found " + exampleSentenceFile.getAbsolutePath());
     }
     else {
@@ -364,20 +364,33 @@ public class ExcelImport implements ExerciseDAO {
 
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
+              boolean promptInEnglish = stimulusInfo != null && tabooEnglish;
               Exercise imported = getExercise(idToUse, dao, weightIndex, next, english, foreignLanguagePhrase, translit,
-                meaning, context, segmentedChinese);
+                meaning, context, segmentedChinese, promptInEnglish);
               if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
                 boolean valid = true;
                 boolean enoughItems = true;
-                if (!wordToSamples.isEmpty()) {
+                if (stimulusInfo != null) {
                   String wordToGuess = tabooEnglish ? imported.getEnglishSentence().trim() : imported.getRefSentence().trim();
-                  List<String> samples = wordToSamples.get(wordToGuess);
-                  valid = (samples != null);
+                  List<String> clues = stimulusInfo.wordToClues.get(wordToGuess);
+                  valid = (clues != null);
                   if (valid) {
                     withExamples.add(wordToGuess);
-                    enoughItems = samples.size() > MIN_TABOO_ITEMS;
-                    if (enoughItems) imported.setSynonymSentences(samples);
-                    else logger.warn("not enough items for " + wordToGuess);
+                    enoughItems = clues.size() > MIN_TABOO_ITEMS;
+                    if (enoughItems) {
+                      imported.getQuestions().clear();
+                      for (int i = 0; i < clues.size(); i++) {
+                        String clue = clues.get(i);
+                        List<List<String>> answersForEachClue = stimulusInfo.wordToAnswers.get(wordToGuess);
+                        List<String> answers = answersForEachClue == null ? Collections.singletonList(wordToGuess) : answersForEachClue.get(i);
+
+                        imported.addQuestion(tabooEnglish ? Exercise.EN : Exercise.FL, clue, answers.get(0), answers);
+                        //logger.debug("exercise id " + imported.getID() + " num clues " + clues.size() + " clue " + clue + " answer " + answers.get(0) + " : " + imported.getQuestions());
+                      }
+                      //logger.debug("exercise id " + imported.getID() + " has questions " + imported.getQuestions());
+                    } else {
+                      logger.warn("not enough items for " + wordToGuess);
+                    }
                   }
                 }
                 if (valid && enoughItems) {
@@ -538,7 +551,7 @@ public class ExcelImport implements ExerciseDAO {
    */
   private Exercise getExercise(String id, FileExerciseDAO dao, int weightIndex, Row next,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
-                               String context, String segmentedChinese) {
+                               String context, String segmentedChinese, boolean promptInEnglish) {
     Exercise imported;
     List<String> translations = new ArrayList<String>();
     if (foreignLanguagePhrase.length() > 0) {
@@ -550,7 +563,7 @@ public class ExcelImport implements ExerciseDAO {
         logger.warn("both english sentence and content null for exercise " + id);
       }
     } else {
-      imported = getExercise(id, dao, english, foreignLanguagePhrase, translit, meaning, context);
+      imported = getExercise(id, dao, english, foreignLanguagePhrase, translit, meaning, context,promptInEnglish);
     }
     imported.setEnglishSentence(english);
     if (translit.length() > 0) {
@@ -634,9 +647,9 @@ public class ExcelImport implements ExerciseDAO {
    */
   private Exercise getExercise(String id, FileExerciseDAO dao,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
-                               String context) {
+                               String context, boolean promptInEnglish) {
     String content = dao.getContent(foreignLanguagePhrase, translit, english, meaning, context);
-    Exercise imported = new Exercise("import", id, content, false, true, english);
+    Exercise imported = new Exercise("import", id, content, promptInEnglish, true, english);
     imported.addQuestion();   // TODO : needed?
 
     String prefix = language.equalsIgnoreCase("msa") ? id + "_" : "";
@@ -742,11 +755,10 @@ public class ExcelImport implements ExerciseDAO {
    * @param examples
    * @return
    */
-  private Map<String, List<String>> readSampleSentenceFile2(File examples) {
+  private StimulusInfo readSampleSentenceFile2(File examples) {
     Map<String, List<String>> wordToSamples = new HashMap<String, List<String>>();
+    Map<String, List<List<String>>> wordToAnswers = new HashMap<String, List<List<String>>>();
     try {
-   /*   String name = "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\examples.txt";
-      File fname = new File(name);*/
       BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(examples), FileExerciseDAO.ENCODING));
       String line2;
       int c = 0;
@@ -754,15 +766,23 @@ public class ExcelImport implements ExerciseDAO {
         c++;
         if (line2.trim().length() > 0) {
           String[] split = line2.split("\\t");
-          if (split.length == 2) {
-            String word = split[0].trim();
+          String word = split[0].trim();
+          if (split.length == 1) {
+            logger.warn("bad line " + line2 + " len " + split.length);
+          }
+          else if (split.length == 2) {
+            String sentence = split[1];
 
             List<String> samples = wordToSamples.get(word);
             if (samples == null) wordToSamples.put(word, samples = new ArrayList<String>());
-            String sentence = split[1];
             samples.add(sentence);
+          }  else if (split.length == 3) {
+            String answers = split[2];
+
+            List<List<String>> samples = wordToAnswers.get(word);
+            if (samples == null) wordToAnswers.put(word, samples = new ArrayList<List<String>>());
+            samples.add(Arrays.asList(answers.split(",")));
           }
-          else logger.warn("bad line " + line2 + " len " + split.length);
         }
       }
       logger.debug("populateExampleSentences : read " + c + " examples");
@@ -771,7 +791,17 @@ public class ExcelImport implements ExerciseDAO {
     } catch (IOException e) {
       logger.error("Got " + e, e);
     }
-    return wordToSamples;
+    return new StimulusInfo(wordToSamples, wordToAnswers);
+  }
+
+  private static class StimulusInfo {
+    Map<String, List<String>> wordToClues;
+    Map<String, List<List<String>>> wordToAnswers;
+
+    public StimulusInfo(Map<String, List<String>> wordToClues, Map<String, List<List<String>>> wordToAnswers) {
+      this.wordToClues = wordToClues;
+      this.wordToAnswers = wordToAnswers;
+    }
   }
 
   public static void main(String [] arg) {
