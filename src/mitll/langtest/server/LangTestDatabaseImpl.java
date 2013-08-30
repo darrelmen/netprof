@@ -414,7 +414,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (serverProps.dataCollectMode) {
        //logger.debug("in data collect mode");
       if (serverProps.biasTowardsUnanswered) {
-        logger.debug("in biasTowardsUnanswered mode : user " +userID);
+        //logger.debug("in biasTowardsUnanswered mode : user " +userID);
 
         if (serverProps.useOutsideResultCounts) {
           String outsideFileOverride = serverProps.outsideFile;
