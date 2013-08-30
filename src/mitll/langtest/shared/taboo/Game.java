@@ -21,6 +21,7 @@ public class Game extends GameInfo {
   public Game(){}
 
   public GameInfo getGameInfo() {
+    if (getGameItems() == null) System.err.println("getGameInfo : huh? game items is null?");
     return new GameInfo(getNumGames(), getGameItems(), getTimestamp());
   }
 
@@ -40,7 +41,7 @@ public class Game extends GameInfo {
     int endIndex = Math.min(allSelectedExercises.size(), (gameCount + 1) * OnlineUsers.GAME_SIZE);
     incrementGames();
     exercisesToDo.addAll(allSelectedExercises.subList(fromIndex, endIndex));
-    System.out.println("startGame... from " + allSelectedExercises.size() + " (" +fromIndex+
+    System.out.println("Game.startGame... from " + allSelectedExercises.size() + " (" +fromIndex+
       "-" +endIndex+
       ") items, " + "startGame... returning " + exercisesToDo.size() + " : " + exercisesToDo);
 
@@ -48,9 +49,7 @@ public class Game extends GameInfo {
     return exercisesToDo;
   }
 
-  public boolean hasStarted() { return itemsInGame != null; }
-
-  public List<ExerciseShell> getGameItems() { return itemsInGame; }
+  public String toString() { return "Game : " + super.toString(); }
 
   public static <T> List<T> randomSample2(List<T> items, int m, Random rnd){
     if (m > items.size()) m = items.size();
