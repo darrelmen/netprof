@@ -59,6 +59,11 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private Timer timer;
 
   @Override
+  public void loadExercise(ExerciseShell exerciseShell) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  @Override
   public boolean isLastExercise(String id) {
     return false;  //To change body of implemented methods use File | Settings | File Templates.
   }
@@ -388,9 +393,6 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   @Override
   public void hideExerciseList() {
   }
-
-  @Override
-  public void showExerciseList() {}
 
   @Override
   public void askForRandomExercise(AsyncCallback<Exercise> callback) {
