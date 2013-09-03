@@ -1,6 +1,7 @@
 package mitll.langtest.shared.taboo;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 
 import java.util.Date;
@@ -31,6 +32,32 @@ public class GameInfo implements IsSerializable {
    // System.out.println("GameInfo : num exercises : " + initNumExercises);
   }
 
+  public ExerciseShell getNext(Exercise current) {
+    int indexOfItem = getIndexOfItem(current);
+    if (indexOfItem == -1) {
+      System.err.println("GameInfo : getNextID can't find  : " + current.getID());
+      return null;
+    }
+    else {
+      return itemsInGame.get(indexOfItem + 1);
+    //  return shell.getID();
+    }
+  }
+  public int getIndexOfItem(Exercise e) {
+    return getIndexOfItem(e.getID());
+  }
+
+  public int getIndexOfItem(String id) {
+    if (itemsInGame == null) return -1;
+    for (int i = 0; i < itemsInGame.size(); i++) {
+      if (itemsInGame.get(i).getID().equals(id)) return i;
+    }
+    System.out.println("couldn't find " + id + " in " + itemsInGame);
+    return -1;
+  }
+
+  public ExerciseShell getFirst() { return itemsInGame.iterator().next(); }
+
   public int getNumGames() {
     return numGames;
   }
@@ -43,6 +70,10 @@ public class GameInfo implements IsSerializable {
 
   public int getNumExercises() {
     return itemsInGame == null ? -1 : itemsInGame.size();
+  }
+
+  public boolean onLast(Exercise e) {
+    return (getNumExercises()-1) == getIndexOfItem(e);
   }
 
   public int getInitialNumExercises() {
@@ -69,5 +100,6 @@ public class GameInfo implements IsSerializable {
   public List<ExerciseShell> getGameItems() { return itemsInGame; }
 
   public String toString() { return "GameInfo : " + (hasStarted() ? " started " : " not started ") +
+    "Count " + gameCount + " total num games " +
     numGames + " num exercises " + getNumExercises() + " timestamp " + new Date(timestamp); }
 }
