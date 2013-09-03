@@ -41,7 +41,10 @@ public class PartnerState implements IsSerializable {
     return typeToSelection;
   }
 
-
+  /**
+   * @see mitll.langtest.client.taboo.Taboo#pollForPartnerOnline(long, boolean)
+   * @return
+   */
   public GameInfo getGameInfo() {
     return gameInfo;
   }
