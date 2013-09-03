@@ -169,7 +169,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    */
   private void addButtonRow(List<SectionNode> rootNodes, long userID, FluidContainer container, Collection<String> types,
                             boolean addInstructions) {
-    System.out.println("addButtonRow (success) for user = " + userID + " got types " + types + " num root nodes " + rootNodes.size());
+    //System.out.println("addButtonRow (success) for user = " + userID + " got types " + types + " num root nodes " + rootNodes.size());
     if (types.isEmpty()) {
       System.err.println("huh? types is empty?");
       return;
@@ -354,7 +354,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    */
   private void showSelectionState(ValueChangeEvent<String> event) {
     SelectionState selectionState = new SelectionState(event);
-    System.out.println("FlexSectionExerciseList.showSelectionState : got " + event + " and state '" + selectionState +"'");
+    //System.out.println("FlexSectionExerciseList.showSelectionState : got " + event + " and state '" + selectionState +"'");
     StringBuilder status = new StringBuilder();
     Set<Map.Entry<String, Collection<String>>> entries = selectionState.getTypeToSection().entrySet();
     for (Map.Entry<String, Collection<String>> part : entries) {
@@ -368,7 +368,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       showDefaultStatus();
     }
     else {
-      System.out.println("FlexSectionExerciseList.showSelectionState : status now " + status);
+      //System.out.println("FlexSectionExerciseList.showSelectionState : status now " + status);
     }
   }
 
