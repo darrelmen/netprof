@@ -62,7 +62,7 @@ public class SinglePlayerRobot {
   }
 
   private boolean isGameOver() {
-    return exercisesRemaining.isEmpty() && clueAnswerPairs.isEmpty();
+    return exercisesRemaining.isEmpty();// && clueAnswerPairs.isEmpty();
   }
 
   /**
@@ -78,7 +78,7 @@ public class SinglePlayerRobot {
     service.getExercise(nextExerciseShell.getID(), new AsyncCallback<Exercise>() {
       @Override
       public void onFailure(Throwable caught) {
-        Window.alert("Couldn't contact server.");
+        Window.alert("getExercise : Couldn't contact server.");
       }
 
       @Override
