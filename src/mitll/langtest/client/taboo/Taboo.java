@@ -77,7 +77,7 @@ public class Taboo {
     service.anyUsersAvailable(fuserid, new AsyncCallback<TabooState>() {
       @Override
       public void onFailure(Throwable caught) {
-        Window.alert("Couldn't contact server.");
+        Window.alert("anyUsersAvailable Couldn't contact server.");
       }
 
       @Override
@@ -118,7 +118,7 @@ public class Taboo {
     });
   }
 
-  private String lastSelection = "";
+  //private String lastSelection = "NOT_SET_BEFORE";
   /**
    * Keep checking that the partner is still active, and if the giver, check if selection state has changed.
    * @param fuserid
@@ -134,7 +134,7 @@ public class Taboo {
         service.isPartnerOnline(fuserid, isGiver, new AsyncCallback<PartnerState>() {
           @Override
           public void onFailure(Throwable caught) {
-            Window.alert("Couldn't contact server.");
+            Window.alert("isPartnerOnline Couldn't contact server.");
           }
 
           @Override
@@ -144,12 +144,15 @@ public class Taboo {
               if (isGiver) {
                 Map<String,Collection<String>> typeToSelection = partnerState.getTypeToSelection();
 
-                if (!lastSelection.equals(typeToSelection.toString())) {
+            /*    if (!lastSelection.equals(typeToSelection.toString())) {
                   lastSelection = typeToSelection.toString();
-                  System.out.println("pollForPartnerOnline : checked if" +
-                    (isGiver ? " receiver partner " : " giver partner ") +
-                    " of me, " + fuserid + ", is online and got state " + typeToSelection);
+                  System.out.println("pollForPartnerOnline : CHANGE    checked if receiver partner of me, " + fuserid + ", is online and got state " + typeToSelection);
                 }
+                else {
+                  System.out.println("pollForPartnerOnline : NO CHANGE checked if receiver partner of me, " + fuserid + ", is online and got state " + typeToSelection);
+                }*/
+                //System.out.println("pollForPartnerOnline : checked if receiver partner of me, " + fuserid + ", is online and got state " + typeToSelection);
+
                 langTest.setSelectionState(typeToSelection);  // TODO user controller...
               }
               else {
@@ -266,7 +269,7 @@ public class Taboo {
 
           service.registerPair(userID, isGiver, new AsyncCallback<Void>() {
             @Override
-            public void onFailure(Throwable caught) { Window.alert("Couldn't contact server."); }
+            public void onFailure(Throwable caught) { Window.alert("registerPair : Couldn't contact server."); }
 
             @Override
             public void onSuccess(Void result) {
