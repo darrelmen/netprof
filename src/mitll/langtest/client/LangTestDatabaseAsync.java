@@ -154,7 +154,7 @@ public interface LangTestDatabaseAsync {
 
   void registerSelectionState(long giver, Map<String, Collection<String>> selectionState, AsyncCallback<Void> async);
 
-  void startGame(long userID, AsyncCallback<GameInfo> async);
+  void startGame(long userID, boolean startOver, AsyncCallback<GameInfo> async);
 
   void postGameScore(long userID, int score, int maxPossibleScore, AsyncCallback<Void> async);
 
