@@ -189,7 +189,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.debug("getExercisesForSelectionState req " + reqID+ " for " + typeToSection + " and " +userID);
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     if (serverProps.sortExercises() || serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
-      logger.debug("\tsorting");
+     // logger.debug("\tsorting");
 
       List<Exercise> copy = getSortedExercises(exercisesForSection);
       return new ExerciseListWrapper(reqID, getExerciseShells(copy));
@@ -1038,11 +1038,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @see mitll.langtest.client.taboo.ReceiverExerciseFactory#startGame()
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
    * @param userID
+   * @param startOver
    * @return
    */
-  public GameInfo startGame(long userID) {
-    return db.getOnlineUsers().startGame(userID);
+  public GameInfo startGame(long userID, boolean startOver) {
+    return db.getOnlineUsers().startGame(userID, startOver);
   }
 
   @Override
@@ -1050,6 +1052,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.getOnlineUsers().postGameScore(userID, score, maxPossibleScore);
   }
 
+  /**
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
+   * @param userID
+   * @return
+   */
   public Leaderboard getLeaderboard(long userID) {
     return db.getOnlineUsers().getLeaderboard(userID);
   }
