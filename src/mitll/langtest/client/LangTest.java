@@ -868,38 +868,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see #checkLogin()
-   * @see ExerciseList#checkBeforeLoad(mitll.langtest.shared.ExerciseShell)
-   */
-  public void login() {
-    PropertyHandler.LOGIN_TYPE loginType = getLoginType();
-
-    System.out.println("loginType " + loginType +
-      " data collect mode " + props.isDataCollectMode() +
-      " crt data collect " + props.isCRTDataCollectMode() +
-      " teacher " + props.isTeacherView() + " grading " + props.isGrading());
-
-    if (loginType.equals(PropertyHandler.LOGIN_TYPE.STUDENT)) {
-      userManager.login();
-    }
-    else if (loginType.equals(PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR)) {
-      userManager.teacherLogin();
-    } // next has already been done in checkLogin
-  /*  else if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) {
-      userManager.teacherLogin();
-    }*/
-    else if (!props.isFlashCard() && ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView() || props.isGrading())) {
-      System.out.println("doing teacher login");
-      userManager.teacherLogin();
-    }
-    else {
-      System.out.println("doing student login");
-
-      userManager.login();
-    }
-  }
-
-  /**
    * Init Flash recorder once we login.
    *
    * Only get the exercises if the user has accepted mic access.
@@ -962,19 +930,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #makeFlashContainer()
    */
   private void checkLogin() {
-    PropertyHandler.LOGIN_TYPE loginType = getLoginType();
+    userManager.checkLogin();
 
-    if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
-      userManager.anonymousLogin();
-    } else if (loginType.equals(PropertyHandler.LOGIN_TYPE.UNDEFINED) && // no explicit setting, so it's dependent on the mode
-      (props.isGoodwaveMode() || isAutoCRTMode() || (props.isFlashcardTeacherView() && !props.isFlashCard()))) {   // no login for pron mode
-      userManager.anonymousLogin();
-    } else {
-      if (props.isTimedGame()) {
-        flashcard.showTimedGameHelp(this);
-      } else {
-        login();
-      }
+    if (props.isTimedGame()) {
+      flashcard.showTimedGameHelp(this);
     }
   }
 
@@ -1057,6 +1016,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     status.setText(msg);
   }
 
+
+  public void loadExercise(ExerciseShell exerciseShell) {
+    exerciseList.loadExercise(exerciseShell);
+  }
   public boolean loadNextExercise(ExerciseShell current) {
     if (progressBar != null) {
       progressBar.showAdvance(exerciseList);
