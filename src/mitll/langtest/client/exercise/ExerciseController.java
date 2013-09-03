@@ -22,6 +22,7 @@ import java.util.Map;
 public interface ExerciseController {
   LangTestDatabaseAsync getService();
   UserFeedback getFeedback();
+  void loadExercise(ExerciseShell exerciseShell);
   boolean loadNextExercise(ExerciseShell current);
   boolean loadNextExercise(String id);
   boolean isLastExercise(String exerciseID);
