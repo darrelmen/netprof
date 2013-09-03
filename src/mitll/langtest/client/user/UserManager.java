@@ -66,7 +66,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class UserManager {
-  public static final long HOUR_IN_MILLIS = 1000 * 60 * 60;
+  private static final long HOUR_IN_MILLIS = 1000 * 60 * 60;
 
   private static final int WEEK_HOURS = 24 * 7;
   private static final int DAY_HOURS = 24;
@@ -95,20 +95,21 @@ public class UserManager {
   private static final String USER_CHOSEN_ID = "userChosenID";
   private static final String AUDIO_TYPE = "audioType";
   private static final String LOGIN_TYPE = "loginType";
-  public static final int NATIVE_MONTHS = 20 * 12;
+  private static final int NATIVE_MONTHS = 20 * 12;
   private static final int INACTIVE_PERIOD_MILLIS = 1000 * 60 * 10; // ten minutes
   private final LangTestDatabaseAsync service;
   private final UserNotification langTest;
   private final boolean useCookie = false;
   private long userID = NO_USER_SET;
   private String userChosenID = "";
-  private boolean isCollectAudio;
+  private final boolean isCollectAudio;
   private final boolean isDataCollectAdmin;
-  private PropertyHandler.LOGIN_TYPE loginType;
+  private final PropertyHandler.LOGIN_TYPE loginType;
   private final boolean isFlashcard;
-  private String appTitle;
+  private final String appTitle;
   private DisclosurePanel dp;
-  private boolean trackUsers;
+  private final boolean trackUsers;
+  private final PropertyHandler props;
 
   private Timer userTimer;
   private String loginTitle = "Data Collector Login";
@@ -127,6 +128,7 @@ public class UserManager {
                      boolean isDataCollectAdmin, boolean isFlashcard, PropertyHandler props) {
     this.langTest = lt;
     this.service = service;
+    this.props = props;
     this.isCollectAudio = props.isCollectAudio();
     this.isDataCollectAdmin = isDataCollectAdmin;
     this.isFlashcard = isFlashcard;
@@ -136,50 +138,53 @@ public class UserManager {
     if (trackUsers) loginTitle = "Taboo Login";
   }
 
-  // user tracking
+  public void checkLogin() {
+    if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
+      anonymousLogin();
+    } else if (loginType.equals(PropertyHandler.LOGIN_TYPE.UNDEFINED) && // no explicit setting, so it's dependent on the mode
+      (props.isGoodwaveMode() || props.isAutocrt() || (props.isFlashcardTeacherView() && !props.isFlashCard()))) {   // no login for pron mode
+      anonymousLogin();
+    } else {
+      loginDifferentTypes();
+    }
+  }
 
   /**
-   * TODO : move cookie manipulation to separate class
-   *
-   * @param sessionID from database
-   * @param audioType
-   * @param userChosenID
-   * @see #addTeacher(int, com.github.gwtbootstrap.client.ui.ListBox, com.github.gwtbootstrap.client.ui.ListBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.Button, boolean)
-   * @see #addUser(int, String, int, String, mitll.langtest.client.PropertyHandler.LOGIN_TYPE)
-   * @see #displayTeacherLogin()
+   * @see #checkLogin()
    */
-  private void storeUser(long sessionID, String audioType, String userChosenID, PropertyHandler.LOGIN_TYPE userType) {
-    //System.out.println("storeUser : user now " + sessionID);
-    final long DURATION = getUserSessionDuration();
-    long futureMoment = getUserSessionEnd(DURATION);
-    if (useCookie) {
-      Date expires = new Date(futureMoment);
-      Cookies.setCookie("sid", "" + sessionID, expires);
-    } else if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+  private void loginDifferentTypes() {
+/*    System.out.println("loginType " + loginType +
+      " data collect mode " + props.isDataCollectMode() +
+      " crt data collect " + props.isCRTDataCollectMode() +
+      " teacher " + props.isTeacherView() + " grading " + props.isGrading());*/
 
-      localStorageIfSupported.setItem(getUserIDCookie(), "" + sessionID);
-      localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
-      rememberUserSessionEnd(localStorageIfSupported, futureMoment);
-      localStorageIfSupported.setItem(getAudioType(), "" + audioType);
-      localStorageIfSupported.setItem(getLoginType(), "" + userType);
-      System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " expires in " + (DURATION/1000) + " seconds");
-    } else {
-      userID = sessionID;
-      this.userChosenID = userChosenID;
+    if (loginType.equals(PropertyHandler.LOGIN_TYPE.STUDENT)) {
+      login();
     }
+    else if (loginType.equals(PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR)) {
+      teacherLogin();
+    } // next has already been done in checkLogin
+  /*  else if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) {
+      teacherLogin();
+    }*/
+    else if (!props.isFlashCard() && ((props.isDataCollectMode() && !props.isCRTDataCollectMode()) || props.isTeacherView() || props.isGrading())) {
+      System.out.println("doing teacher login");
+      teacherLogin();
+    }
+    else {
+      System.out.println("doing student login");
 
-    if (trackUsers) {
-      userAlive();
+      login();
     }
-    langTest.gotUser(sessionID);
   }
+  // user tracking
 
   /**
    * Somebody should call this when the user does something in taboo
    * @see mitll.langtest.client.LangTest#pingAliveUser()
    */
   public void userAlive() {
+    updateUserSessionExpires();
     int user = getUser();
     if (!isActive()) System.err.println("huh? user is not active...\n\n\n");
    // System.out.println(new Date() +" --------> userAlive : " + user);
@@ -223,6 +228,10 @@ public class UserManager {
     userTimer.schedule(INACTIVE_PERIOD_MILLIS);
   }
 
+  /**
+   * @see #userExpired(String)
+   * @param futureMoment
+   */
   private void rememberUserSessionEnd(long futureMoment) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
@@ -230,6 +239,21 @@ public class UserManager {
     }
   }
 
+  private void updateUserSessionExpires() {
+    final long DURATION = getUserSessionDuration();
+    long futureMoment = getUserSessionEnd(DURATION);
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+      rememberUserSessionEnd(localStorageIfSupported, futureMoment);
+    }
+  }
+
+  /**
+   * @see #storeUser(long, String, String, mitll.langtest.client.PropertyHandler.LOGIN_TYPE)
+   * @see #rememberUserSessionEnd(long)
+   * @param localStorageIfSupported
+   * @param futureMoment
+   */
   private void rememberUserSessionEnd(Storage localStorageIfSupported, long futureMoment) {
     localStorageIfSupported.setItem(getExpires(), "" + futureMoment);
   }
@@ -261,9 +285,9 @@ public class UserManager {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#login()
+   * @see #loginDifferentTypes()
    */
-  public void login() {
+  private void login() {
     int user = getUser();
     if (user != NO_USER_SET) {
       System.out.println("UserManager.login : user : " + user);
@@ -282,7 +306,7 @@ public class UserManager {
   /**
    * @see mitll.langtest.client.LangTest#checkLogin
    */
-  public void anonymousLogin() {
+  private void anonymousLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
       System.out.println("UserManager.anonymousLogin : user : " + user);
@@ -343,14 +367,8 @@ public class UserManager {
 
       //System.out.println("user id cookie for " +getUserIDCookie() + " is " + sid);
       if (sid != null && !sid.equals("" + NO_USER_SET)) {
-        int userID1 = Integer.parseInt(sid);
-        if (userExpired(sid)) {
-          clearUser(userID1);
-        } else if (getLoginTypeFromStorage() != loginType) {
-          System.out.println("current login type : " + getLoginTypeFromStorage() + " vs mode " + loginType);
-          clearUser(userID1);
-        }
-
+        boolean expired = checkUserExpired(sid);
+        if (expired) checkLogin();
         sid = localStorageIfSupported.getItem(getUserIDCookie());
       }
       return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
@@ -358,6 +376,20 @@ public class UserManager {
     else {
       return (int) userID;
     }
+  }
+
+  private boolean checkUserExpired(String sid) {
+    int userID1 = Integer.parseInt(sid);
+    boolean expired = false;
+    if (userExpired(sid)) {
+      clearUser(userID1);
+      expired = true;
+    } else if (getLoginTypeFromStorage() != loginType) {
+      System.out.println("current login type : " + getLoginTypeFromStorage() + " vs mode " + loginType);
+      clearUser(userID1);
+      expired = true;
+    }
+    return expired;
   }
 
   /**
@@ -443,7 +475,7 @@ public class UserManager {
     clearCookieState();
   }
 
-  public void clearUser(int userID) {
+  private void clearUser(int userID) {
     userOnline(userID, false);
     clearCookieState();
   }
@@ -465,7 +497,7 @@ public class UserManager {
 
   /**
    * @see mitll.langtest.client.LangTest#doDataCollectAdminView
-   * @see mitll.langtest.client.LangTest#login
+   * @see #loginDifferentTypes()
    */
   public void teacherLogin() {
     int user = getUser();
@@ -657,7 +689,7 @@ public class UserManager {
         /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   }
 
-  public void removeKeyHandler() {
+  private void removeKeyHandler() {
     System.out.println("removeKeyHandler : " + keyHandler);
 
     if (keyHandler != null) keyHandler.removeHandler();
@@ -722,11 +754,11 @@ public class UserManager {
 
   private static class ListBoxFormField {
     public final ListBox box;
-    public final ControlGroup group;
+    //public final ControlGroup group;
 
     public ListBoxFormField(ListBox box, ControlGroup group) {
       this.box = box;
-      this.group = group;
+      //this.group = group;
     }
   }
 
@@ -907,8 +939,7 @@ public class UserManager {
 
   private boolean checkPassword(TextBox password) {
     String trim = password.getText().trim();
-    boolean valid = trim.equalsIgnoreCase(GRADING) || trim.equalsIgnoreCase(TESTING);
-    return valid;
+    return trim.equalsIgnoreCase(GRADING) || trim.equalsIgnoreCase(TESTING);
   }
 
   /**
@@ -1004,20 +1035,6 @@ public class UserManager {
   private void markError(FormField dialectGroup, String message) {
     markError(dialectGroup.group, dialectGroup.box, "Try Again", message);
   }
-
-/*  private void markError(FormField dialectGroup, String header, String message) {
-    markError(dialectGroup.group, dialectGroup.box, header, message);
-  }*/
-
-/*  private void markError(ListBoxFormField dialectGroup, String message) {
-    markError(dialectGroup.group, dialectGroup.box, "Try Again", message);
-  }*/
-
-/*
-  private void markError(ListBoxFormField dialectGroup, String header, String message) {
-    markError(dialectGroup.group, dialectGroup.box, header, message);
-  }
-*/
 
   private void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
     dialectGroup.setType(ControlGroupType.ERROR);
@@ -1142,5 +1159,42 @@ public class UserManager {
     }
 
     return validAge;
+  }
+
+  /**
+   * TODO : move cookie manipulation to separate class
+   *
+   * @param sessionID from database
+   * @param audioType
+   * @param userChosenID
+   * @see #addTeacher(int, com.github.gwtbootstrap.client.ui.ListBox, com.github.gwtbootstrap.client.ui.ListBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.Button, boolean)
+   * @see #addUser(int, String, int, String, mitll.langtest.client.PropertyHandler.LOGIN_TYPE)
+   * @see #displayTeacherLogin()
+   */
+  private void storeUser(long sessionID, String audioType, String userChosenID, PropertyHandler.LOGIN_TYPE userType) {
+    //System.out.println("storeUser : user now " + sessionID);
+    final long DURATION = getUserSessionDuration();
+    long futureMoment = getUserSessionEnd(DURATION);
+    if (useCookie) {
+      Date expires = new Date(futureMoment);
+      Cookies.setCookie("sid", "" + sessionID, expires);
+    } else if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+
+      localStorageIfSupported.setItem(getUserIDCookie(), "" + sessionID);
+      localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
+      rememberUserSessionEnd(localStorageIfSupported, futureMoment);
+      localStorageIfSupported.setItem(getAudioType(), "" + audioType);
+      localStorageIfSupported.setItem(getLoginType(), "" + userType);
+      System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " expires in " + (DURATION/1000) + " seconds");
+    } else {
+      userID = sessionID;
+      this.userChosenID = userChosenID;
+    }
+
+    if (trackUsers) {
+      userAlive();
+    }
+    langTest.gotUser(sessionID);
   }
 }
