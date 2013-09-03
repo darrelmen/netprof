@@ -55,17 +55,17 @@ public class GradedExerciseList extends PagingExerciseList {
     getNextUngraded(true);
     selectFirst();
   }
-
   /**
    * @see #loadExercise(mitll.langtest.shared.ExerciseShell)
-   * @param e
+   * @param exerciseShell
    */
   @Override
-  protected void checkBeforeLoad(final ExerciseShell e) {
-    service.checkoutExerciseID(""+user.getUser(), e.getID(), new AsyncCallback<Void>() {
-      public void onFailure(Throwable caught) { Window.alert("couldn't checkout " + e.getID());}
+  protected void askServerForExercise(final ExerciseShell exerciseShell) {
+    service.checkoutExerciseID(""+user.getUser(),exerciseShell.getID(), new AsyncCallback<Void>() {
+      public void onFailure(Throwable caught) { Window.alert("couldn't checkout " + exerciseShell.getID());}
       public void onSuccess(Void result) {
         feedback.showStatus("");
+        GradedExerciseList.super.askServerForExercise(exerciseShell);
       }
     });
   }
