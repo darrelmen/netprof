@@ -122,7 +122,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param userID
    */
   public void getExercises(long userID) {
-    System.out.println("ExerciseList: getExercises for user " +userID);
+    System.out.println("ExerciseList.getExercises for user " +userID);
 
     if (showInOrder) {
       getExercisesInOrder();
@@ -223,7 +223,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
-  public void rememberAndLoadFirst(List<ExerciseShell>  exercises) {
+  public void rememberAndLoadFirst(List<ExerciseShell> exercises) {
     rememberExercises(exercises);
     loadFirstExercise();
   }
@@ -262,9 +262,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     getParent().setVisible(false);
   }
 
-  public void showExerciseList() {
+/*  public void showExerciseList() {
     getParent().setVisible(true);
-  }
+  }*/
 
   protected void flush() {}
 
@@ -326,7 +326,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see #loadPreviousExercise
    * @param exerciseShell
    */
-  protected void loadExercise(ExerciseShell exerciseShell) {
+  public void loadExercise(ExerciseShell exerciseShell) {
     //String token = History.getToken();
     //String id = getIDFromToken(unencodeToken(token));
     //System.out.println("ExerciseList.loadExercise token '" + token + "' and id '" +id +"'");
@@ -362,7 +362,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected void loadByIDFromToken(String id) {
     ExerciseShell exerciseShell = byID(id);
     if (exerciseShell != null) {
-      checkBeforeLoad(exerciseShell);
       askServerForExercise(exerciseShell);
     }
     else {
@@ -466,14 +465,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected boolean isExercisePanelBusy() {
     Widget current = innerContainer.getWidget();
     return current != null && current instanceof BusyPanel && ((BusyPanel) current).isBusy();
-  }
-
-  /**
-   * @see #loadExercise
-   * @param e
-   */
-  protected void checkBeforeLoad(ExerciseShell e) {
-    feedback.login();
   }
 
   /**
