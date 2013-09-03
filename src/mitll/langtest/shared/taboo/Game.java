@@ -21,18 +21,18 @@ public class Game extends GameInfo {
   public Game(){}
 
   public GameInfo getGameInfo() {
-    if (getGameItems() == null) System.err.println("getGameInfo : huh? game items is null?");
+    if (getGameItems() == null) System.out.println("getGameInfo : game items is null.");
     return new GameInfo(getNumGames(), getGameItems(), getTimestamp(), getGameCount());
   }
 
   public Game(List<ExerciseShell> allSelectedExercises) {
-    System.out.println("Game with " + allSelectedExercises.size());
+    System.out.println("Game.Game with " + allSelectedExercises.size() + " exercises.");
     this.allSelectedExercises = Collections.unmodifiableList(allSelectedExercises);
     numGames = (int) Math.ceil((float)allSelectedExercises.size()/(float)OnlineUsers.GAME_SIZE);
   }
 
   /**
-   * @see OnlineUsers#startGame(long)
+   * @see OnlineUsers#startGame(long, boolean)
    * @return
    */
   public List<ExerciseShell> startGame() {
@@ -53,6 +53,8 @@ public class Game extends GameInfo {
     initNumExercises = itemsInGame.size();
     return exercisesToDo;
   }
+
+  public void resetToFirstGame() { gameCount = 0; }
 
   public String toString() { return "Game : " + super.toString(); }
 
