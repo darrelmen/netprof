@@ -86,11 +86,7 @@ public class ExerciseListLayout {
         }
       } else {
         return new PagingExerciseList(currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), isAutoCRTMode(), controller) {
-          @Override
-          protected void checkBeforeLoad(ExerciseShell e) {
-          } // don't try to login
-        };
+          props.isShowTurkToken(), isAutoCRTMode(), controller);
       }
     }
   }
