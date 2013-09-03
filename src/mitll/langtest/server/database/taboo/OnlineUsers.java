@@ -69,9 +69,7 @@ public class OnlineUsers {
       logger.info("---> addOnline online now " + getOnline());
     }
     else {
-      logger.info("---> addOnline online user " + userid + " now "+getOnline().size() + " online...");
-
-      //logger.info("---> addOnline now " + getOnline().size() + " online...");
+      //logger.info("---> addOnline online user " + userid + " now "+getOnline().size() + " online...");
     }
   }
 
@@ -96,6 +94,7 @@ public class OnlineUsers {
    * 2) The partner is offline, in which case we clean up the giver->receiver map
    * 3) The partner claims they have been paired, but we've erased the pairing in the giver->receiver map
    *
+   * @see mitll.langtest.server.LangTestDatabaseImpl#isPartnerOnline(long, boolean)
    * @param giverOrReceiver
    * @param isGiver
    * @return
@@ -121,9 +120,10 @@ public class OnlineUsers {
         return new PartnerState();
       } else if (online.contains(receiver)) {
         Map<String, Collection<String>> typeToSelectionByPartner = receiverToState.get(receiver);
-        GameInfo game = getGame(giverOrReceiver,isGiver);
+        GameInfo game = getGame(giverOrReceiver, isGiver);
+        if (game == null) logger.error("huh? no game state for giver " + giverOrReceiver);
         //logger.debug("isPartnerOnline : for giver " + giverOrReceiver + ", receiver  " + receiver + " is online, state " + typeToSelectionByPartner);
-        return new PartnerState(true,typeToSelectionByPartner,game);
+        return new PartnerState(true, typeToSelectionByPartner, game);
       } else {
         logger.debug("isPartnerOnline : for giver " + giverOrReceiver + ", receiver  " + receiver + " is not online...");
         checkReceiverForGiver(giverOrReceiver);
@@ -203,20 +203,15 @@ public class OnlineUsers {
         giverID = userid;
         receiverID = receiverUser.id;
       } else {
-       // receiverUser = getUser(userid);
         giverID = getGiverForReceiver(userid).id;
         receiverID = userid;
       }
       logger.info("anyAvailable : giver : " + giverID + " and receiver " + receiverID);
-
-    //  Game game = receiverToGame.get(receiverUser);
-      //exerciseShells = game.startGame();
-  //    gameInfo = new GameInfo(game.getNumGames(),game.startGame());
     } else if (avail) { // take us out of the pool
       addCandidatePair(userid);
     }
 
-    TabooState tabooState = new TabooState(avail, joined, giver/*, gameInfo*/);
+    TabooState tabooState = new TabooState(avail, joined, giver);
    // logger.debug("returning " + tabooState);
     return tabooState;
   }
@@ -227,19 +222,27 @@ public class OnlineUsers {
     // if (gameItems == null) logger.error("getGame : game for " + userID + " has not started?");
     GameInfo gameInfo = game.getGameInfo();
     if (gameInfo.getTimestamp() != lastTimestamp) {
-      logger.info("getGame for " + userID + " game info " + gameInfo);
+      logger.info("getGame   for " + userID + " game info " + gameInfo);
       lastTimestamp = gameInfo.getTimestamp();
     }
     return gameInfo;
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#startGame(long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#startGame
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory#startGame()
    * @param userID
+   * @param startOver
    * @return
    */
-  public GameInfo startGame(long userID) {
+  public GameInfo startGame(long userID, boolean startOver) {
     Game game = getGameFor(userID, false);
+    if (startOver) {
+      logger.info("startGame for " + userID+" starting over...");
+
+      game.resetToFirstGame();
+      receiverToStimulus.remove(getUser(userID));
+    }
     List<ExerciseShell> itemsInGame = game.startGame();
     if (itemsInGame == null) logger.error("startGame huh? game for " + userID + " has not started???\n\n\n");
     GameInfo gameInfo = game.getGameInfo();
@@ -344,7 +347,7 @@ public class OnlineUsers {
     if (receiver == null) {
       return 1;
     }
-    logger.debug("sending " + stimulus + " to " + receiver + " from giver " + userid);
+    logger.debug("sending " + stimulus + " to " + receiver + " from giver " + userid + " on last stim " + onLastStimulus);
     receiverToStimulus.put(receiver, new StimulusAnswerPair(exerciseID, stimulus, answer, onLastStimulus, skippedItem, numClues, isGameOver));
     return 0;
   }
@@ -461,6 +464,12 @@ public class OnlineUsers {
 
  // private final Leaderboard leaderboard = new Leaderboard();
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#postGameScore(long, int, int)
+   * @param userID
+   * @param score
+   * @param maxPossibleScore
+   */
   public void postGameScore(long userID, int score, int maxPossibleScore) {
     User receiver = getUser(userID);
     Map<String, Collection<String>> current = receiverToState.get(receiver);
@@ -483,6 +492,12 @@ public class OnlineUsers {
     leaderboard.addScore(new ScoreInfo(giverForReceiver.id,score,maxPossibleScore-score,0l,selectionState));  // TODO fill in time taken?
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getLeaderboard(long)
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
+   * @param userID
+   * @return
+   */
   public Leaderboard getLeaderboard(long userID) {
     Leaderboard leaderboard = userToScores.get(getUser(userID));
     //leaderboard.s
