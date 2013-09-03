@@ -54,6 +54,7 @@ public interface ListInterface extends RequiresResize {
 
   Widget getExerciseListOnLeftSide(PropertyHandler props);
 
+  void loadExercise(ExerciseShell exerciseShell);
   /**
    * @param current
    * @return
@@ -92,7 +93,7 @@ public interface ListInterface extends RequiresResize {
 
   void hideExerciseList();
 
-  void showExerciseList();
+  //void showExerciseList();
 
   void askForRandomExercise(AsyncCallback<Exercise> callback);
 }

@@ -65,42 +65,43 @@ public class TabooExerciseList extends FlexSectionExerciseList {
       receiverFactory = (ReceiverExerciseFactory) factory;
       isGiver = false;
       System.out.println("TabooExerciseList.setFactory : " + factory.getClass() + " for user " + user.getUser() + " RECEIVER ");
-    }
-    else {
+    } else {
       giverExerciseFactory = (GiverExerciseFactory) factory;
       isGiver = true;
-      System.out.println("TabooExerciseList.setFactory : " + factory.getClass() + " for user " + user.getUser()+ " GIVER ");
+      System.out.println("TabooExerciseList.setFactory : " + factory.getClass() + " for user " + user.getUser() + " GIVER ");
     }
 
-   /* if (isGiver) {
-      showExerciseList();
-      if (buttonRow != null) {
-        //buttonRow.setVisible(false);
-        // TODO : this stuff doesn't work properly...
-        for (int i = 0; i < buttonRow.getWidgetCount(); i++) {
-          if (buttonRow.getWidget(i) != statusHeader) buttonRow.getWidget(i).setVisible(false);
-        }
+    hideExerciseList();
+    if (buttonRow != null) {
+      for (int i = 0; i < buttonRow.getWidgetCount(); i++) {
+        if (buttonRow.getWidget(i) != statusHeader) buttonRow.getWidget(i).setVisible(true);
       }
     }
-    else {*/
-      hideExerciseList();
-      if (buttonRow != null) {
-        //buttonRow.setVisible(true);
-
-        for (int i = 0; i < buttonRow.getWidgetCount(); i++) {
-          if (buttonRow.getWidget(i) != statusHeader) buttonRow.getWidget(i).setVisible(true);
-        }
-      }
-  //  }
   }
 
   protected void tellUserPanelIsBusy() {
     new ModalInfoDialog("Please wait", "Please wait for you partner to respond.");
   }
 
+  private long lastTimestamp;
+  /**
+   * @see mitll.langtest.client.LangTest#setGame
+   * @param game
+   */
   public void setGame(GameInfo game) {
-    if (giverExerciseFactory != null) {
-      giverExerciseFactory.setGame(game);
+    if (isGiver && game != null) {
+      int numExercises = game.getNumExercises();
+      if (numExercises > -1 && game.getTimestamp() != lastTimestamp && giverExerciseFactory != null) {
+        lastTimestamp = game.getTimestamp();
+
+        giverExerciseFactory.setGame(game);
+        if (game.hasStarted()) {
+          String firstItem = game.getGameItems().get(0).getID();
+          System.out.println("----> GIVER:  loading " + firstItem);
+
+          loadByID(firstItem);
+        }
+      }
     }
   }
 
@@ -111,14 +112,11 @@ public class TabooExerciseList extends FlexSectionExerciseList {
     buttonRow = container;
     if (isGiver) {
       System.out.println("----> GIVER:  addBottomText.hiding container for " + userID);
-      //container.setVisible(false);
       for (int i = 0; i < container.getWidgetCount(); i++) {
         if (container.getWidget(i) != widget) container.getWidget(i).setVisible(false);
       }
-     // showExerciseList();
     } else {
       System.out.println("----> RECEIVER:  addBottomText.showing container for " + userID);
-    //  hideExerciseList();
       for (int i = 0; i < container.getWidgetCount(); i++) {
         if (container.getWidget(i) != statusHeader) container.getWidget(i).setVisible(true);
       }
@@ -138,21 +136,37 @@ public class TabooExerciseList extends FlexSectionExerciseList {
       "state is '" + selectionState + "'");
 
     if (isGiver) {
-      super.rememberExercises(result);
-      giverExerciseFactory.startOver();
+     super.rememberExercises(result);
+//      halfRemember(result);
+
+    //  giverExerciseFactory.startOver();
     //  giverExerciseFactory.startGame();
     } else {  // I am a receiver!
-      currentExercises = result; // remember current exercises
-      idToExercise = new HashMap<String, ExerciseShell>();
-      clear();
-      for (final ExerciseShell es : result) {
-        idToExercise.put(es.getID(), es);
-        // addExerciseToList(es);
-      }
-      flush();
+      halfRemember(result);
 
       tellPartnerMyChapterSelection(selectionState);
     }
+  }
+
+  @Override
+  public void rememberAndLoadFirst(List<ExerciseShell> exercises) {
+    if (isGiver) {
+      rememberExercises(exercises);
+    }
+    else {
+      super.rememberAndLoadFirst(exercises);
+    }
+  }
+
+  private void halfRemember(List<ExerciseShell> result) {
+    currentExercises = result; // remember current exercises
+    idToExercise = new HashMap<String, ExerciseShell>();
+    clear();
+    for (final ExerciseShell es : result) {
+      idToExercise.put(es.getID(), es);
+      // addExerciseToList(es);
+    }
+    flush();
   }
 
   private void tellPartnerMyChapterSelection(final SelectionState selectionState) {
@@ -177,7 +191,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
   }
 
   /**
-   * TODO : get game statistics and show leaderboard plot
+   * TODOx : get game statistics and show leaderboard plot
    *
    * So there are two stopping points - at the end of the game and the end of the chapter...
    * @see #loadNextExercise(mitll.langtest.shared.ExerciseShell)
@@ -190,8 +204,9 @@ public class TabooExerciseList extends FlexSectionExerciseList {
       message.add("Or you could stop playing by clicking sign out.");
       new ModalInfoDialog("Game complete!", message);
     } else {
+      System.err.println("We shouldn't get here...\n\n\n\n");
      // new ModalInfoDialog("Chapter(s) complete.", "Would you like to practice this chapter again?");
-      new DialogHelper(true).showErrorMessage("Chapter(s) complete.", "Would you like to practice this chapter(s) again?", "Yes", new DialogHelper.CloseListener() {
+     /* new DialogHelper(true).showErrorMessage("Chapter(s) complete.", "Would you like to practice this chapter(s) again?", "Yes", new DialogHelper.CloseListener() {
         @Override
         public void gotYes() {
           startOver();
@@ -201,7 +216,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
         public void gotNo() {
 
         }
-      });
+      });*/
     }
   }
 
