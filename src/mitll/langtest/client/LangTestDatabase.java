@@ -233,7 +233,7 @@ public interface LangTestDatabase extends RemoteService {
    */
   int checkCorrect(long giverUserID, String stimulus);
 
-  GameInfo startGame(long userID);
+  GameInfo startGame(long userID, boolean startOver);
   void postGameScore(long userID, int score, int maxPossibleScore);
   Leaderboard getLeaderboard(long userID);
 //  GameInfo getGame(long userID, boolean isGiver);
