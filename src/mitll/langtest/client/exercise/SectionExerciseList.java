@@ -72,9 +72,6 @@ public class SectionExerciseList extends PagingExerciseList {
   }
 
   @Override
-  protected void checkBeforeLoad(ExerciseShell e) {}
-
-  @Override
   protected void addComponents() {
     add(sectionPanel = new VerticalPanel());
     addTableWithPager();
@@ -395,7 +392,7 @@ public class SectionExerciseList extends PagingExerciseList {
 
     @Override
     public void onSuccess(ExerciseListWrapper result) {
-      System.out.println("MySetExercisesCallback : onSuccess " + result.exercises.size() + " items.");
+      //System.out.println("MySetExercisesCallback : onSuccess " + result.exercises.size() + " items.");
 
       if (isStaleResponse(result)) {
         System.out.println("\t----> ignoring result " + result.reqID + " b/c before latest " + lastReqID);
@@ -604,7 +601,7 @@ public class SectionExerciseList extends PagingExerciseList {
     return new SelectionState(token);
   }
 
-  private String lastSelectionState = "";
+  private String lastSelectionState = "NO_SELECTION_STATE";
   @Override
   public void setSelectionState(Map<String, Collection<String>> selectionState) {
     String newSelectionState = selectionState.toString().replace("[", "").replace("]", "").replace("{", "").replace("}", "").replace(" ", "");
@@ -622,6 +619,10 @@ public class SectionExerciseList extends PagingExerciseList {
       if (!History.getToken().equals(newSelectionState)) {
         setHistoryItem(newSelectionState);
       }
+    }
+    else {
+     // System.out.println("SectionExerciseList.setSelectionState : selection state still : '" + lastSelectionState + "'");
+
     }
   }
 
@@ -643,7 +644,7 @@ public class SectionExerciseList extends PagingExerciseList {
       selectionState2.put(type,section);
     }
 
-    System.out.println("restoreListBoxState : selection state " + selectionState2);
+   // System.out.println("restoreListBoxState : selection state " + selectionState2);
 
     for (Map.Entry<String, Collection<String>> pair : selectionState2.entrySet()) {
       String type = pair.getKey();
