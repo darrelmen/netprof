@@ -63,7 +63,7 @@ public interface ListInterface extends RequiresResize {
   boolean loadNextExercise(ExerciseShell current);
 
   boolean loadNextExercise(String id);
-  boolean isLastExercise(String id);
+  void makeExercisePanel(Exercise result);
   void startOver();
 
   boolean loadPreviousExercise(ExerciseShell current);
