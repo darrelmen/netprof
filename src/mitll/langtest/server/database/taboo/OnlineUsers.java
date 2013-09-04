@@ -4,6 +4,7 @@ import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.flashcard.ScoreInfo;
+import mitll.langtest.shared.taboo.AnswerBundle;
 import mitll.langtest.shared.taboo.Game;
 import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.PartnerState;
@@ -13,12 +14,13 @@ import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,6 +32,8 @@ import java.util.Map;
 public class OnlineUsers {
   private static final Logger logger = Logger.getLogger(OnlineUsers.class);
   public static final int GAME_SIZE = 3;
+  private final List<String> nastyWords = Arrays.asList("shit", "piss", "fuck", "fucker", "fucking", "cunt", "cocksucker", "motherfucker", "tits", "asshole");
+  private final Set<String> sevenWords = new HashSet<String>(nastyWords);
 
   private final UserDAO userDAO;
   private Collection<User> online = new HashSet<User>();
@@ -216,7 +220,10 @@ public class OnlineUsers {
     return tabooState;
   }
 
-  long lastTimestamp;
+  /**
+   * Just for debugging
+   */
+  private long lastTimestamp;
   public GameInfo getGame(long userID, boolean isGiver) {
     Game game = getGameFor(userID, isGiver);
     // if (gameItems == null) logger.error("getGame : game for " + userID + " has not started?");
@@ -256,6 +263,10 @@ public class OnlineUsers {
     return receiverToGame.get(receiverUser);
   }
 
+  /**
+   * @see #anyAvailable(long)
+   * @param userid
+   */
   private void addCandidatePair(long userid) {
     User first = null, second = null;
     for (User u : online) {
@@ -273,7 +284,8 @@ public class OnlineUsers {
 
   /**
    * User has chosen to be either a giver or receiver.
-   *
+   * @see mitll.langtest.server.LangTestDatabaseImpl#registerPair(long, boolean)
+   * @see mitll.langtest.client.taboo.Taboo#askUserToChooseRole(long)
    * @param userid
    * @param isGiver
    */
@@ -372,6 +384,7 @@ public class OnlineUsers {
  //     logger.debug("not remembering answer, since " + receiverUserID + " is playing by him/herself.");
     } else {
       receiverToStimulus.remove(receiver);
+      answer = replaceProfanity(answer);
       receiverToAnswer.put(receiver,new AnswerBundle(stimulus, answer, correct));
 
       logger.debug("OnlineUsers.registerAnswer : user->answer now " + receiverToAnswer);
@@ -379,29 +392,44 @@ public class OnlineUsers {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#checkCorrect
-   * @param giverUserID
-   * @param exerciseID
-   * @param stimulus
+   * This can be defeated relatively easily...
+   *
+   * @param answer
    * @return
    */
-  public synchronized int checkCorrect(long giverUserID, String exerciseID, String stimulus) {
-    User receiver = getReceiverForGiver(giverUserID);
-    //logger.debug("OnlineUsers.checkCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id);
-
-    AnswerBundle answerBundle = receiverToAnswer.get(receiver);
-    if (answerBundle == null) {
-      //    logger.debug("\tno answer yet...");
-      return -1;
-    } else {
-      logger.debug("\tcheckCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id + " got " + answerBundle);
-      receiverToAnswer.remove(receiver); // sent response to giver -- no need to remember them anymore
-      return answerBundle.correct ? 1 : 0;
+  private String replaceProfanity(String answer) {
+    String[] words = answer.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
+    StringBuilder builder = new StringBuilder();
+    for (String word : words) {
+      if (nastyWords.contains(word)) builder.append(word.replaceAll(".","_"));
+      else builder.append(word);
+      builder.append(" ");
     }
+    return builder.toString().trim();
   }
 
   /**
-   * @see #checkCorrect(long, String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#checkCorrect
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#checkForCorrect
+   * @param giverUserID
+   * @return
+   */
+  public synchronized AnswerBundle checkCorrect(long giverUserID) {
+    User receiver = getReceiverForGiver(giverUserID);
+    //logger.debug("OnlineUsers.checkCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id);
+
+    AnswerBundle answerBundle = receiverToAnswer.remove(receiver);// sent response to giver -- no need to remember them anymore
+    if (answerBundle == null) {
+      //    logger.debug("\tno answer yet...");
+      answerBundle = new AnswerBundle();
+    } else {
+      logger.debug("\tcheckCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id + " got " + answerBundle);
+    }
+    return answerBundle;
+  }
+
+  /**
+   * @see #checkCorrect(long)
    * @see #sendStimulus(long, String, String, String, boolean, boolean, int, boolean)
    * @param giver
    * @return
@@ -499,9 +527,7 @@ public class OnlineUsers {
    * @return
    */
   public Leaderboard getLeaderboard(long userID) {
-    Leaderboard leaderboard = userToScores.get(getUser(userID));
-    //leaderboard.s
-    return leaderboard;
+    return userToScores.get(getUser(userID));
   }
 
   private static class Pair {
@@ -510,26 +536,4 @@ public class OnlineUsers {
     public String toString() { return "Pair : " + first + " and " + second; }
   }
 
-  private static class AnswerBundle {
-    String stimulus;
-    String answer;
-    boolean correct;
-    long timestamp;
-
-    /**
-     * @see OnlineUsers#registerAnswer(long, String, String, boolean)
-     * @param stimulus
-     * @param answer
-     * @param correct
-     */
-    public AnswerBundle(String stimulus, String answer, boolean correct) {
-      this.stimulus = stimulus;
-      this.answer = answer;
-      this.correct = correct;
-      this.timestamp = System.currentTimeMillis();
-    }
-
-    public String toString() { return " answer '" +  answer+ "' is " +(correct ? "correct" : "incorrect") + " at " + new Date(timestamp);
-    }
-  }
 }
