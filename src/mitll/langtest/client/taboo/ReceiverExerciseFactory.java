@@ -419,7 +419,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         new HiddenHandler() {
           @Override
           public void onHidden(HiddenEvent hiddenEvent) {
-            System.out.println(new Date() + " dealWithGameOver..");
+            System.out.println(new Date() + " ReceiverExerciseFactory.dealWithGameOver..");
             service.postGameScore(controller.getUser(), score, totalClues, new AsyncCallback<Void>() {
               @Override
               public void onFailure(Throwable caught) {
@@ -428,7 +428,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
               @Override
               public void onSuccess(Void result) {
-                if (controller.isLastExercise(exerciseID)) {
+                if (!gameInfo.anyGamesRemaining()) {//controller.isLastExercise(exerciseID)) {
                   showLeaderboard(service, controller);
                 } else {
                   loadNext(controller);
@@ -459,9 +459,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     private void showLeaderboard(LangTestDatabaseAsync service, final ExerciseController controller) {
       service.getLeaderboard(controller.getUser(), new AsyncCallback<Leaderboard>() {
         @Override
-        public void onFailure(Throwable caught) {
-          //To change body of implemented methods use File | Settings | File Templates.
-        }
+        public void onFailure(Throwable caught) {}
 
         @Override
         public void onSuccess(Leaderboard result) {
