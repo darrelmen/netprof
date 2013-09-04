@@ -6,11 +6,12 @@ import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.Row;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
-import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
+import com.github.gwtbootstrap.client.ui.event.HideEvent;
+import com.github.gwtbootstrap.client.ui.event.HideHandler;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -69,7 +70,9 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
   private int correctCount, incorrectCount;
   private int score;
   private int totalClues;
-  boolean debugKeyHandler = false;
+  private Map<String, Collection<String>> selectionState;
+
+  private boolean debugKeyHandler = false;
 
   /**
    *
@@ -96,7 +99,6 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     return new ReceiverPanel(service,controller);
   }
 
-  Map<String, Collection<String>> selectionState;
   /**
    * @see TabooExerciseList#rememberExercises(java.util.List)
    * @param exerciseShells
@@ -260,17 +262,18 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       System.out.println("sending answer '" + guessBox.getText() + "' vs '" + answer+ "' which is " + isCorrect + " stim count " + stimulusCount + " on last " + onLastStim);
       boolean onLast = onLastStim || stimulusCount == MAX_CLUES_TO_GIVE;   // never do more than 5 clues
 
-      registerAnswer(service, controller, outer, isCorrect, isCorrect || onLast);
+      boolean movingOnToNext = isCorrect || onLast;
+    //  registerAnswer(service, controller, outer, isCorrect, movingOnToNext);
 
       if (isCorrect) {
        // correctImage.setVisible(true);
         controller.addAdHocExercise(answer);
         soundFeedback.playCorrect();
 
-        int i = displayedStimulus.getNumClues() - stimulusCount + 1;
+        int i = MAX_CLUES_TO_GIVE /*displayedStimulus.getNumClues()*/ - stimulusCount + 1;
         System.out.println("sendAnswer : adding " + i + " to " + score + " clues " + displayedStimulus.getNumClues() + " stim " + stimulusCount);
         score += i;
-        totalClues += displayedStimulus.getNumClues();
+        totalClues += MAX_CLUES_TO_GIVE;//displayedStimulus.getNumClues();
         System.out.println("sendAnswer : score " + score + " total clues " +totalClues);
 
         correctCount++;
@@ -278,7 +281,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         stimulusCount = 0;
         setCorrect();
         showPopup("Correct!" + (singlePlayerRobot == null ? " Please wait for the next item." : ""));
-        maybeGoToNextItem(service, controller, outer);
+        maybeGoToNextItem(service, controller, outer,isCorrect,movingOnToNext);
       }
       else {
        // incorrectImage.setVisible(true);
@@ -288,22 +291,31 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
           incorrectCount++;
           exerciseCount++;
           stimulusCount = 0;
-          totalClues += displayedStimulus.getNumClues();
+          totalClues += MAX_CLUES_TO_GIVE;//displayedStimulus.getNumClues();
           setCorrect();
-          maybeGoToNextItem(service, controller, outer);
+          maybeGoToNextItem(service, controller, outer,isCorrect,movingOnToNext);
         }
         else {
+          registerAnswer(service, controller, outer, isCorrect, movingOnToNext);
           showPopup("Try again...");
         }
       }
       waitForNext();
     }
 
-    private void maybeGoToNextItem(LangTestDatabaseAsync service, ExerciseController controller, ReceiverPanel outer) {
+    /**
+     * @see #sendAnswer(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, mitll.langtest.client.sound.SoundFeedback)
+     * @param service
+     * @param controller
+     * @param outer
+     */
+    private void maybeGoToNextItem(LangTestDatabaseAsync service, ExerciseController controller, ReceiverPanel outer,boolean isCorrect, boolean movingOnToNext) {
       if (isGameOver) {
         // game over... dude...
-        dealWithGameOver(service, controller, outer);
+        dealWithGameOver(service, controller, outer, isCorrect, movingOnToNext);
       } else {
+        registerAnswer(service, controller, outer, isCorrect, movingOnToNext);
+
         loadNext(controller);
       }
     }
@@ -311,12 +323,12 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     private void loadNext(ExerciseController controller) {
      // System.out.println("ReceiverExerciseFactory.loadNext '" + exerciseID+ "'  ");
 
-      controller.loadExercise(gameInfo.getFirst());
+      controller.makeExercisePanel(null);
      // controller.loadNextExercise(exerciseID);
     }
 
     private boolean checkCorrect() {
-      String guess = guessBox.getText();
+      String guess = guessBox.getText().trim();
       boolean isCorrect = guess.equalsIgnoreCase(answer);
       if (!isCorrect) {
         for (String prefix : Arrays.asList("to ", "the ")) {  // TODO : hack for ENGLISH
@@ -414,75 +426,111 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
      * @param controller
      * @param outer
      */
-    private void dealWithGameOver(final LangTestDatabaseAsync service, final ExerciseController controller, final ReceiverPanel outer) {
-      new ModalInfoDialog("Game complete!", "Game complete! Your score was " + score + " out of " + totalClues,
-        new HiddenHandler() {
-          @Override
-          public void onHidden(HiddenEvent hiddenEvent) {
-            System.out.println(new Date() + " ReceiverExerciseFactory.dealWithGameOver..");
-            service.postGameScore(controller.getUser(), score, totalClues, new AsyncCallback<Void>() {
+    private void dealWithGameOver(final LangTestDatabaseAsync service, final ExerciseController controller,
+                                  final ReceiverPanel outer, final boolean isCorrect,final boolean movingOnToNext) {
+      System.out.println(new Date() + " ReceiverExerciseFactory.dealWithGameOver..");
+      service.postGameScore(controller.getUser(), score, totalClues, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          registerAnswer(service, controller, outer, isCorrect, movingOnToNext);   // this way, giver will see response and then know to check for game score
+
+          if (gameInfo.anyGamesRemaining()) {
+            service.getLeaderboard(controller.getUser(), new AsyncCallback<Leaderboard>() {
               @Override
               public void onFailure(Throwable caught) {
-                //To change body of implemented methods use File | Settings | File Templates.
               }
 
               @Override
-              public void onSuccess(Void result) {
-                if (!gameInfo.anyGamesRemaining()) {//controller.isLastExercise(exerciseID)) {
-                  showLeaderboard(service, controller);
-                } else {
-                  loadNext(controller);
-
-                  if (singlePlayerRobot != null) {
-                    startGame(singlePlayerRobot.startGame());
-                  } else {
-                    service.startGame(controller.getUser(), false, new AsyncCallback<GameInfo>() {
-                      @Override
-                      public void onFailure(Throwable caught) {
-                        //To change body of implemented methods use File | Settings | File Templates.
-                      }
-
-                      @Override
-                      public void onSuccess(GameInfo result) {
-                        startGame(result);
-                        checkForStimulus(service, controller, outer);
-                      }
-                    });
+              public void onSuccess(Leaderboard result) {
+                Modal plot = new LeaderboardPlot().showLeaderboardPlot(result, controller.getUser(), 0, selectionState,
+                  "Game complete! Your score was " + score + " out of " + totalClues, 5000);
+                plot.addHideHandler(new HideHandler() {
+                  @Override
+                  public void onHide(HideEvent hideEvent) {
+                    doNextGame(controller, service, outer);
                   }
-                }
+                });
               }
             });
+          } else {
+            showLeaderboard(service, controller, "Would you like to practice this chapter(s) again?",
+              "To continue playing, choose another chapter.");
           }
-        });
+        }
+      });
     }
 
-    private void showLeaderboard(LangTestDatabaseAsync service, final ExerciseController controller) {
+    /**
+     * @see #dealWithGameOver(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
+     * @param controller
+     * @param service
+     * @param outer
+     */
+    private void doNextGame(final ExerciseController controller, final LangTestDatabaseAsync service, final ReceiverPanel outer) {
+      if (singlePlayerRobot != null) {
+        startGame(singlePlayerRobot.startGame());
+        loadNext(controller);
+      } else {
+        service.startGame(controller.getUser(), false, new AsyncCallback<GameInfo>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            //To change body of implemented methods use File | Settings | File Templates.
+          }
+
+          @Override
+          public void onSuccess(GameInfo result) {
+            startGame(result);
+            loadNext(controller);
+            checkForStimulus(service, controller, outer);
+          }
+        });
+      }
+    }
+
+
+    private void showLeaderboard(LangTestDatabaseAsync service, final ExerciseController controller, final String prompt1,
+                                 final String clickNoMessage
+    ) {
+      ClickHandler onYes = new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          controller.startOver();
+        }
+      };
+      ClickHandler onNo = new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          showPopup(clickNoMessage);
+        }
+      };
+      showLeaderboard(service, controller, prompt1, onYes, onNo);
+    }
+
+    private void showLeaderboard(LangTestDatabaseAsync service, final ExerciseController controller, final String prompt1,
+                                 final ClickHandler onYes, final ClickHandler onNo
+    ) {
       service.getLeaderboard(controller.getUser(), new AsyncCallback<Leaderboard>() {
         @Override
-        public void onFailure(Throwable caught) {}
+        public void onFailure(Throwable caught) {
+        }
 
         @Override
         public void onSuccess(Leaderboard result) {
           new LeaderboardPlot().showLeaderboardPlot(result, controller.getUser(), 0, selectionState,
-            "Would you like to practice this chapter(s) again?",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                controller.startOver();
-              }
-            },
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                showPopup("To continue playing, choose another chapter.");
-              }
-            });
+            prompt1,
+            onYes,
+            onNo,0);
         }
       });
     }
 
     private Timer checkStimTimer = null;
-    private Timer verifyStimTimer = null;
+ //   private Timer verifyStimTimer = null;
 
     /**
      * See if giver has sent the next stimulus yet.
@@ -498,7 +546,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
                                      final LangTestDatabaseAsync service, final ExerciseController controller) {
       //System.out.println(new Date() + " gotStimulusResponse : got  " + result);
 
-      if (result.noStimYet) {
+      if (result.isNoStimYet()) {
         //System.out.println("---> " +new Date() + "gotStimulusResponse : got  " + result);
 
         if (checkStimTimer == null) {
@@ -524,7 +572,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       }
     }
 
-    private void pollForStimChange(final ReceiverPanel outer) {
+/*    private void pollForStimChange(final ReceiverPanel outer) {
       if (verifyStimTimer == null) {
         verifyStimTimer = new Timer() {
           @Override
@@ -539,7 +587,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
               @Override
               public void onSuccess(StimulusAnswerPair result) {
                 if (!result.equals(displayedStimulus)) {
-                  if (result.noStimYet) waitForNext();
+                  if (result.isNoStimYet()) waitForNext();
                   else showStimulus(result, outer);
                 }
                 else pollForStimChange(outer);
@@ -555,7 +603,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       else {
         System.out.println("pollForStimChange : DID NOT Queue: Timer : " + checkStimTimer + " " + new Date() + " : checkForStimulus user #" + controller.getUser());
       }
-    }
+    }*/
 
     private void cancelStimTimer() {
       if (checkStimTimer != null) {
@@ -565,13 +613,20 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       }
     }
 
+    /**
+     * @see #checkForStimulus(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
+     * @see #gotStimulusResponse(mitll.langtest.shared.taboo.StimulusAnswerPair, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
+     * @seex #pollForStimChange(mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
+     * @param result
+     * @param outer
+     */
     private void showStimulus(StimulusAnswerPair result, ReceiverPanel outer) {
      // correctImage.setVisible(false);
    //   incorrectImage.setVisible(false);
       displayedStimulus = result;
-      onLastStim = result.isLastStimulus;
-      if (onLastStim)
-      System.out.println("\n\n\n\non last " + onLastStim);
+      onLastStim = result.isLastStimulus();
+/*      if (onLastStim)
+        System.out.println("\n\n\n\non last " + onLastStim);*/
       if (gameInfo != null) {
         showGame();
       }
@@ -586,10 +641,11 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       outer.answer = result.getAnswer();
       exerciseID = result.getExerciseID();
       guessBox.setFocus(true);
-      if (singlePlayerRobot == null) {
+    /*  if (singlePlayerRobot == null) {
         pollForStimChange(outer);
-      }
+      }*/
       isGameOver = result.isGameOver();
+      System.out.println("--------> showStimulus game over = " + isGameOver);
     }
 
     private void showStim(StimulusAnswerPair result) {
@@ -638,7 +694,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     }
 
     private void userHitEnterKey() {
-      System.out.println(new Date() +"\tReceiverExerciseFactory.userHitEnterKey " + keyHandler);
+     // System.out.println(new Date() +"\tReceiverExerciseFactory.userHitEnterKey " + keyHandler);
       if (send != null && guessBox.getText().length() > 0) {
         send.fireEvent(new ButtonClickEvent());
       }
@@ -661,12 +717,12 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
       removeKeyHandler();
       cancelStimTimer();
-
+/*
       if (verifyStimTimer != null) {
         System.out.println("\tCancelling timer " + verifyStimTimer);
 
         verifyStimTimer.cancel();
-      }
+      }*/
     }
 
     public void removeKeyHandler() {
