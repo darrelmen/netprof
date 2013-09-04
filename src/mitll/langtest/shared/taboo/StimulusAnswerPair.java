@@ -14,26 +14,12 @@ public class StimulusAnswerPair implements IsSerializable {
   private String stimulus;
   private String answer;
   private String exerciseID;
-  public boolean isLastStimulus;
-  public boolean didGiverSkip;
-  public boolean noStimYet;
+  private boolean isLastStimulus;
+  private boolean didGiverSkip;
+  private boolean noStimYet;
   private boolean gameOver;
-//  private boolean chapterComplete;
 
-  public StimulusAnswerPair() {}
-
-  /**
-   * @see mitll.langtest.client.taboo.SinglePlayerRobot#checkForStimulus(com.google.gwt.user.client.rpc.AsyncCallback)
-   * @paramx gameOver
-   * @paramx chapterComplete
-   */
-/*
-  public StimulusAnswerPair(boolean gameOver, boolean chapterComplete) {
-    this.gameOver = gameOver;
-   // this.chapterComplete = chapterComplete;
-  }
-*/
-
+  public StimulusAnswerPair() {} // just for serialization
   public StimulusAnswerPair(String exerciseID, String stimulus, String answer, boolean isLastStimulus,
                             boolean didGiverSkip, int totalExpected, boolean isGameOver) {
     this.gameOver = isGameOver;
@@ -79,19 +65,26 @@ public class StimulusAnswerPair implements IsSerializable {
     return gameOver;
   }
 
-/*  public boolean isChapterComplete() {
-    return chapterComplete;
-  }*/
+  public boolean isLastStimulus() {
+    return isLastStimulus;
+  }
+
+  public boolean isDidGiverSkip() {
+    return didGiverSkip;
+  }
+
+  public boolean isNoStimYet() {
+    return noStimYet;
+  }
 
   @Override
   public boolean equals(Object other) {
     if (!(other instanceof StimulusAnswerPair)) return false;
     else {
       StimulusAnswerPair ostim = (StimulusAnswerPair) other;
-      return noStimYet == ostim.noStimYet && exerciseID.equals(ostim.exerciseID) && stimulus.equals(ostim.stimulus);
+      return isNoStimYet() == ostim.isNoStimYet() && exerciseID.equals(ostim.exerciseID) && stimulus.equals(ostim.stimulus);
     }
   }
 
-  public String toString() { return "Ex " + getExerciseID() +
-    " Stim : '" + getStimulus() + "' answer '" + getAnswer() + "'"; }
+  public String toString() { return "Ex " + getExerciseID() + " Stim : '" + getStimulus() + "' answer '" + getAnswer() + "'"; }
 }
