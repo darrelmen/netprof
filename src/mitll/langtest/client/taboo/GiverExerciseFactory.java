@@ -29,6 +29,7 @@ import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.taboo.AnswerBundle;
 import mitll.langtest.shared.taboo.Game;
 import mitll.langtest.shared.taboo.GameInfo;
 
@@ -230,7 +231,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
               getUnrelatedClues(n - 1);
             }
             else {
-              System.out.println("getUnrelatedClues " + n + " for " + result.getID() + " got " + questions.size());
+              //System.out.println("getUnrelatedClues " + n + " for " + result.getID() + " got " + questions.size());
               choiceToExample = populateChoices(clueAnswerPairs, otherExerciseClues);
             }
           }
@@ -245,12 +246,11 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       System.out.println("----> showGame " + gameInfo + " with " + exerciseID);
 
       String gameInfoString = "Game #" + (gameInfo.getGameCount());// + " of " + gameInfo.getNumGames();
-      //    int numExercises = gameInfo.getNumExercises();
       int indexOfItem = gameInfo.getIndexOfItem(exerciseID);
       if (indexOfItem == -1) {
         System.err.println("\n\n\n----> showGame can't find ex # " + exerciseID);
       } else {
-        exerciseDisplay.setText(gameInfoString + ", item #" + (indexOfItem+1));// + " of " + numExercises);
+        exerciseDisplay.setText(gameInfoString + ", item #" + (indexOfItem+1));// + " of " + gameInfo.getNumExercises());
         showStimIndex();
       }
     }
@@ -269,7 +269,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     private void clickOnSend(Exercise exercise, SoundFeedback soundFeedback) {
       final Exercise.QAPair stimulus = getSelectedItem();
       if (stimulus != null) {
-        if (validClues.contains(stimulus.getQuestion())) {
+    //    if (validClues.contains(stimulus.getQuestion())) {
           sentItems.add(stimulus);
           send.setEnabled(false);
           pleaseWait.setVisible(true);
@@ -280,13 +280,13 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
           }
           sendStimulus(stimulus.getQuestion(), exercise,
             stimulus.getAnswer(), soundFeedback, lastChoiceRemaining, clueAnswerPairs.size());
-        } else {
+  /*      } else {
           if (validClues.isEmpty()) {
             System.err.println("\n\n\n---> huh? no valid clues?");
           }
           System.out.println("clickOnSend : no match " + stimulus.getQuestion() + " in " + validClues);
           showPopup("Sorry, that clue doesn't go with this item.  Please choose another.");
-        }
+        }*/
       } else {
         showPopup("Please select a sentence to send.");
       }
@@ -374,7 +374,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
           validClues.add(clue);
         }
       }
-      System.out.println("valid clues " + validClues.size() + " : " + validClues);
+   //   System.out.println("valid clues " + validClues.size() + " : " + validClues);
 
       iterator = otherExerciseClues.iterator();
       while (allClues.size() < ReceiverExerciseFactory.MAX_CLUES_TO_GIVE && iterator.hasNext()) {
@@ -393,7 +393,6 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       Map<RadioButton, Exercise.QAPair> choiceToExample = new HashMap<RadioButton, Exercise.QAPair>();
       for (Exercise.QAPair example : clues) {
         final RadioButton give = new RadioButton("Giver", example.getQuestion());
-   //     System.out.println("adding choice " + example.getQuestion());
         choiceToExample.put(give, example);
         choice.add(give);
       }
@@ -415,7 +414,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       return notSentYet;
     }
 
-    private int lastCorrectResponse = -2;
+   // private AnswerBundle lastCorrectResponse = null;
     /**
      * Keep asking server if the receiver has made a correct answer or not.
      *
@@ -426,50 +425,54 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
      */
     private void checkForCorrect(final long userid, final String stimulus, final Exercise current,
                                  final SoundFeedback feedback) {
-      service.checkCorrect(userid, stimulus, new AsyncCallback<Integer>() {
+      service.checkCorrect(userid, stimulus, new AsyncCallback<AnswerBundle>() {
         @Override
         public void onFailure(Throwable caught) {
           Window.alert("checkCorrect : couldn't contact server.");
         }
 
         @Override
-        public void onSuccess(Integer result) {
-          if (lastCorrectResponse != result) {
+        public void onSuccess(AnswerBundle result) {
+      /*    if (lastCorrectResponse != result) {
             System.out.println("GiverExerciseFactory : checkForCorrect got " + result);
             lastCorrectResponse = result;
-          }
-          if (result == 0) { // incorrect
-            showStimIndex();
-            feedback.playIncorrect();
-            otherClues.clear();
-            otherExerciseClues.clear();
-            getUnrelatedClues(7);
+          }*/
+          if (result.didReceiverReply()) {
+            if (result.isCorrect()) {
+              lastSentExercise = ""; // clear last sent hint -- they got it correct
+              stimulusCount = 0;
+              showStimIndex();
+              showPopup("They guessed correctly!  Moving on to next item.");
+              feedback.playCorrect();
 
-            if (stimulusCount == MAX_CLUES_TO_SEND || sentAllClues()) {
-              showPopup("They didn't guess correctly in " + stimulusCount + " tries" +
-                ", moving to next item...", new CloseHandler<PopupPanel>() {
-                @Override
-                public void onClose(CloseEvent<PopupPanel> event) {
-                  stimulusCount = 0;
-                  loadNext(current);
-                }
-              });
-            } else {
-              showPopup("They didn't guess correctly, please send another sentence.");
-
+              loadNext(current);
               send.setEnabled(true);
               pleaseWait.setVisible(false);
-            }
-          } else if (result == 1) {
-            showStimIndex();
-            lastSentExercise = ""; // clear last sent hint -- they got it correct
-            stimulusCount = 0;
-            showPopup("They guessed correctly!  Moving on to next item.");
-            feedback.playCorrect();
+            } else {
+              feedback.playIncorrect();
+              otherClues.clear();
+              otherExerciseClues.clear();
+              getUnrelatedClues(7);
 
-            loadNext(current);
-            send.setEnabled(true);
-            pleaseWait.setVisible(false);
+              if (stimulusCount == MAX_CLUES_TO_SEND || sentAllClues()) {
+                showPopup("They didn't guess correctly in " + stimulusCount + " tries" +
+                  ", moving to next item...", new CloseHandler<PopupPanel>() {
+                  @Override
+                  public void onClose(CloseEvent<PopupPanel> event) {
+                    stimulusCount = 0;
+                    showStimIndex();
+                    loadNext(current);
+                  }
+                });
+              } else {
+                showPopup("They guessed : <b>" +
+                  result.getAnswer() +
+                  "</b>, please send another sentence.");
+
+                send.setEnabled(true);
+                pleaseWait.setVisible(false);
+              }
+            }
           } else { // they haven't answered yet
             Timer t = new Timer() {
               @Override
@@ -513,7 +516,10 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
   }
 
   private void loadNext(Exercise current) {
-    if (gameInfo.onLast(current)) showPopup("Game Over.");
+    if (gameInfo.onLast(current)) {
+      System.out.println("\n\n\nGiver : game over! ");
+      showPopup("Game Over.");
+    }
     else {
       ExerciseShell next = gameInfo.getNext(current);
       if (next == null) System.err.println("huh? nothing after " + current);
