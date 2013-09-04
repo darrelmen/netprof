@@ -1030,8 +1030,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean loadNextExercise(String id) {
     return exerciseList.loadNextExercise(id);
   }
-  public boolean isLastExercise(String id) {
-    return exerciseList.isLastExercise(id);
+  public void makeExercisePanel(Exercise current) {
+    exerciseList.makeExercisePanel(current);
   }
   public void startOver() {
     exerciseList.startOver();
