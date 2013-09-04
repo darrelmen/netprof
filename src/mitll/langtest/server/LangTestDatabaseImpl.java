@@ -29,6 +29,7 @@ import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.taboo.AnswerBundle;
 import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
@@ -932,9 +933,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private final Leaderboard leaderboard = new Leaderboard();
 
- // @Override
-  //public Leaderboard getLeaderboard(Map<String, Collection<String>> typeToSection) {  return leaderboard;  }
-
   @Override
   public Leaderboard postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState) {
     synchronized (leaderboard) {
@@ -956,7 +954,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public TabooState anyUsersAvailable(long userid) {  return db.getOnlineUsers().anyAvailable(userid);  }
 
   /**
-   * @see mitll.langtest.client.taboo.Taboo
+   * @see mitll.langtest.client.taboo.Taboo#askUserToChooseRole(long)
    * @param userid
    * @param isGiver
    */
@@ -968,7 +966,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userid
    * @param exerciseID
    * @param stimulus
-   * @param answers
    * @param onLastStimulus
    * @param skippedItem
    * @param numClues
@@ -976,7 +973,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, int numClues, boolean isGameOver) {
-   // db.sendStimulus(userid, exerciseID, stimulus, answer);
     return db.getOnlineUsers().sendStimulus(userid, exerciseID, stimulus, answer, onLastStimulus, skippedItem, numClues, isGameOver);
   }
 
@@ -1026,19 +1022,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#checkForCorrect(long, String, mitll.langtest.shared.Exercise, String, mitll.langtest.client.sound.SoundFeedback)
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#checkForCorrect
    * @param giverUserID
    * @param stimulus
    * @return
    */
   @Override
-  public int checkCorrect(long giverUserID, String stimulus) {
-    return db.getOnlineUsers().checkCorrect(giverUserID, "", stimulus);
+  public AnswerBundle checkCorrect(long giverUserID, String stimulus) {
+    return db.getOnlineUsers().checkCorrect(giverUserID);
   }
 
   /**
    * @see mitll.langtest.client.taboo.ReceiverExerciseFactory#startGame()
-   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver
    * @param userID
    * @param startOver
    * @return
@@ -1053,23 +1049,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver
    * @param userID
    * @return
    */
   public Leaderboard getLeaderboard(long userID) {
     return db.getOnlineUsers().getLeaderboard(userID);
   }
-
-  /**
-   *
-   * @param userID
-   * @param isGiver
-   * @return
-   */
-/*  public GameInfo getGame(long userID, boolean isGiver) {
-    return db.getOnlineUsers().getGame(userID, isGiver);
-  }*/
 
   public void logMessage(String message) {
     String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client " + message;

@@ -71,7 +71,6 @@ public class UserManager {
   private static final int WEEK_HOURS = 24 * 7;
   private static final int DAY_HOURS = 24;
   private static final int ONE_YEAR = 24 * 365;
-  //private static final int ONE_MONTH_HOURS = 24 * 30;
 
   private static final int EXPIRATION_HOURS = WEEK_HOURS;
   private static final int SHORT_EXPIRATION_HOURS = DAY_HOURS;
@@ -97,6 +96,8 @@ public class UserManager {
   private static final String LOGIN_TYPE = "loginType";
   private static final int NATIVE_MONTHS = 20 * 12;
   private static final int INACTIVE_PERIOD_MILLIS = 1000 * 60 * 10; // ten minutes
+  private static final int USER_ID_MAX_LENGTH = 80;
+
   private final LangTestDatabaseAsync service;
   private final UserNotification langTest;
   private final boolean useCookie = false;
@@ -607,7 +608,10 @@ public class UserManager {
         // System.out.println("login button got click " + event);
 
         final String userID = user.box.getText();
-        if (userID.length() == 0) {
+        if (userID.length() > USER_ID_MAX_LENGTH) {
+          markError(user, "Please enter a user id of reasonable length.");
+        }
+        else if (userID.length() == 0) {
           markError(user, "Please enter a user id.");
         } else {
           service.userExists(userID, new AsyncCallback<Integer>() {
@@ -682,10 +686,10 @@ public class UserManager {
                                                      }
                                                    }
                                                  });
-    // System.out.println("addKeyHandler made click handler " + keyHandler);
+    System.out.println("UserManager.addKeyHandler made click handler " + keyHandler);
   }
 
-  private class ButtonClickEvent extends ClickEvent{
+  private class ButtonClickEvent extends ClickEvent {
         /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   }
 
