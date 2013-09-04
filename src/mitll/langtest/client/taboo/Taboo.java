@@ -17,9 +17,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.TabooState;
 
@@ -118,7 +116,6 @@ public class Taboo {
     });
   }
 
-  //private String lastSelection = "NOT_SET_BEFORE";
   /**
    * Keep checking that the partner is still active, and if the giver, check if selection state has changed.
    * @param fuserid
@@ -195,7 +192,6 @@ public class Taboo {
   }
 
   /**
-   * TODO : use ModalInfoDialog
    * @see #checkForPartner(long)
    * @param userID
    * @param title
