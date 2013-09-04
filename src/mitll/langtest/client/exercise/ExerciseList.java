@@ -457,7 +457,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see #useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
    * @param result
    */
-  protected void makeExercisePanel(Exercise result) {
+  public void makeExercisePanel(Exercise result) {
     Panel exercisePanel = factory.getExercisePanel(result);
     innerContainer.setWidget(exercisePanel);
   }
