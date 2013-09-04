@@ -50,7 +50,7 @@ public class Game extends GameInfo {
       ") items, " + "startGame... returning " + exercisesToDo.size() + " : " + exercisesToDo);
 
     this.itemsInGame = exercisesToDo;
-    initNumExercises = itemsInGame.size();
+    //initNumExercises = itemsInGame.size();
     return exercisesToDo;
   }
 
