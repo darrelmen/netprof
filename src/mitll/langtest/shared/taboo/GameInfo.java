@@ -18,7 +18,7 @@ public class GameInfo implements IsSerializable {
   protected int numGames;
   protected List<ExerciseShell> itemsInGame;
   protected int gameCount = 0;
-  protected int initNumExercises = 0;
+//  protected int initNumExercises = 0;
   protected long timestamp = System.currentTimeMillis();
 
   public GameInfo() {}
@@ -26,8 +26,9 @@ public class GameInfo implements IsSerializable {
   public GameInfo(int numGames, List<ExerciseShell> itemsInGame, long timestamp, int gameCount) {
     this.numGames = numGames;
     this.itemsInGame = itemsInGame;
+    if (itemsInGame.isEmpty()) System.err.println("GameInfo :game has no items???\n\n\n");
     this.timestamp = timestamp;
-    this.initNumExercises = itemsInGame == null ? -1 : itemsInGame.size();
+    //this.initNumExercises = itemsInGame == null ? -1 : itemsInGame.size();
     this.gameCount = gameCount;
    // System.out.println("GameInfo : num exercises : " + initNumExercises);
   }
@@ -56,7 +57,7 @@ public class GameInfo implements IsSerializable {
     return -1;
   }
 
-  public ExerciseShell getFirst() { return itemsInGame.iterator().next(); }
+ // public ExerciseShell getFirst() { return itemsInGame.iterator().next(); }
 
   public int getNumGames() {
     return numGames;
@@ -76,9 +77,9 @@ public class GameInfo implements IsSerializable {
     return (getNumExercises()-1) == getIndexOfItem(e);
   }
 
-  public int getInitialNumExercises() {
+/*  public int getInitialNumExercises() {
     return initNumExercises;
-  }
+  }*/
 
   protected void restartGames() {
     gameCount = 0;
