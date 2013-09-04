@@ -15,6 +15,7 @@ import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.taboo.AnswerBundle;
 import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
@@ -227,11 +228,12 @@ public interface LangTestDatabase extends RemoteService {
 
   /**
    * Giver checks if receiver answered correctly, given last stimulus.
+   *
    * @param giverUserID
    * @param stimulus
    * @return
    */
-  int checkCorrect(long giverUserID, String stimulus);
+  AnswerBundle checkCorrect(long giverUserID, String stimulus);
 
   GameInfo startGame(long userID, boolean startOver);
   void postGameScore(long userID, int score, int maxPossibleScore);
