@@ -466,7 +466,7 @@ public class DatabaseImpl implements Database {
    */
   public void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean correct) {
     getOnlineUsers().registerAnswer(userid, stimulus, answer, correct);
-    addAnswer((int) userid, "plan",exerciseID,stimulus,answer,correct);
+    addAnswer((int) userid, "plan", exerciseID,stimulus,answer,correct);
   }
 
   /**
@@ -517,26 +517,26 @@ public class DatabaseImpl implements Database {
     return getFlashcardResponse(idToExercise, userStateWrapper);
   }
 
-  private Map<Long,Integer> userToCorrect = new HashMap<Long, Integer>();
+  private Map<Long, Integer> userToCorrect = new HashMap<Long, Integer>();
 
   public ScoreInfo getScoreInfo(long userID, long timeTaken, Map<String, Collection<String>> selection) {
     UserStateWrapper userStateWrapper = userToState.get(userID);
 
-    int correct = userStateWrapper.getPcorrect();
-    int incorrect =  userStateWrapper.getPincorrect();
+    //int correct = userStateWrapper.getPcorrect();
+    int incorrect = userStateWrapper.getPincorrect();
 
-  //  logger.warn("prev " + correct + " inc " + incorrect);
-   //  logger.warn("now  " + userStateWrapper.correct + " inc " + userStateWrapper.incorrect);
+    //  logger.warn("prev " + correct + " inc " + incorrect);
+    //  logger.warn("now  " + userStateWrapper.correct + " inc " + userStateWrapper.incorrect);
 
     //int diffC = Math.max(0,userStateWrapper.correct - correct);
-    int diffI = Math.max(0,userStateWrapper.getIncorrect() - incorrect);
-     logger.warn("diff  " +userToCorrect.get(userID) + " inc " + diffI);
+    int diffI = Math.max(0, userStateWrapper.getIncorrect() - incorrect);
+    logger.warn("diff  " + userToCorrect.get(userID) + " inc " + diffI);
 
     ScoreInfo scoreInfo = new ScoreInfo(userID, userToCorrect.get(userID), 0, timeTaken, selection);
     userStateWrapper.setPcorrect(userStateWrapper.getCorrect());
     userStateWrapper.setPincorrect(userStateWrapper.getIncorrect());
 
-    userToCorrect.put(userID,0);
+    userToCorrect.put(userID, 0);
     return scoreInfo;
   }
 
