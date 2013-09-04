@@ -14,6 +14,7 @@ import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.taboo.AnswerBundle;
 import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
@@ -55,8 +56,6 @@ public interface LangTestDatabaseAsync {
   void ensureMP3(String wavFile, AsyncCallback<Void> async);
 
   void getExercise(String id, AsyncCallback<Exercise> async);
-
- // void getExercise(String id, long userID, AsyncCallback<Exercise> async);
 
   void getScoreForAnswer(Exercise e, int questionID, String answer, AsyncCallback<Double> async);
 
@@ -150,7 +149,7 @@ public interface LangTestDatabaseAsync {
 
   void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean isCorrect, AsyncCallback<Void> async);
 
-  void checkCorrect(long giverUserID, String stimulus, AsyncCallback<Integer> async);
+  void checkCorrect(long giverUserID, String stimulus, AsyncCallback<AnswerBundle> async);
 
   void registerSelectionState(long giver, Map<String, Collection<String>> selectionState, AsyncCallback<Void> async);
 
@@ -159,6 +158,4 @@ public interface LangTestDatabaseAsync {
   void postGameScore(long userID, int score, int maxPossibleScore, AsyncCallback<Void> async);
 
   void getLeaderboard(long userID, AsyncCallback<Leaderboard> async);
-
-//  void getGame(long userID, boolean isGiver, AsyncCallback<GameInfo> async);
 }
