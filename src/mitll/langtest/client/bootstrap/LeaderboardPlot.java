@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Timer;
 import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.flashcard.ScoreInfo;
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -22,20 +23,36 @@ import java.util.Map;
 
 public class LeaderboardPlot {
   public static final float HALF = (1f / 4f);
+  public static final int AUTO_HIDE_DELAY = 3000;
 
   public void showLeaderboardPlot(Leaderboard leaderboard, final long userID, int gameTimeSeconds,
                                   Map<String, Collection<String>> currentSelection,
                                   String prompt,
-                                  final ClickHandler onYes, final ClickHandler onNo) {
+                                  final ClickHandler onYes, final ClickHandler onNo,int autoHideDelay) {
     List<ScoreInfo> scores = leaderboard.getScores(currentSelection);
 
-    showLeaderboardPlot(scores, userID, gameTimeSeconds, currentSelection, prompt,onYes, onNo);
+    showLeaderboardPlot(scores, userID, gameTimeSeconds, currentSelection, prompt,onYes, onNo,autoHideDelay);
   }
 
-  private void showLeaderboardPlot(List<ScoreInfo> scores, final long userID, int gameTimeSeconds,
+  public Modal showLeaderboardPlot(Leaderboard leaderboard,final long userID, int gameTimeSeconds,
+                                   Map<String, Collection<String>> currentSelection,
+                                   String prompt,int autoHideDelay) {
+    List<ScoreInfo> scores = leaderboard.getScores(currentSelection);
+
+    return showLeaderboardPlot(scores, userID, gameTimeSeconds, currentSelection, prompt, null, null,autoHideDelay);
+  }
+
+
+  public Modal showLeaderboardPlot(List<ScoreInfo> scores, final long userID, int gameTimeSeconds,
+                                   Map<String, Collection<String>> currentSelection,
+                                   String prompt,int autoHideDelay) {
+    return showLeaderboardPlot(scores, userID, gameTimeSeconds, currentSelection, prompt, null, null, autoHideDelay);
+  }
+
+  private Modal showLeaderboardPlot(List<ScoreInfo> scores, final long userID, int gameTimeSeconds,
                                   Map<String, Collection<String>> currentSelection,
                                   String prompt,
-                                  final ClickHandler onYes, final ClickHandler onNo) {
+                                  final ClickHandler onYes, final ClickHandler onNo, int autoHideDelay) {
     int pbCorrect = 0;
     int top = 0;
     float total = 0;
@@ -118,49 +135,62 @@ public class LeaderboardPlot {
     modal.setMaxHeigth("650px");
     modal.setHeight("550px");
     modal.add(chart);
-    Button yesButton = new Button();
-/*    yesButton.setHeight("30px");
-    yesButton.setWidth("50px");*/
-    yesButton.setType(ButtonType.PRIMARY);
-    yesButton.setText("Yes");
-    yesButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        modal.hide();
-       // bootstrapFlashcardExerciseList.goAgain(userID);
-        onYes.onClick(event);
-      }
-    });
 
-    FluidRow row = new FluidRow();
-    row.add(new Column(4, yesButton));
-    row.add(new Column(4, new Heading(4)));
-    Button noButton = new Button("No");
-    noButton.setType(ButtonType.INVERSE);
+    Button yesButton = null;
+    Button noButton = null;
 
-    row.add(new Column(4, noButton));
-    noButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        modal.hide();
-     //   bootstrapFlashcardExerciseList.stopForNow(userID);
-        onNo.onClick(event);
-      }
-    });
+    if (onYes != null) {
+      yesButton = new Button("Yes");
+      yesButton.setType(ButtonType.PRIMARY);
+      yesButton.addClickHandler(new ClickHandler() {
+        public void onClick(ClickEvent event) {
+          modal.hide();
+          onYes.onClick(event);
+        }
+      });
+      yesButton.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          modal.hide();
+        }
+      });
+    }
 
-    yesButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        modal.hide();
-      }
-    });
+    if (onNo != null) {
+      noButton = new Button("No");
+      noButton.setType(ButtonType.INVERSE);
+      noButton.addClickHandler(new ClickHandler() {
+        public void onClick(ClickEvent event) {
+          modal.hide();
+          onNo.onClick(event);
+        }
+      });
+    }
 
-    FluidRow row1 = new FluidRow();
-    Column column = new Column(12);
-    row1.add(column);
-//    String prompt = "Would you like to try again?";
-    column.add(new Heading(4, prompt));
-    modal.add(row1);
-    modal.add(row);
+    FluidRow promptRow = new FluidRow();
+    Column column = new Column(12,new Heading(4, prompt));
+    promptRow.add(column);
+    modal.add(promptRow);
+
+    if (onYes != null || onNo != null) {
+      FluidRow row = new FluidRow();
+      if (yesButton != null) row.add(new Column(4, yesButton));
+      row.add(new Column(4, new Heading(4)));
+      if (noButton != null)  row.add(new Column(4, noButton));
+      modal.add(row);
+    }
+    else {
+      Timer t = new Timer() {
+        @Override
+        public void run() {
+          modal.hide();
+        }
+      };
+      t.schedule(autoHideDelay);
+    }
+
     modal.show();
+    return modal;
   }
 
   private float over(float pbCorrect) {
