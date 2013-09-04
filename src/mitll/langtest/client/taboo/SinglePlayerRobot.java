@@ -7,7 +7,6 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.taboo.Game;
-import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 
 import java.util.Collections;
