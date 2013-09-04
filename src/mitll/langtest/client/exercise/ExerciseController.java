@@ -25,7 +25,7 @@ public interface ExerciseController {
   void loadExercise(ExerciseShell exerciseShell);
   boolean loadNextExercise(ExerciseShell current);
   boolean loadNextExercise(String id);
-  boolean isLastExercise(String exerciseID);
+  void makeExercisePanel(Exercise current);
   void setGame(GameInfo game);
   void startOver();
 
