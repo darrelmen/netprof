@@ -22,6 +22,14 @@ public class ScoreInfo implements IsSerializable {
 
   public ScoreInfo() {}
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getScoreInfo(long, long, java.util.Map)
+   * @param userid
+   * @param correct
+   * @param incorrect
+   * @param timeTaken
+   * @param selection
+   */
   public ScoreInfo(long userid, int correct, int incorrect, long timeTaken, Map<String, Collection<String>> selection) {
     this.userid = userid;
     this.correct = correct;

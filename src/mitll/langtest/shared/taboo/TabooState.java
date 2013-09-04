@@ -1,10 +1,6 @@
 package mitll.langtest.shared.taboo;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.shared.ExerciseShell;
-
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
