@@ -1,17 +1,5 @@
 package mitll.langtest.client.taboo;
 
-import com.github.gwtbootstrap.client.ui.Modal;
-import com.github.gwtbootstrap.client.ui.event.HideEvent;
-import com.github.gwtbootstrap.client.ui.event.HideHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.bootstrap.LeaderboardPlot;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.flashcard.Leaderboard;
-import mitll.langtest.shared.taboo.GameInfo;
-
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
