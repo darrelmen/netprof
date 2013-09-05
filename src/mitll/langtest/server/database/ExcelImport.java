@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -849,8 +851,18 @@ public class ExcelImport implements ExerciseDAO {
       this.wordToAnswers = wordToAnswers;
     }
   }
-
   public static void main(String [] arg) {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    try {
+      System.out.println(sdf.parse("2013-09-25").getTime());      // chapter 11
+      System.out.println(sdf.parse("2013-10-08").getTime());
+      System.out.println(sdf.parse("2013-10-29").getTime());
+      System.out.println(sdf.parse("2013-11-13").getTime());     // chapter 14
+    } catch (ParseException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+  }
+    public static void main2(String [] arg) {
 /*
     ExcelImport config = new ExcelImport(
       "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\english\\ESL_ELC_5071-30books_chapters.xlsx", false, "config\\bestAudio", "war\\config\\english", true, "English");
