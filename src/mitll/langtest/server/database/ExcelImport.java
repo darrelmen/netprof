@@ -43,6 +43,8 @@ import java.util.Set;
  */
 public class ExcelImport implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(ExcelImport.class);
+
+  private static final boolean SHOW_SKIPS = false;
   private static final int MIN_TABOO_ITEMS = 1;
 
   private final boolean isFlashcard;
@@ -369,41 +371,17 @@ public class ExcelImport implements ExerciseDAO {
                 meaning, context, segmentedChinese, promptInEnglish);
               if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
                 boolean valid = true;
-                boolean enoughItems = true;
+              //  boolean enoughItems = true;
                 if (stimulusInfo != null) {
-                  String wordToGuess = tabooEnglish ? imported.getEnglishSentence().trim() : imported.getRefSentence().trim();
-                  List<String> clues = stimulusInfo.wordToClues.get(wordToGuess);
-                  valid = (clues != null);
-                  if (valid) {
-                    withExamples.add(wordToGuess);
-                    enoughItems = clues.size() > MIN_TABOO_ITEMS;
-                    if (enoughItems) {
-                      imported.getQuestions().clear();
-                      for (int i = 0; i < clues.size(); i++) {
-                        String clue = clues.get(i);
-                        List<List<String>> answersForEachClue = stimulusInfo.wordToAnswers.get(wordToGuess);
-                        List<String> answers = answersForEachClue == null ? Collections.singletonList(wordToGuess) : answersForEachClue.get(i);
-
-                        imported.addQuestion(tabooEnglish ? Exercise.EN : Exercise.FL, clue, answers.get(0), answers);
-                        //logger.debug("exercise id " + imported.getID() + " num clues " + clues.size() + " clue " + clue + " answer " + answers.get(0) + " : " + imported.getQuestions());
-                      }
-                      //logger.debug("exercise id " + imported.getID() + " has questions " + imported.getQuestions());
-                    } else {
-                      logger.warn("not enough items for " + wordToGuess);
-                    }
-                  }
+                  valid = addTabooQuestions(withExamples, imported);
                 }
-                if (valid && enoughItems) {
+                if (valid) {
                   recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
                   // keep track of synonyms (or better term)
                   rememberExercise(exercises, englishToExercises, imported);
                 } else {
-                  if (valid) {
-                    //logger.debug("skipping exercise " + imported.getID() + " : '" + imported.getEnglishSentence() + "' since not enough sample sentences");
-                  } else {
-                    //logger.debug("skipping exercise " + imported.getID() + " : '" + imported.getEnglishSentence() + "' since no samples sentences");
-                  }
+                    if (SHOW_SKIPS) logger.debug("skipping exercise " + imported.getID() + " : '" + imported.getEnglishSentence() + "' since no sample sentences");
                 }
               }
               else {
@@ -431,8 +409,8 @@ public class ExcelImport implements ExerciseDAO {
     } catch (Exception e) {
       logger.error("got " + e,e);
     }
-       logger.info("got examples " + withExamples);
-    logger.info("max id " +id);
+    if (stimulusInfo != null) logger.info("got  " + withExamples.size() + " examples out of " + exercises.size() + " exercises.");
+    logger.info("max exercise id = " +id);
     if (skipped > 0) {
       logger.info("Skipped " + skipped + " entries with missing audio. " + (100f*((float)skipped)/(float)id)+ "%");
     }
@@ -443,6 +421,33 @@ public class ExcelImport implements ExerciseDAO {
       logger.info("Skipped " + semis + " entries with semicolons or " + (100f*((float)semis)/(float)id)+ "%");
     }
     return exercises;
+  }
+
+  private boolean addTabooQuestions(Set<String> withExamples, Exercise imported) {
+    boolean valid;
+    String wordToGuess = tabooEnglish ? imported.getEnglishSentence().trim() : imported.getRefSentence().trim();
+    List<String> clues = stimulusInfo.wordToClues.get(wordToGuess);
+    valid = (clues != null);
+    if (valid) {
+      withExamples.add(wordToGuess);
+      boolean enoughItems = clues.size() > MIN_TABOO_ITEMS;
+      if (enoughItems) {
+        imported.getQuestions().clear();
+        for (int i = 0; i < clues.size(); i++) {
+          String clue = clues.get(i);
+          List<List<String>> answersForEachClue = stimulusInfo.wordToAnswers.get(wordToGuess);
+          List<String> answers = answersForEachClue == null ? Collections.singletonList(wordToGuess) : answersForEachClue.get(i);
+
+          imported.addQuestion(tabooEnglish ? Exercise.EN : Exercise.FL, clue, answers.get(0), answers);
+          //logger.debug("exercise id " + imported.getID() + " num clues " + clues.size() + " clue " + clue + " answer " + answers.get(0) + " : " + imported.getQuestions());
+        }
+        //logger.debug("exercise id " + imported.getID() + " has questions " + imported.getQuestions());
+      } else {
+        logger.warn("not enough items for " + wordToGuess);
+        valid = enoughItems;
+      }
+    }
+    return valid;
   }
 
   private void rememberExercise(List<Exercise> exercises, Map<String, List<Exercise>> englishToExercises, Exercise imported) {
@@ -635,7 +640,7 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   /**
-   * @see #getExercise(String, FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, String)
+   * @see #getExercise(String, FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, String,boolean)
    * @param id
    * @param dao
    * @param english
@@ -794,17 +799,17 @@ public class ExcelImport implements ExerciseDAO {
             if (split.length < 3) {
               logger.warn("bad line " + line2 + " len " + split.length);
             } else {
-              String word = split[2].trim();
-
+              String word = split[2].trim().toLowerCase();
 
               String sentence = split[0];
-
+              String answer = split[1];
               List<String> samples = wordToSamples.get(word);
               if (samples == null) wordToSamples.put(word, samples = new ArrayList<String>());
+              //if (!sentence.endsWith("?") || true) { // replace ? with underscore
+
+              sentence = getBlankSequence(sentence, answer);
+             // }
               samples.add(sentence);
-
-
-              String answer = split[1];
 
               List<List<String>> answers = wordToAnswers.get(word);
               if (answers == null) wordToAnswers.put(word, answers = new ArrayList<List<String>>());
@@ -813,13 +818,26 @@ public class ExcelImport implements ExerciseDAO {
           }
         }
       }
-      logger.debug("populateExampleSentences : read " + c + " examples");
+      logger.debug("readSampleSentenceFile2 : read " + c + " examples");
 
       reader.close();
     } catch (IOException e) {
       logger.error("Got " + e, e);
     }
     return new StimulusInfo(wordToSamples, wordToAnswers);
+  }
+
+  private String getBlankSequence(String sentence, String answer) {
+    String[] words = answer.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
+    StringBuilder builder = new StringBuilder();
+    for (String token : words) {
+      builder.append(token.replaceAll(".","_"));
+      builder.append(" ");
+    }
+    String sequenceOfBlanks = builder.toString().trim();
+
+    sentence = sentence.replace("?", sequenceOfBlanks);
+    return sentence;
   }
 
   private static class StimulusInfo {

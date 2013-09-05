@@ -3,7 +3,6 @@ package mitll.langtest.client.taboo;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.taboo.Game;
@@ -35,7 +34,6 @@ public class SinglePlayerRobot {
   /**
    * @see mitll.langtest.client.LangTest#setTabooFactory(long, boolean, boolean)
    * @param service
-   * @param propertyHandler
    */
   public SinglePlayerRobot(LangTestDatabaseAsync service) {
     this.service = service;
