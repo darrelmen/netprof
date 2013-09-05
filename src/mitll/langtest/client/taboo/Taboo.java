@@ -86,14 +86,14 @@ public class Taboo {
         if (result.isJoinedPair()) {
           if (result.isGiver()) {
             afterRoleDeterminedConfirmation(fuserid,
-              "You are the giver",
-              "Now choose the next sentence your partner will see to guess the vocabulary word.",
+              "You found a partner to play with!",
+              "You are the giver. Now choose the next clue your partner will see to guess the vocabulary word.",
               SIGN_OUT_TO_STOP_PLAYING,
               true);
           } else {
             afterRoleDeterminedConfirmation(fuserid,
-              "You are the receiver",
-              "Now choose the word that best fills in the blank in the sentence.",
+              "You found a partner to play with!",
+              "You are the receiver. Now choose the word or phrase that fills in the blank in the sentence.",
               SIGN_OUT_TO_STOP_PLAYING,
               false);
           }
@@ -104,7 +104,10 @@ public class Taboo {
           if (!inSinglePlayer) {
             System.out.println("me : " + fuserid + " doing single player : " + inSinglePlayer);
             inSinglePlayer = true;
-            langTest.setTabooFactory(fuserid, false, true);
+            langTest.setTabooFactory(fuserid,
+              false, // receiver
+              true // single player
+            );
           }
           pollForPartner();
         }
@@ -138,13 +141,13 @@ public class Taboo {
                 Map<String,Collection<String>> typeToSelection = partnerState.getTypeToSelection();
 //                System.out.println("pollForPartnerOnline : checked if receiver partner of me, " + fuserid + ", is online and got state " + typeToSelection);
                 langTest.setSelectionState(typeToSelection);  // TODO user controller...
+                controller.setGameOnGiver(partnerState.getGameInfo());
               }
               else {
 /*                System.out.println("pollForPartnerOnline : checked if " +
                   (isGiver ? " receiver partner " : " giver partner ") +
                   " of me, " + fuserid + ", is online.");*/
               }
-              controller.setGame(partnerState.getGameInfo());
             } else {
               onlineTimer.cancel();
               if (userManager.isActive()) {
@@ -223,9 +226,9 @@ public class Taboo {
     final Modal askGiverReceiver = new Modal(true);
     askGiverReceiver.setCloseVisible(false);
 
-    askGiverReceiver.setTitle("Choose role");
+    askGiverReceiver.setTitle("Choose role in game");
     Heading w = new Heading(4);
-    w.setText("Would you like to give items or receive them?");
+    w.setText("Would you like to give clues or guess words?");
     askGiverReceiver.add(w);
     final ControlGroup recordingStyle = new ControlGroup();
     Controls controls = new Controls();
