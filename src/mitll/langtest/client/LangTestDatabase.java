@@ -237,6 +237,6 @@ public interface LangTestDatabase extends RemoteService {
 
   GameInfo startGame(long userID, boolean startOver);
   void postGameScore(long userID, int score, int maxPossibleScore);
-  Leaderboard getLeaderboard(long userID);
+  Leaderboard getLeaderboard(Map<String, Collection<String>> selectionState);
 //  GameInfo getGame(long userID, boolean isGiver);
 }
