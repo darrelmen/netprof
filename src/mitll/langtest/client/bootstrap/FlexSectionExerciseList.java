@@ -740,13 +740,4 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       return !children.isEmpty();
     }
   }
-
-  /**
-   * @see #setOtherListBoxes(java.util.Map)
-   * @param result
-   */
-  @Override
-  protected void populateListBoxAfterSelection(Map<String, Collection<String>> result) {
-    throw new IllegalArgumentException("don't call me");
-  }
 }
