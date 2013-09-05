@@ -31,7 +31,6 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
 import mitll.langtest.shared.flashcard.Leaderboard;
-import mitll.langtest.shared.flashcard.ScoreInfo;
 
 import java.util.Collection;
 import java.util.List;
