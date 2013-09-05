@@ -62,14 +62,13 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class ReceiverExerciseFactory extends ExercisePanelFactory {
-  private static final int POPUP_DURATION = 3500;
+  private static final int POPUP_DURATION = 2500;
   private static final int CHECK_FOR_STIMULUS_INTERVAL = 1000;
   public static final int MAX_CLUES_TO_GIVE = 5;
 
   private SinglePlayerRobot singlePlayerRobot;
   private int exerciseCount = 0;
   private int stimulusCount;
-///  private int correctCount, incorrectCount;
   private int score;
   private Map<String, Collection<String>> selectionState;
 
@@ -217,10 +216,6 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       FluidRow row = new FluidRow();
       container.add(row);
       row.add(send);
-     // row.add(correctImage);
-    //  correctImage.setVisible(true);
-    //  row.add(incorrectImage);
-    //  incorrectImage.setVisible(false);
 
       add(container);
       add(warnNoFlash);
@@ -268,10 +263,9 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       boolean movingOnToNext = isCorrect || onLast;
 
       if (isCorrect) {
-       // controller.addAdHocExercise(answer);
         soundFeedback.playCorrect();
 
-        int i = MAX_CLUES_TO_GIVE /*displayedStimulus.getNumClues()*/ - stimulusCount + 1;
+        int i = MAX_CLUES_TO_GIVE - stimulusCount + 1;
        // System.out.println("sendAnswer : adding " + i + " to " + score + " clues " + displayedStimulus.getNumClues() + " stim " + stimulusCount);
         score += i;
         System.out.println("sendAnswer : score " + score + " total clues " +gameInfo.getTotalClues());
@@ -280,7 +274,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         exerciseCount++;
         stimulusCount = 0;
         setCorrect();
-        showPopup("Correct! +" + i + " points." + (singlePlayerRobot == null ? " Please wait for the next item." : ""), correctImage);
+        showPopup("Correct! +" + i + " points." + (singlePlayerRobot == null ? " Please wait for the next item." : ""), correctImage, 3500);
         maybeGoToNextItem(service, controller, outer,isCorrect,movingOnToNext);
       }
       else {
@@ -367,6 +361,10 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
     private void showPopup(String html, Image image) {
       showPopup(html, image,null, POPUP_DURATION, null);
+    }
+
+    private void showPopup(String html, Image image, int dur) {
+      showPopup(html, image,null, dur, null);
     }
 
     private void showPopup(String html, Image image, Image image2) {
