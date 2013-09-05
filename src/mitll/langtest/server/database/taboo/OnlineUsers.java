@@ -388,11 +388,14 @@ public class OnlineUsers {
     //logger.debug("OnlineUsers.checkCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id);
 
     AnswerBundle answerBundle = receiverToAnswer.remove(receiver);// sent response to giver -- no need to remember them anymore
-    if (answerBundle == null || !answerBundle.getStimulus().equals(stimulus)) {
-      //    logger.debug("\tno answer yet...");
+    if (answerBundle == null) {
+      answerBundle = new AnswerBundle();
+    }
+    else if (!answerBundle.getStimulus().endsWith(stimulus)) {
+      logger.info("\tOnlineUsers.checkCorrect : answer stim " + answerBundle.getStimulus() + " not same as " + stimulus);
       answerBundle = new AnswerBundle();
     } else {
-      logger.debug("\tcheckCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id + " got " + answerBundle);
+      logger.debug("\tOnlineUsers.checkCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id + " got " + answerBundle);
     }
     return answerBundle;
   }
