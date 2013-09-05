@@ -26,7 +26,7 @@ public interface ExerciseController {
   boolean loadNextExercise(ExerciseShell current);
   boolean loadNextExercise(String id);
   void makeExercisePanel(Exercise current);
-  void setGame(GameInfo game);
+  void setGameOnGiver(GameInfo game);
   void startOver();
 
   void askForRandomExercise(AsyncCallback<Exercise> callback);
