@@ -28,7 +28,7 @@ public interface ListInterface extends RequiresResize {
    * @param expectedGrades
    */
   void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades);
-  ExercisePanelFactory getFactory();
+ // ExercisePanelFactory getFactory();
 
   void rememberAndLoadFirst(List<ExerciseShell> exercises);
 
