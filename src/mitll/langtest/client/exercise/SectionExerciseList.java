@@ -42,9 +42,9 @@ public class SectionExerciseList extends PagingExerciseList {
   public static final String ANY = "Clear";
   protected Panel sectionPanel;
   protected long userID;
-  protected boolean showListBoxes;
+  protected final boolean showListBoxes;
 
-  protected Map<String,SectionWidget> typeToBox = new HashMap<String, SectionWidget>();
+  protected final Map<String,SectionWidget> typeToBox = new HashMap<String, SectionWidget>();
 
   /**
    * So the concern is that if we allow people to send bookmarks with items, we can allow them to skip
@@ -52,7 +52,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * I.e. when a new user logs in, we want them to do all of their items in the order we've chosen
    * for them (least answered/recorded first), and not let them skip forward in the list.
    */
-  private boolean includeItemInBookmark = false;
+  private final boolean includeItemInBookmark = false;
 
   /**
    * @see mitll.langtest.client.LangTest#makeExerciseList
@@ -105,7 +105,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param result
    * @param userID
    */
-  protected void useInitialTypeToSectionMap(Map<String, Map<String, Integer>> result, long userID) {
+  private void useInitialTypeToSectionMap(Map<String, Map<String, Integer>> result, long userID) {
     sectionPanel.clear();
 
     //System.out.println("useInitialTypeToSectionMap for " + userID);
@@ -122,7 +122,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param userID
    * @return panel with all the widgets
    */
-  protected Panel getWidgetsForTypes(Map<String, Map<String, Integer>> result, long userID) {
+  private Panel getWidgetsForTypes(Map<String, Map<String, Integer>> result, long userID) {
     final FlexTable flexTable = new FlexTable();
     int row = 0;
     Set<String> types = result.keySet();
@@ -177,8 +177,6 @@ public class SectionExerciseList extends PagingExerciseList {
     return listBox;
   }
 
-  protected void populateListBoxAfterSelection(Map<String, Collection<String>> result) {}
-
   /**
    * @see #getHistoryToken(String)
    * @param type
@@ -210,7 +208,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param listBox
    * @param sectionToCount
    */
-  protected void populateListBox(SectionWidget listBox,  Map<String, Integer>  sectionToCount) {
+  private void populateListBox(SectionWidget listBox,  Map<String, Integer>  sectionToCount) {
     List<String> items = getSortedItems(sectionToCount.keySet());
     listBox.populateTypeWidget(items, sectionToCount);
   }
@@ -316,7 +314,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @see #getWidgetsForTypes(java.util.Map, long)
    * @return
    */
-  protected Widget getEmailWidget() {
+  private Widget getEmailWidget() {
     FlexTable g = new FlexTable();
     int row = 0;
     g.setWidget(row, 0, new HTML("Share via "));
@@ -328,7 +326,7 @@ public class SectionExerciseList extends PagingExerciseList {
   }
 
   private Anchor studentLink;
-  protected Widget getHideBoxesWidget() {
+  private Widget getHideBoxesWidget() {
     studentLink = new Anchor("Link for Students", "#?showSectionWidgets=false");
     return studentLink;
   }
@@ -570,7 +568,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @param typeToSection
    */
-  protected void setOtherListBoxes(final Map<String, Collection<String>> typeToSection) {
+  private void setOtherListBoxes(final Map<String, Collection<String>> typeToSection) {
     System.out.println("setOtherListBoxes type " + typeToSection + " skipping!!! ------------- ");
   }
 
@@ -602,6 +600,11 @@ public class SectionExerciseList extends PagingExerciseList {
   }
 
   private String lastSelectionState = "NO_SELECTION_STATE";
+
+  /**
+   * @see mitll.langtest.client.LangTest#setSelectionState
+   * @param selectionState
+   */
   @Override
   public void setSelectionState(Map<String, Collection<String>> selectionState) {
     String newSelectionState = selectionState.toString().replace("[", "").replace("]", "").replace("{", "").replace("}", "").replace(" ", "");
@@ -631,7 +634,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @param selectionState
    */
-  protected void restoreListBoxState(SelectionState selectionState) {
+  private void restoreListBoxState(SelectionState selectionState) {
     Map<String, Collection<String>> selectionState2 = new HashMap<String, Collection<String>>();
 
     for (String type : typeToBox.keySet()) {
