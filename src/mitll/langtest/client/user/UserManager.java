@@ -648,8 +648,6 @@ public class UserManager {
         }
       }
     });
-    dialogBox.show();
-
     dialogBox.addHiddenHandler(new HiddenHandler() {
       @Override
       public void onHidden(HiddenEvent hiddenEvent) {
@@ -663,6 +661,8 @@ public class UserManager {
         addKeyHandler(login);
       }
     });
+
+    dialogBox.show();
   }
 
   private HandlerRegistration keyHandler;
@@ -694,7 +694,7 @@ public class UserManager {
   }
 
   private void removeKeyHandler() {
-    System.out.println("removeKeyHandler : " + keyHandler);
+    System.out.println("UserManager.removeKeyHandler : " + keyHandler);
 
     if (keyHandler != null) keyHandler.removeHandler();
   }
