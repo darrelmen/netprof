@@ -38,7 +38,7 @@ public class Game extends GameInfo {
   public List<ExerciseShell> startGame() {
     List<ExerciseShell> exercisesToDo = new ArrayList<ExerciseShell>();
     if (!anyGamesRemaining()) {
-      System.out.println("wrap around... ?");
+      System.out.println("startGame : wrap around... ?");
       restartGames();
     }
     int fromIndex = gameCount * OnlineUsers.GAME_SIZE;
@@ -50,13 +50,11 @@ public class Game extends GameInfo {
       ") items, " + "startGame... returning " + exercisesToDo.size() + " : " + exercisesToDo);
 
     this.itemsInGame = exercisesToDo;
-    //initNumExercises = itemsInGame.size();
+    setTotalClues(itemsInGame);
     return exercisesToDo;
   }
 
   public void resetToFirstGame() { gameCount = 0; }
-
-  public String toString() { return "Game : " + super.toString(); }
 
   public static <T> List<T> randomSample2(List<T> items, int m, Random rnd){
     if (m > items.size()) m = items.size();
