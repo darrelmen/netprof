@@ -12,10 +12,10 @@ import java.util.Date;
 * To change this template use File | Settings | File Templates.
 */
 public class AnswerBundle implements IsSerializable {
-  String stimulus;
+  private String stimulus;
   private String answer;
   private boolean correct;
-  long timestamp;
+  private long timestamp;
   private boolean receiverReplied;
 
   public AnswerBundle() {}
@@ -45,6 +45,10 @@ public class AnswerBundle implements IsSerializable {
 
   public boolean didReceiverReply() {
     return receiverReplied;
+  }
+
+  public String getStimulus() {
+    return stimulus;
   }
 
   public String toString() { return " answer '" + getAnswer() + "' is " +(isCorrect() ? "correct" : "incorrect") + " at " + new Date(timestamp);
