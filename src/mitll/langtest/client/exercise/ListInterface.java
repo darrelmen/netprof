@@ -93,7 +93,5 @@ public interface ListInterface extends RequiresResize {
 
   void hideExerciseList();
 
-  //void showExerciseList();
-
   void askForRandomExercise(AsyncCallback<Exercise> callback);
 }
