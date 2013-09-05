@@ -49,7 +49,8 @@ public class OnlineUsers {
   private Map<User,Map<String, Collection<String>>> receiverToState = new HashMap<User, Map<String, Collection<String>>>();
   private Map<User,Game> receiverToGame = new HashMap<User, Game>();
  // private Map<User,List<Leaderboard>> userToScores = new HashMap<User, List<Leaderboard>>();
-  private Map<User,Leaderboard> userToScores = new HashMap<User,Leaderboard>();
+ private Map<User,Leaderboard> userToScores = new HashMap<User,Leaderboard>();
+  private Map<String,Leaderboard> stateToScores = new HashMap<String,Leaderboard>();
 
 /*  private static class GameScore {
     public int score;
@@ -229,7 +230,7 @@ public class OnlineUsers {
     // if (gameItems == null) logger.error("getGame : game for " + userID + " has not started?");
     GameInfo gameInfo = game.getGameInfo();
     if (gameInfo.getTimestamp() != lastTimestamp) {
-      logger.info("getGame   for " + userID + " game info " + gameInfo);
+      logger.info("OnlineUsers.getGame for " + userID + " game info " + gameInfo);
       lastTimestamp = gameInfo.getTimestamp();
     }
     return gameInfo;
@@ -359,7 +360,8 @@ public class OnlineUsers {
     if (receiver == null) {
       return 1;
     }
-    logger.debug("sending " + stimulus + " to " + receiver + " from giver " + userid + " on last stim " + onLastStimulus);
+    logger.debug("OnlineUsers.sendStimulus : sending " + stimulus + " to " + receiver + " from giver " +
+      userid + " on last stim " + onLastStimulus + " game over " + isGameOver);
     receiverToStimulus.put(receiver, new StimulusAnswerPair(exerciseID, stimulus, answer, onLastStimulus, skippedItem, numClues, isGameOver));
     return 0;
   }
@@ -485,49 +487,61 @@ public class OnlineUsers {
       receiverToState.put(user, selectionState);
 
       Game game = receiverToGame.get(user);
-      logger.debug("previous game was " + game);
-      receiverToGame.put(user, new Game(exercisesForSection));
+      logger.debug("registerSelectionState.previous game was " + game);
+      Game newGame = new Game(exercisesForSection);
+      if (game != null && game.hasStarted()) {
+        newGame.startGame();
+      }
+      receiverToGame.put(user, newGame);
     }
   }
-
- // private final Leaderboard leaderboard = new Leaderboard();
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#postGameScore(long, int, int)
-   * @param userID
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
+   * @param receiverID
    * @param score
    * @param maxPossibleScore
    */
-  public void postGameScore(long userID, int score, int maxPossibleScore) {
-    User receiver = getUser(userID);
-    Map<String, Collection<String>> current = receiverToState.get(receiver);
+  public synchronized void postGameScore(long receiverID, int score, int maxPossibleScore) {
+    User receiver = getUser(receiverID);
+    Map<String, Collection<String>> selectionState = receiverToState.get(receiver);
+    Leaderboard leaderboard = stateToScores.get(selectionState.toString());
+    if (leaderboard == null) stateToScores.put(selectionState.toString(), leaderboard = new Leaderboard());
 
-    User giverForReceiver = getGiverForReceiver(userID);
-    if (giverForReceiver != null) {
+    User giverForReceiver = getGiverForReceiver(receiverID);
+
+    long giverID = giverForReceiver == null ? -1 : giverForReceiver.id;
+    leaderboard.addScore(new ScoreInfo(receiver.id, giverID, score, maxPossibleScore-score, 0l, selectionState));  // TODO fill in time taken?
+     logger.debug("state->scores now " + stateToScores);
+
+/*    if (giverForReceiver != null) {
       addGameScore(giverForReceiver, score, maxPossibleScore,current);
     }
-    addGameScore(receiver,score,maxPossibleScore,current);
+    addGameScore(receiver,score,maxPossibleScore,current);*/
   }
 
-  private void addGameScore(User giverForReceiver, int score, int maxPossibleScore, Map<String, Collection<String>> selectionState) {
-   /* List<GameScore> gameScores = userToScores.get(giverForReceiver);
+ /* private synchronized void addGameScore(User giverForReceiver, int score, int maxPossibleScore, Map<String, Collection<String>> selectionState) {
+   *//* List<GameScore> gameScores = userToScores.get(giverForReceiver);
     if (gameScores == null) {
       userToScores.put(giverForReceiver, gameScores = new ArrayList<GameScore>());
       gameScores.add(new GameScore(score, maxPossibleScore));
-    }*/
+    }*//*
     Leaderboard leaderboard = userToScores.get(giverForReceiver);
     if (leaderboard == null) userToScores.put(giverForReceiver, leaderboard = new Leaderboard());
-    leaderboard.addScore(new ScoreInfo(giverForReceiver.id,score,maxPossibleScore-score,0l,selectionState));  // TODO fill in time taken?
+    leaderboard.addScore(new ScoreInfo(giverForReceiver.id, , score, maxPossibleScore-score, 0l, selectionState));  // TODO fill in time taken?
   }
-
+*/
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getLeaderboard(long)
-   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
-   * @param userID
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver
+   * @param selectionState
    * @return
    */
-  public Leaderboard getLeaderboard(long userID) {
-    return userToScores.get(getUser(userID));
+  public synchronized Leaderboard getLeaderboard(Map<String, Collection<String>> selectionState) {
+    Leaderboard leaderboard = stateToScores.get(selectionState.toString());
+    if (leaderboard == null) logger.error("huh? no scores for " + selectionState.toString());
+    return leaderboard;
   }
 
   private static class Pair {
