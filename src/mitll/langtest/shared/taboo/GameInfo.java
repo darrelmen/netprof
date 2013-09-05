@@ -1,6 +1,7 @@
 package mitll.langtest.shared.taboo;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.client.taboo.ReceiverExerciseFactory;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 
@@ -18,19 +19,28 @@ public class GameInfo implements IsSerializable {
   protected int numGames;
   protected List<ExerciseShell> itemsInGame;
   protected int gameCount = 0;
-//  protected int initNumExercises = 0;
   protected long timestamp = System.currentTimeMillis();
+  private int totalClues = 0;
 
   public GameInfo() {}
 
   public GameInfo(int numGames, List<ExerciseShell> itemsInGame, long timestamp, int gameCount) {
     this.numGames = numGames;
     this.itemsInGame = itemsInGame;
-    if (itemsInGame.isEmpty()) System.err.println("GameInfo :game has no items???\n\n\n");
+    if (itemsInGame == null || itemsInGame.isEmpty()) {
+      System.err.println("GameInfo :game has no items???");
+    }
+    else {
+      setTotalClues(itemsInGame);
+    }
     this.timestamp = timestamp;
     //this.initNumExercises = itemsInGame == null ? -1 : itemsInGame.size();
     this.gameCount = gameCount;
-   // System.out.println("GameInfo : num exercises : " + initNumExercises);
+  }
+
+  protected void setTotalClues(List<ExerciseShell> itemsInGame) {
+    totalClues = itemsInGame.size() * ReceiverExerciseFactory.MAX_CLUES_TO_GIVE;
+   // System.out.println("GameInfo :totalClues : " + totalClues);
   }
 
   public ExerciseShell getNext(Exercise current) {
@@ -41,9 +51,11 @@ public class GameInfo implements IsSerializable {
     }
     else {
       return itemsInGame.get(indexOfItem + 1);
-    //  return shell.getID();
     }
   }
+
+  public int getTotalClues() { return totalClues; }
+
   public int getIndexOfItem(Exercise e) {
     return getIndexOfItem(e.getID());
   }
@@ -74,7 +86,10 @@ public class GameInfo implements IsSerializable {
   }
 
   public boolean onLast(Exercise e) {
-    return (getNumExercises()-1) == getIndexOfItem(e);
+    int i = getNumExercises() - 1;
+    int indexOfItem = getIndexOfItem(e);
+    System.out.println("GameInfo:onLast " + e.getID() + " last index " + i + " vs ex index " + indexOfItem);
+    return i == indexOfItem;
   }
 
 /*  public int getInitialNumExercises() {
@@ -102,5 +117,6 @@ public class GameInfo implements IsSerializable {
 
   public String toString() { return "GameInfo : " + (hasStarted() ? " started " : " not started ") +
     "Count " + gameCount + " total num games " +
-    numGames + " num exercises " + getNumExercises() + " timestamp " + new Date(timestamp); }
+    numGames + " num exercises " + getNumExercises() + " clues " + totalClues +
+    " timestamp " + new Date(timestamp); }
 }
