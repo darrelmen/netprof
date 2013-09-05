@@ -6,6 +6,7 @@ import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Controls;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.Row;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -22,6 +23,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
+import mitll.langtest.client.bootstrap.LeaderboardPlot;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -29,11 +31,13 @@ import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.taboo.AnswerBundle;
 import mitll.langtest.shared.taboo.Game;
 import mitll.langtest.shared.taboo.GameInfo;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,12 +62,14 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
   private static final int CHECK_FOR_CORRECT_POLL_PERIOD = 1000;
   public static final int MAX_CLUES = 3;
   public static final int MIN_BOGUS_STIM = 5;
-  public static final int MAX_CLUES_TO_SEND = ReceiverExerciseFactory.MAX_CLUES_TO_GIVE;
+  private static final int MAX_CLUES_TO_SEND = ReceiverExerciseFactory.MAX_CLUES_TO_GIVE;
   private int stimulusCount = 0;
   private GameInfo gameInfo;
+  private long lastTimestamp;
+  private int score;
 
-  GiverPanel giverPanel;
-
+  private GiverPanel giverPanel;
+  private Map<String, Collection<String>> typeToSection;
   /**
    * @param service
    * @param userFeedback
@@ -75,11 +81,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     super(service, userFeedback, controller);
   }
 
-  /**
-   * @see TabooExerciseList#rememberExercises(java.util.List)
-   * @deprecated
-   */
-  public void startOver() {}
+  public void setSelectionState(Map<String, Collection<String>> typeToSection) {  this.typeToSection = typeToSection; }
 
   /**
    * @see mitll.langtest.client.exercise.ExerciseList#makeExercisePanel
@@ -87,13 +89,12 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
    * @return
    */
   public Panel getExercisePanel(final Exercise e) {
-    System.out.println("GiverExerciseFactory.getExercisePanel getting panel ...");
+    System.out.println("GiverExerciseFactory.getExercisePanel getting panel ... for " +e.getID());
     controller.pingAliveUser();
 
     giverPanel = new GiverPanel(e);
     return giverPanel;
   }
-  private long lastTimestamp;
 
   /**
    * @see TabooExerciseList#setGame(mitll.langtest.shared.taboo.GameInfo)
@@ -104,16 +105,19 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     if (giverPanel != null) {
       int numExercises = game.getNumExercises();
       if (numExercises > -1 && game.getTimestamp() != lastTimestamp) {
-        System.out.println("setGame : last timestamp " + lastTimestamp + "/" + new Date(lastTimestamp)+
+        System.out.println("GiverExerciseFactory.setGame : last timestamp " + lastTimestamp + "/" + new Date(lastTimestamp)+
           " <> new timestamp " + game.getTimestamp() + "/" + new Date(game.getTimestamp())+
           " num exercises " + numExercises);
 
         stimulusCount = 0;
-
+        score = 0;
         giverPanel.showGame(gameInfo);
         this.gameInfo = game;
         lastTimestamp = game.getTimestamp();
       }
+    }
+    else {
+      System.out.println("GiverExerciseFactory.setGame panel is null");
     }
   }
 
@@ -128,7 +132,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     private Set<String> otherClues = new HashSet<String>();
     private Heading exerciseDisplay = new Heading(3);
     private Heading stimulus = new Heading(3);
-    private Set<String> validClues = new HashSet<String>();
+  //  private Set<String> validClues = new HashSet<String>();
     private String exerciseID;
 
     public GiverPanel(final Exercise exercise) {
@@ -315,7 +319,11 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       boolean differentExercise = lastSentExercise.length() > 0 && !lastSentExercise.equals(exerciseID);
       lastSentExercise = exerciseID;
 
-      boolean isGameOver = lastChoiceRemaining && gameInfo.onLast(exercise);
+      boolean onLast = gameInfo.onLast(exercise);
+
+      System.out.println(new Date() +" : sendStimulus lastSentExercise : " + lastSentExercise + " Sent '" + stimulus + "' on last " +onLast);
+
+      boolean isGameOver = /*lastChoiceRemaining &&*/ onLast;
       stimulusCount++;
       service.sendStimulus(user, exerciseID, stimulus, answer, lastChoiceRemaining,
         differentExercise, numClues, isGameOver, new AsyncCallback<Integer>() {
@@ -360,7 +368,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
 
       Set<Exercise.QAPair> allClues = new HashSet<Exercise.QAPair>();
 
-      validClues.clear();
+      //validClues.clear();
 
       List<Exercise.QAPair> notSentYet = getNotSentYetHints(clueAnswerPairs);
       Iterator<Exercise.QAPair> iterator = notSentYet.iterator();
@@ -371,7 +379,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
         if (!cluePhrases.contains(clue)) {
           cluePhrases.add(clue);
           allClues.add(next);
-          validClues.add(clue);
+         // validClues.add(clue);
         }
       }
    //   System.out.println("valid clues " + validClues.size() + " : " + validClues);
@@ -440,6 +448,9 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
           if (result.didReceiverReply()) {
             if (result.isCorrect()) {
               lastSentExercise = ""; // clear last sent hint -- they got it correct
+              int i = ReceiverExerciseFactory.MAX_CLUES_TO_GIVE /*displayedStimulus.getNumClues()*/ - stimulusCount + 1;
+             // System.out.println("sendAnswer : adding " + i + " to " + score + " clues " + displayedStimulus.getNumClues() + " stim " + stimulusCount);
+              score += i;
               stimulusCount = 0;
               showStimIndex();
               showPopup("They guessed correctly!  Moving on to next item.");
@@ -493,7 +504,6 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     }
   }
 
-
   private void showPopup(String html) {
     showPopup(html, null);
   }
@@ -518,12 +528,42 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
   private void loadNext(Exercise current) {
     if (gameInfo.onLast(current)) {
       System.out.println("\n\n\nGiver : game over! ");
-      showPopup("Game Over.");
+   //   showPopup("Game Over.");
+      showLeaderboard(/*service,controller*/);
     }
     else {
       ExerciseShell next = gameInfo.getNext(current);
       if (next == null) System.err.println("huh? nothing after " + current);
       else controller.loadExercise(next);
     }
+  }
+
+  private void showLeaderboard(/*final LangTestDatabaseAsync service, final ExerciseController controller*//*, final ReceiverPanel outer*/) {
+    //if (gameInfo.anyGamesRemaining()) {
+      service.getLeaderboard(typeToSection, new AsyncCallback<Leaderboard>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
+
+        @Override
+        public void onSuccess(Leaderboard result) {
+          if (result == null) System.err.println("huh? no leaderboard for " + typeToSection.toString());
+          else {
+            String message = "Game complete! Score was " + score + " out of " + gameInfo.getTotalClues();
+            Modal plot = new LeaderboardPlot().showLeaderboardPlot(result, controller.getUser(), 0, typeToSection,
+              message, 5000);
+          }
+         /* plot.addHideHandler(new HideHandler() {
+            @Override
+            public void onHide(HideEvent hideEvent) {
+              doNextGame(controller, service, outer);
+            }
+          });*/
+        }
+      });
+   /* } else {
+      showLeaderboard(service, controller, "Would you like to practice this chapter(s) again?",
+        "To continue playing, choose another chapter.");
+    }*/
   }
 }
