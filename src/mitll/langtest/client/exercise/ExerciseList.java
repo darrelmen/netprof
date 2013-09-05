@@ -33,7 +33,6 @@ import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -370,8 +369,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
+  /**
+   * @see #loadByIDFromToken(String)
+   * @param exerciseShell
+   */
   protected void askServerForExercise(ExerciseShell exerciseShell) {
-   // System.out.println("ExerciseList.askServerForExercise id = " + exerciseShell.getID());
+    System.out.println("ExerciseList.askServerForExercise id = " + exerciseShell.getID());
     service.getExercise(exerciseShell.getID(), new ExerciseAsyncCallback(exerciseShell));
   }
 
@@ -441,7 +444,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     makeExercisePanel(result);
 
     int i = getIndex(e);
-    System.out.println("useExercise : " +e.getID() + " index " +i);
+    System.out.println("ExerciseList.useExercise : " +e.getID() + " index " +i);
     if (i == -1) {
       System.err.println("can't find " + e + " in list of " + currentExercises.size() + " exercises.");
       return;
