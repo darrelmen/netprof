@@ -63,6 +63,8 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
   public static final int MAX_CLUES = 3;
   public static final int MIN_BOGUS_STIM = 5;
   private static final int MAX_CLUES_TO_SEND = ReceiverExerciseFactory.MAX_CLUES_TO_GIVE;
+  private static final int DELAY_MILLIS = 4000;
+  private static final String PLEASE_WAIT_FOR_RECEIVER_TO_ANSWER = "Please wait for receiver to answer...";
   private int stimulusCount = 0;
   private GameInfo gameInfo;
   private long lastTimestamp;
@@ -126,13 +128,12 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     private Map<RadioButton, Exercise.QAPair> choiceToExample;
     private Controls choice = new Controls();
     private final Button send = new Button("Send");
-    private Heading pleaseWait = new Heading(4, "Please wait for receiver to answer...");
+    private Heading pleaseWait = new Heading(4, PLEASE_WAIT_FOR_RECEIVER_TO_ANSWER);
     private List<Exercise.QAPair> clueAnswerPairs;
     private Set<Exercise.QAPair> otherExerciseClues = new HashSet<Exercise.QAPair>();
     private Set<String> otherClues = new HashSet<String>();
     private Heading exerciseDisplay = new Heading(3);
     private Heading stimulus = new Heading(3);
-  //  private Set<String> validClues = new HashSet<String>();
     private String exerciseID;
 
     public GiverPanel(final Exercise exercise) {
@@ -203,7 +204,8 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
 
       add(send);
       add(pleaseWait);
-      pleaseWait.setVisible(false);
+      pleaseWait.setText("");
+     // pleaseWait.setVisible(false);
     }
 
     /**
@@ -275,7 +277,8 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       if (stimulus != null) {
         sentItems.add(stimulus);
         send.setEnabled(false);
-        pleaseWait.setVisible(true);
+      //  pleaseWait.setVisible(true);
+        pleaseWait.setText(PLEASE_WAIT_FOR_RECEIVER_TO_ANSWER);
         controller.pingAliveUser();
         boolean lastChoiceRemaining = sentAllClues();
         if (lastChoiceRemaining) {
@@ -287,6 +290,21 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
         showPopup("Please select a sentence to send.");
       }
     }
+
+/*    private String getBlankSequence(Exercise.QAPair stimulus) {//String sentence, String answer) {
+      String sentence = stimulus.getQuestion();
+      String answer = stimulus.getAnswer();
+      String[] words = answer.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
+      StringBuilder builder = new StringBuilder();
+      for (String token : words) {
+        builder.append(token.replaceAll(".","_"));
+        builder.append(" ");
+      }
+      String sequenceOfBlanks = builder.toString().trim();
+
+      sentence = sentence.replace("?", sequenceOfBlanks);
+      return sentence;
+    }*/
 
     private boolean sentAllClues() {
       return (clueAnswerPairs.size() == sentItems.size());
@@ -468,7 +486,8 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
 
       loadNext(current);
       send.setEnabled(true);
-      pleaseWait.setVisible(false);
+      //pleaseWait.setVisible(false);
+      pleaseWait.setText("");
     }
 
     private void showIncorrectFeedback(AnswerBundle result, SoundFeedback feedback, final Exercise current) {
@@ -493,14 +512,14 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
           "</b>, please send another sentence.");
 
         send.setEnabled(true);
-        pleaseWait.setVisible(false);
+        pleaseWait.setText("Last guess was : <b>" +  result.getAnswer()+"</b>");
       }
     }
 
 
     @Override
     public boolean isBusy() {
-      return pleaseWait.isVisible();
+      return pleaseWait.getText().length() > 0;
     }
   }
 
@@ -522,7 +541,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
         pleaseWait.hide();
       }
     };
-    t.schedule(3000);
+    t.schedule(DELAY_MILLIS);
   }
 
   private void loadNext(Exercise current) {
