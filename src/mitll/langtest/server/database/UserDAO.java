@@ -161,7 +161,7 @@ public class UserDAO extends DAO {
     database.closeConnection(connection);
 
     int numColumns = getNumColumns(connection, "users");
-    logger.debug("found " + numColumns + " in users table");
+    //logger.debug("found " + numColumns + " in users table");
 
     Set<String> expected = new HashSet<String>();
     expected.addAll(Arrays.asList("id","age","gender","experience","firstname","lastname","ipaddr","nativelang","dialect","userid","timestamp","enabled"));
