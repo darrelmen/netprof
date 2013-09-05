@@ -17,6 +17,7 @@ import java.util.Random;
 */
 public class Game extends GameInfo {
   private List<ExerciseShell> allSelectedExercises;
+  private int GAME_SIZE = 10;
 
   public Game(){}
 
@@ -28,7 +29,7 @@ public class Game extends GameInfo {
   public Game(List<ExerciseShell> allSelectedExercises) {
     System.out.println("Game.Game with " + allSelectedExercises.size() + " exercises.");
     this.allSelectedExercises = Collections.unmodifiableList(allSelectedExercises);
-    numGames = (int) Math.ceil((float)allSelectedExercises.size()/(float)OnlineUsers.GAME_SIZE);
+    numGames = (int) Math.ceil((float)allSelectedExercises.size()/(float)GAME_SIZE);
   }
 
   /**
@@ -41,8 +42,8 @@ public class Game extends GameInfo {
       System.out.println("startGame : wrap around... ?");
       restartGames();
     }
-    int fromIndex = gameCount * OnlineUsers.GAME_SIZE;
-    int endIndex = Math.min(allSelectedExercises.size(), (gameCount + 1) * OnlineUsers.GAME_SIZE);
+    int fromIndex = gameCount * GAME_SIZE;
+    int endIndex = Math.min(allSelectedExercises.size(), (gameCount + 1) * GAME_SIZE);
     incrementGames();
     exercisesToDo.addAll(allSelectedExercises.subList(fromIndex, endIndex));
     System.out.println("Game.startGame... from " + allSelectedExercises.size() + " (" +fromIndex+

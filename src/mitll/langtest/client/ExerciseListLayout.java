@@ -13,7 +13,6 @@ import mitll.langtest.client.grading.GradedExerciseList;
 import mitll.langtest.client.taboo.TabooExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.ExerciseShell;
 
 /**
  * Deals with choosing the right exercise list, depending on the property settings.
