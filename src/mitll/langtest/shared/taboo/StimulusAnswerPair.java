@@ -10,7 +10,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 * To change this template use File | Settings | File Templates.
 */
 public class StimulusAnswerPair implements IsSerializable {
-  private int numClues;
+//  private int numClues;
   private String stimulus;
   private String answer;
   private String exerciseID;
@@ -28,7 +28,7 @@ public class StimulusAnswerPair implements IsSerializable {
     this.setAnswer(answer);
     this.isLastStimulus = isLastStimulus;
     this.didGiverSkip = didGiverSkip;
-    this.numClues = totalExpected;
+   // this.numClues = totalExpected;
   }
 
   public void setNoStimYet(boolean v) { this.noStimYet = v; }
@@ -57,9 +57,11 @@ public class StimulusAnswerPair implements IsSerializable {
     this.exerciseID = exerciseID;
   }
 
+/*
   public int getNumClues() {
     return numClues;
   }
+*/
 
   public boolean isGameOver() {
     return gameOver;
