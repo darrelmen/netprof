@@ -532,7 +532,7 @@ public class DatabaseImpl implements Database {
     int diffI = Math.max(0, userStateWrapper.getIncorrect() - incorrect);
     logger.warn("diff  " + userToCorrect.get(userID) + " inc " + diffI);
 
-    ScoreInfo scoreInfo = new ScoreInfo(userID, userToCorrect.get(userID), 0, timeTaken, selection);
+    ScoreInfo scoreInfo = new ScoreInfo(userID, -1, userToCorrect.get(userID), 0, timeTaken, selection);
     userStateWrapper.setPcorrect(userStateWrapper.getCorrect());
     userStateWrapper.setPincorrect(userStateWrapper.getIncorrect());
 
