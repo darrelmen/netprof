@@ -762,26 +762,54 @@ public class ExcelImport implements ExerciseDAO {
       BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(examples), FileExerciseDAO.ENCODING));
       String line2;
       int c = 0;
-      while ((line2 = reader.readLine()) != null) {
-        c++;
-        if (line2.trim().length() > 0) {
-          String[] split = line2.split("\\t");
-          String word = split[0].trim();
-          if (split.length == 1) {
-            logger.warn("bad line " + line2 + " len " + split.length);
+      if (tabooEnglish) {
+        while ((line2 = reader.readLine()) != null) {
+          c++;
+          if (line2.trim().length() > 0) {
+            String[] split = line2.split("\\t");
+            String word = split[0].trim();
+            if (split.length == 1) {
+              logger.warn("bad line " + line2 + " len " + split.length);
+            } else if (split.length == 2) {
+              String sentence = split[1];
+
+              List<String> samples = wordToSamples.get(word);
+              if (samples == null) wordToSamples.put(word, samples = new ArrayList<String>());
+              samples.add(sentence);
+            } else if (split.length == 3) {
+              String answers = split[2];
+
+              List<List<String>> samples = wordToAnswers.get(word);
+              if (samples == null) wordToAnswers.put(word, samples = new ArrayList<List<String>>());
+              samples.add(Arrays.asList(answers.split(",")));
+            }
           }
-          else if (split.length == 2) {
-            String sentence = split[1];
+        }
+      } else {
+        line2 = reader.readLine(); // skip header
+        while ((line2 = reader.readLine()) != null) {
+          c++;
+          if (line2.trim().length() > 0) {
+            String[] split = line2.split("\\t");
+            if (split.length < 3) {
+              logger.warn("bad line " + line2 + " len " + split.length);
+            } else {
+              String word = split[2].trim();
 
-            List<String> samples = wordToSamples.get(word);
-            if (samples == null) wordToSamples.put(word, samples = new ArrayList<String>());
-            samples.add(sentence);
-          }  else if (split.length == 3) {
-            String answers = split[2];
 
-            List<List<String>> samples = wordToAnswers.get(word);
-            if (samples == null) wordToAnswers.put(word, samples = new ArrayList<List<String>>());
-            samples.add(Arrays.asList(answers.split(",")));
+              String sentence = split[0];
+
+              List<String> samples = wordToSamples.get(word);
+              if (samples == null) wordToSamples.put(word, samples = new ArrayList<String>());
+              samples.add(sentence);
+
+
+              String answer = split[1];
+
+              List<List<String>> answers = wordToAnswers.get(word);
+              if (answers == null) wordToAnswers.put(word, answers = new ArrayList<List<String>>());
+              answers.add(Arrays.asList(answer.split(",")));
+            }
           }
         }
       }
