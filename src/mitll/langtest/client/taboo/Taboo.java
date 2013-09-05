@@ -36,7 +36,7 @@ public class Taboo {
   private final UserManager userManager;
   private final LangTestDatabaseAsync service;
   private LangTest langTest;
-  boolean inSinglePlayer = false;
+  private boolean inSinglePlayer = false;
 
   private static final int INACTIVE_PERIOD_MILLIS = 1000 * 2; // ten minutes
   private static final int INACTIVE_PERIOD_MILLIS2 = 1000 * 2; // ten minutes
@@ -97,10 +97,6 @@ public class Taboo {
               SIGN_OUT_TO_STOP_PLAYING,
               false);
           }
-
-         // System.out.println("\n----> checkForPartner.onSuccess : me : " + fuserid + " isGiver " + result.isGiver());
-        //  exerciseList.rememberAndLoadFirst(result.getExerciseShells());
-        //  GameInfo gameInfo = result.getGameInfo();
           pollForPartnerOnline(fuserid, result.isGiver());
         } else if (result.isAnyAvailable()) {
           askUserToChooseRole(fuserid);
@@ -140,16 +136,7 @@ public class Taboo {
               pollForPartnerOnline(fuserid, isGiver);
               if (isGiver) {
                 Map<String,Collection<String>> typeToSelection = partnerState.getTypeToSelection();
-
-            /*    if (!lastSelection.equals(typeToSelection.toString())) {
-                  lastSelection = typeToSelection.toString();
-                  System.out.println("pollForPartnerOnline : CHANGE    checked if receiver partner of me, " + fuserid + ", is online and got state " + typeToSelection);
-                }
-                else {
-                  System.out.println("pollForPartnerOnline : NO CHANGE checked if receiver partner of me, " + fuserid + ", is online and got state " + typeToSelection);
-                }*/
-                //System.out.println("pollForPartnerOnline : checked if receiver partner of me, " + fuserid + ", is online and got state " + typeToSelection);
-
+//                System.out.println("pollForPartnerOnline : checked if receiver partner of me, " + fuserid + ", is online and got state " + typeToSelection);
                 langTest.setSelectionState(typeToSelection);  // TODO user controller...
               }
               else {
