@@ -1029,7 +1029,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public AnswerBundle checkCorrect(long giverUserID, String stimulus) {
-    return db.getOnlineUsers().checkCorrect(giverUserID);
+    return db.getOnlineUsers().checkCorrect(giverUserID, stimulus);
   }
 
   /**
