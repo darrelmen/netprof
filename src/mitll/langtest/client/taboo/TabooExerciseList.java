@@ -18,8 +18,10 @@ import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.taboo.GameInfo;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -131,15 +133,12 @@ public class TabooExerciseList extends FlexSectionExerciseList {
   protected void rememberExercises(List<ExerciseShell> result) {
     SelectionState selectionState = getSelectionState(History.getToken());
     System.out.println("TabooExerciseList.rememberExercises : user " + userID + " " + (isGiver ? " giver " : " receiver ") +
-      " remembering " + result.size() + " exercises, " +
+      " remembering " + result.size() + " exercises : " + result +
       "state is '" + selectionState + "'");
 
     if (isGiver) {
-     super.rememberExercises(result);
-//      halfRemember(result);
-
-    //  giverExerciseFactory.startOver();
-    //  giverExerciseFactory.startGame();
+      super.rememberExercises(result);
+      giverExerciseFactory.setSelectionState(selectionState.getTypeToSection());
     } else {  // I am a receiver!
       halfRemember(result);
 
@@ -147,6 +146,10 @@ public class TabooExerciseList extends FlexSectionExerciseList {
     }
   }
 
+  /**
+   * HUH? why are we doing this?  what's going on? who else is loading the item?
+   * @param exercises
+   */
   @Override
   public void rememberAndLoadFirst(List<ExerciseShell> exercises) {
     if (isGiver) {
@@ -170,7 +173,17 @@ public class TabooExerciseList extends FlexSectionExerciseList {
 
   private void tellPartnerMyChapterSelection(final SelectionState selectionState) {
     System.out.println("telling partner selection state for " + userID + " is '" + selectionState +"'");
-    service.registerSelectionState(userID, selectionState.getTypeToSection(), new AsyncCallback<Void>() {
+    final Map<String,Collection<String>> typeToSection = selectionState.getTypeToSection();
+
+    if (receiverFactory != null) {
+      System.out.println("TabooExerciseList.tellPartnerMyChapterSelection : remembering " + currentExercises.size());
+      receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(currentExercises), typeToSection);
+    }
+    else {
+      System.err.println("\n\n\nTabooExerciseList.rememberExercises : no factory!!! \n\n\n ");
+    }
+
+    service.registerSelectionState(userID, typeToSection, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         Window.alert("Can't contact server.");
@@ -178,13 +191,6 @@ public class TabooExerciseList extends FlexSectionExerciseList {
 
       @Override
       public void onSuccess(Void result) {
-        if (receiverFactory != null) {
-     //     System.out.println("TabooExerciseList.rememberExercises : remembering " + result.size());
-          receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(currentExercises),selectionState.getTypeToSection());
-        }
-        else {
-          System.err.println("\n\n\nTabooExerciseList.rememberExercises : no factory!!! \n\n\n ");
-        }
       }
     });
   }
