@@ -69,8 +69,6 @@ public class GameInfo implements IsSerializable {
     return -1;
   }
 
- // public ExerciseShell getFirst() { return itemsInGame.iterator().next(); }
-
   public int getNumGames() {
     return numGames;
   }
