@@ -983,7 +983,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public PartnerState isPartnerOnline(long userid, boolean isGiver) { return db.getOnlineUsers().isPartnerOnline(userid,isGiver); }
+  public PartnerState isPartnerOnline(long userid, boolean isGiver) { return db.getOnlineUsers().isPartnerOnline(userid, isGiver); }
 
   /**
    * @see mitll.langtest.client.taboo.TabooExerciseList#tellPartnerMyChapterSelection(mitll.langtest.client.exercise.SelectionState)
@@ -1043,6 +1043,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getOnlineUsers().startGame(userID, startOver);
   }
 
+  /**
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
+   * @param userID
+   * @param score
+   * @param maxPossibleScore
+   */
   @Override
   public void postGameScore(long userID, int score, int maxPossibleScore) {
     db.getOnlineUsers().postGameScore(userID, score, maxPossibleScore);
@@ -1050,11 +1056,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver
-   * @param userID
+   * @param selectionState
    * @return
    */
-  public Leaderboard getLeaderboard(long userID) {
-    return db.getOnlineUsers().getLeaderboard(userID);
+  public Leaderboard getLeaderboard(Map<String, Collection<String>> selectionState) {
+    return db.getOnlineUsers().getLeaderboard(selectionState);
   }
 
   public void logMessage(String message) {
