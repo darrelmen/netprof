@@ -157,5 +157,5 @@ public interface LangTestDatabaseAsync {
 
   void postGameScore(long userID, int score, int maxPossibleScore, AsyncCallback<Void> async);
 
-  void getLeaderboard(long userID, AsyncCallback<Leaderboard> async);
+  void getLeaderboard(Map<String, Collection<String>> selectionState, AsyncCallback<Leaderboard> async);
 }
