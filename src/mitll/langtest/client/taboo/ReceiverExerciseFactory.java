@@ -18,6 +18,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -28,6 +29,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -60,16 +62,15 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class ReceiverExerciseFactory extends ExercisePanelFactory {
-  private static final int POPUP_DURATION = 2000;
+  private static final int POPUP_DURATION = 3500;
   private static final int CHECK_FOR_STIMULUS_INTERVAL = 1000;
   public static final int MAX_CLUES_TO_GIVE = 5;
 
   private SinglePlayerRobot singlePlayerRobot;
   private int exerciseCount = 0;
   private int stimulusCount;
-  private int correctCount, incorrectCount;
+///  private int correctCount, incorrectCount;
   private int score;
-//  private int totalClues;
   private Map<String, Collection<String>> selectionState;
 
   private boolean debugKeyHandler = false;
@@ -140,7 +141,6 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     exerciseCount = 0;
     stimulusCount = 0;
     score = 0;
-  //  totalClues = 0;
   }
 
   private class ReceiverPanel extends FluidContainer {
@@ -155,10 +155,10 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     private Button send;
 
     private boolean onLastStim = false;
-    private StimulusAnswerPair displayedStimulus;
 
-    // Image correctImage   = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
-    //  Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
+    private Image correctImage   = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
+    private Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
+    private Image arrowImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rightArrow.png"));
     private Heading correct = new Heading(4);
     private boolean isGameOver;
 
@@ -254,7 +254,8 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     }
 
     public void setCorrect() {
-      correct.setText(correctCount + "/" + (correctCount + incorrectCount));
+      String outOf = gameInfo != null ? " out of " + gameInfo.getTotalClues() : "";
+      correct.setText("Score " + score + outOf);
     }
 
     private void sendAnswer(final LangTestDatabaseAsync service, final ExerciseController controller,
@@ -265,41 +266,36 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       boolean onLast = onLastStim || stimulusCount == MAX_CLUES_TO_GIVE;   // never do more than 5 clues
 
       boolean movingOnToNext = isCorrect || onLast;
-    //  registerAnswer(service, controller, outer, isCorrect, movingOnToNext);
 
       if (isCorrect) {
-       // correctImage.setVisible(true);
-        controller.addAdHocExercise(answer);
+       // controller.addAdHocExercise(answer);
         soundFeedback.playCorrect();
 
         int i = MAX_CLUES_TO_GIVE /*displayedStimulus.getNumClues()*/ - stimulusCount + 1;
        // System.out.println("sendAnswer : adding " + i + " to " + score + " clues " + displayedStimulus.getNumClues() + " stim " + stimulusCount);
         score += i;
-        //totalClues += MAX_CLUES_TO_GIVE;//displayedStimulus.getNumClues();
         System.out.println("sendAnswer : score " + score + " total clues " +gameInfo.getTotalClues());
 
-        correctCount++;
+      //  correctCount++;
         exerciseCount++;
         stimulusCount = 0;
         setCorrect();
-        showPopup("Correct!" + (singlePlayerRobot == null ? " Please wait for the next item." : ""));
+        showPopup("Correct! +" + i + " points." + (singlePlayerRobot == null ? " Please wait for the next item." : ""), correctImage);
         maybeGoToNextItem(service, controller, outer,isCorrect,movingOnToNext);
       }
       else {
-       // incorrectImage.setVisible(true);
         soundFeedback.playIncorrect();
         if (onLast) {
-         // showPopup("Clues exhausted, moving to next item.", 3000);
-          incorrectCount++;
+          showPopup("Clues exhausted, moving to next item.", incorrectImage, arrowImage);
+      //    incorrectCount++;
           exerciseCount++;
           stimulusCount = 0;
-         // totalClues += MAX_CLUES_TO_GIVE;//displayedStimulus.getNumClues();
           setCorrect();
           maybeGoToNextItem(service, controller, outer,isCorrect,movingOnToNext);
         }
         else {
           registerAnswer(service, controller, outer, isCorrect, movingOnToNext);
-          showPopup("Try again...");
+          showPopup("Try again...", incorrectImage);
         }
       }
       waitForNext();
@@ -326,7 +322,6 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
      // System.out.println("ReceiverExerciseFactory.loadNext '" + exerciseID+ "'  ");
 
       controller.makeExercisePanel(null);
-     // controller.loadNextExercise(exerciseID);
     }
 
     private boolean checkCorrect() {
@@ -370,14 +365,36 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       send.setVisible(false);
     }
 
-    private void showPopup(String html) {
-      showPopup(html, POPUP_DURATION, null);
+    private void showPopup(String html, Image image) {
+      showPopup(html, image,null, POPUP_DURATION, null);
     }
 
-    private void showPopup(String html, int dur, CloseHandler<PopupPanel> closeHandler) {
+    private void showPopup(String html, Image image, Image image2) {
+      showPopup(html, image,image2, POPUP_DURATION, null);
+    }
+
+    private void showPopup(String html, Image image, Image image2, int dur, CloseHandler<PopupPanel> closeHandler) {
       final PopupPanel pleaseWait = new DecoratedPopupPanel();
       pleaseWait.setAutoHideEnabled(true);
-      pleaseWait.add(new HTML(html));
+      HTML w = new HTML(html);
+      if (image != null) {
+        VerticalPanel vp = new VerticalPanel();
+        if (image2 != null) {
+          HorizontalPanel hp = new HorizontalPanel();
+          hp.add(image);
+          hp.setSpacing(5);
+          hp.add(image2);
+          vp.add(hp);
+        } else {
+          vp.add(image);
+        }
+        vp.add(w);
+
+        pleaseWait.add(vp);
+      }
+      else {
+        pleaseWait.add(w);
+      }
       pleaseWait.center();
       if (closeHandler != null) {
         pleaseWait.addCloseHandler(closeHandler);
@@ -511,7 +528,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       ClickHandler onNo = new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          showPopup(clickNoMessage);
+          showPopup(clickNoMessage,null);
         }
       };
       showLeaderboard(service, controller, prompt1, onYes, onNo);
@@ -536,7 +553,6 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     }
 
     private Timer checkStimTimer = null;
- //   private Timer verifyStimTimer = null;
 
     /**
      * See if giver has sent the next stimulus yet.
@@ -551,13 +567,10 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     private void gotStimulusResponse(StimulusAnswerPair result, final ReceiverPanel outer,
                                      final LangTestDatabaseAsync service, final ExerciseController controller) {
       //System.out.println(new Date() + " gotStimulusResponse : got  " + result);
-
       if (result.isNoStimYet()) {
         //System.out.println("---> " +new Date() + "gotStimulusResponse : got  " + result);
-
         if (checkStimTimer == null) {
           //System.out.println("\tMaking a new timer for " + "? at " +new Date() );
-
           checkStimTimer = new Timer() {
             @Override
             public void run() {
@@ -578,43 +591,9 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       }
     }
 
-/*    private void pollForStimChange(final ReceiverPanel outer) {
-      if (verifyStimTimer == null) {
-        verifyStimTimer = new Timer() {
-          @Override
-          public void run() {
-           // System.out.println("pollForStimChange : Fired!  Timer : " + checkStimTimer + " " + new Date() + " : checkForStimulus : " + controller.getUser());
-            verifyStimTimer = null;
-            service.checkForStimulus(controller.getUser(), new AsyncCallback<StimulusAnswerPair>() {
-              @Override
-              public void onFailure(Throwable caught) {
-              }
-
-              @Override
-              public void onSuccess(StimulusAnswerPair result) {
-                if (!result.equals(displayedStimulus)) {
-                  if (result.isNoStimYet()) waitForNext();
-                  else showStimulus(result, outer);
-                }
-                else pollForStimChange(outer);
-              }
-            });
-          }
-        };
-        //System.out.println("pollForStimChange : Queued: Timer : " + checkStimTimer + " " + new Date() + " : checkForStimulus user #" + controller.getUser());
-
-        // Schedule the timer to run once in 1 seconds.
-        verifyStimTimer.schedule(CHECK_FOR_STIMULUS_INTERVAL);
-      }
-      else {
-        System.out.println("pollForStimChange : DID NOT Queue: Timer : " + checkStimTimer + " " + new Date() + " : checkForStimulus user #" + controller.getUser());
-      }
-    }*/
-
     private void cancelStimTimer() {
       if (checkStimTimer != null) {
         System.out.println("\tCancelling timer " + checkStimTimer);
-
         checkStimTimer.cancel();
       }
     }
@@ -622,14 +601,12 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     /**
      * @see #checkForStimulus(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
      * @see #gotStimulusResponse(mitll.langtest.shared.taboo.StimulusAnswerPair, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
-     * @seex #pollForStimChange(mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
      * @param result
      * @param outer
      */
     private void showStimulus(StimulusAnswerPair result, ReceiverPanel outer) {
      // correctImage.setVisible(false);
    //   incorrectImage.setVisible(false);
-      displayedStimulus = result;
       onLastStim = result.isLastStimulus();
 /*      if (onLastStim)
         System.out.println("\n\n\n\non last " + onLastStim);*/
@@ -639,28 +616,27 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
       prompt.setText("Fill in the blank.");
       guessBox.setVisible(true);
+      guessBox.setFocus(true);
       send.setVisible(true);
-      stimulus.setVisible(true);
       if (result.getStimulus() != null) {
-        showStim(result);
+        showStimFull(result);
       }
       stimulusCount++;
       outer.answer = result.getAnswer();
       exerciseID = result.getExerciseID();
-      guessBox.setFocus(true);
-    /*  if (singlePlayerRobot == null) {
-        pollForStimChange(outer);
-      }*/
       isGameOver = result.isGameOver();
       System.out.println("--------> showStimulus game over = " + isGameOver + " stim count " + stimulusCount + " ex id " +exerciseID);
     }
 
-    private void showStim(StimulusAnswerPair result) {
+/*    private void showStim(StimulusAnswerPair result) {
       stimulus.setText("Clue #" + (stimulusCount+1) + "<br/><font color=#0036a2>" + result.getStimulus() +"</font>");
-    }
-/*    private void showStimFull(StimulusAnswerPair result) {
-      stimulus.setText("Clue " + (++stimulusCount) + " of " + displayedStimulus.getNumClues() + "<br/><font color=#0036a2>" + result.getStimulus() +"</font>");
+      stimulus.setVisible(true);
     }*/
+    private void showStimFull(StimulusAnswerPair result) {
+      stimulus.setText("Clue " + (stimulusCount+1) + " of " + result.getNumClues() + "<br/>" +
+        "<font color=#0036a2>" + result.getStimulus() +"</font>");
+      stimulus.setVisible(true);
+    }
 
     private void showGame() {
       String gameInfoString = "Game #" + (gameInfo.getGameCount());// + " of " + gameInfo.getNumGames();
@@ -720,16 +696,8 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     @Override
     protected void onUnload() {
       super.onUnload();
-     // System.out.println(new Date() +" ReceiverExerciseFactory : onUnload");
-
       removeKeyHandler();
       cancelStimTimer();
-/*
-      if (verifyStimTimer != null) {
-        System.out.println("\tCancelling timer " + verifyStimTimer);
-
-        verifyStimTimer.cancel();
-      }*/
     }
 
     public void removeKeyHandler() {
@@ -787,7 +755,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       @Override
       public void onSuccess(Void result) {
         if (!movingOn) {
-          System.out.println("RegisterAnswerResponseCallback.onSuccess -- ");
+          //System.out.println("RegisterAnswerResponseCallback.onSuccess -- ");
 
           checkForStimulus(service, controller, outer);
         }
