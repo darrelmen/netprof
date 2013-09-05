@@ -81,6 +81,38 @@ public class TabooExerciseList extends FlexSectionExerciseList {
     }
   }
 
+  /**
+   * Timed to the spanish II class schedule.
+   */
+  private void setDefaultChapter() {
+    long startOfChapter11 = 1380081600000l;
+    long startOfChapter12 = 1381204800000l;
+    long startOfChapter13 = 1383019200000l;
+    long startOfChapter14 = 1384318800000l;
+
+    long[] longs = {startOfChapter11, startOfChapter12, startOfChapter13, startOfChapter14};
+    int chapter = 10;
+    boolean found = false;
+    for (long start : longs) {
+      if (System.currentTimeMillis() < start) {
+        Map<String, Collection<String>> selectionState = getChapter(chapter);
+        setSelectionState(selectionState);
+        found = true;
+        break;
+      }
+      chapter++;
+    }
+    if (!found) setSelectionState(getChapter(10));
+  }
+
+  private Map<String, Collection<String>> getChapter(int chapter) {
+    Map<String, Collection<String>> selectionState = new HashMap<String, Collection<String>>();
+    List<String> value = new ArrayList<String>();
+    value.add(""+chapter);
+    selectionState.put("chapter", value);
+    return selectionState;
+  }
+
   protected void tellUserPanelIsBusy() {
     new ModalInfoDialog("Please wait", "Please wait for you partner to respond.");
   }
@@ -118,6 +150,8 @@ public class TabooExerciseList extends FlexSectionExerciseList {
     for (int i = 0; i < container.getWidgetCount(); i++) {
       if (container.getWidget(i) != widget) container.getWidget(i).setVisible(!isGiver);
     }
+
+    setDefaultChapter();
     return widget;
   }
 
