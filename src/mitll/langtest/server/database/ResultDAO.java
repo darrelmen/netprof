@@ -580,7 +580,7 @@ public class ResultDAO extends DAO {
   }
 
   private void removeTimeDefault(Connection connection) throws SQLException {
-    logger.info("removing time default value - current_timestamp steps on all values with NOW.");
+    //logger.info("removing time default value - current_timestamp steps on all values with NOW.");
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " + Database.TIME+
         " DROP DEFAULT");
     statement.execute();
