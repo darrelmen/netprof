@@ -55,6 +55,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
   /**
    * If giving, show exercise list, hide selection buttons
    * if receiving, hide exercise list, show selection buttons
+   * @see mitll.langtest.client.LangTest#setTabooFactory
    * @param factory
    * @param user
    * @param expectedGrades
@@ -86,16 +87,18 @@ public class TabooExerciseList extends FlexSectionExerciseList {
 
   private long lastTimestamp;
   /**
-   * @see mitll.langtest.client.LangTest#setGame
+   * @see mitll.langtest.client.LangTest#setGameOnGiver
+   * @see mitll.langtest.client.taboo.Taboo#pollForPartnerOnline(long, boolean)
    * @param game
    */
-  public void setGame(GameInfo game) {
-    if (isGiver && game != null) {
+  public void setGameOnGiver(GameInfo game) {
+    if (!isGiver) System.err.println("set game on giver on receiver???");
+    if (/*isGiver &&*/ game != null) {
       int numExercises = game.getNumExercises();
       if (numExercises > -1 && game.getTimestamp() != lastTimestamp && giverExerciseFactory != null) {
         lastTimestamp = game.getTimestamp();
 
-        giverExerciseFactory.setGame(game);
+        giverExerciseFactory.setGameOnGiver(game);
         if (game.hasStarted()) {
           String firstItem = game.getGameItems().get(0).getID();
           System.out.println("----> GIVER:  loading " + firstItem);
@@ -111,16 +114,9 @@ public class TabooExerciseList extends FlexSectionExerciseList {
   protected Widget addBottomText(FluidContainer container) {
     Widget widget = super.addBottomText(container);
     buttonRow = container;
-    if (isGiver) {
-      System.out.println("----> GIVER:  addBottomText.hiding container for " + userID);
-      for (int i = 0; i < container.getWidgetCount(); i++) {
-        if (container.getWidget(i) != widget) container.getWidget(i).setVisible(false);
-      }
-    } else {
-      System.out.println("----> RECEIVER:  addBottomText.showing container for " + userID);
-      for (int i = 0; i < container.getWidgetCount(); i++) {
-        if (container.getWidget(i) != statusHeader) container.getWidget(i).setVisible(true);
-      }
+
+    for (int i = 0; i < container.getWidgetCount(); i++) {
+      if (container.getWidget(i) != widget) container.getWidget(i).setVisible(!isGiver);
     }
     return widget;
   }
@@ -160,6 +156,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
     }
   }
 
+  // TODO : huh? do we need to do this if we're hiding things...?
   private void halfRemember(List<ExerciseShell> result) {
     currentExercises = result; // remember current exercises
     idToExercise = new HashMap<String, ExerciseShell>();
