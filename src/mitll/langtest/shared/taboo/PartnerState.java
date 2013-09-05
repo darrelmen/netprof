@@ -37,6 +37,10 @@ public class PartnerState implements IsSerializable {
     return online;
   }
 
+  /**
+   * @see mitll.langtest.client.taboo.Taboo#pollForPartnerOnline
+   * @return
+   */
   public Map<String, Collection<String>> getTypeToSelection() {
     return typeToSelection;
   }
