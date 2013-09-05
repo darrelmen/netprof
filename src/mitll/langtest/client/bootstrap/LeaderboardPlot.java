@@ -23,7 +23,7 @@ import java.util.Map;
 
 public class LeaderboardPlot {
   public static final float HALF = (1f / 4f);
-  public static final int AUTO_HIDE_DELAY = 3000;
+ // public static final int AUTO_HIDE_DELAY = 3000;
 
   public void showLeaderboardPlot(Leaderboard leaderboard, final long userID, int gameTimeSeconds,
                                   Map<String, Collection<String>> currentSelection,
@@ -58,13 +58,13 @@ public class LeaderboardPlot {
     float total = 0;
     List<Float> yValuesForUser = new ArrayList<Float>();
     for (ScoreInfo score : scores) {
-      if (score.userid == userID) {
-        if (score.correct > pbCorrect) pbCorrect = score.correct;
-        yValuesForUser.add((float) score.correct);
-        System.out.println("got " + score);
+      if (score.getUserid() == userID || score.getGiverID() == userID) {
+        if (score.getCorrect() > pbCorrect) pbCorrect = score.getCorrect();
+        yValuesForUser.add((float) score.getCorrect());
+        System.out.println("showLeaderboardPlot : for " +userID + " got " + score);
       }
-      if (score.correct > top) top = score.correct;
-      total += score.correct;
+      if (score.getCorrect() > top) top = score.getCorrect();
+      total += score.getCorrect();
     }
     float avg = total / (float) scores.size();
 
