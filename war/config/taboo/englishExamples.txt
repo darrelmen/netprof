@@ -1,6 +1,8 @@
 Parts of the city	Some examples are the downtown area, the uptown area, the suburbs.
 Parts of the city	Different neighborhoods within a large place where people live.
 Parts of the city	In Boston, examples are Chinatown, the North End, the Back bay.
+Parts of the city	In New York, some examples are the Upper East Side and the Village.
+Parts of the city	Different areas with distinctive identities within a metropolis.
 the outskirts	A place where people live that is not the central part of the city.
 the outskirts	When you live here, you live away from the center of the city.
 neighborhood	A nearby area.
