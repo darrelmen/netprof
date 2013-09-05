@@ -64,4 +64,6 @@ public class Leaderboard implements IsSerializable {
   public List<ScoreInfo> getScores(Map<String, Collection<String>> selection) {
     return selectionToScores.get(getHash(selection));
   }
+
+  public String toString() { return selectionToScores.toString(); }
 }
