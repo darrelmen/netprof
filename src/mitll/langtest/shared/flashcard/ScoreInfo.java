@@ -13,8 +13,9 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class ScoreInfo implements IsSerializable {
-  public long userid;
-  public int correct;
+  private long userid;
+  private long giverID;
+  private int correct;
   private int incorrect;
   private long timeTaken;
   private long timestamp;
@@ -25,13 +26,15 @@ public class ScoreInfo implements IsSerializable {
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getScoreInfo(long, long, java.util.Map)
    * @param userid
+   * @param giverID
    * @param correct
    * @param incorrect
    * @param timeTaken
    * @param selection
    */
-  public ScoreInfo(long userid, int correct, int incorrect, long timeTaken, Map<String, Collection<String>> selection) {
+  public ScoreInfo(long userid, long giverID, int correct, int incorrect, long timeTaken, Map<String, Collection<String>> selection) {
     this.userid = userid;
+    this.giverID = giverID;
     this.correct = correct;
     this.incorrect = incorrect;
     this.timeTaken = timeTaken;
@@ -39,7 +42,19 @@ public class ScoreInfo implements IsSerializable {
     this.timestamp = System.currentTimeMillis();
   }
 
+  public long getUserid() {
+    return userid;
+  }
+
+  public long getGiverID() {
+    return giverID;
+  }
+
+  public int getCorrect() {
+    return correct;
+  }
+
   public String toString() {
-    return "user " + userid + " correct " + correct + " for " + selection;
+    return "ScoreInfo : user " + getUserid() + " correct " + getCorrect() + " for " + selection;
   }
 }
