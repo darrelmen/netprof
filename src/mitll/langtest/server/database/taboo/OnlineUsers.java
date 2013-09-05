@@ -2,6 +2,7 @@ package mitll.langtest.server.database.taboo;
 
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.taboo.AnswerBundle;
@@ -10,17 +11,14 @@ import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 import mitll.langtest.shared.taboo.TabooState;
-import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,9 +29,6 @@ import java.util.Set;
  */
 public class OnlineUsers {
   private static final Logger logger = Logger.getLogger(OnlineUsers.class);
-  public static final int GAME_SIZE = 3;
-  private final List<String> nastyWords = Arrays.asList("shit", "piss", "fuck", "fucker", "fucking", "cunt", "cocksucker", "motherfucker", "tits", "asshole");
-  private final Set<String> sevenWords = new HashSet<String>(nastyWords);
 
   private final UserDAO userDAO;
   private Collection<User> online = new HashSet<User>();
@@ -44,20 +39,10 @@ public class OnlineUsers {
   // TODO : write to database
   private Map<User,StimulusAnswerPair> receiverToStimulus = new HashMap<User,StimulusAnswerPair>();
   // TODO : write to database
- // private Map<User,Map<String,List<AnswerBundle>>> receiverToAnswer = new HashMap<User, Map<String, List<AnswerBundle>>>();
   private Map<User,AnswerBundle> receiverToAnswer = new HashMap<User, AnswerBundle>();
   private Map<User,Map<String, Collection<String>>> receiverToState = new HashMap<User, Map<String, Collection<String>>>();
   private Map<User,Game> receiverToGame = new HashMap<User, Game>();
- // private Map<User,List<Leaderboard>> userToScores = new HashMap<User, List<Leaderboard>>();
- private Map<User,Leaderboard> userToScores = new HashMap<User,Leaderboard>();
   private Map<String,Leaderboard> stateToScores = new HashMap<String,Leaderboard>();
-
-/*  private static class GameScore {
-    public int score;
-    public int max;
-    public GameScore(int score, int max) { this.score = score; this.max = max;}
-  }*/
-  // TODOx keep track of join time, order pairings on that basis
 
   public OnlineUsers(UserDAO userDAO) { this.userDAO = userDAO; }
 
@@ -339,11 +324,8 @@ public class OnlineUsers {
    * 1 == inactive receiver
    * 2 == paused...
    *
-   *
-   *
-   *
-   *
    * @see mitll.langtest.server.LangTestDatabaseImpl#sendStimulus
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#sendStimulus
    * @param userid
    * @param exerciseID
    * @param stimulus
@@ -386,7 +368,7 @@ public class OnlineUsers {
  //     logger.debug("not remembering answer, since " + receiverUserID + " is playing by him/herself.");
     } else {
       receiverToStimulus.remove(receiver);
-      answer = replaceProfanity(answer);
+      answer = new ProfanityCleaner().replaceProfanity(answer);
       receiverToAnswer.put(receiver,new AnswerBundle(stimulus, answer, correct));
 
       logger.debug("OnlineUsers.registerAnswer : user->answer now " + receiverToAnswer);
@@ -394,34 +376,19 @@ public class OnlineUsers {
   }
 
   /**
-   * This can be defeated relatively easily...
+   * Make sure this answer is for the expected question/stimulus.
    *
-   * @param answer
-   * @return
-   */
-  private String replaceProfanity(String answer) {
-    String[] words = answer.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
-    StringBuilder builder = new StringBuilder();
-    for (String word : words) {
-      if (nastyWords.contains(word)) builder.append(word.replaceAll(".","_"));
-      else builder.append(word);
-      builder.append(" ");
-    }
-    return builder.toString().trim();
-  }
-
-  /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#checkCorrect
    * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#checkForCorrect
    * @param giverUserID
    * @return
    */
-  public synchronized AnswerBundle checkCorrect(long giverUserID) {
+  public synchronized AnswerBundle checkCorrect(long giverUserID, String stimulus) {
     User receiver = getReceiverForGiver(giverUserID);
     //logger.debug("OnlineUsers.checkCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id);
 
     AnswerBundle answerBundle = receiverToAnswer.remove(receiver);// sent response to giver -- no need to remember them anymore
-    if (answerBundle == null) {
+    if (answerBundle == null || !answerBundle.getStimulus().equals(stimulus)) {
       //    logger.debug("\tno answer yet...");
       answerBundle = new AnswerBundle();
     } else {
@@ -431,7 +398,7 @@ public class OnlineUsers {
   }
 
   /**
-   * @see #checkCorrect(long)
+   * @see #checkCorrect
    * @see #sendStimulus(long, String, String, String, boolean, boolean, int, boolean)
    * @param giver
    * @return
@@ -514,26 +481,10 @@ public class OnlineUsers {
     long giverID = giverForReceiver == null ? -1 : giverForReceiver.id;
     leaderboard.addScore(new ScoreInfo(receiver.id, giverID, score, maxPossibleScore-score, 0l, selectionState));  // TODO fill in time taken?
      logger.debug("state->scores now " + stateToScores);
-
-/*    if (giverForReceiver != null) {
-      addGameScore(giverForReceiver, score, maxPossibleScore,current);
-    }
-    addGameScore(receiver,score,maxPossibleScore,current);*/
   }
 
- /* private synchronized void addGameScore(User giverForReceiver, int score, int maxPossibleScore, Map<String, Collection<String>> selectionState) {
-   *//* List<GameScore> gameScores = userToScores.get(giverForReceiver);
-    if (gameScores == null) {
-      userToScores.put(giverForReceiver, gameScores = new ArrayList<GameScore>());
-      gameScores.add(new GameScore(score, maxPossibleScore));
-    }*//*
-    Leaderboard leaderboard = userToScores.get(giverForReceiver);
-    if (leaderboard == null) userToScores.put(giverForReceiver, leaderboard = new Leaderboard());
-    leaderboard.addScore(new ScoreInfo(giverForReceiver.id, , score, maxPossibleScore-score, 0l, selectionState));  // TODO fill in time taken?
-  }
-*/
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getLeaderboard(long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getLeaderboard
    * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver
    * @param selectionState
    * @return
@@ -549,5 +500,4 @@ public class OnlineUsers {
     public Pair(User first, User second) { this.first = first; this.second = second; }
     public String toString() { return "Pair : " + first + " and " + second; }
   }
-
 }
