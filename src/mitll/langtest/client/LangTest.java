@@ -40,7 +40,6 @@ import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
@@ -1042,8 +1041,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.taboo.Taboo#pollForPartnerOnline(long, boolean)
    * @param gameInfo
    */
-  public void setGame(GameInfo gameInfo) {
-    ((TabooExerciseList)exerciseList).setGame(gameInfo);
+  public void setGameOnGiver(GameInfo gameInfo) {
+    ((TabooExerciseList)exerciseList).setGameOnGiver(gameInfo);
   }
 
   public boolean loadPreviousExercise(Exercise current) {
