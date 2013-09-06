@@ -6,7 +6,7 @@ import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Controls;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Modal;
+import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.Row;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -14,13 +14,14 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
 import mitll.langtest.client.bootstrap.LeaderboardPlot;
@@ -63,7 +64,6 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
   public static final int MAX_CLUES = 3;
   public static final int MIN_BOGUS_STIM = 5;
   private static final int MAX_CLUES_TO_SEND = ReceiverExerciseFactory.MAX_CLUES_TO_GIVE;
-  private static final int DELAY_MILLIS = 4000;
   private static final String PLEASE_WAIT_FOR_RECEIVER_TO_ANSWER = "Please wait for receiver to answer...";
   private int stimulusCount = 0;
   private GameInfo gameInfo;
@@ -135,6 +135,9 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     private Heading exerciseDisplay = new Heading(3);
     private Heading stimulus = new Heading(3);
     private String exerciseID;
+    private Image correctImage   = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
+    private Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
+    private Image arrowImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rightArrow.png"));
 
     public GiverPanel(final Exercise exercise) {
       if (exercise == null) {
@@ -171,8 +174,8 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
 
       Row w = new Row();
 
-      final String refSentence = controller.getProps().doTabooEnglish() ? exercise.getEnglishSentence().trim() : exercise.getRefSentence().trim();
-      w.add(new Heading(2, refSentence));
+      final String vocabItem = getVocabItem(exercise);
+      w.add(new Heading(2, vocabItem));
       add(w);
 
       Row w2 = new Row();
@@ -185,6 +188,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
 
       otherClues.clear();
       otherExerciseClues.clear();
+  //    questionToExercise.clear();
 
       getUnrelatedClues(7);
       // recordingStyle.add(new ControlLabel("<b>Audio Recording Style</b>"));
@@ -205,7 +209,6 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       add(send);
       add(pleaseWait);
       pleaseWait.setText("");
-     // pleaseWait.setVisible(false);
     }
 
     /**
@@ -227,18 +230,22 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
             if (!otherClues.contains(pair.getQuestion())) {
               otherClues.add(pair.getQuestion());
               otherExerciseClues.add(pair);
+             // System.out.println("getUnrelatedClues map " + pair + " to " +result.getID());
+              break;
             }
           }
 
           if (otherExerciseClues.size() > MIN_BOGUS_STIM) {
-            choiceToExample = populateChoices(clueAnswerPairs, otherExerciseClues);
+            //System.out.println("getUnrelatedClues otherExerciseClues " + otherExerciseClues.size());
+
+            choiceToExample = populateChoices(result.getID(),clueAnswerPairs, otherExerciseClues);
           } else {
             if (n > 0) {
               getUnrelatedClues(n - 1);
             }
             else {
-              //System.out.println("getUnrelatedClues " + n + " for " + result.getID() + " got " + questions.size());
-              choiceToExample = populateChoices(clueAnswerPairs, otherExerciseClues);
+            //  System.out.println("getUnrelatedClues " + n + " for " + result.getID() + " got " + questions.size());
+              choiceToExample = populateChoices(result.getID(),clueAnswerPairs, otherExerciseClues);
             }
           }
         }
@@ -284,27 +291,19 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
         if (lastChoiceRemaining) {
           System.out.println("\n---> clickOnSend : sent " + sentItems.size() + " but num clues " + clueAnswerPairs.size());
         }
+       // String id = questionToExercise.get(stimulus).getID();
+        boolean giverChosePoorly = otherExerciseClues.contains(stimulus);// !exercise.getID().equals(id);
+        System.out.println("giver chose poorly = " + giverChosePoorly);// + " " + exercise.getID() + " vs " + id);
+        String correctResponse = stimulus.getAnswer();
+        if (giverChosePoorly) {   // if the clue is for a different item, they can still guess correctly...
+          correctResponse = getVocabItem(exercise);
+        }
         sendStimulus(stimulus.getQuestion(), exercise,
-          stimulus.getAnswer(), soundFeedback, lastChoiceRemaining, clueAnswerPairs.size());
+          correctResponse, soundFeedback, lastChoiceRemaining, clueAnswerPairs.size(), giverChosePoorly);
       } else {
-        showPopup("Please select a sentence to send.");
+        new PopupHelper().showPopup("Please select a sentence to send.");
       }
     }
-
-/*    private String getBlankSequence(Exercise.QAPair stimulus) {//String sentence, String answer) {
-      String sentence = stimulus.getQuestion();
-      String answer = stimulus.getAnswer();
-      String[] words = answer.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
-      StringBuilder builder = new StringBuilder();
-      for (String token : words) {
-        builder.append(token.replaceAll(".","_"));
-        builder.append(" ");
-      }
-      String sequenceOfBlanks = builder.toString().trim();
-
-      sentence = sentence.replace("?", sequenceOfBlanks);
-      return sentence;
-    }*/
 
     private boolean sentAllClues() {
       return (clueAnswerPairs.size() == sentItems.size());
@@ -320,10 +319,11 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
      * @param soundFeedback
      * @param lastChoiceRemaining
      * @param numClues
+     * @param giverChosePoorly
      */
-    private void sendStimulus(final String stimulus, final  Exercise exercise,
+    private void sendStimulus(final String stimulus, final Exercise exercise,
                               String answer, final SoundFeedback soundFeedback,
-                              boolean lastChoiceRemaining, int numClues) {
+                              boolean lastChoiceRemaining, int numClues, boolean giverChosePoorly) {
       final int user = controller.getUser();
       String exerciseID = exercise.getID();
       boolean differentExercise = lastSentExercise.length() > 0 && !lastSentExercise.equals(exerciseID);
@@ -335,7 +335,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
 
       stimulusCount++;
       service.sendStimulus(user, exerciseID, stimulus, answer, lastChoiceRemaining,
-        differentExercise, numClues, onLast, new AsyncCallback<Integer>() {
+        differentExercise, numClues, onLast, giverChosePoorly, new AsyncCallback<Integer>() {
         @Override
         public void onFailure(Throwable caught) { Window.alert("sendStimulus : couldn't contact server."); }
 
@@ -366,11 +366,14 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
      * TODO : ask server what items have been sent instead of keeping in client, since if we reload the page,
      * we loose the history.  OR we could shove it into the cache...?
      *
+     * @see #getUnrelatedClues(int)
      * @param clueAnswerPairs
      * @return
      */
-    private Map<RadioButton, Exercise.QAPair> populateChoices(List<Exercise.QAPair> clueAnswerPairs,
+    private Map<RadioButton, Exercise.QAPair> populateChoices(String exerciseID,
+                                                              List<Exercise.QAPair> clueAnswerPairs,
                                                               Set<Exercise.QAPair> otherExerciseClues) {
+     // System.out.println("populate choices for " + exerciseID);
       if (clueAnswerPairs.isEmpty()) {
         System.err.println("huh? no clues?");
       }
@@ -379,7 +382,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
 
       List<Exercise.QAPair> notSentYet = getNotSentYetHints(clueAnswerPairs);
       Iterator<Exercise.QAPair> iterator = notSentYet.iterator();
-      Set<String> cluePhrases = new HashSet<String>();
+      Set<String> cluePhrases = new HashSet<String>();   // guarantee uniqueness
       while (allClues.size() < MAX_CLUES && iterator.hasNext()) {
         Exercise.QAPair next = iterator.next();
         String clue = next.getQuestion();
@@ -405,7 +408,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       choice.clear();
       Map<RadioButton, Exercise.QAPair> choiceToExample = new HashMap<RadioButton, Exercise.QAPair>();
       for (Exercise.QAPair example : clues) {
-        final RadioButton give = new RadioButton("Giver", example.getQuestion());
+        final RadioButton give = new RadioButton("Giver", example.getQuestion().replaceAll("_\\s_", "__"));
         choiceToExample.put(give, example);
         choice.add(give);
       }
@@ -431,7 +434,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     /**
      * Keep asking server if the receiver has made a correct answer or not.
      *
-     * @see #sendStimulus(String, mitll.langtest.shared.Exercise, String, mitll.langtest.client.sound.SoundFeedback, boolean, int)
+     * @see #sendStimulus(String, mitll.langtest.shared.Exercise, String, mitll.langtest.client.sound.SoundFeedback, boolean, int, boolean)
      * @param userid
      * @param stimulus
      * @param current
@@ -447,10 +450,6 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
 
         @Override
         public void onSuccess(AnswerBundle result) {
-      /*    if (lastCorrectResponse != result) {
-            System.out.println("GiverExerciseFactory : checkForCorrect got " + result);
-            lastCorrectResponse = result;
-          }*/
           if (result.didReceiverReply()) {
             gotAnswerFromReceiver(result, feedback, current);
           } else { // they haven't answered yet
@@ -481,7 +480,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       score += i;
       stimulusCount = 0;
       showStimIndex();
-      showPopup("They guessed correctly!  Moving on to next item.");
+      new PopupHelper().showPopup("They guessed correctly!  Moving on to next item.", correctImage);
       feedback.playCorrect();
 
       loadNext(current);
@@ -497,8 +496,8 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       getUnrelatedClues(7);
 
       if (stimulusCount == MAX_CLUES_TO_SEND || sentAllClues()) {
-        showPopup("They didn't guess correctly in " + stimulusCount + " tries" +
-          ", moving to next item...", new CloseHandler<PopupPanel>() {
+        new PopupHelper().showPopup("They didn't guess correctly in " + stimulusCount + " tries" +
+          ", moving to next item...", incorrectImage, arrowImage, new CloseHandler<PopupPanel>() {
           @Override
           public void onClose(CloseEvent<PopupPanel> event) {
             stimulusCount = 0;
@@ -507,15 +506,15 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
           }
         });
       } else {
-        showPopup("They guessed : <b>" +
+        String message = result.getAnswer().length() > 0 ? "They guessed : <b>" +
           result.getAnswer() +
-          "</b>, please send another sentence.");
+          "</b>, please send another clue." : "They passed, please send another clue.";
+        new PopupHelper().showPopup(message, incorrectImage);
 
         send.setEnabled(true);
-        pleaseWait.setText("Last guess was : <b>" +  result.getAnswer()+"</b>");
+        pleaseWait.setText("Last guess was : <b>" + result.getAnswer() + "</b>");
       }
     }
-
 
     @Override
     public boolean isBusy() {
@@ -523,31 +522,14 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     }
   }
 
-  private void showPopup(String html) {
-    showPopup(html, null);
-  }
-
-  private void showPopup(String html, CloseHandler<PopupPanel> closeHandler) {
-    final PopupPanel pleaseWait = new DecoratedPopupPanel();
-    pleaseWait.setAutoHideEnabled(true);
-    pleaseWait.add(new HTML(html));
-    pleaseWait.center();
-    if (closeHandler != null)
-      pleaseWait.addCloseHandler(closeHandler);
-
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        pleaseWait.hide();
-      }
-    };
-    t.schedule(DELAY_MILLIS);
+  private String getVocabItem(Exercise exercise) {
+    return controller.getProps().doTabooEnglish() ? exercise.getEnglishSentence().trim() : exercise.getRefSentence().trim();
   }
 
   private void loadNext(Exercise current) {
     if (gameInfo.onLast(current)) {
       System.out.println("Giver : game over! ");
-   //   showPopup("Game Over.");
+   //   new PopupHelper().showPopup("Game Over.");
       showLeaderboard();
     }
     else {
