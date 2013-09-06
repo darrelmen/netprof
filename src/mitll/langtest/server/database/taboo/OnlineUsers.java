@@ -181,8 +181,6 @@ public class OnlineUsers {
     }
     boolean joined = giver || receiver;
 
-   // List<ExerciseShell> exerciseShells = null;
-   // GameInfo gameInfo = null;
     if (joined) {
       logger.info("anyAvailable : yea! just joined " + userid + " giver " + giver + " receiver " + receiver);
 
