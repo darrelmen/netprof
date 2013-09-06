@@ -852,6 +852,10 @@ public class ExcelImport implements ExerciseDAO {
     }
   }
   public static void main(String [] arg) {
+                   String guess = "los can't suburbios.";
+
+    guess = guess.replaceAll("\\p{Punct}$",""); // remove trailing punctuation
+    System.out.println("guess " + guess);
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     try {
       System.out.println(sdf.parse("2013-09-25").getTime());      // chapter 11
