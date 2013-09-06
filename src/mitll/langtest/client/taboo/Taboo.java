@@ -21,7 +21,9 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.taboo.PartnerState;
 import mitll.langtest.shared.taboo.TabooState;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -59,7 +61,21 @@ public class Taboo {
   public void initialCheck(final long fuserid) {
     System.out.println("Taboo.initialCheck : me : " + fuserid + " ...");
 
-    checkForPartner(fuserid);
+    String[] strings = {"<ul><li>Taboo is a fill-in-the-blank guessing game!</li></ul>",
+      "<ul><li>If there's another player online, you will automatically start playing with them.</li></ul>",
+      "<ul><li>You either give clues or guess answers to clues.</li></ul>",
+      "<ul><li>All the words are from the chapter vocabulary list.</li></ul>",
+      "<ul><li>Each chapter is divided into games, with 10 words/game and 5 clues/word.</li></ul>",
+      "<ul><li>You get a maximum of 5 points per item, with each wrong guess deducting a point.</li></ul>",
+      "<ul><li>When playing together, both players share the same score.</li></ul>"
+    };
+    List<String> messages = Arrays.asList(strings);
+    ModalInfoDialog modal = new ModalInfoDialog("Taboo Rules", messages, new HiddenHandler() {
+      @Override
+      public void onHidden(HiddenEvent hiddenEvent) {
+        checkForPartner(fuserid);
+      }
+    });
   }
 
   /**
