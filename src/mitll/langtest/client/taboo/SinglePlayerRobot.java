@@ -100,7 +100,7 @@ public class SinglePlayerRobot {
 
           if (clueAnswerPairs.isEmpty()) {
             System.err.println("huh? no stim sentences for " + currentExercise);
-            async.onSuccess(new StimulusAnswerPair(result.getID(), "Data error on server, please report.", "", false, false, numClues, true));
+            async.onSuccess(new StimulusAnswerPair(result.getID(), "Data error on server, please report.", "", false, numClues, true, false));
           } else {
             replyWithNextClue(currentExercise.getID(), async);
           }
@@ -113,7 +113,7 @@ public class SinglePlayerRobot {
     Exercise.QAPair clueAnswerPair = clueAnswerPairs.remove(0);
     String rawStim = clueAnswerPair.getQuestion();
     String answer = clueAnswerPair.getAnswer();
-    async.onSuccess(new StimulusAnswerPair(exerciseID, rawStim, answer, clueAnswerPairs.isEmpty(), false, numClues, isGameOver()));
+    async.onSuccess(new StimulusAnswerPair(exerciseID, rawStim, answer, clueAnswerPairs.isEmpty(), numClues, isGameOver(), false));
   }
 
   /**
