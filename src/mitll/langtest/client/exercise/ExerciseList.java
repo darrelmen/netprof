@@ -209,13 +209,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   protected class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper> {
     public void onFailure(Throwable caught) {
-      feedback.showErrorMessage("Server error", "Server error - couldn't get exercises.");
+      feedback.showErrorMessage("Server error", "SetExercisesCallback : Server error - couldn't get exercises.");
     }
 
     public void onSuccess(ExerciseListWrapper result) {
       //System.out.println("SetExercisesCallback Got " + result.exercises.size() + " results");
       if (isStaleResponse(result)) {
-        System.out.println("----> ignoring result " + result.reqID + " b/c before latest " + lastReqID);
+        System.out.println("----> SetExercisesCallback.onSuccess ignoring result " + result.reqID + " b/c before latest " + lastReqID);
       } else {
         rememberAndLoadFirst(result.exercises);
       }
