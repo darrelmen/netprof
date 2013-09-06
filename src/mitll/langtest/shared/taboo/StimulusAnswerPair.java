@@ -15,20 +15,22 @@ public class StimulusAnswerPair implements IsSerializable {
   private String answer;
   private String exerciseID;
   private boolean isLastStimulus;
-  private boolean didGiverSkip;
+ // private boolean didGiverSkip;
   private boolean noStimYet;
   private boolean gameOver;
+  private boolean giverChosePoorly;
 
   public StimulusAnswerPair() {} // just for serialization
   public StimulusAnswerPair(String exerciseID, String stimulus, String answer, boolean isLastStimulus,
-                            boolean didGiverSkip, int totalExpected, boolean isGameOver) {
+                            int totalExpected, boolean isGameOver, boolean giverChosePoorly) {
     this.gameOver = isGameOver;
     this.setExerciseID(exerciseID);
     this.setStimulus(stimulus);
     this.setAnswer(answer);
     this.isLastStimulus = isLastStimulus;
-    this.didGiverSkip = didGiverSkip;
+  //  this.didGiverSkip = didGiverSkip;
     this.numClues = totalExpected;
+    this.giverChosePoorly = giverChosePoorly;
   }
 
   public void setNoStimYet(boolean v) { this.noStimYet = v; }
@@ -69,12 +71,18 @@ public class StimulusAnswerPair implements IsSerializable {
     return isLastStimulus;
   }
 
+/*
   public boolean isDidGiverSkip() {
     return didGiverSkip;
   }
+*/
 
   public boolean isNoStimYet() {
     return noStimYet;
+  }
+
+  public boolean didGiverChosePoorly() {
+    return giverChosePoorly;
   }
 
   @Override
