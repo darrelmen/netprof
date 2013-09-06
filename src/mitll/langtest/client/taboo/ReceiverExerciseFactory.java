@@ -16,20 +16,16 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -62,7 +58,6 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class ReceiverExerciseFactory extends ExercisePanelFactory {
-  private static final int POPUP_DURATION = 2500;
   private static final int CHECK_FOR_STIMULUS_INTERVAL = 1000;
   public static final int MAX_CLUES_TO_GIVE = 5;
 
@@ -150,16 +145,16 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     private TextBox guessBox = new NoPasteTextBox();
     private Heading stimulus = new Heading(3);
     private String answer;
-    private String exerciseID;
-    private Button send;
-
-    private boolean onLastStim = false;
+    //private String exerciseID;
+    private Button send,pass;
+    private StimulusAnswerPair currentStimulus;
+    //private boolean onLastStim = false;
 
     private Image correctImage   = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
     private Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
     private Image arrowImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rightArrow.png"));
     private Heading correct = new Heading(4);
-    private boolean isGameOver;
+   // private boolean isGameOver;
 
     /**
      * @see ReceiverExerciseFactory#getExercisePanel(mitll.langtest.shared.Exercise)
@@ -195,7 +190,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       w.add(guessBox);
       add(w);
 
-      Button send = new Button("Send Answer");
+      this.send = new Button("Send Answer");
       send.setType(ButtonType.PRIMARY);
       send.setEnabled(true);
       send.setTitle("Press the enter key.");
@@ -217,18 +212,30 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       container.add(row);
       row.add(send);
 
+      pass = new Button("Pass");
+      pass.addStyleName("leftFiveMargin");
+      pass.setType(ButtonType.INFO);
+      pass.setEnabled(true);
+      pass.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          guessBox.setText("");
+          sendAnswer(service, controller, outer, soundFeedback, false);
+        }
+      });
+      row.add(pass);
+
       add(container);
       add(warnNoFlash);
       add(addCorrectIncorrectFeedback());
 
-      this.send = send;
       waitForNext();
       return outer;
     }
 
     private void sendAnswerOnClick(ExerciseController controller, LangTestDatabaseAsync service, ReceiverPanel outer, SoundFeedback soundFeedback) {
       controller.pingAliveUser();
-      sendAnswer(service, controller, outer, soundFeedback);
+      sendAnswer(service, controller, outer, soundFeedback, true);
     }
 
     public Widget addCorrectIncorrectFeedback() {
@@ -254,11 +261,11 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     }
 
     private void sendAnswer(final LangTestDatabaseAsync service, final ExerciseController controller,
-                            final ReceiverPanel outer, SoundFeedback soundFeedback) {
+                            final ReceiverPanel outer, SoundFeedback soundFeedback, boolean showTryAgain) {
       boolean isCorrect = checkCorrect();
       System.out.println("sending answer '" + guessBox.getText() + "' vs '" + answer+ "' which is " + isCorrect +
-        " stim count " + stimulusCount + " on last " + onLastStim);
-      boolean onLast = onLastStim || stimulusCount == MAX_CLUES_TO_GIVE;   // never do more than 5 clues
+        " stim count " + stimulusCount + " on last " + currentStimulus.isLastStimulus());
+      boolean onLast = currentStimulus.isLastStimulus() || stimulusCount == MAX_CLUES_TO_GIVE;   // never do more than 5 clues
 
       boolean movingOnToNext = isCorrect || onLast;
 
@@ -270,18 +277,16 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         score += i;
         System.out.println("sendAnswer : score " + score + " total clues " +gameInfo.getTotalClues());
 
-      //  correctCount++;
         exerciseCount++;
         stimulusCount = 0;
         setCorrect();
-        showPopup("Correct! +" + i + " points." + (singlePlayerRobot == null ? " Please wait for the next item." : ""), correctImage, 3500);
+        new PopupHelper().showPopup("Correct! +" + i + " points." + (singlePlayerRobot == null ? " Please wait for the next item." : ""), correctImage, 3500);
         maybeGoToNextItem(service, controller, outer,isCorrect,movingOnToNext);
       }
       else {
         soundFeedback.playIncorrect();
         if (onLast) {
-          showPopup("Clues exhausted, moving to next item.", incorrectImage, arrowImage);
-      //    incorrectCount++;
+          new PopupHelper().showPopup("Clues exhausted, moving to next item.", incorrectImage, arrowImage);
           exerciseCount++;
           stimulusCount = 0;
           setCorrect();
@@ -289,20 +294,20 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         }
         else {
           registerAnswer(service, controller, outer, isCorrect, movingOnToNext);
-          showPopup("Try again...", incorrectImage);
+          if (showTryAgain) new PopupHelper().showPopup("Try again...", incorrectImage);
         }
       }
       waitForNext();
     }
 
     /**
-     * @see #sendAnswer(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, mitll.langtest.client.sound.SoundFeedback)
+     * @see #sendAnswer(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, mitll.langtest.client.sound.SoundFeedback, boolean)
      * @param service
      * @param controller
      * @param outer
      */
     private void maybeGoToNextItem(LangTestDatabaseAsync service, ExerciseController controller, ReceiverPanel outer,boolean isCorrect, boolean movingOnToNext) {
-      if (isGameOver) {
+      if (currentStimulus.isGameOver()) {
         // game over... dude...
         dealWithGameOver(service, controller, outer, isCorrect, movingOnToNext);
       } else {
@@ -320,7 +325,12 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
     private boolean checkCorrect() {
       String guess = guessBox.getText().trim();
-      boolean isCorrect = guess.equalsIgnoreCase(answer);
+      guess = guess.replaceAll("\\p{Punct}$",""); // remove trailing punctuation
+      String spacesRemoved = guess.replaceAll("\\s+", " ");
+     /* System.out.println("guess now '" + spacesRemoved+
+        "' vs '" +answer+
+        "'");*/
+      boolean isCorrect = spacesRemoved.equalsIgnoreCase(answer);
       if (!isCorrect) {
         for (String prefix : Arrays.asList("to ", "the ")) {  // TODO : hack for ENGLISH
           if (answer.startsWith(prefix)) { // verbs
@@ -345,7 +355,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         singlePlayerRobot.registerAnswer(correct);
       }
 
-      service.registerAnswer(controller.getUser(), exerciseID, stimulus.getText(), guessBox.getText(), correct,
+      service.registerAnswer(controller.getUser(), currentStimulus.getExerciseID(), stimulus.getText(), guessBox.getText(), correct,
         new RegisterAnswerResponseCallback(service, controller, outer, movingOnToNext));
     }
 
@@ -357,54 +367,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       guessBox.setVisible(false);
       guessBox.setText("");
       send.setVisible(false);
-    }
-
-    private void showPopup(String html, Image image) {
-      showPopup(html, image,null, POPUP_DURATION, null);
-    }
-
-    private void showPopup(String html, Image image, int dur) {
-      showPopup(html, image,null, dur, null);
-    }
-
-    private void showPopup(String html, Image image, Image image2) {
-      showPopup(html, image,image2, POPUP_DURATION, null);
-    }
-
-    private void showPopup(String html, Image image, Image image2, int dur, CloseHandler<PopupPanel> closeHandler) {
-      final PopupPanel pleaseWait = new DecoratedPopupPanel();
-      pleaseWait.setAutoHideEnabled(true);
-      HTML w = new HTML(html);
-      if (image != null) {
-        VerticalPanel vp = new VerticalPanel();
-        if (image2 != null) {
-          HorizontalPanel hp = new HorizontalPanel();
-          hp.add(image);
-          hp.setSpacing(5);
-          hp.add(image2);
-          vp.add(hp);
-        } else {
-          vp.add(image);
-        }
-        vp.add(w);
-
-        pleaseWait.add(vp);
-      }
-      else {
-        pleaseWait.add(w);
-      }
-      pleaseWait.center();
-      if (closeHandler != null) {
-        pleaseWait.addCloseHandler(closeHandler);
-      }
-
-      Timer t = new Timer() {
-        @Override
-        public void run() {
-          pleaseWait.hide();
-        }
-      };
-      t.schedule(dur);
+      pass.setVisible(false);
     }
 
     /**
@@ -417,7 +380,6 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
      */
     private void checkForStimulus(final LangTestDatabaseAsync service, final ExerciseController controller, final ReceiverPanel outer) {
       //System.out.println(new Date() + " : checkForStimulus : user " + controller.getUser() + " ----------------");
-     // new Exception().printStackTrace();
       if (singlePlayerRobot != null) {
       //  System.out.println("ReceiverExerciseFactory.checkForStimulus : we have a single player robot...");
         singlePlayerRobot.checkForStimulus(new AsyncCallback<StimulusAnswerPair>() {
@@ -438,7 +400,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     }
 
     /**
-     * @see #sendAnswer(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, mitll.langtest.client.sound.SoundFeedback)
+     * @see #sendAnswer(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, mitll.langtest.client.sound.SoundFeedback, boolean)
      * @param service
      * @param controller
      * @param outer
@@ -526,7 +488,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       ClickHandler onNo = new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          showPopup(clickNoMessage,null);
+          new PopupHelper().showPopup(clickNoMessage);
         }
       };
       showLeaderboard(service, controller, prompt1, onYes, onNo);
@@ -605,7 +567,8 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     private void showStimulus(StimulusAnswerPair result, ReceiverPanel outer) {
      // correctImage.setVisible(false);
    //   incorrectImage.setVisible(false);
-      onLastStim = result.isLastStimulus();
+      //onLastStim = result.isLastStimulus();
+      currentStimulus = result;
 /*      if (onLastStim)
         System.out.println("\n\n\n\non last " + onLastStim);*/
       if (gameInfo != null) {
@@ -616,14 +579,18 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       guessBox.setVisible(true);
       guessBox.setFocus(true);
       send.setVisible(true);
-      if (result.getStimulus() != null) {
+      pass.setVisible(true);
+    //  if (result.getStimulus() != null) {
         showStimFull(result);
-      }
+    /*  }
+      else {
+        System.err.println("huh? how can stimulus be null????");
+      }*/
       stimulusCount++;
       outer.answer = result.getAnswer();
-      exerciseID = result.getExerciseID();
-      isGameOver = result.isGameOver();
-      System.out.println("--------> showStimulus game over = " + isGameOver + " stim count " + stimulusCount + " ex id " +exerciseID);
+      //exerciseID = result.getExerciseID();
+      System.out.println("--------> showStimulus game over = " + currentStimulus.isGameOver() +
+        " stim count " + stimulusCount + " ex id " +result.getExerciseID());
     }
 
 /*    private void showStim(StimulusAnswerPair result) {
