@@ -125,7 +125,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
    */
   public void setGameOnGiver(GameInfo game) {
     if (!isGiver) System.err.println("set game on giver on receiver???");
-    if (/*isGiver &&*/ game != null) {
+    if (game != null) {
       int numExercises = game.getNumExercises();
       if (numExercises > -1 && game.getTimestamp() != lastTimestamp && giverExerciseFactory != null) {
         lastTimestamp = game.getTimestamp();
