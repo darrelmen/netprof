@@ -145,16 +145,13 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     private TextBox guessBox = new NoPasteTextBox();
     private Heading stimulus = new Heading(3);
     private String answer;
-    //private String exerciseID;
     private Button send,pass;
     private StimulusAnswerPair currentStimulus;
-    //private boolean onLastStim = false;
 
     private Image correctImage   = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
     private Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
     private Image arrowImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rightArrow.png"));
     private Heading correct = new Heading(4);
-   // private boolean isGameOver;
 
     /**
      * @see ReceiverExerciseFactory#getExercisePanel(mitll.langtest.shared.Exercise)
@@ -188,6 +185,8 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
       Row w = new Row();
       w.add(guessBox);
+      guessBox.addStyleName("topMargin");
+      addAccentButtons(controller, w);
       add(w);
 
       this.send = new Button("Send Answer");
@@ -231,6 +230,25 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
       waitForNext();
       return outer;
+    }
+
+    private void addAccentButtons(ExerciseController controller, Row w) {
+      if (!controller.getProps().doTabooEnglish()) {
+         String [] accented = {"á", "é", "í", "ó", "ú", "ü", "ñ"};
+        for (String accent : accented) {
+          final Button w1 = new Button(accent);
+          w1.setType(ButtonType.SUCCESS);
+          w1.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+              guessBox.setText(guessBox.getText() + w1.getText().trim());
+              guessBox.setFocus(true);
+            }
+          });
+          w1.addStyleName("leftFiveMargin");
+          w.add(w1);
+        }
+      }
     }
 
     private void sendAnswerOnClick(ExerciseController controller, LangTestDatabaseAsync service, ReceiverPanel outer, SoundFeedback soundFeedback) {
