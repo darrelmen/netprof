@@ -970,10 +970,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param skippedItem
    * @param numClues
    * @param isGameOver
+   * @param giverChosePoorly
    */
   @Override
-  public int sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus, boolean skippedItem, int numClues, boolean isGameOver) {
-    return db.getOnlineUsers().sendStimulus(userid, exerciseID, stimulus, answer, onLastStimulus, skippedItem, numClues, isGameOver);
+  public int sendStimulus(long userid, String exerciseID, String stimulus, String answer,
+                          boolean onLastStimulus, boolean skippedItem, int numClues, boolean isGameOver,
+                          boolean giverChosePoorly) {
+    return db.getOnlineUsers().sendStimulus(userid, exerciseID, stimulus, answer, onLastStimulus, numClues, isGameOver, giverChosePoorly);
   }
 
   /**
@@ -985,6 +988,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public PartnerState isPartnerOnline(long userid, boolean isGiver) { return db.getOnlineUsers().isPartnerOnline(userid, isGiver); }
 
+  Random rand = new Random();
   /**
    * @see mitll.langtest.client.taboo.TabooExerciseList#tellPartnerMyChapterSelection(mitll.langtest.client.exercise.SelectionState)
    * @param giver
@@ -994,7 +998,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public void registerSelectionState(long giver, Map<String, Collection<String>> selectionState) {
     Collection<Exercise> exercisesForSection = (selectionState.isEmpty()) ? getExercises(giver) : db.getSectionHelper().getExercisesForSelectionState(selectionState);
     List<ExerciseShell> exerciseShells = getExerciseShells(exercisesForSection);
-    Collections.shuffle(exerciseShells);    // randomize order
+
+    logger.debug("first " +exerciseShells.iterator().next().getID());
+    Collections.shuffle(exerciseShells,rand);    // randomize order
+    logger.debug("first " +exerciseShells.iterator().next().getID());
+
     db.getOnlineUsers().registerSelectionState(giver, selectionState, exerciseShells);
   }
 
