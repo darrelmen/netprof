@@ -331,20 +331,20 @@ public class OnlineUsers {
    * @param stimulus
    * @param answer
    * @param onLastStimulus
-   * @param skippedItem
    * @param numClues
    * @param isGameOver
+   * @param giverChosePoorly
    * @return
    */
   public synchronized int sendStimulus(long userid, String exerciseID, String stimulus, String answer,
-                                       boolean onLastStimulus, boolean skippedItem, int numClues, boolean isGameOver) {
+                                       boolean onLastStimulus, int numClues, boolean isGameOver, boolean giverChosePoorly) {
     User receiver = getReceiverForGiver(userid);
     if (receiver == null) {
       return 1;
     }
     logger.debug("OnlineUsers.sendStimulus : sending " + stimulus + " to " + receiver + " from giver " +
       userid + " on last stim " + onLastStimulus + " game over " + isGameOver);
-    receiverToStimulus.put(receiver, new StimulusAnswerPair(exerciseID, stimulus, answer, onLastStimulus, skippedItem, numClues, isGameOver));
+    receiverToStimulus.put(receiver, new StimulusAnswerPair(exerciseID, stimulus, answer, onLastStimulus, numClues, isGameOver, giverChosePoorly));
     return 0;
   }
 
@@ -391,7 +391,7 @@ public class OnlineUsers {
     if (answerBundle == null) {
       answerBundle = new AnswerBundle();
     }
-    else if (!answerBundle.getStimulus().endsWith(stimulus)) {
+    else if (!answerBundle.getStimulus().contains(stimulus)) {  // TODO : this is kinda cheesy
       logger.info("\tOnlineUsers.checkCorrect : answer stim " + answerBundle.getStimulus() + " not same as " + stimulus);
       answerBundle = new AnswerBundle();
     } else {
@@ -402,7 +402,7 @@ public class OnlineUsers {
 
   /**
    * @see #checkCorrect
-   * @see #sendStimulus(long, String, String, String, boolean, boolean, int, boolean)
+   * @see #sendStimulus(long, String, String, String, boolean, int, boolean, boolean)
    * @param giver
    * @return
    */
