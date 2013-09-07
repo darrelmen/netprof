@@ -434,11 +434,9 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
         }
       }
      // System.out.println("getNotSentYetHints now " + notSentYet.size());
-
       return notSentYet;
     }
 
-   // private AnswerBundle lastCorrectResponse = null;
     /**
      * Keep asking server if the receiver has made a correct answer or not.
      *
@@ -450,6 +448,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
      */
     private void checkForCorrect(final long userid, final String stimulus, final Exercise current,
                                  final SoundFeedback feedback) {
+      //System.out.println(new Date() +  " giver : checkForCorrect for " + stimulus );
       service.checkCorrect(userid, stimulus, new AsyncCallback<AnswerBundle>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -458,7 +457,9 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
 
         @Override
         public void onSuccess(AnswerBundle result) {
+
           if (result.didReceiverReply()) {
+            System.out.println("\t"+new Date() +  "giver : onSuccess got " + result );
             gotAnswerFromReceiver(result, feedback, current);
           } else { // they haven't answered yet
             Timer t = new Timer() {
