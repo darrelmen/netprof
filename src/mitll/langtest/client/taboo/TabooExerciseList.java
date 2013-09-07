@@ -124,7 +124,8 @@ public class TabooExerciseList extends FlexSectionExerciseList {
    * @param game
    */
   public void setGameOnGiver(GameInfo game) {
-    if (!isGiver) System.err.println("set game on giver on receiver???");
+    if (!isGiver) System.err.println("set game " + game +
+      " on giver on receiver???");
     if (game != null) {
       int numExercises = game.getNumExercises();
       if (numExercises > -1 && game.getTimestamp() != lastTimestamp && giverExerciseFactory != null) {
@@ -202,6 +203,10 @@ public class TabooExerciseList extends FlexSectionExerciseList {
     flush();
   }
 
+  /**
+   * @see #rememberExercises(java.util.List)
+   * @param selectionState
+   */
   private void tellPartnerMyChapterSelection(final SelectionState selectionState) {
     System.out.println("telling partner selection state for " + userID + " is '" + selectionState +"'");
     final Map<String,Collection<String>> typeToSection = selectionState.getTypeToSection();
