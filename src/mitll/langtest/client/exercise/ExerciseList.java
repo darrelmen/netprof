@@ -497,12 +497,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public int getPercentComplete() { return (int) (100f*((float)visited.size()/(float)currentExercises.size())); }
   @Override
   public int getComplete() { return visited.size(); }
-
+/*
   @Override
   public void addAdHocExercise(String label) {
     addExerciseToList(new ExerciseShell("ID_"+(adHocCount++),label));
     flush();
-  }
+  }*/
 
   @Override
   public void removeCurrentExercise() {
