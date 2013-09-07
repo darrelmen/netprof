@@ -87,7 +87,7 @@ public interface ListInterface extends RequiresResize {
 
   int getComplete();
 
-  void addAdHocExercise(String label);
+  //void addAdHocExercise(String label);
 
   void setSelectionState(Map<String,Collection<String>> selectionState);
 
