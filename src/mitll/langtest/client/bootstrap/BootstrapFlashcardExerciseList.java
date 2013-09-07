@@ -382,9 +382,9 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
       }
     }
   }
-
+/*
   @Override
-  public void addAdHocExercise(String label) {}
+  public void addAdHocExercise(String label) {}*/
   @Override
   public void setSelectionState(Map<String, Collection<String>> selectionState) {
   }
