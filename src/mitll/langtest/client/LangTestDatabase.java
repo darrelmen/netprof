@@ -153,6 +153,7 @@ public interface LangTestDatabase extends RemoteService {
 
   /**
    * Report user state - online/offline
+   * @see mitll.langtest.client.user.UserManager#userOnline(int, boolean)
    * @param userid
    * @param isOnline
    */
@@ -166,6 +167,7 @@ public interface LangTestDatabase extends RemoteService {
    * <li>Am I playing with anyone currently?</li>
    * <li>If so, what's my role (giver/receiver)? </li>
    * </ul>
+   * @see mitll.langtest.client.taboo.Taboo#checkForPartner(long)
    * @param userid
    * @return
    */
@@ -173,6 +175,7 @@ public interface LangTestDatabase extends RemoteService {
 
   /**
    * User chooses taboo role...
+   * @see mitll.langtest.client.taboo.Taboo#askUserToChooseRole
    * @param userid
    * @param isGiver
    */
@@ -180,6 +183,7 @@ public interface LangTestDatabase extends RemoteService {
 
   /**
    * Is my partner online, and if a receiver, which chapter(s) did they choose?
+   * @see mitll.langtest.client.taboo.Taboo#pollForPartnerOnline(long, boolean)
    * @param userid
    * @param isGiver
    * @return
@@ -188,6 +192,7 @@ public interface LangTestDatabase extends RemoteService {
 
   /**
    * Tell giver which chapter(s) was/were chosen.
+   * @see mitll.langtest.client.taboo.TabooExerciseList#tellPartnerMyChapterSelection(mitll.langtest.client.exercise.SelectionState)
    * @param giver
    * @param selectionState
    */
@@ -197,7 +202,7 @@ public interface LangTestDatabase extends RemoteService {
    * Giver chooses a sentence to send to receiver
    *
    *
-   *
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#sendStimulus(String, mitll.langtest.shared.Exercise, String, mitll.langtest.client.sound.SoundFeedback, boolean, int, boolean)
    * @param userid
    * @param exerciseID
    * @param stimulus
@@ -205,13 +210,15 @@ public interface LangTestDatabase extends RemoteService {
    * @param onLastStimulus
    * @param skippedItem
    * @param numClues
-   * @param isGameOver     @return
+   * @param isGameOver
+   * @return
    * @param giverChosePoorly
    */
   int sendStimulus(long userid, String exerciseID, String stimulus, String answers, boolean onLastStimulus, boolean skippedItem, int numClues, boolean isGameOver, boolean giverChosePoorly);
 
   /**
    * Receiver checks for stimulus
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#checkForStimulus(LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
    * @param userid
    * @return
    */
@@ -219,6 +226,8 @@ public interface LangTestDatabase extends RemoteService {
 
   /**
    * Receiver enters an answer, correct or incorrect
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#registerAnswer(LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
+
    * @param userid
    * @param exerciseID
    * @param stimulus
@@ -229,15 +238,36 @@ public interface LangTestDatabase extends RemoteService {
 
   /**
    * Giver checks if receiver answered correctly, given last stimulus.
-   *
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#checkForCorrect(long, String, mitll.langtest.shared.Exercise, mitll.langtest.client.sound.SoundFeedback)
    * @param giverUserID
    * @param stimulus
    * @return
    */
   AnswerBundle checkCorrect(long giverUserID, String stimulus);
 
+  /**
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory#startGame()
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#doNextGame(mitll.langtest.client.exercise.ExerciseController, LangTestDatabaseAsync, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
+   * @param userID
+   * @param startOver
+   * @return
+   */
   GameInfo startGame(long userID, boolean startOver);
+
+  /**
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver(LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
+   * @param userID
+   * @param score
+   * @param maxPossibleScore
+   */
   void postGameScore(long userID, int score, int maxPossibleScore);
+
+  /**
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory#showLeaderboard()
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#showLeaderboard(LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
+
+   * @param selectionState
+   * @return
+   */
   Leaderboard getLeaderboard(Map<String, Collection<String>> selectionState);
-//  GameInfo getGame(long userID, boolean isGiver);
 }
