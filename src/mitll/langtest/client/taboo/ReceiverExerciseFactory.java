@@ -42,6 +42,7 @@ import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.taboo.GameInfo;
 import mitll.langtest.shared.taboo.StimulusAnswerPair;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -60,6 +61,7 @@ import java.util.Map;
 public class ReceiverExerciseFactory extends ExercisePanelFactory {
   private static final int CHECK_FOR_STIMULUS_INTERVAL = 1000;
   public static final int MAX_CLUES_TO_GIVE = 5;
+  private static final String SEND_ANSWER = "Answer";
 
   private SinglePlayerRobot singlePlayerRobot;
   private int exerciseCount = 0;
@@ -138,8 +140,10 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
   }
 
   private class ReceiverPanel extends FluidContainer {
-    private static final String PLEASE_WAIT = "Please wait for giver to send next sentence.";
-    // Heading gameIndicator = new Heading(3);
+    private static final String PLEASE_WAIT = "Please wait for giver to send next " +
+      GiverExerciseFactory.SENTENCE +
+      ".";
+
     private Heading exerciseDisplay = new Heading(3);
     private Heading prompt = new Heading(4);
     private TextBox guessBox = new NoPasteTextBox();
@@ -147,6 +151,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     private String answer;
     private Button send,pass;
     private StimulusAnswerPair currentStimulus;
+    List<Button> buttons;
 
     private Image correctImage   = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
     private Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
@@ -186,10 +191,10 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       Row w = new Row();
       w.add(guessBox);
       guessBox.addStyleName("topMargin");
-      addAccentButtons(controller, w);
+      buttons = addAccentButtons(controller, w);
       add(w);
 
-      this.send = new Button("Send Answer");
+      this.send = new Button(SEND_ANSWER);
       send.setType(ButtonType.PRIMARY);
       send.setEnabled(true);
       send.setTitle("Press the enter key.");
@@ -232,11 +237,13 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       return outer;
     }
 
-    private void addAccentButtons(ExerciseController controller, Row w) {
+    private List<Button> addAccentButtons(ExerciseController controller, Row w) {
+      List<Button> buttons = new ArrayList<Button>();
       if (!controller.getProps().doTabooEnglish()) {
-         String [] accented = {"á", "é", "í", "ó", "ú", "ü", "ñ"};
+        String[] accented = {"á", "é", "í", "ó", "ú", "ü", "ñ"};
         for (String accent : accented) {
           final Button w1 = new Button(accent);
+          buttons.add(w1);
           w1.setType(ButtonType.SUCCESS);
           w1.addClickHandler(new ClickHandler() {
             @Override
@@ -249,6 +256,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
           w.add(w1);
         }
       }
+      return buttons;
     }
 
     private void sendAnswerOnClick(ExerciseController controller, LangTestDatabaseAsync service, ReceiverPanel outer, SoundFeedback soundFeedback) {
@@ -375,17 +383,6 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
       service.registerAnswer(controller.getUser(), currentStimulus.getExerciseID(), stimulus.getText(), guessBox.getText(), correct,
         new RegisterAnswerResponseCallback(service, controller, outer, movingOnToNext));
-    }
-
-    private void waitForNext() {
-      prompt.setText(singlePlayerRobot == null ? PLEASE_WAIT : "");
-      exerciseDisplay.setText("");
-      stimulus.setText("");
-
-      guessBox.setVisible(false);
-      guessBox.setText("");
-      send.setVisible(false);
-      pass.setVisible(false);
     }
 
     /**
@@ -576,6 +573,18 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       }
     }
 
+    private void waitForNext() {
+      prompt.setText(singlePlayerRobot == null ? PLEASE_WAIT : "");
+      exerciseDisplay.setText("");
+      stimulus.setText("");
+
+      guessBox.setVisible(false);
+      guessBox.setText("");
+      send.setVisible(false);
+      pass.setVisible(false);
+      for (Button b : buttons) b.setVisible(false);
+    }
+
     /**
      * @see #checkForStimulus(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
      * @see #gotStimulusResponse(mitll.langtest.shared.taboo.StimulusAnswerPair, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
@@ -583,9 +592,6 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
      * @param outer
      */
     private void showStimulus(StimulusAnswerPair result, ReceiverPanel outer) {
-     // correctImage.setVisible(false);
-   //   incorrectImage.setVisible(false);
-      //onLastStim = result.isLastStimulus();
       currentStimulus = result;
 /*      if (onLastStim)
         System.out.println("\n\n\n\non last " + onLastStim);*/
@@ -598,15 +604,11 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
       guessBox.setFocus(true);
       send.setVisible(true);
       pass.setVisible(true);
-    //  if (result.getStimulus() != null) {
-        showStimFull(result);
-    /*  }
-      else {
-        System.err.println("huh? how can stimulus be null????");
-      }*/
+      for (Button b : buttons) b.setVisible(true);
+
+      showStimFull(result);
       stimulusCount++;
       outer.answer = result.getAnswer();
-      //exerciseID = result.getExerciseID();
       System.out.println("--------> showStimulus game over = " + currentStimulus.isGameOver() +
         " stim count " + stimulusCount + " ex id " +result.getExerciseID());
     }
