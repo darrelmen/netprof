@@ -12,6 +12,7 @@ import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.event.HideEvent;
 import com.github.gwtbootstrap.client.ui.event.HideHandler;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -62,6 +63,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
   private static final int CHECK_FOR_STIMULUS_INTERVAL = 1000;
   public static final int MAX_CLUES_TO_GIVE = 5;
   private static final String SEND_ANSWER = "Answer";
+  private static final String PLEASE_WAIT = " Please wait for the next item.";
 
   private SinglePlayerRobot singlePlayerRobot;
   private int exerciseCount = 0;
@@ -289,7 +291,9 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     private void sendAnswer(final LangTestDatabaseAsync service, final ExerciseController controller,
                             final ReceiverPanel outer, SoundFeedback soundFeedback, boolean showTryAgain) {
       boolean isCorrect = checkCorrect();
-      System.out.println("sending answer '" + guessBox.getText() + "' vs '" + answer+ "' which is " + isCorrect +
+      String answerToSubmit = guessBox.getText();
+      String stimulus = this.stimulus.getText();
+      System.out.println("sending answer '" + answerToSubmit + "' vs '" + answer+ "' which is " + isCorrect +
         " stim count " + stimulusCount + " on last " + currentStimulus.isLastStimulus());
       boolean onLast = currentStimulus.isLastStimulus() || stimulusCount == MAX_CLUES_TO_GIVE;   // never do more than 5 clues
 
@@ -301,13 +305,14 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         int i = MAX_CLUES_TO_GIVE - stimulusCount + 1;
        // System.out.println("sendAnswer : adding " + i + " to " + score + " clues " + displayedStimulus.getNumClues() + " stim " + stimulusCount);
         score += i;
-        System.out.println("sendAnswer : score " + score + " total clues " +gameInfo.getTotalClues());
+        System.out.println("sendAnswer : correct: score " + score + " total clues " +gameInfo.getTotalClues());
 
         exerciseCount++;
         stimulusCount = 0;
         setCorrect();
-        new PopupHelper().showPopup("Correct! +" + i + " points." + (singlePlayerRobot == null ? " Please wait for the next item." : ""), correctImage, 3500);
-        maybeGoToNextItem(service, controller, outer,isCorrect,movingOnToNext);
+        String message = "Correct! +" + i + " points." + (singlePlayerRobot == null ? ReceiverExerciseFactory.PLEASE_WAIT : "");
+        new PopupHelper().showPopup(message, correctImage, 3500);
+        maybeGoToNextItem(service, controller, outer,isCorrect,movingOnToNext, answerToSubmit,stimulus);
       }
       else {
         soundFeedback.playIncorrect();
@@ -316,10 +321,10 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
           exerciseCount++;
           stimulusCount = 0;
           setCorrect();
-          maybeGoToNextItem(service, controller, outer,isCorrect,movingOnToNext);
+          maybeGoToNextItem(service, controller, outer,isCorrect,movingOnToNext, answerToSubmit,stimulus);
         }
         else {
-          registerAnswer(service, controller, outer, isCorrect, movingOnToNext);
+          registerAnswer(service, controller, outer, isCorrect, movingOnToNext, answerToSubmit,stimulus);
           if (showTryAgain) new PopupHelper().showPopup("Try again...", incorrectImage);
         }
       }
@@ -331,13 +336,15 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
      * @param service
      * @param controller
      * @param outer
+     * @param answerToSubmit
      */
-    private void maybeGoToNextItem(LangTestDatabaseAsync service, ExerciseController controller, ReceiverPanel outer,boolean isCorrect, boolean movingOnToNext) {
+    private void maybeGoToNextItem(LangTestDatabaseAsync service, ExerciseController controller, ReceiverPanel outer,
+                                   boolean isCorrect, boolean movingOnToNext, String answerToSubmit, String stimulus) {
       if (currentStimulus.isGameOver()) {
         // game over... dude...
-        dealWithGameOver(service, controller, outer, isCorrect, movingOnToNext);
+        dealWithGameOver(service, controller, outer, isCorrect, movingOnToNext, answerToSubmit,stimulus);
       } else {
-        registerAnswer(service, controller, outer, isCorrect, movingOnToNext);
+        registerAnswer(service, controller, outer, isCorrect, movingOnToNext, answerToSubmit,stimulus);
 
         loadNext(controller);
       }
@@ -376,12 +383,13 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     }
 
     private void registerAnswer(final LangTestDatabaseAsync service, final ExerciseController controller,
-                                final ReceiverPanel outer, boolean correct, boolean movingOnToNext) {
+                                final ReceiverPanel outer, boolean correct, boolean movingOnToNext, String answerToSubmit,
+                                String stimulus) {
       if (singlePlayerRobot != null) {
         singlePlayerRobot.registerAnswer(correct);
       }
 
-      service.registerAnswer(controller.getUser(), currentStimulus.getExerciseID(), stimulus.getText(), guessBox.getText(), correct,
+      service.registerAnswer(controller.getUser(), currentStimulus.getExerciseID(), stimulus, answerToSubmit, correct,
         new RegisterAnswerResponseCallback(service, controller, outer, movingOnToNext));
     }
 
@@ -419,10 +427,13 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
      * @param service
      * @param controller
      * @param outer
+     * @param answerToSubmit
      */
     private void dealWithGameOver(final LangTestDatabaseAsync service, final ExerciseController controller,
-                                  final ReceiverPanel outer, final boolean isCorrect,final boolean movingOnToNext) {
-      System.out.println(new Date() + " ReceiverExerciseFactory.dealWithGameOver. ----------->\n\n");
+                                  final ReceiverPanel outer, final boolean isCorrect, final boolean movingOnToNext,
+                                  final String answerToSubmit, final String stimulus) {
+      System.out.println(new Date() + " ReceiverExerciseFactory.dealWithGameOver. -----------> answer " + answerToSubmit+
+        " \n");
       service.postGameScore(controller.getUser(), score, gameInfo.getTotalClues(), new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -431,9 +442,14 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
         @Override
         public void onSuccess(Void result) {
-          registerAnswer(service, controller, outer, isCorrect, movingOnToNext);   // this way, giver will see response and then know to check for game score
+          registerAnswer(service, controller, outer, isCorrect, movingOnToNext, answerToSubmit,stimulus);   // this way, giver will see response and then know to check for game score
 
-          showLeaderboard(service, controller, outer);
+          Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+              showLeaderboard(service, controller, outer);
+            }
+          });
         }
       });
     }
@@ -465,7 +481,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     }
 
     /**
-     * @see #dealWithGameOver(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
+     * @see #dealWithGameOver
      * @param controller
      * @param service
      * @param outer
@@ -743,6 +759,9 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
           //System.out.println("RegisterAnswerResponseCallback.onSuccess -- ");
 
           checkForStimulus(service, controller, outer);
+        }
+        else {
+
         }
       }
     }
