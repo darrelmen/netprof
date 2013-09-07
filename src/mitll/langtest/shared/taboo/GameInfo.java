@@ -62,10 +62,17 @@ public class GameInfo implements IsSerializable {
 
   public int getIndexOfItem(String id) {
     if (itemsInGame == null) return -1;
+  //  StringBuffer buffer = new StringBuffer();
+  //  for (ExerciseShell exerciseShell : itemsInGame) buffer.append(exerciseShell.getID() + " ");
     for (int i = 0; i < itemsInGame.size(); i++) {
-      if (itemsInGame.get(i).getID().equals(id)) return i;
+      if (itemsInGame.get(i).getID().equals(id)) {
+
+      //  System.out.println("getIndexOfItem :  find " + i + " for " + id +" in " + buffer);
+
+        return i;
+      }
     }
-    System.out.println("couldn't find " + id + " in " + itemsInGame);
+    System.err.println("\n\n\ngetIndexOfItem : couldn't find " + id + " in " + itemsInGame);
     return -1;
   }
 
@@ -86,13 +93,11 @@ public class GameInfo implements IsSerializable {
   public boolean onLast(Exercise e) {
     int i = getNumExercises() - 1;
     int indexOfItem = getIndexOfItem(e);
-    System.out.println("GameInfo:onLast " + e.getID() + " last index " + i + " vs ex index " + indexOfItem);
+    StringBuffer buffer = new StringBuffer();
+    for (ExerciseShell exerciseShell : itemsInGame) buffer.append(exerciseShell.getID() + " ");
+    System.out.println("GameInfo.onLast " + e.getID() + " last index " + i + " vs ex index " + indexOfItem + " in " + buffer);
     return i == indexOfItem;
   }
-
-/*  public int getInitialNumExercises() {
-    return initNumExercises;
-  }*/
 
   protected void restartGames() {
     gameCount = 0;
@@ -103,18 +108,26 @@ public class GameInfo implements IsSerializable {
     setTimestamp();
   }
 
-  public int getGameCount() { return gameCount; }
+  public int getGameCount() {
+    return gameCount;
+  }
 
   public boolean anyGamesRemaining() {
     return gameCount < numGames;
   }
 
-  public boolean hasStarted() { return itemsInGame != null; }
+  public boolean hasStarted() {
+    return itemsInGame != null;
+  }
 
-  public List<ExerciseShell> getGameItems() { return itemsInGame; }
+  public List<ExerciseShell> getGameItems() {
+    return itemsInGame;
+  }
 
-  public String toString() { return "GameInfo : " + (hasStarted() ? " started " : " not started ") +
-    "Count " + gameCount + " total num games " +
-    numGames + " num exercises " + getNumExercises() + " clues " + totalClues +
-    " timestamp " + new Date(timestamp); }
+  public String toString() {
+    return "GameInfo : " + (hasStarted() ? " started " : " not started ") +
+      "Count " + gameCount + " total num games " +
+      numGames + " num exercises " + getNumExercises() + " clues " + totalClues +
+      " timestamp " + new Date(timestamp);
+  }
 }
