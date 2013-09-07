@@ -274,14 +274,7 @@ public class OnlineUsers {
   }
 
   private Game makeGame(User user, List<ExerciseShell> exercisesForSection) {
-   // Game game = receiverToGame.get(user);
- //   logger.debug("registerSelectionState.previous game was " + game);
     Game newGame = new Game(exercisesForSection);
- /*   if (game != null && game.hasStarted()) {
-      logger.warn("---> registerSelectionState.starting game  for new selection?");
-
-      newGame.startGame();
-    }*/
     receiverToGame.put(user, newGame);
     return  newGame;
   }
@@ -404,6 +397,14 @@ public class OnlineUsers {
     return stimulusAnswerPair;
   }
 
+  /**
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#registerAnswer(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
+
+   * @param receiverUserID
+   * @param stimulus
+   * @param answer
+   * @param correct
+   */
   public synchronized void registerAnswer(long receiverUserID, String stimulus, String answer, boolean correct) {
     User receiver = getUser(receiverUserID);
     if (getGiverForReceiver(receiverUserID) == null) {
@@ -411,9 +412,12 @@ public class OnlineUsers {
     } else {
       receiverToStimulus.remove(receiver);
       answer = new ProfanityCleaner().replaceProfanity(answer);
-      receiverToAnswer.put(receiver,new AnswerBundle(stimulus, answer, correct));
+      AnswerBundle value = new AnswerBundle(stimulus, answer, correct);
+      receiverToAnswer.put(receiver, value);
+      logger.debug("OnlineUsers.registerAnswer : " + receiver + " to " + value);
 
-      logger.debug("OnlineUsers.registerAnswer : user->answer now " + receiverToAnswer);
+
+    //  logger.debug("OnlineUsers.registerAnswer : user->answer now " + receiverToAnswer);
     }
   }
 
@@ -430,11 +434,14 @@ public class OnlineUsers {
     //logger.debug("OnlineUsers.checkCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id);
 
     AnswerBundle answerBundle = receiverToAnswer.remove(receiver);// sent response to giver -- no need to remember them anymore
+    //logger.debug("OnlineUsers.checkCorrect : user  " + receiver + " to " + answerBundle);
+
     if (answerBundle == null) {
       answerBundle = new AnswerBundle();
     }
     else if (!answerBundle.getStimulus().contains(stimulus)) {  // TODO : this is kinda cheesy
-      logger.info("\tOnlineUsers.checkCorrect : answer stim '" + answerBundle.getStimulus() + "' not same as " + stimulus);
+      logger.info("\tOnlineUsers.checkCorrect : for giver " + giverUserID + " receiver " + receiver.id+
+        " answer stim '" + answerBundle.getStimulus() + "' not same as " + stimulus);
       answerBundle = new AnswerBundle();
     } else {
       logger.debug("\tOnlineUsers.checkCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id + " got " + answerBundle);
@@ -516,7 +523,6 @@ public class OnlineUsers {
     Map<String, Collection<String>> selectionState = receiverToState.get(receiver);
     Leaderboard leaderboard = stateToScores.get(selectionState.toString());
     if (leaderboard == null) stateToScores.put(selectionState.toString(), leaderboard = new Leaderboard());
-
 
     long giverID = giverForReceiver == null ? -1 : giverForReceiver.id;
     leaderboard.addScore(new ScoreInfo(receiver.id, giverID, score, maxPossibleScore-score, 0l, selectionState));  // TODO fill in time taken?
