@@ -70,7 +70,7 @@ public class Taboo {
       "<ul><li>When playing together, both players share the same score.</li></ul>"
     };
     List<String> messages = Arrays.asList(strings);
-    ModalInfoDialog modal = new ModalInfoDialog("Taboo Rules", messages, new HiddenHandler() {
+    new ModalInfoDialog("Taboo Rules", messages, new HiddenHandler() {
       @Override
       public void onHidden(HiddenEvent hiddenEvent) {
         checkForPartner(fuserid);
@@ -157,7 +157,9 @@ public class Taboo {
                 Map<String,Collection<String>> typeToSelection = partnerState.getTypeToSelection();
 //                System.out.println("pollForPartnerOnline : checked if receiver partner of me, " + fuserid + ", is online and got state " + typeToSelection);
                 langTest.setSelectionState(typeToSelection);  // TODO user controller...
-                controller.setGameOnGiver(partnerState.getGameInfo());
+                if (partnerState.getGameInfo() != null) {
+                  controller.setGameOnGiver(partnerState.getGameInfo());
+                }
               }
               else {
 /*                System.out.println("pollForPartnerOnline : checked if " +
