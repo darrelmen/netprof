@@ -830,6 +830,7 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   private String getBlankSequence(String sentence, String answer) {
+    boolean isQuestion = (sentence.endsWith("?"));
     String[] words = answer.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
     StringBuilder builder = new StringBuilder();
     for (String token : words) {
@@ -838,7 +839,13 @@ public class ExcelImport implements ExerciseDAO {
     }
     String sequenceOfBlanks = builder.toString().trim();
 
+    if (isQuestion) {
+      sentence = sentence.substring(0,sentence.length()-1);
+    }
     sentence = sentence.replace("?", sequenceOfBlanks);
+    if (isQuestion) {
+      sentence += "?";
+    }
     return sentence;
   }
 
