@@ -1053,6 +1053,5 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return exerciseList.onFirst(current);
   }
 
-  //public void addAdHocExercise(String label) { exerciseList.addAdHocExercise(label); }
   public void setSelectionState(Map<String,Collection<String>> selectionState) { exerciseList.setSelectionState(selectionState);}
 }
