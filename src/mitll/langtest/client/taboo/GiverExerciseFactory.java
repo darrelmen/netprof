@@ -65,6 +65,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
   public static final int MIN_BOGUS_STIM = 5;
   private static final int MAX_CLUES_TO_SEND = ReceiverExerciseFactory.MAX_CLUES_TO_GIVE;
   private static final String PLEASE_WAIT_FOR_RECEIVER_TO_ANSWER = "Please wait for receiver to answer...";
+  public static final String SENTENCE = "clue";
   private int stimulusCount = 0;
   private GameInfo gameInfo;
   private long lastTimestamp;
@@ -183,12 +184,13 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       add(w2);
 
       Row w3 = new Row();
-      w3.add(new Heading(4, "Choose a hint sentence to send : "));
+      w3.add(new Heading(4, "Choose a hint " +
+        SENTENCE +
+        " to send : "));
       add(w3);
 
       otherClues.clear();
       otherExerciseClues.clear();
-  //    questionToExercise.clear();
 
       getUnrelatedClues(7);
       // recordingStyle.add(new ControlLabel("<b>Audio Recording Style</b>"));
@@ -268,6 +270,11 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       }
     }
 
+    /**
+     * @see #showGame(mitll.langtest.shared.taboo.GameInfo)
+     * @see #showCorrectFeedback(mitll.langtest.client.sound.SoundFeedback, mitll.langtest.shared.Exercise)
+     * @see #showIncorrectFeedback(mitll.langtest.shared.taboo.AnswerBundle, mitll.langtest.client.sound.SoundFeedback, mitll.langtest.shared.Exercise)
+     */
     private void showStimIndex() {
       stimulus.setText("Clue #" + (stimulusCount+1));// + " of " + clueAnswerPairs.size());
     }
@@ -284,7 +291,6 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
       if (stimulus != null) {
         sentItems.add(stimulus);
         send.setEnabled(false);
-      //  pleaseWait.setVisible(true);
         pleaseWait.setText(PLEASE_WAIT_FOR_RECEIVER_TO_ANSWER);
         controller.pingAliveUser();
         boolean lastChoiceRemaining = sentAllClues();
@@ -301,7 +307,9 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
         sendStimulus(stimulus.getQuestion(), exercise,
           correctResponse, soundFeedback, lastChoiceRemaining, clueAnswerPairs.size(), giverChosePoorly);
       } else {
-        new PopupHelper().showPopup("Please select a sentence to send.");
+        new PopupHelper().showPopup("Please select a " +
+          SENTENCE +
+          " to send.");
       }
     }
 
@@ -506,13 +514,16 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
           }
         });
       } else {
-        String message = result.getAnswer().length() > 0 ? "They guessed : <b>" +
+        showStimIndex();
+
+        boolean wasRealAnswer = result.getAnswer().length() > 0;
+        String message = wasRealAnswer ? "They guessed : <b>" +
           result.getAnswer() +
           "</b>, please send another clue." : "They passed, please send another clue.";
         new PopupHelper().showPopup(message, incorrectImage);
 
         send.setEnabled(true);
-        pleaseWait.setText("Last guess was : <b>" + result.getAnswer() + "</b>");
+        pleaseWait.setText(wasRealAnswer ? "Last guess was : <b>" + result.getAnswer() + "</b>" : "Partner passed.");
       }
     }
 
@@ -527,12 +538,15 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
   }
 
   private void loadNext(Exercise current) {
+    System.out.println("----> Giver : loadNext " + current.getID());
+
     if (gameInfo.onLast(current)) {
       System.out.println("Giver : game over! ");
-   //   new PopupHelper().showPopup("Game Over.");
       showLeaderboard();
     }
     else {
+      System.out.println("Giver : loadNext " + current.getID() + " not last...");
+
       ExerciseShell next = gameInfo.getNext(current);
       if (next == null) System.err.println("huh? nothing after " + current);
       else controller.loadExercise(next);
