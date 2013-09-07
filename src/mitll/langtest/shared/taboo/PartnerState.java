@@ -53,7 +53,7 @@ public class PartnerState implements IsSerializable {
     return gameInfo;
   }
 
-  public void setGameInfo(GameInfo gameInfo) {
+/*  public void setGameInfo(GameInfo gameInfo) {
     this.gameInfo = gameInfo;
-  }
+  }*/
 }
