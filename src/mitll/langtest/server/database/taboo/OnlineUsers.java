@@ -41,6 +41,7 @@ public class OnlineUsers {
   // TODO : write to database
   private Map<User,AnswerBundle> receiverToAnswer = new HashMap<User, AnswerBundle>();
   private Map<User,Map<String, Collection<String>>> receiverToState = new HashMap<User, Map<String, Collection<String>>>();
+  private Map<String,List<ExerciseShell>> stateToItems = new HashMap<String, List<ExerciseShell>>();
   private Map<User,Game> receiverToGame = new HashMap<User, Game>();
   private Map<String,Leaderboard> stateToScores = new HashMap<String,Leaderboard>();
 
@@ -63,15 +64,28 @@ public class OnlineUsers {
     }
   }
 
-  private User getUser(long userid) {
-    return userDAO.getUserWhere(userid);
-  }
-
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#userOnline(long, boolean)
+   * @see mitll.langtest.client.user.UserManager#userOnline(int, boolean)
+   * @param userid
+   */
   public synchronized void removeOnline(long userid) {
     User userWhere = getUser(userid);
-    if (userWhere != null) online.remove(userWhere);
+    if (userWhere != null) {
+      online.remove(userWhere);
+
+      // cleanup, if I'm the receiver...
+      receiverToAnswer.remove(userWhere);
+      receiverToState.remove(userWhere);
+      receiverToGame.remove(userWhere);
+      receiverToStimulus.remove(userWhere);
+    }
 
     logger.info("---> removeOnline : removed " + userid + " online now " + getOnline());
+  }
+
+  private User getUser(long userid) {
+    return userDAO.getUserWhere(userid);
   }
 
   private Collection<User> getOnline() { return online; }
@@ -85,11 +99,13 @@ public class OnlineUsers {
    * 3) The partner claims they have been paired, but we've erased the pairing in the giver->receiver map
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#isPartnerOnline(long, boolean)
+   * @see mitll.langtest.client.taboo.Taboo#pollForPartnerOnline
+   *
    * @param giverOrReceiver
    * @param isGiver
    * @return
    */
-  public PartnerState isPartnerOnline(long giverOrReceiver, boolean isGiver) {
+  public synchronized PartnerState isPartnerOnline(long giverOrReceiver, boolean isGiver) {
     //  logger.debug("isPartnerOnline : checking for partner of " + giverOrReceiver);
     User testUser = getUser(giverOrReceiver);
     if (testUser == null) {
@@ -101,7 +117,6 @@ public class OnlineUsers {
 
     // case 1 : I'm the giverOrReceiver
     if (isGiver) {
-      // User giverUser = getUser(giverOrReceiver);
       User receiver = giverToReceiver.get(testUser);
       if (receiver == null) {
         // giverOrReceiver is not a giver or we've cleaned up the entry already...(?)
@@ -111,7 +126,7 @@ public class OnlineUsers {
       } else if (online.contains(receiver)) {
         Map<String, Collection<String>> typeToSelectionByPartner = receiverToState.get(receiver);
         GameInfo game = getGame(giverOrReceiver, isGiver);
-        if (game == null) logger.error("huh? no game state for giver " + giverOrReceiver);
+        if (game == null) logger.info("no game state (yet) for giver " + giverOrReceiver);
         //logger.debug("isPartnerOnline : for giver " + giverOrReceiver + ", receiver  " + receiver + " is online, state " + typeToSelectionByPartner);
         return new PartnerState(true, typeToSelectionByPartner, game);
       } else {
@@ -208,8 +223,16 @@ public class OnlineUsers {
    * Just for debugging
    */
   private long lastTimestamp;
-  public GameInfo getGame(long userID, boolean isGiver) {
+
+  /**
+   * @see #isPartnerOnline(long, boolean)
+   * @param userID
+   * @param isGiver
+   * @return
+   */
+  private GameInfo getGame(long userID, boolean isGiver) {
     Game game = getGameFor(userID, isGiver);
+    if (game == null) return null;
     // if (gameItems == null) logger.error("getGame : game for " + userID + " has not started?");
     GameInfo gameInfo = game.getGameInfo();
     if (gameInfo.getTimestamp() != lastTimestamp) {
@@ -222,24 +245,45 @@ public class OnlineUsers {
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#startGame
    * @see mitll.langtest.client.taboo.ReceiverExerciseFactory#startGame()
-   * @param userID
+   * @param receiverID
    * @param startOver
    * @return
    */
-  public GameInfo startGame(long userID, boolean startOver) {
-    Game game = getGameFor(userID, false);
+  public synchronized GameInfo startGame(long receiverID, boolean startOver) {
+    logger.info("startGame " + receiverID+" starting a new game");
+
+    Game game = getGameFor(receiverID, false);
+    if (game == null) {
+      User receiverUser = getUser(receiverID);
+      Map<String, Collection<String>> selectionState = receiverToState.get(receiverUser);
+      List<ExerciseShell> exerciseShells = stateToItems.get(selectionState.toString());
+      game = makeGame(receiverUser, exerciseShells);
+    }
     if (startOver) {
-      logger.info("startGame for " + userID+" starting over...");
+      logger.info("startGame for " + receiverID+" starting over...");
 
       game.resetToFirstGame();
-      receiverToStimulus.remove(getUser(userID));
+      receiverToStimulus.remove(getUser(receiverID));
     }
     List<ExerciseShell> itemsInGame = game.startGame();
-    if (itemsInGame == null) logger.error("startGame huh? game for " + userID + " has not started???\n\n\n");
+    if (itemsInGame == null) logger.error("startGame huh? game for " + receiverID + " has not started???\n\n\n");
     GameInfo gameInfo = game.getGameInfo();
-    logger.info("startGame for " + userID+" game info " + gameInfo);
+    logger.info("startGame for " + receiverID+" game info " + gameInfo);
 
     return gameInfo;
+  }
+
+  private Game makeGame(User user, List<ExerciseShell> exercisesForSection) {
+   // Game game = receiverToGame.get(user);
+ //   logger.debug("registerSelectionState.previous game was " + game);
+    Game newGame = new Game(exercisesForSection);
+ /*   if (game != null && game.hasStarted()) {
+      logger.warn("---> registerSelectionState.starting game  for new selection?");
+
+      newGame.startGame();
+    }*/
+    receiverToGame.put(user, newGame);
+    return  newGame;
   }
 
   private Game getGameFor(long userID, boolean isGiver) {
@@ -390,7 +434,7 @@ public class OnlineUsers {
       answerBundle = new AnswerBundle();
     }
     else if (!answerBundle.getStimulus().contains(stimulus)) {  // TODO : this is kinda cheesy
-      logger.info("\tOnlineUsers.checkCorrect : answer stim " + answerBundle.getStimulus() + " not same as " + stimulus);
+      logger.info("\tOnlineUsers.checkCorrect : answer stim '" + answerBundle.getStimulus() + "' not same as " + stimulus);
       answerBundle = new AnswerBundle();
     } else {
       logger.debug("\tOnlineUsers.checkCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id + " got " + answerBundle);
@@ -453,16 +497,10 @@ public class OnlineUsers {
     boolean sameSelection = current != null && current.equals(selectionState);
     if (!sameSelection) {
       receiverToState.put(user, selectionState);
-
-      Game game = receiverToGame.get(user);
-      logger.debug("registerSelectionState.previous game was " + game);
-      Game newGame = new Game(exercisesForSection);
-      if (game != null && game.hasStarted()) {
-        newGame.startGame();
-      }
-      receiverToGame.put(user, newGame);
+      stateToItems.put(selectionState.toString(),exercisesForSection);
     }
   }
+
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#postGameScore(long, int, int)
@@ -473,11 +511,12 @@ public class OnlineUsers {
    */
   public synchronized void postGameScore(long receiverID, int score, int maxPossibleScore) {
     User receiver = getUser(receiverID);
+    User giverForReceiver = getGiverForReceiver(receiverID);
+
     Map<String, Collection<String>> selectionState = receiverToState.get(receiver);
     Leaderboard leaderboard = stateToScores.get(selectionState.toString());
     if (leaderboard == null) stateToScores.put(selectionState.toString(), leaderboard = new Leaderboard());
 
-    User giverForReceiver = getGiverForReceiver(receiverID);
 
     long giverID = giverForReceiver == null ? -1 : giverForReceiver.id;
     leaderboard.addScore(new ScoreInfo(receiver.id, giverID, score, maxPossibleScore-score, 0l, selectionState));  // TODO fill in time taken?
