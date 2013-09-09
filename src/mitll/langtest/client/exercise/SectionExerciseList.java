@@ -390,7 +390,7 @@ public class SectionExerciseList extends PagingExerciseList {
 
     @Override
     public void onSuccess(ExerciseListWrapper result) {
-      //System.out.println("MySetExercisesCallback : onSuccess " + result.exercises.size() + " items.");
+      System.out.println("MySetExercisesCallback : onSuccess " + result.exercises.size() + " items.");
 
       if (isStaleResponse(result)) {
         System.out.println("\t----> ignoring result " + result.reqID + " b/c before latest " + lastReqID);
@@ -398,7 +398,7 @@ public class SectionExerciseList extends PagingExerciseList {
         if (item != null) {
           rememberExercises(result.exercises);
           if (!loadByID(item)) {
-            System.out.println("loadExercises : loading first exercise since couldn't load item=" + item);
+            System.out.println("SectionExerciseList.loadExercises : loading first exercise since couldn't load item=" + item);
             loadFirstExercise();
           }
         } else {
@@ -555,7 +555,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   protected void loadExercises(Map<String, Collection<String>> typeToSection, final String item) {
-    System.out.println("loadExercises : " + typeToSection + " and item '" + item + "'");
+    System.out.println("SectionExerciseList.loadExercises : " + typeToSection + " and item '" + item + "'");
     if (typeToSection.isEmpty() && item == null) {
       noSectionsGetExercises(userID);
     } else {
