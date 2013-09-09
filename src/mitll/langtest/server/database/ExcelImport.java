@@ -842,8 +842,12 @@ public class ExcelImport implements ExerciseDAO {
     if (isQuestion) {
       sentence = sentence.substring(0,sentence.length()-1);
     }
+    String previousSentence = sentence;
     sentence = sentence.replace("?", sequenceOfBlanks);
     if (isQuestion) {
+      if (sentence.equals(previousSentence)) {  // no blank yet added
+        sentence += sequenceOfBlanks;
+      }
       sentence += "?";
     }
     return sentence;
