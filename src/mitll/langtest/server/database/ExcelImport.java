@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,7 +35,7 @@ import java.util.Set;
 
 /**
  * Reads an excel spreadsheet from DLI.
- *
+ * <p/>
  * User: GO22670
  * Date: 2/6/13
  * Time: 8:07 PM
@@ -53,7 +51,7 @@ public class ExcelImport implements ExerciseDAO {
   private boolean tabooEnglish;
 
   private List<Exercise> exercises = null;
-  private Map<String,Exercise> idToExercise = new HashMap<String,Exercise>();
+  private Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
   private List<String> errors = new ArrayList<String>();
   private final String file;
   private SectionHelper sectionHelper = new SectionHelper();
@@ -79,16 +77,16 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   /**
-   * @see DatabaseImpl#makeDAO
    * @param file
    * @param relativeConfigDir
+   * @see DatabaseImpl#makeDAO
    */
   public ExcelImport(String file, String mediaDir, String relativeConfigDir, ServerProperties serverProps) {
     this.file = file;
     this.isFlashcard = serverProps.isFlashcard();
     this.mediaDir = mediaDir;
     boolean missingExists = getMissing(relativeConfigDir, "missingSlow.txt", missingSlowSet);
-    missingExists &= getMissing(relativeConfigDir,"missingFast.txt",missingFastSet);
+    missingExists &= getMissing(relativeConfigDir, "missingFast.txt", missingFastSet);
     shouldHaveRefAudio = missingExists;
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.language = serverProps.getLanguage();
@@ -97,10 +95,10 @@ public class ExcelImport implements ExerciseDAO {
     String exampleSentenceFile1 = serverProps.getExampleSentenceFile();
     if (exampleSentenceFile1 != null && exampleSentenceFile1.length() > 0) {
       this.exampleSentenceFile = new File(relativeConfigDir, exampleSentenceFile1);
-      stimulusInfo = readSampleSentenceFile2(exampleSentenceFile);
+      File badClues = new File(relativeConfigDir, "badClues.txt");
+      stimulusInfo = readSampleSentenceFile2(exampleSentenceFile,badClues);
       logger.debug("ExcelImport : found " + exampleSentenceFile.getAbsolutePath());
-    }
-    else {
+    } else {
       logger.debug("ExcelImport : didn't find " + exampleSentenceFile1);
     }
 
@@ -125,8 +123,7 @@ public class ExcelImport implements ExerciseDAO {
         logger.error("Reading " + missingSlow.getAbsolutePath() + " Got  " + e, e);
       }
 
-    }
-    else {
+    } else {
       logger.debug("Can't find " + file + " under " + relativeConfigDir + " abs path " + missingSlow.getAbsolutePath());
     }
     return missingSlow.exists();
@@ -138,14 +135,14 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getExercises()
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#getExercises()
    */
   public List<Exercise> getRawExercises() {
     synchronized (this) {
       if (exercises == null) {
         exercises = readExercises(new File(file));
-        for (Exercise e : exercises) idToExercise.put(e.getID(),e);
+        for (Exercise e : exercises) idToExercise.put(e.getID(), e);
       }
     }
     return exercises;
@@ -158,9 +155,9 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   /**
-   * @see #getRawExercises()
    * @param file
    * @return
+   * @see #getRawExercises()
    */
   private List<Exercise> readExercises(File file) {
     try {
@@ -168,15 +165,15 @@ public class ExcelImport implements ExerciseDAO {
       List<Exercise> exercises1 = readExercises(inp);
       return exercises1;
     } catch (FileNotFoundException e) {
-      logger.error("looking for " + file.getAbsolutePath() + " got "+e,e);
+      logger.error("looking for " + file.getAbsolutePath() + " got " + e, e);
     }
     return new ArrayList<Exercise>();
   }
 
   /**
-   * @see mitll.langtest.server.SiteDeployer#readExercises(mitll.langtest.shared.Site, org.apache.commons.fileupload.FileItem)
    * @param inp
    * @return
+   * @see mitll.langtest.server.SiteDeployer#readExercises(mitll.langtest.shared.Site, org.apache.commons.fileupload.FileItem)
    */
   public List<Exercise> readExercises(InputStream inp) {
     List<Exercise> exercises = new ArrayList<Exercise>();
@@ -215,26 +212,26 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   /**
-   * @see #readExercises(java.io.InputStream)
    * @param sheet
    * @return
+   * @see #readExercises(java.io.InputStream)
    */
   private Collection<Exercise> readFromSheet(Sheet sheet) {
     Iterator<Row> iter = sheet.rowIterator();
     List<Exercise> exercises = new ArrayList<Exercise>();
-   // logger.debug("for " + sheet.getSheetName() + " regions " +sheet.getNumMergedRegions());
-    Map<Integer,CellRangeAddress> rowToRange = new HashMap<Integer, CellRangeAddress>();
-    for (int  r = 0; r < sheet.getNumMergedRegions();r++) {
+    // logger.debug("for " + sheet.getSheetName() + " regions " +sheet.getNumMergedRegions());
+    Map<Integer, CellRangeAddress> rowToRange = new HashMap<Integer, CellRangeAddress>();
+    for (int r = 0; r < sheet.getNumMergedRegions(); r++) {
       CellRangeAddress mergedRegion = sheet.getMergedRegion(r);
-      for (int rr = mergedRegion.getFirstRow(); rr <= mergedRegion.getLastRow();rr++) {
-        rowToRange.put(rr,mergedRegion);
+      for (int rr = mergedRegion.getFirstRow(); rr <= mergedRegion.getLastRow(); rr++) {
+        rowToRange.put(rr, mergedRegion);
       }
 /*      logger.debug("for " + sheet.getSheetName() + " region  " + mergedRegion + " " +
           mergedRegion.getFirstRow() + " " + mergedRegion.getFirstColumn());*/
     }
     int id = 0;
     boolean gotHeader = false;
-    FileExerciseDAO dao = new FileExerciseDAO("",language, isFlashcard);
+    FileExerciseDAO dao = new FileExerciseDAO("", language, isFlashcard);
 
     int colIndexOffset = -1;
 
@@ -248,7 +245,7 @@ public class ExcelImport implements ExerciseDAO {
     int contextIndex = -1;
     int segmentedIndex = -1;
     List<String> lastRowValues = new ArrayList<String>();
-    Map<String,List<Exercise>> englishToExercises = new HashMap<String, List<Exercise>>();
+    Map<String, List<Exercise>> englishToExercises = new HashMap<String, List<Exercise>>();
     int semis = 0;
     int logging = 0;
     int skipped = 0;
@@ -274,7 +271,7 @@ public class ExcelImport implements ExerciseDAO {
           List<String> predefinedTypeOrder = new ArrayList<String>();
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
-          //  colNormalized = colNormalized.toLowerCase()
+            //  colNormalized = colNormalized.toLowerCase()
             if (colNormalized.startsWith("Word".toLowerCase())) {
               gotHeader = true;
               colIndexOffset = columns.indexOf(col);
@@ -310,13 +307,12 @@ public class ExcelImport implements ExerciseDAO {
 
           logger.info("columns word index " + colIndexOffset +
             " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
-            " meaning " +meaningIndex +
-            " transliterationIndex " +transliterationIndex +
-            " contextIndex " +contextIndex +
-            " id " +idIndex
+            " meaning " + meaningIndex +
+            " transliterationIndex " + transliterationIndex +
+            " contextIndex " + contextIndex +
+            " id " + idIndex
           );
-        }
-        else {
+        } else {
           int colIndex = colIndexOffset;
           String english = getCell(next, colIndex++).trim();
           String foreignLanguagePhrase = getCell(next, colIndex).trim();
@@ -333,7 +329,7 @@ public class ExcelImport implements ExerciseDAO {
               //logger.info("-------- > for row " + next.getRowNum() + " english using " + english);
             }
           }
-          if (english.length()  == 0) {
+          if (english.length() == 0) {
             //logger.info("-------- > for row " + next.getRowNum() + " english is blank ");
             englishSkipped++;
           }
@@ -347,8 +343,8 @@ public class ExcelImport implements ExerciseDAO {
               }
             }
             if (foreignLanguagePhrase.length() == 0) {
-              logger.info("Got empty foreign language phrase row #" + next.getRowNum() +" for " + english);
-              errors.add(sheet.getSheetName()+"/"+"row #" +(next.getRowNum()+1) + " phrase was blank.");
+              logger.info("Got empty foreign language phrase row #" + next.getRowNum() + " for " + english);
+              errors.add(sheet.getSheetName() + "/" + "row #" + (next.getRowNum() + 1) + " phrase was blank.");
               id++;    // TODO is this the right thing for Dari and Farsi???
             } else if (skipSemicolons && (foreignLanguagePhrase.contains(";") || translit.contains(";"))) {
               semis++;
@@ -373,7 +369,7 @@ public class ExcelImport implements ExerciseDAO {
                 meaning, context, segmentedChinese, promptInEnglish);
               if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
                 boolean valid = true;
-              //  boolean enoughItems = true;
+                //  boolean enoughItems = true;
                 if (stimulusInfo != null) {
                   valid = addTabooQuestions(withExamples, imported);
                 }
@@ -383,12 +379,12 @@ public class ExcelImport implements ExerciseDAO {
                   // keep track of synonyms (or better term)
                   rememberExercise(exercises, englishToExercises, imported);
                 } else {
-                    if (SHOW_SKIPS) logger.debug("skipping exercise " + imported.getID() + " : '" + imported.getEnglishSentence() + "' since no sample sentences");
+                  if (SHOW_SKIPS)
+                    logger.debug("skipping exercise " + imported.getID() + " : '" + imported.getEnglishSentence() + "' since no sample sentences");
                 }
-              }
-              else {
+              } else {
                 if (logging++ < 3) {
-                  logger.info("skipping exercise " +imported.getID() + " : '" + imported.getEnglishSentence() +"' since no audio.");
+                  logger.info("skipping exercise " + imported.getID() + " : '" + imported.getEnglishSentence() + "' since no audio.");
                 }
                 skipped++;
               }
@@ -396,31 +392,31 @@ public class ExcelImport implements ExerciseDAO {
                 lastRowValues.add(english);
                 lastRowValues.add(foreignLanguagePhrase);
                 lastRowValues.add(translit);
-              }
-              else if (!lastRowValues.isEmpty()) {
+              } else if (!lastRowValues.isEmpty()) {
                 lastRowValues.clear();
               }
             }
           } else if (gotHeader && foreignLanguagePhrase.length() > 0) {
-            errors.add(sheet.getSheetName()+"/"+"row #" +(next.getRowNum()+1) + " Word/Expression was blank");
+            errors.add(sheet.getSheetName() + "/" + "row #" + (next.getRowNum() + 1) + " Word/Expression was blank");
           }
         }
       }
 
       addSynonyms(englishToExercises);
     } catch (Exception e) {
-      logger.error("got " + e,e);
+      logger.error("got " + e, e);
     }
-    if (stimulusInfo != null) logger.info("got  " + withExamples.size() + " examples out of " + exercises.size() + " exercises.");
-    logger.info("max exercise id = " +id);
+    if (stimulusInfo != null)
+      logger.info("got  " + withExamples.size() + " examples out of " + exercises.size() + " exercises.");
+    logger.info("max exercise id = " + id);
     if (skipped > 0) {
-      logger.info("Skipped " + skipped + " entries with missing audio. " + (100f*((float)skipped)/(float)id)+ "%");
+      logger.info("Skipped " + skipped + " entries with missing audio. " + (100f * ((float) skipped) / (float) id) + "%");
     }
     if (englishSkipped > 0) {
-      logger.info("Skipped " + englishSkipped + " entries with missing english. " + (100f*((float)englishSkipped)/(float)id)+ "%");
+      logger.info("Skipped " + englishSkipped + " entries with missing english. " + (100f * ((float) englishSkipped) / (float) id) + "%");
     }
     if (semis > 0) {
-      logger.info("Skipped " + semis + " entries with semicolons or " + (100f*((float)semis)/(float)id)+ "%");
+      logger.info("Skipped " + semis + " entries with semicolons or " + (100f * ((float) semis) / (float) id) + "%");
     }
     return exercises;
   }
@@ -486,7 +482,7 @@ public class ExcelImport implements ExerciseDAO {
                 }
               }
             } catch (Exception e1) {
-              logger.error("got " + e1 + " on " + e,e1);
+              logger.error("got " + e1 + " on " + e, e1);
             }
           }
         }
@@ -514,7 +510,8 @@ public class ExcelImport implements ExerciseDAO {
     if (foreignLanguagePhrase.startsWith("\'")) {
       foreignLanguagePhrase = foreignLanguagePhrase.substring(1);
     }
-    if (foreignLanguagePhrase.endsWith("\'"))   foreignLanguagePhrase = foreignLanguagePhrase.substring(0,foreignLanguagePhrase.length()-1);
+    if (foreignLanguagePhrase.endsWith("\'"))
+      foreignLanguagePhrase = foreignLanguagePhrase.substring(0, foreignLanguagePhrase.length() - 1);
     return foreignLanguagePhrase;
   }
 
@@ -543,7 +540,6 @@ public class ExcelImport implements ExerciseDAO {
   }*/
 
   /**
-   * @see #readFromSheet(org.apache.poi.ss.usermodel.Sheet)
    * @param id
    * @param dao
    * @param weightIndex
@@ -555,6 +551,7 @@ public class ExcelImport implements ExerciseDAO {
    * @param context
    * @param segmentedChinese
    * @return
+   * @see #readFromSheet(org.apache.poi.ss.usermodel.Sheet)
    */
   private Exercise getExercise(String id, FileExerciseDAO dao, int weightIndex, Row next,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
@@ -570,7 +567,7 @@ public class ExcelImport implements ExerciseDAO {
         logger.warn("both english sentence and content null for exercise " + id);
       }
     } else {
-      imported = getExercise(id, dao, english, foreignLanguagePhrase, translit, meaning, context,promptInEnglish);
+      imported = getExercise(id, dao, english, foreignLanguagePhrase, translit, meaning, context, promptInEnglish);
     }
     imported.setEnglishSentence(english);
     if (translit.length() > 0) {
@@ -607,33 +604,31 @@ public class ExcelImport implements ExerciseDAO {
     if (chapter.startsWith("'")) chapter = chapter.substring(1);
     if (week.startsWith("'")) week = week.substring(1);
 
-    if (debug) logger.debug("unit " + unitIndex +"/"+unit + " chapter " + chapterIndex+"/"+chapter + " week " + week);
+    if (debug)
+      logger.debug("unit " + unitIndex + "/" + unit + " chapter " + chapterIndex + "/" + chapter + " week " + week);
 
     if (unit.length() > 0) {
       if (usePredefinedTypeOrder) {
         pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
-      }
-      else {
-        pairs.add(sectionHelper.addUnitToLesson(imported,unit));
+      } else {
+        pairs.add(sectionHelper.addUnitToLesson(imported, unit));
       }
     }
     if (chapter.length() > 0) {
       if (language.equalsIgnoreCase("English")) {
-        chapter = (unitIndex == -1 ? "" :unit + "-") + chapter; // hack for now to get unique chapters...
+        chapter = (unitIndex == -1 ? "" : unit + "-") + chapter; // hack for now to get unique chapters...
       }
       if (usePredefinedTypeOrder) {
         pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
-      }
-      else {
-        pairs.add(sectionHelper.addChapterToLesson(imported,chapter));
+      } else {
+        pairs.add(sectionHelper.addChapterToLesson(imported, chapter));
       }
     }
     if (week.length() > 0) {
       if (usePredefinedTypeOrder) {
-        pairs.add(sectionHelper.addExerciseToLesson(imported,weekName,chapter));
-      }
-      else {
-        pairs.add(sectionHelper.addWeekToLesson(imported,week));
+        pairs.add(sectionHelper.addExerciseToLesson(imported, weekName, chapter));
+      } else {
+        pairs.add(sectionHelper.addWeekToLesson(imported, week));
       }
     }
     sectionHelper.addAssociations(pairs);
@@ -642,7 +637,6 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   /**
-   * @see #getExercise(String, FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, String,boolean)
    * @param id
    * @param dao
    * @param english
@@ -651,6 +645,7 @@ public class ExcelImport implements ExerciseDAO {
    * @param meaning
    * @param context
    * @return
+   * @see #getExercise(String, FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, String, boolean)
    */
   private Exercise getExercise(String id, FileExerciseDAO dao,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
@@ -686,11 +681,9 @@ public class ExcelImport implements ExerciseDAO {
     if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
       double numericCellValue = cell.getNumericCellValue();
       return "" + new Double(numericCellValue).intValue();
-    }
-    else if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
+    } else if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
       return cell.getStringCellValue().trim();
-    }
-    else {
+    } else {
       return cell.toString().trim();
     }
   }
@@ -705,7 +698,10 @@ public class ExcelImport implements ExerciseDAO {
     return exercises;
   }
 
-  public Set<String> getSections() { return sectionHelper.getSections(); }
+  public Set<String> getSections() {
+    return sectionHelper.getSections();
+  }
+
   public Map<String, Lesson> getSection(String type) {
     return sectionHelper.getSection(type);
   }
@@ -758,11 +754,11 @@ public class ExcelImport implements ExerciseDAO {
   }*/
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#ExcelImport()
    * @param examples
    * @return
+   * @see mitll.langtest.server.database.ExcelImport#ExcelImport()
    */
-  private StimulusInfo readSampleSentenceFile2(File examples) {
+  private StimulusInfo readSampleSentenceFile2(File examples, File badClueFile) {
     Map<String, List<String>> wordToSamples = new HashMap<String, List<String>>();
     Map<String, List<List<String>>> wordToAnswers = new HashMap<String, List<List<String>>>();
     try {
@@ -780,9 +776,7 @@ public class ExcelImport implements ExerciseDAO {
             } else if (split.length == 2) {
               String sentence = split[1];
 
-              List<String> samples = wordToSamples.get(word);
-              if (samples == null) wordToSamples.put(word, samples = new ArrayList<String>());
-              samples.add(sentence);
+              addAnswer(wordToSamples, word, sentence);
             } else if (split.length == 3) {
               String answers = split[2];
 
@@ -792,35 +786,12 @@ public class ExcelImport implements ExerciseDAO {
             }
           }
         }
+        logger.debug("readSampleSentenceFile2 : read " + c + " examples");
       } else {
-        line2 = reader.readLine(); // skip header
-        while ((line2 = reader.readLine()) != null) {
-          c++;
-          if (line2.trim().length() > 0) {
-            String[] split = line2.split("\\t");
-            if (split.length < 3) {
-              logger.warn("bad line " + line2 + " len " + split.length);
-            } else {
-              String word = split[2].trim().toLowerCase();
-
-              String sentence = split[0];
-              String answer = split[1];
-              List<String> samples = wordToSamples.get(word);
-              if (samples == null) wordToSamples.put(word, samples = new ArrayList<String>());
-              //if (!sentence.endsWith("?") || true) { // replace ? with underscore
-
-              sentence = getBlankSequence(sentence, answer);
-             // }
-              samples.add(sentence);
-
-              List<List<String>> answers = wordToAnswers.get(word);
-              if (answers == null) wordToAnswers.put(word, answers = new ArrayList<List<String>>());
-              answers.add(Arrays.asList(answer.split(",")));
-            }
-          }
-        }
+        BufferedReader reader2 = new BufferedReader(new InputStreamReader(new FileInputStream(badClueFile), FileExerciseDAO.ENCODING));
+        Map<String, Set<String>> wordToBadClues = readBadSpanishClues(reader2);
+        readSpanishClues(wordToSamples, wordToAnswers, reader, wordToBadClues);
       }
-      logger.debug("readSampleSentenceFile2 : read " + c + " examples");
 
       reader.close();
     } catch (IOException e) {
@@ -829,18 +800,100 @@ public class ExcelImport implements ExerciseDAO {
     return new StimulusInfo(wordToSamples, wordToAnswers);
   }
 
+  void readSpanishClues(Map<String, List<String>> wordToSamples, Map<String, List<List<String>>> wordToAnswers,
+                        File examples
+  ) throws IOException {
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(examples), FileExerciseDAO.ENCODING));
+    Map<String, Set<String>> wordToBadClues = new HashMap<String, Set<String>>();
+    readSpanishClues(wordToSamples, wordToAnswers, reader, wordToBadClues);
+  }
+
+  private void readSpanishClues(Map<String, List<String>> wordToSamples, Map<String, List<List<String>>> wordToAnswers,
+                                BufferedReader reader,
+                                Map<String, Set<String>> wordToBadClues) throws IOException {
+    String line2;
+    line2 = reader.readLine(); // skip header
+    int c = 0;
+    int badClueCount = 0;
+    while ((line2 = reader.readLine()) != null) {
+      c++;
+      if (line2.trim().length() > 0) {
+        String[] split = line2.split("\\t");
+        if (split.length < 3) {
+          logger.warn("bad line " + line2 + " len " + split.length);
+        } else {
+          String word = split[2].trim().toLowerCase();
+
+          String sentence = split[0];
+          String answer = split[1];
+
+          Set<String> badClues = wordToBadClues.get(word);
+          if (badClues != null && badClues.contains(getCleanedClue(sentence))) {
+           // logger.warn("skipping word " + word + " clue " + sentence);
+            badClueCount++;
+          } else {
+            List<String> samples = wordToSamples.get(word);
+            if (samples == null) wordToSamples.put(word, samples = new ArrayList<String>());
+            //if (!sentence.endsWith("?") || true) { // replace ? with underscore
+
+            sentence = getBlankSequence(sentence, answer);
+            // }
+            samples.add(sentence);
+
+            List<List<String>> answers = wordToAnswers.get(word);
+            if (answers == null) wordToAnswers.put(word, answers = new ArrayList<List<String>>());
+            answers.add(Arrays.asList(answer.split(",")));
+          }
+        }
+      }
+    }
+    logger.debug("readSampleSentenceFile2 : read " + c + " examples threw out " + badClueCount + " bad clues.");
+  }
+
+   String getCleanedClue(String answer) {
+    return answer.replaceAll("_", "").replaceAll("\\?", "").replaceAll("\\s+", "");
+  }
+
+  private Map<String, Set<String>> readBadSpanishClues(BufferedReader reader) throws IOException {
+    String line2;
+    line2 = reader.readLine(); // skip header
+    int c = 0;
+    Map<String, Set<String>> wordToClues = new HashMap<String, Set<String>>();
+    while ((line2 = reader.readLine()) != null) {
+      c++;
+      if (line2.trim().length() > 0) {
+        String[] split = line2.split("\\t");
+        if (split.length < 2) {
+          logger.warn("readBadSpanishClues bad line " + line2 + " len " + split.length);
+        } else {
+          String word = split[0].trim().toLowerCase();
+          String clue = split[1];
+          Set<String> samples = wordToClues.get(word);
+          if (samples == null) wordToClues.put(word, samples = new HashSet<String>());
+          //if (!sentence.endsWith("?") || true) { // replace ? with underscore
+
+          //  sentence = getBlankSequence(sentence, answer);
+          // }
+          samples.add(clue);
+        }
+      }
+    }
+    logger.debug("readBadSpanishClues : read " + c + " examples");
+    return wordToClues;
+  }
+
   private String getBlankSequence(String sentence, String answer) {
     boolean isQuestion = (sentence.endsWith("?"));
     String[] words = answer.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
     StringBuilder builder = new StringBuilder();
     for (String token : words) {
-      builder.append(token.replaceAll(".","_"));
+      builder.append(token.replaceAll(".", "_"));
       builder.append(" ");
     }
     String sequenceOfBlanks = builder.toString().trim();
 
     if (isQuestion) {
-      sentence = sentence.substring(0,sentence.length()-1);
+      sentence = sentence.substring(0, sentence.length() - 1);
     }
     String previousSentence = sentence;
     sentence = sentence.replace("?", sequenceOfBlanks);
@@ -862,9 +915,11 @@ public class ExcelImport implements ExerciseDAO {
       this.wordToAnswers = wordToAnswers;
     }
   }
-  public static void main(String [] arg) {
-                   String guess = "los can't suburbios.";
 
+  public static void main(String[] arg) {
+//                   String guess = "los can't suburbios.";
+
+/*
     guess = guess.replaceAll("\\p{Punct}$",""); // remove trailing punctuation
     System.out.println("guess " + guess);
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -876,15 +931,152 @@ public class ExcelImport implements ExerciseDAO {
     } catch (ParseException e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
+*/
+    Map<String, List<String>> clueToAnswers = new HashMap<String, List<String>>();
+
+    try {
+      String name = "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\Batch_1260169_batch_results.csv";
+      // String name2 = "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\nextExamples.txt";
+
+      //BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(name2), FileExerciseDAO.ENCODING));
+
+      File fname = new File(name);
+      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(fname), FileExerciseDAO.ENCODING));
+      String line2;
+
+      // "20KD21O3W5XHH1RBPGTK5EPLB5ZGA5","29B2KYEPLSP7M2N83UA3VAHQEXPVP1","Spanish Guessing Game","Guess Spanish words from Spanish clues.",
+      // "Spanish, language, game, clues, guess, español, lengua, juego, conjetura","$0.05","Fri Sep 06 20:54:21 GMT 2013","5","BatchId:1260169;","3600","172800","Fri Sep 13 20:54:21 GMT 2013","","","2H5ZKPFE4EGDYVOO2JZIGNZWY0D7HM","A3C2DVYUP88DE7","Approved","Sat Sep 07 10:42:30 GMT 2013","Sat Sep 07 10:43:07 GMT 2013","Mon Sep 09 03:43:07 PDT 2013","Sat Sep 07 17:50:38 PDT 2013","","","37","100% (641/641)","100% (641/641)","100% (488/488)","____ ____ ____ para limpiar el restaurante al final de la noche hay que ____ ____ ____","____ ____ Telas para cubrir las ventanas.","Tengo que hacer del numero uno, tengo que usar ____ ____","barrer el suelo","las cortinas","el primero","","","",""
+
+
+      Set<String> refs = new HashSet<String>();
+      line2 = reader.readLine();
+      int c = 0;
+      while ((line2 = reader.readLine()) != null) {
+
+        String[] split = line2.split("\",\"");
+
+        int i = 27;
+
+
+        try {
+          String c1 = split[i++].replaceAll("_", "");
+          String c2 = split[i++].replaceAll("_", "");
+          //  System.out.println("clue " + c2);
+          String c3 = split[i++].replaceAll("_", "");
+          //  System.out.println("clue " + c3);
+
+          String a1 = split[i++];
+          if (c < 10)
+            System.out.println("" + c1 + "\t= " + a1);
+          String a2 = split[i++];
+          if (c < 10) System.out.println("" + c2 + "\t= " + a2);
+          String a3 = split[i++];
+          if (c++ < 10) System.out.println("" + c3 + "\t= " + a3);
+
+          addAnswer(clueToAnswers, c1, a1);
+          addAnswer(clueToAnswers, c2, a2);
+          addAnswer(clueToAnswers, c3, a3);
+        } catch (Exception e) {
+          System.err.println("couldn't parse " + line2);
+          //  e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
+        //  if (c++ > 10) break;
+
+      }
+
+      float num = 0;
+      float count = 0;
+
+
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("verifiedClues.txt"), FileExerciseDAO.ENCODING));
+
+      for (Map.Entry<String, List<String>> clueToAnswer : clueToAnswers.entrySet()) {
+        num += clueToAnswer.getValue().size();
+        writer.write(clueToAnswer.getKey() + "\n");
+
+        count++;
+      }
+      writer.close();
+
+      System.out.println("average answers " + (num / count) + " num " + num);
+//      logger.debug("read " + c + " examples, found " + refs.size() + " refs");
+      //    residual.removeAll(refs);
+      //  logger.debug("not found " + residual);
+      reader.close();
+      //writer.close();
+    } catch (IOException e) {
+      logger.error("Got " + e, e);
+    }
+    String name =
+      "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\ch10_allturk_cleaned.tsv";
+
+    Map<String, List<String>> wordToClues = new HashMap<String, List<String>>();
+    Map<String, List<List<String>>> wordToAnswers = new HashMap<String, List<List<String>>>();
+    int totalBad = 0;
+    int totalGood = 0;
+    try {
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("badClues.txt"), FileExerciseDAO.ENCODING));
+
+      ExcelImport excelImport = new ExcelImport();
+      excelImport.readSpanishClues(wordToClues, wordToAnswers, new File(name));
+      for (Map.Entry<String, List<String>> wordToClue : wordToClues.entrySet()) {
+        for (String clue : wordToClue.getValue()) {
+          String cclue = clue.replaceAll("_", "");
+          if (cclue.endsWith("?")) cclue = cclue.substring(0, cclue.length() - 1);
+          List<String> answers = clueToAnswers.get(cclue);
+          if (answers != null) {
+            String vocabPhrase = wordToClue.getKey();
+            List<List<String>> expectedAnswers = wordToAnswers.get(vocabPhrase);
+            Set<String> possible = new HashSet<String>();
+            for (List<String> ans : expectedAnswers) {
+              possible.addAll(ans);
+            }
+
+            float bad = 0;
+            float all = answers.size();
+            int i = 0;
+            for (String guess : answers) {
+              if (!possible.contains(guess) && !possible.contains(guess.toLowerCase())) {
+                logger.info("#" + i++ +
+                  " for " + vocabPhrase +
+                  " bad guess '" + guess + "' expecting " + possible);
+                bad++;
+              } else {
+                logger.debug("#" + i++ + " for " + vocabPhrase +
+                  " good guess '" + guess + "' expecting " + possible);
+              }
+            }
+            if (bad > 1) {// || ((bad / all) > 0.5 && all > 2)) {
+              System.out.println("got " + bad + " out of " + all + " for " + cclue);
+              writer.write(vocabPhrase + "\t" + excelImport.getCleanedClue(clue) + "\n");
+              totalBad++;
+            } else if (all > 0) totalGood++;
+          }
+          //else logger.debug("no answer for " + clue + " / " +cclue);
+        }
+      }
+      writer.close();
+      logger.warn("bad " + totalBad + " good " + totalGood);
+    } catch (IOException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
   }
-    public static void main2(String [] arg) {
+
+  private static void addAnswer(Map<String, List<String>> clueToAnswers, String c1, String a1) {
+    List<String> answers = clueToAnswers.get(c1);
+    if (answers == null) clueToAnswers.put(c1, answers = new ArrayList<String>());
+    answers.add(a1);
+  }
+
+  public static void main2(String[] arg) {
 /*
     ExcelImport config = new ExcelImport(
       "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\english\\ESL_ELC_5071-30books_chapters.xlsx", false, "config\\bestAudio", "war\\config\\english", true, "English");
 */
     ServerProperties serverProps = new ServerProperties();
-    serverProps.getProperties().put("language","English");
-    serverProps.getProperties().put("collectAudio","false");
+    serverProps.getProperties().put("language", "English");
+    serverProps.getProperties().put("collectAudio", "false");
     ExcelImport config = new ExcelImport(
       "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\wordlist3.xlsx", "config\\bestAudio", "war\\config\\taboo", serverProps);
     List<Exercise> rawExercises = config.getRawExercises();
@@ -959,9 +1151,8 @@ public class ExcelImport implements ExerciseDAO {
                 writer.write("\n");
                 refs.add(ref);
               }
-            //  break;
-            }
-            else {
+              //  break;
+            } else {
               logger.debug("for '" + sentence + "' and '" + ref + "' before '" + before + "' after '" + after + "'");
             }
           }
