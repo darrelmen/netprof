@@ -12,7 +12,7 @@ import java.util.Date;
 * To change this template use File | Settings | File Templates.
 */
 public class AnswerBundle implements IsSerializable {
-  private String stimulus;
+  private int reqID;
   private String answer;
   private boolean correct;
   private long timestamp;
@@ -20,16 +20,14 @@ public class AnswerBundle implements IsSerializable {
 
   public AnswerBundle() {}
 
-
   /**
-   * @see mitll.langtest.server.database.taboo.OnlineUsers#registerAnswer(long, String, String, boolean)
-   * @param stimulus
+   * @see mitll.langtest.server.database.taboo.OnlineUsers#registerAnswer(long, String, boolean)
    * @param answer
    * @param correct
    */
-  public AnswerBundle(String stimulus, String answer, boolean correct) {
+  public AnswerBundle(String answer, boolean correct) {
     receiverReplied = true;
-    this.stimulus = stimulus;
+    this.reqID = reqID;
     this.answer = answer;
     this.correct = correct;
     this.timestamp = System.currentTimeMillis();
@@ -47,8 +45,8 @@ public class AnswerBundle implements IsSerializable {
     return receiverReplied;
   }
 
-  public String getStimulus() {
-    return stimulus;
+  public int getReqID() {
+    return reqID;
   }
 
   public String toString() { return " answer '" + getAnswer() + "' is " +(isCorrect() ? "correct" : "incorrect") + " at " + new Date(timestamp);
