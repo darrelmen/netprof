@@ -467,7 +467,7 @@ public class DatabaseImpl implements Database {
    * @param correct
    */
   public void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean correct) {
-    getOnlineUsers().registerAnswer(userid, stimulus, answer, correct);
+    getOnlineUsers().registerAnswer(userid, answer, correct);
     addAnswer((int) userid, "plan", exerciseID,stimulus,answer,correct);
   }
 
