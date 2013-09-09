@@ -349,7 +349,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
 
         @Override
         public void onSuccess(Integer result) {
-          if (result == 0) {
+          if (result == 0) { // partner is still active
             System.out.println("sendStimulus.onSuccess : Giver " + user + " Sent '" + stimulus + "'");
             checkForCorrect(user, stimulus, exercise, soundFeedback);
           }
@@ -449,7 +449,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
     private void checkForCorrect(final long userid, final String stimulus, final Exercise current,
                                  final SoundFeedback feedback) {
       //System.out.println(new Date() +  " giver : checkForCorrect for " + stimulus );
-      service.checkCorrect(userid, stimulus, new AsyncCallback<AnswerBundle>() {
+      service.checkCorrect(userid, new AsyncCallback<AnswerBundle>() {
         @Override
         public void onFailure(Throwable caught) {
           Window.alert("checkCorrect : couldn't contact server.");
@@ -459,7 +459,7 @@ public class GiverExerciseFactory extends ExercisePanelFactory {
         public void onSuccess(AnswerBundle result) {
 
           if (result.didReceiverReply()) {
-            System.out.println("\t"+new Date() +  "giver : onSuccess got " + result );
+            System.out.println("\t" + new Date() + "giver : onSuccess got " + result);
             gotAnswerFromReceiver(result, feedback, current);
           } else { // they haven't answered yet
             Timer t = new Timer() {
