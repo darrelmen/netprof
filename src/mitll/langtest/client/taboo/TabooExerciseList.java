@@ -124,7 +124,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
    * @param game
    */
   public void setGameOnGiver(GameInfo game) {
-    if (!isGiver) System.err.println("set game " + game +
+    if (!isGiver) System.err.println("setGameOnGiver game " + game +
       " on giver on receiver???");
     if (game != null) {
       int numExercises = game.getNumExercises();
@@ -237,7 +237,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
    * So there are two stopping points - at the end of the game and the end of the chapter...
    * @see #loadNextExercise(mitll.langtest.shared.ExerciseShell)
    */
-  @Override
+/*  @Override
   protected void onLastItem() {
     if (isGiver) {
       List<String> message = new ArrayList<String>();
@@ -247,7 +247,7 @@ public class TabooExerciseList extends FlexSectionExerciseList {
     } else {
       System.err.println("We shouldn't get here...\n\n\n\n");
      // new ModalInfoDialog("Chapter(s) complete.", "Would you like to practice this chapter again?");
-     /* new DialogHelper(true).showErrorMessage("Chapter(s) complete.", "Would you like to practice this chapter(s) again?", "Yes", new DialogHelper.CloseListener() {
+     *//* new DialogHelper(true).showErrorMessage("Chapter(s) complete.", "Would you like to practice this chapter(s) again?", "Yes", new DialogHelper.CloseListener() {
         @Override
         public void gotYes() {
           startOver();
@@ -257,9 +257,9 @@ public class TabooExerciseList extends FlexSectionExerciseList {
         public void gotNo() {
 
         }
-      });*/
+      });*//*
     }
-  }
+  }*/
 
   public void startOver() {
     receiverFactory.setExerciseShells(new ArrayList<ExerciseShell>(currentExercises), null); // TODO : ARG how can I get the selection state????
