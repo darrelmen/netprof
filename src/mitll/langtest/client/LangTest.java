@@ -682,7 +682,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private SinglePlayerRobot singlePlayerRobot;
 
   /**
-   * @see Taboo#afterRoleDeterminedConfirmation(long, String, String, String, boolean)
+   * @see Taboo#afterRoleDeterminedConfirmation
    * @see Taboo#askUserToChooseRole(long)
    * @see Taboo#checkForPartner(long)
    * @see
@@ -691,7 +691,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param singlePlayer
    */
   public void setTabooFactory(long userID, boolean isGiver, boolean singlePlayer) {
-   // System.out.println("setTabooFactory : User " + userID + " is giver = " + isGiver + " single " + singlePlayer);
+    System.out.println("setTabooFactory : User " + userID + " is giver = " + isGiver + " single " + singlePlayer);
     String appTitle = props.getAppTitle();
     String appTitle1 = appTitle + " : Giver";
     if (isGiver) {
