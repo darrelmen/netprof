@@ -292,7 +292,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
                             final ReceiverPanel outer, SoundFeedback soundFeedback, boolean showTryAgain) {
       boolean isCorrect = checkCorrect();
       String answerToSubmit = guessBox.getText();
-      String stimulus = this.stimulus.getText();
+      String stimulus = currentStimulus.getStimulus();//this.stimulus.getText();
       System.out.println("sending answer '" + answerToSubmit + "' vs '" + answer+ "' which is " + isCorrect +
         " stim count " + stimulusCount + " on last " + currentStimulus.isLastStimulus());
       boolean onLast = currentStimulus.isLastStimulus() || stimulusCount == MAX_CLUES_TO_GIVE;   // never do more than 5 clues
@@ -358,24 +358,26 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
 
     private boolean checkCorrect() {
       String guess = guessBox.getText().trim();
-      guess = guess.replaceAll("\\p{Punct}$",""); // remove trailing punctuation
+      guess = removeTrailingPunct(guess);
       String spacesRemoved = guess.replaceAll("\\s+", " ");
      /* System.out.println("guess now '" + spacesRemoved+
         "' vs '" +answer+
         "'");*/
-      boolean isCorrect = spacesRemoved.equalsIgnoreCase(answer);
+      boolean isCorrect = spacesRemoved.equalsIgnoreCase(removeTrailingPunct(answer));
       if (!isCorrect) {
-        for (String prefix : Arrays.asList("to ", "the ")) {  // TODO : hack for ENGLISH
-          if (answer.startsWith(prefix)) { // verbs
-            String truncated = answer.substring(prefix.length());
-            isCorrect = guess.equalsIgnoreCase(truncated);
+        if (controller.getProps().doTabooEnglish()) {
+          for (String prefix : Arrays.asList("to ", "the ")) {  // TODO : hack for ENGLISH
+            if (answer.startsWith(prefix)) { // verbs
+              String truncated = answer.substring(prefix.length());
+              isCorrect = guess.equalsIgnoreCase(truncated);
 
-            if (isCorrect) break;
-          } else if (guess.startsWith(prefix)) { // verbs
-            String truncated = guess.substring(prefix.length());
-            isCorrect = answer.equalsIgnoreCase(truncated);
+              if (isCorrect) break;
+            } else if (guess.startsWith(prefix)) { // verbs
+              String truncated = guess.substring(prefix.length());
+              isCorrect = answer.equalsIgnoreCase(truncated);
 
-            if (isCorrect) break;
+              if (isCorrect) break;
+            }
           }
         }
       }
@@ -432,8 +434,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     private void dealWithGameOver(final LangTestDatabaseAsync service, final ExerciseController controller,
                                   final ReceiverPanel outer, final boolean isCorrect, final boolean movingOnToNext,
                                   final String answerToSubmit, final String stimulus) {
-      System.out.println(new Date() + " ReceiverExerciseFactory.dealWithGameOver. -----------> answer " + answerToSubmit+
-        " \n");
+     // System.out.println(new Date() + " ReceiverExerciseFactory.dealWithGameOver. --> answer " + answerToSubmit+" \n");
       service.postGameScore(controller.getUser(), score, gameInfo.getTotalClues(), new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -636,7 +637,7 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
     private void showStimFull(StimulusAnswerPair result) {
       stimulus.setText("Clue " + (stimulusCount+1) + " of " + result.getNumClues() + "<br/>" +
         "<font color=#0036a2>" + result.getStimulus() +"</font>");
-      stimulus.setVisible(true);
+     // stimulus.setVisible(true);
     }
 
     private void showGame() {
@@ -765,5 +766,10 @@ public class ReceiverExerciseFactory extends ExercisePanelFactory {
         }
       }
     }
+  }
+
+  private String removeTrailingPunct(String guess) {
+    guess = guess.replaceAll("\\p{Punct}$",""); // remove trailing punctuation
+    return guess;
   }
 }
