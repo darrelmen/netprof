@@ -189,7 +189,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
     logger.debug("getExercisesForSelectionState req " + reqID+ " for " + typeToSection + " and " +userID);
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-    if (serverProps.sortExercises() || serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
+    if (serverProps.trackUsers()) {
+      List<Exercise> copy = new ArrayList<Exercise>(exercisesForSection);
+      Collections.shuffle(copy,rand);    // randomize order
+      return new ExerciseListWrapper(reqID, getExerciseShells(copy));
+    }
+    else if (serverProps.sortExercises() || serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
      // logger.debug("\tsorting");
 
       List<Exercise> copy = getSortedExercises(exercisesForSection);
@@ -998,11 +1003,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public void registerSelectionState(long giver, Map<String, Collection<String>> selectionState) {
     Collection<Exercise> exercisesForSection = (selectionState.isEmpty()) ? getExercises(giver) : db.getSectionHelper().getExercisesForSelectionState(selectionState);
     List<ExerciseShell> exerciseShells = getExerciseShells(exercisesForSection);
-
-    logger.debug("first " +exerciseShells.iterator().next().getID());
     Collections.shuffle(exerciseShells,rand);    // randomize order
-    logger.debug("first " +exerciseShells.iterator().next().getID());
-
     db.getOnlineUsers().registerSelectionState(giver, selectionState, exerciseShells);
   }
 
@@ -1017,7 +1018,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#registerAnswer(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#registerAnswer
    * @param userid
    * @param exerciseID
    * @param stimulus
@@ -1032,12 +1033,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#checkForCorrect
    * @param giverUserID
-   * @param stimulus
    * @return
    */
   @Override
-  public AnswerBundle checkCorrect(long giverUserID, String stimulus) {
-    return db.getOnlineUsers().checkCorrect(giverUserID, stimulus);
+  public AnswerBundle checkCorrect(long giverUserID) {
+    return db.getOnlineUsers().checkCorrect(giverUserID);
   }
 
   /**
@@ -1052,7 +1052,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver
    * @param userID
    * @param score
    * @param maxPossibleScore
