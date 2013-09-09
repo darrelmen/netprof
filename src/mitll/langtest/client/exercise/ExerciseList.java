@@ -213,7 +213,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
 
     public void onSuccess(ExerciseListWrapper result) {
-      //System.out.println("SetExercisesCallback Got " + result.exercises.size() + " results");
+      System.out.println("ExerciseList.SetExercisesCallback Got " + result.exercises.size() + " results");
       if (isStaleResponse(result)) {
         System.out.println("----> SetExercisesCallback.onSuccess ignoring result " + result.reqID + " b/c before latest " + lastReqID);
       } else {
