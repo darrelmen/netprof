@@ -113,6 +113,8 @@ public class ModalInfoDialog {
     begin.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
+        System.out.println("\tModalInfoDialog.clickHandler fired ");
+
         removeKeyHandler();
         modal.hide();
       }
@@ -120,6 +122,8 @@ public class ModalInfoDialog {
     modal.add(begin);
 
     if (handler != null) {
+      System.out.println("\tModalInfoDialog.added hidden handler ");
+
       modal.addHiddenHandler(handler);
     }
 
