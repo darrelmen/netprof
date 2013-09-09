@@ -34,7 +34,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class Taboo {
-  public static final String SIGN_OUT_TO_STOP_PLAYING = "Sign out to stop playing.";
+  private static final String SIGN_OUT_TO_STOP_PLAYING = "Sign out to stop playing.";
   private final UserManager userManager;
   private final LangTestDatabaseAsync service;
   private LangTest langTest;
@@ -58,8 +58,13 @@ public class Taboo {
     this.controller = controller;
   }
 
+  /**
+   * @see LangTest#gotUser(long)
+   * @param fuserid
+   */
   public void initialCheck(final long fuserid) {
     System.out.println("Taboo.initialCheck : me : " + fuserid + " ...");
+    inSinglePlayer = false;
 
     String[] strings = {"<ul><li>Taboo is a fill-in-the-blank guessing game!</li></ul>",
       "<ul><li>If there's another player online, you will automatically start playing with them.</li></ul>",
@@ -73,13 +78,15 @@ public class Taboo {
     new ModalInfoDialog("Taboo Rules", messages, new HiddenHandler() {
       @Override
       public void onHidden(HiddenEvent hiddenEvent) {
+        System.out.println("Taboo.initialCheck - hiddenHandler onHidden fired!");
+
         checkForPartner(fuserid);
       }
     });
   }
 
   /**
-   * TODO : Need some way to quit too - I don't want to play anymore. Sign out?
+   * TODOx : Need some way to quit too - I don't want to play anymore. Sign out?
    * @param fuserid
    */
   private void checkForPartner(final long fuserid) {
@@ -99,26 +106,33 @@ public class Taboo {
         if (result.isAnyAvailable()) {
           System.out.println("checkForPartner.onSuccess : me : " + fuserid + " checking, anyUsersAvailable : " + result);
         }
+      /*  else if (inSinglePlayer) {
+          System.out.println("checkForPartner.onSuccess : me : " + fuserid + " checking, anyUsersAvailable : " + result + " in single player " + inSinglePlayer);
+        }*/
         if (result.isJoinedPair()) {
+          langTest.setTabooFactory(fuserid, result.isGiver(), false);
+          inSinglePlayer = false;
+
           if (result.isGiver()) {
-            afterRoleDeterminedConfirmation(fuserid,
+            afterRoleDeterminedConfirmation(
               "You found a partner to play with!",
               "You are the giver. Now choose the next clue your partner will see to guess the vocabulary word.",
-              SIGN_OUT_TO_STOP_PLAYING,
-              true);
+              SIGN_OUT_TO_STOP_PLAYING
+            );
           } else {
-            afterRoleDeterminedConfirmation(fuserid,
+            afterRoleDeterminedConfirmation(
               "You found a partner to play with!",
               "You are the receiver. Now choose the word or phrase that fills in the blank in the sentence.",
-              SIGN_OUT_TO_STOP_PLAYING,
-              false);
+              SIGN_OUT_TO_STOP_PLAYING
+            );
           }
           pollForPartnerOnline(fuserid, result.isGiver());
         } else if (result.isAnyAvailable()) {
           askUserToChooseRole(fuserid);
         } else {
           if (!inSinglePlayer) {
-            System.out.println("me : " + fuserid + " doing single player : " + inSinglePlayer);
+            new ModalInfoDialog("Single Player","No partners online, so you will be playing with the computer.");
+            System.out.println("checkForPartner : me : " + fuserid + " doing single player : " + inSinglePlayer);
             inSinglePlayer = true;
             langTest.setTabooFactory(fuserid,
               false, // receiver
@@ -156,7 +170,9 @@ public class Taboo {
               if (isGiver) {
                 Map<String,Collection<String>> typeToSelection = partnerState.getTypeToSelection();
 //                System.out.println("pollForPartnerOnline : checked if receiver partner of me, " + fuserid + ", is online and got state " + typeToSelection);
-                langTest.setSelectionState(typeToSelection);  // TODO user controller...
+                if (typeToSelection != null) {
+                	langTest.setSelectionState(typeToSelection);  // TODO user controller...
+                }
                 if (partnerState.getGameInfo() != null) {
                   controller.setGameOnGiver(partnerState.getGameInfo());
                 }
@@ -169,6 +185,7 @@ public class Taboo {
             } else {
               onlineTimer.cancel();
               if (userManager.isActive()) {
+                inSinglePlayer = false;
                 showPartnerSignedOut("Partner Signed Out", "Your partner signed out, will check for another...", fuserid);
               }
             }
@@ -201,13 +218,11 @@ public class Taboo {
 
   /**
    * @see #checkForPartner(long)
-   * @param userID
    * @param title
    * @param message
    * @param message2
-   * @param isGiver
    */
-  private void afterRoleDeterminedConfirmation(final long userID, String title, String message, String message2, final boolean isGiver) {
+  private void afterRoleDeterminedConfirmation(String title, String message, String message2) {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
     modal.add(new Heading(4, message));
@@ -223,8 +238,7 @@ public class Taboo {
       @Override
       public void onClick(ClickEvent event) {
         modal.hide();
-        langTest.setTabooFactory(userID, isGiver, false);
-        inSinglePlayer = false;
+
       }
     });
     modal.add(begin);
@@ -277,8 +291,8 @@ public class Taboo {
 
             @Override
             public void onSuccess(Void result) {
-              langTest.setTabooFactory(userID, isGiver, false);
-              inSinglePlayer = false;
+/*              langTest.setTabooFactory(userID, isGiver, false);
+              inSinglePlayer = false;*/
 
               System.out.println("role registered for " +userID + " checking for partner...");
               checkForPartner(userID);
