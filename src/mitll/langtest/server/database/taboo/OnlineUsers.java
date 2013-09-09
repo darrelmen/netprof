@@ -170,6 +170,7 @@ public class OnlineUsers {
    *
    * So the state machine : online->active (when two online have been paired but haven't accepted their roles)->paired
    * @see mitll.langtest.server.LangTestDatabaseImpl#anyUsersAvailable(long)
+   * @see mitll.langtest.client.taboo.Taboo#checkForPartner
    * @param userid
    * @return
    */
@@ -256,7 +257,14 @@ public class OnlineUsers {
     if (game == null) {
       User receiverUser = getUser(receiverID);
       Map<String, Collection<String>> selectionState = receiverToState.get(receiverUser);
-      List<ExerciseShell> exerciseShells = stateToItems.get(selectionState.toString());
+      String selection = "";
+      if (selectionState == null) {
+    	  logger.error("\n\nstartGame : huh? no selection state for " + receiverID);
+      }
+      else {
+    	  selection = selectionState.toString();
+      }
+      List<ExerciseShell> exerciseShells = stateToItems.get(selection);
       game = makeGame(receiverUser, exerciseShells);
     }
     if (startOver) {
@@ -380,11 +388,14 @@ public class OnlineUsers {
     logger.debug("OnlineUsers.sendStimulus : sending " + stimulus + " to " + receiver + " from giver " +
       userid + " on last stim " + onLastStimulus + " game over " + isGameOver);
     receiverToStimulus.put(receiver, new StimulusAnswerPair(exerciseID, stimulus, answer, onLastStimulus, numClues, isGameOver, giverChosePoorly));
+    receiverToAnswer.remove(receiver);// sent response to giver -- no need to remember them anymore
+
     return 0;
   }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#checkForStimulus(long)
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#checkForStimulus(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
    * @param receiverUserID
    * @return
    */
@@ -398,21 +409,19 @@ public class OnlineUsers {
   }
 
   /**
-   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#registerAnswer(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
-
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#registerAnswer
    * @param receiverUserID
-   * @param stimulus
    * @param answer
    * @param correct
    */
-  public synchronized void registerAnswer(long receiverUserID, String stimulus, String answer, boolean correct) {
+  public synchronized void registerAnswer(long receiverUserID, String answer, boolean correct) {
     User receiver = getUser(receiverUserID);
     if (getGiverForReceiver(receiverUserID) == null) {
  //     logger.debug("not remembering answer, since " + receiverUserID + " is playing by him/herself.");
     } else {
       receiverToStimulus.remove(receiver);
       answer = new ProfanityCleaner().replaceProfanity(answer);
-      AnswerBundle value = new AnswerBundle(stimulus, answer, correct);
+      AnswerBundle value = new AnswerBundle(answer, correct);
       receiverToAnswer.put(receiver, value);
       logger.debug("OnlineUsers.registerAnswer : " + receiver + " to " + value);
 
@@ -427,9 +436,10 @@ public class OnlineUsers {
    * @see mitll.langtest.server.LangTestDatabaseImpl#checkCorrect
    * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#checkForCorrect
    * @param giverUserID
+   * @paramx reqID
    * @return
    */
-  public synchronized AnswerBundle checkCorrect(long giverUserID, String stimulus) {
+  public synchronized AnswerBundle checkCorrect(long giverUserID) {
     User receiver = getReceiverForGiver(giverUserID);
     //logger.debug("OnlineUsers.checkCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id);
 
@@ -439,11 +449,11 @@ public class OnlineUsers {
     if (answerBundle == null) {
       answerBundle = new AnswerBundle();
     }
-    else if (!answerBundle.getStimulus().contains(stimulus)) {  // TODO : this is kinda cheesy
+  /*  else if (answerBundle.getReqID() != reqID) {   // is answer stale -- has there been a more recent stimulus?
       logger.info("\tOnlineUsers.checkCorrect : for giver " + giverUserID + " receiver " + receiver.id+
-        " answer stim '" + answerBundle.getStimulus() + "' not same as " + stimulus);
+        " answer req '" + answerBundle.getReqID() + "' not same as " + reqID);
       answerBundle = new AnswerBundle();
-    } else {
+    }*/ else {
       logger.debug("\tOnlineUsers.checkCorrect : Giver " + giverUserID + " checking for answer from " + receiver.id + " got " + answerBundle);
     }
     return answerBundle;
@@ -511,7 +521,7 @@ public class OnlineUsers {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#postGameScore(long, int, int)
-   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver
    * @param receiverID
    * @param score
    * @param maxPossibleScore
