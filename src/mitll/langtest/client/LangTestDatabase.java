@@ -226,7 +226,7 @@ public interface LangTestDatabase extends RemoteService {
 
   /**
    * Receiver enters an answer, correct or incorrect
-   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#registerAnswer(LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#registerAnswer
 
    * @param userid
    * @param exerciseID
@@ -240,10 +240,9 @@ public interface LangTestDatabase extends RemoteService {
    * Giver checks if receiver answered correctly, given last stimulus.
    * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#checkForCorrect(long, String, mitll.langtest.shared.Exercise, mitll.langtest.client.sound.SoundFeedback)
    * @param giverUserID
-   * @param stimulus
    * @return
    */
-  AnswerBundle checkCorrect(long giverUserID, String stimulus);
+  AnswerBundle checkCorrect(long giverUserID);
 
   /**
    * @see mitll.langtest.client.taboo.ReceiverExerciseFactory#startGame()
@@ -255,7 +254,7 @@ public interface LangTestDatabase extends RemoteService {
   GameInfo startGame(long userID, boolean startOver);
 
   /**
-   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver(LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel, boolean, boolean)
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver
    * @param userID
    * @param score
    * @param maxPossibleScore
