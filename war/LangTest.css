@@ -304,6 +304,10 @@ fieldset {
     margin-left: 10px;
 }
 
+.leftThirtyMargin {
+    margin-left: 30px;
+}
+
 .noMargin {
     margin: 0px;
 }
