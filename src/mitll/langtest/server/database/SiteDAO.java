@@ -306,7 +306,7 @@ public class SiteDAO extends DAO {
 
     int numColumns = getNumColumns(connection, "site");
 
-    logger.debug("numColumns " + numColumns + " site table columns = " + getColumns("site"));
+  //  logger.debug("numColumns " + numColumns + " site table columns = " + getColumns("site"));
 
     if (numColumns < 8) {
       addColumnToTable(connection);
