@@ -15,6 +15,7 @@ import mitll.langtest.server.database.SectionHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
@@ -776,7 +777,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   // Users ---------------------
 
   /**
-   * @see mitll.langtest.client.user.UserManager#displayLoginBox()
+   * @see mitll.langtest.client.user.StudentDialog#addUser(int, String, int)
    * @param age
    * @param gender
    * @param experience
@@ -785,6 +786,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public long addUser(int age, String gender, int experience, String dialect) {
     return db.addUser( getThreadLocalRequest(), age, gender, experience, dialect);
+  }
+
+  public void addDLIUser(DLIUser dliUser) {
+    db.addDLIUser(dliUser);
   }
 
   /**
@@ -812,6 +817,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return l;
   }
 
+  /**
+   * @see mitll.langtest.client.user.UserTable#showDialog(mitll.langtest.client.LangTestDatabaseAsync)
+   * @return
+   */
   public List<User> getUsers() {
     return db.getUsers();
   }
