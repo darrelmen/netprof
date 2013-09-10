@@ -333,6 +333,10 @@ public class UserDAO extends DAO {
 
   public Map<Long, User> getUserMap() {
     List<User> users = getUsers();
+    return getMap(users);
+  }
+
+  public Map<Long, User> getMap(List<User> users) {
     Map<Long, User> idToUser = new HashMap<Long, User>();
     for (User u : users) {
       idToUser.put(u.id, u);
