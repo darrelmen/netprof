@@ -1,7 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
@@ -50,7 +50,7 @@ public class Export {
   }
 
   /**
-   * @see mitll.langtest.server.AutoCRT#getClassifier
+   * @see mitll.langtest.server.autocrt.AutoCRT#getClassifier
    * @param useFLQ
    * @param useSpoken
    * @return
