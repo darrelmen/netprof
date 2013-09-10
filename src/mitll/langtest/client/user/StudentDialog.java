@@ -37,7 +37,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class StudentDialog extends UserDialog {
-  private static final int MIN_WEEKS = 1;
+  private static final int MIN_WEEKS = 0;
   private static final int MAX_WEEKS = 104;
   private final UserManager userManager;
 
@@ -276,7 +276,7 @@ public class StudentDialog extends UserDialog {
   }
 
   private boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max) {
-    return highlightIntegerBox(ageEntryGroup, MIN_AGE, MAX_AGE, Integer.MAX_VALUE);
+    return highlightIntegerBox(ageEntryGroup, min, max, Integer.MAX_VALUE);
   }
 
   private boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max, int exception) {
