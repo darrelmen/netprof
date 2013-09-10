@@ -1,14 +1,19 @@
 package mitll.langtest.server.database;
 
 import mitll.flashcard.UserState;
-import mitll.langtest.shared.CountAndGradeID;
+import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.connection.DatabaseConnection;
+import mitll.langtest.server.database.connection.H2Connection;
+import mitll.langtest.server.database.flashcard.UserStateWrapper;
+import mitll.langtest.server.database.taboo.OnlineUsers;
+import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.FlashcardResponse;
-import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.flashcard.FlashcardResponse;
+import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.ResultsAndGrades;
-import mitll.langtest.shared.ScoreInfo;
-import mitll.langtest.shared.Session;
+import mitll.langtest.shared.grade.ResultsAndGrades;
+import mitll.langtest.shared.flashcard.ScoreInfo;
+import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
@@ -77,8 +82,8 @@ public class DatabaseImpl implements Database {
   private final String configDir;
   private final String absConfigDir;
   private String mediaDir;
-  private boolean isRTL;
   private boolean usePredefinedTypeOrder;
+  ServerProperties serverProps;
 
   private final Map<Long,UserStateWrapper> userToState = new HashMap<Long,UserStateWrapper>();
 
@@ -89,27 +94,28 @@ public class DatabaseImpl implements Database {
    */
 
   public DatabaseImpl(String configDir, String dbName, String lessonPlanFile) {
-    this(configDir, dbName, false,"", false, "",false,false);
+    this(configDir, dbName, "", new ServerProperties());
     this.useFile = true;
     this.lessonPlanFile = lessonPlanFile;
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#makeDatabaseImpl
    * @param configDir
    * @param dbName
-   * @param doImages
+   * @param serverProps
    */
-  public DatabaseImpl(String configDir, String dbName, boolean isWordPairs,
-                      String language, boolean doImages, String relativeConfigDir, boolean isFlashcard, boolean usePredefinedTypeOrder) {
+  public DatabaseImpl(String configDir, String dbName, String relativeConfigDir, ServerProperties serverProps) {
     connection = new H2Connection(configDir, dbName);
     absConfigDir = configDir;
-    this.isWordPairs = isWordPairs;
-    this.doImages = doImages;
-    this.language = language;
     this.configDir = relativeConfigDir;
-    this.isFlashcard = isFlashcard;
-    this.usePredefinedTypeOrder = usePredefinedTypeOrder;
+
+    this.isWordPairs = serverProps.isWordPairs();
+    this.doImages = serverProps.doImages();
+    this.language = serverProps.getLanguage();
+    this.isFlashcard = serverProps.isFlashcard();
+    this.usePredefinedTypeOrder =  serverProps.usePredefinedTypeOrder();
+    this.serverProps = serverProps;
 
     try {
       if (getConnection() == null) {
@@ -200,7 +206,6 @@ public class DatabaseImpl implements Database {
     this.mediaDir = mediaDir;
     this.useFile = useFile;
     this.language = language;
-    this.isRTL = isRTL;
   }
 
   public void setOutsideFile(String outsideFile) { monitoringSupport.setOutsideFile(outsideFile); }
@@ -249,10 +254,19 @@ public class DatabaseImpl implements Database {
     return rawExercises;
   }
 
+  /**
+   * @see #getExercises(boolean, String)
+   * @param useFile
+   * @param lessonPlanFile
+   * @param excel
+   * @param mediaDir
+   */
   private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel, String mediaDir) {
     if (exerciseDAO == null) {
       if (useFile && excel) {
-        this.exerciseDAO = new ExcelImport(lessonPlanFile, isFlashcard, mediaDir, absConfigDir, usePredefinedTypeOrder, language);
+        synchronized (this) {
+          this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, absConfigDir, serverProps);
+        }
       }
       else {
         this.exerciseDAO = makeExerciseDAO(useFile);
@@ -430,92 +444,31 @@ public class DatabaseImpl implements Database {
     return idToCount;
   }
 
-  private static class UserStateWrapper {
-    public final UserState state;
-    private int correct = 0;
-    private int incorrect = 0;
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#userOnline(long, boolean)
+   * @param userid
+   * @param isOnline
+   */
+  public void userOnline(long userid, boolean isOnline) {
+    if (isOnline) getOnlineUsers().addOnline(userid);
+    else getOnlineUsers().removeOnline(userid);
+  }
 
-    private int pcorrect = 0;
-    private int pincorrect = 0;
+  public OnlineUsers getOnlineUsers() {
+    return userDAO.getOnlineUsers();
+  }
 
-    private int counter = 0;
-    private List<Integer> correctHistory = new ArrayList<Integer>();
-    private final List<Exercise> exercises;
-    private final Random random;
-
-    /**
-     * @see DatabaseImpl#getUserStateWrapper(long, java.util.List)
-     * @param state
-     * @param userID
-     * @param exercises
-     */
-    public UserStateWrapper(UserState state, long userID, List<Exercise> exercises) {
-      this.state = state;
-      this.random = new Random(userID);
-      this.exercises = new ArrayList<Exercise>(exercises);
-      Collections.shuffle(exercises, random);
-    }
-
-    public int getCorrect() {
-      return correct;
-    }
-
-    public void setCorrect(int correct) {
-      this.correct = correct;
-    }
-
-    public int getIncorrect() {
-      return incorrect;
-    }
-
-    public void setIncorrect(int incorrect) {
-      this.incorrect = incorrect;
-    }
-
-    public List<Integer> getCorrectHistory() { return correctHistory; }
-
-    public int getNumExercises() {
-      return exercises.size();
-    }
-
-    public boolean isComplete() { return counter == exercises.size(); }
-
-    public void reset() {
-      correctHistory.add(correct);
-      correct = 0;
-      incorrect = 0;
-      shuffle();
-    }
-
-    public void shuffle() {
-      Collections.shuffle(exercises, random);
-      counter = 0;
-    }
-
-    public Exercise getNextExercise() {
-      return exercises.get(counter++ % exercises.size()); // defensive
-    }
-
-    public int getPcorrect() {
-      return pcorrect;
-    }
-
-    public void setPcorrect(int pcorrect) {
-      this.pcorrect = pcorrect;
-    }
-
-    public int getPincorrect() {
-      return pincorrect;
-    }
-
-    public void setPincorrect(int pincorrect) {
-      this.pincorrect = pincorrect;
-    }
-
-    public String toString() {
-      return "UserState : correct " + correct + " incorrect " + incorrect +
-        " num exercises " + getNextExercise() + " is complete " + isComplete();
-    }
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#registerAnswer(long, String, String, String, boolean)
+   * @param userid
+   * @param exerciseID
+   * @param stimulus
+   * @param answer
+   * @param correct
+   */
+  public void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean correct) {
+    getOnlineUsers().registerAnswer(userid, answer, correct);
+    addAnswer((int) userid, "plan", exerciseID,stimulus,answer,correct);
   }
 
   /**
@@ -566,26 +519,26 @@ public class DatabaseImpl implements Database {
     return getFlashcardResponse(idToExercise, userStateWrapper);
   }
 
-  private Map<Long,Integer> userToCorrect = new HashMap<Long, Integer>();
+  private Map<Long, Integer> userToCorrect = new HashMap<Long, Integer>();
 
   public ScoreInfo getScoreInfo(long userID, long timeTaken, Map<String, Collection<String>> selection) {
     UserStateWrapper userStateWrapper = userToState.get(userID);
 
-    int correct = userStateWrapper.getPcorrect();
-    int incorrect =  userStateWrapper.getPincorrect();
+    //int correct = userStateWrapper.getPcorrect();
+    int incorrect = userStateWrapper.getPincorrect();
 
-  //  logger.warn("prev " + correct + " inc " + incorrect);
-   //  logger.warn("now  " + userStateWrapper.correct + " inc " + userStateWrapper.incorrect);
+    //  logger.warn("prev " + correct + " inc " + incorrect);
+    //  logger.warn("now  " + userStateWrapper.correct + " inc " + userStateWrapper.incorrect);
 
     //int diffC = Math.max(0,userStateWrapper.correct - correct);
-    int diffI = Math.max(0,userStateWrapper.incorrect - incorrect);
-     logger.warn("diff  " +userToCorrect.get(userID) + " inc " + diffI);
+    int diffI = Math.max(0, userStateWrapper.getIncorrect() - incorrect);
+    logger.warn("diff  " + userToCorrect.get(userID) + " inc " + diffI);
 
-    ScoreInfo scoreInfo = new ScoreInfo(userID, userToCorrect.get(userID), 0, timeTaken, selection);
+    ScoreInfo scoreInfo = new ScoreInfo(userID, -1, userToCorrect.get(userID), 0, timeTaken, selection);
     userStateWrapper.setPcorrect(userStateWrapper.getCorrect());
     userStateWrapper.setPincorrect(userStateWrapper.getIncorrect());
 
-    userToCorrect.put(userID,0);
+    userToCorrect.put(userID, 0);
     return scoreInfo;
   }
 
@@ -1282,21 +1235,6 @@ public class DatabaseImpl implements Database {
     return new ResultsAndGrades(resultsForExercise, gradesAndIDs.grades, spokenToLangToResult);
   }
 
-/*
-  private Map<Integer, List<Grade>> getIdToGrade(Collection<Grade> grades) {
-    Map<Integer,List<Grade>> idToGrade = new HashMap<Integer, List<Grade>>();
-    for (Grade g : grades) {
-      List<Grade> gradesForResult = idToGrade.get(g.resultID);
-      if (gradesForResult == null) {
-        idToGrade.put(g.resultID, gradesForResult = new ArrayList<Grade>());
-      }
-      gradesForResult.add(g);
-    }
-
-    return idToGrade;
-  }
-*/
-
   /**
    * Creates the result table if it's not there.
    *
@@ -1308,7 +1246,15 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
    */
   public void addAnswer(int userID, Exercise e, int questionID, String answer) {
-    answerDAO.addAnswer(userID, e, questionID, answer, "", !e.promptInEnglish, false, Result.AUDIO_TYPE_UNSET, true, 0);
+    addAnswer(userID, e, questionID, answer, true);
+  }
+
+  public void addAnswer(int userID, String plan, String exerciseID, String stimulus, String answer, boolean correct) {
+    answerDAO.addAnswer(userID, plan, exerciseID, stimulus, answer, correct);
+
+  }
+  private void addAnswer(int userID, Exercise e, int questionID, String answer, boolean correct) {
+    answerDAO.addAnswer(userID, e, questionID, answer, "", !e.promptInEnglish, false, Result.AUDIO_TYPE_UNSET, correct, 0);
   }
 
   /**
@@ -1331,7 +1277,7 @@ public class DatabaseImpl implements Database {
                              boolean valid, boolean flq, boolean spoken,
                              String audioType, int durationInMillis, boolean correct, float score) {
     return answerDAO.addAnswer(this, userID, plan, exerciseID, questionID, "", audioFile, valid, flq, spoken, audioType,
-      durationInMillis, correct, score);
+      durationInMillis, correct, score, "");
   }
 
   /**
@@ -1346,7 +1292,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * @param toChange
-   * @see mitll.langtest.server.LangTestDatabaseImpl#changeGrade(mitll.langtest.shared.Grade)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#changeGrade(mitll.langtest.shared.grade.Grade)
    */
   public void changeGrade(Grade toChange) {
     gradeDAO.changeGrade(toChange);
