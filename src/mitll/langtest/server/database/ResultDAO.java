@@ -1,9 +1,8 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
@@ -25,7 +24,7 @@ import java.util.Map;
  *
  */
 public class ResultDAO extends DAO {
-  private static Logger logger = Logger.getLogger(ResultDAO.class);
+  private static final Logger logger = Logger.getLogger(ResultDAO.class);
 
   private static final String ID = "id";
   private static final String USERID = "userid";
@@ -42,10 +41,11 @@ public class ResultDAO extends DAO {
   static final String DURATION = "duration";
   static final String CORRECT = "correct";
   static final String PRON_SCORE = "pronscore";
+  static final String STIMULUS = "stimulus";
 
-  private GradeDAO gradeDAO;
-  private ScheduleDAO scheduleDAO ;
-  private boolean debug = false;
+  private final GradeDAO gradeDAO;
+  private final ScheduleDAO scheduleDAO ;
+  private final boolean debug = false;
 
   public ResultDAO(Database database, UserDAO userDAO) {
     super(database);
@@ -99,10 +99,10 @@ public class ResultDAO extends DAO {
   }
 
   public static class SimpleResult {
-    public int uniqueID;
-    public String id;
-    private int qid;
-    public long userid;
+    public final int uniqueID;
+    public final String id;
+    private final int qid;
+    public final long userid;
 
 
     public SimpleResult(int uniqueID, String id, int qid, long userid) { this.uniqueID = uniqueID; this.id = id; this.qid = qid; this.userid = userid;}
@@ -135,10 +135,7 @@ public class ResultDAO extends DAO {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + RESULTS + ";");
       ResultSet rs = statement.executeQuery();
-      if (rs.next()) {
-        int i = 1;
-        numResults = rs.getInt(i++);
-      }
+      if (rs.next()) { numResults = rs.getInt(1); }
       rs.close();
       statement.close();
       database.closeConnection(connection);
@@ -170,22 +167,24 @@ public class ResultDAO extends DAO {
       boolean flq = rs.getBoolean(FLQ);
       boolean spoken = rs.getBoolean(SPOKEN);
 
-      String type = rs.getString(AUDIO_TYPE) ;
+      String type = rs.getString(AUDIO_TYPE);
       int dur = rs.getInt(DURATION);
 
       boolean correct = rs.getBoolean(CORRECT);
       float pronScore = rs.getFloat(PRON_SCORE);
+      String stimulus = rs.getString(STIMULUS);
 
-      Result e = new Result(uniqueID, userID, //id
-          plan, // plan
-          exid, // id
-          qid, // qid
-          answer, // answer
-          valid, // valid
-          timestamp.getTime(),
-          flq, spoken, type, dur, correct, pronScore);
-      trimPathForWebPage(e);
-      results.add(e);
+      Result result = new Result(uniqueID, userID, //id
+        plan, // plan
+        exid, // id
+        qid, // qid
+        answer, // answer
+        valid, // valid
+        timestamp.getTime(),
+        flq, spoken, type, dur, correct, pronScore);
+      result.setStimulus(stimulus);
+      trimPathForWebPage(result);
+      results.add(result);
     }
     rs.close();
     statement.close();
@@ -499,6 +498,10 @@ public class ResultDAO extends DAO {
       logger.info(RESULTS + " table had num columns = " + numColumns);
       addFlashcardColumnsToTable(connection);
     }
+    if (numColumns < 15) {
+      logger.info(RESULTS + " table had num columns = " + numColumns);
+      addStimulus(connection);
+    }
    // enrichResults();
     //removeValidDefault(connection);
    // addValidDefault(connection);
@@ -517,28 +520,29 @@ public class ResultDAO extends DAO {
    */
   private void createTable(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
-        RESULTS +
-        " (" +
-        "id IDENTITY, " +
-        "userid INT, " +
-        "plan VARCHAR, " +
-      Database.EXID +" VARCHAR, " +
+      RESULTS +
+      " (" +
+      "id IDENTITY, " +
+      "userid INT, " +
+      "plan VARCHAR, " +
+      Database.EXID + " VARCHAR, " +
       "qid INT," +
       Database.TIME + " TIMESTAMP, " +// " AS CURRENT_TIMESTAMP," +
       "answer CLOB," +
-        "valid BOOLEAN," +
-        FLQ + " BOOLEAN," +
-        SPOKEN + " BOOLEAN," +
-        AUDIO_TYPE + " VARCHAR," +
+      "valid BOOLEAN," +
+      FLQ + " BOOLEAN," +
+      SPOKEN + " BOOLEAN," +
+      AUDIO_TYPE + " VARCHAR," +
       DURATION + " INT," +
       CORRECT + " BOOLEAN," +
-      PRON_SCORE + " FLOAT" +
+      PRON_SCORE + " FLOAT," +
+      STIMULUS + " CLOB" +
       ")");
     statement.execute();
     statement.close();
   }
 
-  private void addColumnToTable(Connection connection) throws SQLException {
+  private void addColumnToTable(Connection connection) {
     try {
       PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
           FLQ +
@@ -560,7 +564,7 @@ public class ResultDAO extends DAO {
     }
   }
 
-  private void addTypeColumnToTable(Connection connection) throws SQLException {
+  private void addTypeColumnToTable(Connection connection) {
     PreparedStatement statement;
 
     try {
@@ -576,14 +580,14 @@ public class ResultDAO extends DAO {
   }
 
   private void removeTimeDefault(Connection connection) throws SQLException {
-    logger.info("removing time default value - current_timestamp steps on all values with NOW.");
+    //logger.info("removing time default value - current_timestamp steps on all values with NOW.");
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " + Database.TIME+
         " DROP DEFAULT");
     statement.execute();
     statement.close();
   }
 
-  private void addDurationColumnToTable(Connection connection) throws SQLException {
+  private void addDurationColumnToTable(Connection connection) {
     try {
       PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
           DURATION +
@@ -596,7 +600,7 @@ public class ResultDAO extends DAO {
     }
   }
 
-  private void addFlashcardColumnsToTable(Connection connection) throws SQLException {
+  private void addFlashcardColumnsToTable(Connection connection) {
     try {
       PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
         CORRECT +
@@ -616,7 +620,20 @@ public class ResultDAO extends DAO {
       statement.execute();
       statement.close();
     } catch (SQLException e) {
-      logger.warn("addDurationColumnToTable : got " + e);
+      logger.warn("addFlashcardColumnsToTable : got " + e);
+    }
+  }
+
+  private void addStimulus(Connection connection) {
+    try {
+      PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
+        STIMULUS +
+        " " +
+        "CLOB");
+      statement.execute();
+      statement.close();
+    } catch (SQLException e) {
+      logger.warn("addStimulus : got " + e);
     }
   }
 
@@ -626,17 +643,19 @@ public class ResultDAO extends DAO {
    * @param connection
    * @throws SQLException
    */
-  private void removeValidDefault(Connection connection) throws SQLException {
+/*  private void removeValidDefault(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " +"valid"+
         " DROP DEFAULT");
     statement.execute();
     statement.close();
-  }
+  }*/
 
+/*
   private void addValidDefault(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " +"valid"+
         " set DEFAULT true");
     statement.execute();
     statement.close();
   }
+*/
 }
