@@ -56,6 +56,10 @@ public class DLIUser implements IsSerializable, Demographics {
     return userID;
   }
 
+  public String toString() {
+    return weeksOfExperience + " weeks exp, ILR (r "+ reading + ", l "+ listening + ", s "+ speaking + ", w "+ writing + ")";
+  }
+
   public static class ILRLevel implements IsSerializable {
     private String ilrLevel;
     private boolean estimating;
@@ -75,5 +79,6 @@ public class DLIUser implements IsSerializable, Demographics {
     public boolean isEstimating() {
       return estimating;
     }
+    public String toString() { return ilrLevel + (isEstimating() ? "(e)" : ""); }
   }
 }
