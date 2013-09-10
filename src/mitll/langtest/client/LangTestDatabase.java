@@ -3,6 +3,7 @@ package mitll.langtest.client;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
@@ -269,4 +270,6 @@ public interface LangTestDatabase extends RemoteService {
    * @return
    */
   Leaderboard getLeaderboard(Map<String, Collection<String>> selectionState);
+
+  void addDLIUser(DLIUser dliUser);
 }
