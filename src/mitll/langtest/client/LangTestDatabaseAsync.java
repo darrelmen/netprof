@@ -2,6 +2,7 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
@@ -158,4 +159,6 @@ public interface LangTestDatabaseAsync {
   void postGameScore(long userID, int score, int maxPossibleScore, AsyncCallback<Void> async);
 
   void getLeaderboard(Map<String, Collection<String>> selectionState, AsyncCallback<Leaderboard> async);
+
+  void addDLIUser(DLIUser dliUser, AsyncCallback<Void> async);
 }
