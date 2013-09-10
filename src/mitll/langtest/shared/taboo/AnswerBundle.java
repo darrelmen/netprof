@@ -27,7 +27,7 @@ public class AnswerBundle implements IsSerializable {
    */
   public AnswerBundle(String answer, boolean correct) {
     receiverReplied = true;
-    this.reqID = reqID;
+   // this.reqID = reqID;
     this.answer = answer;
     this.correct = correct;
     this.timestamp = System.currentTimeMillis();
