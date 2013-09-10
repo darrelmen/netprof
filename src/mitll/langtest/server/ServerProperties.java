@@ -68,6 +68,7 @@ public class ServerProperties {
 //  private static final String LOGIN_TYPE_PARAM = "loginType";
   private static final String SORT_BY_ID = "sortByID";
   private static final String SHOW_LEADERBOARD = "showLeaderboard";
+  private static final String DLI_DEMOGRAPHICS = "dliDemographics";
 
   private Properties props = null;
 
@@ -140,12 +141,16 @@ public class ServerProperties {
     return getDefaultFalse(DOIMAGES);
   }
 
-  public boolean doShowLeaderboard() {
+/*  public boolean doShowLeaderboard() {
     return getDefaultFalse(SHOW_LEADERBOARD);
+  }*/
+
+  public boolean dliDemographics() {
+    return getDefaultFalse(DLI_DEMOGRAPHICS);
   }
 
   /**
-   * @see LangTestDatabaseImpl#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.AudioCheck.ValidityAndDur, String, boolean)
+   * @see AudioFileHelper#getAudioAnswer
    * @return
    */
   public boolean isAutoCRT() {
