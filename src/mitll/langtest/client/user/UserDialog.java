@@ -130,28 +130,32 @@ public class UserDialog {
 
   protected ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
     final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user);
-    return new ListBoxFormField(user, userGroup);
+    return new ListBoxFormField(user);
   }
 
   private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
     final ControlGroup userGroup = new ControlGroup();
-    userGroup.add(new ControlLabel(label));
-    dialogBox.add(userGroup);
-    userGroup.add(user);
     userGroup.addStyleName("leftFiveMargin");
+    userGroup.add(new ControlLabel(label));
+    userGroup.add(user);
+
+    dialogBox.add(userGroup);
     return userGroup;
   }
 
   protected static class ListBoxFormField {
     public final ListBox box;
-    //public final ControlGroup group;
 
-    public ListBoxFormField(ListBox box, ControlGroup group) {
+    public ListBoxFormField(ListBox box) {
       this.box = box;
-      //this.group = group;
     }
-  }
 
+    public String getValue() {
+      return box.getItemText(box.getSelectedIndex());
+    }
+
+    public String toString() { return "Box: "+ getValue(); }
+  }
 
   protected void markError(FormField dialectGroup, String message) {
     markError(dialectGroup.group, dialectGroup.box, "Try Again", message);
@@ -220,14 +224,18 @@ public class UserDialog {
 
 
   protected ListBox getGenderBox() {
-    final ListBox genderBox = new ListBox(false);
-    for (String s : Arrays.asList("Male", "Female")) {
-      genderBox.addItem(s);
-    }
-    genderBox.ensureDebugId("cwListBox-dropBox");
-    return genderBox;
+    List<String> values = Arrays.asList("Male", "Female");
+    return getListBox(values);
   }
 
+  protected ListBox getListBox(List<String> values) {
+    final ListBox genderBox = new ListBox(false);
+    for (String s : values) {
+      genderBox.addItem(s);
+    }
+    // genderBox.ensureDebugId("cwListBox-dropBox");
+    return genderBox;
+  }
 
   protected ListBox getExperienceBox() {
     final ListBox experienceBox = new ListBox(false);
