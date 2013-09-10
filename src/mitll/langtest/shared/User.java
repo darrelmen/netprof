@@ -23,9 +23,20 @@ public class User implements IsSerializable {
   public boolean enabled;
   public boolean admin;
   private int numResults;
+  private Demographics demographics;
 
   public User() {} // for serialization
 
+  /**
+   * @see mitll.langtest.server.database.UserDAO#getUsers()
+   * @param id
+   * @param age
+   * @param gender
+   * @param experience
+   * @param ipaddr
+   * @param password
+   * @param enabled
+   */
   public User(long id, int age, int gender, int experience, String ipaddr, String password,
                boolean enabled) {
      this(id,age,gender,experience,ipaddr,password,"NOT_SET","NOT_SET","NOT_SET","NOT_SET","NOT_SET",0,enabled,false);
@@ -81,9 +92,17 @@ public class User implements IsSerializable {
     this.numResults = numResults;
   }
 
+  public Demographics getDemographics() {
+    return demographics;
+  }
+
+  public void setDemographics(Demographics demographics) {
+    this.demographics = demographics;
+  }
+
   public String toString() {
     return "user " + id + " age " + age + " gender " + gender +
       //  " name " + firstName + " " + lastName +
-      " native " + nativeLang + " dialect " + dialect;
+      " native " + nativeLang + " dialect " + dialect + " demographics " + demographics;
   }
 }
