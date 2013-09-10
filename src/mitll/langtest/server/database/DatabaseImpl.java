@@ -6,6 +6,7 @@ import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.server.database.taboo.OnlineUsers;
+import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
@@ -62,6 +63,7 @@ public class DatabaseImpl implements Database {
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
   private final UserDAO userDAO = new UserDAO(this);
+  private final DLIUserDAO dliUserDAO = new DLIUserDAO(this);
   private final ResultDAO resultDAO = new ResultDAO(this,userDAO);
   private final AnswerDAO answerDAO = new AnswerDAO(this);
   private final GradeDAO gradeDAO = new GradeDAO(this,userDAO, resultDAO);
@@ -82,8 +84,7 @@ public class DatabaseImpl implements Database {
   private final String configDir;
   private final String absConfigDir;
   private String mediaDir;
-  //private boolean usePredefinedTypeOrder;
-  ServerProperties serverProps;
+  private ServerProperties serverProps;
 
   private final Map<Long,UserStateWrapper> userToState = new HashMap<Long,UserStateWrapper>();
 
@@ -157,8 +158,11 @@ public class DatabaseImpl implements Database {
       gradeDAO.createGradesTable(getConnection());
       //graderDAO.createGraderTable(getConnection());
       //userDAO.dropUserTable(this);
-
       userDAO.createUserTable(this);
+
+   //   dliUserDAO.dropUserTable(this);
+      dliUserDAO.createUserTable(this);
+
       siteDAO.createTable(getConnection());
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
@@ -1136,7 +1140,6 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public List<User> getUsers() {
-    List<User> users = userDAO.getUsers();
     Map<Long,Integer> idToCount = new HashMap<Long, Integer>();
 
     for (Result r : resultDAO.getResults()) {
@@ -1144,12 +1147,26 @@ public class DatabaseImpl implements Database {
       if (count == null) idToCount.put(r.userid, 1);
       else idToCount.put(r.userid, count+1);
     }
+    List<User> users = userDAO.getUsers();
+
     for (User u : users) {
       Integer numResults = idToCount.get(u.id);
       if (numResults != null) {
         u.setNumResults(numResults);
       }
     }
+
+    List<DLIUser> users1 = dliUserDAO.getUsers();
+    Map<Long, User> userMap = userDAO.getMap(users);
+
+    for (DLIUser dliUser : users1) {
+      User user = userMap.get(dliUser.getUserID());
+      if (user != null) {
+        user.setDemographics(dliUser);
+        //logger.debug("joined with " +dliUser + " : " + user);
+      }
+    }
+    if (users1.isEmpty()) logger.info("no dli users.");
     return users;
   }
 
@@ -1402,6 +1419,10 @@ public class DatabaseImpl implements Database {
     }
   }
   public String toString() { return "Database : "+ connection.getConnection(); }
+
+  public void addDLIUser(DLIUser dliUser) {
+    dliUserDAO.addUser(dliUser);
+  }
 
 /*  private static String getConfigDir(String language) {
     String installPath = ".";
