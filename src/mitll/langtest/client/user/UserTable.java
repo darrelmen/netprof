@@ -215,7 +215,10 @@ public class UserTable extends PagerTable {
     TextColumn<User> experience = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        return "" + contact.experience + " months";
+        int experience1 = contact.experience;
+        String exp = "" + experience1 + " months";
+        if (contact.getDemographics() != null) exp = contact.getDemographics().toString();
+        return exp;
       }
     };
     experience.setSortable(true);
