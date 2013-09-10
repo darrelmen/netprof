@@ -2,18 +2,23 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.CountAndGradeID;
+import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.FlashcardResponse;
-import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.flashcard.FlashcardResponse;
+import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.ImageResponse;
-import mitll.langtest.shared.Leaderboard;
+import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.ResultsAndGrades;
+import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.SectionNode;
-import mitll.langtest.shared.Session;
+import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.taboo.AnswerBundle;
+import mitll.langtest.shared.taboo.GameInfo;
+import mitll.langtest.shared.taboo.PartnerState;
+import mitll.langtest.shared.taboo.StimulusAnswerPair;
+import mitll.langtest.shared.taboo.TabooState;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -51,8 +56,6 @@ public interface LangTestDatabaseAsync {
   void ensureMP3(String wavFile, AsyncCallback<Void> async);
 
   void getExercise(String id, AsyncCallback<Exercise> async);
-
- // void getExercise(String id, long userID, AsyncCallback<Exercise> async);
 
   void getScoreForAnswer(Exercise e, int questionID, String answer, AsyncCallback<Double> async);
 
@@ -129,7 +132,30 @@ public interface LangTestDatabaseAsync {
 
   void getExerciseIds(int reqID, AsyncCallback<ExerciseListWrapper> async);
 
-  void getLeaderboard(Map<String, Collection<String>> typeToSection, AsyncCallback<Leaderboard> async);
-
   void postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState, AsyncCallback<Leaderboard> async);
+
+  void userOnline(long userid, boolean isOnline, AsyncCallback<Void> async);
+
+  void isPartnerOnline(long userid, boolean isGiver, AsyncCallback<PartnerState> async);
+
+  void anyUsersAvailable(long userid, AsyncCallback<TabooState> async);
+
+  void registerPair(long userid, boolean isGiver, AsyncCallback<Void> async);
+
+  void sendStimulus(long userid, String exerciseID, String stimulus, String answer, boolean onLastStimulus,
+                    boolean skippedItem, int numClues, boolean isGameOver, boolean giverChosePoorly, AsyncCallback<Integer> async);
+
+  void checkForStimulus(long userid, AsyncCallback<StimulusAnswerPair> async);
+
+  void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean isCorrect, AsyncCallback<Void> async);
+
+  void checkCorrect(long giverUserID, AsyncCallback<AnswerBundle> async);
+
+  void registerSelectionState(long giver, Map<String, Collection<String>> selectionState, AsyncCallback<Void> async);
+
+  void startGame(long userID, boolean startOver, AsyncCallback<GameInfo> async);
+
+  void postGameScore(long userID, int score, int maxPossibleScore, AsyncCallback<Void> async);
+
+  void getLeaderboard(Map<String, Collection<String>> selectionState, AsyncCallback<Leaderboard> async);
 }
