@@ -7,25 +7,33 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.LangTestDatabase;
+import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.SectionHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.CountAndGradeID;
+import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ExerciseShell;
-import mitll.langtest.shared.FlashcardResponse;
-import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.flashcard.FlashcardResponse;
+import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.ImageResponse;
-import mitll.langtest.shared.Leaderboard;
+import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.ResultsAndGrades;
-import mitll.langtest.shared.ScoreInfo;
+import mitll.langtest.shared.grade.ResultsAndGrades;
+import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.SectionNode;
-import mitll.langtest.shared.Session;
+import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.taboo.AnswerBundle;
+import mitll.langtest.shared.taboo.GameInfo;
+import mitll.langtest.shared.taboo.PartnerState;
+import mitll.langtest.shared.taboo.StimulusAnswerPair;
+import mitll.langtest.shared.taboo.TabooState;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -149,7 +157,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public ExerciseListWrapper getExerciseIds(int reqID, long userID) {
-    logger.debug("getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
+    logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
     List<Exercise> exercises = getExercises(userID);
     if (serverProps.isGoodwaveMode() && !serverProps.dataCollectMode) {
       exercises = getSortedExercises(exercises);
@@ -181,8 +189,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
     logger.debug("getExercisesForSelectionState req " + reqID+ " for " + typeToSection + " and " +userID);
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-    if (serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
-      logger.debug("\tsorting");
+    if (serverProps.trackUsers()) {
+      List<Exercise> copy = new ArrayList<Exercise>(exercisesForSection);
+      Collections.shuffle(copy,rand);    // randomize order
+      return new ExerciseListWrapper(reqID, getExerciseShells(copy));
+    }
+    else if (serverProps.sortExercises() || serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
+     // logger.debug("\tsorting");
 
       List<Exercise> copy = getSortedExercises(exercisesForSection);
       return new ExerciseListWrapper(reqID, getExerciseShells(copy));
@@ -213,6 +226,34 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private void sortByID(List<Exercise> copy) {
+    boolean allInt = true;
+    int size = Math.min(5, copy.size());
+    for (int i = 0; i < size && allInt; i++) {
+      try {
+        Integer.parseInt(copy.get(i).getID());
+      } catch (NumberFormatException e) {
+        allInt = false;
+      }
+    }
+
+    if (allInt) {
+      try {
+        Collections.sort(copy, new Comparator<ExerciseShell>() {
+          @Override
+          public int compare(ExerciseShell o1, ExerciseShell o2) {
+            Integer first = Integer.parseInt(o1.getID());
+            return first.compareTo(Integer.parseInt(o2.getID()));
+          }
+        });
+      } catch (Exception e) {
+        sortByIDStrings(copy);
+      }
+    } else {
+      sortByIDStrings(copy);
+    }
+  }
+
+  private void sortByIDStrings(List<Exercise> copy) {
     Collections.sort(copy, new Comparator<ExerciseShell>() {
       @Override
       public int compare(ExerciseShell o1, ExerciseShell o2) {
@@ -289,6 +330,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public Collection<String> getTypeOrder() {
     SectionHelper sectionHelper = db.getSectionHelper();
+    if (sectionHelper == null) logger.warn("no section helper for " + db);
     List<String> objects = Collections.emptyList();
     return (sectionHelper == null) ? objects : sectionHelper.getTypeOrder();
   }
@@ -378,7 +420,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (serverProps.dataCollectMode) {
        //logger.debug("in data collect mode");
       if (serverProps.biasTowardsUnanswered) {
-        logger.debug("in biasTowardsUnanswered mode : user " +userID);
+        //logger.debug("in biasTowardsUnanswered mode : user " +userID);
 
         if (serverProps.useOutsideResultCounts) {
           String outsideFileOverride = serverProps.outsideFile;
@@ -500,7 +542,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Remember who is grading which exercise.  Time out reservation after 30 minutes.
    *
-   * @see mitll.langtest.client.exercise.GradedExerciseList#getNextUngraded
+   * @see mitll.langtest.client.grading.GradedExerciseList#getNextUngraded
    * @param user
    * @param expectedGrades
    * @param englishOnly
@@ -638,8 +680,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Get score when doing autoCRT on an audio file.
-   * @see AutoCRT#getAutoCRTDecodeOutput
-   * @see AutoCRT#getFlashcardAnswer
+   * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput
+   * @see mitll.langtest.server.autocrt.AutoCRT#getFlashcardAnswer
    * @param testAudioFile audio file to score
    * @param lmSentences to look for in the audio
    * @return PretestScore for audio
@@ -649,7 +691,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see AutoCRT#getAutoCRTDecodeOutput(String, int, mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
+   * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput(String, int, mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
    * @param phrases
    * @return
    */
@@ -718,7 +760,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.grading.GradingResultManager#changeGrade(mitll.langtest.shared.Grade)
+   * @see mitll.langtest.client.grading.GradingResultManager#changeGrade(mitll.langtest.shared.grade.Grade)
    * @param toChange
    */
   public void changeGrade(Grade toChange) {
@@ -785,7 +827,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @return
-   * @see mitll.langtest.client.ResultManager#showResults()
+   * @see mitll.langtest.client.result.ResultManager#showResults()
    */
   @Override
   public List<Result> getResults(int start, int end) {
@@ -802,7 +844,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.ResultManager#showResults()
+   * @see mitll.langtest.client.result.ResultManager#showResults()
    * @return
    */
   @Override
@@ -897,9 +939,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private final Leaderboard leaderboard = new Leaderboard();
 
   @Override
-  public Leaderboard getLeaderboard(Map<String, Collection<String>> typeToSection) {  return leaderboard;  }
-
-  @Override
   public Leaderboard postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState) {
     synchronized (leaderboard) {
       ScoreInfo scoreInfo = db.getScoreInfo(userid, timeTaken, selectionState);
@@ -909,6 +948,129 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
+  public void userOnline(long userid, boolean isOnline) {  db.userOnline(userid, isOnline);  }
+
+  /**
+   * @see mitll.langtest.client.taboo.Taboo#checkForPartner
+   * @param userid
+   * @return
+   */
+  @Override
+  public TabooState anyUsersAvailable(long userid) {  return db.getOnlineUsers().anyAvailable(userid);  }
+
+  /**
+   * @see mitll.langtest.client.taboo.Taboo#askUserToChooseRole(long)
+   * @param userid
+   * @param isGiver
+   */
+  @Override
+  public void registerPair(long userid, boolean isGiver) {  db.getOnlineUsers().registerPair(userid, isGiver);  }
+
+  /**
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#sendStimulus
+   * @param userid
+   * @param exerciseID
+   * @param stimulus
+   * @param onLastStimulus
+   * @param skippedItem
+   * @param numClues
+   * @param isGameOver
+   * @param giverChosePoorly
+   */
+  @Override
+  public int sendStimulus(long userid, String exerciseID, String stimulus, String answer,
+                          boolean onLastStimulus, boolean skippedItem, int numClues, boolean isGameOver,
+                          boolean giverChosePoorly) {
+    return db.getOnlineUsers().sendStimulus(userid, exerciseID, stimulus, answer, onLastStimulus, numClues, isGameOver, giverChosePoorly);
+  }
+
+  /**
+   * @see mitll.langtest.client.taboo.Taboo#pollForPartnerOnline
+   * @param userid
+   * @param isGiver
+   * @return
+   */
+  @Override
+  public PartnerState isPartnerOnline(long userid, boolean isGiver) { return db.getOnlineUsers().isPartnerOnline(userid, isGiver); }
+
+  Random rand = new Random();
+  /**
+   * @see mitll.langtest.client.taboo.TabooExerciseList#tellPartnerMyChapterSelection(mitll.langtest.client.exercise.SelectionState)
+   * @param giver
+   * @param selectionState
+   */
+  @Override
+  public void registerSelectionState(long giver, Map<String, Collection<String>> selectionState) {
+    Collection<Exercise> exercisesForSection = (selectionState.isEmpty()) ? getExercises(giver) : db.getSectionHelper().getExercisesForSelectionState(selectionState);
+    List<ExerciseShell> exerciseShells = getExerciseShells(exercisesForSection);
+    Collections.shuffle(exerciseShells,rand);    // randomize order
+    db.getOnlineUsers().registerSelectionState(giver, selectionState, exerciseShells);
+  }
+
+  /**
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#checkForStimulus(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
+   * @param userid
+   * @return
+   */
+  @Override
+  public StimulusAnswerPair checkForStimulus(long userid) {
+    return db.getOnlineUsers().checkForStimulus(userid);
+  }
+
+  /**
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#registerAnswer
+   * @param userid
+   * @param exerciseID
+   * @param stimulus
+   * @param answer
+   * @param isCorrect
+   */
+  @Override
+  public void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean isCorrect) {
+    db.registerAnswer(userid, exerciseID, stimulus, answer, isCorrect);
+  }
+
+  /**
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#checkForCorrect
+   * @param giverUserID
+   * @return
+   */
+  @Override
+  public AnswerBundle checkCorrect(long giverUserID) {
+    return db.getOnlineUsers().checkCorrect(giverUserID);
+  }
+
+  /**
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory#startGame()
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver
+   * @param userID
+   * @param startOver
+   * @return
+   */
+  public GameInfo startGame(long userID, boolean startOver) {
+    return db.getOnlineUsers().startGame(userID, startOver);
+  }
+
+  /**
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver
+   * @param userID
+   * @param score
+   * @param maxPossibleScore
+   */
+  @Override
+  public void postGameScore(long userID, int score, int maxPossibleScore) {
+    db.getOnlineUsers().postGameScore(userID, score, maxPossibleScore);
+  }
+
+  /**
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver
+   * @param selectionState
+   * @return
+   */
+  public Leaderboard getLeaderboard(Map<String, Collection<String>> selectionState) {
+    return db.getOnlineUsers().getLeaderboard(selectionState);
+  }
+
   public void logMessage(String message) {
     String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client " + message;
     logger.debug(prefixedMessage);
@@ -962,7 +1124,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param db
    * @return
    */
-  String setInstallPath(boolean useFile, DatabaseImpl db) {
+  public String setInstallPath(boolean useFile, DatabaseImpl db) {
     String lessonPlanFile = getLessonPlan();
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
@@ -999,11 +1161,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
-    boolean wordPairs = serverProps.isWordPairs();
-    String language = serverProps.getLanguage();
-    logger.debug("word pairs " + wordPairs + " language " + language + " config dir " + relativeConfigDir);
-    return new DatabaseImpl(configDir, h2DatabaseFile, wordPairs,
-      language, serverProps.doImages(), relativeConfigDir, serverProps.isFlashcard(),
-      serverProps.usePredefinedTypeOrder());
+    logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
+    return new DatabaseImpl(configDir, h2DatabaseFile, relativeConfigDir,  serverProps);
   }
 }
