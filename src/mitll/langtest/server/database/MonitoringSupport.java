@@ -1,9 +1,9 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.Session;
+import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
