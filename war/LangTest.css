@@ -674,3 +674,7 @@ fieldset > legend {
 .rightMargin {
    margin-right: 5px;
 }
+
+.minWidth {
+    min-width: 190px;
+}
