@@ -1,6 +1,6 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.Grader;
+import mitll.langtest.shared.grade.Grader;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
