@@ -10,10 +10,11 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.ResultManager;
+import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.CountAndGradeID;
-import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.grade.CountAndGradeID;
+import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
@@ -47,9 +48,10 @@ public class GradingResultManager extends ResultManager {
    * @param s
    * @param feedback
    * @param englishOnlyMode
+   * @param propertyHandler
    */
-  public GradingResultManager(LangTestDatabaseAsync s, UserFeedback feedback, boolean englishOnlyMode) {
-    super(s,feedback, "Answer");
+  public GradingResultManager(LangTestDatabaseAsync s, UserFeedback feedback, boolean englishOnlyMode, PropertyHandler propertyHandler) {
+    super(s,feedback, "Answer",propertyHandler);
     this.englishOnlyMode = englishOnlyMode;
   }
 
@@ -96,7 +98,7 @@ public class GradingResultManager extends ResultManager {
   }
 
   /**
-   * @see mitll.langtest.client.ResultManager#getTable
+   * @see mitll.langtest.client.result.ResultManager#getTable
    * @param table
    * @return
    */
@@ -106,7 +108,7 @@ public class GradingResultManager extends ResultManager {
   }
 
   /**
-   * @see mitll.langtest.client.ResultManager#getTable
+   * @see mitll.langtest.client.result.ResultManager#getTable
    * @param grades
    * @param grader
    * @param numGrades
