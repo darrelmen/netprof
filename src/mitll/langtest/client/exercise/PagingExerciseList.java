@@ -308,7 +308,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     } else {
       int pageEnd = table.getPageStart() + table.getPageSize();
       if (i >= pageEnd) {
-        int newStart = Math.min(table.getRowCount() - table.getPageSize(), newIndex);
+        int newStart = Math.max(0,Math.min(table.getRowCount() - table.getPageSize(), newIndex));   // fix for bug from email
         if (DEBUG) System.out.println("new start of next newIndex " +newStart + "/" +newIndex +"/page = " + pageNum+
           " vs current " + table.getVisibleRange());
         table.setVisibleRange(newStart, table.getPageSize());
