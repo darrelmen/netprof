@@ -53,6 +53,8 @@ public class DLIUserDAO extends DAO {
       logger.debug("got " + i1);
       statement.close();
       database.closeConnection(connection);
+
+        logger.debug("now " + getCount(DLIUSERS));
     } catch (Exception ee) {
       ee.printStackTrace();
     }
@@ -76,7 +78,9 @@ public class DLIUserDAO extends DAO {
       "silrEstimating BOOLEAN, " +
       "wilrLevel VARCHAR, " +
       "wilrEstimating BOOLEAN, " +
-      "FOREIGN KEY(USERID) REFERENCES USER(ID)" +
+      "FOREIGN KEY(USERID) REFERENCES " +
+      "USERS" +
+      "(ID)" +
       ")");
     statement.execute();
     statement.close();
