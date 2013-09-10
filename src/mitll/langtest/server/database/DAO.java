@@ -3,6 +3,7 @@ package mitll.langtest.server.database;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -60,6 +61,21 @@ public class DAO {
     }
     //logger.info("table " +table + " has " +columns);
     return columns;
+  }
+
+  protected int getCount(String table) {
+    try {
+      Connection connection = database.getConnection();
+      PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) from " + table);
+      ResultSet rs = statement.executeQuery();
+      if (rs.next()) return rs.getInt(1);
+      statement.close();
+
+      database.closeConnection(connection);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return 0;
   }
 
   /**
