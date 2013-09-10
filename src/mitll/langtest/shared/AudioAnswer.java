@@ -68,7 +68,7 @@ public class AudioAnswer implements IsSerializable {
   public void setDecodeOutput(String decodeOutput) { this.decodeOutput = decodeOutput; }
 
   /**
-   * @see mitll.langtest.server.AutoCRT#getFlashcardAnswer
+   * @see mitll.langtest.server.autocrt.AutoCRT#getFlashcardAnswer
    * @param score
    */
   public void setScore(double score) { this.score = score; }
@@ -91,7 +91,7 @@ public class AudioAnswer implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.AutoCRT#getFlashcardAnswer(Exercise, java.io.File, AudioAnswer, Scoring)
+   * @see mitll.langtest.server.autocrt.AutoCRT#getFlashcardAnswer(Exercise, java.io.File, AudioAnswer, Scoring)
    * @param correct
    */
   public void setCorrect(boolean correct) {
