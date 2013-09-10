@@ -62,12 +62,10 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#doDataCollectAdminView
    * @param lt
    * @param service
-   * @param isDataCollectAdmin
    * @param isFlashcard
    * @param props
    */
-  public UserManager(UserNotification lt, LangTestDatabaseAsync service,
-                     boolean isDataCollectAdmin, boolean isFlashcard, PropertyHandler props) {
+  public UserManager(UserNotification lt, LangTestDatabaseAsync service, boolean isFlashcard, PropertyHandler props) {
     this.langTest = lt;
     this.service = service;
     this.props = props;
