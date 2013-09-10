@@ -82,7 +82,7 @@ public class DatabaseImpl implements Database {
   private final String configDir;
   private final String absConfigDir;
   private String mediaDir;
-  private boolean usePredefinedTypeOrder;
+  //private boolean usePredefinedTypeOrder;
   ServerProperties serverProps;
 
   private final Map<Long,UserStateWrapper> userToState = new HashMap<Long,UserStateWrapper>();
@@ -114,7 +114,7 @@ public class DatabaseImpl implements Database {
     this.doImages = serverProps.doImages();
     this.language = serverProps.getLanguage();
     this.isFlashcard = serverProps.isFlashcard();
-    this.usePredefinedTypeOrder =  serverProps.usePredefinedTypeOrder();
+    //this.usePredefinedTypeOrder =  serverProps.usePredefinedTypeOrder();
     this.serverProps = serverProps;
 
     try {
