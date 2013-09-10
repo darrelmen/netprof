@@ -58,7 +58,7 @@ public class DAO {
     } catch (Exception e) {
       logger.error("doing getColumns: got " +e,e);
     }
-    logger.info("table " +table + " has " +columns);
+    //logger.info("table " +table + " has " +columns);
     return columns;
   }
 
