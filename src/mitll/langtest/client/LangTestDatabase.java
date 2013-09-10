@@ -3,18 +3,23 @@ package mitll.langtest.client;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.CountAndGradeID;
+import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.FlashcardResponse;
-import mitll.langtest.shared.Grade;
+import mitll.langtest.shared.flashcard.FlashcardResponse;
+import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.ImageResponse;
-import mitll.langtest.shared.Leaderboard;
+import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.ResultsAndGrades;
+import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.SectionNode;
-import mitll.langtest.shared.Session;
+import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.taboo.AnswerBundle;
+import mitll.langtest.shared.taboo.GameInfo;
+import mitll.langtest.shared.taboo.PartnerState;
+import mitll.langtest.shared.taboo.StimulusAnswerPair;
+import mitll.langtest.shared.taboo.TabooState;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -36,6 +41,7 @@ public interface LangTestDatabase extends RemoteService {
   // exerciseDAO
   ExerciseListWrapper getExerciseIds(int reqID, long userID);
   ExerciseListWrapper getExerciseIds(int reqID);
+  Exercise getExercise(String id);
 
   ResultsAndGrades getResultsForExercise(String exid, boolean arabicTextDataCollect);
 
@@ -48,6 +54,7 @@ public interface LangTestDatabase extends RemoteService {
   long addUser(int age, String gender, int experience, String firstName, String lastName, String nativeLang, String dialect, String userID);
 
   List<User> getUsers();
+  int userExists(String login);
 
   // answer DAO
   void addTextAnswer(int userID, Exercise exercise, int questionID, String answer);
@@ -66,13 +73,17 @@ public interface LangTestDatabase extends RemoteService {
 
   Map<String,String> getProperties();
 
-  Exercise getExercise(String id);
-
-  int userExists(String login);
+  // data collect admin (site administration) ------------------------------
 
   Site getSiteByID(long id);
   boolean deploySite(long id, String name, String language, String notes);
   List<Site> getSites();
+
+  boolean isAdminUser(long id);
+
+  void setUserEnabled(long id, boolean enabled);
+
+  boolean isEnabledUser(long id);
 
   // monitoring support
 
@@ -94,12 +105,7 @@ public interface LangTestDatabase extends RemoteService {
 
   Map<String, Map<Integer, Integer>> getResultCountsByGender();
   Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts();
-
-  boolean isAdminUser(long id);
-
-  void setUserEnabled(long id, boolean enabled);
-
-  boolean isEnabledUser(long id);
+  Map<Integer, Map<String, Map<String, Integer>>> getGradeCountPerExercise();
 
   void logMessage(String message);
 
@@ -111,6 +117,8 @@ public interface LangTestDatabase extends RemoteService {
    * @param userID   @return
    * */
   ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID);
+
+  // flashcard support ------------------------------------------
 
   FlashcardResponse getNextExercise(long userID);
   FlashcardResponse getNextExercise(long userID,Map<String, Collection<String>> typeToSection);
@@ -132,9 +140,133 @@ public interface LangTestDatabase extends RemoteService {
 
   List<Exercise> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end);
 
-  Map<Integer, Map<String, Map<String, Integer>>> getGradeCountPerExercise();
-
-  Leaderboard getLeaderboard(Map<String, Collection<String>> typeToSection);
-
+  /**
+   * Game is over notification...
+   * @param userid
+   * @param timeTaken
+   * @param selectionState
+   * @return
+   */
   Leaderboard postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState);
+
+  // taboo interface -- TODO : make this a separate module
+
+  /**
+   * Report user state - online/offline
+   * @see mitll.langtest.client.user.UserManager#userOnline(int, boolean)
+   * @param userid
+   * @param isOnline
+   */
+  void userOnline(long userid, boolean isOnline);
+
+  /**
+   * Check user state --
+   *
+   * <ul>
+   * <li>Anyone to play with?  If so, ask the user if they which role they would like to be. </li>
+   * <li>Am I playing with anyone currently?</li>
+   * <li>If so, what's my role (giver/receiver)? </li>
+   * </ul>
+   * @see mitll.langtest.client.taboo.Taboo#checkForPartner(long)
+   * @param userid
+   * @return
+   */
+  TabooState anyUsersAvailable(long userid);
+
+  /**
+   * User chooses taboo role...
+   * @see mitll.langtest.client.taboo.Taboo#askUserToChooseRole
+   * @param userid
+   * @param isGiver
+   */
+  void registerPair(long userid, boolean isGiver);
+
+  /**
+   * Is my partner online, and if a receiver, which chapter(s) did they choose?
+   * @see mitll.langtest.client.taboo.Taboo#pollForPartnerOnline(long, boolean)
+   * @param userid
+   * @param isGiver
+   * @return
+   */
+  PartnerState isPartnerOnline(long userid, boolean isGiver);
+
+  /**
+   * Tell giver which chapter(s) was/were chosen.
+   * @see mitll.langtest.client.taboo.TabooExerciseList#tellPartnerMyChapterSelection(mitll.langtest.client.exercise.SelectionState)
+   * @param giver
+   * @param selectionState
+   */
+  void registerSelectionState(long giver, Map<String, Collection<String>> selectionState);
+
+  /**
+   * Giver chooses a sentence to send to receiver
+   *
+   *
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#sendStimulus(String, mitll.langtest.shared.Exercise, String, mitll.langtest.client.sound.SoundFeedback, boolean, int, boolean)
+   * @param userid
+   * @param exerciseID
+   * @param stimulus
+   * @param answers
+   * @param onLastStimulus
+   * @param skippedItem
+   * @param numClues
+   * @param isGameOver
+   * @return
+   * @param giverChosePoorly
+   */
+  int sendStimulus(long userid, String exerciseID, String stimulus, String answers, boolean onLastStimulus, boolean skippedItem, int numClues, boolean isGameOver, boolean giverChosePoorly);
+
+  /**
+   * Receiver checks for stimulus
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#checkForStimulus(LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
+   * @param userid
+   * @return
+   */
+  StimulusAnswerPair checkForStimulus(long userid);
+
+  /**
+   * Receiver enters an answer, correct or incorrect
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#registerAnswer
+
+   * @param userid
+   * @param exerciseID
+   * @param stimulus
+   * @param answer
+   * @param isCorrect
+   */
+  void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean isCorrect);
+
+  /**
+   * Giver checks if receiver answered correctly, given last stimulus.
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#checkForCorrect(long, String, mitll.langtest.shared.Exercise, mitll.langtest.client.sound.SoundFeedback)
+   * @param giverUserID
+   * @return
+   */
+  AnswerBundle checkCorrect(long giverUserID);
+
+  /**
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory#startGame()
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#doNextGame(mitll.langtest.client.exercise.ExerciseController, LangTestDatabaseAsync, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
+   * @param userID
+   * @param startOver
+   * @return
+   */
+  GameInfo startGame(long userID, boolean startOver);
+
+  /**
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver
+   * @param userID
+   * @param score
+   * @param maxPossibleScore
+   */
+  void postGameScore(long userID, int score, int maxPossibleScore);
+
+  /**
+   * @see mitll.langtest.client.taboo.GiverExerciseFactory#showLeaderboard()
+   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#showLeaderboard(LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
+
+   * @param selectionState
+   * @return
+   */
+  Leaderboard getLeaderboard(Map<String, Collection<String>> selectionState);
 }
