@@ -295,19 +295,7 @@ public class GradeDAO extends DAO {
    * @return
    */
   private int getCount() {
-    try {
-      Connection connection = database.getConnection();
-      PreparedStatement statement;
-      statement = connection.prepareStatement("SELECT COUNT(*) from grades");
-      ResultSet rs = statement.executeQuery();
-      if (rs.next()) return rs.getInt(1);
-      statement.close();
-
-      database.closeConnection(connection);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return 0;
+    return getCount(GRADES);
   }
 
   /**
