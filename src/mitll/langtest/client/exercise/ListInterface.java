@@ -1,9 +1,17 @@
 package mitll.langtest.client.exercise;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.taboo.GameInfo;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,42 +22,53 @@ import mitll.langtest.shared.ExerciseShell;
  */
 public interface ListInterface extends RequiresResize {
   /**
-   * @see mitll.langtest.client.LangTest#setFactory()
+   * @see mitll.langtest.client.LangTest#setFactory
    * @param factory
    * @param user
    * @param expectedGrades
    */
   void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades);
+ // ExercisePanelFactory getFactory();
 
-  /**
-   * @see mitll.langtest.client.LangTest#gotUser(long)
-   * @see mitll.langtest.client.LangTest#makeFlashContainer()
-   * @param userID
-   */
+  void rememberAndLoadFirst(List<ExerciseShell> exercises);
+
+    /**
+     * @see mitll.langtest.client.LangTest#gotUser(long)
+     * @see mitll.langtest.client.LangTest#makeFlashContainer()
+     * @param userID
+     */
   void getExercises(long userID);
 
   /**
-   * @see mitll.langtest.client.LangTest#makeExerciseList(com.google.gwt.user.client.ui.Panel, boolean)
+   * @see mitll.langtest.client.LangTest#makeExerciseList
    * @param exercise_title
    */
   void setExercise_title(String exercise_title);
 
 
   /**
-   * @see mitll.langtest.client.LangTest#makeExerciseList(com.google.gwt.user.client.ui.Panel, boolean)
+   * @see mitll.langtest.client.LangTest#makeExerciseList
    * @return
    */
   Widget getWidget();
 
+  Widget getExerciseListOnLeftSide(PropertyHandler props);
 
+  void loadExercise(ExerciseShell exerciseShell);
   /**
-   * @see mitll.langtest.client.LangTest#loadNextExercise(mitll.langtest.shared.Exercise)
    * @param current
    * @return
+   * @see mitll.langtest.client.LangTest#loadNextExercise
    */
   boolean loadNextExercise(ExerciseShell current);
 
+  boolean loadNextExercise(String id);
+  void makeExercisePanel(Exercise result);
+  void startOver();
+
   boolean loadPreviousExercise(ExerciseShell current);
+
+  public String getCurrentExerciseID();
 
   boolean onFirst(ExerciseShell current);
 
@@ -67,4 +86,12 @@ public interface ListInterface extends RequiresResize {
   int getPercentComplete();
 
   int getComplete();
+
+  //void addAdHocExercise(String label);
+
+  void setSelectionState(Map<String,Collection<String>> selectionState);
+
+  void hideExerciseList();
+
+  void askForRandomExercise(AsyncCallback<Exercise> callback);
 }
