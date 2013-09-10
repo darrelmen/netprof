@@ -6,8 +6,6 @@ import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
 import corpus.HTKDictionary;
 import corpus.LTS;
-import mitll.langtest.server.AudioCheck;
-import mitll.langtest.server.AudioConversion;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.ExcelImport;
 import mitll.langtest.server.database.FileExerciseDAO;
