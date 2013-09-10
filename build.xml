@@ -347,7 +347,16 @@
         </jar>
     </target>
 
+    <target depends="build" name="taboo">
+        <jar destfile="taboo.war" basedir="war"
+             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/taboo/**"
+                >
 
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
 
     <target depends="build" name="npfMandarin">
         <jar destfile="npfMandarin.war" basedir="war"
@@ -451,11 +460,13 @@
             <arg line="-war"/>
             <arg value="war"/>
             <arg line="-style"/>
+
 <!--
             <arg value="OBF"/>
 -->
             <arg value="PRETTY"/>
-
+            <arg line="-localWorkers"/>
+            <arg value="6"/>
 <!--
             <arg value="-compileReport"/>
 -->
