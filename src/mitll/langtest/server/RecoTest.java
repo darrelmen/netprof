@@ -1,5 +1,6 @@
 package mitll.langtest.server;
 
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 import org.apache.log4j.Logger;
