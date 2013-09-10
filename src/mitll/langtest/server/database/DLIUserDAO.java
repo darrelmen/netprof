@@ -1,22 +1,13 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.DLIUser;
-import mitll.langtest.shared.Grader;
-import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class DLIUserDAO extends DAO {
   private static Logger logger = Logger.getLogger(DLIUserDAO.class);

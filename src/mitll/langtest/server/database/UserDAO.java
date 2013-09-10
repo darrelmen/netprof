@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.Grader;
+import mitll.langtest.server.database.taboo.OnlineUsers;
+import mitll.langtest.shared.grade.Grader;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
@@ -19,8 +20,11 @@ import java.util.Set;
 
 public class UserDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserDAO.class);
+  private final OnlineUsers onlineUsers;
 
-  public UserDAO(Database database) { super(database); }
+
+  public UserDAO(Database database) { super(database); this.onlineUsers = new OnlineUsers(this); }
+
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
@@ -75,7 +79,7 @@ public class UserDAO extends DAO {
 
       return newID;
     } catch (Exception ee) {
-      ee.printStackTrace();
+      logger.error("Got " + ee);
     }
     return 0;
   }
@@ -131,7 +135,7 @@ public class UserDAO extends DAO {
     return val;
   }
 
-  void createUserTable(Database database) throws Exception {
+  public void createUserTable(Database database) throws Exception {
     Connection connection = database.getConnection();
 
     PreparedStatement statement;
@@ -157,7 +161,7 @@ public class UserDAO extends DAO {
     database.closeConnection(connection);
 
     int numColumns = getNumColumns(connection, "users");
-    logger.debug("found " + numColumns + " in users table");
+    //logger.debug("found " + numColumns + " in users table");
 
     Set<String> expected = new HashSet<String>();
     expected.addAll(Arrays.asList("id","age","gender","experience","firstname","lastname","ipaddr","nativelang","dialect","userid","timestamp","enabled"));
@@ -196,7 +200,7 @@ public class UserDAO extends DAO {
     statement.close();
   }
 
-  void dropUserTable(Database database) throws Exception {
+  public void dropUserTable(Database database) throws Exception {
     System.err.println("----------- dropUserTable -------------------- ");
     Connection connection = database.getConnection();
     PreparedStatement statement;
@@ -211,60 +215,89 @@ public class UserDAO extends DAO {
    * @return
    */
   public List<User> getUsers() {
+    String sql = "SELECT * from users;";
+    return getUsers(sql);
+  }
+
+  /**
+   * @see OnlineUsers#getUser(long)
+   * @param userid
+   * @return
+   */
+  public User getUserWhere(long userid) {
+    String sql = "SELECT * from users where id=" +userid+";";
+    List<User> users = getUsers(sql);
+    if (users.isEmpty()) {
+      if (userid > 0) {
+        logger.warn("no user with id " + userid);
+      }
+      return null;
+    }
+    else if (users.size() > 1) {
+      logger.warn("huh? " + users.size() + " with  id " + userid);
+    }
+
+    return users.iterator().next();
+  }
+
+  private List<User> getUsers(String sql) {
     try {
       Connection connection = database.getConnection();
-      PreparedStatement statement;
-
-      statement = connection.prepareStatement("SELECT * from users;");
-      int i;
-
+      PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
-      List<User> users = new ArrayList<User>();
-      int columnCount = rs.getMetaData().getColumnCount();
-      if (columnCount == 7) {
-        while (rs.next()) {
-          i = 1;
-          users.add(new User(rs.getLong(i++), //id
-            rs.getInt(i++), // age
-            rs.getInt(i++), //gender
-            rs.getInt(i++), // exp
-            rs.getString(i++), // ip
-            rs.getString(i++), // password
-            rs.getBoolean(i++)));
-        }
-      } else {
-        while (rs.next()) {
-          i = 1;
-          String userid;
-          User newUser = new User(rs.getLong("id"), //id
-            rs.getInt("age"), // age
-            rs.getInt("gender"), //gender
-            rs.getInt("experience"), // exp
-            rs.getString("ipaddr"), // ip
-            rs.getString("password"), // password
-
-            rs.getString("firstName"), // first
-            rs.getString("lastName"), // last
-            rs.getString("nativeLang"), // native
-            rs.getString("dialect"), // dialect
-            userid = rs.getString("userid"), // userid
-            rs.getTimestamp("timestamp").getTime(),
-
-            rs.getBoolean("enabled"),
-            userid != null && (userid.equals("gvidaver") | userid.equals("swade")));
-          users.add(newUser);
-          if (newUser.userID == null) newUser.userID = ""+newUser.id;
-        }
-      }
+      List<User> users = getUsers(rs);
       rs.close();
       statement.close();
       database.closeConnection(connection);
 
       return users;
     } catch (Exception ee) {
-      ee.printStackTrace();
+      logger.error("Got " + ee);
     }
     return new ArrayList<User>();
+  }
+
+  private List<User> getUsers(ResultSet rs) throws SQLException {
+    int i;
+
+    List<User> users = new ArrayList<User>();
+    int columnCount = rs.getMetaData().getColumnCount();
+    if (columnCount == 7) {
+      while (rs.next()) {
+        i = 1;
+        users.add(new User(rs.getLong(i++), //id
+          rs.getInt(i++), // age
+          rs.getInt(i++), //gender
+          rs.getInt(i++), // exp
+          rs.getString(i++), // ip
+          rs.getString(i++), // password
+          rs.getBoolean(i++)));
+      }
+    } else {
+      while (rs.next()) {
+       // i = 1;
+        String userid;
+        User newUser = new User(rs.getLong("id"), //id
+          rs.getInt("age"), // age
+          rs.getInt("gender"), //gender
+          rs.getInt("experience"), // exp
+          rs.getString("ipaddr"), // ip
+          rs.getString("password"), // password
+
+          // first
+          // last
+          rs.getString("nativeLang"), // native
+          rs.getString("dialect"), // dialect
+          userid = rs.getString("userid"), // userid
+          rs.getTimestamp("timestamp").getTime(),
+
+          rs.getBoolean("enabled"),
+          userid != null && (userid.equals("gvidaver") | userid.equals("swade")));
+        users.add(newUser);
+        if (newUser.userID == null) newUser.userID = ""+newUser.id;
+      }
+    }
+    return users;
   }
 
   public boolean isUserMale(long userID) {
@@ -320,5 +353,9 @@ public class UserDAO extends DAO {
 
   public Set<Long> getNativeUsers() {
     return getNativeUserMap().keySet();
+  }
+
+  public OnlineUsers getOnlineUsers() {
+    return onlineUsers;
   }
 }
