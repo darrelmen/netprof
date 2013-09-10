@@ -28,8 +28,6 @@ public class ServerProperties {
 
   private static final String DEBUG_EMAIL = "debugEmail";
   private static final String DOIMAGES = "doimages";
-/*  public static final String FOREGROUND_BLEND = "foregroundBlend";
-  public static final String FOREGROUND_BLEND_DEFAULT = "0.8";*/
   private static final String USE_SCORE_CACHE = "useScoreCache";
   private static final String USE_WEIGHTS = "useWeights";
 
@@ -65,12 +63,15 @@ public class ServerProperties {
   private static final String GOODWAVE_MODE = "goodwaveMode";
   private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
-//  private static final String LOGIN_TYPE_PARAM = "loginType";
   private static final String SORT_BY_ID = "sortByID";
-  private static final String SHOW_LEADERBOARD = "showLeaderboard";
   private static final String DLI_DEMOGRAPHICS = "dliDemographics";
+  private static final String TRACK_USERS_ONLINE = "trackUsers";
+  private static final String SKIP_SEMICOLONS = "skipSemicolons";
+  private static final String SORT_EXERCISES = "sortExercises";
+  private static final String EXAMPLE_SENTENCE_FILE = "exampleSentenceFile";
+  private static final String TABOO_ENGLISH = "tabooEnglish";
 
-  private Properties props = null;
+  private Properties props = new Properties();
 
   public boolean dataCollectMode;
   private boolean collectAudio;
@@ -149,8 +150,16 @@ public class ServerProperties {
     return getDefaultFalse(DLI_DEMOGRAPHICS);
   }
 
+  public boolean doTabooEnglish() {
+    return getDefaultFalse(TABOO_ENGLISH);
+  }
+
+  public boolean trackUsers() {
+    return getDefaultFalse(TRACK_USERS_ONLINE);
+  }
+
   /**
-   * @see AudioFileHelper#getAudioAnswer
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    * @return
    */
   public boolean isAutoCRT() {
@@ -174,11 +183,6 @@ public class ServerProperties {
   public double getMinPronScore() {
     return minPronScore;
   }
-
-/*  public String getBackgroundFile() {
-    return props.getProperty(BACKGROUND_FILE,"");
-  }*/
-
   public boolean isArabicTextDataCollect() {
     return !props.getProperty(ARABIC_TEXT_DATA_COLLECT, "false").equals("false");
   }
@@ -202,6 +206,7 @@ public class ServerProperties {
   public boolean isFlashcardTeacherView() {
     return !props.getProperty(FLASHCARD_TEACHER_VIEW, "false").equals("false");
   }
+
   public boolean usePredefinedTypeOrder() {
     return !props.getProperty(USE_PREDEFINED_TYPE_ORDER, "false").equals("false");
   }
@@ -216,6 +221,18 @@ public class ServerProperties {
 
   public boolean isCollectAudio() {
     return collectAudio;
+  }
+
+  public boolean shouldSkipSemicolonEntries() {
+    return getDefaultTrue(SKIP_SEMICOLONS);
+  }
+
+  public boolean sortExercises() {
+    return getDefaultFalse(SORT_EXERCISES);
+  }
+
+  public String getExampleSentenceFile() {
+    return props.getProperty(EXAMPLE_SENTENCE_FILE);
   }
 
   /**
@@ -255,23 +272,11 @@ public class ServerProperties {
     isDataCollectAdminView = !props.getProperty("dataCollectAdminView", "false").equals("false");
     outsideFile = props.getProperty(OUTSIDE_FILE, OUTSIDE_FILE_DEFAULT);
 
-
-
     String dateFromManifest = getDateFromManifest(servletContext);
     if (dateFromManifest != null && dateFromManifest.length() > 0) {
       //logger.debug("Date from manifest " + dateFromManifest);
       props.setProperty("releaseDate",dateFromManifest);
     }
-/*    try {
-      foregroundBlend = Double.parseDouble(props.getProperty(FOREGROUND_BLEND, FOREGROUND_BLEND_DEFAULT));
-    } catch (NumberFormatException e) {
-      logger.error("Couldn't parse property " + FOREGROUND_BLEND, e);
-      try {
-        foregroundBlend = Double.parseDouble(FOREGROUND_BLEND_DEFAULT);
-      } catch (NumberFormatException e1) {
-        e1.printStackTrace();
-      }
-    }*/
 
     try {
       minPronScore = Double.parseDouble(props.getProperty(MIN_PRON_SCORE, MIN_PRON_SCORE_DEFAULT));
@@ -307,4 +312,5 @@ public class ServerProperties {
     }
     return "";
   }
+
 }
