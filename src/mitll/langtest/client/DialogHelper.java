@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.DialogBox;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DialogHelper {
@@ -34,12 +35,16 @@ public class DialogHelper {
     showErrorMessage(title, msgs, "Close", null);
   }
 
+  public void showErrorMessage(String title, String msg, String buttonName, final CloseListener listener) {
+    showErrorMessage(title, Collections.singletonList(msg), buttonName, listener);
+  }
+
   /**
    * Note : depends on bootstrap
    *
    * @param title
-   * @param msgs
-   */
+     * @param msgs
+     */
   public void showErrorMessage(String title, List<String> msgs, String buttonName, final CloseListener listener) {
     final DialogBox dialogBox;
     Button closeButton;
