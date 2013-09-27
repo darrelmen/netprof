@@ -349,4 +349,13 @@ public class English extends SplitAudio {
       logger.error("Got " +e,e);
     }
   }
+
+  protected void recordMissing(FileWriter missingFast, FileWriter missingSlow, String name) {
+    try {
+      recordMissingFast(missingFast, name);
+      recordMissingFast(missingSlow, name);
+    } catch (IOException e) {
+      SplitAudio.logger.error("got " + e, e);
+    }
+  }
 }
