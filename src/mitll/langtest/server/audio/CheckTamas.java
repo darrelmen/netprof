@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
 
@@ -47,6 +48,15 @@ public class CheckTamas extends SplitAudio {
       }
     } catch (IOException e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+  }
+
+  protected void recordMissing(FileWriter missingFast, FileWriter missingSlow, String name) {
+    try {
+      recordMissingFast(missingFast, name);
+      recordMissingFast(missingSlow, name);
+    } catch (IOException e) {
+      SplitAudio.logger.error("got " + e, e);
     }
   }
 }
