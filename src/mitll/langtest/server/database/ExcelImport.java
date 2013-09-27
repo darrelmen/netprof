@@ -99,7 +99,7 @@ public class ExcelImport implements ExerciseDAO {
       stimulusInfo = readSampleSentenceFile2(exampleSentenceFile,badClues);
       logger.debug("ExcelImport : found " + exampleSentenceFile.getAbsolutePath());
     } else {
-      logger.debug("ExcelImport : didn't find " + exampleSentenceFile1);
+      //logger.debug("ExcelImport : didn't find example sentence file " + exampleSentenceFile1);
     }
 
 /*    logger.debug("\n\n\n\n ---> ExcelImport : config " + relativeConfigDir +
@@ -119,6 +119,9 @@ public class ExcelImport implements ExerciseDAO {
           }
         }
         reader.close();
+
+        logger.debug("Read from " + missingSlow.getAbsolutePath() + " and found " + missing.size());
+
       } catch (Exception e) {
         logger.error("Reading " + missingSlow.getAbsolutePath() + " Got  " + e, e);
       }
