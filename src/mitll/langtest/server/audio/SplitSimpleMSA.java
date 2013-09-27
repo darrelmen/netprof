@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -210,6 +211,15 @@ public class SplitSimpleMSA extends SplitAudio {
       }
     } catch (Exception e) {
       logger.error("got " + e);
+    }
+  }
+
+  protected void recordMissing(FileWriter missingFast, FileWriter missingSlow, String name) {
+    try {
+      recordMissingFast(missingFast, name);
+      recordMissingFast(missingSlow, name);
+    } catch (IOException e) {
+      logger.error("got " + e, e);
     }
   }
 }
