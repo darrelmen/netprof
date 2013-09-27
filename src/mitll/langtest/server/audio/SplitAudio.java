@@ -5,43 +5,28 @@ import audio.image.TranscriptReader;
 import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
 import corpus.HTKDictionary;
-import corpus.LTS;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.ExcelImport;
-import mitll.langtest.server.database.FileExerciseDAO;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.Scores;
-import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -65,7 +50,7 @@ public class SplitAudio {
   private static Logger logger = Logger.getLogger(SplitAudio.class);
 
   private boolean debug;
-  private static final int MAX = 20;//22000;
+  private static final int MAX = Integer.MAX_VALUE;
   public static final double BAD_PHONE = 0.1;
   public static final double BAD_PHONE_PERCENTAGE = 0.2;
   protected static final double MIN_DUR = 0.2;
@@ -86,9 +71,11 @@ public class SplitAudio {
    *
    * @param numThreads
    * @param audioDir
+   * @param throwAwayNonNativeAudio
    */
   // TODO later take data and use database so we keep metadata about audio
-  private void convertExamples(int numThreads, String audioDir, String language, String spreadsheet, String dbName) throws Exception {
+  private void convertExamples(int numThreads, String audioDir, String language, String spreadsheet, String dbName,
+                               boolean throwAwayNonNativeAudio) throws Exception {
     final String configDir = getConfigDir(language);
 
     DatabaseImpl db = new DatabaseImpl(
@@ -106,34 +93,36 @@ public class SplitAudio {
     Map<String, List<Result>> idToResults = getIDToResultsMap(db);
     Set<Long> nativeUsers = new UserDAO(db).getNativeUsers();
     logger.info("convertExamples : Found " + nativeUsers.size() + " native users");
-    convertExamples(numThreads, audioDir, language, idToEx, idToResults,nativeUsers);
+    convertExamples(numThreads, audioDir, language, idToEx, idToResults, nativeUsers, throwAwayNonNativeAudio);
   }
 
   /**
-   * @see #convertExamples(int, String, String, String, String)
    * @param numThreads
    * @param audioDir
    * @param language
    * @param idToEx
    * @param idToResults
    * @param nativeUsers
+   * @param throwAwayNonNativeAudio
    * @throws IOException
    * @throws InterruptedException
    * @throws ExecutionException
+   * @see #convertExamples(int, String, String, String, String, boolean)
    */
   protected void convertExamples(int numThreads, String audioDir, String language,
-                               Map<String, Exercise> idToEx,
-                               Map<String, List<Result>> idToResults, Set<Long> nativeUsers) throws IOException, InterruptedException, ExecutionException {
+                                 Map<String, Exercise> idToEx,
+                                 Map<String, List<Result>> idToResults, Set<Long> nativeUsers,
+                                 boolean throwAwayNonNativeAudio) throws IOException, InterruptedException, ExecutionException {
     final String configDir = getConfigDir(language);
 
-    final String placeToPutAudio = ".."+ File.separator+audioDir + File.separator;
+    final String placeToPutAudio = ".." + File.separator + audioDir + File.separator;
     final File newRefDir = new File(placeToPutAudio + "refAudio");
     newRefDir.mkdir();
     final File bestDir = new File(placeToPutAudio + "bestAudio");
     bestDir.mkdir();
 
     final Map<String, String> properties = getProperties(language, configDir);
-    ASRScoring scoring = getAsrScoring(".",null,properties);
+    ASRScoring scoring = getAsrScoring(".", null, properties);
 
     final HTKDictionary dict = scoring.getDict();
 
@@ -143,7 +132,7 @@ public class SplitAudio {
     final FileWriter missingFast = new FileWriter(configDir + "missingFast.txt");
     List<Future<?>> futures = getSplitAudioFutures(idToEx, missingSlow, missingFast, idToResults, placeToPutAudio,
       newRefDir, bestDir,
-      properties, dict, executorService, language,nativeUsers);
+      properties, dict, executorService, language, nativeUsers, throwAwayNonNativeAudio);
 
     blockUntilComplete(futures);
 
@@ -166,35 +155,34 @@ public class SplitAudio {
   }
 
   /**
-   * @see #convertExamples(int, String, String, String, String)
-   * @see English#normalize()
-   * @see SplitSimpleMSA#splitSimpleMSA(int)
    * @param db
    * @return
+   * @see #convertExamples(int, String, String, String, String, boolean)
+   * @see English#normalize()
+   * @see SplitSimpleMSA#splitSimpleMSA(int)
    */
   protected Map<String, Exercise> getIdToExercise(DatabaseImpl db) {
-    final Map<String,Exercise> idToEx = new HashMap<String, Exercise>();
+    final Map<String, Exercise> idToEx = new HashMap<String, Exercise>();
 
     List<Exercise> exercises = db.getExercises();
     logger.debug("Got " + exercises.size() + " exercises first = " + exercises.iterator().next().getID());
-   // int count = 0;
-    for (Exercise e: exercises) {
-      idToEx.put(e.getID(),e);
-    //  if (count++ < 100) logger.debug("got " + e.getID());
+    // int count = 0;
+    for (Exercise e : exercises) {
+      idToEx.put(e.getID(), e);
+      //  if (count++ < 100) logger.debug("got " + e.getID());
     }
     return idToEx;
   }
 
   protected void blockUntilComplete(List<Future<?>> futures) throws InterruptedException, ExecutionException {
-    logger.info("got " +futures.size() + " futures");
+    logger.info("got " + futures.size() + " futures");
     for (Future<?> future : futures) {
       Object o = future.get();
     }
-    logger.info("all " +futures.size() + " futures complete");
+    logger.info("all " + futures.size() + " futures complete");
   }
 
   /**
-   * @see #convertExamples
    * @param idToEx
    * @param missingSlow
    * @param missingFast
@@ -206,14 +194,18 @@ public class SplitAudio {
    * @param dict
    * @param executorService
    * @param language
+   * @param throwAwayNonNativeAudio
    * @return
+   * @see #convertExamples
    */
   private List<Future<?>> getSplitAudioFutures(final Map<String, Exercise> idToEx,
                                                final FileWriter missingSlow, final FileWriter missingFast,
                                                Map<String, List<Result>> idToResults,
                                                final String placeToPutAudio, final File newRefDir, final File bestDir,
                                                final Map<String, String> properties,
-                                               final HTKDictionary dict, ExecutorService executorService, final String language, Set<Long> nativeUsers) {
+                                               final HTKDictionary dict, ExecutorService executorService, final String language,
+                                               Set<Long> nativeUsers,
+                                               boolean throwAwayNonNativeAudio) {
     List<Future<?>> futures = new ArrayList<Future<?>>();
     List<String> resultIDs = getIdsSorted(idToResults);
     List<String> exerciseIDs = getIdsSorted(idToEx);
@@ -221,7 +213,7 @@ public class SplitAudio {
     if (!resultIDs.containsAll(exerciseIDs)) {
       List<String> missingIds = new ArrayList<String>(resultIDs);
       boolean b = missingIds.removeAll(exerciseIDs);
-      logger.warn("result resultIDs without matching exercise resultIDs are " + missingIds.subList(0,Math.min(100,missingIds.size())));
+      logger.warn("result resultIDs without matching exercise resultIDs are " + missingIds.subList(0, Math.min(100, missingIds.size())));
     }
     for (final String id : resultIDs) {
       final List<Result> resultList = idToResults.get(id);
@@ -229,7 +221,7 @@ public class SplitAudio {
         logger.warn("getSplitAudioFutures skipping " + id + " no results...");
       } else {
         final List<Result> natives = getResultsByNatives(nativeUsers, resultList);
-        if (natives.isEmpty() && !resultList.isEmpty()) {
+        if (natives.isEmpty() && !resultList.isEmpty() && throwAwayNonNativeAudio) {
           logger.warn("getSplitAudioFutures id " + id + " *all* " + resultList.size() + " responses were by non-native speakers");
         } else {
           //logger.debug("getSplitAudioFutures id " + id + " examining " + natives.size() + " native responses.");
@@ -256,7 +248,7 @@ public class SplitAudio {
 
   private List<Result> getResultsByNatives(Set<Long> nativeUsers, List<Result> resultList) {
     final List<Result> natives = new ArrayList<Result>();
-    for (Result r: resultList) {
+    for (Result r : resultList) {
       if (nativeUsers.contains(r.userid)) {
         natives.add(r);
       }
@@ -284,7 +276,7 @@ public class SplitAudio {
   protected Map<String, String> getProperties(String language, String configDir) throws IOException {
     Properties props = new Properties();
     String propFile = configDir + File.separator + language + ".properties";
-    logger.debug("reading from props " +propFile);
+    logger.debug("reading from props " + propFile);
     FileInputStream inStream = new FileInputStream(propFile);
     props.load(inStream);
     Map<String, String> properties = getProperties(props);
@@ -293,13 +285,13 @@ public class SplitAudio {
   }
 
   /**
-   * @see English#convertEnglish(int, String)
-   * @see #convertExamples(int, String, String, String, String)
    * @param db
    * @return
+   * @see English#convertEnglish(int, String)
+   * @see #convertExamples(int, String, String, String, String, boolean)
    */
   protected Map<String, List<Result>> getIDToResultsMap(DatabaseImpl db) {
-    Map<String,List<Result>> idToResults = new HashMap<String, List<Result>>();
+    Map<String, List<Result>> idToResults = new HashMap<String, List<Result>>();
     List<Result> results = db.getResults();
     logger.debug("Got " + results.size() + " results");
     //List<Integer> integers = Arrays.asList(675, 3488, 4374,3658,4026,3697,4116,627,4083,3375,4185,1826);
@@ -309,18 +301,18 @@ public class SplitAudio {
     //);
     /*List<Integer> integers = Arrays.asList( 1826 // hello
     );*/
-   // Set<Integer> test = new HashSet<Integer>(integers);
+    // Set<Integer> test = new HashSet<Integer>(integers);
     for (Result r : results) {
       String id = r.id;
       int i = Integer.parseInt(id);
       if (i < MAX
-     // && test.contains(i)
-       // (i == 675 || i == 3488 || i == 4374 || i == 3658 || i == 4026 || i == 3697  || i == 4116  || i == 627 || i == 4083|| i == 3375|| i == 4185)//39//3496
+        // && test.contains(i)
+        // (i == 675 || i == 3488 || i == 4374 || i == 3658 || i == 4026 || i == 3697  || i == 4116  || i == 627 || i == 4083|| i == 3375|| i == 4185)//39//3496
         //( i == 3375)//39//3496
         // ( i == 4026)//39//3496
-       //( i == 675)//39//3496   // notebook
+        //( i == 675)//39//3496   // notebook
         //( i == 1826)//39//3496      // hello
-      // && ( i == 4185)//39//3496      // eighty
+        // && ( i == 4185)//39//3496      // eighty
         ) {
         List<Result> resultList = idToResults.get(id);//r.getID());
         if (resultList == null) {
@@ -337,22 +329,21 @@ public class SplitAudio {
     return idToResults;
   }
 
-  protected ASRScoring getAsrScoring(String installPath, HTKDictionary dictionary,Map<String, String> properties) {
+  protected ASRScoring getAsrScoring(String installPath, HTKDictionary dictionary, Map<String, String> properties) {
     String deployPath = installPath + File.separator + "war";
     return dictionary == null ? new ASRScoring(deployPath, properties) : new ASRScoring(deployPath, properties, dictionary);
   }
 
   private Map<String, String> getProperties(Properties props) {
-    Map<String,String> kv = new HashMap<String, String>();
+    Map<String, String> kv = new HashMap<String, String>();
     for (Object prop : props.keySet()) {
-      String sp = (String)prop;
-      kv.put(sp,props.getProperty(sp).trim());
+      String sp = (String) prop;
+      kv.put(sp, props.getProperty(sp).trim());
     }
     return kv;
   }
 
   /**
-   * @see #getSplitAudioFutures
    * @param exid2
    * @param idToEx
    * @param missingSlow
@@ -364,6 +355,7 @@ public class SplitAudio {
    * @param properties
    * @param language
    * @throws IOException
+   * @see #getSplitAudioFutures
    */
   private void getBestForEachExercise(String exid2, Map<String, Exercise> idToEx, FileWriter missingSlow, FileWriter missingFast,
                                       File newRefDir, File bestDir,
@@ -396,7 +388,7 @@ public class SplitAudio {
 
   /**
    * find best scoring fast and slow audio split files from the set of originals
-   * @see #getBestForEachExercise(String, java.util.Map, java.io.FileWriter, java.io.FileWriter, java.io.File, java.io.File, java.util.List, String, corpus.HTKDictionary, java.util.Map, String)
+   *
    * @param missingSlow
    * @param missingFast
    * @param newRefDir
@@ -409,51 +401,46 @@ public class SplitAudio {
    * @param exercise
    * @param language
    * @throws IOException
+   * @see #getBestForEachExercise(String, java.util.Map, java.io.FileWriter, java.io.FileWriter, java.io.File, java.io.File, java.util.List, String, corpus.HTKDictionary, java.util.Map, String)
    */
   private void getBest(FileWriter missingSlow, FileWriter missingFast, File newRefDir, File bestDir,
                        String collectedAudioDir,
                        HTKDictionary dictionary, Map<String, String> properties,
                        List<Result> resultsForExercise, String exid, Exercise exercise, String language) throws IOException {
     String refSentence = language.equalsIgnoreCase("english") ? exercise.getEnglishSentence() : exercise.getRefSentence();
-    logger.debug("before refSentence '" + refSentence + "'");
-
-    refSentence = removeTrailingPunct(refSentence.trim());
-    logger.debug("after  refSentence '" + refSentence + "'");
+    refSentence = cleanRefSentence(refSentence);
 
     String[] split = refSentence.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
     refSentence = getRefFromSplit(split);
     int refLength = split.length;
     String firstToken = split[0].trim();
-    String lastToken = split[refLength-1].trim();
-    logger.debug("refSentence '" + refSentence + "' length " + refLength + " first |" + firstToken + "| last |" +lastToken +"|");
+    String lastToken = split[refLength - 1].trim();
+    logger.debug("refSentence '" + refSentence + "' length " + refLength + " first |" + firstToken + "| last |" + lastToken + "|");
 
     File refDirForExercise = new File(newRefDir, exid);
-    //  if (!key.equals(exid)) logger.error("huh?> not the same " + key + "  and " + exid);
-    //logger.debug("making dir " + key + " at " + refDirForExercise.getAbsolutePath());
     refDirForExercise.mkdir();
 
-    File bestDirForExercise = new File(bestDir, exid);
-  //  logger.debug("for '" +refSentence + "' making dir " + key + " at " + bestDirForExercise.getAbsolutePath());
-    bestDirForExercise.mkdir();
-    final ASRScoring scoring = getAsrScoring(".",dictionary,properties);
+    final ASRScoring scoring = getAsrScoring(".", dictionary, properties);
     FastAndSlow fastAndSlow = getBestFilesFromResults(scoring, resultsForExercise, exercise, refSentence,
       firstToken, lastToken,
-      refLength, refDirForExercise,collectedAudioDir);
+      refLength, refDirForExercise, collectedAudioDir);
 
     if (fastAndSlow.valid) {
-      logger.debug("for " + exid + " : '" + exercise.getEnglishSentence() + "'/'" +
-        exercise.getRefSentence() +
+      logger.debug("for " + exid + " : '" + exercise.getEnglishSentence() + "'/'" + exercise.getRefSentence() +
         "' best is " + fastAndSlow);// + " total " + bestTotal);
+
+      File bestDirForExercise = new File(bestDir, exid);
+      //  logger.debug("for '" +refSentence + "' making dir " + key + " at " + bestDirForExercise.getAbsolutePath());
+      bestDirForExercise.mkdir();
       boolean gotBoth = writeBestFiles(missingSlow, missingFast, exid,
         bestDirForExercise, fastAndSlow);
       if (gotBoth) both++; // only if both fast and slow were written do we record it as having both parts done properly
       good++;
-    }
-    else {
+    } else {
       bad++;
 
-      int pct = (int)(100f*(float)both/((float)(good+bad)));
-      logger.warn("Tally : bad " + bad + "/" +good + " good / "+ both+" both (" +pct+
+      int pct = (int) (100f * (float) both / ((float) (good + bad)));
+      logger.warn("Tally : bad " + bad + "/" + good + " good / " + both + " both (" + pct +
         "%): no valid audio for " + exid);
 
       recordMissingFast(missingFast, exid);
@@ -461,17 +448,24 @@ public class SplitAudio {
     }
   }
 
+  private String cleanRefSentence(String refSentence) {
+    refSentence = removeTrailingPunct(refSentence.trim());
+    refSentence = removeDotDotDot(refSentence);
+    return refSentence;
+  }
+
   private String removeTrailingPunct(String refSentence) {
     int before = refSentence.length();
     String newSentence = refSentence.replaceAll("\\p{P}+$", "");
-    if (newSentence.length() != before) logger.info("removeTrailingPunct : removed ending punct : sentence now '" + refSentence +
-      "'");
+    if (newSentence.length() != before)
+      logger.info("removeTrailingPunct : removed ending punct : sentence now '" + refSentence +
+        "'");
     return newSentence;
   }
 
   private String removeDotDotDot(String refSentence) {
     int before = refSentence.length();
-    String newSentence = refSentence.replaceAll("\\.\\.\\.", "");
+    String newSentence = refSentence.replaceAll("\\.\\.\\. ", "");
     if (newSentence.length() != before) logger.info("removeDotDotDot : removed ... : sentence now '" + refSentence +
       "'");
     return newSentence;
@@ -482,7 +476,7 @@ public class SplitAudio {
       recordMissingFast(missingFast, name);
       recordMissingFast(missingSlow, name);
     } catch (IOException e) {
-      logger.error("got "+e,e);
+      logger.error("got " + e, e);
     }
   }
 
@@ -493,23 +487,14 @@ public class SplitAudio {
     }
   }
 
-/*  private String getRefSentence(String refSentence) {
-    String[] split = refSentence.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
-    return getRefFromSplit(split);
-  }*/
-
   /**
    * TODO : do we want to remove punctuation???
+   *
    * @param split
    * @return
    */
   protected String getRefFromSplit(String[] split) {
     String newRefSentence = getRefSentence(split).trim();
-/*    int before = newRefSentence.length();
-    newRefSentence = newRefSentence.replaceAll("\\.$","");
-    if (newRefSentence.length() != before) logger.info("sentence now '" + newRefSentence +
-      "'");*/
-   // newRefSentence = newRefSentence.replaceAll("\\p{P}", "");   // remove punct
     return newRefSentence;
   }
 
@@ -523,7 +508,7 @@ public class SplitAudio {
 
   /**
    * Run alignment and split the audio.
-   * @see #getBest
+   *
    * @param scoring
    * @param resultsForExercise
    * @param exercise
@@ -534,11 +519,12 @@ public class SplitAudio {
    * @param refDirForExercise
    * @param collectedAudioDir
    * @return
+   * @see #getBest
    */
   private FastAndSlow getBestFilesFromResults(ASRScoring scoring, List<Result> resultsForExercise,
-                                         Exercise exercise, String refSentence,
-                                         String first, String last, int refLength,
-                                         File refDirForExercise,String collectedAudioDir ) {
+                                              Exercise exercise, String refSentence,
+                                              String first, String last, int refLength,
+                                              File refDirForExercise, String collectedAudioDir) {
     String id = exercise.getID();
     float bestSlow = 0, bestFast = 0;
     File bestSlowFile = null, bestFastFile = null;
@@ -550,7 +536,7 @@ public class SplitAudio {
       double durationInSeconds = getDuration(answer, parent);
       if (durationInSeconds < MIN_DUR) {
         if (durationInSeconds > 0) {
-          logger.warn("skipping " + name + " since it's less than a " + MIN_DUR+ " second long.");
+          logger.warn("skipping " + name + " since it's less than a " + MIN_DUR + " second long.");
         }
         continue;
       }
@@ -570,8 +556,7 @@ public class SplitAudio {
             " score " + hydecScore +
             " invalid alignment : " + alignments.getWordSeq() + " : " + alignments.getScores());
         }
-        if (//bestTotal < hydecScore &&
-          valid && hydecScore > 0.1f) {
+        if (valid && hydecScore > 0.1f) {
           FastAndSlow consistent = writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
             alignments, false);
           if (consistent.valid) {
@@ -583,7 +568,6 @@ public class SplitAudio {
               float percentBadFast = getPercentBadPhones(fastName, fast.eventScores.get("phones"));
               if (percentBadFast > BAD_PHONE_PERCENTAGE) {
                 logger.warn("---> rejecting new best b/c % bad phones = " + percentBadFast + " so not new best fast : ex " + id + " " + exercise.getEnglishSentence() +
-                  //" best so far is " + bestFastFile.getName() +
                   " score " + bestFast + " hydecScore " + hydecScore + "/" + fast.hydecScore);
               } else {
                 bestFast = fast.hydecScore;
@@ -600,7 +584,6 @@ public class SplitAudio {
               float percentBadSlow = getPercentBadPhones(slowName, slow.eventScores.get("phones"));
               if (percentBadSlow > BAD_PHONE_PERCENTAGE) {
                 logger.warn("---> rejecting new best b/c % bad phones = " + percentBadSlow + " so not new best slow : ex " + id + " " + exercise.getEnglishSentence() +
-                  //" best so far is " + bestSlowFile.getName() +
                   " score " + bestSlow + " hydecScore " + hydecScore + "/" + slow.hydecScore);
               } else {
                 bestSlow = slow.hydecScore;
@@ -621,29 +604,28 @@ public class SplitAudio {
 
   protected float getPercentBadPhones(String fastName, Map<String, Float> phones) {
     int countBad = 0;
-    for (Map.Entry<String,Float> phoneToScore : phones.entrySet()) {
-       if (phoneToScore.getValue() < BAD_PHONE) {
-      //   logger.warn("\tfor " + fastName + " got bad phone score " + phoneToScore.getKey() + " : " + phoneToScore.getValue());
-         countBad++;
-       }
+    for (Map.Entry<String, Float> phoneToScore : phones.entrySet()) {
+      if (phoneToScore.getValue() < BAD_PHONE) {
+        //   logger.warn("\tfor " + fastName + " got bad phone score " + phoneToScore.getKey() + " : " + phoneToScore.getValue());
+        countBad++;
+      }
     }
     if (countBad > 0) {
       logger.warn("getPercentBadPhones : " + phones);
-      for (Map.Entry<String,Float> phoneToScore : phones.entrySet()) {
+      for (Map.Entry<String, Float> phoneToScore : phones.entrySet()) {
         if (phoneToScore.getValue() < BAD_PHONE) {
           logger.warn("\tfor " + fastName + " got bad phone score " + phoneToScore.getKey() + " : " + phoneToScore.getValue());
         }
       }
     }
-    float percentBad = (float) countBad/(float)phones.size();
-    return percentBad;
+    return (float) countBad / (float) phones.size();
   }
 
   protected Scores getAlignmentScores(ASRScoring scoring, String refSentence, String name, String parent, String testAudioFileNoSuffix) {
     String doubled = refSentence + " " + refSentence;
     doubled = doubled.toUpperCase();   // TODO : only for english!?
     Scores align = scoring.align(parent, testAudioFileNoSuffix, doubled);
-    logger.debug("\tdoubled : got " + align + " for " + name + " for '" +doubled +"'");
+    logger.debug("\tdoubled : got " + align + " for " + name + " for '" + doubled + "'");
     return align;
   }
 
@@ -651,7 +633,7 @@ public class SplitAudio {
     String doubled = refSentence;
     doubled = doubled.toUpperCase();   // TODO : only for english!?
     Scores align = scoring.align(parent, testAudioFileNoSuffix, doubled);
-    logger.debug("\tsingle : got " + align + " for " + name + " for '" +doubled +"'");
+    logger.debug("\tsingle : got " + align + " for " + name + " for '" + doubled + "'");
     return align;
   }
 
@@ -665,32 +647,31 @@ public class SplitAudio {
     try {
       testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(parent, name);
     } catch (UnsupportedAudioFileException e) {
-      logger.error("got " +e,e);
+      logger.error("got " + e, e);
     }
     return testAudioFileNoSuffix;
   }
 
   protected double getDuration(File answer, String parent) {
-    File answer2 = new File(parent,answer.getName());
+    File answer2 = new File(parent, answer.getName());
 
     double durationInSeconds = 0;
     if (!answer2.exists()) {
       logger.error("getDuration can't find " + answer2.getAbsolutePath());
-    }
-    else {
+    } else {
       durationInSeconds = audioCheck.getDurationInSeconds(answer2);
-   //   logger.debug("dur of " + answer2 + " is " + durationInSeconds + " seconds");
+      //   logger.debug("dur of " + answer2 + " is " + durationInSeconds + " seconds");
     }
     return durationInSeconds;
   }
 
   /**
-   * @see #getBest(java.io.FileWriter, java.io.FileWriter, java.io.File, java.io.File, String, corpus.HTKDictionary, java.util.Map, java.util.List, String, mitll.langtest.shared.Exercise, String)
    * @param missingSlow
    * @param missingFast
    * @param exid
    * @param bestDirForExercise
    * @throws IOException
+   * @see #getBest(java.io.FileWriter, java.io.FileWriter, java.io.File, java.io.File, String, corpus.HTKDictionary, java.util.Map, java.util.List, String, mitll.langtest.shared.Exercise, String)
    */
   private boolean writeBestFiles(FileWriter missingSlow, FileWriter missingFast,
                                  String exid,
@@ -723,16 +704,16 @@ public class SplitAudio {
   }
 
   protected FastAndSlow writeTheTrimmedFiles(File refDirForExercise, String parent, float floatDur, String testAudioFileNoSuffix,
-                                           GetAlignments alignments, boolean remove16K) {
+                                             GetAlignments alignments, boolean remove16K) {
     float pad = 0.25f;
 
     float start1 = alignments.getStart1();
-    float s1 = Math.max(0,start1-pad);
+    float s1 = Math.max(0, start1 - pad);
     float start2 = alignments.getStart2();
-    float s2 = Math.max(0,start2-pad);
+    float s2 = Math.max(0, start2 - pad);
 
     float end1 = alignments.getEnd1();
-    float e1 = Math.min(floatDur,end1+pad);
+    float e1 = Math.min(floatDur, end1 + pad);
     float midPoint = end1 + ((start2 - end1) / 2);
 
 /*    if (e1 > s2) {
@@ -741,12 +722,12 @@ public class SplitAudio {
 
     if (e1 > midPoint) {
       logger.debug("e1 " + e1 + " is after the midpoint " + midPoint);
-  //    return new FastAndSlow();
-      e1 = Math.max(end1,midPoint);
+      //    return new FastAndSlow();
+      e1 = Math.max(end1, midPoint);
       //s2 = Math.min(start2,midPoint);
     }
 
-    if (e1 > start2)  {
+    if (e1 > start2) {
       logger.warn("for " + testAudioFileNoSuffix +
         " end of fast " + e1 + " is after start of slow " + start2);
       return new FastAndSlow();
@@ -754,7 +735,7 @@ public class SplitAudio {
 
     if (s2 < midPoint) {
       logger.debug("s2 " + s2 + " is before the midpoint " + midPoint);
-      s2 = Math.min(start2,midPoint);
+      s2 = Math.min(start2, midPoint);
     }
 
     if (s2 < e1) {
@@ -768,44 +749,44 @@ public class SplitAudio {
     }
 
     float end2 = alignments.getEnd2();
-   // logger.debug("first file " + start1 + "->" + end1 + " second " + start2 + "->" + end2);
+    // logger.debug("first file " + start1 + "->" + end1 + " second " + start2 + "->" + end2);
     float e2 = Math.min(floatDur, end2 + pad);
 
     float d1 = e1 - s1;
     float d2 = e2 - s2;
-    if (d2 < d1* DURATION_CHECK) {
+    if (d2 < d1 * DURATION_CHECK) {
       logger.debug("slow segment dur " + d2 + " < fast dur " + (d1 * DURATION_CHECK) + " so fixing end to end of audio");
       // can either repair or throw this one out
       e2 = floatDur;
-      d2 = e2-s2;
+      d2 = e2 - s2;
     }
-    if (d2 < d1* DURATION_CHECK) {
-      logger.warn("Still after repair slow segment dur "+d2 + " < fast dur " + (d1* DURATION_CHECK) + " so fixing end to end of audio");
+    if (d2 < d1 * DURATION_CHECK) {
+      logger.warn("Still after repair slow segment dur " + d2 + " < fast dur " + (d1 * DURATION_CHECK) + " so fixing end to end of audio");
       // can either repair or throw this one out
       if (THROW_OUT_FAST_LONGER_THAN_SLOW) return new FastAndSlow();
     }
 
-    File longFileFile = new File(parent,testAudioFileNoSuffix+".wav");
-    if (!longFileFile.exists())logger.error("huh? can't find  " + longFileFile.getAbsolutePath());
+    File longFileFile = new File(parent, testAudioFileNoSuffix + ".wav");
+    if (!longFileFile.exists()) logger.error("huh? can't find  " + longFileFile.getAbsolutePath());
 
     logger.debug("writing ref files to " + refDirForExercise.getAbsolutePath() + " input " + longFileFile.getName() +
-      " pad s1 " + s1 + "-" + e1+
+      " pad s1 " + s1 + "-" + e1 +
       " dur " + d1 +
-      " s2 " + s2 + "-" + e2+
+      " s2 " + s2 + "-" + e2 +
       " dur " + d2);
 
     AudioConverter audioConverter = new AudioConverter();
     String binPath = AudioConversion.WINDOWS_SOX_BIN_DIR;
-    if (! new File(binPath).exists()) binPath = AudioConversion.LINUX_SOX_BIN_DIR;
+    if (!new File(binPath).exists()) binPath = AudioConversion.LINUX_SOX_BIN_DIR;
     String sox = audioConverter.getSox(binPath);
 
-    File fast,slow;
+    File fast, slow;
     if (d1 < MIN_DUR) {
       logger.warn("Skipping audio " + longFileFile.getName() + " since fast audio too short ");
       return new FastAndSlow();
     } else {
 
-      String nameToUse = remove16K ? testAudioFileNoSuffix.replace("_16K","") : testAudioFileNoSuffix;
+      String nameToUse = remove16K ? testAudioFileNoSuffix.replace("_16K", "") : testAudioFileNoSuffix;
       fast = new File(refDirForExercise, nameToUse + "_" + FAST + ".wav");
       audioConverter.trim(sox,
         longFileFile.getAbsolutePath(),
@@ -813,7 +794,7 @@ public class SplitAudio {
         s1,
         d1);
 
-      if (fast.exists() && audioCheck.getDurationInSeconds(fast)< MIN_DUR) {
+      if (fast.exists() && audioCheck.getDurationInSeconds(fast) < MIN_DUR) {
         logger.error("huh? after writing with sox, the audio file is too short?");
         fast.delete();
         return new FastAndSlow();
@@ -827,7 +808,7 @@ public class SplitAudio {
         logger.warn("Skipping audio " + longFileFile.getName() + " since slow audio shorter than fast.");*/
       return new FastAndSlow();
     } else {
-      String nameToUse = remove16K ? testAudioFileNoSuffix.replace("_16K","") : testAudioFileNoSuffix;
+      String nameToUse = remove16K ? testAudioFileNoSuffix.replace("_16K", "") : testAudioFileNoSuffix;
 
       slow = new File(refDirForExercise, nameToUse + "_" + SLOW + ".wav");
       audioConverter.trim(sox,
@@ -836,21 +817,30 @@ public class SplitAudio {
         s2,
         d2);
 
-      if (slow.exists() && audioCheck.getDurationInSeconds(slow)< MIN_DUR) {
+      if (slow.exists() && audioCheck.getDurationInSeconds(slow) < MIN_DUR) {
         logger.error("huh? after writing with sox, the audio file is too short?");
         slow.delete();
         return new FastAndSlow();
       }
     }
-    return new FastAndSlow(fast,slow);
+    return new FastAndSlow(fast, slow);
   }
 
   protected class FastAndSlow {
     protected final boolean valid;
     public File fast;
     public File slow;
-    public FastAndSlow() { this.valid = false; }
-    public FastAndSlow(File fast, File slow) { this.valid = true; this.fast = fast; this.slow = slow; }
+
+    public FastAndSlow() {
+      this.valid = false;
+    }
+
+    public FastAndSlow(File fast, File slow) {
+      this.valid = true;
+      this.fast = fast;
+      this.slow = slow;
+    }
+
     public String toString() {
       return (valid ? " valid " : " invalid ") +
         (fast != null ? (" fast " + fast.getName()) : "") +
@@ -860,9 +850,9 @@ public class SplitAudio {
   }
 
   protected class GetAlignments {
-    private String first,last;
+    private String first, last;
     private int refLength;
-    int lowWordScores =0;
+    int lowWordScores = 0;
     private String name;
     private String wordLabFile;
     private float start1;
@@ -874,7 +864,7 @@ public class SplitAudio {
 
     private String wordSeq = "", scores = "";
 
-    public GetAlignments(String first, String last,int refLength, String name, String wordLabFile) {
+    public GetAlignments(String first, String last, int refLength, String name, String wordLabFile) {
       this.first = first;
       this.last = last;
       this.refLength = refLength;
@@ -902,11 +892,16 @@ public class SplitAudio {
       return lowWordScores < LOW_WORD_SCORE_THRESHOLD;
     }
 
-    public String getWordSeq() { return wordSeq; }
-    public String getScores() { return scores; }
+    public String getWordSeq() {
+      return wordSeq;
+    }
+
+    public String getScores() {
+      return scores;
+    }
 
     public GetAlignments invoke() throws IOException {
-      SortedMap<Float,TranscriptEvent> timeToEvent = new TranscriptReader().readEventsFromFile(wordLabFile);
+      SortedMap<Float, TranscriptEvent> timeToEvent = new TranscriptReader().readEventsFromFile(wordLabFile);
 
       start1 = -1;
       end1 = -1;
@@ -933,7 +928,8 @@ public class SplitAudio {
         if (debug) logger.debug("\ttoken " + tokenCount + " got " + word + " and " + transcriptEvent);
 
         float score = transcriptEvent.score;
-        if (!didFirst) scoreTotal1 += score; else scoreTotal2 += score;
+        if (!didFirst) scoreTotal1 += score;
+        else scoreTotal2 += score;
         if (score < 0.2f) lowWordScores++;
 
         tokenCount++;
@@ -943,7 +939,7 @@ public class SplitAudio {
           } else {
             start2 = transcriptEvent.start;
           }
-          if (debug) logger.debug("\t1 token " + tokenCount + " vs " + (refLength-1));
+          if (debug) logger.debug("\t1 token " + tokenCount + " vs " + (refLength - 1));
 
         }
         if (tokenCount == refLength && last.equalsIgnoreCase(word)) {
@@ -958,7 +954,8 @@ public class SplitAudio {
           }
         }
 
-        if (tokenCount > refLength) logger.error("\n ------ huh? didn't catch ending token? expecting last '" + last+ "' but saw '" +word +"'");
+        if (tokenCount > refLength)
+          logger.error("\n ------ huh? didn't catch ending token? expecting last '" + last + "' but saw '" + word + "'");
         if (debug) logger.debug("\t3 token " + tokenCount + " vs " + (refLength));
       }
 
@@ -966,9 +963,9 @@ public class SplitAudio {
       float dur2 = end2 - start2;
       fastScore = scoreTotal1 / (float) refLength;
       slowScore = scoreTotal2 / (float) refLength;
-      if (debug) logger.debug("\tfirst  " + start1 + "-" +end1 + " dur " + dur1 +
+      if (debug) logger.debug("\tfirst  " + start1 + "-" + end1 + " dur " + dur1 +
         " score " + fastScore +
-        " second " + start2 + "-" +end2 + " dur " + dur2 +
+        " second " + start2 + "-" + end2 + " dur " + dur2 +
         " score " + slowScore +
         " for " + name);
       return this;
@@ -983,24 +980,17 @@ public class SplitAudio {
   }
 
   public static void main(String[] arg) {
-    if (false) {
-      String test = "???? ??????? ?? ???? ??? ???? ??? ??.";
-      System.out.println(new SplitAudio().removeTrailingPunct(test));
-      return;
-    }   if (true) {
-      String test = "??? ?? ??? ??? ???? ?? ... ???? ?? ... ??? ??? ?? ??? ??? ???? ?? ... ???? ?? ... ???";
-      System.out.println(new SplitAudio().removeTrailingPunct(test));
-      return;
-    }
     try {
       int numThreads = Integer.parseInt(arg[0]);
       String audioDir = arg[1];
       String language = arg[2];
       String spreadsheet = arg[3];
       String dbName = arg[4];
-      new SplitAudio().convertExamples(numThreads, audioDir, language, spreadsheet, dbName);
-      //   new SplitAudio().dumpDir2(audioDir, language, dbName, spreadsheet);
-
+      boolean throwAwayNonNativeAudio = true;
+      if (arg.length == 6) {
+        throwAwayNonNativeAudio = arg[5].equalsIgnoreCase("true");
+      }
+      new SplitAudio().convertExamples(numThreads, audioDir, language, spreadsheet, dbName, throwAwayNonNativeAudio);
     } catch (Exception e) {
       e.printStackTrace();
     }
