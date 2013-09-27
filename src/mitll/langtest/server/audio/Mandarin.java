@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -120,5 +122,14 @@ public class Mandarin extends SplitAudio {
   protected BufferedReader getReader(File lessonPlanFile) throws FileNotFoundException, UnsupportedEncodingException {
     FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
     return new BufferedReader(new InputStreamReader(resourceAsStream,"UTF16"));
+  }
+
+  protected void recordMissing(FileWriter missingFast, FileWriter missingSlow, String name) {
+    try {
+      recordMissingFast(missingFast, name);
+      recordMissingFast(missingSlow, name);
+    } catch (IOException e) {
+      SplitAudio.logger.error("got " + e, e);
+    }
   }
 }
