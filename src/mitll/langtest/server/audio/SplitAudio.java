@@ -471,15 +471,6 @@ public class SplitAudio {
     return newSentence;
   }
 
-  protected void recordMissing(FileWriter missingFast, FileWriter missingSlow, String name) {
-    try {
-      recordMissingFast(missingFast, name);
-      recordMissingFast(missingSlow, name);
-    } catch (IOException e) {
-      logger.error("got " + e, e);
-    }
-  }
-
   protected void recordMissingFast(FileWriter missingFast, String name) throws IOException {
     synchronized (missingFast) {
       missingFast.write(name + "\n");
