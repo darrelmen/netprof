@@ -312,7 +312,7 @@ public class English extends SplitAudio {
     }
 
     try {
-      if (true) convertExamples(numThreads, audioDir, language, idToEx, idToResults2, nativeUsers);
+      if (true) convertExamples(numThreads, audioDir, language, idToEx, idToResults2, nativeUsers, false);
     } catch (Exception e) {
       logger.error("Got " + e, e);
     }
