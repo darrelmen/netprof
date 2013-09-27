@@ -474,7 +474,7 @@ public class ASRScoring extends Scoring {
   private void readDictionary() { htkDictionary = makeDict(); }
 
   /**
-   * @see mitll.langtest.server.audio.SplitAudio#convertExamples(int, String, String, java.util.Map, java.util.Map, java.util.Set)
+   * @see mitll.langtest.server.audio.SplitAudio#convertExamples(int, String, String, java.util.Map
    * @return
    */
   public HTKDictionary getDict() { return htkDictionary; }
