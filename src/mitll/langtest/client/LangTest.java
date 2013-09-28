@@ -39,6 +39,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
+import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.ListInterface;
@@ -98,7 +99,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private PropertyHandler props;
   private HTML userline;
   private Flashcard flashcard;
-  Heading pageTitle;
+  private Heading pageTitle;
 
   private Panel headerRow;
   private FluidRow secondRow;
@@ -260,6 +261,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
+
+   // secondRow.add(new Navigation(service, userManager).getNav(currentExerciseVPanel));
     makeExerciseList(secondRow, leftColumn);
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("floatLeft");
