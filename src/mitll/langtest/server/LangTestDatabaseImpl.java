@@ -16,6 +16,7 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.DLIUser;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
@@ -790,6 +791,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public void addDLIUser(DLIUser dliUser) {
     db.addDLIUser(dliUser);
+  }
+
+  @Override
+  public int addUserList(long userid, String name, String description, String dliClass) {
+    //new UserList();
+    return db.addUserList(userid, name, description, dliClass);
+  }
+
+  @Override
+  public List<UserList> getUserListsForText(String search) {
+    return db.getUserListsForText(search);
   }
 
   /**
