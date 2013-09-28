@@ -338,7 +338,7 @@
 
     <target depends="build" name="npfPashto">
         <jar destfile="npfPashto.war" basedir="war"
-             includes="flashFavIcon.gif,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pashto/*,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.dli-pashto/**"
+             includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pashto/*,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-pashto/**"
                 >
 
             <manifest>
@@ -349,7 +349,7 @@
 
     <target depends="build" name="avpPashto">
         <jar destfile="avpPashto.war" basedir="war"
-             includes="flashFavIcon.gif,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pashto/*,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.dli-pashto/**"
+             includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pashto/*,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-pashto/**"
                 >
 
             <manifest>
