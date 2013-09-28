@@ -44,7 +44,6 @@ public class SplitAudio {
 
   private static final int LOW_WORD_SCORE_THRESHOLD = 20;
   private static final boolean THROW_OUT_FAST_LONGER_THAN_SLOW = false;
-  public static final float LOW_SCORE_THRESHOLD = 0.2f;
   public static final float LOW_SINGLE_SCORE_THRESHOLD = 0.4f;
 
   private static Logger logger = Logger.getLogger(SplitAudio.class);
@@ -674,6 +673,7 @@ public class SplitAudio {
     if (fast == null || !fast.exists()) {
       if (fast != null) logger.warn("can't find fast " + fast.getAbsolutePath());
       missingFast.write(exid + "\n");
+      missingFast.flush();
       gotBoth = false;
     } else {
       File file = new File(bestDirForExercise, FAST + ".wav");
@@ -684,6 +684,7 @@ public class SplitAudio {
     if (slow == null || !slow.exists()) {
       if (slow != null) logger.warn("can't find slow " + slow.getAbsolutePath());
       missingSlow.write(exid + "\n");
+      missingSlow.flush();
       gotBoth = false;
     } else {
       File file = new File(bestDirForExercise, SLOW + ".wav");
@@ -817,7 +818,7 @@ public class SplitAudio {
     return new FastAndSlow(fast, slow);
   }
 
-  protected class FastAndSlow {
+  protected static class FastAndSlow {
     protected final boolean valid;
     public File fast;
     public File slow;
@@ -843,7 +844,7 @@ public class SplitAudio {
   protected class GetAlignments {
     private String first, last;
     private int refLength;
-    int lowWordScores = 0;
+    private int lowWordScores = 0;
     private String name;
     private String wordLabFile;
     private float start1;
@@ -855,6 +856,14 @@ public class SplitAudio {
 
     private String wordSeq = "", scores = "";
 
+    /**
+     * @see SplitAudio#getBestFilesFromResults(mitll.langtest.server.scoring.ASRScoring, java.util.List, mitll.langtest.shared.Exercise, String, String, String, int, java.io.File, String)
+     * @param first
+     * @param last
+     * @param refLength
+     * @param name
+     * @param wordLabFile
+     */
     public GetAlignments(String first, String last, int refLength, String name, String wordLabFile) {
       this.first = first;
       this.last = last;
@@ -883,6 +892,10 @@ public class SplitAudio {
       return lowWordScores < LOW_WORD_SCORE_THRESHOLD;
     }
 
+    public boolean isValid2() {
+      return start1 != -1 && start2 != -1 && end1 != -1 && end2 != -1;
+    }
+
     public String getWordSeq() {
       return wordSeq;
     }
@@ -894,6 +907,12 @@ public class SplitAudio {
     public GetAlignments invoke() throws IOException {
       SortedMap<Float, TranscriptEvent> timeToEvent = new TranscriptReader().readEventsFromFile(wordLabFile);
 
+      if (timeToEvent.size() != 2 * refLength) {     // warn if we don't get the expected number of tokens/events
+        String sentence = getSentenceFromLabelFile(timeToEvent);
+
+        logger.warn("Alignment returned " + timeToEvent.size() + " tokens (sentence='" + sentence +
+          "') but expected " + 2 * refLength);
+      }
       start1 = -1;
       end1 = -1;
       start2 = -1;
@@ -954,12 +973,23 @@ public class SplitAudio {
       float dur2 = end2 - start2;
       fastScore = scoreTotal1 / (float) refLength;
       slowScore = scoreTotal2 / (float) refLength;
-      if (debug) logger.debug("\tfirst  " + start1 + "-" + end1 + " dur " + dur1 +
-        " score " + fastScore +
-        " second " + start2 + "-" + end2 + " dur " + dur2 +
-        " score " + slowScore +
-        " for " + name);
+
+      if (debug || !isValid2()) {
+        logger.debug("\tfirst  " + start1 + "-" + end1 + " dur " + dur1 +
+          " score " + fastScore +
+          " second " + start2 + "-" + end2 + " dur " + dur2 +
+          " score " + slowScore +
+          " for " + name + " and alignment sentence was " + getSentenceFromLabelFile(timeToEvent));
+      }
       return this;
+    }
+
+    private String getSentenceFromLabelFile(SortedMap<Float, TranscriptEvent> timeToEvent) {
+      StringBuilder builder = new StringBuilder();
+      for (TranscriptEvent event : timeToEvent.values()) {
+        builder.append(event.event.trim()).append(" ");
+      }
+      return builder.toString();
     }
   }
 
