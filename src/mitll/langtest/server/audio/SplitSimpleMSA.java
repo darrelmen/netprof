@@ -30,6 +30,7 @@ import java.util.concurrent.Future;
  * To change this template use File | Settings | File Templates.
  */
 public class SplitSimpleMSA extends SplitAudio {
+  public static final float LOW_SCORE_THRESHOLD = 0.2f;
   private static Logger logger = Logger.getLogger(SplitSimpleMSA.class);
   protected static final float MSA_MIN_SCORE = 0.2f;
 
@@ -176,7 +177,7 @@ public class SplitSimpleMSA extends SplitAudio {
       }
       File refDirForExercise = new File(newRefDir, name);
       refDirForExercise.mkdir();
-      if (valid && hydecScore > LOW_SCORE_THRESHOLD) {
+      if (valid && hydecScore > Mandarin.LOW_SCORE_THRESHOLD) {
         FastAndSlow consistent = writeTheTrimmedFiles(refDirForExercise, parent, (float) durationInSeconds, testAudioFileNoSuffix,
           alignments, true);
 
