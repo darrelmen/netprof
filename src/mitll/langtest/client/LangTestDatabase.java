@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.DLIUser;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
@@ -272,4 +273,6 @@ public interface LangTestDatabase extends RemoteService {
   Leaderboard getLeaderboard(Map<String, Collection<String>> selectionState);
 
   void addDLIUser(DLIUser dliUser);
+  int addUserList(long userid, String name, String description, String dliClass);
+  List<UserList> getUserListsForText(String search);
 }
