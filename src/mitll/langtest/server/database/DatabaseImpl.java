@@ -7,6 +7,9 @@ import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.server.database.taboo.OnlineUsers;
 import mitll.langtest.shared.DLIUser;
+import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.custom.UserExercise;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
@@ -1422,6 +1425,33 @@ public class DatabaseImpl implements Database {
 
   public void addDLIUser(DLIUser dliUser) {
     dliUserDAO.addUser(dliUser);
+  }
+
+  // TODO add a DAO -- do something smarter!
+  int i = 0;
+  List<UserList> userLists = new ArrayList<UserList>();
+
+  public int addUserList(long userid, String name, String description, String dliClass) {
+    User userWhere = userDAO.getUserWhere(userid);
+    UserList e = new UserList(i++, userWhere, name, description, dliClass);
+    userLists.add(e);
+    return e.getUniqueID();
+  }
+
+  public List<Exercise> addItemToUserList(int userListID, UserExercise userExercise) {
+    for (UserList userList : userLists) {
+      if (userList.getUniqueID() == userListID) {
+        userList.addExercise(userExercise.toExercise());
+        return userList.getExercises();
+      }
+    }
+
+    // TODO : serialize user exercise in DAO
+    return new ArrayList<Exercise>();
+  }
+
+  public List<UserList> getUserListsForText(String search) {
+    return null;  //To change body of created methods use File | Settings | File Templates.
   }
 
 /*  private static String getConfigDir(String language) {
