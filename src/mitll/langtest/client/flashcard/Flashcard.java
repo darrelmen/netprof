@@ -59,7 +59,7 @@ public class Flashcard implements RequiresResize {
   }
 
   public HorizontalPanel makeNPFHeaderRow(String splashText, String appTitle) {
-    String appIcon = "npfIcon.png";
+    String appIcon = "NewProF1.png";
     return getHeaderRow(splashText, appIcon, appTitle);
   }
 
