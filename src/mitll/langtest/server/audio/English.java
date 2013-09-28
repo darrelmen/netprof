@@ -27,6 +27,7 @@ import java.util.TreeMap;
  * To change this template use File | Settings | File Templates.
  */
 public class English extends SplitAudio {
+  public static final float LOW_SCORE_THRESHOLD = 0.2f;
   private static Logger logger = Logger.getLogger(English.class);
 
   /**
@@ -355,7 +356,7 @@ public class English extends SplitAudio {
       recordMissingFast(missingFast, name);
       recordMissingFast(missingSlow, name);
     } catch (IOException e) {
-      SplitAudio.logger.error("got " + e, e);
+      logger.error("got " + e, e);
     }
   }
 }
