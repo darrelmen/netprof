@@ -25,6 +25,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class Mandarin extends SplitAudio {
+  public static final float LOW_SCORE_THRESHOLD = 0.2f;
   private static Logger logger = Logger.getLogger(Mandarin.class);
 
   public void correctMandarin(Map<String, Exercise> idToEx) {
@@ -129,7 +130,7 @@ public class Mandarin extends SplitAudio {
       recordMissingFast(missingFast, name);
       recordMissingFast(missingSlow, name);
     } catch (IOException e) {
-      SplitAudio.logger.error("got " + e, e);
+      logger.error("got " + e, e);
     }
   }
 }
