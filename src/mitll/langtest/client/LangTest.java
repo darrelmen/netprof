@@ -424,7 +424,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     else if (props.isGoodwaveMode() || props.isTrackUsers()) {
       if (element != null) {
-        element.setAttribute("href", LANGTEST_IMAGES + "npfFavIcon.gif");
+        element.setAttribute("href", LANGTEST_IMAGES + "NewProF1_48x48.png");
       }
     }
   }
