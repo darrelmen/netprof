@@ -30,7 +30,7 @@ import java.util.concurrent.Future;
  * To change this template use File | Settings | File Templates.
  */
 public class SplitSimpleMSA extends SplitAudio {
-  public static final float LOW_SCORE_THRESHOLD = 0.2f;
+ // public static final float LOW_SCORE_THRESHOLD = 0.2f;
   private static Logger logger = Logger.getLogger(SplitSimpleMSA.class);
   protected static final float MSA_MIN_SCORE = 0.2f;
 
