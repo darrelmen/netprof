@@ -31,7 +31,6 @@ public class Flashcard implements RequiresResize {
   private Image flashcardImage;
   private Image collab;
   private int min = 720;
-  private String appTitle;
 
   /**
    * @see mitll.langtest.client.LangTest#doFlashcard()
@@ -45,7 +44,7 @@ public class Flashcard implements RequiresResize {
    * @return
    */
   public HorizontalPanel makeFlashcardHeaderRow(String splashText) {
-    String appIcon = "flashcardIcon2.png";
+    String appIcon = "NewProF2.png";
     return getHeaderRow(splashText, appIcon, AVP);
   }
 
@@ -63,7 +62,7 @@ public class Flashcard implements RequiresResize {
     return getHeaderRow(splashText, appIcon, appTitle);
   }
 
-  private HorizontalPanel getHeaderRow(String splashText, String appIcon, String appTitle) {
+  public HorizontalPanel getHeaderRow(String splashText, String appIcon, String appTitle) {
     HorizontalPanel headerRow = new HorizontalPanel();
     headerRow.setWidth("100%");
     headerRow.addStyleName("headerBackground");
