@@ -150,6 +150,13 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     return vPanel;
   }
 
+  /**
+   * @see #getAsyncTable(java.util.Map, int)
+   * @param typeToSection
+   * @param numResults
+   * @param table
+   * @return
+   */
   private AsyncDataProvider<Exercise> createProvider(final Map<String, Collection<String>> typeToSection,
                                                      final int numResults, CellTable<Exercise> table) {
     AsyncDataProvider<Exercise> dataProvider = new AsyncDataProvider<Exercise>() {
@@ -158,7 +165,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
         final int start = display.getVisibleRange().getStart();
         int end = start + display.getVisibleRange().getLength();
         end = end >= numResults ? numResults : end;
-        System.out.println("createProvider : asking for " + start +"->" + end);
+        //System.out.println("createProvider : asking for " + start +"->" + end);
         final int fend = end;
         service.getFullExercisesForSelectionState(typeToSection, start, end, new AsyncCallback<List<Exercise>>() {
           @Override
@@ -168,8 +175,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
 
           @Override
           public void onSuccess(List<Exercise> result) {
-            System.out.println("createProvider : onSuccess for " + start + "->" + fend + " got " + result.size());
-
+            System.out.println("TableSectionExerciseList.createProvider : onSuccess for " + start + "->" + fend + " got " + result.size());
             updateRowData(start, result);
           }
         });
@@ -504,7 +510,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     TextColumn<Exercise> english = new TextColumn<Exercise>() {
       @Override
       public String getValue(Exercise exercise) {
-
+        if (exercise == null) return "";
         String englishSentence = exercise.getEnglishSentence();
         if (englishSentence == null) {
           List<Exercise.QAPair> englishQuestions = exercise.getEnglishQuestions();
@@ -525,6 +531,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     TextColumn<Exercise> flword = new TextColumn<Exercise>() {
       @Override
       public String getValue(Exercise exercise) {
+        if (exercise == null) return "";
         String refSentence = exercise.getRefSentence();
         if (refSentence == null || refSentence.length() == 0) {
           List<Exercise.QAPair> questions = exercise.getForeignLanguageQuestions();
@@ -544,7 +551,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     TextColumn<Exercise> translit = new TextColumn<Exercise>() {
       @Override
       public String getValue(Exercise exercise) {
-        return "" + exercise.getTranslitSentence();
+        return exercise == null ? "" : "" + exercise.getTranslitSentence();
       }
     };
     translit.setSortable(true);
