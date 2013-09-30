@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -71,10 +72,11 @@ public class SplitAudio {
    * @param numThreads
    * @param audioDir
    * @param throwAwayNonNativeAudio
+   * @param onlyTheseIDs
    */
   // TODO later take data and use database so we keep metadata about audio
   private void convertExamples(int numThreads, String audioDir, String language, String spreadsheet, String dbName,
-                               boolean throwAwayNonNativeAudio) throws Exception {
+                               boolean throwAwayNonNativeAudio, Set<String> onlyTheseIDs) throws Exception {
     final String configDir = getConfigDir(language);
 
     DatabaseImpl db = new DatabaseImpl(
@@ -89,7 +91,7 @@ public class SplitAudio {
       new Mandarin().correctMandarin(idToEx);
     }
 
-    Map<String, List<Result>> idToResults = getIDToResultsMap(db);
+    Map<String, List<Result>> idToResults = getIDToResultsMap(db,onlyTheseIDs);
     Set<Long> nativeUsers = new UserDAO(db).getNativeUsers();
     logger.info("convertExamples : Found " + nativeUsers.size() + " native users");
     convertExamples(numThreads, audioDir, language, idToEx, idToResults, nativeUsers, throwAwayNonNativeAudio);
@@ -106,7 +108,7 @@ public class SplitAudio {
    * @throws IOException
    * @throws InterruptedException
    * @throws ExecutionException
-   * @see #convertExamples(int, String, String, String, String, boolean)
+   * @see #convertExamples(int, String, String, String, String, boolean, java.util.Set
    */
   protected void convertExamples(int numThreads, String audioDir, String language,
                                  Map<String, Exercise> idToEx,
@@ -156,7 +158,7 @@ public class SplitAudio {
   /**
    * @param db
    * @return
-   * @see #convertExamples(int, String, String, String, String, boolean)
+   * @see #convertExamples(int, String, String, String, String, boolean, java.util.Set
    * @see English#normalize()
    * @see SplitSimpleMSA#splitSimpleMSA(int)
    */
@@ -176,7 +178,7 @@ public class SplitAudio {
   protected void blockUntilComplete(List<Future<?>> futures) throws InterruptedException, ExecutionException {
     logger.info("got " + futures.size() + " futures");
     for (Future<?> future : futures) {
-      Object o = future.get();
+      /*Object o =*/ future.get();
     }
     logger.info("all " + futures.size() + " futures complete");
   }
@@ -284,39 +286,24 @@ public class SplitAudio {
   }
 
   /**
+   *
    * @param db
+   * @param onlyTheseIDs
    * @return
    * @see English#convertEnglish(int, String)
-   * @see #convertExamples(int, String, String, String, String, boolean)
+   * @see #convertExamples(int, String, String, String, String, boolean, java.util.Set
    */
-  protected Map<String, List<Result>> getIDToResultsMap(DatabaseImpl db) {
+  protected Map<String, List<Result>> getIDToResultsMap(DatabaseImpl db, Set<String> onlyTheseIDs) {
     Map<String, List<Result>> idToResults = new HashMap<String, List<Result>>();
     List<Result> results = db.getResults();
     logger.debug("Got " + results.size() + " results");
-    //List<Integer> integers = Arrays.asList(675, 3488, 4374,3658,4026,3697,4116,627,4083,3375,4185,1826);
-    //List<Integer> integers = Arrays.asList( 3488 // clock
-    //);
-    //List<Integer> integers = Arrays.asList( 4374 // it
-    //);
-    /*List<Integer> integers = Arrays.asList( 1826 // hello
-    );*/
-    // Set<Integer> test = new HashSet<Integer>(integers);
     for (Result r : results) {
       String id = r.id;
       int i = Integer.parseInt(id);
-      if (i < MAX
-        // && test.contains(i)
-        // (i == 675 || i == 3488 || i == 4374 || i == 3658 || i == 4026 || i == 3697  || i == 4116  || i == 627 || i == 4083|| i == 3375|| i == 4185)//39//3496
-        //( i == 3375)//39//3496
-        // ( i == 4026)//39//3496
-        //( i == 675)//39//3496   // notebook
-        //( i == 1826)//39//3496      // hello
-        // && ( i == 4185)//39//3496      // eighty
-        ) {
-        List<Result> resultList = idToResults.get(id);//r.getID());
+      if (i < MAX && (onlyTheseIDs.isEmpty()  || onlyTheseIDs.contains(id))) {
+        List<Result> resultList = idToResults.get(id);
         if (resultList == null) {
-          idToResults.put(id,//r.getID(),
-            resultList = new ArrayList<Result>());
+          idToResults.put(id, resultList = new ArrayList<Result>());
         }
         resultList.add(r);
       }
@@ -1011,7 +998,12 @@ public class SplitAudio {
       if (arg.length == 6) {
         throwAwayNonNativeAudio = arg[5].equalsIgnoreCase("true");
       }
-      new SplitAudio().convertExamples(numThreads, audioDir, language, spreadsheet, dbName, throwAwayNonNativeAudio);
+      Set<String> onlyTheseIDs = new HashSet<String>();
+      if (arg.length > 6) {
+        onlyTheseIDs.add(arg[7]);
+      }
+      new SplitAudio().convertExamples(numThreads, audioDir, language, spreadsheet, dbName, throwAwayNonNativeAudio,
+        onlyTheseIDs);
     } catch (Exception e) {
       e.printStackTrace();
     }
