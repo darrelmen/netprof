@@ -200,7 +200,7 @@ public class English extends SplitAudio {
       configDir +
         "5100-english-no-gloss.txt");
 
-    Map<String, List<Result>> idToResults = getIDToResultsMap(flatList);
+    Map<String, List<Result>> idToResults = getIDToResultsMap(flatList, java.util.Collections.EMPTY_SET);
     logger.debug("convertEnglish : id->results size " + idToResults.size() + " e.g. " + idToResults.keySet().iterator().next());
     Set<Long> nativeUsers = new UserDAO(flatList).getNativeUsers();
     if (nativeUsers.isEmpty()) {
