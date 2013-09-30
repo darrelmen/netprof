@@ -415,6 +415,7 @@ fieldset > legend {
 
 .Instruction {
     text-align: left;
+    margin-bottom: 5px;
 }
 
 .Instruction-title {
@@ -468,6 +469,7 @@ fieldset > legend {
 .pashtofont {
     font-family: 'Pashto Kror Asiatype','HSPashto','HSTahoma',Arial,Helvetica,sans-serif;
     font-size: x-large;
+    margin-bottom: 5px;
 }
 
 .pashtofont td {
