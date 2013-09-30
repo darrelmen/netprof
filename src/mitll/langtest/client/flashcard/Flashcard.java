@@ -69,9 +69,6 @@ public class Flashcard implements RequiresResize {
     headerRow.addStyleName("headerBackground");
     headerRow.addStyleName("headerLowerBorder");
 
-    flashcardImage = new Image(LangTest.LANGTEST_IMAGES + appIcon);
-    flashcardImage.addStyleName("floatLeft");
-
     FlowPanel iconLeftHeader = new FlowPanel();
     headerRow.add(iconLeftHeader);
 
@@ -88,6 +85,10 @@ public class Flashcard implements RequiresResize {
     DOM.setStyleAttribute(subtitle.getElement(), "marginBottom", "5px");
 
     flashcard.add(subtitle);
+
+    flashcardImage = new Image(LangTest.LANGTEST_IMAGES + appIcon);
+    flashcardImage.addStyleName("floatLeft");
+    flashcardImage.addStyleName("rightMargin");
     iconLeftHeader.add(flashcardImage);
     iconLeftHeader.add(flashcard);
     headerRow.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
