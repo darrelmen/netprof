@@ -108,6 +108,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/answers" />
+      <excludeFolder url="file://$MODULE_DIR$/crtH2Dumps" />
       <excludeFolder url="file://$MODULE_DIR$/gwt-unitCache" />
       <excludeFolder url="file://$MODULE_DIR$/out" />
       <excludeFolder url="file://$MODULE_DIR$/war/WEB-INF/deploy" />
@@ -143,15 +144,6 @@
       <library name="guava-13.0.jar">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/guava-13.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="gchart.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/gchart.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -219,6 +211,7 @@
     <orderEntry type="library" name="gwt-visualization" level="project" />
     <orderEntry type="library" name="pronz" level="project" />
     <orderEntry type="library" name="jrobin-1.5.9.1" level="project" />
+    <orderEntry type="library" name="org.moxieapps.gwt.highcharts-1.5.0 (2)" level="project" />
   </component>
 </module>
 
