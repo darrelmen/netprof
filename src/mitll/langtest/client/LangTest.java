@@ -330,6 +330,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       flashcard = new Flashcard();
       title = flashcard.makeNPFHeaderRow(props.getSplash(), props.getAppTitle());
     }
+    else if (props.isFlashcardTeacherView()) {
+      flashcard = new Flashcard();
+      title = flashcard.getHeaderRow(props.getSplash(), "NewProF2.png",props.getAppTitle());
+    }
     else {
       title = getTitleWidget();
     }
@@ -419,7 +423,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Element element = DOM.getElementById("favicon");   // set the page title to be consistent
     if (props.isFlashCard() || props.isFlashcardTeacherView()) {
       if (element != null) {
-        element.setAttribute("href", "flashFavIcon.gif");
+        element.setAttribute("href",  LANGTEST_IMAGES + "NewProF2_48x48.png");
       }
     }
     else if (props.isGoodwaveMode() || props.isTrackUsers()) {
