@@ -18,7 +18,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class CheckTamas extends SplitAudio {
-  public static final float LOW_SCORE_THRESHOLD = 0.2f;
+  //public static final float LOW_SCORE_THRESHOLD = 0.2f;
   private static Logger logger = Logger.getLogger(CheckTamas.class);
 
   public void checkTamas() {
