@@ -33,7 +33,7 @@ public class ExceptionHandlerDialog {
     dialogBox.center();
   }
 
-  public String getExceptionAsString(Throwable throwable) {
+  public static String getExceptionAsString(Throwable throwable) {
     String text = "Uncaught exception: ";
     while (throwable != null) {
       StackTraceElement[] stackTraceElements = throwable.getStackTrace();
