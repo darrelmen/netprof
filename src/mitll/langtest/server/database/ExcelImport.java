@@ -164,9 +164,7 @@ public class ExcelImport implements ExerciseDAO {
    */
   private List<Exercise> readExercises(File file) {
     try {
-      InputStream inp = new FileInputStream(file);
-      List<Exercise> exercises1 = readExercises(inp);
-      return exercises1;
+      return readExercises(new FileInputStream(file));
     } catch (FileNotFoundException e) {
       logger.error("looking for " + file.getAbsolutePath() + " got " + e, e);
     }
@@ -220,18 +218,8 @@ public class ExcelImport implements ExerciseDAO {
    * @see #readExercises(java.io.InputStream)
    */
   private Collection<Exercise> readFromSheet(Sheet sheet) {
-    Iterator<Row> iter = sheet.rowIterator();
     List<Exercise> exercises = new ArrayList<Exercise>();
     // logger.debug("for " + sheet.getSheetName() + " regions " +sheet.getNumMergedRegions());
-    Map<Integer, CellRangeAddress> rowToRange = new HashMap<Integer, CellRangeAddress>();
-    for (int r = 0; r < sheet.getNumMergedRegions(); r++) {
-      CellRangeAddress mergedRegion = sheet.getMergedRegion(r);
-      for (int rr = mergedRegion.getFirstRow(); rr <= mergedRegion.getLastRow(); rr++) {
-        rowToRange.put(rr, mergedRegion);
-      }
-/*      logger.debug("for " + sheet.getSheetName() + " region  " + mergedRegion + " " +
-          mergedRegion.getFirstRow() + " " + mergedRegion.getFirstColumn());*/
-    }
     int id = 0;
     boolean gotHeader = false;
     FileExerciseDAO dao = new FileExerciseDAO("", language, isFlashcard);
@@ -256,6 +244,8 @@ public class ExcelImport implements ExerciseDAO {
     String unitName = null, chapterName = null, weekName = null;
     Set<String> withExamples = new HashSet<String>();
     try {
+      Iterator<Row> iter = sheet.rowIterator();
+      Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
       for (; iter.hasNext(); ) {
         Row next = iter.next();
         //    logger.warn("------------ Row # " + next.getRowNum() + " --------------- ");
@@ -422,6 +412,19 @@ public class ExcelImport implements ExerciseDAO {
       logger.info("Skipped " + semis + " entries with semicolons or " + (100f * ((float) semis) / (float) id) + "%");
     }
     return exercises;
+  }
+
+  private Map<Integer, CellRangeAddress> getRowToRange(Sheet sheet) {
+    Map<Integer, CellRangeAddress> rowToRange = new HashMap<Integer, CellRangeAddress>();
+    for (int r = 0; r < sheet.getNumMergedRegions(); r++) {
+      CellRangeAddress mergedRegion = sheet.getMergedRegion(r);
+      for (int rr = mergedRegion.getFirstRow(); rr <= mergedRegion.getLastRow(); rr++) {
+        rowToRange.put(rr, mergedRegion);
+      }
+/*      logger.debug("for " + sheet.getSheetName() + " region  " + mergedRegion + " " +
+          mergedRegion.getFirstRow() + " " + mergedRegion.getFirstColumn());*/
+    }
+    return rowToRange;
   }
 
   private boolean addTabooQuestions(Set<String> withExamples, Exercise imported) {
@@ -1077,6 +1080,18 @@ public class ExcelImport implements ExerciseDAO {
     ExcelImport config = new ExcelImport(
       "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\english\\ESL_ELC_5071-30books_chapters.xlsx", false, "config\\bestAudio", "war\\config\\english", true, "English");
 */
+    testTaboo();
+
+    //populateSentenceExamples(rawExercises);
+    //writer.close();
+/*
+    List<String> typeOrder = config.sectionHelper.getTypeOrder();
+    System.out.println(" type order " +typeOrder);
+
+    System.out.println(" section nodes " + config.sectionHelper.getSectionNodes());*/
+  }
+
+  private static void testTaboo() {
     ServerProperties serverProps = new ServerProperties();
     serverProps.getProperties().put("language", "English");
     serverProps.getProperties().put("collectAudio", "false");
@@ -1170,13 +1185,5 @@ public class ExcelImport implements ExerciseDAO {
     } catch (IOException e) {
       logger.error("Got " + e, e);
     }
-
-    //populateSentenceExamples(rawExercises);
-    //writer.close();
-/*
-    List<String> typeOrder = config.sectionHelper.getTypeOrder();
-    System.out.println(" type order " +typeOrder);
-
-    System.out.println(" section nodes " + config.sectionHelper.getSectionNodes());*/
   }
 }
