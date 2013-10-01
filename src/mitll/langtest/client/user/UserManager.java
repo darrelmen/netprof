@@ -125,34 +125,16 @@ public class UserManager {
     int user = getUser();
     if (!isActive()) System.err.println("huh? user is not active...\n\n\n");
    // System.out.println(new Date() +" --------> userAlive : " + user);
-    userOnline(user, true);
+    //userOnline(user, true);
     waitThenInactivate();
   }
 
   private void userInactive() {
     int user = getUser();
     System.out.println(new Date() +" --------> userInactive : " + user);
-
-    userOnline(user, false);
   }
 
   public boolean isActive() { return getUser() != NO_USER_SET; }
-
-  private void userOnline(int user, final boolean active) {
-    if (trackUsers) {
-      service.userOnline(user, active, new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          Window.alert("Couldn't contact server, check network connection.");
-        }
-
-        @Override
-        public void onSuccess(Void result) {
-         // System.out.println("registered " + getUser() + " as being " + (active ? "online." : " offline."));
-        }
-      });
-    }
-  }
 
   private void waitThenInactivate() {
     if (userTimer != null) userTimer.cancel();
@@ -408,7 +390,7 @@ public class UserManager {
   }
 
   private void clearUser(int userID) {
-    userOnline(userID, false);
+    //userOnline(userID, false);
     clearCookieState();
   }
 
