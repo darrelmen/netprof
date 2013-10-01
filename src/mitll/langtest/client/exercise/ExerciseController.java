@@ -76,7 +76,6 @@ public interface ExerciseController {
 
   int getFlashcardPreviewFrameHeight();
 
- // void addAdHocExercise(String label);
   void setSelectionState(Map<String,Collection<String>> selectionState);
   PropertyHandler getProps();
 
