@@ -127,7 +127,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         } else {
           long now = System.currentTimeMillis();
           System.out.println("onModuleLoad.getProperties : (failure) took " + (now - then) + " millis");
-          Window.alert("Couldn't contact server.  Please check your network connection.");
+          Window.alert("Couldn't contact server.  Please check your network connection. (getProperties)");
         }
       }
 
@@ -165,7 +165,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
-          Window.alert("Couldn't contact server.  Please check your network connection.");
+          //Window.alert("logMessage : Couldn't contact server.  Please check your network connection.");
         }
 
         @Override
@@ -182,7 +182,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void onModuleLoad2() {
     userManager = new UserManager(this, service, false, props);
     if (props.isTrackUsers()) taboo = new Taboo(userManager, service, this, this);
-    loadVisualizationPackages();
+    //loadVisualizationPackages();  // Note : this is now done in LangTest.html, since it seemed to be intermittently not loaded properly
     if (props.isFlashCard()) {
       loadFlashcard();
       return;
@@ -298,7 +298,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     addResizeHandler();
   }
 
-  private void loadVisualizationPackages() {
+/*  private void loadVisualizationPackages() {
     System.out.println("loadVisualizationPackages...");
 
     VisualizationUtils.loadVisualizationApi(new Runnable() {
@@ -308,7 +308,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         logMessageOnServer("loaded VisualizationUtils.");
       }
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
-  }
+  }*/
 
   private boolean shouldCollectAudio() {
     return props.isCollectAudio() && !props.isFlashcardTeacherView() || props.isFlashCard()  || props.isGoodwaveMode() ;
