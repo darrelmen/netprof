@@ -36,10 +36,6 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.visualization.client.VisualizationUtils;
-import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
-import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
-import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.ListInterface;
@@ -55,11 +51,6 @@ import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
-import mitll.langtest.client.taboo.GiverExerciseFactory;
-import mitll.langtest.client.taboo.ReceiverExerciseFactory;
-import mitll.langtest.client.taboo.SinglePlayerRobot;
-import mitll.langtest.client.taboo.Taboo;
-import mitll.langtest.client.taboo.TabooExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
@@ -67,10 +58,8 @@ import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.taboo.GameInfo;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
@@ -99,7 +88,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private PropertyHandler props;
   private HTML userline;
   private Flashcard flashcard;
-  private Heading pageTitle;
 
   private Panel headerRow;
   private FluidRow secondRow;
@@ -108,7 +96,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Anchor logout;
   private Anchor users;
   private Anchor showResults, monitoring;
-  private Taboo taboo;
+  private HTML releaseStatus;
 
   /**
    * Make an exception handler that displays the exception.
@@ -150,14 +138,29 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void dealWithExceptions() {
     GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
       public void onUncaughtException(Throwable throwable) {
-        ExceptionHandlerDialog exceptionHandlerDialog = new ExceptionHandlerDialog();
-        String exceptionAsString = exceptionHandlerDialog.getExceptionAsString(throwable);
-        int user = userManager != null ? userManager.getUser() : -1;
-        String exerciseID = exerciseList != null ? exerciseList.getCurrentExerciseID() : "Unknown";
-        logMessageOnServer("got browser exception : user #" + user + " exercise " + exerciseID + " : " + exceptionAsString);
-        exceptionHandlerDialog.showExceptionInDialog(browserCheck, exceptionAsString);
+        String exceptionAsString = logException(throwable);
+        if (exceptionAsString.length() > 0) {
+          new ExceptionHandlerDialog().showExceptionInDialog(browserCheck, exceptionAsString);
+        }
       }
     });
+  }
+
+  private boolean lastWasStackOverflow = false;
+
+  public String logException(Throwable throwable) {
+    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(throwable);
+    boolean isStackOverflow = exceptionAsString.contains("Maximum call stack size exceeded");
+    if (isStackOverflow && lastWasStackOverflow) { // we get overwhelmed by repeated exceptions
+      return ""; // skip repeat exceptions
+    }
+    else {
+      lastWasStackOverflow = isStackOverflow;
+    }
+    int user = userManager != null ? userManager.getUser() : -1;
+    String exerciseID = exerciseList != null ? exerciseList.getCurrentExerciseID() : "Unknown";
+    logMessageOnServer("got browser exception : user #" + user + " exercise " + exerciseID + " : " + exceptionAsString);
+    return exceptionAsString;
   }
 
   private void logMessageOnServer(String message) {
@@ -181,7 +184,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void onModuleLoad2() {
     userManager = new UserManager(this, service, false, props);
-    if (props.isTrackUsers()) taboo = new Taboo(userManager, service, this, this);
     //loadVisualizationPackages();  // Note : this is now done in LangTest.html, since it seemed to be intermittently not loaded properly
     if (props.isFlashCard()) {
       loadFlashcard();
@@ -249,7 +251,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     thirdRow.add(leftColumn);
     widgets.add(thirdRow);
 
-    if (isCRTDataCollectMode()) {
+    if ((isCRTDataCollectMode() || props.isDataCollectMode())) {
       addProgressBar(widgets);
     }
     else {
@@ -343,6 +345,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     Column titleColumn = new Column(takeWholeWidth ? 12 : 10, title);
     headerRow.add(titleColumn);
+    makeLogoutParts();
     if (!takeWholeWidth) {
       headerRow.add(new Column(2, getLogout()));
     } else if (isStudent || props.isAdminView() || props.isDataCollectMode()) {
@@ -350,14 +353,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       adminRow.addStyleName("alignCenter");
       adminRow.addStyleName("inlineStyle");
 
-      this.userline = new HTML(getUserText());
-      Anchor logout = getLogoutLink();
-      HTML releaseStatus = getReleaseStatus();
-
+      this.userline.setHTML(getUserText());
       if (props.isAdminView()) {
         adminRow.add(new Column(2, userline));
         adminRow.add(new Column(2, logout));
-        getLogout();
         adminRow.add(new Column(2, users));
         adminRow.add(new Column(2, showResults));
         adminRow.add(new Column(2, monitoring));
@@ -365,7 +364,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
       else {
         adminRow.add(new Column(1, userline));
-        adminRow.add(new Column(2,  releaseStatus));
+        adminRow.add(new Column(2, releaseStatus));
         adminRow.add(new Column(2, 7,  logout));
       }
 
@@ -406,7 +405,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     FluidRow titleRow = new FluidRow();
     titleRow.addStyleName("alignCenter");
     titleRow.addStyleName("inlineStyle");
-    pageTitle = new Heading(2, props.getAppTitle());
+    Heading pageTitle = new Heading(2, props.getAppTitle());
 
     titleRow.add(pageTitle);
 
@@ -673,7 +672,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else if (props.isGrading()) {
       exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer), userManager, props.getNumGradesToCollect());
     } else if (props.isFlashCard()) {
-      exerciseList.setFactory(new FlashcardExercisePanelFactory(service, outer, outer), userManager, 1);
+        exerciseList.setFactory(new FlashcardExercisePanelFactory(service, outer, outer), userManager, 1);
     } else if (props.isDataCollectMode() && props.isCollectAudio() && !props.isCRTDataCollectMode()) {
       exerciseList.setFactory(new WaveformExercisePanelFactory(service, outer, outer), userManager, 1);
     } else {
@@ -683,51 +682,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     if (getLanguage().equalsIgnoreCase("Pashto")) {
       new FontChecker(this).checkPashto();
-    }
-  }
-
-  private SinglePlayerRobot singlePlayerRobot;
-
-  /**
-   * @see Taboo#afterRoleDeterminedConfirmation
-   * @see Taboo#askUserToChooseRole(long)
-   * @see Taboo#checkForPartner(long)
-   * @see
-   * @param userID
-   * @param isGiver
-   * @param singlePlayer
-   */
-  public void setTabooFactory(long userID, boolean isGiver, boolean singlePlayer) {
-    System.out.println("setTabooFactory : User " + userID + " is giver = " + isGiver + " single " + singlePlayer);
-    String appTitle = props.getAppTitle();
-    String appTitle1 = appTitle + " : Giver";
-    if (isGiver) {
-      GiverExerciseFactory factory = new GiverExerciseFactory(service, this, this);
-     // System.out.println("setTabooFactory : made " + factory);
-
-      exerciseList.setFactory(factory, userManager, 1);
-
-    } else {
-      if (singlePlayer && singlePlayerRobot == null) {
-        singlePlayerRobot = new SinglePlayerRobot(service);
-      }
-
-      exerciseList.setFactory(new ReceiverExerciseFactory(service, this, this, singlePlayer ? singlePlayerRobot : null), userManager, 1);
-      appTitle1 = appTitle + (singlePlayer ? " : Single Player" : " : Receiver");
-      if (singlePlayer) {
-        setSelectionState(Collections.EMPTY_MAP);
-      }
-    }
-    setTitle(appTitle1);
-    if (pageTitle == null) {
-      flashcard.setAppTitle(appTitle1);
-    }
-    else {
-      pageTitle.setText(appTitle1);
-    }
-
-    if (!doEverythingAfterFactory(userID)) {
-      exerciseList.getExercises(userID);
     }
   }
 
@@ -781,17 +735,24 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Widget getLogout() {
     VerticalPanel vp = new VerticalPanel();
 
+    vp.add(userline);
+    vp.add(logout);
+    vp.add(users);
+
+    vp.add(showResults);
+    vp.add(monitoring);
+    vp.add(releaseStatus);
+
+    return vp;
+  }
+
+  private void makeLogoutParts() {
     // add logout link
 
     this.userline = new HTML(getUserText());
-    vp.add(userline);
-
     logout = getLogoutLink();
-    vp.add(logout);
 
     makeUsersAnchor(false);
-    vp.add(users);
-
     showResults = new Anchor("Results");
     showResults.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
@@ -806,7 +767,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         });
       }
     });
-    vp.add(showResults);
     showResults.setVisible(props.isAdminView());
 
     monitoring = new Anchor("Monitoring");
@@ -823,14 +783,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         });
       }
     });
-    vp.add(monitoring);
     monitoring.setVisible(props.isAdminView());
 
-    // no click handler for this for now
-    HTML statusLine = getReleaseStatus();
-    vp.add(statusLine);
-
-    return vp;
+    releaseStatus = getReleaseStatus();
   }
 
   private Anchor getLogoutLink() {
@@ -884,16 +839,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param userID
    */
   public void gotUser(long userID) {
-    System.out.println("gotUser : got user " + userID);
-    if (userline != null) userline.setHTML(getUserText());
+    System.out.println("LangTest.gotUser : got user " + userID);
+    if (userline != null) {
+      String userText = getUserText();
+      // System.out.println("LangTest.gotUser : userline = " + userText);
+
+      userline.setHTML(userText);
+    }
+    else {
+      System.out.println("LangTest.gotUser : userline undefined??");
+    }
     if (props.isDataCollectAdminView()) {
       checkForAdminUser();
     } else {
-      if (props.isTrackUsers()) { // OK we're playing taboo!
-        taboo.initialCheck(userID);
-      } else {
-        setFactory(userID);
-      }
+      setFactory(userID);
     }
   }
 
@@ -901,7 +860,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
       System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser);
       if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
-      //  System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
+        //  System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
         exerciseList.getExercises(userID);
       }
       lastUser = userID;
@@ -1027,10 +986,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     exerciseList.loadExercise(exerciseShell);
   }
   public boolean loadNextExercise(ExerciseShell current) {
+    boolean b = exerciseList.loadNextExercise(current);
     if (progressBar != null) {
       progressBar.showAdvance(exerciseList);
     }
-    return exerciseList.loadNextExercise(current);
+    return b;
   }
 
   public boolean loadNextExercise(String id) {
@@ -1043,14 +1003,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     exerciseList.startOver();
   }
   public void askForRandomExercise(AsyncCallback<Exercise> callback) { exerciseList.askForRandomExercise(callback); }
-
-  /**
-   * @see mitll.langtest.client.taboo.Taboo#pollForPartnerOnline(long, boolean)
-   * @param gameInfo
-   */
-  public void setGameOnGiver(GameInfo gameInfo) {
-    ((TabooExerciseList)exerciseList).setGameOnGiver(gameInfo);
-  }
 
   public boolean loadPreviousExercise(Exercise current) {
     return exerciseList.loadPreviousExercise(current);
