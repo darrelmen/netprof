@@ -119,6 +119,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       @Override
       public void onFailure(Throwable caught) {
         Window.alert("getTypeOrder can't contact server. got " + caught);
+        //controller.isLogClientMessages()
       }
 
       @Override
