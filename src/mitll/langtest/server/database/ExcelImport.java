@@ -248,6 +248,7 @@ public class ExcelImport implements ExerciseDAO {
       Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
       for (; iter.hasNext(); ) {
         Row next = iter.next();
+        if (id > 300) break;     // TODO make this an adult option
         //    logger.warn("------------ Row # " + next.getRowNum() + " --------------- ");
         boolean inMergedRow = rowToRange.keySet().contains(next.getRowNum());
 
