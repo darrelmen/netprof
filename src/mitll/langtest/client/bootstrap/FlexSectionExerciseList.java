@@ -54,6 +54,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   private Panel clearColumnContainer;
   private Panel labelColumn;
   protected Heading statusHeader = new Heading(4);
+  private Collection<String> typeOrder;
 
   public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
@@ -109,12 +110,12 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
     DOM.setStyleAttribute(container.getElement(), "paddingRight", "2px");
 
-    getTypeOrder(userID, container);
+    getTypeOrder(container);
 
     return container;
   }
 
-  protected void getTypeOrder(final long userID, final FluidContainer container) {
+  protected void getTypeOrder(final FluidContainer container) {
     service.getTypeOrder(new AsyncCallback<Collection<String>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -124,6 +125,8 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
       @Override
       public void onSuccess(final Collection<String> sortedTypes) {
+        typeOrder = sortedTypes;
+        System.out.println("type order " + typeOrder);
         if (showListBoxes) {
           service.getSectionNodes(new AsyncCallback<List<SectionNode>>() {
             @Override
@@ -133,7 +136,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
             @Override
             public void onSuccess(List<SectionNode> result) {
-              addButtonRow(result, userID, container, sortedTypes, !controller.isGoodwaveMode()); // TODO do something better here
+              addButtonRow(result, container, sortedTypes, !controller.isGoodwaveMode()); // TODO do something better here
             }
           });
         }
@@ -161,14 +164,13 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   }
 
   /**
-   * @see #getTypeOrder(long, com.github.gwtbootstrap.client.ui.FluidContainer)
+   * @see #getTypeOrder(com.github.gwtbootstrap.client.ui.FluidContainer)
    * @param rootNodes
-   * @param userID
    * @param container
    * @param types
    * @param addInstructions
    */
-  private void addButtonRow(List<SectionNode> rootNodes, long userID, FluidContainer container, Collection<String> types,
+  private void addButtonRow(List<SectionNode> rootNodes, FluidContainer container, Collection<String> types,
                             boolean addInstructions) {
     //System.out.println("addButtonRow (success) for user = " + userID + " got types " + types + " num root nodes " + rootNodes.size());
     if (types.isEmpty()) {
@@ -350,26 +352,33 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   }
 
   /**
-   * Add a line that spells out in text which lessons have been chosen.
-   * @param event
+   * Add a line that spells out in text which lessons have been chosen, derived from the selection state.
+   * Show in the same type order as the button rows.
+   *
+   * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
+   * @param event to get the current selection state from
    */
   private void showSelectionState(ValueChangeEvent<String> event) {
     SelectionState selectionState = new SelectionState(event);
     //System.out.println("FlexSectionExerciseList.showSelectionState : got " + event + " and state '" + selectionState +"'");
-    StringBuilder status = new StringBuilder();
-    Set<Map.Entry<String, Collection<String>>> entries = selectionState.getTypeToSection().entrySet();
-    for (Map.Entry<String, Collection<String>> part : entries) {
-        String statusForType = part.getKey() + " " + part.getValue().toString().replaceAll("\\[", "").replaceAll("\\]", "");
-        status.append(statusForType).append(" ");
-    }
-    statusHeader.setText(status.toString());
-    //System.out.println("showSelectionState : entries " + entries + " from " + selectionState.typeToSection + " status " + status);
+    Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
 
-    if (entries.isEmpty()) {
+    if (typeToSection.isEmpty()) {
       showDefaultStatus();
-    }
-    else {
-      //System.out.println("FlexSectionExerciseList.showSelectionState : status now " + status);
+    } else {
+      StringBuilder status = new StringBuilder();
+      for (String type : typeOrder) {
+        Collection<String> selectedItems = typeToSection.get(type);
+        if (selectedItems == null) {
+          System.out.println("showSelectionState : no value for '" + type + "' in " + typeToSection.keySet());
+        } else {
+          String statusForType = type + " " + selectedItems.toString().replaceAll("\\[", "").replaceAll("\\]", "");
+          status.append(statusForType).append(" and ");
+        }
+      }
+      String text = status.toString();
+      if (text.length() > 0) text = text.substring(0, text.length() - " and ".length());
+      statusHeader.setText(text);
     }
   }
 
@@ -694,7 +703,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     /**
      * @param children
      * @see FlexSectionExerciseList#addButtonGroup(com.google.gwt.user.client.ui.HorizontalPanel, java.util.List, String, java.util.List, ButtonGroupSectionWidget)
-     * @see FlexSectionExerciseList#addButtonRow(java.util.List, long, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection, boolean)
+     * @see FlexSectionExerciseList#addButtonRow(java.util.List
      */
     public void setChildren(List<ButtonWithChildren> children) {
       this.children = children;

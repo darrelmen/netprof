@@ -10,7 +10,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
 import mitll.langtest.client.grading.GradedExerciseList;
-import mitll.langtest.client.taboo.TabooExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 
@@ -74,14 +73,8 @@ public class ExerciseListLayout {
           return new TableSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
             props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, controller);
         } else {
-          if (props.isTrackUsers()) {
-            return new TabooExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-              props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, controller);
-          }
-          else {
           return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
             props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, controller);
-          }
         }
       } else {
         return new PagingExerciseList(currentExerciseVPanel, service, feedback,
@@ -100,18 +93,6 @@ public class ExerciseListLayout {
     } else {
       leftColumnContainer.addStyleName("inlineStyle");
       leftColumnContainer.add(exerciseList.getExerciseListOnLeftSide(props));
-
-   /*   FlowPanel leftColumn = new FlowPanel();
-      leftColumn.addStyleName("floatLeft");
-      DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
-
-      leftColumnContainer.add(leftColumn);
-      if (!props.isFlashcardTeacherView() && !props.isMinimalUI()) {
-        Heading items = new Heading(4, ITEMS);
-        items.addStyleName("center");
-        leftColumn.add(items);
-      }
-      leftColumn.add(exerciseList.getWidget());*/
     }
   }
 
