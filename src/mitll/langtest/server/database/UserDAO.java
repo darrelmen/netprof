@@ -160,7 +160,7 @@ public class UserDAO extends DAO {
     statement.close();
     database.closeConnection(connection);
 
-    int numColumns = getNumColumns(connection, "users");
+    //int numColumns = getNumColumns(connection, "users");
     //logger.debug("found " + numColumns + " in users table");
 
     Set<String> expected = new HashSet<String>();
