@@ -77,4 +77,5 @@ public interface ExerciseController {
   void setSelectionState(Map<String,Collection<String>> selectionState);
   PropertyHandler getProps();
 
+  String logException(Throwable throwable);
 }
