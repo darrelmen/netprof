@@ -46,6 +46,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private HandlerRegistration keyHandler;
   private PlayListener playListener;
   private boolean hasFocus;
+  private static final boolean DEBUG = false;
 
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
@@ -81,7 +82,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     doPause();
     destroySound();
     if (listener != null) listener.reinitialize();    // remove playing line, if it's there
-    System.out.println("doing unload of play ------------------> ");
+    if (DEBUG) System.out.println("doing unload of play ------------------> ");
 
     if (keyHandler != null) keyHandler.removeHandler();
   }
@@ -172,6 +173,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @see #doClick()
    */
   private void play() {
+    if (DEBUG) System.out.println("PlayAudioPanel :play");
+
     count = 0;
     setPlayButtonText();
     soundManager.play(currentSound);
@@ -183,12 +186,14 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   private boolean isPlaying() {
-    return playButton.getText().equals(PAUSE_LABEL);
+    boolean isPlaying = playButton.getText().trim().equals(PAUSE_LABEL);
+    if (!isPlaying && DEBUG) System.out.println(new Date() + " isPlaying : " + playButton.getText() + " vs " + PAUSE_LABEL);
+    return isPlaying;
   }
 
   private void setPlayLabel() {
     if (count == 0) {
-     // System.out.println(new Date() + " setPlayLabel");
+      if (DEBUG) System.out.println(new Date() + " setPlayLabel");
 
       playButton.setText(PLAY_LABEL);
       if (playListener != null) {
@@ -245,6 +250,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @see #reinitialize()
    */
   private void pause() {
+    if (DEBUG) System.out.println("PlayAudioPanel :pause");
+
     count = 0;
 
     setPlayLabel();
@@ -264,9 +271,9 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param path to audio file on server
    */
   public void startSong(String path){
-   // System.out.println("PlayAudioPanel : start song : " + path);
+    if (DEBUG) System.out.println("PlayAudioPanel : start song : " + path);
     if (soundManager.isReady()) {
-      //System.out.println(new Date() + " Sound manager is ready.");
+      if (DEBUG) System.out.println(new Date() + " Sound manager is ready.");
       if (soundManager.isOK()) {
         destroySound();
         createSound(path);
@@ -283,7 +290,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    */
   private void createSound(String song){
     currentSound = new Sound(this);
-    //System.out.println("PlayAudioPanel.createSound : " + this + " created sound " + currentSound);
+    if (DEBUG) System.out.println("PlayAudioPanel.createSound : " + this + " created sound " + currentSound);
 
     soundManager.createSound(currentSound, song, song);
   }
