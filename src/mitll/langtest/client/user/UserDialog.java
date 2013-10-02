@@ -129,7 +129,7 @@ public class UserDialog {
   }
 
   protected ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
-    final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user);
+    /*final ControlGroup userGroup = */addControlGroupEntry(dialogBox, label, user);
     return new ListBoxFormField(user);
   }
 
