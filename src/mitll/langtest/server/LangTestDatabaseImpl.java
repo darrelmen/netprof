@@ -121,8 +121,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         throw ee;
       } catch (Exception eee) {
         logAndNotifyServerException(eee);
-        ServletException servletException = new ServletException("rethrow exception", eee);
-        throw servletException;
+        throw new ServletException("rethrow exception", eee);
       }
     }
   }
