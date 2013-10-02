@@ -1,6 +1,5 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.database.taboo.OnlineUsers;
 import mitll.langtest.shared.grade.Grader;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
@@ -20,10 +19,8 @@ import java.util.Set;
 
 public class UserDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserDAO.class);
-  private final OnlineUsers onlineUsers;
 
-
-  public UserDAO(Database database) { super(database); this.onlineUsers = new OnlineUsers(this); }
+  public UserDAO(Database database) { super(database); }
 
 
   /**
@@ -160,7 +157,7 @@ public class UserDAO extends DAO {
     statement.close();
     database.closeConnection(connection);
 
-    int numColumns = getNumColumns(connection, "users");
+    //int numColumns = getNumColumns(connection, "users");
     //logger.debug("found " + numColumns + " in users table");
 
     Set<String> expected = new HashSet<String>();
@@ -220,7 +217,7 @@ public class UserDAO extends DAO {
   }
 
   /**
-   * @see OnlineUsers#getUser(long)
+   * @seex OnlineUsers#getUser(long)
    * @param userid
    * @return
    */
@@ -357,9 +354,5 @@ public class UserDAO extends DAO {
 
   public Set<Long> getNativeUsers() {
     return getNativeUserMap().keySet();
-  }
-
-  public OnlineUsers getOnlineUsers() {
-    return onlineUsers;
   }
 }
