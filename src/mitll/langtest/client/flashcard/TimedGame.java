@@ -1,6 +1,6 @@
 package mitll.langtest.client.flashcard;
 
-import mitll.langtest.client.DialogHelper;
+import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
 
