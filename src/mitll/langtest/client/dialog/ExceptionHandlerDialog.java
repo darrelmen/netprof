@@ -1,7 +1,8 @@
-package mitll.langtest.client;
+package mitll.langtest.client.dialog;
 
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.DialogBox;
+import mitll.langtest.client.BrowserCheck;
 
 /**
  * Show javascript exceptions
@@ -33,7 +34,7 @@ public class ExceptionHandlerDialog {
     dialogBox.center();
   }
 
-  public String getExceptionAsString(Throwable throwable) {
+  public static String getExceptionAsString(Throwable throwable) {
     String text = "Uncaught exception: ";
     while (throwable != null) {
       StackTraceElement[] stackTraceElements = throwable.getStackTrace();
