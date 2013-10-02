@@ -83,7 +83,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
 
     service.getASRScoreForAudio(reqid, path, refSentence, toUse, height, useScoreToColorBkg, new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {
-        Window.alert("Server error -- please report.");
+        Window.alert("Server error -- couldn't contact server.");
         wordTranscript.image.setVisible(false);
         phoneTranscript.image.setVisible(false);
       }
