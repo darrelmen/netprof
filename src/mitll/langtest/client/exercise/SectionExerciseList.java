@@ -394,19 +394,25 @@ public class SectionExerciseList extends PagingExerciseList {
 
       if (isStaleResponse(result)) {
         System.out.println("\t----> ignoring result " + result.reqID + " b/c before latest " + lastReqID);
-      } else if (!result.exercises.isEmpty()) {
-        if (item != null) {
-          rememberExercises(result.exercises);
-          if (!loadByID(item)) {
-            System.out.println("SectionExerciseList.loadExercises : loading first exercise since couldn't load item=" + item);
-            loadFirstExercise();
-          }
+      } else {
+        if (result.exercises.isEmpty()) {
+          gotEmptyExerciseList();
         } else {
-          super.onSuccess(result);     // remember and load the first one
+          if (item != null) {
+            rememberExercises(result.exercises);
+            if (!loadByID(item)) {
+              System.out.println("SectionExerciseList.loadExercises : loading first exercise since couldn't load item=" + item);
+              loadFirstExercise();
+            }
+          } else {
+            super.onSuccess(result);     // remember and load the first one
+          }
         }
       }
     }
   }
+
+  protected void gotEmptyExerciseList() {}
 
   /**
    * @see #pushFirstListBoxSelection
@@ -456,10 +462,10 @@ public class SectionExerciseList extends PagingExerciseList {
     getSelectionState(token);
     //System.out.println("pushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
     if (token != null && (historyToken.equals(token) || trimmedToken.equals(token))) {
-      System.out.println("\tcurrent token '" + token + "' same as new " + historyToken);
+      System.out.println("\tpushNewItem : current token '" + token + "' same as new " + historyToken);
       loadByIDFromToken(exerciseID);
     } else {
-      System.out.println("\tcurrent token '" + token + "' different menu state '" +historyToken+ "' from new " + exerciseID);
+      System.out.println("\tpushNewItem : current token '" + token + "' different menu state '" +historyToken+ "' from new " + exerciseID);
       setHistoryItem(historyToken);
     }
   }
@@ -634,9 +640,10 @@ public class SectionExerciseList extends PagingExerciseList {
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @param selectionState
    */
-  private void restoreListBoxState(SelectionState selectionState) {
+  protected void restoreListBoxState(SelectionState selectionState) {
     Map<String, Collection<String>> selectionState2 = new HashMap<String, Collection<String>>();
 
+    // make sure we all types have selections, even if it's the default Clear (ANY) selection
     for (String type : typeToBox.keySet()) {
       selectionState2.put(type,Collections.singletonList(ANY));
     }
@@ -647,19 +654,98 @@ public class SectionExerciseList extends PagingExerciseList {
       selectionState2.put(type,section);
     }
 
-   // System.out.println("restoreListBoxState : selection state " + selectionState2);
-
-    for (Map.Entry<String, Collection<String>> pair : selectionState2.entrySet()) {
-      String type = pair.getKey();
-      Collection<String> section = pair.getValue();
-      if (!typeToBox.containsKey(type)) {
-        if (!type.equals("item")) {
-          System.err.println("restoreListBoxState for " + selectionState + " : huh? bad type '" + type +
-            "', expecting something in " + typeToBox.keySet());
+    boolean hasNonClearSelection = false;
+    List<String> typesWithSelections = new ArrayList<String>();
+    Collection<String> typeOrder = getTypeOrder(selectionState2);
+    for (String type : typeOrder) {
+      Collection<String> selections = selectionState2.get(type);
+      if (selections.iterator().next().equals(ANY)) {
+        if (hasNonClearSelection) {
+          System.out.println("restoreListBoxState : skipping type since below a selection = " + type);
         }
-      } else {
-        selectItem(type, section);
+        else {
+          System.out.println("restoreListBoxState : clearing " + type);
+
+          selectItem(type, selections);
+        }
+      }
+      else {
+        if (!hasNonClearSelection) {
+          enableAllButtonsFor(type);  // first selection row should always be fully enabled -- there's nothing above it to constrain the selections
+        }
+        hasNonClearSelection = true;
+
+        if (!typeToBox.containsKey(type)) {
+          if (!type.equals("item")) {
+            System.err.println("restoreListBoxState for " + selectionState + " : huh? bad type '" + type +
+              "', expecting something in " + typeToBox.keySet());
+          }
+        } else {
+          typesWithSelections.add(type);
+          //selectItem(type, selections);
+        }
       }
     }
+
+    System.out.println("restoreListBoxState :typesWithSelections " + typesWithSelections);
+
+    // clear enabled state for all items below first selection...
+    if (!typesWithSelections.isEmpty()) {
+      List<String> afterFirst = new ArrayList<String>();
+      String first = typesWithSelections.get(0);
+      boolean start = false;
+      for (String type : typeOrder) {
+         if (start) afterFirst.add(type);
+         if (type.equals(first)) start = true;
+      }
+
+     // List<String> afterFirst = typesWithSelections.subList(1, typesWithSelections.size());
+      System.out.println("restoreListBoxState : afterFirst " + afterFirst);
+
+      for (String type : afterFirst) {
+        System.out.println("restoreListBoxState : clearing enabled on " + type);
+
+        clearEnabled(type);
+      }
+    }
+
+    for (String type : typesWithSelections) {
+      System.out.println("restoreListBoxState : selecting items for " + type);
+
+      Collection<String> selections = selectionState2.get(type);
+      selectItem(type, selections);
+    }
+/*    List<String> toRemove = new ArrayList<String>();
+    for (Map.Entry<String, Collection<String>> typeSelectionPair : selectionState2.entrySet()) {
+      Collection<String> selections = typeSelectionPair.getValue();
+      if (selections.size() == 1 && selections.iterator().next().equals(ANY)) {
+        toRemove.add(typeSelectionPair.getKey());
+        selectItem(typeSelectionPair.getKey(), selections);
+      }
+    }
+
+    System.out.println("restoreListBoxState : selection state " + selectionState2);
+    Collection<String> types = new ArrayList<String>(getTypeOrder(selectionState2));
+    types.removeAll(toRemove);
+    // whatever is left here are actual selections
+    for (String type : types) {
+      if (selectionState2.containsKey(type)) {
+        Collection<String> section = selectionState2.get(type);
+        if (!typeToBox.containsKey(type)) {
+          if (!type.equals("item")) {
+            System.err.println("restoreListBoxState for " + selectionState + " : huh? bad type '" + type +
+              "', expecting something in " + typeToBox.keySet());
+          }
+        } else {
+          selectItem(type, section);
+        }
+      }
+    }*/
+  }
+
+  protected void clearEnabled(String type) {}
+  protected void enableAllButtonsFor(String type) {}
+  protected Collection<String> getTypeOrder(Map<String, Collection<String>> selectionState2) {
+    return selectionState2.keySet();
   }
 }
