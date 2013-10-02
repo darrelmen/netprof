@@ -295,6 +295,9 @@ fieldset {
 .topMargin {
     margin-top: 10px;
 }
+.topFiveMargin {
+     margin-top: 5px;
+ }
 
 .leftFiveMargin {
     margin-left: 5px;
