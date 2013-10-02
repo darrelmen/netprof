@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 public class FlashRecordPanelHeadless extends AbsolutePanel {
   private static final int WIDTH = 250;
   private static final int HEIGHT = 170;
+  private static final String PX = "8px";
   private String id = "flashcontent";
   private static MicPermission micPermission;
   private boolean didPopup = false;
@@ -60,7 +61,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * @see mitll.langtest.client.LangTest#makeFlashContainer()
    */
   public void hide() {
-    setSize("8px", "8px");
+    setSize(PX, PX);
   }
 
   /**
