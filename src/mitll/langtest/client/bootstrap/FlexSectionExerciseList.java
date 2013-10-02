@@ -8,7 +8,6 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
@@ -18,7 +17,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -26,7 +24,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.exercise.SelectionState;
-import mitll.langtest.client.recorder.SimpleRecordExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
 
@@ -87,7 +84,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     this.userID = userID;
     sectionPanel.clear();
 
-    Panel flexTable = getWidgetsForTypes(userID);
+    Panel flexTable = getWidgetsForTypes();
 
     if (!showListBoxes) {
       SelectionState selectionState = getSelectionState(History.getToken());
@@ -103,10 +100,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * Assume for the moment that the first type has the largest elements... and every other type nests underneath it.
    *
    * @see #getExercises(long)
-   * @param userID
    * @return
    */
-  protected Panel getWidgetsForTypes(final long userID) {
+  private Panel getWidgetsForTypes() {
     final FluidContainer container = new FluidContainer();
     DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
     DOM.setStyleAttribute(container.getElement(), "paddingRight", "2px");
@@ -116,7 +112,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     return container;
   }
 
-  protected void getTypeOrder(final FluidContainer container) {
+  private void getTypeOrder(final FluidContainer container) {
     service.getTypeOrder(new AsyncCallback<Collection<String>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -217,6 +213,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     for (String sectionInFirstType : sectionsInType) {
       FlowPanel sectionColumn = new FlowPanel();
       ButtonWithChildren buttonWithChildren = addColumnButton(sectionColumn,sectionInFirstType, buttonGroupSectionWidget);
+      buttonWithChildren.setButtonGroup(buttonGroupSectionWidget);
       last = sectionColumn;
       DOM.setStyleAttribute(sectionColumn.getElement(), "marginBottom", "5px");
       panelInsideScrollPanel.add(sectionColumn);
@@ -235,7 +232,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         List<ButtonWithChildren> buttonWithChildrens = addButtonGroup(rowForChildren, sectionNode.getChildren(),
           subType, subs, sectionWidget1);
         buttonWithChildren.setChildren(buttonWithChildrens);
-        buttonWithChildren.setButtonGroup(sectionWidget1);
         //sectionColumn.add(rowForChildren);
         rowContainer.add(rowForChildren);
         sectionColumn.add(rowContainer);
@@ -312,7 +308,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     int j = 0;
     for (String type : types) {
-      ButtonGroupSectionWidget buttonGroupSectionWidget1 = new ButtonGroupSectionWidget(type,typeToBox);
+      ButtonGroupSectionWidget buttonGroupSectionWidget1 = new ButtonGroupSectionWidget(type);
       typeToBox.put(type,buttonGroupSectionWidget1);
       typeToButton.put(type, buttonTypes.get(j++ % types.size()));
     }
@@ -326,7 +322,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     return nameToNode;
   }
 
-  protected List<String> getLabels(List<SectionNode> nodes) {
+  private List<String> getLabels(List<SectionNode> nodes) {
     List<String> items = new ArrayList<String>();
     for (SectionNode n : nodes) items.add(n.getName());
     return items;
@@ -349,17 +345,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     return widget;
   }
 
-/*
-  @Override
-  public void onValueChange(ValueChangeEvent<String> event) {
-    super.onValueChange(event);
-
-    if (showListBoxes) {
-      showSelectionState(event);
-    }
-  }
-*/
-
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
     super.restoreListBoxState(selectionState);
@@ -376,8 +361,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @param selectionState to get the current selection state from
    */
-  private void showSelectionState(SelectionState selectionState ){//ValueChangeEvent<String> event) {
-    //SelectionState selectionState = new SelectionState(event);
+  private void showSelectionState(SelectionState selectionState ){
     //System.out.println("FlexSectionExerciseList.showSelectionState : got " + event + " and state '" + selectionState +"'");
     Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
 
@@ -411,7 +395,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @see #addButtonRow
    * @param container
    */
-  protected Widget addBottomText(FluidContainer container) {
+  private Widget addBottomText(FluidContainer container) {
     FluidRow status = new FluidRow();
     status.addStyleName("alignCenter");
     status.addStyleName("inlineStyle");
@@ -467,16 +451,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     overallButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        //  System.out.println("got click on " + overallButton + " with children " + overallButton.getButtonChildren());
-/*        if (selectPathToParent) {
-          buttonGroupSectionWidget.selectButton(overallButton, typeToBox);
-        }
-        else {*/
-        //buttonGroupSectionWidget.selectItem(sectionInFirstType, typeToBox);
-        //    buttonGroupSectionWidget.selectItem(Collections.singleton(sectionInFirstType), true, typeToBox);
         buttonGroupSectionWidget.simpleSelectItem(Collections.singleton(sectionInFirstType));
-
-        //      }
         pushNewSectionHistoryToken();
       }
     });
@@ -494,10 +469,25 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     ButtonGroupSectionWidget listBox = (ButtonGroupSectionWidget) typeToBox.get(type);
     listBox.clearSelectionState();
     System.out.println("FlexSectionExerciseList.selectItem : selecting " + type + "=" + sections);
-    listBox.selectItem(sections, typeToBox);
+    listBox.selectItem(sections);
   }
 
-/*  @Override
+  /**
+   * @see SectionExerciseList#restoreListBoxState(mitll.langtest.client.exercise.SelectionState)
+   * @param type
+   */
+  @Override
+  protected void clearEnabled(String type) {
+    ButtonGroupSectionWidget listBox = (ButtonGroupSectionWidget) typeToBox.get(type);
+    listBox.clearEnabled();
+  }
+
+  protected void enableAllButtonsFor(String type) {
+    ButtonGroupSectionWidget listBox = (ButtonGroupSectionWidget) typeToBox.get(type);
+    listBox.enableAll();
+  }
+
+  /*  @Override
   protected void restoreListBoxState(SelectionState selectionState) {
     super.restoreListBoxState(selectionState);
 
@@ -650,7 +640,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         List<ButtonWithChildren> subButtons =
           addButtonGroup(horizontalContainerForChildren, children, subType, subs, sectionWidget1);
         buttonForSection.setChildren(subButtons);
-        buttonForSection.setButtonGroup(sectionWidget1);
+        //buttonForSection.setButtonGroup(sectionWidget1);
       } else {
 
         rowForSection = buttonForSection;
@@ -719,7 +709,6 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     sectionButton.setEnabled(!isClear);
 
     if (isClear) {
-    //  DOM.setStyleAttribute(sectionButton.getElement(), "bottomMargin", "12px");
       DOM.setStyleAttribute(sectionButton.getElement(), "marginBottom", "15px");
     }
 
@@ -760,10 +749,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     public ButtonGroupSectionWidget getButtonGroup() {
       return buttonGroupContainer;
     }
-/*
     public ButtonWithChildren getParentButton() {
       return parent;
-    }*/
+    }
 
     public List<ButtonWithChildren> getSiblings() {
       List<ButtonWithChildren> siblings = new ArrayList<ButtonWithChildren>();
@@ -797,8 +785,8 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         ", children type " + getTypeOfChildren() + " num " + getButtonChildren().size());
     }
 
-    public boolean hasChildren() {
+/*    public boolean hasChildren() {
       return !children.isEmpty();
-    }
+    }*/
   }
 }
