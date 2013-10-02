@@ -5,9 +5,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
-import mitll.langtest.server.database.taboo.OnlineUsers;
 import mitll.langtest.shared.DLIUser;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.grade.CountAndGradeID;
@@ -449,33 +447,6 @@ public class DatabaseImpl implements Database {
       " out of " + allGradesExcluding.grades.size() + " returning map of " +idToCount.size() + " results to count");*/
 
     return idToCount;
-  }
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#userOnline(long, boolean)
-   * @param userid
-   * @param isOnline
-   */
-  public void userOnline(long userid, boolean isOnline) {
-    if (isOnline) getOnlineUsers().addOnline(userid);
-    else getOnlineUsers().removeOnline(userid);
-  }
-
-  public OnlineUsers getOnlineUsers() {
-    return userDAO.getOnlineUsers();
-  }
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#registerAnswer(long, String, String, String, boolean)
-   * @param userid
-   * @param exerciseID
-   * @param stimulus
-   * @param answer
-   * @param correct
-   */
-  public void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean correct) {
-    getOnlineUsers().registerAnswer(userid, answer, correct);
-    addAnswer((int) userid, "plan", exerciseID,stimulus,answer,correct);
   }
 
   /**
