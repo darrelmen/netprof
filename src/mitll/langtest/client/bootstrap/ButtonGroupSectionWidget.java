@@ -15,47 +15,46 @@ import java.util.Map;
 import java.util.Set;
 
 /**
-* A group of buttons that need to maintain
-* User: GO22670
-* Date: 4/8/13
-* Time: 11:19 AM
-* To change this template use File | Settings | File Templates.
-*/
+ * A group of buttons that need to maintain
+ * User: GO22670
+ * Date: 4/8/13
+ * Time: 11:19 AM
+ * To change this template use File | Settings | File Templates.
+ */
 class ButtonGroupSectionWidget implements SectionWidget {
-  private List<Button> buttons = new ArrayList<Button>();
   private Button clearButton;
   private String type;
 
-  private Map<String, Collection<Button>> nameToButton = new HashMap<String, Collection<Button>>();
   private String currentSelection = null;
   private List<Panel> rows = new ArrayList<Panel>();
-  private Set<Button> enabled = new HashSet<Button>();
-  private Set<Button> disabled = new HashSet<Button>();
   private Set<Button> selected = new HashSet<Button>();
-  private Map<String, SectionWidget> typeToBox;
+  private ButtonContainer buttons = new ButtonContainer();
+  private String color;
   private boolean debug = true;
 
-  public ButtonGroupSectionWidget(String type, Map<String,SectionWidget> typeToBox) {
+  public ButtonGroupSectionWidget(String type) {
     this.type = type;
-    this.typeToBox = typeToBox;
   }
 
-  public String getType() {return type;}
+  public String getType() {
+    return type;
+  }
 
   /**
+   * @param row
    * @see FlexSectionExerciseList#addButtonGroup(com.google.gwt.user.client.ui.HorizontalPanel, java.util.List, String, java.util.List, ButtonGroupSectionWidget)
    * @see FlexSectionExerciseList#addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection, boolean)
    * @see FlexSectionExerciseList#addColumnButton(com.google.gwt.user.client.ui.FlowPanel, String, ButtonGroupSectionWidget)
-   *
-   * @param row
    */
-  public void addRow(Panel row) { this.rows.add(row); }
+  public void addRow(Panel row) {
+    this.rows.add(row);
+  }
 
   /**
+   * @param b
    * @see FlexSectionExerciseList#addColumnButton
    * @see FlexSectionExerciseList#makeSectionWidget
    * @see FlexSectionExerciseList#makeSubgroupButton
-   * @param b
    */
   @Override
   public void addButton(Button b) {
@@ -63,13 +62,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
     if (name.equals(SectionExerciseList.ANY)) {
       addClearButton(b);
     } else {
-      this.buttons.add(b);
-      Collection<Button> buttonsAtName = nameToButton.get(name);
-      if (buttonsAtName == null) {
-        nameToButton.put(name, buttonsAtName = new ArrayList<Button>());
-      }
-      buttonsAtName.add(b);
-      enabled.add(b);
+      this.buttons.add(b, name);
     }
   }
 
@@ -78,16 +71,14 @@ class ButtonGroupSectionWidget implements SectionWidget {
     this.color = color;
   }
 
-  private String color;
-
   private void addClearButton(Button b) {
     clearButton = b;
     clearButton.setEnabled(false);
   }
 
   /**
-   * @see SectionExerciseList#getCurrentSelection(String)
    * @return
+   * @see SectionExerciseList#getCurrentSelection(String)
    */
   @Override
   public String getCurrentSelection() {
@@ -97,16 +88,18 @@ class ButtonGroupSectionWidget implements SectionWidget {
     return currentSelection;
   }
 
-  public void clearSelectionState() { currentSelection = null; }
+  public void clearSelectionState() {
+    currentSelection = null;
+  }
 
   /**
    * Look at the buttons to determine what has been clicked.
    *
-   * @see #getCurrentSelection()
    * @return a comma separated list of selected units, chapters, or sections
+   * @see #getCurrentSelection()
    */
   private String getCurrentSelectionInternal() {
-  //  System.out.println("ButtonGroupSectionWidget.getCurrentSelectionInternal for " + type + " checking " + buttons.size() + " buttons.");
+    //  System.out.println("ButtonGroupSectionWidget.getCurrentSelectionInternal for " + type + " checking " + buttons.size() + " buttons.");
     StringBuilder builder = new StringBuilder();
     Set<String> unique = new HashSet<String>();
     List<String> inOrder = new ArrayList<String>();
@@ -132,81 +125,23 @@ class ButtonGroupSectionWidget implements SectionWidget {
 
   @Override
   public String getFirstItem() {
-    return getFirstButton().getText().trim();
-  }
-
-  private FlexSectionExerciseList.ButtonWithChildren getFirstButton() {
-    if (buttons.isEmpty()) return null;
-    return (FlexSectionExerciseList.ButtonWithChildren) buttons.iterator().next();
-  }
-
-  @Override
-  public void selectItem(Collection<String> section, boolean doToggle) {
-    throw new IllegalArgumentException("don't call me!");
+    return buttons.getFirstButton().getText().trim();
   }
 
   /**
-   * @see FlexSectionExerciseList#addClickHandlerToButton(mitll.langtest.client.bootstrap.FlexSectionExerciseList.ButtonWithChildren, String, ButtonGroupSectionWidget)
-   * @param item
-   * @param typeToBox
-   */
-/*  public void selectItem(String item, Map<String, SectionWidget> typeToBox) {
-    System.out.println(this + " selectItem on " + item);
-    selectItem(Collections.singleton(item), true, typeToBox);
-  }*/
-
-  /**
-   * @seex #selectButton(mitll.langtest.client.bootstrap.FlexSectionExerciseList.ButtonWithChildren, boolean, java.util.Map)
-   * @paramx button
-   * @paramx doToggle
-   * @paramx typeToBox
-   */
-/*  public void selectButton(FlexSectionExerciseList.ButtonWithChildren button, boolean doToggle, Map<String, SectionWidget> typeToBox) {
-    boolean active = toggleButton(doToggle, button);
-  //  System.out.println("selectButton on " + button);
-
-    // enable the children
-    ButtonGroupSectionWidget childGroup = enableChildrenButtons(typeToBox, button, active);
-
-    if (childGroup != null) {
-      childGroup.showEnabled();
-    }
-    currentSelection = null;   // this just means we have to reset this on the next call to getCurrentSelection
-
-    // have the row show that there are selections
-    if (active) {
-      for (Panel p : rows) p.addStyleName(color);
-    }
-
-    // make sure the clear button is consistent
-    setClearButtonState(active);
-
-    // recurse!
-    // select path to root...
-
-    FlexSectionExerciseList.ButtonWithChildren parentButton = button.getParentButton();
-    if (parentButton != null) {
-      System.out.println("recurse on " + parentButton);
-      parentButton.getButtonGroup().selectButton(parentButton, doToggle, typeToBox);
-    }
-  }*/
-
-  /**
-   * @see FlexSectionExerciseList#addClickHandlerToButton(mitll.langtest.client.bootstrap.FlexSectionExerciseList.ButtonWithChildren, String, ButtonGroupSectionWidget) (String, java.util.Collection)
-   *
    * @param sections
+   * @see FlexSectionExerciseList#addClickHandlerToButton(mitll.langtest.client.bootstrap.FlexSectionExerciseList.ButtonWithChildren, String, ButtonGroupSectionWidget) (String, java.util.Collection)
    */
   public void simpleSelectItem(Collection<String> sections) {
     clearSelectionState();
-    if (sections.size() == 1 && sections.iterator().next().equals(SectionExerciseList.ANY)) {
+    if (isClearSelection(sections)) {
       clearSelection();
     } else {
       for (String toSelect : sections) {
-        Collection<Button> buttonsAtName = nameToButton.get(toSelect);
+        Collection<Button> buttonsAtName = buttons.getButtonsForName(toSelect);
         if (buttonsAtName == null) {
           System.err.println(">>>> selectItem " + type + "=" + toSelect + " unknown button?");
-        }
-        else {
+        } else {
           for (Button b : buttonsAtName) {
             toggleButton(true, b);
           }
@@ -214,87 +149,61 @@ class ButtonGroupSectionWidget implements SectionWidget {
       }
     }
   }
-    /**
-     * @seex #selectItem(String, java.util.Map)
-     * @see FlexSectionExerciseList#selectItem(String, java.util.Collection)
-     * @param sections
-     * @param typeToBox
-     */
-  //  public void selectItem(Collection<String> sections, boolean doToggle, Map<String,SectionWidget> typeToBox) {
-    public void selectItem(Collection<String> sections, Map<String, SectionWidget> typeToBox) {
-      if (debug) System.out.println("ButtonGroupSectionWidget: selectItem " + this+
-     		 " : " + type + "="+sections);
 
-    if (sections.size() == 1 && sections.iterator().next().equals(SectionExerciseList.ANY)) {
+  private boolean isClearSelection(Collection<String> sections) {
+    return sections.size() == 1 && sections.iterator().next().equals(SectionExerciseList.ANY);
+  }
+
+  /**
+   * @param sections
+   * @see FlexSectionExerciseList#selectItem(String, java.util.Collection)
+   */
+  public void selectItem(Collection<String> sections) {
+    if (debug) System.out.println("ButtonGroupSectionWidget: selectItem " + this + " : " + type + "=" + sections);
+
+    if (isClearSelection(sections)) {
       clearAll();
     } else {
-      ButtonGroupSectionWidget childGroup = null;
+
+      clearExistingSelections(sections);
+
+      Collection<Button> buttonsByName = buttons.getButtonsByName(sections);
+
+      // recurseShowParentEnabled();
+
+      // recurse down the tree, selecting as we go
       int count = 0;
-
-      // clear existing selections when not toggling
-     // if (!doToggle) {  // i.e. when called from restoreSelectionState...?
-        clearExistingSelections(sections);
-    //  }
-
-      Set<Button> buttonsByName = getButtonsByName(sections);
-
-      // get parent of each selected button
-      // get siblings
-      // get children of siblings
-      // deselect children, recursivel
-
+      ButtonGroupSectionWidget childGroup = null;
       for (Button b : buttonsByName) {
-       // if (b.isActive()) {
-        if (debug) System.out.println("selectItem " +  b);
-        for (FlexSectionExerciseList.ButtonWithChildren sibling : ((FlexSectionExerciseList.ButtonWithChildren) b).getSiblings()) {
-
-          if (debug) System.out.println("\tselectItem sibling " +  sibling);
-          for (FlexSectionExerciseList.ButtonWithChildren toDisable : sibling.getButtonChildren()) {
-            if (debug) System.out.println("\t\tselectItem sibling child " +  toDisable);
-
-            disableButton(toDisable);
-          }
+        boolean active = toggleButton(false, b);
+        if (active) count++;
+        FlexSectionExerciseList.ButtonWithChildren buttonWithChildren = (FlexSectionExerciseList.ButtonWithChildren) b;
+        if (hasEnabledPathToParent(buttonWithChildren)) {
+          childGroup = enableChildrenButtons(buttonWithChildren, active);
         }
-       // }
       }
-        //
-/*      for (String toSelect : sections) {
-        Collection<Button> buttonsAtName = nameToButton.get(toSelect);
-        if (buttonsAtName == null) {
-          System.err.println(">>>> selectItem " + type + "=" + toSelect + " unknown button?");
-        }
-        else {*/
-          for (Button b : buttonsByName) {
-            boolean active = toggleButton(false, b);
-            if (active) count++;
-            childGroup = enableChildrenButtons(typeToBox, (FlexSectionExerciseList.ButtonWithChildren) b, active);
-          }
-  //      }
-    //  }
-      if (count != sections.size() /*&& !doToggle*/) {
+      if (count != sections.size()) {
         if (debug) System.out.println("Note : selectItem " +
-          //"doToggle " + /*doToggle + */
-          " : " + type + "=" + sections + " (" + sections.size()+
+          " : " + type + "=" + sections + " (" + sections.size() +
           ") but only " + count + " selected");
       }
+      // disableChildrenOfSiblings(buttonsByName);
 
       if (childGroup != null) {
         childGroup.recurseShowEnabled();
-      }
-      else {
+      } else {
         if (debug) System.out.println("selectItem " +
-          //"doToggle " + doToggle +
-          " : " + type + "=" + sections + " (" + sections.size()+
+          " : " + type + "=" + sections + " (" + sections.size() +
           ") no child group.");
       }
       currentSelection = null;   // this just means we have to reset this on the next call to getCurrentSelection
 
       if (count > 0) {
-        if (debug) System.out.println("ButtonGroupSectionWidget: selectItem " + this+
+        if (debug) System.out.println("ButtonGroupSectionWidget: selectItem " + this +
           " row is selected since " + count + " items are selected.");
         for (Panel p : rows) p.addStyleName(color);
       }
-   // boolean anythingSelected = isAnythingSelected();
+      // boolean anythingSelected = isAnythingSelected();
    /*     if (didSelect && !anythingSelected) {
         System.err.println(">>>> selectItem " + type + "=" + sections + " but nothing selected?");
       } */
@@ -302,134 +211,124 @@ class ButtonGroupSectionWidget implements SectionWidget {
     }
   }
 
-  private void clearExistingSelections(Collection<String> sections) {
-    Set<Button> toSelectSet = getButtonsByName(sections);
-    for (Collection<Button> allButtonsAtName : nameToButton.values()) {
-      for (Button unselectCandidate : allButtonsAtName) {
-        if (!toSelectSet.contains(unselectCandidate)) {
-          if (unselectCandidate.isActive()) {
-            if (debug) System.out.println("ButtonGroupSectionWidget: unselecting " + unselectCandidate.getText());
+  private boolean hasEnabledPathToParent(FlexSectionExerciseList.ButtonWithChildren buttonWithChildren) {
+    boolean enabledPath = true;
+    FlexSectionExerciseList.ButtonWithChildren parent = buttonWithChildren.getParentButton();
+    if (parent != null) {
+      enabledPath = parent.isEnabled();
+      if (enabledPath) {
+        enabledPath = hasEnabledPathToParent(parent);
+      }
+    }
+    return enabledPath;
+  }
 
-            unselectCandidate.setActive(false);
-            selected.remove(unselectCandidate);
-          }
+  /**
+   * get parent of each selected button
+   * get siblings
+   * get children of siblings
+   * deselect children, recursively
+   *
+   * @param buttonsByName
+   */
+  private void disableChildrenOfSiblings(Collection<Button> buttonsByName) {
+    if (debug) System.out.println("disableChildrenOfSiblings finding siblings of " + buttonsByName);
+
+    for (Button b : buttonsByName) {
+      List<FlexSectionExerciseList.ButtonWithChildren> siblings = ((FlexSectionExerciseList.ButtonWithChildren) b).getSiblings();
+      if (debug) System.out.println("disableChildrenOfSiblings " + b + " has " + siblings.size() + " siblings");
+      for (FlexSectionExerciseList.ButtonWithChildren sibling : siblings) {
+
+        if (debug) System.out.println("\tdisableChildrenOfSiblings sibling " + sibling);
+        for (FlexSectionExerciseList.ButtonWithChildren toDisable : sibling.getButtonChildren()) {
+          if (debug) System.out.println("\t\tdisableChildrenOfSiblings sibling child " + toDisable);
+
+          disableButton(toDisable);
+        }
+      }
+      //enableParentPath((FlexSectionExerciseList.ButtonWithChildren)b);
+    }
+  }
+
+  private void clearExistingSelections(Collection<String> sections) {
+    Collection<Button> toSelectSet = buttons.getButtonsByName(sections);
+    for (Button unselectCandidate : buttons.getButtons()) {
+      if (!toSelectSet.contains(unselectCandidate)) {
+        if (unselectCandidate.isActive()) {
+          if (debug) System.out.println("ButtonGroupSectionWidget: unselecting " + unselectCandidate.getText());
+
+          unselectCandidate.setActive(false);
+          selected.remove(unselectCandidate);
         }
       }
     }
   }
 
-  private Set<Button> getButtonsByName(Collection<String> sections) {
-    Set<Button> toSelectSet = new HashSet<Button>();
-    for (String toSelect : sections) {
-      Collection<Button> buttonsAtName = nameToButton.get(toSelect);
-
-      toSelectSet.addAll(buttonsAtName);
-    }
-    return toSelectSet;
-  }
-
+  /**
+   * @param doToggle
+   * @param b
+   * @return
+   * @see #selectItem(java.util.Collection)
+   */
   private boolean toggleButton(boolean doToggle, Button b) {
     boolean active = !doToggle || !b.isActive();
     b.setActive(active);
-    if (active) selected.add(b); else selected.remove(b);
- //   if (active) System.out.println("\ttoggleButton " + b.getText() + " is active");
-  //  else  System.out.println("\t\ttoggleButton " + b.getText() + " is inactive");
+    if (active) selected.add(b);
+    else selected.remove(b);
+    //   if (active) System.out.println("\ttoggleButton " + b.getText() + " is active");
+    //  else  System.out.println("\t\ttoggleButton " + b.getText() + " is inactive");
 
     return active;
   }
 
   /**
-   * @see #selectItem(java.util.Collection, java.util.Map)
-   * @param typeToBox
    * @param bb
    * @param active
    * @return
+   * @paramx typeToBox
+   * @see #selectItem(java.util.Collection)
    */
-  private ButtonGroupSectionWidget enableChildrenButtons(Map<String, SectionWidget> typeToBox,
-                                                         FlexSectionExerciseList.ButtonWithChildren bb, boolean active) {
+  private ButtonGroupSectionWidget enableChildrenButtons(FlexSectionExerciseList.ButtonWithChildren bb, boolean active) {
     ButtonGroupSectionWidget childGroup = null;
     List<FlexSectionExerciseList.ButtonWithChildren> buttonChildren = bb.getButtonChildren();
     if (!buttonChildren.isEmpty()) {
-      childGroup = getButtonGroup(typeToBox, bb);
+      childGroup = buttonChildren.iterator().next().getButtonGroup();
       System.out.println("enableChildrenButtons : " + this + " child group " + childGroup + " and recursing over " + buttonChildren.size() + " children");
-
-      childGroup.rememberEnabled(buttonChildren, active);
+      childGroup.buttons.rememberEnabled(buttonChildren, active);
 
       // recurse!
       for (FlexSectionExerciseList.ButtonWithChildren childButton : buttonChildren) {
         System.out.println("\tenableChildrenButtons : " + this + " recurse " + childButton);
 
-        enableChildrenButtons(typeToBox, childButton, active);
+        enableChildrenButtons(childButton, active);
       }
+    } else {
+      // System.out.println("enableChildrenButtons : " + this + " no children of " + bb);
     }
     return childGroup;
   }
 
   private void disableButton(FlexSectionExerciseList.ButtonWithChildren toDisable) {
-    //disableButton(toDisable);
     ButtonGroupSectionWidget buttonGroup = toDisable.getButtonGroup();
     if (buttonGroup == null) {
       System.out.println("disableButton : " + this + " huh? " + toDisable + " has no group?");
-    }
-    else {
-      buttonGroup.disableButtonInGroup(toDisable);
+    } else {
+      buttonGroup.buttons.disableButton(toDisable);
     }
     for (FlexSectionExerciseList.ButtonWithChildren child : toDisable.getButtonChildren()) {
       disableButton(child);
     }
   }
 
-  private ButtonGroupSectionWidget getButtonGroup(Map<String, SectionWidget> typeToBox, FlexSectionExerciseList.ButtonWithChildren bb) {
-    ButtonGroupSectionWidget childGroup;
-    String typeOfChildren = bb.getTypeOfChildren();
-    //System.out.println("getButtonGroup : " + this + " for " + bb + " type of children " + typeOfChildren);
-    childGroup = (ButtonGroupSectionWidget) typeToBox.get(typeOfChildren);
-    return childGroup;
-  }
-
-  /**
-   * @see #enableChildrenButtons(java.util.Map, mitll.langtest.client.bootstrap.FlexSectionExerciseList.ButtonWithChildren, boolean)
-   * @param buttonChildren
-   * @param isEnable
-   */
-  private void rememberEnabled(List<FlexSectionExerciseList.ButtonWithChildren> buttonChildren, boolean isEnable) {
-    System.out.println(this + " rememberEnabled " + enabled.size() + " enabled, " + disabled.size() + " disabled children = " + buttonChildren + " : to enable = " + isEnable);
-
-    if (isEnable) {
-      if (enabled.size() == buttons.size()) {
-        enabled.clear();
-      }
-      enabled.addAll(buttonChildren);
-    }
-    else {
-      enabled.removeAll(buttonChildren);
-    }
-    if (enabled.isEmpty()) enabled.addAll(buttons);
-    disabled.clear();
-    disabled.addAll(buttons);
-    disabled.removeAll(enabled);
-    System.out.println(this + " rememberEnabled now " + enabled.size() + " enabled, " + disabled.size() + " disabled");
-  }
-
-  private void disableButtonInGroup(Button button) {
-    disabled.add(button);
-    enabled.remove(button);
-  }
-
   private void recurseShowEnabled() {
-    showEnabled();
-    if (getFirstButton() != null && getFirstButton().getButtonChildren() != null && !getFirstButton().getButtonChildren().isEmpty()) {
-      FlexSectionExerciseList.ButtonWithChildren firstChild = getFirstButton().getButtonChildren().iterator().next();
-      /*if (firstChild) {
-        System.out.println("recurseShowEnabled : " + this + " recurse on " + getFirstButton().getButtonGroup() + " button " + getFirstButton());
+    buttons.showEnabled();
+    FlexSectionExerciseList.ButtonWithChildren firstButton = buttons.getFirstButton();
+    if (firstButton != null && firstButton.getButtonChildren() != null && !firstButton.getButtonChildren().isEmpty()) {
+      FlexSectionExerciseList.ButtonWithChildren firstChild = firstButton.getButtonChildren().iterator().next();
+      System.out.println("recurseShowEnabled : " + this + " recurse on " + firstButton.getButtonGroup());
 
-      } else {*/
-        System.out.println("recurseShowEnabled : " + this + " recurse on " + getFirstButton().getButtonGroup());
-
-        firstChild.getButtonGroup().recurseShowEnabled();
-      //}
-    }
-    else {
+      firstChild.getButtonGroup().recurseShowEnabled();
+    } else {
       System.out.println("\trecurseShowEnabled : " + this + " has no children.");
     }
   }
@@ -437,26 +336,22 @@ class ButtonGroupSectionWidget implements SectionWidget {
   /**
    * Clear selection or enable all buttons.
    *
-   * @see #selectItem(java.util.Collection, java.util.Map)
+   * @see #selectItem(java.util.Collection)
    */
   private void clearAll() {
+    System.out.println("clearAll : ---------> disable clear button for type " + type + " checking " + buttons + " buttons <----------- ");
+
+    // manager the selected set
     clearSelection();
     currentSelection = null;
 
-    System.out.println("clearAll : ---------> disable clear button for type " +type + " checking " +buttons.size() + " buttons <----------- ");
-
+    // set the clear button state
     clearButton.setEnabled(false);
+    // color the row to show no selection
     for (Panel p : rows) p.removeStyleName(color);
 
+    // show all buttons enabled
     enableAll();
-
-    FlexSectionExerciseList.ButtonWithChildren next = (FlexSectionExerciseList.ButtonWithChildren) buttons.iterator().next();
-
-    if (next.hasChildren()) {
-      SectionWidget sectionWidget = typeToBox.get(next.getTypeOfChildren());
-     // if (sectionWidget == this) System.err.println("\n\n\nwhy so complicated???");
-      sectionWidget.enableAll();
-    }
   }
 
   private void clearSelection() {
@@ -470,10 +365,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
    * @see #clearAll()
    */
   public void enableAll() {
-    System.out.println("----> enableAll for " + this);
-    enabled.addAll(buttons);
-    disabled.clear();
-    showEnabled();
+    buttons.enableAll();
   }
 
   private void setClearButtonState(boolean anythingSelected) {
@@ -483,33 +375,30 @@ class ButtonGroupSectionWidget implements SectionWidget {
         System.out.println("\tsetClearButtonState  : selectItem clear color");
         for (Panel p : rows) p.removeStyleName(color);
       }
-    }
-    else {
+    } else {
       System.err.println("clear button is not set? ");
     }
   }
 
-  @Override
-  public void populateTypeWidget(Collection<String> items, Map<String, Integer> sectionToCount) {}
-  @Override
-  public Widget getWidget() {  return null; }
-
   /**
-   * @see #clearAll()
-   * @see #enableAll()
-   * @seex #recurseShowEnabled(ButtonGroupSectionWidget)
-   * @seex #selectButton(mitll.langtest.client.bootstrap.FlexSectionExerciseList.ButtonWithChildren, boolean, java.util.Map)
+   * @see FlexSectionExerciseList#clearEnabled(String)
    */
-  private void showEnabled() {
-    System.out.println(this + " : showEnabled " + enabled.size() + " enabled, " + disabled.size() + " disabled");
-
-    for (Button b : enabled) {
-      b.setEnabled(true);
-    }
-    for (Button b : disabled) {
-      b.setEnabled(false);
-    }
+  public void clearEnabled() {
+    buttons.clearEnabled();
   }
 
-  public String toString() { return "Group " + type + " with " + buttons.size() + " buttons"; }
+  public void populateTypeWidget(Collection<String> items, Map<String, Integer> sectionToCount) {
+  }
+
+  public Widget getWidget() {
+    return null;
+  }
+
+  public void selectItem(Collection<String> section, boolean doToggle) {
+    throw new IllegalArgumentException("don't call me!");
+  }
+
+  public String toString() {
+    return "Group " + type + " with " + buttons;
+  }
 }
