@@ -31,15 +31,11 @@ import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
-import mitll.langtest.shared.taboo.AnswerBundle;
-import mitll.langtest.shared.taboo.GameInfo;
-import mitll.langtest.shared.taboo.PartnerState;
-import mitll.langtest.shared.taboo.StimulusAnswerPair;
-import mitll.langtest.shared.taboo.TabooState;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
@@ -78,6 +74,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String configDir;
   private final ServerProperties serverProps = new ServerProperties();
   private PathHelper pathHelper;
+  private Random rand = new Random();
 
   private final Cache<String, String> userToExerciseID = CacheBuilder.newBuilder()
       .concurrencyLevel(4)
@@ -114,8 +111,26 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         siteDeployer.doSiteResponse(db, response, siteDeployer, site);
       }
     } else {
-      super.service(request, response);
+      try {
+        super.service(request, response);
+      } catch (ServletException e) {
+        logAndNotifyServerException(e);
+        throw e;
+      } catch (IOException ee) {
+        logAndNotifyServerException(ee);
+        throw ee;
+      } catch (Exception eee) {
+        logAndNotifyServerException(eee);
+        throw new ServletException("rethrow exception", eee);
+      }
     }
+  }
+
+  private void logAndNotifyServerException(Exception e) {
+    String message = "Server Exception : " + ExceptionUtils.getStackTrace(e);
+    String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
+    logger.debug(prefixedMessage);
+    getMailSupport().email("Server Exception on " + pathHelper.getInstallPath(), prefixedMessage);
   }
 
   public Site getSiteByID(long id) {
@@ -966,130 +981,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       leaderboard.addScore(scoreInfo);
     }
     return leaderboard;
-  }
-
-  @Override
-  public void userOnline(long userid, boolean isOnline) {  db.userOnline(userid, isOnline);  }
-
-  /**
-   * @see mitll.langtest.client.taboo.Taboo#checkForPartner
-   * @param userid
-   * @return
-   */
-  @Override
-  public TabooState anyUsersAvailable(long userid) {  return db.getOnlineUsers().anyAvailable(userid);  }
-
-  /**
-   * @see mitll.langtest.client.taboo.Taboo#askUserToChooseRole(long)
-   * @param userid
-   * @param isGiver
-   */
-  @Override
-  public void registerPair(long userid, boolean isGiver) {  db.getOnlineUsers().registerPair(userid, isGiver);  }
-
-  /**
-   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#sendStimulus
-   * @param userid
-   * @param exerciseID
-   * @param stimulus
-   * @param onLastStimulus
-   * @param skippedItem
-   * @param numClues
-   * @param isGameOver
-   * @param giverChosePoorly
-   */
-  @Override
-  public int sendStimulus(long userid, String exerciseID, String stimulus, String answer,
-                          boolean onLastStimulus, boolean skippedItem, int numClues, boolean isGameOver,
-                          boolean giverChosePoorly) {
-    return db.getOnlineUsers().sendStimulus(userid, exerciseID, stimulus, answer, onLastStimulus, numClues, isGameOver, giverChosePoorly);
-  }
-
-  /**
-   * @see mitll.langtest.client.taboo.Taboo#pollForPartnerOnline
-   * @param userid
-   * @param isGiver
-   * @return
-   */
-  @Override
-  public PartnerState isPartnerOnline(long userid, boolean isGiver) { return db.getOnlineUsers().isPartnerOnline(userid, isGiver); }
-
-  Random rand = new Random();
-  /**
-   * @see mitll.langtest.client.taboo.TabooExerciseList#tellPartnerMyChapterSelection(mitll.langtest.client.exercise.SelectionState)
-   * @param giver
-   * @param selectionState
-   */
-  @Override
-  public void registerSelectionState(long giver, Map<String, Collection<String>> selectionState) {
-    Collection<Exercise> exercisesForSection = (selectionState.isEmpty()) ? getExercises(giver) : db.getSectionHelper().getExercisesForSelectionState(selectionState);
-    List<ExerciseShell> exerciseShells = getExerciseShells(exercisesForSection);
-    Collections.shuffle(exerciseShells,rand);    // randomize order
-    db.getOnlineUsers().registerSelectionState(giver, selectionState, exerciseShells);
-  }
-
-  /**
-   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#checkForStimulus(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel)
-   * @param userid
-   * @return
-   */
-  @Override
-  public StimulusAnswerPair checkForStimulus(long userid) {
-    return db.getOnlineUsers().checkForStimulus(userid);
-  }
-
-  /**
-   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#registerAnswer
-   * @param userid
-   * @param exerciseID
-   * @param stimulus
-   * @param answer
-   * @param isCorrect
-   */
-  @Override
-  public void registerAnswer(long userid, String exerciseID, String stimulus, String answer, boolean isCorrect) {
-    db.registerAnswer(userid, exerciseID, stimulus, answer, isCorrect);
-  }
-
-  /**
-   * @see mitll.langtest.client.taboo.GiverExerciseFactory.GiverPanel#checkForCorrect
-   * @param giverUserID
-   * @return
-   */
-  @Override
-  public AnswerBundle checkCorrect(long giverUserID) {
-    return db.getOnlineUsers().checkCorrect(giverUserID);
-  }
-
-  /**
-   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory#startGame()
-   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver
-   * @param userID
-   * @param startOver
-   * @return
-   */
-  public GameInfo startGame(long userID, boolean startOver) {
-    return db.getOnlineUsers().startGame(userID, startOver);
-  }
-
-  /**
-   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver
-   * @param userID
-   * @param score
-   * @param maxPossibleScore
-   */
-  @Override
-  public void postGameScore(long userID, int score, int maxPossibleScore) {
-    db.getOnlineUsers().postGameScore(userID, score, maxPossibleScore);
-  }
-
-  /**
-   * @see mitll.langtest.client.taboo.ReceiverExerciseFactory.ReceiverPanel#dealWithGameOver
-   * @param selectionState
-   * @return
-   */
-  public Leaderboard getLeaderboard(Map<String, Collection<String>> selectionState) {
-    return db.getOnlineUsers().getLeaderboard(selectionState);
   }
 
   public void logMessage(String message) {
