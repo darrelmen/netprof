@@ -388,6 +388,12 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     return GWT.getHostPageBaseURL() + "?" + "flashcard" + "=true";
   }
 
+  /**
+   * @see #doZero()
+   * @param moduleBaseURL
+   * @param widgetID
+   * @param widgetFeedbackID
+   */
   private native void zero(String moduleBaseURL,String widgetID,String widgetFeedbackID)  /*-{
       var stuff =  $wnd.document.getElementById(widgetID);
       //alert("Stuff is " +stuff);
