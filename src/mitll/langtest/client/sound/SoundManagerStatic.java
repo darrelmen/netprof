@@ -8,6 +8,7 @@ package mitll.langtest.client.sound;
  * To change this template use File | Settings | File Templates.
  */
 public class SoundManagerStatic implements SoundManagerAPI {
+  private boolean debug = false;
   public void initialize() {
     SoundManager.initialize();
   }
@@ -17,7 +18,10 @@ public class SoundManagerStatic implements SoundManagerAPI {
    * @return
    */
   public boolean isReady() {
-    return SoundManager.isReady();
+    boolean ready = SoundManager.isReady();
+    if (debug) System.out.println("SoundManagerStatic.isReady " +ready);
+
+    return ready;
   }
 
   /**
@@ -25,7 +29,10 @@ public class SoundManagerStatic implements SoundManagerAPI {
    * @return
    */
   public boolean isOK() {
-    return SoundManager.isOK();
+    boolean ok = SoundManager.isOK();
+    if (debug) System.out.println("SoundManagerStatic.isOK " +ok);
+
+    return ok;
   }
 
   /**
@@ -37,12 +44,12 @@ public class SoundManagerStatic implements SoundManagerAPI {
    * @param file
    */
   public void createSound(Sound sound, String title, String file) {
-  //  System.out.println("SoundManagerStatic.createSound " +sound);
+  if (debug) System.out.println("SoundManagerStatic.createSound " +sound);
     SoundManager.createSound(sound, title, file);
   }
 
   public void destroySound(Sound sound) {
-  //  System.out.println("SoundManagerStatic.destroy " +sound);
+    if (debug)  System.out.println("SoundManagerStatic.destroy " +sound);
     SoundManager.destroySound(sound);
   }
 
@@ -51,10 +58,13 @@ public class SoundManagerStatic implements SoundManagerAPI {
   }
 
   public void play(Sound sound) {
+    if (debug) System.out.println("SoundManagerStatic.play " + sound);
     SoundManager.play(sound);
   }
 
   public void setPosition(Sound sound, double position) {
+    if (debug) System.out.println("SoundManagerStatic.setPosition " +sound);
+
     SoundManager.setPosition(sound, position);
   }
 
@@ -71,18 +81,26 @@ public class SoundManagerStatic implements SoundManagerAPI {
   }
 
   public void loaded() {
+    if (debug) System.out.println("SoundManagerStatic.loaded ");
+
     SoundManager.loaded();
   }
 
   public void songFinished(Sound sound) {
+    if (debug) System.out.println("SoundManagerStatic.songFinished ");
+
     SoundManager.songFinished(sound);
   }
 
   public void songFirstLoaded(Sound sound, double durationEstimate) {
+    if (debug) System.out.println("SoundManagerStatic.songFirstLoaded " +sound);
+
     SoundManager.songFirstLoaded(sound, durationEstimate);
   }
 
   public void songLoaded(Sound sound, double duration) {
+    if (debug) System.out.println("SoundManagerStatic.songLoaded " +sound);
+
     SoundManager.songLoaded(sound,duration);
   }
 
