@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
-import mitll.langtest.client.DialogHelper;
+import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
 
