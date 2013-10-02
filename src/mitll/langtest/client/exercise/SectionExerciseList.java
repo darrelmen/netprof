@@ -456,10 +456,10 @@ public class SectionExerciseList extends PagingExerciseList {
     getSelectionState(token);
     //System.out.println("pushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
     if (token != null && (historyToken.equals(token) || trimmedToken.equals(token))) {
-      System.out.println("\tcurrent token '" + token + "' same as new " + historyToken);
+      System.out.println("\tpushNewItem : current token '" + token + "' same as new " + historyToken);
       loadByIDFromToken(exerciseID);
     } else {
-      System.out.println("\tcurrent token '" + token + "' different menu state '" +historyToken+ "' from new " + exerciseID);
+      System.out.println("\tpushNewItem : current token '" + token + "' different menu state '" +historyToken+ "' from new " + exerciseID);
       setHistoryItem(historyToken);
     }
   }
@@ -634,7 +634,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @param selectionState
    */
-  private void restoreListBoxState(SelectionState selectionState) {
+  protected void restoreListBoxState(SelectionState selectionState) {
     Map<String, Collection<String>> selectionState2 = new HashMap<String, Collection<String>>();
 
     for (String type : typeToBox.keySet()) {
@@ -647,19 +647,35 @@ public class SectionExerciseList extends PagingExerciseList {
       selectionState2.put(type,section);
     }
 
-   // System.out.println("restoreListBoxState : selection state " + selectionState2);
-
-    for (Map.Entry<String, Collection<String>> pair : selectionState2.entrySet()) {
-      String type = pair.getKey();
-      Collection<String> section = pair.getValue();
-      if (!typeToBox.containsKey(type)) {
-        if (!type.equals("item")) {
-          System.err.println("restoreListBoxState for " + selectionState + " : huh? bad type '" + type +
-            "', expecting something in " + typeToBox.keySet());
-        }
-      } else {
-        selectItem(type, section);
+    List<String> toRemove = new ArrayList<String>();
+    for (Map.Entry<String, Collection<String>> typeSelectionPair : selectionState2.entrySet()) {
+      Collection<String> selections = typeSelectionPair.getValue();
+      if (selections.size() == 1 && selections.iterator().next().equals(ANY)) {
+        toRemove.add(typeSelectionPair.getKey());
+        selectItem(typeSelectionPair.getKey(), selections);
       }
     }
+
+    System.out.println("restoreListBoxState : selection state " + selectionState2);
+    Collection<String> types = new ArrayList<String>(getTypeOrder(selectionState2));
+    types.removeAll(toRemove);
+    // whatever is left here are actual selections
+    for (String type : types) {
+      if (selectionState2.containsKey(type)) {
+        Collection<String> section = selectionState2.get(type);
+        if (!typeToBox.containsKey(type)) {
+          if (!type.equals("item")) {
+            System.err.println("restoreListBoxState for " + selectionState + " : huh? bad type '" + type +
+              "', expecting something in " + typeToBox.keySet());
+          }
+        } else {
+          selectItem(type, section);
+        }
+      }
+    }
+  }
+
+  protected Collection<String> getTypeOrder(Map<String, Collection<String>> selectionState2) {
+    return selectionState2.keySet();
   }
 }
