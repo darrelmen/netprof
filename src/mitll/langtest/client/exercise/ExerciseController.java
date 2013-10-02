@@ -7,7 +7,6 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
-import mitll.langtest.shared.taboo.GameInfo;
 
 import java.util.Collection;
 import java.util.Map;
@@ -26,7 +25,6 @@ public interface ExerciseController {
   boolean loadNextExercise(ExerciseShell current);
   boolean loadNextExercise(String id);
   void makeExercisePanel(Exercise current);
-  void setGameOnGiver(GameInfo game);
   void startOver();
 
   void askForRandomExercise(AsyncCallback<Exercise> callback);
@@ -76,8 +74,8 @@ public interface ExerciseController {
 
   int getFlashcardPreviewFrameHeight();
 
- // void addAdHocExercise(String label);
   void setSelectionState(Map<String,Collection<String>> selectionState);
   PropertyHandler getProps();
 
+  String logException(Throwable throwable);
 }
