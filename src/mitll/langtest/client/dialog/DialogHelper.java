@@ -1,4 +1,4 @@
-package mitll.langtest.client;
+package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Column;
