@@ -1,15 +1,8 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.shared.Exercise;
 import org.apache.log4j.Logger;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
