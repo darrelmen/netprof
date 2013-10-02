@@ -394,19 +394,25 @@ public class SectionExerciseList extends PagingExerciseList {
 
       if (isStaleResponse(result)) {
         System.out.println("\t----> ignoring result " + result.reqID + " b/c before latest " + lastReqID);
-      } else if (!result.exercises.isEmpty()) {
-        if (item != null) {
-          rememberExercises(result.exercises);
-          if (!loadByID(item)) {
-            System.out.println("SectionExerciseList.loadExercises : loading first exercise since couldn't load item=" + item);
-            loadFirstExercise();
-          }
+      } else {
+        if (result.exercises.isEmpty()) {
+          gotEmptyExerciseList();
         } else {
-          super.onSuccess(result);     // remember and load the first one
+          if (item != null) {
+            rememberExercises(result.exercises);
+            if (!loadByID(item)) {
+              System.out.println("SectionExerciseList.loadExercises : loading first exercise since couldn't load item=" + item);
+              loadFirstExercise();
+            }
+          } else {
+            super.onSuccess(result);     // remember and load the first one
+          }
         }
       }
     }
   }
+
+  protected void gotEmptyExerciseList() {}
 
   /**
    * @see #pushFirstListBoxSelection
