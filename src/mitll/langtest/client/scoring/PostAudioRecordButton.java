@@ -145,7 +145,7 @@ public abstract class PostAudioRecordButton extends RecordButton {
   @Override
   protected void showRecording() {
     super.showRecording();
-    int w = getRecord().getOffsetWidth();
+    /*int w =*/ getRecord().getOffsetWidth();
     ((Button) getRecord()).setText(STOP);
    // if (getRecord().getOffsetWidth() < w) getRecord().setWidth(w + "px");
   }
