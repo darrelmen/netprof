@@ -2,6 +2,7 @@ package mitll.langtest.shared.custom;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.User;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.Set;
  * Time: 8:18 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UserList implements IsSerializable {
+public class UserList extends ExerciseShell {//implements IsSerializable {
   private User creator;
   private Set<Long> visitorIDs = new HashSet<Long>();
   private int uniqueID;
@@ -28,6 +29,7 @@ public class UserList implements IsSerializable {
 
   public UserList(){}
   public UserList(int uniqueID, User user, String name, String description, String classMarker){
+    super(""+uniqueID,name);
     this.uniqueID = uniqueID;
     this.creator = user;
     this.name = name;
