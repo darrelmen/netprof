@@ -17,7 +17,7 @@ import java.util.Set;
  * Time: 8:18 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UserList extends ExerciseShell {//implements IsSerializable {
+public class UserList extends ExerciseShell {
   private User creator;
   private Set<Long> visitorIDs;
   private int uniqueID;
@@ -26,7 +26,7 @@ public class UserList extends ExerciseShell {//implements IsSerializable {
   private String description;
   private String classMarker;
   private long modified;
-  private List<Exercise> exercises = new ArrayList<Exercise>();
+  private List<UserExercise> exercises = new ArrayList<UserExercise>();
 
   public UserList(){}
   public UserList(int uniqueID, User user, String name, String description, String classMarker){
@@ -41,7 +41,7 @@ public class UserList extends ExerciseShell {//implements IsSerializable {
     modified = System.currentTimeMillis();
   }
 
-  public void addExercise(Exercise toAdd) {
+  public void addExercise(UserExercise toAdd) {
     exercises.add(toAdd);
     modified = System.currentTimeMillis();
   }
@@ -60,7 +60,7 @@ public class UserList extends ExerciseShell {//implements IsSerializable {
     return classMarker;
   }
 
-  public List<Exercise> getExercises() {
+  public List<UserExercise> getExercises() {
     return exercises;
   }
 
@@ -78,6 +78,10 @@ public class UserList extends ExerciseShell {//implements IsSerializable {
 
   public long getModified() {
     return modified;
+  }
+
+  public boolean contains(UserExercise userExercise) {
+    return getExercises().contains(userExercise);
   }
 
   @Override
