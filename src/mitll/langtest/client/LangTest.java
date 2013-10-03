@@ -100,7 +100,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Anchor users;
   private Anchor showResults, monitoring;
   private HTML releaseStatus;
-
+  Navigation navigation;
   /**
    * Make an exception handler that displays the exception.
    */
@@ -249,9 +249,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // third row ---------------
 
-    Panel thirdRow = new HorizontalPanel();
+/*    Panel thirdRow = new HorizontalPanel();
     Panel leftColumn = new SimplePanel();
-    thirdRow.add(leftColumn);
+    thirdRow.add(leftColumn);*/
+    Panel thirdRow = new FluidRow();
+    thirdRow.getElement().setId("outerThirdRow");
+
     widgets.add(thirdRow);
 
     if ((isCRTDataCollectMode() || props.isDataCollectMode())) {
@@ -263,11 +266,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // set up center panel, initially with flash record panel
     currentExerciseVPanel = new FluidContainer();
-
+    currentExerciseVPanel.getElement().setId("currentExercisePanel");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
 
-    secondRow.add(new Navigation(service, userManager,this).getNav(currentExerciseVPanel));
+    navigation = new Navigation(service, userManager, this);
+    secondRow.add(navigation.getNav(currentExerciseVPanel));
    // makeExerciseList(secondRow, leftColumn);
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("floatLeft");
@@ -585,6 +589,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         if (exerciseList != null) {
           exerciseList.onResize();
         }
+        if (navigation != null) navigation.onResize();
         if (flashcard != null) {
           flashcard.onResize();
         }
@@ -622,6 +627,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Check the URL parameters for special modes.
    *
    * If in goodwave (pronunciation scoring) mode or auto crt mode, skip the user login.
+   * @see #onModuleLoad2()
    */
   private void modeSelect() {
     boolean isGrading = props.isGrading();
@@ -864,11 +870,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private boolean doEverythingAfterFactory(long userID) {
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
       System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser);
-      if (!shouldCollectAudio() || flashRecordPanel.gotPermission() && exerciseList != null) {
+      if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
         //  System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
-        exerciseList.getExercises(userID);
+        if (exerciseList != null) exerciseList.getExercises(userID);
+        if (navigation != null) navigation.showInitialState();
       }
       lastUser = userID;
+
       return true;
     } else if (props.isTimedGame()) {
       exerciseList.reloadExercises();
