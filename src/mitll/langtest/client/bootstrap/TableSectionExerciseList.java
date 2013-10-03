@@ -101,7 +101,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   }
 
     @Override
-  protected void addTableWithPager() {  }
+  protected void addTableWithPager(PagingContainer<? extends ExerciseShell> pagingContainer) {  }
 
   private Panel getPagerAndTable(CellTable<?> table) {
     return getPagerAndTable(table, table);
@@ -466,7 +466,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
 
   PagingContainer<Exercise> exercisePagingContainer;
   @Override
-  protected void makePagingContainer() {
+  protected PagingContainer<? extends ExerciseShell> makePagingContainer() {
     final TableSectionExerciseList outer = this;
     exercisePagingContainer = new PagingContainer<Exercise>(controller) {
       /**
@@ -499,6 +499,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
       }
     };
     pagingContainer = exercisePagingContainer;
+    return pagingContainer;
   }
 
   /**
