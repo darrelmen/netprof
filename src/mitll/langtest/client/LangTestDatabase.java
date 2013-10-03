@@ -148,5 +148,6 @@ public interface LangTestDatabase extends RemoteService {
 
   void addDLIUser(DLIUser dliUser);
   int addUserList(long userid, String name, String description, String dliClass);
+  Collection<UserList> getListsForUser(int userid);
   List<UserList> getUserListsForText(String search);
 }
