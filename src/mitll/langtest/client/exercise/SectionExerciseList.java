@@ -74,7 +74,7 @@ public class SectionExerciseList extends PagingExerciseList {
   @Override
   protected void addComponents() {
     add(sectionPanel = new VerticalPanel());
-    addTableWithPager();
+    addTableWithPager(pagingContainer);
   }
 
   /**

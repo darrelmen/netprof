@@ -3,6 +3,8 @@ package mitll.langtest.client;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.DLIUser;
+import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
@@ -137,5 +139,7 @@ public interface LangTestDatabaseAsync {
 
   void getUserListsForText(String search, AsyncCallback<List<UserList>> async);
 
-  void getListsForUser(int userid, AsyncCallback<Collection<UserList>> async);
+  void getListsForUser(int userid, boolean onlyCreated, AsyncCallback<Collection<UserList>> async);
+
+  void addItemToUserList(int userListID, UserExercise userExercise, AsyncCallback<List<UserExercise>> async);
 }

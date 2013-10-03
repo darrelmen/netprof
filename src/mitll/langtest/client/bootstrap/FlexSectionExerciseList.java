@@ -22,10 +22,12 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.exercise.SelectionState;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.SectionNode;
 
 import java.util.ArrayList;
@@ -55,6 +57,17 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   protected Heading statusHeader = new Heading(4);
   private Collection<String> typeOrder;
 
+  /**
+   * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
+   * @param secondRow
+   * @param currentExerciseVPanel
+   * @param service
+   * @param feedback
+   * @param showTurkToken
+   * @param showInOrder
+   * @param showListBox
+   * @param controller
+   */
   public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
                                  boolean showTurkToken, boolean showInOrder, boolean showListBox, ExerciseController controller) {
@@ -73,7 +86,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
   @Override
   protected void addComponents() {
-    addTableWithPager();
+    PagingContainer<? extends ExerciseShell> exerciseShellPagingContainer = makePagingContainer();
+    System.out.println("addComponents made container " + exerciseShellPagingContainer);
+    addTableWithPager(exerciseShellPagingContainer);
   }
 
   /**
