@@ -53,7 +53,7 @@ public class GradedExerciseList extends PagingExerciseList {
   @Override
   protected void loadFirstExercise() {
     getNextUngraded(true);
-    selectFirst();
+    pagingContainer.selectFirst();
   }
   /**
    * @see #loadExercise(mitll.langtest.shared.ExerciseShell)

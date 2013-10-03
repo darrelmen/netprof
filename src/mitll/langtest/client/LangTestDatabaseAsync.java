@@ -136,4 +136,6 @@ public interface LangTestDatabaseAsync {
   void addUserList(long userid, String name, String description, String dliClass, AsyncCallback<Integer> async);
 
   void getUserListsForText(String search, AsyncCallback<List<UserList>> async);
+
+  void getListsForUser(int userid, AsyncCallback<Collection<UserList>> async);
 }
