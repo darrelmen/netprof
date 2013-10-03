@@ -44,7 +44,7 @@ import java.util.Set;
 public class ExcelImport implements ExerciseDAO {
   private static Logger logger = Logger.getLogger(ExcelImport.class);
 
-  private static final boolean TESTING = false;
+  private static final boolean TESTING = true;
   private static final boolean SHOW_SKIPS = false;
   private static final int MIN_TABOO_ITEMS = 1;
 
