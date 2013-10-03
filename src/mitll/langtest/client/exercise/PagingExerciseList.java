@@ -1,33 +1,11 @@
 package mitll.langtest.client.exercise;
 
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.SafeHtmlCell;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.BrowserEvents;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
-import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Show exercises with a cell table that can handle thousands of rows.
@@ -96,13 +74,14 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   protected void addComponents() {
-    makePagingContainer();
-    addTableWithPager();
+    PagingContainer<? extends ExerciseShell> exerciseShellPagingContainer = makePagingContainer();
+    System.out.println("made container " + exerciseShellPagingContainer);
+    addTableWithPager(exerciseShellPagingContainer);
   }
 
-  protected void makePagingContainer() {
+  protected PagingContainer<? extends ExerciseShell> makePagingContainer() {
     final PagingExerciseList outer = this;
-    pagingContainer = new PagingContainer<ExerciseShell>(controller) {
+    PagingContainer<ExerciseShell> pagingContainer1 = new PagingContainer<ExerciseShell>(controller) {
       @Override
       protected void gotClickOnItem(ExerciseShell e) {
         outer.gotClickOnItem(e);
@@ -115,9 +94,13 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
         selectFirst();    //To change body of overridden methods use File | Settings | File Templates.
       }
     };
+    pagingContainer = pagingContainer1;
+    return pagingContainer1;
   }
 
-  protected void addTableWithPager() {
+  protected void addTableWithPager(PagingContainer<? extends ExerciseShell> pagingContainer) {
+    System.out.println("addTableWithPager container " + pagingContainer);
+
     Panel container = pagingContainer.addTableWithPager();
     add(container);
  /*   makeCellTable();
