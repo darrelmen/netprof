@@ -22,7 +22,6 @@ public class UserDAO extends DAO {
 
   public UserDAO(Database database) { super(database); }
 
-
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p/>
@@ -33,29 +32,27 @@ public class UserDAO extends DAO {
    * @param gender
    * @param experience
    * @param ipAddr
-   * @param firstName
-   * @param lastName
    * @param nativeLang
    * @param dialect
    * @param userID
    * @param enabled
    * @return newly inserted user id, or 0 if something goes horribly wrong
    */
-  public long addUser(int age, String gender, int experience, String ipAddr, String firstName,
-                                   String lastName, String nativeLang, String dialect, String userID, boolean enabled) {
+  public long addUser(int age, String gender, int experience, String ipAddr,
+                      String nativeLang, String dialect, String userID, boolean enabled) {
     try {
       // there are much better ways of doing this...
       long max = 0;
       for (User u : getUsers()) if (u.id > max) max = u.id;
       logger.info("addUser : max is " + max + " new user '" + userID + "' age " +age +
-          " gender " + gender + " '" + firstName + " " + lastName +"'");
+          " gender " + gender);// + " '" + firstName + " " + lastName +"'");
 
       Connection connection = database.getConnection();
       PreparedStatement statement;
 
       statement = connection.prepareStatement(
-          "INSERT INTO users(id,age,gender,experience,ipaddr,firstName,lastName,nativeLang,dialect, userID,enabled) " +
-          "VALUES(?,?,?,?,?,?,?,?,?,?,?);");
+          "INSERT INTO users(id,age,gender,experience,ipaddr,nativeLang,dialect,userID,enabled) " +
+          "VALUES(?,?,?,?,?,?,?,?,?);");
       int i = 1;
       long newID = max + 1;
       statement.setLong(i++, newID);
@@ -63,8 +60,6 @@ public class UserDAO extends DAO {
       statement.setInt(i++, gender.equalsIgnoreCase("male") ? 0 : 1);
       statement.setInt(i++, experience);
       statement.setString(i++, ipAddr);
-      statement.setString(i++, firstName);
-      statement.setString(i++, lastName);
       statement.setString(i++, nativeLang);
       statement.setString(i++, dialect);
       statement.setString(i++, userID);
@@ -88,8 +83,7 @@ public class UserDAO extends DAO {
 
       String sql = "UPDATE users " +
           "SET enabled=" +enabled+
-          " " +
-          "WHERE id=" + id;
+          " WHERE id=" + id;
       logger.debug("enableUser " + id);
       statement = connection.prepareStatement(sql);
 
@@ -144,9 +138,6 @@ public class UserDAO extends DAO {
         "experience INT, " +
         "ipaddr VARCHAR, " +
         "password VARCHAR, " +
-        "firstName VARCHAR, " +
-        "lastName VARCHAR, " +
-
         "nativeLang VARCHAR, " +
         "dialect VARCHAR, " +
         "userID VARCHAR, " +
@@ -184,11 +175,10 @@ public class UserDAO extends DAO {
     for (Grader u : graders) {
       if (userExists(u.name) == -1) {
         logger.info("adding grader " + u);
-        addUser(0, "male", 240, "", "", "", "", "", u.name, true);
+        addUser(0, "male", 240, "", "", "", u.name, true);
       }
     }
   }
-
 
   private void addColumn(Connection connection, String column, String type) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE users ADD " +
