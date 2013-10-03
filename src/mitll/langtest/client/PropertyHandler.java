@@ -79,7 +79,7 @@ public class PropertyHandler {
   private static final String FLASHCARD_PREVIEW_HEIGHT = "flashcardPreviewHeight";
   private static final int DEFAULT_FLASHCARD_PREVIEW_HEIGHT = 610;
 
-  public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT, DATA_COLLECTOR }
+  public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT, DATA_COLLECTOR, SIMPLE }
 
   private final Map<String, String> props;
 
