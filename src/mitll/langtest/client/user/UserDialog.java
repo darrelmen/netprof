@@ -1,27 +1,15 @@
 package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.ControlLabel;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
-import com.github.gwtbootstrap.client.ui.PasswordTextBox;
-import com.github.gwtbootstrap.client.ui.Popover;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.BackdropType;
-import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Timer;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.DisclosurePanel;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.FlowPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 
@@ -35,7 +23,7 @@ import java.util.List;
  * Time: 4:26 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UserDialog extends BasicDialog {
+public abstract class UserDialog extends BasicDialog {
   protected static final int USER_ID_MAX_LENGTH = 80;
 
   private static final String GRADING = "grading";
@@ -57,11 +45,17 @@ public class UserDialog extends BasicDialog {
 
   protected DisclosurePanel dp;
   protected final LangTestDatabaseAsync service;
+  protected UserManager userManager;
+  protected UserNotification userNotification;
 
-  public UserDialog(LangTestDatabaseAsync service, PropertyHandler props) {
+  public UserDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, UserNotification userNotification) {
     this.service = service;
     this.props = props;
+    this.userManager = userManager;
+    this.userNotification =  userNotification;
   }
+
+  public abstract void display(String title);
 
   /**
    * From Modal code.
@@ -90,18 +84,6 @@ public class UserDialog extends BasicDialog {
     return dialogBox;
   }
 
-  protected void markError(FormField dialectGroup, String message) {
-    markError(dialectGroup.group, dialectGroup.box, "Try Again", message);
-  }
-
-  protected void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
-    dialectGroup.setType(ControlGroupType.ERROR);
-    dialect.setFocus(true);
-
-    setupPopover(dialect, header, message);
-  }
-
-
   protected ListBox getGenderBox() {
     List<String> values = Arrays.asList("Male", "Female");
     return getListBox(values);
@@ -124,5 +106,64 @@ public class UserDialog extends BasicDialog {
   private boolean checkPassword(TextBox password) {
     String trim = password.getText().trim();
     return trim.equalsIgnoreCase(GRADING) || trim.equalsIgnoreCase(TESTING);
+  }
+
+  protected Button makeCloseButton() {
+    final Button closeButton = new Button("Login");
+    closeButton.setType(ButtonType.PRIMARY);
+
+    // We can set the id of a widget by accessing its Element
+    closeButton.getElement().setId("closeButton");
+    return closeButton;
+  }
+
+  protected Button addLoginButton(Modal dialogBox) {
+    final Button login = new Button("Login");
+    login.setType(ButtonType.PRIMARY);
+    login.setTitle("Hit enter to log in.");
+    // We can set the id of a widget by accessing its Element
+    login.getElement().setId("login");
+    FlowPanel hp = new FlowPanel();
+    hp.getElement().getStyle().setFloat(Style.Float.RIGHT);
+    hp.add(login);
+
+    dialogBox.add(hp);
+    return login;
+  }
+
+  protected boolean isUserIDValid(FormField user) {
+    final String userID = user.box.getText();
+    if (user.box.getText().length() == 0) {
+      markError(user, "Please enter a userid.");
+      return false;
+    } else if (userID.length() > USER_ID_MAX_LENGTH) {
+      markError(user, "Please enter a user id of reasonable length.");
+      return false;
+    }
+    return true;
+  }
+
+  protected boolean isPasswordValid(FormField password) {
+    boolean valid = password.box.getText().length() > 0;
+    if (!valid) {
+      markError(password, "Please enter a password.");
+    }
+    else if (!checkPassword(password)) {
+      markError(password, "Please use password from the email.");
+      return false;
+    }
+    return true;
+  }
+
+  protected void storeAudioType(String type) {
+    if (props.isCollectAudio()) {
+      userNotification.rememberAudioType(type);
+    }
+  }
+
+  protected void userExists(Integer result, String userID, Modal dialogBox, String audioType, PropertyHandler.LOGIN_TYPE loginType) {
+    dialogBox.hide();
+    storeAudioType(audioType);
+    userManager.storeUser(result, audioType, userID, loginType);
   }
 }
