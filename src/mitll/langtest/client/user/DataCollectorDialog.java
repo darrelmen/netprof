@@ -8,13 +8,7 @@ import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextBox;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
-import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
-import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
-import com.github.gwtbootstrap.client.ui.event.ShowEvent;
-import com.github.gwtbootstrap.client.ui.event.ShowHandler;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -24,7 +18,6 @@ import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DisclosurePanel;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -40,32 +33,20 @@ import mitll.langtest.shared.Result;
  * To change this template use File | Settings | File Templates.
  */
 public class DataCollectorDialog extends UserDialog {
-  private final UserNotification langTest;
-  private UserManager userManager;
-  // private String loginTitle = "Data Collector Login";
-
   public DataCollectorDialog(LangTestDatabaseAsync service, PropertyHandler props,
                              UserNotification langTest,
                              UserManager userManager) {
-    super(service, props);
-    this.langTest = langTest;
-    this.userManager = userManager;
+    super(service, props, userManager, langTest);
   }
 
   /**
    * Really should be named data collector (audio recorder) login
    */
-  public void displayTeacherLogin(String loginTitle) {
+  public void display(String title) {
     final Modal dialogBox = getDialog();
 
-    dialogBox.setTitle(loginTitle);
+    dialogBox.setTitle(title);
 
-    final Button login = new Button("Login");
-    login.setType(ButtonType.PRIMARY);
-    login.setEnabled(true);
-    login.setTitle("Hit enter to log in.");
-    // We can set the id of a widget by accessing its Element
-    login.getElement().setId("login");
     final FormField user = addControlFormField(dialogBox, "User ID");
     final FormField password = addControlFormField(dialogBox, "Password", true);
     final RadioButton regular = new RadioButton("AudioType", "Regular Audio Recording");
@@ -132,22 +113,14 @@ public class DataCollectorDialog extends UserDialog {
       dialogBox.add(dp);
     }
 
-    FlowPanel hp = new FlowPanel();
-    hp.getElement().getStyle().setFloat(Style.Float.RIGHT);
-    hp.add(login);
-
-    dialogBox.add(hp);
+    final Button login = addLoginButton(dialogBox);
 
     login.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         // System.out.println("login button got click " + event);
 
-        final String userID = user.box.getText();
-        if (userID.length() > USER_ID_MAX_LENGTH) {
-          markError(user, "Please enter a user id of reasonable length.");
-        } else if (userID.length() == 0) {
-          markError(user, "Please enter a user id.");
-        } else {
+        if (isUserIDValid(user) && isPasswordValid(password) && isValidAudio(regular, fastThenSlow, recordingStyle)) {
+          final String userID = user.box.getText();
           service.userExists(userID, new AsyncCallback<Integer>() {
             public void onFailure(Throwable caught) {
               Window.alert("userExists : Couldn't contact server");
@@ -156,49 +129,31 @@ public class DataCollectorDialog extends UserDialog {
             public void onSuccess(Integer result) {
               boolean exists = result != -1;
               if (exists) {
-                if (!checkPassword(password)) {
-                  markError(password, "Please use password from the email.");
-                } else if (checkAudioSelection(regular, fastThenSlow)) {
-                  markError(recordingStyle, regular, "Try again", "Please choose either regular or regular then slow audio recording.");
-
-                } else {
-                  dialogBox.hide();
-                  String audioType = fastThenSlow.getValue() ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
-                  storeAudioType(audioType);
-                  userManager.storeUser(result, audioType, userID, PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR);
-                }
+                String audioType = fastThenSlow.getValue() ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
+                userExists(result, userID, dialogBox, audioType, PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR);
               } else {
-                System.out.println(userID + " doesn't exist");
-                if (checkPassword(password)) {
-                  doRegistration(user, password, recordingStyle,
-                    regular, fastThenSlow, nativeLangGroup, dialectGroup, ageEntryGroup,
-                    experienceGroup, genderGroup, dialogBox, login);
-                } else {
-                  markError(password, "Please use password from the email.");
-                }
+                doRegistration(user, password, recordingStyle,
+                  regular, fastThenSlow, nativeLangGroup, dialectGroup, ageEntryGroup,
+                  experienceGroup, genderGroup, dialogBox, login);
               }
             }
           });
         }
       }
     });
-    dialogBox.addHiddenHandler(new HiddenHandler() {
-      @Override
-      public void onHidden(HiddenEvent hiddenEvent) {
-        removeKeyHandler();
-      }
-    });
 
-    dialogBox.addShowHandler(new ShowHandler() {
-      @Override
-      public void onShow(ShowEvent showEvent) {
-        addKeyHandler(login);
-      }
-    });
+    addKeyHandler(login, dialogBox);
 
     dialogBox.show();
   }
 
+  protected boolean isValidAudio(RadioButton regular, RadioButton fastThenSlow,ControlGroup recordingStyle) {
+    if (checkAudioSelection(regular, fastThenSlow)) {
+      markError(recordingStyle, regular, "Try again", "Please choose either regular or regular then slow audio recording.");
+      return false;
+    }
+    return true;
+  }
 
   /**
    * @param user
@@ -212,7 +167,7 @@ public class DataCollectorDialog extends UserDialog {
    * @param genderBox
    * @param dialogBox
    * @param login
-   * @see #displayTeacherLogin
+   * @see #display
    */
   private void doRegistration(FormField user, FormField password, ControlGroup audioGroup,
                               RadioButton regular,
@@ -221,56 +176,46 @@ public class DataCollectorDialog extends UserDialog {
                               ListBoxFormField experienceBox, ListBoxFormField genderBox,
                               Modal dialogBox,
                               Button login) {
+    boolean valid = true;
+    if (!props.isDataCollectAdminView() && checkAudioSelection(regular, fastThenSlow)) {
+      markError(audioGroup, regular, "Try Again", "Please choose either regular or regular then slow audio recording.");
+      valid = false;
+    } else if (!props.isDataCollectAdminView() && nativeLang.getText().isEmpty()) {
+      if (!dp.isOpen()) {
+        dp.setOpen(true);   // reveal registration fields
+      } else {
+        markError(nativeLang, "Language is empty");
+      }
+      valid = false;
+    } else if (!props.isDataCollectAdminView() && dialect.getText().isEmpty()) {
+      markError(dialect, "Dialect is empty");
+      valid = false;
+    }
 
-    boolean valid = user.box.getText().length() > 0;
-    if (!valid) {
-      markError(user, "Please enter a userid.");
-    } else {
-      valid = password.box.getText().length() > 0;
-      if (!valid) {
-        markError(user, "Please enter a userid.");
+    if (valid) {
+      try {
+        int age = getAge(ageEntryBox.box);
+        if (!props.isDataCollectAdminView() && (age < MIN_AGE) || (age > MAX_AGE && age != TEST_AGE)) {
+          valid = false;
+          markError(ageEntryBox, "age '" + age + "' is too young or old.");
+        }
+      } catch (NumberFormatException e) {
+        markError(ageEntryBox, "age '" + ageEntryBox.getText() + "' is invalid.");
+        valid = false;
       }
     }
     if (valid) {
-      valid = checkPassword(password);
-      if (!valid) {
-        markError(password, "Please use password from the email sent to you.");
-        valid = false;
-      } else if (!props.isDataCollectAdminView() && checkAudioSelection(regular, fastThenSlow)) {
-        markError(audioGroup, regular, "Try Again", "Please choose either regular or regular then slow audio recording.");
-        valid = false;
-      } else if (!props.isDataCollectAdminView() && nativeLang.getText().isEmpty()) {
-        if (!dp.isOpen()) {
-          dp.setOpen(true);   // reveal registration fields
-        } else {
-          markError(nativeLang, "Language is empty");
-        }
-        valid = false;
-      } else if (!props.isDataCollectAdminView() && dialect.getText().isEmpty()) {
-        markError(dialect, "Dialect is empty");
-        valid = false;
-      }
-
-      if (valid) {
-        try {
-          int age = getAge(ageEntryBox.box);
-          if (!props.isDataCollectAdminView() && (age < MIN_AGE) || (age > MAX_AGE && age != TEST_AGE)) {
-            valid = false;
-            markError(ageEntryBox, "age '" + age + "' is too young or old.");
-          }
-        } catch (NumberFormatException e) {
-          markError(ageEntryBox, "age '" + ageEntryBox.getText() + "' is invalid.");
-          valid = false;
-        }
-      }
-      if (valid) {
-        int enteredAge = getAge(ageEntryBox.box);
-        checkUserOrCreate(enteredAge, user, experienceBox.box, genderBox.box, nativeLang.box, dialect.box, dialogBox,
-          login, fastThenSlow.getValue());
-      } else {
-        //System.out.println("not valid ------------ ?");
-      }
+      int enteredAge = getAge(ageEntryBox.box);
+      checkUserOrCreate(enteredAge, user, experienceBox.box, genderBox.box, nativeLang.box, dialect.box, dialogBox,
+        login, fastThenSlow.getValue());
+    } else {
+      //System.out.println("not valid ------------ ?");
     }
+
+  }
+
+  private boolean checkAudioSelection(RadioButton regular, RadioButton fastThenSlow) {
+    return props.isCollectAudio() && !regular.getValue() && !fastThenSlow.getValue();
   }
 
   /**
@@ -283,7 +228,7 @@ public class DataCollectorDialog extends UserDialog {
    * @param dialogBox
    * @param closeButton
    * @param isFastAndSlow
-   * @seex #displayTeacherLogin()
+   * @seex #display()
    */
   private void checkUserOrCreate(final int enteredAge, final FormField user, final ListBox experienceBox,
                                  final ListBox genderBox,
@@ -307,7 +252,6 @@ public class DataCollectorDialog extends UserDialog {
       }
     });
   }
-
 
   /**
    * @param age
@@ -335,8 +279,6 @@ public class DataCollectorDialog extends UserDialog {
     service.addUser(age,
       genderBox.getValue(genderBox.getSelectedIndex()),
       monthsOfExperience,
-      "",
-      "",
       nativeLang.getText(),
       dialect.getText(),
       user.getText(),
@@ -350,22 +292,9 @@ public class DataCollectorDialog extends UserDialog {
 
         public void onSuccess(Long result) {
           System.out.println("addUser : server result is " + result);
-          dialogBox.hide();
           String audioType = isFastAndSlow ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
-          storeAudioType(audioType);
-          userManager.storeUser(result, audioType, user.getText(), PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR);
+          userExists(result.intValue(), user.getText(), dialogBox, audioType, PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR);
         }
       });
-  }
-
-  private void storeAudioType(String type) {
-    if (props.isCollectAudio()) {
-      langTest.rememberAudioType(type);
-    }
-  }
-
-
-  private boolean checkAudioSelection(RadioButton regular, RadioButton fastThenSlow) {
-    return props.isCollectAudio() && !regular.getValue() && !fastThenSlow.getValue();
   }
 }
