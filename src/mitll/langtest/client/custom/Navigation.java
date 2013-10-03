@@ -1,15 +1,13 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Icon;
-import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.TextArea;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -26,12 +24,13 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.EnterKeyButtonHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
+import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
 
@@ -46,7 +45,7 @@ import java.util.Collection;
  */
 public class Navigation extends BasicDialog implements RequiresResize {
   public static final ButtonType UNCLICKED = ButtonType.INFO;
-  //private final ExerciseController controller;
+  private final ExerciseController controller;
   LangTestDatabaseAsync service;
   UserManager userManager;
   int userListID;
@@ -57,7 +56,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
   public Navigation(LangTestDatabaseAsync service, UserManager userManager, ExerciseController controller) {
     this.service = service;
    this.userManager = userManager;
-  //  this.controller = controller;
+   this.controller = controller;
   }
 
   /**
@@ -65,71 +64,93 @@ public class Navigation extends BasicDialog implements RequiresResize {
    * @param thirdRow
    * @return
    */
-  public Widget getNav(final Panel thirdRow) {
-    FluidContainer container = new FluidContainer();
-     yourItems = new Button("Your Lessons", IconType.FOLDER_CLOSE);
+  public Widget getNav(final FluidRow secondRow,// final Panel contentPanel,
+                       final Panel thirdRow, final UserFeedback feedback, final PropertyHandler props) {
+    final FluidContainer container = new FluidContainer();
+
+    final FluidRow contentPanel = new FluidRow();
+    FluidRow buttonRow = getButtonRow(secondRow, thirdRow, contentPanel);
+    container.add(buttonRow);
+    container.add(contentPanel);
+
+   // container.add(chapters);
+    return container;
+  }
+
+  private FluidRow getButtonRow(final FluidRow secondRow, final Panel thirdRow,final FluidRow contentPanel) {
+    FluidRow buttonRow = new FluidRow();
+    yourItems = new Button("Your Lessons", IconType.FOLDER_CLOSE);
     yourItems.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         // ask the server for your lessons
         System.out.println("clicked on your items.");
+        hideChapterView(secondRow, thirdRow, contentPanel);
+
         selectTab(yourItems);
-        viewLessons(thirdRow);
+        viewLessons(contentPanel);
       }
     });
     yourItems.setType(UNCLICKED);
-    container.add(yourItems);
+    buttonRow.add(yourItems);
     final Button create = new Button("Create", IconType.PLUS_SIGN);
     create.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         selectTab(create);
+        hideChapterView(secondRow, thirdRow, contentPanel);
 
-        doCreate(thirdRow);
+        doCreate(contentPanel);
         // TODO : add box to permit adding new entries
         // record audio --- how much feedback?
       }
     });
     create.setType(UNCLICKED);
+    buttonRow.add(create);
 
-    container.add(create);
     final Button browse = new Button("Browse", IconType.TH_LIST);
     browse.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         selectTab(browse);
+        hideChapterView(secondRow, thirdRow, contentPanel);
 
         // ask the server for all the lists that are known.
         // maybe have a typeahead box to search over lists and items
       }
     });
     browse.setType(UNCLICKED);
+    buttonRow.add(browse);
 
-    container.add(browse);
     final Button chapters = new Button("Chapters", IconType.BOOK);
     chapters.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-
         selectTab(chapters);
 
         // show traditional chapter widget
+        showChapterView(secondRow, thirdRow, contentPanel);
       }
     });
     chapters.setType(UNCLICKED);
+    buttonRow.add(chapters);
+    return buttonRow;
+  }
 
-    container.add(chapters);
-   /* Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
-      public void execute () {
+  // TODO : really this should be in tabs...
+  private void showChapterView(FluidRow secondRow, Panel thirdRow, FluidRow contentPanel) {
+    System.out.println("\n\n\n----> showChapterView");
+    secondRow.setVisible(true);
+    thirdRow.setVisible(true);
+    contentPanel.setVisible(false);
+  }
 
+  private void hideChapterView(FluidRow secondRow, Panel thirdRow, FluidRow contentPanel) {
+    System.out.println("\n\n\n----> hideChapterView\n\n\n");
 
-        System.out.println("fireEvent for your items.");
-
-       // yourItems.fireEvent(new ButtonClickEvent());
-      }
-    });*/
-
-    return container;
+    secondRow.setVisible(false);
+    thirdRow.setVisible(false);
+    contentPanel.setVisible(true);
   }
 
   private void selectTab(Button clickedOn) {
@@ -139,6 +160,8 @@ public class Navigation extends BasicDialog implements RequiresResize {
   }
 
   public void showInitialState() {
+    System.out.println("\n" +
+      "\nshow initial state! --> \n\n\n\n");
     yourItems.fireEvent(new ButtonClickEvent());
   }
 
@@ -158,7 +181,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
     final FluidContainer child = new FluidContainer();
     thirdRow.add(child);
     child.addStyleName("exerciseBackground");
-    service.getListsForUser(userManager.getUser(),new AsyncCallback<Collection<UserList>>() {
+    service.getListsForUser(userManager.getUser(), false, new AsyncCallback<Collection<UserList>>() {
       @Override
       public void onFailure(Throwable caught) {
         //To change body of implemented methods use File | Settings | File Templates.
@@ -166,14 +189,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
       @Override
       public void onSuccess(Collection<UserList> result) {
-       // PagingContainer<UserList> userListPagingContainer = new PagingContainer<UserList>(controller);
-
-
         listScrollPanel = new ScrollPanel();
-/*
-        listScrollPanel.addStyleName("fullWidth");
-*/
-
         setScrollPanelWidth(listScrollPanel);
         final FluidContainer insideScroll = new FluidContainer();
         insideScroll.addStyleName("userListContainer");
@@ -213,7 +229,19 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
           FluidRow r1 = new FluidRow();
           w.add(r1);
-          r1.add(new Heading(2,"Title : "+ul.getName()));
+
+
+          //FlowPanel fp = new FlowPanel();
+          Heading w1 = new Heading(2, "Title : " + ul.getName());
+          //w1.addStyleName("floatLeft");
+         // r1.add(fp);
+          //fp.add(w1);
+          r1.add(new Column(3,w1));
+          Heading itemMarker = new Heading(3, ul.getExercises().size() + " items");
+          itemMarker.addStyleName("subtitleForeground");
+       //   itemMarker.addStyleName("floatRight");
+          r1.add(new Column(3,itemMarker));
+      //    fp.add(itemMarker);
 
           r1 = new FluidRow();
           w.add(r1);
@@ -252,7 +280,17 @@ public class Navigation extends BasicDialog implements RequiresResize {
     container.add(child);
     //child.addStyleName("fullWidth2");
 
-    child.add(new Heading(1,ul.getName()));
+    //   child.add(new Heading(1,ul.getName()));
+
+    FluidRow r1 = new FluidRow();
+    child.add(r1);
+
+    r1.add(new Column(3, new Heading(1, ul.getName())));
+    Heading itemMarker = new Heading(3, ul.getExercises().size() + " items");
+    itemMarker.addStyleName("subtitleForeground");
+    //   itemMarker.addStyleName("floatRight");
+    r1.add(new Column(3, itemMarker));
+
     boolean created = createdByYou(ul);
     if (created) {
       child = new FluidRow();
