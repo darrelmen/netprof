@@ -36,6 +36,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -266,8 +267,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
 
-   // secondRow.add(new Navigation(service, userManager).getNav(currentExerciseVPanel));
-    makeExerciseList(secondRow, leftColumn);
+    secondRow.add(new Navigation(service, userManager,this).getNav(currentExerciseVPanel));
+   // makeExerciseList(secondRow, leftColumn);
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("floatLeft");
       thirdRow.add(currentExerciseVPanel);
@@ -669,16 +670,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void setFactory(final long userID) {
     final LangTest outer =this;
-    if (props.isGoodwaveMode() && !props.isGrading()) {
-      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer), userManager, 1);
-    } else if (props.isGrading()) {
-      exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer), userManager, props.getNumGradesToCollect());
-    } else if (props.isFlashCard()) {
+    if (exerciseList != null) {
+      if (props.isGoodwaveMode() && !props.isGrading()) {
+        exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer), userManager, 1);
+      } else if (props.isGrading()) {
+        exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer), userManager, props.getNumGradesToCollect());
+      } else if (props.isFlashCard()) {
         exerciseList.setFactory(new FlashcardExercisePanelFactory(service, outer, outer), userManager, 1);
-    } else if (props.isDataCollectMode() && props.isCollectAudio() && !props.isCRTDataCollectMode()) {
-      exerciseList.setFactory(new WaveformExercisePanelFactory(service, outer, outer), userManager, 1);
-    } else {
-      exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer), userManager, 1);
+      } else if (props.isDataCollectMode() && props.isCollectAudio() && !props.isCRTDataCollectMode()) {
+        exerciseList.setFactory(new WaveformExercisePanelFactory(service, outer, outer), userManager, 1);
+      } else {
+        exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer), userManager, 1);
+      }
     }
     doEverythingAfterFactory(userID);
 
@@ -861,7 +864,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private boolean doEverythingAfterFactory(long userID) {
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
       System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser);
-      if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
+      if (!shouldCollectAudio() || flashRecordPanel.gotPermission() && exerciseList != null) {
         //  System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
         exerciseList.getExercises(userID);
       }
