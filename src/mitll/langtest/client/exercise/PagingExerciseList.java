@@ -39,7 +39,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingExerciseList extends ExerciseList implements RequiresResize {
-  private static final int MAX_LENGTH_ID = 27;
+/*  private static final int MAX_LENGTH_ID = 27;
   protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
   private ListDataProvider<ExerciseShell> dataProvider;
   private static final boolean DEBUG = false;
@@ -48,13 +48,17 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   private static final float MAX_PAGES = 2f;
   private static final int MIN_PAGE_SIZE = 3;
   private static final float DEFAULT_PAGE_SIZE = 15f;
-  private CellTable<ExerciseShell> table;
+  private CellTable<ExerciseShell> table;*/
   protected ExerciseController controller;
+  protected PagingContainer<? extends ExerciseShell> pagingContainer;
 
+/*
   public interface TableResources extends CellTable.Resources {
-    /**
+    */
+/**
      * The styles applied to the table.
-     */
+     *//*
+
     interface TableStyle extends CellTable.Style {}
 
     @Override
@@ -63,15 +67,18 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   public interface RTLTableResources extends CellTable.Resources {
-    /**
+    */
+/**
      * The styles applied to the table.
-     */
+     *//*
+
     interface TableStyle extends CellTable.Style {}
 
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "RTLExerciseCellTableStyleSheet.css"})
     TableStyle cellTableStyle();
   }
+*/
 
   /**
    * @see mitll.langtest.client.LangTest#makeExerciseList
@@ -89,11 +96,31 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   protected void addComponents() {
+    makePagingContainer();
     addTableWithPager();
   }
 
+  protected void makePagingContainer() {
+    final PagingExerciseList outer = this;
+    pagingContainer = new PagingContainer<ExerciseShell>(controller) {
+      @Override
+      protected void gotClickOnItem(ExerciseShell e) {
+        outer.gotClickOnItem(e);
+      }
+
+      @Override
+      protected void loadFirstExercise() {
+        outer.loadFirstExercise();
+
+        selectFirst();    //To change body of overridden methods use File | Settings | File Templates.
+      }
+    };
+  }
+
   protected void addTableWithPager() {
-    makeCellTable();
+    Panel container = pagingContainer.addTableWithPager();
+    add(container);
+ /*   makeCellTable();
 
     // Create a data provider.
     this.dataProvider = new ListDataProvider<ExerciseShell>();
@@ -110,10 +137,10 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     FlowPanel column = new FlowPanel();
     add(column);
     column.add(pager);
-    column.add(table);
+    column.add(table);*/
   }
 
-  protected CellTable<Exercise> makeCellTable() {
+/*  protected CellTable<Exercise> makeCellTable() {
     CellTable.Resources o;
 
     if (controller.isRightAlignContent()) {   // so when we truncate long entries, the ... appears on the correct end
@@ -138,13 +165,13 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
     addColumnsToTable(true);
     return null;
-  }
+  }*/
 
-  protected void addColumnsToTable(boolean consumeClicks) {
+/*  protected void addColumnsToTable(boolean consumeClicks) {
     Column<ExerciseShell, SafeHtml> id2 = getExerciseIdColumn(consumeClicks);
 
     // this would be better, but want to consume clicks
-  /*  TextColumn<ExerciseShell> id2 = new TextColumn<ExerciseShell>() {
+  *//*  TextColumn<ExerciseShell> id2 = new TextColumn<ExerciseShell>() {
       @Override
       public String getValue(ExerciseShell exerciseShell) {
         String columnText =  exerciseShell.getTooltip();
@@ -152,17 +179,17 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
         return columnText;
       }
-    };*/
+    };*//*
 
     id2.setCellStyleNames("alignLeft");
     table.addColumn(id2);
-  }
+  }*/
 
   /**
-   * @see #addColumnsToTable
+   * @seex #addColumnsToTable
    * @return
    */
-  private Column<ExerciseShell, SafeHtml> getExerciseIdColumn(final boolean consumeClicks) {
+/*  private Column<ExerciseShell, SafeHtml> getExerciseIdColumn(final boolean consumeClicks) {
     return new Column<ExerciseShell, SafeHtml>(new SafeHtmlCell() {
         @Override
         public Set<String> getConsumedEvents() {
@@ -196,7 +223,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
           return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
         }
       };
-  }
+  }*/
 
   protected void tellUserPanelIsBusy() {
     Window.alert("Please stop recording before changing items.");
@@ -205,60 +232,71 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   protected String getHistoryToken(String id) { return "item=" +id; }
 
   protected void gotClickOnItem(final ExerciseShell e) {
-    pushNewItem(e.getID());
+   // pushNewItem(e.getID());
+
+    if (isExercisePanelBusy()) {
+      tellUserPanelIsBusy();
+      markCurrentExercise(currentExercise);
+    } else {
+      pushNewItem(e.getID());
+    }
   }
 
   /**
    * @see SectionExerciseList.MySetExercisesCallback#onSuccess
    */
-  @Override
+ /* @Override
   protected void loadFirstExercise() {
     super.loadFirstExercise();
     selectFirst();
-  }
-
+  }*/
+/*
   protected void selectFirst() {
     table.getSelectionModel().setSelected(currentExercises.get(0), true);
     table.redraw();
     onResize();
-  }
+  }*/
 
   public void clear() {
-    List<ExerciseShell> list = dataProvider.getList();
+   /* List<ExerciseShell> list = dataProvider.getList();
     List<ExerciseShell> copy = new ArrayList<ExerciseShell>();
 
     for (ExerciseShell es : list) copy.add(es);
     for (ExerciseShell es : copy) list.remove(es);
-    table.setRowCount(list.size());
+    table.setRowCount(list.size());*/
+    pagingContainer.clear();
   }
 
   @Override
   public void flush() {
-    dataProvider.flush();
-    table.setRowCount(dataProvider.getList().size());
+/*    dataProvider.flush();
+    table.setRowCount(dataProvider.getList().size());*/
+    pagingContainer.flush();
   }
 
   @Override
   protected void addExerciseToList(ExerciseShell exercise) {
-    List<ExerciseShell> list = dataProvider.getList();
-    list.add(exercise);
+/*    List<ExerciseShell> list = dataProvider.getList();
+    list.add(exercise);*/
+    pagingContainer.addExerciseToList2(exercise);
   }
 
   @Override
   public void onResize() {
     super.onResize();
+    pagingContainer.onResize(currentExercise);
 /*    System.out.println("Got on resize " + Window.getClientHeight() + " " +
         getOffsetHeight() + " bodyheight = " + table.getBodyHeight() + " table offset height " + table.getOffsetHeight() + " parent height " + getParent().getOffsetHeight());*/
-    int numRows = getNumTableRowsGivenScreenHeight();
+/*    int numRows = getNumTableRowsGivenScreenHeight();
     if (table.getPageSize() != numRows) {
       //System.out.println("num rows now " + numRows);
       table.setPageSize(numRows);
       table.redraw();
       markCurrentExercise(currentExercise);
-    }
+    }*/
   }
 
-  protected int getNumTableRowsGivenScreenHeight() {
+/*  protected int getNumTableRowsGivenScreenHeight() {
     int header = getTableHeaderHeight();
     int leftOver = Window.getClientHeight() - header - 100;
 
@@ -277,15 +315,15 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
       }
     }
     return Math.max(MIN_PAGE_SIZE, Math.round(ratio));
-  }
+  }*/
 
-  protected int heightOfCellTableWith15Rows() {
+/*  protected int heightOfCellTableWith15Rows() {
     return HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
-  }
-
+  }*/
+/*
   protected int getTableHeaderHeight() {
     return controller.getHeightOfTopRows();
-  }
+  }*/
 
   /**
    * not sure how this happens, but need Math.max(0,...)
@@ -293,8 +331,11 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    * @see ExerciseList#useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
    * @param i
    */
-  @Override
+ @Override
   protected void markCurrentExercise(int i) {
+   pagingContainer.markCurrentExercise(i);
+ }
+   /*
     if (currentExercises == null) return;
     ExerciseShell itemToSelect = currentExercises.get(i);
     if (DEBUG)  System.out.println(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID());
@@ -321,5 +362,5 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
       }
     }
     table.redraw();
-  }
+  }*/
 }

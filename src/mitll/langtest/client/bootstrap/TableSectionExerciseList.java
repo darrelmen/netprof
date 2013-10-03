@@ -45,8 +45,10 @@ import com.google.gwt.view.client.HasRows;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -78,6 +80,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   private int tries =10;
   private String token = "";
   private int frameHeight = FRAME_HEIGHT;
+  private CellTable<? extends ExerciseShell> table;
 
   public TableSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                   UserFeedback feedback, boolean showTurkToken, boolean showInOrder,
@@ -100,34 +103,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     @Override
   protected void addTableWithPager() {  }
 
-  private CellTable<Exercise> table;
-
-  /**
-   * @see #addTableToLayout(java.util.Map)
-   * @param typeToSection
-   * @param numResults
-   * @return
-   */
-  private Widget getAsyncTable(Map<String, Collection<String>> typeToSection,int numResults) {
-    CellTable<Exercise> table = makeCellTable();
-    table.setStriped(true);
-    table.setBordered(false);
-    table.setWidth("100%");
-    table.setHeight("100%");
-    table.setRowCount(numResults, true);
-    int numRows = getNumTableRowsGivenScreenHeight();
-    numRows = Math.min(10,numRows);
-    table.setVisibleRange(0,Math.min(numResults,numRows));
-    createProvider(typeToSection, numResults,table);
-
-    this.table = table;
-
-    Panel pagerAndTable = getPagerAndTable(table);
-    pagerAndTable.setWidth("100%");
-    return pagerAndTable;
-  }
-
-  private Panel getPagerAndTable(CellTable<Exercise> table) {
+  private Panel getPagerAndTable(CellTable<?> table) {
     return getPagerAndTable(table, table);
   }
 
@@ -488,11 +464,48 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     CellTable.Style cellTableStyle();
   }
 
+  PagingContainer<Exercise> exercisePagingContainer;
+  @Override
+  protected void makePagingContainer() {
+    final TableSectionExerciseList outer = this;
+    exercisePagingContainer = new PagingContainer<Exercise>(controller) {
+      /**
+       * @see mitll.langtest.client.bootstrap.TableSectionExerciseList#getAsyncTable(java.util.Map, int)
+       * @return
+       */
+      @Override
+      public CellTable<Exercise> makeBootstrapCellTable(CellTable.Resources resources) {
+        //Resources resources = GWT.create(Resources.class);
+        CellTable<Exercise> table = new CellTable<Exercise>(PAGE_SIZE, resources);
+        DOM.setStyleAttribute(table.getElement(), "marginBottom", "2px");
+
+        table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
+
+        table.setWidth("100%", true);
+        table.setHeight("auto");
+
+        // Add a selection model to handle user selection.
+        final SingleSelectionModel<Exercise> selectionModel = new SingleSelectionModel<Exercise>();
+        table.setSelectionModel(selectionModel);
+
+        outer.addColumnsToTable(table);
+
+        return table;
+      }
+
+      @Override
+      protected int heightOfCellTableWith15Rows() {
+        return 700;
+      }
+    };
+    pagingContainer = exercisePagingContainer;
+  }
+
   /**
    * @see #getAsyncTable(java.util.Map, int)
    * @return
    */
-  @Override
+/*  @Override
   protected CellTable<Exercise> makeCellTable() {
     Resources resources = GWT.create(Resources.class);
     CellTable<Exercise> table = new CellTable<Exercise>(PAGE_SIZE,resources);
@@ -510,7 +523,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     addColumnsToTable(table);
 
     return table;
-  }
+  }*/
 
   protected void addColumnsToTable(CellTable<Exercise> table) {
     TextColumn<Exercise> english = new TextColumn<Exercise>() {
@@ -603,11 +616,39 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     });
   }
 
+  /**
+   * @see #addTableToLayout(java.util.Map)
+   * @param typeToSection
+   * @param numResults
+   * @return
+   */
+  private Widget getAsyncTable(Map<String, Collection<String>> typeToSection,int numResults) {
+    Resources resources = GWT.create(Resources.class);
+
+    // CellTable<? extends ExerciseShell> table = pagingContainer.makeBootstrapCellTable(resources);
+    CellTable<Exercise> table = exercisePagingContainer.makeBootstrapCellTable(resources);
+    table.setStriped(true);
+    table.setBordered(false);
+    table.setWidth("100%");
+    table.setHeight("100%");
+    table.setRowCount(numResults, true);
+    int numRows = pagingContainer.getNumTableRowsGivenScreenHeight();
+    numRows = Math.min(10,numRows);
+    table.setVisibleRange(0,Math.min(numResults,numRows));
+    createProvider(typeToSection, numResults,table);
+
+    this.table = table;
+
+    Panel pagerAndTable = getPagerAndTable(table);
+    pagerAndTable.setWidth("100%");
+    return pagerAndTable;
+  }
+
   @Override
   public void onResize() {
     setScrollPanelWidth();
 
-    int numRows = getNumTableRowsGivenScreenHeight();
+    int numRows = pagingContainer.getNumTableRowsGivenScreenHeight();
     numRows = Math.min(10,numRows);
 
     if (table != null && table.getPageSize() != numRows) {
@@ -619,8 +660,8 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     }
   }
 
-  @Override
+/*  @Override
   protected int heightOfCellTableWith15Rows() {
     return 700;
-  }
+  }*/
 }
