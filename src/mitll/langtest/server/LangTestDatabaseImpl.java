@@ -810,13 +810,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public int addUserList(long userid, String name, String description, String dliClass) {
-    //new UserList();
-    return db.addUserList(userid, name, description, dliClass);
+    return db.getUserListManager().addUserList(userid, name, description, dliClass);
+  }
+
+  public Collection<UserList> getListsForUser(int userid) {
+   return db.getUserListManager().getListsForUser(userid);
   }
 
   @Override
   public List<UserList> getUserListsForText(String search) {
-    return db.getUserListsForText(search);
+    return db.getUserListManager().getUserListsForText(search);
   }
 
   /**
