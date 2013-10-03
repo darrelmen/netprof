@@ -1,7 +1,7 @@
 package mitll.langtest.shared.custom;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseShell;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,7 +10,7 @@ import mitll.langtest.shared.Exercise;
  * Time: 8:37 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UserExercise implements IsSerializable {
+public class UserExercise extends ExerciseShell {
   int uniqueID;
   String english;
   String foreignLanguage;
@@ -20,13 +20,25 @@ public class UserExercise implements IsSerializable {
   String context;
   String audioRef;
   String slowAudioRef;
+  boolean isPredef;
+  String exerciseID;
 
   public UserExercise() {}
 
   public UserExercise(int uniqueID, String english, String foreignLanguage) {
+    super("Custom_"+uniqueID,english);
     this.uniqueID = uniqueID;
     this.english = english;
     this.foreignLanguage = foreignLanguage;
+  }
+
+  public UserExercise(Exercise exercise) {
+    super(exercise.getID(),exercise.getEnglishSentence());
+
+    this.isPredef = true;
+    this.exerciseID = exercise.getID();
+    this.english = exercise.getEnglishSentence();
+    this.foreignLanguage = exercise.getContent();
   }
 
   public UserExercise(int uniqueID, String english, String foreignLanguage, String audioRef) {
@@ -34,9 +46,9 @@ public class UserExercise implements IsSerializable {
     this.audioRef = audioRef;
   }
 
-  public Exercise toExercise() {
+/*  public Exercise toExercise() {
     return new Exercise("plan", "Custom_" + uniqueID, english, audioRef, foreignLanguage, english);
-  }
+  }*/
 
   public String toString() {
     return "UserExercise #" + uniqueID + " : " + english + " = " + foreignLanguage + " audio " + audioRef;
