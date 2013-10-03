@@ -7,8 +7,6 @@ import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.shared.DLIUser;
-import mitll.langtest.shared.custom.UserExercise;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
@@ -1089,14 +1087,14 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
   private long addUser(int age, String gender, int experience, String ipAddr, String dialect) {
-    return userDAO.addUser(age, gender, experience, ipAddr, "", "", "", dialect, "", false);
+    return userDAO.addUser(age, gender, experience, ipAddr, "", dialect, "", false);
   }
 
   public long addUser(HttpServletRequest request,
-                      int age, String gender, int experience, String firstName, String lastName,
+                      int age, String gender, int experience,
                       String nativeLang, String dialect, String userID) {
     String ip = getIPInfo(request);
-    return addUser(age, gender, experience, ip, firstName, lastName, nativeLang, dialect, userID);
+    return addUser(age, gender, experience, ip, nativeLang, dialect, userID);
   }
 
   private String getIPInfo(HttpServletRequest request) {
@@ -1106,9 +1104,9 @@ public class DatabaseImpl implements Database {
     return request.getRemoteHost() +/*"/"+ request.getRemoteAddr()+*/(header != null ? "/" + header : "") + " at " + format;
   }
 
-  private long addUser(int age, String gender, int experience, String ipAddr, String firstName, String lastName,
-                      String nativeLang, String dialect, String userID) {
-    return userDAO.addUser(age, gender, experience, ipAddr, firstName, lastName, nativeLang, dialect, userID, false);
+  private long addUser(int age, String gender, int experience, String ipAddr,
+                       String nativeLang, String dialect, String userID) {
+    return userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false);
   }
 
   /**
