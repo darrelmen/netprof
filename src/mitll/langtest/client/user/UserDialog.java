@@ -15,8 +15,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
@@ -37,7 +35,7 @@ import java.util.List;
  * Time: 4:26 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UserDialog {
+public class UserDialog extends BasicDialog {
   protected static final int USER_ID_MAX_LENGTH = 80;
 
   private static final String GRADING = "grading";
@@ -92,71 +90,6 @@ public class UserDialog {
     return dialogBox;
   }
 
-  protected static class FormField {
-    public final TextBox box;
-    public final ControlGroup group;
-
-    public FormField(final TextBox box, final ControlGroup group) {
-      this.box = box;
-
-      box.addKeyUpHandler(new KeyUpHandler() {
-        public void onKeyUp(KeyUpEvent event) {
-          if (box.getText().length() > 0) {
-            group.setType(ControlGroupType.NONE);
-          }
-        }
-      });
-
-      this.group = group;
-    }
-
-    public String getText() { return box.getText(); }
-  }
-
-  protected FormField addControlFormField(Panel dialogBox, String label) {
-    return addControlFormField(dialogBox, label, false);
-  }
-
-  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword) {
-    final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
-
-    return getFormField(dialogBox, label, user);
-  }
-
-  private FormField getFormField(Panel dialogBox, String label, TextBox user) {
-    final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user);
-    return new FormField(user, userGroup);
-  }
-
-  protected ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
-    /*final ControlGroup userGroup = */addControlGroupEntry(dialogBox, label, user);
-    return new ListBoxFormField(user);
-  }
-
-  private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
-    final ControlGroup userGroup = new ControlGroup();
-    userGroup.addStyleName("leftFiveMargin");
-    userGroup.add(new ControlLabel(label));
-    userGroup.add(user);
-
-    dialogBox.add(userGroup);
-    return userGroup;
-  }
-
-  protected static class ListBoxFormField {
-    public final ListBox box;
-
-    public ListBoxFormField(ListBox box) {
-      this.box = box;
-    }
-
-    public String getValue() {
-      return box.getItemText(box.getSelectedIndex());
-    }
-
-    public String toString() { return "Box: "+ getValue(); }
-  }
-
   protected void markError(FormField dialectGroup, String message) {
     markError(dialectGroup.group, dialectGroup.box, "Try Again", message);
   }
@@ -168,73 +101,10 @@ public class UserDialog {
     setupPopover(dialect, header, message);
   }
 
-  protected void setupPopover(final Widget w, String heading, final String message) {
-    // System.out.println("triggering popover on " + w + " with " + message);
-    final Popover popover = new Popover();
-    popover.setWidget(w);
-    popover.setText(message);
-    popover.setHeading(heading);
-    popover.setPlacement(Placement.RIGHT);
-    popover.reconfigure();
-    popover.show();
-
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        //System.out.println("hide popover on " + w + " with " + message);
-        popover.hide();
-      }
-    };
-    t.schedule(3000);
-  }
-
-  private HandlerRegistration keyHandler;
-
-  protected void addKeyHandler(final Button send) {
-    keyHandler = Event.addNativePreviewHandler(new
-                                                 Event.NativePreviewHandler() {
-
-                                                   @Override
-                                                   public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                                                     NativeEvent ne = event.getNativeEvent();
-                                                     int keyCode = ne.getKeyCode();
-
-                                                     boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
-
-                                                     //   System.out.println("key code is " +keyCode);
-                                                     if (isEnter && event.getTypeInt() == 512 &&
-                                                       "[object KeyboardEvent]".equals(ne.getString())) {
-                                                       ne.preventDefault();
-                                                       send.fireEvent(new ButtonClickEvent());
-                                                     }
-                                                   }
-                                                 });
-    System.out.println("UserManager.addKeyHandler made click handler " + keyHandler);
-  }
-
-  private class ButtonClickEvent extends ClickEvent {
-        /*To call click() function for Programmatic equivalent of the user clicking the button.*/
-  }
-
-  protected void removeKeyHandler() {
-    System.out.println("UserManager.removeKeyHandler : " + keyHandler);
-
-    if (keyHandler != null) keyHandler.removeHandler();
-  }
-
 
   protected ListBox getGenderBox() {
     List<String> values = Arrays.asList("Male", "Female");
     return getListBox(values);
-  }
-
-  protected ListBox getListBox(List<String> values) {
-    final ListBox genderBox = new ListBox(false);
-    for (String s : values) {
-      genderBox.addItem(s);
-    }
-    // genderBox.ensureDebugId("cwListBox-dropBox");
-    return genderBox;
   }
 
   protected ListBox getExperienceBox() {
