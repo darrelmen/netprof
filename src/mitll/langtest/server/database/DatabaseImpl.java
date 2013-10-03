@@ -4,6 +4,7 @@ import mitll.flashcard.UserState;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.custom.UserExercise;
@@ -69,6 +70,7 @@ public class DatabaseImpl implements Database {
   private final AnswerDAO answerDAO = new AnswerDAO(this);
   private final GradeDAO gradeDAO = new GradeDAO(this,userDAO, resultDAO);
   private final SiteDAO siteDAO = new SiteDAO(this, userDAO);
+  private final UserListManager userListManager = new UserListManager(userDAO);
 
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
@@ -1398,32 +1400,7 @@ public class DatabaseImpl implements Database {
     dliUserDAO.addUser(dliUser);
   }
 
-  // TODO add a DAO -- do something smarter!
-  int i = 0;
-  List<UserList> userLists = new ArrayList<UserList>();
-
-  public int addUserList(long userid, String name, String description, String dliClass) {
-    User userWhere = userDAO.getUserWhere(userid);
-    UserList e = new UserList(i++, userWhere, name, description, dliClass);
-    userLists.add(e);
-    return e.getUniqueID();
-  }
-
-  public List<Exercise> addItemToUserList(int userListID, UserExercise userExercise) {
-    for (UserList userList : userLists) {
-      if (userList.getUniqueID() == userListID) {
-        userList.addExercise(userExercise.toExercise());
-        return userList.getExercises();
-      }
-    }
-
-    // TODO : serialize user exercise in DAO
-    return new ArrayList<Exercise>();
-  }
-
-  public List<UserList> getUserListsForText(String search) {
-    return null;  //To change body of created methods use File | Settings | File Templates.
-  }
+  public UserListManager getUserListManager() { return userListManager; }
 
 /*  private static String getConfigDir(String language) {
     String installPath = ".";
