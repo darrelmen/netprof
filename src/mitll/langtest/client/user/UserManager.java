@@ -74,6 +74,8 @@ public class UserManager {
   }
 
   public void checkLogin() {
+    System.out.println("checkLogin");
+
     if (loginType.equals(PropertyHandler.LOGIN_TYPE.UNDEFINED)) {  // no explicit setting, so it's dependent on the mode
       if (props.isGoodwaveMode() || props.isAutocrt() || (props.isFlashcardTeacherView() && !props.isFlashCard())) {   // no login for pron mode
         anonymousLogin();
@@ -176,7 +178,11 @@ public class UserManager {
    * @see #checkLogin()
    */
   private void login(PropertyHandler.LOGIN_TYPE loginType) {
+    System.out.println("checkLogin");
+
     if (!isCurrentCachedUser()) {
+      System.out.println("checkLogin for " + loginType);
+
       if (loginType == PropertyHandler.LOGIN_TYPE.ANONYMOUS || loginType == PropertyHandler.LOGIN_TYPE.UNDEFINED) {
         System.out.println("UserManager.login : adding anonymous user");
         addAnonymousUser();
@@ -204,7 +210,7 @@ public class UserManager {
     if (user == NO_USER_SET) {
       return false;
     } else {
-      //System.out.println("UserManager.anonymousLogin : user : " + user);
+      System.out.println("UserManager.isCurrentCachedUser : user : " + user);
       rememberAudioType();
       langTest.gotUser(user);
       return true;
