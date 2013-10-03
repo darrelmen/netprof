@@ -243,19 +243,25 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // first row ---------------
     widgets.add(headerRow = makeHeaderRow());
 
+    Panel fourthRow = new FluidRow();
+    widgets.add(fourthRow);
+
     // second row ---------------
     secondRow = new FluidRow();
     widgets.add(secondRow);
+    secondRow.getElement().setId("secondRow");
 
     // third row ---------------
 
-/*    Panel thirdRow = new HorizontalPanel();
+   Panel thirdRow = new HorizontalPanel();
+//    Panel thirdRow = new FluidRow();
     Panel leftColumn = new SimplePanel();
-    thirdRow.add(leftColumn);*/
-    Panel thirdRow = new FluidRow();
+    thirdRow.add(leftColumn);
     thirdRow.getElement().setId("outerThirdRow");
 
     widgets.add(thirdRow);
+
+
 
     if ((isCRTDataCollectMode() || props.isDataCollectMode())) {
       addProgressBar(widgets);
@@ -271,8 +277,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
 
     navigation = new Navigation(service, userManager, this);
-    secondRow.add(navigation.getNav(currentExerciseVPanel));
-   // makeExerciseList(secondRow, leftColumn);
+    fourthRow.add(navigation.getNav(secondRow,/*fourthRow,*/thirdRow,this,getProps()));
+    makeExerciseList(secondRow, leftColumn);
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("floatLeft");
       thirdRow.add(currentExerciseVPanel);
@@ -867,13 +873,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
+  boolean everShownInitialState =false;
   private boolean doEverythingAfterFactory(long userID) {
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
       System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser);
       if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
         //  System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
         if (exerciseList != null) exerciseList.getExercises(userID);
-        if (navigation != null) navigation.showInitialState();
+        if (navigation != null) {
+          if (!everShownInitialState) {
+            navigation.showInitialState();
+            everShownInitialState = true;
+          }
+        }
       }
       lastUser = userID;
 
