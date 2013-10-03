@@ -568,11 +568,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return i == currentExercises.size() - 1;
   }
 
-  public boolean isLastExercise(String id) {
+/*  public boolean isLastExercise(String id) {
     System.out.println("ExerciseList.isLastExercise " + id);
     ExerciseShell exerciseByID = getExerciseByID(id);
     return exerciseByID != null && isOnLastItem(getIndex(exerciseByID));
-  }
+  }*/
 
   public boolean loadNextExercise(String id) {
     System.out.println("ExerciseList.loadNextExercise " + id);
