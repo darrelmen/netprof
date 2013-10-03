@@ -167,10 +167,7 @@ public class StudentDialog extends UserDialog {
   }
 
   protected ListBox getListBox2(List<String> values) {
-    final ListBox genderBox = new ListBox(false);
-    for (String s : values) {
-      genderBox.addItem(s);
-    }
+    final ListBox genderBox = getListBox(values);
     genderBox.setWidth("60px");
     // genderBox.ensureDebugId("cwListBox-dropBox");
     return genderBox;
