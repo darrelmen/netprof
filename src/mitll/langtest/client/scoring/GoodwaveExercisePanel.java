@@ -1,20 +1,27 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.RadioButton;
+import com.github.gwtbootstrap.client.ui.SplitDropdownButton;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -31,6 +38,11 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.custom.UserExercise;
+import mitll.langtest.shared.custom.UserList;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Mainly delegates recording to the {@link mitll.langtest.client.recorder.SimpleRecordPanel}.
@@ -63,7 +75,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private ScoreListener scorePanel;
   private AudioPanel contentAudio, answerAudio;
   private NavigationHelper navigationHelper;
-
+  int activeCount =0;
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
    * and a right side -- the charts and gauges {@link ASRScorePanel}
@@ -83,6 +95,62 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     HorizontalPanel hp = new HorizontalPanel();
     hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e));
+
+    final SplitDropdownButton w1 = new SplitDropdownButton("Add Item to List");
+    w1.setIcon(IconType.PLUS_SIGN);
+
+    service.getListsForUser(controller.getUser(), true, new AsyncCallback<Collection<UserList>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        //To change body of implemented methods use File | Settings | File Templates.
+      }
+
+      @Override
+      public void onSuccess(Collection<UserList> result) {
+        boolean anyAdded = false;
+        for (final UserList ul : result) {
+          if (!ul.contains(new UserExercise(e))) {
+            activeCount++;
+            anyAdded = true;
+            final NavLink widget = new NavLink(ul.getName());
+            w1.add(widget);
+            widget.addClickHandler(new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
+                service.addItemToUserList(ul.getUniqueID(), new UserExercise(e), new AsyncCallback<List<UserExercise>>() {
+                  @Override
+                  public void onFailure(Throwable caught) {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                  }
+
+                  @Override
+                  public void onSuccess(List<UserExercise> result) {
+                    showPopup("Item Added!");
+                    System.out.println("Before Widgets = " + w1.getWidgetCount());
+
+                  //  w1.remove(widget);
+                    widget.setVisible(false);
+                    activeCount--;
+                    System.out.println("After Widgets = " + w1.getWidgetCount());
+                    if (activeCount == 0) {
+                      NavLink widget = new NavLink("Exercise already added to your list(s)");
+                      w1.add(widget);
+                    }
+                  }
+                });
+              }
+            });
+          }
+        }
+        if (!anyAdded) {
+          NavLink widget = new NavLink("Exercise already added to your list(s)");
+          w1.add(widget);
+        }
+      }
+    });
+    w1.setType(ButtonType.PRIMARY);
+    hp.add(w1);
+
     center.add(hp);
     setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     add(center);
@@ -107,6 +175,21 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     center.add(navigationHelper.makeSpacer());
     center.add(navigationHelper);
     navigationHelper.enableNextButton(true);
+  }
+
+  private void showPopup(String html) {
+    final PopupPanel pleaseWait = new DecoratedPopupPanel();
+    pleaseWait.setAutoHideEnabled(true);
+    pleaseWait.add(new HTML(html));
+    pleaseWait.center();
+
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        pleaseWait.hide();
+      }
+    };
+    t.schedule(2000);
   }
 
   private void setBusy(boolean v) { this.isBusy = v;}
