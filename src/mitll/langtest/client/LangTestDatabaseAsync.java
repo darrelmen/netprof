@@ -29,6 +29,7 @@ import java.util.Map;
 public interface LangTestDatabaseAsync {
   void addTextAnswer(int usedID, Exercise exercise, int questionID, String answer, AsyncCallback<Void> async);
   void addUser(int age, String gender, int experience, String dialect, AsyncCallback<Long> async);
+  void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, AsyncCallback<Long> async);
   void getUsers(AsyncCallback<List<User>> async);
 
   void writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
@@ -56,7 +57,6 @@ public interface LangTestDatabaseAsync {
 
   void getScoreForAnswer(Exercise e, int questionID, String answer, AsyncCallback<Double> async);
 
-  void addUser(int age, String gender, int experience, String firstName, String lastName, String nativeLang, String dialect, String userID, AsyncCallback<Long> async);
 
   void userExists(String login, AsyncCallback<Integer> async);
 
