@@ -9,12 +9,7 @@ import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.TextBox;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
-import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
-import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
-import com.github.gwtbootstrap.client.ui.event.ShowEvent;
-import com.github.gwtbootstrap.client.ui.event.ShowHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -40,19 +35,19 @@ public class StudentDialog extends UserDialog {
   private static final int MAX_WEEKS = 104;
   private final UserManager userManager;
 
-  public StudentDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager) {
-    super(service, props);
+  public StudentDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, UserNotification userNotification) {
+    super(service, props, userManager, userNotification);
     this.userManager = userManager;
   }
 
   /**
-   * @see UserManager#login()
+   * @see UserManager#login
    */
-  public void displayLoginBox() {
+  public void display(String title) {
     final Modal dialogBox = getDialog();
     dialogBox.setMaxHeigth("650px");
     dialogBox.setHeight("600px");
-    dialogBox.setTitle("Login Questions");
+    dialogBox.setTitle(title);
 
     final FormField ageEntryGroup = addControlFormField(dialogBox, "Your age");
     final ListBoxFormField genderGroup = getListBoxFormField(dialogBox, "Gender", getGenderBox());
@@ -149,19 +144,7 @@ public class StudentDialog extends UserDialog {
     // Add a handler to send the name to the server
     closeButton.addClickHandler(new MyHandler());
 
-    dialogBox.addHiddenHandler(new HiddenHandler() {
-      @Override
-      public void onHidden(HiddenEvent hiddenEvent) {
-        removeKeyHandler();
-      }
-    });
-
-    dialogBox.addShowHandler(new ShowHandler() {
-      @Override
-      public void onShow(ShowEvent showEvent) {
-        addKeyHandler(closeButton);
-      }
-    });
+    addKeyHandler(closeButton, dialogBox);
 
     dialogBox.show();
   }
@@ -169,17 +152,15 @@ public class StudentDialog extends UserDialog {
   protected ListBox getListBox2(List<String> values) {
     final ListBox genderBox = getListBox(values);
     genderBox.setWidth("60px");
-    // genderBox.ensureDebugId("cwListBox-dropBox");
     return genderBox;
   }
-
 
   /**
    * @param monthsOfExperience
    * @param ageEntryBox
    * @param genderBox
    * @param dialectBox
-   * @see #displayLoginBox()
+   * @see #display(String)
    */
   private void addUser(int monthsOfExperience, TextBox ageEntryBox, ListBox genderBox, TextBox dialectBox,
                       final int weeksOfExperience,
@@ -258,38 +239,7 @@ public class StudentDialog extends UserDialog {
       monthsOfExperience, dialect, async);
   }
 
-  private Button makeCloseButton() {
-    final Button closeButton = new Button("Login");
-    closeButton.setType(ButtonType.PRIMARY);
-
-    // We can set the id of a widget by accessing its Element
-    closeButton.getElement().setId("closeButton");
-    return closeButton;
-  }
-
   private boolean highlightIntegerBox(FormField ageEntryGroup) {
     return highlightIntegerBox(ageEntryGroup, MIN_AGE, MAX_AGE, TEST_AGE);
-  }
-
-  private boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max) {
-    return highlightIntegerBox(ageEntryGroup, min, max, Integer.MAX_VALUE);
-  }
-
-  private boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max, int exception) {
-    String text = ageEntryGroup.box.getText();
-    boolean validAge = false;
-    if (text.length() == 0) {
-      ageEntryGroup.group.setType(ControlGroupType.WARNING);
-    } else {
-      try {
-        int age = Integer.parseInt(text);
-        validAge = (age > min && age < max) || age == exception;
-        ageEntryGroup.group.setType(validAge ? ControlGroupType.NONE : ControlGroupType.ERROR);
-      } catch (NumberFormatException e) {
-        ageEntryGroup.group.setType(ControlGroupType.ERROR);
-      }
-    }
-
-    return validAge;
   }
 }
