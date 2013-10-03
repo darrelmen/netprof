@@ -30,6 +30,7 @@ h1 {
     color:#ffffff;
 }
 
+
 .headerLowerBorder {
     border-style:solid;
     border-width: 2px;
@@ -686,4 +687,49 @@ fieldset > legend {
 
 .minWidth {
     min-width: 190px;
+}
+
+.userListContent {
+    margin-top: 10px;
+/*
+    width: 100%;
+*/
+    /*
+        background: none repeat scroll 0 0 #FFFFFF;
+    */
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+
+.userListBackground {
+    background-color:#ffffff;
+}
+
+.fullWidth {
+    width: 100%;
+
+}
+.fullWidth2 {
+    width: 95%;
+
+}
+.userListContainer {
+/*
+    width: 100%;
+*/
+    background-color: rgba(110, 175, 255, 0.27);
+    border: none;
+}
+
+.handCursor {
+    cursor: pointer;
+}
+
+.userListDarkerBlueColor {
+    background-color: #669dc6;
+}
+.userListOperations {
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset;
 }

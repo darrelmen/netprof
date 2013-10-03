@@ -16,6 +16,7 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.DLIUser;
+import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
@@ -813,13 +814,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getUserListManager().addUserList(userid, name, description, dliClass);
   }
 
-  public Collection<UserList> getListsForUser(int userid) {
-   return db.getUserListManager().getListsForUser(userid);
+  /**
+   * @see mitll.langtest.client.custom.Navigation#viewLessons
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
+   * @param userid
+   * @param onlyCreated
+   * @return
+   */
+  public Collection<UserList> getListsForUser(int userid, boolean onlyCreated) {
+   return db.getUserListManager().getListsForUser(userid, onlyCreated);
   }
 
   @Override
   public List<UserList> getUserListsForText(String search) {
     return db.getUserListManager().getUserListsForText(search);
+  }
+
+  public List<UserExercise> addItemToUserList(int userListID, UserExercise userExercise) {
+    List<UserExercise> exercises = db.getUserListManager().addItemToUserList(userListID, userExercise);
+    return exercises;//getExerciseShells(exercises);
   }
 
   /**

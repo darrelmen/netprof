@@ -49,14 +49,21 @@ public class UserListManager {
     }
   }
 
-  public Collection<UserList> getListsForUser(int userid) {
+  public Collection<UserList> getListsForUser(int userid, boolean onlyCreated) {
     if (userid == -1) return Collections.emptyList();
     logger.debug("getListsForUser for " + userid);
 
     List<UserList> listsForUser = new ArrayList<UserList>();
     for (UserList userList : userLists) {
-      if (userList.getCreator().id == userid) {
-        listsForUser.add(userList);
+      boolean isCreator = userList.getCreator().id == userid;
+      if (onlyCreated) {
+        if (isCreator) {
+          listsForUser.add(userList);
+        }
+      } else {
+        if (userList.getVisitorIDs().contains((long) userid) || isCreator) {
+          listsForUser.add(userList);
+        }
       }
     }
 
@@ -73,26 +80,28 @@ public class UserListManager {
       }
     });
 
-    logger.debug("getListsForUser " + listsForUser.size() + " for " + userid);
+    logger.debug("getListsForUser " + listsForUser.size() + "(" +listsForUser+
+      ") for " + userid);
 
     return listsForUser;
   }
 
-  public List<Exercise> addItemToUserList(int userListID, UserExercise userExercise) {
+  public List<UserExercise> addItemToUserList(int userListID, UserExercise userExercise) {
     for (UserList userList : userLists) {
       if (userList.getUniqueID() == userListID) {
-        userList.addExercise(userExercise.toExercise());
+        userList.addExercise(userExercise/*.toExercise()*/);
+
+
+        logger.debug("addItemToUserList " + userList);
         return userList.getExercises();
       }
     }
 
     // TODO : serialize user exercise in DAO
-    return new ArrayList<Exercise>();
+    return Collections.emptyList();
   }
 
   public List<UserList> getUserListsForText(String search) {
     return null;  //To change body of created methods use File | Settings | File Templates.
   }
-
-
 }

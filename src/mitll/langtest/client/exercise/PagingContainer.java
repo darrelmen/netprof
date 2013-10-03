@@ -288,10 +288,12 @@ public class PagingContainer<T extends ExerciseShell/*,S extends ExerciseShell*/
 
     float ratio = DEFAULT_PAGE_SIZE * tableRatio;
     if (dataProvider.getList() != null) {
-      T toLoad = dataProvider.getList().get(0);
+      if (!dataProvider.getList().isEmpty()) {
+        T toLoad = dataProvider.getList().get(0);
 
-      if (toLoad.getID().length() > ID_LINE_WRAP_LENGTH) {
-        ratio /= 2; // hack for long ids
+        if (toLoad.getID().length() > ID_LINE_WRAP_LENGTH) {
+          ratio /= 2; // hack for long ids
+        }
       }
     }
     return Math.max(MIN_PAGE_SIZE, Math.round(ratio));
@@ -312,7 +314,7 @@ public class PagingContainer<T extends ExerciseShell/*,S extends ExerciseShell*/
    * @see ExerciseList#useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
    */
   protected void markCurrentExercise(int i) {
-    if (dataProvider.getList() == null) return;
+    if (dataProvider.getList() == null || dataProvider.getList().isEmpty()) return;
     T itemToSelect = dataProvider.getList().get(i);
     if (DEBUG) System.out.println(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID());
     table.getSelectionModel().setSelected(itemToSelect, true);
