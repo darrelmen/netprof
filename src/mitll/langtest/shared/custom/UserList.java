@@ -19,12 +19,13 @@ import java.util.Set;
  */
 public class UserList extends ExerciseShell {//implements IsSerializable {
   private User creator;
-  private Set<Long> visitorIDs = new HashSet<Long>();
+  private Set<Long> visitorIDs;
   private int uniqueID;
 
   private String name;
   private String description;
   private String classMarker;
+  private long modified;
   private List<Exercise> exercises = new ArrayList<Exercise>();
 
   public UserList(){}
@@ -35,10 +36,16 @@ public class UserList extends ExerciseShell {//implements IsSerializable {
     this.name = name;
     this.description = description;
     this.classMarker = classMarker;
+    visitorIDs = new HashSet<Long>();
     addVisitor(user);
+    modified = System.currentTimeMillis();
   }
 
-  public void addExercise(Exercise toAdd) { exercises.add(toAdd); }
+  public void addExercise(Exercise toAdd) {
+    exercises.add(toAdd);
+    modified = System.currentTimeMillis();
+  }
+
   public void addVisitor(User user) { visitorIDs.add(user.id); }
 
   public String getName() {
@@ -65,14 +72,18 @@ public class UserList extends ExerciseShell {//implements IsSerializable {
     return visitorIDs;
   }
 
+  public int getUniqueID() {
+    return uniqueID;
+  }
+
+  public long getModified() {
+    return modified;
+  }
+
   @Override
   public String toString() {
     return "UserList #" + getUniqueID() + " "+name + " by " + creator+ " visited by " + visitorIDs+
       "  : "+
       " with " + getExercises().size() + " exercises.";
-  }
-
-  public int getUniqueID() {
-    return uniqueID;
   }
 }
