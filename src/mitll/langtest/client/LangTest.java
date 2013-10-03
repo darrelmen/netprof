@@ -343,7 +343,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       title = getTitleWidget();
     }
 
-    boolean isStudent = getLoginType().equals(PropertyHandler.LOGIN_TYPE.STUDENT);
+    boolean isStudent = getLoginType().equals(PropertyHandler.LOGIN_TYPE.STUDENT) ||  getLoginType().equals(PropertyHandler.LOGIN_TYPE.SIMPLE);
     boolean takeWholeWidth = isStudent || props.isFlashcardTeacherView() || props.isShowSections() || props.isGoodwaveMode();
 
     Column titleColumn = new Column(takeWholeWidth ? 12 : 10, title);
@@ -366,9 +366,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         adminRow.add(new Column(2, releaseStatus));
       }
       else {
-        adminRow.add(new Column(1, userline));
+        adminRow.add(new Column(2, userline));
         adminRow.add(new Column(2, releaseStatus));
-        adminRow.add(new Column(2, 7,  logout));
+        adminRow.add(new Column(6, new SimplePanel()));
+        adminRow.add(new Column(2, logout));
       }
 
       titleColumn.add(adminRow);
@@ -624,10 +625,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void modeSelect() {
     boolean isGrading = props.isGrading();
-    if (logout != null) logout.setVisible(!props.isGoodwaveMode() && !props.isFlashcardTeacherView());
+    boolean isStudent = getLoginType().equals(PropertyHandler.LOGIN_TYPE.STUDENT) || getLoginType().equals(PropertyHandler.LOGIN_TYPE.SIMPLE);  // TODO add property to control this!
+    if (logout != null) logout.setVisible(isStudent || !props.isGoodwaveMode() && !props.isFlashcardTeacherView());
     if (userline != null) {
-      boolean isStudent = getLoginType().equals(PropertyHandler.LOGIN_TYPE.STUDENT);
-
       userline.setVisible(isStudent || (!props.isGoodwaveMode() && !props.isFlashcardTeacherView()));
     }
     if (users != null) users.setVisible(isGrading || props.isAdminView());
