@@ -61,6 +61,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected final LangTestDatabaseAsync service;
   protected final UserFeedback feedback;
   private ExercisePanelFactory factory;
+  private Panel createdPanel;
   protected UserManager user;
   private String exercise_title;
   private final boolean showTurkToken;
@@ -197,6 +198,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected String unencodeToken(String token) {
     token = token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ").replaceAll("\\+", " ");
     return token;
+  }
+
+  public Panel getCreatedPanel() {
+    return createdPanel;
   }
 
   /**
@@ -427,7 +432,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param e
    */
   private void useExercise(Exercise result, ExerciseShell e) {
-    makeExercisePanel(result);
+    createdPanel = makeExercisePanel(result);
 
     int i = getIndex(e);
     System.out.println("ExerciseList.useExercise : " +e.getID() + " index " +i);
@@ -446,9 +451,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see #useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
    * @param result
    */
-  public void makeExercisePanel(Exercise result) {
+  public Panel makeExercisePanel(Exercise result) {
+    System.out.println("ExerciseList.makeExercisePanel : " +result);
+
     Panel exercisePanel = factory.getExercisePanel(result);
     innerContainer.setWidget(exercisePanel);
+    return exercisePanel;
   }
 
   protected boolean isExercisePanelBusy() {
