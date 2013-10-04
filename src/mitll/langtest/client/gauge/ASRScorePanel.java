@@ -43,6 +43,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    //   "You will see your scores for each recording in the Exercise History section.</p>";
   "";
   public static final int CHART_HEIGHT = 120;
+  private static final boolean SHOW_HELP = false;
 
   private final PretestGauge ASRGauge;
   private Panel phoneList;
@@ -83,11 +84,12 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
     CaptionPanel instructionsCaptionPanel = new CaptionPanel("Help");
     FlowPanel instructionsPanel = new FlowPanel();
+
     Label instructions = new Label(LISTENER_INSTRUCTIONS);
     instructions.addStyleName("leftAlign");
     instructionsPanel.add(instructions);
     instructionsCaptionPanel.add(instructionsPanel);
-    add(instructionsCaptionPanel);
+    if (SHOW_HELP) add(instructionsCaptionPanel);
 	}
 
   @Override
