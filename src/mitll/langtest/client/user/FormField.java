@@ -32,4 +32,5 @@ public class FormField {
   }
 
   public String getText() { return box.getText(); }
+  public String toString() { return "Form : " + box.getText(); }
 }
