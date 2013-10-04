@@ -1,6 +1,7 @@
 package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.PropertyHandler;
@@ -61,7 +62,7 @@ public interface ListInterface extends RequiresResize {
   boolean loadNextExercise(ExerciseShell current);
 
   boolean loadNextExercise(String id);
-  void makeExercisePanel(Exercise result);
+  Panel makeExercisePanel(Exercise result);
   void startOver();
 
   boolean loadPreviousExercise(ExerciseShell current);
@@ -90,4 +91,5 @@ public interface ListInterface extends RequiresResize {
   void hideExerciseList();
 
   void askForRandomExercise(AsyncCallback<Exercise> callback);
+  Panel getCreatedPanel();
 }
