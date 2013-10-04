@@ -3,22 +3,21 @@ package mitll.langtest.client;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.DLIUser;
-import mitll.langtest.shared.ExerciseShell;
-import mitll.langtest.shared.custom.UserExercise;
-import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.flashcard.FlashcardResponse;
-import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.ImageResponse;
-import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.grade.ResultsAndGrades;
 import mitll.langtest.shared.SectionNode;
-import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.custom.UserExercise;
+import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.flashcard.FlashcardResponse;
+import mitll.langtest.shared.flashcard.Leaderboard;
+import mitll.langtest.shared.grade.CountAndGradeID;
+import mitll.langtest.shared.grade.Grade;
+import mitll.langtest.shared.grade.ResultsAndGrades;
+import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Collection;
@@ -137,7 +136,7 @@ public interface LangTestDatabaseAsync {
 
   void addUserList(long userid, String name, String description, String dliClass, AsyncCallback<Integer> async);
 
-  void getUserListsForText(String search, AsyncCallback<List<UserList>> async);
+  void getUserListsForText(String search, AsyncCallback<Collection<UserList>> async);
 
   void getListsForUser(int userid, boolean onlyCreated, AsyncCallback<Collection<UserList>> async);
 
