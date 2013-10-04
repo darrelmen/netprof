@@ -826,7 +826,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public List<UserList> getUserListsForText(String search) {
+  public Collection<UserList> getUserListsForText(String search) {
     return db.getUserListManager().getUserListsForText(search);
   }
 
