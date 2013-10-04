@@ -693,7 +693,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg) {
       return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-        false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache());
+          false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache());
   }
 
   /**
@@ -809,6 +809,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.addDLIUser(dliUser);
   }
 
+  /**
+   * @see mitll.langtest.client.custom.Navigation#doCreate
+   * @param userid
+   * @param name
+   * @param description
+   * @param dliClass
+   * @return
+   */
   @Override
   public int addUserList(long userid, String name, String description, String dliClass) {
     return db.getUserListManager().addUserList(userid, name, description, dliClass);
@@ -832,7 +840,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public List<UserExercise> addItemToUserList(int userListID, UserExercise userExercise) {
     List<UserExercise> exercises = db.getUserListManager().addItemToUserList(userListID, userExercise);
-    return exercises;//getExerciseShells(exercises);
+    return exercises;
   }
 
   /**

@@ -1,43 +1,30 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Tab;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.TextArea;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.resources.Bootstrap;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.EnterKeyButtonHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.PagingExerciseList;
+import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.Collection;
@@ -50,21 +37,24 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class Navigation extends BasicDialog implements RequiresResize {
-  public static final ButtonType UNCLICKED = ButtonType.INFO;
+  // public static final ButtonType UNCLICKED = ButtonType.INFO;
   private final ExerciseController controller;
   LangTestDatabaseAsync service;
   UserManager userManager;
   int userListID;
   //Button yourItems;
-  Button lastClicked = null;
+  // Button lastClicked = null;
   ScrollPanel listScrollPanel;
   UserFeedback feedback;
   private PropertyHandler props;
+  //GoodwaveExercisePanel goodwaveExercisePanel;
+  ListInterface listInterface;
 
-  public Navigation(LangTestDatabaseAsync service, UserManager userManager, ExerciseController controller) {
+  public Navigation(LangTestDatabaseAsync service, UserManager userManager, ExerciseController controller, ListInterface listInterface) {
     this.service = service;
-   this.userManager = userManager;
-   this.controller = controller;
+    this.userManager = userManager;
+    this.controller = controller;
+    this.listInterface = listInterface;
   }
 
   /**
@@ -82,17 +72,17 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
     this.feedback = feedback;
     this.props = props;
-  //  final FluidRow contentPanel = new FluidRow();
+    //  final FluidRow contentPanel = new FluidRow();
     //FluidRow buttonRow = getButtonRow(secondRow, thirdRow, contentPanel);
     Panel buttonRow = getButtonRow2(secondAndThird);//secondRow, thirdRow, contentPanel);
     container.add(buttonRow);
-  //  container.add(contentPanel);
+    //  container.add(contentPanel);
 
     return container;
   }
   TabPanel tabPanel;
   Tab yourItems;
-   FluidContainer yourItemsContent;
+  FluidContainer yourItemsContent;
   private Panel getButtonRow2(Panel secondAndThird) {
     tabPanel = new TabPanel(Bootstrap.Tabs.ABOVE);
 
@@ -140,14 +130,27 @@ public class Navigation extends BasicDialog implements RequiresResize {
     chapters.setIcon(IconType.TH_LIST);
     chapters.setHeading("Chapters");
     tabPanel.add(chapters.asTabLink());
-   // final FluidContainer chaptersContent = new FluidContainer();
+    tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
+      @Override
+      public void onShow(TabPanel.ShowEvent showEvent) {
+        System.out.println("\ngot shown event");
+        if (listInterface.getCreatedPanel() != null) {
+          ((GoodwaveExercisePanel)listInterface.getCreatedPanel()).wasRevealed();
+        }
+        else {
+          System.out.println("no goodwave panel yet --->\n\n\n");
+
+        }
+      }
+    });
+    // final FluidContainer chaptersContent = new FluidContainer();
     chapters.add(secondAndThird);
-    chapters.addClickHandler(new ClickHandler() {
+  /*  chapters.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         //showChapterView(secondRow, thirdRow, contentPanel);
       }
-    });
+    });*/
 
     return tabPanel;
   }
@@ -157,12 +160,10 @@ public class Navigation extends BasicDialog implements RequiresResize {
   }
 
   public void showInitialState() {
-    System.out.println("\n" +
-      "\nshow initial state! --> \n\n\n\n");
+    System.out.println("show initial state! -->");
     tabPanel.selectTab(0);
-  yourItems.fireEvent(new ButtonClickEvent());
+    yourItems.fireEvent(new ButtonClickEvent());
     refreshViewLessons();
-    //yourItems.fireEvent(new ButtonClickEvent());
   }
 
   @Override
@@ -270,28 +271,39 @@ public class Navigation extends BasicDialog implements RequiresResize {
   private void doNPF(UserList ul, FluidContainer listContent) {
     System.out.println("doing npf!!! \n\n\n\n");
     //FlowPanel fp = new FlowPanel();
-    Panel fp = new FluidContainer();
-    FluidRow row = new FluidRow();
-    fp.add(row);
+    // Panel fp = new FluidContainer();
+    HorizontalPanel hp = new HorizontalPanel();
 
-    listContent.add(fp);
+    //  FluidRow row = new FluidRow();
+    // fp.add(row);
+
+    //  listContent.add(fp);
     listContent.addStyleName("userListBackground");
-    //SimplePanel left = new SimplePanel();
+    SimplePanel left = new SimplePanel();
 
-    Column left = new Column(2);
-    row.add(left);
+    //  Column left = new Column(2);
+    // row.add(left);
     //left.addStyleName("floatLeft");
+    hp.add(left);
+    SimplePanel right = new SimplePanel();
+    //Column right = new Column(10);
 
-  //  SimplePanel right = new SimplePanel();
-    Column right = new Column(10);
+    //  row.add(right);
+    hp.add(right);
+    //   right.addStyleName("floatRight");
 
-    row.add(right);
- //   right.addStyleName("floatRight");
-
-    PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller);
+    PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller);/* {
+      @Override
+      public Panel makeExercisePanel(Exercise result) {
+        Panel widgets = super.makeExercisePanel(result);
+        goodwaveExercisePanel = (GoodwaveExercisePanel) widgets;
+        System.out.println("got goodwave panel : " + goodwaveExercisePanel);
+        return widgets;
+      }
+    };*/
     exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller), userManager, 1);
 
-   // left.addStyleName("inlineStyle");
+    // left.addStyleName("inlineStyle");
     left.add(exerciseList.getExerciseListOnLeftSide(props));
     exerciseList.rememberAndLoadFirst(ul.getExercises());
   }
@@ -307,7 +319,14 @@ public class Navigation extends BasicDialog implements RequiresResize {
     // fill in the middle panel with a form to allow you to create a list
     // post the results to the server
     thirdRow.clear();
-    FluidContainer child = new FluidContainer();
+    final EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper(true);
+    FluidContainer child = new FluidContainer() {
+      @Override
+      protected void onUnload() {
+        super.onUnload();
+        enterKeyButtonHelper.removeKeyHandler();
+      }
+    };
     thirdRow.add(child);
     child.addStyleName("userListContainer");
 
@@ -318,9 +337,9 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
     row = new FluidRow();
     child.add(row);
-   // final TextBox titleBox = new TextBox();
-   // ControlGroup group = addControlGroupEntry(row,"Title", titleBox);
-   // row.add(group);
+    // final TextBox titleBox = new TextBox();
+    // ControlGroup group = addControlGroupEntry(row,"Title", titleBox);
+    // row.add(group);
 
     final FormField titleBox = addControlFormField(row, "Title");
 
@@ -342,7 +361,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
     child.add(row);
 
 
-    final EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper(true);
+
     Button submit = new Button("Create List");
     submit.setType(ButtonType.PRIMARY);
     submit.addClickHandler(new ClickHandler() {
@@ -388,6 +407,9 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
     @Override
     public void onSuccess(Collection<UserList> result) {
+
+      System.out.println("Displayig " + result.size() + " items");
+      if (result.isEmpty()) System.err.println("\n\nhuh? no results for user");
       listScrollPanel = new ScrollPanel();
       setScrollPanelWidth(listScrollPanel);
       final FluidContainer insideScroll = new FluidContainer();
@@ -401,7 +423,6 @@ public class Navigation extends BasicDialog implements RequiresResize {
         widgets.addClickHandler(new ClickHandler() {
           @Override
           public void onClick(ClickEvent event) {
-          //  Window.alert("Do something on select.");
             showList(ul, contentPanel);
           }
         });
@@ -433,14 +454,14 @@ public class Navigation extends BasicDialog implements RequiresResize {
         //FlowPanel fp = new FlowPanel();
         Heading w1 = new Heading(2, "Title : " + ul.getName());
         //w1.addStyleName("floatLeft");
-       // r1.add(fp);
+        // r1.add(fp);
         //fp.add(w1);
         r1.add(new Column(3,w1));
         Heading itemMarker = new Heading(3, ul.getExercises().size() + " items");
         itemMarker.addStyleName("subtitleForeground");
-     //   itemMarker.addStyleName("floatRight");
+        //   itemMarker.addStyleName("floatRight");
         r1.add(new Column(3,itemMarker));
-    //    fp.add(itemMarker);
+        //    fp.add(itemMarker);
 
         r1 = new FluidRow();
         w.add(r1);
