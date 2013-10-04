@@ -36,7 +36,7 @@ public class UserListManager {
     else return userList.getUniqueID();
   }
 
-  public UserList getUserList(long userid, String name, String description, String dliClass) {
+  private UserList getUserList(long userid, String name, String description, String dliClass) {
     User userWhere = userDAO.getUserWhere(userid);
     if (userWhere == null) {
       logger.error("huh? no user with id " + userid);
@@ -44,7 +44,7 @@ public class UserListManager {
     } else {
       UserList e = new UserList(i++, userWhere, name, description, dliClass);
       userLists.add(e);
-      logger.debug("now there are " + userLists.size() + " lists for " + userid);
+      logger.debug("getUserList : now there are " + userLists.size() + " lists for " + userid);
       return e;
     }
   }
@@ -73,17 +73,21 @@ public class UserListManager {
       else return Collections.singletonList(userList);
     }
 
-    Collections.sort(userLists,new Comparator<UserList>() {
-      @Override
-      public int compare(UserList o1, UserList o2) {
-        return o1.getModified() > o2.getModified() ? -1 : o1.getModified() < o2.getModified()? +1 : 0;  //To change body of implemented methods use File | Settings | File Templates.
-      }
-    });
+    sortByTime(listsForUser);
 
     logger.debug("getListsForUser " + listsForUser.size() + "(" +listsForUser+
       ") for " + userid);
 
     return listsForUser;
+  }
+
+  private void sortByTime(List<UserList> listsForUser) {
+    Collections.sort(listsForUser, new Comparator<UserList>() {
+      @Override
+      public int compare(UserList o1, UserList o2) {
+        return o1.getModified() > o2.getModified() ? -1 : o1.getModified() < o2.getModified() ? +1 : 0;  //To change body of implemented methods use File | Settings | File Templates.
+      }
+    });
   }
 
   public List<UserExercise> addItemToUserList(int userListID, UserExercise userExercise) {
@@ -102,6 +106,10 @@ public class UserListManager {
   }
 
   public List<UserList> getUserListsForText(String search) {
-    return null;  //To change body of created methods use File | Settings | File Templates.
+    List<UserList> listsForUser = new ArrayList<UserList>(userLists);
+    sortByTime(listsForUser);
+
+
+    return listsForUser;  //To change body of created methods use File | Settings | File Templates.
   }
 }
