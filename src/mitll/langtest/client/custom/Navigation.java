@@ -5,9 +5,12 @@ import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Tab;
+import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.TextArea;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.resources.Bootstrap;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -23,11 +26,14 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.EnterKeyButtonHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.PagingExerciseList;
+import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserFeedback;
@@ -49,9 +55,11 @@ public class Navigation extends BasicDialog implements RequiresResize {
   LangTestDatabaseAsync service;
   UserManager userManager;
   int userListID;
-  Button yourItems;
+  //Button yourItems;
   Button lastClicked = null;
   ScrollPanel listScrollPanel;
+  UserFeedback feedback;
+  private PropertyHandler props;
 
   public Navigation(LangTestDatabaseAsync service, UserManager userManager, ExerciseController controller) {
     this.service = service;
@@ -61,108 +69,100 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2
-   * @param thirdRow
+   * @paramx thirdRow
    * @return
    */
-  public Widget getNav(final FluidRow secondRow,// final Panel contentPanel,
-                       final Panel thirdRow, final UserFeedback feedback, final PropertyHandler props) {
+  public Widget getNav(//final FluidRow secondRow,
+                       //final Panel thirdRow,
+                       final Panel secondAndThird,
+
+
+                       final UserFeedback feedback, final PropertyHandler props) {
     final FluidContainer container = new FluidContainer();
 
-    final FluidRow contentPanel = new FluidRow();
-    FluidRow buttonRow = getButtonRow(secondRow, thirdRow, contentPanel);
+    this.feedback = feedback;
+    this.props = props;
+  //  final FluidRow contentPanel = new FluidRow();
+    //FluidRow buttonRow = getButtonRow(secondRow, thirdRow, contentPanel);
+    Panel buttonRow = getButtonRow2(secondAndThird);//secondRow, thirdRow, contentPanel);
     container.add(buttonRow);
-    container.add(contentPanel);
+  //  container.add(contentPanel);
 
-   // container.add(chapters);
     return container;
   }
+  TabPanel tabPanel;
+  Tab yourItems;
+   FluidContainer yourItemsContent;
+  private Panel getButtonRow2(Panel secondAndThird) {
+    tabPanel = new TabPanel(Bootstrap.Tabs.ABOVE);
 
-  private FluidRow getButtonRow(final FluidRow secondRow, final Panel thirdRow,final FluidRow contentPanel) {
-    FluidRow buttonRow = new FluidRow();
-    yourItems = new Button("Your Lessons", IconType.FOLDER_CLOSE);
+    yourItems = new Tab();
+    yourItems.setIcon(IconType.FOLDER_CLOSE);
+    yourItems.setHeading("Your Lists");
+    tabPanel.add(yourItems.asTabLink());
+    yourItemsContent = new FluidContainer();
+    yourItems.add(yourItemsContent);
     yourItems.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        // ask the server for your lessons
-        System.out.println("clicked on your items.");
-        hideChapterView(secondRow, thirdRow, contentPanel);
-
-        selectTab(yourItems);
-        viewLessons(contentPanel);
+        refreshViewLessons();
       }
     });
-    yourItems.setType(UNCLICKED);
-    buttonRow.add(yourItems);
-    final Button create = new Button("Create", IconType.PLUS_SIGN);
+    refreshViewLessons();
+
+    Tab create = new Tab();
+    create.setIcon(IconType.PLUS_SIGN);
+    create.setHeading("Create");
+    tabPanel.add(create.asTabLink());
+    final FluidContainer createContent = new FluidContainer();
+    create.add(createContent);
     create.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        selectTab(create);
-        hideChapterView(secondRow, thirdRow, contentPanel);
-
-        doCreate(contentPanel);
-        // TODO : add box to permit adding new entries
-        // record audio --- how much feedback?
+        doCreate(createContent);
       }
     });
-    create.setType(UNCLICKED);
-    buttonRow.add(create);
 
-    final Button browse = new Button("Browse", IconType.TH_LIST);
+    Tab browse = new Tab();
+    browse.setIcon(IconType.TH_LIST);
+    browse.setHeading("Browse");
+    tabPanel.add(browse.asTabLink());
+    final FluidContainer browseContent = new FluidContainer();
+    browse.add(browseContent);
     browse.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        selectTab(browse);
-        hideChapterView(secondRow, thirdRow, contentPanel);
-
-        // ask the server for all the lists that are known.
-        // maybe have a typeahead box to search over lists and items
+        viewLessons(browseContent, true);
       }
     });
-    browse.setType(UNCLICKED);
-    buttonRow.add(browse);
 
-    final Button chapters = new Button("Chapters", IconType.BOOK);
+    Tab chapters = new Tab();
+    chapters.setIcon(IconType.TH_LIST);
+    chapters.setHeading("Chapters");
+    tabPanel.add(chapters.asTabLink());
+   // final FluidContainer chaptersContent = new FluidContainer();
+    chapters.add(secondAndThird);
     chapters.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        selectTab(chapters);
-
-        // show traditional chapter widget
-        showChapterView(secondRow, thirdRow, contentPanel);
+        //showChapterView(secondRow, thirdRow, contentPanel);
       }
     });
-    chapters.setType(UNCLICKED);
-    buttonRow.add(chapters);
-    return buttonRow;
+
+    return tabPanel;
   }
 
-  // TODO : really this should be in tabs...
-  private void showChapterView(FluidRow secondRow, Panel thirdRow, FluidRow contentPanel) {
-    System.out.println("\n\n\n----> showChapterView");
-    secondRow.setVisible(true);
-    thirdRow.setVisible(true);
-    contentPanel.setVisible(false);
-  }
-
-  private void hideChapterView(FluidRow secondRow, Panel thirdRow, FluidRow contentPanel) {
-    System.out.println("\n\n\n----> hideChapterView\n\n\n");
-
-    secondRow.setVisible(false);
-    thirdRow.setVisible(false);
-    contentPanel.setVisible(true);
-  }
-
-  private void selectTab(Button clickedOn) {
-    clickedOn.setType(ButtonType.PRIMARY);
-    if (lastClicked != null) lastClicked.setType(UNCLICKED);
-    lastClicked = clickedOn;
+  private void refreshViewLessons() {
+    viewLessons(yourItemsContent, false);
   }
 
   public void showInitialState() {
     System.out.println("\n" +
       "\nshow initial state! --> \n\n\n\n");
-    yourItems.fireEvent(new ButtonClickEvent());
+    tabPanel.selectTab(0);
+  yourItems.fireEvent(new ButtonClickEvent());
+    refreshViewLessons();
+    //yourItems.fireEvent(new ButtonClickEvent());
   }
 
   @Override
@@ -174,103 +174,29 @@ public class Navigation extends BasicDialog implements RequiresResize {
         /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   }
 
-  private void viewLessons(final Panel thirdRow) {
-    thirdRow.clear();
-    thirdRow.getElement().setId("thirdRow");
+  private void viewLessons(final Panel contentPanel, boolean getAll) {
+    contentPanel.clear();
+    contentPanel.getElement().setId("contentPanel");
 
     final FluidContainer child = new FluidContainer();
-    thirdRow.add(child);
+    contentPanel.add(child);
     child.addStyleName("exerciseBackground");
-    service.getListsForUser(userManager.getUser(), false, new AsyncCallback<Collection<UserList>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        //To change body of implemented methods use File | Settings | File Templates.
-      }
-
-      @Override
-      public void onSuccess(Collection<UserList> result) {
-        listScrollPanel = new ScrollPanel();
-        setScrollPanelWidth(listScrollPanel);
-        final FluidContainer insideScroll = new FluidContainer();
-        insideScroll.addStyleName("userListContainer");
-        listScrollPanel.add(insideScroll);
-        for (final UserList ul : result) {
-          final FocusPanel widgets = new FocusPanel();
-          widgets.addStyleName("userListContent");
-          widgets.addStyleName("userListBackground");
-
-          widgets.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-            //  Window.alert("Do something on select.");
-              showList(ul,thirdRow);
-            }
-          });
-          widgets.addMouseOverHandler(new MouseOverHandler() {
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-              widgets.removeStyleName("userListBackground");
-              widgets.addStyleName("blueBackground");
-              widgets.addStyleName("handCursor");
-              widgets.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-            }
-          });
-          widgets.addMouseOutHandler(new MouseOutHandler() {
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-              widgets.removeStyleName("blueBackground");
-              widgets.addStyleName("userListBackground");
-              widgets.removeStyleName("handCursor");
-            }
-          });
-          insideScroll.add(widgets);
-          FluidContainer w = new FluidContainer();
-          widgets.add(w);
-
-          FluidRow r1 = new FluidRow();
-          w.add(r1);
-
-
-          //FlowPanel fp = new FlowPanel();
-          Heading w1 = new Heading(2, "Title : " + ul.getName());
-          //w1.addStyleName("floatLeft");
-         // r1.add(fp);
-          //fp.add(w1);
-          r1.add(new Column(3,w1));
-          Heading itemMarker = new Heading(3, ul.getExercises().size() + " items");
-          itemMarker.addStyleName("subtitleForeground");
-       //   itemMarker.addStyleName("floatRight");
-          r1.add(new Column(3,itemMarker));
-      //    fp.add(itemMarker);
-
-          r1 = new FluidRow();
-          w.add(r1);
-          r1.add(new Heading(3,"Description : "+ul.getDescription()));
-
-          r1 = new FluidRow();
-          w.add(r1);
-          r1.add(new Heading(3,"Class : "+ul.getClassMarker()));
-
-          if (createdByYou(ul)) {
-            r1 = new FluidRow();
-            w.add(r1);
-            r1.add(new HTML("<b>Created by you.</b>"));
-          }
-        }
-        child.add(listScrollPanel);
-      }
-    });
+    if (getAll) {
+      service.getUserListsForText("", new UserListCallback(contentPanel, child));
+    } else {
+      service.getListsForUser(userManager.getUser(), false, new UserListCallback(contentPanel, child));
+    }
   }
 
   private boolean createdByYou(UserList ul) {
     return ul.getCreator().id == userManager.getUser();
   }
 
-  private void showList(UserList ul, Panel thirdRow) {
+  private void showList(final UserList ul, Panel contentPanel) {
     FluidContainer container = new FluidContainer();
-    thirdRow.clear();
-    thirdRow.add(container);
-    thirdRow.addStyleName("fullWidth2");
+    contentPanel.clear();
+    contentPanel.add(container);
+    contentPanel.addStyleName("fullWidth2");
 
     container.getElement().setId("showListContainer");
     container.addStyleName("userListDarkerBlueColor");
@@ -301,35 +227,14 @@ public class Navigation extends BasicDialog implements RequiresResize {
     operations.addStyleName("userListOperations");
     FluidRow opRow = new FluidRow();
     operations.add(opRow);
-/*
-    FocusPanel pair = new FocusPanel();
 
-
-    FlowPanel rowPair = new FlowPanel();
-
-    rowPair.add(new Image(LangTest.LANGTEST_IMAGES + "NewProF1.png"));
-    rowPair.add(new Heading(3,"Learn"));
-
-    operations.add(rowPair);
-    pair.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        Window.alert("Do npf");
-      }
-    });
-    //opRow.add(new Image(LangTest.LANGTEST_IMAGES + "NewProF1.png"));
-    opRow.add(pair);
-    opRow.add(new Image(LangTest.LANGTEST_IMAGES + "NewProF2.png"));
-
-*/
-
-
+    final FluidContainer listContent = new FluidContainer();
     Button w = new Button("Learn Pronunciation", IconType.LIGHTBULB);
     opRow.add(w);
     w.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        Window.alert("do npf!");
+        doNPF(ul, listContent);
       }
     });
     Button practice = new Button("Practice", IconType.CHECK);
@@ -359,6 +264,36 @@ public class Navigation extends BasicDialog implements RequiresResize {
       });
     }
     container.add(operations);
+    container.add(listContent);
+  }
+
+  private void doNPF(UserList ul, FluidContainer listContent) {
+    System.out.println("doing npf!!! \n\n\n\n");
+    //FlowPanel fp = new FlowPanel();
+    Panel fp = new FluidContainer();
+    FluidRow row = new FluidRow();
+    fp.add(row);
+
+    listContent.add(fp);
+    listContent.addStyleName("userListBackground");
+    //SimplePanel left = new SimplePanel();
+
+    Column left = new Column(2);
+    row.add(left);
+    //left.addStyleName("floatLeft");
+
+  //  SimplePanel right = new SimplePanel();
+    Column right = new Column(10);
+
+    row.add(right);
+ //   right.addStyleName("floatRight");
+
+    PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller);
+    exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller), userManager, 1);
+
+   // left.addStyleName("inlineStyle");
+    left.add(exerciseList.getExerciseListOnLeftSide(props));
+    exerciseList.rememberAndLoadFirst(ul.getExercises());
   }
 
   private void setScrollPanelWidth(ScrollPanel row) {
@@ -405,13 +340,16 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
     row = new FluidRow();
     child.add(row);
+
+
+    final EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper(true);
     Button submit = new Button("Create List");
     submit.setType(ButtonType.PRIMARY);
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         System.out.println("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getText());
-
+        enterKeyButtonHelper.removeKeyHandler();
         // TODO : validate
 
         service.addUserList(userManager.getUser(), titleBox.getText(), area.getText(), classBox.getText(), new AsyncCallback<Integer>() {
@@ -430,8 +368,95 @@ public class Navigation extends BasicDialog implements RequiresResize {
         });
       }
     });
-    new EnterKeyButtonHelper(true).addKeyHandler(submit);
-    // group = addControlGroupEntry(row, "Class", dliClass);
+    enterKeyButtonHelper.addKeyHandler(submit);
     row.add(submit);
+  }
+
+  private class UserListCallback implements AsyncCallback<Collection<UserList>> {
+    private final Panel contentPanel;
+    private final FluidContainer child;
+
+    public UserListCallback(Panel contentPanel, FluidContainer child) {
+      this.contentPanel = contentPanel;
+      this.child = child;
+    }
+
+    @Override
+    public void onFailure(Throwable caught) {
+      //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void onSuccess(Collection<UserList> result) {
+      listScrollPanel = new ScrollPanel();
+      setScrollPanelWidth(listScrollPanel);
+      final FluidContainer insideScroll = new FluidContainer();
+      insideScroll.addStyleName("userListContainer");
+      listScrollPanel.add(insideScroll);
+      for (final UserList ul : result) {
+        final FocusPanel widgets = new FocusPanel();
+        widgets.addStyleName("userListContent");
+        widgets.addStyleName("userListBackground");
+
+        widgets.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+          //  Window.alert("Do something on select.");
+            showList(ul, contentPanel);
+          }
+        });
+        widgets.addMouseOverHandler(new MouseOverHandler() {
+          @Override
+          public void onMouseOver(MouseOverEvent event) {
+            widgets.removeStyleName("userListBackground");
+            widgets.addStyleName("blueBackground");
+            widgets.addStyleName("handCursor");
+            widgets.getElement().getStyle().setCursor(Style.Cursor.POINTER);
+          }
+        });
+        widgets.addMouseOutHandler(new MouseOutHandler() {
+          @Override
+          public void onMouseOut(MouseOutEvent event) {
+            widgets.removeStyleName("blueBackground");
+            widgets.addStyleName("userListBackground");
+            widgets.removeStyleName("handCursor");
+          }
+        });
+        insideScroll.add(widgets);
+        FluidContainer w = new FluidContainer();
+        widgets.add(w);
+
+        FluidRow r1 = new FluidRow();
+        w.add(r1);
+
+
+        //FlowPanel fp = new FlowPanel();
+        Heading w1 = new Heading(2, "Title : " + ul.getName());
+        //w1.addStyleName("floatLeft");
+       // r1.add(fp);
+        //fp.add(w1);
+        r1.add(new Column(3,w1));
+        Heading itemMarker = new Heading(3, ul.getExercises().size() + " items");
+        itemMarker.addStyleName("subtitleForeground");
+     //   itemMarker.addStyleName("floatRight");
+        r1.add(new Column(3,itemMarker));
+    //    fp.add(itemMarker);
+
+        r1 = new FluidRow();
+        w.add(r1);
+        r1.add(new Heading(3,"Description : "+ul.getDescription()));
+
+        r1 = new FluidRow();
+        w.add(r1);
+        r1.add(new Heading(3,"Class : "+ul.getClassMarker()));
+
+        if (createdByYou(ul)) {
+          r1 = new FluidRow();
+          w.add(r1);
+          r1.add(new HTML("<b>Created by you.</b>"));
+        }
+      }
+      child.add(listScrollPanel);
+    }
   }
 }
