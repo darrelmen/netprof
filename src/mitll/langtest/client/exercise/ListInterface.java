@@ -27,9 +27,8 @@ public interface ListInterface extends RequiresResize {
    * @param expectedGrades
    */
   void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades);
- // ExercisePanelFactory getFactory();
 
-  void rememberAndLoadFirst(List<ExerciseShell> exercises);
+  void rememberAndLoadFirst(List<? extends ExerciseShell> exercises);
 
     /**
      * @see mitll.langtest.client.LangTest#gotUser(long)
@@ -85,8 +84,6 @@ public interface ListInterface extends RequiresResize {
   int getPercentComplete();
 
   int getComplete();
-
-  //void addAdHocExercise(String label);
 
   void setSelectionState(Map<String,Collection<String>> selectionState);
 
