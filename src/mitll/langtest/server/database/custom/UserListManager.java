@@ -1,17 +1,12 @@
 package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.UserDAO;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,25 +25,40 @@ public class UserListManager {
 
   public UserListManager(UserDAO userDAO) { this.userDAO = userDAO; }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUserList(long, String, String, String)
+   * @see mitll.langtest.client.custom.Navigation#doCreate
+   * @param userid
+   * @param name
+   * @param description
+   * @param dliClass
+   * @return
+   */
   public int addUserList(long userid, String name, String description, String dliClass) {
-    UserList userList = getUserList(userid, name, description, dliClass);
+    UserList userList = createUserList(userid, name, description, dliClass, false);
     if (userList == null) return -1;
     else return userList.getUniqueID();
   }
 
-  private UserList getUserList(long userid, String name, String description, String dliClass) {
+  private UserList createUserList(long userid, String name, String description, String dliClass, boolean isPrivate) {
     User userWhere = userDAO.getUserWhere(userid);
     if (userWhere == null) {
       logger.error("huh? no user with id " + userid);
       return null;
     } else {
-      UserList e = new UserList(i++, userWhere, name, description, dliClass);
+      UserList e = new UserList(i++, userWhere, name, description, dliClass, isPrivate);
       userLists.add(e);
-      logger.debug("getUserList : now there are " + userLists.size() + " lists for " + userid);
+      logger.debug("createUserList : now there are " + userLists.size() + " lists for " + userid);
       return e;
     }
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getListsForUser(int, boolean)
+   * @param userid
+   * @param onlyCreated
+   * @return
+   */
   public Collection<UserList> getListsForUser(int userid, boolean onlyCreated) {
     if (userid == -1) return Collections.emptyList();
     logger.debug("getListsForUser for " + userid);
@@ -68,7 +78,7 @@ public class UserListManager {
     }
 
     if (listsForUser.isEmpty()) {
-      UserList userList = getUserList(userid, "My List", "Default list", "Choose a class");
+      UserList userList = createUserList(userid, "My List", "Default list", "Choose a class", true);
       if (userList == null) return Collections.emptyList();
       else return Collections.singletonList(userList);
     }
@@ -108,7 +118,12 @@ public class UserListManager {
   public List<UserList> getUserListsForText(String search) {
     List<UserList> listsForUser = new ArrayList<UserList>(userLists);
     sortByTime(listsForUser);
+    Iterator<UserList> iterator = listsForUser.iterator();
+    while (iterator.hasNext()) {
+      if (iterator.next().isPrivate()) iterator.remove();
+    }
 
+    System.out.println("before " + userLists.size() + " after " + listsForUser.size());
 
     return listsForUser;  //To change body of created methods use File | Settings | File Templates.
   }
