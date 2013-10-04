@@ -75,7 +75,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private ScoreListener scorePanel;
   private AudioPanel contentAudio, answerAudio;
   private NavigationHelper navigationHelper;
-  int activeCount =0;
+  private SplitDropdownButton addToList;
+  private int activeCount = 0;
+
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
    * and a right side -- the charts and gauges {@link ASRScorePanel}
@@ -96,9 +98,43 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e));
 
-    final SplitDropdownButton w1 = new SplitDropdownButton("Add Item to List");
-    w1.setIcon(IconType.PLUS_SIGN);
+    addToList = new SplitDropdownButton("Add Item to List");
+    addToList.setIcon(IconType.PLUS_SIGN);
+    populateListChoices(e, controller, addToList);
+    addToList.setType(ButtonType.PRIMARY);
+    hp.add(addToList);
 
+    center.add(hp);
+    setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+    add(center);
+    setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+
+    if (e.isRepeat()) {
+      ASRScorePanel widgets = new ASRScorePanel();
+      add(widgets);
+      scorePanel = widgets;
+      addQuestions(service, controller, 1, center);
+    } else {
+      addQuestions(service, controller, 1, center);
+    }
+
+    this.navigationHelper = new NavigationHelper(exercise, controller, new PostAnswerProvider() {
+      @Override
+      public void postAnswers(ExerciseController controller, Exercise completedExercise) {
+        System.out.println("postAnswers : load next exercise " + completedExercise.getID());
+        controller.loadNextExercise(completedExercise);
+      }
+    });
+    center.add(navigationHelper.makeSpacer());
+    center.add(navigationHelper);
+    navigationHelper.enableNextButton(true);
+
+
+  }
+
+
+
+  private void populateListChoices(final Exercise e, ExerciseController controller, final SplitDropdownButton w1) {
     service.getListsForUser(controller.getUser(), true, new AsyncCallback<Collection<UserList>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -107,6 +143,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       @Override
       public void onSuccess(Collection<UserList> result) {
+        w1.clear();
+        activeCount = 0;
         boolean anyAdded = false;
         for (final UserList ul : result) {
           if (!ul.contains(new UserExercise(e))) {
@@ -148,33 +186,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         }
       }
     });
-    w1.setType(ButtonType.PRIMARY);
-    hp.add(w1);
-
-    center.add(hp);
-    setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-    add(center);
-    setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-
-    if (e.isRepeat()) {
-      ASRScorePanel widgets = new ASRScorePanel();
-      add(widgets);
-      scorePanel = widgets;
-      addQuestions(service, controller, 1, center);
-    } else {
-      addQuestions(service, controller, 1, center);
-    }
-
-    this.navigationHelper = new NavigationHelper(exercise, controller, new PostAnswerProvider() {
-      @Override
-      public void postAnswers(ExerciseController controller, Exercise completedExercise) {
-        System.out.println("postAnswers : load next exercise " + completedExercise.getID());
-        controller.loadNextExercise(completedExercise);
-      }
-    });
-    center.add(navigationHelper.makeSpacer());
-    center.add(navigationHelper);
-    navigationHelper.enableNextButton(true);
   }
 
   private void showPopup(String html) {
@@ -338,6 +349,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   private String wavToMP3(String path) {
     return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
+  }
+
+  public void wasRevealed() {
+    populateListChoices(exercise, controller, addToList);
   }
 
   private static class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
