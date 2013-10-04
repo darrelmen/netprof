@@ -52,22 +52,22 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   ValueChangeHandler<String> {
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
   public static final String ITEMS = "Items";
-  protected List<ExerciseShell> currentExercises = null;
-  protected Map<String,ExerciseShell> idToExercise = null;
+  protected List<? extends ExerciseShell> currentExercises = null;
+  private Map<String,ExerciseShell> idToExercise = null;
   protected int currentExercise = 0;
-  private List<HTML> progressMarkers = new ArrayList<HTML>();
+  private final List<HTML> progressMarkers = new ArrayList<HTML>();
 
   private SimplePanel innerContainer;
-  protected LangTestDatabaseAsync service;
-  protected UserFeedback feedback;
+  protected final LangTestDatabaseAsync service;
+  protected final UserFeedback feedback;
   private ExercisePanelFactory factory;
   protected UserManager user;
   private String exercise_title;
-  protected final boolean showTurkToken;
+  private final boolean showTurkToken;
   private final boolean showInOrder;
   private int countSincePrompt = 0;
   protected int lastReqID = 0;
-  private Set<Integer> visited = new HashSet<Integer>();
+  private final Set<Integer> visited = new HashSet<Integer>();
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -92,7 +92,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     History.addValueChangeHandler(this);
   }
 
-  protected void addWidgets(Panel currentExerciseVPanel) {
+  private void addWidgets(Panel currentExerciseVPanel) {
     this.innerContainer = new SimplePanel();
     this.innerContainer.setWidth("100%");
     this.innerContainer.setHeight("100%");
@@ -103,7 +103,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see mitll.langtest.client.LangTest#setFactory
    * @param factory
    * @param user
-   * @paramx doGrading
    * @param expectedGrades
    */
   public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {
@@ -127,7 +126,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       service.getExerciseIds(lastReqID, userID, new SetExercisesCallback());
     }
   }
-
 
   /**
    * So we have a catch-22 -
@@ -219,7 +217,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
-  public void rememberAndLoadFirst(List<ExerciseShell> exercises) {
+  public void rememberAndLoadFirst(List<? extends ExerciseShell> exercises) {
     rememberExercises(exercises);
     loadFirstExercise();
   }
@@ -228,7 +226,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return result.reqID < lastReqID;
   }
 
-  protected void rememberExercises(List<ExerciseShell> result) {
+  protected void rememberExercises(List<? extends ExerciseShell> result) {
     System.out.println("ExerciseList : remembering " + result.size() + " exercises");
     currentExercises = result; // remember current exercises
     currentExercise = 0;
@@ -241,11 +239,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     flush();
   }
 
-/*  public Collection<ExerciseShell> getExerciseShells() {
-    return idToExercise.values();
-  }
-  */
-  private Random random = new Random();
+  private final Random random = new Random();
   public void askForRandomExercise(AsyncCallback<Exercise> callback) {
     ExerciseShell shell = currentExercises.get(random.nextInt(currentExercises.size()));
     service.getExercise(shell.getID(), callback);
@@ -258,12 +252,14 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     getParent().setVisible(false);
   }
 
-/*  public void showExerciseList() {
-    getParent().setVisible(true);
-  }*/
-
+  /**
+   * @see #rememberExercises
+   */
   protected void flush() {}
 
+  /**
+   * @see #rememberExercises
+   */
   protected void addExerciseToList(final ExerciseShell e) {
     final HTML w = makeAndAddExerciseEntry(e);
 
@@ -284,14 +280,16 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     });
   }
 
-  protected HTML makeAndAddExerciseEntry(ExerciseShell e) {
+  /**
+   * @see #rememberExercises
+   */
+  private HTML makeAndAddExerciseEntry(ExerciseShell e) {
     final HTML w = new HTML("<b>" + e.getID() + "</b>");
     w.setStylePrimaryName("exercise");
     add(w);
     progressMarkers.add(w);
     return w;
   }
-
 
   protected void loadFirstExercise() {
     if (currentExercises.isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
@@ -323,16 +321,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param exerciseShell
    */
   public void loadExercise(ExerciseShell exerciseShell) {
-    //String token = History.getToken();
-    //String id = getIDFromToken(unencodeToken(token));
-    //System.out.println("ExerciseList.loadExercise token '" + token + "' and id '" +id +"'");
-
-/*    if (id.equals(exerciseShell.getID())) {
-      System.out.println("skipping current token " + token);
-    } else {*/
-      //System.out.println("loadExercise " + exerciseShell.getID() + " vs " +id);
       pushNewItem(exerciseShell.getID());
-  //  }
   }
 
   /**
@@ -381,7 +370,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return token;
   }
 
-  protected String getIDFromToken(String token) {
+  private String getIDFromToken(String token) {
     if (token.startsWith("#item=") || token.startsWith("item=")) {
       String[] split = token.split("=");
       return split[1].trim();
@@ -494,20 +483,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public int getPercentComplete() { return (int) (100f*((float)visited.size()/(float)currentExercises.size())); }
   @Override
   public int getComplete() { return visited.size(); }
-/*
-  @Override
-  public void addAdHocExercise(String label) {
-    addExerciseToList(new ExerciseShell("ID_"+(adHocCount++),label));
-    flush();
-  }*/
 
   @Override
   public void removeCurrentExercise() {
     Widget current = innerContainer.getWidget();
     if (current != null) {
-      //System.out.println("Remove current widget");
       if (!innerContainer.remove(current)) {
-        System.out.println("\tdidn't remove current widget");
+        System.err.println("\tdidn't remove current widget");
       }
     }
   }
@@ -529,7 +511,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     html.getElement().scrollIntoView();
   }
 
-  protected void unselectCurrent() {
+  private void unselectCurrent() {
     HTML html = progressMarkers.get(currentExercise);
     html.setStyleDependentName("highlighted", false);
   }
@@ -561,15 +543,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return onLast;
   }
 
-  protected boolean isOnLastItem(int i) {
+  private boolean isOnLastItem(int i) {
     return i == currentExercises.size() - 1;
   }
-
-/*  public boolean isLastExercise(String id) {
-    System.out.println("ExerciseList.isLastExercise " + id);
-    ExerciseShell exerciseByID = getExerciseByID(id);
-    return exerciseByID != null && isOnLastItem(getIndex(exerciseByID));
-  }*/
 
   public boolean loadNextExercise(String id) {
     System.out.println("ExerciseList.loadNextExercise " + id);
@@ -639,7 +615,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     leftColumn.addStyleName("minWidth");
     DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
 
-    //leftColumnContainer.add(leftColumn);
     if (!props.isFlashcardTeacherView() && !props.isMinimalUI()) {
       Heading items = new Heading(4, ITEMS);
       items.addStyleName("center");
