@@ -243,12 +243,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // first row ---------------
     widgets.add(headerRow = makeHeaderRow());
 
-    Panel fourthRow = new FluidRow();
-    widgets.add(fourthRow);
+    Panel belowFirstRow = new FluidRow();
+    widgets.add(belowFirstRow);
 
     // second row ---------------
     secondRow = new FluidRow();
-    widgets.add(secondRow);
+  //  widgets.add(secondRow);
     secondRow.getElement().setId("secondRow");
 
     // third row ---------------
@@ -259,9 +259,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     thirdRow.add(leftColumn);
     thirdRow.getElement().setId("outerThirdRow");
 
-    widgets.add(thirdRow);
-
-
+  //  widgets.add(thirdRow);
+    FluidContainer bothSecondAndThird = new FluidContainer();
+    bothSecondAndThird.add(secondRow);
+    bothSecondAndThird.add(thirdRow);
+  //  widgets.add(bothSecondAndThird);
 
     if ((isCRTDataCollectMode() || props.isDataCollectMode())) {
       addProgressBar(widgets);
@@ -277,7 +279,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
 
     navigation = new Navigation(service, userManager, this);
-    fourthRow.add(navigation.getNav(secondRow,/*fourthRow,*/thirdRow,this,getProps()));
+ //   belowFirstRow.add(navigation.getNav(secondRow,/*belowFirstRow,*/thirdRow, this, getProps()));
+    belowFirstRow.add(navigation.getNav(bothSecondAndThird, this, getProps()));
     makeExerciseList(secondRow, leftColumn);
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("floatLeft");
@@ -295,7 +298,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     if (shouldCollectAudio()) {
       makeFlashContainer();
-      currentExerciseVPanel.add(flashRecordPanel);
+  //    currentExerciseVPanel.add(flashRecordPanel);
+      belowFirstRow.add(flashRecordPanel);
     }
     else {
       System.out.println("*not* allowing recording of audio.");
