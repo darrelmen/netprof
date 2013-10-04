@@ -7,6 +7,7 @@ import com.github.gwtbootstrap.client.ui.TextArea;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.resources.Bootstrap;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
@@ -14,6 +15,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
 import mitll.langtest.client.dialog.EnterKeyButtonHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ListInterface;
@@ -83,7 +85,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
   Tab yourItems;
   Panel yourItemsContent;
   private Panel getButtonRow2(Panel secondAndThird) {
-    tabPanel = new TabPanel(Bootstrap.Tabs.ABOVE);
+    tabPanel = new TabPanel();
 
     final TabAndContent yourStuff = makeTab(tabPanel, IconType.FOLDER_CLOSE, "Your Lists");
     yourItems = yourStuff.tab;
@@ -123,7 +125,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
        /* System.out.println("got shown event : '" +showEvent + "'\n" +
             "\ntarget " + showEvent.getTarget()+
             " ' target name '" + showEvent.getTarget().getName() + "'");*/
-        if (listInterface.getCreatedPanel() != null && showEvent.getTarget().toString().contains(CHAPTERS)) {
+        if (listInterface.getCreatedPanel() != null && showEvent.getTarget() != null && showEvent.getTarget().toString().contains(CHAPTERS)) {
           // System.out.println("\n\nupdating lists --->\n\n\n");
 
           ((GoodwaveExercisePanel) listInterface.getCreatedPanel()).wasRevealed();
@@ -219,88 +221,92 @@ public class Navigation extends BasicDialog implements RequiresResize {
       container.add(child);
       child.add(new Heading(3,"<b>Created by you.</b>"));
     }
-    FluidContainer operations = new FluidContainer();
-    operations.addStyleName("userListOperations");
-    FluidRow opRow = new FluidRow();
-    operations.add(opRow);
-
     final FluidContainer listContent = new FluidContainer();
-    Button w = new Button("Learn Pronunciation", IconType.LIGHTBULB);
-    opRow.add(w);
-    w.addClickHandler(new ClickHandler() {
+
+    Panel operations = getListOperations(ul, created, listContent);
+    container.add(operations);
+    container.add(listContent);
+  }
+
+  private Panel getListOperations(final UserList ul, boolean created, final FluidContainer listContent) {
+    final TabPanel tabPanel = new TabPanel();
+
+    final TabAndContent learn = makeTab(tabPanel, IconType.LIGHTBULB, "Learn Pronunciation");
+    learn.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        doNPF(ul, listContent);
+
+        System.out.println("\n\ngot event on learn");
+
+        addNPFToContent(ul, listContent);
       }
     });
-    Button practice = new Button("Practice", IconType.CHECK);
-    opRow.add(practice);
-    practice.addClickHandler(new ClickHandler() {
+    final TabAndContent practice = makeTab(tabPanel, IconType.CHECK, "Practice");
+
+    practice.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         Window.alert("do avp!");
       }
     });
+
+
     if (created) {
-      Button w1 = new Button("Add Item", IconType.PLUS_SIGN);
-      opRow.add(w1);
-      w1.addClickHandler(new ClickHandler() {
+      final TabAndContent addItem = makeTab(tabPanel, IconType.PLUS_SIGN, "Add Item");
+      addItem.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
           Window.alert("add item to list");
         }
       });
-      Button edit = new Button("Edit", IconType.EDIT);
-      opRow.add(edit);
-      edit.addClickHandler(new ClickHandler() {
+
+      final TabAndContent edit = makeTab(tabPanel, IconType.EDIT, "Edit");
+      edit.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          Window.alert("edit items");
+          Window.alert("edit  list");
         }
       });
     }
-    container.add(operations);
-    container.add(listContent);
+  //  tabPanel.selectTab(0);
+
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        tabPanel.selectTab(0);
+
+      //  System.out.println("fire event on learn");
+      //  learn.tab.fireEvent(new ButtonClickEvent());
+        addNPFToContent(ul,listContent);
+      }
+    });
+
+
+  return tabPanel;
   }
 
-  private void doNPF(UserList ul, FluidContainer listContent) {
+  private void addNPFToContent(UserList ul, FluidContainer listContent) {
+    Panel npfContent = doNPF(ul);
+
+    listContent.add(npfContent);
+    listContent.addStyleName("userListBackground");
+  }
+
+  private Panel doNPF(UserList ul) {
     System.out.println("doing npf!!! \n\n\n\n");
-    //FlowPanel fp = new FlowPanel();
-    // Panel fp = new FluidContainer();
     HorizontalPanel hp = new HorizontalPanel();
 
-    //  FluidRow row = new FluidRow();
-    // fp.add(row);
 
-     listContent.add(hp);
-    listContent.addStyleName("userListBackground");
     SimplePanel left = new SimplePanel();
 
-    //  Column left = new Column(2);
-    // row.add(left);
-    //left.addStyleName("floatLeft");
     hp.add(left);
     SimplePanel right = new SimplePanel();
-    //Column right = new Column(10);
-
-    //  row.add(right);
     hp.add(right);
-    //   right.addStyleName("floatRight");
 
-    PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller);/* {
-      @Override
-      public Panel makeExercisePanel(Exercise result) {
-        Panel widgets = super.makeExercisePanel(result);
-        goodwaveExercisePanel = (GoodwaveExercisePanel) widgets;
-        System.out.println("got goodwave panel : " + goodwaveExercisePanel);
-        return widgets;
-      }
-    };*/
+    PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller);
     exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller), userManager, 1);
-
-    // left.addStyleName("inlineStyle");
     left.add(exerciseList.getExerciseListOnLeftSide(props));
     exerciseList.rememberAndLoadFirst(ul.getExercises());
+    return hp;
   }
 
   private void setScrollPanelWidth(ScrollPanel row) {
