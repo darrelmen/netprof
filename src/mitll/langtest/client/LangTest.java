@@ -168,15 +168,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void logMessageOnServer(String message) {
     service.logMessage(message,
-      new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          //Window.alert("logMessage : Couldn't contact server.  Please check your network connection.");
-        }
+        new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            //Window.alert("logMessage : Couldn't contact server.  Please check your network connection.");
+          }
 
-        @Override
-        public void onSuccess(Void result) {}
-      });
+          @Override
+          public void onSuccess(Void result) {
+          }
+        });
   }
 
   /**
@@ -278,10 +279,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
 
-    navigation = new Navigation(service, userManager, this);
+    ListInterface listInterface = makeExerciseList(secondRow, leftColumn);
+    navigation = new Navigation(service, userManager, this, listInterface);
  //   belowFirstRow.add(navigation.getNav(secondRow,/*belowFirstRow,*/thirdRow, this, getProps()));
     belowFirstRow.add(navigation.getNav(bothSecondAndThird, this, getProps()));
-    makeExerciseList(secondRow, leftColumn);
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("floatLeft");
       thirdRow.add(currentExerciseVPanel);
@@ -616,8 +617,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    *
    * @see #onModuleLoad2()
    */
-  private void makeExerciseList(FluidRow secondRow, Panel leftColumn) {
+  private ListInterface makeExerciseList(FluidRow secondRow, Panel leftColumn) {
     this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, leftColumn, this, currentExerciseVPanel,service,this);
+    return exerciseList;
   }
 
   public int getHeightOfTopRows() {
