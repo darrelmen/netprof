@@ -37,17 +37,16 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class Navigation extends BasicDialog implements RequiresResize {
-  // public static final ButtonType UNCLICKED = ButtonType.INFO;
+  public static final String CHAPTERS = "Chapters";
+  private static final boolean SHOW_CREATED = false;
   private final ExerciseController controller;
   LangTestDatabaseAsync service;
   UserManager userManager;
   int userListID;
-  //Button yourItems;
-  // Button lastClicked = null;
+
   ScrollPanel listScrollPanel;
   UserFeedback feedback;
   private PropertyHandler props;
-  //GoodwaveExercisePanel goodwaveExercisePanel;
   ListInterface listInterface;
 
   public Navigation(LangTestDatabaseAsync service, UserManager userManager, ExerciseController controller, ListInterface listInterface) {
@@ -82,16 +81,13 @@ public class Navigation extends BasicDialog implements RequiresResize {
   }
   TabPanel tabPanel;
   Tab yourItems;
-  FluidContainer yourItemsContent;
+  Panel yourItemsContent;
   private Panel getButtonRow2(Panel secondAndThird) {
     tabPanel = new TabPanel(Bootstrap.Tabs.ABOVE);
 
-    yourItems = new Tab();
-    yourItems.setIcon(IconType.FOLDER_CLOSE);
-    yourItems.setHeading("Your Lists");
-    tabPanel.add(yourItems.asTabLink());
-    yourItemsContent = new FluidContainer();
-    yourItems.add(yourItemsContent);
+    final TabAndContent yourStuff = makeTab(tabPanel, IconType.FOLDER_CLOSE, "Your Lists");
+    yourItems = yourStuff.tab;
+    yourItemsContent = yourStuff.content;
     yourItems.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -100,59 +96,61 @@ public class Navigation extends BasicDialog implements RequiresResize {
     });
     refreshViewLessons();
 
-    Tab create = new Tab();
-    create.setIcon(IconType.PLUS_SIGN);
-    create.setHeading("Create");
-    tabPanel.add(create.asTabLink());
-    final FluidContainer createContent = new FluidContainer();
-    create.add(createContent);
-    create.addClickHandler(new ClickHandler() {
+    final TabAndContent create = makeTab(tabPanel, IconType.PLUS_SIGN, "Create");
+    create.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        doCreate(createContent);
+        doCreate(create.content);
       }
     });
 
-    Tab browse = new Tab();
-    browse.setIcon(IconType.TH_LIST);
-    browse.setHeading("Browse");
-    tabPanel.add(browse.asTabLink());
-    final FluidContainer browseContent = new FluidContainer();
-    browse.add(browseContent);
-    browse.addClickHandler(new ClickHandler() {
+    final TabAndContent browse = makeTab(tabPanel, IconType.TH_LIST, "Browse");
+    browse.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        viewLessons(browseContent, true);
+        viewLessons(browse.content, true);
       }
     });
 
-    Tab chapters = new Tab();
-    chapters.setIcon(IconType.TH_LIST);
-    chapters.setHeading("Chapters");
-    tabPanel.add(chapters.asTabLink());
+
+    final TabAndContent chapters = makeTab(tabPanel, IconType.TH_LIST, CHAPTERS);
+    chapters.content.add(secondAndThird);
+
+    // so we can know when chapters is revealed and tell it to update it's lists
     tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
       @Override
       public void onShow(TabPanel.ShowEvent showEvent) {
-        System.out.println("\ngot shown event");
-        if (listInterface.getCreatedPanel() != null) {
-          ((GoodwaveExercisePanel)listInterface.getCreatedPanel()).wasRevealed();
-        }
-        else {
-          System.out.println("no goodwave panel yet --->\n\n\n");
+       /* System.out.println("got shown event : '" +showEvent + "'\n" +
+            "\ntarget " + showEvent.getTarget()+
+            " ' target name '" + showEvent.getTarget().getName() + "'");*/
+        if (listInterface.getCreatedPanel() != null && showEvent.getTarget().toString().contains(CHAPTERS)) {
+          // System.out.println("\n\nupdating lists --->\n\n\n");
+
+          ((GoodwaveExercisePanel) listInterface.getCreatedPanel()).wasRevealed();
+        } else {
+          // System.out.println("no goodwave panel yet --->\n\n\n");
 
         }
       }
     });
-    // final FluidContainer chaptersContent = new FluidContainer();
-    chapters.add(secondAndThird);
-  /*  chapters.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        //showChapterView(secondRow, thirdRow, contentPanel);
-      }
-    });*/
 
     return tabPanel;
+  }
+
+  private TabAndContent makeTab(TabPanel toAddTo,IconType iconType, String label) {
+    Tab create = new Tab();
+    create.setIcon(iconType);
+    create.setHeading(label);
+    toAddTo.add(create.asTabLink());
+    final FluidContainer createContent = new FluidContainer();
+    create.add(createContent);
+    return new TabAndContent(create,createContent);
+  }
+
+  private static class TabAndContent {
+    public Tab tab;
+    public Panel content;
+    public TabAndContent(Tab tab, Panel panel) { this.tab = tab; this.content = panel;}
   }
 
   private void refreshViewLessons() {
@@ -205,9 +203,6 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
     FluidRow child = new FluidRow();
     container.add(child);
-    //child.addStyleName("fullWidth2");
-
-    //   child.add(new Heading(1,ul.getName()));
 
     FluidRow r1 = new FluidRow();
     child.add(r1);
@@ -219,7 +214,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
     r1.add(new Column(3, itemMarker));
 
     boolean created = createdByYou(ul);
-    if (created) {
+    if (created && SHOW_CREATED) {
       child = new FluidRow();
       container.add(child);
       child.add(new Heading(3,"<b>Created by you.</b>"));
@@ -277,7 +272,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
     //  FluidRow row = new FluidRow();
     // fp.add(row);
 
-    //  listContent.add(fp);
+     listContent.add(hp);
     listContent.addStyleName("userListBackground");
     SimplePanel left = new SimplePanel();
 
