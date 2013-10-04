@@ -13,19 +13,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.CaptionPanel;
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasEnabled;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.ProvidesResize;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.BusyPanel;
@@ -96,13 +84,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
     hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-    hp.add(getQuestionContent(e));
+    Panel addToList = makeAddToList(e, controller);
+    Widget questionContent = getQuestionContent(e,addToList);
+    questionContent.addStyleName("floatLeft");
+    hp.add(questionContent);
 
-    addToList = new SplitDropdownButton("Add Item to List");
-    addToList.setIcon(IconType.PLUS_SIGN);
-    populateListChoices(e, controller, addToList);
-    addToList.setType(ButtonType.PRIMARY);
-    hp.add(addToList);
+   // hp.add(addToList);
 
     center.add(hp);
     setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -111,6 +98,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     if (e.isRepeat()) {
       ASRScorePanel widgets = new ASRScorePanel();
+   //   widgets.insert(addToList,0);
       add(widgets);
       scorePanel = widgets;
       addQuestions(service, controller, 1, center);
@@ -128,11 +116,16 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     center.add(navigationHelper.makeSpacer());
     center.add(navigationHelper);
     navigationHelper.enableNextButton(true);
-
-
   }
 
+  private Panel makeAddToList(Exercise e, ExerciseController controller) {
+    addToList = new SplitDropdownButton("Add Item to List");
+    addToList.setIcon(IconType.PLUS_SIGN);
+    populateListChoices(e, controller, addToList);
+    addToList.setType(ButtonType.PRIMARY);
+    return addToList;
 
+  }
 
   private void populateListChoices(final Exercise e, ExerciseController controller, final SplitDropdownButton w1) {
     service.getListsForUser(controller.getUser(), true, new AsyncCallback<Collection<UserList>>() {
@@ -240,7 +233,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param e for this exercise
    * @return the panel that has the instructions and the audio panel
    */
-  private Widget getQuestionContent(Exercise e) {
+  private Widget getQuestionContent(Exercise e, Panel addToList) {
     String content = e.getContent();
     String path = null;
     if (e.isRepeat()) {
@@ -262,10 +255,19 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     final VerticalPanel vp = new VerticalPanel();
 
-    CaptionPanel cpContent = new CaptionPanel(INSTRUCTIONS);
+    //CaptionPanel cpContent = new CaptionPanel(INSTRUCTIONS);
     Widget questionContent = new HTML(content);
-    cpContent.setContentWidget(questionContent);
-    vp.add(cpContent);
+    FlowPanel fp = new FlowPanel();
+    questionContent.addStyleName("floatLeft");
+    fp.addStyleName("trueInlineStyle");
+    fp.add(questionContent);
+    fp.add(addToList);
+    addToList.addStyleName("floatRight");
+
+    //cpContent.setContentWidget(fp);
+
+    vp.add(fp);  // was cpContent
+    vp.addStyleName("topMargin");
 
     if (path != null) {
       ensureMP3(e, path, vp);
@@ -278,7 +280,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   /**
    * soundmanager plays mp3 files -- make sure there is a copy of the wav file as an mp3 on the server.
-   * @see #getQuestionContent(mitll.langtest.shared.Exercise)
+   * @see #getQuestionContent
    * @param e
    * @param path
    * @param vp
