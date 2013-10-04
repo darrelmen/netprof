@@ -58,23 +58,16 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private Timer timer;
 
   @Override
-  public void makeExercisePanel(Exercise result) {
-    //To change body of implemented methods use File | Settings | File Templates.
+  public Panel makeExercisePanel(Exercise result) {
+    return null;
   }
 
   @Override
   public void loadExercise(ExerciseShell exerciseShell) {
-    //To change body of implemented methods use File | Settings | File Templates.
   }
-
-/*  @Override
-  public boolean isLastExercise(String id) {
-    return false;  //To change body of implemented methods use File | Settings | File Templates.
-  }*/
 
   @Override
   public void startOver() {
-    //To change body of implemented methods use File | Settings | File Templates.
   }
 
   @Override
@@ -396,6 +389,11 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   @Override
   public void askForRandomExercise(AsyncCallback<Exercise> callback) {
     //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  @Override
+  public Panel getCreatedPanel() {
+    return null;  //To change body of implemented methods use File | Settings | File Templates.
   }
 
   public void rememberAndLoadFirst(List<? extends ExerciseShell> exercises){}
