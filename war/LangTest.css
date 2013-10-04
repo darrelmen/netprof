@@ -217,6 +217,9 @@ h1 {
 .inlineStyle {
     display: inline-block;
 }
+.trueInlineStyle {
+     display: inline;
+ }
 
 .buttonMargin {
     margin-right: 3px;
