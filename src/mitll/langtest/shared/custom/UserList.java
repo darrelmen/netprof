@@ -26,16 +26,27 @@ public class UserList extends ExerciseShell {
   private String description;
   private String classMarker;
   private long modified;
+  private boolean isPrivate;
   private List<UserExercise> exercises = new ArrayList<UserExercise>();
 
   public UserList(){}
-  public UserList(int uniqueID, User user, String name, String description, String classMarker){
+
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#getUserList(long, String, String, String)
+   * @param uniqueID
+   * @param user
+   * @param name
+   * @param description
+   * @param classMarker
+   */
+  public UserList(int uniqueID, User user, String name, String description, String classMarker, boolean isPrivate){
     super(""+uniqueID,name);
     this.uniqueID = uniqueID;
     this.creator = user;
     this.name = name;
     this.description = description;
     this.classMarker = classMarker;
+    this.isPrivate = isPrivate;
     visitorIDs = new HashSet<Long>();
     addVisitor(user);
     modified = System.currentTimeMillis();
@@ -89,5 +100,9 @@ public class UserList extends ExerciseShell {
     return "UserList #" + getUniqueID() + " "+name + " by " + creator+ " visited by " + visitorIDs+
       "  : "+
       " with " + getExercises().size() + " exercises.";
+  }
+
+  public boolean isPrivate() {
+    return isPrivate;
   }
 }
