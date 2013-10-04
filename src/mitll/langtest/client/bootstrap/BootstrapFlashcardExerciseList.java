@@ -398,7 +398,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     //To change body of implemented methods use File | Settings | File Templates.
   }
 
-  public void rememberAndLoadFirst(List<ExerciseShell> exercises){}
+  public void rememberAndLoadFirst(List<? extends ExerciseShell> exercises){}
 
   protected void grabFocus(final BootstrapExercisePanel panel) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
