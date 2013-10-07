@@ -95,7 +95,7 @@ public class SmallDatabaseImpl implements Database {
    * @return
    * @throws Exception
    */
-  private Connection dbLogin() throws Exception {
+  private Connection dbLogin() /*throws Exception*/ {
     if (localConnection != null) return localConnection;
     try {
       Class.forName(driver).newInstance();
@@ -123,12 +123,12 @@ public class SmallDatabaseImpl implements Database {
       this.localConnection = connection;
       return connection;
     } catch (Exception ex) {
-      ex.printStackTrace();
-      throw ex;
+      logger.error("Got " +ex,ex);
     }
+    return null;
   }
 
-  public Connection getConnection() throws Exception {
+  public Connection getConnection() /*throws Exception */{
     Connection c;
     try {
       if (servlet == null) {
@@ -144,9 +144,13 @@ public class SmallDatabaseImpl implements Database {
     if (c == null) {
       return c;
     }
-    c.setAutoCommit(true);
-    if (c.isClosed()) {
-      logger.warn("getConnection : conn " + c + " is closed!");
+    try {
+      c.setAutoCommit(true);
+      if (c.isClosed()) {
+        logger.warn("getConnection : conn " + c + " is closed!");
+      }
+    } catch (SQLException e) {
+      logger.error("got " +e,e);
     }
     return c;
   }
