@@ -843,6 +843,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return exercises;
   }
 
+  public UserExercise createNewItem(long userid, String english, String foreign) {
+    return db.getUserListManager().createNewItem(userid, english, foreign);
+  }
+
   /**
    *
    *
