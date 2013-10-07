@@ -626,7 +626,6 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   private Widget getAsyncTable(Map<String, Collection<String>> typeToSection,int numResults) {
     Resources resources = GWT.create(Resources.class);
 
-    // CellTable<? extends ExerciseShell> table = pagingContainer.makeBootstrapCellTable(resources);
     CellTable<Exercise> table = exercisePagingContainer.makeBootstrapCellTable(resources);
     table.setStriped(true);
     table.setBordered(false);
