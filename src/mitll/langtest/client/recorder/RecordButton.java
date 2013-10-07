@@ -49,11 +49,11 @@ public abstract class RecordButton {
     if (addKeyHandler) keyHandler = addKeyHandler();
   }
 
-  public RecordButton(Widget recordButton, int delay, boolean addKeyHandler) {
+/*  public RecordButton(Widget recordButton, int delay, boolean addKeyHandler) {
     this(delay, addKeyHandler);
     this.record = recordButton;
     setupRecordButton(recordButton);
-  }
+  }*/
 
   /**
    * @see RecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel)
