@@ -2,6 +2,7 @@ package mitll.langtest.server;
 
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
+import audio.tools.FileCopier;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
@@ -65,6 +66,8 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring {
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
+  private static final String FAST = "Fast";
+  private static final String SLOW = "Slow";
 
   private static final int MB = (1024 * 1024);
   private static final int TIMEOUT = 30;
@@ -385,6 +388,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     long then = System.currentTimeMillis();
     List<Exercise> exercises = getExercises();
     Exercise byID = db.getExercise(id);
+    if (byID == null) {
+      byID = db.getUserExerciseWhere(id);
+    }
     if (byID == null) {
       logger.error("huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
     }
@@ -845,6 +851,46 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public UserExercise createNewItem(long userid, String english, String foreign) {
     return db.getUserListManager().createNewItem(userid, english, foreign);
+  }
+
+  /**
+   * Put the new item in the database,
+   * copy the audio under bestAudio
+   * assign the item to a user list
+   * @param userExercise
+   */
+  public UserExercise reallyCreateNewItem(UserList userList, UserExercise userExercise) {
+    File fileRef = pathHelper.getAbsoluteFile(userExercise.getRefAudio());
+    String fast = FAST + ".wav";
+    db.getUserListManager().reallyCreateNewItem(userList, userExercise);
+
+    String refAudio = getRefAudioPath(userExercise, fileRef, fast);
+    userExercise.setRefAudio(refAudio);
+
+    if (userExercise.getSlowAudioRef() != null && !userExercise.getSlowAudioRef().isEmpty()) {
+      fileRef = pathHelper.getAbsoluteFile(userExercise.getSlowAudioRef());
+      String slow = SLOW + ".wav";
+
+      refAudio = getRefAudioPath(userExercise, fileRef, slow);
+      userExercise.setSlowAudioRef(refAudio);
+    }
+    logger.debug("exercise now  " + userExercise);
+
+    // TODO do the same thing for slow
+
+
+    return userExercise;
+  }
+
+  private String getRefAudioPath(UserExercise userExercise, File fileRef, String fast) {
+    final File bestDir = pathHelper.getAbsoluteFile("bestAudio");
+    bestDir.mkdir();
+    File bestDirForExercise = new File(bestDir, userExercise.getID());
+    bestDirForExercise.mkdir();
+    File destination = new File(bestDirForExercise, fast);
+    logger.debug("copying from " + fileRef +  " to " + destination.getAbsolutePath());
+    new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
+    return "bestAudio" + File.separator + userExercise.getID() + File.separator + fast;
   }
 
   /**
