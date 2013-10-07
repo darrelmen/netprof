@@ -1,7 +1,5 @@
 package mitll.langtest.shared.custom;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.User;
 
@@ -105,7 +103,7 @@ public class UserList extends ExerciseShell {
 
   @Override
   public String toString() {
-    return "UserList #" + getUniqueID() + " "+name + " by " + creator+ " visited by " + visitorIDs+
+    return "UserList #" + getUniqueID() + " "+name + " by " + creator.id+ " visited by " + visitorIDs+
         "  : "+
         " with " + getExercises().size() + " exercises.";
   }
