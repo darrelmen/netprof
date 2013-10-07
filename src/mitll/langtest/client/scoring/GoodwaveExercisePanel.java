@@ -131,7 +131,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     service.getListsForUser(controller.getUser(), true, new AsyncCallback<Collection<UserList>>() {
       @Override
       public void onFailure(Throwable caught) {
-        //To change body of implemented methods use File | Settings | File Templates.
       }
 
       @Override
@@ -157,12 +156,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
                   @Override
                   public void onSuccess(List<UserExercise> result) {
                     showPopup("Item Added!");
-                    System.out.println("Before Widgets = " + w1.getWidgetCount());
-
-                  //  w1.remove(widget);
                     widget.setVisible(false);
                     activeCount--;
-                    System.out.println("After Widgets = " + w1.getWidgetCount());
                     if (activeCount == 0) {
                       NavLink widget = new NavLink("Exercise already added to your list(s)");
                       w1.add(widget);
@@ -196,7 +191,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     t.schedule(2000);
   }
 
-  private void setBusy(boolean v) { this.isBusy = v;}
+  public void setBusy(boolean v) { this.isBusy = v;}
 
   /**
    * For every question,
@@ -335,7 +330,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     ASRScoringAudioPanel audioPanel;
 
     if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
-      audioPanel = new FastAndSlowASRScoringAudioPanel(path, scorePanel);
+      audioPanel = new FastAndSlowASRScoringAudioPanel(path,controller, scorePanel);
     }
     else {
       audioPanel = new ASRScoringAudioPanel(path,e.getRefSentence(),service,controller, false, scorePanel);
@@ -375,9 +370,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param index
    * @return
    */
-  private Widget getAnswerWidget(LangTestDatabaseAsync service,
-                                 final ExerciseController controller, final int index) {
-    ScoringAudioPanel widgets = new ASRRecordAudioPanel(service, index);
+  private Widget getAnswerWidget(LangTestDatabaseAsync service, final ExerciseController controller, final int index) {
+    ScoringAudioPanel widgets = new ASRRecordAudioPanel(service, index, controller);
     widgets.addScoreListener(scorePanel);
     answerAudio = widgets;
     answerAudio.setScreenPortion(controller.getScreenPortion());
@@ -397,8 +391,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * @see GoodwaveExercisePanel#getAnswerWidget
      * @param service
      * @param index
+     * @param controller
      */
-    public ASRRecordAudioPanel(LangTestDatabaseAsync service, int index) {
+    public ASRRecordAudioPanel(LangTestDatabaseAsync service, int index, ExerciseController controller) {
       super(service, controller.getSegmentRepeats(),
         false, // no keyboard
         controller, scorePanel);
@@ -419,7 +414,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     protected PlayAudioPanel makePlayAudioPanel(Widget toAdd) {
       recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
       recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
-      postAudioRecordButton = new MyPostAudioRecordButton();
+      postAudioRecordButton = new MyPostAudioRecordButton(controller);
       Widget record = postAudioRecordButton.getRecord();
       DOM.setElementProperty(record.getElement(),"margin","8px");
       playAudioPanel = new MyPlayAudioPanel(recordImage1,recordImage2, soundManager, postAudioRecordButton, GoodwaveExercisePanel.this);
@@ -469,8 +464,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
 
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
-      public MyPostAudioRecordButton() {
-        super(exercise, controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index, recordImage1, recordImage2);
+      public MyPostAudioRecordButton(ExerciseController controller) {
+        super(exercise, controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index, recordImage1, recordImage2,false);
       }
 
       @Override
@@ -518,11 +513,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * @see GoodwaveExercisePanel#getScoringAudioPanel(mitll.langtest.shared.Exercise, String)
      * @param path
      */
-    public FastAndSlowASRScoringAudioPanel(String path, ScoreListener scoreListener) {
+    public FastAndSlowASRScoringAudioPanel(String path, ExerciseController controller1, ScoreListener scoreListener) {
       super(path,
           exercise.getRefSentence(),
           GoodwaveExercisePanel.this.service,
-          controller,
+          controller1,
           false // no keyboard space bar binding
         ,
         scoreListener);

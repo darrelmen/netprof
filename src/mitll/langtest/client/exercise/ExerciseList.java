@@ -296,9 +296,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return w;
   }
 
+  /**
+   * @see #rememberAndLoadFirst(java.util.List)
+   */
   protected void loadFirstExercise() {
     if (currentExercises.isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
-      Window.alert("Server error : no exercises. Please contact administrator.");
+      //Window.alert("Server error : no exercises. Please contact administrator.");
+      System.err.println("loadFirstExercise : current exercises is empty?");
     } else {
       ExerciseShell toLoad = currentExercises.get(0);
 
