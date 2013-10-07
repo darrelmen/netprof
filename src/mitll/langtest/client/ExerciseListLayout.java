@@ -65,20 +65,20 @@ public class ExerciseListLayout {
                                          Panel currentExerciseVPanel, LangTestDatabaseAsync service, ExerciseController controller) {
     if (isGrading) {
       return new GradedExerciseList(currentExerciseVPanel, service, feedback,
-        true, props.isEnglishOnlyMode(), controller);
+        true, props.isEnglishOnlyMode(), controller,"grading");
     } else {
       if (props.isShowSections()) {
         boolean showSectionWidgets = props.isShowSectionWidgets();
         if (props.isFlashcardTeacherView()) {
           return new TableSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-            props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, controller);
+            props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, controller, "table");
         } else {
           return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-            props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, controller);
+            props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, controller, "flex");
         }
       } else {
         return new PagingExerciseList(currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), isAutoCRTMode(), controller);
+          props.isShowTurkToken(), isAutoCRTMode(), controller, "paging");
       }
     }
   }
