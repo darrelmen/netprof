@@ -128,6 +128,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   private void populateListChoices(final Exercise e, ExerciseController controller, final SplitDropdownButton w1) {
+    System.out.println("populate list choices for " + controller.getUser());
     service.getListsForUser(controller.getUser(), true, new AsyncCallback<Collection<UserList>>() {
       @Override
       public void onFailure(Throwable caught) {
