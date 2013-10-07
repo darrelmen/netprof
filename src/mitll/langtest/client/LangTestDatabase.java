@@ -152,4 +152,5 @@ public interface LangTestDatabase extends RemoteService {
   Collection<UserList> getListsForUser(int userid, boolean onlyCreated);
   Collection<UserList> getUserListsForText(String search);
   List<UserExercise> addItemToUserList(int userListID, UserExercise userExercise);
+  UserExercise createNewItem(long userid, String english, String foreign);
 }
