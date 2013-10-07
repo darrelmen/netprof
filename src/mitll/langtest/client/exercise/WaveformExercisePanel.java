@@ -48,7 +48,7 @@ public class WaveformExercisePanel extends ExercisePanel {
    */
   @Override
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
-    audioPanel = new RecordAudioPanel(exercise, controller, this, service, index);
+    audioPanel = new RecordAudioPanel(exercise, controller, this, service, index, true);
     return audioPanel;
   }
 
