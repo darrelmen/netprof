@@ -153,4 +153,5 @@ public interface LangTestDatabase extends RemoteService {
   Collection<UserList> getUserListsForText(String search);
   List<UserExercise> addItemToUserList(int userListID, UserExercise userExercise);
   UserExercise createNewItem(long userid, String english, String foreign);
+  UserExercise reallyCreateNewItem(UserList userList, UserExercise userExercise/*, String refAudioPath, String slowRefAudioPath*/);
 }
