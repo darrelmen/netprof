@@ -48,7 +48,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence" +
     " and speech occur, or whether the mic is working properly.";
   public static final int IMAGE_WIDTH_SLOP = 100;
-  private final ScoreListener gaugePanel;
+  private ScoreListener gaugePanel = null;
   protected String audioPath;
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
@@ -68,7 +68,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private final boolean debug = false;
   private float screenPortion = 1.0f;
   private final boolean logMessages;
-  private ExerciseController controller;
+  protected ExerciseController controller;
 
   /**
    * @see mitll.langtest.client.exercise.WaveformExercisePanel.RecordAudioPanel#RecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int)
@@ -79,13 +79,18 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   public AudioPanel(String path, LangTestDatabaseAsync service,
                     boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
+    this(service,useKeyboard,controller);
+    this.gaugePanel = gaugePanel;
+    addWidgets(path);
+  }
+
+  public AudioPanel( LangTestDatabaseAsync service,
+                    boolean useKeyboard, ExerciseController controller) {
     this.soundManager = controller.getSoundManager();
     this.service = service;
     this.useKeyboard = useKeyboard;
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
-    this.gaugePanel = gaugePanel;
-    addWidgets(path);
   }
 
   public void onResize() {
@@ -97,7 +102,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param path
    * @return
    */
-  private void addWidgets(String path) {
+  public void addWidgets(String path) {
     imageContainer = new VerticalPanel();
 
     HorizontalPanel hp = new HorizontalPanel();
