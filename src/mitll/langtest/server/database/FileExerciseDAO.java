@@ -517,7 +517,7 @@ public class FileExerciseDAO implements ExerciseDAO {
    */
   private Exercise getWordListExercise(String contentSentence, String id) {
     contentSentence = getRefSentence(contentSentence);
-    String content = getArabic(contentSentence);
+    String content = getArabic(contentSentence,isUrdu,isPashto);
 
     Exercise exercise = new Exercise("repeat", id, content, false, true, contentSentence);
     exercise.setRefSentence(contentSentence);
@@ -568,7 +568,7 @@ public class FileExerciseDAO implements ExerciseDAO {
 
     String foreignLanguagePhrase = split[0].trim();
     foreignLanguagePhrase = foreignLanguagePhrase.replaceAll("<s>", "").replaceAll("</s>", "").trim();
-    String content = getArabic(foreignLanguagePhrase);
+    String content = getArabic(foreignLanguagePhrase,isUrdu,isPashto);
 
     String audioFileName = split[1].trim();
     String english = "";
@@ -634,7 +634,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     String translit = split1[3];
     String english = split1[4];
 
-    String content = getContent(arabic, translit, english,"");
+    String content = getContent(arabic, translit, english,"",isEnglish,isUrdu,isPashto);
     String fastAudioRef = mediaDir+File.separator+name+File.separator+ FAST + ".wav";
     String slowAudioRef = mediaDir+File.separator+name+File.separator+ SLOW + ".wav";
 
@@ -642,12 +642,17 @@ public class FileExerciseDAO implements ExerciseDAO {
         ensureForwardSlashes(fastAudioRef), ensureForwardSlashes(slowAudioRef), arabic, english);
   }
 
-  private String getContent(String arabic, String translit, String english, String meaning) {
-    return getContent(arabic, translit, english, meaning, "");
+
+  public static String getContent(String arabic, String translit, String english, String meaning, String language) {
+    return getContent(arabic, translit, english, meaning, "", language.equalsIgnoreCase("english"), language.equalsIgnoreCase("urdu"), language.equalsIgnoreCase("pashto"));
   }
 
-  public String getContent(String arabic, String translit, String english, String meaning, String context) {
-    String arabicHTML = getArabic(arabic);
+  public static String getContent(String arabic, String translit, String english, String meaning, boolean isEnglish, boolean isUrdu, boolean isPashto) {
+    return getContent(arabic, translit, english, meaning, "", isEnglish, isUrdu, isPashto);
+  }
+
+  public static String getContent(String arabic, String translit, String english, String meaning, String context, boolean isEnglish, boolean isUrdu, boolean isPashto) {
+    String arabicHTML = getArabic(arabic, isUrdu, isPashto);
     String translitHTML = translit.length() > 0 ?
       getSpanWrapper("Transliteration:", translit)
       : "";
@@ -665,17 +670,17 @@ public class FileExerciseDAO implements ExerciseDAO {
       contextHTML;
   }
 
-  private String getSpanWrapper(String rowTitle, String english) {
+  private static String getSpanWrapper(String rowTitle, String english) {
     return "<div class=\"Instruction\">\n" +
-    "<span class=\"Instruction-title\">" +
+      "<span class=\"Instruction-title\">" +
       rowTitle +
       "</span>\n" +
-    "<span class=\"Instruction-data\"> " + english +
+      "<span class=\"Instruction-data\"> " + english +
     "</span>\n" +
     "</div>";
   }
 
-  private String getArabic(String arabic) {
+  private static String getArabic(String arabic, boolean isUrdu, boolean isPashto) {
     return "<div class=\"Instruction\">\n" +
         "<span class=\"Instruction-title\">Say:</span>\n" +
         "<span class=\"" +

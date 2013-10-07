@@ -10,9 +10,8 @@ import com.github.gwtbootstrap.client.ui.Popover;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.dialog.EnterKeyButtonHelper;
@@ -35,7 +34,6 @@ public class BasicDialog {
 
   protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
-
     return getFormField(dialogBox, label, user);
   }
 
@@ -59,28 +57,8 @@ public class BasicDialog {
     return userGroup;
   }
 
-  protected void setupPopover(final Widget w, String heading, final String message) {
-    // System.out.println("triggering popover on " + w + " with " + message);
-    final Popover popover = new Popover();
-    popover.setWidget(w);
-    popover.setText(message);
-    popover.setHeading(heading);
-    popover.setPlacement(Placement.RIGHT);
-    popover.reconfigure();
-    popover.show();
-
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        //System.out.println("hide popover on " + w + " with " + message);
-        popover.hide();
-      }
-    };
-    t.schedule(3000);
-  }
-
   protected void addKeyHandler(final Button send, Modal dialog) {
-    enterKeyButtonHelper.addKeyHandler(send,dialog);
+    enterKeyButtonHelper.addKeyHandler(send, dialog);
   }
 
  /* protected void removeKeyHandler() {
@@ -97,14 +75,43 @@ public class BasicDialog {
   }
 
   protected void markError(FormField dialectGroup, String message) {
-    markError(dialectGroup.group, dialectGroup.box, "Try Again", message);
+    markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, "Try Again", message);
   }
 
-  protected void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
+  protected void markError(ControlGroup dialectGroup, Widget dialect, String header, String message) {
+    markError(dialectGroup, dialect, (Focusable) dialect, header, message);
+  }
+
+  protected void markError(ControlGroup dialectGroup, Widget dialect, Focusable focusable, String header, String message) {
     dialectGroup.setType(ControlGroupType.ERROR);
-    dialect.setFocus(true);
+    focusable.setFocus(true);
 
     setupPopover(dialect, header, message);
+  }
+
+  protected void setupPopover(final Widget w, String heading, final String message) {
+     System.out.println("\n\n\ntriggering popover on " + w.getTitle() + " with " + heading + "/"+message);
+    final MyPopover popover = new MyPopover();
+    popover.setWidget(w);
+    popover.setText(message);
+    popover.setHeading(heading);
+    popover.setPlacement(Placement.RIGHT);
+    popover.reconfigure();
+    popover.show();
+
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        //System.out.println("hide popover on " + w + " with " + message);
+        popover.dontFireAgain();
+        popover.setHideDelay(0);
+        popover.clear();
+        popover.reconfigure();
+
+        //   popover.clear();
+      }
+    };
+    t.schedule(3000);
   }
 
   protected boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max) {
@@ -127,5 +134,12 @@ public class BasicDialog {
     }
 
     return validAge;
+  }
+
+  private static class MyPopover extends Popover {
+    public void dontFireAgain() {
+      hide();
+      asWidget();
+    }
   }
 }
