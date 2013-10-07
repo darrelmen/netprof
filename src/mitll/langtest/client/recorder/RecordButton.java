@@ -11,11 +11,13 @@ import com.google.gwt.event.dom.client.HasBlurHandlers;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.HasFocusHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTest;
 
 /**
  * Basically a click handler and a timer to click stop recording, if the user doesn't.
@@ -30,12 +32,12 @@ public abstract class RecordButton {
 
   private boolean recording = false;
   private Timer recordTimer;
-  //  private FocusWidget record = null;
- private Widget record = null;
+  private Widget record = null;
   private int autoStopDelay;
   private HandlerRegistration keyHandler;
   private boolean hasFocus = false;
-  private Image recordImage1, recordImage2;
+  private Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
+  private Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
 
   /**
    * @see mitll.langtest.client.bootstrap.BootstrapExercisePanel.MyRecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel)
@@ -47,6 +49,12 @@ public abstract class RecordButton {
     if (addKeyHandler) keyHandler = addKeyHandler();
   }
 
+  public RecordButton(Widget recordButton, int delay, boolean addKeyHandler) {
+    this(delay, addKeyHandler);
+    this.record = recordButton;
+    setupRecordButton(recordButton);
+  }
+
   /**
    * @see RecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel)
    * @param recordButton
@@ -55,7 +63,7 @@ public abstract class RecordButton {
    * @param recordImage2
    * @param addKeyHandler
    */
-  public RecordButton(/*Focus*/Widget recordButton, int delay, Image recordImage1, Image recordImage2, boolean addKeyHandler) {
+  public RecordButton(Widget recordButton, int delay, Image recordImage1, Image recordImage2, boolean addKeyHandler) {
     this(delay, addKeyHandler);
     this.record = recordButton;
     setupRecordButton(recordButton);
@@ -63,7 +71,7 @@ public abstract class RecordButton {
     this.recordImage2 = recordImage2;
   }
 
-  protected void setupRecordButton(/*Focus*/Widget recordButton) {
+  protected void setupRecordButton(Widget recordButton) {
 
     HasClickHandlers clickable = (HasClickHandlers) recordButton;
     HasFocusHandlers focusable = (HasFocusHandlers) recordButton;
