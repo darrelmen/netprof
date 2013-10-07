@@ -6,7 +6,6 @@ import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.TextArea;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.resources.Bootstrap;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
@@ -15,18 +14,17 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
 import mitll.langtest.client.dialog.EnterKeyButtonHelper;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ListInterface;
-import mitll.langtest.client.exercise.PagingExerciseList;
+import mitll.langtest.client.exercise.*;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.Collection;
@@ -42,14 +40,14 @@ public class Navigation extends BasicDialog implements RequiresResize {
   public static final String CHAPTERS = "Chapters";
   private static final boolean SHOW_CREATED = false;
   private final ExerciseController controller;
-  LangTestDatabaseAsync service;
-  UserManager userManager;
-  int userListID;
+  private LangTestDatabaseAsync service;
+  private UserManager userManager;
+  private int userListID;
 
-  ScrollPanel listScrollPanel;
-  UserFeedback feedback;
+  private ScrollPanel listScrollPanel;
+  private UserFeedback feedback;
   private PropertyHandler props;
-  ListInterface listInterface;
+  private ListInterface listInterface;
 
   public Navigation(LangTestDatabaseAsync service, UserManager userManager, ExerciseController controller, ListInterface listInterface) {
     this.service = service;
@@ -200,7 +198,6 @@ public class Navigation extends BasicDialog implements RequiresResize {
     contentPanel.addStyleName("fullWidth2");
 
     container.getElement().setId("showListContainer");
-    container.addStyleName("userListDarkerBlueColor");
     container.addStyleName("fullWidth2");
 
     FluidRow child = new FluidRow();
@@ -208,6 +205,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
     FluidRow r1 = new FluidRow();
     child.add(r1);
+    child.addStyleName("userListDarkerBlueColor");
 
     r1.add(new Column(3, new Heading(1, ul.getName())));
     Heading itemMarker = new Heading(3, ul.getExercises().size() + " items");
@@ -223,22 +221,19 @@ public class Navigation extends BasicDialog implements RequiresResize {
     }
     final FluidContainer listContent = new FluidContainer();
 
-    Panel operations = getListOperations(ul, created, listContent);
+    Panel operations = getListOperations(ul, created/*, listContent*/);
     container.add(operations);
     container.add(listContent);
   }
 
-  private Panel getListOperations(final UserList ul, boolean created, final FluidContainer listContent) {
+  private Panel getListOperations(final UserList ul, final boolean created/*, final FluidContainer listContent*/) {
     final TabPanel tabPanel = new TabPanel();
 
     final TabAndContent learn = makeTab(tabPanel, IconType.LIGHTBULB, "Learn Pronunciation");
     learn.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-
-        System.out.println("\n\ngot event on learn");
-
-        addNPFToContent(ul, listContent);
+        showNPF(ul, learn);
       }
     });
     final TabAndContent practice = makeTab(tabPanel, IconType.CHECK, "Practice");
@@ -250,13 +245,14 @@ public class Navigation extends BasicDialog implements RequiresResize {
       }
     });
 
-
+    TabAndContent addItem = null;
     if (created) {
-      final TabAndContent addItem = makeTab(tabPanel, IconType.PLUS_SIGN, "Add Item");
+      addItem = makeTab(tabPanel, IconType.PLUS_SIGN, "Add Item");
+      final TabAndContent finalAddItem = addItem;
       addItem.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          Window.alert("add item to list");
+          showAddItem(ul, finalAddItem);
         }
       });
 
@@ -268,23 +264,34 @@ public class Navigation extends BasicDialog implements RequiresResize {
         }
       });
     }
-  //  tabPanel.selectTab(0);
 
+    final TabAndContent finalAddItem = addItem;
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        tabPanel.selectTab(0);
-
-      //  System.out.println("fire event on learn");
-      //  learn.tab.fireEvent(new ButtonClickEvent());
-        addNPFToContent(ul,listContent);
+        if (created && ul.isEmpty()) {
+          tabPanel.selectTab(2);
+          showAddItem(ul, finalAddItem);
+        } else {
+          tabPanel.selectTab(0);
+          showNPF(ul, learn);
+        }
       }
     });
 
-
-  return tabPanel;
+    return tabPanel;
   }
 
-  private void addNPFToContent(UserList ul, FluidContainer listContent) {
+  private void showAddItem(UserList ul, TabAndContent addItem) {
+    Panel widgets = addItem(ul);
+    addItem.content.add(widgets);
+  }
+
+  private void showNPF(UserList ul, TabAndContent learn) {
+    learn.content.clear();
+    addNPFToContent(ul, learn.content);
+  }
+
+  private void addNPFToContent(UserList ul, Panel listContent) {
     Panel npfContent = doNPF(ul);
 
     listContent.add(npfContent);
@@ -292,12 +299,8 @@ public class Navigation extends BasicDialog implements RequiresResize {
   }
 
   private Panel doNPF(UserList ul) {
-    System.out.println("doing npf!!! \n\n\n\n");
     HorizontalPanel hp = new HorizontalPanel();
-
-
     SimplePanel left = new SimplePanel();
-
     hp.add(left);
     SimplePanel right = new SimplePanel();
     hp.add(right);
@@ -309,9 +312,122 @@ public class Navigation extends BasicDialog implements RequiresResize {
     return hp;
   }
 
+  private Panel addItem(UserList ul) {
+    HorizontalPanel hp = new HorizontalPanel();
+    SimplePanel left = new SimplePanel();
+    hp.add(left);
+    SimplePanel right = new SimplePanel();
+    hp.add(right);
+
+    //PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller);
+
+    PagingContainer<ExerciseShell> pagingContainer = new PagingContainer<ExerciseShell>(controller);
+    Panel container = pagingContainer.getTableWithPager();
+    left.add(container);
+
+    right.add(addNew(ul));
+    return hp;
+  }
+
+
+  private Panel addNew(UserList ul) {
+    FluidContainer container = new FluidContainer();
+    FluidRow row = new FluidRow();
+    container.add(row);
+
+    final Heading header = new Heading(2,"Add a new item");
+    row.add(header);
+
+    row = new FluidRow();
+    container.add(row);
+    final FormField english = addControlFormField(row, "English");
+
+    row = new FluidRow();
+    container.add(row);
+    final FormField foreignLang = addControlFormField(row, "Foreign Language ("+controller.getLanguage() +")");
+
+     row = new FluidRow();
+    container.add(row);
+
+    final Heading recordPrompt = new Heading(4,"Record normal speed reference recording");
+    row.add(recordPrompt);
+
+    row = new FluidRow();
+    container.add(row);
+
+    final LangTestDatabaseAsync outerService = service;
+    row.add(new RecordAudioPanel(null,controller,row,service,0) {
+      @Override
+      protected void getEachImage(int width) {
+        float newWidth = Window.getClientWidth() * 0.65f;
+        super.getEachImage((int)newWidth);    //To change body of overridden methods use File | Settings | File Templates.
+      }
+
+      @Override
+      protected WaveformPostAudioRecordButton makePostAudioRecordButton() {
+        return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, 0) {
+          @Override
+          public void stopRecording() {
+            System.out.println("stopRecording with exercise " + exercise);
+            if (exercise == null) {
+              //feedback.rememberAudioType();
+              outerService.createNewItem(userManager.getUser(), english.getText(), foreignLang.getText(), new AsyncCallback<UserExercise>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                  //To change body of implemented methods use File | Settings | File Templates.
+                }
+
+                @Override
+                public void onSuccess(UserExercise newExercise) {
+                  exercise = newExercise.toExercise();
+                  setExercise(exercise);
+                  stopRecording();    //To change body of overridden methods use File | Settings | File Templates.
+                }
+              });
+            } else {
+              super.stopRecording();
+            }
+          }
+
+          @Override
+          public void useResult(AudioAnswer result) {
+            super.useResult(result);
+            System.out.println("path to audio is " + result.path);
+
+          }
+        };
+      }
+    });
+
+    Button submit = new Button("Create");
+    submit.setType(ButtonType.PRIMARY);
+    submit.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        System.out.println("creating list for " + english + " " + foreignLang);
+        // TODO : validate
+
+        service.createNewItem(userManager.getUser(), english.getText(), foreignLang.getText(), new AsyncCallback<UserExercise>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            //To change body of implemented methods use File | Settings | File Templates.
+          }
+
+          @Override
+          public void onSuccess(UserExercise newExercise) {
+
+          }
+        });
+      }
+    });
+    row.add(submit);
+
+    return container;
+  }
+
   private void setScrollPanelWidth(ScrollPanel row) {
     if (row != null) {
-      row.setWidth((Window.getClientWidth() * 0.9) + "px");
+      row.setWidth((Window.getClientWidth() * 0.95) + "px");
       row.setHeight((Window.getClientHeight() * 0.7) + "px");
     }
   }
@@ -338,30 +454,19 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
     row = new FluidRow();
     child.add(row);
-    // final TextBox titleBox = new TextBox();
-    // ControlGroup group = addControlGroupEntry(row,"Title", titleBox);
-    // row.add(group);
-
     final FormField titleBox = addControlFormField(row, "Title");
 
     row = new FluidRow();
     child.add(row);
     final TextArea area = new TextArea();
-    /*ControlGroup group =*/ addControlGroupEntry(row,"Description", area);
+    addControlGroupEntry(row,"Description", area);
 
     row = new FluidRow();
     child.add(row);
-   /* final TextBox dliClass = new TextBox();
-    group = addControlGroupEntry(row, "Class", dliClass);
-    row.add(group);*/
 
     final FormField classBox = addControlFormField(row, "Class");
-
-
     row = new FluidRow();
     child.add(row);
-
-
 
     Button submit = new Button("Create List");
     submit.setType(ButtonType.PRIMARY);
