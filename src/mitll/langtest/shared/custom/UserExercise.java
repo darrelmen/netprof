@@ -15,23 +15,29 @@ public class UserExercise extends ExerciseShell {
   String english;
   String foreignLanguage;
   // String whichLanguage;
-  //User creator;
+  long creator;
   String meaning;
   String context;
-  String audioRef;
+  String comment;
+  private String audioRef;
   String slowAudioRef;
   boolean isPredef;
   String exerciseID;
 
   public UserExercise() {}
 
-  public UserExercise(int uniqueID, String english, String foreignLanguage) {
+  public UserExercise(int uniqueID, long creator, String english, String foreignLanguage) {
     super("Custom_"+uniqueID,english);
+    this.creator = creator;
     this.uniqueID = uniqueID;
     this.english = english;
     this.foreignLanguage = foreignLanguage;
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#populateListChoices(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.github.gwtbootstrap.client.ui.SplitDropdownButton)
+   * @param exercise
+   */
   public UserExercise(Exercise exercise) {
     super(exercise.getID(),exercise.getEnglishSentence());
 
@@ -41,16 +47,24 @@ public class UserExercise extends ExerciseShell {
     this.foreignLanguage = exercise.getContent();
   }
 
-  public UserExercise(int uniqueID, String english, String foreignLanguage, String audioRef) {
+ /* private UserExercise(int uniqueID, String english, String foreignLanguage, String audioRef) {
     this(uniqueID, english, foreignLanguage);
+    this.setAudioRef(audioRef);
+  }*/
+
+  public Exercise toExercise() {
+    return new Exercise("plan", "Custom_" + uniqueID, english, audioRef, foreignLanguage, english);
+  }
+
+  public String getAudioRef() {
+    return audioRef;
+  }
+
+  public void setAudioRef(String audioRef) {
     this.audioRef = audioRef;
   }
 
-/*  public Exercise toExercise() {
-    return new Exercise("plan", "Custom_" + uniqueID, english, audioRef, foreignLanguage, english);
-  }*/
-
   public String toString() {
-    return "UserExercise #" + uniqueID + " : " + english + " = " + foreignLanguage + " audio " + audioRef;
+    return "UserExercise #" + uniqueID + " : " + english + " = " + foreignLanguage + " audio " + getAudioRef();
   }
 }
