@@ -95,14 +95,18 @@ public class UserList extends ExerciseShell {
     return getExercises().contains(userExercise);
   }
 
+  public boolean isPrivate() {
+    return isPrivate;
+  }
+
+  public boolean isEmpty() {
+    return getExercises().isEmpty();
+  }
+
   @Override
   public String toString() {
     return "UserList #" + getUniqueID() + " "+name + " by " + creator+ " visited by " + visitorIDs+
-      "  : "+
-      " with " + getExercises().size() + " exercises.";
-  }
-
-  public boolean isPrivate() {
-    return isPrivate;
+        "  : "+
+        " with " + getExercises().size() + " exercises.";
   }
 }
