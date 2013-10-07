@@ -67,11 +67,12 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @param showInOrder
    * @param showListBox
    * @param controller
+   * @param instance
    */
   public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
-                                 boolean showTurkToken, boolean showInOrder, boolean showListBox, ExerciseController controller) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox, controller);
+                                 boolean showTurkToken, boolean showInOrder, boolean showListBox, ExerciseController controller, String instance) {
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox, controller, instance);
 
     Panel child = sectionPanel = new FluidContainer();
     DOM.setStyleAttribute(sectionPanel.getElement(), "paddingLeft", "2px");
