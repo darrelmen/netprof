@@ -256,6 +256,11 @@ public class PagingContainer<T extends ExerciseShell> {
     list.add((T) exercise);  // TODO : can't remember how I avoid this
   }
 
+  public <S extends ExerciseShell> void addAndFlush(S exercise) {
+    addExerciseToList2(exercise);
+    flush();
+  }
+
 /*  protected void addExerciseShellToList(ExerciseShell exercise) {
     List<T> list = dataProvider.getList();
     T something = (T)exercise;
