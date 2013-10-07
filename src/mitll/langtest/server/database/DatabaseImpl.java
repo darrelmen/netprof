@@ -7,6 +7,7 @@ import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.shared.DLIUser;
+import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
@@ -69,6 +70,8 @@ public class DatabaseImpl implements Database {
   private final GradeDAO gradeDAO = new GradeDAO(this,userDAO, resultDAO);
   private final SiteDAO siteDAO = new SiteDAO(this, userDAO);
   private final UserListManager userListManager = new UserListManager(userDAO);
+  private UserExerciseDAO userExerciseDAO;
+  FileExerciseDAO fileExerciseDAO = new FileExerciseDAO("","",false);
 
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
@@ -116,7 +119,6 @@ public class DatabaseImpl implements Database {
     this.doImages = serverProps.doImages();
     this.language = serverProps.getLanguage();
     this.isFlashcard = serverProps.isFlashcard();
-    //this.usePredefinedTypeOrder =  serverProps.usePredefinedTypeOrder();
     this.serverProps = serverProps;
 
     try {
@@ -165,13 +167,15 @@ public class DatabaseImpl implements Database {
       dliUserDAO.createUserTable(this);
 
       siteDAO.createTable(getConnection());
+      userExerciseDAO = new UserExerciseDAO(this);
+      userListManager.setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
   }
 
   @Override
-  public Connection getConnection() throws Exception {
+  public Connection getConnection()/* throws Exception*/ {
     return connection.getConnection();
   }
 
@@ -1399,6 +1403,11 @@ public class DatabaseImpl implements Database {
   }
 
   public UserListManager getUserListManager() { return userListManager; }
+
+  public Exercise getUserExerciseWhere(String id) {
+    UserExercise where = userExerciseDAO.getWhere(id);
+    return where != null ? where.toExercise(language) : null;
+  }
 
 /*  private static String getConfigDir(String language) {
     String installPath = ".";
