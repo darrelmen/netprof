@@ -84,8 +84,8 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
 
   public TableSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                   UserFeedback feedback, boolean showTurkToken, boolean showInOrder,
-                                  boolean showListBox, ExerciseController controller) {
-    super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox, controller);
+                                  boolean showListBox, ExerciseController controller, String instance) {
+    super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox, controller, instance);
     setWidth("100%");
     this.frameHeight = controller.getFlashcardPreviewFrameHeight();
   }
