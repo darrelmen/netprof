@@ -127,4 +127,10 @@ public class UserListManager {
 
     return listsForUser;  //To change body of created methods use File | Settings | File Templates.
   }
+
+  int userExerciseCount = 0;
+  public UserExercise createNewItem(long userid, String english, String foreign) {
+    int uniqueID = userExerciseCount++;
+    return new UserExercise(uniqueID, userid, english, foreign);
+  }
 }
