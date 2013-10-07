@@ -1,6 +1,8 @@
 package mitll.langtest.server.database.custom;
 
+import mitll.langtest.server.database.FileExerciseDAO;
 import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.server.database.UserExerciseDAO;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -22,6 +24,8 @@ public class UserListManager {
   // TODO add a DAO -- do something smarter!
   int i = 0;
   List<UserList> userLists = new ArrayList<UserList>();
+  private UserExerciseDAO userExerciseDAO;
+  FileExerciseDAO fileExerciseDAO =  new FileExerciseDAO("","",false);
 
   public UserListManager(UserDAO userDAO) { this.userDAO = userDAO; }
 
@@ -133,4 +137,27 @@ public class UserListManager {
     int uniqueID = userExerciseCount++;
     return new UserExercise(uniqueID, userid, english, foreign);
   }
+
+  // TODO make a dao for this...
+  public void reallyCreateNewItem(UserList userList, UserExercise userExercise) {
+    userExerciseDAO.add(userExercise);
+
+    boolean found = false;
+    for (UserList ul : userLists) {
+      if (ul.getUniqueID() == userList.getUniqueID()) {
+        ul.addExercise(userExercise);
+        logger.debug("now " + ul + " after adding " + userExercise);
+        found = true;
+      }
+    }
+    if (!found) logger.error("couldn't find ul with id " + userList.getUniqueID() + " in " + userLists);
+  }
+
+  public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
+    this.userExerciseDAO = userExerciseDAO;
+  }
+
+/*  public UserExerciseDAO getUserExerciseDAO() {
+    return userExerciseDAO;
+  }*/
 }
