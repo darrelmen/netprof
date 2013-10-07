@@ -69,28 +69,29 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private float screenPortion = 1.0f;
   private final boolean logMessages;
   protected ExerciseController controller;
+  private boolean showSpectrogram = true;
 
   /**
-   * @see mitll.langtest.client.exercise.WaveformExercisePanel.RecordAudioPanel#RecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int)
-   * @see ScoringAudioPanel#ScoringAudioPanel
+   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
    * @param service
    * @param useKeyboard
    * @param gaugePanel
    */
   public AudioPanel(String path, LangTestDatabaseAsync service,
                     boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
-    this(service,useKeyboard,controller);
+    this(service,useKeyboard,controller, true);
     this.gaugePanel = gaugePanel;
     addWidgets(path);
   }
 
-  public AudioPanel( LangTestDatabaseAsync service,
-                    boolean useKeyboard, ExerciseController controller) {
+  public AudioPanel(LangTestDatabaseAsync service,
+                    boolean useKeyboard, ExerciseController controller, boolean showSpectrogram) {
     this.soundManager = controller.getSoundManager();
     this.service = service;
     this.useKeyboard = useKeyboard;
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
+    this.showSpectrogram = showSpectrogram;
   }
 
   public void onResize() {
@@ -121,9 +122,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     getWaveform().image.setAltText(WAVEFORM_TOOLTIP);
     getWaveform().image.setTitle(WAVEFORM_TOOLTIP);
     spectrogram = new ImageAndCheck();
-    imageContainer.add(getSpectrogram().image);
-    controlPanel.add(addCheckbox(SPECTROGRAM, getSpectrogram()));
-
+    if (showSpectrogram) {
+      imageContainer.add(getSpectrogram().image);
+      controlPanel.add(addCheckbox(SPECTROGRAM, getSpectrogram()));
+    }
     words = new ImageAndCheck();
     imageContainer.add(words.image);
     controlPanel.add(addCheckbox("words", words));
@@ -288,7 +290,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   protected void getEachImage(int width) {
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
-    getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
+    if (showSpectrogram) {
+      getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
+    }
   }
 
   /**
