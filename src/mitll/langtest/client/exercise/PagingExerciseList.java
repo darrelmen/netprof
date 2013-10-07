@@ -27,10 +27,11 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    * @param feedback
    * @param showTurkToken
    * @param controller
+   * @param instance
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            boolean showTurkToken, boolean showInOrder, ExerciseController controller) {
-    super(currentExerciseVPanel, service, feedback, null, showTurkToken, showInOrder);
+                            boolean showTurkToken, boolean showInOrder, ExerciseController controller, String instance) {
+    super(currentExerciseVPanel, service, feedback, null, showTurkToken, showInOrder, instance);
     this.controller = controller;
     addComponents();
   }
