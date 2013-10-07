@@ -1,5 +1,6 @@
 package mitll.langtest.client.exercise;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.HasEnabled;
@@ -31,16 +32,17 @@ public class RecordAudioPanel extends AudioPanel {
    *
    * @param exercise
    * @param controller
-   *@param service
+   * @param service
    * @param index
+   * @param showSpectrogram
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
   public RecordAudioPanel(Exercise exercise, ExerciseController controller, Panel widgets,
-                          LangTestDatabaseAsync service, int index) {
+                          LangTestDatabaseAsync service, int index, boolean showSpectrogram) {
     super(service,
       // use full screen width
       true, // use keyboard
-      controller);
+      controller, showSpectrogram);
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
@@ -71,6 +73,8 @@ public class RecordAudioPanel extends AudioPanel {
     super.onUnload();
     postAudioRecordButton.onUnload();
   }
+
+  public Button getButton() { return (Button)postAudioRecordButton.getRecord(); }
 
   private class MyPlayAudioPanel extends PlayAudioPanel {
     public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel) {
