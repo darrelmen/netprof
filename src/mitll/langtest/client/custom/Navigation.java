@@ -4,11 +4,14 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.TextArea;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -57,31 +60,24 @@ public class Navigation extends BasicDialog implements RequiresResize {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#onModuleLoad2
-   * @paramx thirdRow
    * @return
+   * @paramx thirdRow
+   * @see mitll.langtest.client.LangTest#onModuleLoad2
    */
-  public Widget getNav(//final FluidRow secondRow,
-                       //final Panel thirdRow,
-                       final Panel secondAndThird,
-
-
-                       final UserFeedback feedback, final PropertyHandler props) {
-    final FluidContainer container = new FluidContainer();
-
+  public Widget getNav(final Panel secondAndThird, final UserFeedback feedback, final PropertyHandler props) {
+    FluidContainer container = new FluidContainer();
     this.feedback = feedback;
     this.props = props;
-    //  final FluidRow contentPanel = new FluidRow();
-    //FluidRow buttonRow = getButtonRow(secondRow, thirdRow, contentPanel);
-    Panel buttonRow = getButtonRow2(secondAndThird);//secondRow, thirdRow, contentPanel);
+    Panel buttonRow = getButtonRow2(secondAndThird);
     container.add(buttonRow);
-    //  container.add(contentPanel);
 
     return container;
   }
-  TabPanel tabPanel;
-  Tab yourItems;
-  Panel yourItemsContent;
+
+  private TabPanel tabPanel;
+  private Tab yourItems;
+  private Panel yourItemsContent;
+
   private Panel getButtonRow2(Panel secondAndThird) {
     tabPanel = new TabPanel();
 
@@ -137,20 +133,30 @@ public class Navigation extends BasicDialog implements RequiresResize {
     return tabPanel;
   }
 
-  private TabAndContent makeTab(TabPanel toAddTo,IconType iconType, String label) {
+  private TabAndContent makeTab(TabPanel toAddTo, IconType iconType, String label) {
     Tab create = new Tab();
     create.setIcon(iconType);
     create.setHeading(label);
     toAddTo.add(create.asTabLink());
     final FluidContainer createContent = new FluidContainer();
     create.add(createContent);
-    return new TabAndContent(create,createContent);
+    zeroPadding(createContent);
+    return new TabAndContent(create, createContent);
+  }
+
+  private void zeroPadding(Panel createContent) {
+    DOM.setStyleAttribute(createContent.getElement(), "paddingLeft", "0px");
+    DOM.setStyleAttribute(createContent.getElement(), "paddingRight", "0px");
   }
 
   private static class TabAndContent {
     public Tab tab;
     public Panel content;
-    public TabAndContent(Tab tab, Panel panel) { this.tab = tab; this.content = panel;}
+
+    public TabAndContent(Tab tab, Panel panel) {
+      this.tab = tab;
+      this.content = panel;
+    }
   }
 
   private void refreshViewLessons() {
@@ -177,7 +183,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
     contentPanel.clear();
     contentPanel.getElement().setId("contentPanel");
 
-    final FluidContainer child = new FluidContainer();
+    final Panel child = new DivWidget();
     contentPanel.add(child);
     child.addStyleName("exerciseBackground");
     if (getAll) {
@@ -217,16 +223,16 @@ public class Navigation extends BasicDialog implements RequiresResize {
     if (created && SHOW_CREATED) {
       child = new FluidRow();
       container.add(child);
-      child.add(new Heading(3,"<b>Created by you.</b>"));
+      child.add(new Heading(3, "<b>Created by you.</b>"));
     }
     final FluidContainer listContent = new FluidContainer();
 
-    Panel operations = getListOperations(ul, created/*, listContent*/);
+    Panel operations = getListOperations(ul, created);
     container.add(operations);
     container.add(listContent);
   }
 
-  private Panel getListOperations(final UserList ul, final boolean created/*, final FluidContainer listContent*/) {
+  private Panel getListOperations(final UserList ul, final boolean created) {
     final TabPanel tabPanel = new TabPanel();
 
     final TabAndContent learn = makeTab(tabPanel, IconType.LIGHTBULB, "Learn Pronunciation");
@@ -305,7 +311,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
     SimplePanel right = new SimplePanel();
     hp.add(right);
 
-    PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller);
+    PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller, "navigationNPF");
     exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller), userManager, 1);
     left.add(exerciseList.getExerciseListOnLeftSide(props));
     exerciseList.rememberAndLoadFirst(ul.getExercises());
@@ -319,24 +325,31 @@ public class Navigation extends BasicDialog implements RequiresResize {
     SimplePanel right = new SimplePanel();
     hp.add(right);
 
-    //PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller);
-
     PagingContainer<ExerciseShell> pagingContainer = new PagingContainer<ExerciseShell>(controller);
     Panel container = pagingContainer.getTableWithPager();
     left.add(container);
-
-    right.add(addNew(ul));
+    for (ExerciseShell es : ul.getExercises()) {
+       pagingContainer.addExerciseToList2(es);
+    }
+    pagingContainer.flush();
+    right.add(addNew(ul,pagingContainer,right));
     return hp;
   }
 
+  private String slowPath, fastPath;
+  private UserExercise createdExercise = null;
 
-  private Panel addNew(UserList ul) {
-    FluidContainer container = new FluidContainer();
+  private Panel addNew(final UserList ul, final PagingContainer<?> pagingContainer, final Panel toAddTo) {
+    final FluidContainer container = new FluidContainer();
+    container.addStyleName("greenBackground");
     FluidRow row = new FluidRow();
-    container.add(row);
-
-    final Heading header = new Heading(2,"Add a new item");
-    row.add(header);
+    slowPath = null;
+    fastPath = null;
+    if (false) {
+      container.add(row);
+      final Heading header = new Heading(3, "Add a new item");
+      row.add(header);
+    }
 
     row = new FluidRow();
     container.add(row);
@@ -344,25 +357,29 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
     row = new FluidRow();
     container.add(row);
-    final FormField foreignLang = addControlFormField(row, "Foreign Language ("+controller.getLanguage() +")");
+    final FormField foreignLang = addControlFormField(row, "Foreign Language (" + controller.getLanguage() + ")");
 
-     row = new FluidRow();
+/*
+    row = new FluidRow();
     container.add(row);
-
-    final Heading recordPrompt = new Heading(4,"Record normal speed reference recording");
+    final Heading recordPrompt = new Heading(4, "Record normal speed reference recording");
     row.add(recordPrompt);
-
+*/
     row = new FluidRow();
     container.add(row);
 
     final LangTestDatabaseAsync outerService = service;
-    row.add(new RecordAudioPanel(null,controller,row,service,0) {
+    final RecordAudioPanel rap = new RecordAudioPanel(null, controller, row, service, 0, false) {
       @Override
       protected void getEachImage(int width) {
         float newWidth = Window.getClientWidth() * 0.65f;
-        super.getEachImage((int)newWidth);    //To change body of overridden methods use File | Settings | File Templates.
+        super.getEachImage((int) newWidth);    //To change body of overridden methods use File | Settings | File Templates.
       }
 
+      /**
+       * @see RecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
+       * @return
+       */
       @Override
       protected WaveformPostAudioRecordButton makePostAudioRecordButton() {
         return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, 0) {
@@ -379,9 +396,12 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
                 @Override
                 public void onSuccess(UserExercise newExercise) {
+                  createdExercise = newExercise;
+                  System.out.println("stopRecording with createdExercise " + createdExercise);
+
                   exercise = newExercise.toExercise();
                   setExercise(exercise);
-                  stopRecording();    //To change body of overridden methods use File | Settings | File Templates.
+                  stopRecording();
                 }
               });
             } else {
@@ -393,41 +413,63 @@ public class Navigation extends BasicDialog implements RequiresResize {
           public void useResult(AudioAnswer result) {
             super.useResult(result);
             System.out.println("path to audio is " + result.path);
-
+            fastPath = result.path;
           }
         };
       }
-    });
+    };
+    final ControlGroup normalSpeedRecording = addControlGroupEntry(row, "Record normal speed reference recording", rap);
 
     Button submit = new Button("Create");
-    submit.setType(ButtonType.PRIMARY);
+    row.addStyleName("buttonMargin2");
+    submit.setType(ButtonType.SUCCESS);
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        System.out.println("creating list for " + english + " " + foreignLang);
-        // TODO : validate
+        System.out.println("creating new item for " + english + " " + foreignLang);
 
-        service.createNewItem(userManager.getUser(), english.getText(), foreignLang.getText(), new AsyncCallback<UserExercise>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            //To change body of implemented methods use File | Settings | File Templates.
-          }
+        if (english.getText().isEmpty()) {
+          markError(english, "Please enter an english word or phrase.");
+        } else if (foreignLang.getText().isEmpty()) {
+          markError(foreignLang, "Please enter the foreign language phrase.");
+        } else if (fastPath == null) {
+          markError(normalSpeedRecording, rap.getButton(), rap.getButton(), "", "Please record reference audio for the foreign language phrase.");
+          rap.getButton().addMouseOverHandler(new MouseOverHandler() {
+            @Override
+            public void onMouseOver(MouseOverEvent event) {
+              normalSpeedRecording.setType(ControlGroupType.NONE);
+            }
+          });
+        } else {
+          System.out.println("really creating new item for " + english + " " + foreignLang + " created " + createdExercise);
 
-          @Override
-          public void onSuccess(UserExercise newExercise) {
+          createdExercise.setRefAudio(fastPath);
+          createdExercise.setSlowAudioRef(slowPath);
+          service.reallyCreateNewItem(ul, createdExercise, new AsyncCallback<UserExercise>() {
+            @Override
+            public void onFailure(Throwable caught) {}
 
-          }
-        });
+            @Override
+            public void onSuccess(UserExercise newExercise) {
+              ul.addExercise(newExercise);
+              pagingContainer.addAndFlush(newExercise);
+              toAddTo.clear();
+              toAddTo.add(addNew(ul, pagingContainer, toAddTo));
+            }
+          });
+        }
       }
     });
-    row.add(submit);
+    Column column = new Column(2, 9, submit);
+    column.addStyleName("topMargin");
+    row.add(column);
 
     return container;
   }
 
   private void setScrollPanelWidth(ScrollPanel row) {
     if (row != null) {
-      row.setWidth((Window.getClientWidth() * 0.95) + "px");
+      row.setWidth((Window.getClientWidth() * 0.90) + "px");
       row.setHeight((Window.getClientHeight() * 0.7) + "px");
     }
   }
@@ -437,7 +479,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
     // post the results to the server
     thirdRow.clear();
     final EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper(true);
-    FluidContainer child = new FluidContainer() {
+    Panel child = new DivWidget() {
       @Override
       protected void onUnload() {
         super.onUnload();
@@ -445,11 +487,12 @@ public class Navigation extends BasicDialog implements RequiresResize {
       }
     };
     thirdRow.add(child);
+    zeroPadding(child);
     child.addStyleName("userListContainer");
 
     FluidRow row = new FluidRow();
     child.add(row);
-    final Heading header = new Heading(2,"Create a New List");
+    final Heading header = new Heading(2, "Create a New List");
     row.add(header);
 
     row = new FluidRow();
@@ -459,7 +502,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
     row = new FluidRow();
     child.add(row);
     final TextArea area = new TextArea();
-    addControlGroupEntry(row,"Description", area);
+    addControlGroupEntry(row, "Description", area);
 
     row = new FluidRow();
     child.add(row);
@@ -499,9 +542,9 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
   private class UserListCallback implements AsyncCallback<Collection<UserList>> {
     private final Panel contentPanel;
-    private final FluidContainer child;
+    private final Panel child;
 
-    public UserListCallback(Panel contentPanel, FluidContainer child) {
+    public UserListCallback(Panel contentPanel, Panel child) {
       this.contentPanel = contentPanel;
       this.child = child;
     }
@@ -513,18 +556,19 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
     @Override
     public void onSuccess(Collection<UserList> result) {
-
-      System.out.println("Displayig " + result.size() + " items");
+      System.out.println("Displaying " + result.size() + " items");
       if (result.isEmpty()) System.err.println("\n\nhuh? no results for user");
       listScrollPanel = new ScrollPanel();
       setScrollPanelWidth(listScrollPanel);
-      final FluidContainer insideScroll = new FluidContainer();
+      final Panel insideScroll = new DivWidget();
       insideScroll.addStyleName("userListContainer");
       listScrollPanel.add(insideScroll);
       for (final UserList ul : result) {
         final FocusPanel widgets = new FocusPanel();
+
         widgets.addStyleName("userListContent");
         widgets.addStyleName("userListBackground");
+        widgets.addStyleName("leftTenMargin");
 
         widgets.addClickHandler(new ClickHandler() {
           @Override
@@ -562,20 +606,20 @@ public class Navigation extends BasicDialog implements RequiresResize {
         //w1.addStyleName("floatLeft");
         // r1.add(fp);
         //fp.add(w1);
-        r1.add(new Column(3,w1));
+        r1.add(new Column(6, w1));
         Heading itemMarker = new Heading(3, ul.getExercises().size() + " items");
         itemMarker.addStyleName("subtitleForeground");
         //   itemMarker.addStyleName("floatRight");
-        r1.add(new Column(3,itemMarker));
+        r1.add(new Column(3, itemMarker));
         //    fp.add(itemMarker);
 
         r1 = new FluidRow();
         w.add(r1);
-        r1.add(new Heading(3,"Description : "+ul.getDescription()));
+        r1.add(new Heading(3, "Description : " + ul.getDescription()));
 
         r1 = new FluidRow();
         w.add(r1);
-        r1.add(new Heading(3,"Class : "+ul.getClassMarker()));
+        r1.add(new Heading(3, "Class : " + ul.getClassMarker()));
 
         if (createdByYou(ul)) {
           r1 = new FluidRow();
