@@ -32,7 +32,7 @@ import java.util.Set;
  * Time: 7:49 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingContainer<T extends ExerciseShell/*,S extends ExerciseShell*/> {
+public class PagingContainer<T extends ExerciseShell> {
   private static final int MAX_LENGTH_ID = 27;
   protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
   private ListDataProvider<T> dataProvider;
@@ -73,7 +73,7 @@ public class PagingContainer<T extends ExerciseShell/*,S extends ExerciseShell*/
     TableStyle cellTableStyle();
   }
 
-  public Panel addTableWithPager() {
+  public Panel getTableWithPager() {
     makeCellTable();
 
     // Create a data provider.
@@ -89,7 +89,6 @@ public class PagingContainer<T extends ExerciseShell/*,S extends ExerciseShell*/
     pager.setDisplay(table);
 
     FlowPanel column = new FlowPanel();
-    //  add(column);
     column.add(pager);
     column.add(table);
 
