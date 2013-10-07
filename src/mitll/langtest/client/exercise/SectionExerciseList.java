@@ -63,11 +63,12 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param showInOrder
    * @param showListBoxes
    * @param controller
+   * @param instance
    */
   public SectionExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                              UserFeedback feedback,
-                             boolean showTurkToken, boolean showInOrder, boolean showListBoxes, ExerciseController controller) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller);
+                             boolean showTurkToken, boolean showInOrder, boolean showListBoxes, ExerciseController controller, String instance) {
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, instance);
     this.showListBoxes = showListBoxes;
   }
 
@@ -511,6 +512,7 @@ public class SectionExerciseList extends PagingExerciseList {
       System.out.println("getHistoryToken for " + id + " is " +builder);
     }
     //System.out.println("\tgetHistoryToken for " + id + " is " +builder.toString());
+    builder.append(";instance=" + instance);
 
     return builder.toString();
   }
@@ -523,7 +525,12 @@ public class SectionExerciseList extends PagingExerciseList {
   public void onValueChange(ValueChangeEvent<String> event) {
     String rawToken = getTokenFromEvent(event);
     System.out.println(new Date() +" onValueChange : ------ start: token is '" + rawToken +"' ------------ ");
-    String item = getSelectionState(rawToken).getItem();
+    SelectionState selectionState1 = getSelectionState(rawToken);
+    if (!selectionState1.getInstance().equals(instance)) {
+      System.out.println(new Date() +" onValueChange : token '" + rawToken +"' is not for me (" + instance+ ")------------ ");
+      return;
+    }
+    String item = selectionState1.getItem();
 
     if (item != null && item.length() > 0 && hasExercise(item)) {
       if (includeItemInBookmark) {
