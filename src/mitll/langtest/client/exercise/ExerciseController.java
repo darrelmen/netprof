@@ -24,10 +24,6 @@ public interface ExerciseController {
   void loadExercise(ExerciseShell exerciseShell);
   boolean loadNextExercise(ExerciseShell current);
   boolean loadNextExercise(String id);
-  void makeExercisePanel(Exercise current);
-  void startOver();
-
-  void askForRandomExercise(AsyncCallback<Exercise> callback);
 
   boolean loadPreviousExercise(Exercise current);
 
