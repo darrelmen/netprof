@@ -161,6 +161,11 @@ public class ExercisePanel extends VerticalPanel implements
   public void onResize() {}
   public boolean isBusy() { return false; }
 
+  @Override
+  public void setBusy(boolean v) {
+
+  }
+
   /**
    * For every question,
    * <ul>
