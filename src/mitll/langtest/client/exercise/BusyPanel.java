@@ -9,4 +9,5 @@ package mitll.langtest.client.exercise;
  */
 public interface BusyPanel {
   boolean isBusy();
+  void setBusy(boolean v);
 }
