@@ -63,14 +63,13 @@ public interface ListInterface extends RequiresResize {
 
   boolean loadNextExercise(String id);
   Panel makeExercisePanel(Exercise result);
-  void startOver();
 
   boolean loadPreviousExercise(ExerciseShell current);
 
   public String getCurrentExerciseID();
 
   boolean onFirst(ExerciseShell current);
-
+  boolean onLast(ExerciseShell current);
   /**
    * @see mitll.langtest.client.LangTest#resetState()
    */
@@ -90,6 +89,5 @@ public interface ListInterface extends RequiresResize {
 
   void hideExerciseList();
 
-  void askForRandomExercise(AsyncCallback<Exercise> callback);
   Panel getCreatedPanel();
 }
