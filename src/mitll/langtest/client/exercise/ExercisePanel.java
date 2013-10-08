@@ -67,6 +67,7 @@ public class ExercisePanel extends VerticalPanel implements
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
   protected NavigationHelper navigationHelper;
+  protected ListInterface exerciseList;
 
   /**
    * @see ExercisePanelFactory#getExercisePanel
@@ -75,13 +76,15 @@ public class ExercisePanel extends VerticalPanel implements
    * @param service
    * @param userFeedback
    * @param controller
+   * @param exerciseList
    */
   public ExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                       final ExerciseController controller) {
+                       final ExerciseController controller, ListInterface exerciseList) {
     this.exercise = e;
     this.controller = controller;
     this.service = service;
     this.feedback = userFeedback;
+    this.exerciseList = exerciseList;
     this.navigationHelper = getNavigationHelper(controller);
     addItemHeader(e);
 
@@ -120,7 +123,7 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper(exercise,controller, this);
+    return new NavigationHelper(exercise,controller, this, exerciseList);
   }
 
   protected void addInstructions() {
@@ -346,7 +349,7 @@ public class ExercisePanel extends VerticalPanel implements
           public void onSuccess(Void result) {
             incomplete.remove(tb);
             if (incomplete.isEmpty()) {
-              controller.loadNextExercise(completedExercise);
+              exerciseList.loadNextExercise(completedExercise);
             }
           }
         }
@@ -503,12 +506,6 @@ public class ExercisePanel extends VerticalPanel implements
     navigationHelper.enableNextButton((completed.size() == answers.size()));
   }
 
-  protected void enableNextButton(boolean val) {
-    navigationHelper.enableNextButton(val);
-  }
-
-  protected void setButtonsEnabled(boolean val) {
-    navigationHelper.setButtonsEnabled(val);
-  }
-
+  protected void enableNextButton(boolean val) {  navigationHelper.enableNextButton(val); }
+  protected void setButtonsEnabled(boolean val) { navigationHelper.setButtonsEnabled(val);}
 }
