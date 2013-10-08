@@ -249,7 +249,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       idToExercise.put(es.getID(),es);
       addExerciseToList(es);
     }
-    System.out.println("ExerciseList : map now " + idToExercise);
+    System.out.println("ExerciseList : map keys now " + idToExercise.keySet());
 
     flush();
   }
@@ -668,11 +668,14 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   @Override
   public boolean onFirst(ExerciseShell current) {
     System.out.println("on first " + current);
+    if (current == null) return true;
     return currentExercises.size() == 1 || getIndex(current) == 0;
   }
 
   @Override
   public boolean onLast(ExerciseShell current) {
+    if (current == null) return true;
+
     return currentExercises.size() == 1 || isOnLastItem(getIndex(current));
 //    System.out.println("on last " + current + " = " + onLastItem);
 
