@@ -26,10 +26,12 @@ import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -288,6 +290,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
   }
 
   private void showAddItem(UserList ul, TabAndContent addItem) {
+    addItem.content.clear();
     Panel widgets = addItem(ul);
     addItem.content.add(widgets);
   }
@@ -310,14 +313,25 @@ public class Navigation extends BasicDialog implements RequiresResize {
     hp.add(left);
     SimplePanel right = new SimplePanel();
     hp.add(right);
+    right.addStyleName("greenBackground");
 
     PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller, "navigationNPF");
-    exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller), userManager, 1);
+    exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList) {
+      @Override
+      public Panel getExercisePanel(Exercise e) {
+        return new GoodwaveExercisePanel(e, controller, exerciseList, 0.65f);
+      }
+    }, userManager, 1);
     left.add(exerciseList.getExerciseListOnLeftSide(props));
-    exerciseList.rememberAndLoadFirst(ul.getExercises());
+    exerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()));
     return hp;
   }
 
+  /**
+   * @see #showAddItem(mitll.langtest.shared.custom.UserList, mitll.langtest.client.custom.Navigation.TabAndContent)
+   * @param ul
+   * @return
+   */
   private Panel addItem(UserList ul) {
     HorizontalPanel hp = new HorizontalPanel();
     SimplePanel left = new SimplePanel();
@@ -354,6 +368,12 @@ public class Navigation extends BasicDialog implements RequiresResize {
     row = new FluidRow();
     container.add(row);
     final FormField english = addControlFormField(row, "English");
+
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        english.box.setFocus(true);
+      }
+    });
 
     row = new FluidRow();
     container.add(row);

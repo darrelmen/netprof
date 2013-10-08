@@ -65,7 +65,7 @@ public class ASRScoring extends Scoring {
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
    */
-  private double lowScoreThresholdKeepTempDir = -1;
+  private double lowScoreThresholdKeepTempDir = 1.1;//-1;
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
@@ -124,7 +124,7 @@ public class ASRScoring extends Scoring {
   }*/
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    * @param testAudioDir
    * @param testAudioFileNoSuffix
    * @param sentence that should be what the test audio contains
@@ -474,11 +474,15 @@ public class ASRScoring extends Scoring {
   private void readDictionary() { htkDictionary = makeDict(); }
 
   /**
-   * @see mitll.langtest.server.audio.SplitAudio#convertExamples(int, String, String, java.util.Map
+   * @see mitll.langtest.server.audio.SplitAudio#convertExamples
    * @return
    */
   public HTKDictionary getDict() { return htkDictionary; }
 
+  /**
+   * @see #readDictionary()
+   * @return
+   */
   private HTKDictionary makeDict() {
     String dictFile = configFileCreator.getDictFile();
     boolean dictExists = new File(dictFile).exists();
@@ -508,7 +512,7 @@ public class ASRScoring extends Scoring {
     try {
       jscoreOut = testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
       float hydec_score = jscoreOut._1;
-      long timeToRunHydec = System.currentTimeMillis() - then;
+  //    long timeToRunHydec = System.currentTimeMillis() - then;
     //  logger.debug("getScoresFromHydec : got score " + hydec_score +" and took " + timeToRunHydec + " millis");
 
       return new Scores(hydec_score, jscoreOut._2);
