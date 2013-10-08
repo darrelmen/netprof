@@ -65,7 +65,7 @@ public class ASRScoring extends Scoring {
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
    */
-  private double lowScoreThresholdKeepTempDir = 1.1;//-1;
+  private double lowScoreThresholdKeepTempDir = -1;
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
