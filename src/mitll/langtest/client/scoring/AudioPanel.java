@@ -94,16 +94,16 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.showSpectrogram = showSpectrogram;
   }
 
-  public void onResize() {
-    getImages();
-  }
+  public void onResize() { getImages(); }
 
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
+   * @see #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
    * @param path
    * @return
    */
   public void addWidgets(String path) {
+    System.out.println("addWidgets audio path = " + path);
     imageContainer = new VerticalPanel();
 
     HorizontalPanel hp = new HorizontalPanel();
@@ -273,19 +273,20 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : 0;
     int width = (int) ((screenPortion*((float)Window.getClientWidth())) - leftColumnWidth) - rightSide;
 
-  //  System.out.println("getImages : leftColumnWidth " + leftColumnWidth + " width " + width + " vs window width " + Window.getClientWidth());
+    System.out.println("getImages : path = " + audioPath + " screen " + screenPortion +
+      " leftColumnWidth " + leftColumnWidth + " width " + width + " vs window width " + Window.getClientWidth());
 
     //int width = getOffsetWidth();
-    int diff = Math.abs(Window.getClientWidth() - lastWidth);
+    int diff = Math.abs(width - lastWidth);
     if (lastWidth == 0 || diff > 100) {
-      lastWidth = Window.getClientWidth();
+      lastWidth = width;
 
       //System.out.println("getImages : offset width " + getOffsetWidth() + " width " + width + " path " + audioPath);
       getEachImage(width);
     }
-    else {
+/*    else {
       //System.out.println("getImages : not updating, offset width " + getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
-    }
+    }*/
   }
 
   protected void getEachImage(int width) {
