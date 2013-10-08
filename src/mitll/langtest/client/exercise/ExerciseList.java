@@ -225,6 +225,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
+  /**
+   * @see mitll.langtest.client.custom.Navigation#doNPF
+   * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
+   * @param exercises
+   */
   public void rememberAndLoadFirst(List<? extends ExerciseShell> exercises) {
     rememberExercises(exercises);
     loadFirstExercise();
@@ -247,12 +252,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     System.out.println("ExerciseList : map now " + idToExercise);
 
     flush();
-  }
-
-  private final Random random = new Random();
-  public void askForRandomExercise(AsyncCallback<Exercise> callback) {
-    ExerciseShell shell = currentExercises.get(random.nextInt(currentExercises.size()));
-    service.getExercise(shell.getID(), callback);
   }
 
   public void setSelectionState(Map<String, Collection<String>> selectionState) {}
@@ -364,7 +363,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       askServerForExercise(exerciseShell);
     }
     else {
-      Window.alert("unknown item " + id);
+      //Window.alert("unknown item " + id);
       System.out.println("can't load " +id + " keys were " + idToExercise.keySet());
     }
   }
@@ -455,6 +454,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   private void useExercise(Exercise result, ExerciseShell e) {
     createdPanel = makeExercisePanel(result);
+    System.out.println("ExerciseList.useExercise : " +e.getID());
 
     int i = getIndex(e);
     System.out.println("ExerciseList.useExercise : " +e.getID() + " index " +i);
@@ -511,10 +511,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private int getIndex(ExerciseShell current) {
     String id = current.getID();
     ExerciseShell shell = idToExercise.get(id);
-    System.out.println("getIndex : got " + shell + " current " + current);
+   // System.out.println("getIndex : got " + shell + " current id '" + id +"'");
     int i = shell != null ? currentExercises.indexOf(shell) : -1;
-    System.out.println("getIndex : index of '" + id + "' is #" + i + " and item is " + current +
-        " map size " + idToExercise.size() + " exercise list size " +currentExercises.size() + " current " +currentExercises);
+    System.out.println("getIndex : index of '" + id + "' is #" + i + " and item is " + current.getClass() +
+        " map size " + idToExercise.size() + " exercise list size " +currentExercises.size());// + " current " +currentExercises);
     return i;
   }
 
@@ -556,12 +556,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#loadNextExercise
+   * @seex NavigationHelper#loadNextExercise
    * @param current
    * @return
    */
   @Override
   public boolean loadNextExercise(ExerciseShell current) {
+    System.out.println("ExerciseList.loadNextExercise current is : " +current);
     int i = getIndex(current);
 
     visited.add(i);
@@ -580,10 +581,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       showTurkToken(current);
     }
     return onLast;
-  }
-
-  private boolean isOnLastItem(int i) {
-    return i == currentExercises.size() - 1;
   }
 
   public boolean loadNextExercise(String id) {
@@ -608,9 +605,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     feedback.showErrorMessage("Test Complete", "Test Complete! Thank you!");
   }
 
-  public void startOver() {}
-
-
   /**
    * So a turker can get credit for their work.
    * @param current
@@ -628,7 +622,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#loadPreviousExercise(mitll.langtest.shared.Exercise)
+   * @seex NavigationHelper#loadPreviousExercise
    * @param current
    * @return
    */
@@ -667,14 +661,26 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public Widget getWidget() {   return this;  }
 
   /**
-   * @see mitll.langtest.client.LangTest#onFirst(mitll.langtest.shared.Exercise)
+   * @see NavigationHelper#getNextAndPreviousButtons(mitll.langtest.shared.Exercise, ExerciseController)
    * @param current
    * @return
    */
   @Override
   public boolean onFirst(ExerciseShell current) {
     System.out.println("on first " + current);
-    return getIndex(current) == 0;
+    return currentExercises.size() == 1 || getIndex(current) == 0;
+  }
+
+  @Override
+  public boolean onLast(ExerciseShell current) {
+    return currentExercises.size() == 1 || isOnLastItem(getIndex(current));
+//    System.out.println("on last " + current + " = " + onLastItem);
+
+  //  return onLastItem;
+  }
+
+  private boolean isOnLastItem(int i) {
+    return i == currentExercises.size() - 1;
   }
 
   @Override
