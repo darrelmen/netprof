@@ -4,6 +4,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
@@ -20,14 +21,15 @@ public class GoodwaveExercisePanelFactory extends ExercisePanelFactory {
    * @param service
    * @param userFeedback
    * @param controller
+   * @param listContainer
    */
   public GoodwaveExercisePanelFactory(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                                      final ExerciseController controller) {
-    super(service, userFeedback, controller);
+                                      final ExerciseController controller, ListInterface listContainer) {
+    super(service, userFeedback, controller, listContainer);
   }
 
   @Override
   public Panel getExercisePanel(Exercise e) {
-    return new GoodwaveExercisePanel(e, controller);
+    return new GoodwaveExercisePanel(e, controller, exerciseList, 1.0f);
   }
 }
