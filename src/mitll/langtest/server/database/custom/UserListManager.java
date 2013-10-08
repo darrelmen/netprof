@@ -18,6 +18,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class UserListManager {
+  public static final String MY_LIST = "Favorites";
   private static Logger logger = Logger.getLogger(UserListManager.class);
 
   private final UserDAO userDAO;
@@ -25,7 +26,6 @@ public class UserListManager {
   int i = 0;
   List<UserList> userLists = new ArrayList<UserList>();
   private UserExerciseDAO userExerciseDAO;
-  FileExerciseDAO fileExerciseDAO =  new FileExerciseDAO("","",false);
 
   public UserListManager(UserDAO userDAO) { this.userDAO = userDAO; }
 
@@ -82,7 +82,7 @@ public class UserListManager {
     }
 
     if (listsForUser.isEmpty()) {
-      UserList userList = createUserList(userid, "My List", "Default list", "Choose a class", true);
+      UserList userList = createUserList(userid, MY_LIST, "Default list", "Choose a class", true);
       if (userList == null) return Collections.emptyList();
       else return Collections.singletonList(userList);
     }
