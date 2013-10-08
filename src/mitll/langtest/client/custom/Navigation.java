@@ -16,22 +16,18 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.EnterKeyButtonHelper;
 import mitll.langtest.client.exercise.*;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -44,6 +40,7 @@ import java.util.Collection;
 public class Navigation extends BasicDialog implements RequiresResize {
   public static final String CHAPTERS = "Chapters";
   private static final boolean SHOW_CREATED = false;
+  public static final String YOUR_LISTS = "Your Lists";
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
@@ -51,14 +48,18 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
   private ScrollPanel listScrollPanel;
   private UserFeedback feedback;
-  private PropertyHandler props;
+  // private PropertyHandler props;
   private ListInterface listInterface;
+  NPFHelper npfHelper;
+  NPFHelper avpHelper;
 
-  public Navigation(LangTestDatabaseAsync service, UserManager userManager, ExerciseController controller, ListInterface listInterface) {
+  public Navigation(final LangTestDatabaseAsync service, final UserManager userManager, final ExerciseController controller, final ListInterface listInterface) {
     this.service = service;
     this.userManager = userManager;
     this.controller = controller;
     this.listInterface = listInterface;
+    npfHelper = new NPFHelper(service, feedback, userManager, controller);
+    avpHelper = new AVPHelper(/*this, */feedback,service, userManager, controller);
   }
 
   /**
@@ -66,10 +67,10 @@ public class Navigation extends BasicDialog implements RequiresResize {
    * @paramx thirdRow
    * @see mitll.langtest.client.LangTest#onModuleLoad2
    */
-  public Widget getNav(final Panel secondAndThird, final UserFeedback feedback, final PropertyHandler props) {
+  public Widget getNav(final Panel secondAndThird, final UserFeedback feedback) {
     FluidContainer container = new FluidContainer();
     this.feedback = feedback;
-    this.props = props;
+    //   this.props = props;
     Panel buttonRow = getButtonRow2(secondAndThird);
     container.add(buttonRow);
 
@@ -83,7 +84,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
   private Panel getButtonRow2(Panel secondAndThird) {
     tabPanel = new TabPanel();
 
-    final TabAndContent yourStuff = makeTab(tabPanel, IconType.FOLDER_CLOSE, "Your Lists");
+    final TabAndContent yourStuff = makeTab(tabPanel, IconType.FOLDER_CLOSE, YOUR_LISTS);
     yourItems = yourStuff.tab;
     yourItemsContent = yourStuff.content;
     yourItems.addClickHandler(new ClickHandler() {
@@ -121,13 +122,17 @@ public class Navigation extends BasicDialog implements RequiresResize {
        /* System.out.println("got shown event : '" +showEvent + "'\n" +
             "\ntarget " + showEvent.getTarget()+
             " ' target name '" + showEvent.getTarget().getName() + "'");*/
-        if (listInterface.getCreatedPanel() != null && showEvent.getTarget() != null && showEvent.getTarget().toString().contains(CHAPTERS)) {
+        String targetName =showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
+
+        System.out.println("got shown event : '" +showEvent + "'\n target " + targetName);
+
+        if (listInterface.getCreatedPanel() != null && targetName.contains(CHAPTERS)) {
           // System.out.println("\n\nupdating lists --->\n\n\n");
 
           ((GoodwaveExercisePanel) listInterface.getCreatedPanel()).wasRevealed();
-        } else {
-          // System.out.println("no goodwave panel yet --->\n\n\n");
-
+        } else if (!targetName.contains(YOUR_LISTS)){
+          System.out.println("calling disable key handler on " + avpHelper);
+          avpHelper.disableKeyHandler();
         }
       }
     });
@@ -151,7 +156,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
     DOM.setStyleAttribute(createContent.getElement(), "paddingRight", "0px");
   }
 
-  private static class TabAndContent {
+  public static class TabAndContent {
     public Tab tab;
     public Panel content;
 
@@ -175,6 +180,8 @@ public class Navigation extends BasicDialog implements RequiresResize {
   @Override
   public void onResize() {
     setScrollPanelWidth(listScrollPanel);
+    npfHelper.onResize();
+    avpHelper.onResize();
   }
 
   private class ButtonClickEvent extends ClickEvent {
@@ -218,7 +225,6 @@ public class Navigation extends BasicDialog implements RequiresResize {
     r1.add(new Column(3, new Heading(1, ul.getName())));
     Heading itemMarker = new Heading(3, ul.getExercises().size() + " items");
     itemMarker.addStyleName("subtitleForeground");
-    //   itemMarker.addStyleName("floatRight");
     r1.add(new Column(3, itemMarker));
 
     boolean created = createdByYou(ul);
@@ -241,7 +247,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
     learn.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        showNPF(ul, learn);
+        npfHelper.showNPF(ul, learn, "learn");
       }
     });
     final TabAndContent practice = makeTab(tabPanel, IconType.CHECK, "Practice");
@@ -249,12 +255,12 @@ public class Navigation extends BasicDialog implements RequiresResize {
     practice.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        Window.alert("do avp!");
+        avpHelper.showNPF(ul, practice,"practice");
       }
     });
 
     TabAndContent addItem = null;
-    if (created) {
+    if (created && !ul.isPrivate()) {
       addItem = makeTab(tabPanel, IconType.PLUS_SIGN, "Add Item");
       final TabAndContent finalAddItem = addItem;
       addItem.tab.addClickHandler(new ClickHandler() {
@@ -276,12 +282,12 @@ public class Navigation extends BasicDialog implements RequiresResize {
     final TabAndContent finalAddItem = addItem;
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        if (created && ul.isEmpty()) {
+        if (created && !ul.isPrivate() && ul.isEmpty()) {
           tabPanel.selectTab(2);
           showAddItem(ul, finalAddItem);
         } else {
           tabPanel.selectTab(0);
-          showNPF(ul, learn);
+          npfHelper.showNPF(ul, learn, "learn");
         }
       }
     });
@@ -295,11 +301,19 @@ public class Navigation extends BasicDialog implements RequiresResize {
     addItem.content.add(widgets);
   }
 
+/*  private boolean madeNPFContent = false;
+
   private void showNPF(UserList ul, TabAndContent learn) {
-    learn.content.clear();
-    addNPFToContent(ul, learn.content);
+    if (!madeNPFContent) {
+      addNPFToContent(ul, learn.content);
+      madeNPFContent = true;
+    }
+    else {
+      npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()));
+    }
   }
 
+  private PagingExerciseList npfExerciseList;
   private void addNPFToContent(UserList ul, Panel listContent) {
     Panel npfContent = doNPF(ul);
 
@@ -311,10 +325,18 @@ public class Navigation extends BasicDialog implements RequiresResize {
     HorizontalPanel hp = new HorizontalPanel();
     SimplePanel left = new SimplePanel();
     hp.add(left);
-    SimplePanel right = new SimplePanel();
-    hp.add(right);
-    right.addStyleName("greenBackground");
+    SimplePanel npfContentPanel = new SimplePanel();
+    hp.add(npfContentPanel);
+    npfContentPanel.addStyleName("greenBackground");
+    npfContentPanel.addStyleName("userNPFContent");
 
+    npfExerciseList = makeNPFExerciseList(npfContentPanel);
+    left.add(npfExerciseList.getExerciseListOnLeftSide(props));
+    npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()));
+    return hp;
+  }
+
+  private PagingExerciseList makeNPFExerciseList(SimplePanel right) {
     PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller, "navigationNPF");
     exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
@@ -322,15 +344,13 @@ public class Navigation extends BasicDialog implements RequiresResize {
         return new GoodwaveExercisePanel(e, controller, exerciseList, 0.65f);
       }
     }, userManager, 1);
-    left.add(exerciseList.getExerciseListOnLeftSide(props));
-    exerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()));
-    return hp;
-  }
+    return exerciseList;
+  }*/
 
   /**
-   * @see #showAddItem(mitll.langtest.shared.custom.UserList, mitll.langtest.client.custom.Navigation.TabAndContent)
    * @param ul
    * @return
+   * @see #showAddItem(mitll.langtest.shared.custom.UserList, mitll.langtest.client.custom.Navigation.TabAndContent)
    */
   private Panel addItem(UserList ul) {
     HorizontalPanel hp = new HorizontalPanel();
@@ -343,10 +363,10 @@ public class Navigation extends BasicDialog implements RequiresResize {
     Panel container = pagingContainer.getTableWithPager();
     left.add(container);
     for (ExerciseShell es : ul.getExercises()) {
-       pagingContainer.addExerciseToList2(es);
+      pagingContainer.addExerciseToList2(es);
     }
     pagingContainer.flush();
-    right.add(addNew(ul,pagingContainer,right));
+    right.add(addNew(ul, pagingContainer, right));
     return hp;
   }
 
@@ -356,7 +376,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
   private Panel addNew(final UserList ul, final PagingContainer<?> pagingContainer, final Panel toAddTo) {
     final FluidContainer container = new FluidContainer();
     container.addStyleName("greenBackground");
-    FluidRow row = new FluidRow();
+    FluidRow row;
     slowPath = null;
     fastPath = null;
     if (false) {
@@ -467,7 +487,8 @@ public class Navigation extends BasicDialog implements RequiresResize {
           createdExercise.setSlowAudioRef(slowPath);
           service.reallyCreateNewItem(ul, createdExercise, new AsyncCallback<UserExercise>() {
             @Override
-            public void onFailure(Throwable caught) {}
+            public void onFailure(Throwable caught) {
+            }
 
             @Override
             public void onSuccess(UserExercise newExercise) {
@@ -650,4 +671,5 @@ public class Navigation extends BasicDialog implements RequiresResize {
       child.add(listScrollPanel);
     }
   }
+
 }
