@@ -37,6 +37,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
+import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.sound.SoundFeedback;
@@ -89,17 +90,21 @@ public class BootstrapExercisePanel extends FluidContainer {
   private Timer t;
   private ProgressBar scoreFeedback = new ProgressBar();
   private SoundFeedback soundFeedback;
+  ListInterface exerciseList;
 
   /**
+   *
    * @param e
    * @param service
    * @param controller
+   * @param exerciseList
    * @see mitll.langtest.client.flashcard.FlashcardExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    */
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
-                                final ExerciseController controller) {
+                                final ExerciseController controller, ListInterface exerciseList) {
     setStyleName("exerciseBackground");
     addStyleName("cardBorder");
+    this.exerciseList = exerciseList;
     stockStore = Storage.getLocalStorageIfSupported();
     if (stockStore != null) {
       feedback = getCookieValue(FEEDBACK_TIMES_SHOWN);
@@ -665,7 +670,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       Timer t = new Timer() {
         @Override
         public void run() {
-          controller.loadNextExercise(exercise);
+          exerciseList.loadNextExercise(exercise);
         }
       };
       t.schedule(isDemoMode ? LONG_DELAY_MILLIS : DELAY_MILLIS);
@@ -699,7 +704,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       Timer t = new Timer() {
         @Override
         public void run() {
-          controller.loadNextExercise(exercise);
+          exerciseList.loadNextExercise(exercise);
         }
       };
       t.schedule(isDemoMode ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : DELAY_MILLIS_LONG);
