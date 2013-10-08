@@ -66,7 +66,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private NavigationHelper navigationHelper;
   private SplitDropdownButton addToList;
   private int activeCount = 0;
-
+  float screenPortion;
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
    * and a right side -- the charts and gauges {@link ASRScorePanel}
@@ -80,6 +80,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     this.exercise = e;
     this.controller = controller;
     this.service = controller.getService();
+    this.screenPortion = screenPortion;
 
     final VerticalPanel center = new VerticalPanel();
 
@@ -113,7 +114,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         System.out.println("postAnswers : load next exercise " + completedExercise.getID());
         listContainer.loadNextExercise(completedExercise);
       }
-    }, listContainer);
+    }, listContainer, true);
     center.add(navigationHelper.makeSpacer());
     center.add(navigationHelper);
  //   navigationHelper.enableNextButton(true);
@@ -343,7 +344,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     cp.setContentWidget(audioPanel);
 
     contentAudio = audioPanel;
-    contentAudio.setScreenPortion(controller.getScreenPortion());
+    contentAudio.setScreenPortion(screenPortion);
     return cp;
   }
 
