@@ -18,6 +18,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.gauge.ASRScorePanel;
@@ -72,9 +73,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    * @param e for this exercise
    * @param controller
+   * @param listContainer
+   * @param screenPortion
    */
-  public GoodwaveExercisePanel(final Exercise e,
-                               final ExerciseController controller) {
+  public GoodwaveExercisePanel(final Exercise e, final ExerciseController controller, final ListInterface listContainer, float screenPortion) {
     this.exercise = e;
     this.controller = controller;
     this.service = controller.getService();
@@ -89,33 +91,32 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     questionContent.addStyleName("floatLeft");
     hp.add(questionContent);
 
-   // hp.add(addToList);
-
     center.add(hp);
     setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     add(center);
     setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
     if (e.isRepeat()) {
+      System.out.println("loading repeat exercise : " + e);
       ASRScorePanel widgets = new ASRScorePanel();
-   //   widgets.insert(addToList,0);
       add(widgets);
       scorePanel = widgets;
-      addQuestions(service, controller, 1, center);
+      addQuestions(service, controller, 1, center, screenPortion);
     } else {
-      addQuestions(service, controller, 1, center);
+      System.out.println("loading " + e + " screen portion " + screenPortion);
+      addQuestions(service, controller, 1, center, screenPortion);
     }
 
     this.navigationHelper = new NavigationHelper(exercise, controller, new PostAnswerProvider() {
       @Override
       public void postAnswers(ExerciseController controller, Exercise completedExercise) {
         System.out.println("postAnswers : load next exercise " + completedExercise.getID());
-        controller.loadNextExercise(completedExercise);
+        listContainer.loadNextExercise(completedExercise);
       }
-    });
+    }, listContainer);
     center.add(navigationHelper.makeSpacer());
     center.add(navigationHelper);
-    navigationHelper.enableNextButton(true);
+ //   navigationHelper.enableNextButton(true);
   }
 
   private Panel makeAddToList(Exercise e, ExerciseController controller) {
@@ -205,9 +206,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param service
    * @param controller used in subclasses for audio control
    * @param i
+   * @param screenPortion
    */
-  private void addQuestions(LangTestDatabaseAsync service, ExerciseController controller, int i, Panel toAddTo) {
-    Widget answerWidget = getAnswerWidget(service, controller, i);
+  private void addQuestions(LangTestDatabaseAsync service, ExerciseController controller, int i, Panel toAddTo, float screenPortion) {
+    Widget answerWidget = getAnswerWidget(service, controller, i, screenPortion);
 
     ResizableCaptionPanel cp = new ResizableCaptionPanel(USER_RECORDER);
     cp.setContentWidget(answerWidget);
@@ -366,16 +368,18 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
+   *
    * @param service
    * @param controller
    * @param index
+   * @param screenPortion
    * @return
    */
-  private Widget getAnswerWidget(LangTestDatabaseAsync service, final ExerciseController controller, final int index) {
+  private Widget getAnswerWidget(LangTestDatabaseAsync service, final ExerciseController controller, final int index, float screenPortion) {
     ScoringAudioPanel widgets = new ASRRecordAudioPanel(service, index, controller);
     widgets.addScoreListener(scorePanel);
     answerAudio = widgets;
-    answerAudio.setScreenPortion(controller.getScreenPortion());
+    answerAudio.setScreenPortion(screenPortion);
 
     return widgets;
   }
