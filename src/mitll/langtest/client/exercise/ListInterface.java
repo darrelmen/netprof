@@ -1,6 +1,5 @@
 package mitll.langtest.client.exercise;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
@@ -43,7 +42,6 @@ public interface ListInterface extends RequiresResize {
    * @param exercise_title
    */
   void setExercise_title(String exercise_title);
-
 
   /**
    * @see mitll.langtest.client.LangTest#makeExerciseList
