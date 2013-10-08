@@ -58,8 +58,6 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserTable;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
 
 import java.util.Collection;
@@ -690,15 +688,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     final LangTest outer =this;
     if (exerciseList != null) {
       if (props.isGoodwaveMode() && !props.isGrading()) {
-        exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer), userManager, 1);
+        exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList), userManager, 1);
       } else if (props.isGrading()) {
-        exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer), userManager, props.getNumGradesToCollect());
+        exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer, exerciseList), userManager, props.getNumGradesToCollect());
       } else if (props.isFlashCard()) {
-        exerciseList.setFactory(new FlashcardExercisePanelFactory(service, outer, outer), userManager, 1);
+        exerciseList.setFactory(new FlashcardExercisePanelFactory(service, outer, outer, exerciseList), userManager, 1);
       } else if (props.isDataCollectMode() && props.isCollectAudio() && !props.isCRTDataCollectMode()) {
-        exerciseList.setFactory(new WaveformExercisePanelFactory(service, outer, outer), userManager, 1);
+        exerciseList.setFactory(new WaveformExercisePanelFactory(service, outer, outer, exerciseList), userManager, 1);
       } else {
-        exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer), userManager, 1);
+        exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList), userManager, 1);
       }
     }
     doEverythingAfterFactory(userID);
@@ -1013,18 +1011,22 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
 
-  public void loadExercise(ExerciseShell exerciseShell) {
+ /* public void loadExercise(ExerciseShell exerciseShell) {
     exerciseList.loadExercise(exerciseShell);
   }
   public boolean loadNextExercise(ExerciseShell current) {
     boolean b = exerciseList.loadNextExercise(current);
+    showProgress(exerciseList);
+    return b;
+  }*/
+
+  public void showProgress(ListInterface exerciseList) {
     if (progressBar != null) {
       progressBar.showAdvance(exerciseList);
     }
-    return b;
   }
 
-  public boolean loadNextExercise(String id) {
+/*  public boolean loadNextExercise(String id) {
     return exerciseList.loadNextExercise(id);
   }
 
@@ -1034,7 +1036,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public boolean onFirst(Exercise current) {
     return exerciseList.onFirst(current);
-  }
+  }*/
 
   public void setSelectionState(Map<String,Collection<String>> selectionState) { exerciseList.setSelectionState(selectionState);}
 }
