@@ -122,8 +122,15 @@ public abstract class RecordButton {
                                            });
   }
 
+  /**
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#onUnload()
+   */
   public void onUnload() {
     //System.out.println("removing handler for recording " + keyHandler);
+    removeKeyHandler();
+  }
+
+  public void removeKeyHandler() {
     if (keyHandler != null) {
       keyHandler.removeHandler();
       keyHandler = null;
