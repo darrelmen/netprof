@@ -49,9 +49,11 @@ public class PropertyHandler {
   private static final String LANGUAGE = "language";
   private static final String CONTINUE_PROMPT = "promptBeforeNextItem";
   private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
-  private static final String DLI_DEMOGRAPHICS = "dliDemographics";
+  //private static final String DLI_DEMOGRAPHICS = "dliDemographics";
   private static final String TRACK_ONLINE_USERS = "trackUsers";
   private static final String TABOO_ENGLISH = "tabooEnglish";
+  private static final String BIND_NEXT_TO_ENTER = "bindNextToEnter";
+  private static final String SCREEN_PORTION = "screenPortion";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -114,7 +116,7 @@ public class PropertyHandler {
   private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
   private int gameTimeSeconds = DEFAULT_GAME_TIME_SECONDS;
-  private float screenPortion;
+  private float screenPortion = 1.0f;
   private boolean CRTDataCollectMode;
   private String splashTitle;
   private boolean promptBeforeNextItem = false;
@@ -122,8 +124,9 @@ public class PropertyHandler {
   private boolean addRecordKeyBinding = true;
   private LOGIN_TYPE loginType = LOGIN_TYPE.UNDEFINED;
   private int flashcardPreviewHeight = DEFAULT_FLASHCARD_PREVIEW_HEIGHT;
-  private boolean dliDemographics;
+ // private boolean dliDemographics;
   private boolean trackUsers, tabooEnglish;
+  private boolean bindNextToEnter;
 
   public PropertyHandler(Map<String,String> props) {
     this.props = props;
@@ -172,9 +175,11 @@ public class PropertyHandler {
       else if (key.equals(CONTINUE_PROMPT)) promptBeforeNextItem = getBoolean(value);
       else if (key.equals(RIGHT_ALIGN_CONTENT)) rightAlignContent = getBoolean(value);
       else if (key.equals(ADD_RECORD_KEY_BINDING)) addRecordKeyBinding = getBoolean(value);
-      else if (key.equals(DLI_DEMOGRAPHICS)) dliDemographics = getBoolean(value);
+     // else if (key.equals(DLI_DEMOGRAPHICS)) dliDemographics = getBoolean(value);
       else if (key.equals(TRACK_ONLINE_USERS)) trackUsers = getBoolean(value);
       else if (key.equals(TABOO_ENGLISH)) tabooEnglish = getBoolean(value);
+      else if (key.equals(BIND_NEXT_TO_ENTER)) bindNextToEnter = getBoolean(value);
+      else if (key.equals(SCREEN_PORTION)) screenPortion = getFloat(value,1.0f,SCREEN_PORTION);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
@@ -189,6 +194,18 @@ public class PropertyHandler {
     try {
       if (value == null) return defValue;
       int i = Integer.parseInt(value);
+      System.out.println("value for " + propName +"=" +i + " vs default = " +defValue);
+      return i;
+    } catch (NumberFormatException e) {
+      System.err.println("couldn't parse " + value + "using " + defValue +" for " + propName);
+    }
+    return defValue;
+  }
+
+  private float getFloat(String value, float defValue, String propName) {
+    try {
+      if (value == null) return defValue;
+      float i = Float.parseFloat(value);
       System.out.println("value for " + propName +"=" +i + " vs default = " +defValue);
       return i;
     } catch (NumberFormatException e) {
@@ -227,7 +244,7 @@ public class PropertyHandler {
     }
 
     String screenPortionParam =  Window.Location.getParameter("screenPortion");
-    screenPortion = 1.0f;
+    //screenPortion = 1.0f;
     if (screenPortionParam != null) {
       try {
         screenPortion = Float.parseFloat(screenPortionParam);
@@ -449,13 +466,19 @@ public class PropertyHandler {
     return flashcardPreviewHeight;
   }
 
-  public boolean getDliDemographics() {
+/*  public boolean getDliDemographics() {
     return dliDemographics;
-  }
+  }*/
+
   public boolean isTrackUsers() {
     return trackUsers;
   }
+
   public boolean doTabooEnglish() {
     return tabooEnglish;
+  }
+
+  public boolean isBindNextToEnter() {
+    return bindNextToEnter;
   }
 }
