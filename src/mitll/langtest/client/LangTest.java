@@ -280,7 +280,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     ListInterface listInterface = makeExerciseList(secondRow, leftColumn);
     navigation = new Navigation(service, userManager, this, listInterface);
  //   belowFirstRow.add(navigation.getNav(secondRow,/*belowFirstRow,*/thirdRow, this, getProps()));
-    belowFirstRow.add(navigation.getNav(bothSecondAndThird, this, getProps()));
+    belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("floatLeft");
       thirdRow.add(currentExerciseVPanel);
@@ -688,7 +688,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     final LangTest outer =this;
     if (exerciseList != null) {
       if (props.isGoodwaveMode() && !props.isGrading()) {
-        exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList), userManager, 1);
+        exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, getScreenPortion()), userManager, 1);
       } else if (props.isGrading()) {
         exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer, exerciseList), userManager, props.getNumGradesToCollect());
       } else if (props.isFlashCard()) {
