@@ -18,14 +18,13 @@ public class WaveformExercisePanelFactory extends ExercisePanelFactory {
    * @param service
    * @param userFeedback
    * @param controller
+   * @param exerciseList
    */
   public WaveformExercisePanelFactory(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                                     final ExerciseController controller) {
-    super(service, userFeedback, controller);
+                                      final ExerciseController controller, ListInterface exerciseList) {
+    super(service, userFeedback, controller, exerciseList);
   }
 
   @Override
-  public Panel getExercisePanel(Exercise e) {
-    return new WaveformExercisePanel(e, service, userFeedback, controller);
-  }
+  public Panel getExercisePanel(Exercise e) { return new WaveformExercisePanel(e, service, userFeedback, controller, exerciseList); }
 }
