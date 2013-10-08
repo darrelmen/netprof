@@ -16,20 +16,23 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class GoodwaveExercisePanelFactory extends ExercisePanelFactory {
+  float screenPortion;
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    * @param service
    * @param userFeedback
    * @param controller
    * @param listContainer
+   * @param screenPortion
    */
   public GoodwaveExercisePanelFactory(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                                      final ExerciseController controller, ListInterface listContainer) {
+                                      final ExerciseController controller, ListInterface listContainer, float screenPortion) {
     super(service, userFeedback, controller, listContainer);
+    this.screenPortion = screenPortion;
   }
 
   @Override
   public Panel getExercisePanel(Exercise e) {
-    return new GoodwaveExercisePanel(e, controller, exerciseList, 1.0f);
+    return new GoodwaveExercisePanel(e, controller, exerciseList, screenPortion);
   }
 }
