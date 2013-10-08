@@ -33,7 +33,8 @@ public class NavigationHelper extends HorizontalPanel {
   private static final String RIGHT_ARROW_TOOLTIP = "Press enter to go to the next item.";
   private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
 
-  private Button prev,next;
+  private Button prev;
+  private Button next;
   private HandlerRegistration keyHandler;
   private boolean debug = false;
   private boolean enableNextOnlyWhenAllCompleted = true;
@@ -46,13 +47,15 @@ public class NavigationHelper extends HorizontalPanel {
    * @param controller
    * @param provider
    * @param listContainer
+   * @param addButtons
    */
-  public NavigationHelper(Exercise exercise, ExerciseController controller, PostAnswerProvider provider, ListInterface listContainer) {
+  public NavigationHelper(Exercise exercise, ExerciseController controller, PostAnswerProvider provider,
+                          ListInterface listContainer, boolean addButtons) {
     enableNextOnlyWhenAllCompleted = !getLanguage(controller).equalsIgnoreCase("Pashto");   // hack?
     this.provider = provider;
     this.listContainer = listContainer;
     setSpacing(5);
-    getNextAndPreviousButtons(exercise, controller);
+    getNextAndPreviousButtons(exercise, controller, addButtons);
   }
 
   private String getLanguage( ExerciseController controller) {
@@ -61,28 +64,40 @@ public class NavigationHelper extends HorizontalPanel {
   }
 
   /**
-   * @see NavigationHelper#NavigationHelper(mitll.langtest.shared.Exercise, ExerciseController, PostAnswerProvider, ListInterface)
+   * @see NavigationHelper#NavigationHelper(mitll.langtest.shared.Exercise, ExerciseController, PostAnswerProvider, ListInterface, boolean)
    * @param e
    * @param controller
+   * @param addButtons
    */
   private void getNextAndPreviousButtons(final Exercise e,
-                                         final ExerciseController controller) {
+                                         final ExerciseController controller, boolean addButtons) {
     boolean useKeyHandler = controller.isCollectAudio();
 
+    makePrevButton(e, controller, addButtons, useKeyHandler);
+
+    makeNextButton(e, controller, addButtons);
+
+    // TODO : revisit in the context of text data collections
+    addKeyHandler(e, controller, useKeyHandler);
+  }
+
+  private void makePrevButton(final Exercise e, ExerciseController controller, boolean addButtons, boolean useKeyHandler) {
     this.prev = new Button("Previous");
-    prev.addClickHandler(new ClickHandler() {
+    getPrev().addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        clickPrev(controller, e);
+        clickPrev(e);
       }
     });
     boolean onFirst = !listContainer.onFirst(e);
-    prev.setEnabled(onFirst);
-    if (useKeyHandler) prev.setTitle(LEFT_ARROW_TOOLTIP);
-    prev.setType(ButtonType.SUCCESS);
+    getPrev().setEnabled(onFirst);
+    if (useKeyHandler) getPrev().setTitle(LEFT_ARROW_TOOLTIP);
+    getPrev().setType(ButtonType.SUCCESS);
 
-    add(prev);
-    prev.setVisible(!controller.isMinimalUI() || !controller.isPromptBeforeNextItem());
+    if (addButtons) add(getPrev());
+    getPrev().setVisible(!controller.isMinimalUI() || !controller.isPromptBeforeNextItem());
+  }
 
+  private void makeNextButton(final Exercise e, final ExerciseController controller, boolean addButtons) {
     this.next = new Button(getNextButtonText());
     next.setType(ButtonType.SUCCESS);
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
@@ -90,7 +105,7 @@ public class NavigationHelper extends HorizontalPanel {
     }
     next.setEnabled(!listContainer.onLast(e));
 
-    add(next);
+    if (addButtons)  add(next);
     if (controller.getProps().isBindNextToEnter()) next.setTitle(RIGHT_ARROW_TOOLTIP);
 
     DOM.setElementAttribute(next.getElement(), "id", "nextButton");
@@ -101,9 +116,6 @@ public class NavigationHelper extends HorizontalPanel {
         clickNext(controller, e);
       }
     });
-
-    // TODO : revisit in the context of text data collections
-    addKeyHandler(e, controller, useKeyHandler);
   }
 
   public SimplePanel makeSpacer() {
@@ -112,9 +124,9 @@ public class NavigationHelper extends HorizontalPanel {
     return spacer;
   }
 
-  private void clickPrev(ExerciseController controller, Exercise e) {
-    if (prev.isEnabled() && prev.isVisible()) {
-      System.out.println("clickPrev " +keyHandler+ " click on prev " + prev);
+  private void clickPrev(Exercise e) {
+    if (getPrev().isEnabled() && getPrev().isVisible()) {
+      System.out.println("clickPrev " +keyHandler+ " click on prev " + getPrev());
       listContainer.loadPreviousExercise(e);
     }
     else {
@@ -208,10 +220,10 @@ public class NavigationHelper extends HorizontalPanel {
                                                      int keyCode = ne.getKeyCode();
                                                      boolean isLeft = keyCode == KeyCodes.KEY_LEFT;
                                                      //   boolean isRight = keyCode == KeyCodes.KEY_RIGHT;
-                                                     boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
+                                                     boolean isEnter = keyCode == (controller.getProps().isBindNextToEnter() ? KeyCodes.KEY_ENTER : KeyCodes.KEY_RIGHT);
 
                                                      //   System.out.println("key code is " +keyCode);
-                                                     if (((useKeyHandler && isLeft) || (controller.getProps().isBindNextToEnter() && isEnter)) && event.getTypeInt() == 512 &&
+                                                     if (((useKeyHandler && isLeft) || isEnter) && event.getTypeInt() == 512 &&
                                                        "[object KeyboardEvent]".equals(ne.getString())) {
                                                        ne.preventDefault();
 
@@ -225,8 +237,8 @@ public class NavigationHelper extends HorizontalPanel {
                                                        }
 
                                                        if (isLeft) {
-                                                         clickPrev(controller, e);
-                                                       } else if (controller.getProps().isBindNextToEnter()) {
+                                                         clickPrev(e);
+                                                       } else {
                                                          clickNext(controller, e);
                                                        }
                                                      }
@@ -246,9 +258,10 @@ public class NavigationHelper extends HorizontalPanel {
   }
 
   public void setButtonsEnabled(boolean val) {
-    prev.setEnabled(val);
+    getPrev().setEnabled(val);
     next.setEnabled(val);
   }
 
   public Widget getNext() { return next; }
+  public Button getPrev() { return prev; }
 }
