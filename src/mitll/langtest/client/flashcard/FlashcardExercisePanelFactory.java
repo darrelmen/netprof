@@ -5,6 +5,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
@@ -17,14 +18,16 @@ import mitll.langtest.shared.Exercise;
  */
 public class FlashcardExercisePanelFactory extends ExercisePanelFactory {
   /**
+   *
    * @param service
    * @param userFeedback
    * @param controller
-   * @see mitll.langtest.client.LangTest#setFactory()
+   * @param exerciseList
+   * @see mitll.langtest.client.LangTest#setFactory
    */
   public FlashcardExercisePanelFactory(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                                       final ExerciseController controller) {
-    super(service, userFeedback, controller);
+                                       final ExerciseController controller, ListInterface exerciseList) {
+    super(service, userFeedback, controller, exerciseList);
   }
 
   /**
@@ -32,7 +35,5 @@ public class FlashcardExercisePanelFactory extends ExercisePanelFactory {
    * @param e
    * @return
    */
-  public Panel getExercisePanel(Exercise e) {
-    return new BootstrapExercisePanel(e, service, controller);
-  }
+  public Panel getExercisePanel(Exercise e) { return new BootstrapExercisePanel(e, service, controller, exerciseList); }
 }
