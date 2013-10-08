@@ -4,6 +4,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanel;
+import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
@@ -21,17 +22,18 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    * @param service
    * @param userFeedback
    * @param controller
+   * @param exerciseList
    */
   public SimpleRecordExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                                   final ExerciseController controller) {
-    super(e,service,userFeedback,controller);
+                                   final ExerciseController controller, ListInterface exerciseList) {
+    super(e,service,userFeedback,controller, exerciseList);
   }
 
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
    *
-   * @see mitll.langtest.client.exercise.ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController)
+   * @see mitll.langtest.client.exercise.ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.exercise.ListInterface)
    * @param exercise
    * @param service
    * @param controller
@@ -55,12 +57,12 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    * on the server, notice which audio posts have arrived, and take the latest ones...
    * <br></br>
    * Move on to next exercise...
-   * @see ExercisePanel#clickNext(LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.exercise.NavigationHelper#clickNext
    * @param controller
    * @param completedExercise
    */
   @Override
   public void postAnswers(ExerciseController controller, Exercise completedExercise) {
-    controller.loadNextExercise(completedExercise);
+    exerciseList.loadNextExercise(completedExercise);
   }
 }
