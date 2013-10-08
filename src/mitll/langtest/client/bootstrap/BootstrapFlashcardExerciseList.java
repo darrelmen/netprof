@@ -63,13 +63,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   }
 
   @Override
-  public void loadExercise(ExerciseShell exerciseShell) {
-  }
-
-  @Override
-  public void startOver() {
-  }
-
+  public void loadExercise(ExerciseShell exerciseShell) {}
   @Override
   public boolean loadNextExercise(String id) {
     return false;
@@ -252,7 +246,8 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
       }
 
       @Override
-      public void onSuccess(Void result) {}
+      public void onSuccess(Void result) {
+      }
     });
   }
 
@@ -342,6 +337,11 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   }
 
   @Override
+  public boolean onLast(ExerciseShell current) {
+    return false;  //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  @Override
   public void clear() {
     exercisePanelColumn.clear();
   }
@@ -383,13 +383,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   }
 
   @Override
-  public void hideExerciseList() {
-  }
-
-  @Override
-  public void askForRandomExercise(AsyncCallback<Exercise> callback) {
-    //To change body of implemented methods use File | Settings | File Templates.
-  }
+  public void hideExerciseList() {}
 
   @Override
   public Panel getCreatedPanel() {
