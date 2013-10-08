@@ -45,7 +45,7 @@ public class ExerciseFormatter {
       "</div>";
   }
 
-  private static String getArabic(String arabic, boolean isUrdu, boolean isPashto) {
+  public static String getArabic(String arabic, boolean isUrdu, boolean isPashto) {
     return "<div class=\"Instruction\">\n" +
       "<span class=\"Instruction-title\">Say:</span>\n" +
       "<span class=\"" +
