@@ -107,6 +107,10 @@ public class ConfigFileCreator {
     return configFile;
   }
 
+  /**
+   * @see mitll.langtest.server.scoring.ASRScoring#makeDict()
+   * @return
+   */
   public String getDictFile() {
     return getDictFile(getModelsDir());
   }
