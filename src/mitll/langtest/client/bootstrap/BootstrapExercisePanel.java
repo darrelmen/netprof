@@ -90,10 +90,9 @@ public class BootstrapExercisePanel extends FluidContainer {
   private Timer t;
   private ProgressBar scoreFeedback = new ProgressBar();
   private SoundFeedback soundFeedback;
-  ListInterface exerciseList;
+  private ListInterface exerciseList;
 
   /**
-   *
    * @param e
    * @param service
    * @param controller
@@ -192,7 +191,7 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param e
    * @return
    */
-  private Widget getCardPrompt(Exercise e, ExerciseController controller)/* throws Exception*/ {
+  protected FlowPanel getCardPrompt(Exercise e, ExerciseController controller) {
     FluidRow questionRow = new FluidRow();
     Widget questionContent = getQuestionContent(e, controller);
     Column contentContainer = new Column(12, questionContent);
@@ -200,15 +199,19 @@ public class BootstrapExercisePanel extends FluidContainer {
     return questionRow;
   }
 
-  private Widget getQuestionContent(Exercise e, ExerciseController controller) /*throws Exception*/ {
+  private Widget getQuestionContent(Exercise e, ExerciseController controller) {
     int headingSize = 1;
     String stimulus = e.getEnglishSentence();
     //    String markup = "<p>\\W&nbsp; </p>";
     //    Window.alert("doing getQuestionContent");
     //String stimulus;
-    String content = e.getContent();
+    String content = getContentFromExercise(e);
     if (content == null) {
-      content = stimulus;
+      //   content = stimulus;
+      Widget hero = new Heading(headingSize, stimulus);
+      hero.addStyleName("cardText");
+      //   if (true) throw new Exception("Testin!");
+      return hero;
     } else {
       stimulus = content;
       //   System.err.println("before " + content);
@@ -225,17 +228,19 @@ public class BootstrapExercisePanel extends FluidContainer {
     //  headingSize = 4;
     //  String content = e.getContent();
     if (content != null) {
-      Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
    /*   if (content.contains(markup)) {
         System.out.println("getQuestionContent : removing " + markup);
         content = content.replaceAll(markup, "<br></br>");
       }*/
-      if (content.contains("<p>"))
-        stimulus = "<h3 style='margin-right: 30px'>" +
+      if (content.contains("<p>")) {
+        Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
+        String questionText = "<br>" +
+          qaPair.getQuestion();
+        stimulus = "<h1>" +
           //  "Debug baby!"+
-          content + "<br>" +
-          qaPair.getQuestion() +
-          "</h3>";
+          content + questionText +
+          "</h1>";
+      }
       HTML html = getHTML(stimulus, true, controller);
       html.addStyleName("cardText");
       html.addStyleName("marginRight");
@@ -251,6 +256,10 @@ public class BootstrapExercisePanel extends FluidContainer {
     hero.addStyleName("cardText");
     //   if (true) throw new Exception("Testin!");
     return hero;
+  }
+
+  protected String getContentFromExercise(Exercise e) {
+    return e.getContent();
   }
 
   private HTML getHTML(String content, boolean requireAlignment, ExerciseController controller) {
@@ -271,6 +280,8 @@ public class BootstrapExercisePanel extends FluidContainer {
     else {
       html.addStyleName("xlargeFont");
     }*/
+    html.addStyleName("xlargeFont");
+
     return html;
   }
 
@@ -351,7 +362,7 @@ public class BootstrapExercisePanel extends FluidContainer {
 
   protected MyRecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service,
                                                 ExerciseController controller, final int index) {
-    return new MyRecordButtonPanel(service, controller, exercise, index);
+    return new MyRecordButtonPanel(service, controller, exercise, index, true);
   }
 
   /**
@@ -370,8 +381,8 @@ public class BootstrapExercisePanel extends FluidContainer {
   private class MyRecordButtonPanel extends RecordButtonPanel {
     private final Exercise exercise;
 
-    public MyRecordButtonPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, int index) {
-      super(service, controller, exercise, null, index);
+    public MyRecordButtonPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, int index, boolean doFlashcardAudio) {
+      super(service, controller, exercise, null, index, doFlashcardAudio);
       this.exercise = exercise;
     }
 
@@ -405,38 +416,39 @@ public class BootstrapExercisePanel extends FluidContainer {
 
         @Override
         protected HandlerRegistration addKeyHandler() {
-          return Event.addNativePreviewHandler(new
-                                                 Event.NativePreviewHandler() {
+          HandlerRegistration keyHandler = Event.addNativePreviewHandler(new
+                                                                           Event.NativePreviewHandler() {
 
-                                                   @Override
-                                                   public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                                                     NativeEvent ne = event.getNativeEvent();
-                                                     if ("[object KeyboardEvent]".equals(ne.getString())) {
+                                                                             @Override
+                                                                             public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                                                                               NativeEvent ne = event.getNativeEvent();
+                                                                               if ("[object KeyboardEvent]".equals(ne.getString())) {
 
                           /*                             System.out.println(new java.util.Date() + " : key handler : Got " + event + " type int " +
                                                          event.getTypeInt() + " assoc " + event.getAssociatedType() +
                                                          " native " + event.getNativeEvent() + " source " + event.getSource() + " " + ne.getCharCode());
 */
-                                                       int typeInt = event.getTypeInt();
-                                                       boolean keyPress = typeInt == KEY_PRESS;
-                                                       boolean isSpace = ne.getCharCode() == SPACE_CHAR;
+                                                                                 int typeInt = event.getTypeInt();
+                                                                                 boolean keyPress = typeInt == KEY_PRESS;
+                                                                                 boolean isSpace = ne.getCharCode() == SPACE_CHAR;
 
-                                                       if (keyPress && !isSpace) {
-                                                         showPopup("Press and hold space bar to begin recording, release to stop.");
-                                                       }
-                                                       if (keyPress && !keyIsDown && isSpace) {
-                                                         keyIsDown = true;
-                                                         doClick();
-                                                       } else {
-                                                         boolean keyUp = typeInt == KEY_UP;
-                                                         if (keyUp && keyIsDown) {
-                                                           keyIsDown = false;
-                                                           doClick();
-                                                         }
-                                                       }
-                                                     }
-                                                   }
-                                                 });
+                                                                                 if (keyPress && !isSpace) {
+                                                                                   showPopup("Press and hold space bar to begin recording, release to stop.");
+                                                                                 }
+                                                                                 if (keyPress && !keyIsDown && isSpace) {
+                                                                                   keyIsDown = true;
+                                                                                   doClick();
+                                                                                 } else {
+                                                                                   boolean keyUp = typeInt == KEY_UP;
+                                                                                   if (keyUp && keyIsDown) {
+                                                                                     keyIsDown = false;
+                                                                                     doClick();
+                                                                                   }
+                                                                                 }
+                                                                               }
+                                                                             }
+                                                                           });
+          return keyHandler;
         }
       };
     }
@@ -523,7 +535,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     protected void receivedAudioAnswer(final AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
       boolean correct = result.isCorrect();
       final double score = result.getScore();
-      System.out.println("answer correct = " + correct + " pron score : " + score);
+      System.out.println("receivedAudioAnswer : answer correct = " + correct + " pron score : " + score);
 
       recordButton.setResource(correct ? correctImage : incorrectImage);
       recordButton.setHeight("112px");
@@ -701,6 +713,7 @@ public class BootstrapExercisePanel extends FluidContainer {
 
     private void nextAfterDelay(boolean correct) {
       // Schedule the timer to run once in 1 seconds.
+      System.out.println("doing nextAfterDelay " + correct);
       Timer t = new Timer() {
         @Override
         public void run() {
@@ -769,7 +782,7 @@ public class BootstrapExercisePanel extends FluidContainer {
   }
 
   @Override
-  protected void onUnload() {
+  public void onUnload() {
     for (MyRecordButtonPanel answers : answerWidgets) {
       answers.onUnload();
     }
