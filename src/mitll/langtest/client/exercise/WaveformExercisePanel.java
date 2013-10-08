@@ -13,10 +13,8 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class WaveformExercisePanel extends ExercisePanel {
-
   private boolean isBusy = false;
   private RecordAudioPanel audioPanel;
-
 
   /**
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
@@ -26,20 +24,21 @@ public class WaveformExercisePanel extends ExercisePanel {
    * @param controller
    */
   public WaveformExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                                   final ExerciseController controller) {
-    super(e, service, userFeedback, controller);
+                                   final ExerciseController controller, ListInterface exerciseList) {
+    super(e, service, userFeedback, controller, exerciseList);
   }
 
   public void setBusy(boolean v) {
     this.isBusy = v;
     setButtonsEnabled(!isBusy);
   }
+  public boolean isBusy() { return isBusy;  }
 
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
    *
-   * @see mitll.langtest.client.exercise.ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController)
+   * @see ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, ListInterface)
    * @param exercise
    * @param service
    * @param controller
@@ -53,9 +52,7 @@ public class WaveformExercisePanel extends ExercisePanel {
   }
 
   @Override
-  public void onResize() {
-    audioPanel.onResize();
-  }
+  public void onResize() { audioPanel.onResize();  }
 
   /**
    * @see ExercisePanel#addQuestionPrompt(com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.Exercise)
@@ -77,11 +74,6 @@ public class WaveformExercisePanel extends ExercisePanel {
    */
   @Override
   public void postAnswers(ExerciseController controller, Exercise completedExercise) {
-    controller.loadNextExercise(completedExercise);
+    exerciseList.loadNextExercise(completedExercise);
   }
-
-  public boolean isBusy() {
-    return isBusy;
-  }
-
 }
