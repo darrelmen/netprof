@@ -48,20 +48,21 @@ public class RecordButtonPanel {
   protected Panel panel;
   private Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
   private Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
-
+  boolean doFlashcardAudio = false;
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
    *
    * @see SimpleRecordExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
   public RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
-                           final Exercise exercise, final ExerciseQuestionState questionState, final int index){
+                           final Exercise exercise, final ExerciseQuestionState questionState, final int index, boolean doFlashcardAudio){
     final RecordButtonPanel outer = this;
     this.service = service;
     this.controller = controller;
     this.exercise = exercise;
     this.questionState = questionState;
     this.index = index;
+    this.doFlashcardAudio = doFlashcardAudio;
     // make record button
     // make images
     recordImage = new Image(RECORD_PNG);
@@ -152,7 +153,7 @@ public class RecordButtonPanel {
    * Once audio is posted to the server, two pieces of information come back in the AudioAnswer: the audio validity<br></br>
    *  (false if it's too short, etc.) and a URL to the stored audio on the server. <br></br>
    *   This is used to make the audio playback widget.
-   * @see #RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int)
+   * @see #RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int, boolean)
    */
   public void stopRecording() {
     System.out.println("stop recording... ");
@@ -168,7 +169,7 @@ public class RecordButtonPanel {
       reqid,
       !exercise.promptInEnglish,
       controller.getAudioType(),
-      controller.isFlashCard(),
+      doFlashcardAudio,
       new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
           recordButton.setEnabled(true);
