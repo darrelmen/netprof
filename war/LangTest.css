@@ -707,6 +707,15 @@ fieldset > legend {
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
 }
 
+.userNPFContent {
+    margin-top: 10px;
+    /*
+        background: none repeat scroll 0 0 #FFFFFF;
+    */
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+    padding: 5px;
+}
 
 .userListBackground {
     background-color:#ffffff;
