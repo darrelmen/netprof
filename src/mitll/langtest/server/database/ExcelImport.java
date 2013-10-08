@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseFormatter;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -658,7 +659,7 @@ public class ExcelImport implements ExerciseDAO {
   private Exercise getExercise(String id, FileExerciseDAO dao,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
                                String context, boolean promptInEnglish) {
-    String content = dao.getContent(foreignLanguagePhrase, translit, english, meaning, context);
+    String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context);
     Exercise imported = new Exercise("import", id, content, promptInEnglish, true, english);
     imported.addQuestion();   // TODO : needed?
 
