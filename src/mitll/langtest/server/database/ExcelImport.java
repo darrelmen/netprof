@@ -503,14 +503,14 @@ public class ExcelImport implements ExerciseDAO {
             //logger.debug("e " + e.getID() + " '" + e.getEnglishSentence() + "' has " + e.getSynonymAudioRefs().size() + " audio refs or " + translations);
           }
         }
-      } else if (false) {   // hard to test
+      } /*else if (false) {   // hard to test
         for (Exercise e : exercises2) {
           List<String> doubles = new ArrayList<String>();
           doubles.add(e.getRefAudio());
           doubles.add(e.getRefAudio());
           e.setSynonymAudioRefs(doubles);
         }
-      }
+      }*/
     }
   }
 
@@ -956,7 +956,7 @@ public class ExcelImport implements ExerciseDAO {
       // "Spanish, language, game, clues, guess, espaol, lengua, juego, conjetura","$0.05","Fri Sep 06 20:54:21 GMT 2013","5","BatchId:1260169;","3600","172800","Fri Sep 13 20:54:21 GMT 2013","","","2H5ZKPFE4EGDYVOO2JZIGNZWY0D7HM","A3C2DVYUP88DE7","Approved","Sat Sep 07 10:42:30 GMT 2013","Sat Sep 07 10:43:07 GMT 2013","Mon Sep 09 03:43:07 PDT 2013","Sat Sep 07 17:50:38 PDT 2013","","","37","100% (641/641)","100% (641/641)","100% (488/488)","____ ____ ____ para limpiar el restaurante al final de la noche hay que ____ ____ ____","____ ____ Telas para cubrir las ventanas.","Tengo que hacer del numero uno, tengo que usar ____ ____","barrer el suelo","las cortinas","el primero","","","",""
 
 
-      Set<String> refs = new HashSet<String>();
+      //Set<String> refs = new HashSet<String>();
       line2 = reader.readLine();
       int c = 0;
       while ((line2 = reader.readLine()) != null) {
