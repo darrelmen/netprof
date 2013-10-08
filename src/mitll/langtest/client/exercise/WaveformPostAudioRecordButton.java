@@ -1,6 +1,5 @@
 package mitll.langtest.client.exercise;
 
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
