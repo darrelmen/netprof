@@ -79,13 +79,15 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   public AudioPanel(String path, LangTestDatabaseAsync service,
                     boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
-    this(service,useKeyboard,controller, true);
+    this(service, useKeyboard, controller, true);
     this.gaugePanel = gaugePanel;
     addWidgets(path);
   }
 
   public AudioPanel(LangTestDatabaseAsync service,
                     boolean useKeyboard, ExerciseController controller, boolean showSpectrogram) {
+    this.screenPortion = controller.getScreenPortion();
+    System.out.println("Screen portion " + screenPortion);
     this.soundManager = controller.getSoundManager();
     this.service = service;
     this.useKeyboard = useKeyboard;
@@ -174,6 +176,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   public void setScreenPortion(float screenPortion) {
+    System.out.println("setScreenPortion : screenPortion " + screenPortion);
     this.screenPortion = screenPortion;
   }
 
@@ -271,10 +274,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     int leftColumnWidth = Math.min(175,controller.getLeftColumnWidth()) + IMAGE_WIDTH_SLOP;
     //int rightMargin = screenPortion == 1.0f ? leftColumnWidth : (int)(screenPortion*((float)rightMarginToUse));
     int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : 0;
-    int width = (int) ((screenPortion*((float)Window.getClientWidth())) - leftColumnWidth) - rightSide;
+    float scaledWidth = screenPortion * ((float) Window.getClientWidth());
+    int width = ((int) scaledWidth) - leftColumnWidth - rightSide;
 
-    System.out.println("getImages : path = " + audioPath + " screen " + screenPortion +
-      " leftColumnWidth " + leftColumnWidth + " width " + width + " vs window width " + Window.getClientWidth());
+    System.out.println("getImages : path = " + audioPath + " screen portion " + screenPortion +
+      " leftColumnWidth " + leftColumnWidth +
+      " scaledWidth " + scaledWidth +" width " + width + " vs window width " + Window.getClientWidth());
 
     //int width = getOffsetWidth();
     int diff = Math.abs(width - lastWidth);
