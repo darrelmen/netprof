@@ -17,25 +17,28 @@ public class ExercisePanelFactory {
   protected LangTestDatabaseAsync service;
   protected UserFeedback userFeedback;
   protected ExerciseController controller;
+  protected ListInterface exerciseList;
 
   /**
    * @see mitll.langtest.client.LangTest#setFactory
    * @param service
    * @param userFeedback
    * @param controller
+   * @param exerciseList
    */
-  public ExercisePanelFactory( final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                               final ExerciseController controller) {
+  public ExercisePanelFactory(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
+                              final ExerciseController controller, ListInterface exerciseList) {
     this.service = service;
     this.userFeedback = userFeedback;
     this.controller = controller;
+    this.exerciseList = exerciseList;
   }
 
   public Panel getExercisePanel(Exercise e) {
     if (e.getType() == Exercise.EXERCISE_TYPE.RECORD) {
-      return new SimpleRecordExercisePanel(e, service, userFeedback, controller);
+      return new SimpleRecordExercisePanel(e, service, userFeedback, controller, exerciseList);
     } else {
-      return new ExercisePanel(e, service, userFeedback, controller);
+      return new ExercisePanel(e, service, userFeedback, controller, exerciseList);
     }
   }
 }
