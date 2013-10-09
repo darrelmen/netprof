@@ -513,8 +513,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     ExerciseShell shell = idToExercise.get(id);
    // System.out.println("getIndex : got " + shell + " current id '" + id +"'");
     int i = shell != null ? currentExercises.indexOf(shell) : -1;
-    System.out.println("getIndex : index of '" + id + "' is #" + i + " and item is " + current.getClass() +
-        " map size " + idToExercise.size() + " exercise list size " +currentExercises.size());// + " current " +currentExercises);
+/*    System.out.println("getIndex : index of '" + id + "' is #" + i + " and item is " + current.getClass() +
+        " map size " + idToExercise.size() + " exercise list size " +currentExercises.size());// + " current " +currentExercises);*/
     return i;
   }
 
@@ -687,5 +687,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   @Override
-  public void reloadExercises() {}
+  public void reloadExercises() {
+    loadFirstExercise();
+  }
 }
