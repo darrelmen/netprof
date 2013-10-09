@@ -6,6 +6,7 @@ import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
@@ -46,6 +47,7 @@ import java.util.Map;
  */
 public class FlexSectionExerciseList extends SectionExerciseList {
   private static final int HEADING_FOR_LABEL = 4;
+  private static final int UNACCOUNTED_WIDTH = 120;
 
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private Map<String, ButtonType> typeToButton = new HashMap<String, ButtonType>();
@@ -74,10 +76,10 @@ public class FlexSectionExerciseList extends SectionExerciseList {
                                  boolean showTurkToken, boolean showInOrder, boolean showListBox, ExerciseController controller, String instance) {
     super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox, controller, instance);
 
-    Panel child = sectionPanel = new FluidContainer();
+    sectionPanel = new FluidContainer();
     DOM.setStyleAttribute(sectionPanel.getElement(), "paddingLeft", "2px");
     DOM.setStyleAttribute(sectionPanel.getElement(), "paddingRight", "2px");
-    secondRow.add(new Column(12, child));
+    secondRow.add(new Column(12, sectionPanel));
 
     buttonTypes.add(ButtonType.PRIMARY);
     buttonTypes.add(ButtonType.SUCCESS);
@@ -202,8 +204,10 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     if (addInstructions) container.add(getInstructionRow());
     FlexTable firstTypeRow = new FlexTable();
+    firstTypeRow.getElement().setId("firstTypeRow");
     container.add(firstTypeRow);
     firstTypeRow.addStyleName("alignTop");
+   // firstTypeRow.addStyleName("positionAbsolute");
 
     populateButtonGroups(types);
 
@@ -310,6 +314,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     panelInsideScrollPanel = new HorizontalPanel();
     panelInsideScrollPanel.addStyleName("blueBackground");
     panelInsideScrollPanel.addStyleName("borderSpacing");
+    panelInsideScrollPanel.getElement().setId("panelInsideScrollPanel");
 
     makeScrollPanel(firstTypeRow, panelInsideScrollPanel);
   }
@@ -317,6 +322,11 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   private void makeScrollPanel(FlexTable firstTypeRow, Panel panelInside) {
     this.scrollPanel = new ScrollPanel(panelInside);
     this.scrollPanel.addStyleName("leftFiveMargin");
+    this.scrollPanel.getElement().setId("scrollPanel");
+
+/*    DivWidget div = new DivWidget();
+    div.addStyleName("positionAbsolute");
+    div.add(scrollPanel);*/
     firstTypeRow.setWidget(0, 2, scrollPanel);
     setScrollPanelWidth();
   }
@@ -540,19 +550,29 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     return clear;
   }
 
+  /**
+   * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection, boolean)
+   * @param columnContainer
+   */
   private void setSizesAndPushFirst(Widget columnContainer) {
-    int offsetHeight = columnContainer.getOffsetHeight() + 5;
+  //  int offsetHeight = columnContainer.getOffsetHeight() + 5;
 
     // System.out.println("height is " + offsetHeight);
     //scrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
-    panelInsideScrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
+ //   panelInsideScrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
     // panelInsideScrollPanel.getParent().setHeight(Math.max(50, offsetHeight) + "px");
 
-    int width = Window.getClientWidth() - labelColumn.getOffsetWidth() - clearColumnContainer.getOffsetWidth() - 90;
+    //int width = Window.getClientWidth() - labelColumn.getOffsetWidth() - clearColumnContainer.getOffsetWidth() - 90;
     //  System.out.println("setting width to " +width);
     // scrollPanel.setWidth(Math.max(300, width) + "px");
-    scrollPanel.setWidth("100%");
+   // scrollPanel.setWidth("100%");
     pushFirstListBoxSelection();
+
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        setScrollPanelWidth();
+      }
+    });
   }
 
   /**
@@ -674,9 +694,12 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
   protected void setScrollPanelWidth() {
     if (labelColumn != null) {
-      int width = Window.getClientWidth() - labelColumn.getOffsetWidth() - clearColumnContainer.getOffsetWidth() - 90;
-      // System.out.println("scrollPanel width is " + width);
+      int width = Window.getClientWidth() - labelColumn.getOffsetWidth() - clearColumnContainer.getOffsetWidth() - UNACCOUNTED_WIDTH;
+      System.out.println("setScrollPanelWidth : scrollPanel width is " + width);
       scrollPanel.setWidth(Math.max(300, width) + "px");
+    }
+    else {
+      System.out.println("setScrollPanelWidth : labelColumn is null");
     }
   }
 
@@ -728,6 +751,11 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     sectionWidgetFinal.addButton(sectionButton);
 
     return sectionButton;
+  }
+
+  @Override
+  protected int getVerticalUnaccountedFor() {
+    return 160;
   }
 
   public static class ButtonWithChildren extends Button {
