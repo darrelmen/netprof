@@ -20,7 +20,7 @@ import java.util.Map;
 public class SelectionState {
   private String item;
   private Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
-  private String instance;
+  private String instance = "";
 
   /**
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#showSelectionState
