@@ -38,9 +38,10 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class Navigation extends BasicDialog implements RequiresResize {
-  public static final String CHAPTERS = "Chapters";
+  private static final String CHAPTERS = "Chapters";
   private static final boolean SHOW_CREATED = false;
-  public static final String YOUR_LISTS = "Your Lists";
+  private static final String YOUR_LISTS = "Your Lists";
+  public static final String PRACTICE = "Practice";
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
@@ -51,7 +52,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
   private ListInterface listInterface;
   NPFHelper npfHelper;
   NPFHelper avpHelper;
-  Heading itemMarker;
+  HTML itemMarker;
 
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager, final ExerciseController controller, final ListInterface listInterface) {
     this.service = service;
@@ -79,6 +80,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
   private TabPanel tabPanel;
   private Tab yourItems;
   private Panel yourItemsContent;
+  private TabAndContent browse;
 
   private Panel getButtonRow2(Panel secondAndThird) {
     tabPanel = new TabPanel();
@@ -102,11 +104,11 @@ public class Navigation extends BasicDialog implements RequiresResize {
       }
     });
 
-    final TabAndContent browse = makeTab(tabPanel, IconType.TH_LIST, "Browse");
+    browse = makeTab(tabPanel, IconType.TH_LIST, "Browse");
     browse.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        viewLessons(browse.content, true);
+        viewBrowse();
       }
     });
 
@@ -120,27 +122,25 @@ public class Navigation extends BasicDialog implements RequiresResize {
        /* System.out.println("got shown event : '" +showEvent + "'\n" +
             "\ntarget " + showEvent.getTarget()+
             " ' target name '" + showEvent.getTarget().getName() + "'");*/
-        String targetName =showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
+        String targetName = showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
 
         System.out.println("got shown event : '" +showEvent + "'\n target '" + targetName + "'");
 
         boolean wasChapters = targetName.contains(CHAPTERS);
         if (wasChapters) {
           System.out.println("got chapters! created panel : " + listInterface.getCreatedPanel() + "\n\n\n");
-
         }
         if (listInterface.getCreatedPanel() != null && wasChapters) {
-          // System.out.println("\n\nupdating lists --->\n\n\n");
-
           ((GoodwaveExercisePanel) listInterface.getCreatedPanel()).wasRevealed();
-        } else if (!targetName.contains(YOUR_LISTS)){
-          System.out.println("calling disable key handler on " + avpHelper);
-          avpHelper.disableKeyHandler();
         }
       }
     });
 
     return tabPanel;
+  }
+
+  private void viewBrowse() {
+    viewLessons(browse.content, true);
   }
 
   private TabAndContent makeTab(TabPanel toAddTo, IconType iconType, String label) {
@@ -175,9 +175,51 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
   public void showInitialState() {
     System.out.println("show initial state! -->");
+
+    service.getListsForUser(userManager.getUser(), false, new AsyncCallback<Collection<UserList>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        //To change body of implemented methods use File | Settings | File Templates.
+      }
+
+      @Override
+      public void onSuccess(Collection<UserList> result) {
+        if (result.size() == 1 && result.iterator().next().getExercises().isEmpty()) {
+          service.getUserListsForText("", new AsyncCallback<Collection<UserList>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            @Override
+            public void onSuccess(Collection<UserList> result) {
+              if (!result.isEmpty()) {
+                // show site-wide browse list instead
+                showBrowse();
+              }
+              else { // otherwise show the chapters tab
+                tabPanel.selectTab(3);
+              }
+            }
+          });
+        }
+        else {
+          showMyLists();
+        }
+      }
+    });
+  }
+
+  private void showMyLists() {
     tabPanel.selectTab(0);
     yourItems.fireEvent(new ButtonClickEvent());
     refreshViewLessons();
+  }
+
+  private void showBrowse() {
+    tabPanel.selectTab(2);
+    browse.tab.fireEvent(new ButtonClickEvent());
+    viewBrowse();
   }
 
   @Override
@@ -232,7 +274,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
     child.addStyleName("userListDarkerBlueColor");
 
     r1.add(new Column(3, new Heading(1, ul.getName())));
-    itemMarker = new Heading(3, ul.getExercises().size() + " items");
+    itemMarker = new HTML(ul.getExercises().size() + " items");
     itemMarker.addStyleName("subtitleForeground");
     r1.add(new Column(3, itemMarker));
 
@@ -259,8 +301,8 @@ public class Navigation extends BasicDialog implements RequiresResize {
         npfHelper.showNPF(ul, learn, "learn");
       }
     });
-    final TabAndContent practice = makeTab(tabPanel, IconType.CHECK, "Practice");
 
+    final TabAndContent practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
     practice.tab.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -301,6 +343,22 @@ public class Navigation extends BasicDialog implements RequiresResize {
       }
     });
 
+    tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
+      @Override
+      public void onShow(TabPanel.ShowEvent showEvent) {
+        String targetName = showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
+
+        if (targetName.length() > 0) {
+          System.out.println("got shown event : '" + showEvent + "'\n target '" + targetName + "'");
+          if (targetName.contains(PRACTICE)) {
+            avpHelper.addKeyHandler();
+          } else {
+            avpHelper.removeKeyHandler();
+          }
+        }
+      }
+    });
+
     return tabPanel;
   }
 
@@ -322,7 +380,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
     SimplePanel right = new SimplePanel();
     hp.add(right);
 
-    PagingContainer<ExerciseShell> pagingContainer = new PagingContainer<ExerciseShell>(controller);
+    PagingContainer<ExerciseShell> pagingContainer = new PagingContainer<ExerciseShell>(controller, 100);
     Panel container = pagingContainer.getTableWithPager();
     left.add(container);
     for (ExerciseShell es : ul.getExercises()) {
@@ -565,77 +623,96 @@ public class Navigation extends BasicDialog implements RequiresResize {
     @Override
     public void onSuccess(Collection<UserList> result) {
       System.out.println("Displaying " + result.size() + " items");
-      if (result.isEmpty()) System.err.println("\n\nhuh? no results for user");
-      listScrollPanel = new ScrollPanel();
-      setScrollPanelWidth(listScrollPanel);
-      final Panel insideScroll = new DivWidget();
-      insideScroll.addStyleName("userListContainer");
-      listScrollPanel.add(insideScroll);
-      for (final UserList ul : result) {
-        final FocusPanel widgets = new FocusPanel();
-
-        widgets.addStyleName("userListContent");
-        widgets.addStyleName("userListBackground");
-        widgets.addStyleName("leftTenMargin");
-
-        widgets.addClickHandler(new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            showList(ul, contentPanel);
+      // if (result.isEmpty()) System.err.println("\n\nhuh? no results for user");
+      if (result.isEmpty()) {
+        child.add(new Heading(3, "No lists created yet."));
+      } else {
+        listScrollPanel = new ScrollPanel();
+        setScrollPanelWidth(listScrollPanel);
+        final Panel insideScroll = new DivWidget();
+        insideScroll.addStyleName("userListContainer");
+        listScrollPanel.add(insideScroll);
+        boolean anyAdded = false;
+        for (final UserList ul : result) {
+          if (!ul.isEmpty() || !ul.isPrivate()) {
+            anyAdded = true;
+            insideScroll.add(getDisplayRowPerList(ul));
           }
-        });
-        widgets.addMouseOverHandler(new MouseOverHandler() {
-          @Override
-          public void onMouseOver(MouseOverEvent event) {
-            widgets.removeStyleName("userListBackground");
-            widgets.addStyleName("blueBackground");
-            widgets.addStyleName("handCursor");
-            widgets.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-          }
-        });
-        widgets.addMouseOutHandler(new MouseOutHandler() {
-          @Override
-          public void onMouseOut(MouseOutEvent event) {
-            widgets.removeStyleName("blueBackground");
-            widgets.addStyleName("userListBackground");
-            widgets.removeStyleName("handCursor");
-          }
-        });
-        insideScroll.add(widgets);
-        FluidContainer w = new FluidContainer();
-        widgets.add(w);
+        }
+        if (!anyAdded) {
+          insideScroll.add(new Heading(3, "No lists created or visited yet."));
+        }
+        child.add(listScrollPanel);
+      }
+    }
 
-        FluidRow r1 = new FluidRow();
-        w.add(r1);
+    private Panel getDisplayRowPerList(final UserList ul) {
+      final FocusPanel widgets = new FocusPanel();
+
+      widgets.addStyleName("userListContent");
+      widgets.addStyleName("userListBackground");
+      widgets.addStyleName("leftTenMargin");
+
+      widgets.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          showList(ul, contentPanel);
+        }
+      });
+      widgets.addMouseOverHandler(new MouseOverHandler() {
+        @Override
+        public void onMouseOver(MouseOverEvent event) {
+          widgets.removeStyleName("userListBackground");
+          widgets.addStyleName("blueBackground");
+          widgets.addStyleName("handCursor");
+          widgets.getElement().getStyle().setCursor(Style.Cursor.POINTER);
+        }
+      });
+      widgets.addMouseOutHandler(new MouseOutHandler() {
+        @Override
+        public void onMouseOut(MouseOutEvent event) {
+          widgets.removeStyleName("blueBackground");
+          widgets.addStyleName("userListBackground");
+          widgets.removeStyleName("handCursor");
+        }
+      });
+      FluidContainer w = new FluidContainer();
+      widgets.add(w);
+
+      FluidRow r1 = new FluidRow();
+      w.add(r1);
 
 
-        //FlowPanel fp = new FlowPanel();
-        Heading w1 = new Heading(2, "Title : " + ul.getName());
-        //w1.addStyleName("floatLeft");
-        // r1.add(fp);
-        //fp.add(w1);
-        r1.add(new Column(6, w1));
-        itemMarker = new Heading(3, ul.getExercises().size() + " items");
-        itemMarker.addStyleName("subtitleForeground");
-        //   itemMarker.addStyleName("floatRight");
-        r1.add(new Column(3, itemMarker));
-        //    fp.add(itemMarker);
-
+      //FlowPanel fp = new FlowPanel();
+      //  Heading nameInfo = new Heading(2, ul.getName());
+      Widget nameInfo = new HTML(ul.getName());
+      nameInfo.addStyleName("userListFont");
+      //nameInfo.addStyleName("floatLeft");
+      // r1.add(fp);
+      //fp.add(nameInfo);
+      r1.add(new Column(6, nameInfo));
+      //  itemMarker = new Heading(3, ul.getExercises().size() + " items");
+      itemMarker = new HTML(ul.getExercises().size() + " items");
+      itemMarker.addStyleName("numItemFont");
+      //   itemMarker.addStyleName("floatRight");
+      r1.add(new Column(3, itemMarker));
+      //    fp.add(itemMarker);
+/*
         r1 = new FluidRow();
         w.add(r1);
-        r1.add(new Heading(3, "Description : " + ul.getDescription()));
+        r1.add(new Heading(3, "Description : " + ul.getDescription()));*/
 
-        r1 = new FluidRow();
+  /*      r1 = new FluidRow();
         w.add(r1);
         r1.add(new Heading(3, "Class : " + ul.getClassMarker()));
-
-        if (createdByYou(ul)) {
-          r1 = new FluidRow();
-          w.add(r1);
-          r1.add(new HTML("<b>Created by you.</b>"));
-        }
+*/
+      if (createdByYou(ul)) {
+        r1 = new FluidRow();
+        w.add(r1);
+        r1.add(new HTML("<b>Created by you.</b>"));
       }
-      child.add(listScrollPanel);
+      return widgets;
     }
+
   }
 }
