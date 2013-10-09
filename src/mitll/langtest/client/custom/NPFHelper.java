@@ -131,10 +131,14 @@ public class NPFHelper implements RequiresResize {
 
   @Override
   public void onResize() {
-    if (npfContentPanel != null) npfContentPanel.setWidth(Window.getClientWidth()*0.7f  + "px");
+    if (npfContentPanel != null) npfContentPanel.setWidth(((Window.getClientWidth() * 0.7f) - 100)  + "px");
   }
 
-  public void disableKeyHandler() {
+  public void removeKeyHandler() {
     //To change body of created methods use File | Settings | File Templates.
+  }
+
+  public void addKeyHandler() {
+  //  if (bootstrapPanel != null) bootstrapPanel.addKeyHandler();
   }
 }
