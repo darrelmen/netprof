@@ -28,10 +28,11 @@ class AVPHelper extends NPFHelper {
   private final LangTestDatabaseAsync service;
   private final UserManager userManager;
   private final ExerciseController controller;
-  ListInterface outerExerciseList;
-  Exercise currentExercise;
-  UserFeedback feedback;
-  BootstrapExercisePanel bootstrapPanel;
+  private ListInterface outerExerciseList;
+  private Exercise currentExercise;
+  private UserFeedback feedback;
+  private BootstrapExercisePanel bootstrapPanel;
+  boolean addKeyHandler;
 
   public AVPHelper(UserFeedback feedback, LangTestDatabaseAsync service, UserManager userManager, ExerciseController controller) {
     super(service, feedback, userManager, controller);
@@ -49,7 +50,7 @@ class AVPHelper extends NPFHelper {
       public Panel getExercisePanel(Exercise e) {
         currentExercise = e;
 
-        bootstrapPanel = new BootstrapExercisePanel(e, service, controller, exerciseList) {
+        bootstrapPanel = new BootstrapExercisePanel(e, service, controller, exerciseList, false) {
           NavigationHelper navigationHelper;
 
           @Override
@@ -72,6 +73,10 @@ class AVPHelper extends NPFHelper {
             return cardPrompt;    //To change body of overridden methods use File | Settings | File Templates.
           }
         };
+
+        System.out.println("got here : BootstrapExercisePanel " + bootstrapPanel);
+
+        if (addKeyHandler) bootstrapPanel.addKeyHandler();
         return bootstrapPanel;
       }
     }, userManager, 1);
@@ -79,12 +84,7 @@ class AVPHelper extends NPFHelper {
 
   @Override
   protected SimplePanel setupContent(HorizontalPanel hp) {
-
-   /* hp.add(navigationHelper.getPrev());*/
-    SimplePanel widgets = super.setupContent(hp);//To change body of overridden methods use File | Settings | File Templates.
-/*
-    hp.add(navigationHelper.getNext());
-*/
+    SimplePanel widgets = super.setupContent(hp);
     float v = Window.getClientWidth() * 0.5f;
     System.out.println("Avp width " + v);
     widgets.setWidth(v + "px");
@@ -93,11 +93,25 @@ class AVPHelper extends NPFHelper {
 
   @Override
   public void onResize() {
-    if (getNpfContentPanel() != null) getNpfContentPanel().setWidth(Window.getClientWidth() * 0.5f + "px");
+    if (getNpfContentPanel() != null) getNpfContentPanel().setWidth(((Window.getClientWidth() * 0.6f) - 100) + "px");
   }
 
   @Override
-  public void disableKeyHandler() {
-    if (bootstrapPanel != null) bootstrapPanel.onUnload();
+  public void removeKeyHandler() {
+    System.out.println("avp removeKeyHandler\n\n\n");
+    addKeyHandler = false;
+    if (bootstrapPanel != null) bootstrapPanel.removeKeyHandler();
+  }
+
+  @Override
+  public void addKeyHandler() {
+    if (bootstrapPanel != null) {
+      System.out.println("avp adding key handler\n\n\n");
+      bootstrapPanel.addKeyHandler();
+    }
+    else {
+      System.out.println("avp no panel yet to add key handler to\n\n\n");
+      addKeyHandler = true;
+    }
   }
 }
