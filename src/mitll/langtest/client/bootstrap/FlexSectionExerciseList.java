@@ -97,7 +97,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory
    */
   public void getExercises(final long userID) {
-    //System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID);
+    System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID);
     this.userID = userID;
     sectionPanel.clear();
 
@@ -105,9 +105,13 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     if (!showListBoxes) {
       SelectionState selectionState = getSelectionState(History.getToken());
-      System.out.println("FlexSectionExerciseList : getExercises for " + userID + " selectionState " + selectionState);
+      System.out.println("FlexSectionExerciseList : getExercises for " + userID +
+        " selectionState " + selectionState + " and " + selectionState.getInstance());
 
       loadExercises(selectionState.getTypeToSection(), selectionState.getItem());
+    }
+    else {
+      System.out.println("\n\n\nFlexSectionExerciseList : getExercises ignoring request for user " + userID);
     }
 
     sectionPanel.add(flexTable);
@@ -502,6 +506,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     listBox.enableAll();
   }
 
+  /**
+   * @see SectionExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
+   */
   protected void gotEmptyExerciseList() {
     new ModalInfoDialog("Empty selection", "The selected sections don't overlap.  Try clearing one of your selections.");
   }
