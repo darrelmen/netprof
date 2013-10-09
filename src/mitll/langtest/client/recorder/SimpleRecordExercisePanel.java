@@ -42,7 +42,7 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    */
   @Override
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
-      return new SimpleRecordPanel(service, controller,exercise, this, index).getPanel();
+    return new SimpleRecordPanel(service, controller, exercise, this, index).getPanel();
   }
 
   @Override
