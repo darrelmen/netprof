@@ -882,14 +882,24 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
       System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser);
       if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
-        //  System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
-        if (exerciseList != null) exerciseList.getExercises(userID);
+        if (exerciseList != null) {
+          System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
+          exerciseList.getExercises(userID);
+        }
+        else {
+          System.out.println("\tdoEverythingAfterFactory : " + userID + " exercise list is null???");
+        }
+
         if (navigation != null) {
           if (!everShownInitialState) {
             navigation.showInitialState();
             everShownInitialState = true;
           }
         }
+      }
+      else {
+        System.out.println("\tdoEverythingAfterFactory : " + userID + " NOT getting exercises");
+
       }
       lastUser = userID;
 
