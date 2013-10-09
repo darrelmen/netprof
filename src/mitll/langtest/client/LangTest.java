@@ -249,6 +249,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     secondRow = new FluidRow();
   //  widgets.add(secondRow);
     secondRow.getElement().setId("secondRow");
+   // secondRow.addStyleName("overflowStyle");
 
     // third row ---------------
 
