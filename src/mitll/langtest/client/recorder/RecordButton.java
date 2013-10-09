@@ -34,29 +34,23 @@ public abstract class RecordButton {
   private Timer recordTimer;
   private Widget record = null;
   private int autoStopDelay;
-  private HandlerRegistration keyHandler;
+  protected HandlerRegistration keyHandler;
   private boolean hasFocus = false;
   private Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
   private Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
 
   /**
-   * @see mitll.langtest.client.bootstrap.BootstrapExercisePanel.MyRecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel)
+   * @see RecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel, boolean)
    * @param delay
    * @param addKeyHandler
    */
   public RecordButton(int delay, boolean addKeyHandler) {
     this.autoStopDelay = delay;
-    if (addKeyHandler) keyHandler = addKeyHandler();
+    if (addKeyHandler) addKeyHandler();
   }
 
-/*  public RecordButton(Widget recordButton, int delay, boolean addKeyHandler) {
-    this(delay, addKeyHandler);
-    this.record = recordButton;
-    setupRecordButton(recordButton);
-  }*/
-
   /**
-   * @see RecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel)
+   * @see RecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel, boolean)
    * @param recordButton
    * @param delay
    * @param recordImage1
@@ -96,8 +90,8 @@ public abstract class RecordButton {
     recordButton.setTitle("Press the space bar to record/stop recording");
   }
 
-  protected HandlerRegistration addKeyHandler() {
-    return Event.addNativePreviewHandler(new
+  public HandlerRegistration addKeyHandler() {
+    keyHandler = Event.addNativePreviewHandler(new
                                            Event.NativePreviewHandler() {
 
                                              @Override
@@ -120,18 +114,21 @@ public abstract class RecordButton {
                                                }
                                              }
                                            });
+    return keyHandler;
   }
 
   /**
    * @see mitll.langtest.client.recorder.RecordButtonPanel#onUnload()
    */
   public void onUnload() {
-    //System.out.println("removing handler for recording " + keyHandler);
+    System.out.println("RecordButton.onUnload : removing handler for recording " + keyHandler);
+
     removeKeyHandler();
   }
 
   public void removeKeyHandler() {
     if (keyHandler != null) {
+      System.out.println("removing handler for recording " + keyHandler);
       keyHandler.removeHandler();
       keyHandler = null;
     }
