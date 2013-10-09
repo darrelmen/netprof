@@ -44,9 +44,11 @@ public class PagingContainer<T extends ExerciseShell> {
   private static final float DEFAULT_PAGE_SIZE = 15f;
   private CellTable<T> table;
   protected ExerciseController controller;
+  private int verticalUnaccountedFor = 100;
 
-  public PagingContainer(ExerciseController controller) {
+  public PagingContainer(ExerciseController controller, int verticalUnaccountedFor) {
     this.controller = controller;
+    this.verticalUnaccountedFor = verticalUnaccountedFor;
   }
 
   public interface TableResources extends CellTable.Resources {
@@ -282,7 +284,7 @@ public class PagingContainer<T extends ExerciseShell> {
 
   public int getNumTableRowsGivenScreenHeight() {
     int header = getTableHeaderHeight();
-    int leftOver = Window.getClientHeight() - header - 100;
+    int leftOver = Window.getClientHeight() - header - verticalUnaccountedFor;
 
     //System.out.println("Got on resize " + Window.getClientHeight() + " " + header + " result = " + leftOver);
 
