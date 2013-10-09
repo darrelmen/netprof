@@ -55,7 +55,7 @@ public class SectionExerciseList extends PagingExerciseList {
   private final boolean includeItemInBookmark = false;
 
   /**
-   * @see mitll.langtest.client.LangTest#makeExerciseList
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, boolean, boolean, ExerciseController, String)
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
@@ -65,7 +65,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param controller
    * @param instance
    */
-  public SectionExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service,
+  protected SectionExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                              UserFeedback feedback,
                              boolean showTurkToken, boolean showInOrder, boolean showListBoxes, ExerciseController controller, String instance) {
     super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, instance);
