@@ -1,5 +1,7 @@
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
+import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -42,16 +44,30 @@ public class NPFHelper implements RequiresResize {
     this.userManager = userManager;
   }
 
+  /**
+   * @see Navigation#getListOperations(mitll.langtest.shared.custom.UserList, boolean)
+   * @param ul
+   * @param learn
+   * @param instanceName
+   */
   public void showNPF(UserList ul, Navigation.TabAndContent learn,String instanceName) {
-    if (!madeNPFContent) {
-      //System.out.println("adding npf content");
+    int widgetCount = learn.content.getWidgetCount();
+    if (!madeNPFContent || widgetCount == 0) {
+      System.out.println(getClass() + " : adding npf content widget count = " + widgetCount);
       addNPFToContent(ul, learn.content,instanceName);
+      System.out.println(getClass() + " : after adding npf content widget count = " + learn.content.getWidgetCount());
+
       madeNPFContent = true;
     } else {
-      //System.out.println("*NOT* adding npf content");
+      System.out.println(getClass() + " : *NOT* adding npf content widget count = " + widgetCount);
+      rememberAndLoadFirst(ul);
+      System.out.println(getClass() + " : *NOT* after adding npf content widget count = " + learn.content.getWidgetCount());
 
-      npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()));
     }
+  }
+
+  private void rememberAndLoadFirst(UserList ul) {
+    npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()));
   }
 
   private PagingExerciseList npfExerciseList;
@@ -72,7 +88,7 @@ public class NPFHelper implements RequiresResize {
     npfExerciseList = makeNPFExerciseList(getNpfContentPanel(),instanceName);
 
     left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
-    npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()));
+    rememberAndLoadFirst(ul);
     setupContent(hp);
     return hp;
   }
@@ -88,7 +104,12 @@ public class NPFHelper implements RequiresResize {
     PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller, instanceName) {
       @Override
       protected void onLastItem() {
-        new ModalInfoDialog("Complete","List complete!");
+        new ModalInfoDialog("Complete","List complete!", new HiddenHandler() {
+          @Override
+          public void onHidden(HiddenEvent hiddenEvent) {
+            reloadExercises();
+          }
+        });
       }
     };
     setFactory(exerciseList);
