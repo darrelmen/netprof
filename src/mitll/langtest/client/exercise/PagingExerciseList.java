@@ -43,7 +43,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   protected PagingContainer<? extends ExerciseShell> makePagingContainer() {
     final PagingExerciseList outer = this;
-    PagingContainer<ExerciseShell> pagingContainer1 = new PagingContainer<ExerciseShell>(controller) {
+    PagingContainer<ExerciseShell> pagingContainer1 = new PagingContainer<ExerciseShell>(controller, getVerticalUnaccountedFor()) {
       @Override
       protected void gotClickOnItem(ExerciseShell e) {
         outer.gotClickOnItem(e);
@@ -58,6 +58,10 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     };
     pagingContainer = pagingContainer1;
     return pagingContainer1;
+  }
+
+  protected int getVerticalUnaccountedFor() {
+    return 100;
   }
 
   protected void addTableWithPager(PagingContainer<? extends ExerciseShell> pagingContainer) {
