@@ -93,14 +93,16 @@ public class BootstrapExercisePanel extends FluidContainer {
   private ListInterface exerciseList;
 
   /**
+   *
    * @param e
    * @param service
    * @param controller
    * @param exerciseList
+   * @param addKeyBinding
    * @see mitll.langtest.client.flashcard.FlashcardExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    */
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
-                                final ExerciseController controller, ListInterface exerciseList) {
+                                final ExerciseController controller, ListInterface exerciseList, boolean addKeyBinding) {
     setStyleName("exerciseBackground");
     addStyleName("cardBorder");
     this.exerciseList = exerciseList;
@@ -113,7 +115,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     soundFeedback = new SoundFeedback(controller.getSoundManager(), warnNoFlash);
 
     add(getHelpRow(controller));
-    // Window.alert("got here : BootstrapExercisePanel ");
+    System.out.println("got here : BootstrapExercisePanel " + this);
     // try {
     //  add(new HTML("Got here"));
     add(getCardPrompt(e, controller));
@@ -121,7 +123,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       Window.alert("got " +e1);
     }*/
 
-    addRecordingAndFeedbackWidgets(e, service, controller);
+    addRecordingAndFeedbackWidgets(e, service, controller, addKeyBinding);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
   }
@@ -298,10 +300,12 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param e
    * @param service
    * @param controller used in subclasses for audio control
+   * @param addKeyBinding
    */
-  private void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
+  private void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller,
+                                              boolean addKeyBinding) {
     // add answer widget to do the recording
-    MyRecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1);
+    MyRecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1, addKeyBinding);
     this.answerWidgets.add(answerWidget);
 
     FluidRow recordButtonRow = getRecordButtonRow(answerWidget.getRecordButton());
@@ -364,9 +368,9 @@ public class BootstrapExercisePanel extends FluidContainer {
     return feedbackRow;
   }
 
-  protected MyRecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service,
-                                                ExerciseController controller, final int index) {
-    return new MyRecordButtonPanel(service, controller, exercise, index, true);
+  private MyRecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service,
+                                              ExerciseController controller, final int index, boolean addKeyBinding) {
+    return new MyRecordButtonPanel(service, controller, exercise, index, true, addKeyBinding);
   }
 
   /**
@@ -385,14 +389,22 @@ public class BootstrapExercisePanel extends FluidContainer {
   private class MyRecordButtonPanel extends RecordButtonPanel {
     private final Exercise exercise;
 
-    public MyRecordButtonPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, int index, boolean doFlashcardAudio) {
-      super(service, controller, exercise, null, index, doFlashcardAudio);
+    public MyRecordButtonPanel(LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise,
+                               int index, boolean doFlashcardAudio, boolean addKeyBinding) {
+      super(service, controller, exercise, null, index, doFlashcardAudio, addKeyBinding);
       this.exercise = exercise;
     }
 
+    /**
+     * @see
+     * @param controller
+     * @param outer
+     * @param addKeyHandler
+     * @return
+     */
     @Override
-    protected RecordButton makeRecordButton(ExerciseController controller, final RecordButtonPanel outer) {
-      return new RecordButton(controller.getRecordTimeout(), true) {
+    protected RecordButton makeRecordButton(ExerciseController controller, final RecordButtonPanel outer, boolean addKeyHandler) {
+      return new RecordButton(controller.getRecordTimeout(), addKeyHandler) {
         @Override
         protected void stopRecording() {
           outer.stopRecording();
@@ -418,9 +430,13 @@ public class BootstrapExercisePanel extends FluidContainer {
           super.doClick();
         }
 
+        /**
+         * @see RecordButton#RecordButton(int, boolean)
+         * @return
+         */
         @Override
-        protected HandlerRegistration addKeyHandler() {
-          HandlerRegistration keyHandler = Event.addNativePreviewHandler(new
+        public HandlerRegistration addKeyHandler() {
+          keyHandler = Event.addNativePreviewHandler(new
                                                                            Event.NativePreviewHandler() {
 
                                                                              @Override
@@ -452,6 +468,7 @@ public class BootstrapExercisePanel extends FluidContainer {
                                                                                }
                                                                              }
                                                                            });
+          System.out.println(new java.util.Date() + " : key handler " + keyHandler);
           return keyHandler;
         }
       };
@@ -520,7 +537,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       onUnload();
     }
 
-    int numMP3s = 0;
+    private int numMP3s = 0;
 
     /**
      * Deal with three cases: <br></br>
@@ -792,6 +809,20 @@ public class BootstrapExercisePanel extends FluidContainer {
   public void onUnload() {
     for (MyRecordButtonPanel answers : answerWidgets) {
       answers.onUnload();
+    }
+  }
+
+  public void addKeyHandler() {
+    for (MyRecordButtonPanel answers : answerWidgets) {
+      System.out.println("avp adding key handler : " + answers);
+
+      answers.addKeyHandler();
+    }
+  }
+
+  public void removeKeyHandler() {
+    for (MyRecordButtonPanel answers : answerWidgets) {
+      answers.removeKeyHandler();
     }
   }
 }
