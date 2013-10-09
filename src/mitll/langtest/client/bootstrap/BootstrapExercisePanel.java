@@ -202,6 +202,10 @@ public class BootstrapExercisePanel extends FluidContainer {
   private Widget getQuestionContent(Exercise e, ExerciseController controller) {
     int headingSize = 1;
     String stimulus = e.getEnglishSentence();
+
+    if (stimulus == null) {
+      System.err.println("huh? exer " +e + " has null english???");
+    }
     //    String markup = "<p>\\W&nbsp; </p>";
     //    Window.alert("doing getQuestionContent");
     //String stimulus;
@@ -535,13 +539,13 @@ public class BootstrapExercisePanel extends FluidContainer {
     protected void receivedAudioAnswer(final AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
       boolean correct = result.isCorrect();
       final double score = result.getScore();
-      System.out.println("receivedAudioAnswer : answer correct = " + correct + " pron score : " + score);
 
       recordButton.setResource(correct ? correctImage : incorrectImage);
       recordButton.setHeight("112px");
 
       String path = exercise.getRefAudio() != null ? exercise.getRefAudio() : exercise.getSlowAudioRef();
       final boolean hasRefAudio = path != null;
+      System.out.println("receivedAudioAnswer : answer correct = " + correct + " pron score : " + score + " has ref audio " + hasRefAudio);
 
       if (result.validity != AudioAnswer.Validity.OK) {
         showPopup(result.validity.getPrompt());
@@ -638,6 +642,9 @@ public class BootstrapExercisePanel extends FluidContainer {
         } else {
           String path = exercise.getRefAudio();
           path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
+
+          System.out.println("showIncorrectFeedback : playing " + path);
+
           soundFeedback.createSound(path, new SoundFeedback.EndListener() {
             @Override
             public void songEnded() {
