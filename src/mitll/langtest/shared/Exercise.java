@@ -318,6 +318,10 @@ public class Exercise extends ExerciseShell  {
     return englishSentence;
   }
 
+  /**
+   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, mitll.langtest.server.database.FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, String, boolean)
+   * @param englishSentence
+   */
   public void setEnglishSentence(String englishSentence) {
     this.englishSentence = englishSentence;
   }
