@@ -468,7 +468,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   @Override
   protected PagingContainer<? extends ExerciseShell> makePagingContainer() {
     final TableSectionExerciseList outer = this;
-    exercisePagingContainer = new PagingContainer<Exercise>(controller) {
+    exercisePagingContainer = new PagingContainer<Exercise>(controller, 100) {
       /**
        * @see mitll.langtest.client.bootstrap.TableSectionExerciseList#getAsyncTable(java.util.Map, int)
        * @return
@@ -659,9 +659,4 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
       table.redraw();
     }
   }
-
-/*  @Override
-  protected int heightOfCellTableWith15Rows() {
-    return 700;
-  }*/
 }
