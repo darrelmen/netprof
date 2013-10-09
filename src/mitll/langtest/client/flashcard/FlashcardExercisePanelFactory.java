@@ -35,5 +35,7 @@ public class FlashcardExercisePanelFactory extends ExercisePanelFactory {
    * @param e
    * @return
    */
-  public Panel getExercisePanel(Exercise e) { return new BootstrapExercisePanel(e, service, controller, exerciseList); }
+  public Panel getExercisePanel(Exercise e) {
+    return new BootstrapExercisePanel(e, service, controller, exerciseList, true);
+  }
 }
