@@ -64,11 +64,6 @@ public class UserExercise extends ExerciseShell {
     this.foreignLanguage = exercise.getContent();
   }
 
- /* private UserExercise(int uniqueID, String english, String foreignLanguage, String refAudio) {
-    this(uniqueID, english, foreignLanguage);
-    this.setRefAudio(refAudio);
-  }*/
-
   /**
    * @see mitll.langtest.client.custom.Navigation#addNew(UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel)
    * @return
@@ -84,6 +79,7 @@ public class UserExercise extends ExerciseShell {
     imported.setSlowRefAudio(slowAudioRef);
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
     imported.setRefSentence(getForeignLanguage());
+    imported.setEnglishSentence(english);
     return imported;
   }
 
