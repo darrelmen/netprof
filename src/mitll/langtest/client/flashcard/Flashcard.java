@@ -72,7 +72,7 @@ public class Flashcard implements RequiresResize {
     headerRow.add(iconLeftHeader);
 
     Panel flashcard = new FlowPanel();
-    flashcard.addStyleName("inlineStyle");
+    flashcard.addStyleName("inlineBlockStyle");
     flashcard.addStyleName("headerBackground");
     flashcard.addStyleName("leftAlign");
     appName = new Paragraph("<span>" + appTitle + "</span>");
