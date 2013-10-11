@@ -152,9 +152,9 @@ public class Flashcard implements RequiresResize {
       });
     } else {
       List<String> msgs = new ArrayList<String>();
-      msgs.add("Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.");
-      msgs.add("Press and hold the " + TimedGame.RECORDING_KEY + " to record.");
-      msgs.add("Release to stop recording.");
+      msgs.add("Listen to the audio, then answer the question below.");
+      msgs.add("Press the space bar to begin recording your answer.");
+      msgs.add("Release the space bar to end recording.");
       DialogHelper dialogHelper = new DialogHelper(false);
       dialogHelper.showErrorMessage("Help", msgs);
     }
