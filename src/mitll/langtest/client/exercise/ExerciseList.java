@@ -67,7 +67,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private final boolean showInOrder;
   private int countSincePrompt = 0;
   protected int lastReqID = 0;
-  private int adHocCount = 0;
+  //private int adHocCount = 0;
   private Set<Integer> visited = new HashSet<Integer>();
 
   /**
