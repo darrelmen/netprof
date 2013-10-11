@@ -640,7 +640,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
             imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM : null;
     if (imageType1 == null) return new ImageResponse(); // success = false!
     String imageOutDir = pathHelper.getImageOutDir();
-    logger.debug("getting images for " + wavAudioFile + "");
+    logger.debug("getting images (" + width + ", " + height + ") (" +reqid+ ") type " + imageType+
+      " for " + wavAudioFile + "");
     String absolutePathToImage = imageWriter.writeImageSimple(wavAudioFile, pathHelper.getAbsoluteFile(imageOutDir).getAbsolutePath(),
         width, height, imageType1);
     String installPath = pathHelper.getInstallPath();
