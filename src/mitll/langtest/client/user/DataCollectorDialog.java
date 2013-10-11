@@ -8,25 +8,17 @@ import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextBox;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.github.gwtbootstrap.client.ui.event.ShowEvent;
 import com.github.gwtbootstrap.client.ui.event.ShowHandler;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.logical.shared.OpenEvent;
-import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DisclosurePanel;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
@@ -42,7 +34,6 @@ import mitll.langtest.shared.Result;
 public class DataCollectorDialog extends UserDialog {
   private final UserNotification langTest;
   private UserManager userManager;
-  // private String loginTitle = "Data Collector Login";
 
   public DataCollectorDialog(LangTestDatabaseAsync service, PropertyHandler props,
                              UserNotification langTest,
@@ -56,18 +47,11 @@ public class DataCollectorDialog extends UserDialog {
    * Really should be named data collector (audio recorder) login
    */
   public void displayTeacherLogin(String loginTitle) {
-    final Modal dialogBox = getDialog();
+    final Modal dialogBox = getDialog(loginTitle);
 
-    dialogBox.setTitle(loginTitle);
-
-    final Button login = new Button("Login");
-    login.setType(ButtonType.PRIMARY);
-    login.setEnabled(true);
-    login.setTitle("Hit enter to log in.");
-    // We can set the id of a widget by accessing its Element
-    login.getElement().setId("login");
     final FormField user = addControlFormField(dialogBox, "User ID");
     final FormField password = addControlFormField(dialogBox, "Password", true);
+
     final RadioButton regular = new RadioButton("AudioType", "Regular Audio Recording");
     final RadioButton fastThenSlow = new RadioButton("AudioType", "Record Regular Speed then Slow");
 
@@ -95,49 +79,20 @@ public class DataCollectorDialog extends UserDialog {
       dialogBox.add(recordingStyle);
     }
 
-    SimplePanel spacer = new SimplePanel();
-    spacer.setSize("20px", "5px");
-    dialogBox.add(spacer);
-    dialogBox.add(new HTML("<i>New users : click on Registration below and fill in the fields.</i>"));
-    SimplePanel spacer2 = new SimplePanel();
-    spacer2.setSize("20px", "5px");
-    dialogBox.add(spacer2);
+    addRegistrationPrompt(dialogBox);
 
-    final FormField nativeLangGroup, dialectGroup, ageEntryGroup;
-    final ListBoxFormField genderGroup, experienceGroup;
-    VerticalPanel register = new VerticalPanel();
-    nativeLangGroup = addControlFormField(register, "Native Lang (L1)");
-    dialectGroup = addControlFormField(register, "Dialect");
-    ageEntryGroup = addControlFormField(register, "Your age");
-    genderGroup = getListBoxFormField(register, "Select gender", getGenderBox());
-    experienceGroup = getListBoxFormField(register, "Select months of experience", getExperienceBox());
+    final RegistrationInfo registrationInfo = getRegistrationInfo();
+    Panel register = registrationInfo.getRegister();
 
     dialogBox.setMaxHeigth(Window.getClientHeight() * 0.8 + "px");
+    DisclosurePanel dp = null;
     if (!props.isDataCollectAdminView()) {
-      dp = new DisclosurePanel("Registration");
-      dp.setContent(register);
-      dp.addOpenHandler(new OpenHandler<DisclosurePanel>() {
-        @Override
-        public void onOpen(OpenEvent<DisclosurePanel> event) {
-          centerVertically(dialogBox.getElement()); // need to resize the dialog when reveal hidden widgets
-        }
-      });
-
-      dp.addCloseHandler(new CloseHandler<DisclosurePanel>() {
-        @Override
-        public void onClose(CloseEvent<DisclosurePanel> event) {
-          centerVertically(dialogBox.getElement());
-        }
-      });
+      dp = getDisclosurePanel(dialogBox, register);
       dialogBox.add(dp);
     }
+    final DisclosurePanel disclosurePanel = dp;
 
-    FlowPanel hp = new FlowPanel();
-    hp.getElement().getStyle().setFloat(Style.Float.RIGHT);
-    hp.add(login);
-
-    dialogBox.add(hp);
-
+    final Button login = addLoginButton(dialogBox);
     login.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         // System.out.println("login button got click " + event);
@@ -160,7 +115,6 @@ public class DataCollectorDialog extends UserDialog {
                   markError(password, "Please use password from the email.");
                 } else if (checkAudioSelection(regular, fastThenSlow)) {
                   markError(recordingStyle, regular, "Try again", "Please choose either regular or regular then slow audio recording.");
-
                 } else {
                   dialogBox.hide();
                   String audioType = fastThenSlow.getValue() ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
@@ -171,8 +125,8 @@ public class DataCollectorDialog extends UserDialog {
                 System.out.println(userID + " doesn't exist");
                 if (checkPassword(password)) {
                   doRegistration(user, password, recordingStyle,
-                    regular, fastThenSlow, nativeLangGroup, dialectGroup, ageEntryGroup,
-                    experienceGroup, genderGroup, dialogBox, login);
+                    regular, fastThenSlow, registrationInfo,
+                    dialogBox, login, disclosurePanel);
                 } else {
                   markError(password, "Please use password from the email.");
                 }
@@ -188,7 +142,6 @@ public class DataCollectorDialog extends UserDialog {
         removeKeyHandler();
       }
     });
-
     dialogBox.addShowHandler(new ShowHandler() {
       @Override
       public void onShow(ShowEvent showEvent) {
@@ -199,28 +152,34 @@ public class DataCollectorDialog extends UserDialog {
     dialogBox.show();
   }
 
+  protected RegistrationInfo getRegistrationInfo() {
+    return new RegistrationInfo().invoke();
+  }
 
   /**
+   *
    * @param user
    * @param password
    * @param regular
    * @param fastThenSlow
-   * @param nativeLang
-   * @param dialect
-   * @param ageEntryBox
-   * @param experienceBox
-   * @param genderBox
    * @param dialogBox
    * @param login
+   * @param disclosurePanel
+   * @paramx nativeLang
+   * @paramx dialect
+   * @paramx ageEntryBox
+   * @paramx experienceBox
+   * @paramx genderBox
    * @see #displayTeacherLogin
    */
   private void doRegistration(FormField user, FormField password, ControlGroup audioGroup,
                               RadioButton regular,
                               RadioButton fastThenSlow,
-                              FormField nativeLang, FormField dialect, FormField ageEntryBox,
-                              ListBoxFormField experienceBox, ListBoxFormField genderBox,
+                              RegistrationInfo registrationInfo,
+                              //   FormField nativeLang, FormField dialect, FormField ageEntryBox,
+                              //   ListBoxFormField experienceBox, ListBoxFormField genderBox,
                               Modal dialogBox,
-                              Button login) {
+                              Button login, DisclosurePanel disclosurePanel) {
 
     boolean valid = user.box.getText().length() > 0;
     if (!valid) {
@@ -231,6 +190,8 @@ public class DataCollectorDialog extends UserDialog {
         markError(user, "Please enter a userid.");
       }
     }
+    FormField nativeLangGroup = registrationInfo.getNativeLangGroup();
+    FormField dialectGroup = registrationInfo.getDialectGroup();
     if (valid) {
       valid = checkPassword(password);
       if (!valid) {
@@ -239,37 +200,44 @@ public class DataCollectorDialog extends UserDialog {
       } else if (!props.isDataCollectAdminView() && checkAudioSelection(regular, fastThenSlow)) {
         markError(audioGroup, regular, "Try Again", "Please choose either regular or regular then slow audio recording.");
         valid = false;
-      } else if (!props.isDataCollectAdminView() && nativeLang.getText().isEmpty()) {
-        if (!dp.isOpen()) {
-          dp.setOpen(true);   // reveal registration fields
+      } else {
+        if (!props.isDataCollectAdminView() && nativeLangGroup.getText().isEmpty()) {
+          if (!disclosurePanel.isOpen()) {
+            disclosurePanel.setOpen(true);   // reveal registration fields
+          } else {
+            markError(nativeLangGroup, "Language is empty");
+          }
+          valid = false;
         } else {
-          markError(nativeLang, "Language is empty");
+          if (!props.isDataCollectAdminView() && dialectGroup.getText().isEmpty()) {
+            markError(dialectGroup, "Dialect is empty");
+            valid = false;
+          }
         }
-        valid = false;
-      } else if (!props.isDataCollectAdminView() && dialect.getText().isEmpty()) {
-        markError(dialect, "Dialect is empty");
-        valid = false;
       }
 
+      FormField ageEntryGroup = registrationInfo.getAgeEntryGroup();
       if (valid) {
         try {
-          int age = getAge(ageEntryBox.box);
+          int age = getAge(ageEntryGroup.box);
           if (!props.isDataCollectAdminView() && (age < MIN_AGE) || (age > MAX_AGE && age != TEST_AGE)) {
             valid = false;
-            markError(ageEntryBox, "age '" + age + "' is too young or old.");
+            markError(ageEntryGroup, "age '" + age + "' is too young or old.");
           }
         } catch (NumberFormatException e) {
-          markError(ageEntryBox, "age '" + ageEntryBox.getText() + "' is invalid.");
+          markError(ageEntryGroup, "age '" + ageEntryGroup.getText() + "' is invalid.");
           valid = false;
         }
       }
       if (valid) {
-        int enteredAge = getAge(ageEntryBox.box);
-        checkUserOrCreate(enteredAge, user, experienceBox.box, genderBox.box, nativeLang.box, dialect.box, dialogBox,
+        int enteredAge = getAge(ageEntryGroup.box);
+        checkUserOrCreate(enteredAge, user,
+          registrationInfo.getExperienceGroup().box, registrationInfo.getGenderGroup().box,
+          nativeLangGroup.box, dialectGroup.box, dialogBox,
           login, fastThenSlow.getValue());
-      } else {
+      } /*else {
         //System.out.println("not valid ------------ ?");
-      }
+      }*/
     }
   }
 
@@ -367,5 +335,48 @@ public class DataCollectorDialog extends UserDialog {
 
   private boolean checkAudioSelection(RadioButton regular, RadioButton fastThenSlow) {
     return props.isCollectAudio() && !regular.getValue() && !fastThenSlow.getValue();
+  }
+
+  private class RegistrationInfo {
+    private FormField nativeLangGroup;
+    private FormField dialectGroup;
+    private FormField ageEntryGroup;
+    private ListBoxFormField genderGroup;
+    private ListBoxFormField experienceGroup;
+    private VerticalPanel register;
+
+    public FormField getNativeLangGroup() {
+      return nativeLangGroup;
+    }
+
+    public FormField getDialectGroup() {
+      return dialectGroup;
+    }
+
+    public FormField getAgeEntryGroup() {
+      return ageEntryGroup;
+    }
+
+    public ListBoxFormField getGenderGroup() {
+      return genderGroup;
+    }
+
+    public ListBoxFormField getExperienceGroup() {
+      return experienceGroup;
+    }
+
+    public VerticalPanel getRegister() {
+      return register;
+    }
+
+    public RegistrationInfo invoke() {
+      register = new VerticalPanel();
+      nativeLangGroup = addControlFormField(register, "Native Lang (L1)");
+      dialectGroup = addControlFormField(register, "Dialect");
+      ageEntryGroup = addControlFormField(register, "Your age");
+      genderGroup = getListBoxFormField(register, "Select gender", getGenderBox());
+      experienceGroup = getListBoxFormField(register, "Select months of experience", getExperienceBox());
+      return this;
+    }
   }
 }

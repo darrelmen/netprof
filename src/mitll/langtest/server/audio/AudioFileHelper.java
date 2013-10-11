@@ -34,11 +34,13 @@ public class AudioFileHelper {
   private ASRScoring asrScoring;
   private AutoCRT autoCRT;
   private DatabaseImpl db;
+  LangTestDatabaseImpl langTestDatabase;
 
-  public AudioFileHelper(PathHelper pathHelper, ServerProperties serverProperties, DatabaseImpl db) {
+  public AudioFileHelper(PathHelper pathHelper, ServerProperties serverProperties, DatabaseImpl db, LangTestDatabaseImpl langTestDatabase) {
     this.pathHelper = pathHelper;
     this.serverProps = serverProperties;
     this.db = db;
+    this.langTestDatabase = langTestDatabase;
   }
 
   /**
@@ -312,7 +314,7 @@ public class AudioFileHelper {
 
   private void makeASRScoring() {
     if (asrScoring == null) {
-      asrScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties()); // lazy eval since reads in the dictionary
+      asrScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase); // lazy eval since reads in the dictionary
     }
   }
 
