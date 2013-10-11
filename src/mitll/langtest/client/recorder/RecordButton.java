@@ -91,6 +91,11 @@ public abstract class RecordButton {
   }
 
   public HandlerRegistration addKeyHandler() {
+    if (keyHandler != null) {  // forget any old ones, so we don't have duplicates
+      removeKeyHandler();
+    }
+    System.out.println("RecordButton.addKeyHandler : adding keyhandler");
+
     keyHandler = Event.addNativePreviewHandler(new
                                            Event.NativePreviewHandler() {
 
@@ -128,7 +133,7 @@ public abstract class RecordButton {
 
   public void removeKeyHandler() {
     if (keyHandler != null) {
-      System.out.println("removing handler for recording " + keyHandler);
+      System.out.println("RecordButton : removing handler for recording " + keyHandler);
       keyHandler.removeHandler();
       keyHandler = null;
     }
