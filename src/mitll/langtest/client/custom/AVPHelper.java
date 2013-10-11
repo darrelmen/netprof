@@ -74,17 +74,19 @@ class AVPHelper extends NPFHelper {
           }
         };
 
-        System.out.println("got here : BootstrapExercisePanel " + bootstrapPanel);
 
-        if (addKeyHandler) bootstrapPanel.addKeyHandler();
+        if (addKeyHandler) {
+          System.out.println("adding key handler to " + bootstrapPanel);
+          bootstrapPanel.addKeyHandler();
+        }
         return bootstrapPanel;
       }
     }, userManager, 1);
   }
 
   @Override
-  protected SimplePanel setupContent(HorizontalPanel hp) {
-    SimplePanel widgets = super.setupContent(hp);
+  protected Panel setupContent(Panel hp) {
+    Panel widgets = super.setupContent(hp);
     float v = Window.getClientWidth() * 0.5f;
     System.out.println("Avp width " + v);
     widgets.setWidth(v + "px");
