@@ -91,7 +91,7 @@ public class ExerciseListLayout {
     if (props.isTeacherView()) {
       leftColumnContainer.add(exerciseList.getWidget());
     } else {
-      leftColumnContainer.addStyleName("inlineStyle");
+      leftColumnContainer.addStyleName("inlineBlockStyle");
       leftColumnContainer.add(exerciseList.getExerciseListOnLeftSide(props));
     }
   }
