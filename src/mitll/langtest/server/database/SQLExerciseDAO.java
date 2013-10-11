@@ -135,11 +135,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
   }
 
   private boolean debug = true;
-  private boolean recordUnitChapterWeek(//int unitIndex, int chapterIndex, int weekIndex,
-                                      //  Row next,
-                                        Exercise imported
-    //, String unitName, String chapterName, String weekName
-  ) {
+  private boolean recordUnitChapterWeek(Exercise imported) {
     String[] split = imported.getID().split("-");
     String unit = split[0];//getCell(next, unitIndex);
     String chapter = split.length > 1 ? split[1] : "";//getCell(next, chapterIndex);
@@ -190,6 +186,13 @@ public class SQLExerciseDAO implements ExerciseDAO {
   private Exercise getExercise(String plan, String exid, JSONObject obj) {
     String content = getContent(obj);
 
+    if (content.contains("<td dir=\"rtl\">")) {
+      content = content.replaceAll("Orientation :","Orientation");
+      content = content.replaceAll("<td width=\"20%\"> &nbsp; </td>","");
+      content = content.replaceAll("td","h2");
+      content = content.replaceAll("br","h2");
+      content += "</h2>";
+    }
     //String tip = "Item #"+exid; // TODO : have more informative tooltip
     String tip = exid; // TODO : have more informative tooltip
     Exercise exercise = new Exercise(plan, exid, content, false, false, tip);
@@ -216,8 +219,8 @@ public class SQLExerciseDAO implements ExerciseDAO {
       logger.warn("no content key in " + obj.keySet());
     } else {
       content = getSrcHTML5WithMediaDir(content,mediaDir);
-
     }
+
     return content;
   }
 
