@@ -456,10 +456,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     HorizontalPanel headerRow = flashcard.makeFlashcardHeaderRow(props.getSplash());
     container.add(headerRow);
+   // container.add(userline = new HTML(getUserText()));
 
     userManager = new UserManager(this, service, true, props);
     this.exerciseList = new ExerciseListLayout(props).makeFlashcardExerciseList(container, service, userManager);
 
+    // setup flash
     makeFlashContainer();
 
     Row flashRow = new FluidRow();
@@ -467,6 +469,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     flashRow.addStyleName("whiteBackground");
     flashRow.add(new Column(1, flashRecordPanel));
 
+    // setup sound manager
     setupSoundManager();
 
     if (!props.isTimedGame()) {
@@ -815,14 +818,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private String getUserText() {
-    String greeting = userManager.getUserID() == null ? "" : ("Hello " + userManager.getUserID());
+    String greeting = getGreeting();
     return "<span><font size=-2>" + greeting + "</font></span>";
+  }
+
+  public String getGreeting() {
+    return userManager.getUserID() == null ? "" : ("Hello " + userManager.getUserID());
   }
 
   /**
    * @see #getLogout()
    */
-  private void resetState() {
+  @Override
+  public void resetState() {
     userManager.clearUser();
     exerciseList.removeCurrentExercise();
     exerciseList.clear();
@@ -884,7 +892,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       flashRecordPanel.initFlash();
     }
     else {
-      System.out.println("checkInitFlash : skip init flash, just checkLogin");
+      boolean gotPermission = flashRecordPanel != null && flashRecordPanel.gotPermission();
+      System.out.println("checkInitFlash : skip init flash, just checkLogin (got permission = " + gotPermission+")");
 
       checkLogin();
     }

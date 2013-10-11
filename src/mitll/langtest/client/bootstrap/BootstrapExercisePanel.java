@@ -1,13 +1,17 @@
 package mitll.langtest.client.bootstrap;
 
 import com.github.gwtbootstrap.client.ui.Column;
+import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.Nav;
+import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.Paragraph;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -55,14 +59,15 @@ import java.util.List;
  */
 public class BootstrapExercisePanel extends FluidContainer {
   private static final int LONG_DELAY_MILLIS = 3500;
-  private static final int DELAY_MILLIS = 1200;//1250;
+  private static final int DELAY_MILLIS = 1000;//1250;
   private static final int DELAY_MILLIS_LONG = 3000;
   public static final String PRONUNCIATION_SCORE = "Pronunciation score ";
+  public static final int DELAY_CHARACTERS = 40;
   private Column scoreFeedbackColumn;
   private static final String FEEDBACK_TIMES_SHOWN = "FeedbackTimesShown";
   public static final int DELAY_MILLIS1 = 300;
   private static final int PERIOD_MILLIS = DELAY_MILLIS1;
-  private static final int MAX_INTRO_FEEBACK_COUNT = 5;
+  private static final int MAX_INTRO_FEEBACK_COUNT = -1;
   private static final int KEY_PRESS = 256;
   private static final int KEY_UP = 512;
   private static final int SPACE_CHAR = 32;
@@ -164,7 +169,8 @@ public class BootstrapExercisePanel extends FluidContainer {
     helpRow.addStyleName("helpPadding");
 
     // add help image on right side of row
-    helpRow.add(getHelpImage(controller));
+  //  helpRow.add(getHelpImage(controller));
+    helpRow.add(getHelp(controller));
     return helpRow;
   }
 
@@ -178,6 +184,30 @@ public class BootstrapExercisePanel extends FluidContainer {
       }
     });
     return image;
+  }
+
+  private Panel getHelp(final ExerciseController controller) {
+    Nav div = new Nav();
+    Dropdown menu = new Dropdown(controller.getGreeting());
+    menu.setIcon(IconType.QUESTION_SIGN);
+    NavLink help = new NavLink("Help");
+    help.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.showFlashHelp();
+      }
+    });
+    menu.add(help);
+    NavLink widget = new NavLink("Log Out");
+    widget.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.resetState();
+      }
+    });
+    menu.add(widget);
+    div.add(menu);
+    return div;
   }
 
   /**
@@ -226,11 +256,13 @@ public class BootstrapExercisePanel extends FluidContainer {
         content = content.replaceAll(markup, "<br></br>");
       }*/
       if (content.contains("<p>"))
-        stimulus = "<h3 style='margin-right: 30px'>" +
-          //  "Debug baby!"+
-          content + "<br>" +
-          qaPair.getQuestion() +
-          "</h3>";
+        stimulus =
+          "<h2 style='margin-right: 30px'>" +
+            content +
+            "</h2>" +
+            "<h2 style='margin-right: 30px'>" +
+            qaPair.getQuestion() +
+            "</h2>";
       HTML html = getHTML(stimulus, true, controller);
       html.addStyleName("cardText");
       html.addStyleName("marginRight");
@@ -243,6 +275,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     // System.out.println("Heading size " + headingSize);
 
     Widget hero = new Heading(headingSize, stimulus);
+    hero.addStyleName("marginRight");
     hero.addStyleName("cardText");
     //   if (true) throw new Exception("Testin!");
     return hero;
@@ -260,12 +293,6 @@ public class BootstrapExercisePanel extends FluidContainer {
     }
 
     html.addStyleName("wrapword");
-  /*  if (getLanguage().equalsIgnoreCase("Pashto")) {
-      html.addStyleName("pashtofont");
-    }
-    else {
-      html.addStyleName("xlargeFont");
-    }*/
     return html;
   }
 
@@ -518,28 +545,29 @@ public class BootstrapExercisePanel extends FluidContainer {
     protected void receivedAudioAnswer(final AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
       boolean correct = result.isCorrect();
       final double score = result.getScore();
-      System.out.println("answer correct = " + correct + " pron score : " + score);
 
       recordButton.setResource(correct ? correctImage : incorrectImage);
       recordButton.setHeight("112px");
 
       String path = exercise.getRefAudio() != null ? exercise.getRefAudio() : exercise.getSlowAudioRef();
       final boolean hasRefAudio = path != null;
+      System.out.println("answer correct = " + correct + " pron score : " + score + " has ref " + hasRefAudio);
 
+      String feedback = "";
       if (result.validity != AudioAnswer.Validity.OK) {
         showPopup(result.validity.getPrompt());
-        nextAfterDelay(correct);
+        nextAfterDelay(correct, "");
       } else if (correct) {
         showCorrectFeedback(score);
       } else {   // incorrect!!
         if (hasRefAudio) {
           ensureMP3(result, score, path, hasRefAudio);
         } else {
-          showIncorrectFeedback(result, score, hasRefAudio);
+          feedback = showIncorrectFeedback(result, score, hasRefAudio);
         }
       }
       if (correct || !hasRefAudio) {
-        nextAfterDelay(correct);
+        nextAfterDelay(correct, feedback);
       }
     }
 
@@ -608,39 +636,45 @@ public class BootstrapExercisePanel extends FluidContainer {
      * @param result
      * @param score
      * @param hasRefAudio
+     * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
      */
-    private void showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio) {
+    private String showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio) {
       showPronScoreFeedback(score);
-
       boolean hasSynonymAudio = !exercise.getSynonymAudioRefs().isEmpty();
+      System.out.println("showIncorrectFeedback : playing " + toPlay + " result " + result + " score " + score + " has ref " + hasRefAudio +
+        " hasSynonymAudio " + hasSynonymAudio);
+
+      String correctPrompt = getCorrectDisplay();
       if (hasRefAudio) {
         if (hasSynonymAudio) {
           toPlay.addAll(exercise.getSynonymAudioRefs());
           System.out.println("showIncorrectFeedback : playing " + toPlay);
-          playAllAudio();
+          playAllAudio(correctPrompt);
         } else {
           String path = exercise.getRefAudio();
           path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
+          final String fcorrectPrompt = correctPrompt;
+
           soundFeedback.createSound(path, new SoundFeedback.EndListener() {
             @Override
             public void songEnded() {
-              goToNextItem();
+              goToNextItem(fcorrectPrompt);
             }
           });
         }
       } else {
         soundFeedback.playIncorrect();
       }
-      String correctPrompt = getCorrectDisplay();
 
       if (isDemoMode) {
         correctPrompt = "Heard: " + result.decodeOutput + "<p>" + correctPrompt;
       }
       recoOutput.setText(correctPrompt);
       DOM.setStyleAttribute(recoOutput.getElement(), "color", "#000000");
+      return correctPrompt;
     }
 
-    private void playAllAudio() {
+    private void playAllAudio(final String infoToShow) {
       String path = toPlay.get(0);
       path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
 
@@ -653,33 +687,35 @@ public class BootstrapExercisePanel extends FluidContainer {
           System.out.println("playAllAudio : songEnded " + toPlay.size() + " items left.");
 
           if (!toPlay.isEmpty()) {
-            playAllAudio();
+            playAllAudio(infoToShow);
           } else {
-            goToNextItem();
+            goToNextItem(infoToShow);
           }
         }
       });
     }
 
-    private void goToNextItem() {
+    private void goToNextItem(String infoToShow) {
       Timer t = new Timer() {
         @Override
         public void run() {
           controller.loadNextExercise(exercise);
         }
       };
-      t.schedule(isDemoMode ? LONG_DELAY_MILLIS : DELAY_MILLIS);
+      int delay = getFeedbackLengthProportionalDelay(infoToShow);
+      System.out.println("goToNextItem : using delay " + delay);
+      t.schedule(isDemoMode ? LONG_DELAY_MILLIS : delay);
     }
 
     private String getCorrectDisplay() {
       String refSentence = exercise.getRefSentence();
-      String translit = exercise.getTranslitSentence().length() > 0 ? " (" + exercise.getTranslitSentence() + ")" : "";
+      String translit = exercise.getTranslitSentence().length() > 0 ? "<br/>(" + exercise.getTranslitSentence() + ")" : "";
 
       if (refSentence == null || refSentence.length() == 0) {
         List<Exercise.QAPair> questions = exercise.getForeignLanguageQuestions();
         refSentence = getAltAnswers(questions);
         List<Exercise.QAPair> eq = exercise.getEnglishQuestions();
-        translit = " (" + getAltAnswers(eq) + " )";
+        translit = "<br/>(" + getAltAnswers(eq) + " )";
       }
       boolean hasSynonyms = !exercise.getSynonymSentences().isEmpty();
       if (hasSynonyms) {
@@ -694,7 +730,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       return "Answer: " + refSentence + (hasSynonyms ? "" : translit);
     }
 
-    private void nextAfterDelay(boolean correct) {
+    private void nextAfterDelay(boolean correct, String feedback) {
       // Schedule the timer to run once in 1 seconds.
       Timer t = new Timer() {
         @Override
@@ -702,13 +738,26 @@ public class BootstrapExercisePanel extends FluidContainer {
           controller.loadNextExercise(exercise);
         }
       };
-      t.schedule(isDemoMode ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : DELAY_MILLIS_LONG);
+      int incorrectDelay = DELAY_MILLIS_LONG;
+      if (!feedback.isEmpty()) {
+        int delay = getFeedbackLengthProportionalDelay(feedback);
+        incorrectDelay += delay;
+
+        System.out.println("nextAfterDelay Delay is " + incorrectDelay + " len " + feedback.length());
+      }
+      t.schedule(isDemoMode ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : incorrectDelay);
     }
 
     @Override
     protected void receivedAudioFailure() {
       recordButton.setResource(enterImage);
     }
+  }
+
+  private int getFeedbackLengthProportionalDelay(String feedback) {
+    int mult1 = feedback.length() / DELAY_CHARACTERS;
+    int mult = Math.max(1, mult1);
+    return mult * BootstrapExercisePanel.DELAY_MILLIS;
   }
 
   private String getAltAnswers(List<Exercise.QAPair> questions) {
