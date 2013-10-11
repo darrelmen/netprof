@@ -244,7 +244,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
 
     // make flashcardCopy button
     Panel twoButtons = new FlowPanel();
-    twoButtons.addStyleName("inlineStyle");
+    twoButtons.addStyleName("inlineBlockStyle");
     twoButtons.add(copyButton);
 
     Button preview = getPreviewButton(timed);
