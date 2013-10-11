@@ -116,6 +116,7 @@ public class BootstrapExercisePanel extends FluidContainer {
 
     add(getHelpRow(controller));
     System.out.println("got here : BootstrapExercisePanel " + this);
+  //  new Exception().printStackTrace();;
     // try {
     //  add(new HTML("Got here"));
     add(getCardPrompt(e, controller));
@@ -126,6 +127,13 @@ public class BootstrapExercisePanel extends FluidContainer {
     addRecordingAndFeedbackWidgets(e, service, controller, addKeyBinding);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
+  }
+
+  @Override
+  public void onBrowserEvent(Event event) {
+    super.onBrowserEvent(event);
+
+    System.out.println("onBrowserEvent : got event " + event + " : " + DOM.eventGetType(event));
   }
 
   /**
@@ -814,7 +822,7 @@ public class BootstrapExercisePanel extends FluidContainer {
 
   public void addKeyHandler() {
     for (MyRecordButtonPanel answers : answerWidgets) {
-      System.out.println("avp adding key handler : " + answers);
+      System.out.println("addKeyHandler : avp adding key handler : " + answers);
 
       answers.addKeyHandler();
     }

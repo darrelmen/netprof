@@ -261,10 +261,12 @@ public class Navigation extends BasicDialog implements RequiresResize {
     FluidContainer container = new FluidContainer();
     contentPanel.clear();
     contentPanel.add(container);
-    contentPanel.addStyleName("fullWidth2");
+   // contentPanel.addStyleName("fullWidth2");
 
     container.getElement().setId("showListContainer");
     container.addStyleName("fullWidth2");
+    DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
+    DOM.setStyleAttribute(container.getElement(), "paddingRight", "2px");
 
     FluidRow child = new FluidRow();
     container.add(child);
@@ -628,8 +630,11 @@ public class Navigation extends BasicDialog implements RequiresResize {
         child.add(new Heading(3, "No lists created yet."));
       } else {
         listScrollPanel = new ScrollPanel();
+        listScrollPanel.getElement().setId("scrollPanel");
+
         setScrollPanelWidth(listScrollPanel);
         final Panel insideScroll = new DivWidget();
+        insideScroll.getElement().setId("insideScroll");
         insideScroll.addStyleName("userListContainer");
         listScrollPanel.add(insideScroll);
         boolean anyAdded = false;
@@ -685,8 +690,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
 
       //FlowPanel fp = new FlowPanel();
       //  Heading nameInfo = new Heading(2, ul.getName());
-      Widget nameInfo = new HTML(ul.getName());
-      nameInfo.addStyleName("userListFont");
+      Widget nameInfo = getUserListText(ul.getName());
       //nameInfo.addStyleName("floatLeft");
       // r1.add(fp);
       //fp.add(nameInfo);
@@ -700,12 +704,21 @@ public class Navigation extends BasicDialog implements RequiresResize {
 /*
         r1 = new FluidRow();
         w.add(r1);
-        r1.add(new Heading(3, "Description : " + ul.getDescription()));*/
-
+        r1.add(new Heading(3, "Description : " + ul.getDescription()));
+        */
+      r1 = new FluidRow();
+      w.add(r1);
+      r1.add(getUserListText2(ul.getDescription()));
   /*      r1 = new FluidRow();
         w.add(r1);
         r1.add(new Heading(3, "Class : " + ul.getClassMarker()));
 */
+      if (!ul.getClassMarker().isEmpty()) {
+        r1 = new FluidRow();
+        w.add(r1);
+        r1.add(getUserListText2(ul.getClassMarker()));
+      }
+
       if (createdByYou(ul)) {
         r1 = new FluidRow();
         w.add(r1);
@@ -714,5 +727,17 @@ public class Navigation extends BasicDialog implements RequiresResize {
       return widgets;
     }
 
+  }
+
+  private Widget getUserListText(String content) {
+    Widget nameInfo = new HTML(content);
+    nameInfo.addStyleName("userListFont");
+    return nameInfo;
+  }
+
+  private Widget getUserListText2(String content) {
+    Widget nameInfo = new HTML(content);
+    nameInfo.addStyleName("userListFont2");
+    return nameInfo;
   }
 }
