@@ -55,7 +55,8 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    */
 	public ASRScorePanel(){
     addStyleName("leftFiveMargin");
-    setWidth("180px");
+    addStyleName("floatRight");
+   // setWidth("180px");
     CaptionPanel chartCaptionPanel = new CaptionPanel("Exercise History");
 
     chartPanel = new SimplePanel();
