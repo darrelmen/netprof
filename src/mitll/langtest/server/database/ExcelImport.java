@@ -43,9 +43,10 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class ExcelImport implements ExerciseDAO {
+  public static final int TESTING_MAX = 500;
   private static Logger logger = Logger.getLogger(ExcelImport.class);
 
-  private static final boolean TESTING = false;
+  private static final boolean TESTING = true;
   private static final boolean SHOW_SKIPS = false;
   private static final int MIN_TABOO_ITEMS = 1;
 
@@ -250,7 +251,7 @@ public class ExcelImport implements ExerciseDAO {
       Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
       for (; iter.hasNext(); ) {
         Row next = iter.next();
-        if (TESTING && id > 300) break;     // TODO make this an adult option
+        if (TESTING && id > TESTING_MAX) break;     // TODO make this an adult option
         //    logger.warn("------------ Row # " + next.getRowNum() + " --------------- ");
         boolean inMergedRow = rowToRange.keySet().contains(next.getRowNum());
 
