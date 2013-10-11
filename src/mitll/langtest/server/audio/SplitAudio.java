@@ -5,6 +5,7 @@ import audio.image.TranscriptReader;
 import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
 import corpus.HTKDictionary;
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.scoring.ASRScoring;
@@ -317,7 +318,7 @@ public class SplitAudio {
 
   protected ASRScoring getAsrScoring(String installPath, HTKDictionary dictionary, Map<String, String> properties) {
     String deployPath = installPath + File.separator + "war";
-    return dictionary == null ? new ASRScoring(deployPath, properties) : new ASRScoring(deployPath, properties, dictionary);
+    return dictionary == null ? new ASRScoring(deployPath, properties, (LangTestDatabaseImpl)null) : new ASRScoring(deployPath, properties, dictionary);
   }
 
   private Map<String, String> getProperties(Properties props) {
