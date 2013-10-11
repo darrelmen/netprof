@@ -28,11 +28,11 @@ public class UserManager {
 
   private static final int WEEK_HOURS = 24 * 7;
   private static final int DAY_HOURS = 24;
-  private static final int ONE_YEAR = 24 * 365;
+  //private static final int ONE_YEAR = 24 * 365;
 
   private static final int EXPIRATION_HOURS = WEEK_HOURS;
   private static final int SHORT_EXPIRATION_HOURS = DAY_HOURS;
-  private static final int FOREVER_HOURS = ONE_YEAR;
+//  private static final int FOREVER_HOURS = ONE_YEAR;
 
   private static final int NO_USER_SET = -1;
 
@@ -49,7 +49,6 @@ public class UserManager {
   private String userChosenID = "";
 
   private final PropertyHandler.LOGIN_TYPE loginType;
-  private final boolean isFlashcard;
   private final String appTitle;
   private final boolean trackUsers;
   private final PropertyHandler props;
@@ -69,21 +68,25 @@ public class UserManager {
     this.langTest = lt;
     this.service = service;
     this.props = props;
-    this.isFlashcard = isFlashcard;
     this.loginType = props.getLoginType();
     this.appTitle = props.getAppTitle();
     this.trackUsers = props.isTrackUsers();
   }
 
   public void checkLogin() {
+    System.out.println("loginType " + loginType);
     if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
       anonymousLogin();
     } else if (loginType.equals(PropertyHandler.LOGIN_TYPE.UNDEFINED) && // no explicit setting, so it's dependent on the mode
-      (props.isGoodwaveMode() || props.isAutocrt() || (props.isFlashcardTeacherView() && !props.isFlashCard()))) {   // no login for pron mode
+      (props.isGoodwaveMode() || props.isAutocrt() || isInitialFlashcardTeacherView())) {   // no login for pron mode
       anonymousLogin();
     } else {
       loginDifferentTypes();
     }
+  }
+
+  private boolean isInitialFlashcardTeacherView() {
+    return (props.isFlashcardTeacherView() && !props.isFlashCard());
   }
 
   /**
@@ -193,7 +196,6 @@ public class UserManager {
   private long getUserSessionDuration() {
     boolean useShortExpiration = loginType.equals(PropertyHandler.LOGIN_TYPE.STUDENT);
     return HOUR_IN_MILLIS * (
-      isFlashcard ? FOREVER_HOURS :
       (useShortExpiration ? SHORT_EXPIRATION_HOURS : EXPIRATION_HOURS));
   }
 
@@ -203,20 +205,19 @@ public class UserManager {
   private void login() {
     int user = getUser();
     if (user != NO_USER_SET) {
-      System.out.println("UserManager.login : user : " + user);
+      System.out.println("UserManager.login : current user : " + user);
       rememberAudioType();
       langTest.gotUser(user);
     }
-    else if (isFlashcard) {
+/*    else if (isFlashcard) {
       System.out.println("UserManager.login : adding anonymous user");
       addAnonymousUser();
-    }
+    }*/
     else {
-      StudentDialog studentDialog = new StudentDialog(service,props,this);
+      StudentDialog studentDialog = new StudentDialog(service,props,this, langTest);
       studentDialog.displayLoginBox();
     }
   }
-
 
   /**
    * @see mitll.langtest.client.LangTest#checkLogin
@@ -224,18 +225,20 @@ public class UserManager {
   private void anonymousLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
-      System.out.println("UserManager.anonymousLogin : user : " + user);
+      System.out.println("UserManager.anonymousLogin : current user : " + user);
       rememberAudioType();
       langTest.gotUser(user);
     }
     else {
+      System.out.println("UserManager.anonymousLogin : make new user, since user = " + user);
+
       addAnonymousUser();
     }
   }
 
   private void addAnonymousUser() {
-    StudentDialog studentDialog = new StudentDialog(service,props,this);
-    studentDialog.addUser(89, "male", 0);
+    StudentDialog studentDialog = new StudentDialog(service,props,this,langTest);
+    studentDialog.addUser(89, "male", 0,"");
   }
 
   /**
@@ -439,7 +442,7 @@ public class UserManager {
    * @see DataCollectorDialog#displayTeacherLogin
    */
   void storeUser(long sessionID, String audioType, String userChosenID, PropertyHandler.LOGIN_TYPE userType) {
-    //System.out.println("storeUser : user now " + sessionID);
+    System.out.println("storeUser : user now " + sessionID + " audio type '" + audioType +"'");
     final long DURATION = getUserSessionDuration();
     long futureMoment = getUserSessionEnd(DURATION);
     if (useCookie) {
@@ -453,7 +456,7 @@ public class UserManager {
       rememberUserSessionEnd(localStorageIfSupported, futureMoment);
       localStorageIfSupported.setItem(getAudioType(), "" + audioType);
       localStorageIfSupported.setItem(getLoginType(), "" + userType);
-      System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " expires in " + (DURATION/1000) + " seconds");
+      System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " audio '" + audioType+"' expires in " + (DURATION/1000) + " seconds");
     } else {
       userID = sessionID;
       this.userChosenID = userChosenID;
