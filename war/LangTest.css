@@ -217,6 +217,10 @@ h1 {
     display: inline-block;
 }
 
+.realInlineStyle {
+    display: inline;
+}
+
 .buttonMargin {
     margin-right: 3px;
 }
@@ -290,6 +294,10 @@ fieldset {
 
 .leftFifteenPercentMargin {
     margin-left: 15%;
+}
+
+.dialogExpandedTopMargin {
+    margin-top: -70px;
 }
 
 .topMargin {
