@@ -105,7 +105,7 @@ public class Exercise extends ExerciseShell  {
   public Exercise(String plan, String id, String content, boolean promptInEnglish, boolean recordAudio, String tooltip) {
     super(id,tooltip);
     this.plan = plan;
-    this.content = content;
+    this.setContent(content);
     this.setType(recordAudio ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE);
     this.promptInEnglish = promptInEnglish;
   }
@@ -123,7 +123,7 @@ public class Exercise extends ExerciseShell  {
     super(id,tooltip);
 
     this.plan = plan;
-    this.content = content;
+    this.setContent(content);
     this.refAudio = audioRef;
     this.refSentences.add(sentenceRef);
     this.setType(EXERCISE_TYPE.REPEAT);
@@ -133,7 +133,7 @@ public class Exercise extends ExerciseShell  {
     super(id,tooltip);
 
     this.plan = plan;
-    this.content = content;
+    this.setContent(content);
     this.refSentences = sentenceRefs;
     this.setType(EXERCISE_TYPE.RECORD);
   }
@@ -328,6 +328,11 @@ public class Exercise extends ExerciseShell  {
 
   public void setSegmented(String segmented) {
     this.segmented = segmented;
+  }
+
+
+  public void setContent(String content) {
+    this.content = content;
   }
 
   public String toString() {
