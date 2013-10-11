@@ -111,7 +111,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void onFailure(Throwable caught) {
         if (caught instanceof IncompatibleRemoteServiceException) {
           Window.alert("This application has recently been updated.\nPlease refresh this page, or restart your browser." +
-            "\nIf you still see this message, clear your cache. (" +caught.getMessage()+
+            "\nIf you still see this message, clear your cache. (" + caught.getMessage() +
             ")");
         } else {
           long now = System.currentTimeMillis();
@@ -368,7 +368,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else if (isStudent || props.isAdminView() || props.isDataCollectMode()) {
       FluidRow adminRow = new FluidRow();
       adminRow.addStyleName("alignCenter");
-      adminRow.addStyleName("inlineStyle");
+      adminRow.addStyleName("inlineBlockStyle");
 
       this.userline.setHTML(getUserText());
       if (props.isAdminView()) {
@@ -422,7 +422,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Widget getTitleWidget() {
     FluidRow titleRow = new FluidRow();
     titleRow.addStyleName("alignCenter");
-    titleRow.addStyleName("inlineStyle");
+    titleRow.addStyleName("inlineBlockStyle");
     Heading pageTitle = new Heading(2, props.getAppTitle());
 
     titleRow.add(pageTitle);
