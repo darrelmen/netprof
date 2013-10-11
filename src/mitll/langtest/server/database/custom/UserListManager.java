@@ -82,7 +82,7 @@ public class UserListManager {
     }
 
     if (listsForUser.isEmpty()) {
-      UserList userList = createUserList(userid, MY_LIST, "Default list", "Choose a class", true);
+      UserList userList = createUserList(userid, MY_LIST, "My Favorites", "", true);
       if (userList == null) return Collections.emptyList();
       else return Collections.singletonList(userList);
     }
