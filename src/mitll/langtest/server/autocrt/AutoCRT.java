@@ -43,7 +43,7 @@ public class AutoCRT {
   private double minPronScore;
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#makeAutoCRT()
+   * @see mitll.langtest.server.audio.AudioFileHelper#makeAutoCRT
    * @param exporter
    * @param db
    * @param installPath
@@ -72,13 +72,15 @@ public class AutoCRT {
                                      AudioAnswer answer) {
     Collection<String> exportedAnswers = getExportedAnswers(exerciseID, questionID);
     exportedAnswers = db.getValidPhrases(exportedAnswers);
-    logger.info("got answers " + exportedAnswers.size());
+    logger.info("getAutoCRTDecodeOutput : got answers, num = " + exportedAnswers.size());
 
     PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, exportedAnswers);
 
     String recoSentence = asrScoreForAudio.getRecoSentence();
     logger.info("reco sentence was '" + recoSentence + "', score " + asrScoreForAudio.getHydecScore());
-    if (recoSentence.equals(SmallVocabDecoder.UNKNOWN_MODEL) || asrScoreForAudio.getHydecScore() < MIN_CRT_SCORE) {
+    boolean lowPronScore = asrScoreForAudio.getHydecScore() < minPronScore;
+    if (recoSentence.equals(SmallVocabDecoder.UNKNOWN_MODEL) || lowPronScore) {
+      if (lowPronScore) logger.info("\t-----------> rejecting result since score too low");
       answer.setDecodeOutput("Unexpected word.");
       answer.setScore(0d);
     } else {
