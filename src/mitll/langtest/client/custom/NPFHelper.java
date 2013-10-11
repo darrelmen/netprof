@@ -3,6 +3,7 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -81,11 +82,15 @@ public class NPFHelper implements RequiresResize {
 
   private SimplePanel npfContentPanel;
   private Panel doNPF(UserList ul, String instanceName) {
-    HorizontalPanel hp = new HorizontalPanel();
+    Panel hp = new HorizontalPanel();
+   // Panel hp = new FlowPanel();
     SimplePanel left = new SimplePanel();
     hp.add(left);
+    left.addStyleName("floatLeft");
     npfContentPanel = new SimplePanel();
-    npfExerciseList = makeNPFExerciseList(getNpfContentPanel(),instanceName);
+    hp.add(npfContentPanel);
+    npfContentPanel.addStyleName("floatRight");
+    npfExerciseList = makeNPFExerciseList(npfContentPanel,instanceName);
 
     left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
     rememberAndLoadFirst(ul);
@@ -93,10 +98,10 @@ public class NPFHelper implements RequiresResize {
     return hp;
   }
 
-  protected SimplePanel setupContent(HorizontalPanel hp) {
-    hp.add(getNpfContentPanel());
-    getNpfContentPanel().addStyleName("greenBackground");
-    getNpfContentPanel().addStyleName("userNPFContent");
+  protected Panel setupContent(Panel hp) {
+    //hp.add(npfContentPanel);
+   /* npfContentPanel.addStyleName("greenBackground");
+    npfContentPanel.addStyleName("userNPFContent");*/
     return npfContentPanel;
   }
 
@@ -125,13 +130,21 @@ public class NPFHelper implements RequiresResize {
     }, userManager, 1);
   }
 
-  public SimplePanel getNpfContentPanel() {
+  /**
+   * @see #doNPF(mitll.langtest.shared.custom.UserList, String)
+   * @return
+   */
+  protected SimplePanel getNpfContentPanel() {
     return npfContentPanel;
   }
 
   @Override
   public void onResize() {
-    if (npfContentPanel != null) npfContentPanel.setWidth(((Window.getClientWidth() * 0.7f) - 100)  + "px");
+    if (npfContentPanel != null) {
+      float v = (Window.getClientWidth() * 0.8f) - 100;
+      System.out.println("content width is " + v);
+    //  npfContentPanel.setWidth(v + "px");
+    }
   }
 
   public void removeKeyHandler() {
