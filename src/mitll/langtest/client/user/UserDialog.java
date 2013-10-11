@@ -1,28 +1,42 @@
 package mitll.langtest.client.user;
 
+import com.github.gwtbootstrap.client.ui.Accordion;
+import com.github.gwtbootstrap.client.ui.AccordionGroup;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.ControlLabel;
+import com.github.gwtbootstrap.client.ui.Controls;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.Popover;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.BackdropType;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DisclosurePanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
@@ -55,9 +69,9 @@ public class UserDialog {
     "16+ months",
     "Native speaker");
   protected static final int NATIVE_MONTHS = 20 * 12;
+  public static final double MAX_HEIGHT = 0.95;
   protected final PropertyHandler props;
 
-  protected DisclosurePanel dp;
   protected final LangTestDatabaseAsync service;
 
   public UserDialog(LangTestDatabaseAsync service, PropertyHandler props) {
@@ -68,6 +82,7 @@ public class UserDialog {
   /**
    * From Modal code.
    * Centers fixed positioned element vertically.
+   *
    * @param e Element to center vertically
    */
   protected native void centerVertically(Element e) /*-{
@@ -84,12 +99,123 @@ public class UserDialog {
     return i;
   }
 
-  protected Modal getDialog() {
+  protected Modal getDialog(String title) {
     final Modal dialogBox = new Modal();
+    dialogBox.setTitle(title);
     dialogBox.setCloseVisible(false);
     dialogBox.setKeyboard(false);
     dialogBox.setBackdrop(BackdropType.STATIC);
     return dialogBox;
+  }
+
+
+  protected AccordionGroup getAccordion(final Modal dialogBox, Panel register) {
+    Accordion dp = new Accordion();
+    AccordionGroup accordionGroup = new AccordionGroup();
+    accordionGroup.setHeading("Registration");
+    accordionGroup.add(register);
+    dp.add(accordionGroup);
+    dialogBox.add(dp);
+/*    accordionGroup.add(new OpenHandler<DisclosurePanel>() {
+      @Override
+      public void onOpen(OpenEvent<DisclosurePanel> event) {
+        dialogBox.setHeight("750px");
+  *//*      dialogBox.setMaxHeigth(Window.getClientHeight() * MAX_HEIGHT + "px");
+        centerVertically(dialogBox.getElement()); // need to resize the dialog when reveal hidden widgets
+*//*
+        //dialogBox.setMaxHeigth((Window.getClientHeight() * MAX_HEIGHT) + "px");
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+          public void execute() {
+            System.out.println("1   centering vertically... " + dialogBox.getOffsetHeight());
+            //dialogBox.setHeight("750px");
+            //   dialogBox.setMaxHeigth(Window.getClientHeight() * MAX_HEIGHT + "px");
+            //      centerVertically(dialogBox.getElement()); // need to resize the dialog when reveal hidden widgets
+          }
+        });
+
+
+      }
+    });
+
+    dp.addCloseHandler(new CloseHandler<DisclosurePanel>() {
+      @Override
+      public void onClose(CloseEvent<DisclosurePanel> event) {
+        dialogBox.setHeight("481px");
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+          public void execute() {
+            System.out.println("2  centering vertically...");
+//            dialogBox.setHeight("481px");
+
+            //    centerVertically(dialogBox.getElement()); // need to resize the dialog when reveal hidden widgets
+          }
+        });
+      }
+    });*/
+    return accordionGroup;
+  }
+
+  protected DisclosurePanel getDisclosurePanel(final Modal dialogBox, Panel register) {
+    DisclosurePanel dp = new DisclosurePanel("Registration");
+    dp.setContent(register);
+    dp.addOpenHandler(new OpenHandler<DisclosurePanel>() {
+      @Override
+      public void onOpen(OpenEvent<DisclosurePanel> event) {
+        dialogBox.setHeight("750px");
+  /*      dialogBox.setMaxHeigth(Window.getClientHeight() * MAX_HEIGHT + "px");
+        centerVertically(dialogBox.getElement()); // need to resize the dialog when reveal hidden widgets
+*/
+        //dialogBox.setMaxHeigth((Window.getClientHeight() * MAX_HEIGHT) + "px");
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+          public void execute() {
+            System.out.println("1   centering vertically... " + dialogBox.getOffsetHeight());
+            //dialogBox.setHeight("750px");
+            //   dialogBox.setMaxHeigth(Window.getClientHeight() * MAX_HEIGHT + "px");
+      //      centerVertically(dialogBox.getElement()); // need to resize the dialog when reveal hidden widgets
+          }
+        });
+
+
+      }
+    });
+
+    dp.addCloseHandler(new CloseHandler<DisclosurePanel>() {
+      @Override
+      public void onClose(CloseEvent<DisclosurePanel> event) {
+        dialogBox.setHeight("481px");
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+          public void execute() {
+            System.out.println("2  centering vertically...");
+//            dialogBox.setHeight("481px");
+
+            //    centerVertically(dialogBox.getElement()); // need to resize the dialog when reveal hidden widgets
+          }
+        });
+      }
+    });
+    return dp;
+  }
+
+  protected Widget addRegistrationPrompt(Panel dialogBox) {
+    HTML child = new HTML("<i>New users : click on Registration below and fill in the fields.</i>");
+    dialogBox.add(child);
+    return child;
+  }
+
+  protected Button addLoginButton(Modal dialogBox) {
+    FlowPanel hp = new FlowPanel();
+    hp.getElement().getStyle().setFloat(Style.Float.RIGHT);
+    final Button login = new Button("Login");
+    login.setType(ButtonType.PRIMARY);
+    login.setEnabled(true);
+    login.setTitle("Hit enter to log in.");
+    // We can set the id of a widget by accessing its Element
+    login.getElement().setId("login");
+    hp.add(login);
+
+    dialogBox.add(hp);
+    return login;
   }
 
   protected static class FormField {
@@ -110,7 +236,9 @@ public class UserDialog {
       this.group = group;
     }
 
-    public String getText() { return box.getText(); }
+    public String getText() {
+      return box.getText();
+    }
   }
 
   protected FormField addControlFormField(Panel dialogBox, String label) {
@@ -129,15 +257,19 @@ public class UserDialog {
   }
 
   protected ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
-    /*final ControlGroup userGroup = */addControlGroupEntry(dialogBox, label, user);
+    /*final ControlGroup userGroup = */
+    addControlGroupEntry(dialogBox, label, user);
     return new ListBoxFormField(user);
   }
 
   private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
+
+    Controls controls = new Controls();
     userGroup.add(new ControlLabel(label));
-    userGroup.add(user);
+    controls.add(user);
+    userGroup.add(controls);
 
     dialogBox.add(userGroup);
     return userGroup;
@@ -154,7 +286,9 @@ public class UserDialog {
       return box.getItemText(box.getSelectedIndex());
     }
 
-    public String toString() { return "Box: "+ getValue(); }
+    public String toString() {
+      return "Box: " + getValue();
+    }
   }
 
   protected void markError(FormField dialectGroup, String message) {
