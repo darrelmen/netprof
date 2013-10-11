@@ -22,6 +22,7 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
+import com.google.gwt.media.client.Audio;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.DOM;
@@ -61,12 +62,11 @@ public class BootstrapExercisePanel extends FluidContainer {
   private static final int LONG_DELAY_MILLIS = 3500;
   private static final int DELAY_MILLIS = 1000;//1250;
   private static final int DELAY_MILLIS_LONG = 3000;
-  public static final String PRONUNCIATION_SCORE = "Pronunciation score ";
-  public static final int DELAY_CHARACTERS = 40;
-  private Column scoreFeedbackColumn;
+  private static final String PRONUNCIATION_SCORE = "Pronunciation score ";
+  private static final int DELAY_CHARACTERS = 40;
+  private static final String LISTEN_TO_THIS_AUDIO = "Listen to this audio";
   private static final String FEEDBACK_TIMES_SHOWN = "FeedbackTimesShown";
-  public static final int DELAY_MILLIS1 = 300;
-  private static final int PERIOD_MILLIS = DELAY_MILLIS1;
+  private static final int PERIOD_MILLIS = 300;
   private static final int MAX_INTRO_FEEBACK_COUNT = -1;
   private static final int KEY_PRESS = 256;
   private static final int KEY_UP = 512;
@@ -75,6 +75,7 @@ public class BootstrapExercisePanel extends FluidContainer {
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
 
+  private Column scoreFeedbackColumn;
   private List<MyRecordButtonPanel> answerWidgets = new ArrayList<MyRecordButtonPanel>();
   private Storage stockStore = null;
 
@@ -84,7 +85,7 @@ public class BootstrapExercisePanel extends FluidContainer {
   public Image correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
   public Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
   private Image enterImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "blueSpaceBar.png"));//"space48_2.png"));
-  private static final String HELP_IMAGE = LangTest.LANGTEST_IMAGES + "/helpIconBlue.png";
+  //private static final String HELP_IMAGE = LangTest.LANGTEST_IMAGES + "/helpIconBlue.png";
   public static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>";
 
   private Heading recoOutput;
@@ -114,14 +115,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     soundFeedback = new SoundFeedback(controller.getSoundManager(), warnNoFlash);
 
     add(getHelpRow(controller));
-    // Window.alert("got here : BootstrapExercisePanel ");
-    // try {
-    //  add(new HTML("Got here"));
     add(getCardPrompt(e, controller));
- /*   } catch (Exception e1) {
-      Window.alert("got " +e1);
-    }*/
-
     addRecordingAndFeedbackWidgets(e, service, controller);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
@@ -169,21 +163,8 @@ public class BootstrapExercisePanel extends FluidContainer {
     helpRow.addStyleName("helpPadding");
 
     // add help image on right side of row
-  //  helpRow.add(getHelpImage(controller));
     helpRow.add(getHelp(controller));
     return helpRow;
-  }
-
-  private Image getHelpImage(final ExerciseController controller) {
-    Image image = new Image(HELP_IMAGE);
-
-    image.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.showFlashHelp();
-      }
-    });
-    return image;
   }
 
   private Panel getHelp(final ExerciseController controller) {
@@ -217,7 +198,7 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param e
    * @return
    */
-  private Widget getCardPrompt(Exercise e, ExerciseController controller)/* throws Exception*/ {
+  private Widget getCardPrompt(Exercise e, ExerciseController controller) {
     FluidRow questionRow = new FluidRow();
     Widget questionContent = getQuestionContent(e, controller);
     Column contentContainer = new Column(12, questionContent);
@@ -225,60 +206,89 @@ public class BootstrapExercisePanel extends FluidContainer {
     return questionRow;
   }
 
-  private Widget getQuestionContent(Exercise e, ExerciseController controller) /*throws Exception*/ {
+  private Widget getQuestionContent(Exercise e, ExerciseController controller) {
     int headingSize = 1;
     String stimulus = e.getEnglishSentence();
-    //    String markup = "<p>\\W&nbsp; </p>";
-    //    Window.alert("doing getQuestionContent");
-    //String stimulus;
     String content = e.getContent();
+
     if (content == null) {
       content = stimulus;
     } else {
       stimulus = content;
-      //   System.err.println("before " + content);
-      //   content = content.replaceAll("<p>","<br>");
-      //   content = content.replaceAll("</p>","</br>");
-      // if (content.contains(markup)) {
-      //  System.out.println("getQuestionContent : removing " + markup);
-      //   content = content.replaceAll(markup, "<br></br>");
-      // }
     }
 
-    //System.out.println("stim " + stimulus);
-    //stimulus += "nullStim_Initially";
-    //  headingSize = 4;
-    //  String content = e.getContent();
     if (content != null) {
       Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
-   /*   if (content.contains(markup)) {
-        System.out.println("getQuestionContent : removing " + markup);
-        content = content.replaceAll(markup, "<br></br>");
-      }*/
-      if (content.contains("<p>"))
+  /*    if (content.contains("<p>") && false)
         stimulus =
           "<h2 style='margin-right: 30px'>" +
             content +
             "</h2>" +
             "<h2 style='margin-right: 30px'>" +
             qaPair.getQuestion() +
-            "</h2>";
-      HTML html = getHTML(stimulus, true, controller);
-      html.addStyleName("cardText");
-      html.addStyleName("marginRight");
+            "</h2>";*/
 
-      return html;
+      content = content.replaceAll("<p> &nbsp; </p>", "");
+      String splitTerm = LISTEN_TO_THIS_AUDIO;
+      String[] split = content.split(splitTerm);
+      String prefix = split[0];
+      HTML contentPrefix = getHTML(prefix, true, controller);
+      contentPrefix.addStyleName("marginRight");
+
+      Panel container = new FlowPanel();
+      container.add(contentPrefix);
+
+      // Todo : this is vulnerable to a variety of issues.
+      if (e.getRefAudio() != null && e.getRefAudio().length() > 0) {
+        Panel container2 = new FlowPanel();
+        HTML prompt = getHTML("<h3 style='margin-right: 30px'>" + splitTerm + "</h3>", true, controller);
+        container2.add(prompt);
+        SimplePanel simplePanel = new SimplePanel();
+        simplePanel.add(getAudioWidget(e));
+        container2.add(simplePanel);
+
+        String suffix = split[1];
+        HTML contentSuffix = getHTML("<br/>" + // TODO: br is a hack
+          "<h3 style='margin-right: 30px'>" + suffix + "</h3>", true, controller);
+        contentSuffix.addStyleName("marginRight");
+        container2.add(contentSuffix);
+        container2.addStyleName("rightAlign");
+        container.add(container2);
+      }
+
+      container.add(getHTML("<h2 style='margin-right: 30px'>" + qaPair.getQuestion() + "</h2>", true, controller));
+
+      return container;
+    } else {
+      Widget hero = new Heading(headingSize, stimulus);
+      hero.addStyleName("marginRight");
+      return hero;
     }
+  }
 
-    // if (stimulus == null) stimulus = "Blank for exercise #" +e.getID();
+  private Widget getAudioWidget(Exercise e) {
+    String refAudio = e.getRefAudio();
+    String type = refAudio.substring(refAudio.length() - 3);
 
-    // System.out.println("Heading size " + headingSize);
+    final Audio audio = getAudioNoFocus(refAudio, type);
+    audio.addStyleName("floatRight");
+    audio.addStyleName("rightMargin");
 
-    Widget hero = new Heading(headingSize, stimulus);
-    hero.addStyleName("marginRight");
-    hero.addStyleName("cardText");
-    //   if (true) throw new Exception("Testin!");
-    return hero;
+    return audio;
+  }
+
+  private Audio getAudioNoFocus(String refAudio, String type) {
+    final Audio audio = Audio.createIfSupported();
+    audio.setControls(true);
+    audio.addSource(refAudio, "audio/" + type);
+    audio.addSource(refAudio.replace(".mp3", ".ogg"), "audio/ogg");
+    audio.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        audio.setFocus(false);
+      }
+    });
+    return audio;
   }
 
   private HTML getHTML(String content, boolean requireAlignment, ExerciseController controller) {
@@ -384,7 +394,6 @@ public class BootstrapExercisePanel extends FluidContainer {
    */
   public void grabFocus() {
     for (MyRecordButtonPanel widget : answerWidgets) {
-      //System.out.println("Grab focus!!!");
       widget.getRecordButton().setFocus(true);
     }
   }
@@ -526,7 +535,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       onUnload();
     }
 
-    int numMP3s = 0;
+    private int numMP3s = 0;
 
     /**
      * Deal with three cases: <br></br>
