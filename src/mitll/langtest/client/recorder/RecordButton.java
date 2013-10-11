@@ -97,9 +97,10 @@ public abstract class RecordButton {
                                                NativeEvent ne = event.getNativeEvent();
                                                if (ne.getKeyCode() == SPACE_CHAR &&
                                                  event.getTypeInt() == 512 &&
-                                                 "[object KeyboardEvent]".equals(ne.getString()) &&
-                                                 !hasFocus) {
+                                                 "[object KeyboardEvent]".equals(ne.getString())/* &&
+                                                 !hasFocus*/) {
                                                  ne.preventDefault();
+                                                 ne.stopPropagation();
 /*                                                         System.out.println(new Date() + " : Click handler : Got " + event + " type int " +
                                                              event.getTypeInt() + " assoc " + event.getAssociatedType() +
                                                              " native " + event.getNativeEvent() + " source " + event.getSource());*/
