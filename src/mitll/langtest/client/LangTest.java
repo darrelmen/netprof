@@ -472,13 +472,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // setup sound manager
     setupSoundManager();
 
-    if (!props.isTimedGame()) {
+/*    if (!props.isTimedGame()) {
       showHelpNewUser();
-    }
+    }*/
 
     modeSelect();
   }
 
+  /**
+   * @see #doFlashcard()
+   */
   private void showHelpNewUser() {
     Storage stockStore = Storage.getLocalStorageIfSupported();
     boolean showedHelpAlready = false;
