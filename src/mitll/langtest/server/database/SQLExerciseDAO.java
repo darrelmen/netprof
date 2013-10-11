@@ -1,11 +1,13 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.database.testing.SmallDatabaseImpl;
 import mitll.langtest.shared.Exercise;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Clob;
@@ -102,7 +104,6 @@ public class SQLExerciseDAO implements ExerciseDAO {
         if (content.startsWith("{")) {
           JSONObject obj = JSONObject.fromObject(content);
           Exercise e = getExercise(plan, exid, obj);
-       //   logger.debug("Got " + e);
           if (e == null) {
             logger.warn("couldn't find exercise for plan '" + plan + "'");
           } else if (e.getID() == null) {
@@ -184,18 +185,16 @@ public class SQLExerciseDAO implements ExerciseDAO {
    * @return Exercise from the json
    */
   private Exercise getExercise(String plan, String exid, JSONObject obj) {
-    String content = getContent(obj);
 
-    if (content.contains("<td dir=\"rtl\">")) {
-      content = content.replaceAll("Orientation :","Orientation");
-      content = content.replaceAll("<td width=\"20%\"> &nbsp; </td>","");
-      content = content.replaceAll("td","h2");
-      content = content.replaceAll("br","h2");
-      content += "</h2>";
-    }
     //String tip = "Item #"+exid; // TODO : have more informative tooltip
     String tip = exid; // TODO : have more informative tooltip
-    Exercise exercise = new Exercise(plan, exid, content, false, false, tip);
+    Exercise exercise = new Exercise(plan, exid, "", false, false, tip);
+
+    String content = getContent(obj,exercise);
+
+    content = convertTableMarkup(content);
+    exercise.setContent(content);
+
     Object qa1 = obj.get("qa");
     if (qa1 == null) {
       logger.warn("no qa key in " + obj.keySet());
@@ -203,6 +202,17 @@ public class SQLExerciseDAO implements ExerciseDAO {
     Collection<JSONObject> qa = JSONArray.toCollection((JSONArray) qa1, JSONObject.class);
     addQuestions(exercise, qa);
     return exercise;
+  }
+
+  private String convertTableMarkup(String content) {
+    if (content.contains("<td dir=\"rtl\">")) {
+      content = content.replaceAll("Orientation :","Orientation");
+      content = content.replaceAll("<td width=\"20%\"> &nbsp; </td>","");
+      content = content.replaceAll("td","h3");
+      content = content.replaceAll("br","h3");
+      content += "</h3>";
+    }
+    return content;
   }
 
   /**
@@ -213,12 +223,38 @@ public class SQLExerciseDAO implements ExerciseDAO {
    * @param obj json to get content from
    * @return content with media paths set
    */
-  private String getContent(JSONObject obj) {
+  private String getContent(JSONObject obj, Exercise exercise) {
     String content = (String) obj.get("content");
     if (content == null) {
       logger.warn("no content key in " + obj.keySet());
     } else {
       content = getSrcHTML5WithMediaDir(content,mediaDir);
+      if (content.contains("<audio")) {
+        String[] split = content.split("<audio");
+        String before = split[0];
+        String after = split[1];
+
+       // logger.debug("before " + before);
+     //   logger.debug("after " + after);
+        String[] split1 = after.split("</audio>");
+        String audioTag = split1[0];
+        String afterContent = split1.length > 1 ? split1[1] : "";
+
+      //  logger.debug("audioTag " + audioTag);
+
+        String[] split2 = audioTag.split("src=\"");
+
+        String audioPathOrig = split2[1];
+     //   logger.debug("audioPathOrig " + audioPathOrig);
+
+        String audioPath = audioPathOrig.split("mp3")[0];
+        exercise.setRefAudio(audioPath + "mp3");
+
+
+        content = before + /*newStuff + */afterContent;
+/*        System.out.println("Content " + content);
+        System.out.println("ref audio " + exercise.getRefAudio());*/
+      }
     }
 
     return content;
@@ -255,7 +291,6 @@ public class SQLExerciseDAO implements ExerciseDAO {
     return b.toString();
   }
 
-/*
   private static String getConfigDir(String language) {
     String installPath = ".";
     String dariConfig = File.separator +
@@ -267,23 +302,23 @@ public class SQLExerciseDAO implements ExerciseDAO {
       File.separator;
     return installPath + dariConfig;
   }
-*/
 
-/*  public static void main(String [] arg) {
+  public static void main(String [] arg) {
 
 
-*//*    final String configDir = getConfigDir("MSA");
+   // final String configDir = getConfigDir("pilot");
 
-    DatabaseImpl unitAndChapter = new DatabaseImpl(
+/*    DatabaseImpl unitAndChapter = new DatabaseImpl(
       configDir,
       "arabicText",
       configDir +
-        spreadsheet);*//*
+        spreadsheet);*/
 
-    SQLExerciseDAO sqlExerciseDAO = new SQLExerciseDAO(new SmallDatabaseImpl("war/config/pilot/arabicText"), "config" +
+    SQLExerciseDAO sqlExerciseDAO = new SQLExerciseDAO(new SmallDatabaseImpl("war/config/pilot/avpDemo"), "config" +
       File.separator +
-      "media");
-    Exercise next = sqlExerciseDAO.getRawExercises().iterator().next();
+      "pilot");
+    List<Exercise> rawExercises = sqlExerciseDAO.getRawExercises();
+    Exercise next = rawExercises.iterator().next();
     System.out.println("First is " +next + " content " + next.getContent());
-  }*/
+  }
 }
