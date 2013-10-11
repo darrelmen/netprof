@@ -126,7 +126,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  private void logAndNotifyServerException(Exception e) {
+  public void logAndNotifyServerException(Exception e) {
     String message = "Server Exception : " + ExceptionUtils.getStackTrace(e);
     String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
     logger.debug(prefixedMessage);
@@ -1026,7 +1026,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     this.pathHelper = new PathHelper(getServletContext());
     readProperties(getServletContext());
     setInstallPath(serverProps.getUseFile(), db);
-    audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db);
+    audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this);
     new RecoTest(this,serverProps,pathHelper,audioFileHelper);
   }
 
