@@ -78,4 +78,8 @@ public interface ExerciseController {
   PropertyHandler getProps();
 
   String logException(Throwable throwable);
+
+  String getGreeting();
+
+  void resetState();
 }
