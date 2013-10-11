@@ -15,8 +15,11 @@ import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
+import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
+import com.github.gwtbootstrap.client.ui.event.ShownEvent;
+import com.github.gwtbootstrap.client.ui.event.ShownHandler;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -30,13 +33,11 @@ import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
@@ -69,7 +70,6 @@ public class UserDialog {
     "16+ months",
     "Native speaker");
   protected static final int NATIVE_MONTHS = 20 * 12;
-  public static final double MAX_HEIGHT = 0.95;
   protected final PropertyHandler props;
 
   protected final LangTestDatabaseAsync service;
@@ -83,11 +83,11 @@ public class UserDialog {
    * From Modal code.
    * Centers fixed positioned element vertically.
    *
-   * @param e Element to center vertically
+   * @paramx e Element to center vertically
    */
-  protected native void centerVertically(Element e) /*-{
+/*  protected native void centerVertically(Element e) *//*-{
       $wnd.jQuery(e).css("margin-top", (-1 * $wnd.jQuery(e).outerHeight() / 2) + "px");
-  }-*/;
+  }-*//*;*/
 
   protected int getAge(TextBox ageEntryBox) {
     int i = 0;
@@ -110,51 +110,35 @@ public class UserDialog {
 
 
   protected AccordionGroup getAccordion(final Modal dialogBox, Panel register) {
-    Accordion dp = new Accordion();
+    Accordion accordion = new Accordion();
     AccordionGroup accordionGroup = new AccordionGroup();
     accordionGroup.setHeading("Registration");
     accordionGroup.add(register);
-    dp.add(accordionGroup);
-    dialogBox.add(dp);
-/*    accordionGroup.add(new OpenHandler<DisclosurePanel>() {
+    accordion.add(accordionGroup);
+   // ScrollPanel scrollPanel = new ScrollPanel();
+   // scrollPanel.add(accordion);
+    dialogBox.add(accordion);
+
+    accordionGroup.addShownHandler(new ShownHandler() {
       @Override
-      public void onOpen(OpenEvent<DisclosurePanel> event) {
-        dialogBox.setHeight("750px");
-  *//*      dialogBox.setMaxHeigth(Window.getClientHeight() * MAX_HEIGHT + "px");
-        centerVertically(dialogBox.getElement()); // need to resize the dialog when reveal hidden widgets
-*//*
-        //dialogBox.setMaxHeigth((Window.getClientHeight() * MAX_HEIGHT) + "px");
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-          public void execute() {
-            System.out.println("1   centering vertically... " + dialogBox.getOffsetHeight());
-            //dialogBox.setHeight("750px");
-            //   dialogBox.setMaxHeigth(Window.getClientHeight() * MAX_HEIGHT + "px");
-            //      centerVertically(dialogBox.getElement()); // need to resize the dialog when reveal hidden widgets
-          }
-        });
-
-
+      public void onShown(ShownEvent shownEvent) {
+        dialogBox.addStyleName("dialogExpandedTopMargin");      }
+    });
+    accordionGroup.addHiddenHandler(new HiddenHandler() {
+      @Override
+      public void onHidden(HiddenEvent hiddenEvent) {
+        dialogBox.removeStyleName("dialogExpandedTopMargin");
       }
     });
-
-    dp.addCloseHandler(new CloseHandler<DisclosurePanel>() {
-      @Override
-      public void onClose(CloseEvent<DisclosurePanel> event) {
-        dialogBox.setHeight("481px");
-
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-          public void execute() {
-            System.out.println("2  centering vertically...");
-//            dialogBox.setHeight("481px");
-
-            //    centerVertically(dialogBox.getElement()); // need to resize the dialog when reveal hidden widgets
-          }
-        });
-      }
-    });*/
     return accordionGroup;
   }
 
+  /**
+   * @deprecated - use accordion instead
+   * @param dialogBox
+   * @param register
+   * @return
+   */
   protected DisclosurePanel getDisclosurePanel(final Modal dialogBox, Panel register) {
     DisclosurePanel dp = new DisclosurePanel("Registration");
     dp.setContent(register);
@@ -174,8 +158,6 @@ public class UserDialog {
       //      centerVertically(dialogBox.getElement()); // need to resize the dialog when reveal hidden widgets
           }
         });
-
-
       }
     });
 
@@ -257,7 +239,6 @@ public class UserDialog {
   }
 
   protected ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
-    /*final ControlGroup userGroup = */
     addControlGroupEntry(dialogBox, label, user);
     return new ListBoxFormField(user);
   }
@@ -367,7 +348,6 @@ public class UserDialog {
     for (String s : values) {
       genderBox.addItem(s);
     }
-    // genderBox.ensureDebugId("cwListBox-dropBox");
     return genderBox;
   }
 
