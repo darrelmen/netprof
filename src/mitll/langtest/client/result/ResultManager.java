@@ -384,7 +384,7 @@ public class ResultManager extends PagerTable {
       TextColumn<Result> audioType = new TextColumn<Result>() {
         @Override
         public String getValue(Result answer) {
-          return answer.isFastAndSlowAudio() ? "Fast and Slow" : "Regular";
+          return answer.getAudioType();// ? "Fast and Slow" : "Regular";
         }
       };
       audioType.setSortable(true);
