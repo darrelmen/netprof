@@ -71,32 +71,27 @@ public class StudentDialog extends UserDialog {
     final ListBoxFormField purpose = getListBoxFormField(fieldset, "Purpose", getListBox2(Arrays.asList("Data Collection", "Practice", "Demo")));
 
     purpose.box.setWidth("150px");
-  //  final Widget widget = addRegistrationPrompt(fieldset);
 
     Panel register = new FlowPanel();
     RegistrationInfo registrationInfo = new RegistrationInfo(register);
-  //  final DisclosurePanel dp = getDisclosurePanel(dialogBox, register);
-    final AccordionGroup dp = getAccordion(dialogBox, register);
-   // dialogBox.add(dp);
+    final AccordionGroup accordion = getAccordion(dialogBox, register);
 
     purpose.box.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         boolean showRegister = !canSkipRegister(purpose.getValue());
-   //     widget.setVisible(showRegister);
-        dp.setVisible(showRegister);
+        accordion.setVisible(showRegister);
       }
     });
 
     final Button closeButton = addLoginButton(dialogBox);
-    addClickHandler(dialogBox, registrationInfo, user, password, purpose, closeButton, dp);
+    addClickHandler(dialogBox, registrationInfo, user, password, purpose, closeButton, accordion);
 
     configureKeyHandler(dialogBox, closeButton);
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         user.box.setFocus(true);
-        System.out.println("width is " + dialogBox.getOffsetWidth());
       }
     });
 
@@ -118,6 +113,16 @@ public class StudentDialog extends UserDialog {
     });
   }
 
+  /**
+   * @see #displayLoginBox()
+   * @param dialogBox
+   * @param registrationInfo
+   * @param user
+   * @param password
+   * @param purpose
+   * @param closeButton
+   * @param accordion
+   */
   private void addClickHandler(final Modal dialogBox,
                                final RegistrationInfo registrationInfo,
                                final FormField user, final FormField password, final ListBoxFormField purpose,
