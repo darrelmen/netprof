@@ -40,7 +40,7 @@ import java.util.List;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize {
+public class GoodwaveExercisePanel extends FlowPanel implements BusyPanel, RequiresResize, ProvidesResize {
   private static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
   private static final String USER_RECORDER = "User Recorder";
   private static final String INSTRUCTIONS = "Instructions";
@@ -82,26 +82,39 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     this.service = controller.getService();
     this.screenPortion = screenPortion;
 
-    final VerticalPanel center = new VerticalPanel();
-
+    addStyleName("inlineBlockStyle");
+    getElement().setId("GoodwaveExercisePanel");
+    //final Panel center = new VerticalPanel();
+    final Panel center = new FlowPanel();
+    center.addStyleName("blockStyle");
+    center.getElement().setId("GoodwaveVerticalCenter");
+    center.addStyleName("floatLeft");
     // attempt to left justify
-    HorizontalPanel hp = new HorizontalPanel();
-    hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+  //  Panel hp = new HorizontalPanel();
+    Panel hp = new FlowPanel();
+    hp.getElement().setId("GoodwaveHorizontalPanel");
+   // hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
     Panel addToList = makeAddToList(e, controller);
     Widget questionContent = getQuestionContent(e,addToList);
     questionContent.addStyleName("floatLeft");
     hp.add(questionContent);
+    hp.addStyleName("trueInlineStyle");
+    /*hp.*/setWidth("100%");
 
     center.add(hp);
-    setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+    //setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     add(center);
-    setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+    //setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
     if (e.isRepeat()) {
       System.out.println("loading repeat exercise : " + e);
-      ASRScorePanel widgets = new ASRScorePanel();
-      add(widgets);
-      scorePanel = widgets;
+      ASRScorePanel scorePanel = new ASRScorePanel();
+      scorePanel.getElement().setId("ScorePanel");
+
+      scorePanel.addStyleName("floatRight");
+
+      add(scorePanel);
+      this.scorePanel = scorePanel;
       addQuestions(service, controller, 1, center, screenPortion);
     } else {
       System.out.println("loading " + e + " screen portion " + screenPortion);
@@ -252,7 +265,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       this.refAudio = path;
     }
 
-    final VerticalPanel vp = new VerticalPanel();
+  //  final Panel vp = new VerticalPanel();
+    final Panel vp = new FlowPanel();
+    vp.getElement().setId("QuestionContent");
+    vp.addStyleName("blockStyle");
 
     //CaptionPanel cpContent = new CaptionPanel(INSTRUCTIONS);
     Widget questionContent = new HTML(content);
@@ -284,7 +300,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param path
    * @param vp
    */
-  private void ensureMP3(Exercise e, String path, final VerticalPanel vp) {
+  private void ensureMP3(Exercise e, String path, final Panel vp) {
     final String fpath = path;
     final Exercise fe = e;
     //System.out.println("for exercise " + fe.getID() + " ensuring mp3 exists for " +path);
