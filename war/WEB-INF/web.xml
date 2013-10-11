@@ -10,7 +10,7 @@
     <welcome-file>LangTest.html</welcome-file>
   </welcome-file-list>
 
-    <!-- setup java melody -->
+<!--    &lt;!&ndash; setup java melody &ndash;&gt;
     <filter>
         <filter-name>monitoring</filter-name>
         <filter-class>net.bull.javamelody.MonitoringFilter</filter-class>
@@ -23,7 +23,7 @@
         <listener-class>net.bull.javamelody.SessionListener</listener-class>
     </listener>
 
-    <!-- setup security for java melody -->
+    &lt;!&ndash; setup security for java melody &ndash;&gt;
     <login-config>
         <auth-method>BASIC</auth-method>
         <realm-name>Monitoring</realm-name>
@@ -34,17 +34,27 @@
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>Monitoring</web-resource-name>
-            <url-pattern>/monitoring/*</url-pattern>   <!-- note ending star to make it work on mtex -->
+            <url-pattern>/monitoring/*</url-pattern>   &lt;!&ndash; note ending star to make it work on mtex &ndash;&gt;
         </web-resource-collection>
         <auth-constraint>
             <role-name>access</role-name>
         </auth-constraint>
-        <!-- if SSL enabled (SSL and certificate must then be configured in the server)
+        &lt;!&ndash; if SSL enabled (SSL and certificate must then be configured in the server)
         <user-data-constraint>
                 <transport-guarantee>CONFIDENTIAL</transport-guarantee>
         </user-data-constraint>
-        -->
-    </security-constraint>
+        &ndash;&gt;
+    </security-constraint>-->
+
+    <filter>
+        <filter-name>gwtCacheControlFilter</filter-name>
+        <filter-class>mitll.langtest.server.filter.GWTFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>gwtCacheControlFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 
   <servlet>
     <servlet-name>databaseServlet</servlet-name>
@@ -58,41 +68,17 @@
 
   <context-param>
     <param-name>tomcatWriteDirectoryFullPath</param-name>
-    <param-value>answers</param-value>
+      <param-value>answers</param-value>
   </context-param>
 
-  <context-param>
-    <param-name>config</param-name>
+    <context-param>
+        <param-name>config</param-name>
+        <param-value>pilot</param-value>
+    </context-param>
 
-    <param-value>dari</param-value>
-    <!--<param-value>autocrt</param-value>-->
-    <!--<param-value>urdu</param-value>-->
-    <!--<param-value>english</param-value>-->
-    <!--<param-value>farsi2</param-value>-->
-<!--
-    <param-value>farsi</param-value>
--->
-
-<!--
-      <param-value>flashcard</param-value>
--->
-<!--
-      <param-value>unitFlashcard</param-value>
--->
-
-
-      <!--<param-value>pilot</param-value> -->
-    <!--<param-value>pashto</param-value>-->
-    <!--<param-value>msa</param-value>-->
-  </context-param>
-
- <context-param>
+    <context-param>
         <param-name>configFile</param-name>
-<!--
-     <param-value>frenchEnglish.properties</param-value>
--->
-
-             <param-value>dari.properties</param-value>
-  </context-param>
+        <param-value>flashcard.properties</param-value>
+    </context-param>
 
 </web-app>
