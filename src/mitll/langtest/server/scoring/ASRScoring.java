@@ -9,6 +9,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
 import corpus.HTKDictionary;
 import corpus.LTS;
+import mitll.langtest.client.LangTestDatabase;
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -52,6 +54,7 @@ public class ASRScoring extends Scoring {
   public static final String SMALL_LM_SLF = "smallLM.slf";
 
   private final SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
+  private LangTestDatabaseImpl langTestDatabase;
 
   /**
    * By keeping these here, we ensure that we only ever read the dictionary once
@@ -71,9 +74,11 @@ public class ASRScoring extends Scoring {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    * @param deployPath
    * @param properties
+   * @param langTestDatabase
    */
-  public ASRScoring(String deployPath, Map<String, String> properties) {
-    this(deployPath, properties, null);
+  public ASRScoring(String deployPath, Map<String, String> properties, LangTestDatabaseImpl langTestDatabase) {
+    this(deployPath, properties, (HTKDictionary)null);
+    this.langTestDatabase = langTestDatabase;
     readDictionary();
   }
 
@@ -517,6 +522,7 @@ public class ASRScoring extends Scoring {
       return new Scores();
     } catch (Exception ee) {
       logger.warn("Running align/decode on " + sentence +" Got " + ee, ee);
+      if (langTestDatabase != null) langTestDatabase.logAndNotifyServerException(ee);
     }
 
     long timeToRunHydec = System.currentTimeMillis() - then;
