@@ -427,7 +427,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   private Widget addBottomText(FluidContainer container) {
     FluidRow status = new FluidRow();
     status.addStyleName("alignCenter");
-    status.addStyleName("inlineStyle");
+    status.addStyleName("inlineBlockStyle");
     container.add(status);
     status.add(statusHeader);
     return status;
@@ -436,7 +436,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   private Panel getInstructionRow() {
     Panel instructions = new FluidRow();
     instructions.addStyleName("alignCenter");
-    instructions.addStyleName("inlineStyle");
+    instructions.addStyleName("inlineBlockStyle");
 
     String userPrompt = getUserPrompt();
     if (userPrompt.length() > 0) {
@@ -459,7 +459,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   private ButtonWithChildren addColumnButton(FlowPanel columnContainer,
                                              final String sectionInFirstType,
                                              final ButtonGroupSectionWidget buttonGroupSectionWidget) {
-    columnContainer.addStyleName("inlineStyle");
+    columnContainer.addStyleName("inlineBlockStyle");
     // add a button
     ButtonWithChildren overallButton = makeOverallButton(buttonGroupSectionWidget.getType(), sectionInFirstType);
     addClickHandlerToButton(overallButton, sectionInFirstType, buttonGroupSectionWidget);
