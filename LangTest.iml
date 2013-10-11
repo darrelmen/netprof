@@ -191,27 +191,15 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="gwt-user" level="project" />
     <orderEntry type="library" name="mira" level="project" />
     <orderEntry type="library" name="poi-3.9-20121203" level="project" />
     <orderEntry type="library" name="xmlbeans-2.3.0" level="project" />
     <orderEntry type="library" name="dom4j-1.6.1" level="project" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/gwt-bootstrap-2.2.2.0-SNAPSHOT.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/gwt-bootstrap-2.2.2.0-SNAPSHOT.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
     <orderEntry type="library" name="mail" level="project" />
     <orderEntry type="library" name="gwt-visualization" level="project" />
     <orderEntry type="library" name="pronz" level="project" />
-    <orderEntry type="library" name="jrobin-1.5.9.1" level="project" />
     <orderEntry type="library" name="org.moxieapps.gwt.highcharts-1.5.0 (2)" level="project" />
+    <orderEntry type="library" name="gwt-bootstrap-2.3.2.0-SNAPSHOT" level="project" />
   </component>
 </module>
 
