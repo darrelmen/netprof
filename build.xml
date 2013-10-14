@@ -53,7 +53,7 @@
         <pathelement location="war/WEB-INF/lib/dom4j-1.6.1.jar"/>
         <pathelement location="war/WEB-INF/lib/commons-fileupload-1.2.2.jar"/>
         <pathelement location="war/WEB-INF/lib/flashcard.jar"/>
-        <pathelement location="war/WEB-INF/lib/gwt-bootstrap-2.2.2.0-SNAPSHOT.jar"/>
+        <pathelement location="war/WEB-INF/lib/gwt-bootstrap-2.3.2.0-SNAPSHOT.jar"/>
         <pathelement location="war/WEB-INF/lib/org.moxieapps.gwt.highcharts-1.5.0.jar"/>
     </path>
     <target name="init" depends="clean">
