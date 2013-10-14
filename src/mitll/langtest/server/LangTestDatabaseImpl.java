@@ -793,7 +793,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   // Users ---------------------
 
   /**
-   * @see mitll.langtest.client.user.StudentDialog#addUser(int, String, int)
+   * @see mitll.langtest.client.user.StudentDialog#addUser
    * @param age
    * @param gender
    * @param experience
@@ -805,12 +805,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public void addDLIUser(DLIUser dliUser) {
-    db.addDLIUser(dliUser);
+    try {
+      db.addDLIUser(dliUser);
+    } catch (Exception e) {
+      logAndNotifyServerException(e);
+    }
   }
 
   @Override
   public int addUserList(long userid, String name, String description, String dliClass) {
-    //new UserList();
     return db.addUserList(userid, name, description, dliClass);
   }
 
