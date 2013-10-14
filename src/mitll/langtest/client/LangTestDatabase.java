@@ -111,7 +111,8 @@ public interface LangTestDatabase extends RemoteService {
   /**
    * @param reqID
    * @param typeToSection
-   * @param userID   @return
+   * @param userID
+   * @return
    * */
   ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID);
 
