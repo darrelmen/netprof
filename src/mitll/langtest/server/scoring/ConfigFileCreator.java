@@ -15,7 +15,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class ConfigFileCreator {
-  private static Logger logger = Logger.getLogger(ConfigFileCreator.class);
+ // private static Logger logger = Logger.getLogger(ConfigFileCreator.class);
 
   private final String platform = Utils.package$.MODULE$.platform();
   private final Map<String, String> properties;
