@@ -31,6 +31,7 @@ import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.DisclosurePanel;
@@ -119,17 +120,22 @@ public class UserDialog {
    // scrollPanel.add(accordion);
     dialogBox.add(accordion);
 
-    accordionGroup.addShownHandler(new ShownHandler() {
+/*    accordionGroup.addShownHandler(new ShownHandler() {
       @Override
       public void onShown(ShownEvent shownEvent) {
-        dialogBox.addStyleName("dialogExpandedTopMargin");      }
+     //   System.out.println("onShown dialog height is " +dialogBox.getOffsetHeight());
+        DOM.setStyleAttribute(dialogBox.getElement(), "top", "3%");
+       // dialogBox.addStyleName("dialogExpandedTopMargin");
+      }
     });
     accordionGroup.addHiddenHandler(new HiddenHandler() {
       @Override
       public void onHidden(HiddenEvent hiddenEvent) {
-        dialogBox.removeStyleName("dialogExpandedTopMargin");
+     //   System.out.println("onHide dialog height is " +dialogBox.getOffsetHeight());
+        DOM.setStyleAttribute(dialogBox.getElement(), "top", "10%");
+        //dialogBox.removeStyleName("dialogExpandedTopMargin");
       }
-    });
+    });*/
     return accordionGroup;
   }
 
