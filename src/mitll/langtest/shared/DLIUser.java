@@ -21,6 +21,15 @@ public class DLIUser implements IsSerializable, Demographics {
   public DLIUser() {
   }
 
+  /**
+   * @see mitll.langtest.client.user.StudentDialog#addUser(int, String, int, String)
+   * @param userID
+   * @param weeksOfExperience
+   * @param reading
+   * @param listening
+   * @param speaking
+   * @param writing
+   */
   public DLIUser(long userID, int weeksOfExperience,
                  ILRLevel reading, ILRLevel listening, ILRLevel speaking, ILRLevel writing) {
     this.userID = userID;
@@ -57,7 +66,7 @@ public class DLIUser implements IsSerializable, Demographics {
   }
 
   public String toString() {
-    return weeksOfExperience + " weeks exp, ILR (r "+ reading + ", l "+ listening + ", s "+ speaking + ", w "+ writing + ")";
+    return "user id " + userID + " has " +weeksOfExperience + " weeks exp, ILR (r "+ reading + ", l "+ listening + ", s "+ speaking + ", w "+ writing + ")";
   }
 
   public static class ILRLevel implements IsSerializable {
