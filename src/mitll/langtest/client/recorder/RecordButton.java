@@ -30,8 +30,7 @@ public abstract class RecordButton {
 
   private boolean recording = false;
   private Timer recordTimer;
-  //  private FocusWidget record = null;
- private Widget record = null;
+  private Widget record = null;
   private int autoStopDelay;
   private HandlerRegistration keyHandler;
   private boolean hasFocus = false;
