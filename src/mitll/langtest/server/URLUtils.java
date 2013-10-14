@@ -15,7 +15,7 @@ import java.net.URL;
  * To change this template use File | Settings | File Templates.
  */
 public class URLUtils {
-  private static Logger logger = Logger.getLogger(URLUtils.class);
+  //private static Logger logger = Logger.getLogger(URLUtils.class);
   private HttpServletRequest request;
   public URLUtils() {}
   public URLUtils(HttpServletRequest request) {
