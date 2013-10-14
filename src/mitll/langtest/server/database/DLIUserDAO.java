@@ -21,11 +21,10 @@ public class DLIUserDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see mitll.langtest.server.database.DatabaseImpl#addUser
-   * @return newly inserted user id, or 0 if something goes horribly wrong
+   * @see mitll.langtest.server.database.DatabaseImpl#addDLIUser(mitll.langtest.shared.DLIUser)
    */
-  public void addUser(DLIUser dliUser) {
-    try {
+  public void addUser(DLIUser dliUser) throws Exception {
+  //  try {
 
       // there are much better ways of doing this...
       logger.info("addUser :dliUser " +dliUser);
@@ -55,9 +54,9 @@ public class DLIUserDAO extends DAO {
       database.closeConnection(connection);
 
         logger.debug("now " + getCount(DLIUSERS));
-    } catch (Exception ee) {
+/*    } catch (Exception ee) {
       ee.printStackTrace();
-    }
+    }*/
   }
 
   void createUserTable(Database database) throws Exception {
@@ -127,7 +126,7 @@ public class DLIUserDAO extends DAO {
 
       return users;
     } catch (Exception ee) {
-      ee.printStackTrace();
+      logger.error("Got " + ee, ee);
     }
     return new ArrayList<DLIUser>();
   }
