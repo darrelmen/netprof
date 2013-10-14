@@ -9,7 +9,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
 import corpus.HTKDictionary;
 import corpus.LTS;
-import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
