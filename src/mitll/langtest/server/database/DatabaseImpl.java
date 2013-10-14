@@ -1394,7 +1394,7 @@ public class DatabaseImpl implements Database {
   }
   public String toString() { return "Database : "+ connection.getConnection(); }
 
-  public void addDLIUser(DLIUser dliUser) {
+  public void addDLIUser(DLIUser dliUser) throws Exception {
     dliUserDAO.addUser(dliUser);
   }
 
