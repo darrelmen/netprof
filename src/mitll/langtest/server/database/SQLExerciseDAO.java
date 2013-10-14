@@ -135,7 +135,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
     return exercises;
   }
 
-  private boolean debug = true;
+ // private boolean debug = true;
   private boolean recordUnitChapterWeek(Exercise imported) {
     String[] split = imported.getID().split("-");
     String unit = split[0];//getCell(next, unitIndex);
@@ -211,6 +211,11 @@ public class SQLExerciseDAO implements ExerciseDAO {
       content = content.replaceAll("td","h3");
       content = content.replaceAll("br","h3");
       content += "</h3>";
+    }
+    if (content.contains("<p")) {
+      content = content.replaceAll("<p>\\s+</p>","");
+      content = content.replaceAll("<p> &nbsp; </p>","");
+      content = content.replaceAll("<p","<h3").replaceAll("p>","h3>");
     }
     return content;
   }
