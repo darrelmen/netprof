@@ -22,6 +22,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -59,16 +60,20 @@ public class StudentDialog extends UserDialog {
    */
   public void displayLoginBox() {
     final Modal dialogBox = getDialog("Login Questions");
+    dialogBox.setAnimation(false);
     dialogBox.setMaxHeigth("760px");
-    //dialogBox.setWidth(Window.getClientWidth()*0.5f);
+    DOM.setStyleAttribute(dialogBox.getElement(), "top", "4%");
     Form form = new Form();
     form.addStyleName("form-horizontal");
+    DOM.setStyleAttribute(form.getElement(), "marginBottom", "0px");
+
     Fieldset fieldset = new Fieldset();
     form.add(fieldset);
     dialogBox.add(form);
     final FormField user = addControlFormField(fieldset, "User ID");
     final FormField password = addControlFormField(fieldset, "Password", true);
-    final ListBoxFormField purpose = getListBoxFormField(fieldset, "Purpose", getListBox2(Arrays.asList("Data Collection", "Practice", "Demo")));
+    final ListBoxFormField purpose = getListBoxFormField(fieldset, "Purpose",
+      getListBox2(Arrays.asList("Data Collection", "Practice", "Demo")));
 
     purpose.box.setWidth("150px");
 
@@ -127,7 +132,6 @@ public class StudentDialog extends UserDialog {
                                final RegistrationInfo registrationInfo,
                                final FormField user, final FormField password, final ListBoxFormField purpose,
                                Button closeButton,
-                               //                             final DisclosurePanel disclosurePanel
                                final AccordionGroup accordion) {
     // Create a handler for the sendButton and nameField
     class MyHandler implements ClickHandler {
@@ -245,7 +249,6 @@ public class StudentDialog extends UserDialog {
       genderBox.addItem(s);
     }
     genderBox.setWidth("60px");
-    // genderBox.ensureDebugId("cwListBox-dropBox");
     return genderBox;
   }
 
@@ -346,17 +349,6 @@ public class StudentDialog extends UserDialog {
       monthsOfExperience, dialect, async);
   }
 
-/*
-  private Button makeCloseButton() {
-    final Button closeButton = new Button("Login");
-    closeButton.setType(ButtonType.PRIMARY);
-
-    // We can set the id of a widget by accessing its Element
-    closeButton.getElement().setId("closeButton");
-    return closeButton;
-  }
-*/
-
   private boolean highlightIntegerBox(FormField ageEntryGroup) {
     return highlightIntegerBox(ageEntryGroup, MIN_AGE, MAX_AGE, TEST_AGE);
   }
@@ -384,7 +376,6 @@ public class StudentDialog extends UserDialog {
   }
 
   private class RegistrationInfo {
-    // private Modal dialogBox;
     private FormField ageEntryGroup;
     private ListBoxFormField genderGroup;
     private FormField weeks;
@@ -397,10 +388,6 @@ public class StudentDialog extends UserDialog {
     private CheckBox silr;
     private CheckBox wilr;
     private FormField dialectGroup;
-
- /*   public RegistrationInfo(Modal dialogBox) {
-      this.dialogBox = dialogBox;
-    }*/
 
     public FormField getAgeEntryGroup() {
       return ageEntryGroup;
@@ -452,6 +439,8 @@ public class StudentDialog extends UserDialog {
 
     public RegistrationInfo(Panel dialogBox) {
       Form form = new Form();
+      DOM.setStyleAttribute(form.getElement(), "marginBottom", "0px");
+
       form.addStyleName("form-horizontal");
       Fieldset fieldset = new Fieldset();
       form.add(fieldset);
