@@ -70,6 +70,7 @@ public class ServerProperties {
   private static final String SORT_EXERCISES = "sortExercises";
   private static final String EXAMPLE_SENTENCE_FILE = "exampleSentenceFile";
   private static final String TABOO_ENGLISH = "tabooEnglish";
+  private static final String AUDIO_OFFSET = "audioOffset";
 
   private Properties props = new Properties();
 
@@ -233,6 +234,14 @@ public class ServerProperties {
 
   public String getExampleSentenceFile() {
     return props.getProperty(EXAMPLE_SENTENCE_FILE);
+  }
+
+  public int getAudioOffset() {
+    try {
+      return Integer.parseInt(props.getProperty(AUDIO_OFFSET));
+    } catch (NumberFormatException e) {
+      return 0;
+    }
   }
 
   /**
