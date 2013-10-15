@@ -66,6 +66,7 @@ public class ExcelImport implements ExerciseDAO {
   private final String language;
   private boolean skipSemicolons;
   private File exampleSentenceFile;
+  int audioOffset = 0;
 
   /**
    * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
@@ -93,6 +94,7 @@ public class ExcelImport implements ExerciseDAO {
     this.language = serverProps.getLanguage();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
     this.tabooEnglish = serverProps.doTabooEnglish();
+    this.audioOffset = serverProps.getAudioOffset();
     String exampleSentenceFile1 = serverProps.getExampleSentenceFile();
     if (exampleSentenceFile1 != null && exampleSentenceFile1.length() > 0) {
       this.exampleSentenceFile = new File(relativeConfigDir, exampleSentenceFile1);
@@ -669,6 +671,9 @@ public class ExcelImport implements ExerciseDAO {
 
     String prefix = language.equalsIgnoreCase("msa") ? id + "_" : "";
     String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : id;
+    if (audioOffset != 0) {
+      audioDir = "" +(Integer.parseInt(audioDir.trim())+audioOffset);
+    }
     String fastAudioRef = mediaDir + File.separator + audioDir + File.separator + prefix + "Fast" + ".wav";
     String slowAudioRef = mediaDir + File.separator + audioDir + File.separator + prefix + "Slow" + ".wav";
 
