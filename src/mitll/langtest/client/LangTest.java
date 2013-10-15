@@ -482,7 +482,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   /**
    * @see #doFlashcard()
    */
-  private void showHelpNewUser() {
+/*  private void showHelpNewUser() {
     Storage stockStore = Storage.getLocalStorageIfSupported();
     boolean showedHelpAlready = false;
     if (stockStore != null) {
@@ -493,10 +493,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (!showedHelpAlready) {
       showFlashHelp();
     }
-  }
+  }*/
 
   @Override
-  public void showFlashHelp() { flashcard.showFlashHelp(this); }
+  public void showFlashHelp() { flashcard.showFlashHelp(this, props.isFlashCard()); }
 
   private void doDataCollectAdminView() {
     setPageTitle();
