@@ -84,7 +84,7 @@ public class BootstrapExercisePanel extends FluidContainer {
   private Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
   public Image correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
   public Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
-  private Image enterImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "blueSpaceBar.png"));//"space48_2.png"));
+  private Image enterImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "blueSpaceBar.png"));
   //private static final String HELP_IMAGE = LangTest.LANGTEST_IMAGES + "/helpIconBlue.png";
   public static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>";
 
@@ -217,7 +217,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       stimulus = content;
     }
 
-    if (content != null) {
+    if (content != null && !controller.isFlashCard()) {
       Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
   /*    if (content.contains("<p>") && false)
         stimulus =
@@ -661,15 +661,20 @@ public class BootstrapExercisePanel extends FluidContainer {
           playAllAudio(correctPrompt);
         } else {
           String path = exercise.getRefAudio();
-          path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
-          final String fcorrectPrompt = correctPrompt;
+          if (path == null) path = exercise.getSlowAudioRef(); // fall back to slow audio
+          if (path == null) {
+            soundFeedback.playIncorrect(); // this should never happen
+          } else {
+            path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
+            final String fcorrectPrompt = correctPrompt;
 
-          soundFeedback.createSound(path, new SoundFeedback.EndListener() {
-            @Override
-            public void songEnded() {
-              goToNextItem(fcorrectPrompt);
-            }
-          });
+            soundFeedback.createSound(path, new SoundFeedback.EndListener() {
+              @Override
+              public void songEnded() {
+                goToNextItem(fcorrectPrompt);
+              }
+            });
+          }
         }
       } else {
         soundFeedback.playIncorrect();
