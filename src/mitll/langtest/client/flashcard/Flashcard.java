@@ -105,7 +105,6 @@ public class Flashcard implements RequiresResize {
     return headerRow;
   }
 
-
   @Override
   public void onResize() {
       int clientWidth = Window.getClientWidth();
@@ -113,8 +112,7 @@ public class Flashcard implements RequiresResize {
       if (clientWidth < 1100) {
         setFontWidth();
       } else {
-        DOM.setStyleAttribute(appName.getElement(), "fontSize", MAX_FONT_EM +
-          "em");
+        DOM.setStyleAttribute(appName.getElement(), "fontSize", MAX_FONT_EM + "em");
       }
   }
 
@@ -138,7 +136,7 @@ public class Flashcard implements RequiresResize {
     DOM.setStyleAttribute(appName.getElement(), "fontSize", fontsize);
   }
 
-  public void showFlashHelp(final LangTest langTest) {
+  public void showFlashHelp(final LangTest langTest, boolean isFlashcard) {
     final PropertyHandler props = langTest.getProps();
     if (props.isTimedGame()) {
       GWT.runAsync(new RunAsyncCallback() {
@@ -152,7 +150,7 @@ public class Flashcard implements RequiresResize {
       });
     } else {
       List<String> msgs = new ArrayList<String>();
-      msgs.add("Listen to the audio, then answer the question below.");
+      msgs.add(isFlashcard ? "Practice your vocabulary by saying the matching " + props.getLanguage() + " phrase.":"Listen to the audio, then answer the question below.");
       msgs.add("Press the space bar to begin recording your answer.");
       msgs.add("Release the space bar to end recording.");
       DialogHelper dialogHelper = new DialogHelper(false);
