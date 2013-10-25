@@ -1,10 +1,7 @@
 package mitll.langtest.client.user;
 
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.shared.Result;
 
 /**
  * Created with IntelliJ IDEA.
