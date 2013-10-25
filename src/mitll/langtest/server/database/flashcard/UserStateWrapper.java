@@ -20,11 +20,11 @@ public class UserStateWrapper {
   private int correct = 0;
   private int incorrect = 0;
 
-  private int pcorrect = 0;
+//  /private int pcorrect = 0;
   private int pincorrect = 0;
 
   private int counter = 0;
-  private List<Integer> correctHistory = new ArrayList<Integer>();
+ // private List<Integer> correctHistory = new ArrayList<Integer>();
   private final List<Exercise> exercises;
   private final Random random;
 
@@ -57,7 +57,7 @@ public class UserStateWrapper {
     this.incorrect = incorrect;
   }
 
-  public List<Integer> getCorrectHistory() { return correctHistory; }
+  //public List<Integer> getCorrectHistory() { return correctHistory; }
 
   public int getNumExercises() {
     return exercises.size();
@@ -66,7 +66,7 @@ public class UserStateWrapper {
   public boolean isComplete() { return counter == exercises.size(); }
 
   public void reset() {
-    correctHistory.add(correct);
+   // correctHistory.add(correct);
     correct = 0;
     incorrect = 0;
     shuffle();
@@ -81,12 +81,12 @@ public class UserStateWrapper {
     return exercises.get(counter++ % exercises.size()); // defensive
   }
 
-  public int getPcorrect() {
+/*  public int getPcorrect() {
     return pcorrect;
-  }
+  }*/
 
   public void setPcorrect(int pcorrect) {
-    this.pcorrect = pcorrect;
+  //  this.pcorrect = pcorrect;
   }
 
   public int getPincorrect() {
