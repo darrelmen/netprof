@@ -39,7 +39,7 @@ public class MonitoringSupport {
   //private static final int MB = (KB * KB);
   private static final int SESSION_GAP = 10 * 60 * 1000;
   private static final int MINUTE_MILLIS = 60 * 1000;
-  private static final int HOUR_IN_MILLIS = (60 * MINUTE_MILLIS);
+  //private static final int HOUR_IN_MILLIS = (60 * MINUTE_MILLIS);
   //private static final float HOUR_IN_MILLIS_FLOAT = (float)HOUR_IN_MILLIS;
   private static final float MINUTE_MILLIS_FLOAT = (float)MINUTE_MILLIS;
 
