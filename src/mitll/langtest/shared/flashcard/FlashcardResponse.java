@@ -16,15 +16,6 @@ public class FlashcardResponse implements IsSerializable {
   private Exercise nextExercise;
   public int correct, incorrect;
   public boolean finished = false;
-  private List<Integer> correctHistory;
-
- // public List<Integer> getCorrectHistory() { return correctHistory; }
-
-  /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getFlashcardResponse
-   * @param h
-   */
-  public void setCorrectHistory(List<Integer> h) { correctHistory = h; }
 
   public FlashcardResponse() {}
 
@@ -39,15 +30,15 @@ public class FlashcardResponse implements IsSerializable {
     return "FlashcardResponse : " +
       (nextExercise != null ? "exercise id=" + nextExercise.getID() : " no exercise") +
       " correct " + correct + " incorrect " + incorrect +
-      " finished= " + finished +
-      (correctHistory != null ? " " + correctHistory.size() + " items in history." : "");
+      " finished= " + finished
+      //+
+     // (correctHistory != null ? " " + correctHistory.size() + " items in history." : "")
+      ;
   }
 
   /**
    * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList.FlashcardResponseAsyncCallback#onSuccess(FlashcardResponse)
    * @return
    */
-  public Exercise getNextExercise() {
-    return nextExercise;
-  }
+  public Exercise getNextExercise() { return nextExercise; }
 }
