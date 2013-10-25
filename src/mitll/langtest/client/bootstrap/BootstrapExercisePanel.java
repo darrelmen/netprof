@@ -34,6 +34,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -74,6 +75,7 @@ public class BootstrapExercisePanel extends FluidContainer {
   private static final int HIDE_DELAY = 2500;
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
+  private static final boolean NEXT_ON_BAD_AUDIO = false;
 
   private Column scoreFeedbackColumn;
   private List<MyRecordButtonPanel> answerWidgets = new ArrayList<MyRecordButtonPanel>();
@@ -85,7 +87,6 @@ public class BootstrapExercisePanel extends FluidContainer {
   public Image correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
   public Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
   private Image enterImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "blueSpaceBar.png"));
-  //private static final String HELP_IMAGE = LangTest.LANGTEST_IMAGES + "/helpIconBlue.png";
   public static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>";
 
   private Heading recoOutput;
@@ -217,17 +218,10 @@ public class BootstrapExercisePanel extends FluidContainer {
       stimulus = content;
     }
 
-    if (content != null && !controller.isFlashCard()) {
-      Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
-  /*    if (content.contains("<p>") && false)
-        stimulus =
-          "<h2 style='margin-right: 30px'>" +
-            content +
-            "</h2>" +
-            "<h2 style='margin-right: 30px'>" +
-            qaPair.getQuestion() +
-            "</h2>";*/
+    if (content != null/* && !controller.isFlashCard()*/) {
+      System.out.println("\tfor " + e.getID() + " not flashcard");
 
+      Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
       content = content.replaceAll("<p> &nbsp; </p>", "");
       String splitTerm = LISTEN_TO_THIS_AUDIO;
       String[] split = content.split(splitTerm);
@@ -236,6 +230,9 @@ public class BootstrapExercisePanel extends FluidContainer {
       contentPrefix.addStyleName("marginRight");
 
       Panel container = new FlowPanel();
+      Heading child = new Heading(5, "Exercise " + e.getID());
+      child.addStyleName("leftTenMargin");
+      container.add(child);
       container.add(contentPrefix);
 
       // Todo : this is vulnerable to a variety of issues.
@@ -565,7 +562,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       String feedback = "";
       if (result.validity != AudioAnswer.Validity.OK) {
         showPopup(result.validity.getPrompt());
-        nextAfterDelay(correct, "");
+        if (NEXT_ON_BAD_AUDIO) nextAfterDelay(correct, "");
       } else if (correct) {
         showCorrectFeedback(score);
       } else {   // incorrect!!
