@@ -47,6 +47,10 @@ public class BrowserCheck {
   public boolean isIE7() { return getBrowserAndVersion().equals("IE 7"); }
   public boolean isIE() { return browser.equals("IE"); }
 
+  /**
+   * @see mitll.langtest.client.LangTest#getReleaseStatus()
+   * @return
+   */
   public String getBrowserAndVersion() {
     String agent = getUserAgent();
     return getBrowser(agent);
