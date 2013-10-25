@@ -234,7 +234,7 @@ h1 {
     margin-right: 50px;
 }
 
-.buttonMargin2 {
+.marginBottomTen {
     margin-bottom: 10px;
 }
 
@@ -306,6 +306,17 @@ fieldset {
 .topFiveMargin {
      margin-top: 5px;
  }
+
+/*.topMarginFifty {
+    margin-top: 50%;
+}
+
+.topMarginFifty {
+     margin-top: 50%;
+ }
+.bottomMarginFifty {
+     margin-bottom: 50%;
+ }*/
 
 .leftFiveMargin {
     margin-left: 5px;
@@ -697,4 +708,15 @@ fieldset > legend {
 
 .minWidth {
     min-width: 190px;
+}
+
+.userNPFContent {
+    margin-top: 10px;
+    width:100%;
+    /*
+background: none repeat scroll 0 0 #FFFFFF;
+*/
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+    padding: 5px;
 }
