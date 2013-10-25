@@ -507,7 +507,7 @@ public class ASRScoring extends Scoring {
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
     long then = System.currentTimeMillis();
 
-    logger.debug("getScoresFromHydec using " + configFile + " to decode " + sentence);
+    //logger.debug("getScoresFromHydec using " + configFile + " to decode " + sentence);
 
     try {
       jscoreOut = testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
