@@ -17,7 +17,6 @@ import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
@@ -161,7 +160,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     int user = userManager != null ? userManager.getUser() : -1;
     String exerciseID = exerciseList != null ? exerciseList.getCurrentExerciseID() : "Unknown";
-    logMessageOnServer("got browser exception : user #" + user + " exercise " + exerciseID + " : " + exceptionAsString);
+    logMessageOnServer("got browser exception : user #" + user + " exercise " + exerciseID + " browser " + browserCheck.getBrowserAndVersion()+
+    " : " + exceptionAsString);
     return exceptionAsString;
   }
 
@@ -266,7 +266,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
 
-   // secondRow.add(new Navigation(service, userManager).getNav(currentExerciseVPanel));
     makeExerciseList(secondRow, leftColumn);
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("floatLeft");
@@ -456,7 +455,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     HorizontalPanel headerRow = flashcard.makeFlashcardHeaderRow(props.getSplash());
     container.add(headerRow);
-   // container.add(userline = new HTML(getUserText()));
 
     userManager = new UserManager(this, service, true, props);
     this.exerciseList = new ExerciseListLayout(props).makeFlashcardExerciseList(container, service, userManager);
@@ -629,12 +627,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void modeSelect() {
     boolean isGrading = props.isGrading();
-    if (logout != null) logout.setVisible(!props.isGoodwaveMode() && !props.isFlashcardTeacherView());
-    if (userline != null) {
-      boolean isStudent = getLoginType().equals(PropertyHandler.LOGIN_TYPE.STUDENT);
-
-      userline.setVisible(isStudent || (!props.isGoodwaveMode() && !props.isFlashcardTeacherView()));
-    }
+    boolean isStudent = getLoginType().equals(PropertyHandler.LOGIN_TYPE.STUDENT);
+    boolean showUserLine = isStudent || (!props.isGoodwaveMode() && !props.isFlashcardTeacherView());
+    if (logout != null) logout.setVisible(showUserLine);
+    if (userline != null) userline.setVisible(showUserLine);
     if (users != null) users.setVisible(isGrading || props.isAdminView());
     if (showResults != null) showResults.setVisible(isGrading || props.isAdminView());
     if (monitoring != null) monitoring.setVisible(isGrading || props.isAdminView());
@@ -662,10 +658,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         checkLogin();
       }
 
-      public void gotDenial() {
-        System.err.println("dude!!!!");
-        showPopupOnDenial();
-      }
+      public void gotDenial() {  showPopupOnDenial();   }
     });
   }
 
@@ -755,8 +748,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void makeLogoutParts() {
-    // add logout link
-
     this.userline = new HTML(getUserText());
     logout = getLogoutLink();
 
@@ -798,7 +789,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Anchor getLogoutLink() {
     SafeHtmlBuilder b = new SafeHtmlBuilder();
-    String s = "<font size=+1>Sign Out</font>";
+   // String s = "<font size=+1>Sign Out</font>";
+    String s = "Sign Out";
     b.appendHtmlConstant(s);
     Anchor logout = new Anchor(b.toSafeHtml());
     logout.addClickHandler(new ClickHandler() {
@@ -855,8 +847,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     System.out.println("LangTest.gotUser : got user " + userID);
     if (userline != null) {
       String userText = getUserText();
-      // System.out.println("LangTest.gotUser : userline = " + userText);
-
       userline.setHTML(userText);
     }
     else {
