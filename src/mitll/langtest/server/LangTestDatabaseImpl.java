@@ -497,30 +497,31 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList#getExercises(long)
    * @param userID
    * @param typeToSection
+   * @param getNext
    * @return
    */
   @Override
-  public FlashcardResponse getNextExercise(long userID, Map<String, Collection<String>> typeToSection) {
+  public FlashcardResponse getNextExercise(long userID, Map<String, Collection<String>> typeToSection, boolean getNext) {
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-    //logger.debug("getNextExercise : req " + typeToSection + " yields " + exercisesForSection.size() + " exercises.");
     List<Exercise> copy = new ArrayList<Exercise>(exercisesForSection);
     if (serverProps.sortExercisesByID()) {
       sortByID(copy);
     }
-    FlashcardResponse nextExercise = db.getNextExercise(copy,userID, serverProps.isTimedGame(), typeToSection);
-    //logger.debug("\tnextExercise " + nextExercise);
-
+    FlashcardResponse nextExercise = db.getNextExercise(copy,userID, serverProps.isTimedGame(), getNext);
     return getFlashcardResponse(userID, nextExercise);
   }
 
   /**
    * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList#getExercises(long)
    * @param userID
+   * @param getNext
    * @return
    */
   @Override
-  public FlashcardResponse getNextExercise(long userID) {
-    FlashcardResponse nextExercise = db.getNextExercise(userID, serverProps.isTimedGame());
+  public FlashcardResponse getNextExercise(long userID, boolean getNext) {
+    logger.debug("getNextExercise " +getNext);
+
+    FlashcardResponse nextExercise = db.getNextExercise(userID, serverProps.isTimedGame(), getNext);
     return getFlashcardResponse(userID, nextExercise);
   }
 
