@@ -14,7 +14,7 @@ public class DLIUserDAO extends DAO {
 
   private static final String DLIUSERS = "dliusers";
 
-  public DLIUserDAO(Database database) { super(database); }
+  public DLIUserDAO(Database database) {  super(database); }
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
@@ -24,39 +24,33 @@ public class DLIUserDAO extends DAO {
    * @see mitll.langtest.server.database.DatabaseImpl#addDLIUser(mitll.langtest.shared.DLIUser)
    */
   public void addUser(DLIUser dliUser) throws Exception {
-  //  try {
+    // there are much better ways of doing this...
+    logger.info("addUser :dliUser " + dliUser);
 
-      // there are much better ways of doing this...
-      logger.info("addUser :dliUser " +dliUser);
+    Connection connection = database.getConnection();
+    PreparedStatement statement;
 
-      Connection connection = database.getConnection();
-      PreparedStatement statement;
+    statement = connection.prepareStatement(
+      "INSERT INTO " + DLIUSERS +
+        "(userid,weeksOfExperience,rilrLevel,rilrEstimating,lilrLevel,lilrEstimating,silrLevel,silrEstimating,wilrLevel,wilrEstimating) " +
+        "VALUES(?,?,?,?,?,?,?,?,?,?);");
+    int i = 1;
+    statement.setLong(i++, dliUser.getUserID());
+    statement.setInt(i++, dliUser.getWeeksOfExperience());
+    statement.setString(i++, dliUser.getReading().getIlrLevel());
+    statement.setBoolean(i++, dliUser.getReading().isEstimating());
+    statement.setString(i++, dliUser.getListening().getIlrLevel());
+    statement.setBoolean(i++, dliUser.getListening().isEstimating());
+    statement.setString(i++, dliUser.getSpeaking().getIlrLevel());
+    statement.setBoolean(i++, dliUser.getSpeaking().isEstimating());
+    statement.setString(i++, dliUser.getWriting().getIlrLevel());
+    statement.setBoolean(i++, dliUser.getWriting().isEstimating());
 
-      statement = connection.prepareStatement(
-          "INSERT INTO " +DLIUSERS+
-            "(userid,weeksOfExperience,rilrLevel,rilrEstimating,lilrLevel,lilrEstimating,silrLevel,silrEstimating,wilrLevel,wilrEstimating) " +
-          "VALUES(?,?,?,?,?,?,?,?,?,?);");
-      int i = 1;
-      statement.setLong(i++, dliUser.getUserID());
-      statement.setInt(i++, dliUser.getWeeksOfExperience());
-      statement.setString(i++, dliUser.getReading().getIlrLevel());
-      statement.setBoolean(i++, dliUser.getReading().isEstimating());
-      statement.setString(i++, dliUser.getListening().getIlrLevel());
-      statement.setBoolean(i++, dliUser.getListening().isEstimating());
-      statement.setString(i++, dliUser.getSpeaking().getIlrLevel());
-      statement.setBoolean(i++, dliUser.getSpeaking().isEstimating());
-      statement.setString(i++, dliUser.getWriting().getIlrLevel());
-      statement.setBoolean(i++, dliUser.getWriting().isEstimating());
+    int i1 = statement.executeUpdate();
+    statement.close();
+    database.closeConnection(connection);
 
-      int i1 = statement.executeUpdate();
-      logger.debug("got " + i1);
-      statement.close();
-      database.closeConnection(connection);
-
-        logger.debug("now " + getCount(DLIUSERS));
-/*    } catch (Exception ee) {
-      ee.printStackTrace();
-    }*/
+    logger.debug("added user# " + i1 + "  now " + getCount(DLIUSERS));
   }
 
   void createUserTable(Database database) throws Exception {
@@ -89,7 +83,7 @@ public class DLIUserDAO extends DAO {
   void dropUserTable(Database database) throws Exception {
     System.err.println("----------- dropUserTable -------------------- ");
     Connection connection = database.getConnection();
-    PreparedStatement statement = connection.prepareStatement("drop TABLE " +DLIUSERS);
+    PreparedStatement statement = connection.prepareStatement("drop TABLE " + DLIUSERS);
     statement.execute();
     statement.close();
     database.closeConnection(connection);
@@ -97,6 +91,7 @@ public class DLIUserDAO extends DAO {
 
   /**
    * Pulls the list of users out of the database.
+   *
    * @return
    */
   public List<DLIUser> getUsers() {
