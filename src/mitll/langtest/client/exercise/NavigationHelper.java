@@ -39,6 +39,13 @@ public class NavigationHelper extends HorizontalPanel {
   private boolean enableNextOnlyWhenAllCompleted = true;
   private PostAnswerProvider provider;
 
+  /**
+   * @see ExercisePanel#getNavigationHelper(ExerciseController)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel(mitll.langtest.shared.Exercise, ExerciseController)
+   * @param exercise
+   * @param controller
+   * @param provider
+   */
   public NavigationHelper(Exercise exercise, ExerciseController controller, PostAnswerProvider provider) {
     enableNextOnlyWhenAllCompleted = !getLanguage(controller).equalsIgnoreCase("Pashto");   // hack?
     this.provider = provider;
@@ -246,5 +253,6 @@ public class NavigationHelper extends HorizontalPanel {
     next.setEnabled(val);
   }
 
+  public Widget getPrev() { return prev; }
   public Widget getNext() { return next; }
 }
