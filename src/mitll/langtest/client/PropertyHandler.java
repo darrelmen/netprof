@@ -274,6 +274,7 @@ public class PropertyHandler {
     String flashcardParam = Window.Location.getParameter(FLASHCARD);
     if (flashcardParam != null) {
       flashCard = !flashcardParam.equals("false");
+      System.out.println("\n\n\nsetting flashcard param " + flashCard);
     }
 
     String timedgameParam = Window.Location.getParameter(TIMED_GAME);
@@ -404,6 +405,8 @@ public class PropertyHandler {
    * @return
    */
   public boolean isFlashCard() {
+    System.out.println("\n\n\ngetting flashcard param " + flashCard);
+
     return flashCard;
   }
 
