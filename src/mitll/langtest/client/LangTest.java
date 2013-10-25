@@ -41,6 +41,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
+import mitll.langtest.client.flashcard.DataCollectionFlashcardFactory;
 import mitll.langtest.client.flashcard.Flashcard;
 import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
@@ -457,7 +458,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     container.add(headerRow);
 
     userManager = new UserManager(this, service, true, props);
-    this.exerciseList = new ExerciseListLayout(props).makeFlashcardExerciseList(container, service, userManager);
+    this.exerciseList = new ExerciseListLayout(props).makeFlashcardExerciseList(container, service, userManager, this);
 
     // setup flash
     makeFlashContainer();
@@ -667,13 +668,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #gotUser(long)
    */
   public void setFactory(final long userID) {
-    final LangTest outer =this;
+    final LangTest outer = this;
     if (props.isGoodwaveMode() && !props.isGrading()) {
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer), userManager, 1);
     } else if (props.isGrading()) {
       exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer), userManager, props.getNumGradesToCollect());
+    } else if (props.getFlashcardNextAndPrev()) {
+      exerciseList.setFactory(new DataCollectionFlashcardFactory(service, outer, outer), userManager, 1);
     } else if (props.isFlashCard()) {
-        exerciseList.setFactory(new FlashcardExercisePanelFactory(service, outer, outer), userManager, 1);
+      exerciseList.setFactory(new FlashcardExercisePanelFactory(service, outer, outer), userManager, 1);
     } else if (props.isDataCollectMode() && props.isCollectAudio() && !props.isCRTDataCollectMode()) {
       exerciseList.setFactory(new WaveformExercisePanelFactory(service, outer, outer), userManager, 1);
     } else {
