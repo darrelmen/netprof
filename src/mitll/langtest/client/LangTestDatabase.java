@@ -118,8 +118,8 @@ public interface LangTestDatabase extends RemoteService {
 
   // flashcard support ------------------------------------------
 
-  FlashcardResponse getNextExercise(long userID);
-  FlashcardResponse getNextExercise(long userID,Map<String, Collection<String>> typeToSection);
+  FlashcardResponse getNextExercise(long userID, boolean getNext);
+  FlashcardResponse getNextExercise(long userID, Map<String, Collection<String>> typeToSection, boolean getNext);
 
   void resetUserState(long userID);
   void clearUserState(long userID);
