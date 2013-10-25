@@ -97,8 +97,8 @@ public interface LangTestDatabaseAsync {
 
   void sendEmail(int userID, String to, String replyTo, String subject, String message, String token, AsyncCallback<Void> async);
 
-  void getNextExercise(long userID, AsyncCallback<FlashcardResponse> async);
-  void getNextExercise(long userID, Map<String, Collection<String>> typeToSection, AsyncCallback<FlashcardResponse> async);
+  void getNextExercise(long userID, boolean getNext, AsyncCallback<FlashcardResponse> async);
+  void getNextExercise(long userID, Map<String, Collection<String>> typeToSection, boolean getNext, AsyncCallback<FlashcardResponse> async);
 
   void resetUserState(long userID, AsyncCallback<Void> async);
 
