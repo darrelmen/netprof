@@ -33,11 +33,11 @@ public abstract class RecordButton {
   private Widget record = null;
   private int autoStopDelay;
   private HandlerRegistration keyHandler;
-  private boolean hasFocus = false;
+ // private boolean hasFocus = false;
   private Image recordImage1, recordImage2;
 
   /**
-   * @see mitll.langtest.client.bootstrap.BootstrapExercisePanel.MyRecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel)
+   * @see mitll.langtest.client.bootstrap.FlashcardRecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel)
    * @param delay
    * @param addKeyHandler
    */
@@ -54,7 +54,7 @@ public abstract class RecordButton {
    * @param recordImage2
    * @param addKeyHandler
    */
-  public RecordButton(/*Focus*/Widget recordButton, int delay, Image recordImage1, Image recordImage2, boolean addKeyHandler) {
+  public RecordButton(Widget recordButton, int delay, Image recordImage1, Image recordImage2, boolean addKeyHandler) {
     this(delay, addKeyHandler);
     this.record = recordButton;
     setupRecordButton(recordButton);
@@ -62,17 +62,16 @@ public abstract class RecordButton {
     this.recordImage2 = recordImage2;
   }
 
-  protected void setupRecordButton(/*Focus*/Widget recordButton) {
-
+  protected void setupRecordButton(Widget recordButton) {
     HasClickHandlers clickable = (HasClickHandlers) recordButton;
-    HasFocusHandlers focusable = (HasFocusHandlers) recordButton;
-    HasBlurHandlers blurable = (HasBlurHandlers) recordButton;
+/*    HasFocusHandlers focusable = (HasFocusHandlers) recordButton;
+    HasBlurHandlers blurable = (HasBlurHandlers) recordButton;*/
     clickable.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         doClick();
       }
     });
-    focusable.addFocusHandler(new FocusHandler() {
+/*    focusable.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
         hasFocus = true;
@@ -83,7 +82,7 @@ public abstract class RecordButton {
       public void onBlur(BlurEvent event) {
         hasFocus = false;
       }
-    });
+    });*/
     recordButton.setTitle("Press the space bar to record/stop recording");
   }
 
@@ -115,8 +114,9 @@ public abstract class RecordButton {
   }
 
   public void onUnload() {
-    //System.out.println("removing handler for recording " + keyHandler);
+   // System.out.println("onUnload : removing handler for recording " + keyHandler);
     if (keyHandler != null) {
+      System.out.println("\tremoving handler for recording " + keyHandler);
       keyHandler.removeHandler();
       keyHandler = null;
     }
