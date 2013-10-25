@@ -52,6 +52,7 @@ public class PropertyHandler {
   private static final String DLI_DEMOGRAPHICS = "dliDemographics";
   private static final String TRACK_ONLINE_USERS = "trackUsers";
   private static final String TABOO_ENGLISH = "tabooEnglish";
+  private static final String FLASHCARD_NEXT_AND_PREV = "flashcardNextAndPrev";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -124,6 +125,7 @@ public class PropertyHandler {
   private int flashcardPreviewHeight = DEFAULT_FLASHCARD_PREVIEW_HEIGHT;
   private boolean dliDemographics;
   private boolean trackUsers, tabooEnglish;
+  private boolean flashcardNextAndPrev;
 
   public PropertyHandler(Map<String,String> props) {
     this.props = props;
@@ -175,6 +177,7 @@ public class PropertyHandler {
       else if (key.equals(DLI_DEMOGRAPHICS)) dliDemographics = getBoolean(value);
       else if (key.equals(TRACK_ONLINE_USERS)) trackUsers = getBoolean(value);
       else if (key.equals(TABOO_ENGLISH)) tabooEnglish = getBoolean(value);
+      else if (key.equals(FLASHCARD_NEXT_AND_PREV)) flashcardNextAndPrev = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
@@ -274,7 +277,6 @@ public class PropertyHandler {
     String flashcardParam = Window.Location.getParameter(FLASHCARD);
     if (flashcardParam != null) {
       flashCard = !flashcardParam.equals("false");
-      System.out.println("\n\n\nsetting flashcard param " + flashCard);
     }
 
     String timedgameParam = Window.Location.getParameter(TIMED_GAME);
@@ -404,11 +406,7 @@ public class PropertyHandler {
    * @see mitll.langtest.client.LangTest#setFactory
    * @return
    */
-  public boolean isFlashCard() {
-    System.out.println("\n\n\ngetting flashcard param " + flashCard);
-
-    return flashCard;
-  }
+  public boolean isFlashCard() {  return flashCard; }
 
   public boolean isFlashcardTeacherView() {
     return flashcardTeacherView;
@@ -452,13 +450,14 @@ public class PropertyHandler {
     return flashcardPreviewHeight;
   }
 
-  public boolean getDliDemographics() {
-    return dliDemographics;
+  public boolean getFlashcardNextAndPrev() {
+    return flashcardNextAndPrev;
+  }
+
+  public boolean showFlashcardAnswer() {
+    return false; // TODO add property
   }
   public boolean isTrackUsers() {
     return trackUsers;
-  }
-  public boolean doTabooEnglish() {
-    return tabooEnglish;
   }
 }
