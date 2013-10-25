@@ -454,29 +454,32 @@ public class DatabaseImpl implements Database {
    * remember state for user so they can resume their flashcard exercise from that point.
    * synchronize!
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getNextExercise(long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getNextExercise
    * @param userID
    * @param isTimedGame
-   * @param typeToSection
+   * @param getNext
    * @return
    */
-  public FlashcardResponse getNextExercise(List<Exercise> exercises, long userID, boolean isTimedGame, Map<String, Collection<String>> typeToSection) {
-    return getFlashcardResponse(userID, isTimedGame, exercises);
+  public FlashcardResponse getNextExercise(List<Exercise> exercises, long userID, boolean isTimedGame, boolean getNext) {
+    logger.info("getNextExercise 1 : for user " + userID + " next = " +getNext);// + " index " + index);
+
+    return getFlashcardResponse(userID, isTimedGame, exercises, getNext);
   }
 
-  public FlashcardResponse getNextExercise(long userID, boolean isTimedGame) {
-    List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
-    return getFlashcardResponse(userID, isTimedGame, exercises);
+  public FlashcardResponse getNextExercise(long userID, boolean isTimedGame, boolean getNext) {
+ //   List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
+    List<Exercise> exercises = getExercisesBiasTowardsUnanswered(userID,false);
+    return getFlashcardResponse(userID, isTimedGame, exercises, getNext);
   }
 
-  private FlashcardResponse getFlashcardResponse(long userID, boolean isTimedGame, List<Exercise> exercises) {
+  private FlashcardResponse getFlashcardResponse(long userID, boolean isTimedGame, List<Exercise> exercises, boolean getNext) {
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
     for (Exercise e : exercises) idToExercise.put(e.getID(), e);
     UserStateWrapper userStateWrapper;
 
     synchronized (userToState) {
       userStateWrapper = userToState.get(userID);
-      logger.info("getExercises : for user  " + userID + " idToExercise has " + idToExercise.size() + " user state " + userStateWrapper);// + " index " + index);
+      logger.info("getExercises : for user " + userID + " idToExercise has " + idToExercise.size() + " user state " + userStateWrapper + " next = " +getNext);// + " index " + index);
       if (userStateWrapper == null || (userStateWrapper.getNumExercises() != exercises.size())) {
         userStateWrapper = getUserStateWrapper(userID, exercises);
         userToState.put(userID, userStateWrapper);
@@ -488,11 +491,13 @@ public class DatabaseImpl implements Database {
       if (userStateWrapper.isComplete()) {
         userStateWrapper.shuffle();
       }
+      logger.info("\tgetExercises : for user " + userID + " next = " +getNext);// + " index " + index);
+
+      Exercise nextExercise = getNext ? userStateWrapper.getNextExercise() : userStateWrapper.getPrevExercise();
       flashcardResponse =
-        new FlashcardResponse(userStateWrapper.getNextExercise(),
+        new FlashcardResponse(nextExercise,
           userStateWrapper.getCorrect(),
           userStateWrapper.getIncorrect());
-      //flashcardResponse.setCorrectHistory(userStateWrapper.getCorrectHistory());
       return flashcardResponse;
     }
     return getFlashcardResponse(idToExercise, userStateWrapper);
@@ -601,6 +606,7 @@ public class DatabaseImpl implements Database {
   public void resetUserState(long userID) {
     synchronized (userToState) {
       UserStateWrapper userStateWrapper = userToState.get(userID);
+      logger.debug("resetUserState for " + userID);
       userStateWrapper.reset();     // remember past state
     }
   }
