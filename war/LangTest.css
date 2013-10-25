@@ -688,9 +688,12 @@ fieldset > legend {
     margin-bottom: 30%;
 }
 
-.rightMargin {
-   margin-right: 5px;
+.rightFiveMargin {
+    margin-right: 5px;
 }
+.rightTenMargin {
+     margin-right: 10px;
+ }
 
 .minWidth {
     min-width: 190px;
