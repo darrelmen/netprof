@@ -159,6 +159,11 @@ public class RecordButtonPanel {
     controller.stopRecording();
     final Panel outer = getPanel();
 
+    int tries = 1;
+    postAudioFile(outer, tries);
+  }
+
+  private void postAudioFile(final Panel outer, final int tries) {
     reqid++;
     service.writeAudioFile(controller.getBase64EncodedWavFile(),
       exercise.getPlan(),
@@ -171,11 +176,16 @@ public class RecordButtonPanel {
       controller.isFlashCard(),
       new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
-          recordButton.setEnabled(true);
-          receivedAudioFailure();
+          controller.logException(caught);
+          if (tries > 0) {
+            postAudioFile(outer, tries - 1); // try one more time...
+          } else {
+            recordButton.setEnabled(true);
+            receivedAudioFailure();
 
-          Window.alert("writeAudioFile : stopRecording : Couldn't post answers for exercise.");
-          new ExceptionHandlerDialog(caught);
+            Window.alert("writeAudioFile : stopRecording : Couldn't post answers for exercise.");
+            new ExceptionHandlerDialog(caught);
+          }
         }
 
         public void onSuccess(AudioAnswer result) {
