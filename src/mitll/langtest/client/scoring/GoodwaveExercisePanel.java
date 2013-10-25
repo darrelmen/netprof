@@ -357,7 +357,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       protected void addButtons() {
         Widget record = postAudioRecordButton.getRecord();
         add(record);
-        record.addStyleName("rightMargin");
+        record.addStyleName("rightFiveMargin");
         super.addButtons();
       }
 
