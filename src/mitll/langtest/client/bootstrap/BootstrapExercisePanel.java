@@ -34,7 +34,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -238,6 +237,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       // Todo : this is vulnerable to a variety of issues.
       if (e.getRefAudio() != null && e.getRefAudio().length() > 0) {
         Panel container2 = new FlowPanel();
+        container2.addStyleName("rightFiveMargin");
         HTML prompt = getHTML("<h3 style='margin-right: 30px'>" + splitTerm + "</h3>", true, controller);
         container2.add(prompt);
         SimplePanel simplePanel = new SimplePanel();
@@ -269,7 +269,7 @@ public class BootstrapExercisePanel extends FluidContainer {
 
     final Audio audio = getAudioNoFocus(refAudio, type);
     audio.addStyleName("floatRight");
-    audio.addStyleName("rightMargin");
+    audio.addStyleName("rightFiveMargin");
 
     return audio;
   }
@@ -294,10 +294,11 @@ public class BootstrapExercisePanel extends FluidContainer {
       requireAlignment && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
 
     HTML html = new HTML(content, direction);
-    html.setWidth("100%");
+  //  html.setWidth("100%");
     if (requireAlignment && rightAlignContent) {
       html.addStyleName("rightAlign");
     }
+    html.addStyleName("rightTenMargin");
 
     html.addStyleName("wrapword");
     return html;
