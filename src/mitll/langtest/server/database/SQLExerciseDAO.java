@@ -206,7 +206,8 @@ public class SQLExerciseDAO implements ExerciseDAO {
 
   private String convertTableMarkup(String content) {
     if (content.contains("<td dir=\"rtl\">")) {
-      content = content.replaceAll("Orientation :","Orientation");
+      content = content.replaceAll("Orientation :","Question Scenario");
+      content = content.replaceAll("Orientation:","Question Scenario");
       content = content.replaceAll("<td width=\"20%\"> &nbsp; </td>","");
       content = content.replaceAll("td","h3");
       content = content.replaceAll("br","h3");
