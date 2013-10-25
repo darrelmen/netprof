@@ -11,13 +11,14 @@ import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Form;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
-import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.github.gwtbootstrap.client.ui.event.ShowEvent;
 import com.github.gwtbootstrap.client.ui.event.ShowHandler;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -81,16 +82,17 @@ public class StudentDialog extends UserDialog {
     RegistrationInfo registrationInfo = new RegistrationInfo(register);
     final AccordionGroup accordion = getAccordion(dialogBox, register);
 
-    purpose.box.addClickHandler(new ClickHandler() {
+    purpose.box.addChangeHandler(new ChangeHandler() {
       @Override
-      public void onClick(ClickEvent event) {
-        boolean showRegister = !canSkipRegister(purpose.getValue());
-        accordion.setVisible(showRegister);
+      public void onChange(ChangeEvent event) {
+        boolean b = canSkipRegister(purpose.getValue());
+        if (b) accordion.hide();
+        else accordion.show();
       }
     });
 
     final Button closeButton = addLoginButton(dialogBox);
-    addClickHandler(dialogBox, registrationInfo, user, password, purpose, closeButton, accordion);
+    closeButton.addClickHandler(makeCloseHandler(dialogBox, registrationInfo, user, password, purpose, accordion));
 
     configureKeyHandler(dialogBox, closeButton);
 
@@ -119,22 +121,20 @@ public class StudentDialog extends UserDialog {
   }
 
   /**
-   * @see #displayLoginBox()
    * @param dialogBox
    * @param registrationInfo
    * @param user
    * @param password
    * @param purpose
-   * @param closeButton
    * @param accordion
+   * @see #displayLoginBox()
    */
-  private void addClickHandler(final Modal dialogBox,
-                               final RegistrationInfo registrationInfo,
-                               final FormField user, final FormField password, final ListBoxFormField purpose,
-                               Button closeButton,
-                               final AccordionGroup accordion) {
+  private ClickHandler makeCloseHandler(final Modal dialogBox,
+                                        final RegistrationInfo registrationInfo,
+                                        final FormField user, final FormField password, final ListBoxFormField purpose,
+                                        final AccordionGroup accordion) {
     // Create a handler for the sendButton and nameField
-    class MyHandler implements ClickHandler {
+    return new ClickHandler() {
       /**
        * Do validation.
        * Fired when the user clicks on the sendButton.
@@ -151,54 +151,49 @@ public class StudentDialog extends UserDialog {
             @Override
             public void onSuccess(Integer result) {
               boolean exists = result != -1;
-              String purposeValue = purpose.getValue();
-              String audioType = getAudioTypeFromPurpose(purposeValue);
+              String audioType = getAudioTypeFromPurpose(purpose.getValue());
               if (exists) {
                 dialogBox.hide();
                 langTest.rememberAudioType(audioType);
                 userManager.storeUser(result, audioType, userID, PropertyHandler.LOGIN_TYPE.STUDENT);
               } else {
-                if (canSkipRegister(purposeValue)) {
+              /*  if (canSkipRegister(purposeValue)) {
                   dialogBox.hide();
-                  sendNameToServer(registrationInfo, audioType);
-                } else {
-                  /*if (!disclosurePanel.isOpen()) {
-                    disclosurePanel.setOpen(true);   // reveal registration fields
-                  }*/
-                  accordion.show();
-                  if (highlightIntegerBox(registrationInfo.ageEntryGroup)) {
-                    if (highlightIntegerBox(registrationInfo.weeks, MIN_WEEKS, MAX_WEEKS)) {
-                      if (registrationInfo.dialectGroup.getText().isEmpty()) {
-                        markError(registrationInfo.dialectGroup, "Please enter a language dialect.");
-                      } else {
-                        dialogBox.hide();
-                        sendNameToServer(registrationInfo, audioType);
-                      }
-                    } else {
-                      markError(registrationInfo.weeks, "Please enter weeks between " + MIN_WEEKS + " and " + MAX_WEEKS + ".");
-                    }
-                  } else {
-                    markError(registrationInfo.ageEntryGroup, "Please enter age between " + MIN_AGE + " and " + MAX_AGE + ".");
-                  }
-                }
+                  sendNameToServer(registrationInfo, audioType, userID);
+                } else {*/
+                System.out.println("reveal!");
+                accordion.show();
+                checkThenRegister(audioType, registrationInfo, dialogBox, userID);
               }
             }
           });
         }
       }
+    };
+  }
 
-
+  private void checkThenRegister(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID) {
+    if (highlightIntegerBox(registrationInfo.ageEntryGroup)) {
+      if (highlightIntegerBox(registrationInfo.weeks, MIN_WEEKS, MAX_WEEKS)) {
+        if (registrationInfo.dialectGroup.getText().isEmpty()) {
+          markError(registrationInfo.dialectGroup, "Please enter a language dialect.");
+        } else {
+          dialogBox.hide();
+          sendNameToServer(registrationInfo, audioType, userID);
+        }
+      } else {
+        markError(registrationInfo.weeks, "Please enter weeks between " + MIN_WEEKS + " and " + MAX_WEEKS + ".");
+      }
+    } else {
+      markError(registrationInfo.ageEntryGroup, "Please enter age between " + MIN_AGE + " and " + MAX_AGE + ".");
     }
-
-    // Add a handler to send the name to the server
-    closeButton.addClickHandler(new MyHandler());
   }
 
   private String getAudioTypeFromPurpose(String purposeValue) {
     return purposeValue.equalsIgnoreCase("Practice") ?
-                    Result.AUDIO_TYPE_PRACTICE : (purposeValue.equalsIgnoreCase("Demo") ?
-                    Result.AUDIO_TYPE_DEMO :
-                    Result.AUDIO_TYPE_FAST_AND_SLOW);
+      Result.AUDIO_TYPE_PRACTICE : (purposeValue.equalsIgnoreCase("Demo") ?
+      Result.AUDIO_TYPE_DEMO :
+      Result.AUDIO_TYPE_FAST_AND_SLOW);
   }
 
   private boolean canSkipRegister(String purposeValue) {
@@ -254,30 +249,31 @@ public class StudentDialog extends UserDialog {
 
   /**
    * Send the name from the nameField to the server and wait for a response.
+   *
+   * @see #makeCloseHandler(com.github.gwtbootstrap.client.ui.Modal, mitll.langtest.client.user.StudentDialog.RegistrationInfo, mitll.langtest.client.user.UserDialog.FormField, mitll.langtest.client.user.UserDialog.FormField, mitll.langtest.client.user.UserDialog.ListBoxFormField, com.github.gwtbootstrap.client.ui.AccordionGroup)
    */
-  private void sendNameToServer(RegistrationInfo registrationInfo, String audioType) {
-    int weeksValue = registrationInfo.weeks.getText().isEmpty() ? 0: Integer.parseInt(registrationInfo.weeks.getText());
-    addUser(0, registrationInfo.ageEntryGroup.box, registrationInfo.genderGroup.box, registrationInfo.dialectGroup.box, weeksValue,
-      registrationInfo.reading.getValue(), registrationInfo.listening.getValue(), registrationInfo.speaking.getValue(), registrationInfo.writing.getValue(),
-      registrationInfo.rilr.getValue(), registrationInfo.lilr.getValue(), registrationInfo.silr.getValue(), registrationInfo.wilr.getValue(),audioType);
+  private void sendNameToServer(RegistrationInfo registrationInfo, String audioType, String userID) {
+    int weeksValue = registrationInfo.weeks.getText().isEmpty() ? 0 : Integer.parseInt(registrationInfo.weeks.getText());
+    addUser(0, weeksValue, registrationInfo, audioType, userID);
   }
 
   /**
    * @param monthsOfExperience
-   * @param ageEntryBox
-   * @param genderBox
-   * @param dialectBox
+   * @param userID
    * @see #displayLoginBox()
    */
-  private void addUser(int monthsOfExperience, TextBox ageEntryBox, ListBox genderBox, TextBox dialectBox,
-                       final int weeksOfExperience,
-                       final String reading, final String listening, final String speaking, final String writing,
-                       final boolean rEst, final boolean lEst, final boolean sEst, final boolean wEst,
-                       final String audioType) {
-    int age = getAge(ageEntryBox);
-    String gender = genderBox.getValue(genderBox.getSelectedIndex());
+  private void addUser(int monthsOfExperience, final int weeksOfExperience,
+                       final RegistrationInfo registrationInfo,
+                       final String audioType, String userID) {
+    int age = getAge(registrationInfo.ageEntryGroup.box);
+    String gender = registrationInfo.genderGroup.getValue();
 
-    AsyncCallback<Long> async = new AsyncCallback<Long>() {
+    AsyncCallback<Long> async = getAddDLIUserCallback(weeksOfExperience, registrationInfo, audioType);
+    addUser(age, gender, monthsOfExperience, registrationInfo.dialectGroup.getText(), "", userID, async);
+  }
+
+  private AsyncCallback<Long> getAddDLIUserCallback(final int weeksOfExperience, final RegistrationInfo registrationInfo, final String audioType) {
+    return new AsyncCallback<Long>() {
       public void onFailure(Throwable caught) {
         Window.alert("addUser : Couldn't contact server.");
       }
@@ -287,10 +283,10 @@ public class StudentDialog extends UserDialog {
         userManager.storeUser(result, audioType, "" + result, PropertyHandler.LOGIN_TYPE.STUDENT);
 
         DLIUser dliUser = new DLIUser(result, weeksOfExperience,
-          new DLIUser.ILRLevel(reading, rEst),
-          new DLIUser.ILRLevel(listening, lEst),
-          new DLIUser.ILRLevel(speaking, sEst),
-          new DLIUser.ILRLevel(writing, wEst)
+          new DLIUser.ILRLevel(registrationInfo.reading.getValue(), registrationInfo.rilr.getValue()),
+          new DLIUser.ILRLevel(registrationInfo.listening.getValue(), registrationInfo.lilr.getValue()),
+          new DLIUser.ILRLevel(registrationInfo.speaking.getValue(), registrationInfo.silr.getValue()),
+          new DLIUser.ILRLevel(registrationInfo.writing.getValue(), registrationInfo.wilr.getValue())
         );
 
         service.addDLIUser(dliUser, new AsyncCallback<Void>() {
@@ -305,7 +301,6 @@ public class StudentDialog extends UserDialog {
         });
       }
     };
-    addUser(age, gender, monthsOfExperience, dialectBox.getText(), async);
   }
 
   /**
@@ -340,13 +335,14 @@ public class StudentDialog extends UserDialog {
         userManager.storeUser(result, audioType, "" + result, loginType);
       }
     };
-    addUser(age, gender, monthsOfExperience, dialect, async);
+    addUser(age, gender, monthsOfExperience, dialect, "", "", async);
   }
 
-  private void addUser(int age, String gender, int monthsOfExperience, String dialect, AsyncCallback<Long> async) {
+  private void addUser(int age, String gender, int monthsOfExperience, String dialect, String nativeLang, String userID,
+                       AsyncCallback<Long> async) {
     service.addUser(age,
       gender,
-      monthsOfExperience, dialect, async);
+      monthsOfExperience, dialect, nativeLang, userID, async);
   }
 
   private boolean highlightIntegerBox(FormField ageEntryGroup) {
