@@ -48,7 +48,7 @@ public interface LangTestDatabase extends RemoteService {
 
   // user DAO
   long addUser(int age, String gender, int experience, String dialect);
-  long addUser(int age, String gender, int experience, String firstName, String lastName, String nativeLang, String dialect, String userID);
+  long addUser(int age, String gender, int experience, String dialect, String nativeLang, String userID);
 
   List<User> getUsers();
   int userExists(String login);
