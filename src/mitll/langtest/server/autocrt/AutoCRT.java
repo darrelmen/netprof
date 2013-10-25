@@ -32,7 +32,7 @@ import java.util.TreeSet;
 public class AutoCRT {
   private static Logger logger = Logger.getLogger(AutoCRT.class);
 
-  private static final float MIN_CRT_SCORE = 0.1f;
+  //private static final float MIN_CRT_SCORE = 0.1f;
   //private static final double MINIMUM_FLASHCARD_PRON_SCORE = 0.19;
   private Classifier<AutoGradeExperiment.Event> classifier = null;
   private Map<String, Export.ExerciseExport> exerciseIDToExport;

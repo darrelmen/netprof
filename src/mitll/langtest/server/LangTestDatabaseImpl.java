@@ -824,21 +824,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    *
+   *
+   *
    * @param age
    * @param gender
    * @param experience
-   * @param firstName
-   * @param lastName
-   * @param nativeLang
    * @param dialect
+   * @param nativeLang
    * @param userID
    * @return
    */
   @Override
   public long addUser(int age, String gender, int experience,
-                      String firstName, String lastName, String nativeLang, String dialect, String userID) {
-    logger.info("Adding user " + userID + " " + firstName + " " + lastName);
-    long l = db.addUser(getThreadLocalRequest(),age, gender, experience, firstName, lastName, nativeLang, dialect, userID);
+                      String dialect, String nativeLang, String userID) {
+    logger.info("Adding user " + userID);// + " " + firstName + " " + lastName);
+    long l = db.addUser(getThreadLocalRequest(),age, gender, experience, dialect, nativeLang, userID);
 
     if (l != 0 && serverProps.isDataCollectAdminView) {
       new SiteDeployer().sendNewUserEmail(getMailSupport(), getThreadLocalRequest(), userID);
