@@ -57,6 +57,7 @@ import java.util.TreeSet;
 public class DatabaseImpl implements Database {
   private static Logger logger = Logger.getLogger(DatabaseImpl.class);
 
+  private static final boolean DO_SIMPLE_FLASHCARDS = true;
   private static final boolean DROP_USER = false;
   private static final boolean DROP_RESULT = false;
   private static final int MIN_INCORRECT_ANSWERS = 10;
@@ -460,15 +461,15 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public FlashcardResponse getNextExercise(List<Exercise> exercises, long userID, boolean isTimedGame, Map<String, Collection<String>> typeToSection) {
-    return getFlashcardResponse(userID, isTimedGame, exercises, typeToSection);
+    return getFlashcardResponse(userID, isTimedGame, exercises);
   }
 
   public FlashcardResponse getNextExercise(long userID, boolean isTimedGame) {
     List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
-    return getFlashcardResponse(userID, isTimedGame, exercises, new HashMap<String, Collection<String>>());
+    return getFlashcardResponse(userID, isTimedGame, exercises);
   }
 
-  private FlashcardResponse getFlashcardResponse(long userID, boolean isTimedGame, List<Exercise> exercises, Map<String, Collection<String>> typeToSection) {
+  private FlashcardResponse getFlashcardResponse(long userID, boolean isTimedGame, List<Exercise> exercises) {
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
     for (Exercise e : exercises) idToExercise.put(e.getID(), e);
     UserStateWrapper userStateWrapper;
@@ -482,7 +483,7 @@ public class DatabaseImpl implements Database {
       }
     }
 
-    if (isTimedGame) {
+    if (isTimedGame || DO_SIMPLE_FLASHCARDS) {
       FlashcardResponse flashcardResponse;
       if (userStateWrapper.isComplete()) {
         userStateWrapper.shuffle();
@@ -491,7 +492,7 @@ public class DatabaseImpl implements Database {
         new FlashcardResponse(userStateWrapper.getNextExercise(),
           userStateWrapper.getCorrect(),
           userStateWrapper.getIncorrect());
-      flashcardResponse.setCorrectHistory(userStateWrapper.getCorrectHistory());
+      //flashcardResponse.setCorrectHistory(userStateWrapper.getCorrectHistory());
       return flashcardResponse;
     }
     return getFlashcardResponse(idToExercise, userStateWrapper);
@@ -1087,14 +1088,14 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
   private long addUser(int age, String gender, int experience, String ipAddr, String dialect) {
-    return userDAO.addUser(age, gender, experience, ipAddr, "", "", "", dialect, "", false);
+    return userDAO.addUser(age, gender, experience, ipAddr, "", dialect, "", false);
   }
 
   public long addUser(HttpServletRequest request,
-                      int age, String gender, int experience, String firstName, String lastName,
-                      String nativeLang, String dialect, String userID) {
+                      int age, String gender, int experience,
+                      String dialect, String nativeLang, String userID) {
     String ip = getIPInfo(request);
-    return addUser(age, gender, experience, ip, firstName, lastName, nativeLang, dialect, userID);
+    return addUser(age, gender, experience, ip, nativeLang, dialect, userID);
   }
 
   private String getIPInfo(HttpServletRequest request) {
@@ -1104,9 +1105,9 @@ public class DatabaseImpl implements Database {
     return request.getRemoteHost() +/*"/"+ request.getRemoteAddr()+*/(header != null ? "/" + header : "") + " at " + format;
   }
 
-  private long addUser(int age, String gender, int experience, String ipAddr, String firstName, String lastName,
-                      String nativeLang, String dialect, String userID) {
-    return userDAO.addUser(age, gender, experience, ipAddr, firstName, lastName, nativeLang, dialect, userID, false);
+  private long addUser(int age, String gender, int experience, String ipAddr,
+                       String nativeLang, String dialect, String userID) {
+    return userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false);
   }
 
   /**
