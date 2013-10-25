@@ -66,7 +66,6 @@ public class UserStateWrapper {
   public boolean isComplete() { return counter == exercises.size(); }
 
   public void reset() {
-   // correctHistory.add(correct);
     correct = 0;
     incorrect = 0;
     shuffle();
@@ -78,7 +77,18 @@ public class UserStateWrapper {
   }
 
   public Exercise getNextExercise() {
+    System.out.println("Getting next " + counter);
+
     return exercises.get(counter++ % exercises.size()); // defensive
+  }
+
+  public Exercise getPrevExercise() {
+    if (counter > 0) {
+      System.out.println("Getting prev " + counter);
+      counter -= 1;
+    }
+    System.out.println("Getting prev " + counter);
+    return exercises.get(counter % exercises.size()); // defensive
   }
 
 /*  public int getPcorrect() {
