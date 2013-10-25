@@ -19,6 +19,12 @@ public class FlashcardResponse implements IsSerializable {
 
   public FlashcardResponse() {}
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getFlashcardResponse(long, boolean, java.util.List)
+   * @param e
+   * @param correct
+   * @param incorrect
+   */
   public FlashcardResponse(Exercise e, int correct, int incorrect) {
     this.nextExercise = e;
     this.correct = correct;
