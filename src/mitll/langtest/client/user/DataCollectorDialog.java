@@ -300,14 +300,23 @@ public class DataCollectorDialog extends UserDialog {
       monthsOfExperience = NATIVE_MONTHS;
     }
 
+    final String userName = user.getText();
+    String gender = genderBox.getValue(genderBox.getSelectedIndex());
+    String nativeLangValue = nativeLang.getText();
+    String dialectValue = dialect.getText();
+    addFullUser(dialogBox, closeButton, userManager,
+      userName, gender, nativeLangValue, dialectValue, age, monthsOfExperience, isFastAndSlow);
+  }
+
+  protected void addFullUser(final Modal dialogBox, final Button closeButton,
+                             final UserManager userManager,
+                             final String userName, String gender, String nativeLangValue, String dialectValue, int age,
+                             int monthsOfExperience, final boolean isFastAndSlow) {
     service.addUser(age,
-      genderBox.getValue(genderBox.getSelectedIndex()),
+      gender,
       monthsOfExperience,
-      "",
-      "",
-      nativeLang.getText(),
-      dialect.getText(),
-      user.getText(),
+      dialectValue, nativeLangValue,
+      userName,
 
       new AsyncCallback<Long>() {
         public void onFailure(Throwable caught) {
@@ -321,17 +330,16 @@ public class DataCollectorDialog extends UserDialog {
           dialogBox.hide();
           String audioType = isFastAndSlow ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
           storeAudioType(audioType);
-          userManager.storeUser(result, audioType, user.getText(), PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR);
+          userManager.storeUser(result, audioType, userName, PropertyHandler.LOGIN_TYPE.DATA_COLLECTOR);
         }
       });
   }
 
-  private void storeAudioType(String type) {
+  protected void storeAudioType(String type) {
     if (props.isCollectAudio()) {
       langTest.rememberAudioType(type);
     }
   }
-
 
   private boolean checkAudioSelection(RadioButton regular, RadioButton fastThenSlow) {
     return props.isCollectAudio() && !regular.getValue() && !fastThenSlow.getValue();
