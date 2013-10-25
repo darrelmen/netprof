@@ -87,7 +87,7 @@ public class Flashcard implements RequiresResize {
 
     flashcardImage = new Image(LangTest.LANGTEST_IMAGES + appIcon);
     flashcardImage.addStyleName("floatLeft");
-    flashcardImage.addStyleName("rightMargin");
+    flashcardImage.addStyleName("rightFiveMargin");
     iconLeftHeader.add(flashcardImage);
     iconLeftHeader.add(flashcard);
     headerRow.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
