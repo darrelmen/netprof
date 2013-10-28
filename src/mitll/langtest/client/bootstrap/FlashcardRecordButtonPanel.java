@@ -79,6 +79,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
     this.exercise = exercise;
     isDemoMode = controller.isDemoMode();
     this.warnUserWhenNotSpace = warnUserWhenNotSpace;
+    recordButton.setTitle("Please press and hold the space bar to record");
   }
 
   @Override
