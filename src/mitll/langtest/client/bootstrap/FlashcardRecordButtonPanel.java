@@ -1,8 +1,20 @@
 package mitll.langtest.client.bootstrap;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import mitll.langtest.client.LangTest;
+import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExerciseQuestionState;
+import mitll.langtest.client.recorder.RecordButton;
+import mitll.langtest.client.recorder.RecordButtonPanel;
+import mitll.langtest.client.sound.SoundFeedback;
+import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.Exercise;
+
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
-import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
@@ -17,18 +29,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExerciseQuestionState;
-import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.client.recorder.RecordButtonPanel;
-import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
 * Created with IntelliJ IDEA.
@@ -41,36 +41,44 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
   private static final int KEY_PRESS = 256;
   private static final int KEY_UP = 512;
   private static final int SPACE_CHAR = 32;
-  //private static final int HIDE_DELAY = 2500;
-  private static final int DELAY_MILLIS = 1000;//1250;
+  private static final int DELAY_MILLIS = 1000;
   private static final int DELAY_MILLIS_LONG = 3000;
   private static final int LONG_DELAY_MILLIS = 3500;
   private static final int DELAY_CHARACTERS = 40;
   private static final int PERIOD_MILLIS = 300;
   private static final boolean NEXT_ON_BAD_AUDIO = false;
-  //private static final String FEEDBACK_TIMES_SHOWN = "FeedbackTimesShown";
-  //private static final int MAX_INTRO_FEEBACK_COUNT = -1;
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
+  private static final String NO_SPACE_WARNING = "Press and hold space bar to begin recording, release to stop.";
 
   private Image waitingForResponseImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress48.gif"));
   private Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
   private Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
-//  public Image correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
-//  public Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
   private Image enterImage;  // todo change to text with blue background
   private Timer t;
   private boolean keyIsDown;
   private boolean isDemoMode;
+  boolean warnUserWhenNotSpace;
 
   private final Exercise exercise;
   private BootstrapExercisePanel widgets;
 
-  public FlashcardRecordButtonPanel(BootstrapExercisePanel widgets, LangTestDatabaseAsync service, ExerciseController controller, Exercise exercise, int index) {
+  /**
+   * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @param widgets
+   * @param service
+   * @param controller
+   * @param exercise
+   * @param index
+   * @param warnUserWhenNotSpace
+   */
+  public FlashcardRecordButtonPanel(BootstrapExercisePanel widgets, LangTestDatabaseAsync service,
+                                    ExerciseController controller, Exercise exercise, int index, boolean warnUserWhenNotSpace) {
     super(service, controller, exercise, null, index);
     this.widgets = widgets;
     this.exercise = exercise;
     isDemoMode = controller.isDemoMode();
+    this.warnUserWhenNotSpace = warnUserWhenNotSpace;
   }
 
   @Override
@@ -120,7 +128,9 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
                                                      boolean isSpace = ne.getCharCode() == SPACE_CHAR;
 
                                                      if (keyPress && !isSpace) {
-                                                       widgets.showPopup("Press and hold space bar to begin recording, release to stop.");
+                                                       if (warnUserWhenNotSpace) {
+                                                         widgets.showPopup(NO_SPACE_WARNING);
+                                                       }
                                                      }
                                                      if (keyPress && !keyIsDown && isSpace) {
                                                        keyIsDown = true;
@@ -204,8 +214,6 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
     t.cancel();
     recordButton.setResource(waitingForResponseImage);
     recordButton.setHeight("112px");
-
-    //onUnload();
   }
 
   private int numMP3s = 0;
@@ -314,8 +322,6 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
     }*/
   }
 
-  private List<String> toPlay = new ArrayList<String>();
-
   /**
    * If there's reference audio, play it and wait for it to finish.
    *
@@ -327,15 +333,16 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
   private String showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio) {
     widgets.showPronScoreFeedback(score);
     boolean hasSynonymAudio = !exercise.getSynonymAudioRefs().isEmpty();
-    System.out.println("showIncorrectFeedback : playing " + toPlay + " result " + result + " score " + score + " has ref " + hasRefAudio +
+    System.out.println("showIncorrectFeedback : playing " + exercise.getSynonymAudioRefs()
+      + " result " + result + " score " + score + " has ref " + hasRefAudio +
       " hasSynonymAudio " + hasSynonymAudio);
 
     String correctPrompt = getCorrectDisplay();
     if (hasRefAudio) {
       if (hasSynonymAudio) {
-        toPlay.addAll(exercise.getSynonymAudioRefs());
+        List<String> toPlay = new ArrayList<String>(exercise.getSynonymAudioRefs());
         System.out.println("showIncorrectFeedback : playing " + toPlay);
-        playAllAudio(correctPrompt);
+        playAllAudio(correctPrompt,toPlay);
       } else {
         String path = exercise.getRefAudio();
         if (path == null) path = exercise.getSlowAudioRef(); // fall back to slow audio
@@ -368,7 +375,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
     return correctPrompt;
   }
 
-  private void playAllAudio(final String infoToShow) {
+  private void playAllAudio(final String infoToShow, final List<String> toPlay) {
     String path = toPlay.get(0);
     path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
 
@@ -381,7 +388,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
         System.out.println("playAllAudio : songEnded " + toPlay.size() + " items left.");
 
         if (!toPlay.isEmpty()) {
-          playAllAudio(infoToShow);
+          playAllAudio(infoToShow,toPlay);
         } else {
           goToNextItem(infoToShow);
         }

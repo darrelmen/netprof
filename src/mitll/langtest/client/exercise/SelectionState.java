@@ -31,7 +31,7 @@ public class SelectionState {
 
   /**
    * Populated from history token!
-   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList#getExercises(long)
+   * @see ListInterface#getExercises(long, boolean)
    */
   public SelectionState() {
     this(History.getToken());
@@ -46,7 +46,7 @@ public class SelectionState {
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList#getExercises(long)
+   * @see ListInterface#getExercises(long, boolean)
    */
   public boolean isEmpty() { return getTypeToSection().isEmpty(); }
 
