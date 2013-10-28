@@ -123,8 +123,8 @@ public class PropertyHandler {
   private boolean addRecordKeyBinding = true;
   private LOGIN_TYPE loginType = LOGIN_TYPE.UNDEFINED;
   private int flashcardPreviewHeight = DEFAULT_FLASHCARD_PREVIEW_HEIGHT;
-  private boolean dliDemographics;
-  private boolean trackUsers, tabooEnglish;
+  //private boolean dliDemographics;
+  private boolean trackUsers;//, tabooEnglish;
   private boolean flashcardNextAndPrev;
 
   public PropertyHandler(Map<String,String> props) {
@@ -174,9 +174,9 @@ public class PropertyHandler {
       else if (key.equals(CONTINUE_PROMPT)) promptBeforeNextItem = getBoolean(value);
       else if (key.equals(RIGHT_ALIGN_CONTENT)) rightAlignContent = getBoolean(value);
       else if (key.equals(ADD_RECORD_KEY_BINDING)) addRecordKeyBinding = getBoolean(value);
-      else if (key.equals(DLI_DEMOGRAPHICS)) dliDemographics = getBoolean(value);
+     // else if (key.equals(DLI_DEMOGRAPHICS)) dliDemographics = getBoolean(value);
       else if (key.equals(TRACK_ONLINE_USERS)) trackUsers = getBoolean(value);
-      else if (key.equals(TABOO_ENGLISH)) tabooEnglish = getBoolean(value);
+    //  else if (key.equals(TABOO_ENGLISH)) tabooEnglish = getBoolean(value);
       else if (key.equals(FLASHCARD_NEXT_AND_PREV)) flashcardNextAndPrev = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
