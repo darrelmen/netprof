@@ -116,8 +116,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory(long)
    * @see SectionExerciseList#noSectionsGetExercises(long)
    * @param userID
+   * @param getNext
    */
-  public void getExercises(long userID) {
+  public void getExercises(long userID, boolean getNext) {
     System.out.println("ExerciseList.getExercises for user " +userID);
 
     if (showInOrder) {
@@ -202,7 +203,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-   * @see #getExercises(long)
+   * @see ListInterface#getExercises(long, boolean)
    */
   protected class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper> {
     public void onFailure(Throwable caught) {
@@ -245,11 +246,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return idToExercise.values();
   }
   */
-  private Random random = new Random();
+/*  private Random random = new Random();
   public void askForRandomExercise(AsyncCallback<Exercise> callback) {
     ExerciseShell shell = currentExercises.get(random.nextInt(currentExercises.size()));
     service.getExercise(shell.getID(), callback);
-  }
+  }*/
 
   public void setSelectionState(Map<String, Collection<String>> selectionState) {}
 
@@ -592,9 +593,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   protected void onLastItem() {
     feedback.showErrorMessage("Test Complete", "Test Complete! Thank you!");
   }
-
-  public void startOver() {}
-
 
   /**
    * So a turker can get credit for their work.
