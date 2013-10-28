@@ -34,8 +34,9 @@ public interface ListInterface extends RequiresResize {
      * @see mitll.langtest.client.LangTest#gotUser(long)
      * @see mitll.langtest.client.LangTest#makeFlashContainer()
      * @param userID
+     * @param getNext
      */
-  void getExercises(long userID);
+  void getExercises(long userID, boolean getNext);
 
   /**
    * @see mitll.langtest.client.LangTest#makeExerciseList
@@ -62,7 +63,6 @@ public interface ListInterface extends RequiresResize {
 
   boolean loadNextExercise(String id);
   void makeExercisePanel(Exercise result);
-  void startOver();
 
   boolean loadPreviousExercise(ExerciseShell current);
 
@@ -88,6 +88,4 @@ public interface ListInterface extends RequiresResize {
   void setSelectionState(Map<String,Collection<String>> selectionState);
 
   void hideExerciseList();
-
-  void askForRandomExercise(AsyncCallback<Exercise> callback);
 }
