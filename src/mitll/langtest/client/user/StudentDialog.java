@@ -384,7 +384,7 @@ public class StudentDialog extends UserDialog {
     private CheckBox silr;
     private CheckBox wilr;
     private FormField dialectGroup;
-
+/*
     public FormField getAgeEntryGroup() {
       return ageEntryGroup;
     }
@@ -431,7 +431,7 @@ public class StudentDialog extends UserDialog {
 
     public FormField getDialectGroup() {
       return dialectGroup;
-    }
+    }*/
 
     public RegistrationInfo(Panel dialogBox) {
       Form form = new Form();
