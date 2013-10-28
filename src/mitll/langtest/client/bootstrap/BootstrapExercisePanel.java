@@ -1,5 +1,14 @@
 package mitll.langtest.client.bootstrap;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import mitll.langtest.client.LangTest;
+import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.sound.SoundFeedback;
+import mitll.langtest.shared.Exercise;
+
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
@@ -12,8 +21,6 @@ import com.github.gwtbootstrap.client.ui.Paragraph;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.common.util.concurrent.AbstractScheduledService;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
@@ -22,7 +29,6 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
@@ -32,14 +38,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.shared.Exercise;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -64,7 +62,8 @@ public class BootstrapExercisePanel extends FluidContainer {
   private Heading recoOutput;
   private ProgressBar scoreFeedback = new ProgressBar();
   private SoundFeedback soundFeedback;
-  final Widget cardPrompt;
+  protected final Widget cardPrompt;
+
   /**
    * @param e
    * @param service
@@ -153,50 +152,51 @@ public class BootstrapExercisePanel extends FluidContainer {
       stimulus = content;
     }
 
-    if (content != null/* && !controller.isFlashCard()*/) {
-      System.out.println("\tfor " + e.getID() + " not flashcard");
-
-      Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
-      content = content.replaceAll("<p> &nbsp; </p>", "");
-      String splitTerm = LISTEN_TO_THIS_AUDIO;
-      String[] split = content.split(splitTerm);
-      String prefix = split[0];
-      HTML contentPrefix = getHTML(prefix, true, controller);
-      contentPrefix.addStyleName("marginRight");
-
-      Panel container = new FlowPanel();
-      Heading child = new Heading(5, "Exercise " + e.getID());
-      child.addStyleName("leftTenMargin");
-      container.add(child);
-      container.add(contentPrefix);
-
-      // Todo : this is vulnerable to a variety of issues.
-      if (e.getRefAudio() != null && e.getRefAudio().length() > 0) {
-        Panel container2 = new FlowPanel();
-        container2.addStyleName("rightFiveMargin");
-        HTML prompt = getHTML("<h3 style='margin-right: 30px'>" + splitTerm + "</h3>", true, controller);
-        container2.add(prompt);
-        SimplePanel simplePanel = new SimplePanel();
-        simplePanel.add(getAudioWidget(e));
-        container2.add(simplePanel);
-
-        String suffix = split[1];
-        HTML contentSuffix = getHTML("<br/>" + // TODO: br is a hack
-          "<h3 style='margin-right: 30px'>" + suffix + "</h3>", true, controller);
-        contentSuffix.addStyleName("marginRight");
-        container2.add(contentSuffix);
-        container2.addStyleName("rightAlign");
-        container.add(container2);
-      }
-
-      container.add(getHTML("<h2 style='margin-right: 30px'>" + qaPair.getQuestion() + "</h2>", true, controller));
-
-      return container;
+    if (content != null && !controller.isDataCollectMode()) {
+      return makeFlashcardForCRT(e, controller, content);
     } else {
       Widget hero = new Heading(headingSize, stimulus);
       hero.addStyleName("marginRight");
       return hero;
     }
+  }
+
+  private Panel makeFlashcardForCRT(Exercise e, ExerciseController controller, String content) {
+    Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
+    content = content.replaceAll("<p> &nbsp; </p>", "");
+    String splitTerm = LISTEN_TO_THIS_AUDIO;
+    String[] split = content.split(splitTerm);
+    String prefix = split[0];
+    HTML contentPrefix = getHTML(prefix, true, controller);
+    contentPrefix.addStyleName("marginRight");
+
+    Panel container = new FlowPanel();
+    Heading child = new Heading(5, "Exercise " + e.getID());
+    child.addStyleName("leftTenMargin");
+    container.add(child);
+    container.add(contentPrefix);
+
+    // Todo : this is vulnerable to a variety of issues.
+    if (e.getRefAudio() != null && e.getRefAudio().length() > 0) {
+      Panel container2 = new FlowPanel();
+      container2.addStyleName("rightFiveMargin");
+      HTML prompt = getHTML("<h3 style='margin-right: 30px'>" + splitTerm + "</h3>", true, controller);
+      container2.add(prompt);
+      SimplePanel simplePanel = new SimplePanel();
+      simplePanel.add(getAudioWidget(e));
+      container2.add(simplePanel);
+
+      String suffix = split[1];
+      HTML contentSuffix = getHTML("<br/>" + // TODO: br is a hack
+        "<h3 style='margin-right: 30px'>" + suffix + "</h3>", true, controller);
+      contentSuffix.addStyleName("marginRight");
+      container2.add(contentSuffix);
+      container2.addStyleName("rightAlign");
+      container.add(container2);
+    }
+
+    container.add(getHTML("<h2 style='margin-right: 30px'>" + qaPair.getQuestion() + "</h2>", true, controller));
+    return container;
   }
 
   private Widget getAudioWidget(Exercise e) {
@@ -324,7 +324,7 @@ public class BootstrapExercisePanel extends FluidContainer {
 
   protected FlashcardRecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service,
                                                 ExerciseController controller, final int index) {
-    return new FlashcardRecordButtonPanel(this, service, controller, exercise, index);
+    return new FlashcardRecordButtonPanel(this, service, controller, exercise, index, true);
   }
 
   /**
