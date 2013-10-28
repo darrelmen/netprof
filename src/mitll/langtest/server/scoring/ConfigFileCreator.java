@@ -1,7 +1,6 @@
 package mitll.langtest.server.scoring;
 
 import corpus.LTS;
-import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.util.HashMap;
