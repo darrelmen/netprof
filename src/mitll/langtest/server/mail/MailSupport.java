@@ -23,10 +23,24 @@ public class MailSupport {
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
   private boolean debugEmail;
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getMailSupport()
+   * @param debugEmail
+   */
   public MailSupport(boolean debugEmail) {
     this.debugEmail = debugEmail;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#sendEmail(int, String, String, String, String, String)
+   * @param serverName
+   * @param baseURL
+   * @param to
+   * @param replyTo
+   * @param subject
+   * @param message
+   * @param token
+   */
   public void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message, String token) {
     List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<String>();
     if (toAddresses.isEmpty()) {
@@ -104,8 +118,18 @@ public class MailSupport {
       body);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#logAndNotifyServerException(Exception)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#logMessage(String)
+   *
+   * @param subject
+   * @param message
+   */
   public void email(String subject, String message) {
     normalEmail(RECIPIENT_NAME, EMAIL, new ArrayList<String>(),subject, message,"localhost");
+  }
+  public void email(String receiver, String subject, String message) {
+    normalEmail(RECIPIENT_NAME, receiver, new ArrayList<String>(),subject, message,"localhost");
   }
 
 /*  public void email(String recipientName, String recipientEmail, String subject, String message) {
@@ -186,7 +210,9 @@ public class MailSupport {
                               String subject, String message) throws Exception {
     Message msg = new MimeMessage(session);
     msg.setFrom(new InternetAddress(EMAIL, DATA_COLLECT_WEBMASTER));
-    msg.addRecipient(Message.RecipientType.TO, new InternetAddress(recipientEmail, recipientName));
+    InternetAddress address = new InternetAddress(recipientEmail, recipientName);
+    logger.debug("Sending to " + address);
+    msg.addRecipient(Message.RecipientType.TO, address);
     for (String ccEmail : ccEmails) {
       msg.addRecipient(Message.RecipientType.CC, new InternetAddress(ccEmail));
     }
