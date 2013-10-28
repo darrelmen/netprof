@@ -123,7 +123,7 @@ public class UserManager {
    */
   public void userAlive() {
     updateUserSessionExpires();
-    int user = getUser();
+   // int user = getUser();
     if (!isActive()) System.err.println("huh? user is not active...\n\n\n");
    // System.out.println(new Date() +" --------> userAlive : " + user);
     //userOnline(user, true);
