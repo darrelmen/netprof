@@ -223,7 +223,7 @@ public class English extends SplitAudio {
 
       if (englishSentence.contains(";")) {
         //logger.warn("skipping semi colon : " + englishSentence);
-      } else if (englishSentence == null) logger.warn("huh? no english sentence for " + e.getID());
+      }
       else {
         String key = englishSentence.toLowerCase().trim();
 
