@@ -1,13 +1,13 @@
 package mitll.langtest.client.flashcard;
 
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
 import mitll.langtest.client.bootstrap.DataCollectionFlashcard;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
+
+import com.google.gwt.user.client.ui.Panel;
 
 /**
  * Make Bootstrap exercise panels...
