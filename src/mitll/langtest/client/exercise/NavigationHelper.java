@@ -58,6 +58,7 @@ public class NavigationHelper extends HorizontalPanel {
     this.provider = new PostAnswerProvider() {
       @Override
       public void postAnswers(ExerciseController controller, Exercise completedExercise) {
+        System.out.println("NavigationHelper.postAnswers.loadNextExercise " + exercise.getID());
         controller.loadNextExercise(exercise);
       }
     };
@@ -80,8 +81,7 @@ public class NavigationHelper extends HorizontalPanel {
         clickPrev(controller, e);
       }
     });
-    boolean onFirst = !controller.onFirst(e);
-    prev.setEnabled(onFirst);
+    prev.setEnabled(!controller.onFirst(e));
     if (useKeyHandler) prev.setTitle(LEFT_ARROW_TOOLTIP);
     prev.setType(ButtonType.SUCCESS);
 
@@ -94,7 +94,7 @@ public class NavigationHelper extends HorizontalPanel {
       next.setEnabled(false);
     }
     add(next);
-    if (true) next.setTitle(RIGHT_ARROW_TOOLTIP);
+    /*if (true) */next.setTitle(RIGHT_ARROW_TOOLTIP);
 
     DOM.setElementAttribute(next.getElement(), "id", "nextButton");
 
@@ -119,6 +119,11 @@ public class NavigationHelper extends HorizontalPanel {
     if (prev.isEnabled() && prev.isVisible()) {
       System.out.println("clickPrev " +keyHandler+ " click on prev " + prev);
       controller.loadPreviousExercise(e);
+
+    //  boolean enabled = !controller.onFirst(e);
+    //  System.out.println("---> clickPrev enabled " +enabled);
+
+     // prev.setEnabled(enabled);
     }
     else {
       System.out.println("---> clickPrev " +keyHandler+ " ignoring click prev.");
@@ -138,6 +143,12 @@ public class NavigationHelper extends HorizontalPanel {
         showConfirmNextDialog(controller, e);
       } else {
         provider.postAnswers(controller, e);
+
+       // System.out.println("clickNext " + prev.isEnabled());
+
+       // boolean enabled = !controller.onFirst(e);
+        //prev.setEnabled(enabled);
+        System.out.println("clickNext after " + prev.isEnabled());
       }
     }
     else {
@@ -185,6 +196,7 @@ public class NavigationHelper extends HorizontalPanel {
     yesButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         provider.postAnswers(controller, e);
+        prev.setEnabled(!controller.onFirst(e));
         dialogBox.hide();
       }
     });
@@ -246,6 +258,10 @@ public class NavigationHelper extends HorizontalPanel {
 
   public void enableNextButton(boolean val) {
     next.setEnabled(val);
+  }
+
+  public void enablePrevButton(boolean val) {
+    prev.setEnabled(val);
   }
 
   public void setButtonsEnabled(boolean val) {
