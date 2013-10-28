@@ -130,7 +130,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String message = "Server Exception : " + ExceptionUtils.getStackTrace(e);
     String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
     logger.debug(prefixedMessage);
-    getMailSupport().email("Server Exception on " + pathHelper.getInstallPath(), prefixedMessage);
+    getMailSupport().email(serverProps.getEmailAddress(),"Server Exception on " + pathHelper.getInstallPath(), prefixedMessage);
   }
 
   public Site getSiteByID(long id) {
@@ -168,7 +168,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.exercise.ExerciseList#getExercises
+   * @see mitll.langtest.client.exercise.ListInterface#getExercises
    * @param reqID
    * @param userID
    * @return
@@ -411,7 +411,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @param userID
    * @return exercises for user id
-   * @see mitll.langtest.client.exercise.ExerciseList#getExercises(long)
+   * @see mitll.langtest.client.exercise.ListInterface#getExercises(long, boolean)
    */
   private List<Exercise> getExercises(long userID) {
     makeAutoCRT();
@@ -494,7 +494,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList#getExercises(long)
+   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList#getExercises(long, boolean)
+   *
    * @param userID
    * @param typeToSection
    * @param getNext
@@ -503,28 +504,35 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public FlashcardResponse getNextExercise(long userID, Map<String, Collection<String>> typeToSection, boolean getNext) {
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-    List<Exercise> copy = new ArrayList<Exercise>(exercisesForSection);
+    List<Exercise> copy = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection, false);
+/*    List<Exercise> copy = new ArrayList<Exercise>(exercisesForSection);
     if (serverProps.sortExercisesByID()) {
       sortByID(copy);
-    }
+    }*/
     FlashcardResponse nextExercise = db.getNextExercise(copy,userID, serverProps.isTimedGame(), getNext);
     return getFlashcardResponse(userID, nextExercise);
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList#getExercises(long)
+   * @see mitll.langtest.client.exercise.ListInterface#getExercises(long, boolean)
    * @param userID
    * @param getNext
    * @return
    */
   @Override
   public FlashcardResponse getNextExercise(long userID, boolean getNext) {
-    logger.debug("getNextExercise " +getNext);
+    logger.debug("getNextExercise " + getNext);
 
     FlashcardResponse nextExercise = db.getNextExercise(userID, serverProps.isTimedGame(), getNext);
     return getFlashcardResponse(userID, nextExercise);
   }
 
+  /**
+   * Before we return a reference to the next card to do, make sure there's an mp3 to play if they get it wrong
+   * @param userID
+   * @param nextExercise
+   * @return
+   */
   private FlashcardResponse getFlashcardResponse(long userID, FlashcardResponse nextExercise) {
     if (nextExercise == null || nextExercise.getNextExercise() == null) {
       logger.error("huh? no next exercise for user " +userID);
@@ -992,7 +1000,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.debug(prefixedMessage);
 
     if (message.startsWith("got browser exception")) {
-      getMailSupport().email("Javascript Exception", prefixedMessage);
+      getMailSupport().email(serverProps.getEmailAddress(),"Javascript Exception", prefixedMessage);
     }
   }
 

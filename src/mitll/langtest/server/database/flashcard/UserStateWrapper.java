@@ -19,15 +19,12 @@ public class UserStateWrapper {
   public final UserState state;
   private int correct = 0;
   private int incorrect = 0;
-
-//  /private int pcorrect = 0;
   private int pincorrect = 0;
 
   private int counter = 0;
- // private List<Integer> correctHistory = new ArrayList<Integer>();
   private final List<Exercise> exercises;
   private final Random random;
-
+  private boolean initial = true;
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getUserStateWrapper(long, java.util.List)
    * @param state
@@ -57,8 +54,6 @@ public class UserStateWrapper {
     this.incorrect = incorrect;
   }
 
-  //public List<Integer> getCorrectHistory() { return correctHistory; }
-
   public int getNumExercises() {
     return exercises.size();
   }
@@ -76,19 +71,51 @@ public class UserStateWrapper {
     counter = 0;
   }
 
-  public Exercise getNextExercise() {
-    System.out.println("Getting next " + counter);
-
-    return exercises.get(counter++ % exercises.size()); // defensive
+  public Exercise getFirst() {
+    initial = false;
+    return exercises.iterator().next();
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getFlashcardResponse(long, boolean, java.util.List, boolean)
+   * @return
+   */
+  public Exercise getNextExercise() {
+    if (initial) return getFirst();
+    else {
+      System.out.println("Getting next " + counter);
+      Exercise exercise = exercises.get(++counter % exercises.size());
+      System.out.println("Getting next now " + counter);
+
+      return exercise; // defensive
+    }
+  }
+
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getFlashcardResponse(long, boolean, java.util.List, boolean)
+   * @return
+   */
   public Exercise getPrevExercise() {
-    if (counter > 0) {
-      System.out.println("Getting prev " + counter);
-      counter -= 1;
+    if (counter == 0) {
+      counter = exercises.size();
     }
     System.out.println("Getting prev " + counter);
-    return exercises.get(counter % exercises.size()); // defensive
+
+    Exercise exercise = exercises.get(--counter % exercises.size());
+    System.out.println("Getting prev now " + counter);
+
+    return exercise; // defensive
+  }
+
+  public boolean onFirst() {
+    boolean b = counter == 0;
+    System.out.println("on first " + counter + " : " + b);
+
+    return b;
+  }
+
+  public boolean onLast() {
+    return counter % exercises.size() == 0;
   }
 
 /*  public int getPcorrect() {
@@ -109,6 +136,6 @@ public class UserStateWrapper {
 
   public String toString() {
     return "UserState : correct " + correct + " incorrect " + getIncorrect() +
-      " num exercises " + getNextExercise() + " is complete " + isComplete();
+      " num exercises " + exercises.size() + " is complete " + isComplete();
   }
 }
