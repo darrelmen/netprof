@@ -461,25 +461,22 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public FlashcardResponse getNextExercise(List<Exercise> exercises, long userID, boolean isTimedGame, boolean getNext) {
-    logger.info("getNextExercise 1 : for user " + userID + " next = " +getNext);// + " index " + index);
-
     return getFlashcardResponse(userID, isTimedGame, exercises, getNext);
   }
 
   public FlashcardResponse getNextExercise(long userID, boolean isTimedGame, boolean getNext) {
- //   List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
-    List<Exercise> exercises = getExercisesBiasTowardsUnanswered(userID,false);
+    List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
     return getFlashcardResponse(userID, isTimedGame, exercises, getNext);
   }
 
-  private FlashcardResponse getFlashcardResponse(long userID, boolean isTimedGame, List<Exercise> exercises, boolean getNext) {
-    Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
-    for (Exercise e : exercises) idToExercise.put(e.getID(), e);
+  private FlashcardResponse getFlashcardResponse(long userID, boolean isTimedGame, List<Exercise> exercises,
+                                                 boolean getNext) {
     UserStateWrapper userStateWrapper;
 
     synchronized (userToState) {
       userStateWrapper = userToState.get(userID);
-      logger.info("getExercises : for user " + userID + " idToExercise has " + idToExercise.size() + " user state " + userStateWrapper + " next = " +getNext);// + " index " + index);
+      logger.info("getFlashcardResponse : for user " + userID +
+        " exercises has " + exercises.size() + " user state " + userStateWrapper + " next = " +getNext);
       if (userStateWrapper == null || (userStateWrapper.getNumExercises() != exercises.size())) {
         userStateWrapper = getUserStateWrapper(userID, exercises);
         userToState.put(userID, userStateWrapper);
@@ -491,16 +488,24 @@ public class DatabaseImpl implements Database {
       if (userStateWrapper.isComplete()) {
         userStateWrapper.shuffle();
       }
-      logger.info("\tgetExercises : for user " + userID + " next = " +getNext);// + " index " + index);
-
       Exercise nextExercise = getNext ? userStateWrapper.getNextExercise() : userStateWrapper.getPrevExercise();
+
+      boolean onFirst = userStateWrapper.onFirst();
+      boolean onLast = userStateWrapper.onLast();
+
       flashcardResponse =
         new FlashcardResponse(nextExercise,
           userStateWrapper.getCorrect(),
-          userStateWrapper.getIncorrect());
+          userStateWrapper.getIncorrect(), onFirst, onLast);
+
+      logger.debug("returning " + flashcardResponse);
       return flashcardResponse;
     }
-    return getFlashcardResponse(idToExercise, userStateWrapper);
+    else {
+      Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
+      for (Exercise e : exercises) idToExercise.put(e.getID(), e);
+      return getFlashcardResponse(idToExercise, userStateWrapper);
+    }
   }
 
   private Map<Long, Integer> userToCorrect = new HashMap<Long, Integer>();
@@ -543,6 +548,7 @@ public class DatabaseImpl implements Database {
 /*    if (userState.finished()) {
       logger.info("-------------- user " + userID + " is finished ---------------- ");
     }*/
+    logger.debug("making user state for " + userID + " with " + exercises.size() + " exercises");
     userStateWrapper = new UserStateWrapper(userState, userID, exercises);
     return userStateWrapper;
   }
@@ -557,7 +563,7 @@ public class DatabaseImpl implements Database {
         Exercise exercise = idToExercise.get(state.next());
         return new FlashcardResponse(exercise,
           userState.getCorrect(),
-          userState.getIncorrect());
+          userState.getIncorrect(), false, false);
       }
     } catch (Exception e) {
       return new FlashcardResponse(true,
@@ -631,15 +637,23 @@ public class DatabaseImpl implements Database {
   /**
    * Show unanswered questions first, then ones with 1, then 2, then 3,... answers
    * Also be aware of the user's gender -- if you're female, show questions that have no female answers first.
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesInModeDependentOrder(long)
+   * @see #getNextExercise(long, boolean, boolean)
    * @param userID so we can show gender aware orderings (i.e. show entries with fewer female responses to females, etc.)
    * @return ordered list of exercises
    */
   public List<Exercise> getExercisesBiasTowardsUnanswered(long userID, boolean useWeights) {
     List<Exercise> rawExercises = getExercises();
-    return getExercisesBiasTowardsUnanswered(userID, rawExercises,useWeights);
+    return getExercisesBiasTowardsUnanswered(userID, rawExercises, useWeights);
   }
 
+  /**
+   *
+   * @param userID
+   * @param rawExercises
+   * @param useWeights
+   * @return
+   */
   public List<Exercise> getExercisesBiasTowardsUnanswered(long userID, Collection<Exercise> rawExercises, boolean useWeights) {
     Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
     Map<String,Integer> idToCount = new HashMap<String, Integer>();
@@ -652,7 +666,7 @@ public class DatabaseImpl implements Database {
 
     getExerciseIDToResultCount(userID, idToCount,results);
 
-   // logger.debug("getExercisesBiasTowardsUnanswered id->count " + idToCount);
+    logger.debug("getExercisesBiasTowardsUnanswered for " + userID+ " id->count " + idToCount);
     //logger.debug("count " +idToCount.get())
 
     Map<String, Integer> idToCountScaled = getScaledIdToCount(idToCount, idToWeight);
