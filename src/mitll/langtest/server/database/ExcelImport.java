@@ -93,7 +93,7 @@ public class ExcelImport implements ExerciseDAO {
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.language = serverProps.getLanguage();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
-    this.tabooEnglish = serverProps.doTabooEnglish();
+    //this.tabooEnglish = serverProps.doTabooEnglish();
     this.audioOffset = serverProps.getAudioOffset();
     String exampleSentenceFile1 = serverProps.getExampleSentenceFile();
     if (exampleSentenceFile1 != null && exampleSentenceFile1.length() > 0) {
