@@ -22,7 +22,6 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.ListInterface;
@@ -55,28 +54,9 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private UserManager user;
   private Heading correct = new Heading(4);
   private ProgressBar bar = new ProgressBar();
+  private FlashcardResponse latestResponse;
 
   private Timer timer;
-
-  @Override
-  public void makeExercisePanel(Exercise result) {
-    //To change body of implemented methods use File | Settings | File Templates.
-  }
-
-  @Override
-  public void loadExercise(ExerciseShell exerciseShell) {
-    //To change body of implemented methods use File | Settings | File Templates.
-  }
-
-  @Override
-  public void startOver() {
-    //To change body of implemented methods use File | Settings | File Templates.
-  }
-
-  @Override
-  public boolean loadNextExercise(String id) {
-    return false;
-  }
 
   private boolean expired = false;
   private boolean timerRunning = false;
@@ -85,11 +65,9 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private Panel bottomRow = new FlowPanel();
   private boolean isTimedGame = false;
   private Map<String,Collection<String>> currentSelection;
-/*         private ExerciseController controller;
-  protected int lastReqID = 0;*/
-  private boolean getNext = true;
 
   /**
+   *
    *
    *
    * @param currentExerciseVPanel
@@ -99,11 +77,10 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
    * @see mitll.langtest.client.LangTest#doFlashcard()
    */
   public BootstrapFlashcardExerciseList(Container currentExerciseVPanel, LangTestDatabaseAsync service,
-                                        UserManager user, ExerciseController controller,
+                                        UserManager user,
                                         boolean isTimedGame, int gameTimeSeconds) {
     this.service = service;
     this.gameTimeSeconds = gameTimeSeconds;
-   // this.controller = controller;
     FluidRow row = new FluidRow();
     currentExerciseVPanel.add(row);
     exercisePanelColumn = new Column(SIZE);
@@ -136,25 +113,18 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   }
 
   @Override
-  public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {
-    this.factory = factory;
-  }
+  public void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades) {  this.factory = factory;  }
 
   /**
+   *
    * @param userID
+   * @param getNext
    * @see mitll.langtest.client.LangTest#gotUser(long)
    */
   @Override
-  public void getExercises(final long userID) {
-    System.out.println("ExerciseList.getExercises for " + userID + " expired " + expired + " time running " + timerRunning + " getnext " + getNext);
-
-  /*  if (controller.getProps().getFlashcardNextAndPrev()) {
-      System.out.println("ExerciseList.getExercises for user " +userID);
-
-        lastReqID++;
-        service.getExerciseIds(lastReqID, userID, new SetExercisesCallback());
-    }
-    else*/ if (!expired) {
+  public void getExercises(final long userID, boolean getNext) {
+    System.out.println("BootstrapFlashcardExerciseList.getExercises for " + userID + " expired " + expired + " time running " + timerRunning + " getnext " +getNext);
+    if (!expired) {
       if (!timerRunning) {
         if (isTimedGame) {
           startTimer(userID);
@@ -163,12 +133,9 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
       SelectionState selectionState = new SelectionState();
       if (selectionState.isEmpty()) {
-        System.out.println("1 Getting next for " +userID + " selection state : " +selectionState + " getNext " + getNext);
-
         service.getNextExercise(userID, getNext, new FlashcardResponseAsyncCallback());
       }
       else {
-        System.out.println("2 Getting next for " +userID + " selection state : " +selectionState + " getNext " + getNext);
         this.currentSelection = selectionState.getTypeToSection();
         service.getNextExercise(userID, currentSelection, getNext, new FlashcardResponseAsyncCallback());
       }
@@ -282,8 +249,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
       public void onSuccess(Void result) {
         System.out.println("Going again!");
         expired = false;
-        getNext = true;
-        getExercises(userID);
+        getExercises(userID, true);
       }
     });
   }
@@ -292,9 +258,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   public void setExercise_title(String exercise_title) {}
 
   @Override
-  public Widget getWidget() {
-    return new SimplePanel();
-  }
+  public Widget getWidget() { return new SimplePanel(); }
 
   public Widget getExerciseListOnLeftSide(PropertyHandler props) {
     FlowPanel leftColumn = new FlowPanel();
@@ -318,9 +282,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   @Override
   public boolean loadNextExercise(ExerciseShell current) {
     System.out.println("-------------- loadNextExercise -------- " + current);
-    getNext = true;
-
-    getExercises(user.getUser());
+    getExercises(user.getUser(), true);
     return true;
   }
 
@@ -330,9 +292,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
     if (!timerRunning) {
       expired = false;
-      getNext = true;
-
-      getExercises(user.getUser());
+      getExercises(user.getUser(), true);
     }
   }
 
@@ -348,9 +308,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
   @Override
   public boolean loadPreviousExercise(ExerciseShell current) {
-    getNext = false;
-    getExercises(user.getUser());
-
+    getExercises(user.getUser(), false);
     return true;
   }
 
@@ -361,7 +319,9 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
   @Override
   public boolean onFirst(ExerciseShell current) {
-    return false;
+    System.out.println("onFirst : response " + latestResponse);
+
+    return latestResponse == null || latestResponse.isOnFirst();
   }
 
   @Override
@@ -388,6 +348,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
       if (result.finished) {
         Window.alert("Flashcards Complete!");
       } else {
+        latestResponse = result;
         Panel exercisePanel = factory.getExercisePanel(result.getNextExercise());
         exercisePanelColumn.clear();
 
@@ -398,23 +359,16 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
       }
     }
   }
-/*
-  @Override
-  public void addAdHocExercise(String label) {}*/
-  @Override
-  public void setSelectionState(Map<String, Collection<String>> selectionState) {
-  }
 
   @Override
-  public void hideExerciseList() {
-  }
+  public void setSelectionState(Map<String, Collection<String>> selectionState) {}
 
   @Override
-  public void askForRandomExercise(AsyncCallback<Exercise> callback) {
-    //To change body of implemented methods use File | Settings | File Templates.
-  }
-
+  public void hideExerciseList() {}
   public void rememberAndLoadFirst(List<ExerciseShell> exercises){}
+  public void makeExercisePanel(Exercise result) {}
+  public void loadExercise(ExerciseShell exerciseShell) {}
+  public boolean loadNextExercise(String id) { return false; }
 
   protected void grabFocus(final BootstrapExercisePanel panel) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
