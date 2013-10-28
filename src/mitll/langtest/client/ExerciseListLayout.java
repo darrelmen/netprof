@@ -30,7 +30,7 @@ public class ExerciseListLayout {
   }
 
   public ListInterface makeFlashcardExerciseList(FluidContainer container, LangTestDatabaseAsync service, UserManager userManager, ExerciseController controller) {
-    this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager, controller, props.isTimedGame(), props.getGameTimeSeconds());
+    this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager, props.isTimedGame(), props.getGameTimeSeconds());
     return exerciseList;
   }
 
