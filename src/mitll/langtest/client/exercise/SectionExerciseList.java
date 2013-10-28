@@ -81,9 +81,10 @@ public class SectionExerciseList extends PagingExerciseList {
    * After logging in, we get the type->section map and build the list boxes.
    * @see mitll.langtest.client.LangTest#gotUser
    * @param userID
+   * @param getNext
    */
   @Override
-  public void getExercises(final long userID) {
+  public void getExercises(final long userID, boolean getNext) {
     System.out.println("SectionExerciseList.getExercises : Get exercises for user=" + userID);
     this.userID = userID;
     service.getTypeToSectionToCount(new AsyncCallback<Map<String, Map<String, Integer>>>() {
@@ -350,7 +351,7 @@ public class SectionExerciseList extends PagingExerciseList {
   /**
    * So if we have an existing history token, use it to set current selection.
    * If not, push the current state of the list boxes and act on it
-   * @see #getExercises(long)
+   * @see ListInterface#getExercises(long, boolean)
    */
   protected void pushFirstListBoxSelection() {
     String initToken = History.getToken();
@@ -371,7 +372,7 @@ public class SectionExerciseList extends PagingExerciseList {
    * @param userID
    */
   protected void noSectionsGetExercises(long userID) {
-    super.getExercises(userID);
+    super.getExercises(userID, true);
   }
 
   /**
