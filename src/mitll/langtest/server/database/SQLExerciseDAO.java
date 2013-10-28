@@ -43,18 +43,11 @@ public class SQLExerciseDAO implements ExerciseDAO {
   public SQLExerciseDAO(Database database, String mediaDir) {
     this.database = database;
     this.mediaDir = mediaDir;
-/*    String suffix = File.separator +
-      "media";
-    if (this.mediaDir.endsWith(suffix)) {
-      this.mediaDir = this.mediaDir.substring(0,mediaDir.length()-suffix.length());
-    }*/
     logger.debug("database " + database + " media dir " + mediaDir);
   }
 
   @Override
-  public SectionHelper getSectionHelper() {
-    return sectionHelper;
-  }
+  public SectionHelper getSectionHelper() { return sectionHelper; }
 
   @Override
   public Exercise getExercise(String id) {
@@ -210,7 +203,12 @@ public class SQLExerciseDAO implements ExerciseDAO {
       content = content.replaceAll("Orientation:","Question Scenario");
       content = content.replaceAll("<td width=\"20%\"> &nbsp; </td>","");
       content = content.replaceAll("td","h3");
-      content = content.replaceAll("br","h3");
+      content = content.replaceAll("br", "h3");
+      if (content.contains(":")) {
+        content = content.replaceAll(":", " ");
+      } else {
+//        logger.debug("no colon in " + content);
+      }
       content += "</h3>";
     }
     if (content.contains("<p")) {
@@ -297,7 +295,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
     return b.toString();
   }
 
-  private static String getConfigDir(String language) {
+/*  private static String getConfigDir(String language) {
     String installPath = ".";
     String dariConfig = File.separator +
       "war" +
@@ -307,7 +305,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
       language +
       File.separator;
     return installPath + dariConfig;
-  }
+  }*/
 
   public static void main(String [] arg) {
 
