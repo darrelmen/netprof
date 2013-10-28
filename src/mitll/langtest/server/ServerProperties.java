@@ -69,7 +69,8 @@ public class ServerProperties {
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
   private static final String SORT_EXERCISES = "sortExercises";
   private static final String EXAMPLE_SENTENCE_FILE = "exampleSentenceFile";
-  private static final String TABOO_ENGLISH = "tabooEnglish";
+  private static final String EMAIL_ADDRESS = "emailAddress";
+  private static final String DEFAULT_EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String AUDIO_OFFSET = "audioOffset";
 
   private Properties props = new Properties();
@@ -141,18 +142,6 @@ public class ServerProperties {
 
   public boolean doImages() {
     return getDefaultFalse(DOIMAGES);
-  }
-
-/*  public boolean doShowLeaderboard() {
-    return getDefaultFalse(SHOW_LEADERBOARD);
-  }*/
-
-  public boolean dliDemographics() {
-    return getDefaultFalse(DLI_DEMOGRAPHICS);
-  }
-
-  public boolean doTabooEnglish() {
-    return getDefaultFalse(TABOO_ENGLISH);
   }
 
   public boolean trackUsers() {
@@ -234,6 +223,10 @@ public class ServerProperties {
 
   public String getExampleSentenceFile() {
     return props.getProperty(EXAMPLE_SENTENCE_FILE);
+  }
+
+  public String getEmailAddress() {
+    return props.getProperty(EMAIL_ADDRESS, DEFAULT_EMAIL);
   }
 
   public int getAudioOffset() {
