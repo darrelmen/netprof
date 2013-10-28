@@ -226,7 +226,7 @@ public class AudioFileHelper {
   }
 
 
-  private String getWavAudioFile(String audioFile) {
+/*  private String getWavAudioFile(String audioFile) {
     if (audioFile.endsWith(".mp3")) {
       String wavFile = removeSuffix(audioFile) +".wav";
       File test = pathHelper.getAbsoluteFile(wavFile);
@@ -234,7 +234,7 @@ public class AudioFileHelper {
     }
 
     return audioFile;
-  }
+  }*/
 
   /**
    * @see #dealWithMP3Audio(String)
