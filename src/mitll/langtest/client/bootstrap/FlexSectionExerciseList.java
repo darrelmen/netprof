@@ -77,10 +77,12 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   }
 
   /**
+   *
    * @param userID
+   * @param getNext
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory
    */
-  public void getExercises(final long userID) {
+  public void getExercises(final long userID, boolean getNext) {
     //System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID);
     this.userID = userID;
     sectionPanel.clear();
@@ -101,7 +103,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * Assume for the moment that the first type has the largest elements... and every other type nests underneath it.
    *
    * @return
-   * @see #getExercises(long)
+   * @see mitll.langtest.client.exercise.ListInterface#getExercises(long, boolean)
    */
   private Panel getWidgetsForTypes() {
     final FluidContainer container = new FluidContainer();
@@ -525,7 +527,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     panelInsideScrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
     // panelInsideScrollPanel.getParent().setHeight(Math.max(50, offsetHeight) + "px");
 
-    int width = Window.getClientWidth() - labelColumn.getOffsetWidth() - clearColumnContainer.getOffsetWidth() - 90;
+    //int width = Window.getClientWidth() - labelColumn.getOffsetWidth() - clearColumnContainer.getOffsetWidth() - 90;
     //  System.out.println("setting width to " +width);
     // scrollPanel.setWidth(Math.max(300, width) + "px");
     scrollPanel.setWidth("100%");
