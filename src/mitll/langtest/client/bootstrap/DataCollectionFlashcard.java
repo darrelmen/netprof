@@ -20,10 +20,11 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class DataCollectionFlashcard extends BootstrapExercisePanel {
+  private Panel leftButtonContainer, rightButtonContainer;
+  private NavigationHelper navigationHelper;
+
   public DataCollectionFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
     super(e, service, controller);
-    System.out.println("making new flashcard");
-
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
       public void execute () {
         int offsetHeight = cardPrompt.getOffsetHeight();
@@ -31,9 +32,13 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
         DOM.setStyleAttribute(rightButtonContainer.getElement(), "marginTop", ((offsetHeight/2)-50) +"px");
       }
     });
+    navigationHelper.enablePrevButton(!controller.onFirst(null));
   }
 
-  Panel leftButtonContainer, rightButtonContainer;
+  @Override
+  protected FlashcardRecordButtonPanel getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, int index) {
+    return new FlashcardRecordButtonPanel(this, service, controller, exercise, index, false);
+  }
 
   protected Widget getCardPrompt(Exercise e, ExerciseController controller) {
     FluidRow questionRow = new FluidRow();
@@ -43,7 +48,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
     contentContainer.addStyleName("userNPFContent");
     contentContainer.addStyleName("topMargin");
     contentContainer.addStyleName("marginBottomTen");
-    NavigationHelper navigationHelper = new NavigationHelper(e,controller,false);
+    navigationHelper = new NavigationHelper(e,controller,false);
 
     Widget prev = navigationHelper.getPrev();
     HorizontalPanel hp = getCenteredContainer(prev);
@@ -61,8 +66,13 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
     hp.setWidth("100%");
     hp.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
     hp.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
-    //hp.addStyleName("topMarginFifty");
     hp.add(prev);
     return hp;
+  }
+
+  @Override
+  protected void onUnload() {
+    super.onUnload();
+    navigationHelper.removeKeyHandler();
   }
 }
