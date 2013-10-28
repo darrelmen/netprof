@@ -16,9 +16,9 @@ public class ScoreInfo implements IsSerializable {
   private long userid;
   private long giverID;
   private int correct;
-  private int incorrect;
-  private long timeTaken;
-  private long timestamp;
+ // private int incorrect;
+ // private long timeTaken;
+//  private long timestamp;
   public Map<String, Collection<String>> selection;
 
   public ScoreInfo() {}
@@ -36,10 +36,10 @@ public class ScoreInfo implements IsSerializable {
     this.userid = userid;
     this.giverID = giverID;
     this.correct = correct;
-    this.incorrect = incorrect;
-    this.timeTaken = timeTaken;
+  //  this.incorrect = incorrect;
+  //  this.timeTaken = timeTaken;
     this.selection = selection;
-    this.timestamp = System.currentTimeMillis();
+  //  this.timestamp = System.currentTimeMillis();
   }
 
   public long getUserid() {

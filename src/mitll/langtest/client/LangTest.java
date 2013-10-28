@@ -867,7 +867,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser);
       if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
         //  System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
-        exerciseList.getExercises(userID);
+        exerciseList.getExercises(userID, true);
       }
       lastUser = userID;
       return true;
@@ -988,10 +988,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     status.setText(msg);
   }
 
-
-  public void loadExercise(ExerciseShell exerciseShell) {
-    exerciseList.loadExercise(exerciseShell);
-  }
   public boolean loadNextExercise(ExerciseShell current) {
     boolean b = exerciseList.loadNextExercise(current);
     if (progressBar != null) {
@@ -1003,13 +999,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean loadNextExercise(String id) {
     return exerciseList.loadNextExercise(id);
   }
-  public void makeExercisePanel(Exercise current) {
-    exerciseList.makeExercisePanel(current);
-  }
-  public void startOver() {
-    exerciseList.startOver();
-  }
-  public void askForRandomExercise(AsyncCallback<Exercise> callback) { exerciseList.askForRandomExercise(callback); }
 
   public boolean loadPreviousExercise(Exercise current) {
     return exerciseList.loadPreviousExercise(current);
