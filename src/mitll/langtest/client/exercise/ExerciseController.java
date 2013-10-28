@@ -1,6 +1,5 @@
 package mitll.langtest.client.exercise;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.sound.SoundManagerAPI;
