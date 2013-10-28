@@ -153,7 +153,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       stimulus = content;
     }
 
-    if (content != null/* && !controller.isFlashCard()*/) {
+    if (content != null && controller.isDataCollectMode()/* && !controller.isFlashCard()*/) {
       System.out.println("\tfor " + e.getID() + " not flashcard");
 
       Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
