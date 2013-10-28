@@ -1,7 +1,5 @@
 package mitll.langtest.server;
 
-import org.apache.log4j.Logger;
-
 import javax.servlet.http.HttpServletRequest;
 import java.net.MalformedURLException;
 import java.net.URI;
