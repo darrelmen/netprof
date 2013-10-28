@@ -306,7 +306,7 @@ public class SectionHelper {
       logger.error("couldn't find any valid types given " + typeToSection);
       currentList = Collections.emptyList();
     }
-    logger.debug("getExercisesForSelectionState : request " + typeToSection + " yielded " + currentList.size() + " exercises");
+    //logger.debug("getExercisesForSelectionState : request " + typeToSection + " yielded " + currentList.size() + " exercises");
     return currentList;
   }
 
