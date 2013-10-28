@@ -15,7 +15,7 @@ import java.util.Set;
 public class SkipWords extends English {
   private static Logger logger = Logger.getLogger(SkipWords.class);
 
-  private void dumpDir2(String audioDir, String language, String dbName, String spreadsheet) {
+/*  private void dumpDir2(String audioDir, String language, String dbName, String spreadsheet) {
     logger.warn("audio dir " + audioDir + " lang " + language + " db " + dbName + " spreadsheet " + spreadsheet);
 
     Set<String> files = getFilesInBestDir(audioDir);
@@ -29,6 +29,6 @@ public class SkipWords extends English {
         spreadsheet);
 
     writeMissingFiles(files, configDir, unitAndChapter);
-  }
+  }*/
 
 }
