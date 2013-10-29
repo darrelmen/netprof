@@ -55,6 +55,7 @@ public interface LangTestDatabase extends RemoteService {
 
   // answer DAO
   void addTextAnswer(int userID, Exercise exercise, int questionID, String answer);
+  void addTextAnswer(int userID, Exercise exercise, String stimulus, String answer, boolean correct);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard);
   double getScoreForAnswer(Exercise e, int questionID, String answer);
@@ -148,6 +149,4 @@ public interface LangTestDatabase extends RemoteService {
   Leaderboard postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState);
 
   void addDLIUser(DLIUser dliUser);
-  int addUserList(long userid, String name, String description, String dliClass);
-  List<UserList> getUserListsForText(String search);
 }
