@@ -49,9 +49,9 @@ public class PropertyHandler {
   private static final String LANGUAGE = "language";
   private static final String CONTINUE_PROMPT = "promptBeforeNextItem";
   private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
-  private static final String DLI_DEMOGRAPHICS = "dliDemographics";
+ // private static final String DLI_DEMOGRAPHICS = "dliDemographics";
   private static final String TRACK_ONLINE_USERS = "trackUsers";
-  private static final String TABOO_ENGLISH = "tabooEnglish";
+ // private static final String TABOO_ENGLISH = "tabooEnglish";
   private static final String FLASHCARD_NEXT_AND_PREV = "flashcardNextAndPrev";
 
   // URL parameters that can override above parameters
@@ -79,6 +79,7 @@ public class PropertyHandler {
   private static final String LOGIN_TYPE_PARAM = "loginType";
   private static final String FLASHCARD_PREVIEW_HEIGHT = "flashcardPreviewHeight";
   private static final int DEFAULT_FLASHCARD_PREVIEW_HEIGHT = 610;
+  private static final String SHOW_FLASHCARD_ANSWER = "showFlashcardAnswer";
 
   public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT, DATA_COLLECTOR }
 
@@ -123,10 +124,14 @@ public class PropertyHandler {
   private boolean addRecordKeyBinding = true;
   private LOGIN_TYPE loginType = LOGIN_TYPE.UNDEFINED;
   private int flashcardPreviewHeight = DEFAULT_FLASHCARD_PREVIEW_HEIGHT;
-  //private boolean dliDemographics;
-  private boolean trackUsers;//, tabooEnglish;
+  private boolean trackUsers;
   private boolean flashcardNextAndPrev;
+  private boolean showFlashcardAnswer = true;
 
+  /**
+   * @see mitll.langtest.client.LangTest#onModuleLoad()
+   * @param props
+   */
   public PropertyHandler(Map<String,String> props) {
     this.props = props;
     useProps();
@@ -178,6 +183,7 @@ public class PropertyHandler {
       else if (key.equals(TRACK_ONLINE_USERS)) trackUsers = getBoolean(value);
     //  else if (key.equals(TABOO_ENGLISH)) tabooEnglish = getBoolean(value);
       else if (key.equals(FLASHCARD_NEXT_AND_PREV)) flashcardNextAndPrev = getBoolean(value);
+      else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
@@ -208,6 +214,8 @@ public class PropertyHandler {
    * Override config.properties settings with URL parameters, if provided.
    * <br></br>
    * exercise_title=nl0002_lms&transform_score_c1=68.51101&transform_score_c2=2.67174
+   *
+   * @see #PropertyHandler(java.util.Map)
    * @return
    */
   private boolean checkParams() {
@@ -455,7 +463,7 @@ public class PropertyHandler {
   }
 
   public boolean showFlashcardAnswer() {
-    return false; // TODO add property
+    return showFlashcardAnswer;
   }
   public boolean isTrackUsers() {
     return trackUsers;
