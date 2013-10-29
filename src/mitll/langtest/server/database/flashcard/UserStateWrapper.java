@@ -83,9 +83,9 @@ public class UserStateWrapper {
   public Exercise getNextExercise() {
     if (initial) return getFirst();
     else {
-      System.out.println("Getting next " + counter);
+    //  System.out.println("Getting next " + counter);
       Exercise exercise = exercises.get(++counter % exercises.size());
-      System.out.println("Getting next now " + counter);
+  //    System.out.println("Getting next now " + counter);
 
       return exercise; // defensive
     }
@@ -99,17 +99,17 @@ public class UserStateWrapper {
     if (counter == 0) {
       counter = exercises.size();
     }
-    System.out.println("Getting prev " + counter);
+ //   System.out.println("Getting prev " + counter);
 
     Exercise exercise = exercises.get(--counter % exercises.size());
-    System.out.println("Getting prev now " + counter);
+ //   System.out.println("Getting prev now " + counter);
 
     return exercise; // defensive
   }
 
   public boolean onFirst() {
     boolean b = counter == 0;
-    System.out.println("on first " + counter + " : " + b);
+    //System.out.println("on first " + counter + " : " + b);
 
     return b;
   }
