@@ -12,11 +12,11 @@ import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.SectionHelper;
+import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.DLIUser;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
@@ -415,20 +415,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private List<Exercise> getExercises(long userID) {
     makeAutoCRT();
-
     List<Exercise> exercises = getExercisesInModeDependentOrder(userID);
-
-    //logger.debug("isCRTDataCollect is " +serverProps.isCRTDataCollect());
-
     if (serverProps.isCRTDataCollect()) {
-      //logger.debug("isCRTDataCollect is true");
-
       setPromptAndRecordOnExercises(userID, exercises);
     }
-    //if (!exercises.isEmpty())
-   //   logger.debug("for user #" + userID +" got " + exercises.size() + " exercises , first " + exercises.iterator().next());
-          //" ref sentence = '" + exercises.iterator().next().getRefSentence() + "'");
-
     return exercises;
   }
 
@@ -775,9 +765,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.addAnswer(userID, exercise.getPlan(),exercise.getID(), stimulus, answer, correct);
   }
 
-  public double getScoreForAnswer(Exercise e, int questionID, String answer) {
+  public double getScoreForAnswer(long userID, Exercise exercise, int questionID, String answer) {
     makeAutoCRT();
-    return audioFileHelper.getScoreForAnswer(e, questionID, answer);
+    double scoreForAnswer = audioFileHelper.getScoreForAnswer(exercise, questionID, answer);
+    scoreForAnswer -= 0.3;
+    scoreForAnswer *= 1.4; // now 0-1
+    //UserStateWrapper userStateWrapper = db.updateFlashcardState(userID, exercise.getID(), scoreForAnswer > 0.499d);
+    return scoreForAnswer;
+    //return new FlashcardResponse(false,userStateWrapper.getCorrect(),userStateWrapper.getIncorrect());
   }
 
   // Grades ---------------------
@@ -842,7 +837,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public long addUser(int age, String gender, int experience,
                       String dialect, String nativeLang, String userID) {
-    logger.info("Adding user " + userID);// + " " + firstName + " " + lastName);
+    logger.info("Adding user " + userID);
     long l = db.addUser(getThreadLocalRequest(),age, gender, experience, dialect, nativeLang, userID);
 
     if (l != 0 && serverProps.isDataCollectAdminView) {
@@ -883,8 +878,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
     });
     List<Result> resultList = results.subList(start, end);
-    List<Result> copy = new ArrayList<Result>(resultList);
-    return copy;
+    return new ArrayList<Result>(resultList);
   }
 
   /**
