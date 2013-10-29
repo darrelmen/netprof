@@ -123,7 +123,8 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
    */
   @Override
   public void getExercises(final long userID, boolean getNext) {
-    System.out.println("BootstrapFlashcardExerciseList.getExercises for " + userID + " expired " + expired + " time running " + timerRunning + " getnext " +getNext);
+    System.out.println("BootstrapFlashcardExerciseList.getExercises for " + userID + " expired " + expired +
+      " time running " + timerRunning + " getnext " +getNext);
     if (!expired) {
       if (!timerRunning) {
         if (isTimedGame) {
@@ -354,10 +355,14 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
         exercisePanelColumn.add(exercisePanel);
         bottomRow.setVisible(true);
-        correct.setText(result.correct + "/" + (result.correct + result.incorrect));
+        updateCorrectIncorrectCounter(result.correct, result.incorrect);
         grabFocus((BootstrapExercisePanel) exercisePanel);   // TODO : not sure this works really
       }
     }
+  }
+
+  protected void updateCorrectIncorrectCounter(int correctCount, int incorrectCount) {
+    correct.setText(correctCount + "/" + (correctCount + incorrectCount));
   }
 
   @Override
