@@ -47,6 +47,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
   private static final int DELAY_CHARACTERS = 40;
   private static final int PERIOD_MILLIS = 300;
   private static final boolean NEXT_ON_BAD_AUDIO = false;
+ // private static final boolean CONTINUE_TO_NEXT = false;
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
   private static final String NO_SPACE_WARNING = "Press and hold space bar to begin recording, release to stop.";
@@ -62,6 +63,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
 
   private final Exercise exercise;
   private BootstrapExercisePanel widgets;
+  private final boolean continueToNext;
 
   /**
    * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
@@ -79,6 +81,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
     this.exercise = exercise;
     isDemoMode = controller.isDemoMode();
     this.warnUserWhenNotSpace = warnUserWhenNotSpace;
+    continueToNext = !controller.getProps().getFlashcardNextAndPrev();
     recordButton.setTitle("Please press and hold the space bar to record");
   }
 
@@ -248,10 +251,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
     boolean badAudioRecording = result.validity != AudioAnswer.Validity.OK;
     if (badAudioRecording) {
       widgets.showPopup(result.validity.getPrompt());
-      if (NEXT_ON_BAD_AUDIO) nextAfterDelay(correct, "");
-      else {
-        initRecordButton();
-      }
+      nextAfterDelay(correct, "");
     } else if (correct) {
       showCorrectFeedback(score);
     } else {   // incorrect!!
@@ -262,7 +262,11 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
       }
     }
     if (!badAudioRecording && (correct || !hasRefAudio)) {
+      System.out.println("correct " + correct + " has ref " + hasRefAudio);
       nextAfterDelay(correct, feedback);
+    }
+    else {
+
     }
   }
 
@@ -313,14 +317,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
 
   private void showCorrectFeedback(double score) {
     widgets.showPronScoreFeedback(score);
-
     widgets.getSoundFeedback().playCorrect();
-/*    if (widgets.feedback < MAX_INTRO_FEEBACK_COUNT) {
-      String correctPrompt = "Correct! It's: " + exercise.getRefSentence();
-      widgets.getRecoOutput().setText(correctPrompt);
-      DOM.setStyleAttribute(widgets.getRecoOutput().getElement(), "color", "#000000");
-      widgets.incrCookie(FEEDBACK_TIMES_SHOWN);
-    }*/
   }
 
   /**
@@ -339,14 +336,17 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
       " hasSynonymAudio " + hasSynonymAudio);
 
     String correctPrompt = getCorrectDisplay();
-    if (hasRefAudio) {
+    if (hasRefAudio && continueToNext) {
+      System.out.println("has ref " + continueToNext);
       if (hasSynonymAudio) {
         List<String> toPlay = new ArrayList<String>(exercise.getSynonymAudioRefs());
-        System.out.println("showIncorrectFeedback : playing " + toPlay);
+      //  System.out.println("showIncorrectFeedback : playing " + toPlay);
         playAllAudio(correctPrompt,toPlay);
       } else {
         String path = exercise.getRefAudio();
-        if (path == null) path = exercise.getSlowAudioRef(); // fall back to slow audio
+        if (path == null) {
+          path = exercise.getSlowAudioRef(); // fall back to slow audio
+        }
         if (path == null) {
           widgets.getSoundFeedback().playIncorrect(); // this should never happen
         } else {
@@ -363,6 +363,18 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
       }
     } else {
       widgets.getSoundFeedback().playIncorrect();
+
+      System.out.println("doing nextAfterDelay");
+      // Schedule the timer to run once in 1 seconds.
+      Timer t = new Timer() {
+        @Override
+        public void run() {
+          initRecordButton();
+          widgets.clearFeedback();
+        }
+      };
+      int incorrectDelay = DELAY_MILLIS_LONG;
+      t.schedule(incorrectDelay);
     }
 
     if (isDemoMode) {
@@ -398,15 +410,19 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
   }
 
   private void goToNextItem(String infoToShow) {
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        controller.loadNextExercise(exercise);
-      }
-    };
-    int delay = getFeedbackLengthProportionalDelay(infoToShow);
-    System.out.println("goToNextItem : using delay " + delay);
-    t.schedule(isDemoMode ? LONG_DELAY_MILLIS : delay);
+    if (continueToNext) {
+      Timer t = new Timer() {
+        @Override
+        public void run() {
+          controller.loadNextExercise(exercise);
+        }
+      };
+      int delay = getFeedbackLengthProportionalDelay(infoToShow);
+      System.out.println("goToNextItem : using delay " + delay);
+      t.schedule(isDemoMode ? LONG_DELAY_MILLIS : delay);
+    } else {
+      initRecordButton();
+    }
   }
 
   private int getFeedbackLengthProportionalDelay(String feedback) {
@@ -451,22 +467,27 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
     } else return "";
   }
 
-  protected void nextAfterDelay(boolean correct, String feedback) {
-    // Schedule the timer to run once in 1 seconds.
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        controller.loadNextExercise(exercise);
-      }
-    };
-    int incorrectDelay = DELAY_MILLIS_LONG;
-    if (!feedback.isEmpty()) {
-      int delay = getFeedbackLengthProportionalDelay(feedback);
-      incorrectDelay += delay;
+  private void nextAfterDelay(boolean correct, String feedback) {
+    if (NEXT_ON_BAD_AUDIO) {
+      System.out.println("doing nextAfterDelay");
+      // Schedule the timer to run once in 1 seconds.
+      Timer t = new Timer() {
+        @Override
+        public void run() {
+          controller.loadNextExercise(exercise);
+        }
+      };
+      int incorrectDelay = DELAY_MILLIS_LONG;
+      if (!feedback.isEmpty()) {
+        int delay = getFeedbackLengthProportionalDelay(feedback);
+        incorrectDelay += delay;
 
-      System.out.println("nextAfterDelay Delay is " + incorrectDelay + " len " + feedback.length());
+        System.out.println("nextAfterDelay Delay is " + incorrectDelay + " len " + feedback.length());
+      }
+      t.schedule(isDemoMode ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : incorrectDelay);
+    } else {
+      initRecordButton();
     }
-    t.schedule(isDemoMode ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : incorrectDelay);
   }
 
   /**
