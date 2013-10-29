@@ -64,7 +64,6 @@ public class ServerProperties {
   private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
   private static final String SORT_BY_ID = "sortByID";
-  private static final String DLI_DEMOGRAPHICS = "dliDemographics";
   private static final String TRACK_USERS_ONLINE = "trackUsers";
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
   private static final String SORT_EXERCISES = "sortExercises";
