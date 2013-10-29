@@ -72,7 +72,7 @@ public class UserManager {
   }
 
   public void checkLogin() {
-    System.out.println("loginType " + loginType);
+    //System.out.println("loginType " + loginType);
     if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
       anonymousLogin();
     } else if (loginType.equals(PropertyHandler.LOGIN_TYPE.UNDEFINED) && // no explicit setting, so it's dependent on the mode
