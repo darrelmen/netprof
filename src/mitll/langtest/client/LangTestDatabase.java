@@ -4,7 +4,6 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.DLIUser;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
@@ -58,7 +57,7 @@ public interface LangTestDatabase extends RemoteService {
   void addTextAnswer(int userID, Exercise exercise, String stimulus, String answer, boolean correct);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard);
-  double getScoreForAnswer(Exercise e, int questionID, String answer);
+  double getScoreForAnswer(long userID, Exercise e, int questionID, String answer);
 
   Exercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly);
 
