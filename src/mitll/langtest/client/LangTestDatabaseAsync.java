@@ -58,7 +58,7 @@ public interface LangTestDatabaseAsync {
 
   void getExercise(String id, AsyncCallback<Exercise> async);
 
-  void getScoreForAnswer(Exercise e, int questionID, String answer, AsyncCallback<Double> async);
+  void getScoreForAnswer(long userID, Exercise e, int questionID, String answer, AsyncCallback<Double> async);
 
   void getUserToResultCount(AsyncCallback<Map<User, Integer>> async);
 
