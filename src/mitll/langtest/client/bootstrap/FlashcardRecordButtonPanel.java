@@ -55,6 +55,9 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
   private Image waitingForResponseImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress48.gif"));
   private Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
   private Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
+
+  public Image correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
+  public Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
   private Image enterImage;  // todo change to text with blue background
   private Timer t;
   private boolean keyIsDown;
@@ -233,14 +236,14 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
    * @param result        response from server
    * @param questionState ignored here
    * @param outer         ignored here
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile
    */
   @Override
   protected void receivedAudioAnswer(final AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
     boolean correct = result.isCorrect();
     final double score = result.getScore();
 
-    recordButton.setResource(correct ? widgets.correctImage : widgets.incorrectImage);
+    recordButton.setResource(correct ? correctImage : incorrectImage);
     recordButton.setHeight("112px");
 
     String path = exercise.getRefAudio() != null ? exercise.getRefAudio() : exercise.getSlowAudioRef();
