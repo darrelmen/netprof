@@ -437,7 +437,7 @@ public class ExercisePanel extends VerticalPanel implements
     check.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         check.setEnabled(false);
-        service.getScoreForAnswer(exercise, index, answer.getText(), new AsyncCallback<Double>() {
+        service.getScoreForAnswer(0, exercise, index, answer.getText(), new AsyncCallback<Double>() {
           @Override
           public void onFailure(Throwable caught) {
             check.setEnabled(true);
