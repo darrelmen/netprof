@@ -679,7 +679,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer) {
           @Override
           public Panel getExercisePanel(Exercise e) {
-            return new TextCRTFlashcard(e,service,controller);
+            return new TextCRTFlashcard(e,service,controller, userManager);
           }
         },userManager,1);
       }
