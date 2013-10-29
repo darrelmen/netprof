@@ -669,13 +669,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void setFactory(final long userID) {
     final LangTest outer = this;
+   // if (props.getFlashcardNextAndPrev()) Window.alert("got next and prev");
     if (props.isGoodwaveMode() && !props.isGrading()) {
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer), userManager, 1);
     } else if (props.isGrading()) {
       exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer), userManager, props.getNumGradesToCollect());
     } else if (props.getFlashcardNextAndPrev()) {
+  //    Window.alert("using DataCollectionFlashcardFactory");
       exerciseList.setFactory(new DataCollectionFlashcardFactory(service, outer, outer), userManager, 1);
     } else if (props.isFlashCard()) {
+   //   Window.alert("using FlashcardExercisePanelFactory");
+
       exerciseList.setFactory(new FlashcardExercisePanelFactory(service, outer, outer), userManager, 1);
     } else if (props.isDataCollectMode() && props.isCollectAudio() && !props.isCRTDataCollectMode()) {
       exerciseList.setFactory(new WaveformExercisePanelFactory(service, outer, outer), userManager, 1);
