@@ -31,7 +31,7 @@ import mitll.langtest.shared.Exercise;
 public class DataCollectionFlashcard extends BootstrapExercisePanel {
   private static final String LISTEN_TO_THIS_AUDIO = "Listen to this audio";
   private Panel leftButtonContainer, rightButtonContainer;
-  private NavigationHelper navigationHelper;
+  protected NavigationHelper navigationHelper;
 
   /**
    * @see mitll.langtest.client.flashcard.DataCollectionFlashcardFactory#getExercisePanel(mitll.langtest.shared.Exercise)
@@ -39,8 +39,8 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
    * @param service
    * @param controller
    */
-  public DataCollectionFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
-    super(e, service, controller);
+  public DataCollectionFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int feedbackHeight) {
+    super(e, service, controller, feedbackHeight);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
       public void execute () {
         int offsetHeight = cardPrompt.getOffsetHeight();
@@ -65,7 +65,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
     contentContainer.addStyleName("userNPFContent");
     contentContainer.addStyleName("topMargin");
     contentContainer.addStyleName("marginBottomTen");
-    navigationHelper = new NavigationHelper(e,controller,false);
+    makeNavigationHelper(e, controller);
 
     Widget prev = navigationHelper.getPrev();
     HorizontalPanel hp = getCenteredContainer(prev);
@@ -75,6 +75,10 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
     questionRow.add(new Column(2,rightButtonContainer = getCenteredContainer(navigationHelper.getNext())));
 
     return questionRow;
+  }
+
+  protected void makeNavigationHelper(Exercise e, ExerciseController controller) {
+    navigationHelper = new NavigationHelper(e,controller,false, true);
   }
 
   protected Widget getQuestionContent2(Exercise e, ExerciseController controller) {
@@ -87,25 +91,9 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
     return makeFlashcardForCRT(e, controller, content);
   }
 
-  private HorizontalPanel getCenteredContainer(Widget prev) {
-    HorizontalPanel hp = new HorizontalPanel();
-    hp.setHeight("100%");
-    hp.setWidth("100%");
-    hp.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
-    hp.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
-    hp.add(prev);
-    return hp;
-  }
-
-  @Override
-  protected void onUnload() {
-    super.onUnload();
-    navigationHelper.removeKeyHandler();
-  }
-
   private Panel makeFlashcardForCRT(Exercise e, ExerciseController controller, String content) {
     Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
-   // content = content.replaceAll("<p> &nbsp; </p>", "");
+    // content = content.replaceAll("<p> &nbsp; </p>", "");
     String splitTerm = LISTEN_TO_THIS_AUDIO;
     String[] split = content.split(splitTerm);
     String prefix = split[0];
@@ -139,6 +127,22 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
 
     container.add(getHTML("<h2 style='margin-right: 30px'>" + qaPair.getQuestion() + "</h2>", true, controller));
     return container;
+  }
+
+  private HorizontalPanel getCenteredContainer(Widget prev) {
+    HorizontalPanel hp = new HorizontalPanel();
+    hp.setHeight("100%");
+    hp.setWidth("100%");
+    hp.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
+    hp.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
+    hp.add(prev);
+    return hp;
+  }
+
+  @Override
+  protected void onUnload() {
+    super.onUnload();
+    navigationHelper.removeKeyHandler();
   }
 
   private Widget getAudioWidget(Exercise e) {
