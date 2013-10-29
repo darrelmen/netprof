@@ -32,8 +32,7 @@ import java.util.TreeSet;
 public class AutoCRT {
   private static Logger logger = Logger.getLogger(AutoCRT.class);
 
-  //private static final float MIN_CRT_SCORE = 0.1f;
-  //private static final double MINIMUM_FLASHCARD_PRON_SCORE = 0.19;
+  private static final boolean TESTING = false; // this doesn't really work
   private Classifier<AutoGradeExperiment.Event> classifier = null;
   private Map<String, Export.ExerciseExport> exerciseIDToExport;
   private String installPath;
@@ -208,6 +207,7 @@ public class AutoCRT {
     return getScoreForExercise(e.getID(), questionID, answer);
   }
   private double getScoreForExercise(String id, int questionID, String answer) {
+    if (TESTING) return 0.1;
     getClassifier();
     String key = id + "_" + questionID;
     Export.ExerciseExport exerciseExport = getExportForExercise(key);
@@ -238,7 +238,7 @@ public class AutoCRT {
   }
 
   /**
-   * @see #getAutoCRTDecodeOutput(String, int, mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer, mitll.langtest.server.scoring.Scoring)
+   * @see #getAutoCRTDecodeOutput
    * @param id
    * @param questionID
    * @return
@@ -247,8 +247,11 @@ public class AutoCRT {
     getClassifier();
 
     Set<String> answers = new TreeSet<String>();
-    for (Export.ResponseAndGrade resp : getExportForExercise(id, questionID).rgs) {
-      answers.add(resp.response);
+    Export.ExerciseExport exportForExercise = getExportForExercise(id, questionID);
+    if (exportForExercise != null) {
+      for (Export.ResponseAndGrade resp : exportForExercise.rgs) {
+        answers.add(resp.response);
+      }
     }
     return answers;
   }
@@ -273,27 +276,32 @@ public class AutoCRT {
    */
   private Classifier<AutoGradeExperiment.Event> getClassifier() {
     if (classifier != null) return classifier;
-   // Set<String> allAnswers = new HashSet<String>();
-    List<Export.ExerciseExport> export = exporter.getExport(true, false);
-    exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
-    for (Export.ExerciseExport exp : export) {
-      exerciseIDToExport.put(exp.id,exp);
- //     for (Export.ResponseAndGrade rg : exp.rgs) allAnswers.add(rg.response);
+
+    if (TESTING) {
+      exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
+      return null;
+    } else {
+      List<Export.ExerciseExport> export = exporter.getExport(true, false);
+      exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
+      for (Export.ExerciseExport exp : export) {
+        exerciseIDToExport.put(exp.id, exp);
+        //     for (Export.ResponseAndGrade rg : exp.rgs) allAnswers.add(rg.response);
+      }
+      String[] args = new String[6];
+
+      String configDir = (installPath != null ? installPath + File.separator : "") + mediaDir + File.separator;
+      String config = configDir + "runAutoGradeWinNoBad.cfg";     // TODO use template for deploy/platform specific config
+      if (!new File(config).exists()) logger.error("couldn't find " + config);
+      args[0] = "-C";
+      args[1] = config;
+      args[2] = "-log";
+      args[3] = configDir + "out.log";
+      args[4] = "-blacklist-file";
+      args[5] = configDir + "blacklist.txt";
+
+      ag.experiment.AutoGradeExperiment.main(args);
+      classifier = AutoGradeExperiment.getClassifierFromExport(export);
+      return classifier;
     }
-    String[] args = new String[6];
-
-    String configDir = (installPath != null ? installPath + File.separator : "") + mediaDir + File.separator;
-    String config = configDir + "runAutoGradeWinNoBad.cfg";     // TODO use template for deploy/platform specific config
-    if (!new File(config).exists()) logger.error("couldn't find " + config);
-    args[0] = "-C";
-    args[1] = config;
-    args[2] = "-log";
-    args[3] =  configDir + "out.log";
-    args[4] = "-blacklist-file";
-    args[5] = configDir + "blacklist.txt";
-
-    ag.experiment.AutoGradeExperiment.main(args);
-    classifier = AutoGradeExperiment.getClassifierFromExport(export);
-    return classifier;
   }
 }
