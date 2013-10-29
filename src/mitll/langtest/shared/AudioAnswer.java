@@ -75,7 +75,7 @@ public class AudioAnswer implements IsSerializable {
 
 
   /**
-   * @see mitll.langtest.client.bootstrap.BootstrapExercisePanel.MyRecordButtonPanel#receivedAudioAnswer(AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.bootstrap.FlashcardRecordButtonPanel#receivedAudioAnswer(AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
    * @return score from hydec (see nnscore)
    */
   public double getScore() {
@@ -83,7 +83,7 @@ public class AudioAnswer implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.BootstrapExercisePanel.MyRecordButtonPanel#receivedAudioAnswer(AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.bootstrap.FlashcardRecordButtonPanel#receivedAudioAnswer(AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
    * @return
    */
   public boolean isCorrect() {
@@ -91,16 +91,12 @@ public class AudioAnswer implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.autocrt.AutoCRT#getFlashcardAnswer(Exercise, java.io.File, AudioAnswer, Scoring)
+   * @see mitll.langtest.server.autocrt.AutoCRT#getFlashcardAnswer
    * @param correct
    */
   public void setCorrect(boolean correct) {
     this.correct = correct;
   }
-
-/*  public long getResultID() {
-    return resultID;
-  }*/
 
   public void setResultID(long resultID) {
     this.resultID = resultID;
