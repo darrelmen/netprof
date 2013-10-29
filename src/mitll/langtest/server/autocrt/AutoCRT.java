@@ -96,8 +96,9 @@ public class AutoCRT {
   /**
    * Allow multiple correct answers from synonym sentence list.
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#isMatch
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getAudioAnswer
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
    * @param e
    * @param audioFile
    * @param answer
@@ -275,7 +276,7 @@ public class AutoCRT {
    * @see AutoGradeExperiment
    * @return a mira classifier
    */
-  private Classifier<AutoGradeExperiment.Event> getClassifier() {
+  private synchronized Classifier<AutoGradeExperiment.Event> getClassifier() {
     if (classifier != null) return classifier;
 
     if (TESTING) {
