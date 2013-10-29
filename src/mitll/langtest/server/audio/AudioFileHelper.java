@@ -34,7 +34,7 @@ public class AudioFileHelper {
   private ASRScoring asrScoring;
   private AutoCRT autoCRT;
   private DatabaseImpl db;
-  LangTestDatabaseImpl langTestDatabase;
+  private LangTestDatabaseImpl langTestDatabase;
 
   public AudioFileHelper(PathHelper pathHelper, ServerProperties serverProperties, DatabaseImpl db, LangTestDatabaseImpl langTestDatabase) {
     this.pathHelper = pathHelper;
@@ -131,6 +131,13 @@ public class AudioFileHelper {
     }
   }
 
+  /**
+   * @see LangTestDatabaseImpl#getScoreForAnswer(mitll.langtest.shared.Exercise, int, String)
+   * @param e
+   * @param questionID
+   * @param answer
+   * @return
+   */
   public double getScoreForAnswer(Exercise e, int questionID, String answer) {
     return autoCRT.getScoreForExercise(e, questionID, answer);
   }
@@ -298,7 +305,7 @@ public class AudioFileHelper {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
     if (serverProps.isFlashcard()|| doFlashcard) {
       //makeAutoCRT();
-      makeASRScoring();
+      /*if (!serverProps.)*/ makeASRScoring();
       if (serverProps.isAutoCRT()) {
         autoCRT.getAutoCRTDecodeOutput(exercise, questionID, langTestDatabase.getExercise(exercise), file, audioAnswer);
       } else {
