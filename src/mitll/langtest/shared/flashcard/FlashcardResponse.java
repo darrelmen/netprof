@@ -17,6 +17,7 @@ public class FlashcardResponse implements IsSerializable {
   public boolean finished = false;
   private boolean onFirst = false;
   private boolean onLast = false;
+  private double score;
 
   public FlashcardResponse() {}
 
@@ -42,6 +43,11 @@ public class FlashcardResponse implements IsSerializable {
     this.incorrect = incorrect;
   }
 
+  public FlashcardResponse( int correct, int incorrect, double score) {
+    this(false,correct,incorrect);
+    this.score = score;
+  }
+
   /**
    * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList.FlashcardResponseAsyncCallback#onSuccess(FlashcardResponse)
    * @return
@@ -49,6 +55,10 @@ public class FlashcardResponse implements IsSerializable {
   public Exercise getNextExercise() { return nextExercise; }
   public boolean isOnFirst() { return onFirst; }
   public boolean isOnLast() { return onLast; }
+
+  public double getScore() {
+    return score;
+  }
 
   public String toString() {
     return "FlashcardResponse : " +
