@@ -49,6 +49,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
       }
     });
     navigationHelper.enablePrevButton(!controller.onFirst(null));
+    navigationHelper.enableNextButton(false);
   }
 
   @Override
@@ -179,5 +180,11 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
 
     html.addStyleName("wrapword");
     return html;
+  }
+
+  @Override
+  public void showPronScoreFeedback(double score) {
+    super.showPronScoreFeedback(score);
+    navigationHelper.enableNextButton(true);
   }
 }
