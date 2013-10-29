@@ -47,13 +47,11 @@ public class BootstrapExercisePanel extends FluidContainer {
   private Column scoreFeedbackColumn;
   private List<FlashcardRecordButtonPanel> answerWidgets = new ArrayList<FlashcardRecordButtonPanel>();
 
-  public Image correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
-  public Image incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
   public static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>";
 
   private Heading recoOutput;
   private ProgressBar scoreFeedback = new ProgressBar();
-  private SoundFeedback soundFeedback;
+  protected SoundFeedback soundFeedback;
   protected final Widget cardPrompt;
 
   /**
@@ -63,7 +61,7 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @see mitll.langtest.client.flashcard.FlashcardExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    */
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
-                                final ExerciseController controller) {
+                                final ExerciseController controller, int feedbackHeight) {
     setStyleName("exerciseBackground");
     addStyleName("cardBorder");
     HTML warnNoFlash = new HTML(WARN_NO_FLASH);
@@ -73,7 +71,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     cardPrompt = getCardPrompt(e, controller);
     cardPrompt.getElement().setId("cardPrompt");
     add(cardPrompt);
-    addRecordingAndFeedbackWidgets(e, service, controller);
+    addRecordingAndFeedbackWidgets(e, service, controller, feedbackHeight);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
   }
@@ -156,24 +154,21 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param service
    * @param controller used in subclasses for audio control
    */
-  private void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
+  private void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int feedbackHeight) {
     // add answer widget to do the recording
-    FlashcardRecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1);
-    this.answerWidgets.add(answerWidget);
-
-    FluidRow recordButtonRow = getRecordButtonRow(answerWidget.getRecordButton());
-    add(recordButtonRow);
-    recordButtonRow.getElement().setId("recordButtonRow");
+    add(getAnswerAndRecordButtonRow(e, service, controller));
 
     if (controller.getProps().showFlashcardAnswer()) {
-      FluidRow recoOutputRow = getRecoOutputRow();
-      add(recoOutputRow);
-      recoOutputRow.getElement().setId("recoOutputRow");
+      add(getRecoOutputRow());
     }
 
-    FluidRow feedbackRow = getScoreFeedbackRow();
-    feedbackRow.getElement().setId("feedbackRow");
-    add(feedbackRow);
+    add(getScoreFeedbackRow(feedbackHeight));
+  }
+
+  protected Widget getAnswerAndRecordButtonRow(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
+    FlashcardRecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1);
+    this.answerWidgets.add(answerWidget);
+    return getRecordButtonRow(answerWidget.getRecordButton());
   }
 
   /**
@@ -182,15 +177,18 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param recordButton
    * @return
    */
-  private FluidRow getRecordButtonRow(Widget recordButton) {
+  protected FluidRow getRecordButtonRow(Widget recordButton) {
     FluidRow recordButtonRow = new FluidRow();
     Paragraph recordButtonContainer = new Paragraph();
     recordButtonContainer.addStyleName("alignCenter");
     recordButtonContainer.add(recordButton);
     recordButton.addStyleName("alignCenter");
     recordButtonRow.add(new Column(12, recordButtonContainer));
+    recordButtonRow.getElement().setId("recordButtonRow");
     return recordButtonRow;
   }
+
+  protected Panel recoOutputContainer;
 
   /**
    * Center align the text feedback (correct/incorrect)
@@ -199,30 +197,33 @@ public class BootstrapExercisePanel extends FluidContainer {
    */
   private FluidRow getRecoOutputRow() {
     FluidRow recoOutputRow = new FluidRow();
-    Paragraph paragraph2 = new Paragraph();
-    paragraph2.addStyleName("alignCenter");
+    recoOutputContainer = new Paragraph();
+    recoOutputContainer.addStyleName("alignCenter");
 
-    recoOutputRow.add(new Column(12, paragraph2));
+    recoOutputRow.add(new Column(12, recoOutputContainer));
     recoOutput = new Heading(3, "Answer");
-    getRecoOutput().addStyleName("cardHiddenText");   // same color as background so text takes up space but is invisible
-    DOM.setStyleAttribute(getRecoOutput().getElement(), "color", "#ebebec");
+    recoOutput.addStyleName("cardHiddenText");   // same color as background so text takes up space but is invisible
+    DOM.setStyleAttribute(recoOutput.getElement(), "color", "#ebebec");
 
-    paragraph2.add(getRecoOutput());
+    recoOutputContainer.add(recoOutput);
+    recoOutputRow.getElement().setId("recoOutputRow");
     return recoOutputRow;
   }
 
+  private SimplePanel feedbackDummyPanel;
   /**
    * Holds the pron score feedback.
    * Initially made with a placeholder.
    *
    * @return
    */
-  private FluidRow getScoreFeedbackRow() {
+  private FluidRow getScoreFeedbackRow(int height) {
     FluidRow feedbackRow = new FluidRow();
-    SimplePanel widgets = new SimplePanel();
-    widgets.setHeight(30 +"px");
-    scoreFeedbackColumn = new Column(6, 3, widgets);
+    feedbackDummyPanel = new SimplePanel();
+    feedbackDummyPanel.setHeight(height + "px");
+    scoreFeedbackColumn = new Column(6, 3, feedbackDummyPanel);
     feedbackRow.add(scoreFeedbackColumn);
+    feedbackRow.getElement().setId("feedbackRow");
     return feedbackRow;
   }
 
@@ -251,6 +252,11 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @see FlashcardRecordButtonPanel#showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
   public void showPronScoreFeedback(double score) {
+    String pronunciationScore = PRONUNCIATION_SCORE;
+    showScoreFeedback(pronunciationScore, score);
+  }
+
+  protected void showScoreFeedback(String pronunciationScore, double score) {
     if (score < 0) score = 0;
     double percent = 100 * score;
 
@@ -260,7 +266,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     int percent1 = (int) percent;
     scoreFeedback.setPercent(percent1 < 40 ? 40 : percent1);   // just so the words will show up
 
-    scoreFeedback.setText(PRONUNCIATION_SCORE + (int) percent + "%");
+    scoreFeedback.setText(pronunciationScore + (int) percent + "%");
     scoreFeedback.setVisible(true);
     scoreFeedback.setColor(
       score > 0.8 ? ProgressBarBase.Color.SUCCESS :
@@ -268,7 +274,7 @@ public class BootstrapExercisePanel extends FluidContainer {
           score > 0.4 ? ProgressBarBase.Color.WARNING : ProgressBarBase.Color.DANGER);
   }
 
-  public void clearFeedback() { scoreFeedbackColumn.clear(); }
+  public void clearFeedback() { scoreFeedbackColumn.clear(); scoreFeedbackColumn.add(feedbackDummyPanel);}
 
   public void showPopup(String html) {
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
