@@ -28,6 +28,7 @@ import java.util.Map;
  */
 public interface LangTestDatabaseAsync {
   void addTextAnswer(int usedID, Exercise exercise, int questionID, String answer, AsyncCallback<Void> async);
+  void addTextAnswer(int userID, Exercise exercise, String stimulus, String answer, boolean correct, AsyncCallback<Void> async);
   void addUser(int age, String gender, int experience, String dialect, AsyncCallback<Long> async);
   void addUser(int age, String gender, int experience, String dialect, String nativeLang, String userID, AsyncCallback<Long> async);
   void userExists(String login, AsyncCallback<Integer> async);
@@ -131,8 +132,4 @@ public interface LangTestDatabaseAsync {
   void postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState, AsyncCallback<Leaderboard> async);
 
   void addDLIUser(DLIUser dliUser, AsyncCallback<Void> async);
-
-  void addUserList(long userid, String name, String description, String dliClass, AsyncCallback<Integer> async);
-
-  void getUserListsForText(String search, AsyncCallback<List<UserList>> async);
 }

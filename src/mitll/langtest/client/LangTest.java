@@ -35,6 +35,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.bootstrap.TextCRTFlashcard;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -669,17 +670,23 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void setFactory(final long userID) {
     final LangTest outer = this;
-   // if (props.getFlashcardNextAndPrev()) Window.alert("got next and prev");
     if (props.isGoodwaveMode() && !props.isGrading()) {
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer), userManager, 1);
     } else if (props.isGrading()) {
       exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer), userManager, props.getNumGradesToCollect());
     } else if (props.getFlashcardNextAndPrev()) {
-  //    Window.alert("using DataCollectionFlashcardFactory");
+      if (props.isFlashcardTextResponse())  {
+        exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer) {
+          @Override
+          public Panel getExercisePanel(Exercise e) {
+            return new TextCRTFlashcard(e,service,controller);
+          }
+        },userManager,1);
+      }
+      else {
       exerciseList.setFactory(new DataCollectionFlashcardFactory(service, outer, outer), userManager, 1);
+      }
     } else if (props.isFlashCard()) {
-   //   Window.alert("using FlashcardExercisePanelFactory");
-
       exerciseList.setFactory(new FlashcardExercisePanelFactory(service, outer, outer), userManager, 1);
     } else if (props.isDataCollectMode() && props.isCollectAudio() && !props.isCRTDataCollectMode()) {
       exerciseList.setFactory(new WaveformExercisePanelFactory(service, outer, outer), userManager, 1);
@@ -857,7 +864,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       userline.setHTML(userText);
     }
     else {
-      System.out.println("LangTest.gotUser : userline undefined??");
+    //  System.out.println("LangTest.gotUser : userline undefined??");
     }
     if (props.isDataCollectAdminView()) {
       checkForAdminUser();
