@@ -770,7 +770,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.addAnswer(userID, exercise, questionID, answer);
   }
 
+  @Override
+  public void addTextAnswer(int userID, Exercise exercise, String stimulus, String answer, boolean correct) {
+    db.addAnswer(userID, exercise.getPlan(),exercise.getID(), stimulus, answer, correct);
+  }
+
   public double getScoreForAnswer(Exercise e, int questionID, String answer) {
+    makeAutoCRT();
     return audioFileHelper.getScoreForAnswer(e, questionID, answer);
   }
 
@@ -819,16 +825,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } catch (Exception e) {
       logAndNotifyServerException(e);
     }
-  }
-
-  @Override
-  public int addUserList(long userid, String name, String description, String dliClass) {
-    return db.addUserList(userid, name, description, dliClass);
-  }
-
-  @Override
-  public List<UserList> getUserListsForText(String search) {
-    return db.getUserListsForText(search);
   }
 
   /**
