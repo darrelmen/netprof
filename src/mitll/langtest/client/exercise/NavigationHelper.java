@@ -31,6 +31,7 @@ import java.util.Date;
 public class NavigationHelper extends HorizontalPanel {
   private static final String LEFT_ARROW_TOOLTIP = "Press the left arrow key to go to the previous item.";
   private static final String RIGHT_ARROW_TOOLTIP = "Press enter to go to the next item.";
+  private static final String RIGHT_ARROW_TOOLTIP2 = "Press the right arrow key to go to the next item.";
   private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
 
   private Button prev,next;
@@ -104,7 +105,7 @@ public class NavigationHelper extends HorizontalPanel {
       next.setEnabled(false);
     }
     add(next);
-    /*if (true) */next.setTitle(RIGHT_ARROW_TOOLTIP);
+    /*if (true) */next.setTitle(bindEnterKey ? RIGHT_ARROW_TOOLTIP : RIGHT_ARROW_TOOLTIP2);
 
     DOM.setElementAttribute(next.getElement(), "id", "nextButton");
 
@@ -127,16 +128,7 @@ public class NavigationHelper extends HorizontalPanel {
 
   private void clickPrev(ExerciseController controller, Exercise e) {
     if (prev.isEnabled() && prev.isVisible()) {
-      System.out.println("clickPrev " +keyHandler+ " click on prev " + prev);
       controller.loadPreviousExercise(e);
-
-    //  boolean enabled = !controller.onFirst(e);
-    //  System.out.println("---> clickPrev enabled " +enabled);
-
-     // prev.setEnabled(enabled);
-    }
-    else {
-      System.out.println("---> clickPrev " +keyHandler+ " ignoring click prev.");
     }
   }
 
@@ -153,12 +145,6 @@ public class NavigationHelper extends HorizontalPanel {
         showConfirmNextDialog(controller, e);
       } else {
         provider.postAnswers(controller, e);
-
-       // System.out.println("clickNext " + prev.isEnabled());
-
-       // boolean enabled = !controller.onFirst(e);
-        //prev.setEnabled(enabled);
-        System.out.println("clickNext after " + prev.isEnabled());
       }
     }
     else {
@@ -233,7 +219,9 @@ public class NavigationHelper extends HorizontalPanel {
                                                      int keyCode = ne.getKeyCode();
                                                      boolean isLeft = keyCode == KeyCodes.KEY_LEFT;
                                                      //   boolean isRight = keyCode == KeyCodes.KEY_RIGHT;
-                                                     boolean isEnter = bindEnterKey && keyCode == KeyCodes.KEY_ENTER;
+                                                     boolean isEnter =
+                                                        (bindEnterKey && keyCode == KeyCodes.KEY_ENTER) ||
+                                                       (!bindEnterKey && keyCode == KeyCodes.KEY_RIGHT);
 
                                                      //   System.out.println("key code is " +keyCode);
                                                      if (((useKeyHandler && isLeft) || isEnter) && event.getTypeInt() == 512 &&
