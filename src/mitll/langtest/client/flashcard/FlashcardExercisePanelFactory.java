@@ -20,7 +20,7 @@ public class FlashcardExercisePanelFactory extends ExercisePanelFactory {
    * @param service
    * @param userFeedback
    * @param controller
-   * @see mitll.langtest.client.LangTest#setFactory()
+   * @see mitll.langtest.client.LangTest#setFactory
    */
   public FlashcardExercisePanelFactory(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                                        final ExerciseController controller) {
@@ -33,6 +33,6 @@ public class FlashcardExercisePanelFactory extends ExercisePanelFactory {
    * @return
    */
   public Panel getExercisePanel(Exercise e) {
-    return new BootstrapExercisePanel(e, service, controller);
+    return new BootstrapExercisePanel(e, service, controller, 30);
   }
 }
