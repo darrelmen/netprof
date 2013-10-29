@@ -574,25 +574,26 @@ public class DatabaseImpl implements Database {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
    * @param userID
    * @param exerciseID
    * @param isCorrect
    */
-  public void updateFlashcardState(long userID, String exerciseID, boolean isCorrect) {
+  public UserStateWrapper updateFlashcardState(long userID, String exerciseID, boolean isCorrect) {
     if (isCorrect) {
       Integer integer = userToCorrect.get(userID);
       userToCorrect.put(userID, integer == null ? 1 : integer + 1);
     }
+    UserStateWrapper state = null;
     synchronized (userToState) {
       try {
-        UserStateWrapper state = userToState.get(userID);
+        state = userToState.get(userID);
         if (state == null) {
           logger.error("can't find state for user id " + userID);
         } else {
           state.state.update(exerciseID, isCorrect);
           if (isCorrect) {
             state.setCorrect(state.getCorrect() + 1);
- //           userToCorrect.put(userID,userToCorrect.get(userID) == null ? 1 : userToCorrect.get(userID+1));
           }
           else {
             state.setIncorrect(state.getIncorrect() + 1);
@@ -603,6 +604,7 @@ public class DatabaseImpl implements Database {
         userToState.remove(userID);
       }
     }
+    return state;
   }
 
   /**
