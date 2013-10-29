@@ -319,7 +319,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
   @Override
   public boolean onFirst(ExerciseShell current) {
-    System.out.println("onFirst : response " + latestResponse);
+    //System.out.println("onFirst : response " + latestResponse);
 
     return latestResponse == null || latestResponse.isOnFirst();
   }
