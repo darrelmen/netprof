@@ -80,6 +80,7 @@ public class PropertyHandler {
   private static final String FLASHCARD_PREVIEW_HEIGHT = "flashcardPreviewHeight";
   private static final int DEFAULT_FLASHCARD_PREVIEW_HEIGHT = 610;
   private static final String SHOW_FLASHCARD_ANSWER = "showFlashcardAnswer";
+  private static final String FLASHCARD_TEXT_RESPONSE = "flashcardTextResponse";
 
   public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT, DATA_COLLECTOR }
 
@@ -126,6 +127,7 @@ public class PropertyHandler {
   private int flashcardPreviewHeight = DEFAULT_FLASHCARD_PREVIEW_HEIGHT;
   private boolean trackUsers;
   private boolean flashcardNextAndPrev;
+  private boolean flashcardTextResponse = false;
   private boolean showFlashcardAnswer = true;
 
   /**
@@ -183,6 +185,7 @@ public class PropertyHandler {
       else if (key.equals(TRACK_ONLINE_USERS)) trackUsers = getBoolean(value);
     //  else if (key.equals(TABOO_ENGLISH)) tabooEnglish = getBoolean(value);
       else if (key.equals(FLASHCARD_NEXT_AND_PREV)) flashcardNextAndPrev = getBoolean(value);
+      else if (key.equals(FLASHCARD_TEXT_RESPONSE)) flashcardTextResponse = getBoolean(value);
       else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
@@ -460,6 +463,10 @@ public class PropertyHandler {
 
   public boolean getFlashcardNextAndPrev() {
     return flashcardNextAndPrev;
+  }
+
+  public boolean isFlashcardTextResponse() {
+    return flashcardTextResponse;
   }
 
   public boolean showFlashcardAnswer() {
