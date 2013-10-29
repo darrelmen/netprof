@@ -38,6 +38,7 @@ public class NavigationHelper extends HorizontalPanel {
   private boolean debug = false;
   private boolean enableNextOnlyWhenAllCompleted = true;
   private PostAnswerProvider provider;
+  boolean bindEnterKey = true;
 
   /**
    * @see ExercisePanel#getNavigationHelper(ExerciseController)
@@ -53,8 +54,17 @@ public class NavigationHelper extends HorizontalPanel {
     getNextAndPreviousButtons(exercise, controller);
   }
 
-  public NavigationHelper(final Exercise exercise, ExerciseController controller, boolean enableNextOnlyWhenAllCompleted) {
+  /**
+   * @see mitll.langtest.client.bootstrap.DataCollectionFlashcard#getCardPrompt(mitll.langtest.shared.Exercise, ExerciseController)
+   * @param exercise
+   * @param controller
+   * @param enableNextOnlyWhenAllCompleted
+   * @param bindEnterKey
+   */
+  public NavigationHelper(final Exercise exercise, ExerciseController controller, boolean enableNextOnlyWhenAllCompleted,
+                          boolean bindEnterKey) {
     this.enableNextOnlyWhenAllCompleted = enableNextOnlyWhenAllCompleted;
+    this.bindEnterKey = bindEnterKey;
     this.provider = new PostAnswerProvider() {
       @Override
       public void postAnswers(ExerciseController controller, Exercise completedExercise) {
@@ -223,7 +233,7 @@ public class NavigationHelper extends HorizontalPanel {
                                                      int keyCode = ne.getKeyCode();
                                                      boolean isLeft = keyCode == KeyCodes.KEY_LEFT;
                                                      //   boolean isRight = keyCode == KeyCodes.KEY_RIGHT;
-                                                     boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
+                                                     boolean isEnter = bindEnterKey && keyCode == KeyCodes.KEY_ENTER;
 
                                                      //   System.out.println("key code is " +keyCode);
                                                      if (((useKeyHandler && isLeft) || isEnter) && event.getTypeInt() == 512 &&
