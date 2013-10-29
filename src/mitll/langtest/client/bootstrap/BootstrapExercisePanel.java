@@ -141,7 +141,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       stimulus = content;
     }
 
-    Widget hero = new Heading(5, stimulus + " <br>BootstrapExercisePanel");
+    Widget hero = new Heading(5, stimulus);
     hero.addStyleName("marginRight");
     return hero;
   }
