@@ -22,6 +22,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.exercise.NoPasteTextBox;
 import mitll.langtest.client.recorder.RecordButtonPanel;
+import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -33,14 +34,16 @@ import mitll.langtest.shared.Exercise;
  */
 public class TextCRTFlashcard extends DataCollectionFlashcard {
   private static final int HIDE_FEEDBACK = 2500;
-  private static final double CORRECT_SCORE_THRESHOLD = 0.6;
+  private static final double CORRECT_SCORE_THRESHOLD = 0.5;
   private EnterKeyButtonHelper enterKeyButtonHelper;
   private Image grayImage;
   private Image correctImage;
   private Image incorrectImage;
+  private UserManager userManager;
 
-  public TextCRTFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
+  public TextCRTFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, UserManager userManager) {
     super(e, service, controller, 40);
+    this.userManager = userManager;
   }
 
   @Override
@@ -48,7 +51,6 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
     navigationHelper = new NavigationHelper(e, controller, false, false);
   }
 
-//  private Panel checkContainer;
   /**
    *
    * @param exercise
@@ -58,7 +60,8 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
    */
   @Override
   protected Widget getAnswerAndRecordButtonRow(final Exercise exercise, final LangTestDatabaseAsync service, ExerciseController controller) {
-    final TextBox noPasteAnswer = new NoPasteTextBox();
+    boolean allowPaste = controller.isDemoMode();
+    final TextBox noPasteAnswer = allowPaste ? new TextBox() : new NoPasteTextBox();
     noPasteAnswer.setFocus(true);
     noPasteAnswer.addStyleName("topMargin");
     final Button check = new Button("Check Answer");
@@ -69,6 +72,7 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
     });
 
     check.setType(ButtonType.PRIMARY);
+    check.setTitle("Hit Enter to submit answer.");
     check.setEnabled(true);
     check.addStyleName("leftFiveMargin");
     check.addClickHandler(new ClickHandler() {
@@ -76,7 +80,7 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
       public void onClick(ClickEvent event) {
         String guess = noPasteAnswer.getText();
 
-        service.getScoreForAnswer(exercise, 0, guess, new AsyncCallback<Double>() {
+        service.getScoreForAnswer(userManager.getUser(), exercise, 1, guess, new AsyncCallback<Double>() {
           @Override
           public void onFailure(Throwable caught) {
             check.setEnabled(true);
@@ -84,14 +88,14 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
           @Override
           public void onSuccess(Double result) {
             check.setEnabled(true);
-            result *= 2.5;
-            result -= 1.25;
+      /*      result *= 2.5;
+            result -= 1.25;*/
+            //result -= 0.3; // the floor
+            //result *= 1.43;
             result = Math.max(0,result);
             result = Math.min(1.0,result);
 
             showPronScoreFeedback(result);
-        //    recoOutputContainer.setVisible(true);
-
             if (result > CORRECT_SCORE_THRESHOLD) {
               soundFeedback.playCorrect();
               showScoreIcon(true);
@@ -104,17 +108,6 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
               @Override
               public void run() {
                 clearFeedback();
-               // recoOutputContainer.clear();
-               // recoOutputContainer.setVisible(false);
-
-          /*
-                recoOutputContainer.clear();
-
-                Heading recoOutput = new Heading(4, "Answer");
-                recoOutput.addStyleName("cardHiddenText");   // same color as background so text takes up space but is invisible
-                DOM.setStyleAttribute(recoOutput.getElement(), "color", "#ebebec");
-                recoOutputContainer.add(recoOutput);*/
-            //    checkContainer.clear();
                 recordButton.setResource(grayImage);
               }
             };
@@ -126,20 +119,13 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
 
     FluidRow row = new FluidRow();
     row.add(noPasteAnswer);
-    //FluidRow row1 = new FluidRow();
-    //row1.add(check);
     row.add(check);
-    //checkContainer = new FlowPanel();
-    // row.add(checkContainer);
 
    grayImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "gray_48x48.png"));
    correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
    incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
 
     row.add(recordButton = getRecordButton());
- //   FluidContainer fc = new FluidContainer();
-  //  fc.add(row);
-   // fc.add(row1);
 
     enterKeyButtonHelper = new EnterKeyButtonHelper(false);
     enterKeyButtonHelper.addKeyHandler(check);
@@ -150,19 +136,11 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
       }
     });
 
-    //  return getRecordButtonRow(fc);
       return getRecordButtonRow(row);
   }
 
   RecordButtonPanel.ImageAnchor recordButton;
   private void showScoreIcon(boolean correct) {
-/*    RecordButtonPanel.ImageAnchor recordButton = getRecordButton(correct);
- *//*   recoOutputContainer.clear();
-    recoOutputContainer.add(recordButton);
-*//*
-    checkContainer.clear();
-    checkContainer.add(recordButton);*/
-  //  recordButton.setVisible(true);
     recordButton.setResource(correct ? correctImage : incorrectImage);
   }
 
@@ -172,108 +150,8 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
     recordButton.addStyleName("leftFiveMargin");
     recordButton.setResource(grayImage);
     recordButton.setHeight("112px");
- //   recordButton.setVisible(false);
     return recordButton;
   }
-
-/*  private Panel getAutoCRTCheckAnswerWidget(final Exercise exercise, final LangTestDatabaseAsync service,
-                                                      final int index, final TextBox answer) {
-   Panel hp = new FlowPanel();
-  //  hp.setSpacing(5);
-    hp.add(answer);
-    final Button check = new Button("Check Answer");
-    check.setType(ButtonType.PRIMARY);
-    check.setEnabled(false);
-    hp.add(check);
-    final Label resp = new Label();
-    hp.add(resp);
-
-    answer.addKeyUpHandler(new KeyUpHandler() {
-      public void onKeyUp(KeyUpEvent event) {
-        resp.setText("");
-        check.setEnabled(answer.getText().length() > 0);
-      }
-    });
-
-    check.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        check.setEnabled(false);
-        service.getScoreForAnswer(exercise, index, answer.getText(), new AsyncCallback<Double>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            check.setEnabled(true);
-          }
-          @Override
-          public void onSuccess(Double result) {
-            check.setEnabled(true);
-
-            showAutoCRTScore(result, resp);
-          }
-        });
-      }
-    });
-    return hp;
-  }*/
-
-/*
-  private void addAnswer(final Exercise exercise, LangTestDatabaseAsync service, TextBox textBox, final boolean correct) {
-    service.addTextAnswer(controller.getUser(), exercise, exercise.getEnglishSentence(), textBox.getText(), correct, new AsyncCallback<Void>() {
-      public void onFailure(Throwable caught) {
-        controller.getFeedback().showErrorMessage("Server error", "Couldn't post answers for exercise.");
-      }
-
-      public void onSuccess(Void result) {
-        //nextAfterDelay(exercise, correct ? 2000 : 3000);
-      }
-    }
-    );
-  }
-*/
-
-
-/*  private void showAutoCRTScore(Double result, Label resp) {
-    result *= 2.5;
-    result -= 1.25;
-    result = Math.max(0,result);
-    result = Math.min(1.0,result);
-    String percent = ((int) (result * 100)) + "%";
-    if (result > 0.6) {
-      resp.setText("Correct! Score was " + percent);
-      resp.setStyleName("correct");
-      soundFeedback.playCorrect();
-    }
-    else {
-      resp.setText("Try again - score was " + percent);
-      resp.setStyleName("incorrect");
-      soundFeedback.playIncorrect();
-    }
-  }*/
-
-/*
-  private void nextAfterDelay(final Exercise exercise, final int delayMillis) {
-    // Schedule the timer to run once in 1 seconds.
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        controller.loadNextExercise(exercise);
-      }
-    };
-    t.schedule(delayMillis);
-  }
-*/
-/*
-  @Override
-  protected Widget getQuestionContent(Exercise e) {
-    FluidContainer container = new FluidContainer();
-    FluidRow row = new FluidRow();
-    container.add(row);
-    String stimulus = e.getEnglishSentence();
-    Widget hero = new Heading(1, stimulus);
-    hero.addStyleName("cardText");
-
-    row.add(new Column(12, hero));
-    return container;
-  }*/
 
   @Override
   public void showPronScoreFeedback(double score) {
