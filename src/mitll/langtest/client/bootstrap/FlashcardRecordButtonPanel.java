@@ -268,9 +268,6 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
       System.out.println("correct " + correct + " has ref " + hasRefAudio);
       nextAfterDelay(correct, feedback);
     }
-    else {
-
-    }
   }
 
   /**
