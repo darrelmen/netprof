@@ -94,7 +94,7 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
             //result *= 1.43;
             result = Math.max(0,result);
             result = Math.min(1.0,result);
-
+            if (result > 0.9) result = 1.0; //let's round up when we're almost totally correct 97%->100%
             showPronScoreFeedback(result);
             if (result > CORRECT_SCORE_THRESHOLD) {
               soundFeedback.playCorrect();
