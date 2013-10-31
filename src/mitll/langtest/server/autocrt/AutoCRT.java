@@ -115,7 +115,7 @@ public class AutoCRT {
   /**
    * Allow multiple correct answers from synonym sentence list.
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getAudioAnswer
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
    * @see mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
    * @param e
@@ -305,7 +305,6 @@ public class AutoCRT {
     if (classifier != null) return classifier;
 
     String configDir = (installPath != null ? installPath + File.separator : "") + mediaDir + File.separator;
-
     File serializedClassifier = new File(configDir, "serializedClassifier.ser");
     if (USE_SERIALIZED && serializedClassifier.exists()) {
       try {
@@ -353,8 +352,10 @@ public class AutoCRT {
         args[5] = configDir + "blacklist.txt";
 
         ag.experiment.AutoGradeExperiment.main(args);
+        long then = System.currentTimeMillis();
         classifier = AutoGradeExperiment.getClassifierFromExport(export);
-
+        long now = System.currentTimeMillis();
+        logger.debug("took " +((now-then)/1000) + " seconds to train classifier on " + export.size() + " items.");
         if (USE_SERIALIZED) {
           try {
             FileOutputStream fos = new FileOutputStream(serializedClassifier);
