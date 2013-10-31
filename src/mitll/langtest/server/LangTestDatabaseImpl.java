@@ -12,7 +12,6 @@ import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.SectionHelper;
-import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
@@ -37,6 +36,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
+import scala.actors.threadpool.Arrays;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -760,20 +760,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.addAnswer(userID, exercise, questionID, answer);
   }
 
-  @Override
-  public void addTextAnswer(int userID, Exercise exercise, String stimulus, String answer, boolean correct) {
-    db.addAnswer(userID, exercise.getPlan(),exercise.getID(), stimulus, answer, correct);
-  }
-
+  /**
+   * @see mitll.langtest.client.bootstrap.TextCRTFlashcard#getScoreForGuess(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.shared.Exercise, com.github.gwtbootstrap.client.ui.Button)
+   * @param userID
+   * @param exercise
+   * @param questionID
+   * @param answer
+   * @return
+   */
   public double getScoreForAnswer(long userID, Exercise exercise, int questionID, String answer) {
     makeAutoCRT();
     double scoreForAnswer = audioFileHelper.getScoreForAnswer(exercise, questionID, answer);
+    db.getAnswerDAO().addAnswer((int) userID, exercise.getPlan(), exercise.getID(), "", answer, (scoreForAnswer > 0.5), (float) scoreForAnswer);
 
-    //scoreForAnswer -= 0.3;
-    //scoreForAnswer *= 1.4; // now 0-1
-    //UserStateWrapper userStateWrapper = db.updateFlashcardState(userID, exercise.getID(), scoreForAnswer > 0.499d);
     return scoreForAnswer;
-    //return new FlashcardResponse(false,userStateWrapper.getCorrect(),userStateWrapper.getIncorrect());
   }
 
   // Grades ---------------------
@@ -870,14 +870,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.result.ResultManager#showResults()
    */
   @Override
-  public List<Result> getResults(int start, int end) {
+  public List<Result> getResults(int start, int end, String sortInfo) {
     List<Result> results = db.getResultsWithGrades();
-    Collections.sort(results, new Comparator<Result>() {
-      @Override
-      public int compare(Result o1, Result o2) {
-        return o1.uniqueID < o2.uniqueID ? -1 : o1.uniqueID > o2.uniqueID ? +1 : 0;
-      }
-    });
+    if (!results.isEmpty()) {
+      String[] columns = sortInfo.split(",");
+      Comparator<Result> comparator = results.get(0).getComparator(Arrays.asList(columns));
+      Collections.sort(results, comparator);
+    }
     List<Result> resultList = results.subList(start, end);
     return new ArrayList<Result>(resultList);
   }
