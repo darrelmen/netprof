@@ -1263,10 +1263,11 @@ public class DatabaseImpl implements Database {
     addAnswer(userID, e, questionID, answer, true);
   }
 
-  public void addAnswer(int userID, String plan, String exerciseID, String stimulus, String answer, boolean correct) {
-    answerDAO.addAnswer(userID, plan, exerciseID, stimulus, answer, correct);
+  public AnswerDAO getAnswerDAO() { return answerDAO; }
 
-  }
+/*  public void addAnswer(int userID, String plan, String exerciseID, String stimulus, String answer, boolean correct) {
+    answerDAO.addAnswer(userID, plan, exerciseID, stimulus, answer, correct);
+  }*/
   private void addAnswer(int userID, Exercise e, int questionID, String answer, boolean correct) {
     answerDAO.addAnswer(userID, e, questionID, answer, "", !e.promptInEnglish, false, Result.AUDIO_TYPE_UNSET, correct, 0);
   }
