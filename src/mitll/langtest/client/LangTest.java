@@ -255,7 +255,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     thirdRow.add(leftColumn);
     widgets.add(thirdRow);
 
-    if ((isCRTDataCollectMode() || props.isDataCollectMode())) {
+    if ((isCRTDataCollectMode() || props.isDataCollectMode()) && !props.isFlashcardTeacherView()) {
       addProgressBar(widgets);
     }
     else {
