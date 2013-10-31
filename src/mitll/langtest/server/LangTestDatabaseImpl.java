@@ -768,8 +768,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public double getScoreForAnswer(long userID, Exercise exercise, int questionID, String answer) {
     makeAutoCRT();
     double scoreForAnswer = audioFileHelper.getScoreForAnswer(exercise, questionID, answer);
-    scoreForAnswer -= 0.3;
-    scoreForAnswer *= 1.4; // now 0-1
+
+    //scoreForAnswer -= 0.3;
+    //scoreForAnswer *= 1.4; // now 0-1
     //UserStateWrapper userStateWrapper = db.updateFlashcardState(userID, exercise.getID(), scoreForAnswer > 0.499d);
     return scoreForAnswer;
     //return new FlashcardResponse(false,userStateWrapper.getCorrect(),userStateWrapper.getIncorrect());

@@ -11,6 +11,11 @@ import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,6 +35,9 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class AutoCRT {
+  public static final double CORRECT_THRESHOLD = 0.499;
+  private static final boolean GET_MSA = false;
+  private static final boolean USE_SERIALIZED = false;
   private static Logger logger = Logger.getLogger(AutoCRT.class);
 
   private static final boolean TESTING = false; // this doesn't really work
@@ -60,7 +68,8 @@ public class AutoCRT {
   /**
    * Get an auto crt reco output and score given an audio answer.
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getAudioAnswer
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
    * @param exerciseID
    * @param questionID
    * @param e
@@ -71,17 +80,24 @@ public class AutoCRT {
                                      AudioAnswer answer) {
     Collection<String> exportedAnswers = getExportedAnswers(exerciseID, questionID);
     exportedAnswers = db.getValidPhrases(exportedAnswers);
-    logger.info("getAutoCRTDecodeOutput : got answers, num = " + exportedAnswers.size());
+    //logger.info("getAutoCRTDecodeOutput : got answers, num = " + exportedAnswers.size());
 
     PretestScore asrScoreForAudio = db.getASRScoreForAudio(audioFile, exportedAnswers);
 
     String recoSentence = asrScoreForAudio.getRecoSentence();
-    logger.info("reco sentence was '" + recoSentence + "', score " + asrScoreForAudio.getHydecScore());
     boolean lowPronScore = asrScoreForAudio.getHydecScore() < minPronScore;
-    if (recoSentence.equals(SmallVocabDecoder.UNKNOWN_MODEL) || lowPronScore) {
-      if (lowPronScore) logger.info("\t-----------> rejecting result since score too low");
+    boolean matchedUnknown = recoSentence.equals(SmallVocabDecoder.UNKNOWN_MODEL);
+
+    logger.info("for " + exerciseID + " given " +exportedAnswers.size() + " possible matches," +
+      " reco sentence was '" + recoSentence + "', score " + asrScoreForAudio.getHydecScore() +
+      (lowPronScore ? " score too low " : "") +
+      (matchedUnknown ? " matched unknown model " : ""));
+
+    if (matchedUnknown || lowPronScore) {
+      //if (lowPronScore) logger.info("\t-----------> rejecting result since score too low");
       answer.setDecodeOutput("Unexpected word.");
-      answer.setScore(0d);
+      answer.setScore(asrScoreForAudio.getHydecScore());
+      answer.setCorrect(false);
     } else {
       String annotatedResponse = getAnnotatedResponse(exerciseID, questionID, recoSentence);
 
@@ -89,7 +105,10 @@ public class AutoCRT {
 
       answer.setDecodeOutput(annotatedResponse);
       answer.setScore(scoreForAnswer);
-      answer.setCorrect(scoreForAnswer > 0.499);
+      boolean correct = scoreForAnswer > CORRECT_THRESHOLD;
+
+      logger.info("for " + exerciseID + " reco sentence was '" + recoSentence + "' classifier score "+scoreForAnswer + " correct " + correct);
+      answer.setCorrect(correct);
     }
   }
 
@@ -199,15 +218,20 @@ public class AutoCRT {
    * Do this by getting all other answers to this question and the answer key and given this information
    * and the answer, ask the classifier to score the answer.
    * @see mitll.langtest.server.audio.AudioFileHelper#getScoreForAnswer(mitll.langtest.shared.Exercise, int, String)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer(mitll.langtest.shared.Exercise, int, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
    * @param e for this exercise
    * @param questionID for this question (when multiple questions in an exercise)
    * @param answer to score (correct->incorrect)
    * @return 0-1
    */
   public double getScoreForExercise(Exercise e, int questionID, String answer) {
+    if (answer.isEmpty()) {
+      logger.warn("huh? for exercise " + e.getID() + " question " + questionID + " answer is empty?");
+      return 0d;
+    }
     return getScoreForExercise(e.getID(), questionID, answer);
   }
+
   private double getScoreForExercise(String id, int questionID, String answer) {
     if (TESTING) return 0.1;
     getClassifier();
@@ -219,7 +243,8 @@ public class AutoCRT {
     }
     else {
       double score = AutoGradeExperiment.getScore(getClassifier(), answer, exerciseExport);
-      logger.info("AutoGradeExperiment : score was " + score + " for " + exerciseExport);
+      logger.info("AutoGradeExperiment : score was " + score + " for answer '" +  answer+
+        "' in context of " + exerciseExport );
       return score;
     }
   }
@@ -276,34 +301,72 @@ public class AutoCRT {
    * @see AutoGradeExperiment
    * @return a mira classifier
    */
-  private synchronized Classifier<AutoGradeExperiment.Event> getClassifier() {
+  private Classifier<AutoGradeExperiment.Event> getClassifier() {
     if (classifier != null) return classifier;
 
-    if (TESTING) {
-      exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
-      return null;
-    } else {
-      List<Export.ExerciseExport> export = exporter.getExport(true, false);
-      exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
-      for (Export.ExerciseExport exp : export) {
-        exerciseIDToExport.put(exp.id, exp);
-        //     for (Export.ResponseAndGrade rg : exp.rgs) allAnswers.add(rg.response);
+    String configDir = (installPath != null ? installPath + File.separator : "") + mediaDir + File.separator;
+
+    File serializedClassifier = new File(configDir, "serializedClassifier.ser");
+    if (USE_SERIALIZED && serializedClassifier.exists()) {
+      try {
+        FileInputStream fis = new FileInputStream(serializedClassifier);
+        ObjectInputStream ois = new ObjectInputStream(fis);
+        classifier = (Classifier<AutoGradeExperiment.Event>) ois.readObject();
+        logger.info("rehydrated classifier " + classifier);
+        ois.close();
+
+        List<Export.ExerciseExport> export = exporter.getExport(true, false);
+        exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
+        for (Export.ExerciseExport exp : export) {
+          exerciseIDToExport.put(exp.id, exp);
+        }
+
+      } catch (IOException e) {
+        logger.error("Got " + e, e);
+      } catch (ClassNotFoundException e) {
+        logger.error("Got " + e, e);
       }
-      String[] args = new String[6];
-
-      String configDir = (installPath != null ? installPath + File.separator : "") + mediaDir + File.separator;
-      String config = configDir + "runAutoGradeWinNoBad.cfg";     // TODO use template for deploy/platform specific config
-      if (!new File(config).exists()) logger.error("couldn't find " + config);
-      args[0] = "-C";
-      args[1] = config;
-      args[2] = "-log";
-      args[3] = configDir + "out.log";
-      args[4] = "-blacklist-file";
-      args[5] = configDir + "blacklist.txt";
-
-      ag.experiment.AutoGradeExperiment.main(args);
-      classifier = AutoGradeExperiment.getClassifierFromExport(export);
       return classifier;
+    } else {
+      if (TESTING) {
+        exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
+        return null;
+      } else if (GET_MSA) {
+        List<Export.ExerciseExport> export = exporter.getExport(true, false);
+        AutoGradeExperiment.runOverallModelOnExport(export);
+        return null;
+      } else {
+        List<Export.ExerciseExport> export = exporter.getExport(true, false);
+        exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
+        for (Export.ExerciseExport exp : export) {
+          exerciseIDToExport.put(exp.id, exp);
+        }
+        String[] args = new String[6];
+
+        String config = configDir + "runAutoGradeWinNoBad.cfg";     // TODO use template for deploy/platform specific config
+        if (!new File(config).exists()) logger.error("couldn't find " + config);
+        args[0] = "-C";
+        args[1] = config;
+        args[2] = "-log";
+        args[3] = configDir + "out.log";
+        args[4] = "-blacklist-file";
+        args[5] = configDir + "blacklist.txt";
+
+        ag.experiment.AutoGradeExperiment.main(args);
+        classifier = AutoGradeExperiment.getClassifierFromExport(export);
+
+        if (USE_SERIALIZED) {
+          try {
+            FileOutputStream fos = new FileOutputStream(serializedClassifier);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(classifier);
+            oos.close();
+          } catch (IOException e) {
+            logger.error("Got " + e, e);
+          }
+        }
+        return classifier;
+      }
     }
   }
 }
