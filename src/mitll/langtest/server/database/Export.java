@@ -15,7 +15,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created with IntelliJ IDEA.
+ * Export graded results to give to classifier training.
+ *
+ * See Jacob's mira3 classifier.
+ *
  * User: GO22670
  * Date: 11/29/12
  * Time: 6:04 PM
@@ -55,36 +58,38 @@ public class Export {
    * @param useSpoken
    * @return
    */
-  public List<ExerciseExport> getExport(boolean useFLQ,boolean useSpoken) {
-    List<ExerciseExport> names = new ArrayList<ExerciseExport>();
-//    int n = 20;
-
+  public List<ExerciseExport> getExport(boolean useFLQ, boolean useSpoken) {
     Map<Integer, List<Grade>> idToGrade = getIdToGrade(gradeDAO.getGrades());
+    logger.debug("getExport : got " +idToGrade.size() + " grades");
 
-    logger.debug("got " +idToGrade.size() + " grades");
+    Map<String, List<Result>> exerciseToResult = populateMapOfExerciseIdToResults();
+    logger.debug("getExport : got " +exerciseToResult.size() + " exercise with results");
+
+    List<Exercise> exercises = getExercises();
+    logger.debug("getExport : got " +exercises.size() + " exercises");
+
+    List<ExerciseExport> names = new ArrayList<ExerciseExport>();
+    for (Exercise e : exercises) {
+      List<Result> results1 = exerciseToResult.get(e.getID());
+      List<ExerciseExport> resultsForExercise = getExports(idToGrade, results1, e, useFLQ, useSpoken);
+      names.addAll(resultsForExercise);
+    }
+    logger.debug("getExport : produced " +names.size() + " exports");
+
+    return names;
+  }
+
+  private Map<String, List<Result>> populateMapOfExerciseIdToResults() {
     Map<String,List<Result>> exerciseToResult = new HashMap<String, List<Result>>();
     List<Result> results = resultDAO.getResults();
-    logger.debug("got " +results.size() + " results");
+    logger.debug("populateMapOfExerciseIdToResults : got " +results.size() + " results");
 
     for (Result r : results) {
       List<Result> res = exerciseToResult.get(r.id);
       if (res == null) exerciseToResult.put(r.id, res = new ArrayList<Result>());
       res.add(r);
     }
-
-    List<Exercise> exercises = getExercises();
-    logger.debug("got " +exercises.size() + " exercises");
-
-    for (Exercise e : exercises) {
-//      System.out.println("on " + e);
-      List<Result> results1 = exerciseToResult.get(e.getID());
-      List<ExerciseExport> resultsForExercise = getExports(idToGrade, results1, e, useFLQ, useSpoken);
-      names.addAll(resultsForExercise);
-      // if (n-- == 0) break;
-    }
-    logger.debug("got " +names.size() + " exports");
-
-    return names;
+    return exerciseToResult;
   }
 
   public static class ExerciseExport {
@@ -103,27 +108,23 @@ public class Export {
     }
   }
 
-
   public static class ResponseAndGrade {
     public String response;
     public float grade;
     public ResponseAndGrade(String response, int grade) {
       this.response = response;
-      this.grade = ((float) (grade-1))/4f;
+      this.grade = ((float) (grade-1))/4f;  // jacob's stuff wants a 0->1 scale
    //   logger.debug("mapping " + grade + " to " + this.grade);
     }
     @Override
     public String toString() { return "grd " + grade + " for '" + "" /*response*/ +"'"; }
   }
 
-
   /**
    * @see #getExport(boolean, boolean)
    * @return
    */
-  private List<Exercise> getExercises() {
-    return exerciseDAO.getRawExercises();
-  }
+  private List<Exercise> getExercises() { return exerciseDAO.getRawExercises();  }
 
   /**
    * Complicated.  To figure out spoken/written, flq/english we have to go back and join against the schedule.
@@ -132,57 +133,33 @@ public class Export {
    * @param useFLQ
    * @param useSpoken
    * @return
+   * @see #getExport(boolean, boolean)
    */
   private List<ExerciseExport> getExports(Map<Integer, List<Grade>> idToGrade, List<Result> resultsForExercise,
                                          Exercise exercise, boolean useFLQ, boolean useSpoken) {
     boolean debug = false;
-
-    List<ExerciseExport> ret = new ArrayList<ExerciseExport>();
-
-    Map<Integer, ExerciseExport> qidToExport = new HashMap<Integer, ExerciseExport>();
-    int qid = 0;
-    for (Exercise.QAPair q : exercise.getQuestions()) {
-      ExerciseExport e1 = new ExerciseExport(exercise.getID() + "_" + ++qid, q.getAnswer());
-      qidToExport.put(qid, e1);
-    }
+    Map<Integer, ExerciseExport> qidToExport = populateIdToExportMap(exercise);
   //  logger.debug("got qid->export " +qidToExport.size() + " items");
-    Set<ExerciseExport> valid = new HashSet<ExerciseExport>();
-
-    List<Exercise.QAPair> qaPairs = useFLQ ? exercise.getForeignLanguageQuestions() : exercise.getEnglishQuestions();
-    qid = 1;
-    for (Exercise.QAPair q : qaPairs) {
-      ExerciseExport exerciseExport = qidToExport.get(qid);
-
-      if (exerciseExport == null)
-        System.err.println("no qid " + qid + " in " + qidToExport.keySet() + " for " + exercise);
-      else {
-        for (String answer : q.getAlternateAnswers()) {
-          if (answer.length() == 0) {
-            logger.warn("huh? alternate answer is empty??? for " + q + " in " + exercise.getID());
-          } else {
-            exerciseExport.addRG(answer, 5);
-          }
-        }
-      }
-      qid++;
-    }
-
+    addPredefinedAnswers(exercise, useFLQ, qidToExport);
    // logger.debug("got " +resultsForExercise.size() + " resultsForExercise ");
 
+    List<ExerciseExport> ret = new ArrayList<ExerciseExport>();
+    Set<ExerciseExport> valid = new HashSet<ExerciseExport>();
 
     // find results, after join with schedule, add join with the grade
     for (Result r : resultsForExercise) {
       if (r.flq == useFLQ && r.spoken == useSpoken) {
         ExerciseExport exerciseExport = qidToExport.get(r.qid);
-        if (exerciseExport == null) logger.warn("for " + r.getID() +
-          " can't find r qid " + r.qid + " in keys " + qidToExport.keySet());
+        if (exerciseExport == null) {
+          logger.warn("getExports : for " + r.getID() +" can't find r qid " + r.qid + " in keys " + qidToExport.keySet());
+        }
         else {
           List<Grade> gradesForResult = idToGrade.get(r.uniqueID);
           if (gradesForResult == null) {
             //System.err.println("no grades for result " + r);
           } else {
             for (Grade g : gradesForResult) {
-              if (g.grade > 0) {
+              if (g.grade > 0) {  // filter out bad items (valid grades are 1-5)
                 if (r.answer.length() > 0) {
                   exerciseExport.addRG(r.answer, g.grade);
                   if (!valid.contains(exerciseExport)) {
@@ -191,17 +168,58 @@ public class Export {
                   }
                 }
                 else {
-                  logger.warn("skipping " + r.getID() + " with empty answer.");
+                  logger.warn("getExports : skipping result " + r.getID() + " with empty answer.");
                 }
               }
             }
           }
         }
       } else {
-        if (debug) System.out.println("\tSkipping result " + r + " since not match to " + useFLQ + " and " + useSpoken);
+        if (debug) logger.debug("\tSkipping result " + r + " since not match to " + useFLQ + " and " + useSpoken);
       }
     }
     return ret;
+  }
+
+  private Map<Integer, ExerciseExport> populateIdToExportMap(Exercise exercise) {
+    Map<Integer, ExerciseExport> qidToExport = new HashMap<Integer, ExerciseExport>();
+    int qid = 0;
+    for (Exercise.QAPair q : exercise.getQuestions()) {
+      ExerciseExport e1 = new ExerciseExport(exercise.getID() + "_" + ++qid, q.getAnswer());
+      qidToExport.put(qid, e1);
+    }
+    return qidToExport;
+  }
+
+  /**
+   * If the exercise already has predefined answers, add those
+   * @param exercise
+   * @param useFLQ
+   * @param qidToExport
+   */
+  private void addPredefinedAnswers(Exercise exercise, boolean useFLQ, Map<Integer, ExerciseExport> qidToExport) {
+    int qid;List<Exercise.QAPair> qaPairs = useFLQ ? exercise.getForeignLanguageQuestions() : exercise.getEnglishQuestions();
+    qid = 1;
+    int count = 0;
+    for (Exercise.QAPair q : qaPairs) {
+      ExerciseExport exerciseExport = qidToExport.get(qid);
+
+      if (exerciseExport == null) {
+        logger.error("no qid " + qid + " in " + qidToExport.keySet() + " for " + exercise);
+      } else {
+        for (String answer : q.getAlternateAnswers()) {
+          if (answer.length() == 0) {
+            logger.warn("huh? alternate answer is empty??? for " + q + " in " + exercise.getID());
+          } else {
+            exerciseExport.addRG(answer, 5);
+            count++;
+          }
+        }
+        //logger.debug("for " + exercise.getID() + " export is " + exerciseExport);
+      }
+      qid++;
+    }
+    //logger.debug("for " + exercise.getID() + " added " + count + " predefined answers");
   }
 
   private Map<Integer, List<Grade>> getIdToGrade(Collection<Grade> grades) {
@@ -212,11 +230,7 @@ public class Export {
         idToGrade.put(g.resultID, gradesForResult = new ArrayList<Grade>());
       }
       gradesForResult.add(g);
-     /* if (gradesForResult.size() > 1)
-        System.out.println("r  " +g.resultID+ " grades " + gradesForResult.size());*/
-
     }
-    // System.out.println("r->g " +idToGrade.size() + " keys " + idToGrade.keySet());
     return idToGrade;
   }
 
