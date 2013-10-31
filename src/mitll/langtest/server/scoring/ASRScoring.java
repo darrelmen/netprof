@@ -67,7 +67,7 @@ public class ASRScoring extends Scoring {
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
    */
-  private double lowScoreThresholdKeepTempDir = -1;
+  private double lowScoreThresholdKeepTempDir = 0.3;
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
@@ -287,6 +287,7 @@ public class ASRScoring extends Scoring {
    * The event scores returned are a map of event type to event name to score (e.g. "words"->"dog"->0.5)
    * The score per audio file is cached in {@link #audioToScore}
    *
+   * @see #getScoreForAudio(String, String, String, String, boolean, String, boolean)
    * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean)
    * @param testAudioDir
    * @param testAudioFileNoSuffix
@@ -566,7 +567,11 @@ public class ASRScoring extends Scoring {
     return letterToSoundClass.process(phrase) != null;
   }
 
-
+  /**
+   * @see #getValidPhrases(java.util.Collection)
+   * @param sentences
+   * @return
+   */
   private Collection<String> getValidSentences(Collection<String> sentences) {
     Set<String> filtered = new TreeSet<String>();
 
@@ -602,7 +607,9 @@ public class ASRScoring extends Scoring {
       }
     }
 
-    logger.warn("getValidSentences : skipped " + skipped.size() + " sentences : " + skipped  );
+    if (!skipped.isEmpty()) {
+      logger.warn("getValidSentences : skipped " + skipped.size() + " sentences : " + skipped  );
+    }
 
 /*    try {
       if (utf8 != null) {
