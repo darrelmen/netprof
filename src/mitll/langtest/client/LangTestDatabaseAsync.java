@@ -28,7 +28,6 @@ import java.util.Map;
  */
 public interface LangTestDatabaseAsync {
   void addTextAnswer(int usedID, Exercise exercise, int questionID, String answer, AsyncCallback<Void> async);
-  void addTextAnswer(int userID, Exercise exercise, String stimulus, String answer, boolean correct, AsyncCallback<Void> async);
   void addUser(int age, String gender, int experience, String dialect, AsyncCallback<Long> async);
   void addUser(int age, String gender, int experience, String dialect, String nativeLang, String userID, AsyncCallback<Long> async);
   void userExists(String login, AsyncCallback<Integer> async);
@@ -74,7 +73,7 @@ public interface LangTestDatabaseAsync {
 
   void getNumResults(AsyncCallback<Integer> async);
 
-  void getResults(int start, int end, AsyncCallback<List<Result>> async);
+  void getResults(int start, int end, String sortInfo, AsyncCallback<List<Result>> async);
 
   void getResultStats(AsyncCallback<Map<String, Number>> async);
 
