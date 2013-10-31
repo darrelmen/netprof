@@ -39,6 +39,8 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
   private Image grayImage;
   private Image correctImage;
   private Image incorrectImage;
+  private Image waitingForResponseImage;
+
   private UserManager userManager;
 
   public TextCRTFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, UserManager userManager) {
@@ -52,14 +54,14 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
   }
 
   /**
-   *
    * @param exercise
    * @param service
    * @param controller
    * @return
    */
   @Override
-  protected Widget getAnswerAndRecordButtonRow(final Exercise exercise, final LangTestDatabaseAsync service, ExerciseController controller) {
+  protected Widget getAnswerAndRecordButtonRow(final Exercise exercise, final LangTestDatabaseAsync service,
+                                               ExerciseController controller) {
     boolean allowPaste = controller.isDemoMode();
     final TextBox noPasteAnswer = allowPaste ? new TextBox() : new NoPasteTextBox();
     noPasteAnswer.setFocus(true);
@@ -79,41 +81,7 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
       @Override
       public void onClick(ClickEvent event) {
         String guess = noPasteAnswer.getText();
-
-        service.getScoreForAnswer(userManager.getUser(), exercise, 1, guess, new AsyncCallback<Double>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            check.setEnabled(true);
-          }
-          @Override
-          public void onSuccess(Double result) {
-            check.setEnabled(true);
-      /*      result *= 2.5;
-            result -= 1.25;*/
-            //result -= 0.3; // the floor
-            //result *= 1.43;
-            result = Math.max(0,result);
-            result = Math.min(1.0,result);
-            if (result > 0.9) result = 1.0; //let's round up when we're almost totally correct 97%->100%
-            showPronScoreFeedback(result);
-            if (result > CORRECT_SCORE_THRESHOLD) {
-              soundFeedback.playCorrect();
-              showScoreIcon(true);
-            }
-            else {
-              soundFeedback.playIncorrect();
-              showScoreIcon(false);
-            }
-            Timer t = new Timer() {
-              @Override
-              public void run() {
-                clearFeedback();
-                recordButton.setResource(grayImage);
-              }
-            };
-            t.schedule(HIDE_FEEDBACK);
-          }
-        });
+        getScoreForGuess(guess, service, exercise, check);
       }
     });
 
@@ -121,9 +89,10 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
     row.add(noPasteAnswer);
     row.add(check);
 
-   grayImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "gray_48x48.png"));
-   correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
-   incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
+    grayImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "gray_48x48.png"));
+    correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
+    incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
+    waitingForResponseImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress48.gif"));
 
     row.add(recordButton = getRecordButton());
 
@@ -136,10 +105,47 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
       }
     });
 
-      return getRecordButtonRow(row);
+    return getRecordButtonRow(row);
   }
 
-  RecordButtonPanel.ImageAnchor recordButton;
+  private void getScoreForGuess(String guess, LangTestDatabaseAsync service, Exercise exercise, final Button check) {
+    check.setEnabled(false);
+    recordButton.setResource(waitingForResponseImage);
+
+    service.getScoreForAnswer(userManager.getUser(), exercise, 1, guess, new AsyncCallback<Double>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        check.setEnabled(true);
+      }
+
+      @Override
+      public void onSuccess(Double result) {
+        check.setEnabled(true);
+        result = Math.max(0, result);
+        result = Math.min(1.0, result);
+        if (result > 0.9) result = 1.0; //let's round up when we're almost totally correct 97%->100%
+        showPronScoreFeedback(result);
+        if (result > CORRECT_SCORE_THRESHOLD) {
+          soundFeedback.playCorrect();
+          showScoreIcon(true);
+        } else {
+          soundFeedback.playIncorrect();
+          showScoreIcon(false);
+        }
+        Timer t = new Timer() {
+          @Override
+          public void run() {
+            clearFeedback();
+            recordButton.setResource(grayImage);
+          }
+        };
+        t.schedule(HIDE_FEEDBACK);
+      }
+    });
+  }
+
+  private RecordButtonPanel.ImageAnchor recordButton;
+
   private void showScoreIcon(boolean correct) {
     recordButton.setResource(correct ? correctImage : incorrectImage);
   }
@@ -155,7 +161,7 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
 
   @Override
   public void showPronScoreFeedback(double score) {
-    showScoreFeedback("Score ",score);
+    showScoreFeedback("Score ", score);
     navigationHelper.enableNextButton(true);
   }
 
