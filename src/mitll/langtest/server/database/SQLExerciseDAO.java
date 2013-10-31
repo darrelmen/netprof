@@ -7,9 +7,12 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -307,6 +310,35 @@ public class SQLExerciseDAO implements ExerciseDAO {
     return installPath + dariConfig;
   }*/
 
+  private static void dumpQuestionsAndAnswers(SQLExerciseDAO sqlExerciseDAO) {
+    List<Exercise> rawExercises = sqlExerciseDAO.getRawExercises();
+    //Exercise next = rawExercises.iterator().next();
+    try {
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("L0PQuestionAndAnswer.tsv"), FileExerciseDAO.ENCODING));
+      BufferedWriter writer2 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("L0PQuestionAndAnswerEnglish.tsv"), FileExerciseDAO.ENCODING));
+      //  System.out.println("First is " +next + " content " + next.getContent());
+      writer.write("ID\tQuestion\tAnswer\n");
+      writer2.write("ID\tQuestion\tAnswer\n");
+
+      for (Exercise e : rawExercises) {
+        if (e.getID().contains("L0P")) {
+          for (Exercise.QAPair qaPair : e.getForeignLanguageQuestions()) {
+            String x = e.getID() + "\t" + qaPair.getQuestion() + "\t" + qaPair.getAnswer();
+            writer.write(x+"\n");
+          }
+          for (Exercise.QAPair qaPair : e.getEnglishQuestions()) {
+            String x = e.getID() + "\t" + qaPair.getQuestion() + "\t" + qaPair.getAnswer();
+            writer2.write(x+"\n");
+          }
+        }
+      }
+      writer.close();
+      writer2.close();
+    } catch (Exception e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+  }
+
   public static void main(String [] arg) {
 
 
@@ -321,8 +353,6 @@ public class SQLExerciseDAO implements ExerciseDAO {
     SQLExerciseDAO sqlExerciseDAO = new SQLExerciseDAO(new SmallDatabaseImpl("war/config/pilot/avpDemo"), "config" +
       File.separator +
       "pilot");
-    List<Exercise> rawExercises = sqlExerciseDAO.getRawExercises();
-    Exercise next = rawExercises.iterator().next();
-    System.out.println("First is " +next + " content " + next.getContent());
+    dumpQuestionsAndAnswers(sqlExerciseDAO);
   }
 }
