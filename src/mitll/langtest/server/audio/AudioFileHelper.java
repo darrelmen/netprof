@@ -205,9 +205,7 @@ public class AudioFileHelper {
    * @param audioFile
    * @param answer
    */
-  public void getFlashcardAnswer(Exercise e,
-                                 File audioFile,
-                                 AudioAnswer answer) {
+  public void getFlashcardAnswer(Exercise e, File audioFile, AudioAnswer answer) {
     this.autoCRT.getFlashcardAnswer(e, audioFile, answer);
   }
 
@@ -234,7 +232,6 @@ public class AudioFileHelper {
       return testAudioFile;
     }
   }
-
 
 /*  private String getWavAudioFile(String audioFile) {
     if (audioFile.endsWith(".mp3")) {
@@ -307,8 +304,7 @@ public class AudioFileHelper {
                                      LangTestDatabase langTestDatabase) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
     if (serverProps.isFlashcard()|| doFlashcard) {
-      //makeAutoCRT();
-      /*if (!serverProps.)*/ makeASRScoring();
+      makeASRScoring();
       if (serverProps.isAutoCRT()) {
         autoCRT.getAutoCRTDecodeOutput(exercise, questionID, langTestDatabase.getExercise(exercise), file, audioAnswer);
       } else {
