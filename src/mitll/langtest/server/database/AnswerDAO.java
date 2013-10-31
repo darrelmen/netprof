@@ -46,8 +46,12 @@ public class AnswerDAO {
     addAnswer(database,userID, plan, id, questionID, answer, audioFile, true,  flq, spoken, audioType, 0, correct, pronScore, "");
   }
 
-  public void addAnswer(int userID, String plan, String exerciseID, String stimulus, String answer, boolean correct) {
+/*  public void addAnswer(int userID, String plan, String exerciseID, String stimulus, String answer, boolean correct) {
     addAnswer(database, userID, plan, exerciseID, 0, answer, "", true, false, false, Result.AUDIO_TYPE_UNSET, 0, correct, 0, stimulus);
+  }*/
+
+  public void addAnswer(int userID, String plan, String exerciseID, String stimulus, String answer, boolean correct,float pronScore) {
+    addAnswer(database, userID, plan, exerciseID, 0, answer, "", true, false, false, Result.AUDIO_TYPE_UNSET, 0, correct, pronScore, stimulus);
   }
 
   /**
