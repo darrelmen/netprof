@@ -328,16 +328,23 @@ public class AudioFileHelper {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#makeAutoCRT()
+   * @param relativeConfigDir
+   * @param crtScoring
+   * @param studentAnswersDB
+   * @param langTestDatabase
+   */
   public void makeAutoCRT(String relativeConfigDir, AutoCRTScoring crtScoring, DatabaseImpl studentAnswersDB, LangTestDatabaseImpl langTestDatabase) {
-      if (autoCRT == null) {
-        DatabaseImpl exportDB = serverProps.isAutoCRT() ? studentAnswersDB : db;
-        if (serverProps.isAutoCRT()) {
-          langTestDatabase.setInstallPath(serverProps.getUseFile(), exportDB);
-          exportDB.getExercises();
-        }
-        autoCRT = new AutoCRT(exportDB.getExport(), crtScoring, pathHelper.getInstallPath(), relativeConfigDir,
-          serverProps.getMinPronScore());
+    if (autoCRT == null) {
+      DatabaseImpl exportDB = serverProps.isAutoCRT() ? studentAnswersDB : db;
+      if (serverProps.isAutoCRT()) {
+        langTestDatabase.setInstallPath(serverProps.getUseFile(), exportDB);
+        exportDB.getExercises();
       }
+      autoCRT = new AutoCRT(exportDB.getExport(), crtScoring, pathHelper.getInstallPath(), relativeConfigDir,
+        serverProps.getMinPronScore());
+    }
   }
   /**
    * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean)
