@@ -3,6 +3,11 @@ package mitll.langtest.shared;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.grade.Grade;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+
 /**
  * An answer to a question. <br></br>
  * Records who answered it, which plan, which exercise, which question within a multi-question exercise, and
@@ -131,6 +136,88 @@ public class Result implements IsSerializable {
 
   public void setStimulus(String stimulus) {
     this.stimulus = stimulus;
+  }
+
+  public Comparator<Result> getComparator(final Collection<String> columns) {
+//    System.out.println("columns " + columns);
+    final List<String> copy = new ArrayList<String>(columns);
+    if (copy.isEmpty() || copy.iterator().next().equals("")) {
+      return new Comparator<Result>() {
+        @Override
+        public int compare(Result o1, Result o2) {
+          return o1.uniqueID < o2.uniqueID ? -1 : o1.uniqueID > o2.uniqueID ? +1 : 0;
+        }
+      };
+    } else {
+      return new Comparator<Result>() {
+        @Override
+        public int compare(Result o1, Result o2) {
+          for (String col : copy) {
+            String[] split = col.split("_");
+            String field = split[0];
+
+            if (split.length != 2) System.err.println("huh? col = " + col);
+            boolean asc = split.length <= 1 || split[1].equals("ASC");
+
+            int comp = 0;
+            if (field.equals("userid")) {
+              comp = o1.userid < o2.userid ? -1 : o2.userid < o1.userid ? +1 : 0;
+            }
+            if (comp != 0) return asc ? comp : -1 * comp;
+
+            if (field.equals("id")) {
+              comp = o1.id.compareTo(o2.id);
+            }
+            if (comp != 0) return asc ? comp : -1 * comp;
+
+            if (field.equals("qid")) {
+              comp = o1.qid < o2.qid ? -1 : o2.qid < o1.qid ? +1 : 0;
+            }
+            if (comp != 0) return asc ? comp : -1 * comp;
+
+            if (field.equals("valid")) {
+              comp = o1.valid == o2.valid ? 0 : (!o1.valid && o2.valid ? -1 : +1);
+            }
+            if (comp != 0) return asc ? comp : -1 * comp;
+
+            if (field.equals("timestamp")) {
+              comp = o1.timestamp < o2.timestamp ? -1 : o2.timestamp < o1.timestamp ? +1 : 0;
+            }
+            if (comp != 0) return asc ? comp : -1 * comp;
+
+            if (o1.audioType != null) {
+              if (field.equals("audioType")) {
+                comp = o1.audioType.compareTo(o2.audioType);
+              }
+              if (comp != 0) return asc ? comp : -1 * comp;
+            }
+
+            if (o1.gradeInfo != null) {
+              if (field.equals("gradeInfo")) {
+                comp = o1.gradeInfo.compareTo(o2.gradeInfo);
+              }
+              if (comp != 0) return asc ? comp : -1 * comp;
+            }
+            if (field.equals("durationInMillis")) {
+              comp = o1.durationInMillis < o2.durationInMillis ? -1 : o2.durationInMillis < o1.durationInMillis ? +1 : 0;
+            }
+            if (comp != 0) return asc ? comp : -1 * comp;
+
+            if (field.equals("correct")) {
+              comp = o1.correct == o2.correct ? 0 : (!o1.correct && o2.correct ? -1 : +1);
+            }
+            if (comp != 0) return asc ? comp : -1 * comp;
+
+            if (field.equals("pronScore")) {
+              comp = o1.pronScore < o2.pronScore ? -1 : o2.pronScore < o1.pronScore ? +1 : 0;
+            }
+          /*if (comp != 0) */
+            return asc ? comp : -1 * comp;
+          }
+          return 0;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+      };
+    }
   }
 
   @Override
