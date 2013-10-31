@@ -99,7 +99,7 @@ public class Export {
 
     public String toString() {
       return "id " + id + " " + key.size() + " keys : '" + "" +/*new HashSet<String>(key) +   */
-          "' and " + rgs.size();// + " responses " + new HashSet<ResponseAndGrade>(rgs);
+          "' and " + rgs.size() + " responses ";// + new HashSet<ResponseAndGrade>(rgs);
     }
   }
 
@@ -109,7 +109,8 @@ public class Export {
     public float grade;
     public ResponseAndGrade(String response, int grade) {
       this.response = response;
-      this.grade = ((float) grade)/5;
+      this.grade = ((float) (grade-1))/4f;
+   //   logger.debug("mapping " + grade + " to " + this.grade);
     }
     @Override
     public String toString() { return "grd " + grade + " for '" + "" /*response*/ +"'"; }
