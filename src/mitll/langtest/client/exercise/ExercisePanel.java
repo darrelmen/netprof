@@ -2,23 +2,17 @@ package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.TextBox;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
@@ -27,6 +21,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.bootstrap.AudioExerciseContent;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
@@ -106,21 +101,13 @@ public class ExercisePanel extends VerticalPanel implements
 
     addQuestions(e, service, controller, i);
 
-    SimplePanel spacer = makeSpacer();
-    add(spacer);
-
     // add next and prev buttons
     add(navigationHelper);
-  }
-
-  private SimplePanel makeSpacer() {
-    SimplePanel spacer = new SimplePanel();
-    spacer.setSize("100%", "20px");
-    return spacer;
+    navigationHelper.addStyleName("topMargin");
   }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper(exercise,controller, this);
+    return new NavigationHelper(exercise, controller, this);
   }
 
   protected void addInstructions() {
@@ -133,8 +120,12 @@ public class ExercisePanel extends VerticalPanel implements
 
   private Widget getQuestionContent(Exercise e) {
     String content = e.getContent();
-    HTML html = getHTML(content, true);
-    return html;
+    if (content.contains("Listen")) {
+      return new AudioExerciseContent().getQuestionContent(e, controller, false, false);
+    }
+    else {
+      return getHTML(content, true);
+    }
   }
 
   private HTML getHTML(String content, boolean requireAlignment) {
@@ -208,9 +199,7 @@ public class ExercisePanel extends VerticalPanel implements
     }
   }
 
-  protected boolean shouldShowAnswer() {
-    return controller.isDemoMode();
-  }
+  protected boolean shouldShowAnswer() { return controller.isDemoMode();  }
 
   protected void getQuestionHeader(int i, int total, Exercise.QAPair qaPair, Exercise.QAPair pair, boolean showAnswer) {
     getQuestionHeader(i,total,qaPair,showAnswer,true);
@@ -256,6 +245,11 @@ public class ExercisePanel extends VerticalPanel implements
     }
   }
 
+  /**
+   * @see #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
+   * @param vp
+   * @param e
+   */
   private void addQuestionPrompt(Panel vp, Exercise e) {
     vp.add(new HTML(getQuestionPrompt(e.promptInEnglish)));
     SimplePanel spacer = new SimplePanel();
@@ -274,11 +268,22 @@ public class ExercisePanel extends VerticalPanel implements
 
   private String getLanguage() {
     String language = controller.getLanguage();
-    String lang = (language == null || language.length() == 0) ? THE_FOREIGN_LANGUAGE : language;
-    return lang;
+    return (language == null || language.length() == 0) ? THE_FOREIGN_LANGUAGE : language;
   }
 
+  /**
+   * @see mitll.langtest.client.recorder.SimpleRecordExercisePanel#getQuestionPrompt(boolean)
+   * @param promptInEnglish
+   * @return
+   */
   protected String getSpokenPrompt(boolean promptInEnglish) {
+    String instructions = getInstructions();
+    String studentPrompt = SPEAK_AND_RECORD_YOUR_ANSWER_IN + (promptInEnglish ? ENGLISH : getLanguage()) + " ";
+    String teacherPrompt = TEACHER_PROMPT;
+    return THREE_SPACES + (controller.isDataCollectMode() && !controller.isCRTDataCollectMode() ? teacherPrompt : studentPrompt) + instructions;
+  }
+
+  protected String getInstructions() {
     String instructions = ":";
     String prefix = "<br></br>" + THREE_SPACES;
     if (controller.getAudioType().equals(Result.AUDIO_TYPE_FAST_AND_SLOW)) {
@@ -290,9 +295,7 @@ public class ExercisePanel extends VerticalPanel implements
     else if (!controller.isCRTDataCollectMode()) {
       System.out.println("unknown audio type " + controller.getAudioType());
     }
-    String studentPrompt = SPEAK_AND_RECORD_YOUR_ANSWER_IN + (promptInEnglish ? ENGLISH : getLanguage()) + " ";
-    String teacherPrompt = TEACHER_PROMPT;
-    return THREE_SPACES + (controller.isDataCollectMode() && !controller.isCRTDataCollectMode() ? teacherPrompt : studentPrompt) + instructions;
+    return instructions;
   }
 
   protected int getQuestionPromptSpacer() {
@@ -398,12 +401,12 @@ public class ExercisePanel extends VerticalPanel implements
       });
     }
 
-    if (controller.isAutoCRTMode()) {
+/*    if (controller.isAutoCRTMode()) {
       return getAutoCRTCheckAnswerWidget(exercise, service, index, answer);
     }
-    else {
+    else {*/
       return answer;
-    }
+  //  }
   }
 
   @Override
@@ -416,6 +419,7 @@ public class ExercisePanel extends VerticalPanel implements
     }
   }
 
+/*
   private HorizontalPanel getAutoCRTCheckAnswerWidget(final Exercise exercise, final LangTestDatabaseAsync service,
                                                       final int index, final TextBox answer) {
     HorizontalPanel hp = new TextValue();
@@ -452,7 +456,9 @@ public class ExercisePanel extends VerticalPanel implements
     });
     return hp;
   }
+*/
 
+/*
   private void showAutoCRTScore(Double result, Label resp) {
     result *= 2.5;
     result -= 1.25;
@@ -468,8 +474,9 @@ public class ExercisePanel extends VerticalPanel implements
       resp.setStyleName("incorrect");
     }
   }
+*/
 
-  private static class TextValue extends HorizontalPanel implements HasValue<String> {
+/*  private static class TextValue extends HorizontalPanel implements HasValue<String> {
     private String value;
     @Override
     public String getValue() { return value; }
@@ -482,7 +489,7 @@ public class ExercisePanel extends VerticalPanel implements
 
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) { return null; }
-  }
+  }*/
 
   public void recordIncomplete(Widget answer) {
     completed.remove(answer);
