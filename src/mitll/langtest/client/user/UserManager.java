@@ -438,7 +438,7 @@ public class UserManager {
    * @param audioType
    * @param userChosenID
    * @see DataCollectorDialog#addTeacher(int, com.github.gwtbootstrap.client.ui.ListBox, com.github.gwtbootstrap.client.ui.ListBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.Button, boolean)
-   * @see StudentDialog#addUser(int, String, int, String, mitll.langtest.client.PropertyHandler.LOGIN_TYPE)
+   * @see StudentDialog#addUser
    * @see DataCollectorDialog#displayTeacherLogin
    */
   void storeUser(long sessionID, String audioType, String userChosenID, PropertyHandler.LOGIN_TYPE userType) {
