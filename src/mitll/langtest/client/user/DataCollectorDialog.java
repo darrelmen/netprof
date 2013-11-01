@@ -1,5 +1,6 @@
 package mitll.langtest.client.user;
 
+import com.github.gwtbootstrap.client.ui.AccordionGroup;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.ControlLabel;
@@ -9,15 +10,16 @@ import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.github.gwtbootstrap.client.ui.event.ShowEvent;
 import com.github.gwtbootstrap.client.ui.event.ShowHandler;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -79,24 +81,19 @@ public class DataCollectorDialog extends UserDialog {
       dialogBox.add(recordingStyle);
     }
 
-    addRegistrationPrompt(dialogBox);
-
     final RegistrationInfo registrationInfo = getRegistrationInfo();
     Panel register = registrationInfo.getRegister();
 
-    dialogBox.setMaxHeigth(Window.getClientHeight() * 0.8 + "px");
-    DisclosurePanel dp = null;
+    dialogBox.setMaxHeigth(Window.getClientHeight() * 0.95 + "px");
+    AccordionGroup accordion = null;
     if (!props.isDataCollectAdminView()) {
-      dp = getDisclosurePanel(dialogBox, register);
-      dialogBox.add(dp);
+      accordion = getAccordion(dialogBox, register);
     }
-    final DisclosurePanel disclosurePanel = dp;
+    final AccordionGroup accordionFinal = accordion;
 
     final Button login = addLoginButton(dialogBox);
     login.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        // System.out.println("login button got click " + event);
-
         final String userID = user.box.getText();
         if (userID.length() > USER_ID_MAX_LENGTH) {
           markError(user, "Please enter a user id of reasonable length.");
@@ -114,7 +111,7 @@ public class DataCollectorDialog extends UserDialog {
                 if (!checkPassword(password)) {
                   markError(password, "Please use password from the email.");
                 } else if (checkAudioSelection(regular, fastThenSlow)) {
-                  markError(recordingStyle, regular, "Try again", "Please choose either regular or regular then slow audio recording.");
+                  markError(recordingStyle, regular, "Try again", "Please choose either regular or regular then slow audio recording.", Placement.BOTTOM);
                 } else {
                   dialogBox.hide();
                   String audioType = fastThenSlow.getValue() ? Result.AUDIO_TYPE_FAST_AND_SLOW : Result.AUDIO_TYPE_REGULAR;
@@ -126,7 +123,7 @@ public class DataCollectorDialog extends UserDialog {
                 if (checkPassword(password)) {
                   doRegistration(user, password, recordingStyle,
                     regular, fastThenSlow, registrationInfo,
-                    dialogBox, login, disclosurePanel);
+                    dialogBox, login, accordionFinal);
                 } else {
                   markError(password, "Please use password from the email.");
                 }
@@ -149,6 +146,12 @@ public class DataCollectorDialog extends UserDialog {
       }
     });
 
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        user.box.setFocus(true);
+      }
+    });
+
     dialogBox.show();
   }
 
@@ -164,22 +167,15 @@ public class DataCollectorDialog extends UserDialog {
    * @param fastThenSlow
    * @param dialogBox
    * @param login
-   * @param disclosurePanel
-   * @paramx nativeLang
-   * @paramx dialect
-   * @paramx ageEntryBox
-   * @paramx experienceBox
-   * @paramx genderBox
+   * @param accordion
    * @see #displayTeacherLogin
    */
   private void doRegistration(FormField user, FormField password, ControlGroup audioGroup,
                               RadioButton regular,
                               RadioButton fastThenSlow,
                               RegistrationInfo registrationInfo,
-                              //   FormField nativeLang, FormField dialect, FormField ageEntryBox,
-                              //   ListBoxFormField experienceBox, ListBoxFormField genderBox,
                               Modal dialogBox,
-                              Button login, DisclosurePanel disclosurePanel) {
+                              Button login, AccordionGroup accordion) {
 
     boolean valid = user.box.getText().length() > 0;
     if (!valid) {
@@ -198,15 +194,12 @@ public class DataCollectorDialog extends UserDialog {
         markError(password, "Please use password from the email sent to you.");
         valid = false;
       } else if (!props.isDataCollectAdminView() && checkAudioSelection(regular, fastThenSlow)) {
-        markError(audioGroup, regular, "Try Again", "Please choose either regular or regular then slow audio recording.");
+        markError(audioGroup, regular, "Try Again", "Please choose a style", Placement.BOTTOM);// either regular or regular then slow audio recording.");
         valid = false;
       } else {
         if (!props.isDataCollectAdminView() && nativeLangGroup.getText().isEmpty()) {
-          if (!disclosurePanel.isOpen()) {
-            disclosurePanel.setOpen(true);   // reveal registration fields
-          } else {
-            markError(nativeLangGroup, "Language is empty");
-          }
+          accordion.show();
+          markError(nativeLangGroup, "Language is empty");
           valid = false;
         } else {
           if (!props.isDataCollectAdminView() && dialectGroup.getText().isEmpty()) {
@@ -235,9 +228,7 @@ public class DataCollectorDialog extends UserDialog {
           registrationInfo.getExperienceGroup().box, registrationInfo.getGenderGroup().box,
           nativeLangGroup.box, dialectGroup.box, dialogBox,
           login, fastThenSlow.getValue());
-      } /*else {
-        //System.out.println("not valid ------------ ?");
-      }*/
+      }
     }
   }
 

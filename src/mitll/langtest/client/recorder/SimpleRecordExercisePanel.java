@@ -25,6 +25,7 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
   public SimpleRecordExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                                    final ExerciseController controller) {
     super(e,service,userFeedback,controller);
+    System.out.println("making record exercise panel\n\n\n\n");
   }
 
   /**
@@ -40,9 +41,14 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    */
   @Override
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
-      return new SimpleRecordPanel(service, controller,exercise, this, index).getPanel();
+    return new SimpleRecordPanel(service, controller, exercise, this, index).getPanel();
   }
 
+  /**
+   * @see ExercisePanel#addQuestionPrompt(com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.Exercise)
+   * @param promptInEnglish
+   * @return
+   */
   @Override
   protected String getQuestionPrompt(boolean promptInEnglish) {
     return getSpokenPrompt(promptInEnglish);
@@ -55,7 +61,7 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    * on the server, notice which audio posts have arrived, and take the latest ones...
    * <br></br>
    * Move on to next exercise...
-   * @see ExercisePanel#clickNext(LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
+   * @see mitll.langtest.client.exercise.NavigationHelper#clickNext
    * @param controller
    * @param completedExercise
    */
