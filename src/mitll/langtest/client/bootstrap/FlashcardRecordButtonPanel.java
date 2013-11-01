@@ -248,7 +248,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
 
     String path = exercise.getRefAudio() != null ? exercise.getRefAudio() : exercise.getSlowAudioRef();
     final boolean hasRefAudio = path != null;
-    System.out.println("answer correct = " + correct + " pron score : " + score + " has ref " + hasRefAudio);
+    //System.out.println("answer correct = " + correct + " pron score : " + score + " has ref " + hasRefAudio);
 
     String feedback = "";
     boolean badAudioRecording = result.validity != AudioAnswer.Validity.OK;
@@ -265,7 +265,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
       }
     }
     if (!badAudioRecording && (correct || !hasRefAudio)) {
-      System.out.println("correct " + correct + " has ref " + hasRefAudio);
+      System.out.println("receivedAudioAnswer: correct " + correct + " pron score : " + score +" has ref " + hasRefAudio);
       nextAfterDelay(correct, feedback);
     }
   }
@@ -487,6 +487,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
       t.schedule(isDemoMode ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : incorrectDelay);
     } else {
       initRecordButton();
+      widgets.clearFeedback();
     }
   }
 
