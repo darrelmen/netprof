@@ -101,12 +101,12 @@ public class SimpleRecordPanel extends RecordButtonPanel {
   private void showAudioValidity(AudioAnswer.Validity result, ExerciseQuestionState questionState, Widget outer) {
     check.setVisible(false);
     if (result == AudioAnswer.Validity.OK) {
-      if (!controller.isAutoCRTMode()) check.setUrl(IMAGES_CHECKMARK);
+      /*if (!controller.isAutoCRTMode())*/ check.setUrl(IMAGES_CHECKMARK);
       check.setAltText("Audio Saved");
       questionState.recordCompleted(outer);
     }
     else {
-      if (!controller.isAutoCRTMode()) check.setUrl(IMAGES_REDX_PNG);
+      /*if (!controller.isAutoCRTMode())*/ check.setUrl(IMAGES_REDX_PNG);
       check.setAltText("Audio Invalid");
       questionState.recordIncomplete(outer);
 
