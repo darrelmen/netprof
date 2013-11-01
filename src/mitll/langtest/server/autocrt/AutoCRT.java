@@ -11,11 +11,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,7 +33,7 @@ import java.util.TreeSet;
 public class AutoCRT {
   public static final double CORRECT_THRESHOLD = 0.499;
   private static final boolean GET_MSA = false;
-  private static final boolean USE_SERIALIZED = false;
+  private static final boolean USE_SERIALIZED = true;
   private static Logger logger = Logger.getLogger(AutoCRT.class);
 
   private static final boolean TESTING = false; // this doesn't really work
@@ -243,7 +239,8 @@ public class AutoCRT {
     }
     else {
       double score = AutoGradeExperiment.getScore(getClassifier(), answer, exerciseExport);
-      logger.info("AutoGradeExperiment : score was " + score + " for answer '" +  answer+
+      DecimalFormat format = new DecimalFormat("#.###");
+      logger.info("AutoGradeExperiment : score was " + format.format(score) + " for answer '" +  answer+
         "' in context of " + exerciseExport );
       return score;
     }
@@ -307,67 +304,64 @@ public class AutoCRT {
     String configDir = (installPath != null ? installPath + File.separator : "") + mediaDir + File.separator;
     File serializedClassifier = new File(configDir, "serializedClassifier.ser");
     if (USE_SERIALIZED && serializedClassifier.exists()) {
-      try {
-        FileInputStream fis = new FileInputStream(serializedClassifier);
-        ObjectInputStream ois = new ObjectInputStream(fis);
-        classifier = (Classifier<AutoGradeExperiment.Event>) ois.readObject();
-        logger.info("rehydrated classifier " + classifier);
-        ois.close();
-
-        List<Export.ExerciseExport> export = exporter.getExport(true, false);
-        exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
-        for (Export.ExerciseExport exp : export) {
-          exerciseIDToExport.put(exp.id, exp);
-        }
-
-      } catch (IOException e) {
-        logger.error("Got " + e, e);
-      } catch (ClassNotFoundException e) {
-        logger.error("Got " + e, e);
-      }
+      logger.info("using previously calculated classifier.");
+      List<Export.ExerciseExport> export = getExportedGradedItems();
+      readConfigFile(configDir);
+      classifier = AutoGradeExperiment.getClassifierFromSavedModel(serializedClassifier.getAbsolutePath(), export);
       return classifier;
     } else {
       if (TESTING) {
         exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
         return null;
       } else if (GET_MSA) {
-        List<Export.ExerciseExport> export = exporter.getExport(true, false);
+        List<Export.ExerciseExport> export = getExportedGradedItems();
         AutoGradeExperiment.runOverallModelOnExport(export);
         return null;
       } else {
-        List<Export.ExerciseExport> export = exporter.getExport(true, false);
-        exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
-        for (Export.ExerciseExport exp : export) {
-          exerciseIDToExport.put(exp.id, exp);
-        }
-        String[] args = new String[6];
+        List<Export.ExerciseExport> export = getExportedGradedItems();
+        readConfigFile(configDir);
 
-        String config = configDir + "runAutoGradeWinNoBad.cfg";     // TODO use template for deploy/platform specific config
-        if (!new File(config).exists()) logger.error("couldn't find " + config);
-        args[0] = "-C";
-        args[1] = config;
-        args[2] = "-log";
-        args[3] = configDir + "out.log";
-        args[4] = "-blacklist-file";
-        args[5] = configDir + "blacklist.txt";
-
-        ag.experiment.AutoGradeExperiment.main(args);
-        long then = System.currentTimeMillis();
-        classifier = AutoGradeExperiment.getClassifierFromExport(export);
-        long now = System.currentTimeMillis();
-        logger.debug("took " +((now-then)/1000) + " seconds to train classifier on " + export.size() + " items.");
         if (USE_SERIALIZED) {
-          try {
-            FileOutputStream fos = new FileOutputStream(serializedClassifier);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(classifier);
-            oos.close();
-          } catch (IOException e) {
-            logger.error("Got " + e, e);
-          }
+          AutoGradeExperiment.saveClassifierAfterExport(export, serializedClassifier.getAbsolutePath());
+          logger.info("saved classifier to " + serializedClassifier.getAbsolutePath());
+          classifier = AutoGradeExperiment.getClassifierFromSavedModel(serializedClassifier.getAbsolutePath(), export);
+        }
+        else {
+          long then = System.currentTimeMillis();
+          classifier = AutoGradeExperiment.getClassifierFromExport(export);
+          long now = System.currentTimeMillis();
+          logger.debug("took " +((now-then)/1000) + " seconds to train classifier on " + export.size() + " items.");
         }
         return classifier;
       }
+    }
+  }
+
+  private void readConfigFile(String configDir) {
+    String[] args = new String[6];
+
+    String config = configDir + "runAutoGradeWinNoBad.cfg";     // TODO use template for deploy/platform specific config
+    if (!new File(config).exists()) logger.error("readConfigFile : couldn't find " + config);
+    args[0] = "-C";
+    args[1] = config;
+    args[2] = "-log";
+    args[3] = configDir + "out.log";
+    args[4] = "-blacklist-file";
+    args[5] = configDir + "blacklist.txt";
+
+    AutoGradeExperiment.main(args);
+  }
+
+  private List<Export.ExerciseExport> getExportedGradedItems() {
+    List<Export.ExerciseExport> export = exporter.getExport(true, false);
+    populateExportIdToExport(export);
+    return export;
+  }
+
+  private void populateExportIdToExport(List<Export.ExerciseExport> export) {
+    exerciseIDToExport = new HashMap<String, Export.ExerciseExport>();
+    for (Export.ExerciseExport exp : export) {
+      exerciseIDToExport.put(exp.id, exp);
     }
   }
 }
