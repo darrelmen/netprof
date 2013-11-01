@@ -64,6 +64,10 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
                                                ExerciseController controller) {
     boolean allowPaste = controller.isDemoMode();
     final TextBox noPasteAnswer = allowPaste ? new TextBox() : new NoPasteTextBox();
+    if (controller.isRightAlignContent()) {
+      noPasteAnswer.addStyleName("rightAlign");
+    }
+
     noPasteAnswer.setFocus(true);
     noPasteAnswer.addStyleName("topMargin");
     final Button check = new Button("Check Answer");
