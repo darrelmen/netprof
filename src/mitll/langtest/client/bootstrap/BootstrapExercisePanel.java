@@ -1,5 +1,13 @@
 package mitll.langtest.client.bootstrap;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.sound.SoundFeedback;
+import mitll.langtest.shared.Exercise;
+
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
@@ -8,8 +16,6 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Nav;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.Paragraph;
-import com.github.gwtbootstrap.client.ui.ProgressBar;
-import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -20,15 +26,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.shared.Exercise;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -41,15 +39,16 @@ public class BootstrapExercisePanel extends FluidContainer {
   private static final String PRONUNCIATION_SCORE = "Pronunciation score ";
   private static final int HIDE_DELAY = 2500;
 
-  private Column scoreFeedbackColumn;
+ // private Column scoreFeedbackColumn;
   private List<FlashcardRecordButtonPanel> answerWidgets = new ArrayList<FlashcardRecordButtonPanel>();
 
   public static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>";
 
   private Heading recoOutput;
-  private ProgressBar scoreFeedback = new ProgressBar();
+  //private ProgressBar scoreFeedback = new ProgressBar();
   protected SoundFeedback soundFeedback;
   protected final Widget cardPrompt;
+  protected ScoreFeedback scoreFeedback = new ScoreFeedback();
 
   /**
    * @param e
@@ -161,7 +160,7 @@ public class BootstrapExercisePanel extends FluidContainer {
       add(getRecoOutputRow());
     }
 
-    add(getScoreFeedbackRow(feedbackHeight));
+    add(scoreFeedback.getScoreFeedbackRow(feedbackHeight));
   }
 
   protected Widget getAnswerAndRecordButtonRow(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
@@ -209,14 +208,14 @@ public class BootstrapExercisePanel extends FluidContainer {
     return recoOutputRow;
   }
 
-  private SimplePanel feedbackDummyPanel;
+//  private SimplePanel feedbackDummyPanel;
   /**
    * Holds the pron score feedback.
    * Initially made with a placeholder.
    *
    * @return
    */
-  private FluidRow getScoreFeedbackRow(int height) {
+/*  private FluidRow getScoreFeedbackRow(int height) {
     FluidRow feedbackRow = new FluidRow();
     feedbackDummyPanel = new SimplePanel();
     feedbackDummyPanel.setHeight(height + "px");
@@ -224,7 +223,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     feedbackRow.add(scoreFeedbackColumn);
     feedbackRow.getElement().setId("feedbackRow");
     return feedbackRow;
-  }
+  }*/
 
   protected FlashcardRecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service,
                                                 ExerciseController controller, final int index) {
@@ -247,14 +246,17 @@ public class BootstrapExercisePanel extends FluidContainer {
    * Show progress bar with score percentage, colored by score.
    * Note it has to be wide enough to hold the text "pronunciation score xxx %"
    *
+   *
    * @param score
+   * @param scorePrefix
    * @see FlashcardRecordButtonPanel#showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
-  public void showPronScoreFeedback(double score) {
-    String pronunciationScore = PRONUNCIATION_SCORE;
-    showScoreFeedback(pronunciationScore, score);
+  public void showPronScoreFeedback(double score, String scorePrefix) {
+//    String pronunciationScore = PRONUNCIATION_SCORE;
+    scoreFeedback.showScoreFeedback(scorePrefix, score);
   }
 
+/*
   protected void showScoreFeedback(String pronunciationScore, double score) {
     if (score < 0) score = 0;
     double percent = 100 * score;
@@ -274,6 +276,11 @@ public class BootstrapExercisePanel extends FluidContainer {
   }
 
   public void clearFeedback() { scoreFeedbackColumn.clear(); scoreFeedbackColumn.add(feedbackDummyPanel);}
+*/
+public void clearFeedback() {
+  scoreFeedback.clearFeedback();
+}
+
 
   public void showPopup(String html) {
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
