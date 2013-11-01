@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -227,6 +228,10 @@ public class SQLExerciseDAO implements ExerciseDAO {
    *
    * e.g. config/pilot/media
    *
+   * If there's an audio tag in the content, make that the ref audio for the exercise.
+   * @see Exercise#setRefAudio(String)
+   * @see mitll.langtest.client.bootstrap.DataCollectionFlashcard#getAudioWidget
+   *
    * @param obj json to get content from
    * @return content with media paths set
    */
@@ -250,15 +255,13 @@ public class SQLExerciseDAO implements ExerciseDAO {
       //  logger.debug("audioTag " + audioTag);
 
         String[] split2 = audioTag.split("src=\"");
-
         String audioPathOrig = split2[1];
      //   logger.debug("audioPathOrig " + audioPathOrig);
 
         String audioPath = audioPathOrig.split("mp3")[0];
         exercise.setRefAudio(audioPath + "mp3");
 
-
-        content = before + /*newStuff + */afterContent;
+        content = before + afterContent;
 /*        System.out.println("Content " + content);
         System.out.println("ref audio " + exercise.getRefAudio());*/
       }
@@ -306,7 +309,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
       "config" +
       File.separator +
       language +
-      File.separator;
+      File.separator;  cd w
     return installPath + dariConfig;
   }*/
 
@@ -314,29 +317,82 @@ public class SQLExerciseDAO implements ExerciseDAO {
     List<Exercise> rawExercises = sqlExerciseDAO.getRawExercises();
     //Exercise next = rawExercises.iterator().next();
     try {
-      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("L0PQuestionAndAnswer.tsv"), FileExerciseDAO.ENCODING));
-      BufferedWriter writer2 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("L0PQuestionAndAnswerEnglish.tsv"), FileExerciseDAO.ENCODING));
+      String filename = "QuestionAndAnswer";
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename +
+        ".tsv"), FileExerciseDAO.ENCODING));
+      BufferedWriter writer2 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename +
+        "English.tsv"), FileExerciseDAO.ENCODING));
       //  System.out.println("First is " +next + " content " + next.getContent());
-      writer.write("ID\tQuestion\tAnswer\n");
-      writer2.write("ID\tQuestion\tAnswer\n");
+ /*     writer.write ("ID\tQ #\tQuestion\t" +
+        "Answer" +
+        "\n");
+*/
+      writer.write("ID\t"+ "Audio\t" +"Scenario\t"+
+        "Q #\tQuestion\t");// +
+   //   writer.write("Content\t");
+      for (int i = 1; i < 7; i++) writer.write("Answer #" +i+ "\t");
+      writer.write("\n");
+
+      writer2.write("ID\t"+ "Audio\t" +"Scenario\t"+
+        "Q #\tQuestion\t");// +
+    //  writer2.write("Content\t");
+
+      for (int i = 1; i < 7; i++) writer2.write("Answer #" +i+ "\t");
+      writer2.write("\n");
 
       for (Exercise e : rawExercises) {
-        if (e.getID().contains("L0P")) {
+        int q = 0, qq = 0;
+     //   if (e.getID().contains("L0P")) {
           for (Exercise.QAPair qaPair : e.getForeignLanguageQuestions()) {
-            String x = e.getID() + "\t" + qaPair.getQuestion() + "\t" + qaPair.getAnswer();
-            writer.write(x+"\n");
+            q++;
+            writeQAPair(writer, e,q, qaPair);
           }
-          for (Exercise.QAPair qaPair : e.getEnglishQuestions()) {
-            String x = e.getID() + "\t" + qaPair.getQuestion() + "\t" + qaPair.getAnswer();
-            writer2.write(x+"\n");
+      //  writer2.write(e.getEnglishSentence()+"\t");
+
+        for (Exercise.QAPair qaPair : e.getEnglishQuestions()) {
+        /*    String x = e.getID() + "\t" + qaPair.getQuestion() + "\t" + qaPair.getAnswer();
+            writer2.write(x+"\n");*/
+                     qq++;
+            writeQAPair(writer2, e, qq,qaPair);
+
           }
-        }
+        //}
       }
       writer.close();
       writer2.close();
     } catch (Exception e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
+  }
+
+  private static void writeQAPair(BufferedWriter writer, Exercise e, int q,Exercise.QAPair qaPair) throws IOException {
+    writer.write(e.getID() + "\t");
+    String content = e.getContent();
+    boolean isAudio = content.contains("Listen to this");
+
+    writer.write(isAudio ? "Yes\t" :"No\t");
+
+    String[] split = content.split("Question Scenario");
+    if (split.length > 1) {
+      String s = split[1];
+      String[] split1 = s.split("<h3 dir=\"rtl\">");
+
+      String s1 = split1[1];
+      String s2 = s1.split("</h3>")[0];
+      //logger.warn("s2 " +s2);
+      writer.write(s2 + "\t");
+    }
+
+    // String x = e.getID() + "\t" + qaPair.getQuestion() + "\t" + qaPair.getAnswer();
+    writer.write(q+ "\t");
+    writer.write(qaPair.getQuestion()+ "\t");
+    List<String> alternateAnswers = qaPair.getAlternateAnswers();
+    ListIterator<String> answerIterator = alternateAnswers.listIterator();
+    while (answerIterator.hasNext()) {
+      writer.write(answerIterator.next());
+      if (answerIterator.hasNext()) writer.write("\t");
+    }
+    writer.write("\n");
   }
 
   public static void main(String [] arg) {
