@@ -71,14 +71,14 @@ public class ExerciseListLayout {
         boolean showSectionWidgets = props.isShowSectionWidgets();
         if (props.isFlashcardTeacherView()) {
           return new TableSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-            props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, controller);
+            props.isShowTurkToken(), props.showExercisesInOrder(), showSectionWidgets, controller);
         } else {
           return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-            props.isShowTurkToken(), isAutoCRTMode(), showSectionWidgets, controller);
+            props.isShowTurkToken(), props.showExercisesInOrder(), showSectionWidgets, controller);
         }
       } else {
         return new PagingExerciseList(currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), isAutoCRTMode(), controller);
+          props.isShowTurkToken(), props.showExercisesInOrder(), controller);
       }
     }
   }
@@ -99,6 +99,4 @@ public class ExerciseListLayout {
   private boolean showOnlyOneExercise() {
     return props.getExercise_title() != null;
   }
-  private boolean isAutoCRTMode() {  return props.isAutocrt(); }
-
 }
