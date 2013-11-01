@@ -22,7 +22,8 @@ import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.shared.Exercise;
 
 /**
- * Created with IntelliJ IDEA.
+ * Do text response in a flashcard format.
+ *
  * User: GO22670
  * Date: 10/25/13
  * Time: 12:55 PM
@@ -30,6 +31,7 @@ import mitll.langtest.shared.Exercise;
  */
 public class DataCollectionFlashcard extends BootstrapExercisePanel {
   private static final String LISTEN_TO_THIS_AUDIO = "Listen to this audio";
+  private static final int LOGIN_WIDGET_HEIGHT = 50; // TODO : do something better to figure out the height of the login widget
   private Panel leftButtonContainer, rightButtonContainer;
   protected NavigationHelper navigationHelper;
 
@@ -44,8 +46,8 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
       public void execute () {
         int offsetHeight = cardPrompt.getOffsetHeight();
-        DOM.setStyleAttribute(leftButtonContainer.getElement(), "marginTop", (offsetHeight / 2) + "px");
-        DOM.setStyleAttribute(rightButtonContainer.getElement(), "marginTop", ((offsetHeight/2)-50) +"px");
+        DOM.setStyleAttribute(leftButtonContainer.getElement(),  "marginTop", (offsetHeight / 2) + "px");
+        DOM.setStyleAttribute(rightButtonContainer.getElement(), "marginTop", ((offsetHeight/2)- LOGIN_WIDGET_HEIGHT) +"px");
       }
     });
     navigationHelper.enablePrevButton(!controller.onFirst(null));
@@ -91,6 +93,14 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
     return makeFlashcardForCRT(e, controller, content);
   }
 
+  /**
+   * Do hacky stuff to take the content and splice in an html 5 audio widget to play back audio.
+   *
+   * @param e
+   * @param controller
+   * @param content
+   * @return
+   */
   private Panel makeFlashcardForCRT(Exercise e, ExerciseController controller, String content) {
     Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
     // content = content.replaceAll("<p> &nbsp; </p>", "");
@@ -145,6 +155,12 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
     navigationHelper.removeKeyHandler();
   }
 
+  /**
+   * Make an html 5 audio widget using the exercise's ref audio field.
+   *
+   * @param e
+   * @return
+   */
   private Widget getAudioWidget(Exercise e) {
     String refAudio = e.getRefAudio();
     String type = refAudio.substring(refAudio.length() - 3);
@@ -156,6 +172,12 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
     return audio;
   }
 
+  /**
+   * Make both mp3 and ogg types
+   * @param refAudio
+   * @param type
+   * @return
+   */
   private Audio getAudioNoFocus(String refAudio, String type) {
     final Audio audio = Audio.createIfSupported();
     audio.setControls(true);
@@ -170,6 +192,13 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
     return audio;
   }
 
+  /**
+   * @see #makeFlashcardForCRT(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, String)
+   * @param content text we want to align
+   * @param requireAlignment so you can override it for certain widgets and not make it RTL
+   * @param controller to ask for the RTL property
+   * @return HTML that has it's text-align set consistent with the language (RTL for arabic, etc.)
+   */
   private HTML getHTML(String content, boolean requireAlignment, ExerciseController controller) {
     boolean rightAlignContent = controller.isRightAlignContent();
     HasDirection.Direction direction =
