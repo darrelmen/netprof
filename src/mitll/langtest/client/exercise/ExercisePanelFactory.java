@@ -2,6 +2,7 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.recorder.FeedbackRecordPanel;
 import mitll.langtest.client.recorder.SimpleRecordExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
@@ -33,7 +34,11 @@ public class ExercisePanelFactory {
 
   public Panel getExercisePanel(Exercise e) {
     if (e.getType() == Exercise.EXERCISE_TYPE.RECORD) {
-      return new SimpleRecordExercisePanel(e, service, userFeedback, controller);
+      if (controller.isAutoCRTMode() && !e.promptInEnglish) {
+        return new FeedbackRecordPanel(e, service, userFeedback, controller);
+      } else {
+        return new SimpleRecordExercisePanel(e, service, userFeedback, controller);
+      }
     } else {
       return new ExercisePanel(e, service, userFeedback, controller);
     }
