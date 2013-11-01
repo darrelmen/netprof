@@ -1071,6 +1071,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db = makeDatabaseImpl(h2DatabaseFile);
     if (serverProps.isAutoCRT()) {
       studentAnswersDB = makeDatabaseImpl(serverProps.getH2StudentAnswersDatabase());
+      logger.debug("using student answers db at " + serverProps.getH2StudentAnswersDatabase());
     }
   }
 
