@@ -71,6 +71,7 @@ public class ServerProperties {
   private static final String EMAIL_ADDRESS = "emailAddress";
   private static final String DEFAULT_EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String AUDIO_OFFSET = "audioOffset";
+  private static final String EXERCISES_IN_ORDER = "exercisesInOrder";
 
   private Properties props = new Properties();
 
