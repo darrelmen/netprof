@@ -81,6 +81,7 @@ public class PropertyHandler {
   private static final int DEFAULT_FLASHCARD_PREVIEW_HEIGHT = 610;
   private static final String SHOW_FLASHCARD_ANSWER = "showFlashcardAnswer";
   private static final String FLASHCARD_TEXT_RESPONSE = "flashcardTextResponse";
+  private static final String EXERCISES_IN_ORDER = "exercisesInOrder";
 
   public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT, DATA_COLLECTOR }
 
@@ -129,6 +130,7 @@ public class PropertyHandler {
   private boolean flashcardNextAndPrev;
   private boolean flashcardTextResponse = false;
   private boolean showFlashcardAnswer = true;
+  private boolean showExercisesInOrder = false;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad()
@@ -187,6 +189,7 @@ public class PropertyHandler {
       else if (key.equals(FLASHCARD_NEXT_AND_PREV)) flashcardNextAndPrev = getBoolean(value);
       else if (key.equals(FLASHCARD_TEXT_RESPONSE)) flashcardTextResponse = getBoolean(value);
       else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
+      else if (key.equals(EXERCISES_IN_ORDER)) showExercisesInOrder = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
@@ -298,6 +301,9 @@ public class PropertyHandler {
     }
     if (Window.Location.getParameter(SHOW_SECTIONS) != null) {
       showSections = !Window.Location.getParameter(SHOW_SECTIONS).equals("false");
+    }
+    if (Window.Location.getParameter(EXERCISES_IN_ORDER) != null) {
+      showExercisesInOrder = !Window.Location.getParameter(EXERCISES_IN_ORDER).equals("false");
     }
     return grading;
   }
@@ -476,5 +482,9 @@ public class PropertyHandler {
   }
   public boolean isTrackUsers() {
     return trackUsers;
+  }
+
+  public boolean showExercisesInOrder() {
+    return showExercisesInOrder;
   }
 }
