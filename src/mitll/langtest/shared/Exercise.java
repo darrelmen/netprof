@@ -33,7 +33,6 @@ public class Exercise extends ExerciseShell  {
   private String refAudio;
   private String slowAudioRef;
   private String englishSentence;
-  //private String segmented;
   private List<String> refSentences = new ArrayList<String>();
   private List<String> synonymSentences = new ArrayList<String>();
   private List<String> synonymTransliterations = new ArrayList<String>();
