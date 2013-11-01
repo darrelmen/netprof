@@ -34,6 +34,6 @@ public class DataCollectionFlashcardFactory extends ExercisePanelFactory {
    * @return
    */
   public Panel getExercisePanel(Exercise e) {
-    return new DataCollectionFlashcard(e, service, controller, 30);
+    return new DataCollectionFlashcard(e, service, controller, 40);
   }
 }
