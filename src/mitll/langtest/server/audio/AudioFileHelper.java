@@ -303,17 +303,18 @@ public class AudioFileHelper {
                                      File file, AudioCheck.ValidityAndDur validity, String url, boolean doFlashcard,
                                      LangTestDatabase langTestDatabase) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
+    Exercise exercise1 = langTestDatabase.getExercise(exercise);
     if (serverProps.isFlashcard()|| doFlashcard) {
       makeASRScoring();
       if (serverProps.isAutoCRT()) {
-        autoCRT.getAutoCRTDecodeOutput(exercise, questionID, langTestDatabase.getExercise(exercise), file, audioAnswer);
+        autoCRT.getAutoCRTDecodeOutput(exercise, questionID, exercise1, file, audioAnswer);
       } else {
-        autoCRT.getFlashcardAnswer(langTestDatabase.getExercise(exercise), file, audioAnswer);
+        autoCRT.getFlashcardAnswer(exercise1, file, audioAnswer);
       }
       db.updateFlashcardState(user, exercise, audioAnswer.isCorrect());
       return audioAnswer;
-    } else if (serverProps.isAutoCRT()) {
-      autoCRT.getAutoCRTDecodeOutput(exercise, questionID, langTestDatabase.getExercise(exercise), file, audioAnswer);
+    } else if (serverProps.isAutoCRT() && !exercise1.promptInEnglish) { // TODO : hack -- don't do CRT on english
+      autoCRT.getAutoCRTDecodeOutput(exercise, questionID, exercise1, file, audioAnswer);
     }
     return audioAnswer;
   }
