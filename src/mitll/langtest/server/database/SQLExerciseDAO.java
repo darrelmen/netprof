@@ -153,7 +153,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
     if (chapter.startsWith("'")) chapter = chapter.substring(1);
     if (week.startsWith("'")) week = week.substring(1);
 
-    //if (debug) logger.debug("unit " + unitIndex +"/"+unit + " chapter " + chapterIndex+"/"+chapter + " week " + week);
+    if (DEBUG) logger.debug("unit " +unit + " chapter " + chapter + " week " + week + " for " + imported.getID());
 
     if (unit.length() > 0) {
         pairs.add(sectionHelper.addUnitToLesson(imported,unit));
@@ -201,6 +201,11 @@ public class SQLExerciseDAO implements ExerciseDAO {
     return exercise;
   }
 
+  /**
+   * <table>\n<tr><td> <i>Orientation: <\/i><\/td>\n<td width=\"20%\"> &nbsp; <\/td>\n<td dir=\"rtl\"> \u0631\u062d\u0644\u0629 \u0627\u0644\u0649 \u0645\u0635\u0631: <\/td><\/tr>\n<\/table>\n<p> &nbsp; <\/p>\n<h2>
+   * @param content
+   * @return
+   */
   private String convertTableMarkup(String content) {
     if (content.contains("<td dir=\"rtl\">")) {
       content = content.replaceAll("Orientation :","Question Scenario");
