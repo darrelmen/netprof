@@ -201,7 +201,9 @@ public class PropertyHandler {
     try {
       if (value == null) return defValue;
       int i = Integer.parseInt(value);
-      System.out.println("value for " + propName +"=" +i + " vs default = " +defValue);
+      if (i != defValue) {
+        System.out.println("getInt : value for " + propName +"=" +i + " vs default = " +defValue);
+      }
       return i;
     } catch (NumberFormatException e) {
       System.err.println("couldn't parse " + value + "using " + defValue +" for " + propName);
@@ -440,7 +442,7 @@ public class PropertyHandler {
   }
 
   public int getGameTimeSeconds() {
-    System.out.println("game time seconds " + gameTimeSeconds);
+    //System.out.println("game time seconds " + gameTimeSeconds);
     return gameTimeSeconds;
   }
 
