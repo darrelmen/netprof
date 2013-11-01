@@ -193,7 +193,7 @@ public class StudentDialog extends UserDialog {
     return purposeValue.equalsIgnoreCase("Practice") ?
       Result.AUDIO_TYPE_PRACTICE : (purposeValue.equalsIgnoreCase("Demo") ?
       Result.AUDIO_TYPE_DEMO :
-      Result.AUDIO_TYPE_FAST_AND_SLOW);
+      Result.AUDIO_TYPE_REGULAR);
   }
 
   private boolean canSkipRegister(String purposeValue) {
@@ -384,54 +384,6 @@ public class StudentDialog extends UserDialog {
     private CheckBox silr;
     private CheckBox wilr;
     private FormField dialectGroup;
-/*
-    public FormField getAgeEntryGroup() {
-      return ageEntryGroup;
-    }
-
-    public ListBoxFormField getGenderGroup() {
-      return genderGroup;
-    }
-
-    public FormField getWeeks() {
-      return weeks;
-    }
-
-    public ListBoxFormField getReading() {
-      return reading;
-    }
-
-    public ListBoxFormField getListening() {
-      return listening;
-    }
-
-    public ListBoxFormField getSpeaking() {
-      return speaking;
-    }
-
-    public ListBoxFormField getWriting() {
-      return writing;
-    }
-
-    public CheckBox getRilr() {
-      return rilr;
-    }
-
-    public CheckBox getLilr() {
-      return lilr;
-    }
-
-    public CheckBox getSilr() {
-      return silr;
-    }
-
-    public CheckBox getWilr() {
-      return wilr;
-    }
-
-    public FormField getDialectGroup() {
-      return dialectGroup;
-    }*/
 
     public RegistrationInfo(Panel dialogBox) {
       Form form = new Form();
@@ -452,13 +404,9 @@ public class StudentDialog extends UserDialog {
       dialogBox.add(ilrLevel);
 
       FluidRow row = getILRLevels();
-
-/*      Controls controls = new Controls();
-      controls.add(row);*/
       dialogBox.add(row);
 
       FluidRow row2 = getEstimating();
-
       dialogBox.add(row2);
 
       dialectGroup = getDialect(fieldset);
