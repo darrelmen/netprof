@@ -345,7 +345,7 @@ public class AudioFileHelper {
   /**
    * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean)
    */
-  private class DirAndName {
+  private static class DirAndName {
     private final String testAudioFile;
     private final String installPath;
     private String testAudioName;
