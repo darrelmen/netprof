@@ -68,6 +68,7 @@ public class BootstrapExercisePanel extends FluidContainer {
     cardPrompt = getCardPrompt(e, controller);
     cardPrompt.getElement().setId("cardPrompt");
     add(cardPrompt);
+    System.out.println("height " +feedbackHeight);
     addRecordingAndFeedbackWidgets(e, service, controller, feedbackHeight);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
@@ -151,7 +152,8 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param service
    * @param controller used in subclasses for audio control
    */
-  private void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int feedbackHeight) {
+  private void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller,
+                                              int feedbackHeight) {
     // add answer widget to do the recording
     add(getAnswerAndRecordButtonRow(e, service, controller));
 
