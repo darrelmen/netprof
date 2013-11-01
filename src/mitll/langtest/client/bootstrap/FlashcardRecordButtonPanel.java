@@ -48,6 +48,8 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
   private static final int PERIOD_MILLIS = 300;
   private static final boolean NEXT_ON_BAD_AUDIO = false;
  // private static final boolean CONTINUE_TO_NEXT = false;
+ private static final String PRONUNCIATION_SCORE = "Pronunciation score ";
+
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
   private static final String NO_SPACE_WARNING = "Press and hold space bar to begin recording, release to stop.";
@@ -316,7 +318,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
   }
 
   private void showCorrectFeedback(double score) {
-    widgets.showPronScoreFeedback(score);
+    widgets.showPronScoreFeedback(score, PRONUNCIATION_SCORE);
     widgets.getSoundFeedback().playCorrect();
   }
 
@@ -329,7 +331,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
    * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
    */
   private String showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio) {
-    widgets.showPronScoreFeedback(score);
+    widgets.showPronScoreFeedback(score, PRONUNCIATION_SCORE);
     boolean hasSynonymAudio = !exercise.getSynonymAudioRefs().isEmpty();
     System.out.println("showIncorrectFeedback : playing " + exercise.getSynonymAudioRefs()
       + " result " + result + " score " + score + " has ref " + hasRefAudio +
