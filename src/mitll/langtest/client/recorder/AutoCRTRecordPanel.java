@@ -36,9 +36,6 @@ public class AutoCRTRecordPanel extends SimpleRecordPanel {
   }
 
   @Override
-  protected void addValidityFeedback(int index) {}
-
-  @Override
   public void startRecording() {
     super.startRecording();
     resp.setText("");
@@ -64,12 +61,12 @@ public class AutoCRTRecordPanel extends SimpleRecordPanel {
 
   private void showAutoCRTFeedback(AudioAnswer result) {
     double score = result.getScore();
-    score *= 2.5;
-    score -= 1.25;
+/*    score *= 2.5;
+    score -= 1.25;*/
     score = Math.max(0,score);
     score = Math.min(1.0,score);
     String percent = ((int) (score * 100)) + "%";
-    if (result.getScore() > 0.6) {
+    if (result.isCorrect()) {//result.getScore() > 0.5) {
       resp.setHTML("Correct! Score for <font size=+1>" + result.decodeOutput + "</font> was " + percent);
       resp.setStyleName("correct");
     } else {
