@@ -307,7 +307,11 @@ public class AutoCRT {
       logger.info("using previously calculated classifier.");
       List<Export.ExerciseExport> export = getExportedGradedItems();
       readConfigFile(configDir);
+      long then = System.currentTimeMillis();
       classifier = AutoGradeExperiment.getClassifierFromSavedModel(serializedClassifier.getAbsolutePath(), export);
+      long now = System.currentTimeMillis();
+      long l = (now - then) / 1000;
+      if (l > 1) logger.debug("took " + l + " seconds to rehydrate classifier");
       return classifier;
     } else {
       if (TESTING) {
@@ -322,8 +326,11 @@ public class AutoCRT {
         readConfigFile(configDir);
 
         if (USE_SERIALIZED) {
+          long then = System.currentTimeMillis();
           AutoGradeExperiment.saveClassifierAfterExport(export, serializedClassifier.getAbsolutePath());
-          logger.info("saved classifier to " + serializedClassifier.getAbsolutePath());
+          long now = System.currentTimeMillis();
+
+          logger.info("took " +((now-then)/1000) + " seconds to saved classifier to " + serializedClassifier.getAbsolutePath());
           classifier = AutoGradeExperiment.getClassifierFromSavedModel(serializedClassifier.getAbsolutePath(), export);
         }
         else {
@@ -353,8 +360,14 @@ public class AutoCRT {
   }
 
   private List<Export.ExerciseExport> getExportedGradedItems() {
+    long then = System.currentTimeMillis();
+
     List<Export.ExerciseExport> export = exporter.getExport(true, false);
     populateExportIdToExport(export);
+    long now = System.currentTimeMillis();
+
+    logger.debug("took " +((now-then)/1000) + " seconds to do getExportedGradedItems on " + export.size() + " items.");
+
     return export;
   }
 
