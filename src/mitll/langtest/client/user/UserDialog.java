@@ -15,24 +15,17 @@ import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.logical.shared.OpenEvent;
-import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -52,7 +45,7 @@ public class UserDialog {
   protected static final int USER_ID_MAX_LENGTH = 80;
 
   private static final String GRADING = "grading";
-  private static final String TESTING = "testing";
+  private static final String TESTING = "testing";  // TODO make these safer
 
   protected static final int MIN_AGE = 12;
   protected static final int MAX_AGE = 90;
@@ -75,20 +68,10 @@ public class UserDialog {
     this.props = props;
   }
 
-  /**
-   * From Modal code.
-   * Centers fixed positioned element vertically.
-   *
-   * @paramx e Element to center vertically
-   */
-/*  protected native void centerVertically(Element e) *//*-{
-      $wnd.jQuery(e).css("margin-top", (-1 * $wnd.jQuery(e).outerHeight() / 2) + "px");
-  }-*//*;*/
-
   protected int getAge(TextBox ageEntryBox) {
     int i = 0;
     try {
-      i = props.isDataCollectAdminView() ? 89 : Integer.parseInt(ageEntryBox.getText());
+      i = props.isDataCollectAdminView() ? MAX_AGE-1 : Integer.parseInt(ageEntryBox.getText());
     } catch (NumberFormatException e) {
       System.out.println("couldn't parse " + ageEntryBox.getText());
     }
@@ -104,87 +87,21 @@ public class UserDialog {
     return dialogBox;
   }
 
-
   protected AccordionGroup getAccordion(final Modal dialogBox, Panel register) {
     Accordion accordion = new Accordion();
     AccordionGroup accordionGroup = new AccordionGroup();
     accordionGroup.setHeading("Registration");
     accordionGroup.add(register);
     accordion.add(accordionGroup);
-   // ScrollPanel scrollPanel = new ScrollPanel();
-   // scrollPanel.add(accordion);
     dialogBox.add(accordion);
-
-/*    accordionGroup.addShownHandler(new ShownHandler() {
-      @Override
-      public void onShown(ShownEvent shownEvent) {
-     //   System.out.println("onShown dialog height is " +dialogBox.getOffsetHeight());
-        DOM.setStyleAttribute(dialogBox.getElement(), "top", "3%");
-       // dialogBox.addStyleName("dialogExpandedTopMargin");
-      }
-    });
-    accordionGroup.addHiddenHandler(new HiddenHandler() {
-      @Override
-      public void onHidden(HiddenEvent hiddenEvent) {
-     //   System.out.println("onHide dialog height is " +dialogBox.getOffsetHeight());
-        DOM.setStyleAttribute(dialogBox.getElement(), "top", "10%");
-        //dialogBox.removeStyleName("dialogExpandedTopMargin");
-      }
-    });*/
     return accordionGroup;
   }
 
-  /**
-   * @deprecated - use accordion instead
-   * @param dialogBox
-   * @param register
-   * @return
-   */
-  protected DisclosurePanel getDisclosurePanel(final Modal dialogBox, Panel register) {
-    DisclosurePanel dp = new DisclosurePanel("Registration");
-    dp.setContent(register);
-    dp.addOpenHandler(new OpenHandler<DisclosurePanel>() {
-      @Override
-      public void onOpen(OpenEvent<DisclosurePanel> event) {
-        dialogBox.setHeight("750px");
-  /*      dialogBox.setMaxHeigth(Window.getClientHeight() * MAX_HEIGHT + "px");
-        centerVertically(dialogBox.getElement()); // need to resize the dialog when reveal hidden widgets
-*/
-        //dialogBox.setMaxHeigth((Window.getClientHeight() * MAX_HEIGHT) + "px");
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-          public void execute() {
-            System.out.println("1   centering vertically... " + dialogBox.getOffsetHeight());
-            //dialogBox.setHeight("750px");
-            //   dialogBox.setMaxHeigth(Window.getClientHeight() * MAX_HEIGHT + "px");
-      //      centerVertically(dialogBox.getElement()); // need to resize the dialog when reveal hidden widgets
-          }
-        });
-      }
-    });
-
-    dp.addCloseHandler(new CloseHandler<DisclosurePanel>() {
-      @Override
-      public void onClose(CloseEvent<DisclosurePanel> event) {
-        dialogBox.setHeight("481px");
-
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-          public void execute() {
-            System.out.println("2  centering vertically...");
-//            dialogBox.setHeight("481px");
-
-            //    centerVertically(dialogBox.getElement()); // need to resize the dialog when reveal hidden widgets
-          }
-        });
-      }
-    });
-    return dp;
-  }
-
-  protected Widget addRegistrationPrompt(Panel dialogBox) {
+/*  protected Widget addRegistrationPrompt(Panel dialogBox) {
     HTML child = new HTML("<i>New users : click on Registration below and fill in the fields.</i>");
     dialogBox.add(child);
     return child;
-  }
+  }*/
 
   protected Button addLoginButton(Modal dialogBox) {
     FlowPanel hp = new FlowPanel();
@@ -260,19 +177,9 @@ public class UserDialog {
   protected static class ListBoxFormField {
     public final ListBox box;
 
-    public ListBoxFormField(ListBox box) {
-      this.box = box;
-    }
-
-    public String getValue() {
-      return box.getItemText(box.getSelectedIndex());
-    }
-
-
-
-    public String toString() {
-      return "Box: " + getValue();
-    }
+    public ListBoxFormField(ListBox box) { this.box = box; }
+    public String getValue() { return box.getItemText(box.getSelectedIndex()); }
+    public String toString() { return "Box: " + getValue();  }
   }
 
   protected void markError(FormField dialectGroup, String message) {
@@ -280,19 +187,34 @@ public class UserDialog {
   }
 
   protected void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
+    markError(dialectGroup, dialect, header, message, Placement.RIGHT);
+  }
+
+  protected void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement) {
     dialectGroup.setType(ControlGroupType.ERROR);
     dialect.setFocus(true);
 
-    setupPopover(dialect, header, message);
+    setupPopover(dialect, header, message, placement);
   }
 
-  protected void setupPopover(final Widget w, String heading, final String message) {
+/*  protected void setupPopover(final Widget w, String heading, final String message) {
+    setupPopover(w, heading, message, Placement.RIGHT);
+  }*/
+
+  /**
+   * TODO : bug - once shown these never really go away
+   * @param w
+   * @param heading
+   * @param message
+   * @param placement
+   */
+  protected void setupPopover(final Widget w, String heading, final String message, Placement placement) {
     // System.out.println("triggering popover on " + w + " with " + message);
     final Popover popover = new Popover();
     popover.setWidget(w);
     popover.setText(message);
     popover.setHeading(heading);
-    popover.setPlacement(Placement.RIGHT);
+    popover.setPlacement(placement);
     popover.reconfigure();
     popover.show();
 
@@ -308,6 +230,7 @@ public class UserDialog {
 
   private HandlerRegistration keyHandler;
 
+  // TODO : replace with enter key handler
   protected void addKeyHandler(final Button send) {
     keyHandler = Event.addNativePreviewHandler(new
                                                  Event.NativePreviewHandler() {
@@ -336,10 +259,8 @@ public class UserDialog {
 
   protected void removeKeyHandler() {
     System.out.println("UserManager.removeKeyHandler : " + keyHandler);
-
     if (keyHandler != null) keyHandler.removeHandler();
   }
-
 
   protected ListBox getGenderBox() {
     List<String> values = Arrays.asList("Male", "Female");
@@ -364,9 +285,7 @@ public class UserDialog {
     return experienceBox;
   }
 
-  protected boolean checkPassword(FormField password) {
-    return checkPassword(password.box);
-  }
+  protected boolean checkPassword(FormField password) { return checkPassword(password.box);  }
 
   private boolean checkPassword(TextBox password) {
     String trim = password.getText().trim();
