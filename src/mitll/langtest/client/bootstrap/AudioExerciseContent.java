@@ -56,6 +56,7 @@ public class AudioExerciseContent {
     System.out.println("prefix " +prefix);
     HTML contentPrefix = getHTML(prefix, true);
     contentPrefix.addStyleName("marginRight");
+    if (rightAlignContent) contentPrefix.addStyleName("rightAlign");
 
     Panel container = new FlowPanel();
 
@@ -85,7 +86,9 @@ public class AudioExerciseContent {
       container.add(container2);
     }
 
-    container.add(getHTML("<h2 style='margin-right: 30px'>" + qaPair.getQuestion() + "</h2>", true));
+    if (showQuestion) {
+      container.add(getHTML("<h2 style='margin-right: 30px'>" + qaPair.getQuestion() + "</h2>", true));
+    }
     return container;
   }
 
