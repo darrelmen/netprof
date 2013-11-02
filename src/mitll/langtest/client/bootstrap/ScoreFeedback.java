@@ -6,8 +6,14 @@ import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.sound.SoundFeedback;
@@ -20,22 +26,25 @@ import mitll.langtest.client.sound.SoundFeedback;
  * To change this template use File | Settings | File Templates.
  */
 public class ScoreFeedback {
-  private static final String PRONUNCIATION_SCORE = "Pronunciation score ";
+ // private static final String PRONUNCIATION_SCORE = "Pronunciation score ";
   private static final int HIDE_FEEDBACK = 2500;
   private static final double CORRECT_SCORE_THRESHOLD = 0.5;
 
-  private Image grayImage;
+  private Image grayImage,whiteImage;
   private Image correctImage;
   private Image incorrectImage;
   private Image waitingForResponseImage;
   private RecordButtonPanel.ImageAnchor feedbackImage;
-  private Column scoreFeedbackColumn;
+  private Panel scoreFeedbackColumn;
   private ProgressBar scoreFeedback = new ProgressBar();
 
   private SimplePanel feedbackDummyPanel;
+  private boolean useWhite;
 
-  public ScoreFeedback() {
+  public ScoreFeedback(boolean useWhite) {
+    this.useWhite = useWhite;
     grayImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "gray_48x48.png"));
+    whiteImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_48x48.png"));
     correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
     incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
     waitingForResponseImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress48.gif"));
@@ -56,6 +65,37 @@ public class ScoreFeedback {
     return feedbackRow;
   }
 
+  public Panel getSimpleRow(Widget left, int height) {
+    FlowPanel feedbackRow = new FlowPanel();
+    feedbackRow.add(left);
+    feedbackDummyPanel = new SimplePanel();
+    feedbackDummyPanel.setHeight(height + "px");
+    feedbackDummyPanel.addStyleName("floatLeft");
+
+    scoreFeedbackColumn = new SimplePanel(feedbackDummyPanel);
+   // scoreFeedbackColumn =   getCenteredContainer(feedbackDummyPanel);
+  //  SimplePanel panel = new SimplePanel(scoreFeedbackColumn);
+    feedbackRow.add(scoreFeedbackColumn);
+    scoreFeedbackColumn.addStyleName("leftFiftyMargin");
+    scoreFeedbackColumn.addStyleName("floatLeft");
+  //  scoreFeedbackColumn.addStyleName("topBarMargin");
+    feedbackRow.getElement().setId("feedbackRow");
+    return feedbackRow;
+  }
+
+/*
+  private HorizontalPanel getCenteredContainer(Widget prev) {
+    HorizontalPanel hp = new HorizontalPanel();
+    hp.setHeight("100%");
+    hp.setWidth("100%");
+    hp.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
+    hp.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
+    hp.add(prev);
+    return hp;
+  }
+*/
+
+
   public void setWaiting() {
     feedbackImage.setResource(waitingForResponseImage);
   }
@@ -72,37 +112,40 @@ public class ScoreFeedback {
       soundFeedback.playIncorrect();
       showScoreIcon(false);
     }
+   // hideFeedback();
+  }
+
+  public void hideFeedback() {
     Timer t = new Timer() {
       @Override
       public void run() {
         clearFeedback();
-        feedbackImage.setResource(grayImage);
+        feedbackImage.setResource(useWhite ? whiteImage : grayImage);
       }
     };
     t.schedule(HIDE_FEEDBACK);
   }
-/*
-  public void showPronScoreFeedback(double score) {
-    String pronunciationScore = PRONUNCIATION_SCORE;
-    showScoreFeedback(pronunciationScore, score);
-  }*/
 
   public void showScoreFeedback(String pronunciationScore, double score) {
     if (score < 0) score = 0;
     double percent = 100 * score;
 
     scoreFeedbackColumn.clear();
-    scoreFeedbackColumn.add(scoreFeedback);
+    scoreFeedbackColumn.add(getScoreFeedback());
+    getScoreFeedback().setWidth(Window.getClientWidth() * 0.5 + "px");
 
     int percent1 = (int) percent;
-    scoreFeedback.setPercent(percent1 < 40 ? 40 : percent1);   // just so the words will show up
+    getScoreFeedback().setPercent(percent1 < 40 ? 40 : percent1);   // just so the words will show up
 
-    scoreFeedback.setText(pronunciationScore + (int) percent + "%");
-    scoreFeedback.setVisible(true);
-    scoreFeedback.setColor(
+    getScoreFeedback().setText(pronunciationScore + (int) percent + "%");
+    getScoreFeedback().setVisible(true);
+    getScoreFeedback().setColor(
       score > 0.8 ? ProgressBarBase.Color.SUCCESS :
         score > 0.6 ? ProgressBarBase.Color.DEFAULT :
           score > 0.4 ? ProgressBarBase.Color.WARNING : ProgressBarBase.Color.DANGER);
+
+    DOM.setStyleAttribute(scoreFeedback.getElement(), "marginTop", "18px");
+    DOM.setStyleAttribute(scoreFeedback.getElement(), "marginLeft", "10px");
   }
 
   public void clearFeedback() {
@@ -118,8 +161,13 @@ public class ScoreFeedback {
     RecordButtonPanel.ImageAnchor image;
     image = new RecordButtonPanel.ImageAnchor();
     image.addStyleName("leftFiveMargin");
-    image.setResource(grayImage);
-    image.setHeight("112px");
+    image.setResource(useWhite ? whiteImage : grayImage);
+    image.setHeight("48px");
+    feedbackImage = image;
     return image;
+  }
+
+  public ProgressBar getScoreFeedback() {
+    return scoreFeedback;
   }
 }
