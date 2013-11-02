@@ -138,6 +138,7 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
       public void onSuccess(Double result) {
         check.setEnabled(true);
         scoreFeedback.showCRTFeedback(result, soundFeedback, "Score ");
+        scoreFeedback.hideFeedback();
       }
     });
   }
