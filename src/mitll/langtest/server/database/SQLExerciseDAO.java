@@ -220,6 +220,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
       }
       content += "</h3>";
     }
+    content = content.replaceAll("dir=\"rtl\"","dir=\"rtl\" style=\"text-align:right\"");
     if (content.contains("<p")) {
       content = content.replaceAll("<p>\\s+</p>","");
       content = content.replaceAll("<p> &nbsp; </p>","");
