@@ -30,7 +30,7 @@ public class ProgressHelper {
 
   public void showAdvance(ListInterface exerciseList) {
     getProgressBar().setPercent(100 - exerciseList.getPercentComplete());
-    getProgressBar().setText((exerciseList.getComplete() + 1) + " complete.");
+    getProgressBar().setText(exerciseList.getComplete() + " complete."); // TODO when is this +1 and when not??
   }
 
   public ProgressBar getProgressBar() {
