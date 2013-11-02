@@ -401,12 +401,7 @@ public class ExercisePanel extends VerticalPanel implements
       });
     }
 
-/*    if (controller.isAutoCRTMode()) {
-      return getAutoCRTCheckAnswerWidget(exercise, service, index, answer);
-    }
-    else {*/
-      return answer;
-  //  }
+    return answer;
   }
 
   @Override
@@ -418,78 +413,6 @@ public class ExercisePanel extends VerticalPanel implements
       ((FocusWidget)widget).setFocus(true);
     }
   }
-
-/*
-  private HorizontalPanel getAutoCRTCheckAnswerWidget(final Exercise exercise, final LangTestDatabaseAsync service,
-                                                      final int index, final TextBox answer) {
-    HorizontalPanel hp = new TextValue();
-    hp.setSpacing(5);
-    hp.add(answer);
-    final Button check = new Button("Check Answer");
-    check.setEnabled(false);
-    hp.add(check);
-    final Label resp = new Label();
-    hp.add(resp);
-
-    answer.addKeyUpHandler(new KeyUpHandler() {
-      public void onKeyUp(KeyUpEvent event) {
-        resp.setText("");
-        check.setEnabled(answer.getText().length() > 0);
-      }
-    });
-
-    check.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        check.setEnabled(false);
-        service.getScoreForAnswer(0, exercise, index, answer.getText(), new AsyncCallback<Double>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            check.setEnabled(true);
-          }
-          @Override
-          public void onSuccess(Double result) {
-            check.setEnabled(true);
-            showAutoCRTScore(result, resp);
-          }
-        });
-      }
-    });
-    return hp;
-  }
-*/
-
-/*
-  private void showAutoCRTScore(Double result, Label resp) {
-    result *= 2.5;
-    result -= 1.25;
-    result = Math.max(0,result);
-    result = Math.min(1.0,result);
-    String percent = ((int) (result * 100)) + "%";
-    if (result > 0.6) {
-      resp.setText("Correct! Score was " + percent);
-      resp.setStyleName("correct");
-    }
-    else {
-      resp.setText("Try again - score was " + percent);
-      resp.setStyleName("incorrect");
-    }
-  }
-*/
-
-/*  private static class TextValue extends HorizontalPanel implements HasValue<String> {
-    private String value;
-    @Override
-    public String getValue() { return value; }
-
-    @Override
-    public void setValue(String value) { this.value = value; }
-
-    @Override
-    public void setValue(String value, boolean fireEvents) {  this.value = value; }
-
-    @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) { return null; }
-  }*/
 
   public void recordIncomplete(Widget answer) {
     completed.remove(answer);
