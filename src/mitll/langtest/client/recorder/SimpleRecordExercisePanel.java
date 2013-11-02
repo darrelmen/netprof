@@ -25,14 +25,13 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
   public SimpleRecordExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                                    final ExerciseController controller) {
     super(e,service,userFeedback,controller);
-    System.out.println("making record exercise panel\n\n\n\n");
   }
 
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
    *
-   * @see mitll.langtest.client.exercise.ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController)
+   * @see mitll.langtest.client.exercise.ExercisePanel#addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @param exercise
    * @param service
    * @param controller
@@ -50,9 +49,7 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    * @return
    */
   @Override
-  protected String getQuestionPrompt(boolean promptInEnglish) {
-    return getSpokenPrompt(promptInEnglish);
-  }
+  protected String getQuestionPrompt(boolean promptInEnglish) { return getSpokenPrompt(promptInEnglish);  }
 
   @Override
   protected void addInstructions() {}
