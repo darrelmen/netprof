@@ -217,8 +217,6 @@ public class RecordButtonPanel {
   public static class ImageAnchor extends Anchor {
     private Image img = null;
     public ImageAnchor() {}
-    //public void show() { setVisible(true); }
-    //public void hide() { setVisible(false); }
     public void setResource(Image img2) {
       if (this.img != null) {
         DOM.removeChild(getElement(), this.img.getElement());
