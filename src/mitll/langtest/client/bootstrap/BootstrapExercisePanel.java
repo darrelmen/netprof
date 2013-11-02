@@ -48,7 +48,7 @@ public class BootstrapExercisePanel extends FluidContainer {
   //private ProgressBar scoreFeedback = new ProgressBar();
   protected SoundFeedback soundFeedback;
   protected final Widget cardPrompt;
-  protected ScoreFeedback scoreFeedback = new ScoreFeedback();
+  protected ScoreFeedback scoreFeedback = new ScoreFeedback(false);
 
   /**
    * @param e
