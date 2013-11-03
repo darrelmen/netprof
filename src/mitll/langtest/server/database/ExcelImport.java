@@ -669,7 +669,7 @@ public class ExcelImport implements ExerciseDAO {
     Exercise imported = new Exercise("import", id, content, promptInEnglish, true, english);
     imported.addQuestion();   // TODO : needed?
 
-    String prefix = language.equalsIgnoreCase("msa") ? id + "_" : "";
+    String prefix = "";//language.equalsIgnoreCase("msa") ? id + "_" : "";
     String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : id;
     if (audioOffset != 0) {
       audioDir = "" +(Integer.parseInt(audioDir.trim())+audioOffset);
