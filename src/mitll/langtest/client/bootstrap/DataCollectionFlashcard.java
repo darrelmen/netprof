@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
+import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.Exercise;
 
 /**
@@ -44,11 +45,25 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
     navigationHelper.enableNextButton(false);
   }
 
+  /**
+   * @see BootstrapExercisePanel#getAnswerAndRecordButtonRow(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
+   * @param exercise
+   * @param service
+   * @param controller
+   * @param index
+   * @return
+   */
   @Override
-  protected FlashcardRecordButtonPanel getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, int index) {
+  protected RecordButtonPanel getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, int index) {
     return new FlashcardRecordButtonPanel(this, service, controller, exercise, index, false);
   }
 
+  /**
+   * @see BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @param e
+   * @param controller
+   * @return
+   */
   protected Widget getCardPrompt(Exercise e, ExerciseController controller) {
     FluidRow questionRow = new FluidRow();
     Widget questionContent = new AudioExerciseContent().getQuestionContent(e, controller, true, true);
