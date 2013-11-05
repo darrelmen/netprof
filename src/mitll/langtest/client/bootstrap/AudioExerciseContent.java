@@ -80,8 +80,8 @@ public class AudioExerciseContent {
       container2.add(simplePanel);
 
       String suffix = split[1];
-      System.out.println("suffix '" + suffix +"'");
-      //String append  = "";
+
+      // edit the content to reflect the response type
       if (responseType.equals("Both")) {
         suffix = suffix.replace("answer the question below","answer the question below<br/>both written and spoken");
       } else if (responseType.equals("Text")) {
