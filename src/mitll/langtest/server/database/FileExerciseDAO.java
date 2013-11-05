@@ -368,7 +368,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     String[] split = line.split("\\t");
     int i =0;
     String id = split[i++].trim();
-    String level = split[i++].trim();
+    /*String level =*/ split[i++].trim();
     String type = split[i++].trim();
     String includeFile = split[i++].trim();
 
