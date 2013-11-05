@@ -32,7 +32,7 @@ public class CombinedResponseFlashcard extends TextCRTFlashcard implements Exerc
   private Set<Widget> completed = new HashSet<Widget>();
 
   public CombinedResponseFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, UserManager userManager) {
-    super(e, service, controller, userManager);    //To change body of overridden methods use File | Settings | File Templates.
+    super(e, service, controller, userManager);
   }
 
   @Override
@@ -53,7 +53,7 @@ public class CombinedResponseFlashcard extends TextCRTFlashcard implements Exerc
   }
 
   private void enableNext() {
-    System.out.println("enabled " + completed.size());
+   // System.out.println("enabled " + completed.size());
     navigationHelper.enableNextButton((completed.size() == 2));
   }
 
