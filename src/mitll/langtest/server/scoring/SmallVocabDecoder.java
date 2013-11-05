@@ -130,7 +130,7 @@ public class SmallVocabDecoder {
    * @param scoringDir hydec location
    * @return SLF file that is created, might not exist if any of the steps fail (e.g. if bin exes are not marked executable)
    */
-  private String createSLFFile(List<String> lmSentences, List<String> background, List<String> vocab, String tmpDir, String modelsDir,
+/*  private String createSLFFile(List<String> lmSentences, List<String> background, List<String> vocab, String tmpDir, String modelsDir,
                               String scoringDir) {
     String convertedFile = tmpDir + File.separator + SMALL_LM_SLF;
     if (platform.startsWith("win")) {
@@ -159,7 +159,7 @@ public class SmallVocabDecoder {
     }
     if (!new File(convertedFile).exists()) logger.error("Couldn't create " +convertedFile);
     return convertedFile;
-  }
+  }*/
 
   /**
    * Get the vocabulary to use when generating a language model. <br></br>
