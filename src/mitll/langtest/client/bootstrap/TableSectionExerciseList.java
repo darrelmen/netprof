@@ -75,7 +75,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   private Button timedFlashcardCopy;
   private TextBox urlInputBox = new TextBox();
   private TextBox urlInputBox2 = new TextBox();
-  private int tries =10;
+  private int tries = 10;
   private String token = "";
   private int frameHeight = FRAME_HEIGHT;
 
@@ -193,7 +193,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   /**
    * @see mitll.langtest.client.bootstrap.TableSectionExerciseList#addTableToLayout(java.util.Map)
    */
-  protected Widget getPreviewWidgets() {
+  private Widget getPreviewWidgets() {
     HorizontalPanel previewRow = new HorizontalPanel();
     previewRow.setWidth("100%");
     DOM.setStyleAttribute(previewRow.getElement(), "marginTop", "5px");
@@ -241,7 +241,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
    * @param timed
    * @return
    */
-  protected Widget getFlashcard(String title, Button copyButton, TextBox urlInputBox, boolean timed) {
+  private Widget getFlashcard(String title, Button copyButton, TextBox urlInputBox, boolean timed) {
     VerticalPanel titleAndURL = new VerticalPanel();
 
     Heading titleHeader = new Heading(6, title);
@@ -338,7 +338,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   /**
    * @see mitll.langtest.client.bootstrap.TableSectionExerciseList#addTableToLayout(java.util.Map)
    */
-  protected void doZero() {
+  private void doZero() {
     String widgetID = FLASHCARDCOPY;
     zero(GWT.getModuleBaseURL(), widgetID, widgetID + "Feedback");
     registerCallback();
@@ -482,6 +482,9 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     return USER_PROMPT;
   }
 
+  /**
+   * Must be public for GWT.create to work.
+   */
   public interface Resources extends CellTable.Resources {
     @Override
     @Source({ CellTable.Style.DEFAULT_CSS, "FlashcardCellTableStyleSheet.css" })
@@ -512,7 +515,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     return table;
   }
 
-  protected void addColumnsToTable(CellTable<Exercise> table) {
+  private void addColumnsToTable(CellTable<Exercise> table) {
     TextColumn<Exercise> english = new TextColumn<Exercise>() {
       @Override
       public String getValue(Exercise exercise) {
