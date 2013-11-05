@@ -24,7 +24,7 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    */
   public SimpleRecordExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                                    final ExerciseController controller) {
-    super(e,service,userFeedback,controller);
+    super(e, service, userFeedback, controller);
   }
 
   /**
@@ -40,7 +40,8 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    */
   @Override
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
-    return new SimpleRecordPanel(service, controller, exercise, this, index).getPanel();
+    SimpleRecordExercisePanel questionState = this;
+    return new SimpleRecordPanel(service, controller, exercise, questionState, index).getPanel();
   }
 
   /**
