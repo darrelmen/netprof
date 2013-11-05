@@ -1,7 +1,6 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -50,19 +49,30 @@ public class AnswerDAO {
     addAnswer(database, userID, plan, exerciseID, 0, answer, "", true, false, false, Result.AUDIO_TYPE_UNSET, 0, correct, 0, stimulus);
   }*/
 
-  public void addAnswer(int userID, String plan, String exerciseID, String stimulus, String answer, boolean correct,float pronScore) {
-    addAnswer(database, userID, plan, exerciseID, 0, answer, "", true, false, false, Result.AUDIO_TYPE_UNSET, 0, correct, pronScore, stimulus);
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer(long, mitll.langtest.shared.Exercise, int, String)
+   * @param userID
+   * @param plan
+   * @param exerciseID
+   * @param stimulus
+   * @param answer
+   * @param answerType
+   * @param correct
+   * @param pronScore
+   */
+  public void addAnswer(int userID, String plan, String exerciseID, String stimulus, String answer, String answerType, boolean correct, float pronScore) {
+    addAnswer(database, userID, plan, exerciseID, 0, answer, "", true, false, false, answerType, 0, correct, pronScore, stimulus);
   }
 
   /**
-   * @see DatabaseImpl#isAnswerValid(int, mitll.langtest.shared.Exercise, int, Database)
+   * @seex DatabaseImpl#isAnswerValid(int, mitll.langtest.shared.Exercise, int, Database)
    * @param userID
    * @param e
    * @param questionID
    * @param database
    * @return
    */
-  public boolean isAnswerValid(int userID, Exercise e, int questionID, Database database) {
+/*  public boolean isAnswerValid(int userID, Exercise e, int questionID, Database database) {
     boolean val = false;
     try {
       Connection connection = database.getConnection();
@@ -90,7 +100,7 @@ public class AnswerDAO {
       e1.printStackTrace();
     }
     return val;
-  }
+  }*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
@@ -130,7 +140,6 @@ public class AnswerDAO {
    * Add a row to the table.
    * Each insert is marked with a timestamp.
    * This allows us to determine user completion rate.
-   *
    *
    *
    * @param connection
@@ -209,13 +218,13 @@ public class AnswerDAO {
     return newID;
   }
 
-  private boolean debug = true;
+  //private boolean debug = true;
 
   /**
    * @see DatabaseImpl#changeGrade(mitll.langtest.shared.grade.Grade)
-   * @param id
+   * @paramx id
    */
-  public void changeAnswer(String id, boolean correct, float score) {
+/*  public void changeAnswer(String id, boolean correct, float score) {
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement;
@@ -241,7 +250,7 @@ public class AnswerDAO {
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
+  }*/
 
   private String copyStringChar(String plan) {
     return new String(plan.toCharArray());
