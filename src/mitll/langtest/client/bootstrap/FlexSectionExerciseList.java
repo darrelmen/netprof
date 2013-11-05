@@ -396,7 +396,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @param container
    * @see #addButtonRow
    */
-  private Widget addBottomText(FluidContainer container) {
+  protected Widget addBottomText(FluidContainer container) {
     FluidRow status = new FluidRow();
     status.addStyleName("alignCenter");
     status.addStyleName("inlineStyle");
@@ -405,7 +405,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     return status;
   }
 
-  private Panel getInstructionRow() {
+  protected Panel getInstructionRow() {
     Panel instructions = new FluidRow();
     instructions.addStyleName("alignCenter");
     instructions.addStyleName("inlineStyle");
