@@ -35,6 +35,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.bootstrap.CombinedResponseFlashcard;
 import mitll.langtest.client.bootstrap.TextCRTFlashcard;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
@@ -428,7 +429,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         element.setAttribute("href",  LANGTEST_IMAGES + "NewProF2_48x48.png");
       }
     }
-    else if (props.isGoodwaveMode() || props.isTrackUsers()) {
+    else if (props.isGoodwaveMode()) {
       if (element != null) {
         element.setAttribute("href", LANGTEST_IMAGES + "NewProF1_48x48.png");
       }
@@ -675,16 +676,25 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else if (props.isGrading()) {
       exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer), userManager, props.getNumGradesToCollect());
     } else if (props.getFlashcardNextAndPrev()) {
-      if (props.isFlashcardTextResponse())  {
+      String responseType = props.getResponseType();
+
+      System.out.println("got response type " + responseType);
+      if (responseType.equalsIgnoreCase("Text")) {
         exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer) {
           @Override
           public Panel getExercisePanel(Exercise e) {
-            return new TextCRTFlashcard(e,service,controller, userManager);
+            return new TextCRTFlashcard(e, service, controller, userManager);
           }
-        },userManager,1);
-      }
-      else {
-      exerciseList.setFactory(new DataCollectionFlashcardFactory(service, outer, outer), userManager, 1);
+        }, userManager, 1);
+      } else if (responseType.equalsIgnoreCase("Audio")) {
+        exerciseList.setFactory(new DataCollectionFlashcardFactory(service, outer, outer), userManager, 1);
+      } else if (responseType.equalsIgnoreCase("Both")) {
+        exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer) {
+          @Override
+          public Panel getExercisePanel(Exercise e) {
+            return new CombinedResponseFlashcard(e, service, controller, userManager);
+          }
+        }, userManager, 1);
       }
     } else if (props.isFlashCard()) {
       exerciseList.setFactory(new FlashcardExercisePanelFactory(service, outer, outer), userManager, 1);
