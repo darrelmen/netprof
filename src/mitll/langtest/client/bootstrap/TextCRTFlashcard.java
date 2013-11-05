@@ -31,9 +31,11 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
   private EnterKeyButtonHelper enterKeyButtonHelper;
   private UserManager userManager;
   protected ScoreFeedback textScoreFeedback;
+  private String responseType;
 
   public TextCRTFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, UserManager userManager) {
     super(e, service, controller, 40);
+    responseType = controller.getProps().getResponseType();
     this.userManager = userManager;
   }
 
@@ -45,7 +47,6 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
   @Override
   protected void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller,
                                                 int feedbackHeight) {
-    // add answer widget to do the recording
     add(getAnswerAndRecordButtonRow(e, service, controller));
     add(textScoreFeedback.getScoreFeedbackRow(feedbackHeight));
   }
@@ -68,7 +69,8 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
     boolean allowPaste = controller.isDemoMode();
     final Button check = new Button("Check Answer");
     final TextBox noPasteAnswer = getAnswerBox(controller, allowPaste, check);
-    setupSubmitButton(exercise, service, check, noPasteAnswer, scoreFeedback);
+    String answerType = controller.getAudioType();
+    setupSubmitButton(exercise, service, check, noPasteAnswer, scoreFeedback, answerType);
 
     FluidRow row = new FluidRow();
     row.add(noPasteAnswer);
@@ -79,10 +81,10 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
   }
 
   private void setupSubmitButton(final Exercise exercise, final LangTestDatabaseAsync service, final Button check,
-                                 final TextBox noPasteAnswer, final ScoreFeedback scoreFeedback) {
+                                 final TextBox noPasteAnswer, final ScoreFeedback scoreFeedback, final String answerType) {
     check.setType(ButtonType.PRIMARY);
     check.setTitle("Hit Enter to submit answer.");
-    check.setEnabled(true);
+    check.setEnabled(false);
     check.addStyleName("leftFiveMargin");
 
     enterKeyButtonHelper = new EnterKeyButtonHelper(false);
@@ -92,7 +94,7 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
       @Override
       public void onClick(ClickEvent event) {
         String guess = noPasteAnswer.getText();
-        getScoreForGuess(guess, service, exercise, check, scoreFeedback);
+        getScoreForGuess(guess, service, exercise, check, scoreFeedback, answerType);
       }
     });
   }
@@ -121,11 +123,11 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
   }
 
   private void getScoreForGuess(String guess, LangTestDatabaseAsync service, Exercise exercise, final Button check,
-                                final ScoreFeedback scoreFeedback) {
+                                final ScoreFeedback scoreFeedback,String answerType) {
     check.setEnabled(false);
     scoreFeedback.setWaiting();
 
-    service.getScoreForAnswer(userManager.getUser(), exercise, 1, guess, new AsyncCallback<Double>() {
+    service.getScoreForAnswer(userManager.getUser(), exercise, 1, guess, answerType, new AsyncCallback<Double>() {
       @Override
       public void onFailure(Throwable caught) {
         check.setEnabled(true);
@@ -133,26 +135,16 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
 
       @Override
       public void onSuccess(Double result) {
+        check.setEnabled(true);
         gotScoreForGuess(result, check, scoreFeedback);
       }
     });
   }
 
   protected void gotScoreForGuess(Double result, Button check, ScoreFeedback scoreFeedback) {
-    check.setEnabled(true);
-    scoreFeedback.showCRTFeedback(result, soundFeedback, "Score ");
+    scoreFeedback.showCRTFeedback(result, soundFeedback, "Score ", false);
     scoreFeedback.hideFeedback();
-  }
-
-  /**
-   * Is this ever called?
-   * @param score
-   * @param scorePrefix
-   */
-  @Override
-  public void showPronScoreFeedback(double score, String scorePrefix) {
-    System.err.println("showPronScoreFeedback\n\n\n ");
-    super.showPronScoreFeedback(score,"Score ");
+    if (responseType.equalsIgnoreCase("Text")) navigationHelper.enableNextButton(true);
   }
 
   @Override
