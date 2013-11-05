@@ -28,16 +28,9 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class TextCRTFlashcard extends DataCollectionFlashcard {
-  private static final int HIDE_FEEDBACK = 2500;
-  private static final double CORRECT_SCORE_THRESHOLD = 0.5;
   private EnterKeyButtonHelper enterKeyButtonHelper;
-/*  private Image grayImage;
-  private Image correctImage;
-  private Image incorrectImage;
-  private Image waitingForResponseImage;
-  private RecordButtonPanel.ImageAnchor feedbackImage;*/
-
   private UserManager userManager;
+  protected ScoreFeedback textScoreFeedback;
 
   public TextCRTFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, UserManager userManager) {
     super(e, service, controller, 40);
@@ -49,6 +42,14 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
     navigationHelper = new NavigationHelper(e, controller, false, false);
   }
 
+  @Override
+  protected void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller,
+                                                int feedbackHeight) {
+    // add answer widget to do the recording
+    add(getAnswerAndRecordButtonRow(e, service, controller));
+    add(textScoreFeedback.getScoreFeedbackRow(feedbackHeight));
+  }
+
   /**
    * @param exercise
    * @param service
@@ -58,31 +59,27 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
   @Override
   protected Widget getAnswerAndRecordButtonRow(final Exercise exercise, final LangTestDatabaseAsync service,
                                                ExerciseController controller) {
+    textScoreFeedback = new ScoreFeedback(false);
+    return getTextResponseWidget(exercise, service, controller, textScoreFeedback);
+  }
+
+  private Widget getTextResponseWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
+                                       ScoreFeedback scoreFeedback) {
     boolean allowPaste = controller.isDemoMode();
     final Button check = new Button("Check Answer");
     final TextBox noPasteAnswer = getAnswerBox(controller, allowPaste, check);
-    setupSubmitButton(exercise, service, check, noPasteAnswer);
+    setupSubmitButton(exercise, service, check, noPasteAnswer, scoreFeedback);
 
     FluidRow row = new FluidRow();
     row.add(noPasteAnswer);
     row.add(check);
 
-   // scoreFeedback.makeFeedbackImages();
-    row.add(/*feedbackImage =*/ scoreFeedback.getFeedbackImage());
+    row.add(scoreFeedback.getFeedbackImage());
     return getRecordButtonRow(row);
   }
 
-/*
-  private void makeFeedbackImages() {
-    grayImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "gray_48x48.png"));
-    correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
-    incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
-    waitingForResponseImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress48.gif"));
-  }
-*/
-
   private void setupSubmitButton(final Exercise exercise, final LangTestDatabaseAsync service, final Button check,
-                                 final TextBox noPasteAnswer) {
+                                 final TextBox noPasteAnswer, final ScoreFeedback scoreFeedback) {
     check.setType(ButtonType.PRIMARY);
     check.setTitle("Hit Enter to submit answer.");
     check.setEnabled(true);
@@ -95,7 +92,7 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
       @Override
       public void onClick(ClickEvent event) {
         String guess = noPasteAnswer.getText();
-        getScoreForGuess(guess, service, exercise, check);
+        getScoreForGuess(guess, service, exercise, check, scoreFeedback);
       }
     });
   }
@@ -123,10 +120,10 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
     return noPasteAnswer;
   }
 
-  private void getScoreForGuess(String guess, LangTestDatabaseAsync service, Exercise exercise, final Button check) {
+  private void getScoreForGuess(String guess, LangTestDatabaseAsync service, Exercise exercise, final Button check,
+                                final ScoreFeedback scoreFeedback) {
     check.setEnabled(false);
-   // feedbackImage.setResource(waitingForResponseImage);
-     scoreFeedback.setWaiting();
+    scoreFeedback.setWaiting();
 
     service.getScoreForAnswer(userManager.getUser(), exercise, 1, guess, new AsyncCallback<Double>() {
       @Override
@@ -136,49 +133,16 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
 
       @Override
       public void onSuccess(Double result) {
-        check.setEnabled(true);
-        scoreFeedback.showCRTFeedback(result, soundFeedback, "Score ");
-        scoreFeedback.hideFeedback();
+        gotScoreForGuess(result, check, scoreFeedback);
       }
     });
   }
 
-/*  private void showCRTFeedback(Double result) {
-    result = Math.max(0, result);
-    result = Math.min(1.0, result);
-    if (result > 0.9) result = 1.0; //let's round up when we're almost totally correct 97%->100%
-    showPronScoreFeedback(result);
-    if (result > CORRECT_SCORE_THRESHOLD) {
-      soundFeedback.playCorrect();
-      showScoreIcon(true);
-    } else {
-      soundFeedback.playIncorrect();
-      showScoreIcon(false);
-    }
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        clearFeedback();
-        feedbackImage.setResource(grayImage);
-      }
-    };
-    t.schedule(HIDE_FEEDBACK);
-  }*/
-
-/*
-  private void showScoreIcon(boolean correct) {
-    feedbackImage.setResource(correct ? correctImage : incorrectImage);
+  protected void gotScoreForGuess(Double result, Button check, ScoreFeedback scoreFeedback) {
+    check.setEnabled(true);
+    scoreFeedback.showCRTFeedback(result, soundFeedback, "Score ");
+    scoreFeedback.hideFeedback();
   }
-*/
-
-/*  private RecordButtonPanel.ImageAnchor getFeedbackImage() {
-    RecordButtonPanel.ImageAnchor image;
-    image = new RecordButtonPanel.ImageAnchor();
-    image.addStyleName("leftFiveMargin");
-    image.setResource(grayImage);
-    image.setHeight("112px");
-    return image;
-  }*/
 
   /**
    * Is this ever called?
@@ -187,9 +151,8 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
    */
   @Override
   public void showPronScoreFeedback(double score, String scorePrefix) {
+    System.err.println("showPronScoreFeedback\n\n\n ");
     super.showPronScoreFeedback(score,"Score ");
-/*    scoreFeedback.showScoreFeedback("Score ", score);
-    navigationHelper.enableNextButton(true);*/
   }
 
   @Override
