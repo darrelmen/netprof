@@ -77,7 +77,7 @@ public abstract class RecordButton {
         hasFocus = false;
       }
     });*/
-    recordButton.setTitle("Press the space bar to record/stop recording");
+    if (keyHandler != null) recordButton.setTitle("Press the space bar to record/stop recording");
   }
 
   protected HandlerRegistration addKeyHandler() {
@@ -134,16 +134,12 @@ public abstract class RecordButton {
   }
 
   private void start() {
-    //long now = System.currentTimeMillis();
-    //System.out.println("start recording at " + now);
     recording = true;
     startRecording();
     showRecording();
   }
 
   private void stop() {
-    //long now = System.currentTimeMillis();
-   // System.out.println("stop recording at " + now);// + " " + (now-then));
     recording = false;
     showStopped();
     stopRecording();
