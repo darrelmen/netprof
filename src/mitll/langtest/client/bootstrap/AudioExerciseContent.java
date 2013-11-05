@@ -24,10 +24,11 @@ import mitll.langtest.shared.Exercise;
 public class AudioExerciseContent {
   private static final String LISTEN_TO_THIS_AUDIO = "Listen to this audio";
   private boolean rightAlignContent;
+  private String responseType;
 
   public Widget getQuestionContent(Exercise e, ExerciseController controller, boolean includeExerciseID, boolean showQuestion) {
     rightAlignContent = controller.isRightAlignContent();
-
+    responseType = controller.getProps().getResponseType();
     String stimulus = e.getEnglishSentence();
     String content = e.getContent();
 
@@ -48,12 +49,10 @@ public class AudioExerciseContent {
    */
   private Panel makeFlashcardForCRT(Exercise e, String content, boolean includeExerciseID, boolean showQuestion) {
     Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
-    // content = content.replaceAll("<p> &nbsp; </p>", "");
     String splitTerm = LISTEN_TO_THIS_AUDIO;
     String[] split = content.split(splitTerm);
     String prefix = split[0];
 
-    System.out.println("prefix " +prefix);
     HTML contentPrefix = getHTML(prefix, true);
     contentPrefix.addStyleName("marginRight");
     if (rightAlignContent) contentPrefix.addStyleName("rightAlign");
@@ -73,13 +72,23 @@ public class AudioExerciseContent {
       container2.addStyleName("rightFiveMargin");
       HTML prompt = getHTML("<h3 style='margin-right: 30px'>" + splitTerm + "</h3>", true);
       container2.add(prompt);
+      prompt.getElement().setId("prompt");
       SimplePanel simplePanel = new SimplePanel();
+      simplePanel.getElement().setId("audioWidgeContainer");
+
       simplePanel.add(getAudioWidget(e));
       container2.add(simplePanel);
 
       String suffix = split[1];
+      System.out.println("suffix '" + suffix +"'");
+      //String append  = "";
+      if (responseType.equals("Both")) {
+        suffix = suffix.replace("answer the question below","answer the question below<br/>both written and spoken");
+      } else if (responseType.equals("Text")) {
+        suffix = suffix.replace("answer the question", "type your answer to the question");
+      }
       HTML contentSuffix = getHTML("<br/>" + // TODO: br is a hack
-        "<h3 style='margin-right: 30px'>" + suffix + "</h3>", true);
+        "<h3 style='margin-right: 30px'><p word-wrap:break-word;>" + suffix + "</p></h3>", true);
       contentSuffix.addStyleName("marginRight");
       container2.add(contentSuffix);
       container2.addStyleName("rightAlign");
