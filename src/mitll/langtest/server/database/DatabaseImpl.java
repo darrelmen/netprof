@@ -1257,6 +1257,7 @@ public class DatabaseImpl implements Database {
    * @param e
    * @param questionID
    * @param answer
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addTextAnswer(int, mitll.langtest.shared.Exercise, int, String)
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise)
    */
   public void addAnswer(int userID, Exercise e, int questionID, String answer) {
@@ -1309,22 +1310,8 @@ public class DatabaseImpl implements Database {
    * @param toChange
    * @see mitll.langtest.server.LangTestDatabaseImpl#changeGrade(mitll.langtest.shared.grade.Grade)
    */
-  public void changeGrade(Grade toChange) {
-    gradeDAO.changeGrade(toChange);
-  }
-
-  public void changeAnswer(String id, boolean correct, float pronScore) {
-    answerDAO.changeAnswer(id, correct, pronScore);
-  }
-
-  public int userExists(String login) {
-    return userDAO.userExists(login);
-  }
-
-  public boolean isAnswerValid(int userID, Exercise exercise, int questionID, Database database) {
-    return answerDAO.isAnswerValid(userID, exercise, questionID, database);
-  }
-
+  public void changeGrade(Grade toChange) {  gradeDAO.changeGrade(toChange);  }
+  public int userExists(String login) { return userDAO.userExists(login);  }
 
   /**
    * @see mitll.langtest.server.SiteDeployer#doSiteResponse(DatabaseImpl, javax.servlet.http.HttpServletResponse, mitll.langtest.server.SiteDeployer, mitll.langtest.shared.Site)
