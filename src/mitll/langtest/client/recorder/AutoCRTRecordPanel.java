@@ -58,7 +58,7 @@ public class AutoCRTRecordPanel extends SimpleRecordPanel {
   @Override
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {
     super.receivedAudioAnswer(result, questionState, outer);
-    scoreFeedback.showCRTFeedback(result.getScore(), soundFeedback, "Score ");
+    scoreFeedback.showCRTFeedback(result.getScore(), soundFeedback, "Score ", true);
   }
 
   @Override
