@@ -3,6 +3,9 @@ package mitll.langtest.client.bootstrap;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.PopupPanel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -46,6 +49,8 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
   private static final int LONG_DELAY_MILLIS = 3500;
   private static final int DELAY_CHARACTERS = 40;
   private static final int PERIOD_MILLIS = 300;
+  private static final int HIDE_DELAY = 2500;
+
   private static final boolean NEXT_ON_BAD_AUDIO = false;
  // private static final boolean CONTINUE_TO_NEXT = false;
  private static final String PRONUNCIATION_SCORE = "Pronunciation score ";
@@ -80,7 +85,8 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
    * @param warnUserWhenNotSpace
    */
   public FlashcardRecordButtonPanel(BootstrapExercisePanel widgets, LangTestDatabaseAsync service,
-                                    ExerciseController controller, Exercise exercise, int index, boolean warnUserWhenNotSpace) {
+                                    ExerciseController controller, Exercise exercise, int index,
+                                    boolean warnUserWhenNotSpace) {
     super(service, controller, exercise, null, index);
     this.widgets = widgets;
     this.exercise = exercise;
@@ -138,7 +144,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
 
                                                      if (keyPress && !isSpace) {
                                                        if (warnUserWhenNotSpace) {
-                                                         widgets.showPopup(NO_SPACE_WARNING);
+                                                         /*widgets.*/showPopup(NO_SPACE_WARNING);
                                                        }
                                                      }
                                                      if (keyPress && !keyIsDown && isSpace) {
@@ -159,7 +165,21 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
   }
 
   @Override
-  protected void layoutRecordButton() {
+  protected void layoutRecordButton() {}
+
+  public void showPopup(String html) {
+    final PopupPanel pleaseWait = new DecoratedPopupPanel();
+    pleaseWait.setAutoHideEnabled(true);
+    pleaseWait.add(new HTML(html));
+    pleaseWait.center();
+
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        pleaseWait.hide();
+      }
+    };
+    t.schedule(HIDE_DELAY);
   }
 
   @Override
@@ -255,7 +275,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
     String feedback = "";
     boolean badAudioRecording = result.validity != AudioAnswer.Validity.OK;
     if (badAudioRecording) {
-      widgets.showPopup(result.validity.getPrompt());
+      /*widgets.*/showPopup(result.validity.getPrompt());
       nextAfterDelay(correct, "");
     } else if (correct) {
       showCorrectFeedback(score);
