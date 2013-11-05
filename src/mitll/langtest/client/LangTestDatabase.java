@@ -56,7 +56,7 @@ public interface LangTestDatabase extends RemoteService {
   void addTextAnswer(int userID, Exercise exercise, int questionID, String answer);
   AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard);
-  double getScoreForAnswer(long userID, Exercise e, int questionID, String answer);
+  double getScoreForAnswer(long userID, Exercise e, int questionID, String answer, String answerType);
 
   Exercise getNextUngradedExercise(String user, int expectedGrades, boolean englishOnly);
 
