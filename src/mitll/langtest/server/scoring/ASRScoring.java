@@ -505,6 +505,7 @@ public class ASRScoring extends Scoring {
    * @return
    */
   private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
+    sentence = sentence.replaceAll("\\p{Z}+", " ");
     Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut;
     long then = System.currentTimeMillis();
 
