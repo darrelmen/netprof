@@ -303,6 +303,9 @@ fieldset {
 .topMargin {
     margin-top: 10px;
 }
+.topBarMargin {
+     margin-top: 18px;
+ }
 .topFiveMargin {
      margin-top: 5px;
  }
@@ -329,6 +332,10 @@ fieldset {
 .leftThirtyMargin {
     margin-left: 30px;
 }
+
+.leftFiftyMargin {
+     margin-left: 55px;
+ }
 
 .noMargin {
     margin: 0px;
