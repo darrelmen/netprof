@@ -231,7 +231,7 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @see FlashcardRecordButtonPanel#showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
   public void showPronScoreFeedback(double score, String scorePrefix) {
-    audioScoreFeedback.showScoreFeedback(scorePrefix, score);
+    audioScoreFeedback.showScoreFeedback(scorePrefix, score, false);
   }
 
   public void clearFeedback() {
