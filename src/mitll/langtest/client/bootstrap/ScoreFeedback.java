@@ -10,7 +10,6 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -26,7 +25,6 @@ import mitll.langtest.client.sound.SoundFeedback;
  * To change this template use File | Settings | File Templates.
  */
 public class ScoreFeedback {
- // private static final String PRONUNCIATION_SCORE = "Pronunciation score ";
   private static final int HIDE_FEEDBACK = 2500;
   private static final double CORRECT_SCORE_THRESHOLD = 0.5;
 
@@ -53,6 +51,7 @@ public class ScoreFeedback {
    * Holds the pron score feedback.
    * Initially made with a placeholder.
    *
+   * @see BootstrapExercisePanel#addRecordingAndFeedbackWidgets(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @return
    */
   public FluidRow getScoreFeedbackRow(int height) {
@@ -60,6 +59,19 @@ public class ScoreFeedback {
     feedbackDummyPanel = new SimplePanel();
     feedbackDummyPanel.setHeight(height + "px");
     scoreFeedbackColumn = new Column(6, 3, feedbackDummyPanel);
+    feedbackRow.add(scoreFeedbackColumn);
+    feedbackRow.getElement().setId("feedbackRow");
+    return feedbackRow;
+  }
+
+  public FluidRow getScoreFeedbackRow2(Widget left,int height) {
+    FluidRow feedbackRow = new FluidRow();
+    feedbackDummyPanel = new SimplePanel();
+    feedbackDummyPanel.setHeight(height + "px");
+    feedbackRow.add(new Column(3));
+    feedbackRow.add(new Column(1,left));
+
+    scoreFeedbackColumn = new Column(5, feedbackDummyPanel);
     feedbackRow.add(scoreFeedbackColumn);
     feedbackRow.getElement().setId("feedbackRow");
     return feedbackRow;
@@ -73,33 +85,24 @@ public class ScoreFeedback {
     feedbackDummyPanel.addStyleName("floatLeft");
 
     scoreFeedbackColumn = new SimplePanel(feedbackDummyPanel);
-   // scoreFeedbackColumn =   getCenteredContainer(feedbackDummyPanel);
-  //  SimplePanel panel = new SimplePanel(scoreFeedbackColumn);
     feedbackRow.add(scoreFeedbackColumn);
     scoreFeedbackColumn.addStyleName("leftFiftyMargin");
     scoreFeedbackColumn.addStyleName("floatLeft");
-  //  scoreFeedbackColumn.addStyleName("topBarMargin");
     feedbackRow.getElement().setId("feedbackRow");
     return feedbackRow;
   }
-
-/*
-  private HorizontalPanel getCenteredContainer(Widget prev) {
-    HorizontalPanel hp = new HorizontalPanel();
-    hp.setHeight("100%");
-    hp.setWidth("100%");
-    hp.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
-    hp.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
-    hp.add(prev);
-    return hp;
-  }
-*/
-
 
   public void setWaiting() {
     feedbackImage.setResource(waitingForResponseImage);
   }
 
+  /**
+   * @see TextCRTFlashcard#getScoreForGuess(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.shared.Exercise, com.github.gwtbootstrap.client.ui.Button, ScoreFeedback)
+   * @see mitll.langtest.client.recorder.AutoCRTRecordPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
+   * @param result
+   * @param soundFeedback
+   * @param pronunciationScore
+   */
   public void showCRTFeedback(Double result, SoundFeedback soundFeedback, String pronunciationScore) {
     result = Math.max(0, result);
     result = Math.min(1.0, result);
@@ -112,7 +115,6 @@ public class ScoreFeedback {
       soundFeedback.playIncorrect();
       showScoreIcon(false);
     }
-   // hideFeedback();
   }
 
   public void hideFeedback() {
@@ -157,6 +159,10 @@ public class ScoreFeedback {
     feedbackImage.setResource(correct ? correctImage : incorrectImage);
   }
 
+  /**
+   * @see
+   * @return
+   */
   public RecordButtonPanel.ImageAnchor getFeedbackImage() {
     RecordButtonPanel.ImageAnchor image;
     image = new RecordButtonPanel.ImageAnchor();
