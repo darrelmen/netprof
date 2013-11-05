@@ -27,22 +27,23 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
     super(e, service, userFeedback, controller);
   }
 
-  AutoCRTRecordPanel autoCRTRecordPanel;
-  ScoreFeedback scoreFeedback;
+  private AutoCRTRecordPanel autoCRTRecordPanel;
+ // private ScoreFeedback scoreFeedback;
+
   @Override
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
     autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, index);
     Panel panel = autoCRTRecordPanel.getPanel();
-   return getVerticalPanel(panel);
+    return getVerticalPanel(panel,new ScoreFeedback(true));
   }
 
-  public Panel getVerticalPanel(Panel panel) {
+  public Panel getVerticalPanel(Panel panel, ScoreFeedback scoreFeedback) {
     FluidContainer container = new FluidContainer();
     FluidRow row1 = new FluidRow();
     container.add(row1);
     row1.add(panel);
 
-    scoreFeedback = new ScoreFeedback(true);
+   // scoreFeedback = new ScoreFeedback(true);
 
     SimplePanel simplePanel = new SimplePanel(scoreFeedback.getFeedbackImage());
     simplePanel.addStyleName("floatLeft");
@@ -54,7 +55,7 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
     container.add(scoreFeedbackRow);
 
     HTML warnNoFlash = new HTML(BootstrapExercisePanel.WARN_NO_FLASH);
-    autoCRTRecordPanel.setSoundFeedback( new SoundFeedback(controller.getSoundManager(), warnNoFlash));
+    autoCRTRecordPanel.setSoundFeedback(new SoundFeedback(controller.getSoundManager(), warnNoFlash));
     autoCRTRecordPanel.setScoreFeedback(scoreFeedback);
     warnNoFlash.setVisible(false);
     FluidRow row3 = new FluidRow();
