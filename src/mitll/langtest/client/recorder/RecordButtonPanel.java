@@ -1,10 +1,12 @@
 package mitll.langtest.client.recorder;
 
+import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -128,6 +130,36 @@ public class RecordButtonPanel {
     recordImage1.setVisible(false);
     panel.add(recordImage2);
     recordImage2.setVisible(false);
+  }
+
+  protected void layoutRecordButton2() {
+  //  SimplePanel recordButtonContainer = new SimplePanel();
+  //  FlowPanel recordButtonContainer = new FlowPanel();
+
+  //  recordButtonContainer.setWidth("75px");
+//    recordButtonContainer.add(recordButton);
+  //  recordButton.addStyleName("leftFiftyPercentMargin");
+
+/*    HorizontalPanel hp = new HorizontalPanel() {
+      @Override
+      protected void onUnload() {
+        RecordButtonPanel.this.onUnload();
+      }
+    };
+    hp.add(recordButtonContainer);*/
+ //   this.panel = recordButtonContainer;
+
+  //  panel.add(recordImage1);
+    recordImage1.setVisible(false);
+ //   panel.add(recordImage2);
+    recordImage2.setVisible(false);
+
+
+    FluidRow row = new FluidRow();
+    row.add(recordButton);
+    row.add(recordImage1);
+    row.add(recordImage2);
+    panel = row;
   }
 
   public void onUnload() {
