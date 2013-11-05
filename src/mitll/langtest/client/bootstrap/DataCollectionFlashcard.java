@@ -104,6 +104,12 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
     navigationHelper.removeKeyHandler();
   }
 
+  /**
+   * @see FlashcardRecordButtonPanel#showCorrectFeedback(double)
+   * @see FlashcardRecordButtonPanel#showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
+   * @param score
+   * @param scorePrefix
+   */
   @Override
   public void showPronScoreFeedback(double score, String scorePrefix) {
     super.showPronScoreFeedback(score, scorePrefix);
