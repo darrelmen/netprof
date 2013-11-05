@@ -50,7 +50,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
     }
 
     playback.setHeight("30px"); // for audio controls to show
-
+    playback.addStyleName("leftFiveMargin");
     // make audio feedback widget
     addValidityFeedback(index);
 
@@ -103,12 +103,12 @@ public class SimpleRecordPanel extends RecordButtonPanel {
     if (result == AudioAnswer.Validity.OK) {
       /*if (!controller.isAutoCRTMode())*/ check.setUrl(IMAGES_CHECKMARK);
       check.setAltText("Audio Saved");
-      questionState.recordCompleted(outer);
+      if (questionState != null) questionState.recordCompleted(outer);
     }
     else {
       /*if (!controller.isAutoCRTMode())*/ check.setUrl(IMAGES_REDX_PNG);
       check.setAltText("Audio Invalid");
-      questionState.recordIncomplete(outer);
+      if (questionState != null) questionState.recordIncomplete(outer);
 
       showPopup(result.getPrompt());
     }
