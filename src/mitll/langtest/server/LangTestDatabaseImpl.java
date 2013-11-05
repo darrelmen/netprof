@@ -754,24 +754,27 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param exercise
    * @param questionID
    * @param answer
-   * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
+   * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers
    */
   public void addTextAnswer(int userID, Exercise exercise, int questionID, String answer) {
     db.addAnswer(userID, exercise, questionID, answer);
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.TextCRTFlashcard#getScoreForGuess(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.shared.Exercise, com.github.gwtbootstrap.client.ui.Button)
+   * @see mitll.langtest.client.bootstrap.TextCRTFlashcard#getScoreForGuess
    * @param userID
    * @param exercise
    * @param questionID
    * @param answer
+   * @param answerType
    * @return
    */
-  public double getScoreForAnswer(long userID, Exercise exercise, int questionID, String answer) {
+  public double getScoreForAnswer(long userID, Exercise exercise, int questionID, String answer, String answerType) {
     makeAutoCRT();
     double scoreForAnswer = audioFileHelper.getScoreForAnswer(exercise, questionID, answer);
-    db.getAnswerDAO().addAnswer((int) userID, exercise.getPlan(), exercise.getID(), "", answer, (scoreForAnswer > 0.5), (float) scoreForAnswer);
+    boolean correct = scoreForAnswer > 0.5;
+    db.getAnswerDAO().addAnswer((int) userID, exercise.getPlan(), exercise.getID(), "", answer, answerType, correct,
+      (float) scoreForAnswer);
 
     return scoreForAnswer;
   }
