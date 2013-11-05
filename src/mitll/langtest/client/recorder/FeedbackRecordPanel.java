@@ -23,18 +23,16 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
+  private AutoCRTRecordPanel autoCRTRecordPanel;
+
   public FeedbackRecordPanel(Exercise e, LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller) {
     super(e, service, userFeedback, controller);
   }
 
-  private AutoCRTRecordPanel autoCRTRecordPanel;
- // private ScoreFeedback scoreFeedback;
-
   @Override
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
     autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, index);
-    Panel panel = autoCRTRecordPanel.getPanel();
-    return getVerticalPanel(panel,new ScoreFeedback(true));
+    return getVerticalPanel(autoCRTRecordPanel.getPanel(), new ScoreFeedback(true));
   }
 
   public Panel getVerticalPanel(Panel panel, ScoreFeedback scoreFeedback) {
@@ -42,8 +40,6 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
     FluidRow row1 = new FluidRow();
     container.add(row1);
     row1.add(panel);
-
-   // scoreFeedback = new ScoreFeedback(true);
 
     SimplePanel simplePanel = new SimplePanel(scoreFeedback.getFeedbackImage());
     simplePanel.addStyleName("floatLeft");
@@ -66,7 +62,5 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
   }
 
   @Override
-  protected String getInstructions() {
-    return "";
-  }
+  protected String getInstructions() {  return "";  }
 }
