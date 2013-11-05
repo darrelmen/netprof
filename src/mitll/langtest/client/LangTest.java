@@ -678,7 +678,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else if (props.getFlashcardNextAndPrev()) {
       String responseType = props.getResponseType();
 
-      System.out.println("got response type " + responseType);
+      //System.out.println("got response type " + responseType);
       if (responseType.equalsIgnoreCase("Text")) {
         exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer) {
           @Override
@@ -872,9 +872,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (userline != null) {
       String userText = getUserText();
       userline.setHTML(userText);
-    }
-    else {
-    //  System.out.println("LangTest.gotUser : userline undefined??");
     }
     if (props.isDataCollectAdminView()) {
       checkForAdminUser();
