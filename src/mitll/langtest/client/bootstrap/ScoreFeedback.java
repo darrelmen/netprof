@@ -47,6 +47,7 @@ public class ScoreFeedback {
     incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
     waitingForResponseImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress48.gif"));
   }
+
   /**
    * Holds the pron score feedback.
    * Initially made with a placeholder.
@@ -73,7 +74,7 @@ public class ScoreFeedback {
 
     scoreFeedbackColumn = new Column(5, feedbackDummyPanel);
     feedbackRow.add(scoreFeedbackColumn);
-    feedbackRow.getElement().setId("feedbackRow");
+    feedbackRow.getElement().setId("feedbackRow2");
     return feedbackRow;
   }
 
@@ -88,7 +89,7 @@ public class ScoreFeedback {
     feedbackRow.add(scoreFeedbackColumn);
     scoreFeedbackColumn.addStyleName("leftFiftyMargin");
     scoreFeedbackColumn.addStyleName("floatLeft");
-    feedbackRow.getElement().setId("feedbackRow");
+    feedbackRow.getElement().setId("feedbackRowSimple");
     return feedbackRow;
   }
 
@@ -97,17 +98,18 @@ public class ScoreFeedback {
   }
 
   /**
-   * @see TextCRTFlashcard#getScoreForGuess(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.shared.Exercise, com.github.gwtbootstrap.client.ui.Button, ScoreFeedback)
+   * @see TextCRTFlashcard#getScoreForGuess
    * @see mitll.langtest.client.recorder.AutoCRTRecordPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
    * @param result
    * @param soundFeedback
    * @param pronunciationScore
+   * @param centerVertically
    */
-  public void showCRTFeedback(Double result, SoundFeedback soundFeedback, String pronunciationScore) {
+  public void showCRTFeedback(Double result, SoundFeedback soundFeedback, String pronunciationScore, boolean centerVertically) {
     result = Math.max(0, result);
     result = Math.min(1.0, result);
     if (result > 0.9) result = 1.0; //let's round up when we're almost totally correct 97%->100%
-    showScoreFeedback(pronunciationScore, result);
+    showScoreFeedback(pronunciationScore, result, centerVertically);
     if (result > CORRECT_SCORE_THRESHOLD) {
       soundFeedback.playCorrect();
       showScoreIcon(true);
@@ -128,7 +130,14 @@ public class ScoreFeedback {
     t.schedule(HIDE_FEEDBACK);
   }
 
-  public void showScoreFeedback(String pronunciationScore, double score) {
+  /**
+   * @see BootstrapExercisePanel#showPronScoreFeedback(double, String)
+   * @see #showCRTFeedback(Double, mitll.langtest.client.sound.SoundFeedback, String, boolean)
+   * @param pronunciationScore
+   * @param score
+   * @param centerVertically
+   */
+  public void showScoreFeedback(String pronunciationScore, double score, boolean centerVertically) {
     if (score < 0) score = 0;
     double percent = 100 * score;
 
@@ -146,7 +155,10 @@ public class ScoreFeedback {
         score > 0.6 ? ProgressBarBase.Color.DEFAULT :
           score > 0.4 ? ProgressBarBase.Color.WARNING : ProgressBarBase.Color.DANGER);
 
-    DOM.setStyleAttribute(scoreFeedback.getElement(), "marginTop", "18px");
+    if (centerVertically) {
+      DOM.setStyleAttribute(scoreFeedback.getElement(), "marginTop", "18px");
+      DOM.setStyleAttribute(scoreFeedback.getElement(), "marginBottom", "10px");
+    }
     DOM.setStyleAttribute(scoreFeedback.getElement(), "marginLeft", "10px");
   }
 
