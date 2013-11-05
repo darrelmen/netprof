@@ -49,9 +49,8 @@ public class PropertyHandler {
   private static final String LANGUAGE = "language";
   private static final String CONTINUE_PROMPT = "promptBeforeNextItem";
   private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
- // private static final String DLI_DEMOGRAPHICS = "dliDemographics";
   private static final String TRACK_ONLINE_USERS = "trackUsers";
- // private static final String TABOO_ENGLISH = "tabooEnglish";
+  private static final String RESPONSE_TYPE = "responseType";
   private static final String FLASHCARD_NEXT_AND_PREV = "flashcardNextAndPrev";
 
   // URL parameters that can override above parameters
@@ -131,6 +130,7 @@ public class PropertyHandler {
   private boolean flashcardTextResponse = false;
   private boolean showFlashcardAnswer = true;
   private boolean showExercisesInOrder = false;
+  private String responseType = "Audio";
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad()
@@ -190,6 +190,7 @@ public class PropertyHandler {
       else if (key.equals(FLASHCARD_TEXT_RESPONSE)) flashcardTextResponse = getBoolean(value);
       else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
       else if (key.equals(EXERCISES_IN_ORDER)) showExercisesInOrder = getBoolean(value);
+      else if (key.equals(RESPONSE_TYPE)) responseType = value;
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
@@ -304,6 +305,10 @@ public class PropertyHandler {
     }
     if (Window.Location.getParameter(EXERCISES_IN_ORDER) != null) {
       showExercisesInOrder = !Window.Location.getParameter(EXERCISES_IN_ORDER).equals("false");
+    }
+
+    if (Window.Location.getParameter(RESPONSE_TYPE) != null) {
+      responseType = Window.Location.getParameter(RESPONSE_TYPE);
     }
     return grading;
   }
@@ -486,5 +491,9 @@ public class PropertyHandler {
 
   public boolean showExercisesInOrder() {
     return showExercisesInOrder;
+  }
+
+  public String getResponseType() {
+    return responseType;
   }
 }
