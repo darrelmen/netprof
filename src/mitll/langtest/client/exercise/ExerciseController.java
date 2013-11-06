@@ -67,7 +67,7 @@ public interface ExerciseController {
 
   int getFlashcardPreviewFrameHeight();
 
-  void setSelectionState(Map<String,Collection<String>> selectionState);
+//  void setSelectionState(Map<String,Collection<String>> selectionState);
   PropertyHandler getProps();
 
   String logException(Throwable throwable);

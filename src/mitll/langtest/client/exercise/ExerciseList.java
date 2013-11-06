@@ -67,6 +67,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private int countSincePrompt = 0;
   protected int lastReqID = 0;
   private Set<Integer> visited = new HashSet<Integer>();
+  protected boolean isCRTDataMode;
 
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
@@ -76,17 +77,18 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param factory
    * @param showTurkToken
    * @param showInOrder
+   * @param isCRTDataMode
    */
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                       ExercisePanelFactory factory,
-                      boolean showTurkToken, boolean showInOrder) {
+                      boolean showTurkToken, boolean showInOrder, boolean isCRTDataMode) {
     addWidgets(currentExerciseVPanel);
     this.service = service;
     this.feedback = feedback;
     this.factory = factory;
     this.showTurkToken = showTurkToken;
     this.showInOrder = showInOrder;
-
+    this.isCRTDataMode = isCRTDataMode;
     // Add history listener
     History.addValueChangeHandler(this);
   }
@@ -201,6 +203,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return token;
   }
 
+  private String unencodeTokenDontRemovePlus(String token) {
+    token = token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ");
+    return token;
+  }
+
   /**
    * @see ListInterface#getExercises(long, boolean)
    */
@@ -241,26 +248,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     flush();
   }
 
-/*  public Collection<ExerciseShell> getExerciseShells() {
-    return idToExercise.values();
-  }
-  */
-/*  private Random random = new Random();
-  public void askForRandomExercise(AsyncCallback<Exercise> callback) {
-    ExerciseShell shell = currentExercises.get(random.nextInt(currentExercises.size()));
-    service.getExercise(shell.getID(), callback);
-  }*/
-
   public void setSelectionState(Map<String, Collection<String>> selectionState) {}
 
   @Override
-  public void hideExerciseList() {
-    getParent().setVisible(false);
-  }
-
-/*  public void showExerciseList() {
-    getParent().setVisible(true);
-  }*/
+  public void hideExerciseList() {  getParent().setVisible(false);  }
 
   protected void flush() {}
 
@@ -377,7 +368,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected String getTokenFromEvent(ValueChangeEvent<String> event) {
     String token = event.getValue();
-    token = unencodeToken(token);
+    System.out.println("getTokenFromEvent  token " + token);
+    token = isCRTDataMode ? unencodeTokenDontRemovePlus(token) : unencodeToken(token);
+    System.out.println("getTokenFromEvent token after " + token);
+
     return token;
   }
 

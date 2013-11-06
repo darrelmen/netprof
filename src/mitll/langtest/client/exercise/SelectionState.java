@@ -1,6 +1,5 @@
 package mitll.langtest.client.exercise;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.History;
 
 import java.util.ArrayList;
@@ -25,24 +24,25 @@ public class SelectionState {
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#showSelectionState(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @param event
    */
-  public SelectionState(ValueChangeEvent<String> event) {
+/*  public SelectionState(ValueChangeEvent<String> event) {
     parseToken(getTokenFromEvent(event));
-  }
+  }*/
 
   /**
    * Populated from history token!
    * @see ListInterface#getExercises(long, boolean)
    */
   public SelectionState() {
-    this(History.getToken());
+    this(History.getToken(), true);
   }
 
   /**
    * @see SectionExerciseList#getSelectionState(String)
    * @param token
+   * @param removePlus
    */
-  public SelectionState(String token) {
-    parseToken(unencodeToken(token));
+  public SelectionState(String token, boolean removePlus) {
+    parseToken(removePlus ? unencodeToken(token) : unencodeToken2(token));
   }
 
   /**
@@ -50,15 +50,22 @@ public class SelectionState {
    */
   public boolean isEmpty() { return getTypeToSection().isEmpty(); }
 
+/*
   private String getTokenFromEvent(ValueChangeEvent<String> event) {
     String token = event.getValue();
     token = unencodeToken(token);
     return token;
   }
+*/
 
 
   private String unencodeToken(String token) {
     token = token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ").replaceAll("\\+", " ");
+    return token;
+  }
+
+  private String unencodeToken2(String token) {
+    token = token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ");
     return token;
   }
 
