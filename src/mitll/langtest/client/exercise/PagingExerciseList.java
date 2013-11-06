@@ -1,11 +1,17 @@
 package mitll.langtest.client.exercise;
 
 import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.CompositeCell;
+import com.google.gwt.cell.client.IconCellDecorator;
 import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -14,6 +20,7 @@ import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
@@ -72,9 +79,10 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     @Source({CellTable.Style.DEFAULT_CSS, "RTLExerciseCellTableStyleSheet.css"})
     TableStyle cellTableStyle();
   }
-
+  //Image myImage;
+  ImageResource resource;
   /**
-   * @see mitll.langtest.client.LangTest#makeExerciseList
+   * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController)
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
@@ -85,8 +93,16 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                             boolean showTurkToken, boolean showInOrder, ExerciseController controller, boolean isCRTDataMode) {
     super(currentExerciseVPanel, service, feedback, null, showTurkToken, showInOrder, isCRTDataMode);
+/*    MyResources myResources = GWT.create(MyResources.class);
+    resource = myResources.myImage();*/
+
+    System.out.println("resource " + resource);
+
     this.controller = controller;
     addComponents();
+
+
+   //  myImage = new Image(resource);
   }
 
   protected void addComponents() {
@@ -142,8 +158,14 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   protected void addColumnsToTable(boolean consumeClicks) {
-    Column<ExerciseShell, SafeHtml> id2 = getExerciseIdColumn(consumeClicks);
-
+    if (!isCRTDataMode) {
+      Column<ExerciseShell, SafeHtml> id2 = getExerciseIdColumn(consumeClicks);
+      id2.setCellStyleNames("alignLeft");
+      table.addColumn(id2);
+    } /*else {
+      Column<ExerciseShell, SafeHtml> id2 = getExerciseIdColumn2(consumeClicks);
+      table.addColumn(id2);
+    }*/
     // this would be better, but want to consume clicks
   /*  TextColumn<ExerciseShell> id2 = new TextColumn<ExerciseShell>() {
       @Override
@@ -154,49 +176,81 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
         return columnText;
       }
     };*/
-
-    id2.setCellStyleNames("alignLeft");
-    table.addColumn(id2);
   }
 
   /**
    * @see #addColumnsToTable
    * @return
    */
-  private Column<ExerciseShell, SafeHtml> getExerciseIdColumn(final boolean consumeClicks) {
-    return new Column<ExerciseShell, SafeHtml>(new SafeHtmlCell() {
-        @Override
-        public Set<String> getConsumedEvents() {
-          Set<String> events = new HashSet<String>();
-          if (consumeClicks) events.add(BrowserEvents.CLICK);
-          return events;
-        }
-      }) {
-        @Override
-        public SafeHtml getValue(ExerciseShell object) {
-          return getColumnToolTip(object.getTooltip());
-        }
+  protected Column<ExerciseShell, SafeHtml> getExerciseIdColumn(final boolean consumeClicks) {
+    return new Column<ExerciseShell, SafeHtml>(new MySafeHtmlCell(consumeClicks)) {
 
-        @Override
-        public void onBrowserEvent(Cell.Context context, Element elem, ExerciseShell object, NativeEvent event) {
-          super.onBrowserEvent(context, elem, object, event);
-          if (BrowserEvents.CLICK.equals(event.getType())) {
-            System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
-            final ExerciseShell e = object;
-            if (isExercisePanelBusy()) {
-              tellUserPanelIsBusy();
-              markCurrentExercise(currentExercise);
-            } else {
-              gotClickOnItem(e);
-            }
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, ExerciseShell object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        if (BrowserEvents.CLICK.equals(event.getType())) {
+          System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
+          final ExerciseShell e = object;
+          if (isExercisePanelBusy()) {
+            tellUserPanelIsBusy();
+            markCurrentExercise(currentExercise);
+          } else {
+            gotClickOnItem(e);
           }
         }
+      }
 
-        private SafeHtml getColumnToolTip(String columnText) {
-          if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0,MAX_LENGTH_ID-3)+"...";
-          return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
+      @Override
+      public SafeHtml getValue(ExerciseShell object) {
+        String columnText = object.getTooltip();
+        if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
+        return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
+      }
+    };
+  }
+/*
+
+  interface MyResources extends ClientBundle {
+    @Source(".icon-check")
+    @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both)
+    com.google.gwt.resources.client.ImageResource myImage();
+
+    @ClientBundle.Source("com/github/gwtbootstrap/client/ui/resources/css/font-awesome.css")
+    MyCssResource myCss();
+  }
+
+  interface MyCssResource extends CssResource {
+    String myBackground();
+  }
+*/
+
+
+
+  protected Column<ExerciseShell, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
+    return new Column<ExerciseShell, SafeHtml>(new IconCellDecorator<SafeHtml>(resource,new MySafeHtmlCell(consumeClicks))) {
+
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, ExerciseShell object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        if (BrowserEvents.CLICK.equals(event.getType())) {
+          System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
+          final ExerciseShell e = object;
+          if (isExercisePanelBusy()) {
+            tellUserPanelIsBusy();
+            markCurrentExercise(currentExercise);
+          } else {
+            gotClickOnItem(e);
+          }
         }
-      };
+      }
+
+      @Override
+      public SafeHtml getValue(ExerciseShell object) {
+        String columnText = object.getTooltip();
+        if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
+        return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
+      }
+    };
   }
 
   protected void tellUserPanelIsBusy() {
@@ -322,5 +376,20 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
       }
     }
     table.redraw();
+  }
+
+  private static class MySafeHtmlCell extends SafeHtmlCell {
+    private final boolean consumeClicks;
+
+    public MySafeHtmlCell(boolean consumeClicks) {
+      this.consumeClicks = consumeClicks;
+    }
+
+    @Override
+    public Set<String> getConsumedEvents() {
+      Set<String> events = new HashSet<String>();
+      if (consumeClicks) events.add(BrowserEvents.CLICK);
+      return events;
+    }
   }
 }
