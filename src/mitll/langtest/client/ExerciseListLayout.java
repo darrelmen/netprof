@@ -29,8 +29,10 @@ public class ExerciseListLayout {
     this.props = props;
   }
 
-  public ListInterface makeFlashcardExerciseList(FluidContainer container, LangTestDatabaseAsync service, UserManager userManager, ExerciseController controller) {
-    this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager, props.isTimedGame(), props.getGameTimeSeconds());
+  public ListInterface makeFlashcardExerciseList(FluidContainer container, LangTestDatabaseAsync service,
+                                                 UserManager userManager) {
+    this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager, props.isTimedGame(),
+      props.getGameTimeSeconds());
     return exerciseList;
   }
 
@@ -41,7 +43,8 @@ public class ExerciseListLayout {
    */
   public ListInterface makeExerciseList(FluidRow secondRow,
                                         Panel leftColumn, UserFeedback feedback,
-                                        Panel currentExerciseVPanel, LangTestDatabaseAsync service, ExerciseController controller) {
+                                        Panel currentExerciseVPanel, LangTestDatabaseAsync service,
+                                        ExerciseController controller) {
     boolean isGrading = props.isGrading();
     this.exerciseList = makeExerciseList(secondRow, isGrading, feedback, currentExerciseVPanel, service, controller);
 
@@ -62,7 +65,8 @@ public class ExerciseListLayout {
   }
 
   private ListInterface makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback,
-                                         Panel currentExerciseVPanel, LangTestDatabaseAsync service, ExerciseController controller) {
+                                         Panel currentExerciseVPanel, LangTestDatabaseAsync service,
+                                         ExerciseController controller) {
     if (isGrading) {
       return new GradedExerciseList(currentExerciseVPanel, service, feedback,
         true, props.isEnglishOnlyMode(), controller);
@@ -74,11 +78,11 @@ public class ExerciseListLayout {
             props.isShowTurkToken(), props.showExercisesInOrder(), showSectionWidgets, controller);
         } else {
           return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-            props.isShowTurkToken(), props.showExercisesInOrder(), showSectionWidgets, controller);
+            props.isShowTurkToken(), props.showExercisesInOrder(), showSectionWidgets, controller, props.isCRTDataCollectMode());
         }
       } else {
         return new PagingExerciseList(currentExerciseVPanel, service, feedback,
-          props.isShowTurkToken(), props.showExercisesInOrder(), controller);
+          props.isShowTurkToken(), props.showExercisesInOrder(), controller, props.isCRTDataCollectMode());
       }
     }
   }
