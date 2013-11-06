@@ -173,7 +173,6 @@ public class PropertyHandler {
       else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
       else if (key.equals(SHOW_SECTION_WIDGETS)) showSectionWidgets = getBoolean(value);
       else if (key.equals(FLASHCARD_TEACHER_VIEW)) flashcardTeacherView = getBoolean(value);
-    //  else if (key.equals(DEBUG_EMAIL)) debugEmail = getBoolean(value);
       else if (key.equals(FLASHCARD)) flashCard = getBoolean(value);
       else if (key.equals(LANGUAGE)) language = value;
       else if (key.equals(SPLASH_TITLE)) splashTitle = value;
@@ -183,9 +182,7 @@ public class PropertyHandler {
       else if (key.equals(CONTINUE_PROMPT)) promptBeforeNextItem = getBoolean(value);
       else if (key.equals(RIGHT_ALIGN_CONTENT)) rightAlignContent = getBoolean(value);
       else if (key.equals(ADD_RECORD_KEY_BINDING)) addRecordKeyBinding = getBoolean(value);
-     // else if (key.equals(DLI_DEMOGRAPHICS)) dliDemographics = getBoolean(value);
       else if (key.equals(TRACK_ONLINE_USERS)) trackUsers = getBoolean(value);
-    //  else if (key.equals(TABOO_ENGLISH)) tabooEnglish = getBoolean(value);
       else if (key.equals(FLASHCARD_NEXT_AND_PREV)) flashcardNextAndPrev = getBoolean(value);
       else if (key.equals(FLASHCARD_TEXT_RESPONSE)) flashcardTextResponse = getBoolean(value);
       else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
