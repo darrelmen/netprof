@@ -34,7 +34,7 @@ public class ExercisePanelFactory {
 
   public Panel getExercisePanel(Exercise e) {
     if (e.getType() == Exercise.EXERCISE_TYPE.RECORD) {
-      if (controller.isAutoCRTMode() && !e.promptInEnglish) {
+      if (controller.isAutoCRTMode() && !e.isPromptInEnglish()) {
         return new FeedbackRecordPanel(e, service, userFeedback, controller);
       } else {
         return new SimpleRecordExercisePanel(e, service, userFeedback, controller);
