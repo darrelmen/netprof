@@ -2,14 +2,12 @@ package mitll.langtest.client.bootstrap;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CellTable;
-import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Icon;
-import com.github.gwtbootstrap.client.ui.IconStack;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.Nav;
 import com.github.gwtbootstrap.client.ui.NavLink;
@@ -94,7 +92,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   public TableSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                   UserFeedback feedback, boolean showTurkToken, boolean showInOrder,
                                   boolean showListBox, ExerciseController controller) {
-    super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox, controller);
+    super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox, controller, false);
     setWidth("100%");
     this.frameHeight = controller.getFlashcardPreviewFrameHeight();
     responseType = controller.getProps().getResponseType();
