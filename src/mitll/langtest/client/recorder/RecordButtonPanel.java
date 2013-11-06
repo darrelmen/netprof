@@ -6,7 +6,6 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -203,7 +202,7 @@ public class RecordButtonPanel {
       index,
       controller.getUser(),
       reqid,
-      !exercise.promptInEnglish,
+      !exercise.isPromptInEnglish(),
       controller.getAudioType(),
       controller.isFlashCard(),
       new AsyncCallback<AudioAnswer>() {
