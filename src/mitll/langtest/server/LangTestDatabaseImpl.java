@@ -430,15 +430,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         //logger.debug("in biasTowardsUnanswered mode : user " +userID);
 
         if (serverProps.useOutsideResultCounts) {
-          String outsideFileOverride = serverProps.outsideFile;
-          String lessonPlanFile = getLessonPlan();
-
-          if (lessonPlanFile.contains("farsi")) outsideFileOverride = configDir + File.separator + "farsi.txt";
-          else if (lessonPlanFile.contains("urdu")) outsideFileOverride = configDir + File.separator + "urdu.txt";
-          else if (lessonPlanFile.contains("sudanese"))
-            outsideFileOverride = configDir + File.separator + "sudanese.txt";
-          exercises = db.getExercisesBiasTowardsUnanswered(userID, outsideFileOverride, serverProps.shouldUseWeights());
-          db.setOutsideFile(outsideFileOverride);
+          exercises = useOutsideResultCounts(userID);
         } else {
           exercises = db.getExercisesBiasTowardsUnanswered(userID,serverProps.shouldUseWeights());
         }
@@ -448,8 +440,27 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } else {
       //if (!serverProps.isArabicTextDataCollect()) logger.debug("*not* in data collect mode");
 
-      exercises = serverProps.isArabicTextDataCollect() ? db.getRandomBalancedList(userID) : db.getUnmodExercises();
+      exercises = serverProps.isArabicTextDataCollect() ? db.getExercisesGradeBalancing(userID) : db.getUnmodExercises();
     }
+    return exercises;
+  }
+
+  /**
+   * Just a one-off thing -- never use this again probably
+   * @param userID
+   * @return
+   */
+  private List<Exercise> useOutsideResultCounts(long userID) {
+    List<Exercise> exercises;
+    String outsideFileOverride = serverProps.outsideFile;
+    String lessonPlanFile = getLessonPlan();
+
+    if (lessonPlanFile.contains("farsi")) outsideFileOverride = configDir + File.separator + "farsi.txt";
+    else if (lessonPlanFile.contains("urdu")) outsideFileOverride = configDir + File.separator + "urdu.txt";
+    else if (lessonPlanFile.contains("sudanese"))
+      outsideFileOverride = configDir + File.separator + "sudanese.txt";
+    exercises = db.getExercisesBiasTowardsUnanswered(userID, outsideFileOverride, serverProps.shouldUseWeights());
+    db.setOutsideFile(outsideFileOverride);
     return exercises;
   }
 
@@ -468,16 +479,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private void setPromptAndRecordOnExercises(long userID, List<Exercise> exercises) {
     Random rand = new Random(userID);
-    //logger.debug("setPromptAndRecordOnExercises for " + userID + " collect audio " + serverProps.isCollectOnlyAudio());
+    logger.debug("setPromptAndRecordOnExercises for " + userID + " collect audio " + serverProps.isCollectOnlyAudio());
     for (Exercise e : exercises) {
       if (serverProps.isCollectOnlyAudio()) {
         e.setRecordAnswer(true);
-        e.setPromptInEnglish(rand.nextBoolean());
+        e.setPromptInEnglish(!serverProps.showForeignLanguageQuestionsOnly() && rand.nextBoolean());
       } else if (!serverProps.isCollectAudio()) {
         e.setTextOnly();
       } else {
         boolean inEnglish = rand.nextBoolean();
-        e.setPromptInEnglish(inEnglish);
+        e.setPromptInEnglish(!serverProps.showForeignLanguageQuestionsOnly() && rand.nextBoolean());
         e.setRecordAnswer(inEnglish || rand.nextBoolean());
       }
     }
@@ -537,23 +548,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public void resetUserState(long userID) {
-    db.resetUserState(userID);
-  }
+  public void resetUserState(long userID) {  db.resetUserState(userID); }
 
   @Override
-  public void clearUserState(long userID) {
-    db.clearUserState(userID);
-  }
+  public void clearUserState(long userID) {  db.clearUserState(userID); }
 
   /**
    * Called from the client.
    * @see mitll.langtest.client.exercise.ExerciseList#getExercisesInOrder()
    * @return
    */
-  List<Exercise> getExercises() {
-    return db.getExercises();
-  }
+  List<Exercise> getExercises() { return db.getExercises();  }
 
   /**
    * Remember who is grading which exercise.  Time out reservation after 30 minutes.
