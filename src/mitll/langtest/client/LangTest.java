@@ -460,7 +460,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     container.add(headerRow);
 
     userManager = new UserManager(this, service, true, props);
-    this.exerciseList = new ExerciseListLayout(props).makeFlashcardExerciseList(container, service, userManager, this);
+    this.exerciseList = new ExerciseListLayout(props).makeFlashcardExerciseList(container, service, userManager);
 
     // setup flash
     makeFlashContainer();
@@ -607,7 +607,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #onModuleLoad2()
    */
   private void makeExerciseList(FluidRow secondRow, Panel leftColumn) {
-    this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, leftColumn, this, currentExerciseVPanel,service,this);
+    boolean isCRTMode = props.isCRTDataCollectMode();
+    this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, leftColumn, this,
+      currentExerciseVPanel,service,this);
   }
 
   public int getHeightOfTopRows() {
@@ -1026,5 +1028,5 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return exerciseList.onFirst(current);
   }
 
-  public void setSelectionState(Map<String,Collection<String>> selectionState) { exerciseList.setSelectionState(selectionState);}
+//  public void setSelectionState(Map<String,Collection<String>> selectionState) { exerciseList.setSelectionState(selectionState);}
 }
