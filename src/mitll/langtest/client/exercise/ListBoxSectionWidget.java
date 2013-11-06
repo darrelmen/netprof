@@ -86,7 +86,7 @@ public class ListBoxSectionWidget extends ListBox implements SectionWidget {
   public void populateTypeWidget(Collection<String> items, Map<String, Integer> sectionToCount) {
     clear();
 
-    addItem(SectionExerciseList.ANY);
+    addItem(HistoryExerciseList.ANY);
     for (String section : items) {
       addItem(section);
     }
