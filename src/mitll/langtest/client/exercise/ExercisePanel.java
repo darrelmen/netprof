@@ -168,7 +168,7 @@ public class ExercisePanel extends VerticalPanel implements
   private void addQuestions(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber) {
     List<Exercise.QAPair> englishQuestions = e.getEnglishQuestions();
     List<Exercise.QAPair> flQuestions = e.getForeignLanguageQuestions();
-    List<Exercise.QAPair> questionsToShow = e.promptInEnglish ? englishQuestions : flQuestions;
+    List<Exercise.QAPair> questionsToShow = e.isPromptInEnglish() ? englishQuestions : flQuestions;
     int n = englishQuestions.size();
     //System.out.println("eng q " + englishQuestions);
     for (Exercise.QAPair pair : e.getQuestions()) {
@@ -251,7 +251,7 @@ public class ExercisePanel extends VerticalPanel implements
    * @param e
    */
   private void addQuestionPrompt(Panel vp, Exercise e) {
-    vp.add(new HTML(getQuestionPrompt(e.promptInEnglish)));
+    vp.add(new HTML(getQuestionPrompt(e.isPromptInEnglish())));
     SimplePanel spacer = new SimplePanel();
     spacer.setSize("50px", getQuestionPromptSpacer() + "px");
     vp.add(spacer);
@@ -386,7 +386,7 @@ public class ExercisePanel extends VerticalPanel implements
     final TextBox answer = allowPaste ? new TextBox() : new NoPasteTextBox();
     answer.setWidth(ANSWER_BOX_WIDTH);
     answer.setFocus(true);
-    if (!exercise.promptInEnglish) {
+    if (!exercise.isPromptInEnglish()) {
       answer.setDirection(HasDirection.Direction.RTL);
     }
     if (enableNextOnlyWhenAllCompleted) {  // make sure user entered in answers for everything
