@@ -6,18 +6,16 @@ import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.shared.DLIUser;
-import mitll.langtest.shared.custom.UserExercise;
-import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.flashcard.FlashcardResponse;
-import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.grade.ResultsAndGrades;
-import mitll.langtest.shared.flashcard.ScoreInfo;
-import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.flashcard.FlashcardResponse;
+import mitll.langtest.shared.flashcard.ScoreInfo;
+import mitll.langtest.shared.grade.CountAndGradeID;
+import mitll.langtest.shared.grade.Grade;
+import mitll.langtest.shared.grade.ResultsAndGrades;
+import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -193,7 +191,7 @@ public class DatabaseImpl implements Database {
    * @return
    */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    return useFile ? new FileExerciseDAO(mediaDir, language, isFlashcard) : new SQLExerciseDAO(this, mediaDir);
+    return useFile ? new FileExerciseDAO(mediaDir, language, isFlashcard) : new SQLExerciseDAO(this, mediaDir, configDir);
   }
 
   /**
@@ -471,17 +469,7 @@ public class DatabaseImpl implements Database {
 
   private FlashcardResponse getFlashcardResponse(long userID, boolean isTimedGame, List<Exercise> exercises,
                                                  boolean getNext) {
-    UserStateWrapper userStateWrapper;
-
-    synchronized (userToState) {
-      userStateWrapper = userToState.get(userID);
-      logger.info("getFlashcardResponse : for user " + userID +
-        " exercises has " + exercises.size() + " user state " + userStateWrapper + " next = " +getNext);
-      if (userStateWrapper == null || (userStateWrapper.getNumExercises() != exercises.size())) {
-        userStateWrapper = getUserStateWrapper(userID, exercises);
-        userToState.put(userID, userStateWrapper);
-      }
-    }
+    UserStateWrapper userStateWrapper = createOrGetUserState(userID, exercises, getNext);
 
     if (isTimedGame || DO_SIMPLE_FLASHCARDS) {
       FlashcardResponse flashcardResponse;
@@ -506,6 +494,21 @@ public class DatabaseImpl implements Database {
       for (Exercise e : exercises) idToExercise.put(e.getID(), e);
       return getFlashcardResponse(idToExercise, userStateWrapper);
     }
+  }
+
+  private UserStateWrapper createOrGetUserState(long userID, List<Exercise> exercises, boolean getNext) {
+    UserStateWrapper userStateWrapper;
+
+    synchronized (userToState) {
+      userStateWrapper = userToState.get(userID);
+      logger.info("getFlashcardResponse : for user " + userID +
+        " exercises has " + exercises.size() + " user state " + userStateWrapper + " next = " +getNext);
+      if (userStateWrapper == null || (userStateWrapper.getNumExercises() != exercises.size())) {
+        userStateWrapper = getUserStateWrapper(userID, exercises);
+        userToState.put(userID, userStateWrapper);
+      }
+    }
+    return userStateWrapper;
   }
 
   private Map<Long, Integer> userToCorrect = new HashMap<Long, Integer>();
@@ -629,7 +632,7 @@ public class DatabaseImpl implements Database {
    *
    *
    * @return unmodifiable list of exercises
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesInModeDependentOrder(long)
    */
   public List<Exercise> getUnmodExercises() {
     List<Exercise> exercises = getExercises(useFile, lessonPlanFile);
@@ -711,7 +714,9 @@ public class DatabaseImpl implements Database {
   /**
    * Merge the online counts with counts from an external file.
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises(long)
+   * A one-off thing only.
+   *
+   * @see mitll.langtest.server.LangTestDatabaseImpl#useOutsideResultCounts(long)
    * @param userID
    * @param outsideFile
    * @param useWeights
@@ -887,55 +892,20 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * An attempt to bias collection so that items that have only been answered correctly are shown more often
-   * since we want an even distribution of correct and incorrect responses.
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesInModeDependentOrder
+   * Return exercises in an order that puts the items with all right answers towards the front and all wrong
+   * toward the back (in the arabic data collect the students were too advanced for the questions, so
+   * they mostly got them right).<br></br>
+   *
+   * Remember there can be multiple questions per exercise, so we need to average over the grades for all
+   * answers for all questions for an exercise.
+   *
+   * Complicated... for those items that have few answers, put those at the front so we get even coverage.
+   * For those items that have a decent number of answers, sort them by grade putting all correct items toward the
+   * front.
+   *
+   * @param userID
+   * @return
    */
-  public List<Exercise> getRandomBalancedList(long userID) {
-    List<Exercise> exercisesGradeBalancing = getExercisesGradeBalancing(userID);
-    return exercisesGradeBalancing;
-  }
-
-/*  private List<Exercise> getRandomList(List<Exercise> exercisesGradeBalancing) {
-    List<Exercise> randomList = new ArrayList<Exercise>();
-    // int focusGroupSize = exercisesGradeBalancing.size()/8;
-    //  Set<Integer> chosen = new HashSet<Integer>();
-    long then = System.currentTimeMillis();
-    int orig = exercisesGradeBalancing.size();
-    while (randomList.size() < orig) {
-      double v = random.nextGaussian();
-      double shift = Math.abs(v);
-      int remaining = exercisesGradeBalancing.size();
-      double inRemaining = (remaining / 8) * Math.abs(shift);
-      double scale = Math.min(remaining -1, inRemaining);
-      int index = (int) scale;
-     // if (!chosen.contains(index)) {
-        Exercise remove = exercisesGradeBalancing.remove(index);
-        randomList.add(remove);
-       // System.out.println("v " + v + " s " + shift + " scale " + index + "/"+ inRemaining+ " of " + remaining +" ex " + remove);
-    }
-    long now = System.currentTimeMillis();
-
-    logger.info("getRandomBalancedList : returning " + randomList.size() + " items, orig size " + orig +
-      " took " +(now-then) + " millis");
-    return randomList;
-  }*/
-
-    /**
-     * Return exercises in an order that puts the items with all right answers towards the front and all wrong
-     * toward the back (in the arabic data collect the students were too advanced for the questions, so
-     * they mostly got them right).<br></br>
-     *
-     * Remember there can be multiple questions per exercise, so we need to average over the grades for all
-     * answers for all questions for an exercise.
-     *
-     * Complicated... for those items that have few answers, put those at the front so we get even coverage.
-     * For those items that have a decent number of answers, sort them by grade putting all correct items toward the
-     * front.
-     *
-     * @param userID
-     * @return
-     */
   public List<Exercise> getExercisesGradeBalancing(long userID) {
     logger.debug("getExercisesGradeBalancing " +userID);
     long start = System.currentTimeMillis();
@@ -1039,6 +1009,12 @@ public class DatabaseImpl implements Database {
     return new ArrayList<ResultAndGrade>(exidToRG.values());
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesInModeDependentOrder(long)
+   * @param userID
+   * @param firstNInOrder
+   * @return
+   */
   public List<Exercise> getExercisesFirstNInOrder(long userID, int firstNInOrder) {
     List<Exercise> rawExercises = getExercises();
     int numInOrder = Math.min(firstNInOrder, rawExercises.size());
@@ -1266,11 +1242,8 @@ public class DatabaseImpl implements Database {
 
   public AnswerDAO getAnswerDAO() { return answerDAO; }
 
-/*  public void addAnswer(int userID, String plan, String exerciseID, String stimulus, String answer, boolean correct) {
-    answerDAO.addAnswer(userID, plan, exerciseID, stimulus, answer, correct);
-  }*/
   private void addAnswer(int userID, Exercise e, int questionID, String answer, boolean correct) {
-    answerDAO.addAnswer(userID, e, questionID, answer, "", !e.promptInEnglish, false, Result.AUDIO_TYPE_UNSET, correct, 0);
+    answerDAO.addAnswer(userID, e, questionID, answer, "", !e.isPromptInEnglish(), false, Result.AUDIO_TYPE_UNSET, correct, 0);
   }
 
   /**
@@ -1403,38 +1376,9 @@ public class DatabaseImpl implements Database {
       logger.error("got " + e, e);
     }
   }
+  public void addDLIUser(DLIUser dliUser) throws Exception { dliUserDAO.addUser(dliUser);  }
+
   public String toString() { return "Database : "+ connection.getConnection(); }
-
-  public void addDLIUser(DLIUser dliUser) throws Exception {
-    dliUserDAO.addUser(dliUser);
-  }
-
-  // TODO add a DAO -- do something smarter!
-  int i = 0;
-  List<UserList> userLists = new ArrayList<UserList>();
-
-  public int addUserList(long userid, String name, String description, String dliClass) {
-    User userWhere = userDAO.getUserWhere(userid);
-    UserList e = new UserList(i++, userWhere, name, description, dliClass);
-    userLists.add(e);
-    return e.getUniqueID();
-  }
-
-  public List<Exercise> addItemToUserList(int userListID, UserExercise userExercise) {
-    for (UserList userList : userLists) {
-      if (userList.getUniqueID() == userListID) {
-        userList.addExercise(userExercise.toExercise());
-        return userList.getExercises();
-      }
-    }
-
-    // TODO : serialize user exercise in DAO
-    return new ArrayList<Exercise>();
-  }
-
-  public List<UserList> getUserListsForText(String search) {
-    return null;  //To change body of created methods use File | Settings | File Templates.
-  }
 
 /*  private static String getConfigDir(String language) {
     String installPath = ".";
