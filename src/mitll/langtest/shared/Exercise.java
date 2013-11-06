@@ -28,7 +28,7 @@ public class Exercise extends ExerciseShell  {
   private String plan;
   private String content;
   private EXERCISE_TYPE type = EXERCISE_TYPE.RECORD;
-  public boolean promptInEnglish = true;
+  private boolean promptInEnglish = true;
   private Map<String,List<QAPair>> langToQuestion = null;
   private String refAudio;
   private String slowAudioRef;
@@ -106,7 +106,7 @@ public class Exercise extends ExerciseShell  {
     this.plan = plan;
     this.setContent(content);
     this.setType(recordAudio ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE);
-    this.promptInEnglish = promptInEnglish;
+    this.setPromptInEnglish(promptInEnglish);
   }
 
   /**
@@ -269,13 +269,6 @@ public class Exercise extends ExerciseShell  {
     translitSentences.add(translitSentence);
   }
 
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#setPromptAndRecordOnExercises(long, java.util.List)
-   * @param b
-   */
-  public void setPromptInEnglish(boolean b) {
-    this.promptInEnglish = b;
-  }
 
   public void setRecordAnswer(boolean spoken) {
     setType(spoken ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE);
@@ -286,7 +279,7 @@ public class Exercise extends ExerciseShell  {
    * @return
    */
   public List<QAPair> getQuestions() {
-    List<QAPair> qaPairs = langToQuestion == null ? new ArrayList<QAPair>() : langToQuestion.get(promptInEnglish ? EN : FL);
+    List<QAPair> qaPairs = langToQuestion == null ? new ArrayList<QAPair>() : langToQuestion.get(isPromptInEnglish() ? EN : FL);
     return qaPairs == null ? new ArrayList<QAPair>() : qaPairs;
   }
 
@@ -305,34 +298,22 @@ public class Exercise extends ExerciseShell  {
     return en.size();
   }
 
-  public double getWeight() {
-    return weight;
-  }
+  public double getWeight() { return weight;  }
+  public void setWeight(double weight) { this.weight = weight;  }
 
-  public void setWeight(double weight) {
-    this.weight = weight;
-  }
+  public String getEnglishSentence() {  return englishSentence;  }
+  public void setEnglishSentence(String englishSentence) { this.englishSentence = englishSentence;  }
 
-  public String getEnglishSentence() {
-    return englishSentence;
-  }
+  public void setType(EXERCISE_TYPE type) { this.type = type;  }
 
-  public void setEnglishSentence(String englishSentence) {
-    this.englishSentence = englishSentence;
-  }
+  public void setContent(String content) { this.content = content;  }
 
-  public void setType(EXERCISE_TYPE type) {
-    this.type = type;
-  }
-
-  public void setSegmented(String segmented) {
-//    this.segmented = segmented;
-  }
-
-
-  public void setContent(String content) {
-    this.content = content;
-  }
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#setPromptAndRecordOnExercises(long, java.util.List)
+   * @param b
+   */
+  public void setPromptInEnglish(boolean b) { this.promptInEnglish = b;  }
+  public boolean isPromptInEnglish() { return promptInEnglish;  }
 
   public String toString() {
     String moreAboutQuestions = DEBUG ? " : " +  getQuestionToString() : "";
@@ -343,7 +324,7 @@ public class Exercise extends ExerciseShell  {
           " ref sentence '" + getRefSentence() +"' audio " + refAudio + questionInfo;
     }
     else {
-      return "Exercise " + getType() + " " +plan+"/"+ id + "/" + (promptInEnglish?"english":"foreign")+
+      return "Exercise " + getType() + " " +plan+"/"+ id + "/" + (isPromptInEnglish() ?"english":"foreign")+
           " : content bytes = " + content.length() + (DEBUG ? " content : " +content : "")+
           " ref '" + getRefSentence() + "' translit '" + getTranslitSentence()+ "'"+
         questionInfo;
