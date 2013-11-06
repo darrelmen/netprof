@@ -313,7 +313,7 @@ public class AudioFileHelper {
       }
       db.updateFlashcardState(user, exercise, audioAnswer.isCorrect());
       return audioAnswer;
-    } else if (serverProps.isAutoCRT() && !exercise1.promptInEnglish) { // TODO : hack -- don't do CRT on english
+    } else if (serverProps.isAutoCRT() && !exercise1.isPromptInEnglish()) { // TODO : hack -- don't do CRT on english
       autoCRT.getAutoCRTDecodeOutput(exercise, questionID, exercise1, file, audioAnswer);
     }
     return audioAnswer;
