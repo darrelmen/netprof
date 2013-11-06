@@ -72,6 +72,7 @@ public class ServerProperties {
   private static final String DEFAULT_EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String AUDIO_OFFSET = "audioOffset";
   private static final String EXERCISES_IN_ORDER = "exercisesInOrder";
+  private static final String FOREIGN_LANGUAGE_QUESTIONS_ONLY = "foreignLanguageQuestionsOnly";
 
   private Properties props = new Properties();
 
@@ -219,6 +220,10 @@ public class ServerProperties {
 
   public boolean sortExercises() {
     return getDefaultFalse(SORT_EXERCISES);
+  }
+
+  public boolean showForeignLanguageQuestionsOnly() {
+    return getDefaultFalse(FOREIGN_LANGUAGE_QUESTIONS_ONLY);
   }
 
   public String getExampleSentenceFile() {
