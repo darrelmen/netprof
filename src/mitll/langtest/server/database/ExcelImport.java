@@ -563,7 +563,7 @@ public class ExcelImport implements ExerciseDAO {
    * @param meaning
    * @param context
    * @param segmentedChinese
-   * @param refAudioIndex
+   * @paramx refAudioIndex
    * @return
    * @see #readFromSheet(org.apache.poi.ss.usermodel.Sheet)
    */
@@ -589,7 +589,7 @@ public class ExcelImport implements ExerciseDAO {
     }
     List<String> inOrderTranslations = new ArrayList<String>(translations);
     imported.setRefSentences(inOrderTranslations);
-    if (!segmentedChinese.isEmpty()) imported.setSegmented(segmentedChinese);
+    //if (!segmentedChinese.isEmpty()) imported.setSegmented(segmentedChinese);
 
     if (weightIndex != -1) {
       imported.setWeight(getNumericCell(next, weightIndex));
