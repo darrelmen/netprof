@@ -22,6 +22,8 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.HistoryExerciseList;
+import mitll.langtest.client.exercise.ItemSorter;
 import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.exercise.SelectionState;
@@ -42,7 +44,7 @@ import java.util.Map;
  * Time: 5:32 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FlexSectionExerciseList extends SectionExerciseList {
+public class FlexSectionExerciseList extends HistoryExerciseList {
   private static final int HEADING_FOR_LABEL = 4;
 
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
@@ -54,11 +56,27 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   private Panel labelColumn;
   protected Heading statusHeader = new Heading(4);
   private Collection<String> typeOrder;
+  private Panel sectionPanel;
+  //private boolean showListBox;
 
+  /**
+   * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
+   * @param secondRow
+   * @param currentExerciseVPanel
+   * @param service
+   * @param feedback
+   * @param showTurkToken
+   * @param showInOrder
+   * @param showListBox
+   * @param controller
+   * @param isCRTDataMode
+   */
   public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
-                                 boolean showTurkToken, boolean showInOrder, boolean showListBox, ExerciseController controller) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox, controller);
+                                 boolean showTurkToken, boolean showInOrder, boolean showListBox,
+                                 ExerciseController controller, boolean isCRTDataMode) {
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, isCRTDataMode);
+    //this.showListBox = showListBox; // TODO what is this???
 
     Panel child = sectionPanel = new FluidContainer();
     DOM.setStyleAttribute(sectionPanel.getElement(), "paddingLeft", "2px");
@@ -70,11 +88,13 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     buttonTypes.add(ButtonType.INFO);
     buttonTypes.add(ButtonType.WARNING);
   }
+/*
 
   @Override
   protected void addComponents() {
     addTableWithPager();
   }
+*/
 
   /**
    *
@@ -83,20 +103,29 @@ public class FlexSectionExerciseList extends SectionExerciseList {
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory
    */
   public void getExercises(final long userID, boolean getNext) {
-    //System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID);
+    System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID);
     this.userID = userID;
     sectionPanel.clear();
 
     Panel flexTable = getWidgetsForTypes();
 
-    if (!showListBoxes) {
+ /*   if (!showListBoxes) {
       SelectionState selectionState = getSelectionState(History.getToken());
       System.out.println("FlexSectionExerciseList : getExercises for " + userID + " selectionState " + selectionState);
 
       loadExercises(selectionState.getTypeToSection(), selectionState.getItem());
-    }
+    }*/
 
     sectionPanel.add(flexTable);
+  }
+
+  /**
+   * @see #loadExercises(java.util.Map, String)
+   * @see #pushNewSectionHistoryToken()
+   * @param userID
+   */
+  protected void noSectionsGetExercises(long userID) {
+    super.getExercises(userID, true);
   }
 
   /**
@@ -125,8 +154,8 @@ public class FlexSectionExerciseList extends SectionExerciseList {
       @Override
       public void onSuccess(final Collection<String> sortedTypes) {
         typeOrder = sortedTypes;
-        System.out.println("type order " + typeOrder);
-        if (showListBoxes) {
+        System.out.println("getTypeOrder type order " + typeOrder);
+      //  if (showListBoxes) {
           service.getSectionNodes(new AsyncCallback<List<SectionNode>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -135,12 +164,14 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
             @Override
             public void onSuccess(List<SectionNode> result) {
+              System.out.println("\tgetSectionNodes nodes " + result.size());
+
               addButtonRow(result, container, sortedTypes, !controller.isGoodwaveMode()); // TODO do something better here
             }
           });
-        } else {
+   /*     } else {
           addStudentTypeAndSection(container, sortedTypes);
-        }
+        }*/
       }
     });
   }
@@ -150,10 +181,10 @@ public class FlexSectionExerciseList extends SectionExerciseList {
     return typeOrder;
   }
 
-  private void addStudentTypeAndSection(FluidContainer container, Collection<String> sortedTypes) {
+/*  private void addStudentTypeAndSection(FluidContainer container, Collection<String> sortedTypes) {
     String token = unencodeToken(History.getToken());
     SelectionState selectionState = getSelectionState(token);
-    System.out.println("\n\nsorted types " + sortedTypes);
+    //System.out.println("\n\nsorted types " + sortedTypes);
     for (final String type : sortedTypes) {
       Collection<String> typeValue = selectionState.getTypeToSection().get(type);
       if (typeValue != null) {
@@ -164,7 +195,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         fluidRow.add(new Column(1, new Heading(4, typeValue.toString())));
       }
     }
-  }
+  }*/
 
   /**
    * @param rootNodes
@@ -201,7 +232,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
 
     // add columns for each section within first type...
 
-    Collection<String> sectionsInType = getSortedItems(getLabels(rootNodes));
+    Collection<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(rootNodes));
     Map<String, SectionNode> nameToNode = getNameToNode(rootNodes);
     numSections = sectionsInType.size();
 
@@ -350,9 +381,9 @@ public class FlexSectionExerciseList extends SectionExerciseList {
   protected void restoreListBoxState(SelectionState selectionState) {
     super.restoreListBoxState(selectionState);
 
-    if (showListBoxes) {
+    //if (showListBoxes) {
       showSelectionState(selectionState);
-    }
+    //}
   }
 
   /**
@@ -580,7 +611,7 @@ public class FlexSectionExerciseList extends SectionExerciseList {
                                                   List<String> remainingTypes, ButtonGroupSectionWidget sectionWidget) {
     Map<String, SectionNode> nameToNode = getNameToNode(rootNodes);
 
-    List<String> sortedItems = getSortedItems(getLabels(rootNodes));
+    List<String> sortedItems = new ItemSorter().getSortedItems(getLabels(rootNodes));
     ButtonType buttonType = typeToButton.get(typeForOriginal);
 
     List<String> objects = Collections.emptyList();
@@ -775,9 +806,5 @@ public class FlexSectionExerciseList extends SectionExerciseList {
         (children.isEmpty() ? "" :
           ", children type " + getTypeOfChildren() + " num " + getButtonChildren().size());
     }
-
-/*    public boolean hasChildren() {
-      return !children.isEmpty();
-    }*/
   }
 }
