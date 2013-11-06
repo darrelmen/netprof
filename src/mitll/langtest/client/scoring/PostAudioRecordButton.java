@@ -66,7 +66,7 @@ public abstract class PostAudioRecordButton extends RecordButton {
       index,
       controller.getUser(),
       reqid,
-      !exercise.promptInEnglish,
+      !exercise.isPromptInEnglish(),
       controller.getAudioType(),
       false, new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
