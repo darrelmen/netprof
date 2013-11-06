@@ -3,6 +3,7 @@ package mitll.langtest.client.bootstrap;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.exercise.HistoryExerciseList;
 import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.SectionWidget;
 
@@ -58,7 +59,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
   @Override
   public void addButton(Button b) {
     String name = b.getText().trim();
-    if (name.equals(SectionExerciseList.ANY)) {
+    if (name.equals(HistoryExerciseList.ANY)) {
       addClearButton(b);
     } else {
       this.buttons.add(b, name);
@@ -118,7 +119,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
     if (builder.length() > 0) {
       return builder.toString();
     } else {
-      return SectionExerciseList.ANY;
+      return HistoryExerciseList.ANY;
     }
   }
 
@@ -150,7 +151,7 @@ class ButtonGroupSectionWidget implements SectionWidget {
   }
 
   private boolean isClearSelection(Collection<String> sections) {
-    return sections.size() == 1 && sections.iterator().next().equals(SectionExerciseList.ANY);
+    return sections.size() == 1 && sections.iterator().next().equals(HistoryExerciseList.ANY);
   }
 
   /**

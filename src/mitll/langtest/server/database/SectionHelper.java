@@ -39,7 +39,6 @@ public class SectionHelper {
       types.addAll(typeToSectionToTypeToSections.keySet());
       if (types.isEmpty()) {
         types.addAll(typeToUnitToLesson.keySet());
-       // Collections.sort(types);
       }
       else {
         Collections.sort(types, new Comparator<String>() {
@@ -51,16 +50,16 @@ public class SectionHelper {
           }
         });
       }
-
-     // logger.debug("getTypeOrder : types " + types);
-
-
       return types;
     } else {
       return predefinedTypeOrder;
     }
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getSectionNodes()
+   * @return
+   */
   public List<SectionNode> getSectionNodes() {
     return getChildren(getTypeOrder());
   }
@@ -84,7 +83,10 @@ public class SectionHelper {
         }
       }
     } else {
-      for (Map.Entry<String, Lesson> rootSection : typeToUnitToLesson.get(root).entrySet()) {
+      Map<String, Lesson> stringLessonMap = typeToUnitToLesson.get(root);
+      if (stringLessonMap == null) logger.error("no entry for " + root + " in " +typeToUnitToLesson.keySet());
+      logger.debug("for " + root + " got " + stringLessonMap);
+      for (Map.Entry<String, Lesson> rootSection : stringLessonMap.entrySet()) {
         SectionNode parent = new SectionNode(root, rootSection.getKey());
         firstSet.add(parent);
       }
@@ -406,7 +408,7 @@ public class SectionHelper {
    * @see ExcelImport#recordUnitChapterWeek(int, int, int, org.apache.poi.ss.usermodel.Row, mitll.langtest.shared.Exercise, String, String, String)
    * @param pairs
    */
-  public void addAssociations(List<Pair> pairs) {
+  public void addAssociations(Collection<Pair> pairs) {
     for (Pair p : pairs) {
       List<Pair> others = new ArrayList<Pair>(pairs);
       others.remove(p);
@@ -442,6 +444,7 @@ public class SectionHelper {
   }
 
   public void report() {
+    logger.debug("type order " + getTypeOrder());
     for (String key : typeToUnitToLesson.keySet()) {
       Map<String, Lesson> categoryToLesson = typeToUnitToLesson.get(key);
       Set<String> sections = categoryToLesson.keySet();
