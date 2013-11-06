@@ -1,17 +1,9 @@
 package mitll.langtest.server.scoring;
 
-import corpus.package$;
-import mitll.langtest.server.ProcessRunner;
-import mitll.langtest.server.database.FileExerciseDAO;
-import org.apache.log4j.Logger;
-
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +12,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import mitll.langtest.server.ProcessRunner;
+import mitll.langtest.server.database.FileExerciseDAO;
+
+import org.apache.log4j.Logger;
 
 /**
  * Creates the LM for a small vocab decoder from foreground and background sentences.
@@ -247,7 +244,7 @@ public class SmallVocabDecoder {
    * @param slfFile that is in octal
    * @param convertedFile that will be in UTF-8
    */
-  private void doOctalConversion(String slfFile, String convertedFile) {
+/*  private void doOctalConversion(String slfFile, String convertedFile) {
     try {
       if (!new File(slfFile).exists()) {
         if (platform.equals("win32")) {
@@ -270,7 +267,7 @@ public class SmallVocabDecoder {
       e.printStackTrace();
     }
   }
-
+*/
   private void writeVocab(String vocabFile, List<String> vocab) {
     try {
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(vocabFile), FileExerciseDAO.ENCODING));
@@ -292,7 +289,7 @@ public class SmallVocabDecoder {
    * @param tmpDir
    * @return smallLM file
    */
-  private File writeLMToFile(List<String> lmSentences, String tmpDir) {
+/*  private File writeLMToFile(List<String> lmSentences, String tmpDir) {
     try {
       File outFile = new File(tmpDir, "smallLM_" +lmSentences.size()+ ".txt");
       logger.info("wrote lm with " + lmSentences.size() + " sentences to " +outFile.getAbsolutePath());
@@ -307,7 +304,7 @@ public class SmallVocabDecoder {
       e.printStackTrace();
     }
     return null;
-  }
+  }*/
 
   /**
    * ngram-count -text smallLM.txt -lm smallLmOut.srilm -write-vocab out.vocab -order 2 -cdiscount 0.0001 –unk
