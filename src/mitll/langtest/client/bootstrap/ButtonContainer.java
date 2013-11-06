@@ -44,7 +44,7 @@ public class ButtonContainer {
    Set<Button> toSelectSet = new HashSet<Button>();
    for (String toSelect : sections) {
      Collection<Button> buttonsAtName = nameToButton.get(toSelect);
-
+     if (buttonsAtName == null) System.err.println("getButtonsByName : huh? can't find " + toSelect + " in " + nameToButton.keySet());
      toSelectSet.addAll(buttonsAtName);
    }
    return toSelectSet;
