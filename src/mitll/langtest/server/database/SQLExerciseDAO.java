@@ -9,10 +9,13 @@ import org.apache.log4j.Logger;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,7 +24,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -38,16 +43,98 @@ public class SQLExerciseDAO implements ExerciseDAO {
   private List<Exercise> exercises;
   private Map<String,Exercise> idToExercise = new HashMap<String,Exercise>();
   private SectionHelper sectionHelper = new SectionHelper();
+  private Map<String,List<String>> levelToExercises = new HashMap<String,List<String>>();
+  private Map<String,String> exerciseToLevel = new HashMap<String,String>();
 
   /**
    * @see DatabaseImpl#makeExerciseDAO(boolean)
    * @param database
    * @param mediaDir
+   * @param configDir
    */
-  public SQLExerciseDAO(Database database, String mediaDir) {
+  public SQLExerciseDAO(Database database, String mediaDir, String configDir) {
     this.database = database;
     this.mediaDir = mediaDir;
     logger.debug("database " + database + " media dir " + mediaDir);
+  //  File ilrMapping = new File(configDir,"autocrt-docids.txt");
+    File ilrMapping = new File(configDir,"vlr-parle-pilot-items.txt");
+
+    if (ilrMapping.exists()) {
+      readILRMapping2(ilrMapping);
+    }
+    else logger.debug("can't find " + ilrMapping.getAbsolutePath());
+    getRawExercises();
+    int size = idToExercise.keySet().size();
+    int size1 = getMappedExercises().size();
+    if (size != size1) {
+      logger.error("huh? there are " + size + " ids from reading the database, but " + size1 + " from reading the mapping file" );
+      HashSet<String> strings = new HashSet<String>(idToExercise.keySet());
+      boolean b = strings.removeAll(getMappedExercises());
+      logger.error("unmapped are " + strings);
+    }
+  }
+
+  private void readILRMapping(File ilrMapping) {
+    try {
+      BufferedReader reader = getReader(ilrMapping.getAbsolutePath());
+      String line;
+      reader.readLine(); //read header
+      while ((line = reader.readLine()) != null) {
+        String[] split = line.split("\\|");
+     //   logger.debug("line " + line + " split size " + split.length);
+        if (split.length < 6) continue;
+        String ilr = split[5].trim();
+        String id = split[6].trim();
+        List<String> ids = levelToExercises.get(ilr);
+        if (ids == null) {
+          levelToExercises.put(ilr, ids = new ArrayList<String>());
+        }
+        ids.add(id);
+      }
+      logger.debug("map has size " + levelToExercises.size() + " keys " + levelToExercises.keySet());// + " : " + levelToExercises);
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+  }
+
+  private void readILRMapping2(File ilrMapping) {
+    try {
+      BufferedReader reader = getReader(ilrMapping.getAbsolutePath());
+      String line;
+ //     reader.readLine(); //read header
+      while ((line = reader.readLine()) != null) {
+        String[] split = line.split("\t");
+        //   logger.debug("line " + line + " split size " + split.length);
+        if (split.length < 2) continue;
+        String ilr = split[1].trim();
+        ilr = ilr.split("/")[0];
+        String id = split[0].trim();
+        List<String> ids = levelToExercises.get(ilr);
+        if (ids == null) {
+          levelToExercises.put(ilr, ids = new ArrayList<String>());
+        }
+        exerciseToLevel.put(id,ilr);
+        ids.add(id);
+      }
+      logger.debug("map has size " + levelToExercises.size() + " keys " + levelToExercises.keySet());// + " : " + levelToExercises);
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+  }
+
+/*  public List<String> getExercisesForLevel(String level) {
+    return levelToExercises.get(level);
+  }*/
+
+  public Set<String> getMappedExercises() {
+    Set<String> strings = new HashSet<String>();
+    for (List<String> ids : levelToExercises.values()) { strings.addAll(ids); }
+    return strings;
+  }
+
+  private BufferedReader getReader(String lessonPlanFile) throws FileNotFoundException, UnsupportedEncodingException {
+    FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
+    return new BufferedReader(new InputStreamReader(resourceAsStream,ENCODING));
   }
 
   @Override
@@ -89,13 +176,10 @@ public class SQLExerciseDAO implements ExerciseDAO {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
-      // int count = 0;
+      boolean useMapping = !exerciseToLevel.isEmpty();
       while (rs.next()) {
-      //  if (count++ > 10) break;
         String plan = rs.getString(1);
         String exid = rs.getString(2);
-        // String type = rs.getString(3);
-        // boolean onlyfa = rs.getBoolean(4);
         String content = getStringFromClob(rs.getClob(5));
 
         if (content.startsWith("{")) {
@@ -107,18 +191,27 @@ public class SQLExerciseDAO implements ExerciseDAO {
             logger.warn("no valid exid for " + e);
           } else {
             exercises.add(e);
-            recordUnitChapterWeek(e);
+
+            if (useMapping) {
+              sectionHelper.addAssociations(Collections.singleton(sectionHelper.addExerciseToLesson(e,"ILR Level",exerciseToLevel.get(exid))));
+            }
+            else {
+              recordUnitChapterWeek(e);
+            }
           }
         } else {
           logger.warn("expecting a { (marking json data), so skipping " + content);
         }
       }
+      if (useMapping) {
+        sectionHelper.setPredefinedTypeOrder(Arrays.asList("ILR Level"));
+      }
       rs.close();
       statement.close();
       database.closeConnection(connection);
 
-   //   logger.debug("reporting for " +database);
-   //   sectionHelper.report();
+      logger.debug("reporting for " +database);
+      sectionHelper.report();
 
     } catch (Exception e) {
       logger.warn("got " + e,e);
@@ -132,6 +225,11 @@ public class SQLExerciseDAO implements ExerciseDAO {
     return exercises;
   }
 
+  /**
+   * @see #getExercises(String)
+   * @param imported
+   * @return
+   */
  // private boolean debug = true;
   private boolean recordUnitChapterWeek(Exercise imported) {
     String[] split = imported.getID().split("-");
@@ -182,7 +280,6 @@ public class SQLExerciseDAO implements ExerciseDAO {
    * @return Exercise from the json
    */
   private Exercise getExercise(String plan, String exid, JSONObject obj) {
-
     //String tip = "Item #"+exid; // TODO : have more informative tooltip
     String tip = exid; // TODO : have more informative tooltip
     Exercise exercise = new Exercise(plan, exid, "", false, false, tip);
@@ -236,7 +333,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
    *
    * If there's an audio tag in the content, make that the ref audio for the exercise.
    * @see Exercise#setRefAudio(String)
-   * @see mitll.langtest.client.bootstrap.DataCollectionFlashcard#getAudioWidget
+   * @see mitll.langtest.client.bootstrap.AudioExerciseContent#getAudioWidget
    *
    * @param obj json to get content from
    * @return content with media paths set
@@ -412,9 +509,11 @@ public class SQLExerciseDAO implements ExerciseDAO {
       configDir +
         spreadsheet);*/
 
-    SQLExerciseDAO sqlExerciseDAO = new SQLExerciseDAO(new SmallDatabaseImpl("war/config/pilot/avpDemo"), "config" +
+    String configDir = "config" +
       File.separator +
-      "pilot");
-    dumpQuestionsAndAnswers(sqlExerciseDAO);
+      "pilot";
+    SQLExerciseDAO sqlExerciseDAO = new SQLExerciseDAO(new SmallDatabaseImpl("war/config/pilot/avpDemo"), configDir, "war"+File.separator+configDir);
+    sqlExerciseDAO.getSectionHelper().getSectionNodes();
+  //  dumpQuestionsAndAnswers(sqlExerciseDAO);
   }
 }
