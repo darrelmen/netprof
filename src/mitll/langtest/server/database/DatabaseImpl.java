@@ -469,7 +469,7 @@ public class DatabaseImpl implements Database {
 
   private FlashcardResponse getFlashcardResponse(long userID, boolean isTimedGame, List<Exercise> exercises,
                                                  boolean getNext) {
-    UserStateWrapper userStateWrapper = createOrGetUserState(userID, exercises, getNext);
+    UserStateWrapper userStateWrapper = createOrGetUserState(userID, exercises);
 
     if (isTimedGame || DO_SIMPLE_FLASHCARDS) {
       FlashcardResponse flashcardResponse;
@@ -496,13 +496,13 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  private UserStateWrapper createOrGetUserState(long userID, List<Exercise> exercises, boolean getNext) {
+  private UserStateWrapper createOrGetUserState(long userID, List<Exercise> exercises) {
     UserStateWrapper userStateWrapper;
 
     synchronized (userToState) {
       userStateWrapper = userToState.get(userID);
       logger.info("getFlashcardResponse : for user " + userID +
-        " exercises has " + exercises.size() + " user state " + userStateWrapper + " next = " +getNext);
+        " exercises has " + exercises.size() + " user state " + userStateWrapper);// + " next = " +getNext);
       if (userStateWrapper == null || (userStateWrapper.getNumExercises() != exercises.size())) {
         userStateWrapper = getUserStateWrapper(userID, exercises);
         userToState.put(userID, userStateWrapper);
@@ -527,7 +527,7 @@ public class DatabaseImpl implements Database {
     logger.warn("diff  " + userToCorrect.get(userID) + " inc " + diffI);
 
     ScoreInfo scoreInfo = new ScoreInfo(userID, -1, userToCorrect.get(userID), 0, timeTaken, selection);
-    userStateWrapper.setPcorrect(userStateWrapper.getCorrect());
+    //userStateWrapper.setPcorrect(userStateWrapper.getCorrect());
     userStateWrapper.setPincorrect(userStateWrapper.getIncorrect());
 
     userToCorrect.put(userID, 0);
@@ -542,16 +542,20 @@ public class DatabaseImpl implements Database {
    */
   private UserStateWrapper getUserStateWrapper(long userID, List<Exercise> exercises) {
     UserStateWrapper userStateWrapper;
-    String[] strings = new String[exercises.size()];
-    int i = 0;
-    for (Exercise e : exercises) {
-      strings[i++] = e.getID();
+    String[] strings = new String[0];
+    if (exercises != null) {
+      strings = new String[exercises.size()];
+      int i = 0;
+      for (Exercise e : exercises) {
+        strings[i++] = e.getID();
+      }
     }
+
     UserState userState = new UserState(strings);
 /*    if (userState.finished()) {
       logger.info("-------------- user " + userID + " is finished ---------------- ");
     }*/
-    logger.debug("making user state for " + userID + " with " + exercises.size() + " exercises");
+    logger.debug("making user state for " + userID + " with " + strings.length + " exercises");
     userStateWrapper = new UserStateWrapper(userState, userID, exercises);
     return userStateWrapper;
   }
@@ -1147,14 +1151,13 @@ public class DatabaseImpl implements Database {
    * Pulls the list of results out of the database.
    *
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(int, int)
+   * @see mitll.langtest.server.audio.SplitAudio#getIDToResultsMap(DatabaseImpl, java.util.Set)
    */
   public List<Result> getResults() { return resultDAO.getResults(); }
   private List<ResultDAO.SimpleResult> getSimpleResults() { return resultDAO.getSimpleResults(); }
 
   public List<Result> getResultsWithGrades() {
     List<Result> results = resultDAO.getResults();
-   // for (Result r:results) logger.debug("getResultsWithGrades got " + r);
     Map<Integer,Result> idToResult = new HashMap<Integer, Result>();
     for (Result r : results) idToResult.put(r.uniqueID, r);
     for (Grade g : gradeDAO.getGrades()) {
@@ -1265,8 +1268,19 @@ public class DatabaseImpl implements Database {
                              String audioFile,
                              boolean valid, boolean flq, boolean spoken,
                              String audioType, int durationInMillis, boolean correct, float score) {
+    List<Exercise> objects = Collections.emptyList();
+    UserStateWrapper userStateWrapper = createOrGetUserState(userID, objects);
+    if (valid) userStateWrapper.addCompleted(exerciseID);
+
     return answerDAO.addAnswer(this, userID, plan, exerciseID, questionID, "", audioFile, valid, flq, spoken, audioType,
       durationInMillis, correct, score, "");
+  }
+
+  public Set<String> getCompletedExercises(int userID) {
+    List<Exercise> objects = Collections.emptyList();
+
+    UserStateWrapper userStateWrapper = createOrGetUserState(userID, objects);
+    return userStateWrapper.getCompleted();
   }
 
   /**
