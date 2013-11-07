@@ -74,7 +74,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
     }
   }
 
-  private void readILRMapping(File ilrMapping) {
+/*  private void readILRMapping(File ilrMapping) {
     try {
       BufferedReader reader = getReader(ilrMapping.getAbsolutePath());
       String line;
@@ -95,16 +95,14 @@ public class SQLExerciseDAO implements ExerciseDAO {
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
-  }
+  }*/
 
   private void readILRMapping2(File ilrMapping) {
     try {
       BufferedReader reader = getReader(ilrMapping.getAbsolutePath());
       String line;
- //     reader.readLine(); //read header
       while ((line = reader.readLine()) != null) {
         String[] split = line.split("\t");
-        //   logger.debug("line " + line + " split size " + split.length);
         if (split.length < 2) continue;
         String ilr = split[1].trim();
         ilr = ilr.split("/")[0];
@@ -172,12 +170,14 @@ public class SQLExerciseDAO implements ExerciseDAO {
 
   private List<Exercise> getExercises(String sql) {
     List<Exercise> exercises = new ArrayList<Exercise>();
+    //int count = 0;
     try {
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       boolean useMapping = !exerciseToLevel.isEmpty();
       while (rs.next()) {
+      //  if (count++ > 5) break;
         String plan = rs.getString(1);
         String exid = rs.getString(2);
         String content = getStringFromClob(rs.getClob(5));
@@ -210,11 +210,11 @@ public class SQLExerciseDAO implements ExerciseDAO {
       statement.close();
       database.closeConnection(connection);
 
-      logger.debug("reporting for " +database);
-      sectionHelper.report();
+      //logger.debug("reporting for " +database);
+      //sectionHelper.report();
 
     } catch (Exception e) {
-      logger.warn("got " + e,e);
+      logger.error("got " + e,e);
     }
 
     if (exercises.isEmpty()) {
@@ -230,7 +230,6 @@ public class SQLExerciseDAO implements ExerciseDAO {
    * @param imported
    * @return
    */
- // private boolean debug = true;
   private boolean recordUnitChapterWeek(Exercise imported) {
     String[] split = imported.getID().split("-");
     String unit = split[0];//getCell(next, unitIndex);
@@ -312,8 +311,6 @@ public class SQLExerciseDAO implements ExerciseDAO {
       content = content.replaceAll("br", "h3");
       if (content.contains(":")) {
         content = content.replaceAll(":", " ");
-      } else {
-//        logger.debug("no colon in " + content);
       }
       content += "</h3>";
     }
@@ -464,7 +461,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
       writer.close();
       writer2.close();
     } catch (Exception e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      e.printStackTrace();
     }
   }
 
