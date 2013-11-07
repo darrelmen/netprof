@@ -52,6 +52,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
@@ -206,12 +207,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
     logger.debug("getExercisesForSelectionState req " + reqID+ " for " + typeToSection + " and " +userID);
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-    if (serverProps.trackUsers()) {
-      List<Exercise> copy = new ArrayList<Exercise>(exercisesForSection);
-      Collections.shuffle(copy,rand);    // randomize order
-      return new ExerciseListWrapper(reqID, getExerciseShells(copy));
-    }
-    else if (serverProps.sortExercises() || serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
+    if (serverProps.sortExercises() || serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
      // logger.debug("\tsorting");
 
       List<Exercise> copy = getSortedExercises(exercisesForSection);
@@ -417,7 +413,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     makeAutoCRT();
     List<Exercise> exercises = getExercisesInModeDependentOrder(userID);
     if (serverProps.isCRTDataCollect()) {
-      setPromptAndRecordOnExercises(userID, exercises);
+      setPromptAndRecordOnExercises(exercises);
     }
     return exercises;
   }
@@ -425,7 +421,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private List<Exercise> getExercisesInModeDependentOrder(long userID) {
     List<Exercise> exercises;
     if (serverProps.dataCollectMode) {
-       //logger.debug("in data collect mode");
+      logger.debug("in data collect mode");
       if (serverProps.biasTowardsUnanswered) {
         //logger.debug("in biasTowardsUnanswered mode : user " +userID);
 
@@ -435,7 +431,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           exercises = db.getExercisesBiasTowardsUnanswered(userID,serverProps.shouldUseWeights());
         }
       } else {
-        exercises = db.getExercisesFirstNInOrder(userID, serverProps.firstNInOrder);
+        //exercises = db.getExercisesFirstNInOrder(userID, serverProps.firstNInOrder);
+        exercises = db.getUnmodExercises();
+        //List<Exercise> rawExercises = getExercises();
+
+        if (serverProps.isCRTDataCollect()) {
+          setPromptAndRecordOnExercises(exercises);
+        }
       }
     } else {
       //if (!serverProps.isArabicTextDataCollect()) logger.debug("*not* in data collect mode");
@@ -474,12 +476,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * Uses the user id as a random seed so we get repeatable behavior per user.
    *
    * @see #getExercises(long)
-   * @param userID for this user
    * @param exercises to alter
    */
-  private void setPromptAndRecordOnExercises(long userID, List<Exercise> exercises) {
-    Random rand = new Random(userID);
-    logger.debug("setPromptAndRecordOnExercises for " + userID + " collect audio " + serverProps.isCollectOnlyAudio());
+  private void setPromptAndRecordOnExercises(List<Exercise> exercises) {
+    logger.debug("setPromptAndRecordOnExercises for  collect audio " + serverProps.isCollectOnlyAudio());
     for (Exercise e : exercises) {
       if (serverProps.isCollectOnlyAudio()) {
         e.setRecordAnswer(true);
@@ -918,8 +918,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
                                     int user, int reqid, boolean flq, String audioType, boolean doFlashcard) {
     makeAutoCRT();
-    return this.audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, questionID, user, reqid, flq, audioType, doFlashcard, this);
+    return this.audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, questionID, user, reqid, flq,
+      audioType, doFlashcard, this);
   }
+
+  @Override
+  public Set<String> getCompletedExercises(int user) {  return db.getCompletedExercises(user);  }
 
   void makeAutoCRT() {
     audioFileHelper.makeAutoCRT(relativeConfigDir, this, studentAnswersDB, this);
