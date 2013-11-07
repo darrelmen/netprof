@@ -5,8 +5,10 @@ import mitll.langtest.shared.Exercise;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 /**
 * Created with IntelliJ IDEA.
@@ -23,6 +25,7 @@ public class UserStateWrapper {
 
   private int counter = 0;
   private final List<Exercise> exercises;
+  private Set<String> completed = new HashSet<String>();
   private final Random random;
   private boolean initial = true;
   /**
@@ -34,8 +37,11 @@ public class UserStateWrapper {
   public UserStateWrapper(UserState state, long userID, List<Exercise> exercises) {
     this.state = state;
     this.random = new Random(userID);
-    this.exercises = new ArrayList<Exercise>(exercises);
-    Collections.shuffle(exercises, random);
+    if (exercises != null) {
+      this.exercises = new ArrayList<Exercise>(exercises);
+      Collections.shuffle(exercises, random);
+    }
+    else this.exercises = Collections.emptyList();
   }
 
   public int getCorrect() {
@@ -49,14 +55,14 @@ public class UserStateWrapper {
   public int getIncorrect() {
     return incorrect;
   }
+  public void addCompleted(String exid) { completed.add(exid); }
+  public Set<String> getCompleted() { return completed; }
 
   public void setIncorrect(int incorrect) {
     this.incorrect = incorrect;
   }
 
-  public int getNumExercises() {
-    return exercises.size();
-  }
+  public int getNumExercises() { return exercises.size();  }
 
   public boolean isComplete() { return counter == exercises.size(); }
 
@@ -83,11 +89,7 @@ public class UserStateWrapper {
   public Exercise getNextExercise() {
     if (initial) return getFirst();
     else {
-    //  System.out.println("Getting next " + counter);
-      Exercise exercise = exercises.get(++counter % exercises.size());
-  //    System.out.println("Getting next now " + counter);
-
-      return exercise; // defensive
+      return exercises.get(++counter % exercises.size());
     }
   }
 
@@ -99,40 +101,15 @@ public class UserStateWrapper {
     if (counter == 0) {
       counter = exercises.size();
     }
- //   System.out.println("Getting prev " + counter);
-
-    Exercise exercise = exercises.get(--counter % exercises.size());
- //   System.out.println("Getting prev now " + counter);
-
-    return exercise; // defensive
+    return exercises.get(--counter % exercises.size());
   }
 
-  public boolean onFirst() {
-    boolean b = counter == 0;
-    //System.out.println("on first " + counter + " : " + b);
+  public boolean onFirst() {  return counter == 0;  }
+  public boolean onLast() {   return counter % exercises.size() == 0;  }
 
-    return b;
-  }
+  public int getPincorrect() {  return pincorrect;  }
 
-  public boolean onLast() {
-    return counter % exercises.size() == 0;
-  }
-
-/*  public int getPcorrect() {
-    return pcorrect;
-  }*/
-
-  public void setPcorrect(int pcorrect) {
-  //  this.pcorrect = pcorrect;
-  }
-
-  public int getPincorrect() {
-    return pincorrect;
-  }
-
-  public void setPincorrect(int pincorrect) {
-    this.pincorrect = pincorrect;
-  }
+  public void setPincorrect(int pincorrect) {  this.pincorrect = pincorrect;  }
 
   public String toString() {
     return "UserState : correct " + correct + " incorrect " + getIncorrect() +
