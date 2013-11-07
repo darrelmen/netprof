@@ -22,6 +22,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -147,4 +148,6 @@ public interface LangTestDatabase extends RemoteService {
   Leaderboard postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState);
 
   void addDLIUser(DLIUser dliUser);
+
+  Set<String> getCompletedExercises(int user);
 }
