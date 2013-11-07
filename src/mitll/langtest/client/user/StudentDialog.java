@@ -260,7 +260,7 @@ public class StudentDialog extends UserDialog {
   /**
    * @param monthsOfExperience
    * @param userID
-   * @see #displayLoginBox()
+   * @see #sendNameToServer(mitll.langtest.client.user.StudentDialog.RegistrationInfo, String, String)
    */
   private void addUser(int monthsOfExperience, final int weeksOfExperience,
                        final RegistrationInfo registrationInfo,
@@ -268,11 +268,12 @@ public class StudentDialog extends UserDialog {
     int age = getAge(registrationInfo.ageEntryGroup.box);
     String gender = registrationInfo.genderGroup.getValue();
 
-    AsyncCallback<Long> async = getAddDLIUserCallback(weeksOfExperience, registrationInfo, audioType);
+    AsyncCallback<Long> async = getAddDLIUserCallback(weeksOfExperience, registrationInfo, audioType, userID);
     addUser(age, gender, monthsOfExperience, registrationInfo.dialectGroup.getText(), "", userID, async);
   }
 
-  private AsyncCallback<Long> getAddDLIUserCallback(final int weeksOfExperience, final RegistrationInfo registrationInfo, final String audioType) {
+  private AsyncCallback<Long> getAddDLIUserCallback(final int weeksOfExperience, final RegistrationInfo registrationInfo,
+                                                    final String audioType, final String userChosenID) {
     return new AsyncCallback<Long>() {
       public void onFailure(Throwable caught) {
         Window.alert("addUser : Couldn't contact server.");
@@ -280,7 +281,7 @@ public class StudentDialog extends UserDialog {
 
       public void onSuccess(Long result) {
         System.out.println("addUser : server result is " + result);
-        userManager.storeUser(result, audioType, "" + result, PropertyHandler.LOGIN_TYPE.STUDENT);
+        userManager.storeUser(result, audioType, userChosenID, PropertyHandler.LOGIN_TYPE.STUDENT);
 
         DLIUser dliUser = new DLIUser(result, weeksOfExperience,
           new DLIUser.ILRLevel(registrationInfo.reading.getValue(), registrationInfo.rilr.getValue()),
@@ -309,8 +310,7 @@ public class StudentDialog extends UserDialog {
    * @param monthsOfExperience
    * @see UserManager#addAnonymousUser()
    */
-  public void addUser(int age, String gender, int monthsOfExperience,
-                      String audioType) {
+  public void addUser(int age, String gender, int monthsOfExperience, String audioType) {
     addUser(age, gender, monthsOfExperience, "", PropertyHandler.LOGIN_TYPE.ANONYMOUS, audioType);
   }
 
@@ -320,7 +320,7 @@ public class StudentDialog extends UserDialog {
    * @param monthsOfExperience
    * @param dialect
    * @param loginType
-   * @see #addUser
+   * @see #addUser(int, String, int, String)
    */
   private void addUser(int age, String gender, int monthsOfExperience, String dialect,
                        final PropertyHandler.LOGIN_TYPE loginType,
