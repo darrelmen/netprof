@@ -25,6 +25,8 @@ public interface ExerciseController {
   boolean loadPreviousExercise(Exercise current);
 
   boolean onFirst(Exercise current);
+  ListInterface getExerciseList();
+  void showProgress();
 
   int getUser();
   void pingAliveUser();
@@ -67,7 +69,6 @@ public interface ExerciseController {
 
   int getFlashcardPreviewFrameHeight();
 
-//  void setSelectionState(Map<String,Collection<String>> selectionState);
   PropertyHandler getProps();
 
   String logException(Throwable throwable);
