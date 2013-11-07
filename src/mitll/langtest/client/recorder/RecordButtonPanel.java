@@ -131,7 +131,8 @@ public class RecordButtonPanel {
     recordImage2.setVisible(false);
   }
 
-  protected void layoutRecordButton2() {
+  /** Half-hearted attempt to not use the deprecated horizontal panel **/
+/*  protected void layoutRecordButton2() {
   //  SimplePanel recordButtonContainer = new SimplePanel();
   //  FlowPanel recordButtonContainer = new FlowPanel();
 
@@ -139,13 +140,13 @@ public class RecordButtonPanel {
 //    recordButtonContainer.add(recordButton);
   //  recordButton.addStyleName("leftFiftyPercentMargin");
 
-/*    HorizontalPanel hp = new HorizontalPanel() {
+*//*    HorizontalPanel hp = new HorizontalPanel() {
       @Override
       protected void onUnload() {
         RecordButtonPanel.this.onUnload();
       }
     };
-    hp.add(recordButtonContainer);*/
+    hp.add(recordButtonContainer);*//*
  //   this.panel = recordButtonContainer;
 
   //  panel.add(recordImage1);
@@ -159,7 +160,7 @@ public class RecordButtonPanel {
     row.add(recordImage1);
     row.add(recordImage2);
     panel = row;
-  }
+  }*/
 
   public void onUnload() {
     rb.onUnload();
@@ -186,12 +187,8 @@ public class RecordButtonPanel {
    * @see #RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int)
    */
   public void stopRecording() {
-    System.out.println("stop recording... ");
     controller.stopRecording();
-    final Panel outer = getPanel();
-
-    int tries = 1;
-    postAudioFile(outer, tries);
+    postAudioFile(getPanel(), 1);
   }
 
   private void postAudioFile(final Panel outer, final int tries) {
