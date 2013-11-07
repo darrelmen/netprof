@@ -40,6 +40,7 @@ import mitll.langtest.client.bootstrap.TextCRTFlashcard;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.ListInterface;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
@@ -232,10 +233,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
 
     boolean usualLayout = !showOnlyOneExercise();
-    Container widgets = new FluidContainer();
+    Container verticalContainer = new FluidContainer();
 
     if (usualLayout) {
-      RootPanel.get().add(widgets);
+      RootPanel.get().add(verticalContainer);
     }
     DOM.setStyleAttribute(RootPanel.get().getElement(), "paddingTop", "2px");
 
@@ -243,24 +244,24 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // header/title line
     // first row ---------------
-    widgets.add(headerRow = makeHeaderRow());
+    verticalContainer.add(headerRow = makeHeaderRow());
 
     // second row ---------------
     secondRow = new FluidRow();
-    widgets.add(secondRow);
+    verticalContainer.add(secondRow);
 
     // third row ---------------
 
     Panel thirdRow = new HorizontalPanel();
     Panel leftColumn = new SimplePanel();
     thirdRow.add(leftColumn);
-    widgets.add(thirdRow);
+    verticalContainer.add(thirdRow);
 
     if ((isCRTDataCollectMode() || props.isDataCollectMode()) && !props.isFlashcardTeacherView()) {
-      addProgressBar(widgets);
+      addProgressBar(verticalContainer);
     }
     else {
-      widgets.add(status);
+      verticalContainer.add(status);
     }
 
     // set up center panel, initially with flash record panel
@@ -1010,10 +1011,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public boolean loadNextExercise(ExerciseShell current) {
     boolean b = exerciseList.loadNextExercise(current);
+    showProgress();
+    return b;
+  }
+
+  public void showProgress() {
     if (progressBar != null) {
       progressBar.showAdvance(exerciseList);
     }
-    return b;
   }
 
   public boolean loadNextExercise(String id) {
@@ -1028,5 +1033,5 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return exerciseList.onFirst(current);
   }
 
-//  public void setSelectionState(Map<String,Collection<String>> selectionState) { exerciseList.setSelectionState(selectionState);}
+  public ListInterface getExerciseList() { return exerciseList; }
 }
