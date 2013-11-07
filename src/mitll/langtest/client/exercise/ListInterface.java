@@ -10,6 +10,7 @@ import mitll.langtest.shared.ExerciseShell;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -83,6 +84,8 @@ public interface ListInterface extends RequiresResize {
   int getPercentComplete();
 
   int getComplete();
+
+  void setCompleted(Set<String> completed);
 
   void setSelectionState(Map<String,Collection<String>> selectionState);
 
