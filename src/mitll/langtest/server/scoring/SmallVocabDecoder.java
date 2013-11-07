@@ -31,10 +31,10 @@ public class SmallVocabDecoder {
 
   public static final int VOCAB_SIZE_LIMIT = 200;
   private static final String FINAL_BLEND_VOCAB = "finalBlend.vocab";
-  private static final String SMALL_LMOUT_SRILM = "smallLMOut.srilm";
+/*  private static final String SMALL_LMOUT_SRILM = "smallLMOut.srilm";
   private static final String LARGE_VOCAB_TXT = "largeVocab.txt";
   private static final String BACKGROUND_LMOUT_SRILM = "backgroundLMOut.srilm";
-  private static final String COMBINED_SRILM = "combined.srilm";
+  private static final String COMBINED_SRILM = "combined.srilm";*/
 
   /**
    * How much weight to give the foreground vs the background lm.
@@ -53,7 +53,7 @@ public class SmallVocabDecoder {
   /**
    * Platform -- windows, mac, linux, etc.
    */
-  private final String platform = Utils.package$.MODULE$.platform();
+ // private final String platform = Utils.package$.MODULE$.platform();
   private double foregroundBackgroundBlend;
 
   /**
@@ -268,7 +268,7 @@ public class SmallVocabDecoder {
     }
   }
 */
-  private void writeVocab(String vocabFile, List<String> vocab) {
+/*  private void writeVocab(String vocabFile, List<String> vocab) {
     try {
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(vocabFile), FileExerciseDAO.ENCODING));
 
@@ -279,7 +279,7 @@ public class SmallVocabDecoder {
     } catch (IOException e) {
       e.printStackTrace();
     }
-  }
+  }*/
 
   /**
    * Write LM sentences out, without punctuation.
