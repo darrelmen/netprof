@@ -51,9 +51,11 @@ public class GradedExerciseList extends PagingExerciseList {
    * @see SetExercisesCallback#onSuccess
    */
   @Override
-  protected void loadFirstExercise() {
+  protected ExerciseShell loadFirstExercise() {
     getNextUngraded(true);
-    selectFirst();
+    ExerciseShell toSelect = currentExercises.get(0);
+    selectFirst(toSelect);
+    return toSelect;
   }
   /**
    * @see #loadExercise(mitll.langtest.shared.ExerciseShell)
