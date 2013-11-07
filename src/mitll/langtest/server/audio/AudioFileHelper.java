@@ -77,7 +77,6 @@ public class AudioFileHelper {
     }
 
     String url = pathHelper.ensureForwardSlashes(wavPath);
-    // logger.info("writeAudioFile converted " + wavPathWithForwardSlashSeparators + " to url " + url);
 
     AudioAnswer answer = (isValid) ?
       getAudioAnswer(exercise, questionID, user, reqid, file, validity, url, doFlashcard, langTestDatabase) :
