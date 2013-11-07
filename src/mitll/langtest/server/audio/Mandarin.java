@@ -103,9 +103,9 @@ public class Mandarin extends SplitAudio {
 
       String line;
 
-      int error = 0;
+   /*   int error = 0;
       int error2 = 0;
-      int c = 0;
+      int c = 0;*/
       while ((line = reader.readLine()) != null) {
         utf8.write(line);
         utf8.write("\n");
