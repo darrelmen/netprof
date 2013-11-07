@@ -1,16 +1,11 @@
 package mitll.langtest.client.exercise;
 
 import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.CompositeCell;
-import com.google.gwt.cell.client.IconCellDecorator;
 import com.google.gwt.cell.client.SafeHtmlCell;
-import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -20,7 +15,6 @@ import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
@@ -48,6 +42,7 @@ import java.util.Set;
 public class PagingExerciseList extends ExerciseList implements RequiresResize {
   private static final int MAX_LENGTH_ID = 27;
   protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
+  private static final int KLUDGE_AMT = 120;
   private ListDataProvider<ExerciseShell> dataProvider;
   private static final boolean DEBUG = false;
   private static final int ID_LINE_WRAP_LENGTH = 20;
@@ -57,6 +52,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   private static final float DEFAULT_PAGE_SIZE = 15f;
   private CellTable<ExerciseShell> table;
   protected ExerciseController controller;
+  private Set<String> completed = new HashSet<String>();
 
   public interface TableResources extends CellTable.Resources {
     /**
@@ -79,8 +75,6 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     @Source({CellTable.Style.DEFAULT_CSS, "RTLExerciseCellTableStyleSheet.css"})
     TableStyle cellTableStyle();
   }
-  //Image myImage;
-  ImageResource resource;
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController)
    * @param currentExerciseVPanel
@@ -92,17 +86,31 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                             boolean showTurkToken, boolean showInOrder, ExerciseController controller, boolean isCRTDataMode) {
-    super(currentExerciseVPanel, service, feedback, null, showTurkToken, showInOrder, isCRTDataMode);
-/*    MyResources myResources = GWT.create(MyResources.class);
-    resource = myResources.myImage();*/
-
-    System.out.println("resource " + resource);
-
+    super(currentExerciseVPanel, service, feedback, null, controller, showTurkToken, showInOrder, isCRTDataMode);
     this.controller = controller;
     addComponents();
+  }
 
+  public void setCompleted(Set<String> completed) {
+    this.completed = completed;
+    table.redraw();
+  }
 
-   //  myImage = new Image(resource);
+  @Override
+  public int getPercentComplete() {
+    if (isCRTDataMode) {
+      return (int) (100f * ((float) completed.size() / (float) currentExercises.size()));
+    } else {
+      return super.getPercentComplete();
+    }
+  }
+
+  public int getComplete() {
+    if (isCRTDataMode) {
+      return completed.size();
+    } else {
+      return super.getComplete();
+    }
   }
 
   protected void addComponents() {
@@ -158,14 +166,14 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   protected void addColumnsToTable(boolean consumeClicks) {
-    if (!isCRTDataMode) {
+    if (isCRTDataMode) {
+      Column<ExerciseShell, SafeHtml> id2 = getExerciseIdColumn2(consumeClicks);
+      table.addColumn(id2);
+    } else {
       Column<ExerciseShell, SafeHtml> id2 = getExerciseIdColumn(consumeClicks);
       id2.setCellStyleNames("alignLeft");
       table.addColumn(id2);
-    } /*else {
-      Column<ExerciseShell, SafeHtml> id2 = getExerciseIdColumn2(consumeClicks);
-      table.addColumn(id2);
-    }*/
+    }
     // this would be better, but want to consume clicks
   /*  TextColumn<ExerciseShell> id2 = new TextColumn<ExerciseShell>() {
       @Override
@@ -208,26 +216,9 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
       }
     };
   }
-/*
-
-  interface MyResources extends ClientBundle {
-    @Source(".icon-check")
-    @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both)
-    com.google.gwt.resources.client.ImageResource myImage();
-
-    @ClientBundle.Source("com/github/gwtbootstrap/client/ui/resources/css/font-awesome.css")
-    MyCssResource myCss();
-  }
-
-  interface MyCssResource extends CssResource {
-    String myBackground();
-  }
-*/
-
-
 
   protected Column<ExerciseShell, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
-    return new Column<ExerciseShell, SafeHtml>(new IconCellDecorator<SafeHtml>(resource,new MySafeHtmlCell(consumeClicks))) {
+    return new Column<ExerciseShell, SafeHtml>(new MySafeHtmlCell(consumeClicks)) {
 
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, ExerciseShell object, NativeEvent event) {
@@ -248,7 +239,9 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
       public SafeHtml getValue(ExerciseShell object) {
         String columnText = object.getTooltip();
         if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
-        return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
+        boolean complete = completed.contains(object.getID());
+      //  System.out.println("check -- " + complete + " for " + object.getID() + " in " + completed.size() + " : " + completed);
+        return new SafeHtmlBuilder().appendHtmlConstant(columnText +(complete?"&nbsp;<i class='icon-check'></i>":"")).toSafeHtml();
       }
     };
   }
@@ -264,16 +257,34 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   /**
-   * @see SectionExerciseList.MySetExercisesCallback#onSuccess
+   * @see mitll.langtest.client.exercise.HistoryExerciseList.MySetExercisesCallback#onSuccess
    */
   @Override
-  protected void loadFirstExercise() {
-    super.loadFirstExercise();
-    selectFirst();
+  protected ExerciseShell loadFirstExercise() {
+    ExerciseShell exerciseShell = super.loadFirstExercise();
+    selectFirst(exerciseShell);
+    return exerciseShell;
   }
 
-  protected void selectFirst() {
-    table.getSelectionModel().setSelected(currentExercises.get(0), true);
+  @Override
+  protected ExerciseShell findFirstExercise() {
+    if (isCRTDataMode) {
+      return getFirstNotCompleted();
+    }
+    else {
+      return super.findFirstExercise();
+    }
+  }
+
+  private ExerciseShell getFirstNotCompleted() {
+    for (ExerciseShell es : currentExercises) {
+      if (!completed.contains(es.getID())) return es;
+    }
+    return super.findFirstExercise();
+  }
+
+  protected void selectFirst(ExerciseShell toSelect) {
+    table.getSelectionModel().setSelected(toSelect, true);
     table.redraw();
     onResize();
   }
@@ -315,8 +326,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   protected int getNumTableRowsGivenScreenHeight() {
     int header = getTableHeaderHeight();
-    int leftOver = Window.getClientHeight() - header - 100;
-
+    int leftOver = Window.getClientHeight() - header - KLUDGE_AMT;
     //System.out.println("Got on resize " + Window.getClientHeight() + " " + header + " result = " + leftOver);
 
     float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
@@ -363,7 +373,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     int pageNum = i / table.getPageSize();
     int newIndex = pageNum *table.getPageSize();
     if (i < table.getPageStart()) {
-      int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
+      int newStart = Math.max(0, newIndex);
       if (DEBUG) System.out.println("new start of prev page " +newStart + " vs current " + table.getVisibleRange());
       table.setVisibleRange(newStart, table.getPageSize());
     } else {
