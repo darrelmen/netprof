@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -103,19 +104,31 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory
    */
   public void getExercises(final long userID, boolean getNext) {
-    System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID);
+    System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID + " crt mode " +isCRTDataMode);
     this.userID = userID;
+
+    if (isCRTDataMode) {
+      service.getCompletedExercises((int)userID, new AsyncCallback<Set<String>>() {
+        @Override
+        public void onFailure(Throwable caught) {}
+
+        @Override
+        public void onSuccess(Set<String> result) {
+          System.out.println("\tFlexSectionExerciseList : getExercises : got " + result.size() + " complete");
+
+          controller.getExerciseList().setCompleted(result);
+          addWidgets();
+        }
+      });
+    }
+    else {
+      addWidgets();
+    }
+  }
+
+  private void addWidgets() {
     sectionPanel.clear();
-
     Panel flexTable = getWidgetsForTypes();
-
- /*   if (!showListBoxes) {
-      SelectionState selectionState = getSelectionState(History.getToken());
-      System.out.println("FlexSectionExerciseList : getExercises for " + userID + " selectionState " + selectionState);
-
-      loadExercises(selectionState.getTypeToSection(), selectionState.getItem());
-    }*/
-
     sectionPanel.add(flexTable);
   }
 
