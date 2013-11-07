@@ -2,6 +2,7 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
@@ -15,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -35,8 +37,10 @@ public class HistoryExerciseList extends PagingExerciseList {
   private final boolean includeItemInBookmark = false;
   protected long userID;
 
-  public HistoryExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback, boolean showTurkToken, boolean showInOrder, ExerciseController controller, boolean isCRTDataMode) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, isCRTDataMode);    //To change body of overridden methods use File | Settings | File Templates.
+  public HistoryExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
+                             boolean showTurkToken, boolean showInOrder, ExerciseController controller,
+                             boolean isCRTDataMode) {
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, isCRTDataMode);
   }
 
   /**
@@ -310,9 +314,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   }
 
   protected void clearEnabled(String type) {}
-
   protected void enableAllButtonsFor(String type) {}
-
   protected Collection<String> getTypeOrder(Map<String, Collection<String>> selectionState2) {
     return selectionState2.keySet();
   }
@@ -364,8 +366,28 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @param item null is OK
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
-  protected void loadExercises(Map<String, Collection<String>> typeToSection, final String item) {
-    System.out.println("SectionExerciseList.loadExercises : " + typeToSection + " and item '" + item + "'");
+  protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
+    System.out.println("HistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "'");
+    if (isCRTDataMode) {
+      service.getCompletedExercises(controller.getUser(),new AsyncCallback<Set<String>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public void onSuccess(Set<String> result) {
+          controller.getExerciseList().setCompleted(result);
+          reallyLoadExercises(typeToSection, item);
+        }
+      });
+    }
+    else {
+      reallyLoadExercises(typeToSection, item);
+    }
+  }
+
+  private void reallyLoadExercises(Map<String, Collection<String>> typeToSection, String item) {
     if (typeToSection.isEmpty() && item == null) {
       noSectionsGetExercises(userID);
     } else {
@@ -375,28 +397,16 @@ public class HistoryExerciseList extends PagingExerciseList {
   }
 
   /**
-   * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
-   * @param typeToSection
-   */
-/*  private void setOtherListBoxes(final Map<String, Collection<String>> typeToSection) {
-    System.out.println("setOtherListBoxes type " + typeToSection + " skipping!!! ------------- ");
-  }*/
-
-  /**
    * Ask the server for the items for the type->item map.  Remember the results and select the first one.
    */
   private class MySetExercisesCallback extends SetExercisesCallback {
     private final String item;
 
     /**
-     * @see mitll.langtest.client.exercise.SectionExerciseList#loadExercises(java.util.Map, String)
+     * @see mitll.langtest.client.exercise.HistoryExerciseList#loadExercises(java.util.Map, String)
      * @param item
      */
-    public MySetExercisesCallback(String item) {
-      System.out.println("MySetExercisesCallback : for " + item);
-
-      this.item = item;
-    }
+    public MySetExercisesCallback(String item) {  this.item = item;  }
 
     @Override
     public void onSuccess(ExerciseListWrapper result) {
@@ -410,6 +420,7 @@ public class HistoryExerciseList extends PagingExerciseList {
         } else {
           if (item != null) {
             rememberExercises(result.exercises);
+            controller.showProgress();
             if (!loadByID(item)) {
               System.out.println("\tMySetExercisesCallback.onSuccess : loading first exercise since couldn't load item=" + item);
               loadFirstExercise();
