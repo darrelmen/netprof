@@ -3,6 +3,7 @@
  */
 package mitll.langtest.client.recorder;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.ScoreFeedback;
@@ -11,6 +12,8 @@ import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
+
+import java.util.Set;
 
 /**
  * Has three parts -- record/stop button, audio validity feedback, and audio html 5 control to playback audio just posted to the server. <br></br>
@@ -59,6 +62,19 @@ public class AutoCRTRecordPanel extends SimpleRecordPanel {
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {
     super.receivedAudioAnswer(result, questionState, outer);
     scoreFeedback.showCRTFeedback(result.getScore(), soundFeedback, "Score ", true);
+
+    service.getCompletedExercises(controller.getUser(),new AsyncCallback<Set<String>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        //To change body of implemented methods use File | Settings | File Templates.
+      }
+
+      @Override
+      public void onSuccess(Set<String> result) {
+        System.out.println("completed set was " + result);
+        controller.getExerciseList().setCompleted(result);
+      }
+    });
   }
 
   @Override
