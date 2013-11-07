@@ -3,6 +3,7 @@ package mitll.langtest.client;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.DLIUser;
@@ -131,4 +132,6 @@ public interface LangTestDatabaseAsync {
   void postTimesUp(long userid, long timeTaken, Map<String, Collection<String>> selectionState, AsyncCallback<Leaderboard> async);
 
   void addDLIUser(DLIUser dliUser, AsyncCallback<Void> async);
+
+  void getCompletedExercises(int user, AsyncCallback<Set<String>> async);
 }
