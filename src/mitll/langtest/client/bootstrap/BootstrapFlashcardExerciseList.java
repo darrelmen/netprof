@@ -35,6 +35,7 @@ import mitll.langtest.shared.flashcard.Leaderboard;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -374,6 +375,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   public void makeExercisePanel(Exercise result) {}
   public void loadExercise(ExerciseShell exerciseShell) {}
   public boolean loadNextExercise(String id) { return false; }
+  public void setCompleted(Set<String> completed) {}
 
   protected void grabFocus(final BootstrapExercisePanel panel) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
