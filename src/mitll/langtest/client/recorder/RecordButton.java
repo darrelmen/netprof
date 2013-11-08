@@ -31,7 +31,7 @@ public abstract class RecordButton {
   private Image recordImage1, recordImage2;
 
   /**
-   * @see mitll.langtest.client.bootstrap.FlashcardRecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel)
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel)
    * @param delay
    * @param addKeyHandler
    */
