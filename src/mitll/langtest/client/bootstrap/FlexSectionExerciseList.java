@@ -9,7 +9,6 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -22,11 +21,11 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.HistoryExerciseList;
-import mitll.langtest.client.exercise.ItemSorter;
-import mitll.langtest.client.exercise.SectionExerciseList;
 import mitll.langtest.client.exercise.SectionWidget;
-import mitll.langtest.client.exercise.SelectionState;
+import mitll.langtest.client.list.HistoryExerciseList;
+import mitll.langtest.client.list.ItemSorter;
+import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.list.section.SectionExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
 
@@ -58,7 +57,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   protected Heading statusHeader = new Heading(4);
   private Collection<String> typeOrder;
   private Panel sectionPanel;
-  //private boolean showListBox;
 
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
@@ -77,25 +75,17 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
                                  boolean showTurkToken, boolean showInOrder, boolean showListBox,
                                  ExerciseController controller, boolean isCRTDataMode) {
     super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, isCRTDataMode);
-    //this.showListBox = showListBox; // TODO what is this???
 
-    Panel child = sectionPanel = new FluidContainer();
+    sectionPanel = new FluidContainer();
     DOM.setStyleAttribute(sectionPanel.getElement(), "paddingLeft", "2px");
     DOM.setStyleAttribute(sectionPanel.getElement(), "paddingRight", "2px");
-    secondRow.add(new Column(12, child));
+    secondRow.add(new Column(12, sectionPanel));
 
     buttonTypes.add(ButtonType.PRIMARY);
     buttonTypes.add(ButtonType.SUCCESS);
     buttonTypes.add(ButtonType.INFO);
     buttonTypes.add(ButtonType.WARNING);
   }
-/*
-
-  @Override
-  protected void addComponents() {
-    addTableWithPager();
-  }
-*/
 
   /**
    *
@@ -145,7 +135,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * Assume for the moment that the first type has the largest elements... and every other type nests underneath it.
    *
    * @return
-   * @see mitll.langtest.client.exercise.ListInterface#getExercises(long, boolean)
+   * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
    */
   private Panel getWidgetsForTypes() {
     final FluidContainer container = new FluidContainer();
@@ -168,7 +158,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       public void onSuccess(final Collection<String> sortedTypes) {
         typeOrder = sortedTypes;
         System.out.println("getTypeOrder type order " + typeOrder);
-      //  if (showListBoxes) {
           service.getSectionNodes(new AsyncCallback<List<SectionNode>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -357,8 +346,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       typeToBox.put(type, buttonGroupSectionWidget1);
       typeToButton.put(type, buttonTypes.get(j++ % types.size()));
     }
-
-    //System.out.println("populateButtonGroups " + types + " : " + typeToBox);
   }
 
   private Map<String, SectionNode> getNameToNode(List<SectionNode> rootNodes) {
@@ -393,10 +380,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
     super.restoreListBoxState(selectionState);
-
-    //if (showListBoxes) {
-      showSelectionState(selectionState);
-    //}
+    showSelectionState(selectionState);
   }
 
   /**
@@ -446,8 +430,24 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     status.addStyleName("inlineStyle");
     container.add(status);
     status.add(statusHeader);
+/*    if (controller.isCRTDataCollectMode()) {
+      sectionPanel.add(new ResponseChoice(controller.getProps().getResponseType(),
+        getResponseChoice()).getResponseTypeWidget());
+    }*/
     return status;
   }
+
+/*  private ResponseChoice.ChoiceMade getResponseChoice() {
+    return new ResponseChoice.ChoiceMade() {
+      @Override
+      public void choiceMade(String responseType) {
+*//*        if (responseType.equals(""))
+        setFactory(); *//*
+      }
+    };
+  }*/
+  @Override
+  protected int getKludge() { return 170;}
 
   protected Panel getInstructionRow() {
     Panel instructions = new FluidRow();
@@ -462,9 +462,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     return instructions;
   }
 
-  protected String getUserPrompt() {
-    return "";
-  }
+  protected String getUserPrompt() { return "";  }
 
   /**
    * @param sectionInFirstType
@@ -507,7 +505,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    *
    * @param type
    * @param sections
-   * @see SectionExerciseList#restoreListBoxState(mitll.langtest.client.exercise.SelectionState)
+   * @see SectionExerciseList#restoreListBoxState(mitll.langtest.client.list.SelectionState)
    */
   @Override
   protected void selectItem(String type, Collection<String> sections) {
@@ -519,7 +517,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
   /**
    * @param type
-   * @see SectionExerciseList#restoreListBoxState(mitll.langtest.client.exercise.SelectionState)
+   * @see SectionExerciseList#restoreListBoxState(mitll.langtest.client.list.SelectionState)
    */
   @Override
   protected void clearEnabled(String type) {
@@ -565,15 +563,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
   private void setSizesAndPushFirst(Widget columnContainer) {
     int offsetHeight = columnContainer.getOffsetHeight() + 5;
-
-    // System.out.println("height is " + offsetHeight);
-    //scrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
     panelInsideScrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
-    // panelInsideScrollPanel.getParent().setHeight(Math.max(50, offsetHeight) + "px");
-
-    //int width = Window.getClientWidth() - labelColumn.getOffsetWidth() - clearColumnContainer.getOffsetWidth() - 90;
-    //  System.out.println("setting width to " +width);
-    // scrollPanel.setWidth(Math.max(300, width) + "px");
     scrollPanel.setWidth("100%");
     pushFirstListBoxSelection();
   }
