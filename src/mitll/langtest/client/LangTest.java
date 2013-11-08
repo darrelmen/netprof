@@ -35,14 +35,13 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.bootstrap.CombinedResponseFlashcard;
-import mitll.langtest.client.bootstrap.TextCRTFlashcard;
+import mitll.langtest.client.flashcard.CombinedResponseFlashcard;
+import mitll.langtest.client.flashcard.TextCRTFlashcard;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.exercise.ListInterface;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
 import mitll.langtest.client.flashcard.DataCollectionFlashcardFactory;
 import mitll.langtest.client.flashcard.Flashcard;
@@ -64,7 +63,6 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -76,7 +74,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Panel currentExerciseVPanel = new FluidContainer();
   private ListInterface exerciseList;
-  private Label status = new Label();
+  private final Label status = new Label();
 
   private UserManager userManager;
   private final UserTable userTable = new UserTable();
@@ -188,7 +186,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    *
    * Initially the flash record player is put in the center of the DockLayout
    */
-  public void onModuleLoad2() {
+  private void onModuleLoad2() {
     userManager = new UserManager(this, service, false, props);
     //loadVisualizationPackages();  // Note : this is now done in LangTest.html, since it seemed to be intermittently not loaded properly
     if (props.isFlashCard()) {
@@ -388,7 +386,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see mitll.langtest.client.exercise.SectionExerciseList#getEmailWidget()
+   * @see mitll.langtest.client.list.section.SectionExerciseList#getEmailWidget()
    * @param subject
    * @param linkTitle
    * @param token
@@ -608,7 +606,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #onModuleLoad2()
    */
   private void makeExerciseList(FluidRow secondRow, Panel leftColumn) {
-    boolean isCRTMode = props.isCRTDataCollectMode();
     this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, leftColumn, this,
       currentExerciseVPanel,service,this);
   }
@@ -672,7 +669,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * This determines which kind of exercise we're going to do.
    * @see #gotUser(long)
    */
-  public void setFactory(final long userID) {
+  private void setFactory(final long userID) {
     final LangTest outer = this;
     if (props.isGoodwaveMode() && !props.isGrading()) {
       exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer), userManager, 1);
