@@ -56,7 +56,7 @@ public class NavigationHelper extends HorizontalPanel {
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.DataCollectionFlashcard#getCardPrompt(mitll.langtest.shared.Exercise, ExerciseController)
+   * @see mitll.langtest.client.flashcard.DataCollectionFlashcard#getCardPrompt(mitll.langtest.shared.Exercise, ExerciseController)
    * @param exercise
    * @param controller
    * @param enableNextOnlyWhenAllCompleted
