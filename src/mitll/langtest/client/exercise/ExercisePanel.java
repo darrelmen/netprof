@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.bootstrap.AudioExerciseContent;
+import mitll.langtest.client.flashcard.AudioExerciseContent;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
@@ -65,7 +65,7 @@ public class ExercisePanel extends VerticalPanel implements
 
   /**
    * @see ExercisePanelFactory#getExercisePanel
-   * @see ExerciseList#loadExercise
+   * @see mitll.langtest.client.list.ExerciseList#loadExercise
    * @param e
    * @param service
    * @param userFeedback
@@ -80,7 +80,7 @@ public class ExercisePanel extends VerticalPanel implements
     this.navigationHelper = getNavigationHelper(controller);
     addItemHeader(e);
 
-    enableNextOnlyWhenAllCompleted = !getLanguage().equalsIgnoreCase("Pashto");
+    enableNextOnlyWhenAllCompleted = !isPashto();
 
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
@@ -140,13 +140,17 @@ public class ExercisePanel extends VerticalPanel implements
     }
 
     html.addStyleName("wrapword");
-    if (getLanguage().equalsIgnoreCase("Pashto")) {
+    if (isPashto()) {
       html.addStyleName("pashtofont");
     }
     else {
       html.addStyleName("xlargeFont");
     }
     return html;
+  }
+
+  private boolean isPashto() {
+    return getLanguage().equalsIgnoreCase("Pashto");
   }
 
   public void onResize() {}
