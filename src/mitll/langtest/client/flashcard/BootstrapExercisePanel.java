@@ -1,4 +1,4 @@
-package mitll.langtest.client.bootstrap;
+package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.Dropdown;
@@ -33,8 +33,6 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class BootstrapExercisePanel extends FluidContainer {
- // private static final int HIDE_DELAY = 2500;
-
   private List<RecordButtonPanel> answerWidgets = new ArrayList<RecordButtonPanel>();
 
   public static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>";
@@ -213,7 +211,7 @@ public class BootstrapExercisePanel extends FluidContainer {
    * Not sure if this is actually necessary -- this is part of who gets the focus when the flashcard is inside
    * an internal frame in a dialog.
    * TODO : remove??
-   * @see BootstrapFlashcardExerciseList#grabFocus(BootstrapExercisePanel)
+   * @see mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#grabFocus(BootstrapExercisePanel)
    */
   public void grabFocus() {
     for (RecordButtonPanel widget : answerWidgets) {
