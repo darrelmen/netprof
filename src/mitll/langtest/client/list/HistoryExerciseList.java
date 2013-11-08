@@ -1,10 +1,12 @@
-package mitll.langtest.client.exercise;
+package mitll.langtest.client.list;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ExerciseShell;
@@ -59,7 +61,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   }
 
   /**
-   * @see SectionExerciseList#getEmailWidget()
+   * @see mitll.langtest.client.list.section.SectionExerciseList#getEmailWidget()
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @param token
    * @return object representing type=value pairs from history token
@@ -142,7 +144,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   /**
    * So if we have an existing history token, use it to set current selection.
    * If not, push the current state of the list boxes and act on it
-   * @see mitll.langtest.client.exercise.ListInterface#getExercises(long, boolean)
+   * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
    */
   protected void pushFirstListBoxSelection() {
     String initToken = History.getToken();
@@ -184,7 +186,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   protected void setModeLinks(String historyToken) {}
 
   /**
-   * @see #restoreListBoxState(mitll.langtest.client.exercise.SelectionState)
+   * @see #restoreListBoxState(SelectionState)
    * @param type
    * @param sections
    */
@@ -403,7 +405,7 @@ public class HistoryExerciseList extends PagingExerciseList {
     private final String item;
 
     /**
-     * @see mitll.langtest.client.exercise.HistoryExerciseList#loadExercises(java.util.Map, String)
+     * @see HistoryExerciseList#loadExercises(java.util.Map, String)
      * @param item
      */
     public MySetExercisesCallback(String item) {  this.item = item;  }
