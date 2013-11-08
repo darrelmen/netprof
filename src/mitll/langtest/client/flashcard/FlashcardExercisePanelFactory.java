@@ -2,7 +2,6 @@ package mitll.langtest.client.flashcard;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
@@ -28,7 +27,7 @@ public class FlashcardExercisePanelFactory extends ExercisePanelFactory {
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList.FlashcardResponseAsyncCallback#onSuccess(mitll.langtest.shared.flashcard.FlashcardResponse)
+   * @see BootstrapFlashcardExerciseList.FlashcardResponseAsyncCallback#onSuccess(mitll.langtest.shared.flashcard.FlashcardResponse)
    * @param e
    * @return
    */
