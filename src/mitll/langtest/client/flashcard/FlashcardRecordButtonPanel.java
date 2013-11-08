@@ -1,4 +1,4 @@
-package mitll.langtest.client.bootstrap;
+package mitll.langtest.client.flashcard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +10,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
+import mitll.langtest.client.flashcard.BootstrapExercisePanel;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.sound.SoundFeedback;
@@ -53,7 +54,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
 
   private static final boolean NEXT_ON_BAD_AUDIO = false;
  // private static final boolean CONTINUE_TO_NEXT = false;
- private static final String PRONUNCIATION_SCORE = "Pronunciation score ";
+  private static final String PRONUNCIATION_SCORE = "Pronunciation score ";
 
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
