@@ -169,7 +169,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.exercise.ListInterface#getExercises
+   * @see mitll.langtest.client.list.ListInterface#getExercises
    * @param reqID
    * @param userID
    * @return
@@ -197,7 +197,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Don't randomize order if we're in netProF (formerly goodwave) mode.
    *
-   * @see mitll.langtest.client.exercise.SectionExerciseList#loadExercises
+   * @see mitll.langtest.client.list.section.SectionExerciseList#loadExercises
    * @param reqID
    * @param typeToSection
    * @param userID
@@ -293,7 +293,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.TableSectionExerciseList#createProvider(java.util.Map, int, com.github.gwtbootstrap.client.ui.CellTable)
+   * @see mitll.langtest.client.list.TableSectionExerciseList#createProvider(java.util.Map, int, com.github.gwtbootstrap.client.ui.CellTable)
    * @param typeToSection
    * @param start
    * @param end
@@ -367,7 +367,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.exercise.ExerciseList#getExercisesInOrder()
+   * @see mitll.langtest.client.list.ExerciseList#getExercisesInOrder()
    * @return
    * @param reqID
    */
@@ -407,7 +407,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @param userID
    * @return exercises for user id
-   * @see mitll.langtest.client.exercise.ListInterface#getExercises(long, boolean)
+   * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
    */
   private List<Exercise> getExercises(long userID) {
     makeAutoCRT();
@@ -495,7 +495,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList#getExercises(long, boolean)
+   * @see mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#getExercises(long, boolean)
    *
    * @param userID
    * @param typeToSection
@@ -515,7 +515,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.exercise.ListInterface#getExercises(long, boolean)
+   * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
    * @param userID
    * @param getNext
    * @return
@@ -555,7 +555,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Called from the client.
-   * @see mitll.langtest.client.exercise.ExerciseList#getExercisesInOrder()
+   * @see mitll.langtest.client.list.ExerciseList#getExercisesInOrder()
    * @return
    */
   List<Exercise> getExercises() { return db.getExercises();  }
@@ -766,7 +766,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.TextCRTFlashcard#getScoreForGuess
+   * @see mitll.langtest.client.flashcard.TextCRTFlashcard#getScoreForGuess
    * @param userID
    * @param exercise
    * @param questionID
