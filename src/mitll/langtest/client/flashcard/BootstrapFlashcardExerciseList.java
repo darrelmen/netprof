@@ -1,4 +1,4 @@
-package mitll.langtest.client.bootstrap;
+package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.Container;
@@ -22,10 +22,10 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.exercise.ExerciseList;
+import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.exercise.ListInterface;
-import mitll.langtest.client.exercise.SelectionState;
+import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
