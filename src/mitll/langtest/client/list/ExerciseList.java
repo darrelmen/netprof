@@ -1,4 +1,4 @@
-package mitll.langtest.client.exercise;
+package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -25,6 +25,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.exercise.BusyPanel;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
@@ -117,7 +120,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   /**
    * Get exercises for this user.
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory(long)
-   * @see SectionExerciseList#noSectionsGetExercises(long)
+   * @see mitll.langtest.client.list.section.SectionExerciseList#noSectionsGetExercises(long)
    * @param userID
    * @param getNext
    */
