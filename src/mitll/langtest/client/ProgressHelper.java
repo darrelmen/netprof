@@ -2,7 +2,7 @@ package mitll.langtest.client;
 
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
-import mitll.langtest.client.exercise.ListInterface;
+import mitll.langtest.client.list.ListInterface;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,8 +30,8 @@ public class ProgressHelper {
 
   public void showAdvance(ListInterface exerciseList) {
     int percentComplete = exerciseList.getPercentComplete();
-    getProgressBar().setPercent(percentComplete);
-    getProgressBar().setText(exerciseList.getComplete() + " complete."); // TODO when is this +1 and when not??
+    getProgressBar().setPercent(percentComplete == 0 ? 100 : percentComplete);
+    getProgressBar().setText(percentComplete == 0 ? "No items completed." :exerciseList.getComplete() + " complete."); // TODO when is this +1 and when not??
   }
 
   public ProgressBar getProgressBar() {

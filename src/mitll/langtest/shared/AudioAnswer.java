@@ -75,7 +75,7 @@ public class AudioAnswer implements IsSerializable {
 
 
   /**
-   * @see mitll.langtest.client.bootstrap.FlashcardRecordButtonPanel#receivedAudioAnswer(AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#receivedAudioAnswer(AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
    * @return score from hydec (see nnscore)
    */
   public double getScore() {
@@ -83,7 +83,7 @@ public class AudioAnswer implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.FlashcardRecordButtonPanel#receivedAudioAnswer(AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#receivedAudioAnswer(AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
    * @return
    */
   public boolean isCorrect() {
