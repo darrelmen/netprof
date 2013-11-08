@@ -57,7 +57,7 @@ public class Leaderboard implements IsSerializable {
   }*/
 
   /**
-   * @see mitll.langtest.client.bootstrap.LeaderboardPlot#showLeaderboardPlot(Leaderboard, long, int, java.util.Map, String, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, int)
+   * @see mitll.langtest.client.flashcard.LeaderboardPlot#showLeaderboardPlot(Leaderboard, long, int, java.util.Map, String, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, int)
    * @param selection
    * @return
    */

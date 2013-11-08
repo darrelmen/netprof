@@ -1,8 +1,10 @@
-package mitll.langtest.client.exercise;
+package mitll.langtest.client.list.section;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.exercise.SectionWidget;
+import mitll.langtest.client.list.HistoryExerciseList;
 
 import java.util.Collection;
 import java.util.Map;
