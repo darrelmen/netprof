@@ -675,7 +675,7 @@ public class DatabaseImpl implements Database {
 
     getExerciseIDToResultCount(userID, idToCount,results);
 
-    logger.debug("getExercisesBiasTowardsUnanswered for " + userID+ " id->count " + idToCount);
+    logger.debug("getExercisesBiasTowardsUnanswered for " + userID+ " id->count " + idToCount.size());
     //logger.debug("count " +idToCount.get())
 
     Map<String, Integer> idToCountScaled = getScaledIdToCount(idToCount, idToWeight);
