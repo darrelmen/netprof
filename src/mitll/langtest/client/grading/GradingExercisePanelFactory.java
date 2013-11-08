@@ -27,7 +27,7 @@ public class GradingExercisePanelFactory extends ExercisePanelFactory {
   }
 
   /**
-   * @see mitll.langtest.client.exercise.ExerciseList#useExercise
+   * @see mitll.langtest.client.list.ExerciseList#useExercise
    * @param e
    * @return
    */
