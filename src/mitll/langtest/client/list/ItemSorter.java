@@ -1,4 +1,4 @@
-package mitll.langtest.client.exercise;
+package mitll.langtest.client.list;
 
 import java.util.ArrayList;
 import java.util.Collection;
