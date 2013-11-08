@@ -1,4 +1,4 @@
-package mitll.langtest.client.bootstrap;
+package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Column;
@@ -34,20 +34,20 @@ public class LeaderboardPlot {
     showLeaderboardPlot(scores, userID, gameTimeSeconds, currentSelection, prompt,onYes, onNo,autoHideDelay);
   }
 
-  public Modal showLeaderboardPlot(Leaderboard leaderboard,final long userID, int gameTimeSeconds,
+/*  public Modal showLeaderboardPlot(Leaderboard leaderboard,final long userID, int gameTimeSeconds,
                                    Map<String, Collection<String>> currentSelection,
                                    String prompt,int autoHideDelay) {
     List<ScoreInfo> scores = leaderboard.getScores(currentSelection);
 
     return showLeaderboardPlot(scores, userID, gameTimeSeconds, currentSelection, prompt, null, null,autoHideDelay);
-  }
+  }*/
 
-
+/*
   public Modal showLeaderboardPlot(List<ScoreInfo> scores, final long userID, int gameTimeSeconds,
                                    Map<String, Collection<String>> currentSelection,
                                    String prompt,int autoHideDelay) {
     return showLeaderboardPlot(scores, userID, gameTimeSeconds, currentSelection, prompt, null, null, autoHideDelay);
-  }
+  }*/
 
   private Modal showLeaderboardPlot(List<ScoreInfo> scores, final long userID, int gameTimeSeconds,
                                   Map<String, Collection<String>> currentSelection,
