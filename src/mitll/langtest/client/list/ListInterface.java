@@ -1,8 +1,9 @@
-package mitll.langtest.client.exercise;
+package mitll.langtest.client.list;
 
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
