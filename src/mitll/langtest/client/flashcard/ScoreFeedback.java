@@ -1,4 +1,4 @@
-package mitll.langtest.client.bootstrap;
+package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidRow;
@@ -52,7 +52,7 @@ public class ScoreFeedback {
    * Holds the pron score feedback.
    * Initially made with a placeholder.
    *
-   * @see BootstrapExercisePanel#addRecordingAndFeedbackWidgets(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#addRecordingAndFeedbackWidgets(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @return
    */
   public FluidRow getScoreFeedbackRow(int height) {
@@ -98,7 +98,7 @@ public class ScoreFeedback {
   }
 
   /**
-   * @see TextCRTFlashcard#getScoreForGuess
+   * @see mitll.langtest.client.flashcard.TextCRTFlashcard#getScoreForGuess
    * @see mitll.langtest.client.recorder.AutoCRTRecordPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
    * @param result
    * @param soundFeedback
@@ -131,7 +131,7 @@ public class ScoreFeedback {
   }
 
   /**
-   * @see BootstrapExercisePanel#showPronScoreFeedback(double, String)
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showPronScoreFeedback(double, String)
    * @see #showCRTFeedback(Double, mitll.langtest.client.sound.SoundFeedback, String, boolean)
    * @param pronunciationScore
    * @param score
