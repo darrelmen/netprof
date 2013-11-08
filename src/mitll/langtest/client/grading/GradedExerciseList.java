@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.exercise.PagingExerciseList;
+import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.Exercise;
