@@ -1,19 +1,12 @@
-package mitll.langtest.client.bootstrap;
+package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CellTable;
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.Modal;
-import com.github.gwtbootstrap.client.ui.Nav;
-import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.TextBox;
-import com.github.gwtbootstrap.client.ui.base.IconAnchor;
-import com.github.gwtbootstrap.client.ui.constants.IconPosition;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.event.ShownEvent;
 import com.github.gwtbootstrap.client.ui.event.ShownHandler;
@@ -52,6 +45,7 @@ import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.HasRows;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
@@ -87,7 +81,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   private String token = "";
   private int frameHeight = FRAME_HEIGHT;
   private CellTable<Exercise> table;
-  private String responseType;
+  private ResponseChoice responseChoice;
 
   public TableSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                   UserFeedback feedback, boolean showTurkToken, boolean showInOrder,
@@ -95,7 +89,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, showListBox, controller, false);
     setWidth("100%");
     this.frameHeight = controller.getFlashcardPreviewFrameHeight();
-    responseType = controller.getProps().getResponseType();
+    responseChoice = new ResponseChoice(controller.getProps().getResponseType());
   }
 
   @Override
@@ -114,69 +108,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   @Override
   protected Widget addBottomText(FluidContainer container) {
     Widget widget = super.addBottomText(container);
-    Panel instructions = new FluidRow();
-    //instructions.addStyleName("alignCenter");
-    instructions.addStyleName("inlineStyle");
-   // instructions.addStyleName("userNPFContent");
-    Nav div = new Nav();
-    Dropdown menu = new Dropdown("Response type");
-    //menu.setIcon(IconType.QUOTE_RIGHT);
-    final Heading responseTypeDisplay = new Heading(5);
-    DOM.setStyleAttribute(responseTypeDisplay.getElement(), "marginTop", "0px");
-
-    responseTypeDisplay.setText(responseType);
-    NavLink audio = new NavLink("Audio");
-    audio.setIcon(IconType.MICROPHONE);
-    audio.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-
-        responseType = "Audio";
-        responseTypeDisplay.setText(responseType);
-
-      }
-    });
-    menu.add(audio);
-
-    NavLink text = new NavLink("Text");
-    text.setIcon(IconType.PENCIL);
-    text.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        responseType = "Text";        responseTypeDisplay.setText(responseType);
-
-      }
-    });
-    menu.add(text);
-
-    NavLink both = new NavLink("Both");
-   // IconStack stack = new IconStack();
-  //  stack.add(new Icon(IconType.MICROPHONE),true);
-  //  stack.add(new Icon(IconType.PENCIL),false);
-    IconAnchor anchor = both.getAnchor();
-    anchor.setIconPosition(IconPosition.LEFT);
-    anchor.add(new Icon(IconType.MICROPHONE));
-    anchor.add(new Icon(IconType.PENCIL));
-    anchor.setIconPosition(IconPosition.LEFT);
-
-    both.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        responseType = "Both";        responseTypeDisplay.setText(responseType);
-
-      }
-    });
-    menu.add(both);
-
-    div.add(menu);
-    Column child = new Column(2, 5, div);
-    instructions.add(child);
-  //  child.addStyleName("tableExerciseListHeader");
-    Column child1 = new Column(1, responseTypeDisplay);
-  //  child1.addStyleName("tableExerciseListHeader");
-
-    instructions.add(child1);
-    container.add(instructions);
+    container.add(responseChoice.getResponseTypeWidget());
     return widget;
   }
 
@@ -269,7 +201,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.TableSectionExerciseList#addTableToLayout(java.util.Map)
+   * @see TableSectionExerciseList#addTableToLayout(java.util.Map)
    */
   private Widget getPreviewWidgets() {
     HorizontalPanel previewRow = new HorizontalPanel();
@@ -414,7 +346,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.TableSectionExerciseList#addTableToLayout(java.util.Map)
+   * @see TableSectionExerciseList#addTableToLayout(java.util.Map)
    */
   private void doZero() {
     String widgetID = FLASHCARDCOPY;
@@ -463,7 +395,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   }
 
   private String getFlashcardURL() {
-    return GWT.getHostPageBaseURL() + "?" + "flashcard" + "=true" +"&responseType="+responseType;
+    return GWT.getHostPageBaseURL() + "?" + "flashcard" + "=true" +"&responseType="+responseChoice.getResponseType();
   }
 
   /**
@@ -508,7 +440,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   }-*/;
 
   /**
-   * @see mitll.langtest.client.exercise.SectionExerciseList#pushNewSectionHistoryToken()
+   * @see mitll.langtest.client.list.section.SectionExerciseList#pushNewSectionHistoryToken()
    * @param historyToken
    */
   protected void setModeLinks(String historyToken) {
@@ -544,7 +476,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   }
 
   private native void registerCallback() /*-{
-      $wnd.feedback = $entry(@mitll.langtest.client.bootstrap.TableSectionExerciseList::feedback(Ljava/lang/String;));
+      $wnd.feedback = $entry(@mitll.langtest.client.list.TableSectionExerciseList::feedback(Ljava/lang/String;));
   }-*/;
 
   /**
