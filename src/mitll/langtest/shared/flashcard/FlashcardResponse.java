@@ -49,7 +49,7 @@ public class FlashcardResponse implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.BootstrapFlashcardExerciseList.FlashcardResponseAsyncCallback#onSuccess(FlashcardResponse)
+   * @see mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList.FlashcardResponseAsyncCallback#onSuccess(FlashcardResponse)
    * @return
    */
   public Exercise getNextExercise() { return nextExercise; }
