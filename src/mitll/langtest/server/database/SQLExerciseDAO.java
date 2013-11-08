@@ -193,7 +193,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
             exercises.add(e);
 
             if (useMapping) {
-              sectionHelper.addAssociations(Collections.singleton(sectionHelper.addExerciseToLesson(e,"ILR Level",exerciseToLevel.get(exid))));
+              sectionHelper.addAssociations(Collections.singleton(sectionHelper.addExerciseToLesson(e, "ILR_Level", exerciseToLevel.get(exid))));
             }
             else {
               recordUnitChapterWeek(e);
@@ -204,7 +204,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
         }
       }
       if (useMapping) {
-        sectionHelper.setPredefinedTypeOrder(Arrays.asList("ILR Level"));
+        sectionHelper.setPredefinedTypeOrder(Arrays.asList("ILR_Level"));
       }
       rs.close();
       statement.close();
@@ -214,7 +214,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
       //sectionHelper.report();
 
     } catch (Exception e) {
-      logger.error("got " + e,e);
+      logger.error("got " + e, e);
     }
 
     if (exercises.isEmpty()) {
@@ -330,7 +330,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
    *
    * If there's an audio tag in the content, make that the ref audio for the exercise.
    * @see Exercise#setRefAudio(String)
-   * @see mitll.langtest.client.bootstrap.AudioExerciseContent#getAudioWidget
+   * @see mitll.langtest.client.flashcard.AudioExerciseContent#getAudioWidget
    *
    * @param obj json to get content from
    * @return content with media paths set
