@@ -1,4 +1,4 @@
-package mitll.langtest.client.exercise;
+package mitll.langtest.client.list;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -6,7 +6,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -20,6 +19,8 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
@@ -42,7 +43,7 @@ import java.util.Set;
 public class PagingExerciseList extends ExerciseList implements RequiresResize {
   private static final int MAX_LENGTH_ID = 27;
   protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
-  private static final int KLUDGE_AMT = 120;
+  protected int KLUDGE_AMT = 120;
   private ListDataProvider<ExerciseShell> dataProvider;
   private static final boolean DEBUG = false;
   private static final int ID_LINE_WRAP_LENGTH = 20;
@@ -257,7 +258,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   /**
-   * @see mitll.langtest.client.exercise.HistoryExerciseList.MySetExercisesCallback#onSuccess
+   * @see mitll.langtest.client.list.HistoryExerciseList.MySetExercisesCallback#onSuccess
    */
   @Override
   protected ExerciseShell loadFirstExercise() {
@@ -326,7 +327,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   protected int getNumTableRowsGivenScreenHeight() {
     int header = getTableHeaderHeight();
-    int leftOver = Window.getClientHeight() - header - KLUDGE_AMT;
+    int leftOver = Window.getClientHeight() - header - getKludge();
     //System.out.println("Got on resize " + Window.getClientHeight() + " " + header + " result = " + leftOver);
 
     float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
@@ -342,6 +343,10 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
       }
     }
     return Math.max(MIN_PAGE_SIZE, Math.round(ratio));
+  }
+
+  protected int getKludge() {
+    return KLUDGE_AMT;
   }
 
   protected int heightOfCellTableWith15Rows() {
