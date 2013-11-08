@@ -2,13 +2,11 @@ package mitll.langtest.client.exercise;
 
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
-
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
