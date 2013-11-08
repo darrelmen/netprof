@@ -1,4 +1,4 @@
-package mitll.langtest.client.bootstrap;
+package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidRow;
