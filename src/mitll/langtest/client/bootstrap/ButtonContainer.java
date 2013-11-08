@@ -17,7 +17,7 @@ import java.util.Set;
  * Time: 10:40 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ButtonContainer {
+class ButtonContainer {
   private List<Button> buttons = new ArrayList<Button>();
   private Set<Button> enabled = new HashSet<Button>();
   private Set<Button> disabled = new HashSet<Button>();
@@ -106,7 +106,7 @@ public class ButtonContainer {
   /**
    * @see mitll.langtest.client.bootstrap.ButtonGroupSectionWidget#clearEnabled()
    * @see FlexSectionExerciseList#clearEnabled(String)
-   * @see mitll.langtest.client.exercise.SectionExerciseList#restoreListBoxState
+   * @see mitll.langtest.client.list.section.SectionExerciseList#restoreListBoxState
    */
   public void clearEnabled() {
     System.out.println(this + " : clearEnabled ");

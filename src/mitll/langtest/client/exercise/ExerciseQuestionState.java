@@ -11,6 +11,5 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public interface ExerciseQuestionState {
   void recordIncomplete(Widget answer);
-
   void recordCompleted(Widget answer);
 }

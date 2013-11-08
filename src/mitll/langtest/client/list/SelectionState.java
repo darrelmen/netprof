@@ -1,4 +1,4 @@
-package mitll.langtest.client.exercise;
+package mitll.langtest.client.list;
 
 import com.google.gwt.user.client.History;
 
@@ -21,23 +21,15 @@ public class SelectionState {
   private Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
 
   /**
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#showSelectionState(com.google.gwt.event.logical.shared.ValueChangeEvent)
-   * @param event
-   */
-/*  public SelectionState(ValueChangeEvent<String> event) {
-    parseToken(getTokenFromEvent(event));
-  }*/
-
-  /**
    * Populated from history token!
-   * @see ListInterface#getExercises(long, boolean)
+   * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
    */
   public SelectionState() {
     this(History.getToken(), true);
   }
 
   /**
-   * @see SectionExerciseList#getSelectionState(String)
+   * @see mitll.langtest.client.list.section.SectionExerciseList#getSelectionState(String)
    * @param token
    * @param removePlus
    */
@@ -46,18 +38,9 @@ public class SelectionState {
   }
 
   /**
-   * @see ListInterface#getExercises(long, boolean)
+   * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
    */
   public boolean isEmpty() { return getTypeToSection().isEmpty(); }
-
-/*
-  private String getTokenFromEvent(ValueChangeEvent<String> event) {
-    String token = event.getValue();
-    token = unencodeToken(token);
-    return token;
-  }
-*/
-
 
   private String unencodeToken(String token) {
     token = token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ").replaceAll("\\+", " ");
