@@ -24,8 +24,8 @@ public class SelectionState {
    * Populated from history token!
    * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
    */
-  public SelectionState() {
-    this(History.getToken(), true);
+  public SelectionState( boolean removePlus) {
+    this(History.getToken(), removePlus);
   }
 
   /**
@@ -34,7 +34,9 @@ public class SelectionState {
    * @param removePlus
    */
   public SelectionState(String token, boolean removePlus) {
-    parseToken(removePlus ? unencodeToken(token) : unencodeToken2(token));
+    String token1 = removePlus ? unencodeToken(token) : unencodeToken2(token);
+    System.out.println("selection state token " + token1);
+    parseToken(token1);
   }
 
   /**
@@ -54,6 +56,7 @@ public class SelectionState {
 
   boolean debug = false;
   private void parseToken(String token) {
+    token = token.split("&")[0];
     String[] parts = token.split(";");
 
     for (String part : parts) {
