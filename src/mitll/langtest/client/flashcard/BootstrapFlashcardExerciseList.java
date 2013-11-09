@@ -49,6 +49,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   public static final float HALF = (1f / 4f);
   private final Column exercisePanelColumn;
   private final LeaderboardPlot leaderboardPlot = new LeaderboardPlot();
+  private final boolean allowPlusInURL;
   private ExercisePanelFactory factory;
   private LangTestDatabaseAsync service;
 
@@ -71,22 +72,24 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
    *
    *
    *
+   *
    * @param currentExerciseVPanel
    * @param service
    * @param user
    * @param gameTimeSeconds
+   * @param props
    * @see mitll.langtest.client.LangTest#doFlashcard()
    */
   public BootstrapFlashcardExerciseList(Container currentExerciseVPanel, LangTestDatabaseAsync service,
                                         UserManager user,
-                                        boolean isTimedGame, int gameTimeSeconds) {
+                                        boolean isTimedGame, int gameTimeSeconds, PropertyHandler props) {
     this.service = service;
     this.gameTimeSeconds = gameTimeSeconds;
     FluidRow row = new FluidRow();
     currentExerciseVPanel.add(row);
     exercisePanelColumn = new Column(SIZE);
     row.add(exercisePanelColumn);
-
+    this.allowPlusInURL = props.shouldAllowPlusInURL();
     Panel correctAndImageRow = new FlowPanel();
     correctAndImageRow.addStyleName("headerBackground");
     correctAndImageRow.addStyleName("blockStyle");
@@ -133,7 +136,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
         }
       }
 
-      SelectionState selectionState = new SelectionState();
+      SelectionState selectionState = new SelectionState(!allowPlusInURL);
       if (selectionState.isEmpty()) {
         service.getNextExercise(userID, getNext, new FlashcardResponseAsyncCallback());
       }
@@ -145,8 +148,6 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   }
 
   private void startTimer(final long userID) {
-    //System.out.println("startTimer for " + userID);
-
     bar.setPercent(100);
     bar.setColor(ProgressBarBase.Color.DEFAULT);
     bar.setText(gameTimeSeconds + " seconds");
