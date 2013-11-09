@@ -59,7 +59,6 @@ public class ServerProperties {
   private static final String TIMED_GAME = "timedGame";
   private static final String MIN_PRON_SCORE = "minPronScore";
   private static final String MIN_PRON_SCORE_DEFAULT = "0.20";
-  private static final String RTL = "rtl";
   private static final String GOODWAVE_MODE = "goodwaveMode";
   private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
@@ -184,10 +183,6 @@ public class ServerProperties {
 
   public boolean isTimedGame() {
     return !props.getProperty(TIMED_GAME, "false").equals("false");
-  }
-
-  public boolean isRTL() {
-    return !props.getProperty(RTL, "false").equals("false");
   }
 
   public boolean isGoodwaveMode() {
