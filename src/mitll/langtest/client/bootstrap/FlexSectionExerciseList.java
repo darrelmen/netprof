@@ -66,13 +66,12 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param feedback
    * @param showTurkToken
    * @param showInOrder
-   * @param showListBox
    * @param controller
    * @param isCRTDataMode
    */
   public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
-                                 boolean showTurkToken, boolean showInOrder, boolean showListBox,
+                                 boolean showTurkToken, boolean showInOrder,
                                  ExerciseController controller, boolean isCRTDataMode) {
     super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, isCRTDataMode);
 
@@ -94,18 +93,17 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory
    */
   public void getExercises(final long userID, boolean getNext) {
-    System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID + " crt mode " +isCRTDataMode);
+    System.out.println("FlexSectionExerciseList : getExercises : Get exercises for user=" + userID + " crt mode " + allowPlusInURL);
     this.userID = userID;
 
-    if (isCRTDataMode) {
+    if (allowPlusInURL) {
       service.getCompletedExercises((int)userID, new AsyncCallback<Set<String>>() {
         @Override
         public void onFailure(Throwable caught) {}
 
         @Override
         public void onSuccess(Set<String> result) {
-          System.out.println("\tFlexSectionExerciseList : getExercises : got " + result.size() + " complete");
-
+          //System.out.println("\tFlexSectionExerciseList : getExercises : got " + result.size() + " complete");
           controller.getExerciseList().setCompleted(result);
           addWidgets();
         }
