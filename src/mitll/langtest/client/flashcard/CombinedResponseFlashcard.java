@@ -1,6 +1,5 @@
 package mitll.langtest.client.flashcard;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
@@ -32,13 +31,15 @@ public class CombinedResponseFlashcard extends TextCRTFlashcard implements Exerc
   private Set<Widget> completed = new HashSet<Widget>();
 
   public CombinedResponseFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, UserManager userManager) {
-    super(e, service, controller, userManager);
+    super(e, service, controller);
   }
 
+  /**
+   * from the text widget
+   */
   @Override
-  protected void gotScoreForGuess(Double result, Button check, ScoreFeedback scoreFeedback) {
-    super.gotScoreForGuess(result,check,scoreFeedback);
-    completed.add(check);
+  protected void answerPosted() {
+    completed.add(this);
     enableNext();
   }
 
@@ -53,7 +54,6 @@ public class CombinedResponseFlashcard extends TextCRTFlashcard implements Exerc
   }
 
   private void enableNext() {
-   // System.out.println("enabled " + completed.size());
     navigationHelper.enableNextButton((completed.size() == 2));
   }
 
@@ -83,15 +83,7 @@ public class CombinedResponseFlashcard extends TextCRTFlashcard implements Exerc
     container.add(row1);
     row1.add(panel);
 
-    SimplePanel simplePanel = new SimplePanel(scoreFeedback.getFeedbackImage());
-    simplePanel.addStyleName("floatLeft");
-
-    Panel scoreFeedbackRow = scoreFeedback.getScoreFeedbackRow2(simplePanel, 48);
-
-    scoreFeedback.getScoreFeedback().setWidth(Window.getClientWidth() * 0.5 + "px");
-    scoreFeedback.getScoreFeedback().addStyleName("topBarMargin");
-
-    container.add(scoreFeedbackRow);
+    addScoreFeedback(scoreFeedback, container);
 
     HTML warnNoFlash = new HTML(BootstrapExercisePanel.WARN_NO_FLASH);
     autoCRTRecordPanel.setSoundFeedback(new SoundFeedback(controller.getSoundManager(), warnNoFlash));
@@ -102,5 +94,17 @@ public class CombinedResponseFlashcard extends TextCRTFlashcard implements Exerc
     row3.add(warnNoFlash);
 
     return outer;
+  }
+
+  private void addScoreFeedback(ScoreFeedback scoreFeedback, FluidContainer container) {
+    SimplePanel simplePanel = new SimplePanel(scoreFeedback.getFeedbackImage());
+    simplePanel.addStyleName("floatLeft");
+
+    Panel scoreFeedbackRow = scoreFeedback.getScoreFeedbackRow2(simplePanel, 48);
+
+    scoreFeedback.getScoreFeedback().setWidth(Window.getClientWidth() * 0.5 + "px");
+    scoreFeedback.getScoreFeedback().addStyleName("topBarMargin");
+
+    container.add(scoreFeedbackRow);
   }
 }
