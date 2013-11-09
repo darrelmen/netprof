@@ -30,7 +30,6 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
-   *
    * @see mitll.langtest.client.exercise.ExercisePanel#addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @param exercise
    * @param service
