@@ -71,7 +71,7 @@ public class AutoCRTRecordPanel extends SimpleRecordPanel {
 
       @Override
       public void onSuccess(Set<String> result) {
-        System.out.println("completed set was " + result);
+        //System.out.println("completed set was " + result);
         controller.getExerciseList().setCompleted(result);
       }
     });
