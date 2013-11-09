@@ -301,7 +301,7 @@ public class SiteDAO extends DAO {
         "deployed BOOLEAN," +
         "creationDate TIMESTAMP " +
         ")");
-    boolean execute = statement.execute();
+    /*boolean execute =*/ statement.execute();
     statement.close();
 
     int numColumns = getNumColumns(connection, "site");
