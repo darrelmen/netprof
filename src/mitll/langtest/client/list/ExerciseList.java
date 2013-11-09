@@ -1,6 +1,7 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -9,6 +10,7 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
@@ -55,23 +57,24 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private static final int NUM_QUESTIONS_FOR_TOKEN = 5;
   public static final String ITEMS = "Items";
   protected List<ExerciseShell> currentExercises = null;
-  protected Map<String,ExerciseShell> idToExercise = null;
+  private Map<String,ExerciseShell> idToExercise = null;
   protected int currentExercise = 0;
-  private List<HTML> progressMarkers = new ArrayList<HTML>();
+  private final List<HTML> progressMarkers = new ArrayList<HTML>();
 
   private SimplePanel innerContainer;
-  protected LangTestDatabaseAsync service;
-  protected UserFeedback feedback;
+  protected final LangTestDatabaseAsync service;
+  protected final UserFeedback feedback;
   private ExercisePanelFactory factory;
   protected UserManager user;
   private String exercise_title;
-  protected final boolean showTurkToken;
+  private final boolean showTurkToken;
   private final boolean showInOrder;
   private int countSincePrompt = 0;
   protected int lastReqID = 0;
-  private Set<Integer> visited = new HashSet<Integer>();
-  protected boolean isCRTDataMode;
-  ExerciseController controller;
+  private final Set<Integer> visited = new HashSet<Integer>();
+  protected final boolean allowPlusInURL;
+  private final ExerciseController controller;
+
   /**
    * @see  mitll.langtest.client.LangTest#makeExerciseList
    * @param currentExerciseVPanel
@@ -92,17 +95,22 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.factory = factory;
     this.showTurkToken = showTurkToken;
     this.showInOrder = showInOrder;
-    this.isCRTDataMode = isCRTDataMode;
+    this.allowPlusInURL = controller.getProps().shouldAllowPlusInURL();
     this.controller = controller;
     // Add history listener
     History.addValueChangeHandler(this);
   }
 
-  protected void addWidgets(Panel currentExerciseVPanel) {
+  private void addWidgets(final Panel currentExerciseVPanel) {
     this.innerContainer = new SimplePanel();
     this.innerContainer.setWidth("100%");
     this.innerContainer.setHeight("100%");
     currentExerciseVPanel.add(innerContainer);
+    Scheduler.get().scheduleDeferred(new Command() {
+      public void execute() {
+        currentExerciseVPanel.addStyleName("userNPFContent");
+      }
+    });
   }
 
   /**
@@ -151,6 +159,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   private void pushFirstSelection(String exerciseID) {
     String token = History.getToken();
+    token = token.split("&")[0]; // remove any other parameters
     String idFromToken = getIDFromToken(token);
     System.out.println("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
       "' vs new exercise " +exerciseID);
@@ -203,7 +212,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     this.exercise_title = exercise_title;
   }
 
-  protected String unencodeToken(String token) {
+  private String unencodeToken(String token) {
     token = token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ").replaceAll("\\+", " ");
     return token;
   }
@@ -285,7 +294,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     });
   }
 
-  protected HTML makeAndAddExerciseEntry(ExerciseShell e) {
+  private HTML makeAndAddExerciseEntry(ExerciseShell e) {
     final HTML w = new HTML("<b>" + e.getID() + "</b>");
     w.setStylePrimaryName("exercise");
     add(w);
@@ -372,11 +381,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected String getTokenFromEvent(ValueChangeEvent<String> event) {
     String token = event.getValue();
-    token = isCRTDataMode ? unencodeTokenDontRemovePlus(token) : unencodeToken(token);
+    token = allowPlusInURL ? unencodeTokenDontRemovePlus(token) : unencodeToken(token);
     return token;
   }
 
-  protected String getIDFromToken(String token) {
+  private String getIDFromToken(String token) {
     if (token.startsWith("#item=") || token.startsWith("item=")) {
       String[] split = token.split("=");
       return split[1].trim();
@@ -453,8 +462,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param result
    */
   public void makeExercisePanel(Exercise result) {
-    Panel exercisePanel = factory.getExercisePanel(result);
-    innerContainer.setWidget(exercisePanel);
+    innerContainer.setWidget(factory.getExercisePanel(result));
   }
 
   protected boolean isExercisePanelBusy() {
@@ -515,7 +523,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     html.getElement().scrollIntoView();
   }
 
-  protected void unselectCurrent() {
+  private void unselectCurrent() {
     HTML html = progressMarkers.get(currentExercise);
     html.setStyleDependentName("highlighted", false);
   }
@@ -547,7 +555,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return onLast;
   }
 
-  protected boolean isOnLastItem(int i) {
+  private boolean isOnLastItem(int i) {
     return i == currentExercises.size() - 1;
   }
 
