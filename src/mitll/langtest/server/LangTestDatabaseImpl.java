@@ -780,7 +780,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     boolean correct = scoreForAnswer > 0.5;
     db.getAnswerDAO().addAnswer((int) userID, exercise.getPlan(), exercise.getID(), "", answer, answerType, correct,
       (float) scoreForAnswer);
-
+    db.addCompleted((int) userID,exercise.getID());
     return scoreForAnswer;
   }
 
@@ -1055,7 +1055,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
     db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, serverProps.getLanguage(), useFile,
-      relativeConfigDir+File.separator+serverProps.getMediaDir(), serverProps.isRTL());
+      relativeConfigDir+File.separator+serverProps.getMediaDir());
 
     return lessonPlanFile;
   }
