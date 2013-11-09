@@ -98,7 +98,7 @@ public class ScoreFeedback {
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.TextCRTFlashcard#getScoreForGuess
+   * @see mitll.langtest.client.flashcard.TextResponse#getScoreForGuess
    * @see mitll.langtest.client.recorder.AutoCRTRecordPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
    * @param result
    * @param soundFeedback
@@ -143,7 +143,7 @@ public class ScoreFeedback {
 
     scoreFeedbackColumn.clear();
     scoreFeedbackColumn.add(getScoreFeedback());
-    getScoreFeedback().setWidth(Window.getClientWidth() * 0.5 + "px");
+    getScoreFeedback().setWidth(Math.min(300,Window.getClientWidth() * 0.5) + "px");
 
     int percent1 = (int) percent;
     getScoreFeedback().setPercent(percent1 < 40 ? 40 : percent1);   // just so the words will show up
