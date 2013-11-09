@@ -32,6 +32,11 @@ public class ExercisePanelFactory {
     this.controller = controller;
   }
 
+  /**
+   * @see mitll.langtest.client.list.ExerciseList#makeExercisePanel
+   * @param e
+   * @return
+   */
   public Panel getExercisePanel(Exercise e) {
     if (e.getType() == Exercise.EXERCISE_TYPE.RECORD) {
       if (controller.isAutoCRTMode() && !e.isPromptInEnglish()) {
