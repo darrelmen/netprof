@@ -78,6 +78,10 @@ public class UserStateWrapper {
   }
 
   public Exercise getFirst() {
+    if (exercises.isEmpty()) {
+      System.err.println("huh? no exercises in " + this);
+      return null;
+    }
     initial = false;
     return exercises.iterator().next();
   }
