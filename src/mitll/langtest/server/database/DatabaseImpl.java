@@ -191,7 +191,7 @@ public class DatabaseImpl implements Database {
    * @return
    */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    return useFile ? new FileExerciseDAO(mediaDir, language, isFlashcard) : new SQLExerciseDAO(this, mediaDir, configDir);
+    return useFile ? new FileExerciseDAO(mediaDir, language, isFlashcard) : new SQLExerciseDAO(this, mediaDir, absConfigDir);
   }
 
   /**
@@ -200,10 +200,9 @@ public class DatabaseImpl implements Database {
    * @param lessonPlanFile
    * @param language
    * @param mediaDir
-   * @param isRTL
    */
   public void setInstallPath(String installPath, String lessonPlanFile, String language,
-                             boolean useFile, String mediaDir, boolean isRTL) {
+                             boolean useFile, String mediaDir) {
    // logger.debug("got install path " + installPath + " media " + mediaDir + " is urdu " +isUrdu);
     this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
@@ -503,9 +502,12 @@ public class DatabaseImpl implements Database {
       userStateWrapper = userToState.get(userID);
       logger.info("getFlashcardResponse : for user " + userID +
         " exercises has " + exercises.size() + " user state " + userStateWrapper);// + " next = " +getNext);
-      if (userStateWrapper == null || (userStateWrapper.getNumExercises() != exercises.size())) {
+      if (userStateWrapper == null || (!exercises.isEmpty() && userStateWrapper.getNumExercises() != exercises.size())) {
         userStateWrapper = getUserStateWrapper(userID, exercises);
         userToState.put(userID, userStateWrapper);
+      }
+      else {
+        logger.debug("user state " + userStateWrapper.getNumExercises() + " vs " + exercises.size() + " now " + userStateWrapper);
       }
     }
     return userStateWrapper;
@@ -555,7 +557,7 @@ public class DatabaseImpl implements Database {
 /*    if (userState.finished()) {
       logger.info("-------------- user " + userID + " is finished ---------------- ");
     }*/
-    logger.debug("making user state for " + userID + " with " + strings.length + " exercises");
+    logger.debug("getUserStateWrapper : making user state for " + userID + " with " + strings.length + " exercises");
     userStateWrapper = new UserStateWrapper(userState, userID, exercises);
     return userStateWrapper;
   }
@@ -607,7 +609,7 @@ public class DatabaseImpl implements Database {
           }
         }
       } catch (Exception e) {
-        logger.warn("got " + e + " from updating "+ userID + " with " + exerciseID);
+        logger.error("got " + e + " from updating "+ userID + " with " + exerciseID);
         userToState.remove(userID);
       }
     }
@@ -1268,14 +1270,23 @@ public class DatabaseImpl implements Database {
                              String audioFile,
                              boolean valid, boolean flq, boolean spoken,
                              String audioType, int durationInMillis, boolean correct, float score) {
-    List<Exercise> objects = Collections.emptyList();
-    UserStateWrapper userStateWrapper = createOrGetUserState(userID, objects);
-    if (valid) userStateWrapper.addCompleted(exerciseID);
+    if (valid) addCompleted(userID, exerciseID);
 
     return answerDAO.addAnswer(this, userID, plan, exerciseID, questionID, "", audioFile, valid, flq, spoken, audioType,
       durationInMillis, correct, score, "");
   }
 
+  public void addCompleted(int userID, String exerciseID) {
+    List<Exercise> objects = Collections.emptyList();
+    UserStateWrapper userStateWrapper = createOrGetUserState(userID, objects);
+    userStateWrapper.addCompleted(exerciseID);
+  }
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getCompletedExercises(int)
+   * @param userID
+   * @return
+   */
   public Set<String> getCompletedExercises(int userID) {
     List<Exercise> objects = Collections.emptyList();
 
