@@ -67,7 +67,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @return object representing type=value pairs from history token
    */
   protected SelectionState getSelectionState(String token) {
-    return new SelectionState(token, !isCRTDataMode);
+    return new SelectionState(token, !allowPlusInURL);
   }
 
   /**
@@ -77,7 +77,9 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @return
    */
   protected String getHistoryToken(String id) {
-    if (typeToBox.isEmpty()) return History.getToken();
+    if (typeToBox.isEmpty()) {
+      return History.getToken();
+    }
     //System.out.println("getHistoryToken for " + id + " examining " +typeToBox.size() + " boxes.");
     StringBuilder builder = new StringBuilder();
     for (String type : typeToBox.keySet()) {
@@ -103,7 +105,7 @@ public class HistoryExerciseList extends PagingExerciseList {
     return builder.toString();
   }
 
-  private void setHistoryItem(String historyToken) {
+  protected void setHistoryItem(String historyToken) {
     System.out.println("------------ SectionExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
 
     History.newItem(historyToken);
@@ -120,6 +122,7 @@ public class HistoryExerciseList extends PagingExerciseList {
     System.out.println(new Date() + "------------ SectionExerciseList.pushNewItem : push history '" + historyToken + "' -------------- ");
 
     String token = History.getToken();
+    token = token.split("&")[0];
     getSelectionState(token);
     //System.out.println("pushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
     if (token != null && (historyToken.equals(token) || trimmedToken.equals(token))) {
@@ -370,7 +373,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    */
   protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
     System.out.println("HistoryExerciseList.loadExercises : " + typeToSection + " and item '" + item + "'");
-    if (isCRTDataMode) {
+    if (allowPlusInURL) {
       service.getCompletedExercises(controller.getUser(),new AsyncCallback<Set<String>>() {
         @Override
         public void onFailure(Throwable caught) {
