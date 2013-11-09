@@ -20,7 +20,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
@@ -54,6 +53,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   private CellTable<ExerciseShell> table;
   protected ExerciseController controller;
   private Set<String> completed = new HashSet<String>();
+   boolean isCRTDataMode;
 
   public interface TableResources extends CellTable.Resources {
     /**
@@ -89,12 +89,13 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
                             boolean showTurkToken, boolean showInOrder, ExerciseController controller, boolean isCRTDataMode) {
     super(currentExerciseVPanel, service, feedback, null, controller, showTurkToken, showInOrder, isCRTDataMode);
     this.controller = controller;
+    this.isCRTDataMode = controller.getProps().isCRTDataCollectMode();
     addComponents();
   }
 
   public void setCompleted(Set<String> completed) {
     this.completed = completed;
-    table.redraw();
+    if (table != null) table.redraw(); // todo check this...
   }
 
   @Override
@@ -253,9 +254,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   protected String getHistoryToken(String id) { return "item=" +id; }
 
-  protected void gotClickOnItem(final ExerciseShell e) {
-    pushNewItem(e.getID());
-  }
+  protected void gotClickOnItem(final ExerciseShell e) {  pushNewItem(e.getID());  }
 
   /**
    * @see mitll.langtest.client.list.HistoryExerciseList.MySetExercisesCallback#onSuccess
