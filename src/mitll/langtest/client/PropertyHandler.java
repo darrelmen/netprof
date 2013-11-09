@@ -81,6 +81,7 @@ public class PropertyHandler {
   private static final String SHOW_FLASHCARD_ANSWER = "showFlashcardAnswer";
   private static final String FLASHCARD_TEXT_RESPONSE = "flashcardTextResponse";
   private static final String EXERCISES_IN_ORDER = "exercisesInOrder";
+  private static final String ALLOW_PLUS_IN_URL = "allowPlusInURL";
 
   public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT, DATA_COLLECTOR }
 
@@ -131,6 +132,7 @@ public class PropertyHandler {
   private boolean showFlashcardAnswer = true;
   private boolean showExercisesInOrder = false;
   private String responseType = "Audio";
+  private boolean allowPlusInURL;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad()
@@ -187,6 +189,7 @@ public class PropertyHandler {
       else if (key.equals(FLASHCARD_TEXT_RESPONSE)) flashcardTextResponse = getBoolean(value);
       else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
       else if (key.equals(EXERCISES_IN_ORDER)) showExercisesInOrder = getBoolean(value);
+      else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(RESPONSE_TYPE)) responseType = value;
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
@@ -450,7 +453,6 @@ public class PropertyHandler {
   }
 
   public int getGameTimeSeconds() {
-    //System.out.println("game time seconds " + gameTimeSeconds);
     return gameTimeSeconds;
   }
 
@@ -492,5 +494,12 @@ public class PropertyHandler {
 
   public String getResponseType() {
     return responseType;
+  }
+  public void setResponseType(String responseType) {
+    this.responseType = responseType;
+  }
+
+  public boolean shouldAllowPlusInURL() {
+    return allowPlusInURL;
   }
 }
