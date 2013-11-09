@@ -291,7 +291,6 @@ public class SectionHelper {
   public Collection<Exercise> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection) {
     Collection<Exercise> currentList = null;
 
-
     for (Map.Entry<String, Collection<String>> pair : typeToSection.entrySet()) {
       String type = pair.getKey();
       if (isKnownType(type)) {
@@ -308,7 +307,7 @@ public class SectionHelper {
       logger.error("couldn't find any valid types given " + typeToSection);
       currentList = Collections.emptyList();
     }
-    //logger.debug("getExercisesForSelectionState : request " + typeToSection + " yielded " + currentList.size() + " exercises");
+    logger.debug("getExercisesForSelectionState : request " + typeToSection + " yielded " + currentList.size() + " exercises");
     return currentList;
   }
 
