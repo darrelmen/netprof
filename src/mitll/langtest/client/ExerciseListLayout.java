@@ -3,6 +3,7 @@ package mitll.langtest.client;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.bootstrap.ResponseExerciseList;
 import mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.list.TableSectionExerciseList;
@@ -32,7 +33,7 @@ public class ExerciseListLayout {
   public ListInterface makeFlashcardExerciseList(FluidContainer container, LangTestDatabaseAsync service,
                                                  UserManager userManager) {
     this.exerciseList = new BootstrapFlashcardExerciseList(container, service, userManager, props.isTimedGame(),
-      props.getGameTimeSeconds());
+      props.getGameTimeSeconds(), props);
     return exerciseList;
   }
 
@@ -75,10 +76,16 @@ public class ExerciseListLayout {
         boolean showSectionWidgets = props.isShowSectionWidgets();
         if (props.isFlashcardTeacherView()) {
           return new TableSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-            props.isShowTurkToken(), props.showExercisesInOrder(), showSectionWidgets, controller);
+            props.isShowTurkToken(), props.showExercisesInOrder(), controller);
         } else {
-          return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-            props.isShowTurkToken(), props.showExercisesInOrder(), showSectionWidgets, controller, props.isCRTDataCollectMode());
+          if (props.isCRTDataCollectMode()) {
+            return new ResponseExerciseList(secondRow, currentExerciseVPanel, service, feedback,
+              props.isShowTurkToken(), props.showExercisesInOrder(), controller, props.isCRTDataCollectMode());
+          }
+          else {
+            return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
+              props.isShowTurkToken(), props.showExercisesInOrder(), controller, props.isCRTDataCollectMode());
+          }
         }
       } else {
         return new PagingExerciseList(currentExerciseVPanel, service, feedback,
