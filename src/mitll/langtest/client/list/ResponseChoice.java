@@ -22,7 +22,7 @@ import com.google.gwt.user.client.ui.Panel;
  * Time: 3:29 PM
  * To change this template use File | Settings | File Templates.
  */
-class ResponseChoice {
+public class ResponseChoice {
   private String responseType;
   ChoiceMade choiceMade = null;
 
@@ -30,10 +30,10 @@ class ResponseChoice {
     this.responseType = responseType;
   }
 
-/*  public ResponseChoice(String responseType, ChoiceMade choiceMade) {
+  public ResponseChoice(String responseType, ChoiceMade choiceMade) {
     this.responseType = responseType;
     this.choiceMade = choiceMade;
-  }*/
+  }
 
   public static interface ChoiceMade {
     void choiceMade(String responseType);
@@ -98,6 +98,7 @@ class ResponseChoice {
     instructions.add(child1);
     return instructions;
   }
+
   private void setDisplay(String responseType, Heading responseTypeDisplay) {
     if(responseType.equals("Both")) {
       responseTypeDisplay.setText("<i class='icon-microphone'></i><i class='icon-pencil'></i>&nbsp;"+responseType);
