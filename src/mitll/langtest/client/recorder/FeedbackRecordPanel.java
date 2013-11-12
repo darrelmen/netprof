@@ -29,6 +29,7 @@ import java.util.Set;
  */
 public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
   private AutoCRTRecordPanel autoCRTRecordPanel;
+  TextResponse textResponse;
   private Set<Widget> completed = new HashSet<Widget>();
 
   public FeedbackRecordPanel(Exercise e, LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller) {
@@ -80,7 +81,7 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
 
   private Panel doText(Exercise exercise, final LangTestDatabaseAsync service,final ExerciseController controller,
                        final Widget outer, final String responseType) {
-    TextResponse textResponse = new TextResponse(controller.getUser(), soundFeedback,
+    textResponse = new TextResponse(controller.getUser(), soundFeedback,
       new TextResponse.AnswerPosted() {
         @Override
         public void answerPosted() {
@@ -142,4 +143,11 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
 
   @Override
   protected String getInstructions() {  return "";  }
+
+  @Override
+  protected void onUnload() {
+    super.onUnload();
+    if (autoCRTRecordPanel != null) autoCRTRecordPanel.onUnload();
+    if (textResponse != null) textResponse.onUnload();
+  }
 }
