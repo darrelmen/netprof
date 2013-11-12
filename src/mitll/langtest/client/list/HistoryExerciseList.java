@@ -106,8 +106,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   }
 
   protected void setHistoryItem(String historyToken) {
-    System.out.println("------------ SectionExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
-
+    System.out.println("------------ HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
     History.newItem(historyToken);
   }
 
@@ -119,10 +118,10 @@ public class HistoryExerciseList extends PagingExerciseList {
   protected void pushNewItem(String exerciseID) {
     String historyToken = getHistoryToken(exerciseID);
     String trimmedToken = historyToken.length() > 2? historyToken.substring(0,historyToken.length()-2) : historyToken;
-    System.out.println(new Date() + "------------ SectionExerciseList.pushNewItem : push history '" + historyToken + "' -------------- ");
+    System.out.println(new Date() + "------------ HistoryExerciseList.pushNewItem : push history '" + historyToken + "' -------------- ");
 
     String token = History.getToken();
-    token = token.split("&")[0];
+    token = getSelectionFromToken(token);
     getSelectionState(token);
     //System.out.println("pushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
     if (token != null && (historyToken.equals(token) || trimmedToken.equals(token))) {
@@ -338,7 +337,6 @@ public class HistoryExerciseList extends PagingExerciseList {
 
     if (item != null && item.length() > 0 && hasExercise(item)) {
       if (includeItemInBookmark) {
-    //    System.out.println("onValueChange : loading item " + item);
         loadByIDFromToken(item);
       }
       else {
@@ -346,16 +344,9 @@ public class HistoryExerciseList extends PagingExerciseList {
       }
     } else {
       String token = event.getValue();
-    //  System.out.println("onValueChange '" + token + "'");
       try {
         SelectionState selectionState = getSelectionState(token);
         restoreListBoxState(selectionState);
-        //Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
-
-       // System.out.println("onValueChange '" + token + "' type->section " + typeToSection);
-
-      //  setOtherListBoxes(typeToSection);
-
         loadExercises(selectionState.getTypeToSection(), selectionState.getItem());
       } catch (Exception e) {
         System.out.println("onValueChange " + token + " badly formed. Got " + e);
@@ -377,7 +368,6 @@ public class HistoryExerciseList extends PagingExerciseList {
       service.getCompletedExercises(controller.getUser(),new AsyncCallback<Set<String>>() {
         @Override
         public void onFailure(Throwable caught) {
-          //To change body of implemented methods use File | Settings | File Templates.
         }
 
         @Override
@@ -431,8 +421,7 @@ public class HistoryExerciseList extends PagingExerciseList {
               loadFirstExercise();
             }
             else {
-              System.out.println("\tMySetExercisesCallback.onSuccess :");
-
+              //System.out.println("\tMySetExercisesCallback.onSuccess :");
             }
           } else {
             System.out.println("\tMySetExercisesCallback.onSuccess : item is null");
