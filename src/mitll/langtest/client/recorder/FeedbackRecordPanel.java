@@ -3,6 +3,7 @@ package mitll.langtest.client.recorder;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -68,25 +69,38 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
       return getVerticalPanel(autoCRTRecordPanel.getPanel(), new ScoreFeedback(true),true);
     }
     else if (responseType.equalsIgnoreCase("Text")){
-      Panel widget = doText(exercise, service, controller, outer);
-      return widget;
+      return doText(exercise, service, controller, outer, responseType);
     }
     else {
-      Panel widget = doText(exercise, service, controller, outer);
-
+      Panel widget = doText(exercise, service, controller, outer, responseType);
       widget.add(getVerticalPanel(autoCRTRecordPanel.getPanel(), new ScoreFeedback(true), true));
       return widget;
     }
   }
 
-  private Panel doText(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final Widget outer) {
-    TextResponse textResponse = new TextResponse(controller.getUser(),soundFeedback,
+  private Panel doText(Exercise exercise, final LangTestDatabaseAsync service,final ExerciseController controller,
+                       final Widget outer, final String responseType) {
+    TextResponse textResponse = new TextResponse(controller.getUser(), soundFeedback,
       new TextResponse.AnswerPosted() {
-      @Override
-      public void answerPosted() {
-        recordCompleted(outer);
-      }
-    });
+        @Override
+        public void answerPosted() {
+          recordCompleted(outer);
+          if (responseType.equalsIgnoreCase("Text")) {
+            service.getCompletedExercises(controller.getUser(), new AsyncCallback<Set<String>>() {
+              @Override
+              public void onFailure(Throwable caught) {
+                //To change body of implemented methods use File | Settings | File Templates.
+              }
+
+              @Override
+              public void onSuccess(Set<String> result) {
+                controller.getExerciseList().setCompleted(result);
+                controller.showProgress();
+              }
+            });
+          }
+        }
+      });
 
     FluidContainer container = new FluidContainer();
     textResponse.addWidgets(container,exercise,service,controller,false, true);
