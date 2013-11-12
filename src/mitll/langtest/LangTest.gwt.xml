@@ -19,6 +19,9 @@
   <inherits name="org.moxieapps.gwt.highcharts.Highcharts"/>
 
   <set-property name="bootstrap.responsiveDesign" value="true"/>
+<!--
+  <inherits name="com.google.gwt.activity.Activity" />
+-->
 
   <!-- <inherits name='com.google.gwt.user.theme.standard.Standard'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
