@@ -73,7 +73,6 @@ public class ExerciseListLayout {
         true, props.isEnglishOnlyMode(), controller);
     } else {
       if (props.isShowSections()) {
-        boolean showSectionWidgets = props.isShowSectionWidgets();
         if (props.isFlashcardTeacherView()) {
           return new TableSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
             props.isShowTurkToken(), props.showExercisesInOrder(), controller);
