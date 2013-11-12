@@ -55,8 +55,14 @@ public class SelectionState {
   }
 
   boolean debug = false;
+
+  /**
+   * Deals with responseType being on the URL.
+   * @param token
+   */
   private void parseToken(String token) {
-    token = token.split("&")[0];
+    token = token.contains("###") ? token.split("###")[0] : token;
+
     String[] parts = token.split(";");
 
     for (String part : parts) {
