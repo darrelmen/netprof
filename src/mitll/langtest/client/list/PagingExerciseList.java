@@ -101,7 +101,10 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   @Override
   public int getPercentComplete() {
     if (isCRTDataMode) {
-      return (int) (100f * ((float) completed.size() / (float) currentExercises.size()));
+      int i = (int) Math.ceil(100f * ((float) completed.size() / (float) currentExercises.size()));
+      if (i > 100) i = 100;
+      //System.out.println("completed " + completed.size() + " current " + currentExercises.size() + " " + i);
+      return i;
     } else {
       return super.getPercentComplete();
     }
