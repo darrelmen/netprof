@@ -163,7 +163,7 @@ public class TextResponse {
     if (answerPosted != null) answerPosted.answerPosted();
   }
 
-  protected void onUnload() {
+  public void onUnload() {
     enterKeyButtonHelper.removeKeyHandler();
   }
 
