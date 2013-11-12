@@ -159,7 +159,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   private void pushFirstSelection(String exerciseID) {
     String token = History.getToken();
-    token = token.split("&")[0]; // remove any other parameters
+    token = getSelectionFromToken(token);
     String idFromToken = getIDFromToken(token);
     System.out.println("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
       "' vs new exercise " +exerciseID);
@@ -170,6 +170,16 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     else {
       pushNewItem(exerciseID);
     }
+  }
+
+  /**
+   * Deal with responseType being after ###
+   * @param token
+   * @return
+   */
+  protected String getSelectionFromToken(String token) {
+    token = token.contains("###") ? token.split("###")[0] : token; // remove any other parameters
+    return token;
   }
 
   /**
@@ -314,7 +324,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         if (e != null) toLoad = e;
       }
 
-      //System.out.println("loadFirstExercise ex id =" + toLoad.getID());
       pushFirstSelection(toLoad.getID());
       return toLoad;
     }
@@ -345,8 +354,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param event
    */
   public void onValueChange(ValueChangeEvent<String> event) {
-    // This method is called whenever the application's history changes. Set
-    // the label to reflect the current history token.
+    // Set the label to reflect the current history token. (?)
     String value = event.getValue();
     String token = getTokenFromEvent(event);
     String id = getIDFromToken(token);
@@ -624,7 +632,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     leftColumn.addStyleName("minWidth");
     DOM.setStyleAttribute(leftColumn.getElement(), "paddingRight", "10px");
 
-    //leftColumnContainer.add(leftColumn);
     if (!props.isFlashcardTeacherView() && !props.isMinimalUI()) {
       Heading items = new Heading(4, ITEMS);
       items.addStyleName("center");
