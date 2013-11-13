@@ -86,6 +86,17 @@ public class GradedExerciseList extends PagingExerciseList {
     getNextUngraded(false);
   }
 
+  @Override
+  protected void loadExercises(String selectionState, String prefix) {
+/*    Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
+    lastReqID++;
+    if (typeToSection.isEmpty()) {
+      service.getExerciseIds(lastReqID, userID,prefix, new SetExercisesCallback());
+    } else {
+      service.getExercisesForSelectionState(lastReqID, typeToSection, userID, prefix, new MySetExercisesCallback(null));
+    }*/
+  }
+
   private void getNextUngraded(final boolean showFirstIfNoneToGrade) {
     final PopupPanel popup = getPopup2("Please wait...");
     final Timer t = new Timer() {
