@@ -9,7 +9,6 @@ import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.list.TableSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.grading.GradedExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -72,7 +71,7 @@ public class ExerciseListLayout {
       return new GradedExerciseList(currentExerciseVPanel, service, feedback,
         true, props.isEnglishOnlyMode(), controller);
     } else {
-      if (props.isShowSections()) {
+    //  if (props.isShowSections()) {
         if (props.isFlashcardTeacherView()) {
           return new TableSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
             props.isShowTurkToken(), props.showExercisesInOrder(), controller);
@@ -86,10 +85,11 @@ public class ExerciseListLayout {
               props.isShowTurkToken(), props.showExercisesInOrder(), controller, props.isCRTDataCollectMode());
           }
         }
-      } else {
+      //}
+       /*else {
         return new PagingExerciseList(currentExerciseVPanel, service, feedback,
           props.isShowTurkToken(), props.showExercisesInOrder(), controller, props.isCRTDataCollectMode());
-      }
+      }*/
     }
   }
 
