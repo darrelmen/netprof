@@ -630,18 +630,18 @@ public class ASRScoring extends Scoring {
 
   private boolean checkToken(String token) {
     boolean valid = true;
-    boolean digit = false;
-    boolean english = false;
+  //  boolean digit = false;
+  //  boolean english = false;
     if (token.equalsIgnoreCase(SmallVocabDecoder.UNKNOWN_MODEL)) return true;
     for (int i = 0; i < token.length() && valid; i++) {
       char c = token.charAt(i);
       if (Character.isDigit(c)) {
         valid = false;
-        digit = true;
+    //    digit = true;
       }
       if (Character.UnicodeBlock.of(c) == Character.UnicodeBlock.BASIC_LATIN) {
         valid = false;
-        english = true;
+    //    english = true;
       }
     }
     //if (!valid) logger.warn((digit ? " found digit in " : (english ? " found english in " : "huh? invalid ?")) + token);
