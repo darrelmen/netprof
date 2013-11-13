@@ -150,4 +150,8 @@ public interface LangTestDatabase extends RemoteService {
   void addDLIUser(DLIUser dliUser);
 
   Set<String> getCompletedExercises(int user);
+
+  ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix);
+
+  ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix);
 }
