@@ -48,6 +48,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence" +
     " and speech occur, or whether the mic is working properly.";
   public static final int IMAGE_WIDTH_SLOP = 100;
+  private static final boolean WARN_ABOUT_MISSING_AUDIO = false;
+
   private final ScoreListener gaugePanel;
   protected String audioPath;
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
@@ -316,7 +318,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
           if (!result.successful) {
             System.err.println("got error for request for type " + type);
-            Window.alert("missing audio file on server " + path);
+            if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
           }
           else if (isMostRecentRequest(type,result.req)) {
             imageAndCheck.image.setUrl(result.imageURL);
