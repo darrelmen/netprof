@@ -1,21 +1,30 @@
 package mitll.langtest.client.list;
 
+import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.ControlLabel;
+import com.github.gwtbootstrap.client.ui.Controls;
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.SimplePager;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -39,7 +48,7 @@ import java.util.Set;
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingExerciseList extends ExerciseList implements RequiresResize {
+public abstract class PagingExerciseList extends ExerciseList implements RequiresResize {
   private static final int MAX_LENGTH_ID = 27;
   protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
   protected int KLUDGE_AMT = 120;
@@ -119,10 +128,49 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   protected void addComponents() {
-    addTableWithPager();
+    FlowPanel column = new FlowPanel();
+    add(column);
+
+    final TextBox typeahead = new TextBox();
+    //column.add(typeahead);
+
+    typeahead.addKeyUpHandler(new KeyUpHandler() {
+      public void onKeyUp(KeyUpEvent event) {
+
+//        boolean b = typeahead.getText().length() > 0;
+        String text = typeahead.getText();
+        System.out.println("looking for '" + text+ "' (" +text.length()+ " chars)");
+        loadExercises(getHistoryToken(""), text);
+
+      }
+    });
+
+    addControlGroupEntry(column,"Search",typeahead);
+    Scheduler.get().scheduleDeferred(new Command() {
+      public void execute() {
+        typeahead.setFocus(true);
+      }
+    });
+
+    addTableWithPager(column);
   }
 
-  protected void addTableWithPager() {
+  protected abstract void loadExercises(String selectionState, String prefix);
+
+  private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
+    final ControlGroup userGroup = new ControlGroup();
+    userGroup.addStyleName("leftFiveMargin");
+
+    Controls controls = new Controls();
+    userGroup.add(new ControlLabel(label));
+    controls.add(user);
+    userGroup.add(controls);
+
+    dialogBox.add(userGroup);
+    return userGroup;
+  }
+
+  protected void addTableWithPager(Panel columnToAddTo) {
     makeCellTable();
 
     // Create a data provider.
@@ -137,10 +185,8 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     // Set the cellList as the display.
     pager.setDisplay(table);
 
-    FlowPanel column = new FlowPanel();
-    add(column);
-    column.add(pager);
-    column.add(table);
+    columnToAddTo.add(pager);
+    columnToAddTo.add(table);
   }
 
   protected CellTable<Exercise> makeCellTable() {
