@@ -43,7 +43,7 @@ public abstract class PostAudioRecordButton extends RecordButton {
    */
   public PostAudioRecordButton(Exercise exercise, ExerciseController controller, LangTestDatabaseAsync service,
                                int index, Image recordImage1, Image recordImage2) {
-    super(new Button(RECORD), controller.getRecordTimeout(), recordImage1, recordImage2, true);
+    super(new Button(RECORD), controller.getRecordTimeout(), recordImage1, recordImage2, controller.shouldAddRecordKeyBinding());
     ((Button)getRecord()).setType(ButtonType.PRIMARY);
 
     this.index = index;
