@@ -29,7 +29,7 @@ import java.util.Set;
  */
 public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
   private AutoCRTRecordPanel autoCRTRecordPanel;
-  TextResponse textResponse;
+  private TextResponse textResponse;
   private Set<Widget> completed = new HashSet<Widget>();
 
   public FeedbackRecordPanel(Exercise e, LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller) {
