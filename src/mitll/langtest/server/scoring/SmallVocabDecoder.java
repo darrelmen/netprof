@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import mitll.langtest.server.ProcessRunner;
 import mitll.langtest.server.database.FileExerciseDAO;
 
 import org.apache.log4j.Logger;
@@ -314,7 +313,7 @@ public class SmallVocabDecoder {
    * @param pathToBinDir
    * @return
    */
-  private File runNgramCount(String tmpDir, String srllmOut, File lmFile, String vocabFile, String pathToBinDir, boolean isSmall) {
+/*  private File runNgramCount(String tmpDir, String srllmOut, File lmFile, String vocabFile, String pathToBinDir, boolean isSmall) {
     String srilm = tmpDir + File.separator + srllmOut;
     ProcessBuilder soxFirst = isSmall ? new ProcessBuilder(pathToBinDir +File.separator+"ngram-count",
         "-text",
@@ -326,8 +325,8 @@ public class SmallVocabDecoder {
         "-order",
       MAX_ORDER,
         "-cdiscount",
-        "0.0001"/*,
-        "-unk"*/
+        "0.0001"*//*,
+        "-unk"*//*
     ) : new ProcessBuilder(pathToBinDir +File.separator+"ngram-count",
         "-text",
         lmFile.getAbsolutePath(),
@@ -342,8 +341,8 @@ public class SmallVocabDecoder {
         "-order",
       MAX_ORDER,
         "-kndiscount",
-        "-interpolate"/*,
-        "-unk"*/
+        "-interpolate"*//*,
+        "-unk"*//*
     );
 
     logger.info("ran " +pathToBinDir +File.separator+"ngram-count"+" "+
@@ -358,8 +357,8 @@ public class SmallVocabDecoder {
         "-order"+" "+
       MAX_ORDER +" "+
         "-kndiscount"+" "+
-        "-interpolate"/*+" "+
-        "-unk"*/);
+        "-interpolate"*//*+" "+
+        "-unk"*//*);
 
     try {
       new ProcessRunner().runProcess(soxFirst);
@@ -382,8 +381,8 @@ public class SmallVocabDecoder {
             "-order",
           MAX_ORDER,
             "-cdiscount",
-            "0.0001"/*,
-            "-unk"*/);
+            "0.0001"*//*,
+            "-unk"*//*);
 
         try {
           new ProcessRunner().runProcess(soxFirst2);
@@ -398,7 +397,7 @@ public class SmallVocabDecoder {
       logger.error("didn't make " + srilm);
     }
     return new File(srilm);
-  }
+  }*/
 
   /**
    * By default the weight is 0.8 for the foreground model.
@@ -410,7 +409,7 @@ public class SmallVocabDecoder {
    * @param pathToBinDir
    * @return
    */
-  private File runNgram(String tmpDir, String srilmOut, File foregroundLM, File backgroundLM, String pathToBinDir) {
+/*  private File runNgram(String tmpDir, String srilmOut, File foregroundLM, File backgroundLM, String pathToBinDir) {
     String srilm = tmpDir + File.separator + srilmOut;
     ProcessBuilder ngram = new ProcessBuilder(pathToBinDir +File.separator+"ngram",
         "-lm",
@@ -421,7 +420,7 @@ public class SmallVocabDecoder {
         backgroundLM.getAbsolutePath(),
         "-order",
       MAX_ORDER,
-       /* "-unk",*/
+       *//* "-unk",*//*
         "-write-lm",
         srilm,
         "-write-vocab",
@@ -436,7 +435,7 @@ public class SmallVocabDecoder {
 
     if (!new File(srilm).exists()) logger.error("didn't make " + srilm);
     return new File(srilm);
-  }
+  }*/
 
 
   /**
@@ -445,7 +444,7 @@ public class SmallVocabDecoder {
    * @param srilmFile                                                                       -
    * @param pathToBinDir
    */
-  private String runHBuild(String tmpDir, File srilmFile, String pathToBinDir) {
+/*  private String runHBuild(String tmpDir, File srilmFile, String pathToBinDir) {
     logger.info("running hbuild on " + srilmFile);
     String slfOut = tmpDir + File.separator + "smallOctalLMFromHBuild.slf";
     ProcessBuilder soxFirst = new ProcessBuilder(pathToBinDir +File.separator+"HBuild",
@@ -466,7 +465,7 @@ public class SmallVocabDecoder {
 
     if (!new File(slfOut).exists()) logger.error("runHBuild didn't make " + slfOut);
     return slfOut;
-  }
+  }*/
 
 /*
   public static void main(String []arg) {
