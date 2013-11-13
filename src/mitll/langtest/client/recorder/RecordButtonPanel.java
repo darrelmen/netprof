@@ -1,6 +1,5 @@
 package mitll.langtest.client.recorder;
 
-import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
@@ -11,9 +10,9 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.shared.AudioAnswer;
@@ -81,7 +80,9 @@ public class RecordButtonPanel {
   }
 
   protected RecordButton makeRecordButton(final ExerciseController controller, final RecordButtonPanel outer) {
-    return new RecordButton(recordButton, controller.getRecordTimeout(), recordImage1, recordImage2, controller.shouldAddRecordKeyBinding()) {
+    boolean addKeyHandler = controller.shouldAddRecordKeyBinding();
+    System.out.println("\n\n\nshould add key handler " + addKeyHandler);
+    return new RecordButton(recordButton, controller.getRecordTimeout(), recordImage1, recordImage2, addKeyHandler) {
       @Override
       protected void stopRecording() {
         outer.stopRecording();
