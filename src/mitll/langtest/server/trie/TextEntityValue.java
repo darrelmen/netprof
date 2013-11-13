@@ -1,5 +1,7 @@
 package mitll.langtest.server.trie;
 
+import mitll.langtest.shared.Exercise;
+
 /**
  * Created with IntelliJ IDEA.
  * User: go22670
@@ -9,4 +11,5 @@ package mitll.langtest.server.trie;
  */
 public interface TextEntityValue {
   String getNormalizedValue();
+  Exercise getExercise();
 }
