@@ -9,8 +9,16 @@ package mitll.langtest.server.trie;
  */
 
 
-import java.io.Serializable;
-import java.util.*;
+import mitll.langtest.shared.Exercise;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 /**
  * A tree-like data structure that enables quick lookup due to sharing common prefixes (using Aho Corasick algorithm).
@@ -19,7 +27,7 @@ import java.util.*;
 public class Trie /*implements Serializable*/ {
 
   private static final boolean USE_SINGLE_TOKEN_MAP = false;
-  private static final boolean SPLIT_ON_CHARACTERS = false;
+  private static final boolean SPLIT_ON_CHARACTERS = true;
   private TrieNode root;
   //private Pattern pattern; // put back if for some reason we have non-space whitespace separators in database (?)
   private Map<String,TextEntityValue> singleTokenMap;
@@ -27,7 +35,7 @@ public class Trie /*implements Serializable*/ {
   private boolean convertToUpper = true;
 
   public Trie() {
-    this(true);
+    this(false);
   }
 
   public Trie(boolean convertToUpper) {
@@ -46,8 +54,21 @@ public class Trie /*implements Serializable*/ {
     build(entryList);
   }
 
-  public TrieNode getRoot() {
+  private TrieNode getRoot() {
     return root;
+  }
+
+  public List<EmitValue> getEmits(String toMatch) {
+    TrieNode start = getRoot();
+    for (String c : getChars(toMatch)) {
+      start = start.getNextState(c);
+      if (start == null) break;
+    }
+   // TrieNode he = getRoot().getNextState(toMatch);
+    if (start == null) return Collections.emptyList();
+    else {
+      return start.getEmitsBelow();
+    }
   }
 
   /**
@@ -55,12 +76,12 @@ public class Trie /*implements Serializable*/ {
    *
    * @param entryList
    */
-  public void build(List<TextEntityValue> entryList) {
+  private void build(List<TextEntityValue> entryList) {
     makeNodes(entryList);
     computeFailureFunction();
   }
 
-  public void build2(List<String> entryList) {
+  private void build2(List<String> entryList) {
     makeNodes2(entryList);
     computeFailureFunction();
   }
@@ -151,8 +172,8 @@ public class Trie /*implements Serializable*/ {
     }
 
     TrieNode currentState = root;
-    for (int i = 0; i < n; i++) {
-      String upperCaseToken = convertToUpper ? split.get(i).toUpperCase() : split.get(i);
+    for (String aSplit : split) {
+      String upperCaseToken = convertToUpper ? aSplit.toUpperCase() : aSplit;
 
       // avoid keeping references to duplicate strings
       String uniqueCopy = getUnique(stringCache, upperCaseToken);
@@ -263,10 +284,14 @@ public class Trie /*implements Serializable*/ {
   }
 
   private static class MyTextEntityValue implements TextEntityValue {
-
     private final String entry;
     public MyTextEntityValue(String entry) {
       this.entry = entry;
+    }
+
+    @Override
+    public Exercise getExercise() {
+      return null;
     }
 
     @Override
@@ -280,12 +305,12 @@ public class Trie /*implements Serializable*/ {
     Trie trie = new Trie(false);
 
     String [] str =  {"he went","he goes","he goes home","he goes to work","he returns","hello!","hi","hi there"};
-    List<String> entryList =
-        Arrays.asList(str);
+    List<String> entryList = Arrays.asList(str);
     trie.build2(entryList);
     TrieNode root1 = trie.getRoot();
     System.out.println("got 1 " + root1);
 
+    if (false) {
     TrieNode he = root1.getNextState("he");
     System.out.println("got 2 " + he + " emits " + (he != null ? he.getEmitList() : "null"));
     TrieNode e = he != null ?he.getNextState("goes") : null;
@@ -293,6 +318,19 @@ public class Trie /*implements Serializable*/ {
 
     TrieNode ee = e != null ?e.getNextState("home") : null;
     System.out.println("got 4 " + ee + " emits " + (ee != null ? ee.getEmitList() : "null"));
+    }
+    else {
+      TrieNode he = root1.getNextState("h");
+      System.out.println("got 2 " + he + " emits " + (he != null ? he.getEmitList() : "null"));
+      System.out.println("got 2 " + he + " emits " + (he != null ? he.getEmitsBelow() : "null"));
+      TrieNode e = he != null ?he.getNextState("he") : null;
+      System.out.println("got 3 " + e + " emits " + (e != null ? e.getEmitsBelow() : "null"));
+
+      System.out.println("h = " +trie.getEmits("h"));
+      System.out.println("he = " +trie.getEmits("he"));
+      System.out.println("hel = " +trie.getEmits("hel"));
+      System.out.println("hi = " +trie.getEmits("hi"));
+    }
  //   System.out.println("got 4 " + e.getNextState("l"));
   //  System.out.println("got " + trie.getSingleTokenValue("hel"));
   }
