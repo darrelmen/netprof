@@ -61,7 +61,7 @@ public class SectionExerciseList extends HistoryExerciseList {
   @Override
   protected void addComponents() {
     add(sectionPanel = new VerticalPanel());
-    addTableWithPager();
+    addTableWithPager(null);
   }
 
   /**
