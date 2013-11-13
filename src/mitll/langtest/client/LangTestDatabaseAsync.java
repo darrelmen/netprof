@@ -134,4 +134,8 @@ public interface LangTestDatabaseAsync {
   void addDLIUser(DLIUser dliUser, AsyncCallback<Void> async);
 
   void getCompletedExercises(int user, AsyncCallback<Set<String>> async);
+
+  void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
+
+  void getExerciseIds(int reqID, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
 }

@@ -39,18 +39,30 @@ public class TrieNode {
     this.singleNode = null;
   }
 
-  public boolean hasEmitValues() {
+  private boolean hasEmitValues() {
     return emitList != null && !emitList.isEmpty();
   }
 
+  /**
+   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
+   * @return
+   */
   public List<EmitValue> getEmitList() {
     return emitList;
   }
 
+  /**
+   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
+   * @return
+   */
   public TrieNode getFailureNode() {
     return failureNode;
   }
 
+  /**
+   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
+   * @return
+   */
   public boolean hasTransitionLabel(String transitionLabel) {
     return getNextState(transitionLabel) != null;
   }
@@ -67,7 +79,23 @@ public class TrieNode {
     return gotoMap != null ? gotoMap.get(transitionLabel) : null;
   }
 
-  // everything below is used just during trie construction
+  public List<EmitValue> getEmitsBelow() {
+    List<EmitValue> emits = new ArrayList<EmitValue>();
+    if (emitList != null) {
+      emits.addAll(emitList);
+    }
+    if (singleNode != null) {
+      emits.addAll(singleNode.getEmitsBelow());
+    }
+    else if (gotoMap != null) {
+      for (TrieNode child : gotoMap.values()) {
+        emits.addAll(child.getEmitsBelow());
+      }
+    }
+    return emits;
+  }
+
+  // everything below is used just during trie construction ---------------------------------------------------------
 
   /**
    * @see Trie#addEntryToTrie(TextEntityValue, java.util.Map)
@@ -114,6 +142,10 @@ public class TrieNode {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
+   * @return
+   */
   Collection<String> getTransitionLabels() {
     if (singleTransition != null) {
       return Collections.singleton(singleTransition);
@@ -126,6 +158,10 @@ public class TrieNode {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
+   * @return
+   */
   Collection<TrieNode> getTransitionValues() {
     if (singleNode != null) {
       return Collections.singleton(singleNode);
@@ -143,6 +179,7 @@ public class TrieNode {
    *
    * ONLY use this during building the tree!
    *
+   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    * @param transitionLabel
    * @return node for label
    */
@@ -154,7 +191,7 @@ public class TrieNode {
   }
 
   public String toString() {
-    return singleTransition != null ? (singleTransition + "=[" + singleNode +"] ") : gotoMap != null ? gotoMap.toString() : "" + "" +
+    return singleTransition != null ? (singleTransition + "=[" + singleNode +"]") : gotoMap != null ? gotoMap.toString() : "" + "" +
         (hasEmitValues() ? emitList.size() == 1 ? emitList.iterator().next() : emitList : "");
   }
 }
