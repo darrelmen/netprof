@@ -1,5 +1,7 @@
 package mitll.langtest.server.trie;
 
+import mitll.langtest.shared.Exercise;
+
 /**
  * Created with IntelliJ IDEA.
  * User: go22670
@@ -19,6 +21,7 @@ public class EmitValue {
   public TextEntityValue getTextEntityDescription() {
     return textEntityDescription;
   }
+  public Exercise getExercise() { return textEntityDescription.getExercise(); }
   public String toString() { return textEntityDescription == null ? "huh?" : "'"+textEntityDescription.getNormalizedValue() + "'"
       //+
       //" : " +n
