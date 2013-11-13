@@ -8,8 +8,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ResponseChoice;
-import mitll.langtest.client.places.ResponseTypeView;
-import mitll.langtest.client.places.WirePlaces;
+
 import mitll.langtest.client.user.UserFeedback;
 
 /**
@@ -19,7 +18,7 @@ import mitll.langtest.client.user.UserFeedback;
  * Time: 4:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ResponseExerciseList extends FlexSectionExerciseList implements ResponseTypeView {
+public class ResponseExerciseList extends FlexSectionExerciseList /*implements ResponseTypeView*/ {
   private ResponseChoice responseChoice;
   //WirePlaces wirePlaces;
 
@@ -70,8 +69,8 @@ public class ResponseExerciseList extends FlexSectionExerciseList implements Res
     return widget;
   }
 
-  @Override
+/*  @Override
   public void selectResponseType(String responseType) {
     controller.getProps().setResponseType(responseType);
-  }
+  }*/
 }
