@@ -287,6 +287,7 @@ public class SectionHelper {
      *
      * @param typeToSection
      * @return
+     * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesForSelectionState(int, java.util.Map, long)
      */
   public Collection<Exercise> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection) {
     Collection<Exercise> currentList = null;
