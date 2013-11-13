@@ -93,17 +93,15 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   }
 
   @Override
-  public void clear() {
-    removeComponents();
-  }
+  public void clear() {  removeComponents();  }
 
   protected void noSectionsGetExercises(long userID) {
     Map<String, Collection<String>> objectObjectMap = Collections.emptyMap();
     addTableToLayout(objectObjectMap);
   }
 
-    @Override
-  protected void addTableWithPager() {  }
+  @Override
+  protected void addTableWithPager(Panel columnToAddTo) {}
 
   @Override
   protected Widget addBottomText(FluidContainer container) {
