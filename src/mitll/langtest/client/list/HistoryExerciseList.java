@@ -391,10 +391,26 @@ public class HistoryExerciseList extends PagingExerciseList {
     }
   }
 
+  protected void loadExercises(String selectionState, String prefix) {
+    Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
+    if (prefix.isEmpty()) {
+      reallyLoadExercises(typeToSection, null);
+    } else {
+      lastReqID++;
+      System.out.println("looking for '" + prefix+ "' (" +prefix.length()+ " chars)");
+
+      if (typeToSection.isEmpty()) {
+        service.getExerciseIds(lastReqID, userID, prefix, new SetExercisesCallback());
+      } else {
+        service.getExercisesForSelectionState(lastReqID, typeToSection, userID, prefix, new MySetExercisesCallback(null));
+      }
+    }
+  }
+
   /**
    * Ask the server for the items for the type->item map.  Remember the results and select the first one.
    */
-  private class MySetExercisesCallback extends SetExercisesCallback {
+  protected class MySetExercisesCallback extends SetExercisesCallback {
     private final String item;
 
     /**
