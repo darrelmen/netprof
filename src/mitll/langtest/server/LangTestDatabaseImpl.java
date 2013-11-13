@@ -14,29 +14,29 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.SectionHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
+import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.DLIUser;
-import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ExerciseShell;
-import mitll.langtest.shared.flashcard.FlashcardResponse;
-import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.ImageResponse;
-import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.grade.ResultsAndGrades;
-import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.SectionNode;
-import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.flashcard.FlashcardResponse;
+import mitll.langtest.shared.flashcard.Leaderboard;
+import mitll.langtest.shared.flashcard.ScoreInfo;
+import mitll.langtest.shared.grade.CountAndGradeID;
+import mitll.langtest.shared.grade.Grade;
+import mitll.langtest.shared.grade.ResultsAndGrades;
+import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
-import scala.actors.threadpool.Arrays;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -45,6 +45,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -177,13 +178,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public ExerciseListWrapper getExerciseIds(int reqID, long userID) {
     logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
     List<Exercise> exercises = getExercises(userID);
-    if (serverProps.isGoodwaveMode() && !serverProps.dataCollectMode) {
-      exercises = getSortedExercises(exercises);
-      if (!exercises.isEmpty()) logger.debug("sorting by id -- first is " + exercises.get(0).getID());
-    }
-    List<ExerciseShell> ids = getExerciseShells(exercises);
-    logMemory();
-    return new ExerciseListWrapper(reqID,ids);
+    return getExerciseListWrapper(reqID, exercises);
   }
 
   private List<ExerciseShell> getExerciseShells(Collection<Exercise> exercises) {
@@ -194,10 +189,30 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return ids;
   }
 
+  @Override
+  public ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix) {
+    logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
+    ExerciseTrie trie = new ExerciseTrie(getExercises(userID));
+    List<Exercise> exercisesForPrefix = trie.getExercises(prefix);
+
+    return getExerciseListWrapper(reqID, exercisesForPrefix);
+  }
+
+  private ExerciseListWrapper getExerciseListWrapper(int reqID, List<Exercise> exercisesForPrefix) {
+    if (serverProps.isGoodwaveMode() && !serverProps.dataCollectMode) {
+      exercisesForPrefix = getSortedExercises(exercisesForPrefix);
+      if (!exercisesForPrefix.isEmpty()) logger.debug("sorting by id -- first is " + exercisesForPrefix.get(0).getID());
+    }
+
+    List<ExerciseShell> ids = getExerciseShells(exercisesForPrefix);
+    logMemory();
+    return new ExerciseListWrapper(reqID,ids);
+  }
+
   /**
    * Don't randomize order if we're in netProF (formerly goodwave) mode.
    *
-   * @see mitll.langtest.client.list.section.SectionExerciseList#loadExercises
+   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises
    * @param reqID
    * @param typeToSection
    * @param userID
@@ -205,18 +220,26 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
+    return new ExerciseListWrapper(reqID, getExerciseShells(getExercisesForState(reqID,typeToSection,userID)));
+  }
+
+  @Override
+  public ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix) {
+    List<Exercise> exercisesForState = getExercisesForState(reqID, typeToSection, userID);
+
+    ExerciseTrie trie = new ExerciseTrie(exercisesForState);
+    List<Exercise> exercises = trie.getExercises(prefix);
+
+    return new ExerciseListWrapper(reqID, getExerciseShells(exercises));
+  }
+
+  private List<Exercise> getExercisesForState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
     logger.debug("getExercisesForSelectionState req " + reqID+ " for " + typeToSection + " and " +userID);
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     if (serverProps.sortExercises() || serverProps.isGoodwaveMode() || serverProps.isFlashcardTeacherView()) {
-     // logger.debug("\tsorting");
-
-      List<Exercise> copy = getSortedExercises(exercisesForSection);
-      return new ExerciseListWrapper(reqID, getExerciseShells(copy));
+      return getSortedExercises(exercisesForSection);
     } else {
-      logger.debug("\t *not* sorting");
-
-      List<Exercise> exercisesBiasTowardsUnanswered = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection, serverProps.shouldUseWeights());
-      return new ExerciseListWrapper(reqID, getExerciseShells(exercisesBiasTowardsUnanswered));
+      return db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection, serverProps.shouldUseWeights());
     }
   }
 
@@ -766,7 +789,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.TextCRTFlashcard#getScoreForGuess
+   * @see mitll.langtest.client.flashcard.TextResponse#getScoreForGuess
    * @param userID
    * @param exercise
    * @param questionID
