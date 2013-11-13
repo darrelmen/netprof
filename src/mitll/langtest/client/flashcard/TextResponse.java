@@ -33,18 +33,21 @@ public class TextResponse {
   private static final int FEEDBACK_HEIGHT = 40;
 
   private EnterKeyButtonHelper enterKeyButtonHelper;
-
   private ScoreFeedback textScoreFeedback;
   private SoundFeedback soundFeedback;
   private int user;
+  private AnswerPosted answerPosted;
 
-  AnswerPosted answerPosted;
-
+  /**
+   * @see TextCRTFlashcard#makeNavigationHelper(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController)
+   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#doText(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Widget, String)
+   * @param user to whom to file this answer under
+   * @param soundFeedback so we can play a sound when the answer is correct or incorrect
+   * @param answerPosted callback for when the user types in an answer and the post to the server has completed
+   */
   public TextResponse(int user, SoundFeedback soundFeedback, AnswerPosted answerPosted) {
     this.user = user;
-
     this.soundFeedback = soundFeedback;
-
     this.answerPosted = answerPosted;
   }
 
@@ -78,7 +81,7 @@ public class TextResponse {
     return centered ? getRecordButtonRow(row) : row;
   }
 
-  protected FluidRow getRecordButtonRow(Widget recordButton) {
+  private FluidRow getRecordButtonRow(Widget recordButton) {
     FluidRow recordButtonRow = new FluidRow();
     Paragraph recordButtonContainer = new Paragraph();
     recordButtonContainer.addStyleName("alignCenter");
@@ -114,7 +117,7 @@ public class TextResponse {
       noPasteAnswer.addStyleName("rightAlign");
     }
 
-    noPasteAnswer.setFocus(true);
+  //  noPasteAnswer.setFocus(true);
     noPasteAnswer.addStyleName("topMargin");
     noPasteAnswer.addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
@@ -145,7 +148,7 @@ public class TextResponse {
       @Override
       public void onSuccess(Double result) {
         check.setEnabled(true);
-        gotScoreForGuess(result, check);
+        gotScoreForGuess(result);
       }
     });
   }
@@ -153,11 +156,8 @@ public class TextResponse {
   /**
    * @see #getScoreForGuess(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.shared.Exercise, com.github.gwtbootstrap.client.ui.Button, ScoreFeedback, String)
    * @param result
-   * @param check
-   * @paramx responseType
-   * @paramx navigationHelper
    */
-  private void gotScoreForGuess(Double result, Button check) {
+  private void gotScoreForGuess(Double result) {
     getTextScoreFeedback().showCRTFeedback(result, soundFeedback, "Score ", false);
     getTextScoreFeedback().hideFeedback();
     if (answerPosted != null) answerPosted.answerPosted();
