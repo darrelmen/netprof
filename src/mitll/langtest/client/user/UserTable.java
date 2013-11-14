@@ -1,12 +1,8 @@
 package mitll.langtest.client.user;
 
-import com.google.gwt.cell.client.CheckboxCell;
-import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
@@ -27,30 +23,13 @@ public class UserTable extends PagerTable {
   private static final int PAGE_SIZE = 5;
   private Widget lastTable = null;
   private Button closeButton;
-  private boolean showEnabled = false;
 
   /**
    * @see mitll.langtest.client.LangTest#getLogout()
    */
-  public void showUsers(final LangTestDatabaseAsync service, int userid, boolean isDataCollectAdminView) {
-    if (isDataCollectAdminView) {
-      service.isAdminUser(userid, new AsyncCallback<Boolean>() {
-        @Override
-        public void onFailure(Throwable caught) {
-        }
+  public void showUsers(final LangTestDatabaseAsync service, int userid) { showDialog(service);  }
 
-        @Override
-        public void onSuccess(Boolean result) {
-          showEnabled = result;
-          showDialog(service);
-        }
-      });
-    } else {
-      showDialog(service);
-    }
-  }
-
-  private void showDialog(final LangTestDatabaseAsync service) {
+  protected void showDialog(final LangTestDatabaseAsync service) {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Registered Users");
@@ -112,69 +91,7 @@ public class UserTable extends PagerTable {
     id.setSortable(true);
     table.addColumn(id, "ID");
 
-    TextColumn<User> userID = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) {
-        return "" + contact.userID;
-      }
-    };
-    userID.setSortable(true);
-    table.addColumn(userID, "User ID");
-
-    if (showEnabled) {
-      CheckboxCell checkboxCell = new CheckboxCell(false, false);
-
-      Column<User, Boolean> checkColumn = new Column<User, Boolean>(checkboxCell) {
-        @Override
-        public Boolean getValue(User object) {
-          // Get the value from the selection model.
-          return object.enabled;
-        }
-
-        @Override
-        public void setFieldUpdater(FieldUpdater<User, Boolean> fieldUpdater) {
-          super.setFieldUpdater(fieldUpdater);    //To change body of overridden methods use File | Settings | File Templates.
-        }
-      };
-
-      checkColumn.setFieldUpdater(new FieldUpdater<User, Boolean>() {
-        @Override
-        public void update(int index, User object, Boolean value) {
-          System.out.println("got " + index +  " " + object + " value " + value);
-          service.setUserEnabled(object.id, value, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              Window.alert("setUserEnabled couldn't contact server.");
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-
-            }
-          });
-        }
-      });
-
-      table.addColumn(checkColumn, "Enabled");
-      table.setColumnWidth(checkColumn, 40, Style.Unit.PX);
-    }
-/*    TextColumn<User> firstName = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) {
-        return "" + contact.firstName;
-      }
-    };
-    firstName.setSortable(true);
-    table.addColumn(firstName, "First");
-
-    TextColumn<User> lastName = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) {
-        return "" + contact.lastName;
-      }
-    };
-    lastName.setSortable(true);
-    table.addColumn(lastName, "Last");*/
+    addUserIDColumns(service, table);
 
     TextColumn<User> lang = new TextColumn<User>() {
       @Override
@@ -217,7 +134,13 @@ public class UserTable extends PagerTable {
       public String getValue(User contact) {
         int experience1 = contact.experience;
         String exp = "" + experience1 + " months";
-        if (contact.getDemographics() != null) exp = contact.getDemographics().toString();
+        if (contact.getDemographics() != null) {
+          exp = contact.getDemographics().toString();
+        }
+        String prefix = "user id " + contact.id + " has ";
+        if (exp.startsWith(prefix)) {
+          exp = exp.substring(prefix.length());
+        }
         return exp;
       }
     };
@@ -232,6 +155,15 @@ public class UserTable extends PagerTable {
     };
     items.setSortable(true);
     table.addColumn(items, "Num Results");
+
+    TextColumn<User> rate = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return "" + roundToHundredth(contact.getRate());
+      }
+    };
+    rate.setSortable(true);
+    table.addColumn(rate, "Rate(sec)");
 
     TextColumn<User> ipaddr = new TextColumn<User>() {
       @Override
@@ -305,5 +237,20 @@ public class UserTable extends PagerTable {
     // Create a SimplePager.
    // return getPagerAndTable(table, table, 10, 10);
     return getOldSchoolPagerAndTable(table, table, 10, 10);
+  }
+
+  private float roundToHundredth(double totalHours) {
+    return ((float)((Math.round(totalHours*100))))/100f;
+  }
+
+  protected void addUserIDColumns(final LangTestDatabaseAsync service, CellTable<User> table) {
+    TextColumn<User> userID = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return "" + contact.userID;
+      }
+    };
+    userID.setSortable(true);
+    table.addColumn(userID, "User ID");
   }
 }
