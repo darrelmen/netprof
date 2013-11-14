@@ -168,10 +168,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     final VerticalPanel vp = new VerticalPanel();
 
-    CaptionPanel cpContent = new CaptionPanel(INSTRUCTIONS);
+    //CaptionPanel cpContent = new CaptionPanel(INSTRUCTIONS);
     Widget questionContent = new HTML(content);
-    cpContent.setContentWidget(questionContent);
-    vp.add(cpContent);
+    //cpContent.setContentWidget(questionContent);
+    vp.add(questionContent);
 
     if (path != null) {
       ensureMP3(e, path, vp);
