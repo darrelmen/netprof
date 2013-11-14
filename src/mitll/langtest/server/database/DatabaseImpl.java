@@ -115,7 +115,6 @@ public class DatabaseImpl implements Database {
     this.doImages = serverProps.doImages();
     this.language = serverProps.getLanguage();
     this.isFlashcard = serverProps.isFlashcard();
-    //this.usePredefinedTypeOrder =  serverProps.usePredefinedTypeOrder();
     this.serverProps = serverProps;
 
     try {
@@ -177,7 +176,7 @@ public class DatabaseImpl implements Database {
   public void closeConnection(Connection connection) throws SQLException {}
 
   public Export getExport() {
-    if (exerciseDAO == null) logger.error("huh? exercise dao is null?");
+    //if (exerciseDAO == null) logger.error("huh? exercise dao is null?");
     return new Export(exerciseDAO,resultDAO,gradeDAO);
   }
 
@@ -1115,26 +1114,42 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
+   *
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUsers()
    * @return
    */
   public List<User> getUsers() {
-    Map<Long,Integer> idToCount = new HashMap<Long, Integer>();
-
-    for (Result r : resultDAO.getResults()) {
-      Integer count = idToCount.get(r.userid);
-      if (count == null) idToCount.put(r.userid, 1);
-      else idToCount.put(r.userid, count+1);
-    }
+    Map<Long, Float> userToRate = resultDAO.getSessions().userToRate;
+    Map<Long, Integer> idToCount = populateUserToNumAnswers();
     List<User> users = userDAO.getUsers();
 
     for (User u : users) {
       Integer numResults = idToCount.get(u.id);
       if (numResults != null) {
         u.setNumResults(numResults);
+
+        if (userToRate.containsKey(u.id)) {
+          u.setRate(userToRate.get(u.id));
+        }
       }
     }
 
+    joinWithDLIUsers(users);
+    return users;
+  }
+
+  private Map<Long, Integer> populateUserToNumAnswers() {
+    Map<Long,Integer> idToCount = new HashMap<Long, Integer>();
+    for (Result r : resultDAO.getResults()) {
+      Integer count = idToCount.get(r.userid);
+      if (count == null) idToCount.put(r.userid, 1);
+      else idToCount.put(r.userid, count+1);
+    }
+    return idToCount;
+  }
+
+  private void joinWithDLIUsers(List<User> users) {
     List<DLIUser> users1 = dliUserDAO.getUsers();
     Map<Long, User> userMap = userDAO.getMap(users);
 
@@ -1142,11 +1157,9 @@ public class DatabaseImpl implements Database {
       User user = userMap.get(dliUser.getUserID());
       if (user != null) {
         user.setDemographics(dliUser);
-        //logger.debug("joined with " +dliUser + " : " + user);
       }
     }
     if (users1.isEmpty()) logger.info("no dli users.");
-    return users;
   }
 
   /**
@@ -1345,12 +1358,13 @@ public class DatabaseImpl implements Database {
   public Map<User, Integer> getUserToResultCount() { return monitoringSupport.getUserToResultCount(); }
 
   /**
-   * Determine sessions per user.  If two consecutive items are more than {@link MonitoringSupport#SESSION_GAP} seconds
+   * Determine sessions per user.  If two consecutive items are more than {@link ResultDAO#SESSION_GAP} seconds
    * apart, then we've reached a session boundary.
    * Remove all sessions that have just one answer - must be test sessions.
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getSessions()
    * @return list of duration and numAnswer pairs
    */
-  public List<Session> getSessions() { return monitoringSupport.getSessions(); }
+  public List<Session> getSessions() { return monitoringSupport.getSessions().sessions; }
 
  /**
    * TODO : worry about duplicate userid?
