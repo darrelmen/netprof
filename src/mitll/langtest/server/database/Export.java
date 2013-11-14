@@ -200,7 +200,7 @@ public class Export {
   private void addPredefinedAnswers(Exercise exercise, boolean useFLQ, Map<Integer, ExerciseExport> qidToExport) {
     int qid;List<Exercise.QAPair> qaPairs = useFLQ ? exercise.getForeignLanguageQuestions() : exercise.getEnglishQuestions();
     qid = 1;
-    int count = 0;
+    //int count = 0;
     for (Exercise.QAPair q : qaPairs) {
       ExerciseExport exerciseExport = qidToExport.get(qid);
 
@@ -212,7 +212,7 @@ public class Export {
             logger.warn("huh? alternate answer is empty??? for " + q + " in " + exercise.getID());
           } else {
             exerciseExport.addRG(answer, 5);
-            count++;
+            //count++;
           }
         }
         //logger.debug("for " + exercise.getID() + " export is " + exerciseExport);
