@@ -136,6 +136,7 @@ public class PropertyHandler {
   private boolean showExercisesInOrder = false;
   private String responseType = "Audio";
   private boolean allowPlusInURL;
+  //private boolean showProgressBar;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad()
