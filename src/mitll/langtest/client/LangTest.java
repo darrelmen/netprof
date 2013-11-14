@@ -55,6 +55,7 @@ import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
+import mitll.langtest.client.user.AdminUserTable;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
@@ -77,7 +78,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private final Label status = new Label();
 
   private UserManager userManager;
-  private final UserTable userTable = new UserTable();
+  private UserTable userTable;
   private ResultManager resultManager;
   private MonitoringManager monitoringManager;
   private FlashRecordPanelHeadless flashRecordPanel;
@@ -830,7 +831,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     users = new Anchor("Users");
     users.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        userTable.showUsers(service, userManager.getUser(), isDataCollectAdminView);
+        userTable = isDataCollectAdminView ? new AdminUserTable() : new UserTable();
+        userTable.showUsers(service, userManager.getUser());
       }
     });
     users.setVisible(props.isAdminView());
