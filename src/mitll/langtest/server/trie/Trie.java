@@ -24,12 +24,10 @@ import java.util.Queue;
  * A tree-like data structure that enables quick lookup due to sharing common prefixes (using Aho Corasick algorithm).
  *
  */
-public class Trie /*implements Serializable*/ {
-
+public class Trie {
   private static final boolean USE_SINGLE_TOKEN_MAP = false;
   private static final boolean SPLIT_ON_CHARACTERS = true;
   private TrieNode root;
-  //private Pattern pattern; // put back if for some reason we have non-space whitespace separators in database (?)
   private Map<String,TextEntityValue> singleTokenMap;
   private Map<String,String> tempCache;
   private boolean convertToUpper = true;
@@ -41,31 +39,36 @@ public class Trie /*implements Serializable*/ {
   public Trie(boolean convertToUpper) {
     this.convertToUpper = convertToUpper;
     this.root = new TrieNode();
-    //this.pattern = Pattern.compile("\\s+");
     this.singleTokenMap = new HashMap<String,TextEntityValue>();
   }
 
   /**
    * Just for testing.
-   * @param entryList
+   * @paramx entryList
    */
-  public Trie(List<TextEntityValue> entryList) {
+/*  public Trie(List<TextEntityValue> entryList) {
     this();
     build(entryList);
-  }
+  }*/
 
   private TrieNode getRoot() {
     return root;
   }
 
-  public List<EmitValue> getEmits(String toMatch) {
+  /**
+   * @see ExerciseTrie#getExercises(String)
+   * @param toMatch
+   * @return
+   */
+  List<EmitValue> getEmits(String toMatch) {
     TrieNode start = getRoot();
     for (String c : getChars(toMatch)) {
       start = start.getNextState(c);
       if (start == null) break;
     }
-   // TrieNode he = getRoot().getNextState(toMatch);
-    if (start == null) return Collections.emptyList();
+    if (start == null) {
+      return Collections.emptyList();
+    }
     else {
       return start.getEmitsBelow();
     }
@@ -139,14 +142,6 @@ public class Trie /*implements Serializable*/ {
   public boolean addEntryToTrie(final String entry) {
     return addEntryToTrie(new MyTextEntityValue(entry), tempCache);
   }
- /* public boolean addEntryToTrie2(final String entry) {
-    StringBuilder builder = new StringBuilder();
-    for (int i =0; i < entry.length(); i++) {
-      builder.append(entry.charAt(i));
-      return addEntryToTrie(new MyTextEntityValue(builder.toString()), tempCache);
-
-    }
-  }*/
 
   /**
    * addEntryToTrie is a method to implement algorithm 2 in the AC paper
@@ -210,11 +205,6 @@ public class Trie /*implements Serializable*/ {
     }
     return toAdd;
   }
-
- /*   private List<String> getSpaceSeparatedTokensByPattern(String normalizedValue) {
-       String[] tokenArray = pattern.split(normalizedValue);
-       return Arrays.asList(tokenArray);
-    }*/
 
   /**
    * Faster to use this than a pattern by approximately 12%.
@@ -330,6 +320,7 @@ public class Trie /*implements Serializable*/ {
       System.out.println("he = " +trie.getEmits("he"));
       System.out.println("hel = " +trie.getEmits("hel"));
       System.out.println("hi = " +trie.getEmits("hi"));
+      System.out.println("xx = " +trie.getEmits("xx"));
     }
  //   System.out.println("got 4 " + e.getNextState("l"));
   //  System.out.println("got " + trie.getSingleTokenValue("hel"));
