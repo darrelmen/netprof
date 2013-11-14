@@ -103,7 +103,7 @@ public class OutsideCount {
       genderToPhraseToCount.put(false, new HashMap<String, Integer>());
       line2 = reader.readLine();
       int totalMales =0;
-      int dups = 0;
+      //int dups = 0;
 
       //Writer w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file.getName() + "_dups.txt"), "UTF-8"));
       //Writer w2 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file.getName() + "_all.txt"), "UTF-8"));
@@ -131,7 +131,7 @@ public class OutsideCount {
             //    logger.warn("line # " + count+" : male huh? we've seen phrase " + phrase + " before?");
             //   w.write(phrase+"\n");
             males.put(phrase, males.get(phrase) + maleCount);
-            dups++;
+           // dups++;
           } else {
             males.put(phrase, maleCount);
           }
