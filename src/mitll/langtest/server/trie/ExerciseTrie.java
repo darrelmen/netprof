@@ -22,12 +22,17 @@ public class ExerciseTrie extends Trie {
     startMakingNodes();
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory()/ MB ;
+   // logger.debug("getExercisesForSelectionState : before " + free);
 
     long then = System.currentTimeMillis();
 
     for (Exercise e : exercisesForState) {
-      addEntryToTrie(new ExerciseWrapper(e, true));
-      if (includeForeign) addEntryToTrie(new ExerciseWrapper(e, false));
+      if (e.getEnglishSentence() != null) {
+        addEntryToTrie(new ExerciseWrapper(e, true));
+      }
+      if (includeForeign) {
+        addEntryToTrie(new ExerciseWrapper(e, false));
+      }
     }
     endMakingNodes();
     long now = System.currentTimeMillis();
@@ -39,6 +44,9 @@ public class ExerciseTrie extends Trie {
 
     if (freeAfter-free > 10) {
       logMemory();
+    }
+    else {
+     // logger.debug("getExercisesForSelectionState : after " + freeAfter);
     }
   }
 
@@ -54,27 +62,29 @@ public class ExerciseTrie extends Trie {
     for (EmitValue ev : emits) {
       ids.add(ev.getExercise());
     }
-    logger.debug("for '" +prefix + "' got " + ids.size() + " matches");
+    logger.debug("getExercises : for '" +prefix + "' got " + ids.size() + " matches");
     return ids;
   }
 
   private static class ExerciseWrapper implements TextEntityValue {
-    String value; Exercise e;
+    private String value;
+    private Exercise e;
 
+    /**
+     * @see ExerciseTrie#ExerciseTrie(java.util.Collection, boolean)
+     * @param e
+     * @param useEnglish
+     */
     public ExerciseWrapper(Exercise e, boolean useEnglish) {
       value = (useEnglish ? e.getEnglishSentence() : e.getRefSentence());
       this.e = e;
     }
 
     @Override
-    public Exercise getExercise() {
-      return e;  //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public Exercise getExercise() { return e; }
 
     @Override
-    public String getNormalizedValue() {
-      return value;
-    }
+    public String getNormalizedValue() { return value; }
   }
 
   private long logMemory() {
