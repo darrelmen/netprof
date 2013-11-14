@@ -24,6 +24,7 @@ public class User implements IsSerializable, Comparable<User> {
   public boolean admin;
   private int numResults;
   private Demographics demographics;
+  private float rate = 0.0f;
 
   public User() {} // for serialization
 
@@ -81,10 +82,18 @@ public class User implements IsSerializable, Comparable<User> {
     else return "";
   }
 
+  /**
+   * @see mitll.langtest.client.user.UserTable#getTable
+   * @return
+   */
   public int getNumResults() {
     return numResults;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getUsers
+   * @param numResults
+   */
   public void setNumResults(int numResults) {
     this.numResults = numResults;
   }
@@ -95,6 +104,14 @@ public class User implements IsSerializable, Comparable<User> {
 
   public void setDemographics(Demographics demographics) {
     this.demographics = demographics;
+  }
+
+  public void setRate(float rate) {
+    this.rate = rate;
+  }
+
+  public float getRate() {
+    return rate;
   }
 
   @Override
