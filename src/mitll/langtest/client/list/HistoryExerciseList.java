@@ -97,9 +97,6 @@ public class HistoryExerciseList extends PagingExerciseList {
 
       builder.append(historyToken);
     }*/
-/*    if (false && builder.toString().length() > 0) {
-      System.out.println("getHistoryToken for " + id + " is " +builder);
-    }*/
    System.out.println("\tgetHistoryToken for " + id + " is '" +builder.toString() + "'");
 
     return builder.toString();
@@ -323,8 +320,6 @@ public class HistoryExerciseList extends PagingExerciseList {
     return selectionState2.keySet();
   }
 
-  protected void gotEmptyExerciseList() {}
-
   /**
      * Respond to push a history token.
      * @param event
@@ -367,18 +362,37 @@ public class HistoryExerciseList extends PagingExerciseList {
     if (allowPlusInURL) {
       service.getCompletedExercises(controller.getUser(),new AsyncCallback<Set<String>>() {
         @Override
-        public void onFailure(Throwable caught) {
-        }
+        public void onFailure(Throwable caught) {}
 
         @Override
         public void onSuccess(Set<String> result) {
           controller.getExerciseList().setCompleted(result);
-          reallyLoadExercises(typeToSection, item);
+          loadExercisesUsingPrefix(typeToSection, getPrefix());
         }
       });
     }
     else {
-      reallyLoadExercises(typeToSection, item);
+      loadExercisesUsingPrefix(typeToSection, getPrefix());
+    }
+  }
+
+  protected void loadExercises(String selectionState, String prefix) {
+    Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
+    loadExercisesUsingPrefix(typeToSection, prefix);
+  }
+
+  private void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix) {
+    if (prefix.isEmpty()) {
+      reallyLoadExercises(typeToSection, null);
+    } else {
+      lastReqID++;
+      System.out.println("looking for '" + prefix + "' (" + prefix.length() + " chars) in context of " + typeToSection);
+
+      if (typeToSection.isEmpty()) {
+        service.getExerciseIds(lastReqID, userID, prefix, new SetExercisesCallback());
+      } else {
+        service.getExercisesForSelectionState(lastReqID, typeToSection, userID, prefix, new MySetExercisesCallback(null));
+      }
     }
   }
 
@@ -388,22 +402,6 @@ public class HistoryExerciseList extends PagingExerciseList {
     } else {
       lastReqID++;
       service.getExercisesForSelectionState(lastReqID, typeToSection, userID, new MySetExercisesCallback(item));
-    }
-  }
-
-  protected void loadExercises(String selectionState, String prefix) {
-    Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
-    if (prefix.isEmpty()) {
-      reallyLoadExercises(typeToSection, null);
-    } else {
-      lastReqID++;
-      System.out.println("looking for '" + prefix+ "' (" +prefix.length()+ " chars)");
-
-      if (typeToSection.isEmpty()) {
-        service.getExerciseIds(lastReqID, userID, prefix, new SetExercisesCallback());
-      } else {
-        service.getExercisesForSelectionState(lastReqID, typeToSection, userID, prefix, new MySetExercisesCallback(null));
-      }
     }
   }
 
@@ -428,6 +426,7 @@ public class HistoryExerciseList extends PagingExerciseList {
       } else {
         if (result.exercises.isEmpty()) {
           gotEmptyExerciseList();
+          rememberExercises(result.exercises);
         } else {
           if (item != null) {
             rememberExercises(result.exercises);
