@@ -332,7 +332,7 @@ public class MonitoringSupport {
         " result keys but only " + idToCount.keySet().size() + " exercise keys.");
     }
     else {
-      boolean b = resultKeys.removeAll(idToCount.keySet());
+      /*boolean b =*/ resultKeys.removeAll(idToCount.keySet());
       if (!resultKeys.isEmpty()) {
         logger.error("some result keys are not in the exercise keys " + resultKeys);
       }
