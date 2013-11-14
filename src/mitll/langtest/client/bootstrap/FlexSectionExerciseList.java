@@ -30,6 +30,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -256,7 +257,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
         Panel rowContainer = new FlowPanel();
         rowContainer.addStyleName("rowPadding");
 
-        System.out.println("addButtonRow adding row for " + subType + " under " + sectionInFirstType);
+       // System.out.println("addButtonRow adding row for " + subType + " under " + sectionInFirstType);
 
         HorizontalPanel rowForChildren = new HorizontalPanel();
         rowForChildren.setWidth("100%");
@@ -528,8 +529,12 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     listBox.enableAll();
   }
 
+  /**
+   * @see HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
+   */
   protected void gotEmptyExerciseList() {
-    new ModalInfoDialog("Empty selection", "The selected sections don't overlap.  Try clearing one of your selections.");
+    List<String> strings = Arrays.asList("No items match the selection and search.", "Try clearing one of your selections or changing the search.");
+    new ModalInfoDialog("Empty selection", strings);
   }
 
   /**
