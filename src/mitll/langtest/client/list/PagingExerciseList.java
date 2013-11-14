@@ -48,7 +48,7 @@ import java.util.Set;
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class PagingExerciseList extends ExerciseList implements RequiresResize {
+public class PagingExerciseList extends ExerciseList implements RequiresResize {
   private static final int MAX_LENGTH_ID = 30;
   protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
   protected int KLUDGE_AMT = 120;
@@ -112,7 +112,7 @@ public abstract class PagingExerciseList extends ExerciseList implements Require
     if (isCRTDataMode) {
       int i = (int) Math.ceil(100f * ((float) completed.size() / (float) currentExercises.size()));
       if (i > 100) i = 100;
-      //System.out.println("completed " + completed.size() + " current " + currentExercises.size() + " " + i);
+      System.out.println("completed " + completed.size() + " current " + currentExercises.size() + " " + i);
       return i;
     } else {
       return super.getPercentComplete();
@@ -127,30 +127,30 @@ public abstract class PagingExerciseList extends ExerciseList implements Require
     }
   }
 
-  private TextBox typeahead = null;
+  private TextBox typeAhead = null;
   private String lastValue = "";
   protected void addComponents() {
     FlowPanel column = new FlowPanel();
     add(column);
 
     if (!isCRTDataMode) {
-      typeahead = new TextBox();
+      typeAhead = new TextBox();
 
-      typeahead.addKeyUpHandler(new KeyUpHandler() {
+      typeAhead.addKeyUpHandler(new KeyUpHandler() {
         public void onKeyUp(KeyUpEvent event) {
-          String text = typeahead.getText();
-          System.out.println("looking for '" + text + "' (" + text.length() + " chars)");
+          String text = typeAhead.getText();
           if (!text.equals(lastValue)) {
+            System.out.println("looking for '" + text + "' (" + text.length() + " chars)");
             loadExercises(getHistoryToken(""), text);
             lastValue = text;
           }
         }
       });
 
-      addControlGroupEntry(column, "Search", typeahead);
+      addControlGroupEntry(column, "Search", typeAhead);
       Scheduler.get().scheduleDeferred(new Command() {
         public void execute() {
-          typeahead.setFocus(true);
+          typeAhead.setFocus(true);
         }
       });
     }
@@ -158,8 +158,14 @@ public abstract class PagingExerciseList extends ExerciseList implements Require
     addTableWithPager(column);
   }
 
-  protected abstract void loadExercises(String selectionState, String prefix);
-  protected String getPrefix() { return typeahead == null ? "" : typeahead.getText(); }
+  protected void loadExercises(String selectionState, String prefix) {
+    lastReqID++;
+    System.out.println("looking for '" + prefix + "' (" + prefix.length() + " chars)");
+
+    service.getExerciseIds(lastReqID, controller.getUser(), prefix, new SetExercisesCallback());
+  }
+
+  protected String getPrefix() { return typeAhead == null ? "" : typeAhead.getText(); }
 
   private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
     final ControlGroup userGroup = new ControlGroup();
@@ -406,7 +412,7 @@ public abstract class PagingExerciseList extends ExerciseList implements Require
   }
 
   protected int getTableHeaderHeight() {
-    return controller.getHeightOfTopRows();
+    return controller.getHeightOfTopRows() + 75;
   }
 
   /**
