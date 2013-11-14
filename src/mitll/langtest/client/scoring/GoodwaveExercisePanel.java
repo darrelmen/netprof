@@ -42,7 +42,7 @@ import mitll.langtest.shared.Exercise;
 public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize {
   private static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
   private static final String USER_RECORDER = "User Recorder";
-  private static final String INSTRUCTIONS = "Instructions";
+  //private static final String INSTRUCTIONS = "Instructions";
   private boolean isBusy = false;
   private static final String FAST = "Regular";
   private static final String SLOW = "Slow";
