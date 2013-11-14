@@ -156,6 +156,14 @@ public class Exercise extends ExerciseShell {
 
   public ExerciseShell getShell() { return new ExerciseShell(getID(), getTooltip()); }
 
+  public ExerciseShell getShellCombinedTooltip() {
+    String refSentence = getRefSentence();
+    if (refSentence.length() > 15) {
+      refSentence = refSentence.substring(0, 15);
+    }
+    return new ExerciseShell(getID(), getTooltip() + " / " + refSentence);
+  }
+
   public void addQuestion() {
     addQuestion(FL, "Please record the sentence above.", "", EMPTY_LIST);
   }
