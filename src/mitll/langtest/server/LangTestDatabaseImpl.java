@@ -968,9 +968,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public Set<String> getCompletedExercises(int user) {  return db.getCompletedExercises(user);  }
 
-  void makeAutoCRT() {
-    audioFileHelper.makeAutoCRT(relativeConfigDir, this, studentAnswersDB, this);
-  }
+  void makeAutoCRT() { audioFileHelper.makeAutoCRT(relativeConfigDir, this, studentAnswersDB, this); }
 
   @Override
   public Map<User, Integer> getUserToResultCount() {
@@ -1012,6 +1010,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getDesiredCounts();
   }
 
+  /**
+   * @see mitll.langtest.client.monitoring.MonitoringManager#doSessionQuery(com.google.gwt.user.client.ui.Panel)
+   * @return
+   */
   public List<Session> getSessions() {
     return db.getSessions();
   }
@@ -1131,7 +1133,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
-    logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
+    //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
     return new DatabaseImpl(configDir, h2DatabaseFile, relativeConfigDir,  serverProps);
   }
 }
