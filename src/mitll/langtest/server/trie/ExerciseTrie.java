@@ -18,19 +18,16 @@ public class ExerciseTrie extends Trie {
   private static final Logger logger = Logger.getLogger(ExerciseTrie.class);
   private static final int MB = (1024 * 1024);
 
-  public ExerciseTrie(Collection<Exercise> exercisesForState) {
-    //Trie trie = new Trie();
+  public ExerciseTrie(Collection<Exercise> exercisesForState, boolean includeForeign) {
     startMakingNodes();
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory()/ MB ;
-
-    //logMemory();
 
     long then = System.currentTimeMillis();
 
     for (Exercise e : exercisesForState) {
       addEntryToTrie(new ExerciseWrapper(e, true));
-      addEntryToTrie(new ExerciseWrapper(e, false));
+      if (includeForeign) addEntryToTrie(new ExerciseWrapper(e, false));
     }
     endMakingNodes();
     long now = System.currentTimeMillis();
@@ -45,6 +42,12 @@ public class ExerciseTrie extends Trie {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds(int, long, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesForSelectionState(int, java.util.Map, long, String)
+   * @param prefix
+   * @return
+   */
   public List<Exercise> getExercises(String prefix) {
     List<EmitValue> emits = getEmits(prefix);
     List<Exercise> ids = new ArrayList<Exercise>();
