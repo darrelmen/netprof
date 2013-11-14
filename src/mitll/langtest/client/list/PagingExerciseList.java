@@ -49,7 +49,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class PagingExerciseList extends ExerciseList implements RequiresResize {
-  private static final int MAX_LENGTH_ID = 27;
+  private static final int MAX_LENGTH_ID = 30;
   protected static final int PAGE_SIZE = 15;   // TODO : make this sensitive to vertical real estate?
   protected int KLUDGE_AMT = 120;
   private ListDataProvider<ExerciseShell> dataProvider;
@@ -62,7 +62,7 @@ public abstract class PagingExerciseList extends ExerciseList implements Require
   private CellTable<ExerciseShell> table;
   protected ExerciseController controller;
   private Set<String> completed = new HashSet<String>();
-   boolean isCRTDataMode;
+  private boolean isCRTDataMode;
 
   public interface TableResources extends CellTable.Resources {
     /**
@@ -127,35 +127,35 @@ public abstract class PagingExerciseList extends ExerciseList implements Require
     }
   }
 
+  TextBox typeahead = null;
   protected void addComponents() {
     FlowPanel column = new FlowPanel();
     add(column);
 
-    final TextBox typeahead = new TextBox();
-    //column.add(typeahead);
+    if (!isCRTDataMode) {
+      typeahead = new TextBox();
 
-    typeahead.addKeyUpHandler(new KeyUpHandler() {
-      public void onKeyUp(KeyUpEvent event) {
+      typeahead.addKeyUpHandler(new KeyUpHandler() {
+        public void onKeyUp(KeyUpEvent event) {
+          String text = typeahead.getText();
+          System.out.println("looking for '" + text + "' (" + text.length() + " chars)");
+          loadExercises(getHistoryToken(""), text);
+        }
+      });
 
-//        boolean b = typeahead.getText().length() > 0;
-        String text = typeahead.getText();
-        System.out.println("looking for '" + text+ "' (" +text.length()+ " chars)");
-        loadExercises(getHistoryToken(""), text);
-
-      }
-    });
-
-    addControlGroupEntry(column,"Search",typeahead);
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-        typeahead.setFocus(true);
-      }
-    });
+      addControlGroupEntry(column, "Search", typeahead);
+      Scheduler.get().scheduleDeferred(new Command() {
+        public void execute() {
+          typeahead.setFocus(true);
+        }
+      });
+    }
 
     addTableWithPager(column);
   }
 
   protected abstract void loadExercises(String selectionState, String prefix);
+  protected String getPrefix() { return typeahead == null ? "" : typeahead.getText(); }
 
   private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
     final ControlGroup userGroup = new ControlGroup();
