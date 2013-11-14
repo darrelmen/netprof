@@ -330,8 +330,6 @@ public class MonitoringManager {
         final int badRecordings = result.get("badRecordings").intValue();
 
         vp.add(addGradeInfo(result));
-
-
         vp.add(new HTML("<h2>Session Info</h2>"));
 
         service.getSessions(new AsyncCallback<List<Session>>() {
@@ -346,11 +344,11 @@ public class MonitoringManager {
             Map<Long,Integer> rateToCount = new HashMap<Long, Integer>();
             for (Session s: sessions) {
               totalTime += s.duration;
-              total += s.numAnswers;
+              total += s.getNumAnswers();
 
               Integer count = rateToCount.get(s.getSecAverage());
-              if (count == null) rateToCount.put(s.getSecAverage(), s.numAnswers);
-              else rateToCount.put(s.getSecAverage(),count+s.numAnswers);
+              if (count == null) rateToCount.put(s.getSecAverage(), s.getNumAnswers());
+              else rateToCount.put(s.getSecAverage(),count+ s.getNumAnswers());
             }
             FlexTable flex=  new FlexTable();
             int row = 0;
