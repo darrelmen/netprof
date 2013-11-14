@@ -13,13 +13,17 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -27,6 +31,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -38,6 +43,7 @@ import mitll.langtest.shared.ExerciseShell;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -239,16 +245,25 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     public void onFailure(Throwable caught) {
       feedback.showErrorMessage("Server error", "SetExercisesCallback : Server error - couldn't get exercises.");
     }
-
     public void onSuccess(ExerciseListWrapper result) {
       System.out.println("ExerciseList.SetExercisesCallback Got " + result.exercises.size() + " results");
       if (isStaleResponse(result)) {
         System.out.println("----> SetExercisesCallback.onSuccess ignoring result " + result.reqID + " b/c before latest " + lastReqID);
       } else {
+        if (result.exercises.isEmpty()) {
+          gotEmptyExerciseList();
+        }
         rememberAndLoadFirst(result.exercises);
         controller.showProgress();
       }
     }
+  }
+
+  /**
+   * @see mitll.langtest.client.list.HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
+   */
+  protected void gotEmptyExerciseList() {
+    System.out.println(new Date() +" gotEmptyExerciseList : ------  ------------ ");
   }
 
   /**
@@ -314,7 +329,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected ExerciseShell loadFirstExercise() {
     if (currentExercises.isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
-      Window.alert("Server error : no exercises. Please contact administrator.");
+      //new ModalInfoDialog("No match","No matches found. Please try a different search.");
+      noMatches();
       return null;
     } else {
       ExerciseShell toLoad = findFirstExercise();
@@ -327,6 +343,34 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       pushFirstSelection(toLoad.getID());
       return toLoad;
     }
+  }
+
+
+  /**
+   * Tell the user that we updated the site and refresh the site table.
+   * @paramx submit
+   * @paramx dialogBox
+   */
+  private void noMatches() {
+    final PopupPanel pleaseWait = showPleaseWait("No matches found. Please try a different search.");
+
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        pleaseWait.hide();
+      }
+    };
+
+    // Schedule the timer to run once in 1 seconds.
+    t.schedule(3000);
+  }
+
+  private PopupPanel showPleaseWait(String message) {
+    final PopupPanel pleaseWait = new PopupPanel();
+    pleaseWait.setAutoHideEnabled(false);
+    pleaseWait.add(new HTML(message));
+    pleaseWait.center();
+    return pleaseWait;
   }
 
   protected ExerciseShell findFirstExercise() {
