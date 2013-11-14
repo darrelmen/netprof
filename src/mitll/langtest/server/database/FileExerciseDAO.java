@@ -51,6 +51,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   private boolean isEnglish;
   private final boolean processSemicolons = false;
   private boolean isPashto;
+  private SectionHelper sectionHelper = new SectionHelper();
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
@@ -69,7 +70,7 @@ public class FileExerciseDAO implements ExerciseDAO {
 
   @Override
   public SectionHelper getSectionHelper() {
-    return null;
+    return sectionHelper;
   }
 
   public Exercise getExercise(String id) {
