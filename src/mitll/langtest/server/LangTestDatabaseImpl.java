@@ -178,10 +178,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public ExerciseListWrapper getExerciseIds(int reqID, long userID) {
     logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
     List<Exercise> exercises = getExercises(userID);
-    return getExerciseListWrapper(reqID, exercises);
+    return getExerciseListWrapper(reqID, exercises, false);
   }
 
   private List<ExerciseShell> getExerciseShells(Collection<Exercise> exercises) {
+    return serverProps.getLanguage().equals("English") ? getExerciseShellsShort(exercises) : getExerciseShellsCombined(exercises);
+  }
+
+  private List<ExerciseShell> getExerciseShellsShort(Collection<Exercise> exercises) {
     List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
     for (Exercise e : exercises) {
       ids.add(e.getShell());
@@ -189,16 +193,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return ids;
   }
 
+  private List<ExerciseShell> getExerciseShellsCombined(Collection<Exercise> exercises) {
+    List<ExerciseShell> ids = new ArrayList<ExerciseShell>();
+    for (Exercise e : exercises) {
+      ids.add(e.getShellCombinedTooltip());
+    }
+    return ids;
+  }
+
   @Override
   public ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix) {
     logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
-    ExerciseTrie trie = new ExerciseTrie(getExercises(userID));
+    ExerciseTrie trie = new ExerciseTrie(getExercises(userID), !serverProps.getLanguage().equals("English"));
     List<Exercise> exercisesForPrefix = trie.getExercises(prefix);
 
-    return getExerciseListWrapper(reqID, exercisesForPrefix);
+    return getExerciseListWrapper(reqID, exercisesForPrefix, false);
   }
 
-  private ExerciseListWrapper getExerciseListWrapper(int reqID, List<Exercise> exercisesForPrefix) {
+  private ExerciseListWrapper getExerciseListWrapper(int reqID, List<Exercise> exercisesForPrefix, boolean useCombinedTooltip) {
     if (serverProps.isGoodwaveMode() && !serverProps.dataCollectMode) {
       exercisesForPrefix = getSortedExercises(exercisesForPrefix);
       if (!exercisesForPrefix.isEmpty()) logger.debug("sorting by id -- first is " + exercisesForPrefix.get(0).getID());
@@ -206,7 +218,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     List<ExerciseShell> ids = getExerciseShells(exercisesForPrefix);
     logMemory();
-    return new ExerciseListWrapper(reqID,ids);
+    return new ExerciseListWrapper(reqID, ids);
   }
 
   /**
@@ -223,11 +235,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return new ExerciseListWrapper(reqID, getExerciseShells(getExercisesForState(reqID,typeToSection,userID)));
   }
 
+  /**
+   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(String, String)
+   * @param reqID
+   * @param typeToSection
+   * @param userID
+   * @param prefix
+   * @return
+   */
   @Override
   public ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix) {
     List<Exercise> exercisesForState = getExercisesForState(reqID, typeToSection, userID);
 
-    ExerciseTrie trie = new ExerciseTrie(exercisesForState);
+    ExerciseTrie trie = new ExerciseTrie(exercisesForState, !serverProps.getLanguage().equals("English"));
     List<Exercise> exercises = trie.getExercises(prefix);
 
     return new ExerciseListWrapper(reqID, getExerciseShells(exercises));
