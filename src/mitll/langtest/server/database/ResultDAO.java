@@ -4,6 +4,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -13,6 +14,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -25,6 +28,8 @@ import java.util.Map;
  */
 public class ResultDAO extends DAO {
   private static final Logger logger = Logger.getLogger(ResultDAO.class);
+
+  private static final int SESSION_GAP = 5 * 60 * 1000;
 
   private static final String ID = "id";
   private static final String USERID = "userid";
@@ -332,6 +337,112 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
 
   }
+
+  /**
+   * Determine sessions per user.  If two consecutive items are more than {@link #SESSION_GAP} seconds
+   * apart, then we've reached a session boundary.
+   * Remove all sessions that have just one answer - must be test sessions.
+   *
+   * Multiple answers to the same exercise count as one answer.
+   * @return list of duration and numAnswer pairs
+   */
+  public SessionInfo getSessions() {
+    List<Result> results = getResults();
+
+    Map<Long, List<Result>> userToAnswers = populateUserToAnswers(results);
+    List<Session> sessions = new ArrayList<Session>();
+
+    Map<Long, List<Session>> userToSessions = new HashMap<Long, List<Session>>();
+    Map<Long, Float> userToRate = new HashMap<Long, Float>();
+
+    for (Map.Entry<Long, List<Result>> userToAnswersEntry : userToAnswers.entrySet()) {
+      List<Result> answersForUser = userToAnswersEntry.getValue();
+      sortByTime(answersForUser);
+
+      Session s = null;
+      long last = 0;
+      for (Result r : answersForUser) {
+        if (s == null || r.timestamp - last > SESSION_GAP) {
+          s = new Session();
+          sessions.add(s);
+          List<Session> sessions1 = userToSessions.get(userToAnswersEntry.getKey());
+          if (sessions1 == null) userToSessions.put(userToAnswersEntry.getKey(), sessions1 = new ArrayList<Session>());
+          sessions1.add(s);
+        } else {
+          s.duration += r.timestamp - last;
+        }
+        s.addExerciseID(r.id);
+        last = r.timestamp;
+      }
+    }
+    for (Session session : sessions) session.setNumAnswers();
+    removeShortSessions(sessions);
+
+    for (Map.Entry<Long, List<Session>> sessionPair : userToSessions.entrySet()) {
+      removeShortSessions(sessionPair.getValue());
+      long dur = 0;
+      int num = 0;
+
+      for (Session s : sessionPair.getValue()) {
+        //logger.debug("user " +sessionPair.getKey() + " " + s);
+        dur += s.duration;
+        num += s.getNumAnswers();
+      }
+
+      if (num > 0) {
+        float rate = (float) (dur / 1000) / (float) num;
+        //logger.debug("user " +sessionPair.getKey() + " dur " + dur/1000 + " num " + num+ " rate " +rate);
+        userToRate.put(sessionPair.getKey(), rate);
+      }
+    }
+
+    return new SessionInfo(sessions,userToRate);
+  }
+
+  public static class SessionInfo {
+    public List<Session> sessions;
+    public Map<Long, Float> userToRate;
+    public SessionInfo(List<Session> sessions, Map<Long,Float> userToRate) {
+      this.sessions = sessions;
+      this.userToRate = userToRate;
+    }
+  }
+
+  private void sortByTime(List<Result> answersForUser) {
+    Collections.sort(answersForUser, new Comparator<Result>() {
+      @Override
+      public int compare(Result o1, Result o2) {
+        return o1.timestamp < o2.timestamp ? -1 : o1.timestamp > o2.timestamp ? +1 : 0;
+      }
+    });
+  }
+
+  private void removeShortSessions(List<Session> sessions) {
+    Iterator<Session> iter = sessions.iterator();
+    while(iter.hasNext()) if (iter.next().getNumAnswers() < 2) iter.remove();
+  }
+
+  private Map<Long, List<Result>> populateUserToAnswers(List<Result> results) {
+    Map<Long,List<Result>> userToAnswers = new HashMap<Long, List<Result>>();
+    for (Result r : results) {
+      List<Result> results1 = userToAnswers.get(r.userid);
+      if (results1 == null) userToAnswers.put(r.userid, results1 = new ArrayList<Result>());
+      results1.add(r);
+    }
+    return userToAnswers;
+  }
+
+  private long getRateInMillis(Collection<Session> sessionCollection) {
+    long totalTime = 0;
+    long total = 0;
+    for (Session s: sessionCollection) {
+      totalTime += s.duration;
+      total += s.getNumAnswers();
+    }
+    if (total == 0) return 0l;
+    return totalTime/total;
+  }
+
 
   /**
    * This should only be run once, on an old result table to update it.
