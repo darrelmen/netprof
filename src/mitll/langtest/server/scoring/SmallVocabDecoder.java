@@ -29,7 +29,7 @@ public class SmallVocabDecoder {
   private static final Logger logger = Logger.getLogger(ASRScoring.class);
 
   public static final int VOCAB_SIZE_LIMIT = 200;
-  private static final String FINAL_BLEND_VOCAB = "finalBlend.vocab";
+ // private static final String FINAL_BLEND_VOCAB = "finalBlend.vocab";
 /*  private static final String SMALL_LMOUT_SRILM = "smallLMOut.srilm";
   private static final String LARGE_VOCAB_TXT = "largeVocab.txt";
   private static final String BACKGROUND_LMOUT_SRILM = "backgroundLMOut.srilm";
@@ -45,7 +45,7 @@ public class SmallVocabDecoder {
    * Limit on vocabulary size -- too big and dcodr will run out of memory and segfault
    */
   //private static final int MAX_AUTO_CRT_VOCAB = 200;
-  private static final String MAX_ORDER = "2";  // NOTE 3 does NOT work
+  // private static final String MAX_ORDER = "2";  // NOTE 3 does NOT work
   public static final String UNKNOWN_MODEL = "UNKNOWNMODEL";
   private static final String UNKNOWN_MODEL_BIAS = "-1.20";
 
@@ -53,7 +53,7 @@ public class SmallVocabDecoder {
    * Platform -- windows, mac, linux, etc.
    */
  // private final String platform = Utils.package$.MODULE$.platform();
-  private double foregroundBackgroundBlend;
+ // private double foregroundBackgroundBlend;
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#createSLFFile
