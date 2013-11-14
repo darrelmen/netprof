@@ -59,17 +59,13 @@ public class Exercise extends ExerciseShell {
      * @see mitll.langtest.client.exercise.ExercisePanel#addQuestions
      * @return
      */
-    public String getQuestion() {
-      return question;
-    }
+    public String getQuestion() { return question; }
 
     /**
      * @see mitll.langtest.client.exercise.ExercisePanel#getQuestionHeader
      * @return
      */
-    public String getAnswer() {
-      return answer;
-    }
+    public String getAnswer() { return answer; }
 
     public List<String> getAlternateAnswers() {
       return alternateAnswers;
@@ -77,6 +73,7 @@ public class Exercise extends ExerciseShell {
 
     @Override
     public boolean equals(Object obj) {
+      if (!(obj instanceof QAPair)) return false;
       QAPair otherpair = (QAPair) obj;
       return question.equals(otherpair.question) && answer.equals(otherpair.answer);
     }
@@ -111,7 +108,7 @@ public class Exercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.FileExerciseDAO#readExercises(String)
+   * @see mitll.langtest.server.database.FileExerciseDAO#getSimpleExerciseForLine(String, int)
    * @param plan
    * @param id
    * @param content
@@ -161,7 +158,9 @@ public class Exercise extends ExerciseShell {
     if (refSentence.length() > 15) {
       refSentence = refSentence.substring(0, 15);
     }
-    return new ExerciseShell(getID(), getTooltip() + " / " + refSentence);
+    boolean equals = getTooltip().trim().equals(getRefSentence().trim());
+    String combined = equals ? getTooltip() : getTooltip() + " / " + refSentence;
+    return new ExerciseShell(getID(), combined);
   }
 
   public void addQuestion() {
@@ -240,7 +239,7 @@ public class Exercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getExercise(int, mitll.langtest.server.database.FileExerciseDAO, String, String, String)
+   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, mitll.langtest.server.database.FileExerciseDAO, String, String, String, String, String, boolean, String)
    * @param s
    */
   public void setSlowRefAudio(String s) { this.slowAudioRef = s; }
@@ -254,7 +253,7 @@ public class Exercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getExercise(int, mitll.langtest.server.database.FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String)
+   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, mitll.langtest.server.database.FileExerciseDAO, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, String, boolean, String)
    * @param sentenceRefs
    */
   public void setRefSentences(List<String> sentenceRefs) {
@@ -269,15 +268,10 @@ public class Exercise extends ExerciseShell {
     refSentences.add(ref);
   }
 
-/*  public void addRefSentence(String ref) {
-    if (!refSentences.contains(ref)) refSentences.add(ref);
-  }*/
-
   public void setTranslitSentence(String translitSentence) {
     translitSentences.clear();
     translitSentences.add(translitSentence);
   }
-
 
   public void setRecordAnswer(boolean spoken) {
     setType(spoken ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE);
@@ -318,7 +312,7 @@ public class Exercise extends ExerciseShell {
   public void setContent(String content) { this.content = content;  }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#setPromptAndRecordOnExercises(long, java.util.List)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#setPromptAndRecordOnExercises
    * @param b
    */
   public void setPromptInEnglish(boolean b) { this.promptInEnglish = b;  }
