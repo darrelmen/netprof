@@ -630,7 +630,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see #loadNextExercise(mitll.langtest.shared.ExerciseShell)
    */
   protected void onLastItem() {
-    feedback.showErrorMessage("Test Complete", "Test Complete! Thank you!");
+    if (controller.getProps().isCRTDataCollectMode()) {
+      feedback.showErrorMessage("Test Complete", "Test Complete! Thank you!");
+    }
+    else loadFirstExercise();
   }
 
   /**
