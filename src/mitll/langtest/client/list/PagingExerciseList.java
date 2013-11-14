@@ -127,7 +127,8 @@ public abstract class PagingExerciseList extends ExerciseList implements Require
     }
   }
 
-  TextBox typeahead = null;
+  private TextBox typeahead = null;
+  private String lastValue = "";
   protected void addComponents() {
     FlowPanel column = new FlowPanel();
     add(column);
@@ -139,7 +140,10 @@ public abstract class PagingExerciseList extends ExerciseList implements Require
         public void onKeyUp(KeyUpEvent event) {
           String text = typeahead.getText();
           System.out.println("looking for '" + text + "' (" + text.length() + " chars)");
-          loadExercises(getHistoryToken(""), text);
+          if (!text.equals(lastValue)) {
+            loadExercises(getHistoryToken(""), text);
+            lastValue = text;
+          }
         }
       });
 
