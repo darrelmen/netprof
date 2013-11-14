@@ -68,8 +68,8 @@ public class SQLExerciseDAO implements ExerciseDAO {
     int size1 = getMappedExercises().size();
     if (size != size1) {
       logger.error("huh? there are " + size + " ids from reading the database, but " + size1 + " from reading the mapping file" );
-      HashSet<String> strings = new HashSet<String>(idToExercise.keySet());
-      boolean b = strings.removeAll(getMappedExercises());
+      Set<String> strings = new HashSet<String>(idToExercise.keySet());
+      /*boolean b =*/ strings.removeAll(getMappedExercises());
       logger.error("unmapped are " + strings);
     }
   }
