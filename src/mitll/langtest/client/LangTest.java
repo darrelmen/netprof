@@ -705,9 +705,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     doEverythingAfterFactory(userID);
 
-    if (getLanguage().equalsIgnoreCase("Pashto")) {
+    // Tamas aksed us to turn this off 11/14/13
+/*    if (getLanguage().equalsIgnoreCase("Pashto")) {
       new FontChecker(this).checkPashto();
-    }
+    }*/
   }
 
   /**
