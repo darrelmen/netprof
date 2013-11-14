@@ -31,9 +31,9 @@ public class ModalInfoDialog {
     this(title, Collections.singleton(message), null,null);
   }
 
-/*  public ModalInfoDialog(String title, Collection<String> messages) {
+  public ModalInfoDialog(String title, Collection<String> messages) {
     this(title, messages, null);
-  }*/
+  }
 
   public ModalInfoDialog(String title, String message, HiddenHandler handler) {
     this(title, Collections.singleton(message), null, handler);
