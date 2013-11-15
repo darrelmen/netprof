@@ -1,7 +1,6 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.trie.TextEntityValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
