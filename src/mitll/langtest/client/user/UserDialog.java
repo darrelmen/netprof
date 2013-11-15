@@ -15,15 +15,18 @@ import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Panel;
@@ -31,6 +34,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -97,12 +101,6 @@ public class UserDialog {
     return accordionGroup;
   }
 
-/*  protected Widget addRegistrationPrompt(Panel dialogBox) {
-    HTML child = new HTML("<i>New users : click on Registration below and fill in the fields.</i>");
-    dialogBox.add(child);
-    return child;
-  }*/
-
   protected Button addLoginButton(Modal dialogBox) {
     FlowPanel hp = new FlowPanel();
     hp.getElement().getStyle().setFloat(Style.Float.RIGHT);
@@ -118,17 +116,18 @@ public class UserDialog {
     return login;
   }
 
-  protected static class FormField {
+  protected class FormField {
     public final TextBox box;
     public final ControlGroup group;
 
-    public FormField(final TextBox box, final ControlGroup group) {
+    public FormField(final TextBox box, final ControlGroup group, final int minLength) {
       this.box = box;
 
       box.addKeyUpHandler(new KeyUpHandler() {
         public void onKeyUp(KeyUpEvent event) {
-          if (box.getText().length() > 0) {
+          if (box.getText().length() >= minLength) {
             group.setType(ControlGroupType.NONE);
+            hidePopovers();
           }
         }
       });
@@ -136,24 +135,41 @@ public class UserDialog {
       this.group = group;
     }
 
+    public void clearError() {
+      group.setType(ControlGroupType.NONE);
+      hidePopovers();
+    }
+
+    public void setVisible(boolean visible) {
+      group.setVisible(visible);
+    }
+
     public String getText() {
       return box.getText();
+    }
+
+    protected void markSimpleError(String message) {
+      markError(group, box, "Try Again", message);
     }
   }
 
   protected FormField addControlFormField(Panel dialogBox, String label) {
-    return addControlFormField(dialogBox, label, false);
+    return addControlFormField(dialogBox, label, false, 0);
   }
 
-  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword) {
+  protected FormField addControlFormField(Panel dialogBox, String label, int minLength) {
+    return addControlFormField(dialogBox, label, false, minLength);
+  }
+
+  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
 
-    return getFormField(dialogBox, label, user);
+    return getFormField(dialogBox, label, user, minLength);
   }
 
-  private FormField getFormField(Panel dialogBox, String label, TextBox user) {
+  private FormField getFormField(Panel dialogBox, String label, TextBox user, int minLength) {
     final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user);
-    return new FormField(user, userGroup);
+    return new FormField(user, userGroup, minLength);
   }
 
   protected ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
@@ -174,12 +190,31 @@ public class UserDialog {
     return userGroup;
   }
 
-  protected static class ListBoxFormField {
+  protected class ListBoxFormField {
     public final ListBox box;
 
-    public ListBoxFormField(ListBox box) { this.box = box; }
-    public String getValue() { return box.getItemText(box.getSelectedIndex()); }
-    public String toString() { return "Box: " + getValue();  }
+    public ListBoxFormField(final ListBox box) {
+      this.box = box;
+      box.addChangeHandler(new ChangeHandler() {
+        @Override
+        public void onChange(ChangeEvent event) {
+          hidePopovers();
+        }
+      });
+    }
+
+    public String getValue() {
+      return box.getItemText(box.getSelectedIndex());
+    }
+
+    public String toString() {
+      return "Box: " + getValue();
+    }
+
+    protected void markSimpleError(String message) {
+      box.setFocus(true);
+      setupPopover(box, "Try Again", message, Placement.RIGHT);
+    }
   }
 
   protected void markError(FormField dialectGroup, String message) {
@@ -190,9 +225,11 @@ public class UserDialog {
     markError(dialectGroup, dialect, header, message, Placement.RIGHT);
   }
 
+  //List<ControlGroup> marked = new ArrayList<ControlGroup>();
   protected void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement) {
     dialectGroup.setType(ControlGroupType.ERROR);
     dialect.setFocus(true);
+    //marked.add(dialectGroup);
 
     setupPopover(dialect, header, message, placement);
   }
@@ -201,6 +238,8 @@ public class UserDialog {
     setupPopover(w, heading, message, Placement.RIGHT);
   }*/
 
+  private List<Popover> visiblePopovers = new ArrayList<Popover>();
+
   /**
    * TODO : bug - once shown these never really go away
    * @param w
@@ -208,7 +247,7 @@ public class UserDialog {
    * @param message
    * @param placement
    */
-  protected void setupPopover(final Widget w, String heading, final String message, Placement placement) {
+  protected void setupPopover(final FocusWidget w, String heading, final String message, Placement placement) {
     // System.out.println("triggering popover on " + w + " with " + message);
     final Popover popover = new Popover();
     popover.setWidget(w);
@@ -217,7 +256,8 @@ public class UserDialog {
     popover.setPlacement(placement);
     popover.reconfigure();
     popover.show();
-
+    visiblePopovers.add(popover);
+/*
     Timer t = new Timer() {
       @Override
       public void run() {
@@ -225,7 +265,18 @@ public class UserDialog {
         popover.hide();
       }
     };
-    t.schedule(3000);
+    t.schedule(3000);*/
+
+    Scheduler.get().scheduleDeferred(new Command() {
+      public void execute() {
+        w.setFocus(true);
+      }
+    });
+  }
+
+  public void hidePopovers() {
+    for (Popover popover : visiblePopovers) popover.hide();
+    visiblePopovers.clear();
   }
 
   private HandlerRegistration keyHandler;
