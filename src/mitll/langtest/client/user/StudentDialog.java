@@ -86,6 +86,8 @@ public class StudentDialog extends UserDialog {
     final ListBoxFormField purpose = getListBoxFormField(fieldset, "Purpose", getListBox2(purposes));
 
     final FormField user = addControlFormField(fieldset, "User ID", MIN_LENGTH_USER_ID);
+    user.setVisible(purpose.getValue().equals("Data Collection"));
+
     //final FormField password = addControlFormField(fieldset, "Password", true);
 
     purpose.box.setWidth("150px");
@@ -434,10 +436,6 @@ public class StudentDialog extends UserDialog {
     private ListBoxFormField listening;
     private ListBoxFormField speaking;
     private ListBoxFormField writing;
- /*   private CheckBox rilr;
-    private CheckBox lilr;
-    private CheckBox silr;
-    private CheckBox wilr;*/
     private FormField dialectGroup;
 
     public RegistrationInfo(Panel dialogBox) {
