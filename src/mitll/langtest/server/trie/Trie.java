@@ -79,10 +79,10 @@ public class Trie {
    *
    * @param entryList
    */
-  private void build(List<TextEntityValue> entryList) {
+/*  private void build(List<TextEntityValue> entryList) {
     makeNodes(entryList);
     computeFailureFunction();
-  }
+  }*/
 
   private void build2(List<String> entryList) {
     makeNodes2(entryList);
@@ -104,13 +104,13 @@ public class Trie {
    *
    * @param entryList to store in trie
    */
-  private void makeNodes(List<TextEntityValue> entryList) {
+/*  private void makeNodes(List<TextEntityValue> entryList) {
     startMakingNodes();
     for (TextEntityValue entry : entryList) {
       addEntryToTrie(entry, tempCache);
     }
     endMakingNodes();
-  }
+  }*/
 
   private void makeNodes2(List<String> entryList) {
     startMakingNodes();
