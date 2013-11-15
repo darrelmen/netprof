@@ -52,7 +52,7 @@ public class DataCollectorDialog extends UserDialog {
     final Modal dialogBox = getDialog(loginTitle);
 
     final FormField user = addControlFormField(dialogBox, "User ID");
-    final FormField password = addControlFormField(dialogBox, "Password", true);
+    final FormField password = addControlFormField(dialogBox, "Password", true, minLength);
 
     final RadioButton regular = new RadioButton("AudioType", "Regular Audio Recording");
     final RadioButton fastThenSlow = new RadioButton("AudioType", "Record Regular Speed then Slow");
