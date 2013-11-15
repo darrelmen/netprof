@@ -102,13 +102,13 @@ public class OutsideCount {
       genderToPhraseToCount.put(true, new HashMap<String, Integer>());
       genderToPhraseToCount.put(false, new HashMap<String, Integer>());
       line2 = reader.readLine();
-      int totalMales =0;
+      //int totalMales =0;
       //int dups = 0;
 
       //Writer w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file.getName() + "_dups.txt"), "UTF-8"));
       //Writer w2 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file.getName() + "_all.txt"), "UTF-8"));
 
-      int totalFemales =0;
+      //int totalFemales =0;
       Map<String, Integer> males = genderToPhraseToCount.get(true);
       Map<String, Integer> females = genderToPhraseToCount.get(false);
       while ((line2 = reader.readLine()) != null) {
@@ -124,7 +124,7 @@ public class OutsideCount {
         //if (count < 20) logger.info("Got "+line2 + " male '" + male + "' female '" + female + "' phrase '" + phrase + "'");
         try {
           int maleCount = (int) Double.parseDouble(male);
-          totalMales += maleCount;
+          //totalMales += maleCount;
           //   w2.write(phrase+"\n");
 
           if (males.containsKey(phrase)) {
@@ -141,7 +141,7 @@ public class OutsideCount {
 
         try {
           int femaleCount = (int) Double.parseDouble(female);
-          totalFemales += femaleCount;
+         // totalFemales += femaleCount;
 
           if (females.containsKey(phrase)) {
             //logger.warn("female huh? we've seen phrase " + phrase + " before?");
