@@ -795,7 +795,7 @@ public class MonitoringManager {
   private void doChartSequence(int round, List<String> keys,
                                Map<String, Integer> correct, Map<String, Integer> incorrect, final Panel vp) {
     int size = keys.size();
-    boolean showItemIDs = size > 500;
+    //boolean showItemIDs = size > 500;
     int chartSamples = Math.min(ITEM_CHART_ITEM_WIDTH, size);
 
     for (int i = 0; i < size; i += chartSamples) {
