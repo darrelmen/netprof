@@ -59,10 +59,9 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#doDataCollectAdminView
    * @param lt
    * @param service
-   * @param isFlashcard
    * @param props
    */
-  public UserManager(UserNotification lt, LangTestDatabaseAsync service, boolean isFlashcard, PropertyHandler props) {
+  public UserManager(UserNotification lt, LangTestDatabaseAsync service, PropertyHandler props) {
     this.langTest = lt;
     this.service = service;
     this.props = props;
@@ -220,7 +219,7 @@ public class UserManager {
   /**
    * @see mitll.langtest.client.LangTest#checkLogin
    */
-  private void anonymousLogin() {
+  protected void anonymousLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
       System.out.println("UserManager.anonymousLogin : current user : " + user);
@@ -301,11 +300,13 @@ public class UserManager {
     if (userExpired(sid)) {
       clearUser(userID1);
       expired = true;
-    } else if (getLoginTypeFromStorage() != loginType) {
+    }
+    // this seems like a bad idea if we can login as data collector or as anonymous...
+    /* else if (getLoginTypeFromStorage() != loginType) {
       System.out.println("current login type : " + getLoginTypeFromStorage() + " vs mode " + loginType);
       clearUser(userID1);
       expired = true;
-    }
+    }*/
     return expired;
   }
 
