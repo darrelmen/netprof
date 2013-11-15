@@ -38,10 +38,10 @@ public class MailDialog {
   /**
    * @see LangTest#showEmail(String, String, String)
    * @param subject
-   * @param linkTitle
+   * @paramx linkTitle
    * @param token
    */
-  public void showEmail(final String subject, final String linkTitle, final String token) {
+  public void showEmail(final String subject, /*final String linkTitle,*/ final String token) {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("E-MAIL THIS");
@@ -194,9 +194,9 @@ public class MailDialog {
   }
 
   private class SendClickHandler implements ClickHandler {
-    private final ValueBoxBase toEmail;
-    private final ValueBoxBase replyEmail;
-    private final ValueBoxBase messageBox;
+    private final ValueBoxBase<String> toEmail;
+    private final ValueBoxBase<String> replyEmail;
+    private final ValueBoxBase<String> messageBox;
     private final String subject;
     private final String token;
     //private final String linkTitle;
@@ -205,7 +205,7 @@ public class MailDialog {
     private final HTML ack;
     private final Panel ackPanel;
 
-    public SendClickHandler(ValueBoxBase toEmail, ValueBoxBase replyEmail, ValueBoxBase messageBox,
+    public SendClickHandler(ValueBoxBase<String> toEmail, ValueBoxBase<String> replyEmail, ValueBoxBase<String> messageBox,
                             String subject, String token,
                           //  String linkTitle,
                             DialogBox dialogBox, Panel dialogVPanel,
