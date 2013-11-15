@@ -39,7 +39,7 @@ public class PropertyHandler {
   private static final String NUM_GRADES_TO_COLLECT = "numGradesToCollect";
   private static final String LOG_CLIENT_MESSAGES = "logClient";
   private static final String SHOW_SECTIONS = "showSections";
-  private static final String SHOW_SECTION_WIDGETS = "showSectionWidgets";
+  //private static final String SHOW_SECTION_WIDGETS = "showSectionWidgets";
   //private static final String DEBUG_EMAIL = "debugEmail";
   private static final String FLASHCARD = "flashcard";
   private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
@@ -82,6 +82,7 @@ public class PropertyHandler {
   private static final String FLASHCARD_TEXT_RESPONSE = "flashcardTextResponse";
   private static final String EXERCISES_IN_ORDER = "exercisesInOrder";
   private static final String ALLOW_PLUS_IN_URL = "allowPlusInURL";
+  private static final String PURPOSE_DEFAULT = "purposeDefault";
 
   public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT, DATA_COLLECTOR }
 
@@ -111,7 +112,7 @@ public class PropertyHandler {
   private String nameForRecorder = "Speaker";
   private String language = "";
   private boolean showSections = false;
-  private boolean showSectionWidgets = true;
+  //private boolean showSectionWidgets = true;
   private boolean flashcardTeacherView = false;
   private boolean flashCard = false;
   private boolean timedGame = false;
@@ -136,7 +137,7 @@ public class PropertyHandler {
   private boolean showExercisesInOrder = false;
   private String responseType = "Audio";
   private boolean allowPlusInURL;
-  //private boolean showProgressBar;
+  private String purposeDefault = "Practice";
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad()
@@ -177,7 +178,7 @@ public class PropertyHandler {
       else if (key.equals(NUM_GRADES_TO_COLLECT)) numGradesToCollect = getInt(value, NUM_GRADES_TO_COLLECT_DEFAULT, NUM_GRADES_TO_COLLECT);
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
       else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
-      else if (key.equals(SHOW_SECTION_WIDGETS)) showSectionWidgets = getBoolean(value);
+     // else if (key.equals(SHOW_SECTION_WIDGETS)) showSectionWidgets = getBoolean(value);
       else if (key.equals(FLASHCARD_TEACHER_VIEW)) flashcardTeacherView = getBoolean(value);
       else if (key.equals(FLASHCARD)) flashCard = getBoolean(value);
       else if (key.equals(LANGUAGE)) language = value;
@@ -195,6 +196,7 @@ public class PropertyHandler {
       else if (key.equals(EXERCISES_IN_ORDER)) showExercisesInOrder = getBoolean(value);
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(RESPONSE_TYPE)) responseType = value;
+      else if (key.equals(PURPOSE_DEFAULT)) purposeDefault = value;
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
@@ -291,9 +293,9 @@ public class PropertyHandler {
     }
     gameTimeSeconds = getInt(Window.Location.getParameter(GAME_TIME), gameTimeSeconds, REPEATS);
 
-    if (Window.Location.getParameter(SHOW_SECTION_WIDGETS) != null) {
+/*    if (Window.Location.getParameter(SHOW_SECTION_WIDGETS) != null) {
       showSectionWidgets = !Window.Location.getParameter(SHOW_SECTION_WIDGETS).equals("false");
-    }
+    }*/
 
     String flashcardParam = Window.Location.getParameter(FLASHCARD);
     if (flashcardParam != null) {
@@ -422,12 +424,6 @@ public class PropertyHandler {
     return showSections;
   }
 
-  public boolean isShowSectionWidgets() {
-    System.out.println("isShowSectionWidgets show section widgets " + showSectionWidgets);
-
-    return showSectionWidgets;
-  }
-
   /**
    * @see LangTest#makeExerciseList
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
@@ -505,5 +501,9 @@ public class PropertyHandler {
 
   public boolean shouldAllowPlusInURL() {
     return allowPlusInURL;
+  }
+
+  public String getPurposeDefault() {
+    return purposeDefault;
   }
 }
