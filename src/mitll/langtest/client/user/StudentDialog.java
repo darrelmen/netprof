@@ -6,11 +6,13 @@ import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.ControlLabel;
+import com.github.gwtbootstrap.client.ui.Controls;
 import com.github.gwtbootstrap.client.ui.Fieldset;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Form;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
+import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
@@ -34,6 +36,7 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Result;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -47,20 +50,29 @@ import java.util.List;
 public class StudentDialog extends UserDialog {
   private static final int MIN_WEEKS = 0;
   private static final int MAX_WEEKS = 104;
+  public static final int ILR_CHOICE_WIDTH = 80;
+  public static final int MIN_LENGTH_USER_ID = 4;
   private final UserManager userManager;
   private final UserNotification langTest;
+  private List<String> purposes;
 
   public StudentDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, UserNotification langTest) {
     super(service, props);
     this.userManager = userManager;
     this.langTest = langTest;
+    purposes = new ArrayList<String>();
+    purposes.add(props.getPurposeDefault());
+
+    for (String purpose : Arrays.asList("Data Collection", "Practice", "Demo")) {
+      if (!purpose.equalsIgnoreCase(props.getPurposeDefault())) purposes.add(purpose);
+    }
   }
 
   /**
    * @see UserManager#login()
    */
   public void displayLoginBox() {
-    final Modal dialogBox = getDialog("Login Questions");
+    final Modal dialogBox = getDialog("Login");
     dialogBox.setAnimation(false);
     dialogBox.setMaxHeigth("760px");
     DOM.setStyleAttribute(dialogBox.getElement(), "top", "4%");
@@ -71,28 +83,53 @@ public class StudentDialog extends UserDialog {
     Fieldset fieldset = new Fieldset();
     form.add(fieldset);
     dialogBox.add(form);
-    final FormField user = addControlFormField(fieldset, "User ID");
-    final FormField password = addControlFormField(fieldset, "Password", true);
-    final ListBoxFormField purpose = getListBoxFormField(fieldset, "Purpose",
-      getListBox2(Arrays.asList("Data Collection", "Practice", "Demo")));
+    final ListBoxFormField purpose = getListBoxFormField(fieldset, "Purpose", getListBox2(purposes));
+
+    final FormField user = addControlFormField(fieldset, "User ID", MIN_LENGTH_USER_ID);
+    //final FormField password = addControlFormField(fieldset, "Password", true);
 
     purpose.box.setWidth("150px");
 
     Panel register = new FlowPanel();
     RegistrationInfo registrationInfo = new RegistrationInfo(register);
     final AccordionGroup accordion = getAccordion(dialogBox, register);
+    accordion.setVisible(!canSkipRegister(purpose.getValue()));
 
     purpose.box.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {
         boolean b = canSkipRegister(purpose.getValue());
-        if (b) accordion.hide();
-        else accordion.show();
+        user.setVisible(purpose.getValue().equals("Data Collection"));
+        accordion.setVisible(!canSkipRegister(purpose.getValue()));
+
+        if (b) {
+          accordion.hide();
+        }
+        else {
+          final String userID = user.box.getText();
+          if (!userID.isEmpty()
+            //&& checkValidPassword(password)
+            ) {
+            service.userExists(userID, new AsyncCallback<Integer>() {
+              @Override
+              public void onFailure(Throwable caught) {
+              }
+
+              @Override
+              public void onSuccess(Integer result) {
+                boolean exists = result != -1;
+                if (!exists) {
+                  accordion.show();
+                }
+              }
+            });
+          }
+        }
       }
     });
 
     final Button closeButton = addLoginButton(dialogBox);
-    closeButton.addClickHandler(makeCloseHandler(dialogBox, registrationInfo, user, password, purpose, accordion));
+    closeButton.addClickHandler(makeCloseHandler(dialogBox, registrationInfo, user, /*password,*/ purpose, accordion));
 
     configureKeyHandler(dialogBox, closeButton);
 
@@ -124,14 +161,16 @@ public class StudentDialog extends UserDialog {
    * @param dialogBox
    * @param registrationInfo
    * @param user
-   * @param password
+   * @paramx password
    * @param purpose
    * @param accordion
    * @see #displayLoginBox()
    */
   private ClickHandler makeCloseHandler(final Modal dialogBox,
                                         final RegistrationInfo registrationInfo,
-                                        final FormField user, final FormField password, final ListBoxFormField purpose,
+                                        final FormField user,
+                                        //final FormField password,
+                                        final ListBoxFormField purpose,
                                         final AccordionGroup accordion) {
     // Create a handler for the sendButton and nameField
     return new ClickHandler() {
@@ -140,36 +179,44 @@ public class StudentDialog extends UserDialog {
        * Fired when the user clicks on the sendButton.
        */
       public void onClick(ClickEvent event) {
-
-        final String userID = user.box.getText();
-        if (checkValidUser(user) && checkValidPassword(password)) {
-          service.userExists(userID, new AsyncCallback<Integer>() {
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-
-            @Override
-            public void onSuccess(Integer result) {
-              boolean exists = result != -1;
-              String audioType = getAudioTypeFromPurpose(purpose.getValue());
-              if (exists) {
-                dialogBox.hide();
-                langTest.rememberAudioType(audioType);
-                userManager.storeUser(result, audioType, userID, PropertyHandler.LOGIN_TYPE.STUDENT);
-              } else {
-              /*  if (canSkipRegister(purposeValue)) {
-                  dialogBox.hide();
-                  sendNameToServer(registrationInfo, audioType, userID);
-                } else {*/
-                System.out.println("reveal!");
-                accordion.show();
-                checkThenRegister(audioType, registrationInfo, dialogBox, userID);
-              }
-            }
-          });
+        String purposeSetting = purpose.getValue();
+        final String audioType = getAudioTypeFromPurpose(purposeSetting);
+        if (canSkipRegister(purposeSetting)) {
+          dialogBox.hide();
+          langTest.rememberAudioType(audioType);
+          addAnonymousUser(audioType);
+        } else {
+          checkUserAndMaybeRegister(audioType, user, dialogBox, accordion, registrationInfo);
         }
       }
     };
+  }
+
+  private void checkUserAndMaybeRegister(final String audioType, FormField user, final Modal dialogBox,
+                                         final AccordionGroup accordion, final RegistrationInfo registrationInfo) {
+    final String userID = user.box.getText();
+    if (checkValidUser(user)
+      //&& checkValidPassword(password)
+      ) {
+      service.userExists(userID, new AsyncCallback<Integer>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
+
+        @Override
+        public void onSuccess(Integer result) {
+          boolean exists = result != -1;
+          if (exists) {
+            dialogBox.hide();
+            langTest.rememberAudioType(audioType);
+            userManager.storeUser(result, audioType, userID, PropertyHandler.LOGIN_TYPE.STUDENT);
+          } else {
+            accordion.show();
+            checkThenRegister(audioType, registrationInfo, dialogBox, userID);
+          }
+        }
+      });
+    }
   }
 
   private void checkThenRegister(String audioType, RegistrationInfo registrationInfo, Modal dialogBox, String userID) {
@@ -177,7 +224,7 @@ public class StudentDialog extends UserDialog {
       if (highlightIntegerBox(registrationInfo.weeks, MIN_WEEKS, MAX_WEEKS)) {
         if (registrationInfo.dialectGroup.getText().isEmpty()) {
           markError(registrationInfo.dialectGroup, "Please enter a language dialect.");
-        } else {
+        } else if (registrationInfo.checkValidity() && registrationInfo.checkValidity2()) {
           dialogBox.hide();
           sendNameToServer(registrationInfo, audioType, userID);
         }
@@ -185,7 +232,8 @@ public class StudentDialog extends UserDialog {
         markError(registrationInfo.weeks, "Please enter weeks between " + MIN_WEEKS + " and " + MAX_WEEKS + ".");
       }
     } else {
-      markError(registrationInfo.ageEntryGroup, "Please enter age between " + MIN_AGE + " and " + MAX_AGE + ".");
+      markError(registrationInfo.ageEntryGroup.group, registrationInfo.ageEntryGroup.box, "",
+       "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".");
     }
   }
 
@@ -208,11 +256,15 @@ public class StudentDialog extends UserDialog {
     } else if (userID.length() == 0) {
       markError(user, "Please enter a user id.");
       return false;
+    } else if (userID.length() < MIN_LENGTH_USER_ID) {
+      markError(user, "Please enter a user of a reasonable length.");
+      return false;
     }
+    user.clearError();
     return true;
   }
 
-  private boolean checkValidPassword(FormField password) {
+/*  private boolean checkValidPassword(FormField password) {
     final String userID = password.box.getText();
     if (userID.length() > USER_ID_MAX_LENGTH) {
       markError(password, "Please enter a password of reasonable length.");
@@ -222,7 +274,7 @@ public class StudentDialog extends UserDialog {
       return false;
     }
     return true;
-  }
+  }*/
 
   private FormField getDialect(Panel dialogBox) {
     final FormField dialectGroup = addControlFormField(dialogBox, "Dialect");
@@ -243,14 +295,15 @@ public class StudentDialog extends UserDialog {
     for (String s : values) {
       genderBox.addItem(s);
     }
-    genderBox.setWidth("60px");
+    genderBox.setWidth(ILR_CHOICE_WIDTH +
+      "px");
     return genderBox;
   }
 
   /**
    * Send the name from the nameField to the server and wait for a response.
    *
-   * @see #makeCloseHandler(com.github.gwtbootstrap.client.ui.Modal, mitll.langtest.client.user.StudentDialog.RegistrationInfo, mitll.langtest.client.user.UserDialog.FormField, mitll.langtest.client.user.UserDialog.FormField, mitll.langtest.client.user.UserDialog.ListBoxFormField, com.github.gwtbootstrap.client.ui.AccordionGroup)
+   * @see #makeCloseHandler
    */
   private void sendNameToServer(RegistrationInfo registrationInfo, String audioType, String userID) {
     int weeksValue = registrationInfo.weeks.getText().isEmpty() ? 0 : Integer.parseInt(registrationInfo.weeks.getText());
@@ -284,10 +337,10 @@ public class StudentDialog extends UserDialog {
         userManager.storeUser(result, audioType, userChosenID, PropertyHandler.LOGIN_TYPE.STUDENT);
 
         DLIUser dliUser = new DLIUser(result, weeksOfExperience,
-          new DLIUser.ILRLevel(registrationInfo.reading.getValue(), registrationInfo.rilr.getValue()),
-          new DLIUser.ILRLevel(registrationInfo.listening.getValue(), registrationInfo.lilr.getValue()),
-          new DLIUser.ILRLevel(registrationInfo.speaking.getValue(), registrationInfo.silr.getValue()),
-          new DLIUser.ILRLevel(registrationInfo.writing.getValue(), registrationInfo.wilr.getValue())
+          new DLIUser.ILRLevel(registrationInfo.reading.getValue(), registrationInfo.getValue("rilr")),
+          new DLIUser.ILRLevel(registrationInfo.listening.getValue(), registrationInfo.getValue("lilr")),
+          new DLIUser.ILRLevel(registrationInfo.speaking.getValue(), registrationInfo.getValue("silr")),
+          new DLIUser.ILRLevel(registrationInfo.writing.getValue(), registrationInfo.getValue("wilr"))
         );
 
         service.addDLIUser(dliUser, new AsyncCallback<Void>() {
@@ -303,6 +356,8 @@ public class StudentDialog extends UserDialog {
       }
     };
   }
+
+  private void addAnonymousUser(String audioType) {  addUser(89, "male", 0, audioType);  }
 
   /**
    * @param age
@@ -379,10 +434,10 @@ public class StudentDialog extends UserDialog {
     private ListBoxFormField listening;
     private ListBoxFormField speaking;
     private ListBoxFormField writing;
-    private CheckBox rilr;
+ /*   private CheckBox rilr;
     private CheckBox lilr;
     private CheckBox silr;
-    private CheckBox wilr;
+    private CheckBox wilr;*/
     private FormField dialectGroup;
 
     public RegistrationInfo(Panel dialogBox) {
@@ -406,10 +461,36 @@ public class StudentDialog extends UserDialog {
       FluidRow row = getILRLevels();
       dialogBox.add(row);
 
-      FluidRow row2 = getEstimating();
+      FluidRow row2 = getEstimating2();
       dialogBox.add(row2);
 
       dialectGroup = getDialect(fieldset);
+    }
+
+    public boolean checkValidity() {
+      for (ListBoxFormField f : Arrays.asList(reading,listening,speaking,writing)) {
+         if (f.box.getValue().equals("Unset")) {
+           f.markSimpleError("Choose a level");
+           return false;
+         }
+      }
+      return true;
+    }
+
+    public boolean checkValidity2() {
+      for (YesNo f : ilrs) {
+        if (!f.markSimpleError()) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    public boolean getValue(String ilr) {
+      for (YesNo yn : ilrs) {
+        if (yn.getName().equals(ilr)) return yn.getValue();
+      }
+      return false;
     }
 
     private FluidRow getILRLevels() {
@@ -426,7 +507,7 @@ public class StudentDialog extends UserDialog {
       Column c4 = new Column(2);
       row.add(c4);
 
-      List<String> levels = Arrays.asList("0+", "1", "1+", "2", "2+", "3", "3+", "4");
+      List<String> levels = Arrays.asList("Unset","0+", "1", "1+", "2", "2+", "3", "3+", "4");
       reading = getListBoxFormField(c1, "Reading", getListBox2(levels));
       listening = getListBoxFormField(c2, "Listening", getListBox2(levels));
       speaking = getListBoxFormField(c3, "Speaking", getListBox2(levels));
@@ -434,7 +515,7 @@ public class StudentDialog extends UserDialog {
       return row;
     }
 
-    private FluidRow getEstimating() {
+/*    private FluidRow getEstimating() {
       FluidRow row2 = new FluidRow();
 
       Column cc0 = new Column(2, new HTML("Estimating:"));
@@ -457,6 +538,139 @@ public class StudentDialog extends UserDialog {
       Column cc4 = new Column(2, wilr);
       row2.add(cc4);
       return row2;
+    }*/
+
+    private List<YesNo> ilrs = new ArrayList<YesNo>();
+    private FluidRow getEstimating2() {
+      FluidRow row2 = new FluidRow();
+
+      Column cc0 = new Column(2, new HTML("Estimating:"));
+      row2.add(cc0);
+
+      for (String ilr : Arrays.asList("rilr","lilr","silr","wilr")) {
+        YesNo e = new YesNo(ilr);
+        e.group.addStyleName("leftThirtyMargin");
+
+        Column cc1 = new Column(2, e.group);
+        row2.add(cc1);
+        ilrs.add(e);
+      }
+
+ /*     rilr = new CheckBox();
+
+
+
+      rilr.addStyleName("leftThirtyMargin");
+      lilr = new CheckBox();
+      lilr.addStyleName("leftThirtyMargin");
+      silr = new CheckBox();
+      silr.addStyleName("leftThirtyMargin");
+      wilr = new CheckBox();
+      wilr.addStyleName("leftThirtyMargin");
+      Column cc1 = new Column(2, rilr);
+      row2.add(cc1);
+      Column cc2 = new Column(2, lilr);
+      row2.add(cc2);
+      Column cc3 = new Column(2, silr);
+      row2.add(cc3);
+      Column cc4 = new Column(2, wilr);
+      row2.add(cc4);*/
+      return row2;
+    }
+
+/*    private ControlGroup addChoice(String name) {
+     // String name = "AudioType";
+      final RadioButton yes = new RadioButton(name, "Y");
+      final RadioButton no = new RadioButton(name, "N");
+
+      final ControlGroup group = new ControlGroup();
+
+      yes.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          group.setType(ControlGroupType.NONE);
+        }
+      });
+      no.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          group.setType(ControlGroupType.NONE);
+        }
+      });
+
+      if (props.isCollectAudio()) {
+        //group.add(new ControlLabel("<b>Audio Recording Style</b>"));
+        Controls controls = new Controls();
+        controls.add(yes);
+        controls.add(no);
+        group.add(controls);
+       // dialogBox.add(group);
+      }
+      return group;
+    }*/
+
+
+  }
+
+  private class YesNo {
+   public final RadioButton yes, no;
+    private final String name;
+    public ControlGroup group;
+
+
+    public YesNo(String name) {
+      this.name = name;
+      yes = new RadioButton(name, "Y");
+      yes.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          hidePopovers();
+        }
+      });
+      no = new RadioButton(name, "N");
+      no.addClickHandler(
+        new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            hidePopovers();
+          }
+        }
+      );
+
+      group = new ControlGroup();
+
+      yes.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          group.setType(ControlGroupType.NONE);
+        }
+      });
+      no.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          group.setType(ControlGroupType.NONE);
+        }
+      });
+
+      //group.add(new ControlLabel("<b>Audio Recording Style</b>"));
+      Controls controls = new Controls();
+      controls.add(yes);
+      controls.add(no);
+      group.add(controls);
+      // dialogBox.add(group);
+
+    }
+    public boolean markSimpleError() {
+      if (!yes.getValue() && !no.getValue()) {
+        markError(group,yes,"Please choose","Click yes or no.");
+        return false;
+      }
+      else return true;
+    }
+    public boolean getValue() { return yes.getValue(); }
+
+    public String getName() {
+      return name;
     }
   }
 }
