@@ -360,7 +360,7 @@ public class DatabaseImpl implements Database {
       " use flq " + useFLQ + " spoken " + useSpoken);*/
 
     // remove results that have grades...
-    int skipped = 0;
+    //int skipped = 0;
     Iterator<Result> iterator = resultExcludingExercises.iterator();
     while (iterator.hasNext()) {
       Result result = iterator.next();
@@ -374,7 +374,7 @@ public class DatabaseImpl implements Database {
       else if (filterResults && (result.flq != useFLQ || result.spoken != useSpoken)) {
         //logger.debug("getNextUngradedExercise excluding " + result + " since no match for flq = " + useFLQ + " and spoken = " +useSpoken);
         iterator.remove();
-        skipped++;
+        //skipped++;
       }
       else if (numGrades != null) {
         logger.warn("\tfound grade " + numGrades + " for " +result +"?");
