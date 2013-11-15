@@ -432,17 +432,6 @@ public class ResultDAO extends DAO {
     return userToAnswers;
   }
 
-  private long getRateInMillis(Collection<Session> sessionCollection) {
-    long totalTime = 0;
-    long total = 0;
-    for (Session s: sessionCollection) {
-      totalTime += s.duration;
-      total += s.getNumAnswers();
-    }
-    if (total == 0) return 0l;
-    return totalTime/total;
-  }
-
 
   /**
    * This should only be run once, on an old result table to update it.
