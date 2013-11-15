@@ -148,9 +148,9 @@ public class AudioCheck {
         (wasClipped ? AudioAnswer.Validity.TOO_LOUD : AudioAnswer.Validity.OK) : AudioAnswer.Validity.TOO_QUIET;
       ValidityAndDur validityAndDur = new ValidityAndDur(validity, dur);
 
-      if (validityAndDur.validity != AudioAnswer.Validity.OK) {
-        logger.info("validity " + validityAndDur);
-      }
+      //if (validityAndDur.validity != AudioAnswer.Validity.OK) {
+        //logger.info("validity " + validityAndDur);
+      //}
       return validityAndDur;
     } catch (Exception e) {
       e.printStackTrace();
