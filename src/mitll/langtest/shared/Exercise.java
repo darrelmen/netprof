@@ -158,7 +158,9 @@ public class Exercise extends ExerciseShell {
       refSentence = refSentence.substring(0, 15);
     }
     boolean equals = getTooltip().trim().equals(getRefSentence().trim());
-    String combined = equals ? getTooltip() : getTooltip() + " / " + refSentence;
+    String combined = equals ? getTooltip() : getTooltip() + (refSentence.isEmpty() ? "": " / " + refSentence);
+    if (getTooltip().isEmpty()) combined = refSentence;
+
     return new ExerciseShell(getID(), combined);
   }
 
