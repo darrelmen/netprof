@@ -2,7 +2,6 @@ package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.AccordionGroup;
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.ControlLabel;
@@ -555,9 +554,6 @@ public class StudentDialog extends UserDialog {
       }
 
  /*     rilr = new CheckBox();
-
-
-
       rilr.addStyleName("leftThirtyMargin");
       lilr = new CheckBox();
       lilr.addStyleName("leftThirtyMargin");
