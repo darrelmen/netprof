@@ -133,6 +133,12 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     FlowPanel column = new FlowPanel();
     add(column);
 
+    addTypeAhead(column);
+
+    addTableWithPager(column);
+  }
+
+  protected void addTypeAhead(FlowPanel column) {
     if (!isCRTDataMode) {
       typeAhead = new TextBox();
 
@@ -154,8 +160,6 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
         }
       });
     }
-
-    addTableWithPager(column);
   }
 
   protected void loadExercises(String selectionState, String prefix) {
