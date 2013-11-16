@@ -95,6 +95,9 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
   @Override
   public void clear() {  removeComponents();  }
 
+  @Override
+  protected void addTypeAhead(FlowPanel column) {};
+
   protected void noSectionsGetExercises(long userID) {
     Map<String, Collection<String>> objectObjectMap = Collections.emptyMap();
     addTableToLayout(objectObjectMap);
