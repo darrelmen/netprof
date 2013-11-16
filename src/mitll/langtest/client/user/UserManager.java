@@ -369,7 +369,7 @@ public class UserManager {
     return localStorageIfSupported.getItem(getExpires());
   }
 
-  private PropertyHandler.LOGIN_TYPE getLoginTypeFromStorage() {
+/*  private PropertyHandler.LOGIN_TYPE getLoginTypeFromStorage() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     String item = localStorageIfSupported.getItem(getLoginType());
     try {
@@ -383,7 +383,7 @@ public class UserManager {
       System.err.println("couldn't parse " + item);
       return PropertyHandler.LOGIN_TYPE.UNDEFINED;
     }
-  }
+  }*/
 
   /**
    * @see mitll.langtest.client.LangTest#getLogout()
