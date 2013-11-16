@@ -6,20 +6,19 @@ import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Row;
+import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
+import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.LoadEvent;
-import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
@@ -27,14 +26,13 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.flashcard.CombinedResponseFlashcard;
 import mitll.langtest.client.flashcard.TextCRTFlashcard;
 import mitll.langtest.client.dialog.DialogHelper;
@@ -644,6 +642,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     checkInitFlash();
   }
 
+  private boolean showingPlugInNotice = false;
   /**
    * Hookup feedback for events from Flash generated from the user's response to the Mic Access dialog
    *
@@ -663,6 +662,23 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
 
       public void gotDenial() {  showPopupOnDenial();   }
+
+      /**
+       * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#noMicrophoneFound()
+       */
+      public void noMicAvailable() {
+        if (!showingPlugInNotice) {
+          showingPlugInNotice = true;
+          new ModalInfoDialog("Plug in microphone", "Please plug in your microphone.",
+            new HiddenHandler() {
+              @Override
+              public void onHidden(HiddenEvent hiddenEvent) {
+                showingPlugInNotice = false;
+                removeAndReloadFlash();
+              }
+            });
+        }
+      }
     });
   }
 
@@ -719,40 +735,23 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    *
    */
   private void showPopupOnDenial() {
-    final PopupPanel popupImage = new PopupPanel();
-    popupImage.setAutoHideEnabled(true);
-    final Image image = new Image(LANGTEST_IMAGES +"really.png");
-    image.addLoadHandler(new LoadHandler() {
-      public void onLoad(LoadEvent event) {
-        // since the image has been loaded, the dimensions are known
-        popupImage.center();
-        // only now show the image
-        popupImage.setVisible(true);
-      }
-    });
+    new ModalInfoDialog("Try Again", "Please allow access to the microphone.",
+      new HiddenHandler() {
+        @Override
+        public void onHidden(HiddenEvent hiddenEvent) {
+          removeAndReloadFlash();
+        }
+      });
+  }
 
-    popupImage.add(image);
-    // hide the image until it has been fetched
-    popupImage.setVisible(false);
-    // this causes the image to be loaded into the DOM
-    popupImage.center();
+  private void removeAndReloadFlash() {
+    System.out.println(new Date() + " : removeAndReloadFlash - reloading...");
 
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        popupImage.hide();
-        currentExerciseVPanel.remove(flashRecordPanel);
-
-        flashRecordPanel.removeFlash();
-
-        makeFlashContainer();
-        currentExerciseVPanel.add(flashRecordPanel);
-        flashRecordPanel.initFlash();
-      }
-    };
-
-    // Schedule the timer to run once in 1 seconds.
-    t.schedule(1000);
+    currentExerciseVPanel.remove(flashRecordPanel);
+    flashRecordPanel.removeFlash();
+    makeFlashContainer();
+    currentExerciseVPanel.add(flashRecordPanel);
+    flashRecordPanel.initFlash();
   }
 
   /**
