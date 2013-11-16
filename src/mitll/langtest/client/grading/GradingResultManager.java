@@ -141,7 +141,7 @@ public class GradingResultManager extends ResultManager {
                                                   final boolean editable) {
     final Map<Integer, Grade> resultToGrade = getResultToGrade(grades, gradingColumnIndex);
 
-    AbstractCell selectionCell = editable ? new SelectionCell(GRADING_OPTIONS) : new TextCell();
+    AbstractCell<String> selectionCell = editable ? new SelectionCell(GRADING_OPTIONS) : new TextCell();
     Column<Result, String> col = new Column<Result, String>(selectionCell) {
       @Override
       public String getValue(Result result) {
