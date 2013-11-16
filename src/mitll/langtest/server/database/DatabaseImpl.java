@@ -158,7 +158,6 @@ public class DatabaseImpl implements Database {
       //graderDAO.createGraderTable(getConnection());
       //userDAO.dropUserTable(this);
       userDAO.createUserTable(this);
-
    //   dliUserDAO.dropUserTable(this);
       dliUserDAO.createUserTable(this);
 
