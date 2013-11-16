@@ -58,7 +58,7 @@ public class ResultManager extends PagerTable {
   protected UserFeedback feedback;
   private final AudioTag audioTag = new AudioTag();
   private String nameForAnswer;
-  Map<Column,String> colToField = new HashMap<Column, String>();
+  private Map<Column<?,?>,String> colToField = new HashMap<Column<?,?>, String>();
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2
