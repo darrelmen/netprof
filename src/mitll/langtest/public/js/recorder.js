@@ -5,14 +5,18 @@ function microphone_recorder_events()
 
   switch(arguments[0]) {
   case "ready":
-    Recorder.connect("recorderApp", 0);
+      $('#status').css({'color': '#000'}).append("<p>ready: ");
+      Recorder.connect("recorderApp", 0);
     break;
 
   case "no_microphone_found":
-    break;
+      $('#status').css({'color': '#000'}).append("<p>no_microphone_found: ");
+      noMicrophoneFound();
+      break;
 
   case "microphone_user_request":
-    break;
+      $('#status').css({'color': '#000'}).append("<p>microphone_user_request: ");
+      break;
 
   case "microphone_connected":
     var mic = arguments[1];
@@ -21,7 +25,8 @@ function microphone_recorder_events()
     break;
 
   case "microphone_not_connected":
-    micNotConnected();
+      $('#status').css({'color': '#000'}).append("<p>microphone_not_connected: ");
+      micNotConnected();
     break;
 
 /*  case "microphone_activity":
@@ -64,7 +69,7 @@ Recorder = {
     // flash app needs time to load and initialize
     if(Recorder.recorder && Recorder.recorder.init) {
       $('#status').css({'color': '#0F0'}).append("<p>calling permit at " + new Date().getTime());
-      Recorder.recorder.permit();
+        Recorder.recorder.permit();
       return;
     }
 
@@ -95,7 +100,11 @@ Recorder = {
   },
 
   getWav: function() {
-    return Recorder.recorder.getwavbase64();
+      return Recorder.recorder.getwavbase64();
+  },
+
+  isMicrophoneAvailable: function() {
+      return Recorder.recorder.isMicrophoneAvailable();
   },
 
   showPermission: function() {
@@ -103,7 +112,6 @@ Recorder = {
   }
 
   /*,
-
   showPermissionWindow: function() {
       $('#upload_status').css({'color': '#0F0'}).append(" permit called: ");
 
