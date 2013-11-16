@@ -150,7 +150,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     service.getTypeOrder(new AsyncCallback<Collection<String>>() {
       @Override
       public void onFailure(Throwable caught) {
-        Window.alert("getTypeOrder can't contact server. got " + caught);
+        //Window.alert("getTypeOrder can't contact server. got " + caught);
       }
 
       @Override
