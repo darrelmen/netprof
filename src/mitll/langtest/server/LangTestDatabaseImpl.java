@@ -178,7 +178,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public ExerciseListWrapper getExerciseIds(int reqID, long userID) {
     logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
     List<Exercise> exercises = getExercises(userID);
-    return getExerciseListWrapper(reqID, exercises, false);
+    return getExerciseListWrapper(reqID, exercises);
   }
 
   private List<ExerciseShell> getExerciseShells(Collection<Exercise> exercises) {
@@ -207,10 +207,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     ExerciseTrie trie = new ExerciseTrie(getExercises(userID), !serverProps.getLanguage().equals("English"));
     List<Exercise> exercisesForPrefix = trie.getExercises(prefix);
 
-    return getExerciseListWrapper(reqID, exercisesForPrefix, false);
+    return getExerciseListWrapper(reqID, exercisesForPrefix);
   }
 
-  private ExerciseListWrapper getExerciseListWrapper(int reqID, List<Exercise> exercisesForPrefix, boolean useCombinedTooltip) {
+  private ExerciseListWrapper getExerciseListWrapper(int reqID, List<Exercise> exercisesForPrefix) {
     if (serverProps.isGoodwaveMode() && !serverProps.dataCollectMode) {
       exercisesForPrefix = getSortedExercises(exercisesForPrefix);
       if (!exercisesForPrefix.isEmpty()) logger.debug("sorting by id -- first is " + exercisesForPrefix.get(0).getID());
@@ -350,7 +350,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       if (typeToSection.isEmpty()) {
        // logger.debug("getFullExercisesForSelectionState empty type->section");
-        exercises = getSortedExercises(db.getExercises());
+        exercises = getSortedExercises(getExercises());
         logger.debug("getFullExercisesForSelectionState exercises "+ exercises.size() + " start " + start + " end " + end);
       } else {
         Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
@@ -370,7 +370,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public int getNumExercisesForSelectionState(Map<String, Collection<String>> typeToSection) {
     if (typeToSection.isEmpty()) {
-      int size = db.getExercises().size();
+      int size = getExercises().size();
       logger.debug("getNumExercisesForSelectionState num = " + size);
       return size;
     } else {
@@ -453,7 +453,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
    */
   private List<Exercise> getExercises(long userID) {
-    makeAutoCRT();
     List<Exercise> exercises = getExercisesInModeDependentOrder(userID);
     if (serverProps.isCRTDataCollect()) {
       setPromptAndRecordOnExercises(exercises);
@@ -522,7 +521,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param exercises to alter
    */
   private void setPromptAndRecordOnExercises(List<Exercise> exercises) {
-    logger.debug("setPromptAndRecordOnExercises for  collect audio " + serverProps.isCollectOnlyAudio());
+    //logger.debug("setPromptAndRecordOnExercises for  collect audio " + serverProps.isCollectOnlyAudio());
     for (Exercise e : exercises) {
       if (serverProps.isCollectOnlyAudio()) {
         e.setRecordAnswer(true);
@@ -601,7 +600,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.list.ExerciseList#getExercisesInOrder()
    * @return
    */
-  List<Exercise> getExercises() { return db.getExercises();  }
+  List<Exercise> getExercises() {
+    List<Exercise> exercises = db.getExercises();
+    makeAutoCRT();   // side effect of db.getExercises is to make the exercise DAO which is needed here...
+    return exercises;
+  }
 
   /**
    * Remember who is grading which exercise.  Time out reservation after 30 minutes.
@@ -818,7 +821,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   public double getScoreForAnswer(long userID, Exercise exercise, int questionID, String answer, String answerType) {
-    makeAutoCRT();
     double scoreForAnswer = audioFileHelper.getScoreForAnswer(exercise, questionID, answer);
     boolean correct = scoreForAnswer > 0.5;
     db.getAnswerDAO().addAnswer((int) userID, exercise.getPlan(), exercise.getID(), "", answer, answerType, correct,
@@ -960,7 +962,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
                                     int user, int reqid, boolean flq, String audioType, boolean doFlashcard) {
-    makeAutoCRT();
     return this.audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, questionID, user, reqid, flq,
       audioType, doFlashcard, this);
   }
