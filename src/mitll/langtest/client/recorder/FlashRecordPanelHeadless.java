@@ -106,7 +106,10 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     return $wnd.Recorder.getWav();
   }-*/;
 
-  public void installFlash() {
+  /**
+   * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#rememberInstallFlash()
+   */
+  private void installFlash() {
     if (gotPermission()) {
       micPermission.gotPermission();
     }
@@ -138,6 +141,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
     $wnd.micConnected = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::micConnected());
     $wnd.micNotConnected = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::micNotConnected());
+    $wnd.noMicrophoneFound = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::noMicrophoneFound());
 
     function outputStatus(e) {
       //alert("e.success = " + e.success +"\ne.id = "+ e.id +"\ne.ref = "+ e.ref);
@@ -163,9 +167,15 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * Event from flash when user clicks Deny
    */
   public static void micNotConnected() {
-    System.err.println("mic  NOT   Connected!");
+    System.err.println("---> mic *NOT* Connected!");
     permissionReceived = false;
     micPermission.gotDenial();
+  }
+
+  public static void noMicrophoneFound() {
+    System.err.println("no mic available");
+    permissionReceived = false;
+    micPermission.noMicAvailable();
   }
 
   public boolean gotPermission() { return permissionReceived; }
