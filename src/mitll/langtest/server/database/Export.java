@@ -71,8 +71,10 @@ public class Export {
     List<ExerciseExport> names = new ArrayList<ExerciseExport>();
     for (Exercise e : exercises) {
       List<Result> results1 = exerciseToResult.get(e.getID());
-      List<ExerciseExport> resultsForExercise = getExports(idToGrade, results1, e, useFLQ, useSpoken);
-      names.addAll(resultsForExercise);
+      if (results1 != null) {
+        List<ExerciseExport> resultsForExercise = getExports(idToGrade, results1, e, useFLQ, useSpoken);
+        names.addAll(resultsForExercise);
+      }
     }
     logger.debug("getExport : produced " +names.size() + " exports");
 
