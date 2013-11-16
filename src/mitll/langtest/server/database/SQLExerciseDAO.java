@@ -379,7 +379,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
 
   private void addQuestions(Exercise exercise, Collection<JSONObject> qa) {
     for (JSONObject o : qa) {
-      Set keys = o.keySet();
+      Set<?> keys = o.keySet();
       for (Object lang : keys) {
         JSONObject qaForLang = (JSONObject) o.get(lang);
         String answerKey = (String) qaForLang.get("answerKey");
