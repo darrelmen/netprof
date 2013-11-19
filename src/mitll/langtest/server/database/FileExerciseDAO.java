@@ -545,9 +545,6 @@ public class FileExerciseDAO implements ExerciseDAO {
       else {
         e1 = firstPhrase;
       }
-   /*   if (e1.endsWith("-") && split.length > 1) {
-        e1 = split[split.length-2];
-      }*/
     }
     return e1.trim().replaceAll("-", " ");
   }
