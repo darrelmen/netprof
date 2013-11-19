@@ -18,10 +18,8 @@ public class AnswerDAO {
   private static Logger logger = Logger.getLogger(AnswerDAO.class);
 
   private final Database database;
-
-  public AnswerDAO(Database database) {
-    this.database = database;
-  }
+  ResultDAO resultDAO;
+  public AnswerDAO(Database database, ResultDAO resultDAO) { this.database = database; this.resultDAO = resultDAO; }
 
   /**
    *
@@ -201,6 +199,7 @@ public class AnswerDAO {
     statement.setString(i++, stimulus);
 
     //logger.info("valid is " +valid + " for " +statement);
+    resultDAO.invalidateCachedResults();
 
     statement.executeUpdate();
 

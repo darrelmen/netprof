@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class SQLExerciseDAO implements ExerciseDAO {
+  public static final String HEADER_TAG = "h4";
   private static Logger logger = Logger.getLogger(SQLExerciseDAO.class);
 
   private static final String ENCODING = "UTF8";
@@ -307,18 +308,19 @@ public class SQLExerciseDAO implements ExerciseDAO {
       content = content.replaceAll("Orientation :","Question Scenario");
       content = content.replaceAll("Orientation:","Question Scenario");
       content = content.replaceAll("<td width=\"20%\"> &nbsp; </td>","");
-      content = content.replaceAll("td","h3");
-      content = content.replaceAll("br", "h3");
+      content = content.replaceAll("td", HEADER_TAG);
+      content = content.replaceAll("br", HEADER_TAG);
       if (content.contains(":")) {
         content = content.replaceAll(":", " ");
       }
       content += "</h3>";
     }
     content = content.replaceAll("dir=\"rtl\"","dir=\"rtl\" style=\"text-align:right\"");
+    content = content.replaceAll("h3","h4");
     if (content.contains("<p")) {
       content = content.replaceAll("<p>\\s+</p>","");
       content = content.replaceAll("<p> &nbsp; </p>","");
-      content = content.replaceAll("<p","<h3").replaceAll("p>","h3>");
+      content = content.replaceAll("<p","<h4").replaceAll("p>","h4>");
     }
     return content;
   }
@@ -413,7 +415,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
     return installPath + dariConfig;
   }*/
 
-  private static void dumpQuestionsAndAnswers(SQLExerciseDAO sqlExerciseDAO) {
+/*  private static void dumpQuestionsAndAnswers(SQLExerciseDAO sqlExerciseDAO) {
     List<Exercise> rawExercises = sqlExerciseDAO.getRawExercises();
     //Exercise next = rawExercises.iterator().next();
     try {
@@ -423,10 +425,10 @@ public class SQLExerciseDAO implements ExerciseDAO {
       BufferedWriter writer2 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename +
         "English.tsv"), FileExerciseDAO.ENCODING));
       //  System.out.println("First is " +next + " content " + next.getContent());
- /*     writer.write ("ID\tQ #\tQuestion\t" +
+      writer.write ("ID\tQ #\tQuestion\t" +
         "Answer" +
         "\n");
-*/
+
       writer.write("ID\t"+ "Audio\t" +"Scenario\t"+
         "Q #\tQuestion\t");// +
    //   writer.write("Content\t");
@@ -450,8 +452,8 @@ public class SQLExerciseDAO implements ExerciseDAO {
       //  writer2.write(e.getEnglishSentence()+"\t");
 
         for (Exercise.QAPair qaPair : e.getEnglishQuestions()) {
-        /*    String x = e.getID() + "\t" + qaPair.getQuestion() + "\t" + qaPair.getAnswer();
-            writer2.write(x+"\n");*/
+            String x = e.getID() + "\t" + qaPair.getQuestion() + "\t" + qaPair.getAnswer();
+            writer2.write(x+"\n");
                      qq++;
             writeQAPair(writer2, e, qq,qaPair);
 
@@ -463,7 +465,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
+  }*/
 
   private static void writeQAPair(BufferedWriter writer, Exercise e, int q,Exercise.QAPair qaPair) throws IOException {
     writer.write(e.getID() + "\t");
@@ -475,10 +477,14 @@ public class SQLExerciseDAO implements ExerciseDAO {
     String[] split = content.split("Question Scenario");
     if (split.length > 1) {
       String s = split[1];
-      String[] split1 = s.split("<h3 dir=\"rtl\">");
+      String[] split1 = s.split("<" +
+        HEADER_TAG +
+        " dir=\"rtl\">");
 
       String s1 = split1[1];
-      String s2 = s1.split("</h3>")[0];
+      String s2 = s1.split("</" +
+        HEADER_TAG +
+        ">")[0];
       //logger.warn("s2 " +s2);
       writer.write(s2 + "\t");
     }
