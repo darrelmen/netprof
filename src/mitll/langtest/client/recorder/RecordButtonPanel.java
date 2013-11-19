@@ -108,6 +108,8 @@ public class RecordButtonPanel {
 
   protected Anchor makeRecordButton() {
     recordButton = new ImageAnchor();
+    recordButton.setWidth("70px");
+
     recordButton.setResource(recordImage);
     return recordButton;
   }
