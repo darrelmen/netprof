@@ -7,13 +7,11 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.client.recorder.AutoCRTRecordPanel;
 import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
@@ -28,9 +26,9 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class CombinedResponseFlashcard extends TextCRTFlashcard implements ExerciseQuestionState {
-  private Set<Widget> completed = new HashSet<Widget>();
+  private Set<Object> completed = new HashSet<Object>();
 
-  public CombinedResponseFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, UserManager userManager) {
+  public CombinedResponseFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
     super(e, service, controller);
   }
 
@@ -43,12 +41,12 @@ public class CombinedResponseFlashcard extends TextCRTFlashcard implements Exerc
     enableNext();
   }
 
-  public void recordIncomplete(Widget answer) {
-    completed.remove(answer);
+  public void recordIncomplete(Object answer) {
+    if (!completed.remove(answer)) System.err.println("huh? answer isn't registered?");
     enableNext();
   }
 
-  public void recordCompleted(Widget answer) {
+  public void recordCompleted(Object answer) {
     completed.add(answer);
     enableNext();
   }
