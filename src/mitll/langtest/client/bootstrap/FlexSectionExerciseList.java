@@ -436,6 +436,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     status.add(statusHeader);
     statusHeader.getElement().setId("statusHeader");
     DOM.setStyleAttribute(statusHeader.getElement(), "marginTop", "0px");
+    DOM.setStyleAttribute(statusHeader.getElement(), "marginBottom", "0px");
 
     return status;
   }
