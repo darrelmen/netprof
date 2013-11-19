@@ -128,7 +128,7 @@ public class ASRScoring extends Scoring {
   }*/
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    * @param testAudioDir
    * @param testAudioFileNoSuffix
    * @param sentence that should be what the test audio contains
@@ -479,7 +479,7 @@ public class ASRScoring extends Scoring {
   private void readDictionary() { htkDictionary = makeDict(); }
 
   /**
-   * @see mitll.langtest.server.audio.SplitAudio#convertExamples(int, String, String, java.util.Map
+   * @see mitll.langtest.server.audio.SplitAudio#convertExamples(int, String, String, java.util.Map, java.util.Map, java.util.Set, boolean)
    * @return
    */
   public HTKDictionary getDict() { return htkDictionary; }
