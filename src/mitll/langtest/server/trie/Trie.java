@@ -12,7 +12,6 @@ package mitll.langtest.server.trie;
 import mitll.langtest.shared.Exercise;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -84,10 +83,10 @@ public class Trie {
     computeFailureFunction();
   }*/
 
-  private void build2(List<String> entryList) {
+/*  private void build2(List<String> entryList) {
     makeNodes2(entryList);
     computeFailureFunction();
-  }
+  }*/
 
   /**
    * Check in HashMap for single tokens (less memory than putting everything in the trie).
@@ -112,13 +111,13 @@ public class Trie {
     endMakingNodes();
   }*/
 
-  private void makeNodes2(List<String> entryList) {
+/*  private void makeNodes2(List<String> entryList) {
     startMakingNodes();
     for (String entry : entryList) {
       addEntryToTrie(entry);
     }
     endMakingNodes();
-  }
+  }*/
 
   /**
    * Start building
@@ -291,7 +290,7 @@ public class Trie {
     public String toString() { return entry; }
   }
 
-  public static void main(String [] arg) {
+/*  public static void main(String [] arg) {
     Trie trie = new Trie(false);
 
     String [] str =  {"he went","he goes","he goes home","he goes to work","he returns","hello!","hi","hi there"};
@@ -324,5 +323,5 @@ public class Trie {
     }
  //   System.out.println("got 4 " + e.getNextState("l"));
   //  System.out.println("got " + trie.getSingleTokenValue("hel"));
-  }
+  }*/
 }
