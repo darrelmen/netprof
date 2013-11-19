@@ -65,7 +65,7 @@ public class DatabaseImpl implements Database {
   private final UserDAO userDAO = new UserDAO(this);
   private final DLIUserDAO dliUserDAO = new DLIUserDAO(this);
   private final ResultDAO resultDAO = new ResultDAO(this,userDAO);
-  private final AnswerDAO answerDAO = new AnswerDAO(this);
+  private final AnswerDAO answerDAO = new AnswerDAO(this, resultDAO);
   private final GradeDAO gradeDAO = new GradeDAO(this,userDAO, resultDAO);
   private final SiteDAO siteDAO = new SiteDAO(this, userDAO);
 
