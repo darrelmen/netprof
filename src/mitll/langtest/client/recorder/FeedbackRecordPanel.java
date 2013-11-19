@@ -1,9 +1,11 @@
 package mitll.langtest.client.recorder;
 
+import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -17,7 +19,6 @@ import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -30,26 +31,16 @@ import java.util.Set;
 public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
   private AutoCRTRecordPanel autoCRTRecordPanel;
   private TextResponse textResponse;
-  private Set<Widget> completed = new HashSet<Widget>();
 
   public FeedbackRecordPanel(Exercise e, LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller) {
     super(e, service, userFeedback, controller);
   }
 
-  public void recordIncomplete(Widget answer) {
-    completed.remove(answer);
-    enableNext();
-  }
-
-  public void recordCompleted(Widget answer) {
-    completed.add(answer);
-    enableNext();
-  }
-
-  private void enableNext() {
-    navigationHelper.enableNextButton((completed.size() == (controller.getProps().getResponseType().equalsIgnoreCase("Both") ? 2 :1)));
-  }
-
+  /**
+   * @see #addQuestionPrompt(com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.Exercise)
+   * @param promptInEnglish
+   * @return
+   */
   @Override
   protected String getQuestionPrompt(boolean promptInEnglish) {
     String responseType = controller.getProps().getResponseType();
@@ -61,64 +52,78 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
   }
 
   @Override
-  protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
+  protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
+                                   final int index) {
     autoCRTRecordPanel = new AutoCRTRecordPanel(service, controller, exercise, this, index);
     String responseType = controller.getProps().getResponseType();
-    final Widget outer = this;
 
     if (responseType.equalsIgnoreCase("Audio")) {
-      return getVerticalPanel(autoCRTRecordPanel.getPanel(), new ScoreFeedback(true),true);
+      Panel panel = autoCRTRecordPanel.getPanel();
+      panel.setWidth("100%");
+      addAnswerWidget(index, panel);
+      FluidContainer outerContainer = new FluidContainer();
+      outerContainer.add(panel);
+      outerContainer.addStyleName("floatLeft");
+
+      getFeedbackContainer(outerContainer, new ScoreFeedback(true), true);
+      return outerContainer;
     }
     else if (responseType.equalsIgnoreCase("Text")){
-      return doText(exercise, service, controller, outer, responseType);
+      return doText(exercise, service, controller, index);
     }
     else {
-      Panel widget = doText(exercise, service, controller, outer, responseType);
-      widget.add(getVerticalPanel(autoCRTRecordPanel.getPanel(), new ScoreFeedback(true), true));
-      return widget;
+      FluidRow row = new FluidRow();
+      Panel textWidget = doText(exercise, service, controller, index);
+      textWidget.addStyleName("floatLeft");
+      Panel panel = autoCRTRecordPanel.getPanel();
+
+      addAnswerWidget(index, panel);
+
+      FluidContainer outerContainer = new FluidContainer();
+      outerContainer.add(panel);
+
+      getFeedbackContainer(outerContainer, new ScoreFeedback(true), true);
+      row.add(new Column(6,textWidget));
+      row.add(new Column(6,outerContainer));
+      return row;
     }
   }
 
-  private Panel doText(Exercise exercise, final LangTestDatabaseAsync service,final ExerciseController controller,
-                       final Widget outer, final String responseType) {
+  private Panel doText(Exercise exercise, final LangTestDatabaseAsync service, final ExerciseController controller, int index) {
     textResponse = new TextResponse(controller.getUser(), soundFeedback,
       new TextResponse.AnswerPosted() {
         @Override
         public void answerPosted() {
-          recordCompleted(outer);
-          if (responseType.equalsIgnoreCase("Text")) {
-            service.getCompletedExercises(controller.getUser(), new AsyncCallback<Set<String>>() {
-              @Override
-              public void onFailure(Throwable caught) {
-                //To change body of implemented methods use File | Settings | File Templates.
-              }
-
-              @Override
-              public void onSuccess(Set<String> result) {
-                controller.getExerciseList().setCompleted(result);
-                controller.showProgress();
-              }
-            });
-          }
+          recordCompleted(textResponse.getTextResponseWidget());
         }
       });
 
-    FluidContainer container = new FluidContainer();
-    textResponse.addWidgets(container,exercise,service,controller,false, true);
+    FluidContainer outerContainer = new FluidContainer();
 
-    Panel verticalPanel = getVerticalPanel(container, textResponse.getTextScoreFeedback(),false);
+    Panel row1 = new FlowPanel();
+    row1.getElement().setId("row1");
+    outerContainer.add(row1);
+    outerContainer.addStyleName("floatLeft");
+    Widget widget = textResponse.addWidgets(row1, exercise, service, controller, false, true);
+    widget.getElement().setId("textResponse");
+    addAnswerWidget(index, widget);
+
+    FluidRow row2 = new FluidRow();
+    row2.getElement().setId("row2");
+
+    outerContainer.add(row2);
+
+    getFeedbackContainer(row2, textResponse.getTextScoreFeedback(), false);
+    outerContainer.getElement().setId("outerContainer");
+
     textResponse.setSoundFeedback(soundFeedback);
-    return verticalPanel;
+    return outerContainer;
   }
 
-  SoundFeedback soundFeedback;
-  public Panel getVerticalPanel(Panel panel, ScoreFeedback scoreFeedback,boolean addToContainer) {
-    FluidContainer container = new FluidContainer();
-    FluidRow row1 = new FluidRow();
-    container.add(row1);
-    row1.add(panel);
+  private SoundFeedback soundFeedback;
 
-    if (addToContainer) {
+  private void getFeedbackContainer(Panel container, ScoreFeedback scoreFeedback, boolean addScoreFeedback) {
+    if (addScoreFeedback) {
       SimplePanel simplePanel = new SimplePanel(scoreFeedback.getFeedbackImage());
       simplePanel.addStyleName("floatLeft");
 
@@ -137,8 +142,24 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
     FluidRow row3 = new FluidRow();
     container.add(row3);
     row3.add(warnNoFlash);
+  }
 
-    return container;
+  @Override
+  protected void enableNext() {
+    super.enableNext();
+    if (isCompleted()) {
+      service.getCompletedExercises(controller.getUser(), new AsyncCallback<Set<String>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
+
+        @Override
+        public void onSuccess(Set<String> result) {
+          controller.getExerciseList().setCompleted(result);
+          controller.showProgress();
+        }
+      });
+    }
   }
 
   @Override
