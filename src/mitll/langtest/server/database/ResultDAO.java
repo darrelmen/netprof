@@ -51,6 +51,7 @@ public class ResultDAO extends DAO {
   private final GradeDAO gradeDAO;
   private final ScheduleDAO scheduleDAO ;
   private final boolean debug = false;
+  //private long lastWriteTime = Long.MIN_VALUE;
 
   public ResultDAO(Database database, UserDAO userDAO) {
     super(database);
@@ -117,6 +118,8 @@ public class ResultDAO extends DAO {
     }
   }
 
+  private List<Result> cachedResultsForQuery = null;
+
   /**
    * Pulls the list of results out of the database.
    * @see mitll.langtest.server.database.DatabaseImpl#getResults()
@@ -124,14 +127,28 @@ public class ResultDAO extends DAO {
    */
   public List<Result> getResults() {
     try {
+      synchronized(this) {
+        if (cachedResultsForQuery != null) {
+          return cachedResultsForQuery;
+        }
+      }
       Connection connection = database.getConnection();
       PreparedStatement statement = connection.prepareStatement("SELECT * FROM " +RESULTS+";");
 
-      return getResultsForQuery(connection, statement);
+      List<Result> resultsForQuery = getResultsForQuery(connection, statement);
+
+      synchronized(this) {
+        cachedResultsForQuery = resultsForQuery;
+      }
+      return resultsForQuery;
     } catch (Exception ee) {
       ee.printStackTrace();
     }
     return new ArrayList<Result>();
+  }
+
+  public synchronized void invalidateCachedResults() {
+     cachedResultsForQuery = null;
   }
 
   public int getNumResults() {
@@ -230,8 +247,10 @@ public class ResultDAO extends DAO {
    */
   private boolean areAllResultsGraded(String exerciseID, Collection<Grade> gradedResults, int expected, boolean useEnglishGrades) {
     List<Result> resultsForExercise = getAllResultsForExercise(exerciseID);
-    if (debug && !resultsForExercise.isEmpty()) logger.debug("for " + exerciseID + " expected " + expected +
-      " grades/item before " + resultsForExercise.size() + " results, and " + gradedResults.size() + " grades");
+    if (debug && !resultsForExercise.isEmpty()) {
+    	logger.debug("for " + exerciseID + " expected " + expected +
+    		      " grades/item before " + resultsForExercise.size() + " results, and " + gradedResults.size() + " grades");
+    }
     if (resultsForExercise.isEmpty()) {
       return true;
     }
