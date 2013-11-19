@@ -62,6 +62,7 @@ public class ExercisePanel extends VerticalPanel implements
   private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
   private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak and record your answer in ";
   private static final int ITEM_HEADER = 5;
+  private static final int CONTENT_SCROLL_HEIGHT = 240;
   private List<Widget> answers = new ArrayList<Widget>();
   protected Set<Object> completed = new HashSet<Object>();
   protected Exercise exercise = null;
@@ -136,8 +137,8 @@ public class ExercisePanel extends VerticalPanel implements
       HTML maybeRTLContent = getMaybeRTLContent(content, true);
       maybeRTLContent.addStyleName("rightTenMargin");
       ScrollPanel scroller = new ScrollPanel(maybeRTLContent);
-      scroller.getElement().setId("scroller");
-      scroller.setHeight("250px");
+      scroller.getElement().setId("contentScroller");
+      scroller.setHeight(CONTENT_SCROLL_HEIGHT + "px");
       return scroller;
     }
   }
@@ -248,7 +249,7 @@ public class ExercisePanel extends VerticalPanel implements
     Set<Object> objects = indexToWidgets.get(index);
     if (objects == null) indexToWidgets.put(index, objects = new HashSet<Object>());
     objects.add(answerWidget);
-    System.out.println("now " +answers.size() + " expected");
+    System.out.println("now " +answers.size() + " expected, adding " + answerWidget.getElement().getId());
   }
 
   protected boolean shouldShowAnswer() { return controller.isDemoMode();  }
@@ -469,23 +470,48 @@ public class ExercisePanel extends VerticalPanel implements
     if (after - before != 1 && before > 0) {
       System.err.println("\n\n\nhuh? answer is not on list?");
     }
+    System.out.println("recordIncomplete : "+
+      " completed " + completed.size() + " vs total " + answers.size());
 
     enableNext();
   }
 
   public void recordCompleted(Object answer) {
     completed.add(answer);
+    System.out.println("recordCompleted : id " + ((Widget)answer).getElement().getId()+
+      " completed " + completed.size() + " vs total " + answers.size());
+
+    for (Object complete : completed) {
+      System.out.println("\trecordCompleted : complete " + ((Widget)complete).getElement().getId());
+    }
+
     for (Map.Entry<Integer, Set<Object>> indexWidgetsPair : indexToWidgets.entrySet()) {
       boolean allComplete = true;
-      for (Object widget : indexWidgetsPair.getValue()) {
+      Set<Object> widgetsForTab = indexWidgetsPair.getValue();
+      Integer tabIndex = indexWidgetsPair.getKey();
+      System.out.println("\trecordCompleted : checking " + tabIndex + " and " + widgetsForTab.size());
+
+      for (Object widget : widgetsForTab) {
         if (!completed.contains(widget)) {
+          System.out.println("\trecordCompleted : tab# " + tabIndex + " is *not* complete : " + ((Widget)widget).getElement().getId());
           allComplete = false;
           break;
         }
+        else {
+          System.out.println("\trecordCompleted : tab# " + tabIndex + " is      complete : " + ((Widget)widget).getElement().getId());
+        }
       }
       if (allComplete) {
+        System.out.println("\trecordCompleted : tab# " + tabIndex + " is complete");
+
         if (!indexToTab.isEmpty()) {
-          indexToTab.get(indexWidgetsPair.getKey()).setIcon(IconType.CHECK);
+          System.out.println("\trecordCompleted : tab# " + tabIndex + " set icon");
+
+          indexToTab.get(tabIndex).setIcon(IconType.CHECK);
+        }
+        else {
+          System.out.println("\trecordCompleted : huh? index to tab is empty");
+
         }
       }
     }
