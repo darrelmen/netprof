@@ -13,6 +13,7 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -31,16 +32,18 @@ import mitll.langtest.shared.Exercise;
  */
 public class TextResponse {
   private static final int FEEDBACK_HEIGHT = 40;
+  private static final String CHECK = "Check";
 
   private EnterKeyButtonHelper enterKeyButtonHelper;
   private ScoreFeedback textScoreFeedback;
   private SoundFeedback soundFeedback;
   private int user;
   private AnswerPosted answerPosted;
+  private Widget textResponseWidget;
 
   /**
    * @see TextCRTFlashcard#makeNavigationHelper(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController)
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#doText(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Widget, String)
+   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#doText
    * @param user to whom to file this answer under
    * @param soundFeedback so we can play a sound when the answer is correct or incorrect
    * @param answerPosted callback for when the user types in an answer and the post to the server has completed
@@ -57,27 +60,62 @@ public class TextResponse {
 
   public void setSoundFeedback(SoundFeedback soundFeedback) { this.soundFeedback = soundFeedback; }
 
-  public void addWidgets(Panel toAddTo, Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
+  /**
+   * Has two rows -- the text input box and the score feedback
+   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#doText(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @param toAddTo
+   * @param exercise
+   * @param service
+   * @param controller
+   * @param centered
+   * @param useWhite
+   * @return
+   */
+  public Widget addWidgets(Panel toAddTo, Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
                          boolean centered, boolean useWhite) {
     textScoreFeedback = new ScoreFeedback(useWhite);
 
-    toAddTo.add(getTextResponseWidget(exercise, service, controller, getTextScoreFeedback(), centered));
-    toAddTo.add(getTextScoreFeedback().getScoreFeedbackRow(FEEDBACK_HEIGHT));
+    textResponseWidget = getTextResponseWidget(exercise, service, controller, getTextScoreFeedback(), centered);
+    toAddTo.add(textResponseWidget);
+    textResponseWidget.addStyleName("floatLeft");
+    FluidRow scoreFeedbackRow = getTextScoreFeedback().getScoreFeedbackRow(FEEDBACK_HEIGHT);
+    toAddTo.add(scoreFeedbackRow);
+
+    return textResponseWidget;
   }
 
+  /**
+   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#doText(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @return
+   */
+  public Widget getTextResponseWidget() { return textResponseWidget; }
+
+  /**
+   * Three parts - text input, check button, and feedback icon
+   * @param exercise
+   * @param service
+   * @param controller
+   * @param scoreFeedback
+   * @param centered
+   * @return
+   * @see #addWidgets(com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, boolean)
+   */
   private Widget getTextResponseWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
                                        ScoreFeedback scoreFeedback, boolean centered) {
     boolean allowPaste = controller.isDemoMode();
-    final Button check = new Button("Check Answer");
+    final Button check = new Button(CHECK);
     final TextBox noPasteAnswer = getAnswerBox(controller, allowPaste, check);
     String answerType = controller.getAudioType();
     setupSubmitButton(exercise, service, check, noPasteAnswer, scoreFeedback, answerType);
 
-    FluidRow row = new FluidRow();
+    HorizontalPanel row = new HorizontalPanel();
+    row.getElement().setId("textResponseRow");
     row.add(noPasteAnswer);
     row.add(check);
 
+    // TODO : move this down to feedback row...!
     row.add(scoreFeedback.getFeedbackImage());
+
     return centered ? getRecordButtonRow(row) : row;
   }
 
@@ -117,8 +155,6 @@ public class TextResponse {
       noPasteAnswer.addStyleName("rightAlign");
     }
 
-  //  noPasteAnswer.setFocus(true);
-    noPasteAnswer.addStyleName("topMargin");
     noPasteAnswer.addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
         check.setEnabled(noPasteAnswer.getText().length() > 0);
@@ -159,8 +195,11 @@ public class TextResponse {
    */
   private void gotScoreForGuess(Double result) {
     getTextScoreFeedback().showCRTFeedback(result, soundFeedback, "Score ", false);
-    getTextScoreFeedback().hideFeedback();
-    if (answerPosted != null) answerPosted.answerPosted();
+   // getTextScoreFeedback().hideFeedback();
+    if (answerPosted != null) {
+      System.out.println("calling answer posted for " + result);
+      answerPosted.answerPosted();
+    }
   }
 
   public void onUnload() {
