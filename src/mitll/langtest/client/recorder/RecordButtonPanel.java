@@ -81,7 +81,6 @@ public class RecordButtonPanel {
 
   protected RecordButton makeRecordButton(final ExerciseController controller, final RecordButtonPanel outer) {
     boolean addKeyHandler = controller.shouldAddRecordKeyBinding();
-    System.out.println("\n\n\nshould add key handler " + addKeyHandler);
     return new RecordButton(recordButton, controller.getRecordTimeout(), recordImage1, recordImage2, addKeyHandler) {
       @Override
       protected void stopRecording() {
@@ -113,19 +112,22 @@ public class RecordButtonPanel {
     return recordButton;
   }
 
+  /**
+   * @see #RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int)
+   */
   protected void layoutRecordButton() {
-    SimplePanel recordButtonContainer = new SimplePanel();
-    recordButtonContainer.setWidth("75px");
-    recordButtonContainer.add(recordButton);
-    HorizontalPanel hp = new HorizontalPanel() {
+    SimplePanel recordButtonContainer = new SimplePanel(recordButton) {
       @Override
       protected void onUnload() {
+        super.onUnload();
         RecordButtonPanel.this.onUnload();
       }
     };
+    recordButtonContainer.setWidth("75px");
+    HorizontalPanel hp = new HorizontalPanel();
     hp.add(recordButtonContainer);
     this.panel = hp;
-
+    panel.getElement().setId("recordButtonPanel");
     panel.add(recordImage1);
     recordImage1.setVisible(false);
     panel.add(recordImage2);
@@ -167,6 +169,10 @@ public class RecordButtonPanel {
     rb.onUnload();
   }
 
+  /**
+   * @see FeedbackRecordPanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @return
+   */
   public Panel getPanel() {
      return this.panel;
   }
