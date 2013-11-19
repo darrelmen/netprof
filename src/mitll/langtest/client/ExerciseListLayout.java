@@ -65,6 +65,16 @@ public class ExerciseListLayout {
     addExerciseListOnLeftSide(leftColumn);
   }
 
+  /**
+   * @see #makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
+   * @param secondRow
+   * @param isGrading
+   * @param feedback
+   * @param currentExerciseVPanel
+   * @param service
+   * @param controller
+   * @return
+   */
   private ListInterface makeExerciseList(FluidRow secondRow, boolean isGrading, final UserFeedback feedback,
                                          Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                          ExerciseController controller) {
