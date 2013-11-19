@@ -187,7 +187,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
   private boolean isPlaying() {
     boolean isPlaying = playButton.getText().trim().equals(PAUSE_LABEL);
-    if (!isPlaying && DEBUG) System.out.println(new Date() + " isPlaying : " + playButton.getText() + " vs " + PAUSE_LABEL);
+   // if (!isPlaying && DEBUG) System.out.println(new Date() + " isPlaying : " + playButton.getText() + " vs " + PAUSE_LABEL);
     return isPlaying;
   }
 
