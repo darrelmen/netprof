@@ -49,14 +49,20 @@ public class TextResponse {
    * @param answerPosted callback for when the user types in an answer and the post to the server has completed
    */
   public TextResponse(int user, SoundFeedback soundFeedback, AnswerPosted answerPosted) {
+    this(user, soundFeedback);
+    this.answerPosted = answerPosted;
+  }
+
+  public TextResponse(int user, SoundFeedback soundFeedback) {
     this.user = user;
     this.soundFeedback = soundFeedback;
-    this.answerPosted = answerPosted;
   }
 
   public interface AnswerPosted {
     void answerPosted();
   }
+
+  public void setAnswerPostedCallback(AnswerPosted answerPosted) { this.answerPosted = answerPosted; }
 
   public void setSoundFeedback(SoundFeedback soundFeedback) { this.soundFeedback = soundFeedback; }
 
