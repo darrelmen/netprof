@@ -1,23 +1,28 @@
 package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Tab;
+import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -27,8 +32,10 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -54,14 +61,16 @@ public class ExercisePanel extends VerticalPanel implements
   private static final String ENGLISH = "English";
   private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
   private static final String SPEAK_AND_RECORD_YOUR_ANSWER_IN = "Speak and record your answer in ";
+  private static final int ITEM_HEADER = 5;
   private List<Widget> answers = new ArrayList<Widget>();
-  private Set<Widget> completed = new HashSet<Widget>();
+  protected Set<Object> completed = new HashSet<Object>();
   protected Exercise exercise = null;
   protected ExerciseController controller;
   private boolean enableNextOnlyWhenAllCompleted = true;
   protected LangTestDatabaseAsync service;
   protected UserFeedback feedback;
   protected NavigationHelper navigationHelper;
+  protected Map<Integer,Set<Object>> indexToWidgets = new HashMap<Integer, Set<Object>>();
 
   /**
    * @see ExercisePanelFactory#getExercisePanel
@@ -78,7 +87,9 @@ public class ExercisePanel extends VerticalPanel implements
     this.service = service;
     this.feedback = userFeedback;
     this.navigationHelper = getNavigationHelper(controller);
-    addItemHeader(e);
+    if (e.getQuestions().size() == 1) {
+      addItemHeader(e);
+    }
 
     enableNextOnlyWhenAllCompleted = !isPashto();
 
@@ -97,9 +108,7 @@ public class ExercisePanel extends VerticalPanel implements
     }
     add(hp);
 
-    int i = 1;
-
-    addQuestions(e, service, controller, i);
+    addQuestions(e, service, controller, 1);
 
     // add next and prev buttons
     add(navigationHelper);
@@ -115,7 +124,7 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected void addItemHeader(Exercise e) {
-     add(new Heading(4,"Item #" + e.getID()));
+     add(new Heading(ITEM_HEADER,"Item #" + e.getID()));
   }
 
   private Widget getQuestionContent(Exercise e) {
@@ -124,11 +133,16 @@ public class ExercisePanel extends VerticalPanel implements
       return new AudioExerciseContent().getQuestionContent(e, controller, false, false);
     }
     else {
-      return getHTML(content, true);
+      HTML maybeRTLContent = getMaybeRTLContent(content, true);
+      maybeRTLContent.addStyleName("rightTenMargin");
+      ScrollPanel scroller = new ScrollPanel(maybeRTLContent);
+      scroller.getElement().setId("scroller");
+      scroller.setHeight("250px");
+      return scroller;
     }
   }
 
-  private HTML getHTML(String content, boolean requireAlignment) {
+  private HTML getMaybeRTLContent(String content, boolean requireAlignment) {
     boolean rightAlignContent = controller.isRightAlignContent();
     HasDirection.Direction direction =
       requireAlignment && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
@@ -155,6 +169,8 @@ public class ExercisePanel extends VerticalPanel implements
 
   public void onResize() {}
   public boolean isBusy() { return false; }
+  private TabPanel tabPanel = null;
+  private Map<Integer,Tab> indexToTab = new HashMap<Integer, Tab>();
 
   /**
    * For every question,
@@ -174,78 +190,110 @@ public class ExercisePanel extends VerticalPanel implements
     List<Exercise.QAPair> flQuestions = e.getForeignLanguageQuestions();
     List<Exercise.QAPair> questionsToShow = e.isPromptInEnglish() ? englishQuestions : flQuestions;
     int n = englishQuestions.size();
-    //System.out.println("eng q " + englishQuestions);
-    for (Exercise.QAPair pair : e.getQuestions()) {
-      // add question header
-      Exercise.QAPair engQAPair = questionNumber - 1 < n ? questionsToShow.get(questionNumber - 1) : null;
-
-      if (engQAPair != null) {
-        getQuestionHeader(questionNumber, n, engQAPair, shouldShowAnswer(),!controller.isDemoMode());
-      }
-      else {
-        add(new Heading(6,""));
-      }
-      if (controller.isDemoMode()) {
-        Exercise.QAPair flQAPair  = flQuestions.get(questionNumber - 1);
-        getQuestionHeader(questionNumber, n, flQAPair, pair, shouldShowAnswer());
-      }
-      questionNumber++;
-      // add question prompt
-      VerticalPanel vp = new VerticalPanel();
-      addQuestionPrompt(vp, e);
-
-      // add answer widget
-      Widget answerWidget = getAnswerWidget(e, service, controller, questionNumber -1);
-      vp.add(answerWidget);
-      answers.add(answerWidget);
-
-      add(vp);
+    if (e.getQuestions().size() == 1) {
+      add(getQuestionPanel(e, service, controller, questionNumber, flQuestions, questionsToShow, n, e.getQuestions().iterator().next(),this));
     }
+    else {
+      makeTabPanel(e, service, controller, questionNumber, flQuestions, questionsToShow, n);
+      add(tabPanel);
+    }
+  }
+
+  private void makeTabPanel(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber,
+                            List<Exercise.QAPair> flQuestions, List<Exercise.QAPair> questionsToShow, int n) {
+    tabPanel = new TabPanel();
+    DOM.setStyleAttribute(tabPanel.getWidget(0).getElement(), "marginBottom", "0px");
+
+    for (Exercise.QAPair pair : e.getQuestions()) {
+      Tab tabPane = new Tab();
+      tabPane.setHeading("Question #"+questionNumber);
+      tabPanel.add(tabPane);
+      indexToTab.put(questionNumber,tabPane);
+
+      tabPane.add(getQuestionPanel(e, service, controller, questionNumber, flQuestions, questionsToShow, n, pair,tabPane));
+
+      questionNumber++;
+    }
+    tabPanel.selectTab(0);
+  }
+
+  private VerticalPanel getQuestionPanel(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
+                                         int questionNumber, List<Exercise.QAPair> flQuestions,
+                                         List<Exercise.QAPair> questionsToShow, int n, Exercise.QAPair pair, HasWidgets toAddTo) {
+    Exercise.QAPair engQAPair = questionNumber - 1 < n ? questionsToShow.get(questionNumber - 1) : null;
+
+    if (engQAPair != null) {
+      getQuestionHeader(n, engQAPair, shouldShowAnswer(),!controller.isDemoMode(),toAddTo);
+    }
+    else {
+      toAddTo.add(new Heading(6, ""));
+    }
+    if (controller.isDemoMode()) {
+      Exercise.QAPair flQAPair  = flQuestions.get(questionNumber - 1);
+      getQuestionHeader(questionNumber, n, flQAPair, pair, shouldShowAnswer(), toAddTo);
+    }
+    // add question prompt
+    VerticalPanel vp = new VerticalPanel();
+    addQuestionPrompt(vp, exercise);
+
+    // add answer widget
+    Widget answerWidget = getAnswerWidget(exercise, service, controller, questionNumber);
+    vp.add(answerWidget);
+    vp.addStyleName("userNPFContent2");
+    return vp;
+  }
+
+  protected void addAnswerWidget(int index, Widget answerWidget) {
+    answers.add(answerWidget);
+    Set<Object> objects = indexToWidgets.get(index);
+    if (objects == null) indexToWidgets.put(index, objects = new HashSet<Object>());
+    objects.add(answerWidget);
+    System.out.println("now " +answers.size() + " expected");
   }
 
   protected boolean shouldShowAnswer() { return controller.isDemoMode();  }
 
-  protected void getQuestionHeader(int i, int total, Exercise.QAPair qaPair, Exercise.QAPair pair, boolean showAnswer) {
-    getQuestionHeader(i,total,qaPair,showAnswer,true);
+  protected void getQuestionHeader(int i, int total, Exercise.QAPair qaPair, Exercise.QAPair flQAPair, boolean showAnswer, HasWidgets toAddTo) {
+    getQuestionHeader(total,qaPair,showAnswer,true, toAddTo);
   }
 
   /**
    * @see #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
-   * @see #getQuestionHeader(int, int, mitll.langtest.shared.Exercise.QAPair, boolean, boolean)
-   * @param i
+   * @see #getQuestionHeader(int, int, mitll.langtest.shared.Exercise.QAPair, mitll.langtest.shared.Exercise.QAPair, boolean, HasWidgets)
    * @param total
    * @param qaPair
    * @param showAnswer
    * @param addSpacerAfter
    */
-  private void getQuestionHeader(int i, int total, Exercise.QAPair qaPair, boolean showAnswer, boolean addSpacerAfter) {
+  private void getQuestionHeader(int total, Exercise.QAPair qaPair, boolean showAnswer, boolean addSpacerAfter, HasWidgets toAddTo) {
     String question = qaPair.getQuestion();
-    String prefix = "Question" +
-        (total > 1 ? " #" + i : "") +
-        " : ";
+    String prefix = (total == 1) ? ("Question : ") : "";
 
     if (showAnswer) {
       String answer = qaPair.getAnswer();
 
-      add(new HTML("<br></br><b>" + prefix + "</b>" + question));
+      toAddTo.add(new HTML("<br></br><b>" + prefix + "</b>" + question));
       if (qaPair.getAlternateAnswers().size() > 1) {
         int j = 1;
         for (String alternate : qaPair.getAlternateAnswers()) {
-          add(new HTML("<b>Possible answer #" + j++ +
-              " : " +
-              TWO_SPACES +
-              "</b>" + alternate));
+          toAddTo.add(new HTML("<b>Possible answer #" + j++ +
+            " : " +
+            TWO_SPACES +
+            "</b>" + alternate));
         }
         if (addSpacerAfter) add(new HTML("<br></br>"));
       } else {
-        add(new HTML("<b>Answer : " +
-            TWO_SPACES +
-            "</b>" + answer + (addSpacerAfter ? "<br></br>" : "")));
+        toAddTo.add(new HTML("<b>Answer : " +
+          TWO_SPACES +
+          "</b>" + answer + (addSpacerAfter ? "<br></br>" : "")));
       }
     }
     else {
       String questionHeader = prefix + question;
-      add(getHTML("<h4>" + questionHeader + "</h4>",false));
+      HTML maybeRTLContent = getMaybeRTLContent("<h4>" + questionHeader + "</h4>", false);
+      DOM.setStyleAttribute(maybeRTLContent.getElement(), "marginTop", "0px");
+
+      toAddTo.add(maybeRTLContent);
     }
   }
 
@@ -255,10 +303,10 @@ public class ExercisePanel extends VerticalPanel implements
    * @param e
    */
   private void addQuestionPrompt(Panel vp, Exercise e) {
-    vp.add(new HTML(getQuestionPrompt(e.isPromptInEnglish())));
-    SimplePanel spacer = new SimplePanel();
-    spacer.setSize("50px", getQuestionPromptSpacer() + "px");
-    vp.add(spacer);
+    HTML prompt = new HTML(getQuestionPrompt(e.isPromptInEnglish()));
+    prompt.getElement().setId("questionPrompt");
+    prompt.addStyleName("marginBottomTen");
+    vp.add(prompt);
   }
 
   protected String getQuestionPrompt(boolean promptInEnglish) {
@@ -300,10 +348,6 @@ public class ExercisePanel extends VerticalPanel implements
       System.out.println("unknown audio type " + controller.getAudioType());
     }
     return instructions;
-  }
-
-  protected int getQuestionPromptSpacer() {
-    return 20;
   }
 
   @Override
@@ -404,7 +448,7 @@ public class ExercisePanel extends VerticalPanel implements
         }
       });
     }
-
+    addAnswerWidget(index, answer);
     return answer;
   }
 
@@ -418,18 +462,46 @@ public class ExercisePanel extends VerticalPanel implements
     }
   }
 
-  public void recordIncomplete(Widget answer) {
+  public void recordIncomplete(Object answer) {
+    int before = completed.size();
     completed.remove(answer);
+    int after = completed.size();
+    if (after - before != 1 && before > 0) {
+      System.err.println("\n\n\nhuh? answer is not on list?");
+    }
+
     enableNext();
   }
 
-  public void recordCompleted(Widget answer) {
+  public void recordCompleted(Object answer) {
     completed.add(answer);
+    for (Map.Entry<Integer, Set<Object>> indexWidgetsPair : indexToWidgets.entrySet()) {
+      boolean allComplete = true;
+      for (Object widget : indexWidgetsPair.getValue()) {
+        if (!completed.contains(widget)) {
+          allComplete = false;
+          break;
+        }
+      }
+      if (allComplete) {
+        if (!indexToTab.isEmpty()) {
+          indexToTab.get(indexWidgetsPair.getKey()).setIcon(IconType.CHECK);
+        }
+      }
+    }
     enableNext();
   }
 
-  private void enableNext() {
-    navigationHelper.enableNextButton((completed.size() == answers.size()));
+  protected void enableNext() {
+    System.out.println("answered " + completed.size() + " vs total " + answers.size());
+    boolean isComplete = isCompleted();
+    navigationHelper.enableNextButton(isComplete);
+  }
+
+  protected boolean isCompleted() {
+    boolean b = completed.size() == answers.size();
+    System.out.println("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
+    return b;
   }
 
   protected void enableNextButton(boolean val) {
@@ -439,5 +511,4 @@ public class ExercisePanel extends VerticalPanel implements
   protected void setButtonsEnabled(boolean val) {
     navigationHelper.setButtonsEnabled(val);
   }
-
 }
