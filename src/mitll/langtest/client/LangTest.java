@@ -242,16 +242,21 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // header/title line
     // first row ---------------
     verticalContainer.add(headerRow = makeHeaderRow());
+    headerRow.getElement().setId("headerRow");
 
     // second row ---------------
     secondRow = new FluidRow();
     verticalContainer.add(secondRow);
-
+    secondRow.getElement().setId("secondRow");
     // third row ---------------
 
     Panel thirdRow = new HorizontalPanel();
+    thirdRow.getElement().setId("thirdRow");
+
     Panel leftColumn = new SimplePanel();
     thirdRow.add(leftColumn);
+    leftColumn.getElement().setId("leftColumn");
+
     verticalContainer.add(thirdRow);
 
     if ((isCRTDataCollectMode() || props.isDataCollectMode()) && !props.isFlashcardTeacherView()) {
@@ -709,7 +714,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer) {
           @Override
           public Panel getExercisePanel(Exercise e) {
-            return new CombinedResponseFlashcard(e, service, controller, userManager);
+            return new CombinedResponseFlashcard(e, service, controller);
           }
         }, userManager, 1);
       }
