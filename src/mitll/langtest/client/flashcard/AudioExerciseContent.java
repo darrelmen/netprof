@@ -23,9 +23,19 @@ import mitll.langtest.shared.Exercise;
  */
 public class AudioExerciseContent {
   private static final String LISTEN_TO_THIS_AUDIO = "Listen to this audio";
+  private static final String QUESTION_HEADING = "h4";
+  private static final String AUDIO_PROMPT_HEADING = "h4";
   private boolean rightAlignContent;
   private String responseType;
 
+  /**
+   * @see mitll.langtest.client.exercise.ExercisePanel#getQuestionContent
+   * @param e
+   * @param controller
+   * @param includeExerciseID
+   * @param showQuestion
+   * @return
+   */
   public Widget getQuestionContent(Exercise e, ExerciseController controller, boolean includeExerciseID, boolean showQuestion) {
     rightAlignContent = controller.isRightAlignContent();
     responseType = controller.getProps().getResponseType();
@@ -49,56 +59,110 @@ public class AudioExerciseContent {
    */
   private Panel makeFlashcardForCRT(Exercise e, String content, boolean includeExerciseID, boolean showQuestion) {
     Exercise.QAPair qaPair = e.getForeignLanguageQuestions().get(0);
-    String splitTerm = LISTEN_TO_THIS_AUDIO;
-    String[] split = content.split(splitTerm);
-    String prefix = split[0];
-
-    HTML contentPrefix = getHTML(prefix, true);
-    contentPrefix.addStyleName("marginRight");
-    if (rightAlignContent) contentPrefix.addStyleName("rightAlign");
 
     Panel container = new FlowPanel();
 
+    //addThreeRow(e, content, includeExerciseID, container);
+    addAudioRow(e, content, includeExerciseID, container);
+
+    if (showQuestion) {
+      container.add(getMaybeRTLContent("<" +
+        QUESTION_HEADING +
+        " style='margin-right: 30px'>" + qaPair.getQuestion() + "</" +
+        QUESTION_HEADING +
+        ">", true));
+    }
+    return container;
+  }
+
+  private void addAudioRow(Exercise e, String content, boolean includeExerciseID, Panel container) {
     if (includeExerciseID) {
       Heading child = new Heading(5, "Exercise " + e.getID());
       child.addStyleName("leftTenMargin");
       container.add(child);
     }
+    content = content.replaceAll("h2","h4");
+    content = changeAudioPrompt(content,false);
+    HTML contentFromPrefix = getContentFromPrefix(content);
+/*
+    ScrollPanel scroller = new ScrollPanel(contentFromPrefix);
+    scroller.getElement().setId("scroller");
+    container.add(scroller);*/
+    container.add(contentFromPrefix);
+
+    if (e.getRefAudio() != null && e.getRefAudio().length() > 0) {
+      container.add(getAudioDiv(e));
+    }
+  }
+
+  private void addThreeRow(Exercise e, String content, boolean includeExerciseID, Panel container) {
+    if (includeExerciseID) {
+      Heading child = new Heading(5, "Exercise " + e.getID());
+      child.addStyleName("leftTenMargin");
+      container.add(child);
+    }
+    String[] split = content.split(LISTEN_TO_THIS_AUDIO);
+    HTML contentPrefix = getContentFromPrefix(split[0]);
     container.add(contentPrefix);
 
     // Todo : this is vulnerable to a variety of issues.
     if (e.getRefAudio() != null && e.getRefAudio().length() > 0) {
-      Panel container2 = new FlowPanel();
-      container2.addStyleName("rightFiveMargin");
-      HTML prompt = getHTML("<h3 style='margin-right: 30px'>" + splitTerm + "</h3>", true);
-      container2.add(prompt);
-      prompt.getElement().setId("prompt");
-      SimplePanel simplePanel = new SimplePanel();
-      simplePanel.getElement().setId("audioWidgeContainer");
-
-      simplePanel.add(getAudioWidget(e));
-      container2.add(simplePanel);
-
-      String suffix = split[1];
-
-      // edit the content to reflect the response type
-      if (responseType.equals("Both")) {
-        suffix = suffix.replace("answer the question below","answer the question below<br/>both written and spoken");
-      } else if (responseType.equals("Text")) {
-        suffix = suffix.replace("answer the question", "type your answer to the question");
-      }
-      HTML contentSuffix = getHTML("<br/>" + // TODO: br is a hack
-        "<h3 style='margin-right: 30px'><p word-wrap:break-word;>" + suffix + "</p></h3>", true);
-      contentSuffix.addStyleName("marginRight");
-      container2.add(contentSuffix);
-      container2.addStyleName("rightAlign");
-      container.add(container2);
+      makeThreeRowAudio(e, split[1], container);
     }
+  }
 
-    if (showQuestion) {
-      container.add(getHTML("<h2 style='margin-right: 30px'>" + qaPair.getQuestion() + "</h2>", true));
+  private HTML getContentFromPrefix(String prefix) {
+    HTML contentPrefix = getMaybeRTLContent(prefix, true);
+    contentPrefix.addStyleName("marginRight");
+    if (rightAlignContent) contentPrefix.addStyleName("rightAlign");
+    return contentPrefix;
+  }
+
+  private void makeThreeRowAudio(Exercise e, String suffix, Panel container) {
+    Panel container2 = new FlowPanel();
+    container2.addStyleName("rightFiveMargin");
+    HTML prompt = getMaybeRTLContent("<" +
+      AUDIO_PROMPT_HEADING +
+      " style='margin-right: 30px'>" + LISTEN_TO_THIS_AUDIO + "</" +
+      AUDIO_PROMPT_HEADING +
+      ">", true);
+    container2.add(prompt);
+    prompt.getElement().setId("prompt");
+
+    container2.add(getAudioDiv(e));
+
+    // edit the content to reflect the response type
+    suffix = changeAudioPrompt(suffix,true);
+
+    HTML contentSuffix = getMaybeRTLContent("<br/>" + // TODO: br is a hack
+      "<" +
+      AUDIO_PROMPT_HEADING +
+      " style='margin-right: 30px'><p word-wrap:break-word;>" + suffix + "</p></" +
+      AUDIO_PROMPT_HEADING +
+      ">", true);
+    contentSuffix.addStyleName("marginRight");
+    container2.add(contentSuffix);
+    container2.addStyleName("rightAlign");
+    container.add(container2);
+  }
+
+  private String changeAudioPrompt(String suffix, boolean addBreak) {
+    if (responseType.equals("Both")) {
+      suffix = suffix.replace("answer the question below","answer the question below" +
+        (addBreak?  "<br/>": " ") +
+        "both written and spoken");
+    } else if (responseType.equals("Text")) {
+      suffix = suffix.replace("answer the question", "type your answer to the question");
     }
-    return container;
+    return suffix;
+  }
+
+  private SimplePanel getAudioDiv(Exercise e) {
+    SimplePanel simplePanel = new SimplePanel();
+    simplePanel.getElement().setId("audioWidgetContainer");
+
+    simplePanel.add(getAudioWidget(e));
+    return simplePanel;
   }
 
 
@@ -145,7 +209,7 @@ public class AudioExerciseContent {
    * @param requireAlignment so you can override it for certain widgets and not make it RTL
    * @return HTML that has it's text-align set consistent with the language (RTL for arabic, etc.)
    */
-  private HTML getHTML(String content, boolean requireAlignment) {
+  private HTML getMaybeRTLContent(String content, boolean requireAlignment) {
     HasDirection.Direction direction =
       requireAlignment && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
 
@@ -157,6 +221,7 @@ public class AudioExerciseContent {
     html.addStyleName("rightTenMargin");
 
     html.addStyleName("wrapword");
+    html.getElement().setId("textContent");
     return html;
   }
 }
