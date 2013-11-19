@@ -102,6 +102,10 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     addComponents();
   }
 
+  /**
+   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext()
+   * @param completed
+   */
   public void setCompleted(Set<String> completed) {
     this.completed = completed;
     if (table != null) table.redraw(); // todo check this...
@@ -127,8 +131,9 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     }
   }
 
-  private TextBox typeAhead = null;
-  private String lastValue = "";
+  /**
+   * Add two rows -- the search box and then the item list
+   */
   protected void addComponents() {
     FlowPanel column = new FlowPanel();
     add(column);
@@ -138,13 +143,16 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     addTableWithPager(column);
   }
 
+  private TextBox typeAhead = null;
+  private String lastValue = "";
   protected void addTypeAhead(FlowPanel column) {
     if (!isCRTDataMode) {
       typeAhead = new TextBox();
-
+      typeAhead.setDirectionEstimator(true);   // automatically detect whether text is RTL
       typeAhead.addKeyUpHandler(new KeyUpHandler() {
         public void onKeyUp(KeyUpEvent event) {
           String text = typeAhead.getText();
+        //  text = text.trim();
           if (!text.equals(lastValue)) {
             System.out.println("looking for '" + text + "' (" + text.length() + " chars)");
             loadExercises(getHistoryToken(""), text);
@@ -416,7 +424,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   }
 
   protected int getTableHeaderHeight() {
-    return controller.getHeightOfTopRows() + 75;
+    return controller.getHeightOfTopRows() + (isCRTDataMode ? 0 :75);
   }
 
   /**
