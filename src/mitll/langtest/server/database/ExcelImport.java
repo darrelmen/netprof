@@ -508,14 +508,14 @@ public class ExcelImport implements ExerciseDAO {
             //logger.debug("e " + e.getID() + " '" + e.getEnglishSentence() + "' has " + e.getSynonymAudioRefs().size() + " audio refs or " + translations);
           }
         }
-      } else if (false) {   // hard to test
+      } /*else if (false) {   // hard to test
         for (Exercise e : exercises2) {
           List<String> doubles = new ArrayList<String>();
           doubles.add(e.getRefAudio());
           doubles.add(e.getRefAudio());
           e.setSynonymAudioRefs(doubles);
         }
-      }
+      }*/
     }
   }
 
