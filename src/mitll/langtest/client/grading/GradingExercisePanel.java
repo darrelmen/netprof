@@ -2,9 +2,11 @@ package mitll.langtest.client.grading;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.result.ResultManager;
@@ -60,11 +62,12 @@ public class GradingExercisePanel extends ExercisePanel {
    * @param i
    * @param total
    * @param engQAPair
-   * @param pair
+   * @param flQAPair
    * @param showAnswer
+   * @param toAddTo
    */
   @Override
-  protected void getQuestionHeader(int i, int total, Exercise.QAPair engQAPair, Exercise.QAPair pair, boolean showAnswer) {
+  protected void getQuestionHeader(int i, int total, Exercise.QAPair engQAPair, Exercise.QAPair flQAPair, boolean showAnswer, HasWidgets toAddTo) {
     String english = engQAPair.getQuestion();
     String prefix = "Question" +
         (total > 1 ? " #" + i : "") +
@@ -72,12 +75,12 @@ public class GradingExercisePanel extends ExercisePanel {
 
     if (showAnswer)  {
       String answer = engQAPair.getAnswer();
-      add(new HTML("<br></br><b>" + prefix + "</b>" +english));
-      add(new HTML("<b>Answer : &nbsp;&nbsp;</b>"+answer + "<br></br>"));
+      toAddTo.add(new HTML("<br></br><b>" + prefix + "</b>" +english));
+      toAddTo.add(new HTML("<b>Answer : &nbsp;&nbsp;</b>"+answer + "<br></br>"));
     }
     else {
-      String questionHeader = prefix + pair.getQuestion();
-      add(new HTML("<h4>" + questionHeader + " / " + english + "</h4>"));
+      String questionHeader = prefix + flQAPair.getQuestion();
+      toAddTo.add(new HTML("<h4>" + questionHeader + " / " + english + "</h4>"));
     }
   }
 
@@ -88,10 +91,6 @@ public class GradingExercisePanel extends ExercisePanel {
   @Override
   protected boolean shouldShowAnswer() {
     return super.shouldShowAnswer() || controller.getEnglishOnly();
-  }
-
-  protected int getQuestionPromptSpacer() {
-    return 0;
   }
 
   /**
@@ -155,6 +154,8 @@ public class GradingExercisePanel extends ExercisePanel {
         // if (result.isEmpty()) recordCompleted(outer);
       }
     });
+    addAnswerWidget(index, vp);
+
     return vp;
   }
 
