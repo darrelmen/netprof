@@ -294,7 +294,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // don't do flash if we're doing text only collection
 
-    System.out.println("user agent " + Window.Navigator.getUserAgent());
+    //System.out.println("user agent " + Window.Navigator.getUserAgent());
     if (shouldCollectAudio()) {
       makeFlashContainer();
       currentExerciseVPanel.add(flashRecordPanel);
@@ -309,6 +309,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     modeSelect();
     loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
+  }
+
+  private boolean isIPad() {
+    return Window.Navigator.getUserAgent().toLowerCase().contains("ipad");
   }
 
   private void loadFlashcard() {
@@ -329,7 +333,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private boolean shouldCollectAudio() {
-    return props.isCollectAudio() && !props.isFlashcardTeacherView() || props.isFlashCard()  || props.isGoodwaveMode() ;
+    return !isIPad() && props.isCollectAudio() && !props.isFlashcardTeacherView() || props.isFlashCard()  || props.isGoodwaveMode() ;
   }
 
   /**
