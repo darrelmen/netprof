@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.DLIUser;
+import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
@@ -13,7 +14,6 @@ import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.grade.ResultsAndGrades;
-import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
@@ -63,12 +63,9 @@ public interface LangTestDatabase extends RemoteService {
 
   void checkoutExerciseID(String user,String id);
 
-  void ensureMP3(String wavFile);
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height);
 
   PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg);
-
-  Map<String,String> getProperties();
 
   // data collect admin (site administration) ------------------------------
 
@@ -106,8 +103,6 @@ public interface LangTestDatabase extends RemoteService {
 
   void logMessage(String message);
 
-  Collection<String> getTypeOrder();
-
   /**
    * @param reqID
    * @param typeToSection
@@ -132,8 +127,6 @@ public interface LangTestDatabase extends RemoteService {
    */
   Map<String, Map<String,Integer>> getTypeToSectionToCount();
 
-  List<SectionNode> getSectionNodes();
-
   int getNumExercisesForSelectionState(Map<String, Collection<String>> typeToSection);
 
   List<Exercise> getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end);
@@ -154,4 +147,6 @@ public interface LangTestDatabase extends RemoteService {
   ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix);
 
   ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix);
+
+  StartupInfo getStartupInfo();
 }
