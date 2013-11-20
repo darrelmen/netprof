@@ -207,7 +207,7 @@ public class UserDAO extends DAO {
   public List<User> getUsers() {
     String sql = "SELECT * from users;";
     return getUsers(sql);
-  }
+  }  
 
   /**
    * @seex OnlineUsers#getUser(long)
