@@ -6,8 +6,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasEnabled;
@@ -82,20 +80,23 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
     hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+
+    ASRScorePanel widgets = null;
+    if (e.isRepeat()) {
+      widgets = new ASRScorePanel();
+      scorePanel = widgets;
+    }
+
     hp.add(getQuestionContent(e));
     center.add(hp);
     setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     add(center);
     setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
-    if (e.isRepeat()) {
-      ASRScorePanel widgets = new ASRScorePanel();
+    if (e.isRepeat() && widgets != null) {
       add(widgets);
-      scorePanel = widgets;
-      addQuestions(service, controller, 1, center);
-    } else {
-      addQuestions(service, controller, 1, center);
     }
+    addQuestions(service, controller, 1, center);
 
     this.navigationHelper = new NavigationHelper(exercise, controller, new PostAnswerProvider() {
       @Override
@@ -167,62 +168,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
 
     final VerticalPanel vp = new VerticalPanel();
-
-    //CaptionPanel cpContent = new CaptionPanel(INSTRUCTIONS);
     Widget questionContent = new HTML(content);
-    //cpContent.setContentWidget(questionContent);
     vp.add(questionContent);
-
-    if (path != null) {
-      ensureMP3(e, path, vp);
-    }
-    else {
-      vp.add(getScoringAudioPanel(e, path));
-    }
+    vp.add(getScoringAudioPanel(e, path));
     return vp;
-  }
-
-  /**
-   * soundmanager plays mp3 files -- make sure there is a copy of the wav file as an mp3 on the server.
-   * @see #getQuestionContent(mitll.langtest.shared.Exercise)
-   * @param e
-   * @param path
-   * @param vp
-   */
-  private void ensureMP3(Exercise e, String path, final VerticalPanel vp) {
-    final String fpath = path;
-    final Exercise fe = e;
-    //System.out.println("for exercise " + fe.getID() + " ensuring mp3 exists for " +path);
-    service.ensureMP3(path, new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        Window.alert("Couldn't contact server (ensureMP3).");
-      }
-
-      @Override
-      public void onSuccess(Void result) {
-        if (fe.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
-          if (fe.getSlowAudioRef() != null && !fpath.equals(fe.getSlowAudioRef())) {
-            //System.out.println("for exercise " + fe.getID() +" ensuring mp3 exists for slow audio path " +fe.getSlowAudioRef());
-            service.ensureMP3(fe.getSlowAudioRef(), new AsyncCallback<Void>() {
-              @Override
-              public void onFailure(Throwable caught) {
-                Window.alert("Couldn't contact server (ensureMP3).");
-              }
-
-              @Override
-              public void onSuccess(Void result) {
-                vp.add(getScoringAudioPanel(fe, fpath));
-              }
-            });
-          } else {
-            vp.add(getScoringAudioPanel(fe, fpath));
-          }
-        } else {
-          vp.add(getScoringAudioPanel(fe, fpath));
-        }
-      }
-    });
   }
 
   /**
@@ -238,6 +187,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
     ASRScoringAudioPanel audioPanel;
 
+    System.out.println("score panel " + scorePanel);
     if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
       audioPanel = new FastAndSlowASRScoringAudioPanel(path, scorePanel);
     }

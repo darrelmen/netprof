@@ -22,9 +22,9 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioExerciseContent {
-  private static final String LISTEN_TO_THIS_AUDIO = "Listen to this audio";
+  //private static final String LISTEN_TO_THIS_AUDIO = "Listen to this audio";
   private static final String QUESTION_HEADING = "h4";
-  private static final String AUDIO_PROMPT_HEADING = "h4";
+  //private static final String AUDIO_PROMPT_HEADING = "h4";
   private boolean rightAlignContent;
   private String responseType;
 
@@ -95,7 +95,7 @@ public class AudioExerciseContent {
     }
   }
 
-  private void addThreeRow(Exercise e, String content, boolean includeExerciseID, Panel container) {
+/*  private void addThreeRow(Exercise e, String content, boolean includeExerciseID, Panel container) {
     if (includeExerciseID) {
       Heading child = new Heading(5, "Exercise " + e.getID());
       child.addStyleName("leftTenMargin");
@@ -109,7 +109,7 @@ public class AudioExerciseContent {
     if (e.getRefAudio() != null && e.getRefAudio().length() > 0) {
       makeThreeRowAudio(e, split[1], container);
     }
-  }
+  }*/
 
   private HTML getContentFromPrefix(String prefix) {
     HTML contentPrefix = getMaybeRTLContent(prefix, true);
@@ -118,7 +118,7 @@ public class AudioExerciseContent {
     return contentPrefix;
   }
 
-  private void makeThreeRowAudio(Exercise e, String suffix, Panel container) {
+/*  private void makeThreeRowAudio(Exercise e, String suffix, Panel container) {
     Panel container2 = new FlowPanel();
     container2.addStyleName("rightFiveMargin");
     HTML prompt = getMaybeRTLContent("<" +
@@ -144,7 +144,7 @@ public class AudioExerciseContent {
     container2.add(contentSuffix);
     container2.addStyleName("rightAlign");
     container.add(container2);
-  }
+  }*/
 
   private String changeAudioPrompt(String suffix, boolean addBreak) {
     if (responseType.equals("Both")) {
