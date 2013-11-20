@@ -104,7 +104,9 @@ public class SimpleRecordPanel extends RecordButtonPanel {
     if (result == AudioAnswer.Validity.OK) {
       check.setUrl(IMAGES_CHECKMARK);
       check.setAltText("Audio Saved");
-      if (questionState != null) questionState.recordCompleted(outer);
+      if (questionState != null) {
+        questionState.recordCompleted(outer);
+      }
     }
     else {
       check.setUrl(IMAGES_REDX_PNG);
