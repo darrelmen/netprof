@@ -40,6 +40,7 @@ public class WaveformExercisePanel extends ExercisePanel {
   public WaveformExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
                                    final ExerciseController controller) {
     super(e, service, userFeedback, controller);
+    getElement().setId("WaveformExercisePanel");
   }
 
   public void setBusy(boolean v) { this.isBusy = v; }
@@ -58,6 +59,7 @@ public class WaveformExercisePanel extends ExercisePanel {
   @Override
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
     audioPanel = new RecordAudioPanel(service, index);
+    addAnswerWidget(index,this);
     return audioPanel;
   }
 
@@ -108,6 +110,7 @@ public class WaveformExercisePanel extends ExercisePanel {
         true, // use keyboard
         controller, null);
       this.index = index;
+      getElement().setId("RecordAudioPanel");
     }
 
     /**
@@ -117,8 +120,8 @@ public class WaveformExercisePanel extends ExercisePanel {
      */
     @Override
     protected PlayAudioPanel makePlayAudioPanel(Widget toAdd) {
-      recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
-      recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
+      recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
+      recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
       System.out.println( "making play audio panel with " + recordImage1 + " and " + recordImage2);
 
       MyPostAudioRecordButton myPostAudioRecordButton = new MyPostAudioRecordButton(this, service, index);
