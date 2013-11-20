@@ -171,7 +171,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.list.ListInterface#getExercises
+   * @see mitll.langtest.client.list.ExerciseList#getExercises
    * @param reqID
    * @param userID
    * @return
@@ -493,17 +493,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           exercises = db.getExercisesBiasTowardsUnanswered(userID,serverProps.shouldUseWeights());
         }
       } else {
-        //exercises = db.getExercisesFirstNInOrder(userID, serverProps.firstNInOrder);
         exercises = db.getUnmodExercises();
-        //List<Exercise> rawExercises = getExercises();
-
         if (serverProps.isCRTDataCollect()) {
           setPromptAndRecordOnExercises(exercises);
         }
       }
     } else {
       //if (!serverProps.isArabicTextDataCollect()) logger.debug("*not* in data collect mode");
-
       exercises = serverProps.isArabicTextDataCollect() ? db.getExercisesGradeBalancing(userID) : db.getUnmodExercises();
     }
     return exercises;
@@ -663,14 +659,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#ensureMP3(mitll.langtest.shared.Exercise, String, com.google.gwt.user.client.ui.VerticalPanel)
-   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#ensureMP3(mitll.langtest.shared.AudioAnswer, double, String, boolean)
+   * @see #getExercise(String)
+   * @see #getFlashcardResponse(long, mitll.langtest.shared.flashcard.FlashcardResponse)
    * @param wavFile
    */
   private void ensureMP3(String wavFile) {
-    if (wavFile == null) {
-      logger.warn("ensureMP3 huh? wavFile is null?");
-    } else {
+    if (wavFile != null) {
       new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath());
     }
   }
@@ -849,7 +843,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public double getScoreForAnswer(long userID, Exercise exercise, int questionID, String answer, String answerType) {
     double scoreForAnswer = audioFileHelper.getScoreForAnswer(exercise, questionID, answer);
     boolean correct = scoreForAnswer > 0.5;
-    db.getAnswerDAO().addAnswer((int) userID, exercise.getPlan(), exercise.getID(), "", answer, answerType, correct,
+    db.getAnswerDAO().addAnswer((int) userID, exercise.getPlan(), exercise.getID(), questionID, "", answer, answerType, correct,
       (float) scoreForAnswer);
     db.addCompleted((int) userID,exercise.getID());
     return scoreForAnswer;
@@ -1107,13 +1101,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  //ExerciseListWrapper initialIds = null;
   @Override
   public void init() {
     this.pathHelper = new PathHelper(getServletContext());
     readProperties(getServletContext());
     setInstallPath(serverProps.getUseFile(), db);
     audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this);
-    new RecoTest(this,serverProps,pathHelper,audioFileHelper);
+    new RecoTest(this, serverProps, pathHelper, audioFileHelper);
+
+    if (!serverProps.dataCollectMode && !serverProps.isArabicTextDataCollect()) {
+      db.getUnmodExercises();
+    }
   }
 
   /**
