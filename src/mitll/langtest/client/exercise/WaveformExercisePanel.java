@@ -121,7 +121,7 @@ public class WaveformExercisePanel extends ExercisePanel {
       recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
       System.out.println( "making play audio panel with " + recordImage1 + " and " + recordImage2);
 
-      MyPostAudioRecordButton myPostAudioRecordButton = new MyPostAudioRecordButton(/*playAudioPanel,*/this, service, index);
+      MyPostAudioRecordButton myPostAudioRecordButton = new MyPostAudioRecordButton(this, service, index);
       postAudioRecordButton = myPostAudioRecordButton;
       playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, WaveformExercisePanel.this);
       myPostAudioRecordButton.setPlayAudioPanel(playAudioPanel);
