@@ -32,19 +32,22 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.dialog.ModalInfoDialog;
-import mitll.langtest.client.flashcard.CombinedResponseFlashcard;
-import mitll.langtest.client.flashcard.TextCRTFlashcard;
+import com.google.gwt.visualization.client.VisualizationUtils;
+import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
+import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.exercise.WaveformExercisePanelFactory;
+import mitll.langtest.client.flashcard.CombinedResponseFlashcard;
 import mitll.langtest.client.flashcard.DataCollectionFlashcardFactory;
 import mitll.langtest.client.flashcard.Flashcard;
 import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
+import mitll.langtest.client.flashcard.TextCRTFlashcard;
 import mitll.langtest.client.grading.GradingExercisePanelFactory;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.mail.MailDialog;
 import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
@@ -61,9 +64,9 @@ import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.StartupInfo;
 
 import java.util.Date;
-import java.util.Map;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -99,6 +102,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Anchor users;
   private Anchor showResults, monitoring;
   private HTML releaseStatus;
+  private StartupInfo startupInfo;
 
   /**
    * Make an exception handler that displays the exception.
@@ -108,27 +112,32 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     dealWithExceptions();
     final long then = System.currentTimeMillis();
 
-    service.getProperties(new AsyncCallback<Map<String, String>>() {
+    service.getStartupInfo(new AsyncCallback<StartupInfo>() {
       public void onFailure(Throwable caught) {
         if (caught instanceof IncompatibleRemoteServiceException) {
           Window.alert("This application has recently been updated.\nPlease refresh this page, or restart your browser." +
-            "\nIf you still see this message, clear your cache. (" +caught.getMessage()+
+            "\nIf you still see this message, clear your cache. (" + caught.getMessage() +
             ")");
         } else {
           long now = System.currentTimeMillis();
-          System.out.println("onModuleLoad.getProperties : (failure) took " + (now - then) + " millis");
+          String message = "onModuleLoad.getProperties : (failure) took " + (now - then) + " millis";
+          System.out.println(message);
           Window.alert("Couldn't contact server.  Please check your network connection. (getProperties)");
+          logMessageOnServer(message);
         }
       }
 
-      public void onSuccess(Map<String, String> result) {
+      public void onSuccess(StartupInfo startupInfo2) {
         long now = System.currentTimeMillis();
-        props = new PropertyHandler(result);
-        onModuleLoad2();
+
+        startupInfo = startupInfo2;
+        props = new PropertyHandler(startupInfo2.getProperties());
         if (isLogClientMessages()) {
           String message = "onModuleLoad.getProperties : (success) took " + (now - then) + " millis";
           logMessageOnServer(message);
         }
+
+        onModuleLoad2();
       }
     });
   }
@@ -187,7 +196,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void onModuleLoad2() {
     userManager = new UserManager(this, service, props);
-    //loadVisualizationPackages();  // Note : this is now done in LangTest.html, since it seemed to be intermittently not loaded properly
     if (props.isFlashCard()) {
       loadFlashcard();
       return;
@@ -300,6 +308,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setupSoundManager();
 
     modeSelect();
+    loadVisualizationPackages();  // Note : this is now done in LangTest.html, since it seemed to be intermittently not loaded properly
   }
 
   private void loadFlashcard() {
@@ -307,7 +316,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     addResizeHandler();
   }
 
-/*  private void loadVisualizationPackages() {
+  private void loadVisualizationPackages() {
     System.out.println("loadVisualizationPackages...");
 
     VisualizationUtils.loadVisualizationApi(new Runnable() {
@@ -317,7 +326,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         logMessageOnServer("loaded VisualizationUtils.");
       }
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
-  }*/
+  }
 
   private boolean shouldCollectAudio() {
     return props.isCollectAudio() && !props.isFlashcardTeacherView() || props.isFlashCard()  || props.isGoodwaveMode() ;
@@ -862,6 +871,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     exerciseList.clear();
     lastUser = -2;
     modeSelect();
+  }
+
+  @Override
+  public StartupInfo getStartupInfo() {
+    return startupInfo;
   }
 
   /**
