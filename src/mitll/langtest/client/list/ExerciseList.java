@@ -532,18 +532,21 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   private int getIndex(ExerciseShell current) {
-    String id = current.getID();
-    ExerciseShell shell = idToExercise.get(id);
-    int i = shell != null ? currentExercises.indexOf(shell) : -1;
-/*    System.out.println("index of '" + id + "' is #" + i + " and item is " + current +
-        " map size " + idToExercise.size() + " exercise list size " +currentExercises.size());*/
-    return i;
+    ExerciseShell shell = idToExercise.get(current.getID());
+    return shell != null ? currentExercises.indexOf(shell) : -1;
   }
 
   @Override
-  public int getPercentComplete() { return (int) (100f*Math.ceil((float)visited.size()/(float)currentExercises.size())); }
+  public int getPercentComplete() {
+    float ratio = (float) visited.size() / (float) currentExercises.size();
+    System.out.println("Ratio " + ratio);
+    return (int) (Math.ceil(100f * ratio));
+  }
+
   @Override
-  public int getComplete() { return visited.size(); }
+  public int getComplete() {
+    return visited.size();
+  }
 
   @Override
   public void removeCurrentExercise() {
@@ -625,10 +628,13 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see #loadNextExercise(mitll.langtest.shared.ExerciseShell)
    */
   protected void onLastItem() {
-    if (controller.getProps().isCRTDataCollectMode()) {
+    PropertyHandler props = controller.getProps();
+    if (props.isCRTDataCollectMode() || props.isDataCollectMode()) {
       feedback.showErrorMessage("Test Complete", "Test Complete! Thank you!");
     }
-    else loadFirstExercise();
+    else {
+      loadFirstExercise();
+    }
   }
 
   /**
