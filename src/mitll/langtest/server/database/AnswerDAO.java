@@ -48,18 +48,20 @@ public class AnswerDAO {
   }*/
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer(long, mitll.langtest.shared.Exercise, int, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
    * @param userID
    * @param plan
    * @param exerciseID
+   * @param questionID
    * @param stimulus
    * @param answer
    * @param answerType
    * @param correct
    * @param pronScore
    */
-  public void addAnswer(int userID, String plan, String exerciseID, String stimulus, String answer, String answerType, boolean correct, float pronScore) {
-    addAnswer(database, userID, plan, exerciseID, 0, answer, "", true, false, false, answerType, 0, correct, pronScore, stimulus);
+  public void addAnswer(int userID, String plan, String exerciseID, int questionID, String stimulus, String answer,
+                        String answerType, boolean correct, float pronScore) {
+    addAnswer(database, userID, plan, exerciseID, questionID, answer, "", true, false, false, answerType, 0, correct, pronScore, stimulus);
   }
 
   /**
