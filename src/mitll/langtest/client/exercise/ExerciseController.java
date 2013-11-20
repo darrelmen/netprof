@@ -7,6 +7,7 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.StartupInfo;
 
 /**
  * Created with IntelliJ IDEA.
@@ -74,4 +75,5 @@ public interface ExerciseController {
   String getGreeting();
 
   void resetState();
+  StartupInfo getStartupInfo();
 }
