@@ -293,8 +293,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
 
     // don't do flash if we're doing text only collection
-    //System.out.println("teacher view " + props.isTeacherView() + " arabic text data " + props.isArabicTextDataCollect() + " collect audio " + props.isCollectAudio());
 
+    System.out.println("user agent " + Window.Navigator.getUserAgent());
     if (shouldCollectAudio()) {
       makeFlashContainer();
       currentExerciseVPanel.add(flashRecordPanel);
@@ -308,7 +308,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setupSoundManager();
 
     modeSelect();
-    loadVisualizationPackages();  // Note : this is now done in LangTest.html, since it seemed to be intermittently not loaded properly
+    loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
   }
 
   private void loadFlashcard() {
