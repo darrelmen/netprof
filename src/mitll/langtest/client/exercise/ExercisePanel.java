@@ -136,10 +136,15 @@ public class ExercisePanel extends VerticalPanel implements
     else {
       HTML maybeRTLContent = getMaybeRTLContent(content, true);
       maybeRTLContent.addStyleName("rightTenMargin");
-      ScrollPanel scroller = new ScrollPanel(maybeRTLContent);
-      scroller.getElement().setId("contentScroller");
-      scroller.setHeight(CONTENT_SCROLL_HEIGHT + "px");
-      return scroller;
+      if (content.length() > 200) {
+        System.out.println("content length " + content.length());
+        ScrollPanel scroller = new ScrollPanel(maybeRTLContent);
+        scroller.getElement().setId("contentScroller");
+        scroller.setHeight(CONTENT_SCROLL_HEIGHT + "px");
+        return scroller;
+      } else {
+        return maybeRTLContent;
+      }
     }
   }
 
@@ -244,12 +249,17 @@ public class ExercisePanel extends VerticalPanel implements
     return vp;
   }
 
+  /**
+   * @see #getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
+   * @param index
+   * @param answerWidget
+   */
   protected void addAnswerWidget(int index, Widget answerWidget) {
     answers.add(answerWidget);
     Set<Object> objects = indexToWidgets.get(index);
     if (objects == null) indexToWidgets.put(index, objects = new HashSet<Object>());
     objects.add(answerWidget);
-    System.out.println("now " +answers.size() + " expected, adding " + answerWidget.getElement().getId());
+    System.out.println("addAnswerWidget : now " +answers.size() + " expected, adding '" + answerWidget.getElement().getId() + "'");
   }
 
   protected boolean shouldShowAnswer() { return controller.isDemoMode();  }
@@ -430,6 +440,7 @@ public class ExercisePanel extends VerticalPanel implements
    */
   protected Widget getAnswerWidget(final Exercise exercise, final LangTestDatabaseAsync service,
                                    ExerciseController controller, final int index) {
+    System.out.println("getAnswerWidget for " + exercise.getID() + " and " + index);
     boolean allowPaste = controller.isDemoMode();
     final TextBox answer = allowPaste ? new TextBox() : new NoPasteTextBox();
     answer.setWidth(ANSWER_BOX_WIDTH);
@@ -456,9 +467,11 @@ public class ExercisePanel extends VerticalPanel implements
   protected void onLoad() {
     super.onLoad();
 
-    Widget widget = answers.get(0);
-    if (widget instanceof FocusWidget) {
-      ((FocusWidget)widget).setFocus(true);
+    if (!answers.isEmpty()) {
+      Widget widget = answers.get(0);
+      if (widget instanceof FocusWidget) {
+        ((FocusWidget) widget).setFocus(true); // TODO : not sure if this works as intended
+      }
     }
   }
 
@@ -469,14 +482,14 @@ public class ExercisePanel extends VerticalPanel implements
     if (after - before != 1 && before > 0) {
       System.err.println("\n\n\nhuh? answer is not on list?");
     }
-    System.out.println("recordIncomplete : "+
-      " completed " + completed.size() + " vs total " + answers.size());
+   // System.out.println("recordIncomplete : completed " + completed.size() + " vs total " + answers.size());
 
     enableNext();
   }
 
   public void recordCompleted(Object answer) {
     completed.add(answer);
+
     System.out.println("recordCompleted : id " + ((Widget)answer).getElement().getId()+
       " completed " + completed.size() + " vs total " + answers.size());
 
@@ -484,6 +497,15 @@ public class ExercisePanel extends VerticalPanel implements
       System.out.println("\trecordCompleted : complete " + ((Widget)complete).getElement().getId());
     }
 
+    markTabsComplete();
+    enableNext();
+  }
+
+  /**
+   * If all the answer widgets within a question tab have been answered, put a little check mark icon
+   * on the tab to indicate it's complete.
+   */
+  private void markTabsComplete() {
     for (Map.Entry<Integer, Set<Object>> indexWidgetsPair : indexToWidgets.entrySet()) {
       boolean allComplete = true;
       Set<Object> widgetsForTab = indexWidgetsPair.getValue();
@@ -502,23 +524,15 @@ public class ExercisePanel extends VerticalPanel implements
       }
       if (allComplete) {
         System.out.println("\trecordCompleted : tab# " + tabIndex + " is complete");
-
         if (!indexToTab.isEmpty()) {
-          System.out.println("\trecordCompleted : tab# " + tabIndex + " set icon");
-
           indexToTab.get(tabIndex).setIcon(IconType.CHECK);
-        }
-        else {
-          System.out.println("\trecordCompleted : huh? index to tab is empty");
-
         }
       }
     }
-    enableNext();
   }
 
   protected void enableNext() {
-    System.out.println("answered " + completed.size() + " vs total " + answers.size());
+    System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
     boolean isComplete = isCompleted();
     navigationHelper.enableNextButton(isComplete);
   }
