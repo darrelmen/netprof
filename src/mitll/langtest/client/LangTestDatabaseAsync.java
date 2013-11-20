@@ -11,8 +11,8 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
 import mitll.langtest.shared.flashcard.Leaderboard;
@@ -51,10 +51,6 @@ public interface LangTestDatabaseAsync {
   void getASRScoreForAudio(int reqid, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, AsyncCallback<PretestScore> async);
 
   void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, AsyncCallback<ImageResponse> async);
-
-  void getProperties(AsyncCallback<Map<String, String>> async);
-
-  void ensureMP3(String wavFile, AsyncCallback<Void> async);
 
   void getExercise(String id, AsyncCallback<Exercise> async);
 
@@ -107,10 +103,6 @@ public interface LangTestDatabaseAsync {
 
   void getTypeToSectionToCount(AsyncCallback<Map<String, Map<String, Integer>>> async);
 
-  void getTypeOrder(AsyncCallback<Collection<String>> async);
-
-  void getSectionNodes(AsyncCallback<List<SectionNode>> async);
-
   void getNumExercisesForSelectionState(Map<String, Collection<String>> typeToSection, AsyncCallback<Integer> async);
 
   void getFullExercisesForSelectionState(Map<String, Collection<String>> typeToSection, int start, int end, AsyncCallback<List<Exercise>> async);
@@ -138,4 +130,6 @@ public interface LangTestDatabaseAsync {
   void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
 
   void getExerciseIds(int reqID, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
+
+  void getStartupInfo(AsyncCallback<StartupInfo> async);
 }
