@@ -87,11 +87,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param controller
    * @param showTurkToken
    * @param showInOrder
-   * @param isCRTDataMode
    */
   public ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                       ExercisePanelFactory factory,
-                      ExerciseController controller, boolean showTurkToken, boolean showInOrder, boolean isCRTDataMode) {
+                      ExerciseController controller, boolean showTurkToken, boolean showInOrder) {
     addWidgets(currentExerciseVPanel);
     this.service = service;
     this.feedback = feedback;
@@ -145,7 +144,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       service.getExerciseIds(lastReqID, userID, new SetExercisesCallback());
     }
   }
-
 
   /**
    * So we have a catch-22 -
