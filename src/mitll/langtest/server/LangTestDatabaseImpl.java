@@ -564,10 +564,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public FlashcardResponse getNextExercise(long userID, Map<String, Collection<String>> typeToSection, boolean getNext) {
     Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     List<Exercise> copy = db.getExercisesBiasTowardsUnanswered(userID, exercisesForSection, false);
-/*    List<Exercise> copy = new ArrayList<Exercise>(exercisesForSection);
-    if (serverProps.sortExercisesByID()) {
-      sortByID(copy);
-    }*/
     FlashcardResponse nextExercise = db.getNextExercise(copy,userID, serverProps.isTimedGame(), getNext);
     return getFlashcardResponse(userID, nextExercise);
   }
@@ -580,8 +576,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public FlashcardResponse getNextExercise(long userID, boolean getNext) {
-    logger.debug("getNextExercise " + getNext);
-
     FlashcardResponse nextExercise = db.getNextExercise(userID, serverProps.isTimedGame(), getNext);
     return getFlashcardResponse(userID, nextExercise);
   }
@@ -665,7 +659,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private void ensureMP3(String wavFile) {
     if (wavFile != null) {
-      new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath());
+      if (new File(wavFile).exists()) {
+        new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath());
+      }
     }
   }
 
