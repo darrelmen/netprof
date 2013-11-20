@@ -498,13 +498,13 @@ public class DatabaseImpl implements Database {
 
     synchronized (userToState) {
       userStateWrapper = userToState.get(userID);
-      logger.info("getFlashcardResponse : for user " + userID +
-        " exercises has " + exercises.size() + " user state " + userStateWrapper);// + " next = " +getNext);
+      logger.info("createOrGetUserState : for user " + userID +
+        " exercises has " + exercises.size() + " user state " + userStateWrapper);
       if (userStateWrapper == null || (!exercises.isEmpty() && userStateWrapper.getNumExercises() != exercises.size())) {
         userStateWrapper = getUserStateWrapper(userID, exercises);
         userToState.put(userID, userStateWrapper);
       }
-      else {
+      else if (!exercises.isEmpty()) {
         logger.debug("user state " + userStateWrapper.getNumExercises() + " vs " + exercises.size() + " now " + userStateWrapper);
       }
     }
@@ -515,19 +515,12 @@ public class DatabaseImpl implements Database {
 
   public ScoreInfo getScoreInfo(long userID, long timeTaken, Map<String, Collection<String>> selection) {
     UserStateWrapper userStateWrapper = userToState.get(userID);
-
-    //int correct = userStateWrapper.getPcorrect();
     int incorrect = userStateWrapper.getPincorrect();
 
-    //  logger.warn("prev " + correct + " inc " + incorrect);
-    //  logger.warn("now  " + userStateWrapper.correct + " inc " + userStateWrapper.incorrect);
-
-    //int diffC = Math.max(0,userStateWrapper.correct - correct);
     int diffI = Math.max(0, userStateWrapper.getIncorrect() - incorrect);
-    logger.warn("diff  " + userToCorrect.get(userID) + " inc " + diffI);
+    logger.debug("getScoreInfo : diff  " + userToCorrect.get(userID) + " inc " + diffI);
 
     ScoreInfo scoreInfo = new ScoreInfo(userID, -1, userToCorrect.get(userID), 0, timeTaken, selection);
-    //userStateWrapper.setPcorrect(userStateWrapper.getCorrect());
     userStateWrapper.setPincorrect(userStateWrapper.getIncorrect());
 
     userToCorrect.put(userID, 0);
