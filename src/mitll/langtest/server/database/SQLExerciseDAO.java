@@ -1,13 +1,6 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.database.testing.SmallDatabaseImpl;
-import mitll.langtest.shared.Exercise;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
-
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,9 +19,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+
+import mitll.langtest.server.database.testing.SmallDatabaseImpl;
+import mitll.langtest.shared.Exercise;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+import org.apache.log4j.Logger;
 
 public class SQLExerciseDAO implements ExerciseDAO {
   public static final String HEADER_TAG = "h4";
@@ -465,7 +464,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
     }
   }*/
 
-  private static void writeQAPair(BufferedWriter writer, Exercise e, int q,Exercise.QAPair qaPair) throws IOException {
+/*  private static void writeQAPair(BufferedWriter writer, Exercise e, int q,Exercise.QAPair qaPair) throws IOException {
     writer.write(e.getID() + "\t");
     String content = e.getContent();
     boolean isAudio = content.contains("Listen to this");
@@ -497,7 +496,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
       if (answerIterator.hasNext()) writer.write("\t");
     }
     writer.write("\n");
-  }
+  }*/
 
   public static void main(String [] arg) {
 
