@@ -96,7 +96,7 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                             boolean showTurkToken, boolean showInOrder, ExerciseController controller, boolean isCRTDataMode) {
-    super(currentExerciseVPanel, service, feedback, null, controller, showTurkToken, showInOrder, isCRTDataMode);
+    super(currentExerciseVPanel, service, feedback, null, controller, showTurkToken, showInOrder);
     this.controller = controller;
     this.isCRTDataMode = controller.getProps().isCRTDataCollectMode();
     addComponents();
