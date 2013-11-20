@@ -430,7 +430,6 @@ public class ExercisePanel extends VerticalPanel implements
    */
   protected Widget getAnswerWidget(final Exercise exercise, final LangTestDatabaseAsync service,
                                    ExerciseController controller, final int index) {
-  //  GWT.log("getAnswerWidget for #" +index);
     boolean allowPaste = controller.isDemoMode();
     final TextBox answer = allowPaste ? new TextBox() : new NoPasteTextBox();
     answer.setWidth(ANSWER_BOX_WIDTH);
