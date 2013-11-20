@@ -29,8 +29,6 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Panel;
 
@@ -246,8 +244,6 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
     recordButton.setHeight("112px");
   }
 
-  private int numMP3s = 0;
-
   /**
    * Deal with three cases: <br></br>
    * * the audio was invalid in some way : too short, too quiet, too loud<br></br>
@@ -302,40 +298,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
    * @param hasRefAudio
    */
   private void ensureMP3(final AudioAnswer result, final double score, String path, final boolean hasRefAudio) {
-    boolean hasSynonymAudio = !exercise.getSynonymAudioRefs().isEmpty();
-
-    if (hasSynonymAudio) {
-      numMP3s = exercise.getSynonymAudioRefs().size();
-      for (String spath : exercise.getSynonymAudioRefs()) {
-        //   spath = (spath.endsWith(WAV)) ? spath.replace(WAV, MP3) : spath;
-        service.ensureMP3(spath, new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            Window.alert("Couldn't contact server (ensureMP3).");
-          }
-
-          @Override
-          public void onSuccess(Void result2) {
-            numMP3s--;
-            if (numMP3s == 0) {
-              showIncorrectFeedback(result, score, hasRefAudio);
-            }
-          }
-        });
-      }
-    } else {
-      service.ensureMP3(path, new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          Window.alert("Couldn't contact server (ensureMP3).");
-        }
-
-        @Override
-        public void onSuccess(Void result2) {
-          showIncorrectFeedback(result, score, hasRefAudio);
-        }
-      });
-    }
+     showIncorrectFeedback(result, score, hasRefAudio);
   }
 
   private void showCorrectFeedback(double score) {
