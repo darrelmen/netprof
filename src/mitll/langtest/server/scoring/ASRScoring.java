@@ -300,9 +300,9 @@ public class ASRScoring extends Scoring {
                                    String scoringDir,
                                    boolean decode, String tmpDir) {
     Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
-    if (false) logger.debug("dirs is " + dirs +
+/*    if (false) logger.debug("dirs is " + dirs +
       " audio dir " + testAudioDir + " audio " + testAudioFileNoSuffix + " sentence " + sentence + " decode " + decode + " scoring dir " + scoringDir);
-
+*/
     Audio testAudio = Audio$.MODULE$.apply(
       testAudioDir, testAudioFileNoSuffix,
       false /* notForScoring */, dirs);
