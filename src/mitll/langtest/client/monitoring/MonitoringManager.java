@@ -107,13 +107,13 @@ public class MonitoringManager {
     sp.add(vp);
     dialogVPanel.add(sp);
 
-    doDesiredQuery(getVPanel(vp));
-    doSessionQuery(getVPanel(vp));
-    doResultQuery(getVPanel(vp));
+    doDesiredQuery(getVPanel(vp),null);
+    doSessionQuery(getVPanel(vp),null);
+    doResultQuery(getVPanel(vp),null);
     doGradeQuery(getVPanel(vp));
     doGenderQuery(getVPanel(vp));
    // doTimeUntilItems(getSPanel(vp));
-    doResultLineQuery(getVPanel(vp));
+    doResultLineQuery(getVPanel(vp),null);
     doResultByDayQuery(getSPanel(vp));
     doResultByHourOfDayQuery(getSPanel(vp));
 
@@ -145,11 +145,15 @@ public class MonitoringManager {
     return toUse2;
   }
 
+  private static interface DoIt {
+    void go();
+  }
+
   /**
    *
    * @param vp
    */
-  private void doDesiredQuery(final Panel vp) {
+  private void doDesiredQuery(final Panel vp, final DoIt it) {
     service.getDesiredCounts(new AsyncCallback<Map<String, Map<Integer, Map<Integer, Integer>>>>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -179,6 +183,7 @@ public class MonitoringManager {
 
         Panel hp2 = getItemCalculator(result, "desiredToFemale", "Female");
         vp.add(hp2);
+        if (it != null) it.go();
       }
 
       private Panel getItemCalculator(Map<String, Map<Integer, Map<Integer, Integer>>> result, String key,String gender) {
@@ -317,7 +322,7 @@ public class MonitoringManager {
     return desiredList;
   }
 
-  private void doSessionQuery(final Panel vp) {
+  private void doSessionQuery(final Panel vp, final DoIt it) {
     service.getResultStats(new AsyncCallback<Map<String, Number>>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -394,6 +399,8 @@ public class MonitoringManager {
 
             vp.add(flex);
             getRateChart(rateToCount, vp);
+
+            if (it != null) it.go();
           }
         });
       }
@@ -571,7 +578,7 @@ public class MonitoringManager {
   }
 
 
-  private void doResultLineQuery(final Panel vp) {
+  private void doResultLineQuery(final Panel vp, final DoIt it) {
     service.getResultPerExercise(new AsyncCallback<Map<String,Map<String, Integer>>>() {
       public void onFailure(Throwable caught) {}
 
@@ -630,6 +637,7 @@ public class MonitoringManager {
           femaleTotal += c;
         }
         vp.add(getGenderChart(maleTotal,femaleTotal));
+        if (it != null) it.go();
       }
     });
   }
@@ -722,7 +730,7 @@ public class MonitoringManager {
     return lineChart;
   }
 
-  private void doResultQuery(final Panel vp) {
+  private void doResultQuery(final Panel vp, final DoIt it) {
     service.getResultCountToCount(new AsyncCallback<Map<Integer, Integer>>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Map<Integer, Integer> userToCount) {
@@ -744,6 +752,7 @@ public class MonitoringManager {
         flex.setHTML(1, 1, numAnswered + " or " + (100 - percent) + "%");
         vp.add(flex);
         vp.add(getResultCountChart(userToCount));
+        if (it != null) it.go();
       }
     });
   }
