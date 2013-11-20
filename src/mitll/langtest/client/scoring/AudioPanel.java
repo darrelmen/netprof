@@ -2,8 +2,10 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -42,13 +44,14 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected static final int MIN_WIDTH = 256;
   private static final float WAVEFORM_HEIGHT = 80f;//96;
   private static final float SPECTROGRAM_HEIGHT = 50f;//96;
-  //private static final int RIGHT_MARGIN = ASRScorePanel.X_CHART_SIZE+150;//550;//1;//400;
   protected static final String WAVEFORM = "Waveform";
   protected static final String SPECTROGRAM = "Spectrogram";
   public static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence" +
     " and speech occur, or whether the mic is working properly.";
-  public static final int IMAGE_WIDTH_SLOP = 100;
+
+  private static final int IMAGE_WIDTH_SLOP = 120;
   private static final boolean WARN_ABOUT_MISSING_AUDIO = false;
+  private static final int WINDOW_SIZE_CHANGE_THRESHOLD = 50;
 
   private final ScoreListener gaugePanel;
   protected String audioPath;
@@ -87,6 +90,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
     this.gaugePanel = gaugePanel;
+    if (debug) System.out.println("gauge panel " + gaugePanel);
     addWidgets(path);
   }
 
@@ -156,7 +160,15 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public void onLoad() {
     if (audioPath != null) {
       if (debug) System.out.println("onLoad : audio path is " + audioPath);
-      getImagesForPath(audioPath);
+      Scheduler.get().scheduleDeferred(new Command() {   // helpful???
+        public void execute() {
+          if (debug) System.out.println("\tonLoad : deferred - audio path is " + audioPath);
+
+          getImagesForPath(audioPath);
+        }
+      });
+
+     // getImagesForPath(audioPath);
     }
     else {
       if (debug) System.out.println("onLoad : for AudioPanel got no audio path?");
@@ -197,7 +209,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param path
    */
   public void getImagesForPath(String path) {
-    //System.out.println("AudioPanel : getImagesForPath " +path);
+    if (debug) System.out.println("AudioPanel : getImagesForPath " +path);
     if (path != null) {
       this.audioPath = path;
     }
@@ -264,22 +276,26 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   private void getImages() {
     int leftColumnWidth = Math.min(175,controller.getLeftColumnWidth()) + IMAGE_WIDTH_SLOP;
-    //int rightMargin = screenPortion == 1.0f ? leftColumnWidth : (int)(screenPortion*((float)rightMarginToUse));
     int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : 0;
-    int width = (int) ((screenPortion*((float)Window.getClientWidth())) - leftColumnWidth) - rightSide;
+    if (gaugePanel != null && rightSide == 0) {
+      rightSide = 180; // hack!!!
+    }
+    else {
+      if (debug) System.out.println("\n\n\ngauge panel is null!!!");
+    }
+     int width = (int) ((screenPortion*((float)Window.getClientWidth())) - leftColumnWidth) - rightSide;
 
-  //  System.out.println("getImages : leftColumnWidth " + leftColumnWidth + " width " + width + " vs window width " + Window.getClientWidth());
+    if (debug) System.out.println("getImages : leftColumnWidth " + leftColumnWidth + " width " + width + " vs window width " + Window.getClientWidth() + " right side " + rightSide);
 
-    //int width = getOffsetWidth();
     int diff = Math.abs(Window.getClientWidth() - lastWidth);
-    if (lastWidth == 0 || diff > 100) {
+    if (lastWidth == 0 || diff > WINDOW_SIZE_CHANGE_THRESHOLD) {
       lastWidth = Window.getClientWidth();
 
-      //System.out.println("getImages : offset width " + getOffsetWidth() + " width " + width + " path " + audioPath);
+      if (debug)  System.out.println("getImages : offset width " + getOffsetWidth() + " width " + width + " path " + audioPath);
       getEachImage(width);
     }
     else {
-      //System.out.println("getImages : not updating, offset width " + getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
+      // System.out.println("getImages : not updating, offset width " + getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
     }
   }
 
