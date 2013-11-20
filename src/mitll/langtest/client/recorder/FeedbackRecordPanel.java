@@ -99,7 +99,8 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
     }
   }
 
-  private Panel doText(Exercise exercise, final LangTestDatabaseAsync service, final ExerciseController controller, int index, AutoCRTRecordPanel autoCRTRecordPanel ) {
+  private Panel doText(Exercise exercise, final LangTestDatabaseAsync service, final ExerciseController controller,
+                       int index, AutoCRTRecordPanel autoCRTRecordPanel ) {
     final TextResponse textResponse = new TextResponse(controller.getUser(), soundFeedback);
     textResponse.setAnswerPostedCallback(
       new TextResponse.AnswerPosted() {
@@ -116,7 +117,7 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
     row1.getElement().setId("row1");
     outerContainer.add(row1);
     outerContainer.addStyleName("floatLeft");
-    Widget widget = textResponse.addWidgets(row1, exercise, service, controller, false, true);
+    Widget widget = textResponse.addWidgets(row1, exercise, service, controller, false, true, false, index);
     widget.getElement().setId("textResponse_"+index);
     addAnswerWidget(index, widget);
 
