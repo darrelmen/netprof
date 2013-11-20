@@ -107,7 +107,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
         @Override
         public void onSuccess(Set<String> result) {
-          //System.out.println("\tFlexSectionExerciseList : getExercises : got " + result.size() + " complete");
           controller.getExerciseList().setCompleted(result);
           addWidgets();
         }
@@ -151,34 +150,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   }
 
   private void getTypeOrder(final FluidContainer container) {
-    service.getTypeOrder(new AsyncCallback<Collection<String>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        //Window.alert("getTypeOrder can't contact server. got " + caught);
-      }
-
-      @Override
-      public void onSuccess(final Collection<String> sortedTypes) {
-        typeOrder = sortedTypes;
-        System.out.println("getTypeOrder type order " + typeOrder);
-          service.getSectionNodes(new AsyncCallback<List<SectionNode>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              Window.alert("getSectionNodes can't contact server. got " + caught);
-            }
-
-            @Override
-            public void onSuccess(List<SectionNode> result) {
-              System.out.println("\tgetSectionNodes nodes " + result.size());
-
-              addButtonRow(result, container, sortedTypes, !controller.isGoodwaveMode()); // TODO do something better here
-            }
-          });
-   /*     } else {
-          addStudentTypeAndSection(container, sortedTypes);
-        }*/
-      }
-    });
+    typeOrder = controller.getStartupInfo().getTypeOrder();
+    addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder, !controller.isGoodwaveMode());
   }
 
   @Override
