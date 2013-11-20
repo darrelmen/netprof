@@ -24,6 +24,7 @@ import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.Site;
+import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
 import mitll.langtest.shared.flashcard.Leaderboard;
@@ -383,16 +384,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  @Override
-  public Collection<String> getTypeOrder() {
+  /**
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#getTypeOrder(com.github.gwtbootstrap.client.ui.FluidContainer)
+   * @return
+   */
+  private Collection<String> getTypeOrder() {
     SectionHelper sectionHelper = db.getSectionHelper();
     if (sectionHelper == null) logger.warn("no section helper for " + db);
     List<String> objects = Collections.emptyList();
     return (sectionHelper == null) ? objects : sectionHelper.getTypeOrder();
   }
 
-  @Override
-  public List<SectionNode> getSectionNodes() {
+  /**
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#getTypeOrder(com.github.gwtbootstrap.client.ui.FluidContainer)
+   * @return
+   */
+  private List<SectionNode> getSectionNodes() {
     return db.getSectionHelper().getSectionNodes();
   }
 
@@ -419,6 +426,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return new ExerciseListWrapper(reqID, getExerciseShells(exercises));
   }
 
+  /**
+   * @see mitll.langtest.client.list.ExerciseList#askServerForExercise
+   * @param id
+   * @return
+   */
   public Exercise getExercise(String id) {
     long then = System.currentTimeMillis();
     List<Exercise> exercises = getExercises();
@@ -429,6 +441,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     long now = System.currentTimeMillis();
     if (now - then > 50) {
       logger.debug("getExercise : took " + (now - then) + " millis to find " + id);
+    }
+    if (byID != null) {
+      ensureMP3(byID.getRefAudio());
+      ensureMP3(byID.getSlowAudioRef());
+
+      for (String spath : byID.getSynonymAudioRefs()) {
+        ensureMP3(spath);
+      }
     }
     return byID;
   }
@@ -644,10 +664,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#ensureMP3(mitll.langtest.shared.Exercise, String, com.google.gwt.user.client.ui.VerticalPanel)
-   *
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#ensureMP3(mitll.langtest.shared.AudioAnswer, double, String, boolean)
    * @param wavFile
    */
-  public void ensureMP3(String wavFile) {
+  private void ensureMP3(String wavFile) {
     if (wavFile == null) {
       logger.warn("ensureMP3 huh? wavFile is null?");
     } else {
@@ -725,9 +745,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
+   * @see mitll.langtest.client.LangTest#onModuleLoad
    * @return
    */
- public Map<String, String> getProperties() { return serverProps.getProperties();  }
+  private Map<String, String> getProperties() { return serverProps.getProperties();  }
+
+  @Override
+  public StartupInfo getStartupInfo() {
+    return new StartupInfo(serverProps.getProperties(), getTypeOrder(), getSectionNodes());
+  }
 
   /**
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
