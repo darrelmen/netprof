@@ -1,5 +1,6 @@
 package mitll.langtest.client.recorder;
 
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -39,9 +40,12 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    */
   @Override
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
+    System.out.println("getAnswerWidget : ex " +exercise.getID()+ " index " + index);
+
     SimpleRecordExercisePanel questionState = this;
-    addAnswerWidget(index, questionState);
-    return new SimpleRecordPanel(service, controller, exercise, questionState, index).getPanel();
+    Panel panel = new SimpleRecordPanel(service, controller, exercise, questionState, index).getPanel();
+    addAnswerWidget(index, panel);
+    return panel;
   }
 
   /**
