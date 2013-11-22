@@ -445,6 +445,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (byID != null) {
       ensureMP3(byID.getRefAudio());
       ensureMP3(byID.getSlowAudioRef());
+      if (byID.getRefAudio() == null && byID.getSlowAudioRef() == null) {
+        logger.warn("huh? no ref audio for " + byID);
+      }
 
       for (String spath : byID.getSynonymAudioRefs()) {
         ensureMP3(spath);
@@ -659,9 +662,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private void ensureMP3(String wavFile) {
     if (wavFile != null) {
-      if (new File(wavFile).exists()) {
         new AudioConversion().ensureWriteMP3(wavFile, pathHelper.getInstallPath());
-      }
     }
   }
 
