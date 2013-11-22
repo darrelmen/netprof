@@ -1169,11 +1169,11 @@ public class ExcelImport implements ExerciseDAO {
             char after = ' ';
             if (i > 0) {
               before = sentence.charAt(i - 1);
-              spaceBefore = !Character.isAlphabetic(before);
+              //spaceBefore = !Character.isAlphabetic(before);
             }
             if (i + ref.length() < sentence.length()) {
               after = sentence.charAt(i + ref.length());
-              spaceAfter = !Character.isAlphabetic(after);
+              //spaceAfter = !Character.isAlphabetic(after);
             }
             if (spaceBefore && spaceAfter) {
               boolean valid = true;
