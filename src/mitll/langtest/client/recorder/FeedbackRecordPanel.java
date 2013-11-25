@@ -37,7 +37,7 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
   private SoundFeedback soundFeedback;
 
   public FeedbackRecordPanel(Exercise e, LangTestDatabaseAsync service, UserFeedback userFeedback, ExerciseController controller) {
-    super(e, service, userFeedback, controller);
+    super(e, service, userFeedback, controller, controller.getExerciseList());
   }
 
   /**
