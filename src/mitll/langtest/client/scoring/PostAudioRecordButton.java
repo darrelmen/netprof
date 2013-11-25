@@ -28,7 +28,7 @@ public abstract class PostAudioRecordButton extends RecordButton {
 
   private int index;
   private int reqid = 0;
-  private final Exercise exercise;
+  private Exercise exercise;
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
 
@@ -42,8 +42,8 @@ public abstract class PostAudioRecordButton extends RecordButton {
    * @param recordImage2
    */
   public PostAudioRecordButton(Exercise exercise, ExerciseController controller, LangTestDatabaseAsync service,
-                               int index, Image recordImage1, Image recordImage2) {
-    super(new Button(RECORD), controller.getRecordTimeout(), recordImage1, recordImage2, controller.shouldAddRecordKeyBinding());
+                               int index, Image recordImage1, Image recordImage2, boolean addKeyHandler) {
+    super(new Button(RECORD), controller.getRecordTimeout(), recordImage1, recordImage2, addKeyHandler);
     ((Button)getRecord()).setType(ButtonType.PRIMARY);
 
     this.index = index;
@@ -51,6 +51,8 @@ public abstract class PostAudioRecordButton extends RecordButton {
     this.controller = controller;
     this.service = service;
   }
+
+  public void setExercise(Exercise exercise) { this.exercise = exercise; }
 
   /**
    * @see mitll.langtest.client.recorder.RecordButton#stop()
