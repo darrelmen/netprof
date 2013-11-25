@@ -5,9 +5,9 @@ package mitll.langtest.client.recorder;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.flashcard.ScoreFeedback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExerciseQuestionState;
+import mitll.langtest.client.flashcard.ScoreFeedback;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
