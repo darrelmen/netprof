@@ -1,8 +1,8 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.grade.Grade;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;

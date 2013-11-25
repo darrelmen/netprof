@@ -2,9 +2,9 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.ExcelImport;
+import mitll.langtest.server.database.Lesson;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.server.database.Lesson;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
 import org.apache.commons.fileupload.FileItem;
@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
