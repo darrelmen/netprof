@@ -479,11 +479,19 @@ public class ASRScoring extends Scoring {
   private void readDictionary() { htkDictionary = makeDict(); }
 
   /**
+<<<<<<< HEAD
    * @see mitll.langtest.server.audio.SplitAudio#convertExamples(int, String, String, java.util.Map, java.util.Map, java.util.Set, boolean)
+=======
+   * @see mitll.langtest.server.audio.SplitAudio#convertExamples
+>>>>>>> quizlet
    * @return
    */
   public HTKDictionary getDict() { return htkDictionary; }
 
+  /**
+   * @see #readDictionary()
+   * @return
+   */
   private HTKDictionary makeDict() {
     String dictFile = configFileCreator.getDictFile();
     boolean dictExists = new File(dictFile).exists();
