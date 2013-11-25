@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.flashcard.AudioExerciseContent;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
@@ -72,6 +73,8 @@ public class ExercisePanel extends VerticalPanel implements
   protected UserFeedback feedback;
   protected NavigationHelper navigationHelper;
   protected Map<Integer,Set<Object>> indexToWidgets = new HashMap<Integer, Set<Object>>();
+  protected ListInterface exerciseList;
+
 
   /**
    * @see ExercisePanelFactory#getExercisePanel
@@ -80,13 +83,15 @@ public class ExercisePanel extends VerticalPanel implements
    * @param service
    * @param userFeedback
    * @param controller
+   * @param exerciseList
    */
   public ExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                       final ExerciseController controller) {
+                       final ExerciseController controller, ListInterface exerciseList) {
     this.exercise = e;
     this.controller = controller;
     this.service = service;
     this.feedback = userFeedback;
+    this.exerciseList = exerciseList;
     this.navigationHelper = getNavigationHelper(controller);
     if (e.getQuestions().size() == 1) {
       addItemHeader(e);
@@ -117,7 +122,7 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper(exercise, controller, this);
+    return new NavigationHelper(exercise,controller, this, exerciseList, true);
   }
 
   protected void addInstructions() {
@@ -177,6 +182,11 @@ public class ExercisePanel extends VerticalPanel implements
   public boolean isBusy() { return false; }
   private TabPanel tabPanel = null;
   private Map<Integer,Tab> indexToTab = new HashMap<Integer, Tab>();
+
+  @Override
+  public void setBusy(boolean v) {
+
+  }
 
   /**
    * For every question,
@@ -403,7 +413,7 @@ public class ExercisePanel extends VerticalPanel implements
           public void onSuccess(Void result) {
             incomplete.remove(tb);
             if (incomplete.isEmpty()) {
-              controller.loadNextExercise(completedExercise);
+              exerciseList.loadNextExercise(completedExercise);
             }
           }
         }
@@ -543,11 +553,6 @@ public class ExercisePanel extends VerticalPanel implements
     return b;
   }
 
-  protected void enableNextButton(boolean val) {
-    navigationHelper.enableNextButton(val);
-  }
-
-  protected void setButtonsEnabled(boolean val) {
-    navigationHelper.setButtonsEnabled(val);
-  }
+  protected void enableNextButton(boolean val) {  navigationHelper.enableNextButton(val); }
+  protected void setButtonsEnabled(boolean val) { navigationHelper.setButtonsEnabled(val);}
 }
