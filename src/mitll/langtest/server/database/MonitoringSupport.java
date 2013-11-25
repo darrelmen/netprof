@@ -1,5 +1,12 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.Result;
+import mitll.langtest.shared.User;
+import mitll.langtest.shared.grade.Grade;
+import mitll.langtest.shared.monitoring.Session;
+import org.apache.log4j.Logger;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,14 +19,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.User;
-import mitll.langtest.shared.grade.Grade;
-import mitll.langtest.shared.monitoring.Session;
-
-import org.apache.log4j.Logger;
 
 /**
  * Created with IntelliJ IDEA.
