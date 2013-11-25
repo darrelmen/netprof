@@ -4,12 +4,14 @@ import mitll.flashcard.UserState;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
 import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.grade.CountAndGradeID;
@@ -68,6 +70,9 @@ public class DatabaseImpl implements Database {
   private final AnswerDAO answerDAO = new AnswerDAO(this, resultDAO);
   private final GradeDAO gradeDAO = new GradeDAO(this,userDAO, resultDAO);
   private final SiteDAO siteDAO = new SiteDAO(this, userDAO);
+  private final UserListManager userListManager = new UserListManager(userDAO);
+  private UserExerciseDAO userExerciseDAO;
+  FileExerciseDAO fileExerciseDAO = new FileExerciseDAO("","",false);
 
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
@@ -162,13 +167,15 @@ public class DatabaseImpl implements Database {
       dliUserDAO.createUserTable(this);
 
       siteDAO.createTable(getConnection());
+      userExerciseDAO = new UserExerciseDAO(this);
+      userListManager.setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
   }
 
   @Override
-  public Connection getConnection() throws Exception {
+  public Connection getConnection()/* throws Exception*/ {
     return connection.getConnection();
   }
 
@@ -1088,7 +1095,7 @@ public class DatabaseImpl implements Database {
 
   public long addUser(HttpServletRequest request,
                       int age, String gender, int experience,
-                      String dialect, String nativeLang, String userID) {
+                      String nativeLang, String dialect, String userID) {
     String ip = getIPInfo(request);
     return addUser(age, gender, experience, ip, nativeLang, dialect, userID);
   }
@@ -1410,6 +1417,13 @@ public class DatabaseImpl implements Database {
   public void addDLIUser(DLIUser dliUser) throws Exception { dliUserDAO.addUser(dliUser);  }
 
   public String toString() { return "Database : "+ connection.getConnection(); }
+
+  public UserListManager getUserListManager() { return userListManager; }
+
+  public Exercise getUserExerciseWhere(String id) {
+    UserExercise where = userExerciseDAO.getWhere(id);
+    return where != null ? where.toExercise(language) : null;
+  }
 
 /*  private static String getConfigDir(String language) {
     String installPath = ".";
