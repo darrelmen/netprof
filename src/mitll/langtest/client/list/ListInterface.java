@@ -1,5 +1,6 @@
 package mitll.langtest.client.list;
 
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.PropertyHandler;
@@ -29,7 +30,7 @@ public interface ListInterface extends RequiresResize {
    */
   void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades);
 
-  void rememberAndLoadFirst(List<ExerciseShell> exercises);
+  void rememberAndLoadFirst(List<? extends ExerciseShell> exercises);
 
     /**
      * @see mitll.langtest.client.LangTest#gotUser(long)
@@ -44,7 +45,6 @@ public interface ListInterface extends RequiresResize {
    * @param exercise_title
    */
   void setExercise_title(String exercise_title);
-
 
   /**
    * @see mitll.langtest.client.LangTest#makeExerciseList
@@ -63,14 +63,14 @@ public interface ListInterface extends RequiresResize {
   boolean loadNextExercise(ExerciseShell current);
 
   boolean loadNextExercise(String id);
-  void makeExercisePanel(Exercise result);
+  Panel makeExercisePanel(Exercise result);
 
   boolean loadPreviousExercise(ExerciseShell current);
 
   public String getCurrentExerciseID();
 
   boolean onFirst(ExerciseShell current);
-
+  boolean onLast(ExerciseShell current);
   /**
    * @see mitll.langtest.client.LangTest#resetState()
    */
@@ -91,4 +91,6 @@ public interface ListInterface extends RequiresResize {
   void setSelectionState(Map<String,Collection<String>> selectionState);
 
   void hideExerciseList();
+
+  Panel getCreatedPanel();
 }
