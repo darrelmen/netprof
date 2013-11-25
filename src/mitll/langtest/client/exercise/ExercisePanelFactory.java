@@ -2,6 +2,7 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.recorder.FeedbackRecordPanel;
 import mitll.langtest.client.recorder.SimpleRecordExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
@@ -18,18 +19,21 @@ public class ExercisePanelFactory {
   protected LangTestDatabaseAsync service;
   protected UserFeedback userFeedback;
   protected ExerciseController controller;
+  protected ListInterface exerciseList;
 
   /**
    * @see mitll.langtest.client.LangTest#setFactory
    * @param service
    * @param userFeedback
    * @param controller
+   * @param exerciseList
    */
-  public ExercisePanelFactory( final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                               final ExerciseController controller) {
+  public ExercisePanelFactory(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
+                              final ExerciseController controller, ListInterface exerciseList) {
     this.service = service;
     this.userFeedback = userFeedback;
     this.controller = controller;
+    this.exerciseList = exerciseList;
   }
 
   /**
@@ -42,10 +46,10 @@ public class ExercisePanelFactory {
       if (controller.isAutoCRTMode() && !e.isPromptInEnglish()) {
         return new FeedbackRecordPanel(e, service, userFeedback, controller);
       } else {
-        return new SimpleRecordExercisePanel(e, service, userFeedback, controller);
+        return new SimpleRecordExercisePanel(e, service, userFeedback, controller, exerciseList);
       }
     } else {
-      return new ExercisePanel(e, service, userFeedback, controller);
+      return new ExercisePanel(e, service, userFeedback, controller, exerciseList);
     }
   }
 }
