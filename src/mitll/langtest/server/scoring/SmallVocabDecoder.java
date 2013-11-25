@@ -1,5 +1,8 @@
 package mitll.langtest.server.scoring;
 
+import mitll.langtest.server.database.FileExerciseDAO;
+import org.apache.log4j.Logger;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,10 +15,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import mitll.langtest.server.database.FileExerciseDAO;
-
-import org.apache.log4j.Logger;
 
 /**
  * Creates the LM for a small vocab decoder from foreground and background sentences.

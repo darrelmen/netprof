@@ -9,11 +9,13 @@ import mitll.langtest.client.PropertyHandler;
  * Date: 10/10/13
  * Time: 2:53 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated  get rid of me
  */
 public class LoginDialog extends UserDialog {
-  public LoginDialog(LangTestDatabaseAsync service, PropertyHandler props) {
-    super(service, props);    //To change body of overridden methods use File | Settings | File Templates.
+  public LoginDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, UserNotification userNotification) {
+    super(service, props, userManager, userNotification);    //To change body of overridden methods use File | Settings | File Templates.
   }
+
 
 /*  public void onClick() {
     final String userID = user.box.getText();
