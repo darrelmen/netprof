@@ -4,6 +4,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
@@ -20,10 +21,11 @@ public class GradingExercisePanelFactory extends ExercisePanelFactory {
    * @param service
    * @param userFeedback
    * @param controller
+   * @param exerciseList
    */
   public GradingExercisePanelFactory(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                                     final ExerciseController controller) {
-    super(service, userFeedback, controller);
+                                     final ExerciseController controller, ListInterface exerciseList) {
+    super(service, userFeedback, controller, exerciseList);
   }
 
   /**
@@ -33,6 +35,6 @@ public class GradingExercisePanelFactory extends ExercisePanelFactory {
    */
   @Override
   public Panel getExercisePanel(Exercise e) {
-     return new GradingExercisePanel(e, service, userFeedback, controller);
+     return new GradingExercisePanel(e, service, userFeedback, controller, exerciseList);
   }
 }
