@@ -172,9 +172,9 @@ public class AudioFileHelper {
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                            int width, int height, boolean useScoreToColorBkg,
                                            boolean decode, String tmpDir, boolean useCache) {
-    logger.info("getASRScoreForAudio scoring " + testAudioFile + " with " + sentence + " req# " + reqid);
+    logger.info("getASRScoreForAudio scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid);
 
-    assert(testAudioFile != null && sentence != null);
+    assert(testAudioFile != null && sentence != null && sentence.length() > 0);
     makeASRScoring();
     testAudioFile = dealWithMP3Audio(testAudioFile);
     if (!new File(testAudioFile).exists()) return new PretestScore();
