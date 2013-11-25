@@ -30,6 +30,7 @@ h1 {
     color:#ffffff;
 }
 
+
 .headerLowerBorder {
     border-style:solid;
     border-width: 2px;
@@ -213,9 +214,13 @@ h1 {
     text-align: left;
 }
 
-.inlineStyle {
+.inlineBlockStyle {
     display: inline-block;
+    white-space:nowrap;
 }
+.trueInlineStyle {
+     display: inline;
+ }
 
 .realInlineStyle {
     display: inline;
@@ -357,12 +362,17 @@ fieldset > legend {
 .exerciseBackground {
     background-color: #ebebec;
     color: #262726;
+/*
+    width:95%;
+*/
 
 /*    border: 1px solid #E3E3E3;
     border-radius: 4px 4px 4px 4px;*/
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) inset;
     margin-bottom: 0px;
     min-height: 20px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 #nextButton {  margin-left: 5px; }
@@ -587,7 +597,6 @@ fieldset > legend {
 #sm2-container.high_performance.swf_timeout {
     /* "high performance" case: keep on-screen at all times */
     position: absolute;
-    position: fixed;
 }
 
 #sm2-container.high_performance {
@@ -718,12 +727,89 @@ fieldset > legend {
     border-bottom: inset rgba(0, 0, 0, 0.1);
 }
 
+.userListContent {
+    margin-top: 10px;
+/*
+    width: 90%;
+*/
+    /*
+        background: none repeat scroll 0 0 #FFFFFF;
+    */
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+}
+
 .userNPFContent {
+    margin-top: 10px;
     width:100%;
     /*
-background: none repeat scroll 0 0 #FFFFFF;
-*/
+        background: none repeat scroll 0 0 #FFFFFF;
+    */
     border-radius: 3px 3px 3px 3px;
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
     padding: 5px;
+}
+
+.userListBackground {
+    background-color:#ffffff;
+}
+
+.fullWidth {
+    width: 100%;
+
+}
+.fullWidth2 {
+    width: 95%;
+}
+
+.userListFont {
+    color: #111111;
+    font: 600 19px/1.3 "Helvetica Neue",arial,sans-serif;
+    font-weight: bold;
+}
+
+.userListFont2 {
+    margin-left: 10px;
+    color: #111111;
+    font: 600 15px/1.3 "Helvetica Neue",arial,sans-serif;
+}
+
+.numItemFont {
+    color: #999999;
+    font-size: 95%;
+    font-weight: 200;
+    margin-left: 4px;
+    white-space: nowrap;
+}
+
+.userListContainer {
+/*
+    width: 90%;
+*/
+    background-color: rgba(110, 175, 255, 0.27);
+    border: none;
+    padding-left:0;
+    padding-right:0;
+}
+
+.handCursor {
+    cursor: pointer;
+}
+
+.userListDarkerBlueColor {
+    background-color: #669dc6;
+}
+.userListOperations {
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+}
+
+.greenBackground {
+    background-color: rgba(102, 157, 198, 0.58);
+}
+
+.positionAbsolute {
+    position: absolute;
+    top: 0px;
+    left: 0px;
 }
