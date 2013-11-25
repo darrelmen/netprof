@@ -306,11 +306,16 @@ public class Exercise extends ExerciseShell {
   public void setWeight(double weight) { this.weight = weight;  }
 
   public String getEnglishSentence() {  return englishSentence;  }
-  public void setEnglishSentence(String englishSentence) { this.englishSentence = englishSentence;  }
-
   public void setType(EXERCISE_TYPE type) { this.type = type;  }
 
   public void setContent(String content) { this.content = content;  }
+  /**
+   * @see mitll.langtest.server.database.ExcelImport#getExercise
+   * @param englishSentence
+   */
+  public void setEnglishSentence(String englishSentence) {
+    this.englishSentence = englishSentence;
+  }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#setPromptAndRecordOnExercises
