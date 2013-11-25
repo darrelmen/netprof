@@ -2,6 +2,7 @@ package mitll.langtest.server;
 
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
+import audio.tools.FileCopier;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
@@ -26,6 +27,8 @@ import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.custom.UserExercise;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
 import mitll.langtest.shared.flashcard.Leaderboard;
 import mitll.langtest.shared.flashcard.ScoreInfo;
@@ -67,6 +70,8 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring {
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
+  private static final String FAST = "Fast";
+  private static final String SLOW = "Slow";
 
   private static final int MB = (1024 * 1024);
   private static final int TIMEOUT = 30;
@@ -436,6 +441,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<Exercise> exercises = getExercises();
     Exercise byID = db.getExercise(id);
     if (byID == null) {
+      byID = db.getUserExerciseWhere(id);
+    }
+    if (byID == null) {
       logger.error("huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
     }
     long now = System.currentTimeMillis();
@@ -694,7 +702,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
             imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM : null;
     if (imageType1 == null) return new ImageResponse(); // success = false!
     String imageOutDir = pathHelper.getImageOutDir();
-    logger.debug("getting images for " + wavAudioFile + "");
+    logger.debug("getting images (" + width + ", " + height + ") (" +reqid+ ") type " + imageType+
+      " for " + wavAudioFile + "");
     String absolutePathToImage = imageWriter.writeImageSimple(wavAudioFile, pathHelper.getAbsoluteFile(imageOutDir).getAbsolutePath(),
         width, height, imageType1);
     String installPath = pathHelper.getInstallPath();
@@ -759,7 +768,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg) {
       return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-        false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache());
+          false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache());
   }
 
   /**
@@ -894,22 +903,101 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * @see mitll.langtest.client.custom.Navigation#doCreate
+   * @param userid
+   * @param name
+   * @param description
+   * @param dliClass
+   * @return
+   */
+  @Override
+  public int addUserList(long userid, String name, String description, String dliClass) {
+    return db.getUserListManager().addUserList(userid, name, description, dliClass);
+  }
+
+  /**
+   * @see mitll.langtest.client.custom.Navigation#viewLessons
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
+   * @param userid
+   * @param onlyCreated
+   * @return
+   */
+  public Collection<UserList> getListsForUser(int userid, boolean onlyCreated) {
+   return db.getUserListManager().getListsForUser(userid, onlyCreated);
+  }
+
+  @Override
+  public Collection<UserList> getUserListsForText(String search) {
+    return db.getUserListManager().getUserListsForText(search);
+  }
+
+  public List<UserExercise> addItemToUserList(int userListID, UserExercise userExercise) {
+    List<UserExercise> exercises = db.getUserListManager().addItemToUserList(userListID, userExercise);
+    return exercises;
+  }
+
+  public UserExercise createNewItem(long userid, String english, String foreign) {
+    return db.getUserListManager().createNewItem(userid, english, foreign);
+  }
+
+  /**
+   * Put the new item in the database,
+   * copy the audio under bestAudio
+   * assign the item to a user list
+   * @param userExercise
+   */
+  public UserExercise reallyCreateNewItem(UserList userList, UserExercise userExercise) {
+    File fileRef = pathHelper.getAbsoluteFile(userExercise.getRefAudio());
+    String fast = FAST + ".wav";
+    db.getUserListManager().reallyCreateNewItem(userList, userExercise);
+
+    String refAudio = getRefAudioPath(userExercise, fileRef, fast);
+    userExercise.setRefAudio(refAudio);
+
+    if (userExercise.getSlowAudioRef() != null && !userExercise.getSlowAudioRef().isEmpty()) {
+      fileRef = pathHelper.getAbsoluteFile(userExercise.getSlowAudioRef());
+      String slow = SLOW + ".wav";
+
+      refAudio = getRefAudioPath(userExercise, fileRef, slow);
+      userExercise.setSlowAudioRef(refAudio);
+    }
+    logger.debug("exercise now  " + userExercise);
+
+    // TODO do the same thing for slow
+
+
+    return userExercise;
+  }
+
+  private String getRefAudioPath(UserExercise userExercise, File fileRef, String fast) {
+    final File bestDir = pathHelper.getAbsoluteFile("bestAudio");
+    bestDir.mkdir();
+    File bestDirForExercise = new File(bestDir, userExercise.getID());
+    bestDirForExercise.mkdir();
+    File destination = new File(bestDirForExercise, fast);
+    logger.debug("copying from " + fileRef +  " to " + destination.getAbsolutePath());
+    new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
+    return "bestAudio" + File.separator + userExercise.getID() + File.separator + fast;
+  }
+
+  /**
+   *
    *
    *
    *
    * @param age
    * @param gender
    * @param experience
-   * @param dialect
    * @param nativeLang
+   * @param dialect
    * @param userID
    * @return
    */
   @Override
   public long addUser(int age, String gender, int experience,
-                      String dialect, String nativeLang, String userID) {
-    logger.info("Adding user " + userID);
-    long l = db.addUser(getThreadLocalRequest(),age, gender, experience, dialect, nativeLang, userID);
+                      String nativeLang, String dialect, String userID) {
+    logger.debug("Adding user " + userID);
+    long l = db.addUser(getThreadLocalRequest(),age, gender, experience, nativeLang, dialect, userID);
 
     if (l != 0 && serverProps.isDataCollectAdminView) {
       new SiteDeployer().sendNewUserEmail(getMailSupport(), getThreadLocalRequest(), userID);
