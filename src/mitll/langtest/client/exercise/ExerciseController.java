@@ -5,9 +5,8 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.StartupInfo;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,11 +18,6 @@ import mitll.langtest.shared.StartupInfo;
 public interface ExerciseController {
   LangTestDatabaseAsync getService();
   UserFeedback getFeedback();
-  boolean loadNextExercise(ExerciseShell current);
-  boolean loadNextExercise(String id);
-  boolean loadPreviousExercise(Exercise current);
-
-  boolean onFirst(Exercise current);
   ListInterface getExerciseList();
   void showProgress();
 
