@@ -55,10 +55,10 @@ public class StudentDialog extends UserDialog {
   private final UserNotification langTest;
   private List<String> purposes;
 
-  public StudentDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, UserNotification langTest) {
-    super(service, props);
+  public StudentDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, UserNotification userNotification) {
+    super(service, props, userManager, userNotification);
     this.userManager = userManager;
-    this.langTest = langTest;
+    this.langTest = userNotification;
     purposes = new ArrayList<String>();
     purposes.add(props.getPurposeDefault());
 
@@ -68,8 +68,9 @@ public class StudentDialog extends UserDialog {
   }
 
   /**
-   * @see UserManager#login()
+   * @see UserManager#login
    */
+
   public void displayLoginBox() {
     final Modal dialogBox = getDialog("Login");
     dialogBox.setAnimation(false);
@@ -398,18 +399,18 @@ public class StudentDialog extends UserDialog {
                        AsyncCallback<Long> async) {
     service.addUser(age,
       gender,
-      monthsOfExperience, dialect, nativeLang, userID, async);
+      monthsOfExperience, nativeLang, dialect, userID, async);
   }
 
   private boolean highlightIntegerBox(FormField ageEntryGroup) {
     return highlightIntegerBox(ageEntryGroup, MIN_AGE, MAX_AGE, TEST_AGE);
   }
 
-  private boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max) {
+/*  private boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max) {
     return highlightIntegerBox(ageEntryGroup, min, max, Integer.MAX_VALUE);
-  }
+  }*/
 
-  private boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max, int exception) {
+/*  private boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max, int exception) {
     String text = ageEntryGroup.box.getText();
     boolean validAge = false;
     if (text.length() == 0) {
@@ -425,7 +426,7 @@ public class StudentDialog extends UserDialog {
     }
 
     return validAge;
-  }
+  }*/
 
   private class RegistrationInfo {
     private FormField ageEntryGroup;
