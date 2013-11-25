@@ -26,8 +26,8 @@ import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.monitoring.Session;
 
 import java.util.ArrayList;
 import java.util.Collection;
