@@ -12,7 +12,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.dialog.EnterKeyButtonHelper;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -26,7 +25,7 @@ import java.util.Collections;
  * To change this template use File | Settings | File Templates.
  */
 public class ModalInfoDialog {
-  EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper();
+  private EnterKeyButtonHelper enterKeyButtonHelper = new EnterKeyButtonHelper();
   public ModalInfoDialog(String title, String message) {
     this(title, Collections.singleton(message), null,null);
   }
