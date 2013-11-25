@@ -8,7 +8,6 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ResponseChoice;
-
 import mitll.langtest.client.user.UserFeedback;
 
 /**
@@ -34,8 +33,8 @@ public class ResponseExerciseList extends FlexSectionExerciseList {
    */
   public ResponseExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                               UserFeedback feedback, boolean showTurkToken, boolean showInOrder,
-                              final ExerciseController controller, boolean isCRTDataMode) {
-    super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, isCRTDataMode);
+                              final ExerciseController controller, boolean isCRTDataMode, String instance) {
+    super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, instance);
     String responseType = controller.getProps().getResponseType();
     responseChoice = new ResponseChoice(responseType, new ResponseChoice.ChoiceMade() {
       @Override
