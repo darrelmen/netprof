@@ -6,6 +6,7 @@ import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
@@ -21,12 +22,14 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.ItemSorter;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.list.section.SectionExerciseList;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.SectionNode;
 
 import java.util.ArrayList;
@@ -49,6 +52,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   private static final int HEADING_FOR_LABEL = 4;
   public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT = 50;
   public static final int PANEL_INSIDE_SCROLL_MIN_HEIGHT_SMALL = 30;
+  private static final int UNACCOUNTED_WIDTH = 120;
+
 
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private Map<String, ButtonType> typeToButton = new HashMap<String, ButtonType>();
@@ -69,17 +74,18 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param feedback
    * @param showTurkToken
    * @param showInOrder
+   * @param showListBox
    * @param controller
-   * @param isCRTDataMode
+   * @param instance
    */
   public FlexSectionExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
-                                 boolean showTurkToken, boolean showInOrder,
-                                 ExerciseController controller, boolean isCRTDataMode) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, isCRTDataMode);
+                                 boolean showTurkToken, boolean showInOrder,/* boolean showListBox, */ExerciseController controller, String instance) {
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, controller.isCRTDataCollectMode(),instance);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel");
+
     DOM.setStyleAttribute(sectionPanel.getElement(), "paddingLeft", "2px");
     DOM.setStyleAttribute(sectionPanel.getElement(), "paddingRight", "2px");
     secondRow.add(new Column(12, sectionPanel));
@@ -88,6 +94,13 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     buttonTypes.add(ButtonType.SUCCESS);
     buttonTypes.add(ButtonType.INFO);
     buttonTypes.add(ButtonType.WARNING);
+  }
+
+  @Override
+  protected void addComponents() {
+    PagingContainer<? extends ExerciseShell> exerciseShellPagingContainer = makePagingContainer();
+    System.out.println("addComponents made container " + exerciseShellPagingContainer);
+    addTableWithPager(exerciseShellPagingContainer);
   }
 
   /**
@@ -104,7 +117,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       service.getCompletedExercises((int)userID, new AsyncCallback<Set<String>>() {
         @Override
         public void onFailure(Throwable caught) {}
-
         @Override
         public void onSuccess(Set<String> result) {
           controller.getExerciseList().setCompleted(result);
@@ -193,8 +205,10 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
     if (addInstructions && getUserPrompt().length() > 0) container.add(getInstructionRow());
     FlexTable firstTypeRow = new FlexTable();
+    firstTypeRow.getElement().setId("firstTypeRow");
     container.add(firstTypeRow);
     firstTypeRow.addStyleName("alignTop");
+   // firstTypeRow.addStyleName("positionAbsolute");
 
     populateButtonGroups(types);
 
@@ -252,7 +266,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     long now = System.currentTimeMillis();
     if (now - then > 200) System.out.println("\taddButtonRow took " + (now - then) + " millis");
 
-    if (last != null) setSizesAndPushFirst(last, usuallyThereWillBeAHorizScrollbar);
+    if (last != null) setSizesAndPushFirst(last/*, usuallyThereWillBeAHorizScrollbar*/);
     addBottomText(container);
   }
 
@@ -308,6 +322,11 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   private void makeScrollPanel(FlexTable firstTypeRow, Panel panelInside) {
     this.scrollPanel = new ScrollPanel(panelInside);
     this.scrollPanel.addStyleName("leftFiveMargin");
+    this.scrollPanel.getElement().setId("scrollPanel");
+
+/*    DivWidget div = new DivWidget();
+    div.addStyleName("positionAbsolute");
+    div.add(scrollPanel);*/
     firstTypeRow.setWidget(0, 2, scrollPanel);
     setScrollPanelWidth();
   }
@@ -404,7 +423,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     FluidRow status = new FluidRow();
     status.getElement().setId("statusRow");
     status.addStyleName("alignCenter");
-    status.addStyleName("inlineStyle");
+    status.addStyleName("inlineBlockStyle");
     container.add(status);
     status.add(statusHeader);
     statusHeader.getElement().setId("statusHeader");
@@ -414,13 +433,13 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     return status;
   }
 
-  @Override
+  //@Override
   protected int getKludge() { return 170;}
 
   protected Panel getInstructionRow() {
     Panel instructions = new FluidRow();
     instructions.addStyleName("alignCenter");
-    instructions.addStyleName("inlineStyle");
+    instructions.addStyleName("inlineBlockStyle");
 
     String userPrompt = getUserPrompt();
     if (userPrompt.length() > 0) {
@@ -441,7 +460,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   private ButtonWithChildren addColumnButton(FlowPanel columnContainer,
                                              final String sectionInFirstType,
                                              final ButtonGroupSectionWidget buttonGroupSectionWidget) {
-    columnContainer.addStyleName("inlineStyle");
+    columnContainer.addStyleName("inlineBlockStyle");
     // add a button
     ButtonWithChildren overallButton = makeOverallButton(buttonGroupSectionWidget.getType(), sectionInFirstType);
     addClickHandlerToButton(overallButton, sectionInFirstType, buttonGroupSectionWidget);
@@ -533,12 +552,33 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     return clear;
   }
 
-  private void setSizesAndPushFirst(Widget columnContainer, boolean usuallyThereWillBeAHorizScrollbar) {
-    int offsetHeight = columnContainer.getOffsetHeight() + (usuallyThereWillBeAHorizScrollbar ? 5 :0);
+/*    int offsetHeight = columnContainer.getOffsetHeight() + (usuallyThereWillBeAHorizScrollbar ? 5 :0);
     int minHeight = usuallyThereWillBeAHorizScrollbar ? PANEL_INSIDE_SCROLL_MIN_HEIGHT : PANEL_INSIDE_SCROLL_MIN_HEIGHT_SMALL;
     panelInsideScrollPanel.setHeight(Math.max(minHeight, offsetHeight) + "px");
-    scrollPanel.setWidth("100%");
+    scrollPanel.setWidth("100%");*/
+  /**
+   * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection, boolean)
+   * @param columnContainer
+   */
+  private void setSizesAndPushFirst(Widget columnContainer) {
+  //  int offsetHeight = columnContainer.getOffsetHeight() + 5;
+
+    // System.out.println("height is " + offsetHeight);
+    //scrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
+ //   panelInsideScrollPanel.setHeight(Math.max(50, offsetHeight) + "px");
+    // panelInsideScrollPanel.getParent().setHeight(Math.max(50, offsetHeight) + "px");
+
+    //int width = Window.getClientWidth() - labelColumn.getOffsetWidth() - clearColumnContainer.getOffsetWidth() - 90;
+    //  System.out.println("setting width to " +width);
+    // scrollPanel.setWidth(Math.max(300, width) + "px");
+   // scrollPanel.setWidth("100%");
     pushFirstListBoxSelection();
+
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        setScrollPanelWidth();
+      }
+    });
   }
 
   /**
@@ -660,9 +700,12 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
   protected void setScrollPanelWidth() {
     if (labelColumn != null) {
-      int width = Window.getClientWidth() - labelColumn.getOffsetWidth() - clearColumnContainer.getOffsetWidth() - 90;
-      // System.out.println("scrollPanel width is " + width);
+      int width = Window.getClientWidth() - labelColumn.getOffsetWidth() - clearColumnContainer.getOffsetWidth() - UNACCOUNTED_WIDTH;
+      System.out.println("setScrollPanelWidth : scrollPanel width is " + width);
       scrollPanel.setWidth(Math.max(300, width) + "px");
+    }
+    else {
+      System.out.println("setScrollPanelWidth : labelColumn is null");
     }
   }
 
@@ -714,6 +757,11 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     sectionWidgetFinal.addButton(sectionButton);
 
     return sectionButton;
+  }
+
+  @Override
+  protected int getVerticalUnaccountedFor() {
+    return 160;
   }
 
   public static class ButtonWithChildren extends Button {
