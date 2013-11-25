@@ -1,9 +1,6 @@
 package mitll.langtest.client.sound;
 
 import com.google.gwt.user.client.ui.HTML;
-import mitll.langtest.client.sound.AudioControl;
-import mitll.langtest.client.sound.Sound;
-import mitll.langtest.client.sound.SoundManagerAPI;
 
 import java.util.Date;
 
