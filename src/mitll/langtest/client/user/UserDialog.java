@@ -4,37 +4,23 @@ import com.github.gwtbootstrap.client.ui.Accordion;
 import com.github.gwtbootstrap.client.ui.AccordionGroup;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.ControlLabel;
-import com.github.gwtbootstrap.client.ui.Controls;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
-import com.github.gwtbootstrap.client.ui.Popover;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,7 +31,7 @@ import java.util.List;
  * Time: 4:26 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UserDialog {
+public abstract class UserDialog extends BasicDialog {
   protected static final int USER_ID_MAX_LENGTH = 80;
 
   private static final String GRADING = "grading";
@@ -66,10 +52,14 @@ public class UserDialog {
   protected final PropertyHandler props;
 
   protected final LangTestDatabaseAsync service;
+  protected UserManager userManager;
+  protected UserNotification userNotification;
 
-  public UserDialog(LangTestDatabaseAsync service, PropertyHandler props) {
+  public UserDialog(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, UserNotification userNotification) {
     this.service = service;
     this.props = props;
+    this.userManager = userManager;
+    this.userNotification =  userNotification;
   }
 
   protected int getAge(TextBox ageEntryBox) {
@@ -116,46 +106,12 @@ public class UserDialog {
     return login;
   }
 
-  protected class FormField {
-    public final TextBox box;
-    public final ControlGroup group;
-
-    public FormField(final TextBox box, final ControlGroup group, final int minLength) {
-      this.box = box;
-
-      box.addKeyUpHandler(new KeyUpHandler() {
-        public void onKeyUp(KeyUpEvent event) {
-          if (box.getText().length() >= minLength) {
-            group.setType(ControlGroupType.NONE);
-            hidePopovers();
-          }
-        }
-      });
-
-      this.group = group;
-    }
-
-    public void clearError() {
-      group.setType(ControlGroupType.NONE);
-      hidePopovers();
-    }
-
-    public void setVisible(boolean visible) {
-      group.setVisible(visible);
-    }
-
-    public String getText() {
-      return box.getText();
-    }
-
-    protected void markSimpleError(String message) {
-      markError(group, box, "Try Again", message);
-    }
-  }
+  /*
 
   protected FormField addControlFormField(Panel dialogBox, String label) {
     return addControlFormField(dialogBox, label, false, 0);
   }
+*/
 
   protected FormField addControlFormField(Panel dialogBox, String label, int minLength) {
     return addControlFormField(dialogBox, label, false, minLength);
@@ -172,12 +128,12 @@ public class UserDialog {
     return new FormField(user, userGroup, minLength);
   }
 
-  protected ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
+/*  protected ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
     addControlGroupEntry(dialogBox, label, user);
     return new ListBoxFormField(user);
-  }
+  }*/
 
-  private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
+/*  private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
 
@@ -188,96 +144,15 @@ public class UserDialog {
 
     dialogBox.add(userGroup);
     return userGroup;
-  }
-
-  protected class ListBoxFormField {
-    public final ListBox box;
-
-    public ListBoxFormField(final ListBox box) {
-      this.box = box;
-      box.addChangeHandler(new ChangeHandler() {
-        @Override
-        public void onChange(ChangeEvent event) {
-          hidePopovers();
-        }
-      });
-    }
-
-    public String getValue() {
-      return box.getItemText(box.getSelectedIndex());
-    }
-
-    public String toString() {
-      return "Box: " + getValue();
-    }
-
-    protected void markSimpleError(String message) {
-      box.setFocus(true);
-      setupPopover(box, "Try Again", message, Placement.RIGHT);
-    }
-  }
+  }*/
 
   protected void markError(FormField dialectGroup, String message) {
     markError(dialectGroup.group, dialectGroup.box, "Try Again", message);
   }
 
-  protected void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
-    markError(dialectGroup, dialect, header, message, Placement.RIGHT);
-  }
-
-  //List<ControlGroup> marked = new ArrayList<ControlGroup>();
-  protected void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement) {
-    dialectGroup.setType(ControlGroupType.ERROR);
-    dialect.setFocus(true);
-    //marked.add(dialectGroup);
-
-    setupPopover(dialect, header, message, placement);
-  }
-
-/*  protected void setupPopover(final Widget w, String heading, final String message) {
+  /*  protected void setupPopover(final Widget w, String heading, final String message) {
     setupPopover(w, heading, message, Placement.RIGHT);
   }*/
-
-  private List<Popover> visiblePopovers = new ArrayList<Popover>();
-
-  /**
-   * TODO : bug - once shown these never really go away
-   * @param w
-   * @param heading
-   * @param message
-   * @param placement
-   */
-  protected void setupPopover(final FocusWidget w, String heading, final String message, Placement placement) {
-    // System.out.println("triggering popover on " + w + " with " + message);
-    final Popover popover = new Popover();
-    popover.setWidget(w);
-    popover.setText(message);
-    popover.setHeading(heading);
-    popover.setPlacement(placement);
-    popover.reconfigure();
-    popover.show();
-    visiblePopovers.add(popover);
-/*
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        //System.out.println("hide popover on " + w + " with " + message);
-        popover.hide();
-      }
-    };
-    t.schedule(3000);*/
-
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-        w.setFocus(true);
-      }
-    });
-  }
-
-  public void hidePopovers() {
-    for (Popover popover : visiblePopovers) popover.hide();
-    visiblePopovers.clear();
-  }
 
   private HandlerRegistration keyHandler;
 
@@ -334,7 +209,7 @@ public class UserDialog {
     }
     experienceBox.ensureDebugId("cwListBox-dropBox");
     return experienceBox;
-  }
+    }
 
   protected boolean checkPassword(FormField password) { return checkPassword(password.box);  }
 
