@@ -41,7 +41,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
         DOM.setStyleAttribute(rightButtonContainer.getElement(), "marginTop", ((offsetHeight/2)- LOGIN_WIDGET_HEIGHT) +"px");
       }
     });
-    navigationHelper.enablePrevButton(!controller.onFirst(null));
+    navigationHelper.enablePrevButton(!controller.getExerciseList().onFirst(null));
     navigationHelper.enableNextButton(false);
   }
 
@@ -85,7 +85,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
   }
 
   protected void makeNavigationHelper(Exercise e, ExerciseController controller) {
-    navigationHelper = new NavigationHelper(e,controller,false, true);
+    navigationHelper = new NavigationHelper(e,controller,null,controller.getExerciseList(), true);
   }
 
   private HorizontalPanel getCenteredContainer(Widget prev) {
