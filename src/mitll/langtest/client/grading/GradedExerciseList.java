@@ -37,8 +37,8 @@ public class GradedExerciseList extends PagingExerciseList {
    * @param englishOnly
    */
   public GradedExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            boolean showInOrder, boolean englishOnly, ExerciseController controller) {
-    super(currentExerciseVPanel, service, feedback, false, showInOrder, controller, false);
+                            boolean showInOrder, boolean englishOnly, ExerciseController controller, String instance) {
+    super(currentExerciseVPanel, service, feedback, false, showInOrder, controller, instance);
     this.englishOnly = englishOnly;
   }
 
@@ -51,11 +51,9 @@ public class GradedExerciseList extends PagingExerciseList {
    * @see SetExercisesCallback#onSuccess
    */
   @Override
-  protected ExerciseShell loadFirstExercise() {
+  protected void loadFirstExercise() {
     getNextUngraded(true);
-    ExerciseShell toSelect = currentExercises.get(0);
-    selectFirst(toSelect);
-    return toSelect;
+    pagingContainer.selectFirst();
   }
   /**
    * @see #loadExercise(mitll.langtest.shared.ExerciseShell)
@@ -86,7 +84,6 @@ public class GradedExerciseList extends PagingExerciseList {
     getNextUngraded(false);
   }
 
-  @Override
   protected void loadExercises(String selectionState, String prefix) {
 /*    Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
     lastReqID++;
