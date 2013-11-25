@@ -34,15 +34,10 @@ import mitll.langtest.shared.Result;
  * To change this template use File | Settings | File Templates.
  */
 public class DataCollectorDialog extends UserDialog {
-  private final UserNotification langTest;
-  private UserManager userManager;
-
   public DataCollectorDialog(LangTestDatabaseAsync service, PropertyHandler props,
                              UserNotification langTest,
                              UserManager userManager) {
-    super(service, props);
-    this.langTest = langTest;
-    this.userManager = userManager;
+    super(service, props, userManager, langTest);
   }
 
   /**
@@ -230,7 +225,7 @@ public class DataCollectorDialog extends UserDialog {
           login, fastThenSlow.getValue());
       }
     }
-  }
+    }
 
   /**
    * @param enteredAge
@@ -306,7 +301,7 @@ public class DataCollectorDialog extends UserDialog {
     service.addUser(age,
       gender,
       monthsOfExperience,
-      dialectValue, nativeLangValue,
+      nativeLangValue, dialectValue,
       userName,
 
       new AsyncCallback<Long>() {
@@ -328,7 +323,7 @@ public class DataCollectorDialog extends UserDialog {
 
   protected void storeAudioType(String type) {
     if (props.isCollectAudio()) {
-      langTest.rememberAudioType(type);
+      userNotification.rememberAudioType(type);
     }
   }
 
