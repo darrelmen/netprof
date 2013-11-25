@@ -1,8 +1,8 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.grade.Grade;
-import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
