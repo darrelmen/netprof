@@ -35,6 +35,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
+import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
@@ -62,7 +63,6 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.StartupInfo;
 
@@ -103,6 +103,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Anchor showResults, monitoring;
   private HTML releaseStatus;
   private StartupInfo startupInfo;
+
+  Navigation navigation;
 
   /**
    * Make an exception handler that displays the exception.
@@ -177,15 +179,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void logMessageOnServer(String message) {
     service.logMessage(message,
-      new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          //Window.alert("logMessage : Couldn't contact server.  Please check your network connection.");
-        }
+        new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            //Window.alert("logMessage : Couldn't contact server.  Please check your network connection.");
+          }
 
-        @Override
-        public void onSuccess(Void result) {}
-      });
+          @Override
+          public void onSuccess(Void result) {
+          }
+        });
   }
 
   /**
@@ -252,9 +255,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     verticalContainer.add(headerRow = makeHeaderRow());
     headerRow.getElement().setId("headerRow");
 
+    Panel belowFirstRow = new FluidRow();
+    verticalContainer.add(belowFirstRow);
+
     // second row ---------------
     secondRow = new FluidRow();
-    verticalContainer.add(secondRow);
+/*    verticalContainer.add(secondRow);
     secondRow.getElement().setId("secondRow");
     // third row ---------------
 
@@ -265,7 +271,24 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     thirdRow.add(leftColumn);
     leftColumn.getElement().setId("leftColumn");
 
-    verticalContainer.add(thirdRow);
+    verticalContainer.add(thirdRow);*/
+  //  widgets.add(secondRow);
+    secondRow.getElement().setId("secondRow");
+   // secondRow.addStyleName("overflowStyle");
+
+    // third row ---------------
+
+   Panel thirdRow = new HorizontalPanel();
+//    Panel thirdRow = new FluidRow();
+    Panel leftColumn = new SimplePanel();
+    thirdRow.add(leftColumn);
+    thirdRow.getElement().setId("outerThirdRow");
+
+  //  widgets.add(thirdRow);
+    FluidContainer bothSecondAndThird = new FluidContainer();
+    bothSecondAndThird.add(secondRow);
+    bothSecondAndThird.add(thirdRow);
+  //  widgets.add(bothSecondAndThird);
 
     if ((isCRTDataCollectMode() || props.isDataCollectMode()) && !props.isFlashcardTeacherView()) {
       addProgressBar(verticalContainer);
@@ -276,11 +299,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // set up center panel, initially with flash record panel
     currentExerciseVPanel = new FluidContainer();
-
+    currentExerciseVPanel.getElement().setId("currentExercisePanel");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingLeft", "5px");
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
 
-    makeExerciseList(secondRow, leftColumn);
+    ListInterface listInterface = makeExerciseList(secondRow, leftColumn);
+    navigation = new Navigation(service, userManager, this, listInterface);
+ //   belowFirstRow.add(navigation.getNav(secondRow,/*belowFirstRow,*/thirdRow, this, getProps()));
+    belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
+
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("floatLeft");
       thirdRow.add(currentExerciseVPanel);
@@ -297,7 +324,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     //System.out.println("user agent " + Window.Navigator.getUserAgent());
     if (shouldCollectAudio()) {
       makeFlashContainer();
-      currentExerciseVPanel.add(flashRecordPanel);
+  //    currentExerciseVPanel.add(flashRecordPanel);
+      belowFirstRow.add(flashRecordPanel);
     }
     else {
       System.out.println("*not* allowing recording of audio.");
@@ -348,10 +376,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       flashcard = new Flashcard();
       title = flashcard.makeNPFHeaderRow(props.getSplash());
     }
-    else if (props.isTrackUsers()) {
+/*    else if (props.isTrackUsers()) {
       flashcard = new Flashcard();
       title = flashcard.makeNPFHeaderRow(props.getSplash(), props.getAppTitle());
-    }
+    }*/
     else if (props.isFlashcardTeacherView() || props.isAutocrt()) {
       flashcard = new Flashcard();
       title = flashcard.getHeaderRow(props.getSplash(), "NewProF2.png",props.getAppTitle());
@@ -360,7 +388,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       title = getTitleWidget();
     }
 
-    boolean isStudent = getLoginType().equals(PropertyHandler.LOGIN_TYPE.STUDENT);
+    boolean isStudent = getLoginType().equals(PropertyHandler.LOGIN_TYPE.STUDENT) ||  getLoginType().equals(PropertyHandler.LOGIN_TYPE.SIMPLE);
     boolean takeWholeWidth = isStudent || props.isFlashcardTeacherView() || props.isShowSections() || props.isGoodwaveMode();
 
     Column titleColumn = new Column(takeWholeWidth ? 12 : 10, title);
@@ -371,7 +399,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else if (isStudent || props.isAdminView() || props.isDataCollectMode()) {
       FluidRow adminRow = new FluidRow();
       adminRow.addStyleName("alignCenter");
-      adminRow.addStyleName("inlineStyle");
+      adminRow.addStyleName("inlineBlockStyle");
 
       this.userline.setHTML(getUserText());
       if (props.isAdminView()) {
@@ -383,9 +411,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         adminRow.add(new Column(2, releaseStatus));
       }
       else {
-        adminRow.add(new Column(1, userline));
+        adminRow.add(new Column(2, userline));
         adminRow.add(new Column(2, releaseStatus));
-        adminRow.add(new Column(2, 7,  logout));
+        adminRow.add(new Column(6, new SimplePanel()));
+        adminRow.add(new Column(2, logout));
       }
 
       titleColumn.add(adminRow);
@@ -424,7 +453,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Widget getTitleWidget() {
     FluidRow titleRow = new FluidRow();
     titleRow.addStyleName("alignCenter");
-    titleRow.addStyleName("inlineStyle");
+    titleRow.addStyleName("inlineBlockStyle");
     Heading pageTitle = new Heading(2, props.getAppTitle());
 
     titleRow.add(pageTitle);
@@ -606,6 +635,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         if (exerciseList != null) {
           exerciseList.onResize();
         }
+        if (navigation != null) navigation.onResize();
         if (flashcard != null) {
           flashcard.onResize();
         }
@@ -622,9 +652,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    *
    * @see #onModuleLoad2()
    */
-  private void makeExerciseList(FluidRow secondRow, Panel leftColumn) {
-    this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, leftColumn, this,
-      currentExerciseVPanel,service,this);
+  private ListInterface makeExerciseList(FluidRow secondRow, Panel leftColumn) {
+    this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, leftColumn, this, currentExerciseVPanel,service,this);
+    return exerciseList;
   }
 
   public int getHeightOfTopRows() {
@@ -644,6 +674,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Check the URL parameters for special modes.
    *
    * If in goodwave (pronunciation scoring) mode or auto crt mode, skip the user login.
+   * @see #onModuleLoad2()
    */
   private void modeSelect() {
     boolean isGrading = props.isGrading();
@@ -707,24 +738,24 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void setFactory(final long userID) {
     final LangTest outer = this;
     if (props.isGoodwaveMode() && !props.isGrading()) {
-      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer), userManager, 1);
+      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, outer, outer, exerciseList, getScreenPortion()), userManager, 1);
     } else if (props.isGrading()) {
-      exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer), userManager, props.getNumGradesToCollect());
+      exerciseList.setFactory(new GradingExercisePanelFactory(service, outer, outer, exerciseList), userManager, props.getNumGradesToCollect());
     } else if (props.getFlashcardNextAndPrev()) {
       String responseType = props.getResponseType();
 
       //System.out.println("got response type " + responseType);
       if (responseType.equalsIgnoreCase("Text")) {
-        exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer) {
+        exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList) {
           @Override
           public Panel getExercisePanel(Exercise e) {
             return new TextCRTFlashcard(e, service, controller);
           }
         }, userManager, 1);
       } else if (responseType.equalsIgnoreCase("Audio")) {
-        exerciseList.setFactory(new DataCollectionFlashcardFactory(service, outer, outer), userManager, 1);
+        exerciseList.setFactory(new DataCollectionFlashcardFactory(service, outer, outer, exerciseList), userManager, 1);
       } else if (responseType.equalsIgnoreCase("Both")) {
-        exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer) {
+        exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList) {
           @Override
           public Panel getExercisePanel(Exercise e) {
             return new CombinedResponseFlashcard(e, service, controller);
@@ -732,11 +763,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         }, userManager, 1);
       }
     } else if (props.isFlashCard()) {
-      exerciseList.setFactory(new FlashcardExercisePanelFactory(service, outer, outer), userManager, 1);
+      exerciseList.setFactory(new FlashcardExercisePanelFactory(service, outer, outer, exerciseList), userManager, 1);
     } else if (props.isDataCollectMode() && props.isCollectAudio() && !props.isCRTDataCollectMode()) {
-      exerciseList.setFactory(new WaveformExercisePanelFactory(service, outer, outer), userManager, 1);
+      exerciseList.setFactory(new WaveformExercisePanelFactory(service, outer, outer, exerciseList), userManager, 1);
     } else {
-      exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer), userManager, 1);
+      exerciseList.setFactory(new ExercisePanelFactory(service, outer, outer, exerciseList), userManager, 1);
     }
     doEverythingAfterFactory(userID);
 
@@ -905,14 +936,31 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
+  boolean everShownInitialState =false;
   private boolean doEverythingAfterFactory(long userID) {
     if (userID != lastUser || (props.isGoodwaveMode() || props.isFlashCard() && !props.isTimedGame())) {
       System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser);
       if (!shouldCollectAudio() || flashRecordPanel.gotPermission()) {
-        //  System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
-        exerciseList.getExercises(userID, true);
+        if (exerciseList != null) {
+          System.out.println("\tdoEverythingAfterFactory : " + userID + " get exercises");
+          exerciseList.getExercises(userID, true);
+        }
+        else {
+          System.out.println("\tdoEverythingAfterFactory : " + userID + " exercise list is null???");
+        }
+
+        if (navigation != null) {
+          if (!everShownInitialState) {
+            navigation.showInitialState();
+            everShownInitialState = true;
+          }
+        }
+      }
+      else {
+        System.out.println("\tdoEverythingAfterFactory : " + userID + " NOT getting exercises");
       }
       lastUser = userID;
+
       return true;
     } else if (props.isTimedGame()) {
       exerciseList.reloadExercises();
@@ -1031,19 +1079,28 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     status.setText(msg);
   }
 
+ /* public void loadExercise(ExerciseShell exerciseShell) {
+    exerciseList.loadExercise(exerciseShell);
+  }
   public boolean loadNextExercise(ExerciseShell current) {
     boolean b = exerciseList.loadNextExercise(current);
-    showProgress();
+    showProgress(exerciseList);
     return b;
+  }*/
+
+  @Override
+  public void showProgress() {
+    System.err.println("todo : fix this!");
   }
 
-  public void showProgress() {
+  // TODO fix thsi
+  public void showProgress(ListInterface exerciseList) {
     if (progressBar != null) {
       progressBar.showAdvance(exerciseList);
     }
   }
 
-  public boolean loadNextExercise(String id) {
+/*  public boolean loadNextExercise(String id) {
     return exerciseList.loadNextExercise(id);
   }
 
@@ -1053,7 +1110,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public boolean onFirst(Exercise current) {
     return exerciseList.onFirst(current);
-  }
+  }*/
 
   public ListInterface getExerciseList() { return exerciseList; }
 }

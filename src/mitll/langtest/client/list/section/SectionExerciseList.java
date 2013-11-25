@@ -17,10 +17,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.ItemSorter;
 import mitll.langtest.client.exercise.SectionWidget;
-import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.list.HistoryExerciseList;
+import mitll.langtest.client.list.ItemSorter;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserFeedback;
 
 import java.util.Collection;
@@ -54,7 +54,7 @@ public class SectionExerciseList extends HistoryExerciseList {
                              UserFeedback feedback,
                              boolean showTurkToken, boolean showInOrder, boolean showListBoxes,
                              ExerciseController controller, boolean isCRTDataMode) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, isCRTDataMode);
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, isCRTDataMode, "");
     this.showListBoxes = showListBoxes;
   }
 
