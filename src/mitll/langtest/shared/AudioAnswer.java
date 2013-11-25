@@ -19,7 +19,6 @@ public class AudioAnswer implements IsSerializable {
   public int durationInMillis;
   private long resultID;
 
-
   public enum Validity implements IsSerializable {
     OK("Audio OK."),
     TOO_SHORT("Audio too short. Please record again."),
@@ -73,22 +72,17 @@ public class AudioAnswer implements IsSerializable {
    */
   public void setScore(double score) { this.score = score; }
 
-
   /**
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#receivedAudioAnswer(AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
    * @return score from hydec (see nnscore)
    */
-  public double getScore() {
-    return score;
-  }
+  public double getScore() { return score; }
 
   /**
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#receivedAudioAnswer(AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
    * @return
    */
-  public boolean isCorrect() {
-    return correct;
-  }
+  public boolean isCorrect() { return correct; }
 
   /**
    * @see mitll.langtest.server.autocrt.AutoCRT#getFlashcardAnswer
