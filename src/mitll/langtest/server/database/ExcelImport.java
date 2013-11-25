@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseFormatter;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -42,9 +43,10 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class ExcelImport implements ExerciseDAO {
+  public static final int TESTING_MAX = 500;
   private static Logger logger = Logger.getLogger(ExcelImport.class);
 
-  private static final boolean TESTING = false;
+  private static final boolean TESTING = true;
   private static final boolean SHOW_SKIPS = false;
   private static final int MIN_TABOO_ITEMS = 1;
 
@@ -252,7 +254,7 @@ public class ExcelImport implements ExerciseDAO {
       Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
       for (; iter.hasNext(); ) {
         Row next = iter.next();
-        if (TESTING && id > 300) break;     // TODO make this an adult option
+        if (TESTING && id > TESTING_MAX) break;     // TODO make this an adult option
         //    logger.warn("------------ Row # " + next.getRowNum() + " --------------- ");
         boolean inMergedRow = rowToRange.keySet().contains(next.getRowNum());
 
@@ -665,7 +667,7 @@ public class ExcelImport implements ExerciseDAO {
   private Exercise getExercise(String id, FileExerciseDAO dao,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
                                String context, boolean promptInEnglish, String refAudioIndex) {
-    String content = dao.getContent(foreignLanguagePhrase, translit, english, meaning, context);
+    String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context);
     Exercise imported = new Exercise("import", id, content, promptInEnglish, true, english);
     imported.addQuestion();   // TODO : needed?
 
@@ -983,7 +985,7 @@ public class ExcelImport implements ExerciseDAO {
       String line2;
 
       // "20KD21O3W5XHH1RBPGTK5EPLB5ZGA5","29B2KYEPLSP7M2N83UA3VAHQEXPVP1","Spanish Guessing Game","Guess Spanish words from Spanish clues.",
-      // "Spanish, language, game, clues, guess, español, lengua, juego, conjetura","$0.05","Fri Sep 06 20:54:21 GMT 2013","5","BatchId:1260169;","3600","172800","Fri Sep 13 20:54:21 GMT 2013","","","2H5ZKPFE4EGDYVOO2JZIGNZWY0D7HM","A3C2DVYUP88DE7","Approved","Sat Sep 07 10:42:30 GMT 2013","Sat Sep 07 10:43:07 GMT 2013","Mon Sep 09 03:43:07 PDT 2013","Sat Sep 07 17:50:38 PDT 2013","","","37","100% (641/641)","100% (641/641)","100% (488/488)","____ ____ ____ para limpiar el restaurante al final de la noche hay que ____ ____ ____","____ ____ Telas para cubrir las ventanas.","Tengo que hacer del numero uno, tengo que usar ____ ____","barrer el suelo","las cortinas","el primero","","","",""
+      // "Spanish, language, game, clues, guess, espaol, lengua, juego, conjetura","$0.05","Fri Sep 06 20:54:21 GMT 2013","5","BatchId:1260169;","3600","172800","Fri Sep 13 20:54:21 GMT 2013","","","2H5ZKPFE4EGDYVOO2JZIGNZWY0D7HM","A3C2DVYUP88DE7","Approved","Sat Sep 07 10:42:30 GMT 2013","Sat Sep 07 10:43:07 GMT 2013","Mon Sep 09 03:43:07 PDT 2013","Sat Sep 07 17:50:38 PDT 2013","","","37","100% (641/641)","100% (641/641)","100% (488/488)","____ ____ ____ para limpiar el restaurante al final de la noche hay que ____ ____ ____","____ ____ Telas para cubrir las ventanas.","Tengo que hacer del numero uno, tengo que usar ____ ____","barrer el suelo","las cortinas","el primero","","","",""
 
 
       //Set<String> refs = new HashSet<String>();
