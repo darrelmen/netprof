@@ -1,5 +1,11 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.database.testing.SmallDatabaseImpl;
+import mitll.langtest.shared.Exercise;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import org.apache.log4j.Logger;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,13 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import mitll.langtest.server.database.testing.SmallDatabaseImpl;
-import mitll.langtest.shared.Exercise;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
-import org.apache.log4j.Logger;
 
 public class SQLExerciseDAO implements ExerciseDAO {
   public static final String HEADER_TAG = "h4";
