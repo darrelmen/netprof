@@ -2,6 +2,7 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
@@ -18,14 +19,13 @@ public class WaveformExercisePanelFactory extends ExercisePanelFactory {
    * @param service
    * @param userFeedback
    * @param controller
+   * @param exerciseList
    */
   public WaveformExercisePanelFactory(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                                     final ExerciseController controller) {
-    super(service, userFeedback, controller);
+                                      final ExerciseController controller, ListInterface exerciseList) {
+    super(service, userFeedback, controller, exerciseList);
   }
 
   @Override
-  public Panel getExercisePanel(Exercise e) {
-    return new WaveformExercisePanel(e, service, userFeedback, controller);
-  }
+  public Panel getExercisePanel(Exercise e) { return new WaveformExercisePanel(e, service, userFeedback, controller, exerciseList); }
 }
