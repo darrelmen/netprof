@@ -70,20 +70,28 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected final LangTestDatabaseAsync service;
   protected final SoundManagerAPI soundManager;
   private PlayAudioPanel playAudio;
-  private final boolean debug = false;
+  private final boolean debug = true;
   private float screenPortion = 1.0f;
   private final boolean logMessages;
-  private ExerciseController controller;
+  protected ExerciseController controller;
+  private boolean showSpectrogram = true;
 
   /**
-   * @see mitll.langtest.client.exercise.WaveformExercisePanel.RecordAudioPanel#RecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int)
-   * @see ScoringAudioPanel#ScoringAudioPanel
+   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
    * @param service
    * @param useKeyboard
    * @param gaugePanel
    */
   public AudioPanel(String path, LangTestDatabaseAsync service,
                     boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
+    this(service, useKeyboard, controller, true,gaugePanel);
+    addWidgets(path);
+  }
+
+  public AudioPanel(LangTestDatabaseAsync service,
+                    boolean useKeyboard, ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel) {
+    this.screenPortion = controller.getScreenPortion();
+    System.out.println("Screen portion " + screenPortion);
     this.soundManager = controller.getSoundManager();
     this.service = service;
     this.useKeyboard = useKeyboard;
@@ -91,19 +99,20 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.controller = controller;
     this.gaugePanel = gaugePanel;
     if (debug) System.out.println("gauge panel " + gaugePanel);
-    addWidgets(path);
+    //addWidgets(path);
+    this.showSpectrogram = showSpectrogram;
   }
 
-  public void onResize() {
-    getImages();
-  }
+  public void onResize() { getImages(); }
 
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
+   * @see #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
    * @param path
    * @return
    */
-  private void addWidgets(String path) {
+  public void addWidgets(String path) {
+    System.out.println("addWidgets audio path = " + path);
     imageContainer = new VerticalPanel();
 
     HorizontalPanel hp = new HorizontalPanel();
@@ -122,9 +131,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     getWaveform().image.setAltText(WAVEFORM_TOOLTIP);
     getWaveform().image.setTitle(WAVEFORM_TOOLTIP);
     spectrogram = new ImageAndCheck();
-    imageContainer.add(getSpectrogram().image);
-    controlPanel.add(addCheckbox(SPECTROGRAM, getSpectrogram()));
-
+    if (showSpectrogram) {
+      imageContainer.add(getSpectrogram().image);
+      controlPanel.add(addCheckbox(SPECTROGRAM, getSpectrogram()));
+    }
     words = new ImageAndCheck();
     imageContainer.add(words.image);
     controlPanel.add(addCheckbox("words", words));
@@ -181,6 +191,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   public void setScreenPortion(float screenPortion) {
+    System.out.println("setScreenPortion : screenPortion " + screenPortion);
     this.screenPortion = screenPortion;
   }
 
@@ -281,15 +292,17 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       rightSide = 180; // hack!!!
     }
     else {
-      if (debug) System.out.println("\n\n\ngauge panel is null!!!");
+      if (debug && gaugePanel == null) System.out.println("\n\n\ngauge panel is null!!!");
     }
      int width = (int) ((screenPortion*((float)Window.getClientWidth())) - leftColumnWidth) - rightSide;
 
-    if (debug) System.out.println("getImages : leftColumnWidth " + leftColumnWidth + " width " + width + " vs window width " + Window.getClientWidth() + " right side " + rightSide);
+    if (debug) System.out.println("getImages : leftColumnWidth " + leftColumnWidth + " width " + width + " (screen portion = " +screenPortion+
+      ") vs window width " + Window.getClientWidth() + " right side " + rightSide);
 
     int diff = Math.abs(Window.getClientWidth() - lastWidth);
     if (lastWidth == 0 || diff > WINDOW_SIZE_CHANGE_THRESHOLD) {
       lastWidth = Window.getClientWidth();
+
 
       if (debug)  System.out.println("getImages : offset width " + getOffsetWidth() + " width " + width + " path " + audioPath);
       getEachImage(width);
@@ -301,7 +314,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   protected void getEachImage(int width) {
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
-    getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
+    if (showSpectrogram) {
+      getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
+    }
   }
 
   /**
@@ -314,6 +329,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param imageAndCheck
    */
   private void getImageURLForAudio(final String path, final String type,int width, final ImageAndCheck imageAndCheck) {
+   // new Exception("get images").printStackTrace();
+
     int toUse = Math.max(MIN_WIDTH, width);
     float heightForType = type.equals(WAVEFORM) ? WAVEFORM_HEIGHT : SPECTROGRAM_HEIGHT;
     int height = Math.max(10,(int) (((float)Window.getClientHeight())/1200f * heightForType));
