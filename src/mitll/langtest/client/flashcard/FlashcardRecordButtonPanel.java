@@ -1,22 +1,5 @@
 package mitll.langtest.client.flashcard;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.PopupPanel;
-import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExerciseQuestionState;
-import mitll.langtest.client.flashcard.BootstrapExercisePanel;
-import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.client.recorder.RecordButtonPanel;
-import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
-
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.google.gwt.dom.client.NativeEvent;
@@ -30,7 +13,22 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
+import mitll.langtest.client.LangTest;
+import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExerciseQuestionState;
+import mitll.langtest.client.recorder.RecordButton;
+import mitll.langtest.client.recorder.RecordButtonPanel;
+import mitll.langtest.client.sound.SoundFeedback;
+import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.Exercise;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
 * Created with IntelliJ IDEA.
@@ -86,7 +84,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
   public FlashcardRecordButtonPanel(BootstrapExercisePanel widgets, LangTestDatabaseAsync service,
                                     ExerciseController controller, Exercise exercise, int index,
                                     boolean warnUserWhenNotSpace) {
-    super(service, controller, exercise, null, index);
+    super(service, controller, exercise, null, index, true,controller.shouldAddRecordKeyBinding());
     this.widgets = widgets;
     this.exercise = exercise;
     isDemoMode = controller.isDemoMode();
@@ -95,9 +93,8 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
     recordButton.setTitle("Please press and hold the space bar to record");
   }
 
-  @Override
-  protected RecordButton makeRecordButton(ExerciseController controller, final RecordButtonPanel outer) {
-    return new RecordButton(controller.getRecordTimeout(), true) {
+  protected RecordButton makeRecordButton(ExerciseController controller, final RecordButtonPanel outer, boolean addKeyHandler) {
+    return new RecordButton(controller.getRecordTimeout(), addKeyHandler) {
       @Override
       protected void stopRecording() {
         outer.stopRecording();
@@ -124,7 +121,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
       }
 
       @Override
-      protected HandlerRegistration addKeyHandler() {
+      public HandlerRegistration addKeyHandler() {
         return Event.addNativePreviewHandler(new
                                                Event.NativePreviewHandler() {
 
@@ -400,7 +397,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
       Timer t = new Timer() {
         @Override
         public void run() {
-          controller.loadNextExercise(exercise);
+          controller.getExerciseList().loadNextExercise(exercise);
         }
       };
       int delay = getFeedbackLengthProportionalDelay(infoToShow);
@@ -460,7 +457,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
       Timer t = new Timer() {
         @Override
         public void run() {
-          controller.loadNextExercise(exercise);
+          controller.getExerciseList().loadNextExercise(exercise);
         }
       };
       int incorrectDelay = DELAY_MILLIS_LONG;
