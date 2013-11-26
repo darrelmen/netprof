@@ -1,8 +1,18 @@
 package mitll.langtest.client.list;
 
+import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.ControlLabel;
+import com.github.gwtbootstrap.client.ui.Controls;
+import com.github.gwtbootstrap.client.ui.base.TextBox;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -128,8 +138,59 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
    */
   protected void addComponents() {
     PagingContainer<? extends ExerciseShell> exerciseShellPagingContainer = makePagingContainer();
+
     addTableWithPager(exerciseShellPagingContainer);
   }
+
+  private TextBox typeAhead = null;
+  private String lastValue = "";
+  protected void addTypeAhead(FlowPanel column) {
+    if (!isCRTDataMode) {
+      typeAhead = new TextBox();
+      typeAhead.setDirectionEstimator(true);   // automatically detect whether text is RTL
+      typeAhead.addKeyUpHandler(new KeyUpHandler() {
+        public void onKeyUp(KeyUpEvent event) {
+          String text = typeAhead.getText();
+          //  text = text.trim();
+          if (!text.equals(lastValue)) {
+            System.out.println("looking for '" + text + "' (" + text.length() + " chars)");
+            loadExercises(getHistoryToken(""), text);
+            lastValue = text;
+          }
+        }
+      });
+
+      addControlGroupEntry(column, "Search", typeAhead);
+      Scheduler.get().scheduleDeferred(new Command() {
+        public void execute() {
+          typeAhead.setFocus(true);
+        }
+      });
+    }
+  }
+
+  protected void loadExercises(String selectionState, String prefix) {
+    lastReqID++;
+    System.out.println("looking for '" + prefix + "' (" + prefix.length() + " chars)");
+
+    service.getExerciseIds(lastReqID, controller.getUser(), prefix, new SetExercisesCallback());
+  }
+
+  protected String getPrefix() { return typeAhead == null ? "" : typeAhead.getText(); }
+
+  private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
+    final ControlGroup userGroup = new ControlGroup();
+    userGroup.addStyleName("leftFiveMargin");
+
+    Controls controls = new Controls();
+    userGroup.add(new ControlLabel(label));
+    controls.add(user);
+    userGroup.add(controls);
+
+    dialogBox.add(userGroup);
+    return userGroup;
+  }
+
 
   protected PagingContainer<? extends ExerciseShell> makePagingContainer() {
     final PagingExerciseList outer = this;
@@ -156,6 +217,9 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   protected void addTableWithPager(PagingContainer<? extends ExerciseShell> pagingContainer) {
     Panel container = pagingContainer.getTableWithPager();
+    FlowPanel column = new FlowPanel();
+    add(column);
+    addTypeAhead(column);
     add(container);
   }
 
