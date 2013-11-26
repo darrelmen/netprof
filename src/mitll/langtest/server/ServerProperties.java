@@ -63,15 +63,14 @@ public class ServerProperties {
   private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
   private static final String SORT_BY_ID = "sortByID";
-  private static final String TRACK_USERS_ONLINE = "trackUsers";
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
   private static final String SORT_EXERCISES = "sortExercises";
-  private static final String EXAMPLE_SENTENCE_FILE = "exampleSentenceFile";
   private static final String EMAIL_ADDRESS = "emailAddress";
   private static final String DEFAULT_EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String AUDIO_OFFSET = "audioOffset";
   //private static final String EXERCISES_IN_ORDER = "exercisesInOrder";
   private static final String FOREIGN_LANGUAGE_QUESTIONS_ONLY = "foreignLanguageQuestionsOnly";
+  private static final String MAX_NUM_EXERCISES = "maxNumExercises";
 
   private Properties props = new Properties();
 
@@ -83,6 +82,7 @@ public class ServerProperties {
   public int firstNInOrder;
   public boolean isDataCollectAdminView;
   private double minPronScore;
+  int maxNumExercises = Integer.MAX_VALUE;
 
   public void readPropertiesFile(ServletContext servletContext, String configDir) {
    String configFile = servletContext.getInitParameter("configFile");
@@ -144,10 +144,6 @@ public class ServerProperties {
     return getDefaultFalse(DOIMAGES);
   }
 
-  public boolean trackUsers() {
-    return getDefaultFalse(TRACK_USERS_ONLINE);
-  }
-
   /**
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    * @return
@@ -157,9 +153,7 @@ public class ServerProperties {
   }
 
   public String getLanguage() {
-    String language = props.getProperty(LANGUAGE, "English");
-  //  logger.debug("language = " +language);
-    return language;
+    return props.getProperty(LANGUAGE, "English");
   }
 
   /**
@@ -221,10 +215,6 @@ public class ServerProperties {
     return getDefaultFalse(FOREIGN_LANGUAGE_QUESTIONS_ONLY);
   }
 
-  public String getExampleSentenceFile() {
-    return props.getProperty(EXAMPLE_SENTENCE_FILE);
-  }
-
   public String getEmailAddress() {
     return props.getProperty(EMAIL_ADDRESS, DEFAULT_EMAIL);
   }
@@ -234,6 +224,16 @@ public class ServerProperties {
       return Integer.parseInt(props.getProperty(AUDIO_OFFSET));
     } catch (NumberFormatException e) {
       return 0;
+    }
+  }
+
+  public int getMaxNumExercises() {
+    try {
+      String property = props.getProperty(MAX_NUM_EXERCISES);
+      if (property == null) return maxNumExercises;
+      return Integer.parseInt(property);
+    } catch (NumberFormatException e) {
+      return maxNumExercises;
     }
   }
 
@@ -314,5 +314,4 @@ public class ServerProperties {
     }
     return "";
   }
-
 }
