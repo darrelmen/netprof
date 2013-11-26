@@ -304,9 +304,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     DOM.setStyleAttribute(currentExerciseVPanel.getElement(), "paddingRight", "2px");
 
     ListInterface listInterface = makeExerciseList(secondRow, leftColumn);
-    navigation = new Navigation(service, userManager, this, listInterface);
- //   belowFirstRow.add(navigation.getNav(secondRow,/*belowFirstRow,*/thirdRow, this, getProps()));
-    belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
+    if (getProps().isClassroomMode()) {
+      navigation = new Navigation(service, userManager, this, listInterface);
+      //   belowFirstRow.add(navigation.getNav(secondRow,/*belowFirstRow,*/thirdRow, this, getProps()));
+      belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
+    }
+    else {
+      belowFirstRow.add(bothSecondAndThird);
+    }
 
     if (usualLayout) {
       currentExerciseVPanel.addStyleName("floatLeft");
