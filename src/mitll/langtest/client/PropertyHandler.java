@@ -141,9 +141,8 @@ public class PropertyHandler {
   private String responseType = "Audio";
   private boolean allowPlusInURL;
   private String purposeDefault = "Practice";
- // private boolean dliDemographics;
   private boolean bindNextToEnter;
-  private boolean classroomMode = true;
+  private boolean classroomMode = false;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad()
