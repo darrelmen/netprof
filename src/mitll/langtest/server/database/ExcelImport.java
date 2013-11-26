@@ -43,15 +43,10 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class ExcelImport implements ExerciseDAO {
-  public static final int TESTING_MAX = 500;
   private static Logger logger = Logger.getLogger(ExcelImport.class);
 
-  private static final boolean TESTING = true;
   private static final boolean SHOW_SKIPS = false;
-  private static final int MIN_TABOO_ITEMS = 1;
-
   private final boolean isFlashcard;
-  private boolean tabooEnglish;
 
   private List<Exercise> exercises = null;
   private Map<String, Exercise> idToExercise = new HashMap<String, Exercise>();
@@ -62,13 +57,12 @@ public class ExcelImport implements ExerciseDAO {
   private String mediaDir;
   private Set<String> missingSlowSet = new HashSet<String>();
   private Set<String> missingFastSet = new HashSet<String>();
-  private StimulusInfo stimulusInfo = null;
   private boolean shouldHaveRefAudio = false;
   private boolean usePredefinedTypeOrder;
   private final String language;
   private boolean skipSemicolons;
-  private File exampleSentenceFile;
-  int audioOffset = 0;
+  private int audioOffset = 0;
+  private final int maxExercises;
 
   /**
    * @see mitll.langtest.server.SiteDeployer#readExercisesPopulateSite(mitll.langtest.shared.Site, String, java.io.InputStream)
@@ -77,7 +71,7 @@ public class ExcelImport implements ExerciseDAO {
     this.file = null;
     this.isFlashcard = false;
     this.language = "";
-    exampleSentenceFile = null;
+    maxExercises = Integer.MAX_VALUE;
   }
 
   /**
@@ -88,6 +82,7 @@ public class ExcelImport implements ExerciseDAO {
   public ExcelImport(String file, String mediaDir, String relativeConfigDir, ServerProperties serverProps) {
     this.file = file;
     this.isFlashcard = serverProps.isFlashcard();
+    maxExercises = serverProps.getMaxNumExercises();
     this.mediaDir = mediaDir;
     boolean missingExists = getMissing(relativeConfigDir, "missingSlow.txt", missingSlowSet);
     missingExists &= getMissing(relativeConfigDir, "missingFast.txt", missingFastSet);
@@ -95,17 +90,7 @@ public class ExcelImport implements ExerciseDAO {
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.language = serverProps.getLanguage();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
-    //this.tabooEnglish = serverProps.doTabooEnglish();
     this.audioOffset = serverProps.getAudioOffset();
-    String exampleSentenceFile1 = serverProps.getExampleSentenceFile();
-    if (exampleSentenceFile1 != null && exampleSentenceFile1.length() > 0) {
-      this.exampleSentenceFile = new File(relativeConfigDir, exampleSentenceFile1);
-      File badClues = new File(relativeConfigDir, "badClues.txt");
-      stimulusInfo = readSampleSentenceFile2(exampleSentenceFile, badClues);
-      logger.debug("ExcelImport : found " + exampleSentenceFile.getAbsolutePath());
-    } else {
-      //logger.debug("ExcelImport : didn't find example sentence file " + exampleSentenceFile1);
-    }
 
 /*    logger.debug("\n\n\n\n ---> ExcelImport : config " + relativeConfigDir +
       " media dir " +mediaDir + " slow missing " +missingSlowSet.size() + " fast " + missingFastSet.size());*/
@@ -254,7 +239,7 @@ public class ExcelImport implements ExerciseDAO {
       Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
       for (; iter.hasNext(); ) {
         Row next = iter.next();
-        if (TESTING && id > TESTING_MAX) break;     // TODO make this an adult option
+        if (id > maxExercises) break;     // TODO make this an adult option
         //    logger.warn("------------ Row # " + next.getRowNum() + " --------------- ");
         boolean inMergedRow = rowToRange.keySet().contains(next.getRowNum());
 
@@ -366,15 +351,10 @@ public class ExcelImport implements ExerciseDAO {
 
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
-              boolean promptInEnglish = stimulusInfo != null && tabooEnglish;
               Exercise imported = getExercise(idToUse, dao, weightIndex, next, english, foreignLanguagePhrase, translit,
-                meaning, context, segmentedChinese, promptInEnglish, (audioIndex != -1) ? getCell(next, audioIndex) : "");
+                meaning, context, segmentedChinese, false, (audioIndex != -1) ? getCell(next, audioIndex) : "");
               if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
                 boolean valid = true;
-                //  boolean enoughItems = true;
-                if (stimulusInfo != null) {
-                  valid = addTabooQuestions(withExamples, imported);
-                }
                 if (valid) {
                   recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
@@ -408,8 +388,7 @@ public class ExcelImport implements ExerciseDAO {
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
-    if (stimulusInfo != null)
-      logger.info("got  " + withExamples.size() + " examples out of " + exercises.size() + " exercises.");
+
     logger.info("max exercise id = " + id);
     if (skipped > 0) {
       logger.info("Skipped " + skipped + " entries with missing audio. " + (100f * ((float) skipped) / (float) id) + "%");
@@ -434,33 +413,6 @@ public class ExcelImport implements ExerciseDAO {
           mergedRegion.getFirstRow() + " " + mergedRegion.getFirstColumn());*/
     }
     return rowToRange;
-  }
-
-  private boolean addTabooQuestions(Set<String> withExamples, Exercise imported) {
-    boolean valid;
-    String wordToGuess = tabooEnglish ? imported.getEnglishSentence().trim() : imported.getRefSentence().trim();
-    List<String> clues = stimulusInfo.wordToClues.get(wordToGuess);
-    valid = (clues != null);
-    if (valid) {
-      withExamples.add(wordToGuess);
-      boolean enoughItems = clues.size() > MIN_TABOO_ITEMS;
-      if (enoughItems) {
-        imported.getQuestions().clear();
-        for (int i = 0; i < clues.size(); i++) {
-          String clue = clues.get(i);
-          List<List<String>> answersForEachClue = stimulusInfo.wordToAnswers.get(wordToGuess);
-          List<String> answers = answersForEachClue == null ? Collections.singletonList(wordToGuess) : answersForEachClue.get(i);
-
-          imported.addQuestion(tabooEnglish ? Exercise.EN : Exercise.FL, clue, answers.get(0), answers);
-          //logger.debug("exercise id " + imported.getID() + " num clues " + clues.size() + " clue " + clue + " answer " + answers.get(0) + " : " + imported.getQuestions());
-        }
-        //logger.debug("exercise id " + imported.getID() + " has questions " + imported.getQuestions());
-      } else {
-        logger.warn("not enough items for " + wordToGuess);
-        valid = enoughItems;
-      }
-    }
-    return valid;
   }
 
   private void rememberExercise(List<Exercise> exercises, Map<String, List<Exercise>> englishToExercises, Exercise imported) {
@@ -510,14 +462,7 @@ public class ExcelImport implements ExerciseDAO {
             //logger.debug("e " + e.getID() + " '" + e.getEnglishSentence() + "' has " + e.getSynonymAudioRefs().size() + " audio refs or " + translations);
           }
         }
-      } /*else if (false) {   // hard to test
-        for (Exercise e : exercises2) {
-          List<String> doubles = new ArrayList<String>();
-          doubles.add(e.getRefAudio());
-          doubles.add(e.getRefAudio());
-          e.setSynonymAudioRefs(doubles);
-        }
-      }*/
+      }
     }
   }
 
@@ -746,478 +691,5 @@ public class ExcelImport implements ExerciseDAO {
     return sectionHelper.getSection(type);
   }
 
-  public List<String> getErrors() {
-    return errors;
-  }
-
-/*  private void populateSentenceExamples(List<Exercise> rawExercises, String relativeConfigDir, String exampleFile) {
-    File examples = new File(relativeConfigDir, exampleFile);
-
-    populateExampleSentences(rawExercises, examples);
-  }*/
-
-/*  private void populateExampleSentences(List<Exercise> rawExercises, File examples) {
-    Map<String, List<Exercise>> refToEx = new HashMap<String, List<Exercise>>();
-    for (Exercise e : rawExercises) {
-      List<Exercise> exForRef = refToEx.get(e.getRefSentence().trim());
-      if (exForRef == null) refToEx.put(e.getRefSentence().trim(), exForRef = new ArrayList<Exercise>());
-      exForRef.add(e);
-    }
-
-    readSampleSentenceFile(examples, refToEx);
-  }
-
-  private void readSampleSentenceFile(File examples, Map<String, List<Exercise>> refToEx) {
-    try {
-   *//*   String name = "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\examples.txt";
-      File fname = new File(name);*//*
-      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(examples), FileExerciseDAO.ENCODING));
-      String line2;
-      int c = 0;
-      while ((line2 = reader.readLine()) != null) {
-        c++;
-        String[] split = line2.split("\\t");
-        List<Exercise> exercises1 = refToEx.get(split[0].trim());
-        if (exercises1 != null) {
-          for (Exercise e : exercises1) {
-            //if (e.getSynonymSentences().isEmpty()) logger.debug("adding to " +e);
-            e.getSynonymSentences().add(split[1]);
-          }
-        }
-      }
-      logger.debug("populateExampleSentences : read " + c + " examples");
-
-      reader.close();
-    } catch (IOException e) {
-      logger.error("Got " + e, e);
-    }
-  }*/
-
-  /**
-   * @param examples
-   * @return
-   * @see mitll.langtest.server.database.ExcelImport#ExcelImport()
-   */
-  private StimulusInfo readSampleSentenceFile2(File examples, File badClueFile) {
-    Map<String, List<String>> wordToSamples = new HashMap<String, List<String>>();
-    Map<String, List<List<String>>> wordToAnswers = new HashMap<String, List<List<String>>>();
-    try {
-      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(examples), FileExerciseDAO.ENCODING));
-      String line2;
-      int c = 0;
-      if (tabooEnglish) {
-        while ((line2 = reader.readLine()) != null) {
-          c++;
-          if (line2.trim().length() > 0) {
-            String[] split = line2.split("\\t");
-            String word = split[0].trim();
-            if (split.length == 1) {
-              logger.warn("bad line " + line2 + " len " + split.length);
-            } else if (split.length == 2) {
-              String sentence = split[1];
-
-              addAnswer(wordToSamples, word, sentence);
-            } else if (split.length == 3) {
-              String answers = split[2];
-
-              List<List<String>> samples = wordToAnswers.get(word);
-              if (samples == null) wordToAnswers.put(word, samples = new ArrayList<List<String>>());
-              samples.add(Arrays.asList(answers.split(",")));
-            }
-          }
-        }
-        logger.debug("readSampleSentenceFile2 : read " + c + " examples");
-      } else {
-        BufferedReader reader2 = new BufferedReader(new InputStreamReader(new FileInputStream(badClueFile), FileExerciseDAO.ENCODING));
-        Map<String, Set<String>> wordToBadClues = readBadSpanishClues(reader2);
-        readSpanishClues(wordToSamples, wordToAnswers, reader, wordToBadClues);
-      }
-
-      reader.close();
-    } catch (IOException e) {
-      logger.error("Got " + e, e);
-    }
-    return new StimulusInfo(wordToSamples, wordToAnswers);
-  }
-
-  void readSpanishClues(Map<String, List<String>> wordToSamples, Map<String, List<List<String>>> wordToAnswers,
-                        File examples
-  ) throws IOException {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(examples), FileExerciseDAO.ENCODING));
-    Map<String, Set<String>> wordToBadClues = new HashMap<String, Set<String>>();
-    readSpanishClues(wordToSamples, wordToAnswers, reader, wordToBadClues);
-  }
-
-  private void readSpanishClues(Map<String, List<String>> wordToSamples, Map<String, List<List<String>>> wordToAnswers,
-                                BufferedReader reader,
-                                Map<String, Set<String>> wordToBadClues) throws IOException {
-    String line2;
-    line2 = reader.readLine(); // skip header
-    int c = 0;
-    int badClueCount = 0;
-    while ((line2 = reader.readLine()) != null) {
-      c++;
-      if (line2.trim().length() > 0) {
-        String[] split = line2.split("\\t");
-        if (split.length < 3) {
-          logger.warn("bad line " + line2 + " len " + split.length);
-        } else {
-          String word = split[2].trim().toLowerCase();
-
-          String sentence = split[0];
-          String answer = split[1];
-
-          Set<String> badClues = wordToBadClues.get(word);
-          if (badClues != null && badClues.contains(getCleanedClue(sentence))) {
-            // logger.warn("skipping word " + word + " clue " + sentence);
-            badClueCount++;
-          } else {
-            List<String> samples = wordToSamples.get(word);
-            if (samples == null) wordToSamples.put(word, samples = new ArrayList<String>());
-            //if (!sentence.endsWith("?") || true) { // replace ? with underscore
-
-            sentence = getBlankSequence(sentence, answer);
-            // }
-            samples.add(sentence);
-
-            List<List<String>> answers = wordToAnswers.get(word);
-            if (answers == null) wordToAnswers.put(word, answers = new ArrayList<List<String>>());
-            answers.add(Arrays.asList(answer.split(",")));
-          }
-        }
-      }
-    }
-    logger.debug("readSampleSentenceFile2 : read " + c + " examples threw out " + badClueCount + " bad clues.");
-  }
-
-  String getCleanedClue(String answer) {
-    return answer.replaceAll("_", "").replaceAll("\\?", "").replaceAll("\\s+", "");
-  }
-
-  private Map<String, Set<String>> readBadSpanishClues(BufferedReader reader) throws IOException {
-    String line2;
-    line2 = reader.readLine(); // skip header
-    int c = 0;
-    Map<String, Set<String>> wordToClues = new HashMap<String, Set<String>>();
-    while ((line2 = reader.readLine()) != null) {
-      c++;
-      if (line2.trim().length() > 0) {
-        String[] split = line2.split("\\t");
-        if (split.length < 2) {
-          logger.warn("readBadSpanishClues bad line " + line2 + " len " + split.length);
-        } else {
-          String word = split[0].trim().toLowerCase();
-          String clue = split[1];
-          Set<String> samples = wordToClues.get(word);
-          if (samples == null) wordToClues.put(word, samples = new HashSet<String>());
-          //if (!sentence.endsWith("?") || true) { // replace ? with underscore
-
-          //  sentence = getBlankSequence(sentence, answer);
-          // }
-          samples.add(clue);
-        }
-      }
-    }
-    logger.debug("readBadSpanishClues : read " + c + " examples");
-    return wordToClues;
-  }
-
-  private String getBlankSequence(String sentence, String answer) {
-    boolean isQuestion = (sentence.endsWith("?"));
-    String[] words = answer.split("\\p{Z}+"); // fix for unicode spaces! Thanks Jessica!
-    StringBuilder builder = new StringBuilder();
-    for (String token : words) {
-      builder.append(token.replaceAll(".", "_"));
-      builder.append(" ");
-    }
-    String sequenceOfBlanks = builder.toString().trim();
-
-    if (isQuestion) {
-      sentence = sentence.substring(0, sentence.length() - 1);
-    }
-    String previousSentence = sentence;
-    sentence = sentence.replace("?", sequenceOfBlanks);
-    if (isQuestion) {
-      if (sentence.equals(previousSentence)) {  // no blank yet added
-        sentence += sequenceOfBlanks;
-      }
-      sentence += "?";
-    }
-    return sentence;
-  }
-
-  private static class StimulusInfo {
-    Map<String, List<String>> wordToClues;
-    Map<String, List<List<String>>> wordToAnswers;
-
-    public StimulusInfo(Map<String, List<String>> wordToClues, Map<String, List<List<String>>> wordToAnswers) {
-      this.wordToClues = wordToClues;
-      this.wordToAnswers = wordToAnswers;
-    }
-  }
-
-  public static void main(String[] arg) {
-//                   String guess = "los can't suburbios.";
-
-/*
-    guess = guess.replaceAll("\\p{Punct}$",""); // remove trailing punctuation
-    System.out.println("guess " + guess);
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    try {
-      System.out.println(sdf.parse("2013-09-25").getTime());      // chapter 11
-      System.out.println(sdf.parse("2013-10-08").getTime());
-      System.out.println(sdf.parse("2013-10-29").getTime());
-      System.out.println(sdf.parse("2013-11-13").getTime());     // chapter 14
-    } catch (ParseException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-*/
-    Map<String, List<String>> clueToAnswers = new HashMap<String, List<String>>();
-
-    try {
-      String name = "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\Batch_1260169_batch_results.csv";
-      // String name2 = "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\nextExamples.txt";
-
-      //BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(name2), FileExerciseDAO.ENCODING));
-
-      File fname = new File(name);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(fname), FileExerciseDAO.ENCODING));
-      String line2;
-
-      // "20KD21O3W5XHH1RBPGTK5EPLB5ZGA5","29B2KYEPLSP7M2N83UA3VAHQEXPVP1","Spanish Guessing Game","Guess Spanish words from Spanish clues.",
-      // "Spanish, language, game, clues, guess, espaol, lengua, juego, conjetura","$0.05","Fri Sep 06 20:54:21 GMT 2013","5","BatchId:1260169;","3600","172800","Fri Sep 13 20:54:21 GMT 2013","","","2H5ZKPFE4EGDYVOO2JZIGNZWY0D7HM","A3C2DVYUP88DE7","Approved","Sat Sep 07 10:42:30 GMT 2013","Sat Sep 07 10:43:07 GMT 2013","Mon Sep 09 03:43:07 PDT 2013","Sat Sep 07 17:50:38 PDT 2013","","","37","100% (641/641)","100% (641/641)","100% (488/488)","____ ____ ____ para limpiar el restaurante al final de la noche hay que ____ ____ ____","____ ____ Telas para cubrir las ventanas.","Tengo que hacer del numero uno, tengo que usar ____ ____","barrer el suelo","las cortinas","el primero","","","",""
-
-
-      //Set<String> refs = new HashSet<String>();
-      line2 = reader.readLine();
-      int c = 0;
-      while ((line2 = reader.readLine()) != null) {
-
-        String[] split = line2.split("\",\"");
-
-        int i = 27;
-
-
-        try {
-          String c1 = split[i++].replaceAll("_", "");
-          String c2 = split[i++].replaceAll("_", "");
-          //  System.out.println("clue " + c2);
-          String c3 = split[i++].replaceAll("_", "");
-          //  System.out.println("clue " + c3);
-
-          String a1 = split[i++];
-          if (c < 10)
-            System.out.println("" + c1 + "\t= " + a1);
-          String a2 = split[i++];
-          if (c < 10) System.out.println("" + c2 + "\t= " + a2);
-          String a3 = split[i++];
-          if (c++ < 10) System.out.println("" + c3 + "\t= " + a3);
-
-          addAnswer(clueToAnswers, c1, a1);
-          addAnswer(clueToAnswers, c2, a2);
-          addAnswer(clueToAnswers, c3, a3);
-        } catch (Exception e) {
-          System.err.println("couldn't parse " + line2);
-          //  e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-
-        //  if (c++ > 10) break;
-
-      }
-
-      float num = 0;
-      float count = 0;
-
-
-      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("verifiedClues.txt"), FileExerciseDAO.ENCODING));
-
-      for (Map.Entry<String, List<String>> clueToAnswer : clueToAnswers.entrySet()) {
-        num += clueToAnswer.getValue().size();
-        writer.write(clueToAnswer.getKey() + "\n");
-
-        count++;
-      }
-      writer.close();
-
-      System.out.println("average answers " + (num / count) + " num " + num);
-//      logger.debug("read " + c + " examples, found " + refs.size() + " refs");
-      //    residual.removeAll(refs);
-      //  logger.debug("not found " + residual);
-      reader.close();
-      //writer.close();
-    } catch (IOException e) {
-      logger.error("Got " + e, e);
-    }
-    String name =
-      "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\ch10_allturk_cleaned.tsv";
-
-    Map<String, List<String>> wordToClues = new HashMap<String, List<String>>();
-    Map<String, List<List<String>>> wordToAnswers = new HashMap<String, List<List<String>>>();
-    int totalBad = 0;
-    int totalGood = 0;
-    try {
-      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("badClues.txt"), FileExerciseDAO.ENCODING));
-
-      ExcelImport excelImport = new ExcelImport();
-      excelImport.readSpanishClues(wordToClues, wordToAnswers, new File(name));
-      for (Map.Entry<String, List<String>> wordToClue : wordToClues.entrySet()) {
-        for (String clue : wordToClue.getValue()) {
-          String cclue = clue.replaceAll("_", "");
-          if (cclue.endsWith("?")) cclue = cclue.substring(0, cclue.length() - 1);
-          List<String> answers = clueToAnswers.get(cclue);
-          if (answers != null) {
-            String vocabPhrase = wordToClue.getKey();
-            List<List<String>> expectedAnswers = wordToAnswers.get(vocabPhrase);
-            Set<String> possible = new HashSet<String>();
-            for (List<String> ans : expectedAnswers) {
-              possible.addAll(ans);
-            }
-
-            float bad = 0;
-            float all = answers.size();
-            int i = 0;
-            for (String guess : answers) {
-              if (!possible.contains(guess) && !possible.contains(guess.toLowerCase())) {
-                logger.info("#" + i++ +
-                  " for " + vocabPhrase +
-                  " bad guess '" + guess + "' expecting " + possible);
-                bad++;
-              } else {
-                logger.debug("#" + i++ + " for " + vocabPhrase +
-                  " good guess '" + guess + "' expecting " + possible);
-              }
-            }
-            if (bad > 1) {// || ((bad / all) > 0.5 && all > 2)) {
-              System.out.println("got " + bad + " out of " + all + " for " + cclue);
-              writer.write(vocabPhrase + "\t" + excelImport.getCleanedClue(clue) + "\n");
-              totalBad++;
-            } else if (all > 0) totalGood++;
-          }
-          //else logger.debug("no answer for " + clue + " / " +cclue);
-        }
-      }
-      writer.close();
-      logger.warn("bad " + totalBad + " good " + totalGood);
-    } catch (IOException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-  }
-
-  private static void addAnswer(Map<String, List<String>> clueToAnswers, String c1, String a1) {
-    List<String> answers = clueToAnswers.get(c1);
-    if (answers == null) clueToAnswers.put(c1, answers = new ArrayList<String>());
-    answers.add(a1);
-  }
-
-  public static void main2(String[] arg) {
-/*
-    ExcelImport config = new ExcelImport(
-      "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\english\\ESL_ELC_5071-30books_chapters.xlsx", false, "config\\bestAudio", "war\\config\\english", true, "English");
-*/
-    testTaboo();
-
-    //populateSentenceExamples(rawExercises);
-    //writer.close();
-/*
-    List<String> typeOrder = config.sectionHelper.getTypeOrder();
-    System.out.println(" type order " +typeOrder);
-
-    System.out.println(" section nodes " + config.sectionHelper.getSectionNodes());*/
-  }
-
-  private static void testTaboo() {
-    ServerProperties serverProps = new ServerProperties();
-    serverProps.getProperties().put("language", "English");
-    serverProps.getProperties().put("collectAudio", "false");
-    ExcelImport config = new ExcelImport(
-      "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\wordlist3.xlsx", "config\\bestAudio", "war\\config\\taboo", serverProps);
-    List<Exercise> rawExercises = config.getRawExercises();
-
-    System.out.println("first " + rawExercises.get(0));
-    Map<String, List<Exercise>> refToEx = new HashMap<String, List<Exercise>>();
-    for (Exercise e : rawExercises) {
-      List<Exercise> exForRef = refToEx.get(e.getRefSentence().trim());
-      if (exForRef == null) refToEx.put(e.getRefSentence().trim(), exForRef = new ArrayList<Exercise>());
-      exForRef.add(e);
-    }
-
-    logger.debug("ref has " + refToEx.size());
-
-    try {
-      String name = "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\spaFromTatoeba.csv";
-      String name2 = "C:\\Users\\go22670\\DLITest\\bootstrap\\netPron2\\war\\config\\taboo\\nextExamples.txt";
-
-      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(name2), FileExerciseDAO.ENCODING));
-
-      File fname = new File(name);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(fname), FileExerciseDAO.ENCODING));
-      String line2;
-      int c = 0;
-      int por = 0;
-      int para = 0;
-      int cuando = 0;
-      int este = 0;
-      Set<String> refs = new HashSet<String>();
-      while ((line2 = reader.readLine()) != null) {
-        c++;
-        String[] split = line2.split("\\t");
-        String sentence = split[2].trim();
-
-        for (String ref : refToEx.keySet()) {
-          if (sentence.contains(ref)) {
-            int i = sentence.indexOf(ref);
-            boolean spaceBefore = false, spaceAfter = false;
-            char before = ' ';
-            char after = ' ';
-            if (i > 0) {
-              before = sentence.charAt(i - 1);
-              //spaceBefore = !Character.isAlphabetic(before);
-            }
-            if (i + ref.length() < sentence.length()) {
-              after = sentence.charAt(i + ref.length());
-              //spaceAfter = !Character.isAlphabetic(after);
-            }
-            if (spaceBefore && spaceAfter) {
-              boolean valid = true;
-              if (ref.equals("por")) {
-                por++;
-                if (por > 50) valid = false;
-              }
-              if (ref.equals("para")) {
-                para++;
-                if (para > 50) valid = false;
-              }
-              if (ref.equals("cuando")) {
-                cuando++;
-                if (cuando > 50) valid = false;
-              }
-              if (ref.equals("este")) {
-                este++;
-                if (este > 50) valid = false;
-              }
-              if (valid) {
-                //logger.debug("found '" + sentence + "' for '" + ref + "'");
-                writer.write(ref);
-                writer.write("\t");
-                writer.write(sentence);
-                writer.write("\n");
-                refs.add(ref);
-              }
-              //  break;
-            } else {
-              logger.debug("for '" + sentence + "' and '" + ref + "' before '" + before + "' after '" + after + "'");
-            }
-          }
-        }
-      }
-      logger.debug("read " + c + " examples, found " + refs.size() + " refs");
-      HashSet<String> residual = new HashSet<String>(refToEx.keySet());
-      residual.removeAll(refs);
-      logger.debug("not found " + residual);
-      reader.close();
-      writer.close();
-    } catch (IOException e) {
-      logger.error("Got " + e, e);
-    }
-  }
+  public List<String> getErrors() {  return errors;  }
 }
