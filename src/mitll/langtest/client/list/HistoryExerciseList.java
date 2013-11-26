@@ -376,10 +376,6 @@ public class HistoryExerciseList extends PagingExerciseList {
     }
   }
 
-  private String getPrefix() {
-    return ""; // TODO put this back
-  }
-
   protected void loadExercises(String selectionState, String prefix) {
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
     loadExercisesUsingPrefix(typeToSection, prefix);
