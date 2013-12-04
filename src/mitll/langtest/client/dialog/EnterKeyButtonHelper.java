@@ -1,6 +1,11 @@
 package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Modal;
+import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
+import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
+import com.github.gwtbootstrap.client.ui.event.ShowEvent;
+import com.github.gwtbootstrap.client.ui.event.ShowHandler;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -41,7 +46,24 @@ public class EnterKeyButtonHelper {
     System.out.println("addKeyHandler made click handler " + keyHandler);
   }
 
-  public void removeKeyHandler() {
+  public void addKeyHandler(final Button button, Modal container) {
+   // addKeyHandler(button);
+    container.addHiddenHandler(new HiddenHandler() {
+      @Override
+      public void onHidden(HiddenEvent hiddenEvent) {
+        removeKeyHandler();
+      }
+    });
+
+    container.addShowHandler(new ShowHandler() {
+      @Override
+      public void onShow(ShowEvent showEvent) {
+        addKeyHandler(button);
+      }
+    });
+  }
+
+    public void removeKeyHandler() {
     if (keyHandler == null) {
       System.err.println("\nEnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
 

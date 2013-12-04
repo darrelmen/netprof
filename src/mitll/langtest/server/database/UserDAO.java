@@ -1,7 +1,7 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.grade.Grader;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.grade.Grader;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -22,7 +22,6 @@ public class UserDAO extends DAO {
 
   public UserDAO(Database database) { super(database); }
 
-
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p/>
@@ -39,7 +38,8 @@ public class UserDAO extends DAO {
    * @param enabled
    * @return newly inserted user id, or 0 if something goes horribly wrong
    */
-  public long addUser(int age, String gender, int experience, String ipAddr, String nativeLang, String dialect, String userID, boolean enabled) {
+  public long addUser(int age, String gender, int experience, String ipAddr,
+                      String nativeLang, String dialect, String userID, boolean enabled) {
     try {
       // there are much better ways of doing this...
       long max = 0;
@@ -50,7 +50,7 @@ public class UserDAO extends DAO {
       PreparedStatement statement;
 
       statement = connection.prepareStatement(
-          "INSERT INTO users(id,age,gender,experience,ipaddr,nativeLang,dialect, userID,enabled) " +
+          "INSERT INTO users(id,age,gender,experience,ipaddr,nativeLang,dialect,userID,enabled) " +
           "VALUES(?,?,?,?,?,?,?,?,?);");
       int i = 1;
       long newID = max + 1;
@@ -82,8 +82,7 @@ public class UserDAO extends DAO {
 
       String sql = "UPDATE users " +
           "SET enabled=" +enabled+
-          " " +
-          "WHERE id=" + id;
+          " WHERE id=" + id;
       logger.debug("enableUser " + id);
       statement = connection.prepareStatement(sql);
 
@@ -138,9 +137,6 @@ public class UserDAO extends DAO {
         "experience INT, " +
         "ipaddr VARCHAR, " +
         "password VARCHAR, " +
-        "firstName VARCHAR, " +
-        "lastName VARCHAR, " +
-
         "nativeLang VARCHAR, " +
         "dialect VARCHAR, " +
         "userID VARCHAR, " +
@@ -207,7 +203,7 @@ public class UserDAO extends DAO {
   public List<User> getUsers() {
     String sql = "SELECT * from users;";
     return getUsers(sql);
-  }
+  }  
 
   /**
    * @seex OnlineUsers#getUser(long)
