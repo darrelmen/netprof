@@ -39,7 +39,7 @@ public class PropertyHandler {
   private static final String NUM_GRADES_TO_COLLECT = "numGradesToCollect";
   private static final String LOG_CLIENT_MESSAGES = "logClient";
   private static final String SHOW_SECTIONS = "showSections";
-  private static final String SHOW_SECTION_WIDGETS = "showSectionWidgets";
+  //private static final String SHOW_SECTION_WIDGETS = "showSectionWidgets";
   //private static final String DEBUG_EMAIL = "debugEmail";
   private static final String FLASHCARD = "flashcard";
   private static final String FLASHCARD_TEACHER_VIEW = "flashcardTeacherView";
@@ -52,6 +52,8 @@ public class PropertyHandler {
   private static final String TRACK_ONLINE_USERS = "trackUsers";
   private static final String RESPONSE_TYPE = "responseType";
   private static final String FLASHCARD_NEXT_AND_PREV = "flashcardNextAndPrev";
+  private static final String BIND_NEXT_TO_ENTER = "bindNextToEnter";
+  private static final String SCREEN_PORTION = "screenPortion";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -82,8 +84,10 @@ public class PropertyHandler {
   private static final String FLASHCARD_TEXT_RESPONSE = "flashcardTextResponse";
   private static final String EXERCISES_IN_ORDER = "exercisesInOrder";
   private static final String ALLOW_PLUS_IN_URL = "allowPlusInURL";
+  private static final String PURPOSE_DEFAULT = "purposeDefault";
+  private static final String CLASSROOM_MODE = "classroomMode";
 
-  public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT, DATA_COLLECTOR }
+  public enum LOGIN_TYPE { UNDEFINED, ANONYMOUS, STUDENT, DATA_COLLECTOR, SIMPLE }
 
   private final Map<String, String> props;
 
@@ -111,14 +115,14 @@ public class PropertyHandler {
   private String nameForRecorder = "Speaker";
   private String language = "";
   private boolean showSections = false;
-  private boolean showSectionWidgets = true;
+  //private boolean showSectionWidgets = true;
   private boolean flashcardTeacherView = false;
   private boolean flashCard = false;
   private boolean timedGame = false;
   private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
   private int gameTimeSeconds = DEFAULT_GAME_TIME_SECONDS;
-  private float screenPortion;
+  private float screenPortion = 1.0f;
   private boolean CRTDataCollectMode;
   private String splashTitle;
   private boolean promptBeforeNextItem = false;
@@ -129,13 +133,16 @@ public class PropertyHandler {
   private boolean addRecordKeyBinding = false;
   private LOGIN_TYPE loginType = LOGIN_TYPE.UNDEFINED;
   private int flashcardPreviewHeight = DEFAULT_FLASHCARD_PREVIEW_HEIGHT;
-  private boolean trackUsers;
+
   private boolean flashcardNextAndPrev;
   private boolean flashcardTextResponse = false;
   private boolean showFlashcardAnswer = true;
   private boolean showExercisesInOrder = false;
   private String responseType = "Audio";
   private boolean allowPlusInURL;
+  private String purposeDefault = "Practice";
+  private boolean bindNextToEnter;
+  private boolean classroomMode = false;
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad()
@@ -176,7 +183,7 @@ public class PropertyHandler {
       else if (key.equals(NUM_GRADES_TO_COLLECT)) numGradesToCollect = getInt(value, NUM_GRADES_TO_COLLECT_DEFAULT, NUM_GRADES_TO_COLLECT);
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
       else if (key.equals(SHOW_SECTIONS)) showSections = getBoolean(value);
-      else if (key.equals(SHOW_SECTION_WIDGETS)) showSectionWidgets = getBoolean(value);
+     // else if (key.equals(SHOW_SECTION_WIDGETS)) showSectionWidgets = getBoolean(value);
       else if (key.equals(FLASHCARD_TEACHER_VIEW)) flashcardTeacherView = getBoolean(value);
       else if (key.equals(FLASHCARD)) flashCard = getBoolean(value);
       else if (key.equals(LANGUAGE)) language = value;
@@ -187,13 +194,16 @@ public class PropertyHandler {
       else if (key.equals(CONTINUE_PROMPT)) promptBeforeNextItem = getBoolean(value);
       else if (key.equals(RIGHT_ALIGN_CONTENT)) rightAlignContent = getBoolean(value);
       else if (key.equals(ADD_RECORD_KEY_BINDING)) addRecordKeyBinding = getBoolean(value);
-      else if (key.equals(TRACK_ONLINE_USERS)) trackUsers = getBoolean(value);
       else if (key.equals(FLASHCARD_NEXT_AND_PREV)) flashcardNextAndPrev = getBoolean(value);
       else if (key.equals(FLASHCARD_TEXT_RESPONSE)) flashcardTextResponse = getBoolean(value);
       else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
       else if (key.equals(EXERCISES_IN_ORDER)) showExercisesInOrder = getBoolean(value);
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(RESPONSE_TYPE)) responseType = value;
+      else if (key.equals(PURPOSE_DEFAULT)) purposeDefault = value;
+      else if (key.equals(BIND_NEXT_TO_ENTER)) bindNextToEnter = getBoolean(value);
+      else if (key.equals(SCREEN_PORTION)) screenPortion = getFloat(value,1.0f,SCREEN_PORTION);
+      else if (key.equals(CLASSROOM_MODE)) classroomMode = getBoolean(value);
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
@@ -211,6 +221,18 @@ public class PropertyHandler {
       if (i != defValue) {
         System.out.println("getInt : value for " + propName +"=" +i + " vs default = " +defValue);
       }
+      return i;
+    } catch (NumberFormatException e) {
+      System.err.println("couldn't parse " + value + "using " + defValue +" for " + propName);
+    }
+    return defValue;
+  }
+
+  private float getFloat(String value, float defValue, String propName) {
+    try {
+      if (value == null) return defValue;
+      float i = Float.parseFloat(value);
+      System.out.println("value for " + propName +"=" +i + " vs default = " +defValue);
       return i;
     } catch (NumberFormatException e) {
       System.err.println("couldn't parse " + value + "using " + defValue +" for " + propName);
@@ -250,7 +272,7 @@ public class PropertyHandler {
     }
 
     String screenPortionParam =  Window.Location.getParameter("screenPortion");
-    screenPortion = 1.0f;
+    //screenPortion = 1.0f;
     if (screenPortionParam != null) {
       try {
         screenPortion = Float.parseFloat(screenPortionParam);
@@ -290,9 +312,9 @@ public class PropertyHandler {
     }
     gameTimeSeconds = getInt(Window.Location.getParameter(GAME_TIME), gameTimeSeconds, REPEATS);
 
-    if (Window.Location.getParameter(SHOW_SECTION_WIDGETS) != null) {
+/*    if (Window.Location.getParameter(SHOW_SECTION_WIDGETS) != null) {
       showSectionWidgets = !Window.Location.getParameter(SHOW_SECTION_WIDGETS).equals("false");
-    }
+    }*/
 
     String flashcardParam = Window.Location.getParameter(FLASHCARD);
     if (flashcardParam != null) {
@@ -421,12 +443,6 @@ public class PropertyHandler {
     return showSections;
   }
 
-  public boolean isShowSectionWidgets() {
-    System.out.println("isShowSectionWidgets show section widgets " + showSectionWidgets);
-
-    return showSectionWidgets;
-  }
-
   /**
    * @see LangTest#makeExerciseList
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
@@ -487,9 +503,6 @@ public class PropertyHandler {
   public boolean showFlashcardAnswer() {
     return showFlashcardAnswer;
   }
-  public boolean isTrackUsers() {
-    return trackUsers;
-  }
 
   public boolean showExercisesInOrder() {
     return showExercisesInOrder;
@@ -505,4 +518,14 @@ public class PropertyHandler {
   public boolean shouldAllowPlusInURL() {
     return allowPlusInURL;
   }
+
+  public String getPurposeDefault() {
+    return purposeDefault;
+  }
+
+  public boolean isBindNextToEnter() {
+    return bindNextToEnter;
+  }
+
+  public boolean isClassroomMode() { return classroomMode; }
 }
