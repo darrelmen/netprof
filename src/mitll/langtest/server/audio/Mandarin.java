@@ -61,7 +61,7 @@ public class Mandarin extends SplitAudio {
 
       int error = 0;
       int error2 = 0;
-      int c = 0;
+      //int c = 0;
       while ((line = reader.readLine()) != null) {
         line = line.trim();
         if (line.length() == 0) continue;
