@@ -287,6 +287,8 @@ public class AutoCRT {
     return exerciseIDToExport.get(key);
   }
 
+  public void makeClassifier() { getClassifier(); }
+
   /**
    * Make a classifier given the export date, which has answers and their grades.<br></br>
    * The export data also includes the answer key for each question.<br></br>

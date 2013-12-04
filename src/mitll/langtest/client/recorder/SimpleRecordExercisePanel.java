@@ -1,9 +1,11 @@
 package mitll.langtest.client.recorder;
 
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanel;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Exercise;
 
@@ -21,16 +23,18 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    * @param service
    * @param userFeedback
    * @param controller
+   * @param exerciseList
    */
   public SimpleRecordExercisePanel(final Exercise e, final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                                   final ExerciseController controller) {
-    super(e, service, userFeedback, controller);
+                                   final ExerciseController controller, ListInterface exerciseList) {
+    super(e,service,userFeedback,controller, exerciseList);
   }
 
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
-   * @see mitll.langtest.client.exercise.ExercisePanel#addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   *
+   * @see mitll.langtest.client.exercise.ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.exercise.ListInterface)
    * @param exercise
    * @param service
    * @param controller
@@ -39,8 +43,12 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    */
   @Override
   protected Widget getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
+    System.out.println("getAnswerWidget : ex " +exercise.getID()+ " index " + index);
+
     SimpleRecordExercisePanel questionState = this;
-    return new SimpleRecordPanel(service, controller, exercise, questionState, index).getPanel();
+    Panel panel = new SimpleRecordPanel(service, controller, exercise, questionState, index).getPanel();
+    addAnswerWidget(index, panel);
+    return panel;
   }
 
   /**
@@ -64,6 +72,6 @@ public class SimpleRecordExercisePanel extends ExercisePanel {
    */
   @Override
   public void postAnswers(ExerciseController controller, Exercise completedExercise) {
-    controller.loadNextExercise(completedExercise);
+    exerciseList.loadNextExercise(completedExercise);
   }
 }
