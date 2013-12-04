@@ -8,7 +8,6 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ResponseChoice;
-
 import mitll.langtest.client.user.UserFeedback;
 
 /**
@@ -18,9 +17,8 @@ import mitll.langtest.client.user.UserFeedback;
  * Time: 4:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ResponseExerciseList extends FlexSectionExerciseList /*implements ResponseTypeView*/ {
+public class ResponseExerciseList extends FlexSectionExerciseList {
   private ResponseChoice responseChoice;
-  //WirePlaces wirePlaces;
 
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
@@ -35,11 +33,9 @@ public class ResponseExerciseList extends FlexSectionExerciseList /*implements R
    */
   public ResponseExerciseList(FluidRow secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                               UserFeedback feedback, boolean showTurkToken, boolean showInOrder,
-                              final ExerciseController controller, boolean isCRTDataMode) {
-    super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, isCRTDataMode);
+                              final ExerciseController controller, boolean isCRTDataMode, String instance) {
+    super(secondRow, currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, instance);
     String responseType = controller.getProps().getResponseType();
-   // wirePlaces = new WirePlaces(responseType);
-   // wirePlaces.wire(this,responseType);
     responseChoice = new ResponseChoice(responseType, new ResponseChoice.ChoiceMade() {
       @Override
       public void choiceMade(String responseType) {
@@ -54,11 +50,8 @@ public class ResponseExerciseList extends FlexSectionExerciseList /*implements R
    * @param historyToken
    */
   protected void setHistoryItem(String historyToken) {
-  //  System.out.println("history token '" +historyToken+"'");
     historyToken = historyToken.contains("###") ? historyToken.split("###")[0] : historyToken;
-   // System.out.println("history token '" +historyToken+ "'");
     String historyToken1 =historyToken + "###" +  "responseType=" + responseChoice.getResponseType();
-    //System.out.println("history token1 '" +historyToken1+"'");
     History.newItem(historyToken1);
   }
 
@@ -68,9 +61,4 @@ public class ResponseExerciseList extends FlexSectionExerciseList /*implements R
     container.add(responseChoice.getResponseTypeWidget());
     return widget;
   }
-
-/*  @Override
-  public void selectResponseType(String responseType) {
-    controller.getProps().setResponseType(responseType);
-  }*/
 }
