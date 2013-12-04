@@ -18,10 +18,8 @@ public class AnswerDAO {
   private static Logger logger = Logger.getLogger(AnswerDAO.class);
 
   private final Database database;
-
-  public AnswerDAO(Database database) {
-    this.database = database;
-  }
+  ResultDAO resultDAO;
+  public AnswerDAO(Database database, ResultDAO resultDAO) { this.database = database; this.resultDAO = resultDAO; }
 
   /**
    *
@@ -50,18 +48,20 @@ public class AnswerDAO {
   }*/
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer(long, mitll.langtest.shared.Exercise, int, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
    * @param userID
    * @param plan
    * @param exerciseID
+   * @param questionID
    * @param stimulus
    * @param answer
    * @param answerType
    * @param correct
    * @param pronScore
    */
-  public void addAnswer(int userID, String plan, String exerciseID, String stimulus, String answer, String answerType, boolean correct, float pronScore) {
-    addAnswer(database, userID, plan, exerciseID, 0, answer, "", true, false, false, answerType, 0, correct, pronScore, stimulus);
+  public void addAnswer(int userID, String plan, String exerciseID, int questionID, String stimulus, String answer,
+                        String answerType, boolean correct, float pronScore) {
+    addAnswer(database, userID, plan, exerciseID, questionID, answer, "", true, false, false, answerType, 0, correct, pronScore, stimulus);
   }
 
   /**
@@ -201,6 +201,7 @@ public class AnswerDAO {
     statement.setString(i++, stimulus);
 
     //logger.info("valid is " +valid + " for " +statement);
+    resultDAO.invalidateCachedResults();
 
     statement.executeUpdate();
 
