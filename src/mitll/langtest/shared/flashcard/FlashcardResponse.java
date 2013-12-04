@@ -1,8 +1,7 @@
 package mitll.langtest.shared.flashcard;
 
-import mitll.langtest.shared.Exercise;
-
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.Exercise;
 
 /**
  * Created with IntelliJ IDEA.
