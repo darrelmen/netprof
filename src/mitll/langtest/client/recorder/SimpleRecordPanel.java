@@ -30,8 +30,8 @@ import mitll.langtest.shared.Exercise;
  * @author Gordon Vidaver
  */
 public class SimpleRecordPanel extends RecordButtonPanel {
-  private static final String IMAGES_CHECKMARK = LangTest.LANGTEST_IMAGES +"checkmark.png";
-  private static final String IMAGES_REDX_PNG  = LangTest.LANGTEST_IMAGES +"redx.png";
+  private static final String IMAGES_CHECKMARK = LangTest.LANGTEST_IMAGES +"checkmark32.png";
+  private static final String IMAGES_REDX_PNG  = LangTest.LANGTEST_IMAGES +"redx32.png";
   private Image check;
   private SimplePanel playback = new SimplePanel();
   private final AudioTag audioTag = new AudioTag();
@@ -43,7 +43,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
    */
 	public SimpleRecordPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
                            final Exercise exercise, final ExerciseQuestionState questionState, final int index){
-    super(service, controller, exercise, questionState, index);
+    super(service, controller, exercise, questionState, index, false, true);
     Panel widget = getPanel();
     if (widget instanceof HorizontalPanel) {
       ((HorizontalPanel)widget).setSpacing(10);
@@ -51,6 +51,7 @@ public class SimpleRecordPanel extends RecordButtonPanel {
 
     playback.setHeight("30px"); // for audio controls to show
     playback.addStyleName("leftFiveMargin");
+    playback.setWidth("300px");
     // make audio feedback widget
     addValidityFeedback(index);
 
@@ -101,14 +102,19 @@ public class SimpleRecordPanel extends RecordButtonPanel {
   private void showAudioValidity(AudioAnswer.Validity result, ExerciseQuestionState questionState, Widget outer) {
     check.setVisible(false);
     if (result == AudioAnswer.Validity.OK) {
-      /*if (!controller.isAutoCRTMode())*/ check.setUrl(IMAGES_CHECKMARK);
+      check.setUrl(IMAGES_CHECKMARK);
       check.setAltText("Audio Saved");
-      if (questionState != null) questionState.recordCompleted(outer);
+      if (questionState != null) {
+        questionState.recordCompleted(outer);
+      }
     }
     else {
-      /*if (!controller.isAutoCRTMode())*/ check.setUrl(IMAGES_REDX_PNG);
+      check.setUrl(IMAGES_REDX_PNG);
       check.setAltText("Audio Invalid");
-      if (questionState != null) questionState.recordIncomplete(outer);
+      if (questionState != null) {
+       // System.out.println("record incomplete on " + outer.getElement().getId());
+        questionState.recordIncomplete(outer);
+      }
 
       showPopup(result.getPrompt());
     }
