@@ -48,20 +48,24 @@ public class RecordButtonPanel {
   protected Panel panel;
   private Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
   private Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
+  boolean doFlashcardAudio = false;
 
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
    *
    * @see SimpleRecordExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see mitll.langtest.client.bootstrap.BootstrapExercisePanel.MyRecordButtonPanel#MyRecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, int, boolean, boolean)
    */
   public RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
-                           final Exercise exercise, final ExerciseQuestionState questionState, final int index){
+                           final Exercise exercise, final ExerciseQuestionState questionState, final int index,
+                           boolean doFlashcardAudio, boolean addKeyBinding){
     final RecordButtonPanel outer = this;
     this.service = service;
     this.controller = controller;
     this.exercise = exercise;
     this.questionState = questionState;
     this.index = index;
+    this.doFlashcardAudio = doFlashcardAudio;
     // make record button
     // make images
     recordImage = new Image(RECORD_PNG);
@@ -75,13 +79,14 @@ public class RecordButtonPanel {
     recordButton.getElement().setId("record_button");
     recordButton.setTitle(RECORD);
 
-    this.rb = makeRecordButton(controller, outer);
+    this.rb = makeRecordButton(controller, outer, addKeyBinding);
     layoutRecordButton();
   }
 
-  protected RecordButton makeRecordButton(final ExerciseController controller, final RecordButtonPanel outer) {
-    boolean addKeyHandler = controller.shouldAddRecordKeyBinding();
-    System.out.println("\n\n\nshould add key handler " + addKeyHandler);
+  public void addKeyHandler() { rb.addKeyHandler(); }
+  public void removeKeyHandler() { rb.removeKeyHandler(); }
+
+  protected RecordButton makeRecordButton(final ExerciseController controller, final RecordButtonPanel outer, boolean addKeyHandler) {
     return new RecordButton(recordButton, controller.getRecordTimeout(), recordImage1, recordImage2, addKeyHandler) {
       @Override
       protected void stopRecording() {
@@ -109,23 +114,28 @@ public class RecordButtonPanel {
 
   protected Anchor makeRecordButton() {
     recordButton = new ImageAnchor();
+    recordButton.setWidth("70px");
+
     recordButton.setResource(recordImage);
     return recordButton;
   }
 
+  /**
+   * @see #RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int)
+   */
   protected void layoutRecordButton() {
-    SimplePanel recordButtonContainer = new SimplePanel();
-    recordButtonContainer.setWidth("75px");
-    recordButtonContainer.add(recordButton);
-    HorizontalPanel hp = new HorizontalPanel() {
+    SimplePanel recordButtonContainer = new SimplePanel(recordButton) {
       @Override
       protected void onUnload() {
+        super.onUnload();
         RecordButtonPanel.this.onUnload();
       }
     };
+    recordButtonContainer.setWidth("75px");
+    HorizontalPanel hp = new HorizontalPanel();
     hp.add(recordButtonContainer);
     this.panel = hp;
-
+    panel.getElement().setId("recordButtonPanel");
     panel.add(recordImage1);
     recordImage1.setVisible(false);
     panel.add(recordImage2);
@@ -167,6 +177,10 @@ public class RecordButtonPanel {
     rb.onUnload();
   }
 
+  /**
+   * @see FeedbackRecordPanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @return
+   */
   public Panel getPanel() {
      return this.panel;
   }
@@ -185,7 +199,7 @@ public class RecordButtonPanel {
    * Once audio is posted to the server, two pieces of information come back in the AudioAnswer: the audio validity<br></br>
    *  (false if it's too short, etc.) and a URL to the stored audio on the server. <br></br>
    *   This is used to make the audio playback widget.
-   * @see #RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int)
+   * @see #RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int, boolean, boolean)
    */
   public void stopRecording() {
     controller.stopRecording();
@@ -202,7 +216,7 @@ public class RecordButtonPanel {
       reqid,
       !exercise.isPromptInEnglish(),
       controller.getAudioType(),
-      controller.isFlashCard(),
+      doFlashcardAudio,
       new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
           controller.logException(caught);

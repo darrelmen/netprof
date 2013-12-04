@@ -3,9 +3,9 @@ package mitll.langtest.client.bootstrap;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.section.SectionExerciseList;
-import mitll.langtest.client.exercise.SectionWidget;
 
 import java.util.ArrayList;
 import java.util.Collection;
