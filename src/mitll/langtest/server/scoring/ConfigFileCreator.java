@@ -38,8 +38,8 @@ public class ConfigFileCreator {
   private static final String HLDA_DIR_DEFAULT = "rsi-sctm-hlda";
   public static final String SMALL_LM_SLF = "smallLM.slf";
 
-  private static final String CFG_TEMPLATE_PROP = "configTemplate";
-  private static final String CFG_TEMPLATE_DEFAULT = "generic-nn-model.cfg.template";
+  public static final String CFG_TEMPLATE_PROP = "configTemplate";
+  public static final String CFG_TEMPLATE_DEFAULT = "generic-nn-model.cfg.template";
 
   private static final String DECODE_CFG_TEMPLATE_PROP = "decodeConfigTemplate";
   private static final String DECODE_CFG_TEMPLATE_DEFAULT = "arabic-nn-model-decode.cfg.template";
@@ -106,6 +106,10 @@ public class ConfigFileCreator {
     return configFile;
   }
 
+  /**
+   * @see mitll.langtest.server.scoring.ASRScoring#makeDict()
+   * @return
+   */
   public String getDictFile() {
     return getDictFile(getModelsDir());
   }
@@ -132,7 +136,7 @@ public class ConfigFileCreator {
     return tmpDir.replaceAll("\\\\","\\\\\\\\");
   }
 
-  private String getProp(String var, String defaultValue) {
+  public String getProp(String var, String defaultValue) {
     return properties.containsKey(var) ? properties.get(var) : defaultValue;
   }
 }

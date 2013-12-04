@@ -1,21 +1,18 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.grade.Grade;
+import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,12 +29,12 @@ import java.util.TreeSet;
  */
 public class MonitoringSupport {
   private static final int MIN_DESIRED = 2;
-  public static final int MAX_PEOPLE = 21;
-  private static Logger logger = Logger.getLogger(MonitoringSupport.class);
+  private static final int MAX_PEOPLE = 21;
+  private static final Logger logger = Logger.getLogger(MonitoringSupport.class);
 
   //private static final int KB = (1024);
   //private static final int MB = (KB * KB);
-  private static final int SESSION_GAP = 10 * 60 * 1000;
+  //private static final int SESSION_GAP = 10 * 60 * 1000;
   private static final int MINUTE_MILLIS = 60 * 1000;
   //private static final int HOUR_IN_MILLIS = (60 * MINUTE_MILLIS);
   //private static final float HOUR_IN_MILLIS_FLOAT = (float)HOUR_IN_MILLIS;
@@ -48,7 +45,7 @@ public class MonitoringSupport {
   private final GradeDAO gradeDAO;
   private String outsideFile;
 
-  public MonitoringSupport() {
+  private MonitoringSupport() {
     this(null,null,null);
   }
 
@@ -85,44 +82,15 @@ public class MonitoringSupport {
   }
 
   /**
-   * Determine sessions per user.  If two consecutive items are more than {@link #SESSION_GAP} seconds
+   * Determine sessions per user.  If two consecutive items are more than {@link ResultDAO#SESSION_GAP} seconds
    * apart, then we've reached a session boundary.
    * Remove all sessions that have just one answer - must be test sessions.
+   *
+   * Multiple answers to the same exercise count as one answer.
    * @return list of duration and numAnswer pairs
    */
-  public List<Session> getSessions() {
-    List<Result> results = getResults();
-
-    Map<Long,List<Result>> userToAnswers = new HashMap<Long, List<Result>>();
-    for (Result r : results) {
-      List<Result> results1 = userToAnswers.get(r.userid);
-      if (results1 == null) userToAnswers.put(r.userid, results1 = new ArrayList<Result>());
-      results1.add(r);
-    }
-    List<Session> sessions = new ArrayList<Session>();
-    for (List<Result> resultList : userToAnswers.values()) {
-      Collections.sort(resultList, new Comparator<Result>() {
-        @Override
-        public int compare(Result o1, Result o2) {
-          return o1.timestamp < o2.timestamp ? -1 : o1.timestamp > o2.timestamp ? +1 : 0;
-        }
-      });
-      Session s = null;
-      long last = 0;
-      for (Result r : resultList) {
-        if (s == null || r.timestamp - last > SESSION_GAP) {
-          s = new Session();
-          sessions.add(s);
-        } else {
-          s.duration += r.timestamp - last;
-        }
-        s.numAnswers++;
-        last = r.timestamp;
-      }
-    }
-    Iterator<Session> iter = sessions.iterator();
-    while(iter.hasNext()) if (iter.next().numAnswers < 2) iter.remove();
-    return sessions;
+  public ResultDAO.SessionInfo getSessions() {
+    return resultDAO.getSessions();
   }
 
   private long getRateInMillis(Collection<Session> sessionCollection) {
@@ -130,7 +98,7 @@ public class MonitoringSupport {
     long total = 0;
     for (Session s: sessionCollection) {
         totalTime += s.duration;
-        total += s.numAnswers;
+        total += s.getNumAnswers();
     }
     if (total == 0) return 0l;
     return totalTime/total;
@@ -198,7 +166,7 @@ public class MonitoringSupport {
   }
 
   /**
-   * @see #getOverallResultCount(java.util.List)
+   * @see #getResultPerExercise(java.util.List)
    * @see #getResultCountToCount
    * @return
    */
@@ -536,7 +504,7 @@ public class MonitoringSupport {
     typeToNumAnswerToCount.put("desiredToMale",maleDesiredToPeopleToNumPer);
     typeToNumAnswerToCount.put("desiredToFemale",femaleDesiredToPeopleToNumPer);
   //  logger.info("got " + maleDesiredToPeopleToNumPer);
-    long rateInMillis = getRateInMillis(getSessions());// logger.info("total at");
+    long rateInMillis = getRateInMillis(getSessions().sessions);// logger.info("total at");
     float rateInHours =((float)rateInMillis)/MINUTE_MILLIS_FLOAT;
 
     Map<Integer, Map<Integer, Integer>> maleDesiredToPeopleToHours   = getResourceCounts(maleAnswerToCount,rateInHours);
@@ -547,16 +515,16 @@ public class MonitoringSupport {
     return typeToNumAnswerToCount;
   }
 
-  public Map<Integer, Map<Integer, Integer>> getResourceCounts(Map<Integer, Integer> maleAnswerToCount) {
+  private Map<Integer, Map<Integer, Integer>> getResourceCounts(Map<Integer, Integer> maleAnswerToCount) {
     return getResourceCounts(maleAnswerToCount, 1f);
   }
 
-  public Map<Integer, Map<Integer, Integer>> getResourceCounts(Map<Integer, Integer> maleAnswerToCount, float rateInMinutes) {
+  private Map<Integer, Map<Integer, Integer>> getResourceCounts(Map<Integer, Integer> maleAnswerToCount, float rateInMinutes) {
     //int minPeople = 1;
     int maxPeople = MAX_PEOPLE;
     int maxDesired = 7;
     Map<Integer,Map<Integer,Integer>> desiredToNumPeopleToPerPerson = new HashMap<Integer, Map<Integer, Integer>>();
-    Map<Integer,Integer> numDesiredToTotal = new HashMap<Integer, Integer>();
+    //Map<Integer,Integer> numDesiredToTotal = new HashMap<Integer, Integer>();
     for (int numDesiredPer = MIN_DESIRED; numDesiredPer < maxDesired; numDesiredPer++) {
       int total = 0;
       Map<Integer, Integer> peopleToPerPerson = new HashMap<Integer, Integer>();
@@ -587,11 +555,11 @@ public class MonitoringSupport {
          // total += numPer;
           numPerPerson += (float)numPer / (float)people;
         }*/
-        int itemsOrMinutes = (int) Math.round(numPerPerson);
+        int itemsOrMinutes = Math.round(numPerPerson);
         peopleToPerPerson.put(people, itemsOrMinutes);
         if (rateInMinutes != 1f && itemsOrMinutes == 1 || itemsOrMinutes == 0) break;
       }
-      numDesiredToTotal.put(numDesiredPer,total);
+      //numDesiredToTotal.put(numDesiredPer,total);
     }
     //System.out.println("total " + numDesiredToTotal);
   //  System.out.println("desired to people " + desiredToNumPeopleToPerPerson);
@@ -608,16 +576,26 @@ public class MonitoringSupport {
    */
   private List<Integer> getCountArray(Map<String, Integer> exToCount) {
     List<Integer> countArray = new ArrayList<Integer>(exToCount.size());
-    String next = exToCount.keySet().iterator().next();
-    boolean isInt = false;
-    try {
+ //   String next = exToCount.keySet().iterator().next();
+    boolean isInt = true;
+    for (String id : exToCount.keySet()) {
+      try {
+        String[] split = id.split("/");
+        String left = split[0];
+        Integer.parseInt(left);
+      } catch (NumberFormatException e) {
+        isInt = false;
+        break;
+      }
+    }
+  /*  try {
       String[] split = next.split("/");
       String left = split[0];
       Integer.parseInt(left);
       isInt = true;
     } catch (NumberFormatException e) {
       //logger.debug("Couldn't parse " + left);
-    }
+    }*/
     if (isInt) {
       Map<CompoundKey, Integer> keyToCount = new TreeMap<CompoundKey, Integer>();
       for (Map.Entry<String, Integer> pair : exToCount.entrySet()) {
@@ -743,9 +721,9 @@ public class MonitoringSupport {
     int incorrect = 0;
     int correct = 0;
     int numExercises = 0;
-    int gradeTotal = 0;  float avgGrade; float avgNumGrades;
-    Map<Integer,Integer> expToIncorrect = new HashMap<Integer, Integer>();
-    Map<Integer,Integer> expToCorrect = new HashMap<Integer, Integer>();
+    int gradeTotal = 0;  final float avgGrade; final float avgNumGrades;
+    final Map<Integer,Integer> expToIncorrect = new HashMap<Integer, Integer>();
+    final Map<Integer,Integer> expToCorrect = new HashMap<Integer, Integer>();
 
     /**
      *
@@ -794,7 +772,7 @@ public class MonitoringSupport {
     }*/
   }
 
-  public List<User> getUsers() {
+  private List<User> getUsers() {
     return userDAO.getUsers();
   }
 
@@ -803,9 +781,9 @@ public class MonitoringSupport {
    * Pulls the list of results out of the database.
    *
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(int, int)
+   * @see #getExToCount(java.util.List)
    */
-  public List<Result> getResults() {
+  private List<Result> getResults() {
     return resultDAO.getResults();
   }
 
