@@ -19,6 +19,15 @@ import java.util.Map;
 public class SelectionState {
   private String item;
   private Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
+  private String instance = "";
+
+  /**
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#showSelectionState
+   * @param event
+   */
+/*  public SelectionState(ValueChangeEvent<String> event) {
+    parseToken(getTokenFromEvent(event));
+  }*/
 
   /**
    * Populated from history token!
@@ -82,8 +91,8 @@ public class SelectionState {
         }
         else {
           if (debug) System.out.println("\t\tparseToken : add " + type + " : " +sections);
-
-          add(type, sections);
+          if (type.equals("instance")) instance = section;
+          else add(type, sections);
         }
         if (debug) System.out.println("\tparseToken : part " + part + " : " + type + "->" +section);
       }
@@ -95,6 +104,7 @@ public class SelectionState {
     if (token.contains("item")) {
       int item1 = token.indexOf("item=");
       String itemValue = token.substring(item1+"item=".length());
+      itemValue = itemValue.split(";")[0];
       if (debug) System.out.println("parseToken : got item = '" + itemValue +"'");
       setItem(itemValue);
     }
@@ -118,6 +128,10 @@ public class SelectionState {
 
   public Map<String, Collection<String>> getTypeToSection() {
     return typeToSection;
+  }
+
+  public String getInstance() {
+    return instance;
   }
 
   public String toString() {
