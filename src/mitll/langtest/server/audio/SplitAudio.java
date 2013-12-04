@@ -214,7 +214,7 @@ public class SplitAudio {
     if (exerciseIDs.size() != idToEx.size()) logger.error("\n\n\ngetSplitAudioFutures huh? lost items???");
     if (!resultIDs.containsAll(exerciseIDs)) {
       List<String> missingIds = new ArrayList<String>(resultIDs);
-      boolean b = missingIds.removeAll(exerciseIDs);
+      /*boolean b =*/ missingIds.removeAll(exerciseIDs);
       logger.warn("result resultIDs without matching exercise resultIDs are " + missingIds.subList(0, Math.min(100, missingIds.size())));
     }
     for (final String id : resultIDs) {

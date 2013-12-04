@@ -12,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,7 +28,7 @@ import java.util.TreeMap;
  * To change this template use File | Settings | File Templates.
  */
 public class English extends SplitAudio {
-  public static final float LOW_SCORE_THRESHOLD = 0.2f;
+ // public static final float LOW_SCORE_THRESHOLD = 0.2f;
   private static Logger logger = Logger.getLogger(English.class);
 
   /**
@@ -164,15 +165,13 @@ public class English extends SplitAudio {
 
       logger.warn("skipped " + skipped + " of " + exercises.size() + " files " + files.size() + " e.g. " + files.iterator().next());
     } catch (IOException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      e.printStackTrace();
     }
   }
 
   public void dumpDirEnglish() {
     // logger.warn("audio dir " + audioDir + " lang " + language + " db " +dbName + " spreadsheet " + spreadsheet);
-
     Set<String> files = getFilesInBestDir("englishAudio");
-
     final String configDir = getConfigDir("english");
 
     DatabaseImpl unitAndChapter = new DatabaseImpl(
@@ -200,7 +199,8 @@ public class English extends SplitAudio {
       configDir +
         "5100-english-no-gloss.txt");
 
-    Map<String, List<Result>> idToResults = getIDToResultsMap(flatList, java.util.Collections.EMPTY_SET);
+    Set<String> objects = Collections.emptySet();
+    Map<String, List<Result>> idToResults = getIDToResultsMap(flatList, objects);
     logger.debug("convertEnglish : id->results size " + idToResults.size() + " e.g. " + idToResults.keySet().iterator().next());
     Set<Long> nativeUsers = new UserDAO(flatList).getNativeUsers();
     if (nativeUsers.isEmpty()) {
