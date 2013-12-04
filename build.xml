@@ -316,7 +316,7 @@
 
     <target depends="build" name="hsMSA">
         <jar destfile="hsMSA.war" basedir="war"
-             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/msa/headstartMedia/**,config/msa/trans*,config/msa/MSA-headstart.*,config/msa/msa.h2*,config/msa/*.properties,config/msa/missing*,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
+             includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/msa/headstartMedia/**,config/msa/MSA-headstart.*,config/msa/msa.h2*,config/msa/*.properties,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
                 >
 
             <manifest>
@@ -381,8 +381,8 @@
         </jar>
     </target>
 
-    <target depends="build" name="npfMandarin">
-        <jar destfile="npfMandarin.war" basedir="war"
+    <target depends="build" name="npfCM">
+        <jar destfile="npfCM.war" basedir="war"
              includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/mandarin/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-mandarin/**"
                 >
             <manifest>
@@ -391,8 +391,8 @@
         </jar>
     </target>
 
-    <target depends="build" name="avpMandarin">
-        <jar destfile="avpMandarin.war" basedir="war"
+    <target depends="build" name="avpCM">
+        <jar destfile="avpCM.war" basedir="war"
              includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/mandarin/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-mandarin/**"
                 >
 
@@ -401,6 +401,28 @@
             </manifest>
         </jar>
     </target>
+
+    <target depends="build" name="npfCML1">
+        <jar destfile="npfCML1.war" basedir="war"
+             includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/mandarinL1/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-mandarin/**"
+                >
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target depends="build" name="avpCML1">
+        <jar destfile="avpCML1.war" basedir="war"
+             includes="npfIcon.png,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/mandarinL1/**,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-mandarin/**"
+                >
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
 
     <target depends="build" name="npfMSA">
         <jar destfile="npfMSA.war" basedir="war"
