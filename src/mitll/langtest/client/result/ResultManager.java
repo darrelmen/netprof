@@ -28,8 +28,8 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.grading.GradingExercisePanel;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.grade.Grade;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,7 +58,7 @@ public class ResultManager extends PagerTable {
   protected UserFeedback feedback;
   private final AudioTag audioTag = new AudioTag();
   private String nameForAnswer;
-  Map<Column,String> colToField = new HashMap<Column, String>();
+  private Map<Column<?,?>,String> colToField = new HashMap<Column<?,?>, String>();
 
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2
