@@ -60,8 +60,11 @@ public class ScoreFeedback {
     feedbackDummyPanel = new SimplePanel();
     feedbackDummyPanel.setHeight(height + "px");
     scoreFeedbackColumn = new Column(6, 3, feedbackDummyPanel);
+
+    scoreFeedbackColumn.setWidth(Math.min(300,Window.getClientWidth() * 0.5) + "px");
+
     feedbackRow.add(scoreFeedbackColumn);
-    feedbackRow.getElement().setId("feedbackRow");
+    feedbackRow.getElement().setId("ScoreFeedbackfeedbackRow");
     return feedbackRow;
   }
 
@@ -78,6 +81,12 @@ public class ScoreFeedback {
     return feedbackRow;
   }
 
+  /**
+   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#getFeedbackContainer(com.google.gwt.user.client.ui.Panel, ScoreFeedback, boolean)
+   * @param left
+   * @param height
+   * @return
+   */
   public Panel getSimpleRow(Widget left, int height) {
     FlowPanel feedbackRow = new FlowPanel();
     feedbackRow.add(left);
@@ -86,9 +95,10 @@ public class ScoreFeedback {
     feedbackDummyPanel.addStyleName("floatLeft");
 
     scoreFeedbackColumn = new SimplePanel(feedbackDummyPanel);
+    scoreFeedbackColumn.setWidth(Math.min(300,Window.getClientWidth() * 0.5) + "px");
+    scoreFeedbackColumn.addStyleName("floatRight");
+
     feedbackRow.add(scoreFeedbackColumn);
-    scoreFeedbackColumn.addStyleName("leftFiftyMargin");
-    scoreFeedbackColumn.addStyleName("floatLeft");
     feedbackRow.getElement().setId("feedbackRowSimple");
     return feedbackRow;
   }
@@ -119,6 +129,9 @@ public class ScoreFeedback {
     }
   }
 
+  /**
+   * @see TextResponse#gotScoreForGuess
+   */
   public void hideFeedback() {
     Timer t = new Timer() {
       @Override
