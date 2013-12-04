@@ -128,7 +128,7 @@ public class ASRScoring extends Scoring {
   }*/
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    * @param testAudioDir
    * @param testAudioFileNoSuffix
    * @param sentence that should be what the test audio contains
@@ -300,9 +300,9 @@ public class ASRScoring extends Scoring {
                                    String scoringDir,
                                    boolean decode, String tmpDir) {
     Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
-    if (false) logger.debug("dirs is " + dirs +
+/*    if (false) logger.debug("dirs is " + dirs +
       " audio dir " + testAudioDir + " audio " + testAudioFileNoSuffix + " sentence " + sentence + " decode " + decode + " scoring dir " + scoringDir);
-
+*/
     Audio testAudio = Audio$.MODULE$.apply(
       testAudioDir, testAudioFileNoSuffix,
       false /* notForScoring */, dirs);
@@ -479,11 +479,19 @@ public class ASRScoring extends Scoring {
   private void readDictionary() { htkDictionary = makeDict(); }
 
   /**
-   * @see mitll.langtest.server.audio.SplitAudio#convertExamples(int, String, String, java.util.Map
+<<<<<<< HEAD
+   * @see mitll.langtest.server.audio.SplitAudio#convertExamples(int, String, String, java.util.Map, java.util.Map, java.util.Set, boolean)
+=======
+   * @see mitll.langtest.server.audio.SplitAudio#convertExamples
+>>>>>>> quizlet
    * @return
    */
   public HTKDictionary getDict() { return htkDictionary; }
 
+  /**
+   * @see #readDictionary()
+   * @return
+   */
   private HTKDictionary makeDict() {
     String dictFile = configFileCreator.getDictFile();
     boolean dictExists = new File(dictFile).exists();
@@ -515,7 +523,7 @@ public class ASRScoring extends Scoring {
       jscoreOut = testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
-    //  logger.debug("getScoresFromHydec : got score " + hydec_score +" and took " + timeToRunHydec + " millis");
+      logger.debug("getScoresFromHydec : got score " + hydec_score +" and took " + timeToRunHydec + " millis");
 
       return new Scores(hydec_score, jscoreOut._2);
     } catch (AssertionError e) {
