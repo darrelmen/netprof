@@ -22,8 +22,8 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserManager;
@@ -59,6 +59,18 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private FlashcardResponse latestResponse;
 
   private Timer timer;
+
+  @Override
+  public Panel makeExercisePanel(Exercise result) {
+    return null;
+  }
+
+  @Override
+  public void loadExercise(ExerciseShell exerciseShell) {}
+  @Override
+  public boolean loadNextExercise(String id) {
+    return false;
+  }
 
   private boolean expired = false;
   private boolean timerRunning = false;
@@ -280,7 +292,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   /**
    * @param current
    * @return
-   * @see mitll.langtest.client.LangTest#loadNextExercise
+   * @seex mitll.langtest.client.LangTest#loadNextExercise
    */
   @Override
   public boolean loadNextExercise(ExerciseShell current) {
@@ -328,6 +340,11 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   }
 
   @Override
+  public boolean onLast(ExerciseShell current) {
+    return false;  //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  @Override
   public void clear() {
     exercisePanelColumn.clear();
   }
@@ -372,11 +389,14 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
   @Override
   public void hideExerciseList() {}
-  public void rememberAndLoadFirst(List<ExerciseShell> exercises){}
-  public void makeExercisePanel(Exercise result) {}
-  public void loadExercise(ExerciseShell exerciseShell) {}
-  public boolean loadNextExercise(String id) { return false; }
   public void setCompleted(Set<String> completed) {}
+
+  @Override
+  public Panel getCreatedPanel() {
+    return null;  //To change body of implemented methods use File | Settings | File Templates.
+  }
+
+  public void rememberAndLoadFirst(List<? extends ExerciseShell> exercises){}
 
   protected void grabFocus(final BootstrapExercisePanel panel) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
