@@ -4,12 +4,14 @@ import mitll.flashcard.UserState;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.flashcard.UserStateWrapper;
 import mitll.langtest.shared.DLIUser;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.Site;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.flashcard.FlashcardResponse;
 import mitll.langtest.shared.flashcard.ScoreInfo;
 import mitll.langtest.shared.grade.CountAndGradeID;
@@ -65,9 +67,12 @@ public class DatabaseImpl implements Database {
   private final UserDAO userDAO = new UserDAO(this);
   private final DLIUserDAO dliUserDAO = new DLIUserDAO(this);
   private final ResultDAO resultDAO = new ResultDAO(this,userDAO);
-  private final AnswerDAO answerDAO = new AnswerDAO(this);
+  private final AnswerDAO answerDAO = new AnswerDAO(this, resultDAO);
   private final GradeDAO gradeDAO = new GradeDAO(this,userDAO, resultDAO);
   private final SiteDAO siteDAO = new SiteDAO(this, userDAO);
+  private final UserListManager userListManager = new UserListManager(userDAO);
+  private UserExerciseDAO userExerciseDAO;
+  FileExerciseDAO fileExerciseDAO = new FileExerciseDAO("","",false);
 
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
@@ -115,7 +120,6 @@ public class DatabaseImpl implements Database {
     this.doImages = serverProps.doImages();
     this.language = serverProps.getLanguage();
     this.isFlashcard = serverProps.isFlashcard();
-    //this.usePredefinedTypeOrder =  serverProps.usePredefinedTypeOrder();
     this.serverProps = serverProps;
 
     try {
@@ -159,25 +163,26 @@ public class DatabaseImpl implements Database {
       //graderDAO.createGraderTable(getConnection());
       //userDAO.dropUserTable(this);
       userDAO.createUserTable(this);
-
    //   dliUserDAO.dropUserTable(this);
       dliUserDAO.createUserTable(this);
 
       siteDAO.createTable(getConnection());
+      userExerciseDAO = new UserExerciseDAO(this);
+      userListManager.setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
   }
 
   @Override
-  public Connection getConnection() throws Exception {
+  public Connection getConnection()/* throws Exception*/ {
     return connection.getConnection();
   }
 
   public void closeConnection(Connection connection) throws SQLException {}
 
   public Export getExport() {
-    if (exerciseDAO == null) logger.error("huh? exercise dao is null?");
+    //if (exerciseDAO == null) logger.error("huh? exercise dao is null?");
     return new Export(exerciseDAO,resultDAO,gradeDAO);
   }
 
@@ -361,7 +366,7 @@ public class DatabaseImpl implements Database {
       " use flq " + useFLQ + " spoken " + useSpoken);*/
 
     // remove results that have grades...
-    int skipped = 0;
+    //int skipped = 0;
     Iterator<Result> iterator = resultExcludingExercises.iterator();
     while (iterator.hasNext()) {
       Result result = iterator.next();
@@ -375,7 +380,7 @@ public class DatabaseImpl implements Database {
       else if (filterResults && (result.flq != useFLQ || result.spoken != useSpoken)) {
         //logger.debug("getNextUngradedExercise excluding " + result + " since no match for flq = " + useFLQ + " and spoken = " +useSpoken);
         iterator.remove();
-        skipped++;
+        //skipped++;
       }
       else if (numGrades != null) {
         logger.warn("\tfound grade " + numGrades + " for " +result +"?");
@@ -500,13 +505,13 @@ public class DatabaseImpl implements Database {
 
     synchronized (userToState) {
       userStateWrapper = userToState.get(userID);
-      logger.info("getFlashcardResponse : for user " + userID +
-        " exercises has " + exercises.size() + " user state " + userStateWrapper);// + " next = " +getNext);
+      logger.info("createOrGetUserState : for user " + userID +
+        " exercises has " + exercises.size() + " user state " + userStateWrapper);
       if (userStateWrapper == null || (!exercises.isEmpty() && userStateWrapper.getNumExercises() != exercises.size())) {
         userStateWrapper = getUserStateWrapper(userID, exercises);
         userToState.put(userID, userStateWrapper);
       }
-      else {
+      else if (!exercises.isEmpty()) {
         logger.debug("user state " + userStateWrapper.getNumExercises() + " vs " + exercises.size() + " now " + userStateWrapper);
       }
     }
@@ -517,19 +522,12 @@ public class DatabaseImpl implements Database {
 
   public ScoreInfo getScoreInfo(long userID, long timeTaken, Map<String, Collection<String>> selection) {
     UserStateWrapper userStateWrapper = userToState.get(userID);
-
-    //int correct = userStateWrapper.getPcorrect();
     int incorrect = userStateWrapper.getPincorrect();
 
-    //  logger.warn("prev " + correct + " inc " + incorrect);
-    //  logger.warn("now  " + userStateWrapper.correct + " inc " + userStateWrapper.incorrect);
-
-    //int diffC = Math.max(0,userStateWrapper.correct - correct);
     int diffI = Math.max(0, userStateWrapper.getIncorrect() - incorrect);
-    logger.warn("diff  " + userToCorrect.get(userID) + " inc " + diffI);
+    logger.debug("getScoreInfo : diff  " + userToCorrect.get(userID) + " inc " + diffI);
 
     ScoreInfo scoreInfo = new ScoreInfo(userID, -1, userToCorrect.get(userID), 0, timeTaken, selection);
-    //userStateWrapper.setPcorrect(userStateWrapper.getCorrect());
     userStateWrapper.setPincorrect(userStateWrapper.getIncorrect());
 
     userToCorrect.put(userID, 0);
@@ -1097,7 +1095,7 @@ public class DatabaseImpl implements Database {
 
   public long addUser(HttpServletRequest request,
                       int age, String gender, int experience,
-                      String dialect, String nativeLang, String userID) {
+                      String nativeLang, String dialect, String userID) {
     String ip = getIPInfo(request);
     return addUser(age, gender, experience, ip, nativeLang, dialect, userID);
   }
@@ -1115,26 +1113,42 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
+   *
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUsers()
    * @return
    */
   public List<User> getUsers() {
-    Map<Long,Integer> idToCount = new HashMap<Long, Integer>();
-
-    for (Result r : resultDAO.getResults()) {
-      Integer count = idToCount.get(r.userid);
-      if (count == null) idToCount.put(r.userid, 1);
-      else idToCount.put(r.userid, count+1);
-    }
+    Map<Long, Float> userToRate = resultDAO.getSessions().userToRate;
+    Map<Long, Integer> idToCount = populateUserToNumAnswers();
     List<User> users = userDAO.getUsers();
 
     for (User u : users) {
       Integer numResults = idToCount.get(u.id);
       if (numResults != null) {
         u.setNumResults(numResults);
+
+        if (userToRate.containsKey(u.id)) {
+          u.setRate(userToRate.get(u.id));
+        }
       }
     }
 
+    joinWithDLIUsers(users);
+    return users;
+  }
+
+  private Map<Long, Integer> populateUserToNumAnswers() {
+    Map<Long,Integer> idToCount = new HashMap<Long, Integer>();
+    for (Result r : resultDAO.getResults()) {
+      Integer count = idToCount.get(r.userid);
+      if (count == null) idToCount.put(r.userid, 1);
+      else idToCount.put(r.userid, count+1);
+    }
+    return idToCount;
+  }
+
+  private void joinWithDLIUsers(List<User> users) {
     List<DLIUser> users1 = dliUserDAO.getUsers();
     Map<Long, User> userMap = userDAO.getMap(users);
 
@@ -1142,11 +1156,9 @@ public class DatabaseImpl implements Database {
       User user = userMap.get(dliUser.getUserID());
       if (user != null) {
         user.setDemographics(dliUser);
-        //logger.debug("joined with " +dliUser + " : " + user);
       }
     }
     if (users1.isEmpty()) logger.info("no dli users.");
-    return users;
   }
 
   /**
@@ -1345,12 +1357,13 @@ public class DatabaseImpl implements Database {
   public Map<User, Integer> getUserToResultCount() { return monitoringSupport.getUserToResultCount(); }
 
   /**
-   * Determine sessions per user.  If two consecutive items are more than {@link MonitoringSupport#SESSION_GAP} seconds
+   * Determine sessions per user.  If two consecutive items are more than {@link ResultDAO#SESSION_GAP} seconds
    * apart, then we've reached a session boundary.
    * Remove all sessions that have just one answer - must be test sessions.
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getSessions()
    * @return list of duration and numAnswer pairs
    */
-  public List<Session> getSessions() { return monitoringSupport.getSessions(); }
+  public List<Session> getSessions() { return monitoringSupport.getSessions().sessions; }
 
  /**
    * TODO : worry about duplicate userid?
@@ -1404,6 +1417,13 @@ public class DatabaseImpl implements Database {
   public void addDLIUser(DLIUser dliUser) throws Exception { dliUserDAO.addUser(dliUser);  }
 
   public String toString() { return "Database : "+ connection.getConnection(); }
+
+  public UserListManager getUserListManager() { return userListManager; }
+
+  public Exercise getUserExerciseWhere(String id) {
+    UserExercise where = userExerciseDAO.getWhere(id);
+    return where != null ? where.toExercise(language) : null;
+  }
 
 /*  private static String getConfigDir(String language) {
     String installPath = ".";
