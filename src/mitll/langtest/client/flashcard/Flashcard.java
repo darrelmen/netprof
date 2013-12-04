@@ -12,9 +12,9 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
-import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.dialog.DialogHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +72,7 @@ public class Flashcard implements RequiresResize {
     headerRow.add(iconLeftHeader);
 
     Panel flashcard = new FlowPanel();
-    flashcard.addStyleName("inlineStyle");
+    flashcard.addStyleName("inlineBlockStyle");
     flashcard.addStyleName("headerBackground");
     flashcard.addStyleName("leftAlign");
     appName = new Paragraph("<span>" + appTitle + "</span>");
