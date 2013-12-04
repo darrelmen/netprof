@@ -37,7 +37,7 @@
 
   <context-param>
      <param-name>config</param-name>
-     <param-value>msa</param-value>
+     <param-value>mandarin</param-value>
   </context-param>
 
   <context-param>
