@@ -26,7 +26,7 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
    */
   @Override
   protected void makeNavigationHelper(Exercise e, ExerciseController controller) {
-    navigationHelper = new NavigationHelper(e, controller, false, false);
+    navigationHelper = new NavigationHelper(e, controller, null,controller.getExerciseList(),false);  // todo how to control whether to add buttons???
     textResponse = new TextResponse(controller.getUser(), soundFeedback, new TextResponse.AnswerPosted() {
       @Override
       public void answerPosted() {
@@ -42,7 +42,7 @@ public class TextCRTFlashcard extends DataCollectionFlashcard {
   @Override
   protected void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller,
                                                 int feedbackHeight) {
-    textResponse.addWidgets(this, e, service, controller, true, false);
+    textResponse.addWidgets(this, e, service, controller, true, false, true, 1);
   }
 
   @Override
