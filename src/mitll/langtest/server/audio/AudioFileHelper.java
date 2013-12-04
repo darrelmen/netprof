@@ -172,9 +172,9 @@ public class AudioFileHelper {
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                            int width, int height, boolean useScoreToColorBkg,
                                            boolean decode, String tmpDir, boolean useCache) {
-    logger.info("getASRScoreForAudio scoring " + testAudioFile + " with " + sentence + " req# " + reqid);
+    logger.info("getASRScoreForAudio scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid);
 
-    assert(testAudioFile != null && sentence != null);
+    assert(testAudioFile != null && sentence != null && sentence.length() > 0);
     makeASRScoring();
     testAudioFile = dealWithMP3Audio(testAudioFile);
     if (!new File(testAudioFile).exists()) return new PretestScore();
@@ -232,16 +232,6 @@ public class AudioFileHelper {
     }
   }
 
-/*  private String getWavAudioFile(String audioFile) {
-    if (audioFile.endsWith(".mp3")) {
-      String wavFile = removeSuffix(audioFile) +".wav";
-      File test = pathHelper.getAbsoluteFile(wavFile);
-      audioFile = test.exists() ? test.getAbsolutePath() : getWavForMP3(audioFile);
-    }
-
-    return audioFile;
-  }*/
-
   /**
    * @see #dealWithMP3Audio(String)
    * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int)
@@ -255,7 +245,7 @@ public class AudioFileHelper {
   /**
    * Ultimately does lame --decode from.mp3 to.wav
    *
-   * Worris about converting from either a relative path to an absolute path (given the webapp install location)
+   * Worries about converting from either a relative path to an absolute path (given the webapp install location)
    * or if audioFile is a URL, converting it to a relative path before making an absolute path.
    *
    * Gotta be a better way...
@@ -340,6 +330,9 @@ public class AudioFileHelper {
       }
       autoCRT = new AutoCRT(exportDB.getExport(), crtScoring, pathHelper.getInstallPath(), relativeConfigDir,
         serverProps.getMinPronScore());
+      if (serverProps.isAutoCRT()) {
+        autoCRT.makeClassifier();
+      }
     }
   }
   /**
