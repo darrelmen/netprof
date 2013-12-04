@@ -41,8 +41,6 @@ public class CheckLTS {
     }
   }
 
-
-
   private boolean checkLTS(int id, BufferedWriter writer, SmallVocabDecoder svd, LTS lts, String english, String foreignLanguagePhrase) {
     List<String> tokens = svd.getTokens(foreignLanguagePhrase);
     boolean error = false;
@@ -69,5 +67,4 @@ public class CheckLTS {
     }
     return error;
   }
-
 }
