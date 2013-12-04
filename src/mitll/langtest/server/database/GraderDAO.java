@@ -168,34 +168,6 @@ public class GraderDAO {
     }
   }
 
-  /**
-   * TODO make this work...
-   * @param database
-   * @throws Exception
-   */
-  private void showGrades(Database database) throws Exception {
-    Connection connection = database.getConnection();
-    PreparedStatement statement = connection.prepareStatement("SELECT * FROM grades order by " + Database.TIME);
-    ResultSet rs = statement.executeQuery();
-    int c = 0;
-    while (rs.next()) {
-      c++;
-      int i = 1;
-      if (false) {
-        System.out.println(rs.getInt(i++) + "," + rs.getString(i++) + "," +
-          rs.getString(i++) + "," +
-          rs.getInt(i++) + "," +
-          rs.getString(i++) + "," +
-          rs.getString(i++) + "," +
-          rs.getTimestamp(i++));
-      }
-    }
- //   System.out.println("now " + c + " answers");
-    rs.close();
-    statement.close();
-    database.closeConnection(connection);
-  }
-
   public int getCount() {
     try {
       Connection connection = database.getConnection();
