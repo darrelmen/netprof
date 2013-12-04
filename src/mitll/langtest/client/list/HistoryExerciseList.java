@@ -41,8 +41,8 @@ public class HistoryExerciseList extends PagingExerciseList {
 
   public HistoryExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                              boolean showTurkToken, boolean showInOrder, ExerciseController controller,
-                             boolean isCRTDataMode) {
-    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, isCRTDataMode);
+                             boolean isCRTDataMode, String instance) {
+    super(currentExerciseVPanel, service, feedback, showTurkToken, showInOrder, controller, /*isCRTDataMode,*/instance);
   }
 
   /**
@@ -195,7 +195,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   }
 
   /**
-   * @see PagingExerciseList#getExerciseIdColumn
+   * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer()
    * @param e
    */
   @Override
@@ -386,7 +386,7 @@ public class HistoryExerciseList extends PagingExerciseList {
       reallyLoadExercises(typeToSection, null);
     } else {
       lastReqID++;
-      System.out.println("looking for '" + prefix + "' (" + prefix.length() + " chars) in context of " + typeToSection);
+      System.out.println("loadExercisesUsingPrefix looking for '" + prefix + "' (" + prefix.length() + " chars) in context of " + typeToSection);
 
       if (typeToSection.isEmpty()) {
         service.getExerciseIds(lastReqID, userID, prefix, new SetExercisesCallback());
@@ -397,6 +397,8 @@ public class HistoryExerciseList extends PagingExerciseList {
   }
 
   private void reallyLoadExercises(Map<String, Collection<String>> typeToSection, String item) {
+    System.out.println("reallyLoadExercises looking for '" + item + "' in context of " + typeToSection);
+
     if (typeToSection.isEmpty() && item == null) {
       noSectionsGetExercises(userID);
     } else {
@@ -419,13 +421,20 @@ public class HistoryExerciseList extends PagingExerciseList {
 
     @Override
     public void onSuccess(ExerciseListWrapper result) {
-      System.out.println("MySetExercisesCallback : onSuccess " + result.exercises.size() + " items.");
+      System.out.println("MySetExercisesCallback : onSuccess " + result.exercises.size() + " items and item " +item);
 
       if (isStaleResponse(result)) {
         System.out.println("\t----> ignoring result " + result.reqID + " b/c before latest " + lastReqID);
       } else {
         if (result.exercises.isEmpty()) {
-          gotEmptyExerciseList();
+          System.out.println("\t----> result is empty...");
+
+          if (item != null && item.startsWith("Custom")) {
+            System.out.println("\t----> skip warning about empty list for now "); // TODO revisit this
+          }
+          else {
+            gotEmptyExerciseList();
+          }
           rememberExercises(result.exercises);
         } else {
           if (item != null) {
