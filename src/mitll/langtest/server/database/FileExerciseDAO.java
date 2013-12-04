@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseFormatter;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -51,6 +52,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   private boolean isEnglish;
   private final boolean processSemicolons = false;
   private boolean isPashto;
+  private SectionHelper sectionHelper = new SectionHelper();
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
@@ -69,7 +71,7 @@ public class FileExerciseDAO implements ExerciseDAO {
 
   @Override
   public SectionHelper getSectionHelper() {
-    return null;
+    return sectionHelper;
   }
 
   public Exercise getExercise(String id) {
@@ -517,7 +519,7 @@ public class FileExerciseDAO implements ExerciseDAO {
    */
   private Exercise getWordListExercise(String contentSentence, String id) {
     contentSentence = getRefSentence(contentSentence);
-    String content = getArabic(contentSentence);
+    String content = ExerciseFormatter.getArabic(contentSentence, isUrdu, isPashto);
 
     Exercise exercise = new Exercise("repeat", id, content, false, true, contentSentence);
     exercise.setRefSentence(contentSentence);
@@ -544,9 +546,6 @@ public class FileExerciseDAO implements ExerciseDAO {
       else {
         e1 = firstPhrase;
       }
-   /*   if (e1.endsWith("-") && split.length > 1) {
-        e1 = split[split.length-2];
-      }*/
     }
     return e1.trim().replaceAll("-", " ");
   }
@@ -568,7 +567,7 @@ public class FileExerciseDAO implements ExerciseDAO {
 
     String foreignLanguagePhrase = split[0].trim();
     foreignLanguagePhrase = foreignLanguagePhrase.replaceAll("<s>", "").replaceAll("</s>", "").trim();
-    String content = getArabic(foreignLanguagePhrase);
+    String content = ExerciseFormatter.getArabic(foreignLanguagePhrase,isUrdu,isPashto);
 
     String audioFileName = split[1].trim();
     String english = "";
@@ -634,55 +633,12 @@ public class FileExerciseDAO implements ExerciseDAO {
     String translit = split1[3];
     String english = split1[4];
 
-    String content = getContent(arabic, translit, english,"");
+    String content = ExerciseFormatter.getContent(arabic, translit, english,"",isEnglish,isUrdu,isPashto);
     String fastAudioRef = mediaDir+File.separator+name+File.separator+ FAST + ".wav";
     String slowAudioRef = mediaDir+File.separator+name+File.separator+ SLOW + ".wav";
 
     return new Exercise("repeat", name, content,
         ensureForwardSlashes(fastAudioRef), ensureForwardSlashes(slowAudioRef), arabic, english);
-  }
-
-  private String getContent(String arabic, String translit, String english, String meaning) {
-    return getContent(arabic, translit, english, meaning, "");
-  }
-
-  public String getContent(String arabic, String translit, String english, String meaning, String context) {
-    String arabicHTML = getArabic(arabic);
-    String translitHTML = translit.length() > 0 ?
-      getSpanWrapper("Transliteration:", translit)
-      : "";
-    String translationHTML = (!isEnglish && english.length() > 0) ?
-      getSpanWrapper("Translation:", english) : "";
-    String meaningHTML = (isEnglish && meaning.length() > 0) ?
-      getSpanWrapper("Meaning:", meaning) : "";
-
-    String contextHTML = (context.length() > 0) ?
-      getSpanWrapper("Context:", context) : "";
-    return arabicHTML +
-      translitHTML +
-      translationHTML +
-      meaningHTML +
-      contextHTML;
-  }
-
-  private String getSpanWrapper(String rowTitle, String english) {
-    return "<div class=\"Instruction\">\n" +
-    "<span class=\"Instruction-title\">" +
-      rowTitle +
-      "</span>\n" +
-    "<span class=\"Instruction-data\"> " + english +
-    "</span>\n" +
-    "</div>";
-  }
-
-  private String getArabic(String arabic) {
-    return "<div class=\"Instruction\">\n" +
-        "<span class=\"Instruction-title\">Say:</span>\n" +
-        "<span class=\"" +
-        (isUrdu ? "urdufont" : isPashto ? "pashtofont" : "Instruction-data") +
-        "\"> " + arabic +
-        "</span>\n" +
-        "</div>\n";
   }
 
   private String getImageContent(String flPhrase) {
