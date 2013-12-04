@@ -26,22 +26,24 @@ public abstract class RecordButton {
   private Timer recordTimer;
   private Widget record = null;
   private int autoStopDelay;
-  private HandlerRegistration keyHandler;
+  protected HandlerRegistration keyHandler;
  // private boolean hasFocus = false;
   private Image recordImage1, recordImage2;
 
   /**
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel)
+  private Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
+  private Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
    * @param delay
    * @param addKeyHandler
    */
   public RecordButton(int delay, boolean addKeyHandler) {
     this.autoStopDelay = delay;
-    if (addKeyHandler) keyHandler = addKeyHandler();
+    if (addKeyHandler) addKeyHandler();
   }
 
   /**
-   * @see RecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel)
+   * @see RecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel, boolean)
    * @param recordButton
    * @param delay
    * @param recordImage1
@@ -80,8 +82,13 @@ public abstract class RecordButton {
     if (keyHandler != null) recordButton.setTitle("Press the space bar to record/stop recording");
   }
 
-  protected HandlerRegistration addKeyHandler() {
-    return Event.addNativePreviewHandler(new
+  public HandlerRegistration addKeyHandler() {
+    if (keyHandler != null) {  // forget any old ones, so we don't have duplicates
+      removeKeyHandler();
+    }
+    System.out.println("RecordButton.addKeyHandler : adding keyhandler");
+
+    keyHandler = Event.addNativePreviewHandler(new
                                            Event.NativePreviewHandler() {
 
                                              @Override
@@ -105,12 +112,21 @@ public abstract class RecordButton {
                                                }
                                              }
                                            });
+    return keyHandler;
   }
 
+  /**
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#onUnload()
+   */
   public void onUnload() {
-   // System.out.println("onUnload : removing handler for recording " + keyHandler);
+    System.out.println("RecordButton.onUnload : removing handler for recording " + keyHandler);
+
+    removeKeyHandler();
+  }
+
+  public void removeKeyHandler() {
     if (keyHandler != null) {
-      System.out.println("\tremoving handler for recording " + keyHandler);
+      System.out.println("RecordButton : removing handler for recording " + keyHandler);
       keyHandler.removeHandler();
       keyHandler = null;
     }
