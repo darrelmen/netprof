@@ -48,7 +48,6 @@ public class UserManager {
 
   private final PropertyHandler.LOGIN_TYPE loginType;
   private final String appTitle;
-  private final boolean trackUsers;
   private final PropertyHandler props;
 
   private Timer userTimer;
@@ -59,16 +58,14 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#doDataCollectAdminView
    * @param lt
    * @param service
-   * @param isFlashcard
    * @param props
    */
-  public UserManager(UserNotification lt, LangTestDatabaseAsync service, boolean isFlashcard, PropertyHandler props) {
+  public UserManager(UserNotification lt, LangTestDatabaseAsync service, PropertyHandler props) {
     this.langTest = lt;
     this.service = service;
     this.props = props;
     this.loginType = props.getLoginType();
     this.appTitle = props.getAppTitle();
-    this.trackUsers = props.isTrackUsers();
   }
 
   public void checkLogin() {
@@ -123,19 +120,20 @@ public class UserManager {
    */
   public void userAlive() {
     updateUserSessionExpires();
-   // int user = getUser();
     if (!isActive()) System.err.println("huh? user is not active...\n\n\n");
-   // System.out.println(new Date() +" --------> userAlive : " + user);
+    // System.out.println(new Date() +" --------> userAlive : " + user);
     //userOnline(user, true);
     waitThenInactivate();
   }
 
   private void userInactive() {
     int user = getUser();
-    System.out.println(new Date() +" --------> userInactive : " + user);
+    System.out.println(new Date() + " --------> userInactive : " + user);
   }
 
-  public boolean isActive() { return getUser() != NO_USER_SET; }
+  public boolean isActive() {
+    return getUser() != NO_USER_SET;
+  }
 
   private void waitThenInactivate() {
     if (userTimer != null) userTimer.cancel();
@@ -220,7 +218,7 @@ public class UserManager {
   /**
    * @see mitll.langtest.client.LangTest#checkLogin
    */
-  private void anonymousLogin() {
+  protected void anonymousLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
       System.out.println("UserManager.anonymousLogin : current user : " + user);
@@ -248,8 +246,7 @@ public class UserManager {
   public String getUserID() {
     if (Storage.isLocalStorageSupported()) {
       return Storage.getLocalStorageIfSupported().getItem(getUserChosenID());
-    }
-    else {
+    } else {
       return userChosenID;
     }
   }
@@ -277,8 +274,7 @@ public class UserManager {
         return NO_USER_SET;
       }
       return Integer.parseInt(sid);
-    }
-    else if (Storage.isLocalStorageSupported()) {
+    } else if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       String sid = localStorageIfSupported.getItem(getUserIDCookie());
 
@@ -289,23 +285,29 @@ public class UserManager {
         sid = localStorageIfSupported.getItem(getUserIDCookie());
       }
       return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
-    }
-    else {
+    } else {
       return (int) userID;
     }
   }
 
+  /**
+   * @see #getUser()
+   * @param sid
+   * @return
+   */
   private boolean checkUserExpired(String sid) {
     int userID1 = Integer.parseInt(sid);
     boolean expired = false;
     if (userExpired(sid)) {
       clearUser(userID1);
       expired = true;
-    } else if (getLoginTypeFromStorage() != loginType) {
+    }
+    // this seems like a bad idea if we can login as data collector or as anonymous...
+    /* else if (getLoginTypeFromStorage() != loginType) {
       System.out.println("current login type : " + getLoginTypeFromStorage() + " vs mode " + loginType);
       clearUser(userID1);
       expired = true;
-    }
+    }*/
     return expired;
   }
 
@@ -314,19 +316,19 @@ public class UserManager {
    * @return
    */
   private String getUserIDCookie() {
-    return appTitle + ":"+ USER_ID;
+    return appTitle + ":" + USER_ID;
   }
   private String getUserChosenID() {
-    return appTitle + ":"+ USER_CHOSEN_ID;
+    return appTitle + ":" + USER_CHOSEN_ID;
   }
   private String getAudioType() {
-    return appTitle + ":"+ AUDIO_TYPE;
+    return appTitle + ":" + AUDIO_TYPE;
   }
   private String getLoginType() {
-    return appTitle + ":"+ LOGIN_TYPE;
+    return appTitle + ":" + LOGIN_TYPE;
   }
   private String getExpires() {
-    return appTitle + ":"+ "expires";
+    return appTitle + ":" + "expires";
   }
 
   /**
@@ -337,8 +339,7 @@ public class UserManager {
     String expires = getExpiresCookie();
     if (expires == null) {
       System.out.println("checkExpiration : no expires item?");
-    }
-    else {
+    } else {
       try {
         long expirationDate = Long.parseLong(expires);
 
@@ -352,8 +353,7 @@ public class UserManager {
         if (expirationDate < System.currentTimeMillis()) {
           System.out.println("checkExpiration : " + sid + " has expired.");
           return true;
-        }
-        else {
+        } else {
           //System.out.println("checkExpiration : " +sid + " has expires on " + new Date(expirationDate) + " vs now " + new Date());
         }
       } catch (NumberFormatException e) {
@@ -368,21 +368,20 @@ public class UserManager {
     return localStorageIfSupported.getItem(getExpires());
   }
 
-  private PropertyHandler.LOGIN_TYPE getLoginTypeFromStorage() {
+/*  private PropertyHandler.LOGIN_TYPE getLoginTypeFromStorage() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     String item = localStorageIfSupported.getItem(getLoginType());
     try {
       if (item == null) {
         return PropertyHandler.LOGIN_TYPE.UNDEFINED;
-      }
-      else {
+      } else {
         return PropertyHandler.LOGIN_TYPE.valueOf(item.toUpperCase());
       }
     } catch (IllegalArgumentException e) {
       System.err.println("couldn't parse " + item);
       return PropertyHandler.LOGIN_TYPE.UNDEFINED;
     }
-  }
+  }*/
 
   /**
    * @see mitll.langtest.client.LangTest#getLogout()
@@ -422,19 +421,16 @@ public class UserManager {
       System.out.println("teacherLogin: got cached user : " + user);
       rememberAudioType();
       langTest.gotUser(user);
-      if (trackUsers) {
-        userAlive();
-      }
     } else {
       DataCollectorDialog dataCollectorDialog = new DataCollectorDialog(service, props, langTest, this);
-      dataCollectorDialog.displayTeacherLogin((trackUsers) ? "Taboo Login" : "Data Collector Login");
+      dataCollectorDialog.displayTeacherLogin("Data Collector Login");
     }
   }
 
   /**
    * TODO : move cookie manipulation to separate class
    *
-   * @param sessionID from database
+   * @param sessionID    from database
    * @param audioType
    * @param userChosenID
    * @see DataCollectorDialog#addTeacher(int, com.github.gwtbootstrap.client.ui.ListBox, com.github.gwtbootstrap.client.ui.ListBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.TextBox, com.github.gwtbootstrap.client.ui.Modal, com.github.gwtbootstrap.client.ui.Button, boolean)
@@ -460,10 +456,6 @@ public class UserManager {
     } else {
       userID = sessionID;
       this.userChosenID = userChosenID;
-    }
-
-    if (trackUsers) {
-      userAlive();
     }
     langTest.gotUser(sessionID);
   }

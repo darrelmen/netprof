@@ -26,8 +26,8 @@ import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.monitoring.Session;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -107,13 +107,13 @@ public class MonitoringManager {
     sp.add(vp);
     dialogVPanel.add(sp);
 
-    doDesiredQuery(getVPanel(vp));
-    doSessionQuery(getVPanel(vp));
-    doResultQuery(getVPanel(vp));
+    doDesiredQuery(getVPanel(vp),null);
+    doSessionQuery(getVPanel(vp),null);
+    doResultQuery(getVPanel(vp),null);
     doGradeQuery(getVPanel(vp));
     doGenderQuery(getVPanel(vp));
    // doTimeUntilItems(getSPanel(vp));
-    doResultLineQuery(getVPanel(vp));
+    doResultLineQuery(getVPanel(vp),null);
     doResultByDayQuery(getSPanel(vp));
     doResultByHourOfDayQuery(getSPanel(vp));
 
@@ -145,11 +145,15 @@ public class MonitoringManager {
     return toUse2;
   }
 
+  private static interface DoIt {
+    void go();
+  }
+
   /**
    *
    * @param vp
    */
-  private void doDesiredQuery(final Panel vp) {
+  private void doDesiredQuery(final Panel vp, final DoIt it) {
     service.getDesiredCounts(new AsyncCallback<Map<String, Map<Integer, Map<Integer, Integer>>>>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -179,6 +183,7 @@ public class MonitoringManager {
 
         Panel hp2 = getItemCalculator(result, "desiredToFemale", "Female");
         vp.add(hp2);
+        if (it != null) it.go();
       }
 
       private Panel getItemCalculator(Map<String, Map<Integer, Map<Integer, Integer>>> result, String key,String gender) {
@@ -317,7 +322,7 @@ public class MonitoringManager {
     return desiredList;
   }
 
-  private void doSessionQuery(final Panel vp) {
+  private void doSessionQuery(final Panel vp, final DoIt it) {
     service.getResultStats(new AsyncCallback<Map<String, Number>>() {
       @Override
       public void onFailure(Throwable caught) {}
@@ -330,8 +335,6 @@ public class MonitoringManager {
         final int badRecordings = result.get("badRecordings").intValue();
 
         vp.add(addGradeInfo(result));
-
-
         vp.add(new HTML("<h2>Session Info</h2>"));
 
         service.getSessions(new AsyncCallback<List<Session>>() {
@@ -346,11 +349,11 @@ public class MonitoringManager {
             Map<Long,Integer> rateToCount = new HashMap<Long, Integer>();
             for (Session s: sessions) {
               totalTime += s.duration;
-              total += s.numAnswers;
+              total += s.getNumAnswers();
 
               Integer count = rateToCount.get(s.getSecAverage());
-              if (count == null) rateToCount.put(s.getSecAverage(), s.numAnswers);
-              else rateToCount.put(s.getSecAverage(),count+s.numAnswers);
+              if (count == null) rateToCount.put(s.getSecAverage(), s.getNumAnswers());
+              else rateToCount.put(s.getSecAverage(),count+ s.getNumAnswers());
             }
             FlexTable flex=  new FlexTable();
             int row = 0;
@@ -396,6 +399,8 @@ public class MonitoringManager {
 
             vp.add(flex);
             getRateChart(rateToCount, vp);
+
+            if (it != null) it.go();
           }
         });
       }
@@ -573,7 +578,7 @@ public class MonitoringManager {
   }
 
 
-  private void doResultLineQuery(final Panel vp) {
+  private void doResultLineQuery(final Panel vp, final DoIt it) {
     service.getResultPerExercise(new AsyncCallback<Map<String,Map<String, Integer>>>() {
       public void onFailure(Throwable caught) {}
 
@@ -632,6 +637,7 @@ public class MonitoringManager {
           femaleTotal += c;
         }
         vp.add(getGenderChart(maleTotal,femaleTotal));
+        if (it != null) it.go();
       }
     });
   }
@@ -724,7 +730,7 @@ public class MonitoringManager {
     return lineChart;
   }
 
-  private void doResultQuery(final Panel vp) {
+  private void doResultQuery(final Panel vp, final DoIt it) {
     service.getResultCountToCount(new AsyncCallback<Map<Integer, Integer>>() {
       public void onFailure(Throwable caught) {}
       public void onSuccess(Map<Integer, Integer> userToCount) {
@@ -746,6 +752,7 @@ public class MonitoringManager {
         flex.setHTML(1, 1, numAnswered + " or " + (100 - percent) + "%");
         vp.add(flex);
         vp.add(getResultCountChart(userToCount));
+        if (it != null) it.go();
       }
     });
   }
@@ -797,7 +804,7 @@ public class MonitoringManager {
   private void doChartSequence(int round, List<String> keys,
                                Map<String, Integer> correct, Map<String, Integer> incorrect, final Panel vp) {
     int size = keys.size();
-    boolean showItemIDs = size > 500;
+    //boolean showItemIDs = size > 500;
     int chartSamples = Math.min(ITEM_CHART_ITEM_WIDTH, size);
 
     for (int i = 0; i < size; i += chartSamples) {
