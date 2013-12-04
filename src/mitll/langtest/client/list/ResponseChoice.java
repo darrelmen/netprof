@@ -47,6 +47,8 @@ public class ResponseChoice {
     Panel instructions = new FluidRow();
     instructions.addStyleName("inlineStyle");
     Nav div = new Nav();
+    DOM.setStyleAttribute(div.getElement(), "marginBottom", "0px");
+
     Dropdown menu = new Dropdown("Response type");
 
     final Heading responseTypeDisplay = new Heading(5);
