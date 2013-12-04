@@ -1,22 +1,5 @@
 package mitll.langtest.client.flashcard;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.PopupPanel;
-import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExerciseQuestionState;
-import mitll.langtest.client.flashcard.BootstrapExercisePanel;
-import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.client.recorder.RecordButtonPanel;
-import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Exercise;
-
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.google.gwt.dom.client.NativeEvent;
@@ -29,10 +12,23 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
+import mitll.langtest.client.LangTest;
+import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExerciseQuestionState;
+import mitll.langtest.client.recorder.RecordButton;
+import mitll.langtest.client.recorder.RecordButtonPanel;
+import mitll.langtest.client.sound.SoundFeedback;
+import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.Exercise;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
 * Created with IntelliJ IDEA.
@@ -88,7 +84,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
   public FlashcardRecordButtonPanel(BootstrapExercisePanel widgets, LangTestDatabaseAsync service,
                                     ExerciseController controller, Exercise exercise, int index,
                                     boolean warnUserWhenNotSpace) {
-    super(service, controller, exercise, null, index);
+    super(service, controller, exercise, null, index, true,controller.shouldAddRecordKeyBinding());
     this.widgets = widgets;
     this.exercise = exercise;
     isDemoMode = controller.isDemoMode();
@@ -97,9 +93,8 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
     recordButton.setTitle("Please press and hold the space bar to record");
   }
 
-  @Override
-  protected RecordButton makeRecordButton(ExerciseController controller, final RecordButtonPanel outer) {
-    return new RecordButton(controller.getRecordTimeout(), true) {
+  protected RecordButton makeRecordButton(ExerciseController controller, final RecordButtonPanel outer, boolean addKeyHandler) {
+    return new RecordButton(controller.getRecordTimeout(), addKeyHandler) {
       @Override
       protected void stopRecording() {
         outer.stopRecording();
@@ -126,7 +121,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
       }
 
       @Override
-      protected HandlerRegistration addKeyHandler() {
+      public HandlerRegistration addKeyHandler() {
         return Event.addNativePreviewHandler(new
                                                Event.NativePreviewHandler() {
 
@@ -246,8 +241,6 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
     recordButton.setHeight("112px");
   }
 
-  private int numMP3s = 0;
-
   /**
    * Deal with three cases: <br></br>
    * * the audio was invalid in some way : too short, too quiet, too loud<br></br>
@@ -302,40 +295,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
    * @param hasRefAudio
    */
   private void ensureMP3(final AudioAnswer result, final double score, String path, final boolean hasRefAudio) {
-    boolean hasSynonymAudio = !exercise.getSynonymAudioRefs().isEmpty();
-
-    if (hasSynonymAudio) {
-      numMP3s = exercise.getSynonymAudioRefs().size();
-      for (String spath : exercise.getSynonymAudioRefs()) {
-        //   spath = (spath.endsWith(WAV)) ? spath.replace(WAV, MP3) : spath;
-        service.ensureMP3(spath, new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            Window.alert("Couldn't contact server (ensureMP3).");
-          }
-
-          @Override
-          public void onSuccess(Void result2) {
-            numMP3s--;
-            if (numMP3s == 0) {
-              showIncorrectFeedback(result, score, hasRefAudio);
-            }
-          }
-        });
-      }
-    } else {
-      service.ensureMP3(path, new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          Window.alert("Couldn't contact server (ensureMP3).");
-        }
-
-        @Override
-        public void onSuccess(Void result2) {
-          showIncorrectFeedback(result, score, hasRefAudio);
-        }
-      });
-    }
+     showIncorrectFeedback(result, score, hasRefAudio);
   }
 
   private void showCorrectFeedback(double score) {
@@ -437,7 +397,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
       Timer t = new Timer() {
         @Override
         public void run() {
-          controller.loadNextExercise(exercise);
+          controller.getExerciseList().loadNextExercise(exercise);
         }
       };
       int delay = getFeedbackLengthProportionalDelay(infoToShow);
@@ -497,7 +457,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel {
       Timer t = new Timer() {
         @Override
         public void run() {
-          controller.loadNextExercise(exercise);
+          controller.getExerciseList().loadNextExercise(exercise);
         }
       };
       int incorrectDelay = DELAY_MILLIS_LONG;
