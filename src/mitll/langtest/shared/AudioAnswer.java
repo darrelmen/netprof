@@ -16,8 +16,10 @@ public class AudioAnswer implements IsSerializable {
   public String decodeOutput = "";
   private double score = -1;
   private boolean correct = false;
+  private boolean saidAnswer = false;
   public int durationInMillis;
   private long resultID;
+
 
   public enum Validity implements IsSerializable {
     OK("Audio OK."),
@@ -80,6 +82,7 @@ public class AudioAnswer implements IsSerializable {
 
   /**
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#receivedAudioAnswer(AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput(String, int, Exercise, java.io.File, AudioAnswer)
    * @return
    */
   public boolean isCorrect() { return correct; }
@@ -96,8 +99,16 @@ public class AudioAnswer implements IsSerializable {
     this.resultID = resultID;
   }
 
+  public boolean isSaidAnswer() {
+    return saidAnswer;
+  }
+
+  public void setSaidAnswer(boolean saidAnswer) {
+    this.saidAnswer = saidAnswer;
+  }
+
   public String toString() {
     return "Answer id " +resultID + " : Path " + path + " id " + reqid + " validity " + validity +
-      " correct " + correct + " score " + score;
+      " correct " + correct + " score " + score + " said answer " + saidAnswer;
   }
 }
