@@ -22,14 +22,16 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class UserListManager {
-  public static final String MY_LIST = "Favorites";
   private static Logger logger = Logger.getLogger(UserListManager.class);
+
+  public static final String MY_LIST = "Favorites";
 
   private final UserDAO userDAO;
   // TODO add a DAO -- do something smarter!
-  int i = 0;
-  List<UserList> userLists = new ArrayList<UserList>();
+  private int i = 0;
+  private List<UserList> userLists = new ArrayList<UserList>();
   private UserExerciseDAO userExerciseDAO;
+  int userExerciseCount = 0;
 
   public UserListManager(UserDAO userDAO) { this.userDAO = userDAO; }
 
@@ -111,9 +113,7 @@ public class UserListManager {
   public List<UserExercise> addItemToUserList(int userListID, UserExercise userExercise) {
     for (UserList userList : userLists) {
       if (userList.getUniqueID() == userListID) {
-        userList.addExercise(userExercise/*.toExercise()*/);
-
-
+        userList.addExercise(userExercise);
         logger.debug("addItemToUserList " + userList);
         return userList.getExercises();
       }
@@ -136,7 +136,6 @@ public class UserListManager {
     return listsForUser;  //To change body of created methods use File | Settings | File Templates.
   }
 
-  int userExerciseCount = 0;
   public UserExercise createNewItem(long userid, String english, String foreign) {
     int uniqueID = userExerciseCount++;
     return new UserExercise(uniqueID, userid, english, foreign);
@@ -159,6 +158,11 @@ public class UserListManager {
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
+  }
+
+  public UserList getUserListByID(int id) {
+    for (UserList ul : userLists) if (ul.getUniqueID() == id) return ul;
+    return null;
   }
 
 /*  public UserExerciseDAO getUserExerciseDAO() {
