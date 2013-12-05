@@ -532,10 +532,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   private void useExercise(Exercise result, ExerciseShell e) {
     createdPanel = makeExercisePanel(result);
-    System.out.println("ExerciseList.useExercise : " +e.getID());
-
     int i = getIndex(e);
-    System.out.println("ExerciseList.useExercise : " +e.getID() + " index " +i);
+//  System.out.println("ExerciseList.useExercise : " +e.getID() + " index " +i);
     if (i == -1) {
       System.err.println("useExercise can't find " + e + " in list of " + currentExercises.size() +
         " exercises (" +currentExercises+ ")");
