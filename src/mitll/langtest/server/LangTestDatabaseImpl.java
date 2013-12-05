@@ -208,9 +208,23 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix) {
+  public ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix, int userListID) {
     logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
-    ExerciseTrie trie = new ExerciseTrie(getExercises(userID), !serverProps.getLanguage().equals("English"));
+    List<Exercise> exercises = getExercises(userID);
+
+    if (userListID != -1) {
+      UserList userListByID = db.getUserListManager().getUserListByID(userListID);
+      if (userListByID != null) { // defensive!
+         userListByID.getExercises();
+        List<Exercise> exercises2 = new ArrayList<Exercise>();
+        for (UserExercise ue: userListByID.getExercises()) {
+          Exercise exercise = getExercise(ue.getID());
+          if (exercise != null) exercises2.add(exercise);
+        }
+        exercises = exercises2;
+      }
+    }
+    ExerciseTrie trie = new ExerciseTrie(exercises, !serverProps.getLanguage().equals("English"));
     List<Exercise> exercisesForPrefix = trie.getExercises(prefix);
 
     return getExerciseListWrapper(reqID, exercisesForPrefix);
@@ -921,8 +935,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * @see mitll.langtest.client.custom.Navigation#showInitialState()
    * @see mitll.langtest.client.custom.Navigation#viewLessons
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#populateListChoices
    * @param userid
    * @param onlyCreated
    * @return
