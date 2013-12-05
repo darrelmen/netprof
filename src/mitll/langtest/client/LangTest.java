@@ -831,7 +831,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     logout = getLogoutLink();
 
     makeUsersAnchor(false);
-    showResults = new Anchor("Results");
+    showResults = new Anchor(props.getNameForAnswer()+"s");
     showResults.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         GWT.runAsync(new RunAsyncCallback() {
