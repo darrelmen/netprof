@@ -148,7 +148,7 @@ public interface LangTestDatabase extends RemoteService {
 
   ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix);
 
-  ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix);
+  ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix, int userListID);
 
   StartupInfo getStartupInfo();
   int addUserList(long userid, String name, String description, String dliClass);
