@@ -91,7 +91,7 @@ public class AudioFileHelper {
 
 
   /**
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param testAudioFile
    * @param sentence
@@ -157,7 +157,7 @@ public class AudioFileHelper {
    *
    * @see #getASRScoreForAudio(int, String, String, int, int, boolean)
    * @see mitll.langtest.server.scoring.AutoCRTScoring#getASRScoreForAudio
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param testAudioFile
    * @param sentence empty string when using lmSentences non empty and vice-versa
@@ -185,7 +185,6 @@ public class AudioFileHelper {
     String testAudioName = testDirAndName.getName();
     String testAudioDir = testDirAndName.getDir();
 
-    //logger.debug("getASRScoreForAudio scoring " + testAudioName + " in dir " + testAudioDir);
     if (serverProps.getLanguage().equalsIgnoreCase("English")) sentence = sentence.toUpperCase();  // hack for English
     PretestScore pretestScore = asrScoring.scoreRepeat(
       testAudioDir, removeSuffix(testAudioName),
