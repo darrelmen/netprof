@@ -343,7 +343,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
           System.out.println("getImageURLForAudio : (failure) took " +(now-then) + " millis");
-          Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
+          if (!caught.getMessage().trim().equals("0")) {
+            Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
+          }
+          System.out.println("message " + caught.getMessage() + " " + caught);
         }
         public void onSuccess(ImageResponse result) {
           long now = System.currentTimeMillis();
