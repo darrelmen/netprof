@@ -1,15 +1,13 @@
 package mitll.langtest.client.recorder;
 
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
@@ -31,19 +29,12 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class RecordButtonPanel {
-  protected static final String RECORD_PNG = LangTest.LANGTEST_IMAGES +"record.png";
-  private static final String STOP_PNG   = LangTest.LANGTEST_IMAGES +"stop.png";
-  private static final String RECORD = "Record";
-  private static final String STOP = "Stop";
-  protected final Image recordImage;
-  protected final Image stopImage;
-  protected ImageAnchor recordButton;
+  protected RecordButton recordButton;
   protected LangTestDatabaseAsync service;
   protected ExerciseController controller;
   private Exercise exercise;
   private ExerciseQuestionState questionState;
   private int index;
-  private RecordButton rb;
   private int reqid = 0;
   protected Panel panel;
   private Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
@@ -54,12 +45,10 @@ public class RecordButtonPanel {
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
    *
    * @see SimpleRecordExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
-   * @see mitll.langtest.client.bootstrap.BootstrapExercisePanel.MyRecordButtonPanel#MyRecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, int, boolean, boolean)
    */
   public RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
                            final Exercise exercise, final ExerciseQuestionState questionState, final int index,
                            boolean doFlashcardAudio, boolean addKeyBinding){
-    final RecordButtonPanel outer = this;
     this.service = service;
     this.controller = controller;
     this.exercise = exercise;
@@ -67,114 +56,47 @@ public class RecordButtonPanel {
     this.index = index;
     this.doFlashcardAudio = doFlashcardAudio;
     // make record button
-    // make images
-    recordImage = new Image(RECORD_PNG);
-    recordImage.setAltText(RECORD);
-    stopImage = new Image(STOP_PNG);
-    stopImage.setAltText(STOP);
 
-    // add record button
-    makeRecordButton();
-
-    recordButton.getElement().setId("record_button");
-    recordButton.setTitle(RECORD);
-
-    this.rb = makeRecordButton(controller, outer, addKeyBinding);
-    layoutRecordButton();
+    layoutRecordButton(recordButton = makeRecordButton(controller));
   }
 
-  public void addKeyHandler() { rb.addKeyHandler(); }
-  public void removeKeyHandler() { rb.removeKeyHandler(); }
+  protected RecordButton makeRecordButton(ExerciseController controller) {
+    return new RecordButton( controller.getRecordTimeout(),new RecordButton.RecordingListener() {
+      public void startRecording() {
+        recordImage1.setVisible(true);
+      }
 
-  protected RecordButton makeRecordButton(final ExerciseController controller, final RecordButtonPanel outer, boolean addKeyHandler) {
-    return new RecordButton(recordButton, controller.getRecordTimeout(), recordImage1, recordImage2, addKeyHandler) {
-      @Override
-      protected void stopRecording() {
-        outer.stopRecording();
+      public void flip(boolean first) {
+        recordImage1.setVisible(!first);
+        recordImage2.setVisible(first);
       }
 
       @Override
-      protected void startRecording() {
-        outer.startRecording();
+      public void stopRecording() {
+        recordImage1.setVisible(false);
+        recordImage2.setVisible(false);
       }
-
-      @Override
-      protected void showRecording() {
-        super.showRecording();
-        outer.showRecording();
-      }
-
-      @Override
-      protected void showStopped() {
-        super.showStopped();
-        outer.showStopped();
-      }
-    };
-  }
-
-  protected Anchor makeRecordButton() {
-    recordButton = new ImageAnchor();
-    recordButton.setWidth("70px");
-
-    recordButton.setResource(recordImage);
-    return recordButton;
+    });
   }
 
   /**
-   * @see #RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int)
+   * @see RecordButtonPanel#RecordButtonPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseQuestionState, int, boolean, boolean)
    */
-  protected void layoutRecordButton() {
-    SimplePanel recordButtonContainer = new SimplePanel(recordButton) {
-      @Override
-      protected void onUnload() {
-        super.onUnload();
-        RecordButtonPanel.this.onUnload();
-      }
-    };
+  protected void layoutRecordButton(Widget button) {
+    SimplePanel recordButtonContainer = new SimplePanel(button);
     recordButtonContainer.setWidth("75px");
     HorizontalPanel hp = new HorizontalPanel();
     hp.add(recordButtonContainer);
     this.panel = hp;
     panel.getElement().setId("recordButtonPanel");
+    addImages();
+  }
+
+  protected void addImages() {
     panel.add(recordImage1);
     recordImage1.setVisible(false);
     panel.add(recordImage2);
     recordImage2.setVisible(false);
-  }
-
-  /** Half-hearted attempt to not use the deprecated horizontal panel **/
-/*  protected void layoutRecordButton2() {
-  //  SimplePanel recordButtonContainer = new SimplePanel();
-  //  FlowPanel recordButtonContainer = new FlowPanel();
-
-  //  recordButtonContainer.setWidth("75px");
-//    recordButtonContainer.add(recordButton);
-  //  recordButton.addStyleName("leftFiftyPercentMargin");
-
-*//*    HorizontalPanel hp = new HorizontalPanel() {
-      @Override
-      protected void onUnload() {
-        RecordButtonPanel.this.onUnload();
-      }
-    };
-    hp.add(recordButtonContainer);*//*
- //   this.panel = recordButtonContainer;
-
-  //  panel.add(recordImage1);
-    recordImage1.setVisible(false);
- //   panel.add(recordImage2);
-    recordImage2.setVisible(false);
-
-
-    FluidRow row = new FluidRow();
-    row.add(recordButton);
-    row.add(recordImage1);
-    row.add(recordImage2);
-    panel = row;
-  }*/
-
-  public void onUnload() {
-    rb.onUnload();
   }
 
   /**
@@ -242,30 +164,8 @@ public class RecordButtonPanel {
       });
   }
 
-  public void showRecording() {
-    recordButton.setResource(stopImage);
-    recordButton.setTitle(STOP);
-  }
-
-  public void showStopped() {
-    recordButton.setResource(recordImage);
-    recordButton.setTitle(RECORD);
-  }
-
-  public FocusWidget getRecordButton() { return recordButton; }
+  public Widget getRecordButton() { return recordButton; }
 
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {}
   protected void receivedAudioFailure() {}
-
-  public static class ImageAnchor extends Anchor {
-    private Image img = null;
-    public ImageAnchor() {}
-    public void setResource(Image img2) {
-      if (this.img != null) {
-        DOM.removeChild(getElement(), this.img.getElement());
-      }
-      this.img = img2;
-      DOM.insertBefore(getElement(), img.getElement(), DOM.getFirstChild(getElement()));
-    }
-  }
 }
