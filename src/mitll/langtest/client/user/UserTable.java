@@ -27,7 +27,9 @@ public class UserTable extends PagerTable {
   /**
    * @see mitll.langtest.client.LangTest#getLogout()
    */
-  public void showUsers(final LangTestDatabaseAsync service, int userid) { showDialog(service);  }
+  public void showUsers(final LangTestDatabaseAsync service, int userid) {
+    showDialog(service);
+  }
 
   protected void showDialog(final LangTestDatabaseAsync service) {
     // Create the popup dialog box
@@ -49,7 +51,9 @@ public class UserTable extends PagerTable {
 
     service.getUsers(new AsyncCallback<List<User>>() {
       public void onFailure(Throwable caught) {
-        Window.alert("getUsers couldn't contact server");
+        if (!caught.getMessage().trim().equals("0")) {
+          Window.alert("getUsers couldn't contact server");
+        }
       }
 
       public void onSuccess(List<User> result) {
@@ -58,7 +62,7 @@ public class UserTable extends PagerTable {
           dialogVPanel.remove(closeButton);
         }
 
-        Widget table = getTable(result,service);
+        Widget table = getTable(result, service);
         dialogVPanel.add(table);
         dialogVPanel.add(closeButton);
 
@@ -80,7 +84,7 @@ public class UserTable extends PagerTable {
   private Widget getTable(List<User> result, final LangTestDatabaseAsync service) {
     final CellTable<User> table = new CellTable<User>();
     table.setPageSize(PAGE_SIZE);
-    int width = (int)(Window.getClientWidth() * 0.9);
+    int width = (int) (Window.getClientWidth() * 0.9);
     table.setWidth(width + "px");
     TextColumn<User> id = new TextColumn<User>() {
       @Override
@@ -170,8 +174,8 @@ public class UserTable extends PagerTable {
       public String getValue(User contact) {
         String ipaddr1 = contact.ipaddr;
         int at = ipaddr1.lastIndexOf("at");
-        
-        ipaddr1 = at == -1 ? "" : ipaddr1.substring(0,at);
+
+        ipaddr1 = at == -1 ? "" : ipaddr1.substring(0, at);
         return ipaddr1;
       }
     };
@@ -235,12 +239,12 @@ public class UserTable extends PagerTable {
     table.getColumnSortList().push(id);
 
     // Create a SimplePager.
-   // return getPagerAndTable(table, table, 10, 10);
+    // return getPagerAndTable(table, table, 10, 10);
     return getOldSchoolPagerAndTable(table, table, 10, 10);
   }
 
   private float roundToHundredth(double totalHours) {
-    return ((float)((Math.round(totalHours*100))))/100f;
+    return ((float) ((Math.round(totalHours * 100)))) / 100f;
   }
 
   protected void addUserIDColumns(final LangTestDatabaseAsync service, CellTable<User> table) {
