@@ -422,11 +422,11 @@ public class Navigation extends BasicDialog implements RequiresResize {
     FluidRow row;
     slowPath = null;
     fastPath = null;
-    if (false) {
+/*    if (false) {
       container.add(row);
       final Heading header = new Heading(3, "Add a new item");
       row.add(header);
-    }
+    }*/
 
     row = new FluidRow();
     container.add(row);

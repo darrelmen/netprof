@@ -1,0 +1,69 @@
+@external .myBaseIcon_*;
+
+    /* Our sample icon */
+@sprite .myBaseIcon_enter {
+    gwt-image: "enter";
+    display: inline-block;
+}
+
+@sprite .myBaseIcon_waiting {
+    gwt-image: "waiting";
+    display: inline-block;
+}
+
+@sprite .myBaseIcon_record1 {
+    gwt-image: "record1";
+    display: inline-block;
+}
+
+@sprite .myBaseIcon_record2 {
+    gwt-image: "record2";
+    display: inline-block;
+}
+
+@sprite .myBaseIcon_record1Small {
+    gwt-image: "record1Small";
+    display: inline-block;
+}
+
+@sprite .myBaseIcon_record2Small {
+    gwt-image: "record2Small";
+    display: inline-block;
+}
+
+@sprite .myBaseIcon_correct {
+    gwt-image: "correct";
+    display: inline-block;
+}
+
+@sprite .myBaseIcon_incorrect {
+    gwt-image: "incorrect";
+    display: inline-block;
+}
+
+@sprite .myBaseIcon_record {
+    gwt-image: "record";
+    display: inline-block;
+}
+
+@sprite .myBaseIcon_stop {
+    gwt-image: "stop";
+    display: inline-block;
+}
+
+@sprite .myBaseIcon_white {
+    gwt-image: "white";
+    display: inline-block;
+}
+
+@sprite .myBaseIcon_gray {
+    gwt-image: "gray";
+    display: inline-block;
+}
+
+
+    /* Do some css stuff */
+/*
+.myBaseIcon_logo:hover {
+    opacity: 0.5;
+}*/
