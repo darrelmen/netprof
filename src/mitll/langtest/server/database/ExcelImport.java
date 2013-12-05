@@ -187,7 +187,7 @@ public class ExcelImport implements ExerciseDAO {
           if (count++ < 10) logger.warn(error);
         }
       }
-      sectionHelper.report();
+     // sectionHelper.report();
       inp.close();
     } catch (IOException e) {
       e.printStackTrace();
