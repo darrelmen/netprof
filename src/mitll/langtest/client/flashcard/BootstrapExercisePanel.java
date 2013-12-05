@@ -201,7 +201,7 @@ public class BootstrapExercisePanel extends FluidContainer {
 
   protected RecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service,
                                               ExerciseController controller, final int index, boolean addKeyBinding) {
-    return new FlashcardRecordButtonPanel(this, service, controller, exercise, index, addKeyBinding);
+    return new FlashcardRecordButtonPanel(this, service, controller, exercise, index, true);
   }
 
   /**
