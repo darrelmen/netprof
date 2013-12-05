@@ -39,6 +39,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     super(exercise, controller, service, index, false);
     this.recordAudioPanel = recordAudioPanel;
     this.parentPanel = widgets;
+    getElement().setId("WaveformPostAudioRecordButton");
   }
 
   @Override
