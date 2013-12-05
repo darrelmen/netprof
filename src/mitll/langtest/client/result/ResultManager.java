@@ -460,7 +460,7 @@ public class ResultManager extends PagerTable {
       }
     };
     pronScore.setSortable(true);
-    table.addColumn(pronScore, "PronScore");
+    table.addColumn(pronScore, "ProFScore");
     colToField.put(pronScore, "pronScore");
   }
 
