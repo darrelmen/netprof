@@ -49,7 +49,6 @@ public class PropertyHandler {
   private static final String LANGUAGE = "language";
   private static final String CONTINUE_PROMPT = "promptBeforeNextItem";
   private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
-  private static final String TRACK_ONLINE_USERS = "trackUsers";
   private static final String RESPONSE_TYPE = "responseType";
   private static final String FLASHCARD_NEXT_AND_PREV = "flashcardNextAndPrev";
   private static final String BIND_NEXT_TO_ENTER = "bindNextToEnter";
