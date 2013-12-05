@@ -129,7 +129,7 @@ public interface LangTestDatabaseAsync {
 
   void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
 
-  void getExerciseIds(int reqID, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
+  void getExerciseIds(int reqID, long userID, String prefix, int userListID, AsyncCallback<ExerciseListWrapper> async);
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
