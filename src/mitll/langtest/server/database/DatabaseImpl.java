@@ -1420,6 +1420,11 @@ public class DatabaseImpl implements Database {
 
   public UserListManager getUserListManager() { return userListManager; }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String)
+   * @param id
+   * @return
+   */
   public Exercise getUserExerciseWhere(String id) {
     UserExercise where = userExerciseDAO.getWhere(id);
     return where != null ? where.toExercise(language) : null;
