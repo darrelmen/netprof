@@ -22,9 +22,6 @@ import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.Exercise;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -33,8 +30,6 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class BootstrapExercisePanel extends FluidContainer {
-  private List<RecordButtonPanel> answerWidgets = new ArrayList<RecordButtonPanel>();
-
   public static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>";
 
   private Heading recoOutput;
@@ -44,13 +39,15 @@ public class BootstrapExercisePanel extends FluidContainer {
   protected Panel recoOutputContainer;
 
   /**
+   *
    * @param e
    * @param service
    * @param controller
+   * @param addKeyBinding
    * @see mitll.langtest.client.flashcard.FlashcardExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    */
   public BootstrapExercisePanel(final Exercise e, final LangTestDatabaseAsync service,
-                                final ExerciseController controller, int feedbackHeight) {
+                                final ExerciseController controller, int feedbackHeight, boolean addKeyBinding) {
     setStyleName("exerciseBackground");
     addStyleName("cardBorder");
     HTML warnNoFlash = new HTML(WARN_NO_FLASH);
@@ -110,10 +107,11 @@ public class BootstrapExercisePanel extends FluidContainer {
    * Make a row to show the question content (the prompt or stimulus)
    * and the space bar and feedback widgets beneath it.
    *
+   *
    * @param e
    * @return
    */
-  protected Widget getCardPrompt(Exercise e, ExerciseController controller) {
+  protected FlowPanel getCardPrompt(Exercise e, ExerciseController controller) {
     FluidRow questionRow = new FluidRow();
     Widget questionContent = getQuestionContent(e);
     Column contentContainer = new Column(12, questionContent);
@@ -143,7 +141,7 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param e
    * @param service
    * @param controller used in subclasses for audio control
-   * @see #BootstrapExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see #BootstrapExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean)
    */
   protected void addRecordingAndFeedbackWidgets(Exercise e, LangTestDatabaseAsync service, ExerciseController controller,
                                               int feedbackHeight) {
@@ -154,12 +152,11 @@ public class BootstrapExercisePanel extends FluidContainer {
       add(getRecoOutputRow());
     }
 
-    add(audioScoreFeedback.getScoreFeedbackRow(feedbackHeight));
+    add(audioScoreFeedback.getScoreFeedbackRow(feedbackHeight, false));
   }
 
   protected Widget getAnswerAndRecordButtonRow(Exercise e, LangTestDatabaseAsync service, ExerciseController controller) {
-    RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1);
-    this.answerWidgets.add(answerWidget);
+    RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1, controller.getProps().shouldAddRecordKeyBinding());
     return getRecordButtonRow(answerWidget.getRecordButton());
   }
 
@@ -169,7 +166,7 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @param recordButton
    * @return
    * @see #getAnswerAndRecordButtonRow(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
-   * @see TextCRTFlashcard#getTextResponseWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, ScoreFeedback)
+   * @see CombinedResponseFlashcard#addRecordingAndFeedbackWidgets(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
   protected FluidRow getRecordButtonRow(Widget recordButton) {
     FluidRow recordButtonRow = new FluidRow();
@@ -203,20 +200,8 @@ public class BootstrapExercisePanel extends FluidContainer {
   }
 
   protected RecordButtonPanel getAnswerWidget(final Exercise exercise, LangTestDatabaseAsync service,
-                                              ExerciseController controller, final int index) {
-    return new FlashcardRecordButtonPanel(this, service, controller, exercise, index, true);
-  }
-
-  /**
-   * Not sure if this is actually necessary -- this is part of who gets the focus when the flashcard is inside
-   * an internal frame in a dialog.
-   * TODO : remove??
-   * @see mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#grabFocus(BootstrapExercisePanel)
-   */
-  public void grabFocus() {
-    for (RecordButtonPanel widget : answerWidgets) {
-      widget.getRecordButton().setFocus(true);
-    }
+                                              ExerciseController controller, final int index, boolean addKeyBinding) {
+    return new FlashcardRecordButtonPanel(this, service, controller, exercise, index, addKeyBinding);
   }
 
   /**
@@ -229,18 +214,11 @@ public class BootstrapExercisePanel extends FluidContainer {
    * @see FlashcardRecordButtonPanel#showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
    */
   public void showPronScoreFeedback(double score, String scorePrefix) {
-    audioScoreFeedback.showScoreFeedback(scorePrefix, score, false);
+    audioScoreFeedback.showScoreFeedback(scorePrefix, score, false, false);
   }
 
   public void clearFeedback() {
     audioScoreFeedback.clearFeedback();
-  }
-
-  @Override
-  protected void onUnload() {
-    for (RecordButtonPanel answers : answerWidgets) {
-      answers.onUnload();
-    }
   }
 
   public Heading getRecoOutput() {
