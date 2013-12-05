@@ -27,7 +27,6 @@ import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.ItemSorter;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.client.list.section.SectionExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.SectionNode;
@@ -492,7 +491,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    *
    * @param type
    * @param sections
-   * @see SectionExerciseList#restoreListBoxState(mitll.langtest.client.list.SelectionState)
+   * @see mitll.langtest.client.list.HistoryExerciseList#restoreListBoxState(mitll.langtest.client.list.SelectionState)
    */
   @Override
   protected void selectItem(String type, Collection<String> sections) {
@@ -504,7 +503,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
 
   /**
    * @param type
-   * @see SectionExerciseList#restoreListBoxState(mitll.langtest.client.list.SelectionState)
+   * @see HistoryExerciseList#restoreListBoxState(mitll.langtest.client.list.SelectionState)
    */
   @Override
   protected void clearEnabled(String type) {
