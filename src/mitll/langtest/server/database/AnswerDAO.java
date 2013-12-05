@@ -18,7 +18,8 @@ public class AnswerDAO {
   private static Logger logger = Logger.getLogger(AnswerDAO.class);
 
   private final Database database;
-  ResultDAO resultDAO;
+  private ResultDAO resultDAO;
+
   public AnswerDAO(Database database, ResultDAO resultDAO) { this.database = database; this.resultDAO = resultDAO; }
 
   /**
@@ -219,39 +220,36 @@ public class AnswerDAO {
     return newID;
   }
 
-  //private boolean debug = true;
-
   /**
-   * @see DatabaseImpl#changeGrade(mitll.langtest.shared.grade.Grade)
-   * @paramx id
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(int, long, String, String, int, int, boolean)
+   * @param id
    */
-/*  public void changeAnswer(String id, boolean correct, float score) {
+  public void changeAnswer(long id, float score) {
     try {
       Connection connection = database.getConnection();
-      PreparedStatement statement;
 
       String sql = "UPDATE results " +
-        "SET correct='" + correct + "', " +
+        "SET " +
         ResultDAO.PRON_SCORE+"='" + score + "' " +
         "WHERE id=" + id;
-      if (debug) {
+      if (false) {
         logger.debug("changeAnswer " + id + " score " +score);
       }
-      statement = connection.prepareStatement(sql);
+      PreparedStatement statement = connection.prepareStatement(sql);
 
       int i = statement.executeUpdate();
 
-      if (debug) logger.debug("UPDATE " + i);
+      if (false) logger.debug("UPDATE " + i);
       if (i == 0) {
-        logger.error("huh? didn't update the answer for " + id);
+        logger.error("huh? didn't update the answer for " + id + " sql " + sql);
       }
 
       statement.close();
       database.closeConnection(connection);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error("got " +e,e);
     }
-  }*/
+  }
 
   private String copyStringChar(String plan) {
     return new String(plan.toCharArray());
