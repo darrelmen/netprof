@@ -180,7 +180,7 @@ public class FeedbackRecordPanel extends SimpleRecordExercisePanel {
   @Override
   protected void onUnload() {
     super.onUnload();
-    for (AutoCRTRecordPanel autoCRTRecordPanel : autoCRTRecordPanels) autoCRTRecordPanel.onUnload();
+   // for (AutoCRTRecordPanel autoCRTRecordPanel : autoCRTRecordPanels) autoCRTRecordPanel.onUnload();
     for (TextResponse textResponse : textResponses) textResponse.onUnload();
   }
 }
