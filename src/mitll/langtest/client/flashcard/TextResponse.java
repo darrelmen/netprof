@@ -68,7 +68,7 @@ public class TextResponse {
 
   /**
    * Has two rows -- the text input box and the score feedback
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#doText(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#doText
    * @param toAddTo
    * @param exercise
    * @param service
@@ -86,14 +86,14 @@ public class TextResponse {
     textResponseWidget = getTextResponseWidget(exercise, service, controller, getTextScoreFeedback(), centered, addKeyBinding, questionID);
     toAddTo.add(textResponseWidget);
     textResponseWidget.addStyleName("floatLeft");
-    FluidRow scoreFeedbackRow = getTextScoreFeedback().getScoreFeedbackRow(FEEDBACK_HEIGHT);
+    FluidRow scoreFeedbackRow = getTextScoreFeedback().getScoreFeedbackRow(FEEDBACK_HEIGHT, true);
     toAddTo.add(scoreFeedbackRow);
 
     return textResponseWidget;
   }
 
   /**
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#doText(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#doText
    * @return
    */
   public Widget getTextResponseWidget() { return textResponseWidget; }
