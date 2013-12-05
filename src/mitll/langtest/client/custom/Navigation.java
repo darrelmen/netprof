@@ -194,7 +194,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
   }
 
   public void showInitialState() {
-    System.out.println("show initial state! -->");
+    System.out.println("show initial state for " + userManager.getUser());
 
     service.getListsForUser(userManager.getUser(), false, new AsyncCallback<Collection<UserList>>() {
       @Override
@@ -207,9 +207,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
         if (result.size() == 1 && result.iterator().next().getExercises().isEmpty()) {
           service.getUserListsForText("", new AsyncCallback<Collection<UserList>>() {
             @Override
-            public void onFailure(Throwable caught) {
-              //To change body of implemented methods use File | Settings | File Templates.
-            }
+            public void onFailure(Throwable caught) {}
 
             @Override
             public void onSuccess(Collection<UserList> result) {
