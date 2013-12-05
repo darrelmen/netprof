@@ -1,10 +1,13 @@
 package mitll.langtest.client.recorder;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.base.StyleHelper;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -16,13 +19,13 @@ import mitll.langtest.client.flashcard.MyCustomIconType;
 
 /**
  * Basically a click handler and a timer to click stop recording, if the user doesn't.
- *
+ * <p/>
  * Two kinds of record buttons -- simple ones where clicking on the button starts and stop the recording, and there's a little
  * image next to it to give feedback that recording is occurring.
- *
+ * <p/>
  * The other kinds is the flashcard button, which records while the space bar is held down, (or maybe while the mouse button is held down).
  * It's feedback is the button itself flipping the record images.
- *
+ * <p/>
  * User: go22670
  * Date: 9/7/12
  * Time: 5:58 PM
@@ -36,11 +39,9 @@ public class RecordButton extends Button {
   protected boolean recording = false;
   private Timer recordTimer;
   private final int autoStopDelay;
-  private RecordingListener recordingListener;
+  private boolean doClickAndHold;
 
-  public void setRecordingListener(RecordingListener recordingListener) {
-    this.recordingListener = recordingListener;
-  }
+  private RecordingListener recordingListener;
 
   public static interface RecordingListener {
     void startRecording();
@@ -48,59 +49,80 @@ public class RecordButton extends Button {
     void stopRecording();
   }
 
-  public RecordButton(int delay) {
+  public RecordButton(int delay, boolean doClickAndHold) {
     super(RECORD);
+    this.doClickAndHold = doClickAndHold;
+
     this.autoStopDelay = delay;
     setType(ButtonType.PRIMARY);
-    setBaseIcon(MyCustomIconType.record);
     setupRecordButton();
     getElement().setId("record_button");
   }
 
   /**
-   *
-   *
    * @param delay
    * @param recordingListener
-
+   * @param doClickAndHold
    */
-  public RecordButton( int delay, RecordingListener recordingListener) {
-    this(delay);
+  public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold) {
+    this(delay, doClickAndHold);
     this.setRecordingListener(recordingListener);
   }
 
+  protected void removeImage() {
+    StyleHelper.removeStyle(icon, icon.getBaseIconType());
+  }
+
+  /**
+   * @see #RecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean)
+   * @param recordingListener
+   */
+  public void setRecordingListener(RecordingListener recordingListener) {
+   // System.out.println("set recording listener on " + getElement().getId());
+    this.recordingListener = recordingListener;
+  }
+
   protected boolean mouseDown = false;
+
   protected void setupRecordButton() {
-    addMouseDownHandler(new MouseDownHandler() {
-      @Override
-      public void onMouseDown(MouseDownEvent event) {
-        if (!mouseDown) {
-          mouseDown = true;
+    if (doClickAndHold) {
+      addMouseDownHandler(new MouseDownHandler() {
+        @Override
+        public void onMouseDown(MouseDownEvent event) {
+          if (!mouseDown) {
+            mouseDown = true;
+            doClick();
+          }
+        }
+      });
+
+      addMouseUpHandler(new MouseUpHandler() {
+        @Override
+        public void onMouseUp(MouseUpEvent event) {
+          mouseDown = false;
           doClick();
         }
-      }
-    });
-
-    addMouseUpHandler(new MouseUpHandler() {
-      @Override
-      public void onMouseUp(MouseUpEvent event) {
-        mouseDown = false;
-        doClick();
-      }
-    });
+      });
+    } else {
+      addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          doClick();
+        }
+      });
+    }
 
     addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
-        System.out.println("recordButton " + getElement().getId()+
-          " got focus");
+        System.out.println("recordButton " + getElement().getId() + " got focus");
       }
     });
 
     addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        System.out.println("recordButton " + getElement().getId()+ " got blur");
+        System.out.println("recordButton " + getElement().getId() + " got blur");
         getFocus();
       }
     });
@@ -121,14 +143,13 @@ public class RecordButton extends Button {
    * @seex RecordButton#setupRecordButton(com.google.gwt.user.client.ui.Widget)
    */
   protected void doClick() {
-    //System.err.println("recordButton " + getElement().getId()+ " doClick");
     if (isVisible() && isEnabled()) {
       startOrStopRecording();
     }
   }
 
   private void startOrStopRecording() {
-    //System.err.println("recordButton " + getElement().getId()+ " startOrStopRecording");
+   // System.err.println("recordButton " + getElement().getId()+ " startOrStopRecording");
     if (recording) {
       cancelTimer();
       stop();
@@ -184,25 +205,22 @@ public class RecordButton extends Button {
   }
 
   /**
-   *
    * @return if we want to flip images
    */
   protected boolean showInitialRecordImage() {
-    setBaseIcon(MyCustomIconType.stop);
+    setText(STOP);
     return true;
   }
 
   protected void showFirstRecordImage() {}
-
   protected void showSecondRecordImage() {}
 
   protected void hideBothRecordImages() {
-    setBaseIcon(MyCustomIconType.record);
+    setText(RECORD);
   }
 
   public void initRecordButton() {
     setVisible(true);
-    setBaseIcon(MyCustomIconType.record);
   }
 
   /**
