@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -33,7 +34,7 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
    * @param controller
    */
   public DataCollectionFlashcard(Exercise e, LangTestDatabaseAsync service, ExerciseController controller, int feedbackHeight) {
-    super(e, service, controller, feedbackHeight);
+    super(e, service, controller, feedbackHeight, controller.shouldAddRecordKeyBinding());
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
       public void execute () {
         int offsetHeight = cardPrompt.getOffsetHeight();
@@ -51,20 +52,21 @@ public class DataCollectionFlashcard extends BootstrapExercisePanel {
    * @param service
    * @param controller
    * @param index
+   * @param addKeyBinding
    * @return
    */
   @Override
-  protected RecordButtonPanel getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, int index) {
+  protected RecordButtonPanel getAnswerWidget(Exercise exercise, LangTestDatabaseAsync service, ExerciseController controller, int index, boolean addKeyBinding) {
     return new FlashcardRecordButtonPanel(this, service, controller, exercise, index, false);
   }
 
   /**
-   * @see BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean)
    * @param e
    * @param controller
    * @return
    */
-  protected Widget getCardPrompt(Exercise e, ExerciseController controller) {
+  protected FlowPanel getCardPrompt(Exercise e, ExerciseController controller) {
     FluidRow questionRow = new FluidRow();
     Widget questionContent = new AudioExerciseContent().getQuestionContent(e, controller, true, true);
     Column contentContainer = new Column(8, questionContent);
