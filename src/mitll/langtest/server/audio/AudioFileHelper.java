@@ -132,7 +132,7 @@ public class AudioFileHelper {
 
   /**
    * @see mitll.langtest.client.flashcard.TextCRTFlashcard#getAnswerAndRecordButtonRow(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
-   * @see LangTestDatabaseImpl#getScoreForAnswer(mitll.langtest.shared.Exercise, int, String)
+   * @see LangTestDatabaseImpl#getScoreForAnswer
    * @param e
    * @param questionID
    * @param answer
