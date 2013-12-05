@@ -50,6 +50,8 @@ public class ASRScoring extends Scoring {
   private static Logger logger = Logger.getLogger(ASRScoring.class);
 
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
+  private static final int VOCAB_SIZE_LIMIT = 200;
+
   public static final String SMALL_LM_SLF = "smallLM.slf";
 
   private final SmallVocabDecoder svDecoderHelper = new SmallVocabDecoder();
@@ -319,7 +321,7 @@ public class ASRScoring extends Scoring {
    * @return
    */
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
-    List<String> backgroundVocab = svDecoderHelper.getVocab(background, SmallVocabDecoder.VOCAB_SIZE_LIMIT);
+    List<String> backgroundVocab = svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT);
     return getUniqueTokensInLM(lmSentences, backgroundVocab);
   }
 
@@ -479,11 +481,7 @@ public class ASRScoring extends Scoring {
   private void readDictionary() { htkDictionary = makeDict(); }
 
   /**
-<<<<<<< HEAD
-   * @see mitll.langtest.server.audio.SplitAudio#convertExamples(int, String, String, java.util.Map, java.util.Map, java.util.Set, boolean)
-=======
    * @see mitll.langtest.server.audio.SplitAudio#convertExamples
->>>>>>> quizlet
    * @return
    */
   public HTKDictionary getDict() { return htkDictionary; }
@@ -638,21 +636,16 @@ public class ASRScoring extends Scoring {
 
   private boolean checkToken(String token) {
     boolean valid = true;
-  //  boolean digit = false;
-  //  boolean english = false;
     if (token.equalsIgnoreCase(SmallVocabDecoder.UNKNOWN_MODEL)) return true;
     for (int i = 0; i < token.length() && valid; i++) {
       char c = token.charAt(i);
       if (Character.isDigit(c)) {
         valid = false;
-    //    digit = true;
       }
       if (Character.UnicodeBlock.of(c) == Character.UnicodeBlock.BASIC_LATIN) {
         valid = false;
-    //    english = true;
       }
     }
-    //if (!valid) logger.warn((digit ? " found digit in " : (english ? " found english in " : "huh? invalid ?")) + token);
     return valid;
   }
 
