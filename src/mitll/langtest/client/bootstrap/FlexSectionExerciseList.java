@@ -99,7 +99,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   @Override
   protected void addComponents() {
     PagingContainer<? extends ExerciseShell> exerciseShellPagingContainer = makePagingContainer();
-    System.out.println("addComponents made container " + exerciseShellPagingContainer);
+    //System.out.println("addComponents made container " + exerciseShellPagingContainer);
     addTableWithPager(exerciseShellPagingContainer);
   }
 
