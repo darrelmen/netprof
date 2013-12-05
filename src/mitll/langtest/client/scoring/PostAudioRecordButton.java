@@ -1,17 +1,13 @@
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.client.recorder.SimpleRecordButton;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
@@ -25,9 +21,6 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
- // private static final String RECORD = "Record";
- // private static final String STOP = "Stop";
-
   private int index;
   private int reqid = 0;
   private Exercise exercise;
@@ -45,26 +38,25 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    */
   public PostAudioRecordButton(Exercise exercise, final ExerciseController controller, LangTestDatabaseAsync service,
                                int index, boolean addKeyHandler) {
-    super(controller.getRecordTimeout());
+    super(controller.getRecordTimeout(), false);
     setRecordingListener(this);
     this.index = index;
     this.exercise = exercise;
     this.controller = controller;
     this.service = service;
+    getElement().setId("PostAudioRecordButton");
   }
 
   @Override
-  public void flip(boolean first) {
-    //To change body of implemented methods use File | Settings | File Templates.
-  }
+  public void flip(boolean first) {}
 
   public void setExercise(Exercise exercise) { this.exercise = exercise; }
 
   private Widget getOuter() { return this; }
+
   /**
    * @see mitll.langtest.client.recorder.RecordButton#stop()
    */
-//  @Override
   public void stopRecording() {
     controller.stopRecording();
     reqid++;
@@ -141,11 +133,11 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     });
   }
 
-  protected abstract void useInvalidResult(AudioAnswer result);
-
   public void startRecording() {
     controller.startRecording();
   }
+
+  protected abstract void useInvalidResult(AudioAnswer result);
 
   public abstract void useResult(AudioAnswer result);
 }
