@@ -221,7 +221,7 @@ public class PagingContainer<T extends ExerciseShell> {
   }
 
   /**
-   * @see SectionExerciseList.MySetExercisesCallback#onSuccess
+   * @seex SectionExerciseList.MySetExercisesCallback#onSuccess
    */
   protected void loadFirstExercise() {
     //  super.loadFirstExercise();
@@ -293,7 +293,7 @@ public class PagingContainer<T extends ExerciseShell> {
     // System.out.println("left over " + leftOver + " raw " + rawRatio + " table ratio " + tableRatio);
 
     float ratio = DEFAULT_PAGE_SIZE * tableRatio;
-    if (dataProvider.getList() != null) {
+    if (dataProvider != null && dataProvider.getList() != null) {
       if (!dataProvider.getList().isEmpty()) {
         T toLoad = dataProvider.getList().get(0);
 
@@ -317,7 +317,7 @@ public class PagingContainer<T extends ExerciseShell> {
    * not sure how this happens, but need Math.max(0,...)
    *
    * @param i
-   * @see ExerciseList#useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
+   * @seex ExerciseList#useExercise(mitll.langtest.shared.Exercise, mitll.langtest.shared.ExerciseShell)
    */
   public void markCurrentExercise(int i) {
     if (dataProvider.getList() == null || dataProvider.getList().isEmpty()) return;
