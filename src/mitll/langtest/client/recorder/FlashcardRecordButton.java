@@ -38,7 +38,7 @@ public class FlashcardRecordButton extends RecordButton {
    * @param warnNotASpace
    */
   public FlashcardRecordButton(int delay, RecordingListener recordingListener, boolean warnNotASpace) {
-    super(delay, recordingListener);
+    super(delay, recordingListener, false);
     this.warnUserWhenNotSpace = warnNotASpace;
     setText("space bar");
     DOM.setStyleAttribute(getElement(), "width", "460px");
@@ -49,10 +49,6 @@ public class FlashcardRecordButton extends RecordButton {
     DOM.setStyleAttribute(getElement(), "lineHeight", "37px");
 
     initRecordButton();
-  }
-
-  private void removeImage() {
-    StyleHelper.removeStyle(icon, icon.getBaseIconType());
   }
 
   protected void setupRecordButton() {
