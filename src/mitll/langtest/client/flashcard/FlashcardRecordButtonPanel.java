@@ -43,15 +43,15 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
 
-  private boolean isDemoMode;
+  private final boolean isDemoMode;
   private boolean warnUserWhenNotSpace = true;
 
   private final Exercise exercise;
-  private BootstrapExercisePanel widgets;
+  private final BootstrapExercisePanel exercisePanel;
   private final boolean continueToNext;
 
   /**
-   * @param widgets
+   * @param exercisePanel
    * @param service
    * @param controller
    * @param exercise
@@ -59,17 +59,17 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
    * @param warnUserWhenNotSpace
    * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int, boolean)
    */
-  public FlashcardRecordButtonPanel(BootstrapExercisePanel widgets, LangTestDatabaseAsync service,
+  public FlashcardRecordButtonPanel(BootstrapExercisePanel exercisePanel, LangTestDatabaseAsync service,
                                     ExerciseController controller, Exercise exercise, int index,
                                     boolean warnUserWhenNotSpace) {
     super(service, controller, exercise, null, index, true, controller.shouldAddRecordKeyBinding());
 
-    this.widgets = widgets;
+    this.exercisePanel = exercisePanel;
     this.exercise = exercise;
     isDemoMode = controller.isDemoMode();
     this.warnUserWhenNotSpace = warnUserWhenNotSpace;
     continueToNext = !controller.getProps().getFlashcardNextAndPrev();
-    recordButton.setTitle("Please press and hold the space bar or mouse button to record");
+    recordButton.setTitle("Press and hold the space bar or mouse button to record");
   }
 
   private IconAnchor waiting;
@@ -106,10 +106,14 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
   }
 
   protected RecordButton makeRecordButton(ExerciseController controller) {
-    return new FlashcardRecordButton(controller.getRecordTimeout(), this, warnUserWhenNotSpace);
+    return new FlashcardRecordButton(controller.getRecordTimeout(), this, true);  // TODO : fix later in classroom?
   }
 
-  public void showPopup(String html) {
+  /**
+   * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
+   * @param html
+   */
+  private void showPopup(String html) {
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
     pleaseWait.setAutoHideEnabled(true);
     pleaseWait.add(new HTML(html));
@@ -168,7 +172,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
       showCorrectFeedback(score);
     } else {   // incorrect!!
       if (hasRefAudio) {
-        ensureMP3(result, score, path, hasRefAudio);
+        ensureMP3(result, score, hasRefAudio);
       } else {
         feedback = showIncorrectFeedback(result, score, hasRefAudio);
       }
@@ -184,16 +188,15 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
    *
    * @param result
    * @param score
-   * @param path
    * @param hasRefAudio
    */
-  private void ensureMP3(final AudioAnswer result, final double score, String path, final boolean hasRefAudio) {
+  private void ensureMP3(final AudioAnswer result, final double score, final boolean hasRefAudio) {
     showIncorrectFeedback(result, score, hasRefAudio);
   }
 
   private void showCorrectFeedback(double score) {
-    widgets.showPronScoreFeedback(score, PRONUNCIATION_SCORE);
-    widgets.getSoundFeedback().playCorrect();
+    exercisePanel.showPronScoreFeedback(score, PRONUNCIATION_SCORE);
+    exercisePanel.getSoundFeedback().playCorrect();
   }
 
   /**
@@ -205,7 +208,9 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
    * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
    */
   private String showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio) {
-    widgets.showPronScoreFeedback(score, PRONUNCIATION_SCORE);
+    if (result.isSaidAnswer()) { // if they said the right answer, but poorly, show pron score
+      exercisePanel.showPronScoreFeedback(score, PRONUNCIATION_SCORE);
+    }
     boolean hasSynonymAudio = !exercise.getSynonymAudioRefs().isEmpty();
     System.out.println("showIncorrectFeedback : playing " + exercise.getSynonymAudioRefs()
       + " result " + result + " score " + score + " has ref " + hasRefAudio +
@@ -224,12 +229,12 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
           path = exercise.getSlowAudioRef(); // fall back to slow audio
         }
         if (path == null) {
-          widgets.getSoundFeedback().playIncorrect(); // this should never happen
+          exercisePanel.getSoundFeedback().playIncorrect(); // this should never happen
         } else {
           path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
           final String fcorrectPrompt = correctPrompt;
 
-          widgets.getSoundFeedback().createSound(path, new SoundFeedback.EndListener() {
+          exercisePanel.getSoundFeedback().createSound(path, new SoundFeedback.EndListener() {
             @Override
             public void songEnded() {
               goToNextItem(fcorrectPrompt);
@@ -238,7 +243,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
         }
       }
     } else {
-      widgets.getSoundFeedback().playIncorrect();
+      exercisePanel.getSoundFeedback().playIncorrect();
 
       System.out.println("doing nextAfterDelay");
       // Schedule the timer to run once in 1 seconds.
@@ -246,7 +251,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
         @Override
         public void run() {
           initRecordButton();
-          widgets.clearFeedback();
+          exercisePanel.clearFeedback();
         }
       };
       int incorrectDelay = DELAY_MILLIS_LONG;
@@ -256,7 +261,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
     if (isDemoMode) {
       correctPrompt = "Heard: " + result.decodeOutput + "<p>" + correctPrompt;
     }
-    Heading recoOutput = widgets.getRecoOutput();
+    Heading recoOutput = exercisePanel.getRecoOutput();
     if (recoOutput != null) {
       recoOutput.setText(correctPrompt);
       DOM.setStyleAttribute(recoOutput.getElement(), "color", "#000000");
@@ -274,7 +279,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
     path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
 
     System.out.println("playAllAudio : " + toPlay.size() + " playing " + path);
-    widgets.getSoundFeedback().createSound(path, new SoundFeedback.EndListener() {
+    exercisePanel.getSoundFeedback().createSound(path, new SoundFeedback.EndListener() {
       @Override
       public void songEnded() {
         toPlay.remove(0);
@@ -374,7 +379,7 @@ public class FlashcardRecordButtonPanel extends RecordButtonPanel implements Rec
     } else {
       if (!correct) {
         initRecordButton();
-        widgets.clearFeedback();
+        exercisePanel.clearFeedback();
       } else {
         // go to next item
         Timer t = new Timer() {
