@@ -350,7 +350,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   protected void loadFirstExercise() {
     if (currentExercises.isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
-      //Window.alert("Server error : no exercises. Please contact administrator.");
       noMatches();
       System.err.println("loadFirstExercise : current exercises is empty?");
     } else {
@@ -368,9 +367,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
 
   /**
-   * Tell the user that we updated the site and refresh the site table.
-   * @paramx submit
-   * @paramx dialogBox
    */
   private void noMatches() {
     final PopupPanel pleaseWait = showPleaseWait("No matches found. Please try a different search.");
