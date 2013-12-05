@@ -478,7 +478,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     final TableSectionExerciseList outer = this;
     exercisePagingContainer = new PagingContainer<Exercise>(controller, 100) {
       /**
-       * @see mitll.langtest.client.bootstrap.TableSectionExerciseList#getAsyncTable(java.util.Map, int)
+       * @see mitll.langtest.client.list.TableSectionExerciseList#getAsyncTable(java.util.Map, int)
        * @return
        */
       @Override
@@ -509,30 +509,6 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     pagingContainer = exercisePagingContainer;
     return pagingContainer;
   }
-
-  /**
-   * @see #getAsyncTable(java.util.Map, int)
-   * @return
-   */
-/*  @Override
-  protected CellTable<Exercise> makeCellTable() {
-    Resources resources = GWT.create(Resources.class);
-    CellTable<Exercise> table = new CellTable<Exercise>(PAGE_SIZE,resources);
-    DOM.setStyleAttribute(table.getElement(), "marginBottom", "2px");
-
-    table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
-
-    table.setWidth("100%", true);
-    table.setHeight("auto");
-
-    // Add a selection model to handle user selection.
-    final SingleSelectionModel<Exercise> selectionModel = new SingleSelectionModel<Exercise>();
-    table.setSelectionModel(selectionModel);
-
-    addColumnsToTable(table);
-
-    return table;
-  }*/
 
   private void addColumnsToTable(CellTable<Exercise> table) {
     TextColumn<Exercise> english = new TextColumn<Exercise>() {
