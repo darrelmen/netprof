@@ -94,12 +94,13 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="false" />
-      <excludeFolder url="file://$MODULE_DIR$/crtH2Dumps" />
       <excludeFolder url="file://$MODULE_DIR$/gwt-unitCache" />
-      <excludeFolder url="file://$MODULE_DIR$/out" />
+      <excludeFolder url="file://$MODULE_DIR$/splitScripts" />
+      <excludeFolder url="file://$MODULE_DIR$/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/war/WEB-INF/deploy" />
       <excludeFolder url="file://$MODULE_DIR$/war/answers" />
       <excludeFolder url="file://$MODULE_DIR$/war/audioimages" />
+      <excludeFolder url="file://$MODULE_DIR$/war/bestAudio" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="imagewriter" />
@@ -188,6 +189,10 @@
     <orderEntry type="library" name="ezmorph-1.0.6" level="project" />
     <orderEntry type="library" name="commons-beanutils-1.8.0" level="project" />
     <orderEntry type="library" name="gwt-bootstrap-2.3.2.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="gwt-visualization" level="project" />
+    <orderEntry type="library" name="poi-3.9-20121203" level="project" />
+    <orderEntry type="library" name="pronz" level="project" />
+    <orderEntry type="library" name="mira" level="project" />
   </component>
 </module>
 
