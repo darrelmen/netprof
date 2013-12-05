@@ -389,7 +389,7 @@ public class HistoryExerciseList extends PagingExerciseList {
       System.out.println("loadExercisesUsingPrefix looking for '" + prefix + "' (" + prefix.length() + " chars) in context of " + typeToSection);
 
       if (typeToSection.isEmpty()) {
-        service.getExerciseIds(lastReqID, userID, prefix, new SetExercisesCallback());
+        service.getExerciseIds(lastReqID, userID, prefix, -1, new SetExercisesCallback());
       } else {
         service.getExercisesForSelectionState(lastReqID, typeToSection, userID, prefix, new MySetExercisesCallback(null));
       }
