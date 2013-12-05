@@ -36,6 +36,8 @@ public class NPFHelper implements RequiresResize {
   private UserManager userManager;
 
   private UserFeedback feedback;
+  private PagingExerciseList npfExerciseList;
+  private SimplePanel npfContentPanel;
 
   public NPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller) {
     this.service = service;
@@ -62,34 +64,24 @@ public class NPFHelper implements RequiresResize {
       System.out.println(getClass() + " : *NOT* adding npf content widget count = " + widgetCount);
       rememberAndLoadFirst(ul);
       System.out.println(getClass() + " : *NOT* after adding npf content widget count = " + learn.content.getWidgetCount());
-
     }
   }
 
-  private void rememberAndLoadFirst(UserList ul) {
-    npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()));
-  }
-
-  private PagingExerciseList npfExerciseList;
-
   private void addNPFToContent(UserList ul, Panel listContent, String instanceName) {
     Panel npfContent = doNPF(ul,instanceName);
-
     listContent.add(npfContent);
     listContent.addStyleName("userListBackground");
   }
 
-  private SimplePanel npfContentPanel;
   private Panel doNPF(UserList ul, String instanceName) {
     Panel hp = new HorizontalPanel();
-   // Panel hp = new FlowPanel();
     SimplePanel left = new SimplePanel();
     hp.add(left);
     left.addStyleName("floatLeft");
     npfContentPanel = new SimplePanel();
     hp.add(npfContentPanel);
     npfContentPanel.addStyleName("floatRight");
-    npfExerciseList = makeNPFExerciseList(npfContentPanel,instanceName);
+    npfExerciseList = makeNPFExerciseList(npfContentPanel,instanceName/*,ul*/);
 
     left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
     rememberAndLoadFirst(ul);
@@ -97,14 +89,16 @@ public class NPFHelper implements RequiresResize {
     return hp;
   }
 
+  private void rememberAndLoadFirst(UserList ul) {
+    npfExerciseList.setUserList(ul);
+    npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()));
+  }
+
   protected Panel setupContent(Panel hp) {
-    //hp.add(npfContentPanel);
-   /* npfContentPanel.addStyleName("greenBackground");
-    npfContentPanel.addStyleName("userNPFContent");*/
     return npfContentPanel;
   }
 
-  private PagingExerciseList makeNPFExerciseList(SimplePanel right, String instanceName) {
+  private PagingExerciseList makeNPFExerciseList(SimplePanel right, String instanceName/*,UserList ul*/) {
     PagingExerciseList exerciseList = new PagingExerciseList(right, service, feedback, false, false, controller, instanceName) {
       @Override
       protected void onLastItem() {
@@ -116,6 +110,7 @@ public class NPFHelper implements RequiresResize {
         });
       }
     };
+ //   exerciseList.setUserList(ul);
     setFactory(exerciseList);
     return exerciseList;
   }
@@ -147,10 +142,8 @@ public class NPFHelper implements RequiresResize {
   }
 
   public void removeKeyHandler() {
-    //To change body of created methods use File | Settings | File Templates.
   }
 
   public void addKeyHandler() {
-  //  if (bootstrapPanel != null) bootstrapPanel.addKeyHandler();
   }
 }
