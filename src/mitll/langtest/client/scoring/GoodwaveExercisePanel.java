@@ -483,8 +483,7 @@ setWidth("100%");
       recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
       recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
       postAudioRecordButton = new MyPostAudioRecordButton(controller);
-      Widget record = postAudioRecordButton.getRecord();
-      DOM.setElementProperty(record.getElement(),"margin","8px");
+      DOM.setElementProperty(postAudioRecordButton.getElement(),"margin","8px");
       playAudioPanel = new MyPlayAudioPanel(recordImage1,recordImage2, soundManager, postAudioRecordButton, GoodwaveExercisePanel.this);
       return playAudioPanel;
     }
@@ -492,7 +491,7 @@ setWidth("100%");
     @Override
     protected void onUnload() {
       super.onUnload();
-      postAudioRecordButton.onUnload();
+    //  postAudioRecordButton.onUnload();
       navigationHelper.removeKeyHandler();
     }
 
@@ -502,12 +501,12 @@ setWidth("100%");
         super(soundManager, new PlayListener() {
           public void playStarted() {
             goodwaveExercisePanel.setBusy(true);
-            ((HasEnabled)postAudioRecordButton1.getRecord()).setEnabled(false);
+            postAudioRecordButton1.setEnabled(false);
           }
 
           public void playStopped() {
             goodwaveExercisePanel.setBusy(false);
-            ((HasEnabled)postAudioRecordButton1.getRecord()).setEnabled(true);
+            postAudioRecordButton1.setEnabled(true);
           }
         });
         add(recordImage1);
@@ -518,9 +517,8 @@ setWidth("100%");
 
       @Override
       protected void addButtons() {
-        Widget record = postAudioRecordButton.getRecord();
-        add(record);
-        record.addStyleName("rightFiveMargin");
+        add(postAudioRecordButton);
+        postAudioRecordButton.addStyleName("rightFiveMargin");
         super.addButtons();
       }
 
@@ -533,7 +531,7 @@ setWidth("100%");
 
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
       public MyPostAudioRecordButton(ExerciseController controller) {
-        super(exercise, controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index, recordImage1, recordImage2,false);
+        super(exercise, controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index, /*record1, record2,*/false);
       }
 
       @Override
@@ -543,14 +541,14 @@ setWidth("100%");
       }
 
       @Override
-      protected void startRecording() {
+      public void startRecording() {
         playAudioPanel.setPlayEnabled(false);
         isBusy = true;
         super.startRecording();
       }
 
       @Override
-      protected void stopRecording() {
+      public void stopRecording() {
         playAudioPanel.setPlayEnabled(true);
         isBusy = false;
         super.stopRecording();
