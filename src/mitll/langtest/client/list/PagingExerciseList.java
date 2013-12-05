@@ -18,6 +18,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.custom.UserList;
 
 import java.util.Set;
 
@@ -34,8 +35,13 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
 
   protected ExerciseController controller;
   protected PagingContainer<? extends ExerciseShell> pagingContainer;
-  boolean isCRTDataMode;
-  Set<String> completed;
+  private boolean isCRTDataMode;
+  private Set<String> completed;
+
+  private TextBox typeAhead = null;
+  private String lastValue = "";
+  private UserList userList;
+
   /**
    * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, boolean, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController)
    * @param currentExerciseVPanel
@@ -53,57 +59,6 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     addComponents();
   }
 
-  /**
-   *  private TextBox typeAhead = null;
-   private String lastValue = "";
-   protected void addTypeAhead(FlowPanel column) {
-   if (!isCRTDataMode) {
-   typeAhead = new TextBox();
-   typeAhead.setDirectionEstimator(true);   // automatically detect whether text is RTL
-   typeAhead.addKeyUpHandler(new KeyUpHandler() {
-   public void onKeyUp(KeyUpEvent event) {
-   String text = typeAhead.getText();
-   //  text = text.trim();
-   if (!text.equals(lastValue)) {
-   System.out.println("looking for '" + text + "' (" + text.length() + " chars)");
-   loadExercises(getHistoryToken(""), text);
-   lastValue = text;
-   }
-   }
-   });
-
-   addControlGroupEntry(column, "Search", typeAhead);
-   Scheduler.get().scheduleDeferred(new Command() {
-   public void execute() {
-   typeAhead.setFocus(true);
-   }
-   });
-   }
-   }
-
-   protected void loadExercises(String selectionState, String prefix) {
-   lastReqID++;
-   System.out.println("looking for '" + prefix + "' (" + prefix.length() + " chars)");
-
-   service.getExerciseIds(lastReqID, controller.getUser(), prefix, new SetExercisesCallback());
-   }
-
-   protected String getPrefix() { return typeAhead == null ? "" : typeAhead.getText(); }
-
-   private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
-   final ControlGroup userGroup = new ControlGroup();
-   userGroup.addStyleName("leftFiveMargin");
-
-   Controls controls = new Controls();
-   userGroup.add(new ControlLabel(label));
-   controls.add(user);
-   userGroup.add(controls);
-
-   dialogBox.add(userGroup);
-   return userGroup;
-   }
-
-   */
   /**
    * @see mitll.langtest.client.recorder.FeedbackRecordPanel#enableNext()
    * @param completed
@@ -142,38 +97,16 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     addTableWithPager(exerciseShellPagingContainer);
   }
 
-  private TextBox typeAhead = null;
-  private String lastValue = "";
-  protected void addTypeAhead(FlowPanel column) {
-    if (!isCRTDataMode) {
-      typeAhead = new TextBox();
-      typeAhead.setDirectionEstimator(true);   // automatically detect whether text is RTL
-      typeAhead.addKeyUpHandler(new KeyUpHandler() {
-        public void onKeyUp(KeyUpEvent event) {
-          String text = typeAhead.getText();
-          //  text = text.trim();
-          if (!text.equals(lastValue)) {
-            System.out.println("looking for '" + text + "' (" + text.length() + " chars)");
-            loadExercises(getHistoryToken(""), text);
-            lastValue = text;
-          }
-        }
-      });
-
-      addControlGroupEntry(column, "Search", typeAhead);
-      Scheduler.get().scheduleDeferred(new Command() {
-        public void execute() {
-          typeAhead.setFocus(true);
-        }
-      });
-    }
-  }
-
+  /**
+   * @see #addTypeAhead(com.google.gwt.user.client.ui.FlowPanel)
+   * @param selectionState
+   * @param prefix
+   */
   protected void loadExercises(String selectionState, String prefix) {
     lastReqID++;
-    System.out.println("looking for '" + prefix + "' (" + prefix.length() + " chars)");
+    System.out.println("loadExercises : looking for '" + prefix + "' (" + prefix.length() + " chars)");
 
-    service.getExerciseIds(lastReqID, controller.getUser(), prefix, new SetExercisesCallback());
+    service.getExerciseIds(lastReqID, controller.getUser(), prefix, userList == null ? -1: userList.getUniqueID(), new SetExercisesCallback());
   }
 
   protected String getPrefix() { return typeAhead == null ? "" : typeAhead.getText(); }
@@ -223,12 +156,36 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     add(container);
   }
 
+  protected void addTypeAhead(FlowPanel column) {
+    if (!isCRTDataMode) {
+      typeAhead = new TextBox();
+      typeAhead.setDirectionEstimator(true);   // automatically detect whether text is RTL
+      typeAhead.addKeyUpHandler(new KeyUpHandler() {
+        public void onKeyUp(KeyUpEvent event) {
+          String text = typeAhead.getText();
+          //  text = text.trim();
+          if (!text.equals(lastValue)) {
+            System.out.println("looking for '" + text + "' (" + text.length() + " chars)");
+            loadExercises(getHistoryToken(""), text);
+            lastValue = text;
+          }
+        }
+      });
+
+      addControlGroupEntry(column, "Search", typeAhead);
+      Scheduler.get().scheduleDeferred(new Command() {
+        public void execute() {
+          typeAhead.setFocus(true);
+        }
+      });
+    }
+  }
+
   protected void tellUserPanelIsBusy() {
     Window.alert("Please stop recording before changing items.");
   }
 
   protected String getHistoryToken(String id) { return "item=" +id; }
-
 
   protected void gotClickOnItem(final ExerciseShell e) {
     if (isExercisePanelBusy()) {
@@ -270,4 +227,8 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
   protected void markCurrentExercise(int i) {
    pagingContainer.markCurrentExercise(i);
  }
+
+  public void setUserList(UserList userList) {
+    this.userList = userList;
+  }
 }

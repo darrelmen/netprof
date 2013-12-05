@@ -20,25 +20,19 @@ public class SelectionState {
   private String item;
   private Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
   private String instance = "";
-
-  /**
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#showSelectionState
-   * @param event
-   */
-/*  public SelectionState(ValueChangeEvent<String> event) {
-    parseToken(getTokenFromEvent(event));
-  }*/
+  private boolean debug = false;
 
   /**
    * Populated from history token!
-   * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
+   * @see mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#getExercises(long, boolean)
    */
   public SelectionState( boolean removePlus) {
     this(History.getToken(), removePlus);
   }
 
   /**
-   * @see mitll.langtest.client.list.section.SectionExerciseList#getSelectionState(String)
+   * @see ExerciseList#getIDFromToken(String)
+   * @see HistoryExerciseList#getSelectionState(String)
    * @param token
    * @param removePlus
    */
@@ -49,7 +43,7 @@ public class SelectionState {
   }
 
   /**
-   * @see mitll.langtest.client.list.ListInterface#getExercises(long, boolean)
+   * @see mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#getExercises(long, boolean)
    */
   public boolean isEmpty() { return getTypeToSection().isEmpty(); }
 
@@ -63,7 +57,6 @@ public class SelectionState {
     return token;
   }
 
-  boolean debug = false;
 
   /**
    * Deals with responseType being on the URL.
@@ -83,31 +76,34 @@ public class SelectionState {
 
         String type = segments[0].trim();
         String section = segments[1].trim();
-        String[] split = section.split(",");
-        List<String> sections = Arrays.asList(split);
 
-        if (sections.isEmpty()) {
-          System.err.println("\t\tparseToken : part " + part + " is badly formed ");
+        if (type.equals("#item") || type.equals("item")) {
+          setItem(section);
+        } else {
+          String[] split = section.split(",");
+          List<String> sections = Arrays.asList(split);
+
+          if (sections.isEmpty()) {
+            System.err.println("\t\tparseToken : part " + part + " is badly formed ");
+          } else {
+            if (debug) System.out.println("\t\tparseToken : add " + type + " : " + sections);
+            if (type.equals("instance")) instance = section;
+            else add(type, sections);
+          }
+          if (debug) System.out.println("\tparseToken : part " + part + " : " + type + "->" + section);
         }
-        else {
-          if (debug) System.out.println("\t\tparseToken : add " + type + " : " +sections);
-          if (type.equals("instance")) instance = section;
-          else add(type, sections);
-        }
-        if (debug) System.out.println("\tparseToken : part " + part + " : " + type + "->" +section);
-      }
-      else if (part.length() > 0) {
-        System.err.println("parseToken skipping part '" + part+ "'");
+      } else if (part.length() > 0) {
+        System.err.println("parseToken skipping part '" + part + "'");
       }
     }
 
-    if (token.contains("item")) {
+  /*  if (token.contains("item")) {
       int item1 = token.indexOf("item=");
       String itemValue = token.substring(item1+"item=".length());
       itemValue = itemValue.split(";")[0];
       if (debug) System.out.println("parseToken : got item = '" + itemValue +"'");
       setItem(itemValue);
-    }
+    }*/
 
     if (debug) System.out.println("parseToken : got " + this + " from token '" +token + "'");
   }
