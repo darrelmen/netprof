@@ -70,7 +70,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected final LangTestDatabaseAsync service;
   protected final SoundManagerAPI soundManager;
   private PlayAudioPanel playAudio;
-  private final boolean debug = true;
+  private final boolean debug = false;
   private float screenPortion = 1.0f;
   private final boolean logMessages;
   protected ExerciseController controller;
@@ -112,7 +112,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @return
    */
   public void addWidgets(String path) {
-    System.out.println("addWidgets audio path = " + path);
+    //System.out.println("addWidgets audio path = " + path);
     imageContainer = new VerticalPanel();
 
     HorizontalPanel hp = new HorizontalPanel();
