@@ -71,10 +71,10 @@ public class RecordAudioPanel extends AudioPanel {
   @Override
   protected void onUnload() {
     super.onUnload();
-    postAudioRecordButton.onUnload();
+    //postAudioRecordButton.onUnload();
   }
 
-  public Button getButton() { return (Button)postAudioRecordButton.getRecord(); }
+  public Button getButton() { return postAudioRecordButton; }
 
   private class MyPlayAudioPanel extends PlayAudioPanel {
     public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel) {
@@ -83,14 +83,14 @@ public class RecordAudioPanel extends AudioPanel {
           if (panel instanceof BusyPanel) {
             ((BusyPanel)panel).setBusy(true);
           }
-          ((HasEnabled) RecordAudioPanel.this.postAudioRecordButton.getRecord()).setEnabled(false);
+          postAudioRecordButton.setEnabled(false);
         }
 
         public void playStopped() {
           if (panel instanceof BusyPanel) {
             ((BusyPanel)panel).setBusy(false);
           }
-          ((HasEnabled) RecordAudioPanel.this.postAudioRecordButton.getRecord()).setEnabled(true);
+          postAudioRecordButton.setEnabled(true);
         }
       });
       add(recordImage1);
@@ -105,7 +105,7 @@ public class RecordAudioPanel extends AudioPanel {
     @Override
     protected void addButtons() {
       if (postAudioRecordButton == null) System.err.println("huh? postAudioRecordButton is null???");
-      else add(postAudioRecordButton.getRecord());
+      else add(postAudioRecordButton);
       super.addButtons();
     }
   }
