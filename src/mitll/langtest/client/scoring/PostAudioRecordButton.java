@@ -7,9 +7,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
+import mitll.langtest.client.recorder.SimpleRecordButton;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Exercise;
 
@@ -22,9 +24,9 @@ import mitll.langtest.shared.Exercise;
  * Time: 6:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class PostAudioRecordButton extends RecordButton {
-  private static final String RECORD = "Record";
-  private static final String STOP = "Stop";
+public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
+ // private static final String RECORD = "Record";
+ // private static final String STOP = "Stop";
 
   private int index;
   private int reqid = 0;
@@ -38,27 +40,32 @@ public abstract class PostAudioRecordButton extends RecordButton {
    * @param controller
    * @param service
    * @param index
-   * @param recordImage1
-   * @param recordImage2
+   * @paramx record1
+   * @paramx record2
    */
-  public PostAudioRecordButton(Exercise exercise, ExerciseController controller, LangTestDatabaseAsync service,
-                               int index, Image recordImage1, Image recordImage2, boolean addKeyHandler) {
-    super(new Button(RECORD), controller.getRecordTimeout(), recordImage1, recordImage2, addKeyHandler);
-    ((Button)getRecord()).setType(ButtonType.PRIMARY);
-
+  public PostAudioRecordButton(Exercise exercise, final ExerciseController controller, LangTestDatabaseAsync service,
+                               int index, boolean addKeyHandler) {
+    super(controller.getRecordTimeout());
+    setRecordingListener(this);
     this.index = index;
     this.exercise = exercise;
     this.controller = controller;
     this.service = service;
   }
 
+  @Override
+  public void flip(boolean first) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
   public void setExercise(Exercise exercise) { this.exercise = exercise; }
 
+  private Widget getOuter() { return this; }
   /**
    * @see mitll.langtest.client.recorder.RecordButton#stop()
    */
-  @Override
-  protected void stopRecording() {
+//  @Override
+  public void stopRecording() {
     controller.stopRecording();
     reqid++;
     final long then = System.currentTimeMillis();
@@ -85,7 +92,7 @@ public abstract class PostAudioRecordButton extends RecordButton {
         private void showPopup(String toShow) {
           final PopupPanel popupImage = new PopupPanel(true);
           popupImage.add(new HTML(toShow));
-          popupImage.showRelativeTo(getRecord());
+          popupImage.showRelativeTo(getOuter());
           Timer t = new Timer() {
             @Override
             public void run() {
@@ -136,26 +143,8 @@ public abstract class PostAudioRecordButton extends RecordButton {
 
   protected abstract void useInvalidResult(AudioAnswer result);
 
-  @Override
-  protected void startRecording() {
+  public void startRecording() {
     controller.startRecording();
-  }
-
-  /**
-   * So we don't want the button changing width when we change the text.
-   */
-  @Override
-  protected void showRecording() {
-    super.showRecording();
-    /*int w =*/ getRecord().getOffsetWidth();
-    ((Button) getRecord()).setText(STOP);
-   // if (getRecord().getOffsetWidth() < w) getRecord().setWidth(w + "px");
-  }
-
-  @Override
-  protected void showStopped() {
-    super.showStopped();
-    ((Button) getRecord()).setText(RECORD);
   }
 
   public abstract void useResult(AudioAnswer result);
