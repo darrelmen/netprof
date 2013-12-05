@@ -380,7 +380,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.debug("getNumExercisesForSelectionState num = " + size);
       return size;
     } else {
-      logger.debug("getNumExercisesForSelectionState req = " + typeToSection);
+      //logger.debug("getNumExercisesForSelectionState req = " + typeToSection);
 
       Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
       int size = exercisesForSection.size();
