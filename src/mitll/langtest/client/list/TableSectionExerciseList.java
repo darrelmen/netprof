@@ -151,7 +151,9 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
         service.getFullExercisesForSelectionState(typeToSection, start, end, new AsyncCallback<List<Exercise>>() {
           @Override
           public void onFailure(Throwable caught) {
-            Window.alert("getFullExercisesForSelectionState : Can't contact server.");
+            if (!caught.getMessage().trim().equals("0")) {
+              Window.alert("getFullExercisesForSelectionState : Can't contact server.");
+            }
           }
 
           @Override
@@ -579,7 +581,9 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     service.getNumExercisesForSelectionState(typeToSection, new AsyncCallback<Integer>() {
       @Override
       public void onFailure(Throwable caught) {
-        Window.alert("getNumExercisesForSelectionState : Couldn't contact server.");
+        if (!caught.getMessage().trim().equals("0")) {
+          Window.alert("getNumExercisesForSelectionState : Couldn't contact server.");
+        }
       }
 
       @Override
