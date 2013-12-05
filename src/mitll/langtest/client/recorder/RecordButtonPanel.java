@@ -76,7 +76,7 @@ public class RecordButtonPanel {
         recordImage1.setVisible(false);
         recordImage2.setVisible(false);
       }
-    });
+    }, false);
   }
 
   /**
@@ -165,7 +165,6 @@ public class RecordButtonPanel {
   }
 
   public Widget getRecordButton() { return recordButton; }
-
   protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {}
   protected void receivedAudioFailure() {}
 }
