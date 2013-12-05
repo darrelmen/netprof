@@ -52,7 +52,6 @@ public class RecordButton extends Button {
   public RecordButton(int delay, boolean doClickAndHold) {
     super(RECORD);
     this.doClickAndHold = doClickAndHold;
-
     this.autoStopDelay = delay;
     setType(ButtonType.PRIMARY);
     setupRecordButton();
@@ -91,6 +90,8 @@ public class RecordButton extends Button {
         public void onMouseDown(MouseDownEvent event) {
           if (!mouseDown) {
             mouseDown = true;
+           // System.out.println("RecordButton doClickAndHold " +doClickAndHold + " got click mouse down " + mouseDown);
+
             doClick();
           }
         }
@@ -100,6 +101,8 @@ public class RecordButton extends Button {
         @Override
         public void onMouseUp(MouseUpEvent event) {
           mouseDown = false;
+        //  System.out.println("RecordButton doClickAndHold " +doClickAndHold + " got click mouse up : " + mouseDown);
+
           doClick();
         }
       });
@@ -112,17 +115,18 @@ public class RecordButton extends Button {
       });
     }
 
+/*
     addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
         System.out.println("recordButton " + getElement().getId() + " got focus");
       }
     });
+*/
 
     addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        System.out.println("recordButton " + getElement().getId() + " got blur");
         getFocus();
       }
     });
@@ -138,9 +142,7 @@ public class RecordButton extends Button {
   }
 
   /**
-   * @seex mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel, boolean)
-   * @seex RecordButton#gotKeyPress(com.google.gwt.user.client.Event.NativePreviewEvent, com.google.gwt.dom.client.NativeEvent)
-   * @seex RecordButton#setupRecordButton(com.google.gwt.user.client.ui.Widget)
+   * @see #setupRecordButton
    */
   protected void doClick() {
     if (isVisible() && isEnabled()) {
@@ -221,6 +223,7 @@ public class RecordButton extends Button {
 
   public void initRecordButton() {
     setVisible(true);
+    getFocus();
   }
 
   /**
