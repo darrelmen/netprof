@@ -4,10 +4,10 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.bootstrap.BootstrapExercisePanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.exercise.PostAnswerProvider;
+import mitll.langtest.client.flashcard.BootstrapExercisePanel;
 import mitll.langtest.client.flashcard.FlashcardExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -30,7 +30,6 @@ class AVPHelper extends NPFHelper {
   private Exercise currentExercise;
   private UserFeedback feedback;
   private BootstrapExercisePanel bootstrapPanel;
-  boolean addKeyHandler;
 
   public AVPHelper(UserFeedback feedback, LangTestDatabaseAsync service, UserManager userManager, ExerciseController controller) {
     super(service, feedback, userManager, controller);
@@ -48,13 +47,8 @@ class AVPHelper extends NPFHelper {
       public Panel getExercisePanel(Exercise e) {
         currentExercise = e;
 
-        bootstrapPanel = new BootstrapExercisePanel(e, service, controller, exerciseList, false) {
+        bootstrapPanel = new BootstrapExercisePanel(e, service, controller, 40, false) {
           NavigationHelper navigationHelper;
-
-          @Override
-          protected String getContentFromExercise(Exercise e) {
-            return null;
-          }
 
           @Override
           protected FlowPanel getCardPrompt(Exercise e, ExerciseController controller) {
@@ -72,11 +66,6 @@ class AVPHelper extends NPFHelper {
           }
         };
 
-
-        if (addKeyHandler) {
-          System.out.println("adding key handler to " + bootstrapPanel);
-          bootstrapPanel.addKeyHandler();
-        }
         return bootstrapPanel;
       }
     }, userManager, 1);
@@ -94,24 +83,5 @@ class AVPHelper extends NPFHelper {
   @Override
   public void onResize() {
     if (getNpfContentPanel() != null) getNpfContentPanel().setWidth(((Window.getClientWidth() * 0.6f) - 100) + "px");
-  }
-
-  @Override
-  public void removeKeyHandler() {
-    System.out.println("avp removeKeyHandler\n\n\n");
-    addKeyHandler = false;
-    if (bootstrapPanel != null) bootstrapPanel.removeKeyHandler();
-  }
-
-  @Override
-  public void addKeyHandler() {
-    if (bootstrapPanel != null) {
-      System.out.println("avp adding key handler\n\n\n");
-      bootstrapPanel.addKeyHandler();
-    }
-    else {
-      System.out.println("avp no panel yet to add key handler to\n\n\n");
-      addKeyHandler = true;
-    }
   }
 }
