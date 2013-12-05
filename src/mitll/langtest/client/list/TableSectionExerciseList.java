@@ -293,13 +293,13 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
 
     final Frame frame = new Frame(doTimedFlashcard ? getTimedFlashcardLink() : getFlashcardLink());
     modal.add(frame);
-    frame.addLoadHandler(new LoadHandler() {
+/*    frame.addLoadHandler(new LoadHandler() {
       @Override
       public void onLoad(LoadEvent event) {
         System.out.println("getPreviewModal got load event " + event + " setting focus on frame");
         setFocusOnFrame(frame);
       }
-    });
+    });*/
     frame.setWidth(FRAME_WIDTH + "px");
     frame.setHeight(frameHeight + "px");
     int modalWidth = FRAME_WIDTH + 50;
