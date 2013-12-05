@@ -531,7 +531,7 @@ setWidth("100%");
 
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
       public MyPostAudioRecordButton(ExerciseController controller) {
-        super(exercise, controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index, /*record1, record2,*/false);
+        super(exercise, controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index, false);
       }
 
       @Override
@@ -545,6 +545,7 @@ setWidth("100%");
         playAudioPanel.setPlayEnabled(false);
         isBusy = true;
         super.startRecording();
+        recordImage1.setVisible(true);
       }
 
       @Override
@@ -552,6 +553,15 @@ setWidth("100%");
         playAudioPanel.setPlayEnabled(true);
         isBusy = false;
         super.stopRecording();
+        recordImage1.setVisible(false);
+        recordImage2.setVisible(false);
+
+      }
+
+      @Override
+      public void flip(boolean first) {
+        recordImage1.setVisible(first);
+        recordImage2.setVisible(!first);
       }
 
       /**
