@@ -1,145 +1,134 @@
 package mitll.langtest.client.recorder;
 
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Event;
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.HasEnabled;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.flashcard.MyCustomIconType;
 
 /**
  * Basically a click handler and a timer to click stop recording, if the user doesn't.
+ *
+ * Two kinds of record buttons -- simple ones where clicking on the button starts and stop the recording, and there's a little
+ * image next to it to give feedback that recording is occurring.
+ *
+ * The other kinds is the flashcard button, which records while the space bar is held down, (or maybe while the mouse button is held down).
+ * It's feedback is the button itself flipping the record images.
+ *
  * User: go22670
  * Date: 9/7/12
  * Time: 5:58 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class RecordButton {
-  private static final int SPACE_CHAR = 32;
+public class RecordButton extends Button {
   private static final int PERIOD_MILLIS = 500;
+  private static final String RECORD = "Record";
+  private static final String STOP = "Stop";
 
-  private boolean recording = false;
+  protected boolean recording = false;
   private Timer recordTimer;
-  private Widget record = null;
-  private int autoStopDelay;
-  protected HandlerRegistration keyHandler;
- // private boolean hasFocus = false;
-  private Image recordImage1, recordImage2;
+  private final int autoStopDelay;
+  private RecordingListener recordingListener;
 
-  /**
-   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel)
-  private Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3.png"));
-  private Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4.png"));
-   * @param delay
-   * @param addKeyHandler
-   */
-  public RecordButton(int delay, boolean addKeyHandler) {
+  public void setRecordingListener(RecordingListener recordingListener) {
+    this.recordingListener = recordingListener;
+  }
+
+  public static interface RecordingListener {
+    void startRecording();
+    void flip(boolean first);
+    void stopRecording();
+  }
+
+  public RecordButton(int delay) {
+    super(RECORD);
     this.autoStopDelay = delay;
-    if (addKeyHandler) addKeyHandler();
+    setType(ButtonType.PRIMARY);
+    setBaseIcon(MyCustomIconType.record);
+    setupRecordButton();
+    getElement().setId("record_button");
   }
 
   /**
-   * @see RecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel, boolean)
-   * @param recordButton
+   *
+   *
    * @param delay
-   * @param recordImage1
-   * @param recordImage2
-   * @param addKeyHandler
+   * @param recordingListener
+
    */
-  public RecordButton(Widget recordButton, int delay, Image recordImage1, Image recordImage2, boolean addKeyHandler) {
-    this(delay, addKeyHandler);
-    this.record = recordButton;
-    setupRecordButton(recordButton);
-    this.recordImage1 = recordImage1;
-    this.recordImage2 = recordImage2;
+  public RecordButton( int delay, RecordingListener recordingListener) {
+    this(delay);
+    this.setRecordingListener(recordingListener);
   }
 
-  protected void setupRecordButton(Widget recordButton) {
-    HasClickHandlers clickable = (HasClickHandlers) recordButton;
-/*    HasFocusHandlers focusable = (HasFocusHandlers) recordButton;
-    HasBlurHandlers blurable = (HasBlurHandlers) recordButton;*/
-    clickable.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
+  protected boolean mouseDown = false;
+  protected void setupRecordButton() {
+    addMouseDownHandler(new MouseDownHandler() {
+      @Override
+      public void onMouseDown(MouseDownEvent event) {
+        if (!mouseDown) {
+          mouseDown = true;
+          doClick();
+        }
+      }
+    });
+
+    addMouseUpHandler(new MouseUpHandler() {
+      @Override
+      public void onMouseUp(MouseUpEvent event) {
+        mouseDown = false;
         doClick();
       }
     });
-/*    focusable.addFocusHandler(new FocusHandler() {
+
+    addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
-        hasFocus = true;
+        System.out.println("recordButton " + getElement().getId()+
+          " got focus");
       }
     });
-    blurable.addBlurHandler(new BlurHandler() {
+
+    addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        hasFocus = false;
+        System.out.println("recordButton " + getElement().getId()+ " got blur");
+        getFocus();
       }
-    });*/
-    if (keyHandler != null) recordButton.setTitle("Press the space bar to record/stop recording");
+    });
+    getFocus();
   }
 
-  public HandlerRegistration addKeyHandler() {
-    if (keyHandler != null) {  // forget any old ones, so we don't have duplicates
-      removeKeyHandler();
-    }
-    System.out.println("RecordButton.addKeyHandler : adding keyhandler");
-
-    keyHandler = Event.addNativePreviewHandler(new
-                                           Event.NativePreviewHandler() {
-
-                                             @Override
-                                             public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                                               NativeEvent ne = event.getNativeEvent();
-                                               if (ne.getKeyCode() == SPACE_CHAR &&
-                                                 event.getTypeInt() == 512 &&
-                                                 "[object KeyboardEvent]".equals(ne.getString())/* &&
-                                                 !hasFocus*/) {
-                                                 ne.preventDefault();
-                                                 ne.stopPropagation();
-/*                                                         System.out.println(new Date() + " : Click handler : Got " + event + " type int " +
-                                                             event.getTypeInt() + " assoc " + event.getAssociatedType() +
-                                                             " native " + event.getNativeEvent() + " source " + event.getSource());*/
-                                                 new Timer() {
-                                                   @Override
-                                                   public void run() {
-                                                     doClick();
-                                                   }
-                                                 }.schedule(10);
-                                               }
-                                             }
-                                           });
-    return keyHandler;
+  private void getFocus() {
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        setFocus(true);
+      }
+    });
   }
 
   /**
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#onUnload()
+   * @seex mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton(mitll.langtest.client.exercise.ExerciseController, RecordButtonPanel, boolean)
+   * @seex RecordButton#gotKeyPress(com.google.gwt.user.client.Event.NativePreviewEvent, com.google.gwt.dom.client.NativeEvent)
+   * @seex RecordButton#setupRecordButton(com.google.gwt.user.client.ui.Widget)
    */
-  public void onUnload() {
-    System.out.println("RecordButton.onUnload : removing handler for recording " + keyHandler);
-
-    removeKeyHandler();
-  }
-
-  public void removeKeyHandler() {
-    if (keyHandler != null) {
-      System.out.println("RecordButton : removing handler for recording " + keyHandler);
-      keyHandler.removeHandler();
-      keyHandler = null;
-    }
-  }
-
-  public void doClick() {
-    HasEnabled enabled = (HasEnabled) record;
-    if (record == null || (record.isVisible() && enabled.isEnabled())) {
+  protected void doClick() {
+    //System.err.println("recordButton " + getElement().getId()+ " doClick");
+    if (isVisible() && isEnabled()) {
       startOrStopRecording();
     }
   }
 
-  protected void startOrStopRecording() {
+  private void startOrStopRecording() {
+    //System.err.println("recordButton " + getElement().getId()+ " startOrStopRecording");
     if (recording) {
       cancelTimer();
       stop();
@@ -151,25 +140,19 @@ public abstract class RecordButton {
 
   private void start() {
     recording = true;
-    startRecording();
     showRecording();
+    recordingListener.startRecording();
   }
 
   private void stop() {
     recording = false;
     showStopped();
-    stopRecording();
+    recordingListener.stopRecording();
   }
 
-  protected abstract void startRecording();
-
   protected void showRecording() {
-    if (recordImage1 != null) {
-      recordImage1.setVisible(true);
+    if (showInitialRecordImage()) {
       flipImage();
-    }
-    else {
-      System.err.println("\n\n\n-----------> no record image so can't showRecording");// + " " + (now-then));
     }
   }
 
@@ -181,12 +164,11 @@ public abstract class RecordButton {
       @Override
       public void run() {
         if (first) {
-          recordImage1.setVisible(false);
-          recordImage2.setVisible(true);
-        }
-        else {
-          recordImage1.setVisible(true);
-          recordImage2.setVisible(false);
+          showSecondRecordImage();
+          recordingListener.flip(true);
+        } else {
+          showFirstRecordImage();
+          recordingListener.flip(false);
         }
         first = !first;
       }
@@ -195,11 +177,32 @@ public abstract class RecordButton {
   }
 
   protected void showStopped() {
-    if (recordImage1 != null) {
-      recordImage1.setVisible(false);
-      recordImage2.setVisible(false);
+    if (t != null) {
+      hideBothRecordImages();
       t.cancel();
     }
+  }
+
+  /**
+   *
+   * @return if we want to flip images
+   */
+  protected boolean showInitialRecordImage() {
+    setBaseIcon(MyCustomIconType.stop);
+    return true;
+  }
+
+  protected void showFirstRecordImage() {}
+
+  protected void showSecondRecordImage() {}
+
+  protected void hideBothRecordImages() {
+    setBaseIcon(MyCustomIconType.record);
+  }
+
+  public void initRecordButton() {
+    setVisible(true);
+    setBaseIcon(MyCustomIconType.record);
   }
 
   /**
@@ -220,12 +223,10 @@ public abstract class RecordButton {
     //System.out.println("start schedule timer at " + (then = System.currentTimeMillis()));
     recordTimer.schedule(autoStopDelay);
   }
+
   private void cancelTimer() {
     if (recordTimer != null) {
       recordTimer.cancel();
     }
   }
-  protected abstract void stopRecording();
-
-  public Widget getRecord() {  return record; }
 }
