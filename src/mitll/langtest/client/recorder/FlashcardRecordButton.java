@@ -1,6 +1,5 @@
 package mitll.langtest.client.recorder;
 
-import com.github.gwtbootstrap.client.ui.base.StyleHelper;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -29,8 +28,11 @@ import mitll.langtest.client.flashcard.MyCustomIconType;
  */
 public class FlashcardRecordButton extends RecordButton {
   private static final int SPACE_CHAR = 32;
+  private static final int HIDE_DELAY = 2500;
+  private static final String SPACE_BAR = "space bar";
+  private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to begin recording, release to stop.";
 
-  private boolean warnUserWhenNotSpace;
+  private boolean warnUserWhenNotSpace = true;
 
   /**
    * @param delay
@@ -38,9 +40,9 @@ public class FlashcardRecordButton extends RecordButton {
    * @param warnNotASpace
    */
   public FlashcardRecordButton(int delay, RecordingListener recordingListener, boolean warnNotASpace) {
-    super(delay, recordingListener, false);
+    super(delay, recordingListener, true);
     this.warnUserWhenNotSpace = warnNotASpace;
-    setText("space bar");
+    setText(SPACE_BAR);
     DOM.setStyleAttribute(getElement(), "width", "460px");
     DOM.setStyleAttribute(getElement(), "height", "48px");
     DOM.setStyleAttribute(getElement(), "fontSize", "x-large");
@@ -66,29 +68,21 @@ public class FlashcardRecordButton extends RecordButton {
           warnNotASpace();
         }
       }
-      //System.out.println("got key event " + event);
-
     });
     addKeyUpHandler(new KeyUpHandler() {
       @Override
       public void onKeyUp(KeyUpEvent event) {
         if (event.getNativeKeyCode() == SPACE_CHAR) {
-
           mouseDown = false;
           doClick();
         }
       }
     });
-
   }
-
-  private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to begin recording, release to stop.";
 
   protected void warnNotASpace() {
     showPopup(NO_SPACE_WARNING);
   }
-
-  private static final int HIDE_DELAY = 2500;
 
   public void showPopup(String html) {
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
@@ -122,13 +116,12 @@ public class FlashcardRecordButton extends RecordButton {
 
   protected void hideBothRecordImages() {
     initRecordButton();
+    removeImage();
   }
 
   public void initRecordButton() {
-    removeImage();
-    setText("space bar");
+    super.initRecordButton();
+    setText(SPACE_BAR);
     setType(ButtonType.PRIMARY);
-    setFocus(true);
-    setVisible(true);
   }
 }
