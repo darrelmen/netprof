@@ -31,10 +31,11 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class AutoCRT {
+  private static Logger logger = Logger.getLogger(AutoCRT.class);
+
   public static final double CORRECT_THRESHOLD = 0.499;
   private static final boolean GET_MSA = false;
-  private static final boolean USE_SERIALIZED = true;
-  private static Logger logger = Logger.getLogger(AutoCRT.class);
+  //private static final boolean USE_SERIALIZED = true;
 
   private static final boolean TESTING = false; // this doesn't really work
   private Classifier<AutoGradeExperiment.Event> classifier = null;
@@ -94,6 +95,7 @@ public class AutoCRT {
       answer.setDecodeOutput("Unexpected word.");
       answer.setScore(asrScoreForAudio.getHydecScore());
       answer.setCorrect(false);
+      answer.setSaidAnswer(false);
     } else {
       String annotatedResponse = getAnnotatedResponse(exerciseID, questionID, recoSentence);
 
@@ -103,8 +105,10 @@ public class AutoCRT {
       answer.setScore(scoreForAnswer);
       boolean correct = scoreForAnswer > CORRECT_THRESHOLD;
 
-      logger.info("for " + exerciseID + " reco sentence was '" + recoSentence + "' classifier score "+scoreForAnswer + " correct " + correct);
+      logger.info("for " + exerciseID + " reco sentence was '" + recoSentence + "' classifier score "+scoreForAnswer +
+        " correct " + correct + " matched answer is "+ !matchedUnknown);
       answer.setCorrect(correct);
+      answer.setSaidAnswer(!matchedUnknown);
     }
   }
 
@@ -143,9 +147,14 @@ public class AutoCRT {
     boolean isCorrect = recoSentence != null && isCorrect(foregroundSentences, recoSentence);
     double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
     answer.setCorrect(isCorrect && scoreForAnswer > minPronScore);
+    answer.setSaidAnswer(isCorrect);
     if (!isCorrect) {
       logger.info("incorrect response for exercise #" +e.getID() +
         " reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentences +"' pron score was " + scoreForAnswer);
+    }
+    else {
+      logger.info("correct response for exercise #" +e.getID() +
+        " reco sentence was '" + recoSentence + "' vs " + "'"+foregroundSentences +"' pron score was " + scoreForAnswer + " answer " + answer);
     }
 
     answer.setDecodeOutput(recoSentence);
@@ -305,15 +314,8 @@ public class AutoCRT {
 
     String configDir = (installPath != null ? installPath + File.separator : "") + mediaDir + File.separator;
     File serializedClassifier = new File(configDir, "serializedClassifier.ser");
-    if (USE_SERIALIZED && serializedClassifier.exists()) {
-      logger.info("using previously calculated classifier.");
-      List<Export.ExerciseExport> export = getExportedGradedItems();
-      readConfigFile(configDir);
-      long then = System.currentTimeMillis();
-      classifier = AutoGradeExperiment.getClassifierFromSavedModel(serializedClassifier.getAbsolutePath(), export);
-      long now = System.currentTimeMillis();
-      long l = (now - then) / 1000;
-      if (l > 1) logger.debug("took " + l + " seconds to rehydrate classifier");
+    if (/*USE_SERIALIZED && */serializedClassifier.exists()) {
+      classifier = rehydrateClassifier(configDir, serializedClassifier);
       return classifier;
     } else {
       if (TESTING) {
@@ -327,23 +329,42 @@ public class AutoCRT {
         List<Export.ExerciseExport> export = getExportedGradedItems();
         readConfigFile(configDir);
 
-        if (USE_SERIALIZED) {
+  //      if (USE_SERIALIZED) {
           long then = System.currentTimeMillis();
           AutoGradeExperiment.saveClassifierAfterExport(export, serializedClassifier.getAbsolutePath());
           long now = System.currentTimeMillis();
 
           logger.info("took " +((now-then)/1000) + " seconds to saved classifier to " + serializedClassifier.getAbsolutePath());
           classifier = AutoGradeExperiment.getClassifierFromSavedModel(serializedClassifier.getAbsolutePath(), export);
-        }
+/*        }
         else {
           long then = System.currentTimeMillis();
           classifier = AutoGradeExperiment.getClassifierFromExport(export);
           long now = System.currentTimeMillis();
           logger.debug("took " +((now-then)/1000) + " seconds to train classifier on " + export.size() + " items.");
-        }
+        }*/
         return classifier;
       }
     }
+  }
+
+  /**
+   * TODO : this is overkill - we should serialize/rehydrate the model without calling the svm load/save code directly
+   * @param configDir
+   * @param serializedClassifier
+   * @return
+   */
+  private Classifier<AutoGradeExperiment.Event> rehydrateClassifier(String configDir, File serializedClassifier) {
+    logger.info("using previously calculated classifier.");
+    List<Export.ExerciseExport> export = getExportedGradedItems();
+    readConfigFile(configDir);
+    long then = System.currentTimeMillis();
+    Classifier<AutoGradeExperiment.Event> classifier =
+      AutoGradeExperiment.getClassifierFromSavedModel(serializedClassifier.getAbsolutePath(), export);
+    long now = System.currentTimeMillis();
+    long l = (now - then) / 1000;
+    if (l > 1) logger.debug("took " + l + " seconds to rehydrate classifier");
+    return classifier;
   }
 
   private void readConfigFile(String configDir) {
