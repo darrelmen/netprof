@@ -36,10 +36,11 @@ public class RecordButton extends Button {
   private static final String RECORD = "Record";
   private static final String STOP = "Stop";
 
-  protected boolean recording = false;
+  private boolean recording = false;
   private Timer recordTimer;
   private final int autoStopDelay;
   private boolean doClickAndHold;
+  protected boolean mouseDown = false;
 
   private RecordingListener recordingListener;
 
@@ -76,12 +77,7 @@ public class RecordButton extends Button {
    * @see #RecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean)
    * @param recordingListener
    */
-  public void setRecordingListener(RecordingListener recordingListener) {
-   // System.out.println("set recording listener on " + getElement().getId());
-    this.recordingListener = recordingListener;
-  }
-
-  protected boolean mouseDown = false;
+  public void setRecordingListener(RecordingListener recordingListener) { this.recordingListener = recordingListener;  }
 
   protected void setupRecordButton() {
     if (doClickAndHold) {
@@ -90,8 +86,6 @@ public class RecordButton extends Button {
         public void onMouseDown(MouseDownEvent event) {
           if (!mouseDown) {
             mouseDown = true;
-           // System.out.println("RecordButton doClickAndHold " +doClickAndHold + " got click mouse down " + mouseDown);
-
             doClick();
           }
         }
@@ -101,8 +95,6 @@ public class RecordButton extends Button {
         @Override
         public void onMouseUp(MouseUpEvent event) {
           mouseDown = false;
-        //  System.out.println("RecordButton doClickAndHold " +doClickAndHold + " got click mouse up : " + mouseDown);
-
           doClick();
         }
       });
@@ -124,12 +116,14 @@ public class RecordButton extends Button {
     });
 */
 
+/*
     addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
         getFocus();
       }
     });
+*/
     getFocus();
   }
 
@@ -151,7 +145,6 @@ public class RecordButton extends Button {
   }
 
   private void startOrStopRecording() {
-   // System.err.println("recordButton " + getElement().getId()+ " startOrStopRecording");
     if (recording) {
       cancelTimer();
       stop();
@@ -240,8 +233,6 @@ public class RecordButton extends Button {
       }
     };
 
-    // Schedule the timer to run once in 20 seconds.
-    //System.out.println("start schedule timer at " + (then = System.currentTimeMillis()));
     recordTimer.schedule(autoStopDelay);
   }
 
