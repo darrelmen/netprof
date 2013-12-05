@@ -25,7 +25,7 @@ public class UserStateWrapper {
 
   private int counter = 0;
   private final List<Exercise> exercises;
-  private Set<String> completed = new HashSet<String>();
+  private final Set<String> completed = new HashSet<String>();
   private final Random random;
   private boolean initial = true;
   /**
@@ -77,15 +77,6 @@ public class UserStateWrapper {
     counter = 0;
   }
 
-  public Exercise getFirst() {
-    if (exercises.isEmpty()) {
-      System.err.println("huh? no exercises in " + this);
-      return null;
-    }
-    initial = false;
-    return exercises.iterator().next();
-  }
-
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getFlashcardResponse(long, boolean, java.util.List, boolean)
    * @return
@@ -95,6 +86,15 @@ public class UserStateWrapper {
     else {
       return exercises.get(++counter % exercises.size());
     }
+  }
+
+  private Exercise getFirst() {
+    if (exercises.isEmpty()) {
+      System.err.println("huh? no exercises in " + this);
+      return null;
+    }
+    initial = false;
+    return exercises.iterator().next();
   }
 
   /**
