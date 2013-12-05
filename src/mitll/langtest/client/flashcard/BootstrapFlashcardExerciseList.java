@@ -358,7 +358,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private class FlashcardResponseAsyncCallback implements AsyncCallback<FlashcardResponse> {
     @Override
     public void onFailure(Throwable caught) {
-      if (!caught.getMessage().contains("prompt aborted by user")) {
+      if (!caught.getMessage().contains("prompt aborted by user") && !caught.getMessage().trim().equals("0")) {
         Window.alert("FlashcardResponseAsyncCallback Couldn't contact server.");
       }
     }
