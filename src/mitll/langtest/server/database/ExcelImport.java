@@ -13,20 +13,15 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -510,8 +505,8 @@ public class ExcelImport implements ExerciseDAO {
    * @param meaning
    * @param context
    * @param segmentedChinese
-   * @paramx refAudioIndex
    * @return
+   * @paramx refAudioIndex
    * @see #readFromSheet(org.apache.poi.ss.usermodel.Sheet)
    */
   private Exercise getExercise(String id, FileExerciseDAO dao, int weightIndex, Row next,
@@ -569,28 +564,16 @@ public class ExcelImport implements ExerciseDAO {
       logger.debug("unit " + unitIndex + "/" + unit + " chapter " + chapterIndex + "/" + chapter + " week " + week);
 
     if (unit.length() > 0) {
-      if (usePredefinedTypeOrder) {
-        pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
-      } else {
-        pairs.add(sectionHelper.addUnitToLesson(imported, unit));
-      }
+      pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
     }
     if (chapter.length() > 0) {
       if (language.equalsIgnoreCase("English")) {
         chapter = (unitIndex == -1 ? "" : unit + "-") + chapter; // hack for now to get unique chapters...
       }
-      if (usePredefinedTypeOrder) {
-        pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
-      } else {
-        pairs.add(sectionHelper.addChapterToLesson(imported, chapter));
-      }
+      pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
     }
     if (week.length() > 0) {
-      if (usePredefinedTypeOrder) {
-        pairs.add(sectionHelper.addExerciseToLesson(imported, weekName, chapter));
-      } else {
-        pairs.add(sectionHelper.addWeekToLesson(imported, week));
-      }
+      pairs.add(sectionHelper.addExerciseToLesson(imported, weekName, chapter));
     }
     sectionHelper.addAssociations(pairs);
 
@@ -619,7 +602,7 @@ public class ExcelImport implements ExerciseDAO {
     String prefix = "";//language.equalsIgnoreCase("msa") ? id + "_" : "";
     String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : id;
     if (audioOffset != 0) {
-      audioDir = "" +(Integer.parseInt(audioDir.trim())+audioOffset);
+      audioDir = "" + (Integer.parseInt(audioDir.trim()) + audioOffset);
     }
     String fastAudioRef = mediaDir + File.separator + audioDir + File.separator + prefix + "Fast" + ".wav";
     String slowAudioRef = mediaDir + File.separator + audioDir + File.separator + prefix + "Slow" + ".wav";
@@ -691,5 +674,7 @@ public class ExcelImport implements ExerciseDAO {
     return sectionHelper.getSection(type);
   }
 
-  public List<String> getErrors() {  return errors;  }
+  public List<String> getErrors() {
+    return errors;
+  }
 }
