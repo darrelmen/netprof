@@ -216,7 +216,6 @@ setWidth("100%");
                 service.addItemToUserList(ul.getUniqueID(), new UserExercise(e), new AsyncCallback<List<UserExercise>>() {
                   @Override
                   public void onFailure(Throwable caught) {
-                    //To change body of implemented methods use File | Settings | File Templates.
                   }
 
                   @Override
