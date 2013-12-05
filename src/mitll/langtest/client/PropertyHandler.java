@@ -483,7 +483,7 @@ public class PropertyHandler {
   }
 
   public boolean shouldAddRecordKeyBinding() {
-    return addRecordKeyBinding;
+    return addRecordKeyBinding || flashCard;
   }
 
   public LOGIN_TYPE getLoginType() { return loginType; }
