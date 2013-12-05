@@ -36,13 +36,13 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
                                        ExerciseController controller,
                                        Panel widgets,
                                        RecordAudioPanel recordAudioPanel, LangTestDatabaseAsync service, int index) {
-    super(exercise, controller, service, index, recordAudioPanel.recordImage1, recordAudioPanel.recordImage2, false);
+    super(exercise, controller, service, index, false);
     this.recordAudioPanel = recordAudioPanel;
     this.parentPanel = widgets;
   }
 
   @Override
-  protected void startRecording() {
+  public void startRecording() {
     if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(true);
     }

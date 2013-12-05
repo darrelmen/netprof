@@ -2,10 +2,9 @@ package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
+import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -13,8 +12,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTest;
-import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.sound.SoundFeedback;
 
 /**
@@ -28,25 +25,14 @@ public class ScoreFeedback {
   private static final int HIDE_FEEDBACK = 2500;
   private static final double CORRECT_SCORE_THRESHOLD = 0.5;
 
-  private Image grayImage,whiteImage;
-  private Image correctImage;
-  private Image incorrectImage;
-  private Image waitingForResponseImage;
-  private RecordButtonPanel.ImageAnchor feedbackImage;
+  private IconAnchor feedbackImage;
   private Panel scoreFeedbackColumn;
   private ProgressBar scoreFeedback = new ProgressBar();
 
   private SimplePanel feedbackDummyPanel;
   private boolean useWhite;
 
-  public ScoreFeedback(boolean useWhite) {
-    this.useWhite = useWhite;
-    grayImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "gray_48x48.png"));
-    whiteImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_48x48.png"));
-    correctImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "checkmark48.png"));
-    incorrectImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "redx48.png"));
-    waitingForResponseImage = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress48.gif"));
-  }
+  public ScoreFeedback(boolean useWhite) {  this.useWhite = useWhite;  }
 
   /**
    * Holds the pron score feedback.
@@ -55,13 +41,13 @@ public class ScoreFeedback {
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#addRecordingAndFeedbackWidgets(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    * @return
    */
-  public FluidRow getScoreFeedbackRow(int height) {
+  public FluidRow getScoreFeedbackRow(int height, boolean useShortWidth) {
     FluidRow feedbackRow = new FluidRow();
     feedbackDummyPanel = new SimplePanel();
     feedbackDummyPanel.setHeight(height + "px");
     scoreFeedbackColumn = new Column(6, 3, feedbackDummyPanel);
 
-    scoreFeedbackColumn.setWidth(Math.min(300,Window.getClientWidth() * 0.5) + "px");
+    scoreFeedbackColumn.setWidth(Math.min(useShortWidth ? 300 : Window.getClientWidth() *0.8,Window.getClientWidth() * 0.5) + "px");
 
     feedbackRow.add(scoreFeedbackColumn);
     feedbackRow.getElement().setId("ScoreFeedbackfeedbackRow");
@@ -82,7 +68,7 @@ public class ScoreFeedback {
   }
 
   /**
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#getFeedbackContainer(com.google.gwt.user.client.ui.Panel, ScoreFeedback, boolean)
+   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#getFeedbackContainer
    * @param left
    * @param height
    * @return
@@ -104,7 +90,7 @@ public class ScoreFeedback {
   }
 
   public void setWaiting() {
-    feedbackImage.setResource(waitingForResponseImage);
+    feedbackImage.setBaseIcon(MyCustomIconType.waiting);
   }
 
   /**
@@ -119,7 +105,7 @@ public class ScoreFeedback {
     result = Math.max(0, result);
     result = Math.min(1.0, result);
     if (result > 0.9) result = 1.0; //let's round up when we're almost totally correct 97%->100%
-    showScoreFeedback(pronunciationScore, result, centerVertically);
+    showScoreFeedback(pronunciationScore, result, centerVertically, true);
     if (result > CORRECT_SCORE_THRESHOLD) {
       soundFeedback.playCorrect();
       showScoreIcon(true);
@@ -137,7 +123,7 @@ public class ScoreFeedback {
       @Override
       public void run() {
         clearFeedback();
-        feedbackImage.setResource(useWhite ? whiteImage : grayImage);
+        feedbackImage.setBaseIcon(useWhite ? MyCustomIconType.white : MyCustomIconType.gray);
       }
     };
     t.schedule(HIDE_FEEDBACK);
@@ -149,14 +135,15 @@ public class ScoreFeedback {
    * @param pronunciationScore
    * @param score
    * @param centerVertically
+   * @param useShortWidth
    */
-  public void showScoreFeedback(String pronunciationScore, double score, boolean centerVertically) {
+  public void showScoreFeedback(String pronunciationScore, double score, boolean centerVertically, boolean useShortWidth) {
     if (score < 0) score = 0;
     double percent = 100 * score;
 
     scoreFeedbackColumn.clear();
     scoreFeedbackColumn.add(getScoreFeedback());
-    getScoreFeedback().setWidth(Math.min(300,Window.getClientWidth() * 0.5) + "px");
+    getScoreFeedback().setWidth(Math.min(useShortWidth ? 300 : Window.getClientWidth() *0.8,Window.getClientWidth() * 0.5) + "px");
 
     int percent1 = (int) percent;
     getScoreFeedback().setPercent(percent1 < 40 ? 40 : percent1);   // just so the words will show up
@@ -181,18 +168,19 @@ public class ScoreFeedback {
   }
 
   private void showScoreIcon(boolean correct) {
-    feedbackImage.setResource(correct ? correctImage : incorrectImage);
+    feedbackImage.setBaseIcon(correct ? MyCustomIconType.correct : MyCustomIconType.incorrect);
   }
 
   /**
    * @see
    * @return
    */
-  public RecordButtonPanel.ImageAnchor getFeedbackImage() {
-    RecordButtonPanel.ImageAnchor image;
-    image = new RecordButtonPanel.ImageAnchor();
+  public IconAnchor getFeedbackImage() {
+    IconAnchor image;
+    image = new IconAnchor();
     image.addStyleName("leftFiveMargin");
-    image.setResource(useWhite ? whiteImage : grayImage);
+    image.setBaseIcon(useWhite ? MyCustomIconType.white : MyCustomIconType.gray);
+
     image.setHeight("48px");
     feedbackImage = image;
     return image;
