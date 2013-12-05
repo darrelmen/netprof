@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -35,7 +34,6 @@ import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.recorder.SimpleRecordExercisePanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -98,7 +96,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     addStyleName("inlineBlockStyle");
     getElement().setId("GoodwaveExercisePanel");
-    //final Panel center = new VerticalPanel();
     final Panel center = new FlowPanel();
     center.addStyleName("blockStyle");
     center.getElement().setId("GoodwaveVerticalCenter");
@@ -113,61 +110,23 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     HorizontalPanel horizontalPanel = new HorizontalPanel();
     horizontalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-    Panel hp = horizontalPanel;
 
     if (controller.getProps().isClassroomMode()) {
-     // hp = new FlowPanel();
-      hp.getElement().setId("GoodwaveHorizontalPanel");
-      // hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+      horizontalPanel.getElement().setId("GoodwaveHorizontalPanel");
       Panel addToList = makeAddToList(e, controller);
       Widget questionContent = getQuestionContent(e, addToList);
       questionContent.addStyleName("floatLeft");
-      hp.add(questionContent);
-      //hp.addStyleName("trueInlineStyle");
-
-      //setWidth("100%");
+      horizontalPanel.add(questionContent);
     }
     else {
-    hp.add(getQuestionContent(e,null));
+    horizontalPanel.add(getQuestionContent(e, null));
     }
-  //  Panel hp = new HorizontalPanel();
-/*
-    Panel hp = new FlowPanel();
-    hp.getElement().setId("GoodwaveHorizontalPanel");
-   // hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-    Panel addToList = makeAddToList(e, controller);
-    Widget questionContent = getQuestionContent(e,addToList);
-    questionContent.addStyleName("floatLeft");
-    hp.add(questionContent);
-    hp.addStyleName("trueInlineStyle");
-    */
-/*hp.*//*
-setWidth("100%");
-*/
 
-    center.add(hp);
-    //setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+    center.add(horizontalPanel);
     add(center);
-    //setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-
 
     if (e.isRepeat() && widgets != null) {
       add(widgets);
-
-/*    if (e.isRepeat()) {
-      System.out.println("loading repeat exercise : " + e);
-      ASRScorePanel scorePanel = new ASRScorePanel();
-      scorePanel.getElement().setId("ScorePanel");
-
-      scorePanel.addStyleName("floatRight");
-
-      add(scorePanel);
-      this.scorePanel = scorePanel;
-      addQuestions(service, controller, 1, center, screenPortion);
-    } else {
-      System.out.println("loading " + e + " screen portion " + screenPortion);
-      addQuestions(service, controller, 1, center, screenPortion);*/
-
     }
     addQuestions(service, controller, 1, center, screenPortion); // todo : revisit screen portion...
 
@@ -180,7 +139,6 @@ setWidth("100%");
     }, listContainer, true);
     center.add(navigationHelper.makeSpacer());
     center.add(navigationHelper);
- //   navigationHelper.enableNextButton(true);
   }
 
   private Panel makeAddToList(Exercise e, ExerciseController controller) {
@@ -189,9 +147,14 @@ setWidth("100%");
     populateListChoices(e, controller, addToList);
     addToList.setType(ButtonType.PRIMARY);
     return addToList;
-
   }
 
+  /**
+   * Ask server for the set of current lists for this user.
+   * @param e
+   * @param controller
+   * @param w1
+   */
   private void populateListChoices(final Exercise e, ExerciseController controller, final SplitDropdownButton w1) {
     System.out.println("populateListChoices populate list choices for " + controller.getUser());
     service.getListsForUser(controller.getUser(), true, new AsyncCallback<Collection<UserList>>() {
@@ -392,7 +355,7 @@ setWidth("100%");
     }
     ASRScoringAudioPanel audioPanel;
 
-    System.out.println("getScoringAudioPanel : score panel " + scorePanel);
+    //System.out.println("getScoringAudioPanel : score panel " + scorePanel);
     if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
       audioPanel = new FastAndSlowASRScoringAudioPanel(path,controller, scorePanel);
     }
