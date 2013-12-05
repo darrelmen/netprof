@@ -21,7 +21,7 @@ public class PretestScore implements IsSerializable {
   public PretestScore(float score) { this.hydecScore = score; }
 
   public void setReqid(int r) { this.reqid = r;}
-  public int getReqid() {  return reqid;  }
+  public int  getReqid()      { return reqid;  }
 
   /**
    * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
