@@ -334,8 +334,6 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
 
   @Override
   public boolean onFirst(ExerciseShell current) {
-    //System.out.println("onFirst : response " + latestResponse);
-
     return latestResponse == null || latestResponse.isOnFirst();
   }
 
@@ -360,7 +358,9 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
   private class FlashcardResponseAsyncCallback implements AsyncCallback<FlashcardResponse> {
     @Override
     public void onFailure(Throwable caught) {
-      Window.alert("FlashcardResponseAsyncCallback Couldn't contact server.");
+      if (!caught.getMessage().contains("prompt aborted by user") && !caught.getMessage().trim().equals("0")) {
+        Window.alert("FlashcardResponseAsyncCallback Couldn't contact server.");
+      }
     }
 
     @Override
@@ -375,7 +375,6 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
         exercisePanelColumn.add(exercisePanel);
         bottomRow.setVisible(true);
         updateCorrectIncorrectCounter(result.correct, result.incorrect);
-      //  grabFocus((BootstrapExercisePanel) exercisePanel);   // TODO : not sure this works really
       }
     }
   }
