@@ -449,8 +449,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       /**
        * No keyboard listener for play button -- since there can be two play buttons -- which one gets the space bar?
        */
-      @Override
-      protected void addKeyboardListener() {}
+/*      @Override
+      protected void addKeyboardListener() {}*/
     }
 
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
@@ -505,7 +505,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * versions of the audio file.
    */
   private class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
-    private static final String RADIO_BUTTON_WIDTH = "40px";
+  //  private static final String RADIO_BUTTON_WIDTH = "40px";
     private static final String GROUP = "group";
 
     /**
@@ -535,16 +535,22 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       List<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
       RadioButton first = null;
       for (final AudioAttribute audioAttribute : audioAttributes) {
-        String speed = audioAttribute.getAttributes().get("speed");
-        speed = speed.substring(0,1).toUpperCase() +speed.substring(1);
-        RadioButton fast = new RadioButton(GROUP, speed);
-        if (speed.equalsIgnoreCase("regular")) {
+
+     /*   String speed = audioAttribute.getAttributes().get("speed");
+        boolean isRegularSpeed = speed != null && speed.equalsIgnoreCase("regular");
+
+       // speed = speed.substring(0,1).toUpperCase() +speed.substring(1);
+        String display = speed != null && audioAttribute.hasOnlySpeed() ? speed.substring(0,1).toUpperCase() +speed.substring(1) : audioAttribute.getAttributes().toString();
+        if (!audioAttribute.hasOnlySpeed()) display = display.substring(1,display.length()-1);*/
+
+        RadioButton fast = new RadioButton(GROUP, audioAttribute.getDisplay());
+        if (audioAttribute.isRegularSpeed()) {
           fast.setValue(true);
           madeFast = true;
         }
         if (first == null) first = fast;
         vp.add(fast);
-        fast.setWidth(RADIO_BUTTON_WIDTH);
+        //fast.setWidth(RADIO_BUTTON_WIDTH);
 
         fast.addClickHandler(new ClickHandler() {
           @Override
@@ -559,7 +565,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       if (!madeFast && first != null) first.setValue(true); // select something by default
 
-      vp.setWidth("80px");
+     // vp.setWidth("80px");
 
       if (audioAttributes.isEmpty()) {
         vp.add(new Label("No reference audio."));
@@ -568,7 +574,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       HorizontalPanel hp = new HorizontalPanel();
       hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
       hp.add(vp);
-      hp.setWidth("60px");
+    //  hp.setWidth("60px");
       return vp;
     }
   }
