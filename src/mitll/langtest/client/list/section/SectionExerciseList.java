@@ -34,6 +34,7 @@ import java.util.Set;
  * Date: 2/25/13
  * Time: 1:56 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated
  */
 public class SectionExerciseList extends HistoryExerciseList {
   protected Panel sectionPanel;
