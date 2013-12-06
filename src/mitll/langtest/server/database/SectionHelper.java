@@ -87,7 +87,7 @@ public class SectionHelper {
       if (stringLessonMap == null) {
         logger.error("no entry for " + root + " in " + typeToUnitToLesson.keySet());
       } else {
-        logger.debug("for " + root + " got " + stringLessonMap);
+        //logger.debug("for " + root + " got " + stringLessonMap);
         for (Map.Entry<String, Lesson> rootSection : stringLessonMap.entrySet()) {
           SectionNode parent = new SectionNode(root, rootSection.getKey());
           firstSet.add(parent);
@@ -227,6 +227,13 @@ public class SectionHelper {
   public Pair addChapterToLesson(Exercise exercise, String unitName) { return addExerciseToLesson(exercise, chapterType, unitName);}
   public Pair addWeekToLesson(Exercise exercise, String unitName) { return addExerciseToLesson(exercise, weekType, unitName);}
 
+  /**
+   * @see ExcelImport#recordUnitChapterWeek(int, int, int, org.apache.poi.ss.usermodel.Row, mitll.langtest.shared.Exercise, String, String, String)
+   * @param exercise
+   * @param type
+   * @param unitName
+   * @return
+   */
   public Pair addExerciseToLesson(Exercise exercise, String type, String unitName) {
     Map<String, Lesson> unit = getSectionToLesson(type);
 
