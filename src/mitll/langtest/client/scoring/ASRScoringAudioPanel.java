@@ -54,6 +54,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * Shows spinning beachball (ish) gif while we wait...
    * @see ScoringAudioPanel#getTranscriptImageURLForAudio
    * @param path to audio file on server
+   * @param resultID
    * @param refAudio IGNORED HERE
    * @param refSentence what should be aligned
    * @param wordTranscript image panel that needs a URL pointing to an image generated on the server
@@ -62,7 +63,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param height of images returned
    * @param reqid so if many requests are made quickly and the returns are out of order, we can ignore older requests
    */
-  protected void scoreAudio(final String path, String refAudio, String refSentence,
+  protected void scoreAudio(final String path, long resultID, String refAudio, String refSentence,
                             final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                             int toUse, int height, int reqid) {
     //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
@@ -81,9 +82,11 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
     // Schedule the timer to run once in 1 seconds.
     t.schedule(wasVisible ? 1000 : 1);
 
-    service.getASRScoreForAudio(reqid, path, refSentence, toUse, height, useScoreToColorBkg, new AsyncCallback<PretestScore>() {
+    service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {
-        Window.alert("Server error -- couldn't contact server.");
+        if (!caught.getMessage().trim().equals("0")) {
+          Window.alert("Server error -- couldn't contact server.");
+        }
         wordTranscript.image.setVisible(false);
         phoneTranscript.image.setVisible(false);
       }
