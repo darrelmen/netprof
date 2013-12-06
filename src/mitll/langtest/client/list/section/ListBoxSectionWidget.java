@@ -15,6 +15,7 @@ import java.util.Map;
  * Date: 4/3/13
  * Time: 7:09 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated
  */
 public class ListBoxSectionWidget extends ListBox implements SectionWidget {
   public String getCurrentSelection() {

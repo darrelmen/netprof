@@ -247,7 +247,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   protected class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper> {
     public void onFailure(Throwable caught) {
-      feedback.showErrorMessage("Server error", "SetExercisesCallback : Server error - couldn't get exercises.");
+      if (!caught.getMessage().trim().equals("0")) {
+        feedback.showErrorMessage("Server error", "SetExercisesCallback : Server error - couldn't get exercises.");
+      }
+      System.out.println("Got exception '" +caught.getMessage() + "' " +caught);
     }
     public void onSuccess(ExerciseListWrapper result) {
       System.out.println("ExerciseList.SetExercisesCallback Got " + result.exercises.size() + " results");
@@ -293,8 +296,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       idToExercise.put(es.getID(),es);
       addExerciseToList(es);
     }
-    System.out.println("ExerciseList : map keys now " + idToExercise.keySet());
-
     flush();
   }
 
@@ -351,7 +352,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     if (currentExercises.isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       //Window.alert("Server error : no exercises. Please contact administrator.");
       noMatches();
-   //   return null;
       System.err.println("loadFirstExercise : current exercises is empty?");
     } else {
       ExerciseShell toLoad = findFirstExercise();
@@ -363,7 +363,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
       System.out.println("loadFirstExercise ex id =" + toLoad.getID());
       pushFirstSelection(toLoad.getID());
-   //  return toLoad;
     }
   }
 
@@ -441,7 +440,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       askServerForExercise(exerciseShell);
     }
     else {
-      //Window.alert("unknown item " + id);
       System.out.println("can't load " +id + " keys were " + idToExercise.keySet());
     }
   }
@@ -511,7 +509,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
           ")");
       }
       else {
-        Window.alert("Message from server: " + caught.getMessage());
+        if (!caught.getMessage().trim().equals("0")) {
+          Window.alert("Message from server: " + caught.getMessage());
+        }
+        System.out.println("ex " + caught.getMessage() + " " + caught);
       }
     }
     @Override
@@ -532,10 +533,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   private void useExercise(Exercise result, ExerciseShell e) {
     createdPanel = makeExercisePanel(result);
-    System.out.println("ExerciseList.useExercise : " +e.getID());
-
     int i = getIndex(e);
-    System.out.println("ExerciseList.useExercise : " +e.getID() + " index " +i);
+//  System.out.println("ExerciseList.useExercise : " +e.getID() + " index " +i);
     if (i == -1) {
       System.err.println("useExercise can't find " + e + " in list of " + currentExercises.size() +
         " exercises (" +currentExercises+ ")");
