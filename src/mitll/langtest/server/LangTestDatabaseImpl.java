@@ -222,9 +222,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       if (!exercisesForPrefix.isEmpty()) logger.debug("sorting by id -- first is " + exercisesForPrefix.get(0).getID());
     }
 
-    List<ExerciseShell> ids = getExerciseShells(exercisesForPrefix);
     logMemory();
-    return new ExerciseListWrapper(reqID, ids);
+    return makeExerciseListWrapper(reqID, exercisesForPrefix);
   }
 
   /**
@@ -238,7 +237,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
-    return new ExerciseListWrapper(reqID, getExerciseShells(getExercisesForState(reqID,typeToSection,userID)));
+    List<Exercise> exercisesForState = getExercisesForState(reqID, typeToSection, userID);
+    return makeExerciseListWrapper(reqID, exercisesForState);
   }
 
   /**
@@ -256,7 +256,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     ExerciseTrie trie = new ExerciseTrie(exercisesForState, !serverProps.getLanguage().equals("English"));
     List<Exercise> exercises = trie.getExercises(prefix);
 
-    return new ExerciseListWrapper(reqID, getExerciseShells(exercises));
+    return makeExerciseListWrapper(reqID, exercises);
   }
 
   private List<Exercise> getExercisesForState(int reqID, Map<String, Collection<String>> typeToSection, long userID) {
@@ -428,7 +428,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public ExerciseListWrapper getExerciseIds(int reqID) {
     List<Exercise> exercises = getExercises();
-    return new ExerciseListWrapper(reqID, getExerciseShells(exercises));
+    return makeExerciseListWrapper(reqID, exercises);
+  }
+
+  private ExerciseListWrapper makeExerciseListWrapper(int reqID, List<Exercise> exercises) {
+    if (!exercises.isEmpty()) {
+      ensureMP3s(exercises.get(0));
+    }
+    return new ExerciseListWrapper(reqID, getExerciseShells(exercises), exercises.isEmpty() ? null : exercises.get(0));
   }
 
   /**
@@ -451,17 +458,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.debug("getExercise : took " + (now - then) + " millis to find " + id);
     }
     if (byID != null) {
-      ensureMP3(byID.getRefAudio());
-      ensureMP3(byID.getSlowAudioRef());
-      if (byID.getRefAudio() == null && byID.getSlowAudioRef() == null) {
-        logger.warn("huh? no ref audio for " + byID);
-      }
-
-      for (String spath : byID.getSynonymAudioRefs()) {
-        ensureMP3(spath);
-      }
+      ensureMP3s(byID);
     }
     return byID;
+  }
+
+  private void ensureMP3s(Exercise byID) {
+    ensureMP3(byID.getRefAudio());
+    ensureMP3(byID.getSlowAudioRef());
+    if (byID.getRefAudio() == null && byID.getSlowAudioRef() == null) {
+      logger.warn("huh? no ref audio for " + byID);
+    }
+
+    for (String spath : byID.getSynonymAudioRefs()) {
+      ensureMP3(spath);
+    }
   }
 
   /**
@@ -1099,7 +1110,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Map of overall, male, female to list of counts (ex 0 had 7, ex 1, had 5, etc.)
-   * @see mitll.langtest.client.monitoring.MonitoringManager#doResultLineQuery(com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.monitoring.MonitoringManager#doResultLineQuery
    * @return
    */
   public Map<String, Map<String, Integer>> getResultPerExercise() {
@@ -1120,7 +1131,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.monitoring.MonitoringManager#doSessionQuery(com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.monitoring.MonitoringManager#doSessionQuery
    * @return
    */
   public List<Session> getSessions() {
@@ -1128,7 +1139,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.monitoring.MonitoringManager#doSessionQuery(com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.monitoring.MonitoringManager#doSessionQuery
    * @return
    */
   public Map<String,Number> getResultStats() {
@@ -1189,7 +1200,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  //ExerciseListWrapper initialIds = null;
   @Override
   public void init() {
     this.pathHelper = new PathHelper(getServletContext());
