@@ -49,7 +49,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence" +
     " and speech occur, or whether the mic is working properly.";
 
-  private static final int IMAGE_WIDTH_SLOP = 120;
+  private static final int IMAGE_WIDTH_SLOP = 130;
   private static final boolean WARN_ABOUT_MISSING_AUDIO = false;
   private static final int WINDOW_SIZE_CHANGE_THRESHOLD = 50;
 
