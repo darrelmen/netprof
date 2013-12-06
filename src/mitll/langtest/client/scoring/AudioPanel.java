@@ -57,7 +57,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected String audioPath;
   private final Map<String,Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
-  private boolean useKeyboard = true;
+ // private boolean useKeyboard = true;
 
   private ImageAndCheck waveform;
   private ImageAndCheck spectrogram;
@@ -94,7 +94,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     System.out.println("Screen portion " + screenPortion);
     this.soundManager = controller.getSoundManager();
     this.service = service;
-    this.useKeyboard = useKeyboard;
+ //   this.useKeyboard = useKeyboard;
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
     this.gaugePanel = gaugePanel;
@@ -266,12 +266,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         super.addButtons();
       }
 
-      @Override
+/*      @Override
       protected void addKeyboardListener() {
         if (useKeyboard) {
           super.addKeyboardListener();
         }
-      }
+      }*/
     };
   }
 
