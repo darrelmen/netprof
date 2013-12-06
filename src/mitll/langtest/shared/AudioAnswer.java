@@ -20,7 +20,6 @@ public class AudioAnswer implements IsSerializable {
   public int durationInMillis;
   private long resultID;
 
-
   public enum Validity implements IsSerializable {
     OK("Audio OK."),
     TOO_SHORT("Audio too short. Please record again."),
@@ -95,6 +94,10 @@ public class AudioAnswer implements IsSerializable {
     this.correct = correct;
   }
 
+  public long getResultID() {
+    return resultID;
+  }
+
   public void setResultID(long resultID) {
     this.resultID = resultID;
   }
@@ -108,7 +111,7 @@ public class AudioAnswer implements IsSerializable {
   }
 
   public String toString() {
-    return "Answer id " +resultID + " : Path " + path + " id " + reqid + " validity " + validity +
+    return "Answer id " + getResultID() + " : Path " + path + " id " + reqid + " validity " + validity +
       " correct " + correct + " score " + score + " said answer " + saidAnswer;
   }
 }
