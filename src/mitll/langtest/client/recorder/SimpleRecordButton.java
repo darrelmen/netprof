@@ -2,7 +2,6 @@ package mitll.langtest.client.recorder;
 
 import com.github.gwtbootstrap.client.ui.Image;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 
 /**
