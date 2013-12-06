@@ -17,14 +17,12 @@ public class StartupInfo implements IsSerializable {
   private Map<String, String> properties;
   private Collection<String> typeOrder;
   private List<SectionNode> sectionNodes;
-  //private ExerciseListWrapper exerciseListWrapper;
 
   public StartupInfo() {} // for serialization
-  public StartupInfo(Map<String, String> properties, Collection<String> typeOrder, List<SectionNode> sectionNodes/*, ExerciseListWrapper exerciseListWrapper*/) {
+  public StartupInfo(Map<String, String> properties, Collection<String> typeOrder, List<SectionNode> sectionNodes) {
     this.properties = properties;
     this.typeOrder = typeOrder;
     this.sectionNodes = sectionNodes;
-    //this.exerciseListWrapper = exerciseListWrapper;
   }
 
   public Map<String, String> getProperties() {
