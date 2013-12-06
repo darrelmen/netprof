@@ -30,8 +30,9 @@ public class Exercise extends ExerciseShell {
   private EXERCISE_TYPE type = EXERCISE_TYPE.RECORD;
   private boolean promptInEnglish = true;
   private Map<String,List<QAPair>> langToQuestion = null;
-  private String refAudio;
-  private String slowAudioRef;
+  //private String refAudio;
+ // private String slowAudioRef;
+  private List<AudioAttribute> audioAttributes = new ArrayList<AudioAttribute>();
   private String englishSentence;
   private List<String> refSentences = new ArrayList<String>();
   private List<String> synonymSentences = new ArrayList<String>();
@@ -120,7 +121,8 @@ public class Exercise extends ExerciseShell {
 
     this.plan = plan;
     this.setContent(content);
-    this.refAudio = audioRef;
+  //  this.refAudio = audioRef;
+    setRefAudio(audioRef);
     this.refSentences.add(sentenceRef);
     this.setType(EXERCISE_TYPE.REPEAT);
   }
@@ -135,7 +137,7 @@ public class Exercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.FileExerciseDAO#readFastAndSlowExercises
+   * @see mitll.langtest.server.database.FileExerciseDAO#getExerciseForLine(String)
    * @param plan
    * @param id
    * @param content
@@ -146,7 +148,8 @@ public class Exercise extends ExerciseShell {
    */
   public Exercise(String plan, String id, String content, String fastAudioRef, String slowAudioRef, String sentenceRef, String tooltip) {
     this(plan,id,content,fastAudioRef,sentenceRef, tooltip);
-    this.slowAudioRef = slowAudioRef;
+    //this.slowAudioRef = slowAudioRef;
+    setSlowRefAudio(slowAudioRef);
     this.setType(EXERCISE_TYPE.REPEAT_FAST_SLOW);
   }
 
@@ -210,11 +213,34 @@ public class Exercise extends ExerciseShell {
   public String getContent() { return content; }
   public EXERCISE_TYPE getType() { return type; }
   public boolean isRepeat() { return type == EXERCISE_TYPE.REPEAT || type == EXERCISE_TYPE.REPEAT_FAST_SLOW; }
-  public String getRefAudio() { return refAudio; }
-  public String getSlowAudioRef() { return slowAudioRef; }
-  public void setRefAudio(String s) { this.refAudio = s; }
-  public boolean hasRefAudio() { return refAudio != null || slowAudioRef != null; }
 
+  public String getRefAudio() {
+    AudioAttribute audio = getAudio("speed", "regular");
+    return audio != null ? audio.getAudioRef() : null;
+  }
+
+  public String getSlowAudioRef() {
+    AudioAttribute audio = getAudio("speed", "slow");
+    return audio != null ? audio.getAudioRef() : null;
+  }
+
+  public void setRefAudio(String s) {
+    audioAttributes.add(new AudioAttribute(s).markFast());
+  }
+
+  /**
+   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, mitll.langtest.server.database.FileExerciseDAO, String, String, String, String, String, boolean, String)
+   * @param s
+   */
+  public void setSlowRefAudio(String s) {
+    audioAttributes.add(new AudioAttribute(s).markSlow());
+  }
+
+  public boolean hasRefAudio() { return !audioAttributes.isEmpty(); }
+
+  public List<AudioAttribute> getAudioAttributes() {
+    return audioAttributes;
+  }
   public List<String> getSynonymSentences() {
     return synonymSentences;
   }
@@ -239,12 +265,12 @@ public class Exercise extends ExerciseShell {
     this.synonymAudioRefs = synonymAudioRefs;
   }
 
-  /**
-   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, mitll.langtest.server.database.FileExerciseDAO, String, String, String, String, String, boolean, String)
-   * @param s
-   */
-  public void setSlowRefAudio(String s) { this.slowAudioRef = s; }
-
+  public AudioAttribute getAudio(String name, String value) {
+    for (AudioAttribute audio : audioAttributes) {
+      if (audio.matches(name,value)) return audio;
+    }
+    return null;
+  }
   public String getRefSentence() {
     StringBuilder builder = new StringBuilder();
     for (String s : refSentences) {
@@ -330,7 +356,7 @@ public class Exercise extends ExerciseShell {
 
     if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
       return "Exercise " + type + " " +plan+"/"+ id + "/" + " content bytes = " + content.length() +
-          " ref sentence '" + getRefSentence() +"' audio " + refAudio + questionInfo;
+          " ref sentence '" + getRefSentence() +"' audio " + audioAttributes + " : " + questionInfo;
     }
     else {
       return "Exercise " + getType() + " " +plan+"/"+ id + "/" + (isPromptInEnglish() ?"english":"foreign")+
