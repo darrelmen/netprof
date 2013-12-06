@@ -61,19 +61,27 @@ public class ResultDAO extends DAO {
   }
 
   public List<SimpleResult> getSimpleResults() {
+    return getSimpleResults("");
+  }
+
+  public List<SimpleResult> getResultsForUser(long userid) {
+    return getSimpleResults(" where userid=" +userid);
+  }
+
+  private List<SimpleResult> getSimpleResults(String whereClause) {
     try {
-      Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement("SELECT " +
+      String sql = "SELECT " +
         ID + ", " +
         USERID + ", " +
-        Database.EXID+ ", "+
+        Database.EXID + ", " +
         QID +
         " FROM " +
-        RESULTS+";");
-
+        RESULTS + whereClause;
+      Connection connection = database.getConnection();
+      PreparedStatement statement = connection.prepareStatement(sql);
       return getSimpleResultsForQuery(connection, statement);
     } catch (Exception ee) {
-      ee.printStackTrace();
+      logger.error("got " + ee, ee);
     }
     return new ArrayList<SimpleResult>();
   }
