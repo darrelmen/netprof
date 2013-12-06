@@ -38,6 +38,7 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -55,10 +56,7 @@ import java.util.List;
 public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize {
   private static final String NATIVE_REFERENCE_SPEAKER = "Native Reference Speaker";
   private static final String USER_RECORDER = "User Recorder";
-  //private static final String INSTRUCTIONS = "Instructions";
   private boolean isBusy = false;
-  private static final String FAST = "Regular";
-  private static final String SLOW = "Slow";
 
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
@@ -79,14 +77,16 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private SplitDropdownButton addToList;
   private int activeCount = 0;
   float screenPortion;
+
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
    * and a right side -- the charts and gauges {@link ASRScorePanel}
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
-   * @param e for this exercise
+   *
+   * @param e             for this exercise
    * @param controller
    * @param listContainer
    * @param screenPortion
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    */
   public GoodwaveExercisePanel(final Exercise e, final ExerciseController controller, final ListInterface listContainer, float screenPortion) {
     this.exercise = e;
@@ -108,21 +108,20 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       scorePanel = widgets;
     }
 
-    HorizontalPanel horizontalPanel = new HorizontalPanel();
-    horizontalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+    HorizontalPanel hp = new HorizontalPanel();
+    hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
 
     if (controller.getProps().isClassroomMode()) {
-      horizontalPanel.getElement().setId("GoodwaveHorizontalPanel");
+      hp.getElement().setId("GoodwaveHorizontalPanel");
       Panel addToList = makeAddToList(e, controller);
       Widget questionContent = getQuestionContent(e, addToList);
       questionContent.addStyleName("floatLeft");
-      horizontalPanel.add(questionContent);
-    }
-    else {
-    horizontalPanel.add(getQuestionContent(e, null));
+      hp.add(questionContent);
+    } else {
+      hp.add(getQuestionContent(e, null));
     }
 
-    center.add(horizontalPanel);
+    center.add(hp);
     add(center);
 
     if (e.isRepeat() && widgets != null) {
@@ -219,18 +218,21 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     t.schedule(2000);
   }
 
-  public void setBusy(boolean v) { this.isBusy = v;}
+  public void setBusy(boolean v) {
+    this.isBusy = v;
+  }
 
   /**
    * For every question,
    * <ul>
-   *  <li>show the text of the question,  </li>
-   *  <li>the prompt to the test taker (e.g "Speak your response in English")  </li>
-   *  <li>an answer widget (either a simple text box, an flash audio record and playback widget, or a list of the answers, when grading </li>
+   * <li>show the text of the question,  </li>
+   * <li>the prompt to the test taker (e.g "Speak your response in English")  </li>
+   * <li>an answer widget (either a simple text box, an flash audio record and playback widget, or a list of the answers, when grading </li>
    * </ul>     <br></br>
    * Remember the answer widgets so we can notice which have been answered, and then know when to enable the next button.
+   *
    * @param service
-   * @param controller used in subclasses for audio control
+   * @param controller    used in subclasses for audio control
    * @param i
    * @param screenPortion
    */
@@ -250,22 +252,20 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   /**
    * Show the instructions and the audio panel.<br></br>
-   *
+   * <p/>
    * Replace the html 5 audio tag with our fancy waveform widget.
    *
-   * @see #GoodwaveExercisePanel
    * @param e for this exercise
    * @return the panel that has the instructions and the audio panel
+   * @see #GoodwaveExercisePanel
    */
   private Widget getQuestionContent(Exercise e, Panel addToList) {
     String content = e.getContent();
     String path = null;
     if (e.isRepeat()) {
       this.refAudio = e.getRefAudio() != null ? e.getRefAudio() : e.getSlowAudioRef();
-      //System.out.println("e " +e.getID() + " ref audio " + e.getRefAudio() + " slow " + e.getSlowAudioRef());
       path = refAudio;
-    }
-    else if (content.contains("audio")) {  // if we don't have proper REPEAT exercises
+    } else if (content.contains("audio")) {  // if we don't have proper REPEAT exercises
       int i = content.indexOf("source src=");
       String s = content.substring(i + "source src=".length() + 1).split("\\\"")[0];
       System.err.println("audio path '" + s + "'");
@@ -277,74 +277,36 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       this.refAudio = path;
     }
 
-   final VerticalPanel vp = new VerticalPanel();
-    //Widget questionContent = new HTML(content);
-  //  final Panel vp = new FlowPanel();
+    final VerticalPanel vp = new VerticalPanel();
     vp.getElement().setId("verticalContainer");
-    //vp.add(questionContent);
-
+    vp.addStyleName("blockStyle");
+    Widget questionContent = new HTML(content);
+    questionContent.getElement().setId("QuestionContent");
+    FlowPanel fp = new FlowPanel();
+    questionContent.addStyleName("floatLeft");
+    fp.addStyleName("trueInlineStyle");
+    fp.add(questionContent);
     if (addToList != null) {
-/*      vp.add(addToList);
-      addToList.addStyleName("floatRight");*/
-
-      vp.addStyleName("blockStyle");
-
-      //CaptionPanel cpContent = new CaptionPanel(INSTRUCTIONS);
-      Widget questionContent = new HTML(content);
-      questionContent.getElement().setId("QuestionContent");
-      FlowPanel fp = new FlowPanel();
-      questionContent.addStyleName("floatLeft");
-      fp.addStyleName("trueInlineStyle");
-      fp.add(questionContent);
       fp.add(addToList);
       addToList.addStyleName("floatRight");
-
-      //cpContent.setContentWidget(fp);
-
-      vp.add(fp);  // was cpContent
     }
 
+    vp.add(fp);
+
     Widget scoringAudioPanel = getScoringAudioPanel(e, path);
-  //  scoringAudioPanel.addStyleName("floatLeft");
     SimplePanel div = new SimplePanel(scoringAudioPanel);
     div.addStyleName("trueInlineStyle");
 
     div.addStyleName("floatLeft");
 
     vp.add(div);
-
-  //  final Panel vp = new VerticalPanel();
-/*    final Panel vp = new FlowPanel();
-    vp.getElement().setId("QuestionContent");
-    vp.addStyleName("blockStyle");
-
-    //CaptionPanel cpContent = new CaptionPanel(INSTRUCTIONS);
-    Widget questionContent = new HTML(content);
-    FlowPanel fp = new FlowPanel();
-    questionContent.addStyleName("floatLeft");
-    fp.addStyleName("trueInlineStyle");
-    fp.add(questionContent);
-    fp.add(addToList);
-    addToList.addStyleName("floatRight");
-
-    //cpContent.setContentWidget(fp);
-
-    vp.add(fp);  // was cpContent
-    vp.addStyleName("topMargin");
-
-    if (path != null) {
-      ensureMP3(e, path, vp);
-    }
-    else {
-      vp.add(getScoringAudioPanel(e, path));
-    }*/
-
     return vp;
   }
 
   /**
    * If the exercise type is {@link Exercise.EXERCISE_TYPE#REPEAT_FAST_SLOW} then we put the fast/slow radio
    * buttons before the play button.
+   *
    * @param e
    * @param path
    * @return
@@ -357,10 +319,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     //System.out.println("getScoringAudioPanel : score panel " + scorePanel);
     if (e.getType() == Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW) {
-      audioPanel = new FastAndSlowASRScoringAudioPanel(path,controller, scorePanel);
-    }
-    else {
-      audioPanel = new ASRScoringAudioPanel(path,e.getRefSentence(),service,controller, false, scorePanel);
+      audioPanel = new FastAndSlowASRScoringAudioPanel(path, controller, scorePanel);
+    } else {
+      audioPanel = new ASRScoringAudioPanel(path, e.getRefSentence(), service, controller, false, scorePanel);
     }
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     audioPanel.setRefAudio(path, e.getRefSentence());
@@ -381,18 +342,20 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   private static class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
-   public ResizableCaptionPanel(String name) { super(name); }
+    public ResizableCaptionPanel(String name) {
+      super(name);
+    }
+
     public void onResize() {
       Widget contentWidget = getContentWidget();
       if (contentWidget instanceof RequiresResize) {
-        ((RequiresResize)contentWidget).onResize();
+        ((RequiresResize) contentWidget).onResize();
       }
     }
   }
 
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
-   *
    *
    * @param service
    * @param controller
@@ -418,10 +381,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     private PlayAudioPanel playAudioPanel;
 
     /**
-     * @see GoodwaveExercisePanel#getAnswerWidget
      * @param service
      * @param index
      * @param controller
+     * @see GoodwaveExercisePanel#getAnswerWidget
      */
     public ASRRecordAudioPanel(LangTestDatabaseAsync service, int index, ExerciseController controller) {
       super(service, controller.getSegmentRepeats(),
@@ -436,17 +399,17 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * to the extent that when we're recording, we can't play audio, and when we're playing
      * audio, we can't record. We also mark the widget as busy so we can't move on to a different exercise.
      *
-     * @see AudioPanel#getPlayButtons(com.google.gwt.user.client.ui.Widget)
      * @param toAdd
      * @return
+     * @see AudioPanel#getPlayButtons(com.google.gwt.user.client.ui.Widget)
      */
     @Override
     protected PlayAudioPanel makePlayAudioPanel(Widget toAdd) {
       recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
       recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
       postAudioRecordButton = new MyPostAudioRecordButton(controller);
-      DOM.setElementProperty(postAudioRecordButton.getElement(),"margin","8px");
-      playAudioPanel = new MyPlayAudioPanel(recordImage1,recordImage2, soundManager, postAudioRecordButton, GoodwaveExercisePanel.this);
+      DOM.setElementProperty(postAudioRecordButton.getElement(), "margin", "8px");
+      playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, soundManager, postAudioRecordButton, GoodwaveExercisePanel.this);
       return playAudioPanel;
     }
 
@@ -457,7 +420,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
 
     private class MyPlayAudioPanel extends PlayAudioPanel {
-      public MyPlayAudioPanel(Image recordImage1, Image recordImage2,SoundManagerAPI soundManager,
+      public MyPlayAudioPanel(Image recordImage1, Image recordImage2, SoundManagerAPI soundManager,
                               final PostAudioRecordButton postAudioRecordButton1, final GoodwaveExercisePanel goodwaveExercisePanel) {
         super(soundManager, new PlayListener() {
           public void playStarted() {
@@ -527,17 +490,15 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       }
 
       /**
-       * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
        * @param result
+       * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
        */
       @Override
       protected void useInvalidResult(AudioAnswer result) {}
     }
   }
 
-  public boolean isBusy() {
-    return isBusy;
-  }
+  public boolean isBusy() { return isBusy;  }
 
   /**
    * Scoring panel that, depending on the type of the exercise, shows radio buttons for fast and slow
@@ -548,31 +509,40 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     private static final String GROUP = "group";
 
     /**
-     * @see GoodwaveExercisePanel#getScoringAudioPanel(mitll.langtest.shared.Exercise, String)
      * @param path
+     * @see GoodwaveExercisePanel#getScoringAudioPanel(mitll.langtest.shared.Exercise, String)
      */
     public FastAndSlowASRScoringAudioPanel(String path, ExerciseController controller1, ScoreListener scoreListener) {
       super(path,
-          exercise.getRefSentence(),
-          GoodwaveExercisePanel.this.service,
-          controller1,
-          false // no keyboard space bar binding
+        exercise.getRefSentence(),
+        GoodwaveExercisePanel.this.service,
+        controller1,
+        false // no keyboard space bar binding
         ,
         scoreListener);
     }
 
     /**
-     * @see AudioPanel#addWidgets(String)
      * @return
+     * @see AudioPanel#addWidgets(String)
      */
     @Override
     protected Widget getBeforePlayWidget() {
       VerticalPanel vp = new VerticalPanel();
 
-      boolean anyRef = false;
       boolean madeFast = false;
-      if (exercise.getRefAudio() != null) {
-        RadioButton fast = new RadioButton(GROUP, FAST);
+
+      List<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
+      RadioButton first = null;
+      for (final AudioAttribute audioAttribute : audioAttributes) {
+        String speed = audioAttribute.getAttributes().get("speed");
+        speed = speed.substring(0,1).toUpperCase() +speed.substring(1);
+        RadioButton fast = new RadioButton(GROUP, speed);
+        if (speed.equalsIgnoreCase("regular")) {
+          fast.setValue(true);
+          madeFast = true;
+        }
+        if (first == null) first = fast;
         vp.add(fast);
         fast.setWidth(RADIO_BUTTON_WIDTH);
 
@@ -580,35 +550,18 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
           @Override
           public void onClick(ClickEvent event) {
             doPause();    // if the audio is playing, stop it
-            setRefAudio(exercise.getRefAudio());
-            getImagesForPath(wavToMP3(exercise.getRefAudio()));
+            String audioRef = audioAttribute.getAudioRef();
+            setRefAudio(audioRef);
+            getImagesForPath(wavToMP3(audioRef));
           }
         });
-        fast.setValue(true);
-        anyRef = true;
-        madeFast = true;
       }
 
-      if (exercise.getSlowAudioRef() != null) {
-        RadioButton slow = new RadioButton(GROUP, SLOW);
-        slow.addClickHandler(new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            doPause();
-            setRefAudio(exercise.getSlowAudioRef());
-            getImagesForPath(wavToMP3(exercise.getSlowAudioRef()));
-          }
-        });
-        slow.setWidth(RADIO_BUTTON_WIDTH);
-        vp.add(slow);
-        if (!madeFast) {
-          slow.setValue(true);
-        }
-        anyRef = true;
-      }
+      if (!madeFast && first != null) first.setValue(true); // select something by default
+
       vp.setWidth("80px");
 
-      if (!anyRef) {
+      if (audioAttributes.isEmpty()) {
         vp.add(new Label("No reference audio."));
       }
 
