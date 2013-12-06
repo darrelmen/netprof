@@ -70,7 +70,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected final LangTestDatabaseAsync service;
   protected final SoundManagerAPI soundManager;
   private PlayAudioPanel playAudio;
-  private final boolean debug = true;
+  private final boolean debug = false;
   private float screenPortion = 1.0f;
   private final boolean logMessages;
   protected ExerciseController controller;
@@ -112,7 +112,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @return
    */
   public void addWidgets(String path) {
-    System.out.println("addWidgets audio path = " + path);
+    //System.out.println("addWidgets audio path = " + path);
     imageContainer = new VerticalPanel();
 
     HorizontalPanel hp = new HorizontalPanel();
@@ -343,7 +343,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
           System.out.println("getImageURLForAudio : (failure) took " +(now-then) + " millis");
-          Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
+          if (!caught.getMessage().trim().equals("0")) {
+            Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
+          }
+          System.out.println("message " + caught.getMessage() + " " + caught);
         }
         public void onSuccess(ImageResponse result) {
           long now = System.currentTimeMillis();
