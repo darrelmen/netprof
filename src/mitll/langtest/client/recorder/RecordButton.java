@@ -3,7 +3,6 @@ package mitll.langtest.client.recorder;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.StyleHelper;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
