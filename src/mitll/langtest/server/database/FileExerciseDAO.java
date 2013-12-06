@@ -325,11 +325,11 @@ public class FileExerciseDAO implements ExerciseDAO {
     else {
       logger.debug("found " + exercises.size() + " exercises, first is " + exercises.iterator().next());
     }
-    if (CONFIRM_AUDIO_REFS) confirmAudioRefs(exercises,mediaDir);
+    if (CONFIRM_AUDIO_REFS) confirmAudioRefs(exercises);
     populateIDToExercise();
   }
 
-  private void confirmAudioRefs(List<Exercise> exercises, String mediaDir) {
+  private void confirmAudioRefs(List<Exercise> exercises) {
     int c = 0;
     try {
       FileWriter writer = new FileWriter("missingAudio.txt");
