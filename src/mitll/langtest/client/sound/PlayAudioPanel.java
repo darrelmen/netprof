@@ -37,15 +37,17 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private static final float LONG_AUDIO_THRESHOLD = 1f;
   private static final String PLAY_LABEL = "\u25ba play";
   private static final String PAUSE_LABEL = "|| pause";
-  public static final int SPACE_BAR = 32;
+//  public static final int SPACE_BAR = 32;
   private Sound currentSound = null;
   private SoundManagerAPI soundManager;
   private final Button playButton = new Button(PLAY_LABEL);
   private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>");
   private AudioControl listener;
-  private HandlerRegistration keyHandler;
+ // private HandlerRegistration keyHandler;
   private PlayListener playListener;
-  private boolean hasFocus;
+ // private boolean hasFocus;
+  private static int counter = 0;
+  private int id;
   private static final boolean DEBUG = false;
 
   /**
@@ -84,7 +86,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (listener != null) listener.reinitialize();    // remove playing line, if it's there
     if (DEBUG) System.out.println("doing unload of play ------------------> ");
 
-    if (keyHandler != null) keyHandler.removeHandler();
+    //if (keyHandler != null) keyHandler.removeHandler();
   }
 
   protected void addButtons() {
@@ -93,7 +95,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
         doClick();
       }
     });
-
+/*
     playButton.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
@@ -105,20 +107,22 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
       public void onBlur(BlurEvent event) {
         hasFocus = false;
       }
-    });
+    });*/
     playButton.setType(ButtonType.INFO);
+    playButton.getElement().setId("playButton");
+    playButton.addStyleName("leftFiveMargin");
 
-    addKeyboardListener();
-    if (keyHandler != null) {
+    // addKeyboardListener();
+/*    if (keyHandler != null) {
       playButton.setTitle("Press the space bar to play/stop playing audio.");
-    }
+    }*/
     playButton.setVisible(false);
     add(playButton);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
   }
 
-  protected void addKeyboardListener() {
+/*  protected void addKeyboardListener() {
     keyHandler = Event.addNativePreviewHandler(new
                                                    Event.NativePreviewHandler() {
 
@@ -137,7 +141,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
                                                        }
                                                      }
                                                    });
-  }
+  }*/
 
   private void doClick() {
     if (playButton.isVisible() && playButton.isEnabled()) {
@@ -345,8 +349,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     }
   }
 
-  private static int counter = 0;
-  private int id;
+  public Button getPlayButton() { return playButton;  }
+
   public String toString() { return "PlayAudioPanel #" +id; }
 }
 
