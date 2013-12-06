@@ -187,7 +187,7 @@ public class ExcelImport implements ExerciseDAO {
           if (count++ < 10) logger.warn(error);
         }
       }
-     // sectionHelper.report();
+      if (debug) sectionHelper.report();
       inp.close();
     } catch (IOException e) {
       e.printStackTrace();
@@ -560,8 +560,10 @@ public class ExcelImport implements ExerciseDAO {
     if (chapter.startsWith("'")) chapter = chapter.substring(1);
     if (week.startsWith("'")) week = week.substring(1);
 
-    if (debug)
-      logger.debug("unit " + unitIndex + "/" + unit + " chapter " + chapterIndex + "/" + chapter + " week " + week);
+    if (debug && false)
+      logger.debug("unit(" +unitName+
+        ")" + unitIndex + "/" + unit + " chapter " + chapterIndex + "/(" +chapterName+
+        ")" + chapter + " week (" + weekName+ ") : " + week);
 
     if (unit.length() > 0) {
       pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
@@ -573,7 +575,7 @@ public class ExcelImport implements ExerciseDAO {
       pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
     }
     if (week.length() > 0) {
-      pairs.add(sectionHelper.addExerciseToLesson(imported, weekName, chapter));
+      pairs.add(sectionHelper.addExerciseToLesson(imported, weekName, week));
     }
     sectionHelper.addAssociations(pairs);
 
