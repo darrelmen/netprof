@@ -136,7 +136,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   /**
    * Get exercises for this user.
    * @see mitll.langtest.client.LangTest#doEverythingAfterFactory(long)
-   * @see mitll.langtest.client.list.section.SectionExerciseList#noSectionsGetExercises(long)
+   * @see mitll.langtest.client.list.HistoryExerciseList#noSectionsGetExercises(long)
    * @param userID
    * @param getNext
    */
@@ -253,14 +253,14 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       System.out.println("Got exception '" +caught.getMessage() + "' " +caught);
     }
     public void onSuccess(ExerciseListWrapper result) {
-      System.out.println("ExerciseList.SetExercisesCallback Got " + result.exercises.size() + " results");
+      System.out.println("ExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results");
       if (isStaleResponse(result)) {
-        System.out.println("----> SetExercisesCallback.onSuccess ignoring result " + result.reqID + " b/c before latest " + lastReqID);
+        System.out.println("----> SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
       } else {
-        if (result.exercises.isEmpty()) {
+        if (result.getExercises().isEmpty()) {
           gotEmptyExerciseList();
         }
-        rememberAndLoadFirst(result.exercises);
+        rememberAndLoadFirst(result.getExercises(), result.getFirstExercise());
         controller.showProgress();
       }
     }
@@ -277,13 +277,19 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    * @param exercises
    */
-  public void rememberAndLoadFirst(List<? extends ExerciseShell> exercises) {
+  public void rememberAndLoadFirst(List<? extends ExerciseShell> exercises, Exercise firstExercise) {
     rememberExercises(exercises);
-    loadFirstExercise();
+    if (firstExercise != null) {
+      ExerciseShell firstExerciseShell = findFirstExercise();
+      useExercise(firstExercise, firstExerciseShell);   // allows us to skip another round trip with the server to ask for the first exercise
+    }
+    else {
+      loadFirstExercise();
+    }
   }
 
   protected boolean isStaleResponse(ExerciseListWrapper result) {
-    return result.reqID < lastReqID;
+    return result.getReqID() < lastReqID;
   }
 
   protected void rememberExercises(List<? extends ExerciseShell> result) {
@@ -346,7 +352,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   /**
-   * @see #rememberAndLoadFirst(java.util.List)
+   * @see #rememberAndLoadFirst
    */
   protected void loadFirstExercise() {
     if (currentExercises.isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
