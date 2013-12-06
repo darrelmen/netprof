@@ -136,7 +136,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @param userID
    */
   protected void noSectionsGetExercises(long userID) {
-    System.out.println("noSectionsGetExercises for " + userID);
+    //System.out.println("noSectionsGetExercises for " + userID);
     super.getExercises(userID, true);
   }
 
@@ -421,12 +421,12 @@ public class HistoryExerciseList extends PagingExerciseList {
 
     @Override
     public void onSuccess(ExerciseListWrapper result) {
-      System.out.println("MySetExercisesCallback : onSuccess " + result.exercises.size() + " items and item " +item);
+      System.out.println("MySetExercisesCallback : onSuccess " + result.getExercises().size() + " items and item " +item);
 
       if (isStaleResponse(result)) {
-        System.out.println("\t----> ignoring result " + result.reqID + " b/c before latest " + lastReqID);
+        System.out.println("\t----> ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
       } else {
-        if (result.exercises.isEmpty()) {
+        if (result.getExercises().isEmpty()) {
           System.out.println("\t----> result is empty...");
 
           if (item != null && item.startsWith("Custom")) {
@@ -435,10 +435,10 @@ public class HistoryExerciseList extends PagingExerciseList {
           else {
             gotEmptyExerciseList();
           }
-          rememberExercises(result.exercises);
+          rememberExercises(result.getExercises());
         } else {
           if (item != null) {
-            rememberExercises(result.exercises);
+            rememberExercises(result.getExercises());
             controller.showProgress();
             if (!loadByID(item)) {
               System.out.println("\tMySetExercisesCallback.onSuccess : loading first exercise since couldn't load item=" + item);
