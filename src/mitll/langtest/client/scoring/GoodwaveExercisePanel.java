@@ -216,7 +216,6 @@ setWidth("100%");
                 service.addItemToUserList(ul.getUniqueID(), new UserExercise(e), new AsyncCallback<List<UserExercise>>() {
                   @Override
                   public void onFailure(Throwable caught) {
-                    //To change body of implemented methods use File | Settings | File Templates.
                   }
 
                   @Override
@@ -491,7 +490,6 @@ setWidth("100%");
     @Override
     protected void onUnload() {
       super.onUnload();
-    //  postAudioRecordButton.onUnload();
       navigationHelper.removeKeyHandler();
     }
 
@@ -537,6 +535,7 @@ setWidth("100%");
       @Override
       public void useResult(AudioAnswer result) {
         setRefAudio(refAudio, exercise.getRefSentence());
+        setResultID(result.getResultID());
         getImagesForPath(wavToMP3(result.path));
       }
 
