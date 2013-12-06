@@ -477,7 +477,7 @@ public class SiteDeployer {
   }
 
   private void copyWebsiteComponents(File destDir, File installDir) throws IOException {
-    List<String> toCopy = java.util.Arrays.asList("js", "langtest", "swf", "WEB-INF", "favicon.ico", "LangTest.css", "LangTest.html"/*, "soundmanager2.js"*/);
+    List<String> toCopy = java.util.Arrays.asList("js", "langtest", "swf", "WEB-INF", "LangTest.css", "LangTest.html"/*, "soundmanager2.js"*/);
     for (String dir : toCopy) {
       File file = new File(installDir,dir);
       if (!file.exists()) logger.error("huh? "+ file + "doesn't exist?");
