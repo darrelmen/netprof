@@ -124,9 +124,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     //System.out.println(message);
     service.logMessage(message, new AsyncCallback<Void>() {
       @Override
-      public void onFailure(Throwable caught) {
-       // Window.alert("trouble contacting server.");
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Void result) {}
