@@ -123,9 +123,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         } else {
           long now = System.currentTimeMillis();
           String message = "onModuleLoad.getProperties : (failure) took " + (now - then) + " millis";
+
           System.out.println(message);
-          Window.alert("Couldn't contact server.  Please check your network connection. (getProperties)");
-          logMessageOnServer(message);
+          if (!caught.getMessage().trim().equals("0")) {
+            System.out.println("Exception " + caught.getMessage() + " " + caught + " " + caught.getClass() + " " + caught.getCause());
+            Window.alert("Couldn't contact server.  Please check your network connection. (getProperties)");
+            logMessageOnServer(message);
+          }
         }
       }
 
@@ -450,7 +454,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
 
       public void onSuccess() {
-        new MailDialog(service, userManager).showEmail(subject, /*linkTitle,*/ token);
+        new MailDialog(service, userManager).showEmail(subject, token);
       }
     });
   }

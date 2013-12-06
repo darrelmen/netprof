@@ -67,7 +67,7 @@ public interface LangTestDatabase extends RemoteService {
 
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height);
 
-  PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg);
+  PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg);
 
   // data collect admin (site administration) ------------------------------
 
