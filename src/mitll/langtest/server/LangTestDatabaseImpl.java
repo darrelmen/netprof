@@ -380,7 +380,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.debug("getNumExercisesForSelectionState num = " + size);
       return size;
     } else {
-      logger.debug("getNumExercisesForSelectionState req = " + typeToSection);
+      //logger.debug("getNumExercisesForSelectionState req = " + typeToSection);
 
       Collection<Exercise> exercisesForSection = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
       int size = exercisesForSection.size();
@@ -617,7 +617,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public void clearUserState(long userID) {  db.clearUserState(userID); }
 
   /**
-   * Called from the client.
+   * Called from the client:
    * @see mitll.langtest.client.list.ExerciseList#getExercisesInOrder()
    * @return
    */
@@ -756,8 +756,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
+   * @param resultID
    * @param testAudioFile
    * @param sentence
    * @param width
@@ -765,10 +766,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param useScoreToColorBkg
    * @return
    */
-  public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
+  public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg) {
-      return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-          false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache());
+    PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
+      false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache());
+    if (resultID > -1) {
+      db.getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore());
+    }
+    return asrScoreForAudio;
   }
 
   /**
@@ -932,8 +937,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public List<UserExercise> addItemToUserList(int userListID, UserExercise userExercise) {
-    List<UserExercise> exercises = db.getUserListManager().addItemToUserList(userListID, userExercise);
-    return exercises;
+    return db.getUserListManager().addItemToUserList(userListID, userExercise);
   }
 
   public UserExercise createNewItem(long userid, String english, String foreign) {
@@ -1064,10 +1068,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param doFlashcard
    * @return URL to audio on server and if audio is valid (not too short, etc.)
    */
-
   public AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int questionID,
                                     int user, int reqid, boolean flq, String audioType, boolean doFlashcard) {
-    return this.audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, questionID, user, reqid, flq,
+    return audioFileHelper.writeAudioFile(base64EncodedString, plan, exercise, questionID, user, reqid, flq,
       audioType, doFlashcard, this);
   }
 
