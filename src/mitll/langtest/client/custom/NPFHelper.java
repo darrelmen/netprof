@@ -91,7 +91,7 @@ public class NPFHelper implements RequiresResize {
 
   private void rememberAndLoadFirst(UserList ul) {
     npfExerciseList.setUserList(ul);
-    npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()));
+    npfExerciseList.rememberAndLoadFirst(new ArrayList<UserExercise>(ul.getExercises()),null);
   }
 
   protected Panel setupContent(Panel hp) {
