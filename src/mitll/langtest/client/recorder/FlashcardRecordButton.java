@@ -1,6 +1,7 @@
 package mitll.langtest.client.recorder;
 
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -78,6 +79,15 @@ public class FlashcardRecordButton extends RecordButton {
         }
       }
     });
+    getFocus();
+  }
+
+  private void getFocus() {
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        setFocus(true);
+      }
+    });
   }
 
   protected void warnNotASpace() {
@@ -123,5 +133,6 @@ public class FlashcardRecordButton extends RecordButton {
     super.initRecordButton();
     setText(SPACE_BAR);
     setType(ButtonType.PRIMARY);
+    getFocus();
   }
 }
