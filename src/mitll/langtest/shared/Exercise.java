@@ -241,6 +241,7 @@ public class Exercise extends ExerciseShell {
   public List<AudioAttribute> getAudioAttributes() {
     return audioAttributes;
   }
+
   public List<String> getSynonymSentences() {
     return synonymSentences;
   }
