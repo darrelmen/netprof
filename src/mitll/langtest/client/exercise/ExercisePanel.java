@@ -408,6 +408,7 @@ public class ExercisePanel extends VerticalPanel implements
         service.addTextAnswer(user, exercise, i++, text, new AsyncCallback<Void>() {
           public void onFailure(Throwable caught) {
             controller.getFeedback().showErrorMessage("Server error", "Couldn't post answers for exercise.");
+
           }
 
           public void onSuccess(Void result) {
