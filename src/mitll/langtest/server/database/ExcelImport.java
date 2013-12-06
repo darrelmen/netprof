@@ -648,7 +648,10 @@ public class ExcelImport implements ExerciseDAO {
     if (cell == null) return "";
     if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
       double numericCellValue = cell.getNumericCellValue();
-      return "" + new Double(numericCellValue).intValue();
+      if((new Double(numericCellValue).intValue()) < numericCellValue)
+         return "" + numericCellValue;
+      else
+         return "" + new Double(numericCellValue).intValue();
     } else if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
       return cell.getStringCellValue().trim();
     } else {
