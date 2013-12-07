@@ -53,11 +53,10 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
-	public ASRScorePanel(){
+	public ASRScorePanel(String parent){
     addStyleName("leftFiveMargin");
     addStyleName("floatRight");
     getElement().setId("ASRScorePanel");
-   // setWidth("180px");
     CaptionPanel chartCaptionPanel = new CaptionPanel("Exercise History");
 
     chartPanel = new SimplePanel();
@@ -78,7 +77,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     FlowPanel gaugePanel = new FlowPanel();
 		gaugePanel.setHeight("100%");
 		gaugePanel.setWidth("100%");
-    ASRGauge = new PretestGauge("ASR", INSTRUCTIONS);
+    ASRGauge = new PretestGauge("ASR_"+parent, "ASR", INSTRUCTIONS);
     gaugePanel.add(ASRGauge);
 
     gaugeCaptionPanel.add(gaugePanel);
@@ -94,13 +93,9 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     if (SHOW_HELP) add(instructionsCaptionPanel);
 	}
 
+  //call this after adding the widget to the page
   @Override
   public void onLoad() {
-    initialize();
-  }
-
-	//call this after adding the widget to the page
-  private void initialize() {
     ASRGauge.createCanvasElement();
     initGauge(ASRGauge);
   }
@@ -114,7 +109,6 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   }
 
   private void setASRGaugeValue(float v) { ASRGauge.setValue(v); }
-
 
   /**
    *
