@@ -82,6 +82,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
          * @param toShow
          */
         private void showPopup(String toShow) {
+          System.out.println("\n\n--->show popup " + toShow);
           final PopupPanel popupImage = new PopupPanel(true);
           popupImage.add(new HTML(toShow));
           popupImage.showRelativeTo(getOuter());
@@ -98,7 +99,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
           long now = System.currentTimeMillis();
           long roundtrip = now - then;
 
-          //System.out.println("PostAudioRecordButton : Got audio answer " + result);
+          System.out.println("PostAudioRecordButton : Got audio answer " + result);
           if (result.reqid != reqid) {
             System.out.println("ignoring old response " + result);
             return;
