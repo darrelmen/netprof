@@ -77,6 +77,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
 
   @Override
   protected void useInvalidResult(AudioAnswer result) {
+    System.out.println("got invalid result " +result);
     recordAudioPanel.getWaveform().setVisible(false);
     recordAudioPanel.getSpectrogram().setVisible(false);
     if (parentPanel instanceof ExercisePanel) {
