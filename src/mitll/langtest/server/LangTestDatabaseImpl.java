@@ -993,12 +993,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       String slow = SLOW + ".wav";
 
       refAudio = getRefAudioPath(userExercise, fileRef, slow);
-      userExercise.setSlowAudioRef(refAudio);
+      userExercise.setSlowRefAudio(refAudio);
     }
     logger.debug("exercise now  " + userExercise);
-
-    // TODO do the same thing for slow
-
 
     return userExercise;
   }
