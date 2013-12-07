@@ -1070,18 +1070,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     status.setText(msg);
   }
 
- /* public void loadExercise(ExerciseShell exerciseShell) {
-    exerciseList.loadExercise(exerciseShell);
-  }
-  public boolean loadNextExercise(ExerciseShell current) {
-    boolean b = exerciseList.loadNextExercise(current);
-    showProgress(exerciseList);
-    return b;
-  }*/
-
   @Override
   public void showProgress() {
-    System.err.println("todo : fix this!");
+//    System.err.println("todo : fix this!");
   }
 
   // TODO fix thsi
@@ -1090,18 +1081,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       progressBar.showAdvance(exerciseList);
     }
   }
-
-/*  public boolean loadNextExercise(String id) {
-    return exerciseList.loadNextExercise(id);
-  }
-
-  public boolean loadPreviousExercise(Exercise current) {
-    return exerciseList.loadPreviousExercise(current);
-  }
-
-  public boolean onFirst(Exercise current) {
-    return exerciseList.onFirst(current);
-  }*/
 
   public ListInterface getExerciseList() { return exerciseList; }
 }
