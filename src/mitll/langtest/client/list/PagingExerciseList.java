@@ -124,7 +124,6 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
     return userGroup;
   }
 
-
   protected PagingContainer<? extends ExerciseShell> makePagingContainer() {
     final PagingExerciseList outer = this;
     PagingContainer<ExerciseShell> pagingContainer1 = new PagingContainer<ExerciseShell>(controller, getVerticalUnaccountedFor()) {
@@ -133,12 +132,12 @@ public class PagingExerciseList extends ExerciseList implements RequiresResize {
         outer.gotClickOnItem(e);
       }
 
-      @Override
+/*      @Override
       protected void loadFirstExercise() {
         outer.loadFirstExercise();
 
         selectFirst();    //To change body of overridden methods use File | Settings | File Templates.
-      }
+      }*/
     };
     pagingContainer = pagingContainer1;
     return pagingContainer1;
