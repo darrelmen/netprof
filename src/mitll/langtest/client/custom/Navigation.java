@@ -2,7 +2,6 @@ package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
@@ -11,7 +10,6 @@ import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.TextArea;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -36,14 +34,11 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.EnterKeyButtonHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
-import mitll.langtest.client.exercise.RecordAudioPanel;
-import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -70,11 +65,12 @@ public class Navigation extends BasicDialog implements RequiresResize {
   private ScrollPanel listScrollPanel;
   private UserFeedback feedback;
   private ListInterface listInterface;
-  NPFHelper npfHelper;
-  NPFHelper avpHelper;
-  HTML itemMarker;
+  private NPFHelper npfHelper;
+  private NPFHelper avpHelper;
+  private HTML itemMarker;
 
-  public Navigation(final LangTestDatabaseAsync service, final UserManager userManager, final ExerciseController controller, final ListInterface listInterface) {
+  public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
+                    final ExerciseController controller, final ListInterface listInterface) {
     this.service = service;
     this.userManager = userManager;
     this.controller = controller;
@@ -279,8 +275,6 @@ public class Navigation extends BasicDialog implements RequiresResize {
     FluidContainer container = new FluidContainer();
     contentPanel.clear();
     contentPanel.add(container);
-   // contentPanel.addStyleName("fullWidth2");
-
     container.getElement().setId("showListContainer");
     container.addStyleName("fullWidth2");
     DOM.setStyleAttribute(container.getElement(), "paddingLeft", "2px");
@@ -345,7 +339,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
       edit.tab.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          Window.alert("edit  list");
+        showEditItem(ul,edit);
         }
       });
     }
@@ -388,6 +382,12 @@ public class Navigation extends BasicDialog implements RequiresResize {
     addItem.content.add(widgets);
   }
 
+  private void showEditItem(UserList ul, TabAndContent addItem) {
+    addItem.content.clear();
+    Panel widgets = editItem(ul);
+    addItem.content.add(widgets);
+  }
+
   /**
    * @param ul
    * @return
@@ -400,7 +400,7 @@ public class Navigation extends BasicDialog implements RequiresResize {
     SimplePanel right = new SimplePanel();
     hp.add(right);
 
-    PagingContainer<ExerciseShell> pagingContainer = new PagingContainer<ExerciseShell>(controller, 100);
+    PagingContainer<ExerciseShell> pagingContainer = new PagingContainer<ExerciseShell>(controller, 100); // todo fix hack
     Panel container = pagingContainer.getTableWithPager();
     left.add(container);
     for (ExerciseShell es : ul.getExercises()) {
@@ -408,6 +408,36 @@ public class Navigation extends BasicDialog implements RequiresResize {
     }
     pagingContainer.flush();
     right.add(new NewUserExercise(service,userManager,controller,itemMarker).addNew(ul, pagingContainer, right));
+    return hp;
+  }
+
+  private Panel editItem(UserList ul) {
+    HorizontalPanel hp = new HorizontalPanel();
+    SimplePanel left = new SimplePanel();
+    hp.add(left);
+    SimplePanel right = new SimplePanel();
+    hp.add(right);
+
+    PagingContainer<ExerciseShell> pagingContainer = new PagingContainer<ExerciseShell>(controller, 100){
+      @Override
+      protected void gotClickOnItem(ExerciseShell e) {
+          System.out.println("Got click on " +e);
+      }
+    };
+
+    Panel container = pagingContainer.getTableWithPager();
+    left.add(container);
+    for (ExerciseShell es : ul.getExercises()) {
+      if (es instanceof UserExercise) {
+        if (es.getID().startsWith("Custom")) {
+          pagingContainer.addExerciseToList2(es);
+        }
+      }
+    }
+    pagingContainer.flush();
+    pagingContainer.selectFirst();
+    //TODO : add an edit thing here...
+   // right.add(new NewUserExercise(service,userManager,controller,itemMarker).addNew(ul, pagingContainer, right));
     return hp;
   }
 
