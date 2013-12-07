@@ -61,7 +61,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   }
 
   /**
-   * @see mitll.langtest.client.list.section.SectionExerciseList#getEmailWidget()
+   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(String, String)
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @param token
    * @return object representing type=value pairs from history token
@@ -327,7 +327,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
     String rawToken = getTokenFromEvent(event);
-    System.out.println(new Date() +" onValueChange : ------ start: token is '" + rawToken +"' ------------ ");
+    System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start: token is '" + rawToken +"' ------------\n\n\n ");
     String item = getSelectionState(rawToken).getItem();
 
     if (item != null && item.length() > 0 && hasExercise(item)) {
