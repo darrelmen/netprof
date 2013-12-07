@@ -262,7 +262,7 @@ public class GradingExercisePanel extends ExercisePanel {
 
   @Override
   protected NavigationHelper getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper(exercise,controller, this, exerciseList, true) {
+    return new NavigationHelper(exercise,controller, this, exerciseList, true, true) {
       @Override
       protected String getNextButtonText() {
         return "Next Ungraded";
