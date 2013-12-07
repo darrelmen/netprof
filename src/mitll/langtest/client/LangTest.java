@@ -264,35 +264,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // second row ---------------
     secondRow = new FluidRow();
-/*    verticalContainer.add(secondRow);
     secondRow.getElement().setId("secondRow");
-    // third row ---------------
-
-    Panel thirdRow = new HorizontalPanel();
-    thirdRow.getElement().setId("thirdRow");
-
-    Panel leftColumn = new SimplePanel();
-    thirdRow.add(leftColumn);
-    leftColumn.getElement().setId("leftColumn");
-
-    verticalContainer.add(thirdRow);*/
-  //  widgets.add(secondRow);
-    secondRow.getElement().setId("secondRow");
-   // secondRow.addStyleName("overflowStyle");
 
     // third row ---------------
 
    Panel thirdRow = new HorizontalPanel();
-//    Panel thirdRow = new FluidRow();
     Panel leftColumn = new SimplePanel();
     thirdRow.add(leftColumn);
     thirdRow.getElement().setId("outerThirdRow");
 
-  //  widgets.add(thirdRow);
     FluidContainer bothSecondAndThird = new FluidContainer();
     bothSecondAndThird.add(secondRow);
     bothSecondAndThird.add(thirdRow);
-  //  widgets.add(bothSecondAndThird);
 
     if ((isCRTDataCollectMode() || props.isDataCollectMode()) && !props.isFlashcardTeacherView()) {
       addProgressBar(verticalContainer);
@@ -310,7 +293,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     ListInterface listInterface = makeExerciseList(secondRow, leftColumn);
     if (getProps().isClassroomMode()) {
       navigation = new Navigation(service, userManager, this, listInterface);
-      //   belowFirstRow.add(navigation.getNav(secondRow,/*belowFirstRow,*/thirdRow, this, getProps()));
       belowFirstRow.add(navigation.getNav(bothSecondAndThird, this));
     }
     else {
