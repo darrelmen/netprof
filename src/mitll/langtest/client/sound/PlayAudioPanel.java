@@ -41,7 +41,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private Sound currentSound = null;
   private SoundManagerAPI soundManager;
   private final Button playButton = new Button(PLAY_LABEL);
-  private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? Please add this site to its whitelist.</font>");
+  private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? " +
+    "Please add this site to its whitelist.</font>");
   private AudioControl listener;
  // private HandlerRegistration keyHandler;
   private PlayListener playListener;
@@ -60,6 +61,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     setVerticalAlignment(ALIGN_MIDDLE);
     addButtons();
     id = counter++;
+    getElement().setId("PlayAudioPanel_"+id);
   }
 
   /**
@@ -349,7 +351,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     }
   }
 
-  public Button getPlayButton() { return playButton;  }
+ // public Button getPlayButton() { return playButton;  }
 
   public String toString() { return "PlayAudioPanel #" +id; }
 }
