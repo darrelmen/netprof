@@ -37,13 +37,19 @@ import mitll.langtest.shared.custom.UserList;
  * To change this template use File | Settings | File Templates.
  */
 public class NewUserExercise extends BasicDialog {
- // private String slowPath, fastPath;
   private UserExercise newUserExercise = null;
   private final ExerciseController controller;
   private LangTestDatabaseAsync service;
   private UserManager userManager;
   private HTML itemMarker;
 
+  /**
+   * @see Navigation#addItem(mitll.langtest.shared.custom.UserList)
+   * @param service
+   * @param userManager
+   * @param controller
+   * @param itemMarker
+   */
   public NewUserExercise(final LangTestDatabaseAsync service, final UserManager userManager, ExerciseController controller,HTML itemMarker) {
     this.controller = controller;
     this.service = service;
@@ -54,16 +60,7 @@ public class NewUserExercise extends BasicDialog {
   public Panel addNew(final UserList ul, final PagingContainer<?> pagingContainer, final Panel toAddTo) {
     final FluidContainer container = new FluidContainer();
     container.addStyleName("greenBackground");
-    FluidRow row;
-//    slowPath = null;
- //   fastPath = null;
-/*    if (false) {
-      container.add(row);
-      final Heading header = new Heading(3, "Add a new item");
-      row.add(header);
-    }*/
-
-    row = new FluidRow();
+    FluidRow row = new FluidRow();
     container.add(row);
     final BasicDialog.FormField english = addControlFormField(row, "English");
 
@@ -73,12 +70,6 @@ public class NewUserExercise extends BasicDialog {
     container.add(row);
     final BasicDialog.FormField foreignLang = addControlFormField(row, "Foreign Language (" + controller.getLanguage() + ")");
 
-/*
-    row = new FluidRow();
-    container.add(row);
-    final Heading recordPrompt = new Heading(4, "Record normal speed reference recording");
-    row.add(recordPrompt);
-*/
     row = new FluidRow();
     container.add(row);
 
@@ -86,12 +77,11 @@ public class NewUserExercise extends BasicDialog {
     final ControlGroup normalSpeedRecording = addControlGroupEntry(row, "Record normal speed reference recording", rap);
 
     final CreateFirstRecordAudioPanel rapSlow = makeRecordAudioPanel(row, english, foreignLang,false);
-    final ControlGroup slowSpeedRecording = addControlGroupEntry(row, "Record slow speed reference recording", rapSlow);
+   /* final ControlGroup slowSpeedRecording =*/ addControlGroupEntry(row, "Record slow speed reference recording", rapSlow);
     rap.setOtherRAP(rapSlow.getPostAudioButton());
     rapSlow.setOtherRAP(rap.getPostAudioButton());
 
-    Button submit = makeCreateButton(ul, pagingContainer, toAddTo, /*row, */english, foreignLang, rap, normalSpeedRecording);
- //   submit.addStyleName("marginBottomTen");
+    Button submit = makeCreateButton(ul, pagingContainer, toAddTo, english, foreignLang, rap, normalSpeedRecording);
     DOM.setStyleAttribute(submit.getElement(), "marginBottom", "5px");
 
     Column column = new Column(2, 9, submit);
@@ -114,7 +104,6 @@ public class NewUserExercise extends BasicDialog {
   }
 
   private Button makeCreateButton(final UserList ul, final PagingContainer<?> pagingContainer, final Panel toAddTo,
-                                //  FluidRow row,
                                   final FormField english, final FormField foreignLang,
                                   final RecordAudioPanel rap, final ControlGroup normalSpeedRecording) {
     Button submit = new Button("Create");
@@ -125,16 +114,11 @@ public class NewUserExercise extends BasicDialog {
         System.out.println("makeCreateButton : creating new item for " + english + " " + foreignLang);
 
         if (validateForm(english, foreignLang, rap, normalSpeedRecording)) {
-//        /  System.out.println("really creating new item for " + english + " " + foreignLang + " created " + newUserExercise);
-
-    /*      newUserExercise.setRefAudio();
-          newUserExercise.setSlowRefAudio(slowPath);*/
           newUserExercise.setEnglish(english.getText());
           newUserExercise.setForeignLanguage(foreignLang.getText());
           service.reallyCreateNewItem(ul, newUserExercise, new AsyncCallback<UserExercise>() {
             @Override
-            public void onFailure(Throwable caught) {
-            }
+            public void onFailure(Throwable caught) {}
 
             @Override
             public void onSuccess(UserExercise newExercise) {
