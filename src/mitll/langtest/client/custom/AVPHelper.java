@@ -58,7 +58,7 @@ class AVPHelper extends NPFHelper {
               public void postAnswers(ExerciseController controller, Exercise completedExercise) {
                 outerExerciseList.loadNextExercise(completedExercise);
               }
-            }, outerExerciseList, false);
+            }, outerExerciseList, false, false);
 
             cardPrompt.insert(navigationHelper.getPrev(), 0);
             cardPrompt.add(navigationHelper.getNext());
