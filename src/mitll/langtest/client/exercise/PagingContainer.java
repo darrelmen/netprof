@@ -46,6 +46,11 @@ public class PagingContainer<T extends ExerciseShell> {
   protected ExerciseController controller;
   private int verticalUnaccountedFor = 100;
 
+  /**
+   * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer()
+   * @param controller
+   * @param verticalUnaccountedFor
+   */
   public PagingContainer(ExerciseController controller, int verticalUnaccountedFor) {
     this.controller = controller;
     this.verticalUnaccountedFor = verticalUnaccountedFor;
@@ -106,21 +111,6 @@ public class PagingContainer<T extends ExerciseShell> {
     return null;
   }
 
-  private void configureTable() {
-    table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
-
-    //  table.setWidth("100%", true);
-    table.setWidth("100%");
-    table.setHeight("auto");
-
-    // Add a selection model to handle user selection.
-    final SingleSelectionModel<T> selectionModel = new SingleSelectionModel<T>();
-    table.setSelectionModel(selectionModel);
-    // we don't want to listen for changes in the selection model, since that happens on load too -- we just want clicks
-
-    addColumnsToTable(true);
-  }
-
   private CellTable.Resources chooseResources() {
     CellTable.Resources o;
 
@@ -133,15 +123,24 @@ public class PagingContainer<T extends ExerciseShell> {
   }
 
   public com.github.gwtbootstrap.client.ui.CellTable<T> makeBootstrapCellTable(com.github.gwtbootstrap.client.ui.CellTable.Resources resources) {
-
-    //CellTable.Resources o = chooseResources();
-
     com.github.gwtbootstrap.client.ui.CellTable<T> bootstrapCellTable = createBootstrapCellTable(resources);
     this.table = bootstrapCellTable;
-
     configureTable();
 
     return bootstrapCellTable;
+  }
+
+  private void configureTable() {
+    table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
+    table.setWidth("100%");
+    table.setHeight("auto");
+
+    // Add a selection model to handle user selection.
+    final SingleSelectionModel<T> selectionModel = new SingleSelectionModel<T>();
+    table.setSelectionModel(selectionModel);
+    // we don't want to listen for changes in the selection model, since that happens on load too -- we just want clicks
+
+    addColumnsToTable(true);
   }
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
@@ -214,19 +213,12 @@ public class PagingContainer<T extends ExerciseShell> {
     Window.alert("Please stop recording before changing items.");
   }*/
 
-  //protected String getHistoryToken(String id) { return "item=" +id; }
-
-  protected void gotClickOnItem(final T e) {
-    //pushNewItem(e.getID());
-  }
+  protected void gotClickOnItem(final T e) {}
 
   /**
-   * @seex SectionExerciseList.MySetExercisesCallback#onSuccess
+   * @see mitll.langtest.client.list.HistoryExerciseList.MySetExercisesCallback#onSuccess
    */
-  protected void loadFirstExercise() {
-    //  super.loadFirstExercise();
-    selectFirst();
-  }
+ // protected void loadFirstExercise() { selectFirst();  }
 
   public void selectFirst() {
     table.getSelectionModel().setSelected(dataProvider.getList().get(0), true);
@@ -248,10 +240,10 @@ public class PagingContainer<T extends ExerciseShell> {
     table.setRowCount(dataProvider.getList().size());
   }
 
-  protected void addExerciseToList(T exercise) {
+/*  protected void addExerciseToList(T exercise) {
     List<T> list = dataProvider.getList();
     list.add(exercise);
-  }
+  }*/
 
   public <S extends ExerciseShell> void addExerciseToList2(S exercise) {
     List<T> list = dataProvider.getList();
