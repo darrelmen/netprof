@@ -371,7 +371,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
-
   /**
    */
   private void noMatches() {
@@ -414,7 +413,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param exerciseShell
    */
   public void loadExercise(ExerciseShell exerciseShell) {
-      pushNewItem(exerciseShell.getID());
+    pushNewItem(exerciseShell.getID());
   }
 
   /**
@@ -427,7 +426,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     String value = event.getValue();
     String token = getTokenFromEvent(event);
     String id = getIDFromToken(token);
-    System.out.println("ExerciseList.onValueChange got " + event.getAssociatedType() + " "+ value + " token " + token + " id '" + id +"'");
+    System.out.println("ExerciseList.onValueChange got " + event.getAssociatedType() +
+      " "+ value + " token " + token + " id '" + id +"'");
 
     if (id.length() > 0) {
       loadByIDFromToken(id);
@@ -473,9 +473,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         System.out.println("got history item for another instance '" + selectionState.getInstance() + "' vs me '" + instance +"'");
       } else {
         String item = selectionState.getItem();
-
         System.out.println("got history item for instance '" + selectionState.getInstance() + " : '" + item+"'");
-
         return item;
       }
     }
@@ -662,12 +660,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return onLast;
   }
 
-/*
-  private boolean isOnLastItem(int i) {
-    return i == currentExercises.size() - 1;
-  }
-*/
-
   public boolean loadNextExercise(String id) {
     System.out.println("ExerciseList.loadNextExercise " + id);
     ExerciseShell exerciseByID = getExerciseByID(id);
@@ -752,25 +744,19 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public Widget getWidget() {   return this;  }
 
   /**
-   * @see NavigationHelper#getNextAndPreviousButtons(mitll.langtest.shared.Exercise, ExerciseController)
+   * @see mitll.langtest.client.exercise.NavigationHelper#makePrevButton
    * @param current
    * @return
    */
   @Override
   public boolean onFirst(ExerciseShell current) {
-    System.out.println("on first " + current);
-    if (current == null) return true;
-    return currentExercises.size() == 1 || getIndex(current) == 0;
+    System.out.println("onFirst : of " +currentExercises.size() +", on first is " + current);
+    return current == null || currentExercises.size() == 1 || getIndex(current) == 0;
   }
 
   @Override
   public boolean onLast(ExerciseShell current) {
-    if (current == null) return true;
-
-    return currentExercises.size() == 1 || isOnLastItem(getIndex(current));
-//    System.out.println("on last " + current + " = " + onLastItem);
-
-  //  return onLastItem;
+    return current == null || currentExercises.size() == 1 || isOnLastItem(getIndex(current));
   }
 
   private boolean isOnLastItem(int i) {
