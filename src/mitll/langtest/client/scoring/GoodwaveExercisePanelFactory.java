@@ -16,7 +16,8 @@ import mitll.langtest.shared.Exercise;
  * To change this template use File | Settings | File Templates.
  */
 public class GoodwaveExercisePanelFactory extends ExercisePanelFactory {
-  float screenPortion;
+  private float screenPortion;
+
   /**
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    * @param service
@@ -33,6 +34,9 @@ public class GoodwaveExercisePanelFactory extends ExercisePanelFactory {
 
   @Override
   public Panel getExercisePanel(Exercise e) {
-    return new GoodwaveExercisePanel(e, controller, exerciseList, screenPortion);
+    return new GoodwaveExercisePanel(e, controller, exerciseList, screenPortion,
+      !controller.getProps().isClassroomMode() // don't do keybinding stuff in classroom mode... at least for now
+      ,
+      "normal");
   }
 }
