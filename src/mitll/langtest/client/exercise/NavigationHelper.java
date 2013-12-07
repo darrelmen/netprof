@@ -53,14 +53,15 @@ public class NavigationHelper extends HorizontalPanel {
    * @param provider
    * @param listContainer
    * @param addButtons
+   * @param addKeyHandler
    */
   public NavigationHelper(Exercise exercise, ExerciseController controller, PostAnswerProvider provider,
-                          ListInterface listContainer, boolean addButtons) {
+                          ListInterface listContainer, boolean addButtons, boolean addKeyHandler) {
     enableNextOnlyWhenAllCompleted = !getLanguage(controller).equalsIgnoreCase("Pashto");   // hack?
     this.provider = provider;
     this.listContainer = listContainer;
     setSpacing(5);
-    getNextAndPreviousButtons(exercise, controller, addButtons);
+    getNextAndPreviousButtons(exercise, controller, addButtons, addKeyHandler);
   }
 
   private String getLanguage( ExerciseController controller) {
@@ -69,21 +70,23 @@ public class NavigationHelper extends HorizontalPanel {
   }
 
   /**
-   * @see NavigationHelper#NavigationHelper(mitll.langtest.shared.Exercise, ExerciseController, PostAnswerProvider, ListInterface, boolean)
+   * @see NavigationHelper#NavigationHelper(mitll.langtest.shared.Exercise, ExerciseController, PostAnswerProvider, mitll.langtest.client.list.ListInterface, boolean, boolean)
    * @param e
    * @param controller
    * @param addButtons
+   * @param addKeyHandler
    */
   private void getNextAndPreviousButtons(final Exercise e,
-                                         final ExerciseController controller, boolean addButtons) {
+                                         final ExerciseController controller, boolean addButtons, boolean addKeyHandler) {
     boolean useKeyHandler = controller.isCollectAudio();
 
     makePrevButton(e, controller, addButtons, useKeyHandler);
-
     makeNextButton(e, controller, addButtons);
 
     // TODO : revisit in the context of text data collections
-    addKeyHandler(e, controller, useKeyHandler);
+    if (addKeyHandler) {
+      addKeyHandler(e, controller, useKeyHandler);
+    }
   }
 
   private void makePrevButton(final Exercise e, ExerciseController controller, boolean addButtons, boolean useKeyHandler) {
@@ -257,20 +260,14 @@ public class NavigationHelper extends HorizontalPanel {
     if (keyHandler != null) keyHandler.removeHandler();
   }
 
-  public void enableNextButton(boolean val) {
-    next.setEnabled(val);
-  }
-
-  public void enablePrevButton(boolean val) {
-    prev.setEnabled(val);
-  }
+  public void enableNextButton(boolean val) { next.setEnabled(val); }
+  public void enablePrevButton(boolean val) { prev.setEnabled(val); }
 
   public void setButtonsEnabled(boolean val) {
     getPrev().setEnabled(val);
     next.setEnabled(val);
   }
 
-  //public Widget getPrev() { return prev; }
   public Widget getNext() { return next; }
   public Button getPrev() { return prev; }
 }
