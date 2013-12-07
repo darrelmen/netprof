@@ -114,8 +114,8 @@ public class BasicDialog {
         //System.out.println("hide popover on " + w + " with " + message);
         popover.dontFireAgain();
         popover.setHideDelay(0);
-        popover.clear();
-        popover.reconfigure();
+      //  popover.clear();
+      //  popover.reconfigure();
 
         //   popover.clear();
       }
