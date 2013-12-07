@@ -419,7 +419,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
     updateFlashcardCopy();
   }
 
-  private void setFocusOnFrame(final Frame frame) {
+/*  private void setFocusOnFrame(final Frame frame) {
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         JavaScriptObject cast = frame.getElement().cast();
@@ -444,7 +444,7 @@ public class TableSectionExerciseList extends FlexSectionExerciseList {
         }
       }
     });
-  }
+  }*/
 
   private native void registerCallback() /*-{
       $wnd.feedback = $entry(@mitll.langtest.client.list.TableSectionExerciseList::feedback(Ljava/lang/String;));
