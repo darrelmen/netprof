@@ -110,7 +110,6 @@ public class NPFHelper implements RequiresResize {
         });
       }
     };
- //   exerciseList.setUserList(ul);
     setFactory(exerciseList);
     return exerciseList;
   }
@@ -119,7 +118,7 @@ public class NPFHelper implements RequiresResize {
     exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 0.7f) {
       @Override
       public Panel getExercisePanel(Exercise e) {
-        return new GoodwaveExercisePanel(e, controller, exerciseList, 0.65f);
+        return new GoodwaveExercisePanel(e, controller, exerciseList, 0.65f,false, "classroom");
       }
     }, userManager, 1);
   }
@@ -141,9 +140,6 @@ public class NPFHelper implements RequiresResize {
     }
   }
 
-  public void removeKeyHandler() {
-  }
-
-  public void addKeyHandler() {
-  }
+  //public void removeKeyHandler() {}
+  //public void addKeyHandler() {}
 }
