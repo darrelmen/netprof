@@ -64,13 +64,38 @@ public class RecordAudioPanel extends AudioPanel {
   }
 
   protected WaveformPostAudioRecordButton makePostAudioRecordButton() {
-    return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, index);
+    return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, index) {
+      @Override
+      public void startRecording() {
+        super.startRecording();
+        showStart();
+      }
+
+      @Override
+      public void stopRecording() {
+        super.stopRecording();
+        showStop();
+      }
+
+      @Override
+      public void flip(boolean first) {
+        flipRecordImages(first);
+      }
+    };
   }
 
-  @Override
-  protected void onUnload() {
-    super.onUnload();
-    //postAudioRecordButton.onUnload();
+  protected void showStop() {
+    recordImage1.setVisible(false);
+    recordImage2.setVisible(false);
+  }
+
+  protected void showStart() {
+    recordImage1.setVisible(true);
+  }
+
+  protected void flipRecordImages(boolean first) {
+    recordImage1.setVisible(first);
+    recordImage2.setVisible(!first);
   }
 
   public Button getButton() { return postAudioRecordButton; }
@@ -96,6 +121,7 @@ public class RecordAudioPanel extends AudioPanel {
       recordImage1.setVisible(false);
       add(recordImage2);
       recordImage2.setVisible(false);
+      System.out.println("\n\n\nMyPlayAudioPanel : adding images to " + getElement().getId());
     }
 
     /**
