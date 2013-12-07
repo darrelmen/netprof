@@ -18,7 +18,8 @@ import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
  *
  */
 public class PretestGauge extends HTML{
-	private String id;                      // referenced in native js
+  private String id;                      // referenced in native js
+  private String label;                      // referenced in native js
   private JavaScriptObject canvasObject;  // referenced in native js
   private JavaScriptObject gaugeObject;   // referenced in native js
 
@@ -45,10 +46,12 @@ public class PretestGauge extends HTML{
   /**
    * @see mitll.langtest.client.gauge.ASRScorePanel
    * @param id
+   * @param label
    * @param instructions
    */
-	public PretestGauge(String id, String instructions){
+	public PretestGauge(String id, String label, String instructions){
 		this.id = id;
+    this.label = label;
 
 		setHTML("<div id='" + id + "Container' style='align:center; text-align: center'/>");
 
@@ -106,7 +109,7 @@ public class PretestGauge extends HTML{
 		// Draw the gauge using custom settings (medium)
 		options = {
 			value: 0,
-			label: this.@mitll.langtest.client.pretest.PretestGauge::id,
+			label: this.@mitll.langtest.client.pretest.PretestGauge::label,
 			unitsLabel: ' %',
 			min: 0,
 			max: 100,
