@@ -38,7 +38,7 @@ public class SelectionState {
    */
   public SelectionState(String token, boolean removePlus) {
     String token1 = removePlus ? unencodeToken(token) : unencodeToken2(token);
-    System.out.println("selection state token " + token1);
+    System.out.println("SelectionState : selection state token " + token1);
     parseToken(token1);
   }
 
