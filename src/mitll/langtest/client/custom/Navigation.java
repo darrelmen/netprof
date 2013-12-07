@@ -369,12 +369,12 @@ public class Navigation extends BasicDialog implements RequiresResize {
         String targetName = showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
 
         if (targetName.length() > 0) {
-          System.out.println("got shown event : '" + showEvent + "'\n target '" + targetName + "'");
-          if (targetName.contains(PRACTICE)) {
+         // System.out.println("got shown event : '" + showEvent + "'\n target '" + targetName + "'");
+/*          if (targetName.contains(PRACTICE)) {
             avpHelper.addKeyHandler();
           } else {
             avpHelper.removeKeyHandler();
-          }
+          }*/
         }
       }
     });
@@ -407,146 +407,8 @@ public class Navigation extends BasicDialog implements RequiresResize {
       pagingContainer.addExerciseToList2(es);
     }
     pagingContainer.flush();
-    right.add(addNew(ul, pagingContainer, right));
+    right.add(new NewUserExercise(service,userManager,controller,itemMarker).addNew(ul, pagingContainer, right));
     return hp;
-  }
-
-  private String slowPath, fastPath;
-  private UserExercise createdExercise = null;
-
-  private Panel addNew(final UserList ul, final PagingContainer<?> pagingContainer, final Panel toAddTo) {
-    final FluidContainer container = new FluidContainer();
-    container.addStyleName("greenBackground");
-    FluidRow row;
-    slowPath = null;
-    fastPath = null;
-/*    if (false) {
-      container.add(row);
-      final Heading header = new Heading(3, "Add a new item");
-      row.add(header);
-    }*/
-
-    row = new FluidRow();
-    container.add(row);
-    final FormField english = addControlFormField(row, "English");
-
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        english.box.setFocus(true);
-      }
-    });
-
-    row = new FluidRow();
-    container.add(row);
-    final FormField foreignLang = addControlFormField(row, "Foreign Language (" + controller.getLanguage() + ")");
-
-/*
-    row = new FluidRow();
-    container.add(row);
-    final Heading recordPrompt = new Heading(4, "Record normal speed reference recording");
-    row.add(recordPrompt);
-*/
-    row = new FluidRow();
-    container.add(row);
-
-    final LangTestDatabaseAsync outerService = service;
-    final RecordAudioPanel rap = new RecordAudioPanel(null, controller, row, service, 0, false) {
-      @Override
-      protected void getEachImage(int width) {
-        float newWidth = Window.getClientWidth() * 0.65f;
-        super.getEachImage((int) newWidth);    //To change body of overridden methods use File | Settings | File Templates.
-      }
-
-      /**
-       * @see RecordAudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget)
-       * @return
-       */
-      @Override
-      protected WaveformPostAudioRecordButton makePostAudioRecordButton() {
-        return new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, 0) {
-          @Override
-          public void stopRecording() {
-            System.out.println("stopRecording with exercise " + exercise);
-            if (exercise == null) {
-              //feedback.rememberAudioType();
-              outerService.createNewItem(userManager.getUser(), english.getText(), foreignLang.getText(), new AsyncCallback<UserExercise>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                  //To change body of implemented methods use File | Settings | File Templates.
-                }
-
-                @Override
-                public void onSuccess(UserExercise newExercise) {
-                  createdExercise = newExercise;
-                  System.out.println("stopRecording with createdExercise " + createdExercise);
-
-                  exercise = newExercise.toExercise();
-                  setExercise(exercise);
-                  stopRecording();
-                }
-              });
-            } else {
-              super.stopRecording();
-            }
-          }
-
-          @Override
-          public void useResult(AudioAnswer result) {
-            super.useResult(result);
-            System.out.println("path to audio is " + result.path);
-            fastPath = result.path;
-          }
-        };
-      }
-    };
-    final ControlGroup normalSpeedRecording = addControlGroupEntry(row, "Record normal speed reference recording", rap);
-
-    Button submit = new Button("Create");
-    row.addStyleName("buttonMargin2");
-    submit.setType(ButtonType.SUCCESS);
-    submit.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        System.out.println("creating new item for " + english + " " + foreignLang);
-
-        if (english.getText().isEmpty()) {
-          markError(english, "Please enter an english word or phrase.");
-        } else if (foreignLang.getText().isEmpty()) {
-          markError(foreignLang, "Please enter the foreign language phrase.");
-        } else if (fastPath == null) {
-          markError(normalSpeedRecording, rap.getButton(), rap.getButton(), "", "Please record reference audio for the foreign language phrase.");
-          rap.getButton().addMouseOverHandler(new MouseOverHandler() {
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-              normalSpeedRecording.setType(ControlGroupType.NONE);
-            }
-          });
-        } else {
-//        /  System.out.println("really creating new item for " + english + " " + foreignLang + " created " + createdExercise);
-
-          createdExercise.setRefAudio(fastPath);
-          createdExercise.setSlowAudioRef(slowPath);
-          service.reallyCreateNewItem(ul, createdExercise, new AsyncCallback<UserExercise>() {
-            @Override
-            public void onFailure(Throwable caught) {}
-
-            @Override
-            public void onSuccess(UserExercise newExercise) {
-              ul.addExercise(newExercise);
-              itemMarker.setText(ul.getExercises().size() + " items");
-              pagingContainer.addAndFlush(newExercise);
-              toAddTo.clear();
-              toAddTo.add(addNew(ul, pagingContainer, toAddTo));
-            }
-          });
-        }
-      }
-    });
-    Column column = new Column(2, 9, submit);
-    column.addStyleName("topMargin");
-    row.add(column);
-
-    return container;
   }
 
   private void setScrollPanelWidth(ScrollPanel row) {
