@@ -1,8 +1,13 @@
 package mitll.langtest.shared.custom;
 
+import mitll.langtest.shared.AudioAttribute;
+import mitll.langtest.shared.AudioExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.ExerciseShell;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,18 +16,16 @@ import mitll.langtest.shared.ExerciseShell;
  * Time: 8:37 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UserExercise extends ExerciseShell {
+public class UserExercise extends AudioExercise {
   static int globalCount  = 0;
   int count = 0;
   private long uniqueID; //set by database
   private String english;
   private String foreignLanguage;
   private long creator;
-  String meaning;
+/*  String meaning;
   String context;
-  String comment;
-  private String refAudio;
-  private String slowAudioRef = "";
+  String comment;*/
 
   boolean isPredef;
   String exerciseID;
@@ -45,10 +48,19 @@ public class UserExercise extends ExerciseShell {
     count = globalCount++;
   }
 
+  /**
+   * @see mitll.langtest.server.database.UserExerciseDAO#getUserExercises(String)
+   * @param uniqueID
+   * @param creator
+   * @param english
+   * @param foreignLanguage
+   * @param refAudio
+   * @param slowAudioRef
+   */
   public UserExercise(long uniqueID, long creator, String english, String foreignLanguage, String refAudio, String slowAudioRef) {
     this(uniqueID,creator,english,foreignLanguage);
-    this.refAudio = refAudio;
-    this.slowAudioRef = slowAudioRef;
+    setRefAudio(refAudio);
+    setSlowRefAudio(slowAudioRef);
   }
 
     /**
@@ -65,7 +77,7 @@ public class UserExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#addNew(UserList, mitll.langtest.client.exercise.PagingContainer, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.custom.NewUserExercise#addNew
    * @return
    */
   public Exercise toExercise() {
@@ -75,20 +87,12 @@ public class UserExercise extends ExerciseShell {
   public Exercise toExercise(String language) {
     String content = ExerciseFormatter.getContent(getForeignLanguage(), "", english, "", language);
     Exercise imported = new Exercise("import", id, content, false, true, english);
-    imported.setRefAudio(refAudio);
-    imported.setSlowRefAudio(slowAudioRef);
+    imported.setRefAudio(getRefAudio());
+    imported.setSlowRefAudio(getSlowAudioRef());
     imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
     imported.setRefSentence(getForeignLanguage());
     imported.setEnglishSentence(english);
     return imported;
-  }
-
-  public String getRefAudio() {
-    return refAudio;
-  }
-
-  public void setRefAudio(String refAudio) {
-    this.refAudio = refAudio;
   }
 
   public String getEnglish() {
@@ -103,10 +107,6 @@ public class UserExercise extends ExerciseShell {
     return creator;
   }
 
-  public String getSlowAudioRef() {
-    return slowAudioRef;
-  }
-
   public void setUniqueID(long uniqueID) {
     this.uniqueID = uniqueID;
   }
@@ -118,12 +118,16 @@ public class UserExercise extends ExerciseShell {
     return isPredef ? super.getID() : "Custom_"+uniqueID;    //To change body of overridden methods use File | Settings | File Templates.
   }
 
-  public void setSlowAudioRef(String slowAudioRef) {
-    this.slowAudioRef = slowAudioRef;
+  public void setEnglish(String english) {
+    this.english = english;
+  }
+
+  public void setForeignLanguage(String foreignLanguage) {
+    this.foreignLanguage = foreignLanguage;
   }
 
   public String toString() {
     return "UserExercise (" +count+
-      ") #" + uniqueID + " : " + getEnglish() + " = " + getForeignLanguage() + " audio " + getRefAudio();
+      ") #" + uniqueID + " : " + getEnglish() + " = " + getForeignLanguage() + " audio " + getAudioAttributes();
   }
 }
