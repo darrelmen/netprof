@@ -82,13 +82,16 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
    * and a right side -- the charts and gauges {@link ASRScorePanel}
    *
+   *
    * @param e             for this exercise
    * @param controller
    * @param listContainer
    * @param screenPortion
+   * @param instance
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanelFactory#getExercisePanel(mitll.langtest.shared.Exercise)
    */
-  public GoodwaveExercisePanel(final Exercise e, final ExerciseController controller, final ListInterface listContainer, float screenPortion) {
+  public GoodwaveExercisePanel(final Exercise e, final ExerciseController controller, final ListInterface listContainer,
+                               float screenPortion, boolean addKeyHandler, String instance) {
     this.exercise = e;
     this.controller = controller;
     this.service = controller.getService();
@@ -104,7 +107,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     ASRScorePanel widgets = null;
     if (e.isRepeat()) {
-      widgets = new ASRScorePanel();
+      widgets = new ASRScorePanel("GoodwaveExercisePanel_"+instance);
       scorePanel = widgets;
     }
 
@@ -135,7 +138,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         System.out.println("postAnswers : load next exercise " + completedExercise.getID());
         listContainer.loadNextExercise(completedExercise);
       }
-    }, listContainer, true);
+    }, listContainer, true, addKeyHandler);
     center.add(navigationHelper.makeSpacer());
     center.add(navigationHelper);
   }
@@ -534,6 +537,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       List<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
       RadioButton first = null;
+
+      System.out.println("Attributes were " + audioAttributes);
+
       for (final AudioAttribute audioAttribute : audioAttributes) {
 
      /*   String speed = audioAttribute.getAttributes().get("speed");
@@ -548,7 +554,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
           fast.setValue(true);
           madeFast = true;
         }
-        if (first == null) first = fast;
+        else {
+          System.out.println(audioAttribute +" is not regular speed ");
+        }
+        if (first == null) {
+          first = fast;
+        }
         vp.add(fast);
         //fast.setWidth(RADIO_BUTTON_WIDTH);
 
@@ -563,7 +574,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         });
       }
 
-      if (!madeFast && first != null) first.setValue(true); // select something by default
+      if (!madeFast && first != null) {
+        first.setValue(true); // select something by default
+        System.out.println( "----> set default value\n\n\n");
+      }
 
      // vp.setWidth("80px");
 
