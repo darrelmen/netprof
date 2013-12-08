@@ -14,11 +14,25 @@ import java.util.List;
 public class ExerciseListWrapper implements IsSerializable {
   public ExerciseListWrapper(){}
 
-  public int reqID;
-  public List<ExerciseShell> exercises;
+  private int reqID;
+  private List<ExerciseShell> exercises;
+  private Exercise firstExercise;
 
-  public ExerciseListWrapper(int reqID, List<ExerciseShell> ids) {
+  public ExerciseListWrapper(int reqID, List<ExerciseShell> ids, Exercise firstExercise) {
     this.reqID = reqID;
     this.exercises = ids;
+    this.firstExercise = firstExercise;
+  }
+
+  public int getReqID() {
+    return reqID;
+  }
+
+  public List<ExerciseShell> getExercises() {
+    return exercises;
+  }
+
+  public Exercise getFirstExercise() {
+    return firstExercise;
   }
 }
