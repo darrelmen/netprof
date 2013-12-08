@@ -557,6 +557,9 @@ public class DatabaseImpl implements Database {
     }*/
     logger.debug("getUserStateWrapper : making user state for " + userID + " with " + strings.length + " exercises");
     userStateWrapper = new UserStateWrapper(userState, userID, exercises);
+    for (ResultDAO.SimpleResult result : resultDAO.getResultsForUser(userID)) {
+      userStateWrapper.addCompleted(result.id);
+    }
     return userStateWrapper;
   }
 
