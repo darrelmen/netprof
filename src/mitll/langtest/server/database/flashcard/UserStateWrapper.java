@@ -117,6 +117,6 @@ public class UserStateWrapper {
 
   public String toString() {
     return "UserState : correct " + correct + " incorrect " + getIncorrect() +
-      " num exercises " + exercises.size() + " is complete " + isComplete();
+      " num exercises " + exercises.size() + " is complete " + isComplete() + " num completed " + completed.size();
   }
 }

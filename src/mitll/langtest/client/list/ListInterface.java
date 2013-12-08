@@ -30,7 +30,7 @@ public interface ListInterface extends RequiresResize {
    */
   void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades);
 
-  void rememberAndLoadFirst(List<? extends ExerciseShell> exercises);
+  void rememberAndLoadFirst(List<? extends ExerciseShell> exercises, Exercise firstExercise);
 
     /**
      * @see mitll.langtest.client.LangTest#gotUser(long)
