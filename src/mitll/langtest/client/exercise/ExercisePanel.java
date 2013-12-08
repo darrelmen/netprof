@@ -135,6 +135,8 @@ public class ExercisePanel extends VerticalPanel implements
 
   private Widget getQuestionContent(Exercise e) {
     String content = e.getContent();
+
+    System.out.println("getQuestionContent : content is " + content);
     if (content.contains("Listen")) {
       return new AudioExerciseContent().getQuestionContent(e, controller, false, false);
     }
@@ -142,7 +144,7 @@ public class ExercisePanel extends VerticalPanel implements
       HTML maybeRTLContent = getMaybeRTLContent(content, true);
       maybeRTLContent.addStyleName("rightTenMargin");
       if (content.length() > 200) {
-        System.out.println("content length " + content.length());
+        System.out.println("content length " + content.length() + " " + content);
         ScrollPanel scroller = new ScrollPanel(maybeRTLContent);
         scroller.getElement().setId("contentScroller");
         scroller.setHeight(CONTENT_SCROLL_HEIGHT + "px");
