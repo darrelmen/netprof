@@ -106,33 +106,6 @@ public class RecordButton extends Button {
         }
       });
     }
-
-/*
-    addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        System.out.println("recordButton " + getElement().getId() + " got focus");
-      }
-    });
-*/
-
-/*
-    addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        getFocus();
-      }
-    });
-*/
-    getFocus();
-  }
-
-  private void getFocus() {
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        setFocus(true);
-      }
-    });
   }
 
   /**
@@ -216,7 +189,6 @@ public class RecordButton extends Button {
 
   public void initRecordButton() {
     setVisible(true);
-    getFocus();
   }
 
   /**
