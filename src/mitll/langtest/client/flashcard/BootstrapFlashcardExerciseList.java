@@ -395,7 +395,7 @@ public class BootstrapFlashcardExerciseList implements ListInterface {
     return null;
   }
 
-  public void rememberAndLoadFirst(List<? extends ExerciseShell> exercises){}
+  public void rememberAndLoadFirst(List<? extends ExerciseShell> exercises, Exercise first){}
 
   private class MyTimer extends Timer {
     private final int numSteps;
