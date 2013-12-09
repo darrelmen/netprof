@@ -215,15 +215,12 @@ public class PagingContainer<T extends ExerciseShell> {
 
   protected void gotClickOnItem(final T e) {}
 
-  /**
-   * @see mitll.langtest.client.list.HistoryExerciseList.MySetExercisesCallback#onSuccess
-   */
- // protected void loadFirstExercise() { selectFirst();  }
-
-  public void selectFirst() {
-    table.getSelectionModel().setSelected(dataProvider.getList().get(0), true);
+  public T selectFirst() {
+    T first = dataProvider.getList().get(0);
+    table.getSelectionModel().setSelected(first, true);
     table.redraw();
     onResize(0);
+    return first;
   }
 
   public void clear() {
