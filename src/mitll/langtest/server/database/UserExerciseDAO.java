@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import org.apache.log4j.Logger;
 
@@ -8,13 +9,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 public class UserExerciseDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserExerciseDAO.class);
 
-  private static final String USEREXERCISE = "userexercise";
+  public static final String USEREXERCISE = "userexercise";
 
   public UserExerciseDAO(Database database) {
     super(database);
@@ -53,9 +55,6 @@ public class UserExerciseDAO extends DAO {
       statement.setLong(i++, userExercise.getCreator());
       statement.setString(i++, userExercise.getRefAudio());
       statement.setString(i++, userExercise.getSlowAudioRef());
-
-      int i1 = statement.executeUpdate();
-      logger.debug("got " + i1);
 
       int j = statement.executeUpdate();
 
@@ -112,6 +111,22 @@ public class UserExerciseDAO extends DAO {
     database.closeConnection(connection);
   }
 
+  public Collection<UserExercise> getOnList(long listID) {
+    String sql = "SELECT " +
+      "ue.* from " + USEREXERCISE + " ue, " + UserListExerciseJoinDAO.USER_EXERCISE_LIST_EXERCISE +" uele "+
+      " where ue.uniqueid=uele.exerciseid AND uele.userlistid=" + listID + ";";
+    try {
+      List<UserExercise> userExercises = getUserExercises(sql);
+      if (userExercises.isEmpty()) {
+        logger.error("huh? no exercises on list id " + listID);
+        return Collections.emptyList();
+      } else return userExercises;
+    } catch (SQLException e) {
+      logger.error("got " + e, e);
+    }
+    return Collections.emptyList();
+  }
+
   public UserExercise getWhere(String exid) {
     String unique = exid.substring("Custom_".length());
     String sql = "SELECT * from " + USEREXERCISE + " where uniqueid=" + unique + ";";
@@ -120,12 +135,11 @@ public class UserExerciseDAO extends DAO {
       if (userExercises.isEmpty()) {
         logger.error("huh? no custom exercise with id " + unique);
         return null;
-      }
-      else return userExercises.iterator().next();
+      } else return userExercises.iterator().next();
     } catch (SQLException e) {
-      logger.error("got " +e,e);
-    }                           return null;
-
+      logger.error("got " + e, e);
+    }
+    return null;
   }
 
   /**
