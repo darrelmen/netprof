@@ -81,7 +81,9 @@ public class UserExercise extends AudioExercise {
    * @return
    */
   public Exercise toExercise() {
-    return new Exercise("plan", "Custom_" + uniqueID, getEnglish(), getRefAudio(), getForeignLanguage(), getEnglish());
+    Exercise exercise = new Exercise("plan", "Custom_" + uniqueID, getEnglish(), getRefAudio(), getForeignLanguage(), getEnglish());
+    exercise.setSlowRefAudio(getSlowAudioRef());
+    return exercise;
   }
 
   public Exercise toExercise(String language) {
@@ -128,6 +130,7 @@ public class UserExercise extends AudioExercise {
 
   public String toString() {
     return "UserExercise (" +count+
-      ") #" + uniqueID + " : " + getEnglish() + " = " + getForeignLanguage() + " audio " + getAudioAttributes();
+      ") #" + uniqueID + " : " + getEnglish() + " = " + getForeignLanguage() + " audio attr (" +getAudioAttributes().size()+
+      ") :" + getAudioAttributes();
   }
 }
