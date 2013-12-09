@@ -209,16 +209,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix, int userListID) {
+  public ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix, long userListID) {
     logger.debug("getExerciseIds : getting exercise ids for User id=" + userID + " config " + relativeConfigDir);
     List<Exercise> exercises = getExercises(userID);
 
     if (userListID != -1) {
       UserList userListByID = db.getUserListManager().getUserListByID(userListID);
       if (userListByID != null) { // defensive!
-         userListByID.getExercises();
+        //userListByID.getExercises();
         List<Exercise> exercises2 = new ArrayList<Exercise>();
-        for (UserExercise ue: userListByID.getExercises()) {
+        for (UserExercise ue : userListByID.getExercises()) {
           Exercise exercise = getExercise(ue.getID());
           if (exercise != null) exercises2.add(exercise);
         }
@@ -479,7 +479,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private void ensureMP3s(Exercise byID) {
-    List<AudioAttribute> audioAttributes = byID.getAudioAttributes();
+    Collection<AudioAttribute> audioAttributes = byID.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes) {
       ensureMP3(audioAttribute.getAudioRef());
     }
@@ -945,9 +945,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public int addUserList(long userid, String name, String description, String dliClass) {
+  public long addUserList(long userid, String name, String description, String dliClass) {
     return db.getUserListManager().addUserList(userid, name, description, dliClass);
   }
+
+  public void addVisitor(UserList ul, long user) { db.getUserListManager().addVisitor(ul,user); }
 
   /**
    * @see mitll.langtest.client.custom.Navigation#showInitialState()
@@ -957,7 +959,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param onlyCreated
    * @return
    */
-  public Collection<UserList> getListsForUser(int userid, boolean onlyCreated) {
+  public Collection<UserList> getListsForUser(long userid, boolean onlyCreated) {
    return db.getUserListManager().getListsForUser(userid, onlyCreated);
   }
 
@@ -966,7 +968,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getUserListManager().getUserListsForText(search);
   }
 
-  public List<UserExercise> addItemToUserList(int userListID, UserExercise userExercise) {
+  public Collection<UserExercise> addItemToUserList(long userListID, UserExercise userExercise) {
     return db.getUserListManager().addItemToUserList(userListID, userExercise);
   }
 
@@ -1000,15 +1002,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return userExercise;
   }
 
+  /**
+   * Copying audio from initial recording location to new location.
+   * @param userExercise
+   * @param fileRef
+   * @param fast
+   * @return
+   */
   private String getRefAudioPath(UserExercise userExercise, File fileRef, String fast) {
     final File bestDir = pathHelper.getAbsoluteFile("bestAudio");
     bestDir.mkdir();
     File bestDirForExercise = new File(bestDir, userExercise.getID());
     bestDirForExercise.mkdir();
     File destination = new File(bestDirForExercise, fast);
-    logger.debug("copying from " + fileRef +  " to " + destination.getAbsolutePath());
+    logger.debug("getRefAudioPath : copying from " + fileRef +  " to " + destination.getAbsolutePath());
+    String s = "bestAudio" + File.separator + userExercise.getID() + File.separator + fast;
+    logger.debug("getRefAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
     new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
-    return "bestAudio" + File.separator + userExercise.getID() + File.separator + fast;
+    ensureMP3(s);
+    return s;
   }
 
   /**
