@@ -129,19 +129,21 @@ public interface LangTestDatabaseAsync {
 
   void getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix, AsyncCallback<ExerciseListWrapper> async);
 
-  void getExerciseIds(int reqID, long userID, String prefix, int userListID, AsyncCallback<ExerciseListWrapper> async);
+  void getExerciseIds(int reqID, long userID, String prefix, long userListID, AsyncCallback<ExerciseListWrapper> async);
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
   void getUserListsForText(String search, AsyncCallback<Collection<UserList>> async);
 
-  void getListsForUser(int userid, boolean onlyCreated, AsyncCallback<Collection<UserList>> async);
+  void getListsForUser(long userid, boolean onlyCreated, AsyncCallback<Collection<UserList>> async);
 
-  void addItemToUserList(int userListID, UserExercise userExercise, AsyncCallback<List<UserExercise>> async);
+  void addItemToUserList(long userListID, UserExercise userExercise, AsyncCallback<Collection<UserExercise>> async);
 
   void createNewItem(long userid, String english, String foreign, AsyncCallback<UserExercise> async);
 
   void reallyCreateNewItem(UserList userList, UserExercise userExercise,/*, String refAudioPath, String slowRefAudioPath*/AsyncCallback<UserExercise> async);
 
-  void addUserList(long userid, String name, String description, String dliClass, AsyncCallback<Integer> async);
+  void addUserList(long userid, String name, String description, String dliClass, AsyncCallback<Long> async);
+
+  void addVisitor(UserList ul, long user, AsyncCallback<Void> asyncCallback);
 }
