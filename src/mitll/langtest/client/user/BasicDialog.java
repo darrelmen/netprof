@@ -43,7 +43,7 @@ public class BasicDialog {
 
   protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
-    return getFormField(dialogBox, label, user,minLength);
+    return getFormField(dialogBox, label, user, minLength);
   }
 
   private FormField getFormField(Panel dialogBox, String label, TextBox user, int minLength) {
@@ -239,6 +239,7 @@ public class BasicDialog {
     protected void markSimpleError(String message) {
       markError(group, box, "Try Again", message);
     }
+    public String toString() { return "FormField value " + getText(); }
   }
 
   protected class ListBoxFormField {
