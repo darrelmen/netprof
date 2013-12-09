@@ -1,7 +1,10 @@
 package mitll.langtest.shared;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,7 +14,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioExercise extends ExerciseShell {
-  protected List<AudioAttribute> audioAttributes = new ArrayList<AudioAttribute>();
+  protected Map<String,AudioAttribute> audioAttributes = new HashMap<String, AudioAttribute>();
 
   public AudioExercise() {}
   public AudioExercise(String id, String tooltip) {  super(id,tooltip); }
@@ -27,7 +30,10 @@ public class AudioExercise extends ExerciseShell {
   }
 
   public void setRefAudio(String s) {
-    if (s != null) audioAttributes.add(new AudioAttribute(s).markFast());
+    if (s != null) {
+      AudioAttribute audioAttribute = new AudioAttribute(s).markFast();
+      audioAttributes.put(audioAttribute.getAttributes().toString(),audioAttribute);
+    }
   }
 
   /**
@@ -35,11 +41,14 @@ public class AudioExercise extends ExerciseShell {
    * @param s
    */
   public void setSlowRefAudio(String s) {
-    if (s != null) audioAttributes.add(new AudioAttribute(s).markSlow());
+    if (s != null) {
+      AudioAttribute audioAttribute = new AudioAttribute(s).markSlow();
+      audioAttributes.put(audioAttribute.getAttributes().toString(), audioAttribute);
+    }
   }
 
   public AudioAttribute getAudio(String name, String value) {
-    for (AudioAttribute audio : audioAttributes) {
+    for (AudioAttribute audio : getAudioAttributes()) {
       if (audio.matches(name,value)) return audio;
     }
     return null;
@@ -47,7 +56,5 @@ public class AudioExercise extends ExerciseShell {
 
   public boolean hasRefAudio() { return !audioAttributes.isEmpty(); }
 
-  public List<AudioAttribute> getAudioAttributes() {
-    return audioAttributes;
-  }
+  public Collection<AudioAttribute> getAudioAttributes() { return audioAttributes.values();  }
 }

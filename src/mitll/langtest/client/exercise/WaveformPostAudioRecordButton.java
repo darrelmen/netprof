@@ -16,9 +16,6 @@ import mitll.langtest.shared.Exercise;
 * To change this template use File | Settings | File Templates.
 */
 public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
-  private static final String WAV = ".wav";
-  private static final String MP3 = ".mp3";
-
   private RecordAudioPanel recordAudioPanel;
   private PlayAudioPanel playAudioPanel;
   private Panel parentPanel;
@@ -69,7 +66,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
 
   @Override
   public void useResult(AudioAnswer result) {
-    recordAudioPanel.getImagesForPath(wavToMP3(result.path));
+    recordAudioPanel.getImagesForPath(result.path);
     if (parentPanel instanceof ExercisePanel) {
       ((ExercisePanel) parentPanel).recordCompleted(recordAudioPanel);
     }
@@ -87,9 +84,5 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
 
   public void setPlayAudioPanel(PlayAudioPanel playAudioPanel) {
     this.playAudioPanel = playAudioPanel;
-  }
-
-  private String wavToMP3(String path) {
-    return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
   }
 }

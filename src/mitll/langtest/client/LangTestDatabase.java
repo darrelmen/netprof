@@ -148,13 +148,14 @@ public interface LangTestDatabase extends RemoteService {
 
   ExerciseListWrapper getExercisesForSelectionState(int reqID, Map<String, Collection<String>> typeToSection, long userID, String prefix);
 
-  ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix, int userListID);
+  ExerciseListWrapper getExerciseIds(int reqID, long userID, String prefix, long userListID);
 
   StartupInfo getStartupInfo();
-  int addUserList(long userid, String name, String description, String dliClass);
-  Collection<UserList> getListsForUser(int userid, boolean onlyCreated);
+  long addUserList(long userid, String name, String description, String dliClass);
+  void addVisitor(UserList ul, long user);
+  Collection<UserList> getListsForUser(long userid, boolean onlyCreated);
   Collection<UserList> getUserListsForText(String search);
-  List<UserExercise> addItemToUserList(int userListID, UserExercise userExercise);
+  Collection<UserExercise> addItemToUserList(long userListID, UserExercise userExercise);
   UserExercise createNewItem(long userid, String english, String foreign);
-  UserExercise reallyCreateNewItem(UserList userList, UserExercise userExercise/*, String refAudioPath, String slowRefAudioPath*/);
+  UserExercise reallyCreateNewItem(UserList userList, UserExercise userExercise);
 }
