@@ -64,15 +64,14 @@ public class DatabaseImpl implements Database {
 
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
-  private final UserDAO userDAO = new UserDAO(this);
-  private final DLIUserDAO dliUserDAO = new DLIUserDAO(this);
-  private final ResultDAO resultDAO = new ResultDAO(this,userDAO);
-  private final AnswerDAO answerDAO = new AnswerDAO(this, resultDAO);
-  private final GradeDAO gradeDAO = new GradeDAO(this,userDAO, resultDAO);
-  private final SiteDAO siteDAO = new SiteDAO(this, userDAO);
-  private final UserListManager userListManager = new UserListManager(userDAO);
+  private UserDAO userDAO;
+  private DLIUserDAO dliUserDAO;
+  private ResultDAO resultDAO;
+  private AnswerDAO answerDAO;
+  private GradeDAO gradeDAO;
+  private SiteDAO siteDAO;
+  private UserListManager userListManager;
   private UserExerciseDAO userExerciseDAO;
-  FileExerciseDAO fileExerciseDAO = new FileExerciseDAO("","",false);
 
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
@@ -139,6 +138,16 @@ public class DatabaseImpl implements Database {
    * Create or alter tables as needed.
    */
   private void initializeDAOs() {
+
+    userDAO = new UserDAO(this);
+    dliUserDAO = new DLIUserDAO(this);
+    resultDAO = new ResultDAO(this,userDAO);
+    answerDAO = new AnswerDAO(this, resultDAO);
+    gradeDAO = new GradeDAO(this,userDAO, resultDAO);
+    siteDAO = new SiteDAO(this, userDAO);
+    userListManager = new UserListManager(this, userDAO);
+
+
     if (DROP_USER) {
       try {
         userDAO.dropUserTable(this);
@@ -1419,8 +1428,6 @@ public class DatabaseImpl implements Database {
   }
   public void addDLIUser(DLIUser dliUser) throws Exception { dliUserDAO.addUser(dliUser);  }
 
-  public String toString() { return "Database : "+ connection.getConnection(); }
-
   public UserListManager getUserListManager() { return userListManager; }
 
   /**
@@ -1432,6 +1439,8 @@ public class DatabaseImpl implements Database {
     UserExercise where = userExerciseDAO.getWhere(id);
     return where != null ? where.toExercise(language) : null;
   }
+
+  public String toString() { return "Database : "+ connection.getConnection(); }
 
 /*  private static String getConfigDir(String language) {
     String installPath = ".";
