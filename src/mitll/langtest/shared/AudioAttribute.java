@@ -17,6 +17,7 @@ public class AudioAttribute implements IsSerializable {
   private String audioRef;
   private Map<String, String> attributes;
   private List<String> annotations;
+  //private long userID; // who recorded it - later
 
   public AudioAttribute() {
   }
