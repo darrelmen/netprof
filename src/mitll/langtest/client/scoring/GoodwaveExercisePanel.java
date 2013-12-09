@@ -62,10 +62,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private static final String MP3 = ".mp3";
   private Image recordImage1;
   private Image recordImage2;
-
-  /**
-   * ??? Just for backward compatibility -- so we can run against old plan files
-   */
   private String refAudio;
 
   private Exercise exercise = null;
@@ -76,7 +72,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private NavigationHelper navigationHelper;
   private SplitDropdownButton addToList;
   private int activeCount = 0;
-  float screenPortion;
+  private float screenPortion;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -158,17 +154,17 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param w1
    */
   private void populateListChoices(final Exercise e, ExerciseController controller, final SplitDropdownButton w1) {
-    System.out.println("populateListChoices populate list choices for " + controller.getUser());
+    System.out.println("populateListChoices : populate list choices for " + controller.getUser());
     service.getListsForUser(controller.getUser(), true, new AsyncCallback<Collection<UserList>>() {
       @Override
-      public void onFailure(Throwable caught) {
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Collection<UserList> result) {
         w1.clear();
         activeCount = 0;
         boolean anyAdded = false;
+        System.out.println("\tpopulateListChoices : found list " + result.size() + " choices");
         for (final UserList ul : result) {
           if (!ul.contains(new UserExercise(e))) {
             activeCount++;
@@ -178,13 +174,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
             widget.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
-                service.addItemToUserList(ul.getUniqueID(), new UserExercise(e), new AsyncCallback<List<UserExercise>>() {
+                service.addItemToUserList(ul.getUniqueID(), new UserExercise(e), new AsyncCallback<Collection<UserExercise>>() {
                   @Override
                   public void onFailure(Throwable caught) {
                   }
 
                   @Override
-                  public void onSuccess(List<UserExercise> result) {
+                  public void onSuccess(Collection<UserExercise> result) {
                     showPopup("Item Added!");
                     widget.setVisible(false);
                     activeCount--;
@@ -465,7 +461,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       public void useResult(AudioAnswer result) {
         setRefAudio(refAudio, exercise.getRefSentence());
         setResultID(result.getResultID());
-        getImagesForPath(wavToMP3(result.path));
+        getImagesForPath(result.path);
       }
 
       @Override
@@ -535,20 +531,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       boolean madeFast = false;
 
-      List<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
+      Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
       RadioButton first = null;
 
       System.out.println("Attributes were " + audioAttributes);
 
       for (final AudioAttribute audioAttribute : audioAttributes) {
-
-     /*   String speed = audioAttribute.getAttributes().get("speed");
-        boolean isRegularSpeed = speed != null && speed.equalsIgnoreCase("regular");
-
-       // speed = speed.substring(0,1).toUpperCase() +speed.substring(1);
-        String display = speed != null && audioAttribute.hasOnlySpeed() ? speed.substring(0,1).toUpperCase() +speed.substring(1) : audioAttribute.getAttributes().toString();
-        if (!audioAttribute.hasOnlySpeed()) display = display.substring(1,display.length()-1);*/
-
         RadioButton fast = new RadioButton(GROUP, audioAttribute.getDisplay());
         if (audioAttribute.isRegularSpeed()) {
           fast.setValue(true);
@@ -569,7 +557,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
             doPause();    // if the audio is playing, stop it
             String audioRef = audioAttribute.getAudioRef();
             setRefAudio(audioRef);
-            getImagesForPath(wavToMP3(audioRef));
+            getImagesForPath(audioRef);
           }
         });
       }
