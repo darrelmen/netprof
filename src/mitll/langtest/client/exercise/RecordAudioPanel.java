@@ -121,7 +121,7 @@ public class RecordAudioPanel extends AudioPanel {
       recordImage1.setVisible(false);
       add(recordImage2);
       recordImage2.setVisible(false);
-      System.out.println("\n\n\nMyPlayAudioPanel : adding images to " + getElement().getId());
+      //System.out.println("MyPlayAudioPanel : adding images to " + getElement().getId());
     }
 
     /**
