@@ -4,6 +4,7 @@ import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.User;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,28 +17,29 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class UserList extends ExerciseShell {
+  private long uniqueID;
+
   private User creator;
   private Set<Long> visitorIDs;
-  private int uniqueID;
 
   private String name;
   private String description;
   private String classMarker;
   private long modified;
   private boolean isPrivate;
-  private List<UserExercise> exercises = new ArrayList<UserExercise>();
+  private Collection<UserExercise> exercises = new ArrayList<UserExercise>();
 
   public UserList(){}
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#getUserList(long, String, String, String)
+   * @see mitll.langtest.server.database.custom.UserListManager#createUserList(long, String, String, String, boolean)
    * @param uniqueID
    * @param user
    * @param name
    * @param description
    * @param classMarker
    */
-  public UserList(int uniqueID, User user, String name, String description, String classMarker, boolean isPrivate){
+  public UserList(long uniqueID, User user, String name, String description, String classMarker, long modified, boolean isPrivate){
     super(""+uniqueID,name);
     this.uniqueID = uniqueID;
     this.creator = user;
@@ -47,7 +49,7 @@ public class UserList extends ExerciseShell {
     this.isPrivate = isPrivate;
     visitorIDs = new HashSet<Long>();
     addVisitor(user);
-    modified = System.currentTimeMillis();
+    this.modified = modified;
   }
 
   public void addExercise(UserExercise toAdd) {
@@ -55,6 +57,10 @@ public class UserList extends ExerciseShell {
     modified = System.currentTimeMillis();
   }
 
+  /**
+   * @see #UserList(long, mitll.langtest.shared.User, String, String, String, long, boolean)
+   * @param user
+   */
   public void addVisitor(User user) { visitorIDs.add(user.id); }
 
   public String getName() {
@@ -69,8 +75,12 @@ public class UserList extends ExerciseShell {
     return classMarker;
   }
 
-  public List<UserExercise> getExercises() {
+  public Collection<UserExercise> getExercises() {
     return exercises;
+  }
+
+  public void setExercises(Collection<UserExercise> exercises) {
+    this.exercises = exercises;
   }
 
   public User getCreator() {
@@ -81,8 +91,16 @@ public class UserList extends ExerciseShell {
     return visitorIDs;
   }
 
-  public int getUniqueID() {
+  public void setVisitors(Set<Long> where) {
+    this.visitorIDs = where;
+  }
+
+  public long getUniqueID() {
     return uniqueID;
+  }
+
+  public void setUniqueID(long uniqueID) {
+    this.uniqueID = uniqueID;
   }
 
   public long getModified() {
