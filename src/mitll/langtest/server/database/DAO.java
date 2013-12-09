@@ -78,6 +78,8 @@ public class DAO {
     return 0;
   }
 
+  public Database getDatabase() { return database; }
+
   /**
    * Does not seem to work with h2
    * @param connection
