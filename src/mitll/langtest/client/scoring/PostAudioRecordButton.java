@@ -132,11 +132,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     });
   }
 
-  public void startRecording() {
-    controller.startRecording();
-  }
-
+  public void startRecording() {  controller.startRecording();  }
   protected abstract void useInvalidResult(AudioAnswer result);
-
   public abstract void useResult(AudioAnswer result);
 }
