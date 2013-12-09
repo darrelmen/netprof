@@ -19,6 +19,7 @@ import java.util.Set;
 
 public class UserDAO extends DAO {
   private static Logger logger = Logger.getLogger(UserDAO.class);
+  public static final String USERS = "users";
 
   public UserDAO(Database database) { super(database); }
 
@@ -50,7 +51,9 @@ public class UserDAO extends DAO {
       PreparedStatement statement;
 
       statement = connection.prepareStatement(
-          "INSERT INTO users(id,age,gender,experience,ipaddr,nativeLang,dialect,userID,enabled) " +
+          "INSERT INTO " +
+            USERS +
+            "(id,age,gender,experience,ipaddr,nativeLang,dialect,userID,enabled) " +
           "VALUES(?,?,?,?,?,?,?,?,?);");
       int i = 1;
       long newID = max + 1;
@@ -152,7 +155,7 @@ public class UserDAO extends DAO {
 
     Set<String> expected = new HashSet<String>();
     expected.addAll(Arrays.asList("id","age","gender","experience","firstname","lastname","ipaddr","nativelang","dialect","userid","timestamp","enabled"));
-    /*boolean users = */expected.removeAll(getColumns("users"));
+    /*boolean users = */expected.removeAll(getColumns(USERS));
     if (!expected.isEmpty()) logger.info("adding columns for " + expected);
     for (String missing : expected) {
       if (missing.equalsIgnoreCase("firstName")) { addColumn(connection,"firstName","VARCHAR"); }
