@@ -48,6 +48,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected static final String SPECTROGRAM = "Spectrogram";
   public static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence" +
     " and speech occur, or whether the mic is working properly.";
+  private static final String WAV = ".wav";
+  private static final String MP3 = ".mp3";
 
   private static final int IMAGE_WIDTH_SLOP = 130;
   private static final boolean WARN_ABOUT_MISSING_AUDIO = false;
@@ -84,14 +86,14 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   public AudioPanel(String path, LangTestDatabaseAsync service,
                     boolean useKeyboard, ExerciseController controller, ScoreListener gaugePanel) {
-    this(service, useKeyboard, controller, true,gaugePanel);
+    this(service, useKeyboard, controller, true, gaugePanel);
     addWidgets(path);
   }
 
   public AudioPanel(LangTestDatabaseAsync service,
                     boolean useKeyboard, ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel) {
     this.screenPortion = controller.getScreenPortion();
-    System.out.println("Screen portion " + screenPortion);
+    //System.out.println("Screen portion " + screenPortion);
     this.soundManager = controller.getSoundManager();
     this.service = service;
  //   this.useKeyboard = useKeyboard;
@@ -108,6 +110,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
    * @see #AudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, boolean, mitll.langtest.client.exercise.ExerciseController, ScoreListener)
+   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(mitll.langtest.shared.Exercise, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, int, boolean)
    * @param path
    * @return
    */
@@ -220,6 +223,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param path
    */
   public void getImagesForPath(String path) {
+    path = wavToMP3(path);
     if (debug) System.out.println("AudioPanel : getImagesForPath " +path);
     if (path != null) {
       this.audioPath = path;
@@ -227,6 +231,10 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     lastWidth = 0;
     getImages();
     playAudio.startSong(path);
+  }
+
+  private String wavToMP3(String path) {
+    return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
   }
 
   /**
